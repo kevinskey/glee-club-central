@@ -1,24 +1,66 @@
+
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
-import Index from "./pages/Index";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { AuthProvider } from "@/contexts/AuthContext";
+import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
+import { DashboardLayout } from "@/components/layout/DashboardLayout";
+
+// Pages
+import LandingPage from "./pages/LandingPage";
+import LoginPage from "./pages/LoginPage";
 import NotFound from "./pages/NotFound";
+import DashboardPage from "./pages/DashboardPage";
+import SheetMusicPage from "./pages/sheet-music/SheetMusicPage";
+import PracticePage from "./pages/practice/PracticePage";
+
+// Placeholder pages for other sections
+const RecordingsPage = () => <div className="px-4 py-8">Recording Submissions Page - Coming Soon</div>;
+const DuesPage = () => <div className="px-4 py-8">Pay Dues Page - Coming Soon</div>;
+const SchedulePage = () => <div className="px-4 py-8">Glee Club Schedule Page - Coming Soon</div>;
+const HandbookPage = () => <div className="px-4 py-8">Club Handbook Page - Coming Soon</div>;
+const MerchPage = () => <div className="px-4 py-8">Buy Glee Merch Page - Coming Soon</div>;
+const AttendancePage = () => <div className="px-4 py-8">Check Attendance Record Page - Coming Soon</div>;
 
 const queryClient = new QueryClient();
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
-      <Toaster />
-      <Sonner />
       <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<Index />} />
-          {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-          <Route path="*" element={<NotFound />} />
-        </Routes>
+        <AuthProvider>
+          <Toaster />
+          <Sonner />
+          <Routes>
+            <Route path="/" element={<LandingPage />} />
+            <Route path="/login" element={<LoginPage />} />
+            
+            {/* Protected Dashboard Routes */}
+            <Route
+              path="/dashboard"
+              element={
+                <ProtectedRoute>
+                  <DashboardLayout />
+                </ProtectedRoute>
+              }
+            >
+              <Route index element={<DashboardPage />} />
+              <Route path="sheet-music" element={<SheetMusicPage />} />
+              <Route path="practice" element={<PracticePage />} />
+              <Route path="recordings" element={<RecordingsPage />} />
+              <Route path="dues" element={<DuesPage />} />
+              <Route path="schedule" element={<SchedulePage />} />
+              <Route path="handbook" element={<HandbookPage />} />
+              <Route path="merch" element={<MerchPage />} />
+              <Route path="attendance" element={<AttendancePage />} />
+            </Route>
+
+            {/* Catch-all redirect to 404 */}
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </AuthProvider>
       </BrowserRouter>
     </TooltipProvider>
   </QueryClientProvider>
