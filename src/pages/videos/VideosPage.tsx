@@ -17,8 +17,16 @@ export default function VideosPage() {
   useEffect(() => {
     if (featuredVideo && !selectedVideo) {
       setSelectedVideo(featuredVideo.id);
+      console.log("Setting featured video as selected:", featuredVideo.id);
     }
   }, [featuredVideo, selectedVideo]);
+
+  // For debugging - log when a video is selected
+  useEffect(() => {
+    if (selectedVideo) {
+      console.log("Selected video changed to:", selectedVideo);
+    }
+  }, [selectedVideo]);
 
   // Filter videos based on selected category
   const filteredVideos = filterCategory
@@ -28,6 +36,11 @@ export default function VideosPage() {
   const currentVideo = selectedVideo
     ? videos.find(video => video.id === selectedVideo) || featuredVideo
     : featuredVideo;
+    
+  // Add debugging logs
+  console.log("Current video:", currentVideo);
+  console.log("Videos available:", videos.length);
+  console.log("Filtered videos:", filteredVideos.length);
 
   // Get unique categories for filter
   const categories = [...new Set(videos.map(video => video.category))];

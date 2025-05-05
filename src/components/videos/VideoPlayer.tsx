@@ -10,7 +10,9 @@ interface VideoPlayerProps {
 
 export function VideoPlayer({ videoId, title, description }: VideoPlayerProps) {
   // Construct a proper YouTube embed URL with additional parameters
-  const youtubeEmbedUrl = `https://www.youtube.com/embed/${videoId}?autoplay=0&origin=${window.location.origin}&rel=0`;
+  // Use the current window origin only in browser environments
+  const origin = typeof window !== 'undefined' ? window.location.origin : '';
+  const youtubeEmbedUrl = `https://www.youtube.com/embed/${videoId}?autoplay=0&origin=${origin}&rel=0`;
   
   return (
     <Card className="overflow-hidden">
