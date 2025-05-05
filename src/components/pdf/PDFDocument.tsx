@@ -80,7 +80,6 @@ export const PDFDocument = ({
         src={getPdfViewerUrl()}
         className="w-full h-full border-0" 
         style={{ 
-          transform: `scale(${zoom / 100})`,
           transformOrigin: 'top center',
           position: 'absolute',
           top: 0,

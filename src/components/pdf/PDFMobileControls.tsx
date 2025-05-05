@@ -1,7 +1,7 @@
 
 import React from "react";
 import { Button } from "@/components/ui/button";
-import { ZoomIn, ZoomOut, Download, ArrowLeft, ArrowRight, Pen, ListMusic } from "lucide-react";
+import { ZoomIn, ZoomOut, Download, ArrowLeft, ArrowRight, Pen, ListMusic, Maximize2 } from "lucide-react";
 
 interface PDFMobileControlsProps {
   user: any;
@@ -16,6 +16,8 @@ interface PDFMobileControlsProps {
   onNextPage: () => void;
   onZoomOut: () => void;
   onZoomIn: () => void;
+  onFullscreen: () => void;
+  isFullscreen: boolean;
   url: string;
 }
 
@@ -32,6 +34,8 @@ export const PDFMobileControls = ({
   onNextPage,
   onZoomOut,
   onZoomIn,
+  onFullscreen,
+  isFullscreen,
   url,
 }: PDFMobileControlsProps) => {
   return (
@@ -106,6 +110,15 @@ export const PDFMobileControls = ({
             className="h-8 w-8 p-0 rounded-full flex-shrink-0"
           >
             <ZoomIn className="h-4 w-4" />
+          </Button>
+          <Button 
+            variant="outline"
+            size="sm"
+            onClick={onFullscreen}
+            className="h-8 w-8 p-0 rounded-full flex-shrink-0"
+            aria-label={isFullscreen ? "Exit fullscreen" : "Enter fullscreen"}
+          >
+            <Maximize2 className="h-4 w-4" />
           </Button>
           <Button 
             variant="default"

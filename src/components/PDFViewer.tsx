@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
@@ -28,12 +29,47 @@ export const PDFViewer = ({ url, title, sheetMusicId }: PDFViewerProps) => {
   const [canvasWidth, setCanvasWidth] = useState(0);
   const [canvasHeight, setCanvasHeight] = useState(0);
   const [isSetlistOpen, setIsSetlistOpen] = useState(false);
+  const [isFullscreen, setIsFullscreen] = useState(false);
   
   const { toast } = useToast();
   const isMobile = useIsMobile();
   const { user } = useAuth();
   
   const containerRef = useRef<HTMLDivElement>(null);
+  const viewerRef = useRef<HTMLDivElement>(null);
+  
+  // Handle fullscreen changes
+  useEffect(() => {
+    const handleFullscreenChange = () => {
+      setIsFullscreen(!!document.fullscreenElement);
+    };
+    
+    document.addEventListener('fullscreenchange', handleFullscreenChange);
+    return () => {
+      document.removeEventListener('fullscreenchange', handleFullscreenChange);
+    };
+  }, []);
+  
+  // Toggle fullscreen function
+  const toggleFullscreen = () => {
+    if (!document.fullscreenElement) {
+      // Enter fullscreen
+      if (viewerRef.current?.requestFullscreen) {
+        viewerRef.current.requestFullscreen().catch(err => {
+          toast({
+            title: "Fullscreen error",
+            description: `Error attempting to enable fullscreen: ${err.message}`,
+            variant: "destructive",
+          });
+        });
+      }
+    } else {
+      // Exit fullscreen
+      if (document.exitFullscreen) {
+        document.exitFullscreen();
+      }
+    }
+  };
   
   // Load annotations when component mounts or URL/user changes
   useEffect(() => {
@@ -139,7 +175,10 @@ export const PDFViewer = ({ url, title, sheetMusicId }: PDFViewerProps) => {
   };
   
   return (
-    <div className="relative flex flex-col w-full rounded-lg border border-border overflow-hidden">
+    <div 
+      ref={viewerRef}
+      className={`relative flex flex-col w-full rounded-lg border border-border overflow-hidden ${isFullscreen ? 'fixed inset-0 z-50 bg-background' : ''}`}
+    >
       {/* ForScore-style controls - All controls at the top for mobile */}
       {isMobile && (
         <div className="sticky top-0 z-30 w-full">
@@ -156,6 +195,8 @@ export const PDFViewer = ({ url, title, sheetMusicId }: PDFViewerProps) => {
             onNextPage={handleNextPage}
             onZoomOut={handleZoomOut}
             onZoomIn={handleZoomIn}
+            onFullscreen={toggleFullscreen}
+            isFullscreen={isFullscreen}
             url={url}
           />
           
@@ -216,7 +257,7 @@ export const PDFViewer = ({ url, title, sheetMusicId }: PDFViewerProps) => {
         ref={containerRef} 
         className="relative w-full flex justify-center bg-gray-100 overflow-hidden" 
         style={{ 
-          height: isMobile ? "calc(100vh - 180px)" : "70vh",
+          height: isFullscreen ? "calc(100vh - 60px)" : isMobile ? "calc(100vh - 180px)" : "70vh",
           position: "relative"
         }}
       >
@@ -232,17 +273,19 @@ export const PDFViewer = ({ url, title, sheetMusicId }: PDFViewerProps) => {
         />
       </div>
       
-      {/* Footer Controls */}
-      <div className="p-2 border-t bg-muted/30 flex flex-wrap gap-2 justify-between">
-        <Button 
-          variant="outline"
-          size={isMobile ? "sm" : "default"}
-          onClick={() => window.history.back()}
-          className={isMobile ? "text-xs px-2 max-w-[120px] truncate" : ""}
-        >
-          Back
-        </Button>
-      </div>
+      {/* Footer Controls - Hide in fullscreen mode */}
+      {!isFullscreen && (
+        <div className="p-2 border-t bg-muted/30 flex flex-wrap gap-2 justify-between">
+          <Button 
+            variant="outline"
+            size={isMobile ? "sm" : "default"}
+            onClick={() => window.history.back()}
+            className={isMobile ? "text-xs px-2 max-w-[120px] truncate" : ""}
+          >
+            Back
+          </Button>
+        </div>
+      )}
 
       {/* Setlist Drawer */}
       {user && (
