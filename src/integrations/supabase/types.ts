@@ -72,6 +72,41 @@ export type Database = {
         }
         Relationships: []
       }
+      pdf_annotations: {
+        Row: {
+          annotations: Json
+          created_at: string
+          id: string
+          sheet_music_id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          annotations?: Json
+          created_at?: string
+          id?: string
+          sheet_music_id: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          annotations?: Json
+          created_at?: string
+          id?: string
+          sheet_music_id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pdf_annotations_sheet_music_id_fkey"
+            columns: ["sheet_music_id"]
+            isOneToOne: false
+            referencedRelation: "sheet_music"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           created_at: string

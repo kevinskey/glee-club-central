@@ -97,6 +97,7 @@ export default function ViewSheetMusicPage() {
       <PDFViewer 
         url={music.file_url} 
         title={`${music.title} by ${music.composer}`} 
+        sheetMusicId={music.id}
       />
     </div>
   );

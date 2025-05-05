@@ -1,9 +1,11 @@
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
-import { Loader2, ZoomIn, ZoomOut, Download, ArrowLeft, ArrowRight } from "lucide-react";
+import { Loader2, ZoomIn, ZoomOut, Download, ArrowLeft, ArrowRight, Pen } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { useAuth } from "@/contexts/AuthContext";
+import { supabase } from "@/integrations/supabase/client";
 import {
   Menubar,
   MenubarContent,
@@ -11,20 +13,36 @@ import {
   MenubarMenu,
   MenubarTrigger,
 } from "@/components/ui/menubar";
+import { PDFAnnotationToolbar, AnnotationTool } from "./PDFAnnotationToolbar";
+import { PDFAnnotationCanvas, Annotation } from "./PDFAnnotationCanvas";
 
 interface PDFViewerProps {
   url: string;
   title: string;
+  sheetMusicId?: string;
 }
 
-export const PDFViewer = ({ url, title }: PDFViewerProps) => {
+export const PDFViewer = ({ url, title, sheetMusicId }: PDFViewerProps) => {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [zoom, setZoom] = useState(100); // Zoom level in percentage
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
+  const [showAnnotations, setShowAnnotations] = useState(false);
+  const [activeTool, setActiveTool] = useState<AnnotationTool>(null);
+  const [penColor, setPenColor] = useState("#FF0000"); // Default to red
+  const [penSize, setPenSize] = useState(3);
+  const [annotations, setAnnotations] = useState<Annotation[]>([]);
+  const [canvasWidth, setCanvasWidth] = useState(0);
+  const [canvasHeight, setCanvasHeight] = useState(0);
+  const [isSaving, setIsSaving] = useState(false);
+  
   const { toast } = useToast();
   const isMobile = useIsMobile();
+  const { user } = useAuth();
+  
+  const containerRef = useRef<HTMLDivElement>(null);
+  const iframeRef = useRef<HTMLIFrameElement>(null);
   
   // Set appropriate viewer parameters based on device
   useEffect(() => {
@@ -32,20 +50,98 @@ export const PDFViewer = ({ url, title }: PDFViewerProps) => {
     setZoom(100);
     setIsLoading(true);
     setCurrentPage(1);
-  }, [url]);
+    setAnnotations([]);
+    
+    // If the user is authenticated and we have a sheet music ID, load annotations
+    if (user && sheetMusicId) {
+      loadAnnotations();
+    }
+  }, [url, user, sheetMusicId]);
+  
+  // Fetch annotations when the user and sheet music ID are available
+  const loadAnnotations = async () => {
+    if (!user || !sheetMusicId) return;
+    
+    try {
+      const { data, error } = await supabase
+        .from('pdf_annotations')
+        .select('*')
+        .eq('sheet_music_id', sheetMusicId)
+        .eq('user_id', user.id)
+        .single();
+
+      if (error && error.code !== 'PGRST116') { // PGRST116 is "No rows found" error
+        throw error;
+      }
+
+      if (data && data.annotations) {
+        setAnnotations(data.annotations);
+      }
+    } catch (error) {
+      console.error("Error loading annotations:", error);
+    }
+  };
+
+  // Save annotations to the database
+  const saveAnnotations = async () => {
+    if (!user || !sheetMusicId) {
+      toast({
+        title: "Cannot save annotations",
+        description: "You must be logged in to save annotations.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsSaving(true);
+
+    try {
+      const { data, error } = await supabase
+        .from('pdf_annotations')
+        .upsert(
+          {
+            sheet_music_id: sheetMusicId,
+            user_id: user.id,
+            annotations,
+            updated_at: new Date().toISOString(),
+          },
+          { onConflict: 'sheet_music_id,user_id' }
+        );
+
+      if (error) throw error;
+
+      toast({
+        title: "Annotations saved",
+        description: "Your annotations have been saved successfully.",
+      });
+    } catch (error) {
+      console.error("Error saving annotations:", error);
+      toast({
+        title: "Error saving annotations",
+        description: "There was an error saving your annotations. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSaving(false);
+    }
+  };
   
   const handleLoad = () => {
     setIsLoading(false);
-    // Attempt to get total pages from iframe
-    try {
-      const iframe = document.querySelector('iframe') as HTMLIFrameElement;
-      if (iframe && iframe.contentWindow) {
-        // We can't reliably get page count from PDF embedded in iframe due to security restrictions
-        // So we'll just set a placeholder value here
-        setTotalPages(1);
-      }
-    } catch (e) {
-      console.error("Could not access PDF information:", e);
+    
+    // Update canvas dimensions based on the iframe content size
+    if (iframeRef.current && containerRef.current) {
+      const updateCanvasSize = () => {
+        setCanvasWidth(containerRef.current?.clientWidth || 0);
+        setCanvasHeight(containerRef.current?.clientHeight || 0);
+      };
+      
+      // Initial size update
+      updateCanvasSize();
+      
+      // Update size on resize
+      window.addEventListener('resize', updateCanvasSize);
+      return () => window.removeEventListener('resize', updateCanvasSize);
     }
   };
   
@@ -77,6 +173,23 @@ export const PDFViewer = ({ url, title }: PDFViewerProps) => {
     if (currentPage > 1) {
       setCurrentPage(currentPage - 1);
     }
+  };
+  
+  const toggleAnnotations = () => {
+    setShowAnnotations(!showAnnotations);
+    if (showAnnotations) {
+      setActiveTool(null); // Turn off active tool when hiding annotations
+    }
+  };
+  
+  const handleClearAnnotations = () => {
+    if (window.confirm("Are you sure you want to clear all annotations?")) {
+      setAnnotations([]);
+    }
+  };
+  
+  const handleAnnotationsChange = (newAnnotations: Annotation[]) => {
+    setAnnotations(newAnnotations);
   };
   
   // Build PDF URL with appropriate parameters for the device type and score reading
@@ -147,15 +260,52 @@ export const PDFViewer = ({ url, title }: PDFViewerProps) => {
                 >
                   <Download className="h-4 w-4" /> Download
                 </MenubarItem>
+                {user && sheetMusicId && (
+                  <MenubarItem 
+                    onClick={toggleAnnotations}
+                    className="flex items-center gap-2"
+                  >
+                    <Pen className="h-4 w-4" /> 
+                    {showAnnotations ? "Hide Annotations" : "Show Annotations"}
+                  </MenubarItem>
+                )}
               </MenubarContent>
             </MenubarMenu>
           </Menubar>
+          
+          {/* Show annotation toggle button outside menu on larger screens */}
+          {!isMobile && user && sheetMusicId && (
+            <Button
+              variant={showAnnotations ? "default" : "outline"}
+              size="sm"
+              onClick={toggleAnnotations}
+              className="flex items-center gap-1"
+            >
+              <Pen className="h-4 w-4" />
+              {showAnnotations ? "Hide" : "Annotate"}
+            </Button>
+          )}
         </div>
       </div>
       
-      <div className="relative w-full flex justify-center" style={{ height: isMobile ? "calc(100vh - 200px)" : "70vh" }}>
+      {/* Annotation toolbar */}
+      {showAnnotations && (
+        <PDFAnnotationToolbar
+          isOpen={showAnnotations}
+          activeTool={activeTool}
+          onToolChange={setActiveTool}
+          onSave={saveAnnotations}
+          onClear={handleClearAnnotations}
+          penColor={penColor}
+          onPenColorChange={setPenColor}
+          penSize={penSize}
+          onPenSizeChange={setPenSize}
+        />
+      )}
+      
+      <div ref={containerRef} className="relative w-full flex justify-center" style={{ height: isMobile ? "calc(100vh - 200px)" : "70vh" }}>
         {isLoading && (
-          <div className="absolute inset-0 flex items-center justify-center bg-background/80">
+          <div className="absolute inset-0 flex items-center justify-center bg-background/80 z-30">
             <Loader2 className="h-8 w-8 animate-spin text-primary" />
           </div>
         )}
@@ -175,6 +325,7 @@ export const PDFViewer = ({ url, title }: PDFViewerProps) => {
         ) : (
           <div className="w-full h-full overflow-auto flex justify-center">
             <iframe 
+              ref={iframeRef}
               src={getPdfViewerUrl()}
               className="w-full h-full max-w-3xl mx-auto" 
               style={{ 
@@ -185,7 +336,22 @@ export const PDFViewer = ({ url, title }: PDFViewerProps) => {
               }}
               onLoad={handleLoad}
               onError={handleError}
+              title={title}
             />
+            
+            {showAnnotations && (
+              <PDFAnnotationCanvas
+                containerRef={containerRef}
+                activeTool={activeTool}
+                canvasWidth={canvasWidth}
+                canvasHeight={canvasHeight}
+                penColor={penColor}
+                penSize={penSize}
+                scale={zoom / 100}
+                annotations={annotations}
+                onChange={handleAnnotationsChange}
+              />
+            )}
           </div>
         )}
       </div>
@@ -226,6 +392,18 @@ export const PDFViewer = ({ url, title }: PDFViewerProps) => {
             >
               <Download className="h-4 w-4" />
             </Button>
+            
+            {/* Mobile annotation toggle */}
+            {user && sheetMusicId && (
+              <Button
+                variant={showAnnotations ? "default" : "outline"}
+                size="sm"
+                onClick={toggleAnnotations}
+                className="text-xs px-2"
+              >
+                <Pen className="h-4 w-4" />
+              </Button>
+            )}
           </div>
         )}
       </div>
