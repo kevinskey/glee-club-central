@@ -24,6 +24,7 @@ interface SetlistDrawerProps {
   currentSheetMusicId?: string;
 }
 
+// Define explicit interface for our setlist data
 interface Setlist {
   id: string;
   name: string;
@@ -56,6 +57,7 @@ export const SetlistDrawer = ({ open, onOpenChange, currentSheetMusicId }: Setli
 
     setIsLoading(true);
     try {
+      // Using generic query with casting to handle type safety
       const { data, error } = await supabase
         .from('setlists')
         .select('*')
@@ -65,8 +67,9 @@ export const SetlistDrawer = ({ open, onOpenChange, currentSheetMusicId }: Setli
       if (error) throw error;
 
       if (data && data.length > 0) {
-        setSetlists(data as Setlist[]);
-        setActiveSetlist(data[0] as Setlist);
+        // Cast the data to our Setlist type
+        setSetlists(data as unknown as Setlist[]);
+        setActiveSetlist(data[0] as unknown as Setlist);
       } else {
         setSetlists([]);
         setActiveSetlist(null);
@@ -99,13 +102,14 @@ export const SetlistDrawer = ({ open, onOpenChange, currentSheetMusicId }: Setli
       // Initialize with current sheet music if provided
       const initialSheetMusicIds = currentSheetMusicId ? [currentSheetMusicId] : [];
 
+      // Using generic insert with type assertions
       const { data, error } = await supabase
         .from('setlists')
         .insert({
           name: newSetlistName,
           user_id: user.id,
           sheet_music_ids: initialSheetMusicIds
-        })
+        } as any)
         .select();
 
       if (error) throw error;
@@ -117,7 +121,7 @@ export const SetlistDrawer = ({ open, onOpenChange, currentSheetMusicId }: Setli
         });
         
         // Add new setlist to the list and select it
-        const newSetlist = data[0] as Setlist;
+        const newSetlist = data[0] as unknown as Setlist;
         setSetlists([newSetlist, ...setlists]);
         setActiveSetlist(newSetlist);
         setIsCreatingNew(false);
@@ -152,9 +156,10 @@ export const SetlistDrawer = ({ open, onOpenChange, currentSheetMusicId }: Setli
       // Add the current sheet music to the setlist
       const updatedIds = [...(activeSetlist.sheet_music_ids || []), currentSheetMusicId];
       
+      // Using type assertion to work around TypeScript restriction
       const { error } = await supabase
         .from('setlists')
-        .update({ sheet_music_ids: updatedIds })
+        .update({ sheet_music_ids: updatedIds } as any)
         .eq('id', activeSetlist.id);
 
       if (error) throw error;
@@ -188,9 +193,10 @@ export const SetlistDrawer = ({ open, onOpenChange, currentSheetMusicId }: Setli
       // Remove the sheet music from the setlist
       const updatedIds = activeSetlist.sheet_music_ids.filter(id => id !== sheetMusicId);
       
+      // Using type assertion to work around TypeScript restriction
       const { error } = await supabase
         .from('setlists')
-        .update({ sheet_music_ids: updatedIds })
+        .update({ sheet_music_ids: updatedIds } as any)
         .eq('id', activeSetlist.id);
 
       if (error) throw error;
@@ -221,6 +227,7 @@ export const SetlistDrawer = ({ open, onOpenChange, currentSheetMusicId }: Setli
     if (!confirm("Are you sure you want to delete this setlist?")) return;
 
     try {
+      // Using generic delete
       const { error } = await supabase
         .from('setlists')
         .delete()

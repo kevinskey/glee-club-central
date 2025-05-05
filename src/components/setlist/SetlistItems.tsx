@@ -83,9 +83,10 @@ export const SetlistItems = ({
     newOrder[newIndex] = temp;
     
     try {
+      // Using type assertion to work around TypeScript restriction
       const { error } = await supabase
         .from('setlists')
-        .update({ sheet_music_ids: newOrder })
+        .update({ sheet_music_ids: newOrder } as any)
         .eq('id', setlist.id);
 
       if (error) throw error;
