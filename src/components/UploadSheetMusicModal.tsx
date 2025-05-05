@@ -20,10 +20,16 @@ import { useNavigate } from "react-router-dom";
 
 interface UploadSheetMusicModalProps {
   onUploadComplete: () => void;
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
 }
 
-export function UploadSheetMusicModal({ onUploadComplete }: UploadSheetMusicModalProps) {
-  const [open, setOpen] = useState(false);
+export function UploadSheetMusicModal({ 
+  onUploadComplete,
+  open: controlledOpen,
+  onOpenChange: setControlledOpen
+}: UploadSheetMusicModalProps) {
+  const [internalOpen, setInternalOpen] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [title, setTitle] = useState("");
   const [composer, setComposer] = useState("");
@@ -31,6 +37,13 @@ export function UploadSheetMusicModal({ onUploadComplete }: UploadSheetMusicModa
   const { toast } = useToast();
   const { profile } = useAuth();
   const navigate = useNavigate();
+  
+  // Determine if we're in controlled or uncontrolled mode
+  const isControlled = controlledOpen !== undefined && setControlledOpen !== undefined;
+  const open = isControlled ? controlledOpen : internalOpen;
+  const setOpen = isControlled 
+    ? setControlledOpen 
+    : setInternalOpen;
 
   // Check if user is admin on component mount
   useEffect(() => {
@@ -166,12 +179,14 @@ export function UploadSheetMusicModal({ onUploadComplete }: UploadSheetMusicModa
       setOpen(isOpen);
       if (!isOpen) resetForm();
     }}>
-      <DialogTrigger asChild>
-        <Button size="sm">
-          <FileUp className="mr-2 h-4 w-4" />
-          Upload Sheet Music
-        </Button>
-      </DialogTrigger>
+      {!isControlled && (
+        <DialogTrigger asChild>
+          <Button size="sm">
+            <FileUp className="mr-2 h-4 w-4" />
+            Upload Sheet Music
+          </Button>
+        </DialogTrigger>
+      )}
       <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>
           <DialogTitle>Upload Sheet Music</DialogTitle>

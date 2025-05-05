@@ -2,7 +2,7 @@
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { PageHeader } from "@/components/ui/page-header";
-import { FileText, FolderOpen, Loader2 } from "lucide-react";
+import { FileText, FolderOpen, Loader2, Upload } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
@@ -23,6 +23,7 @@ export default function SheetMusicPage() {
   const { toast } = useToast();
   const [loading, setLoading] = useState(true);
   const [musicFiles, setMusicFiles] = useState<SheetMusic[]>([]);
+  const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
 
   // Fetch sheet music data
   const fetchSheetMusic = async () => {
@@ -83,6 +84,18 @@ export default function SheetMusicPage() {
         }
       />
 
+      {isAdmin && (
+        <div className="mb-6 flex justify-center">
+          <Button 
+            size="lg" 
+            className="gap-2 px-6 py-6 text-lg"
+            onClick={() => setIsUploadModalOpen(true)}
+          >
+            <Upload className="h-5 w-5" /> Upload New Sheet Music
+          </Button>
+        </div>
+      )}
+
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
@@ -139,7 +152,12 @@ export default function SheetMusicPage() {
                       : "There's no sheet music uploaded yet."}
                   </p>
                   {isAdmin && (
-                    <UploadSheetMusicModal onUploadComplete={fetchSheetMusic} />
+                    <Button 
+                      onClick={() => setIsUploadModalOpen(true)}
+                      className="gap-2"
+                    >
+                      <Upload className="h-4 w-4" /> Upload Sheet Music
+                    </Button>
                   )}
                 </div>
               )}
@@ -147,6 +165,14 @@ export default function SheetMusicPage() {
           )}
         </CardContent>
       </Card>
+
+      {isAdmin && (
+        <UploadSheetMusicModal 
+          onUploadComplete={fetchSheetMusic}
+          open={isUploadModalOpen}
+          onOpenChange={setIsUploadModalOpen}
+        />
+      )}
     </div>
   );
 }
