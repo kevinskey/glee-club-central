@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from "react";
-import { Newsfeed } from "lucide-react";
+import { Newspaper } from "lucide-react";
 import { 
   Popover,
   PopoverContent,
@@ -70,14 +70,14 @@ export function NewsFeed() {
     <Popover>
       <PopoverTrigger asChild>
         <Button variant="ghost" size="sm" className="flex items-center gap-1.5 text-sm">
-          <Newsfeed className="h-4 w-4 text-glee-purple" />
+          <Newspaper className="h-4 w-4 text-glee-purple" />
           <span>HBCU Choral News</span>
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-80 p-0" align="end">
         <div className="p-3 font-semibold bg-muted/50">
           <h3 className="flex items-center gap-2">
-            <Newsfeed className="h-4 w-4" />
+            <Newspaper className="h-4 w-4" />
             HBCU Choral News
           </h3>
         </div>

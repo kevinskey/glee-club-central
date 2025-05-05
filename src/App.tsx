@@ -22,6 +22,7 @@ import AudioManagementPage from "./pages/audio-management/AudioManagementPage";
 import SubmitRecordingPage from "./pages/recordings/SubmitRecordingPage";
 import HandbookPage from "./pages/handbook/HandbookPage";
 import VideosPage from "./pages/videos/VideosPage";
+import ProfilePage from "./pages/profile/ProfilePage";
 
 // Placeholder pages for other sections
 const MerchPage = () => <div className="px-4 py-8">Buy Glee Merch Page - Coming Soon</div>;
@@ -62,6 +63,16 @@ const App = () => (
               <Route path="audio-management" element={<AudioManagementPage />} />
               <Route path="videos" element={<VideosPage />} />
             </Route>
+
+            {/* Profile Page */}
+            <Route
+              path="/profile"
+              element={
+                <ProtectedRoute>
+                  <ProfilePage />
+                </ProtectedRoute>
+              }
+            />
 
             {/* Catch-all redirect to 404 */}
             <Route path="*" element={<NotFound />} />

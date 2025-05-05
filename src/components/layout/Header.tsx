@@ -112,9 +112,9 @@ export const Header = () => {
                 <DropdownMenuItem asChild>
                   <button
                     className="flex w-full cursor-pointer items-center"
-                    onClick={() => navigate("/profile")}
+                    onClick={() => navigate("/dashboard")}
                   >
-                    Profile
+                    Dashboard
                   </button>
                 </DropdownMenuItem>
                 <DropdownMenuItem asChild>
