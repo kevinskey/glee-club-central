@@ -1,164 +1,120 @@
 
-import React, { useEffect, useState } from "react";
+import React, { useState, useEffect } from "react";
 import { PageHeader } from "@/components/ui/page-header";
-import { FolderOpen, Loader2, Upload } from "lucide-react";
-import { Card, CardContent } from "@/components/ui/card";
+import { FilesIcon, Upload } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { useAuth } from "@/contexts/AuthContext";
-import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { UploadMediaModal } from "@/components/UploadMediaModal";
+import { supabase } from "@/integrations/supabase/client";
 import { MediaFile } from "@/types/media";
+import { MediaType, getMediaType, getMediaTypeLabel } from "@/utils/mediaUtils";
 import { MediaFilesSection } from "@/components/media/MediaFilesSection";
-import { getMediaTypeLabel } from "@/utils/mediaUtils";
+import { useAudioFiles } from "@/hooks/useAudioFiles";
+import { UploadMediaModal } from "@/components/UploadMediaModal";
+import { Separator } from "@/components/ui/separator";
+import { AudioFile } from "@/types/audio";
 
 export default function MediaLibraryPage() {
-  const { profile } = useAuth();
   const { toast } = useToast();
-  const [loading, setLoading] = useState(true);
-  const [mediaFiles, setMediaFiles] = useState<MediaFile[]>([]);
+  const { audioFiles } = useAudioFiles();
+  
+  const [isLoading, setIsLoading] = useState(true);
   const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
-
-  // Fetch media library data
-  const fetchMediaLibrary = async () => {
-    setLoading(true);
+  const [allMediaFiles, setAllMediaFiles] = useState<MediaFile[]>([]);
+  
+  // Fetch all media files
+  const fetchAllMedia = async () => {
+    setIsLoading(true);
     try {
-      const { data, error } = await supabase
-        .from('media_library')
+      // Fetch files from storage
+      const { data: storageFiles, error: storageError } = await supabase
+        .from('media_files')
         .select('*')
         .order('created_at', { ascending: false });
-
-      if (error) throw error;
-
-      if (data) {
-        // Format dates for display
-        const formattedData = data.map((item: MediaFile) => ({
-          ...item,
-          created_at: new Date(item.created_at).toLocaleDateString()
-        }));
-        
-        setMediaFiles(formattedData);
-      }
+      
+      if (storageError) throw storageError;
+      
+      // Convert audio files to media files format
+      const audioMediaFiles: MediaFile[] = audioFiles.map(audioFile => ({
+        id: audioFile.id,
+        title: audioFile.title,
+        description: audioFile.description,
+        file_url: audioFile.file_url,
+        file_path: audioFile.file_path,
+        file_type: 'audio/mpeg', // Default audio type
+        created_at: audioFile.created_at,
+        uploaded_by: audioFile.uploaded_by
+      }));
+      
+      // Combine all media files
+      const allFiles = [
+        ...(storageFiles || []), 
+        ...audioMediaFiles
+      ];
+      
+      setAllMediaFiles(allFiles);
     } catch (error: any) {
-      console.error("Error fetching media library:", error);
+      console.error("Error fetching media files:", error);
       toast({
-        title: "Error loading media library",
-        description: error.message || "An unexpected error occurred",
-        variant: "destructive",
+        title: "Error loading media",
+        description: error.message || "Failed to load media files",
+        variant: "destructive"
       });
     } finally {
-      setLoading(false);
+      setIsLoading(false);
     }
   };
-
-  // Load data on initial render
+  
   useEffect(() => {
-    fetchMediaLibrary();
-  }, []);
+    fetchAllMedia();
+  }, [audioFiles]); // Refetch when audio files change
+  
+  const handleUploadComplete = () => {
+    fetchAllMedia();
+  };
 
-  // Check if user is an admin
-  const isAdmin = profile?.role === "admin";
+  // Get all media types we have files for
+  const mediaTypes: MediaType[] = ["pdf", "audio", "image", "video", "other"];
 
   return (
-    <div>
+    <div className="space-y-8">
       <PageHeader
         title="Media Library"
-        description="Browse and download media files by category"
-        icon={<FolderOpen className="h-6 w-6" />}
+        description="Access all your media files in one place"
+        icon={<FilesIcon className="h-6 w-6" />}
         actions={
-          // Only show upload button for admin users in the header
-          isAdmin && (
-            <Button 
-              onClick={() => setIsUploadModalOpen(true)}
-              size="sm"
-              className="gap-2"
-            >
-              <Upload className="h-4 w-4" /> Upload Media
-            </Button>
-          )
+          <Button 
+            onClick={() => setIsUploadModalOpen(true)}
+            className="gap-2"
+          >
+            <Upload className="h-4 w-4" /> Upload Media
+          </Button>
         }
       />
-
-      {isAdmin && (
-        <div className="mb-6 flex justify-center">
-          <Button 
-            size="lg" 
-            className="gap-2 px-6 py-6 text-lg"
-            onClick={() => setIsUploadModalOpen(true)}
-          >
-            <Upload className="h-5 w-5" /> Upload New Media
-          </Button>
+      
+      {isLoading ? (
+        <div className="flex justify-center py-12">
+          <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
         </div>
+      ) : (
+        <>
+          {mediaTypes.map((mediaType) => (
+            <React.Fragment key={mediaType}>
+              <MediaFilesSection
+                files={allMediaFiles}
+                mediaType={mediaType}
+                title={getMediaTypeLabel(mediaType)}
+              />
+              <Separator className="my-8" />
+            </React.Fragment>
+          ))}
+        </>
       )}
 
-      <Card>
-        <CardContent className="pt-6">
-          {loading ? (
-            <div className="flex h-[200px] w-full items-center justify-center">
-              <Loader2 className="h-8 w-8 animate-spin text-primary" />
-            </div>
-          ) : (
-            <div className="space-y-4">
-              {mediaFiles.length > 0 ? (
-                <>
-                  <MediaFilesSection 
-                    files={mediaFiles} 
-                    mediaType="pdf" 
-                    title={getMediaTypeLabel("pdf")} 
-                  />
-                  <MediaFilesSection 
-                    files={mediaFiles} 
-                    mediaType="audio" 
-                    title={getMediaTypeLabel("audio")} 
-                  />
-                  <MediaFilesSection 
-                    files={mediaFiles} 
-                    mediaType="image" 
-                    title={getMediaTypeLabel("image")} 
-                  />
-                  <MediaFilesSection 
-                    files={mediaFiles} 
-                    mediaType="video" 
-                    title={getMediaTypeLabel("video")} 
-                  />
-                  <MediaFilesSection 
-                    files={mediaFiles} 
-                    mediaType="other" 
-                    title={getMediaTypeLabel("other")} 
-                  />
-                </>
-              ) : (
-                <div className="flex flex-col items-center justify-center rounded-lg border border-dashed p-8 text-center">
-                  <FolderOpen className="mb-4 h-12 w-12 text-muted-foreground" />
-                  <h3 className="mb-2 text-lg font-medium">No media files yet</h3>
-                  <p className="mb-4 text-sm text-muted-foreground">
-                    {isAdmin 
-                      ? "Upload your first media file using the button below."
-                      : "There's no media files uploaded yet."}
-                  </p>
-                  {isAdmin && (
-                    <Button 
-                      onClick={() => setIsUploadModalOpen(true)}
-                      className="gap-2"
-                    >
-                      <Upload className="h-4 w-4" /> Upload Media
-                    </Button>
-                  )}
-                </div>
-              )}
-            </div>
-          )}
-        </CardContent>
-      </Card>
-
-      {/* Upload Modal */}
-      {isAdmin && (
-        <UploadMediaModal 
-          onUploadComplete={fetchMediaLibrary}
-          open={isUploadModalOpen}
-          onOpenChange={setIsUploadModalOpen}
-        />
-      )}
+      <UploadMediaModal 
+        open={isUploadModalOpen}
+        onOpenChange={setIsUploadModalOpen}
+        onUploadComplete={handleUploadComplete}
+      />
     </div>
   );
 }
