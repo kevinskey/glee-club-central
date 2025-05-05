@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
@@ -206,21 +205,7 @@ export const PDFViewer = ({ url, title, sheetMusicId }: PDFViewerProps) => {
           onError={handleError}
           error={error}
           title={title}
-        >
-          {showAnnotations && (
-            <PDFAnnotationCanvas
-              containerRef={containerRef}
-              activeTool={null} // This will be managed by PDFAnnotationManager
-              canvasWidth={canvasWidth}
-              canvasHeight={canvasHeight}
-              penColor={"#FF0000"}
-              penSize={3}
-              scale={zoom / 100}
-              annotations={annotations}
-              onChange={() => {}} // This will be managed by PDFAnnotationManager
-            />
-          )}
-        </PDFDocument>
+        />
       </div>
       
       {/* Footer Controls */}
