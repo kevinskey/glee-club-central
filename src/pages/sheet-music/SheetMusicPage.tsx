@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { PageHeader } from "@/components/ui/page-header";
@@ -132,12 +131,6 @@ export default function SheetMusicPage() {
                       </p>
                     </div>
                     <div className="flex gap-2">
-                      <Button 
-                        variant="outline" 
-                        onClick={() => handleDownload(file)}
-                      >
-                        Download PDF
-                      </Button>
                       <Button 
                         variant="default" 
                         asChild
