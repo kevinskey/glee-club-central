@@ -1,7 +1,6 @@
-
 import React, { useState, useEffect, useRef } from "react";
 import { PageHeader } from "@/components/ui/page-header";
-import { Headphones, Music, Upload, Mic, Square, Play, Save, VolumeX } from "lucide-react";
+import { Headphones, Music, Upload, Mic, MicOff, Square, Play, Save, VolumeX } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
 import { UploadAudioModal } from "@/components/UploadAudioModal";
@@ -35,6 +34,7 @@ export default function AudioManagementPage() {
   
   // Audio recording state
   const [isRecording, setIsRecording] = useState(false);
+  const [microphoneActive, setMicrophoneActive] = useState(false);
   const [recordingTime, setRecordingTime] = useState(0);
   const [audioURL, setAudioURL] = useState<string | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
@@ -46,6 +46,7 @@ export default function AudioManagementPage() {
   const audioChunksRef = useRef<Blob[]>([]);
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const timerRef = useRef<number | null>(null);
+  const streamRef = useRef<MediaStream | null>(null);
 
   // Filter audio files based on search and category
   useEffect(() => {
@@ -107,10 +108,48 @@ export default function AudioManagementPage() {
       : filteredFiles.filter(file => file.category === category);
   };
 
+  // Initialize microphone
+  const initializeMicrophone = async () => {
+    try {
+      // Request microphone access
+      const stream = await navigator.mediaDevices.getUserMedia({ 
+        audio: {
+          echoCancellation: true,
+          noiseSuppression: true,
+          autoGainControl: true
+        } 
+      });
+      
+      streamRef.current = stream;
+      setMicrophoneActive(true);
+      
+      // Show success message
+      toast({
+        title: "Microphone activated",
+        description: "Your microphone is ready for recording.",
+      });
+      
+      return stream;
+    } catch (error) {
+      console.error('Error accessing microphone:', error);
+      toast({ 
+        title: "Microphone access denied",
+        description: "Please allow microphone access to record audio.",
+        variant: "destructive"
+      });
+      setMicrophoneActive(false);
+      return null;
+    }
+  };
+
   // Start recording
   const startRecording = async () => {
     try {
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      // Get stream (or reuse existing one)
+      const stream = streamRef.current || await initializeMicrophone();
+      if (!stream) return;
+      
+      // Create media recorder
       const mediaRecorder = new MediaRecorder(stream);
       mediaRecorderRef.current = mediaRecorder;
       audioChunksRef.current = [];
@@ -144,7 +183,7 @@ export default function AudioManagementPage() {
       console.error('Error starting recording:', error);
       toast({ 
         title: "Recording failed",
-        description: "Could not access microphone. Please ensure you have granted permission.",
+        description: "Could not start recording. Please try again.",
         variant: "destructive"
       });
     }
@@ -161,9 +200,15 @@ export default function AudioManagementPage() {
         clearInterval(timerRef.current);
         timerRef.current = null;
       }
-      
-      // Stop all audio tracks
-      mediaRecorderRef.current.stream.getTracks().forEach(track => track.stop());
+    }
+  };
+
+  // Release microphone
+  const releaseMicrophone = () => {
+    if (streamRef.current) {
+      streamRef.current.getTracks().forEach(track => track.stop());
+      streamRef.current = null;
+      setMicrophoneActive(false);
     }
   };
 
@@ -260,15 +305,13 @@ export default function AudioManagementPage() {
         clearInterval(timerRef.current);
       }
       
-      if (mediaRecorderRef.current && isRecording) {
-        mediaRecorderRef.current.stream.getTracks().forEach(track => track.stop());
-      }
+      releaseMicrophone();
       
       if (audioURL) {
         URL.revokeObjectURL(audioURL);
       }
     };
-  }, [audioURL, isRecording]);
+  }, [audioURL]);
 
   return (
     <div className="space-y-6">
@@ -290,13 +333,37 @@ export default function AudioManagementPage() {
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <Mic className="h-5 w-5" /> Record Audio
+            {microphoneActive ? (
+              <Mic className="h-5 w-5 text-green-500" />
+            ) : (
+              <MicOff className="h-5 w-5 text-gray-500" />
+            )} 
+            Record Audio
           </CardTitle>
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
             <div className="flex items-center gap-4">
-              {isRecording ? (
+              {!microphoneActive && !isRecording && !audioURL && (
+                <Button 
+                  onClick={initializeMicrophone}
+                  className="gap-2"
+                >
+                  <Mic className="h-4 w-4" /> Activate Microphone
+                </Button>
+              )}
+              
+              {microphoneActive && !isRecording && !audioURL && (
+                <Button 
+                  onClick={startRecording}
+                  variant="default"
+                  className="gap-2"
+                >
+                  <Mic className="h-4 w-4" /> Start Recording
+                </Button>
+              )}
+              
+              {isRecording && (
                 <Button 
                   variant="destructive" 
                   onClick={stopRecording}
@@ -304,20 +371,19 @@ export default function AudioManagementPage() {
                 >
                   <Square className="h-4 w-4" /> Stop Recording
                 </Button>
-              ) : (
-                <Button 
-                  onClick={startRecording}
-                  className="gap-2"
-                  disabled={!!audioURL}
-                >
-                  <Mic className="h-4 w-4" /> Start Recording
-                </Button>
               )}
               
               {isRecording && (
                 <div className="flex items-center gap-2 text-red-500 animate-pulse">
                   <span className="h-2 w-2 rounded-full bg-red-500"></span>
                   <span>Recording: {formatTime(recordingTime)}</span>
+                </div>
+              )}
+              
+              {microphoneActive && !isRecording && (
+                <div className="flex items-center gap-2 text-green-500">
+                  <span className="h-2 w-2 rounded-full bg-green-500"></span>
+                  <span>Microphone active</span>
                 </div>
               )}
             </div>
@@ -372,7 +438,17 @@ export default function AudioManagementPage() {
                       </Select>
                     </div>
                     
-                    <div className="flex justify-end">
+                    <div className="flex justify-between">
+                      <Button 
+                        variant="outline"
+                        onClick={() => {
+                          setAudioURL(null);
+                          setRecordingName(`Recording ${format(new Date(), "yyyy-MM-dd-HH-mm-ss")}`);
+                        }}
+                        className="gap-2"
+                      >
+                        <MicOff className="h-4 w-4" /> Discard Recording
+                      </Button>
                       <Button 
                         onClick={saveRecording}
                         className="gap-2"
