@@ -25,15 +25,15 @@ export default function MediaLibraryPage() {
   const fetchAllMedia = async () => {
     setIsLoading(true);
     try {
-      // Fetch files from storage
+      // Fetch files from storage - fixed table name from "media_files" to "media_library"
       const { data: storageFiles, error: storageError } = await supabase
-        .from('media_files')
+        .from('media_library')
         .select('*')
         .order('created_at', { ascending: false });
       
       if (storageError) throw storageError;
       
-      // Convert audio files to media files format
+      // Convert audio files to media files format, ensuring all required fields are present
       const audioMediaFiles: MediaFile[] = audioFiles.map(audioFile => ({
         id: audioFile.id,
         title: audioFile.title,
@@ -45,13 +45,22 @@ export default function MediaLibraryPage() {
         uploaded_by: audioFile.uploaded_by
       }));
       
-      // Combine all media files
-      const allFiles = [
-        ...(storageFiles || []), 
-        ...audioMediaFiles
-      ];
+      // Combine all media files, ensuring proper type casting for storageFiles
+      const typedStorageFiles = storageFiles?.map(file => ({
+        id: file.id,
+        title: file.title,
+        description: file.description,
+        file_url: file.file_url,
+        file_path: file.file_path,
+        file_type: file.file_type,
+        created_at: file.created_at,
+        uploaded_by: file.uploaded_by
+      })) || [];
       
-      setAllMediaFiles(allFiles);
+      setAllMediaFiles([
+        ...typedStorageFiles,
+        ...audioMediaFiles
+      ]);
     } catch (error: any) {
       console.error("Error fetching media files:", error);
       toast({
