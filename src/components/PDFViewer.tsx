@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
-import { Loader2, ZoomIn, ZoomOut, Download, ArrowLeft, ArrowRight, Pen } from "lucide-react";
+import { Loader2, ZoomIn, ZoomOut, Download, ArrowLeft, ArrowRight, Pen, ListMusic } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useAuth } from "@/contexts/AuthContext";
@@ -15,6 +15,7 @@ import {
 } from "@/components/ui/menubar";
 import { PDFAnnotationToolbar, AnnotationTool } from "./PDFAnnotationToolbar";
 import { PDFAnnotationCanvas, Annotation } from "./PDFAnnotationCanvas";
+import { SetlistDrawer } from "./setlist/SetlistDrawer";
 
 interface PDFViewerProps {
   url: string;
@@ -36,6 +37,7 @@ export const PDFViewer = ({ url, title, sheetMusicId }: PDFViewerProps) => {
   const [canvasWidth, setCanvasWidth] = useState(0);
   const [canvasHeight, setCanvasHeight] = useState(0);
   const [isSaving, setIsSaving] = useState(false);
+  const [isSetlistOpen, setIsSetlistOpen] = useState(false);
   
   const { toast } = useToast();
   const isMobile = useIsMobile();
@@ -75,7 +77,9 @@ export const PDFViewer = ({ url, title, sheetMusicId }: PDFViewerProps) => {
       }
 
       if (data && data.annotations) {
-        setAnnotations(data.annotations);
+        // Ensure annotations is properly typed
+        const savedAnnotations = data.annotations as unknown as Annotation[];
+        setAnnotations(savedAnnotations);
       }
     } catch (error) {
       console.error("Error loading annotations:", error);
@@ -96,13 +100,16 @@ export const PDFViewer = ({ url, title, sheetMusicId }: PDFViewerProps) => {
     setIsSaving(true);
 
     try {
+      // Convert annotations to a JSON-compatible format
+      const annotationsForDB = JSON.parse(JSON.stringify(annotations));
+      
       const { data, error } = await supabase
         .from('pdf_annotations')
         .upsert(
           {
             sheet_music_id: sheetMusicId,
             user_id: user.id,
-            annotations,
+            annotations: annotationsForDB,
             updated_at: new Date().toISOString(),
           },
           { onConflict: 'sheet_music_id,user_id' }
@@ -191,6 +198,10 @@ export const PDFViewer = ({ url, title, sheetMusicId }: PDFViewerProps) => {
   const handleAnnotationsChange = (newAnnotations: Annotation[]) => {
     setAnnotations(newAnnotations);
   };
+
+  const toggleSetlist = () => {
+    setIsSetlistOpen(!isSetlistOpen);
+  };
   
   // Build PDF URL with appropriate parameters for the device type and score reading
   const getPdfViewerUrl = () => {
@@ -269,6 +280,15 @@ export const PDFViewer = ({ url, title, sheetMusicId }: PDFViewerProps) => {
                     {showAnnotations ? "Hide Annotations" : "Show Annotations"}
                   </MenubarItem>
                 )}
+                {user && (
+                  <MenubarItem 
+                    onClick={toggleSetlist}
+                    className="flex items-center gap-2"
+                  >
+                    <ListMusic className="h-4 w-4" /> 
+                    {isSetlistOpen ? "Hide Setlist" : "Show Setlist"}
+                  </MenubarItem>
+                )}
               </MenubarContent>
             </MenubarMenu>
           </Menubar>
@@ -283,6 +303,19 @@ export const PDFViewer = ({ url, title, sheetMusicId }: PDFViewerProps) => {
             >
               <Pen className="h-4 w-4" />
               {showAnnotations ? "Hide" : "Annotate"}
+            </Button>
+          )}
+
+          {/* Show setlist toggle button outside menu on larger screens */}
+          {!isMobile && user && (
+            <Button
+              variant={isSetlistOpen ? "default" : "outline"}
+              size="sm"
+              onClick={toggleSetlist}
+              className="flex items-center gap-1"
+            >
+              <ListMusic className="h-4 w-4" />
+              Setlist
             </Button>
           )}
         </div>
@@ -404,9 +437,30 @@ export const PDFViewer = ({ url, title, sheetMusicId }: PDFViewerProps) => {
                 <Pen className="h-4 w-4" />
               </Button>
             )}
+            
+            {/* Mobile setlist toggle */}
+            {user && (
+              <Button
+                variant={isSetlistOpen ? "default" : "outline"}
+                size="sm"
+                onClick={toggleSetlist}
+                className="text-xs px-2"
+              >
+                <ListMusic className="h-4 w-4" />
+              </Button>
+            )}
           </div>
         )}
       </div>
+
+      {/* Setlist Drawer */}
+      {user && (
+        <SetlistDrawer
+          open={isSetlistOpen}
+          onOpenChange={setIsSetlistOpen}
+          currentSheetMusicId={sheetMusicId}
+        />
+      )}
     </div>
   );
 };
