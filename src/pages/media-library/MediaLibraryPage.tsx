@@ -11,15 +11,18 @@ import { MediaFilesSection } from "@/components/media/MediaFilesSection";
 import { useAudioFiles } from "@/hooks/useAudioFiles";
 import { UploadMediaModal } from "@/components/UploadMediaModal";
 import { Separator } from "@/components/ui/separator";
-import { AudioFile } from "@/types/audio";
+import { useAuth } from "@/contexts/AuthContext";
 
 export default function MediaLibraryPage() {
   const { toast } = useToast();
   const { audioFiles } = useAudioFiles();
+  const { profile } = useAuth();
   
   const [isLoading, setIsLoading] = useState(true);
   const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
   const [allMediaFiles, setAllMediaFiles] = useState<MediaFile[]>([]);
+  
+  const isAdmin = profile?.role === "admin";
   
   // Fetch all media files
   const fetchAllMedia = async () => {
@@ -91,12 +94,14 @@ export default function MediaLibraryPage() {
         description="Access all your media files in one place"
         icon={<FilesIcon className="h-6 w-6" />}
         actions={
-          <Button 
-            onClick={() => setIsUploadModalOpen(true)}
-            className="gap-2"
-          >
-            <Upload className="h-4 w-4" /> Upload Media
-          </Button>
+          isAdmin ? (
+            <Button 
+              onClick={() => setIsUploadModalOpen(true)}
+              className="gap-2"
+            >
+              <Upload className="h-4 w-4" /> Upload Media
+            </Button>
+          ) : null
         }
       />
       
