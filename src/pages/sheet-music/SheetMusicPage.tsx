@@ -66,15 +66,21 @@ export default function SheetMusicPage() {
     window.open(file.file_url, "_blank");
   };
 
+  // Check if user is an admin
+  const isAdmin = profile?.role === "admin";
+
   return (
     <div>
       <PageHeader
         title="Sheet Music Library"
         description="Browse and download sheet music"
         icon={<FileText className="h-6 w-6" />}
-        actions={profile?.role === "admin" && (
-          <UploadSheetMusicModal onUploadComplete={fetchSheetMusic} />
-        )}
+        actions={
+          // Only show upload button for admin users
+          isAdmin && (
+            <UploadSheetMusicModal onUploadComplete={fetchSheetMusic} />
+          )
+        }
       />
 
       <Card>
@@ -128,9 +134,11 @@ export default function SheetMusicPage() {
                   <FolderOpen className="mb-4 h-12 w-12 text-muted-foreground" />
                   <h3 className="mb-2 text-lg font-medium">No sheet music yet</h3>
                   <p className="mb-4 text-sm text-muted-foreground">
-                    There's no sheet music uploaded yet.
+                    {isAdmin 
+                      ? "Upload your first sheet music using the button below."
+                      : "There's no sheet music uploaded yet."}
                   </p>
-                  {profile?.role === "admin" && (
+                  {isAdmin && (
                     <UploadSheetMusicModal onUploadComplete={fetchSheetMusic} />
                   )}
                 </div>
