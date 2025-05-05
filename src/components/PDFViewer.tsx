@@ -161,9 +161,10 @@ export const PDFViewer = ({ url, title, sheetMusicId }: PDFViewerProps) => {
         />
       )}
       
-      {/* Mobile Controls at the top */}
+      {/* ForScore-style controls - Annotations at the top for mobile */}
       {isMobile && (
-        <div className="sticky top-0 z-10 w-full">
+        <div className="sticky top-0 z-30 w-full">
+          {/* Mobile main controls */}
           <PDFMobileControls
             user={user}
             hasAnnotationSupport={!!sheetMusicId}
@@ -180,7 +181,7 @@ export const PDFViewer = ({ url, title, sheetMusicId }: PDFViewerProps) => {
             url={url}
           />
           
-          {/* Annotation Manager for mobile always at the top */}
+          {/* Annotation toolbar at the top for mobile */}
           {isMobile && showAnnotations && (
             <PDFAnnotationManager
               showAnnotations={showAnnotations}
@@ -231,12 +232,12 @@ export const PDFViewer = ({ url, title, sheetMusicId }: PDFViewerProps) => {
       </div>
       
       {/* Footer Controls */}
-      <div className="p-4 border-t bg-muted/30 flex flex-wrap gap-2 justify-between">
+      <div className="p-2 border-t bg-muted/30 flex flex-wrap gap-2 justify-between">
         <Button 
           variant="outline"
           size={isMobile ? "sm" : "default"}
           onClick={() => window.history.back()}
-          className={isMobile ? "text-xs px-2" : ""}
+          className={isMobile ? "text-xs px-2 max-w-[120px] truncate" : ""}
         >
           Back
         </Button>

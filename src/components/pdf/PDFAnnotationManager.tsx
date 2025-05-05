@@ -96,7 +96,7 @@ export const PDFAnnotationManager = ({
   };
 
   return (
-    <>
+    <div className="annotation-manager-container">
       <PDFAnnotationToolbar
         isOpen={showAnnotations}
         activeTool={activeTool}
@@ -123,6 +123,6 @@ export const PDFAnnotationManager = ({
           onChange={handleAnnotationsChange}
         />
       )}
-    </>
+    </div>
   );
 };

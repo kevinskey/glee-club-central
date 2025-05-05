@@ -37,10 +37,10 @@ export const PDFAnnotationToolbar = ({
   if (!isOpen) return null;
 
   return (
-    <div className="p-2 border-b bg-muted/30">
-      <div className={`flex ${isMobile ? "flex-wrap" : ""} gap-2 items-center`}>
+    <div className="p-2 bg-background border-b shadow-sm sticky top-0 z-20">
+      <div className={`flex ${isMobile ? "flex-wrap" : ""} gap-2 items-center justify-between`}>
         <TooltipProvider>
-          <div className={`flex items-center gap-1 ${isMobile ? "w-full justify-center mb-1" : "border-r pr-2"}`}>
+          <div className={`flex items-center gap-1 ${isMobile ? "mb-1" : "border-r pr-2"}`}>
             <Tooltip>
               <TooltipTrigger asChild>
                 <Toggle
@@ -94,14 +94,14 @@ export const PDFAnnotationToolbar = ({
           </div>
 
           {activeTool === "pen" && (
-            <div className={`flex items-center gap-2 ${isMobile ? "w-full justify-center mb-1" : "border-r pr-2"}`}>
-              <div className="flex gap-1">
+            <div className="flex items-center gap-2 flex-wrap">
+              <div className="flex gap-1 flex-wrap">
                 {colors.map((color) => (
                   <Tooltip key={color}>
                     <TooltipTrigger asChild>
                       <button
                         type="button"
-                        className={`w-5 h-5 rounded-full ${
+                        className={`w-5 h-5 rounded-full flex-shrink-0 ${
                           penColor === color ? "ring-2 ring-primary" : ""
                         }`}
                         style={{ backgroundColor: color }}
@@ -115,7 +115,7 @@ export const PDFAnnotationToolbar = ({
                   </Tooltip>
                 ))}
               </div>
-              <div className="flex items-center gap-1">
+              <div className="flex items-center gap-1 flex-wrap">
                 <span className="text-xs text-muted-foreground">Size:</span>
                 <input
                   type="range"
@@ -123,24 +123,24 @@ export const PDFAnnotationToolbar = ({
                   max="10"
                   value={penSize}
                   onChange={(e) => onPenSizeChange(Number(e.target.value))}
-                  className="w-20"
+                  className="w-20 flex-shrink-0"
                 />
                 <span className="text-xs">{penSize}px</span>
               </div>
             </div>
           )}
 
-          <div className={`flex items-center gap-1 ${isMobile ? "w-full justify-center" : ""}`}>
+          <div className="flex items-center gap-1">
             <Tooltip>
               <TooltipTrigger asChild>
                 <Button
                   variant="ghost"
                   size="sm"
                   onClick={onSave}
-                  className="h-8 px-2"
+                  className="h-8 px-2 flex-shrink-0"
                 >
                   <Save className="h-4 w-4 mr-1" />
-                  <span className="text-xs">Save</span>
+                  <span className="text-xs truncate">Save</span>
                 </Button>
               </TooltipTrigger>
               <TooltipContent>
@@ -154,10 +154,10 @@ export const PDFAnnotationToolbar = ({
                   variant="ghost"
                   size="sm"
                   onClick={onClear}
-                  className="h-8 px-2 text-destructive"
+                  className="h-8 px-2 text-destructive flex-shrink-0"
                 >
                   <X className="h-4 w-4 mr-1" />
-                  <span className="text-xs">Clear</span>
+                  <span className="text-xs truncate">Clear</span>
                 </Button>
               </TooltipTrigger>
               <TooltipContent>
