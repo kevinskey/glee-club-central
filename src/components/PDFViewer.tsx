@@ -153,7 +153,7 @@ export const PDFViewer = ({ url, title }: PDFViewerProps) => {
         </div>
       </div>
       
-      <div className="relative w-full" style={{ height: isMobile ? "calc(100vh - 200px)" : "70vh" }}>
+      <div className="relative w-full flex justify-center" style={{ height: isMobile ? "calc(100vh - 200px)" : "70vh" }}>
         {isLoading && (
           <div className="absolute inset-0 flex items-center justify-center bg-background/80">
             <Loader2 className="h-8 w-8 animate-spin text-primary" />
@@ -173,10 +173,10 @@ export const PDFViewer = ({ url, title }: PDFViewerProps) => {
             </div>
           </div>
         ) : (
-          <div className="w-full h-full overflow-auto">
+          <div className="w-full h-full overflow-auto flex justify-center">
             <iframe 
               src={getPdfViewerUrl()}
-              className="w-full h-full" 
+              className="w-full h-full max-w-3xl mx-auto" 
               style={{ 
                 transform: `scale(${zoom / 100})`,
                 transformOrigin: 'top center',

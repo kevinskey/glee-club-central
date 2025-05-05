@@ -84,7 +84,7 @@ export default function ViewSheetMusicPage() {
   }
 
   return (
-    <div className="container max-w-4xl mx-auto px-4">
+    <div className="container max-w-5xl mx-auto px-2 md:px-4">
       <div className={`mb-2 flex items-center justify-between flex-wrap gap-2 ${isMobile ? 'hidden' : ''}`}>
         <h1 className="text-2xl font-bold flex items-center gap-2">
           <FileText className="h-6 w-6 text-primary" />
