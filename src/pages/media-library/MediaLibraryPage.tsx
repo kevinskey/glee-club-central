@@ -23,7 +23,7 @@ import {
 export default function MediaLibraryPage() {
   const { toast } = useToast();
   const { audioFiles } = useAudioFiles();
-  const { user, profile } = useAuth();
+  const { user } = useAuth();
   
   const [isLoading, setIsLoading] = useState(true);
   const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
@@ -35,13 +35,11 @@ export default function MediaLibraryPage() {
   const [selectedMediaType, setSelectedMediaType] = useState<MediaType | "all">("all");
   const [dateFilter, setDateFilter] = useState<"newest" | "oldest">("newest");
   
-  const isAdmin = profile?.role === "admin";
-  
   // Fetch all media files with RLS automatically handling permission
   const fetchAllMedia = async () => {
     setIsLoading(true);
     try {
-      // Fetch files from storage - fixed table name from "media_files" to "media_library"
+      // Fetch files from media_library table
       const { data: storageFiles, error: storageError } = await supabase
         .from('media_library')
         .select('*')
