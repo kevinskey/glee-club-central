@@ -35,26 +35,26 @@ export const PDFMobileControls = ({
   url,
 }: PDFMobileControlsProps) => {
   return (
-    <>
-      {/* Mobile annotation and setlist toggle buttons at the top for better visibility */}
+    <div className="flex flex-col gap-2 w-full">
+      {/* Mobile annotation and setlist toggle buttons */}
       {user && (
-        <div className="flex justify-center gap-2 p-2 border-b">
+        <div className="flex justify-center gap-2 p-2 border-b bg-background/95 rounded-t-lg shadow-sm">
           {hasAnnotationSupport && (
             <Button
               variant={showAnnotations ? "default" : "outline"}
               size="sm"
               onClick={toggleAnnotations}
-              className="flex items-center gap-1"
+              className={`flex items-center gap-1 ${showAnnotations ? "bg-glee-purple hover:bg-glee-purple/90 text-white" : ""}`}
             >
               <Pen className="h-4 w-4" />
-              {showAnnotations ? "Hide Annotations" : "Annotate"}
+              {showAnnotations ? "Hide Notes" : "Add Notes"}
             </Button>
           )}
           <Button
             variant={isSetlistOpen ? "default" : "outline"}
             size="sm"
             onClick={toggleSetlist}
-            className="flex items-center gap-1"
+            className={`flex items-center gap-1 ${isSetlistOpen ? "bg-glee-purple hover:bg-glee-purple/90 text-white" : ""}`}
           >
             <ListMusic className="h-4 w-4" />
             Setlist
@@ -62,57 +62,61 @@ export const PDFMobileControls = ({
         </div>
       )}
       
-      {/* Mobile navigation and zoom controls at the bottom */}
-      <div className="flex gap-1">
-        {/* Page navigation controls for mobile */}
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={onPrevPage}
-          disabled={currentPage <= 1}
-          className="text-xs px-2"
-        >
-          <ArrowLeft className="h-4 w-4" />
-        </Button>
-        <span className="flex items-center justify-center text-xs px-2">
-          {currentPage}
-        </span>
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={onNextPage}
-          disabled={currentPage >= totalPages}
-          className="text-xs px-2"
-        >
-          <ArrowRight className="h-4 w-4" />
-        </Button>
+      {/* Mobile navigation and zoom controls */}
+      <div className="flex justify-between items-center p-2 border-t bg-background/95 rounded-b-lg shadow-sm">
+        {/* Page navigation controls */}
+        <div className="flex items-center gap-1">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={onPrevPage}
+            disabled={currentPage <= 1}
+            className="h-8 w-8 p-0 rounded-full"
+          >
+            <ArrowLeft className="h-4 w-4" />
+          </Button>
+          <span className="text-xs font-medium px-2">
+            {currentPage} / {totalPages}
+          </span>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={onNextPage}
+            disabled={currentPage >= totalPages}
+            className="h-8 w-8 p-0 rounded-full"
+          >
+            <ArrowRight className="h-4 w-4" />
+          </Button>
+        </div>
         
         {/* Zoom controls */}
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={onZoomOut}
-          className="text-xs px-2"
-        >
-          <ZoomOut className="h-4 w-4" />
-        </Button>
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={onZoomIn}
-          className="text-xs px-2"
-        >
-          <ZoomIn className="h-4 w-4" />
-        </Button>
-        <Button 
-          variant="default"
-          size="sm"
-          onClick={() => window.open(url, "_blank")}
-          className="text-xs px-2"
-        >
-          <Download className="h-4 w-4" />
-        </Button>
+        <div className="flex items-center gap-1">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={onZoomOut}
+            className="h-8 w-8 p-0 rounded-full"
+          >
+            <ZoomOut className="h-4 w-4" />
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={onZoomIn}
+            className="h-8 w-8 p-0 rounded-full"
+          >
+            <ZoomIn className="h-4 w-4" />
+          </Button>
+          <Button 
+            variant="default"
+            size="sm"
+            onClick={() => window.open(url, "_blank")}
+            className="h-8 w-8 p-0 rounded-full bg-glee-purple hover:bg-glee-purple/90"
+          >
+            <Download className="h-4 w-4" />
+          </Button>
+        </div>
       </div>
-    </>
+    </div>
   );
 };

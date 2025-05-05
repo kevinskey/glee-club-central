@@ -8,6 +8,7 @@ import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { SetlistDrawer } from "@/components/setlist/SetlistDrawer";
 import { PDFViewer } from "@/components/PDFViewer";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 interface SheetMusic {
   id: string;
@@ -21,6 +22,7 @@ export default function ViewSheetMusicPage() {
   const { toast } = useToast();
   const [sheetMusic, setSheetMusic] = useState<SheetMusic | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const isMobile = useIsMobile();
   
   // Add state for setlist drawer
   const [isSetlistDrawerOpen, setIsSetlistDrawerOpen] = useState(false);
@@ -66,7 +68,7 @@ export default function ViewSheetMusicPage() {
 
   return (
     <div className="space-y-4">
-      <Button asChild variant="ghost">
+      <Button asChild variant="ghost" className="mb-2">
         <Link to="/dashboard/sheet-music" className="flex items-center">
           <ArrowLeft className="mr-2 h-4 w-4" />
           Back to Music Library
@@ -86,12 +88,12 @@ export default function ViewSheetMusicPage() {
         </div>
       ) : (
         <div className="flex flex-col gap-4">
-          <div className="flex items-center justify-between">
+          <div className={`flex ${isMobile ? 'flex-col' : 'items-center justify-between'} gap-2`}>
             <div>
-              <h1 className="text-2xl font-bold">{sheetMusic.title}</h1>
+              <h1 className="text-2xl font-bold leading-tight">{sheetMusic.title}</h1>
               <p className="text-muted-foreground">{sheetMusic.composer}</p>
             </div>
-            <div className="flex items-center space-x-2">
+            <div className={`flex items-center ${isMobile ? 'mt-2 justify-end' : ''} space-x-2`}>
               <Button
                 variant="outline"
                 size="sm"
@@ -100,7 +102,7 @@ export default function ViewSheetMusicPage() {
                 <ListMusic className="h-4 w-4 mr-2" /> Add to Setlist
               </Button>
               <a href={sheetMusic.file_url} target="_blank" rel="noopener noreferrer">
-                <Button variant="default" size="sm">
+                <Button variant="default" size="sm" className="bg-glee-purple hover:bg-glee-purple/90">
                   <Download className="h-4 w-4 mr-2" /> Download
                 </Button>
               </a>

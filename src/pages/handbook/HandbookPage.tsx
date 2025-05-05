@@ -5,6 +5,7 @@ import { BookOpen, Download } from "lucide-react";
 import { PDFViewer } from "@/components/PDFViewer";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 // Use a more reliable PDF hosting service - PDF.js Express free sample PDF
 const HANDBOOK_PDF_URL = "https://pdfjs-express.s3-us-west-2.amazonaws.com/docs/choosing-a-pdf-technology.pdf";
@@ -12,6 +13,7 @@ const HANDBOOK_PDF_URL = "https://pdfjs-express.s3-us-west-2.amazonaws.com/docs/
 export default function HandbookPage() {
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
+  const isMobile = useIsMobile();
   
   const handleDownload = async () => {
     setIsLoading(true);
@@ -60,7 +62,7 @@ export default function HandbookPage() {
         </Button>
       </div>
       
-      <div className="rounded-lg">
+      <div className={`rounded-lg ${isMobile ? 'overflow-hidden' : ''}`}>
         <PDFViewer 
           url={HANDBOOK_PDF_URL} 
           title="Glee Club Handbook 2025" 

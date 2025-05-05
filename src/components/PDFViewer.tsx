@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
@@ -140,24 +139,26 @@ export const PDFViewer = ({ url, title, sheetMusicId }: PDFViewerProps) => {
   };
   
   return (
-    <div className="relative flex flex-col w-full rounded-lg border border-border">
-      {/* Top Controls */}
-      <PDFControls
-        currentPage={currentPage}
-        totalPages={totalPages}
-        onPrevPage={handlePrevPage}
-        onNextPage={handleNextPage}
-        onZoomIn={handleZoomIn}
-        onZoomOut={handleZoomOut}
-        onDownload={() => window.open(url, "_blank")}
-        showAnnotations={showAnnotations}
-        toggleAnnotations={toggleAnnotations}
-        isSetlistOpen={isSetlistOpen}
-        toggleSetlist={toggleSetlist}
-        url={url}
-        hasAnnotationSupport={!!sheetMusicId}
-        user={user}
-      />
+    <div className="relative flex flex-col w-full rounded-lg border border-border overflow-hidden">
+      {/* Desktop Controls */}
+      {!isMobile && (
+        <PDFControls
+          currentPage={currentPage}
+          totalPages={totalPages}
+          onPrevPage={handlePrevPage}
+          onNextPage={handleNextPage}
+          onZoomIn={handleZoomIn}
+          onZoomOut={handleZoomOut}
+          onDownload={() => window.open(url, "_blank")}
+          showAnnotations={showAnnotations}
+          toggleAnnotations={toggleAnnotations}
+          isSetlistOpen={isSetlistOpen}
+          toggleSetlist={toggleSetlist}
+          url={url}
+          hasAnnotationSupport={!!sheetMusicId}
+          user={user}
+        />
+      )}
       
       {/* Annotation Manager (includes toolbar) */}
       <PDFAnnotationManager
@@ -172,23 +173,25 @@ export const PDFViewer = ({ url, title, sheetMusicId }: PDFViewerProps) => {
         setAnnotations={setAnnotations}
       />
       
-      {/* Mobile-specific controls */}
+      {/* Mobile Controls (Top) */}
       {isMobile && (
-        <PDFMobileControls
-          user={user}
-          hasAnnotationSupport={!!sheetMusicId}
-          showAnnotations={showAnnotations}
-          toggleAnnotations={toggleAnnotations}
-          isSetlistOpen={isSetlistOpen}
-          toggleSetlist={toggleSetlist}
-          currentPage={currentPage}
-          totalPages={totalPages}
-          onPrevPage={handlePrevPage}
-          onNextPage={handleNextPage}
-          onZoomOut={handleZoomOut}
-          onZoomIn={handleZoomIn}
-          url={url}
-        />
+        <div className="sticky top-0 z-10 w-full">
+          <PDFMobileControls
+            user={user}
+            hasAnnotationSupport={!!sheetMusicId}
+            showAnnotations={showAnnotations}
+            toggleAnnotations={toggleAnnotations}
+            isSetlistOpen={isSetlistOpen}
+            toggleSetlist={toggleSetlist}
+            currentPage={currentPage}
+            totalPages={totalPages}
+            onPrevPage={handlePrevPage}
+            onNextPage={handleNextPage}
+            onZoomOut={handleZoomOut}
+            onZoomIn={handleZoomIn}
+            url={url}
+          />
+        </div>
       )}
       
       {/* PDF Document Container */}
@@ -219,20 +222,6 @@ export const PDFViewer = ({ url, title, sheetMusicId }: PDFViewerProps) => {
         >
           Back
         </Button>
-        
-        {/* Mobile navigation and zoom controls */}
-        {isMobile && (
-          <div className="flex gap-1">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => window.open(url, "_blank")}
-              className="text-xs px-2"
-            >
-              Download
-            </Button>
-          </div>
-        )}
       </div>
 
       {/* Setlist Drawer */}
