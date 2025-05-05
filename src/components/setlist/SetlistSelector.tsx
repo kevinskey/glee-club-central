@@ -8,7 +8,7 @@ import {
   SelectValue
 } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
-import { ListMusic, Plus, Loader2, AlertCircle, Grid2X2, List } from "lucide-react";
+import { ListMusic, Plus, Loader2, AlertCircle } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
 
 interface Setlist {

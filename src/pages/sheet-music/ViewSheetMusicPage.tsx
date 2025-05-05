@@ -1,104 +1,159 @@
-
-import React, { useEffect, useState } from "react";
-import { useParams, useNavigate } from "react-router-dom";
-import { Loader2, FileText, Download } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
-import { PDFViewer } from "@/components/PDFViewer";
-import { useToast } from "@/hooks/use-toast";
+// Modifications to pass the current sheet music ID to SetlistDrawer
+import { SetlistDrawer } from "@/components/setlist/SetlistDrawer";
+import { useState, useEffect } from "react";
+import { useParams } from "react-router-dom";
+import { Document, Page, pdfjs } from 'react-pdf';
 import { Button } from "@/components/ui/button";
-import { useIsMobile } from "@/hooks/use-mobile";
+import { ArrowLeft, Download, ListMusic } from "lucide-react";
+import { Link } from "react-router-dom";
+import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
+
+pdfjs.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.js`;
 
 interface SheetMusic {
   id: string;
   title: string;
   composer: string;
-  arranger?: string;
-  voice_part?: string;
   file_url: string;
-  file_path: string;
-  created_at: string;
-  uploaded_by: string;
 }
 
 export default function ViewSheetMusicPage() {
-  const { id } = useParams<{ id: string }>();
-  const navigate = useNavigate();
+  const { id: sheetMusicId } = useParams();
+  const params = useParams();
   const { toast } = useToast();
-  const [music, setMusic] = useState<SheetMusic | null>(null);
-  const [loading, setLoading] = useState(true);
-  const isMobile = useIsMobile();
-
+  const [numPages, setNumPages] = useState<number | null>(null);
+  const [pageNumber, setPageNumber] = useState(1);
+  const [sheetMusic, setSheetMusic] = useState<SheetMusic | null>(null);
+  
+  // Add state for setlist drawer
+  const [isSetlistDrawerOpen, setIsSetlistDrawerOpen] = useState(false);
+  
   useEffect(() => {
-    const fetchSheetMusic = async () => {
-      if (!id) {
-        navigate("/dashboard/sheet-music");
-        return;
-      }
+    if (!params.id) {
+      toast({
+        title: "Missing sheet music ID",
+        description: "Please select a sheet music to view",
+        variant: "destructive",
+      });
+      return;
+    }
 
+    const fetchSheetMusic = async () => {
       try {
         const { data, error } = await supabase
-          .from("sheet_music")
-          .select("*")
-          .eq("id", id)
+          .from('sheet_music')
+          .select('*')
+          .eq('id', params.id)
           .single();
 
-        if (error) {
-          throw error;
-        }
+        if (error) throw error;
 
         if (data) {
-          setMusic(data as SheetMusic);
-        } else {
-          toast({
-            title: "Not found",
-            description: "The requested sheet music could not be found.",
-            variant: "destructive",
-          });
-          navigate("/dashboard/sheet-music");
+          setSheetMusic(data as SheetMusic);
         }
       } catch (error: any) {
+        console.error("Error fetching sheet music:", error);
         toast({
-          title: "Error",
-          description: error.message || "Failed to load sheet music.",
+          title: "Error loading sheet music",
+          description: error.message || "An unexpected error occurred",
           variant: "destructive",
         });
-        navigate("/dashboard/sheet-music");
-      } finally {
-        setLoading(false);
       }
     };
 
     fetchSheetMusic();
-  }, [id, toast, navigate]);
+  }, [params.id, toast]);
 
-  if (loading) {
-    return (
-      <div className="flex h-[50vh] items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
-      </div>
-    );
+  function onDocumentLoadSuccess({ numPages: nextNumPages }: { numPages: number }) {
+    setNumPages(nextNumPages);
   }
 
-  if (!music) {
-    return null;
-  }
+  const goToPrevPage = () => {
+    if (pageNumber > 1) {
+      setPageNumber(pageNumber - 1);
+    }
+  };
+
+  const goToNextPage = () => {
+    if (numPages && pageNumber < numPages) {
+      setPageNumber(pageNumber + 1);
+    }
+  };
 
   return (
-    <div className="container max-w-5xl mx-auto px-2 md:px-4">
-      <div className={`mb-2 flex items-center justify-between flex-wrap gap-2 ${isMobile ? 'hidden' : ''}`}>
-        <h1 className="text-2xl font-bold flex items-center gap-2">
-          <FileText className="h-6 w-6 text-primary" />
-          <span className="truncate">{music.title}</span>
-          <span className="text-muted-foreground font-normal text-sm md:text-base truncate">
-            by {music.composer}
-          </span>
-        </h1>
-      </div>
-      <PDFViewer 
-        url={music.file_url} 
-        title={`${music.title} by ${music.composer}`} 
-        sheetMusicId={music.id}
+    <div className="space-y-4">
+      <Button asChild variant="ghost">
+        <Link to="/dashboard/sheet-music" className="flex items-center">
+          <ArrowLeft className="mr-2 h-4 w-4" />
+          Back to Music Library
+        </Link>
+      </Button>
+        
+      {/* This is where the setlist drawer would be added */}
+      <SetlistDrawer
+        open={isSetlistDrawerOpen}
+        onOpenChange={setIsSetlistDrawerOpen}
+        currentSheetMusicId={params.id}
       />
+      
+      {sheetMusic === null ? (
+        <p>Loading sheet music...</p>
+      ) : (
+        <div className="flex flex-col gap-4">
+          <div className="flex items-center justify-between">
+            <div>
+              <h1 className="text-2xl font-bold">{sheetMusic.title}</h1>
+              <p className="text-muted-foreground">{sheetMusic.composer}</p>
+            </div>
+            <div className="flex items-center space-x-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setIsSetlistDrawerOpen(true)}
+              >
+                <ListMusic className="h-4 w-4 mr-2" /> Add to Setlist
+              </Button>
+              <a href={sheetMusic.file_url} target="_blank" rel="noopener noreferrer">
+                <Button variant="default" size="sm">
+                  <Download className="h-4 w-4 mr-2" /> Download
+                </Button>
+              </a>
+            </div>
+          </div>
+          
+          <div className="border rounded-md overflow-hidden">
+            <Document
+              file={sheetMusic.file_url}
+              onLoadSuccess={onDocumentLoadSuccess}
+              className="max-w-full"
+            >
+              <Page pageNumber={pageNumber} width={1000} />
+            </Document>
+            <div className="flex items-center justify-center space-x-4 py-2 bg-gray-100">
+              <Button
+                variant="outline"
+                size="icon"
+                onClick={goToPrevPage}
+                disabled={pageNumber <= 1}
+              >
+                <ArrowLeft className="h-4 w-4" />
+              </Button>
+              <span>
+                Page {pageNumber} of {numPages || "--"}
+              </span>
+              <Button
+                variant="outline"
+                size="icon"
+                onClick={goToNextPage}
+                disabled={numPages ? pageNumber >= numPages : true}
+              >
+                <ArrowRight className="h-4 w-4" />
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

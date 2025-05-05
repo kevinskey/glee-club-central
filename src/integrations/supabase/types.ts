@@ -137,6 +137,30 @@ export type Database = {
         }
         Relationships: []
       }
+      setlists: {
+        Row: {
+          created_at: string
+          id: string
+          name: string
+          sheet_music_ids: string[] | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          name: string
+          sheet_music_ids?: string[] | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          name?: string
+          sheet_music_ids?: string[] | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       sheet_music: {
         Row: {
           composer: string

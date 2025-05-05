@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { PageHeader } from "@/components/ui/page-header";
-import { FileText, FolderOpen, Loader2, Upload, Search, Music, Play, Pause, ListMusic } from "lucide-react";
+import { FileText, FolderOpen, Loader2, Upload, Search, Music, Play, Pause, ListMusic, Plus } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -274,13 +274,22 @@ export default function SheetMusicPage() {
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-xl font-semibold">Sheet Music Collection</h2>
           <div className="flex items-center gap-2">
+            {/* Add Create Setlist button next to the grid view buttons */}
             <Button 
               variant="outline"
               size="sm"
               className="flex items-center gap-1"
               onClick={() => setIsSetlistDrawerOpen(true)}
             >
-              <ListMusic className="h-4 w-4" /> Setlists
+              <Plus className="h-4 w-4" /> Create Setlist
+            </Button>
+            <Button 
+              variant="outline"
+              size="sm"
+              className="flex items-center gap-1 ml-2"
+              onClick={() => setIsSetlistDrawerOpen(true)}
+            >
+              <ListMusic className="h-4 w-4" /> View Setlists
             </Button>
             <TabsList>
               <TabsTrigger value="grid" className="flex items-center gap-1">
