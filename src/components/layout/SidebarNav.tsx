@@ -9,7 +9,8 @@ import {
   ShoppingBag,
   UserCheck,
   FileImage,
-  AudioLines
+  AudioLines,
+  Music2
 } from "lucide-react";
 import { NavItem } from "./NavItem";
 
@@ -34,7 +35,7 @@ export function SidebarNav({ className }: { className?: string }) {
         <li>
           <NavItem
             href="/dashboard/practice"
-            title="Practice Tracks"
+            title="Practice & Sight Reading"
             icon={Music}
           />
         </li>
@@ -80,7 +81,6 @@ export function SidebarNav({ className }: { className?: string }) {
             icon={FileImage}
           />
         </li>
-        {/* Remove the duplicate Audio Management link which might be causing confusion */}
       </ul>
     </nav>
   );

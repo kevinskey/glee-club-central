@@ -1,11 +1,11 @@
-
 import React from "react";
 import { PageHeader } from "@/components/ui/page-header";
-import { Headphones, Music, PlayCircle } from "lucide-react";
+import { Headphones, Music, PlayCircle, Music2 } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
+import { SightReadingEmbed } from "@/components/practice/SightReadingEmbed";
 
 interface PracticeMedia {
   id: string;
@@ -87,7 +87,7 @@ export default function PracticePage() {
     <div>
       <PageHeader
         title="Practice on Your Own"
-        description="Access warm-ups, sectional recordings, and other practice materials"
+        description="Access warm-ups, sectional recordings, sight reading practice, and other materials"
         icon={<Headphones className="h-6 w-6" />}
       />
 
@@ -96,6 +96,7 @@ export default function PracticePage() {
           <TabsTrigger value="warmups">Warm-ups</TabsTrigger>
           <TabsTrigger value="sectionals">Sectionals</TabsTrigger>
           <TabsTrigger value="full">Full Choir</TabsTrigger>
+          <TabsTrigger value="sightreading">Sight Reading</TabsTrigger>
         </TabsList>
 
         {Object.entries(practiceData).map(([key, mediaItems]) => (
@@ -164,6 +165,26 @@ export default function PracticePage() {
             </div>
           </TabsContent>
         ))}
+
+        {/* Sight Reading Practice Tab - Integration with SightReadingFactory.com */}
+        <TabsContent value="sightreading">
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between">
+              <div>
+                <CardTitle className="flex items-center gap-2">
+                  <Music2 className="h-5 w-5" /> 
+                  Sight Reading Practice
+                </CardTitle>
+                <CardDescription>
+                  Improve your sight reading skills with interactive exercises from SightReadingFactory.com
+                </CardDescription>
+              </div>
+            </CardHeader>
+            <CardContent>
+              <SightReadingEmbed />
+            </CardContent>
+          </Card>
+        </TabsContent>
       </Tabs>
     </div>
   );

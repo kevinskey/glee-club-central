@@ -10,7 +10,8 @@ import {
   Headphones, 
   Mic, 
   ShoppingBag,
-  Bell
+  Bell,
+  Music2
 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { PageHeader } from "@/components/ui/page-header";
@@ -64,8 +65,8 @@ export default function DashboardPage() {
       color: "bg-glee-purple/10",
     },
     {
-      title: "Practice on Your Own",
-      description: "Access warm-ups, sectional recordings, and practice media",
+      title: "Practice & Sight Reading",
+      description: "Access warm-ups, sectionals, and sight reading exercises",
       icon: <Headphones className="h-6 w-6" />,
       href: "/dashboard/practice",
       color: "bg-blue-500/10",
