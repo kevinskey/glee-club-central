@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
@@ -205,7 +206,10 @@ export const PDFViewer = ({ url, title, sheetMusicId }: PDFViewerProps) => {
           onError={handleError}
           error={error}
           title={title}
-        />
+        >
+          {/* Allow annotation rendering within PDFDocument */}
+          {showAnnotations && annotations.length > 0 && children}
+        </PDFDocument>
       </div>
       
       {/* Footer Controls */}
@@ -221,21 +225,16 @@ export const PDFViewer = ({ url, title, sheetMusicId }: PDFViewerProps) => {
         
         {/* Mobile navigation and zoom controls */}
         {isMobile && (
-          <PDFMobileControls
-            user={user}
-            hasAnnotationSupport={!!sheetMusicId}
-            showAnnotations={showAnnotations}
-            toggleAnnotations={toggleAnnotations}
-            isSetlistOpen={isSetlistOpen}
-            toggleSetlist={toggleSetlist}
-            currentPage={currentPage}
-            totalPages={totalPages}
-            onPrevPage={handlePrevPage}
-            onNextPage={handleNextPage}
-            onZoomOut={handleZoomOut}
-            onZoomIn={handleZoomIn}
-            url={url}
-          />
+          <div className="flex gap-1">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => window.open(url, "_blank")}
+              className="text-xs px-2"
+            >
+              Download
+            </Button>
+          </div>
         )}
       </div>
 

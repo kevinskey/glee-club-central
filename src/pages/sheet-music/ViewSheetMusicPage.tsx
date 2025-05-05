@@ -1,17 +1,13 @@
 
-// Modifications to pass the current sheet music ID to SetlistDrawer
-import { SetlistDrawer } from "@/components/setlist/SetlistDrawer";
 import { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
-import { Document, Page, pdfjs } from 'react-pdf';
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, ArrowRight, Download, ListMusic } from "lucide-react";
+import { ArrowLeft, Download, ListMusic } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-
-// Important: configure PDF.js worker source
-pdfjs.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.js`;
+import { SetlistDrawer } from "@/components/setlist/SetlistDrawer";
+import { PDFViewer } from "@/components/PDFViewer";
 
 interface SheetMusic {
   id: string;
@@ -22,10 +18,7 @@ interface SheetMusic {
 
 export default function ViewSheetMusicPage() {
   const { id: sheetMusicId } = useParams();
-  const params = useParams();
   const { toast } = useToast();
-  const [numPages, setNumPages] = useState<number | null>(null);
-  const [pageNumber, setPageNumber] = useState(1);
   const [sheetMusic, setSheetMusic] = useState<SheetMusic | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   
@@ -33,7 +26,7 @@ export default function ViewSheetMusicPage() {
   const [isSetlistDrawerOpen, setIsSetlistDrawerOpen] = useState(false);
   
   useEffect(() => {
-    if (!params.id) {
+    if (!sheetMusicId) {
       toast({
         title: "Missing sheet music ID",
         description: "Please select a sheet music to view",
@@ -48,7 +41,7 @@ export default function ViewSheetMusicPage() {
         const { data, error } = await supabase
           .from('sheet_music')
           .select('*')
-          .eq('id', params.id)
+          .eq('id', sheetMusicId)
           .single();
 
         if (error) throw error;
@@ -69,34 +62,7 @@ export default function ViewSheetMusicPage() {
     };
 
     fetchSheetMusic();
-  }, [params.id, toast]);
-
-  function onDocumentLoadSuccess({ numPages: nextNumPages }: { numPages: number }) {
-    setNumPages(nextNumPages);
-    setIsLoading(false);
-  }
-
-  function onDocumentLoadError(error: Error) {
-    console.error("Error loading PDF:", error);
-    setIsLoading(false);
-    toast({
-      title: "Error loading PDF",
-      description: "Could not load the PDF file. Please try again later.",
-      variant: "destructive",
-    });
-  }
-
-  const goToPrevPage = () => {
-    if (pageNumber > 1) {
-      setPageNumber(pageNumber - 1);
-    }
-  };
-
-  const goToNextPage = () => {
-    if (numPages && pageNumber < numPages) {
-      setPageNumber(pageNumber + 1);
-    }
-  };
+  }, [sheetMusicId, toast]);
 
   return (
     <div className="space-y-4">
@@ -107,11 +73,11 @@ export default function ViewSheetMusicPage() {
         </Link>
       </Button>
         
-      {/* This is where the setlist drawer would be added */}
+      {/* Setlist drawer component */}
       <SetlistDrawer
         open={isSetlistDrawerOpen}
         onOpenChange={setIsSetlistDrawerOpen}
-        currentSheetMusicId={params.id}
+        currentSheetMusicId={sheetMusicId}
       />
       
       {sheetMusic === null ? (
@@ -141,61 +107,12 @@ export default function ViewSheetMusicPage() {
             </div>
           </div>
           
-          <div className="border rounded-md overflow-hidden relative">
-            {isLoading && (
-              <div className="absolute inset-0 flex items-center justify-center bg-background/80 z-10">
-                <div className="flex flex-col items-center gap-2">
-                  <div className="h-6 w-6 border-2 border-primary border-t-transparent rounded-full animate-spin"></div>
-                  <p className="text-sm text-muted-foreground">Loading PDF...</p>
-                </div>
-              </div>
-            )}
-            
-            <Document
-              file={sheetMusic.file_url}
-              onLoadSuccess={onDocumentLoadSuccess}
-              onLoadError={onDocumentLoadError}
-              loading={
-                <div className="flex justify-center p-8">
-                  <div className="h-6 w-6 border-2 border-primary border-t-transparent rounded-full animate-spin"></div>
-                </div>
-              }
-              className="max-w-full flex justify-center"
-              options={{ 
-                cMapUrl: 'https://unpkg.com/pdfjs-dist@3.4.120/cmaps/',
-                cMapPacked: true,
-              }}
-            >
-              <Page 
-                pageNumber={pageNumber} 
-                width={Math.min(window.innerWidth * 0.8, 800)}
-                renderTextLayer={false}
-                renderAnnotationLayer={false}
-              />
-            </Document>
-            
-            <div className="flex items-center justify-center space-x-4 py-2 bg-gray-100">
-              <Button
-                variant="outline"
-                size="icon"
-                onClick={goToPrevPage}
-                disabled={pageNumber <= 1}
-              >
-                <ArrowLeft className="h-4 w-4" />
-              </Button>
-              <span>
-                Page {pageNumber} of {numPages || "--"}
-              </span>
-              <Button
-                variant="outline"
-                size="icon"
-                onClick={goToNextPage}
-                disabled={numPages ? pageNumber >= numPages : true}
-              >
-                <ArrowRight className="h-4 w-4" />
-              </Button>
-            </div>
-          </div>
+          {/* Use the PDFViewer component */}
+          <PDFViewer 
+            url={sheetMusic.file_url} 
+            title={sheetMusic.title}
+            sheetMusicId={sheetMusicId}
+          />
         </div>
       )}
     </div>
