@@ -80,13 +80,7 @@ export function SidebarNav({ className }: { className?: string }) {
             icon={FileImage}
           />
         </li>
-        <li>
-          <NavItem
-            href="/dashboard/audio-management"
-            title="Audio Management"
-            icon={AudioLines}
-          />
-        </li>
+        {/* Remove the duplicate Audio Management link which might be causing confusion */}
       </ul>
     </nav>
   );

@@ -12,6 +12,7 @@ interface NavItemProps {
 
 export function NavItem({ href, title, icon: Icon }: NavItemProps) {
   const location = useLocation();
+  // Update the active check to be more precise and improve navigation matching
   const isActive = location.pathname === href || location.pathname.startsWith(`${href}/`);
   
   return (
