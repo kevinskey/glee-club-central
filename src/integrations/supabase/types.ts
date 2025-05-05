@@ -11,6 +11,7 @@ export type Database = {
     Tables: {
       audio_files: {
         Row: {
+          category: string
           created_at: string
           description: string | null
           file_path: string
@@ -20,6 +21,7 @@ export type Database = {
           uploaded_by: string
         }
         Insert: {
+          category?: string
           created_at?: string
           description?: string | null
           file_path: string
@@ -29,6 +31,7 @@ export type Database = {
           uploaded_by: string
         }
         Update: {
+          category?: string
           created_at?: string
           description?: string | null
           file_path?: string

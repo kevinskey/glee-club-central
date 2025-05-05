@@ -17,6 +17,9 @@ import { format } from "date-fns";
 import { v4 as uuidv4 } from "uuid";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Label } from "@/components/ui/label";
+import { getCategoryName } from "@/components/audio/audioCategoryUtils";
 
 export default function AudioManagementPage() {
   const { user } = useAuth();
@@ -36,6 +39,7 @@ export default function AudioManagementPage() {
   const [audioURL, setAudioURL] = useState<string | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [recordingName, setRecordingName] = useState(`Recording ${format(new Date(), "yyyy-MM-dd-HH-mm-ss")}`);
+  const [recordingCategory, setRecordingCategory] = useState<Exclude<AudioPageCategory, "all">>("my_tracks");
   
   // References
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
@@ -196,7 +200,7 @@ export default function AudioManagementPage() {
       const filePath = `uploads/${fileName}`;
       
       // Upload to Supabase storage
-      const { error: uploadError } = await supabase.storage
+      const { error: uploadError, data: uploadData } = await supabase.storage
         .from('audio')
         .upload(filePath, audioBlob);
         
@@ -218,7 +222,7 @@ export default function AudioManagementPage() {
         file_url: publicUrlData.publicUrl,
         file_path: filePath,
         uploaded_by: user.id,
-        category: 'my_tracks'
+        category: recordingCategory
       });
       
       if (insertError) throw insertError;
@@ -226,7 +230,7 @@ export default function AudioManagementPage() {
       // Success
       toast({
         title: "Recording saved",
-        description: "Your recording has been saved to My Tracks.",
+        description: `Your recording has been saved to ${getCategoryName(recordingCategory)}.`,
       });
       
       // Reset state
@@ -236,8 +240,8 @@ export default function AudioManagementPage() {
       // Refresh audio files
       fetchAudioFiles();
       
-      // Switch to my_tracks tab
-      setActiveCategory('my_tracks');
+      // Switch to the category tab where the recording was saved
+      setActiveCategory(recordingCategory);
       
     } catch (error: any) {
       console.error('Error saving recording:', error);
@@ -322,38 +326,60 @@ export default function AudioManagementPage() {
               <div className="space-y-4">
                 <Separator />
                 <div className="grid gap-4">
-                  <div className="flex items-center gap-4">
-                    <Button 
-                      variant="outline" 
-                      onClick={togglePlayback}
-                      className="gap-2"
-                    >
-                      {isPlaying ? (
-                        <>
-                          <Square className="h-4 w-4" /> Pause
-                        </>
-                      ) : (
-                        <>
-                          <Play className="h-4 w-4" /> Play
-                        </>
-                      )}
-                    </Button>
-                    <audio ref={audioRef} onEnded={() => setIsPlaying(false)} className="hidden" />
-                    <div className="flex-1">
-                      <input 
-                        type="text" 
-                        value={recordingName}
-                        onChange={(e) => setRecordingName(e.target.value)}
-                        className="w-full px-3 py-2 border rounded-md"
-                        placeholder="Recording name"
-                      />
+                  <div className="flex flex-col space-y-4">
+                    <div className="flex items-center gap-4">
+                      <Button 
+                        variant="outline" 
+                        onClick={togglePlayback}
+                        className="gap-2"
+                      >
+                        {isPlaying ? (
+                          <>
+                            <Square className="h-4 w-4" /> Pause
+                          </>
+                        ) : (
+                          <>
+                            <Play className="h-4 w-4" /> Play
+                          </>
+                        )}
+                      </Button>
+                      <audio ref={audioRef} onEnded={() => setIsPlaying(false)} className="hidden" />
+                      <div className="flex-1">
+                        <input 
+                          type="text" 
+                          value={recordingName}
+                          onChange={(e) => setRecordingName(e.target.value)}
+                          className="w-full px-3 py-2 border rounded-md"
+                          placeholder="Recording name"
+                        />
+                      </div>
                     </div>
-                    <Button 
-                      onClick={saveRecording}
-                      className="gap-2"
-                    >
-                      <Save className="h-4 w-4" /> Save Recording
-                    </Button>
+                    
+                    <div className="grid gap-2">
+                      <Label htmlFor="recording-category">Save to Category</Label>
+                      <Select 
+                        value={recordingCategory}
+                        onValueChange={(value) => setRecordingCategory(value as Exclude<AudioPageCategory, "all">)}
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select category" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="part_tracks">Part Tracks</SelectItem>
+                          <SelectItem value="recordings">Recordings</SelectItem>
+                          <SelectItem value="my_tracks">My Tracks</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    
+                    <div className="flex justify-end">
+                      <Button 
+                        onClick={saveRecording}
+                        className="gap-2"
+                      >
+                        <Save className="h-4 w-4" /> Save Recording
+                      </Button>
+                    </div>
                   </div>
                 </div>
               </div>

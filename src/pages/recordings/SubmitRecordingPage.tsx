@@ -11,6 +11,9 @@ import { UploadRecordingModal } from "@/components/recordings/UploadRecordingMod
 import { ShareRecordingDialog } from "@/components/recordings/ShareRecordingDialog";
 import { supabase } from "@/integrations/supabase/client";
 import { AudioFile } from "@/types/audio";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Form, FormField, FormItem, FormLabel, FormControl } from "@/components/ui/form";
+import { useForm } from "react-hook-form";
 
 export default function SubmitRecordingPage() {
   const { toast } = useToast();
