@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from "react";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, Music, BookOpen } from "lucide-react";
 
 type NewsItem = {
   title: string;
@@ -26,27 +26,27 @@ export function NewsFeed() {
           publishedAt: "2 hours ago"
         },
         {
-          title: "Howard University Choir Wins National Competition",
-          link: "https://example.com/howard-choir",
-          source: "Choral Music Today",
+          title: "Dr. Kevin Johnson Leads Masterclass at National Choral Convention",
+          link: "https://example.com/johnson-masterclass",
+          source: "Choral Director",
           publishedAt: "5 hours ago"
         },
         {
-          title: "The Impact of HBCU Choirs on American Music Culture",
-          link: "https://example.com/hbcu-impact",
-          source: "Music Education Weekly",
+          title: "Spring Concert Series Announced - Tickets Now Available",
+          link: "https://example.com/spring-concert",
+          source: "Campus Events",
           publishedAt: "1 day ago"
         },
         {
-          title: "Upcoming HBCU Choral Festival Announced for Fall 2025",
-          link: "https://example.com/choral-festival",
-          source: "College Music News",
+          title: "Glee Club to Perform at Governor's Arts Celebration",
+          link: "https://example.com/governors-arts",
+          source: "State Arts Council",
           publishedAt: "2 days ago"
         },
         {
-          title: "Grammy-Winning Composer Partners with HBCU Choirs",
-          link: "https://example.com/grammy-composer",
-          source: "Music Industry News",
+          title: "New Scholarship Established for Voice Students",
+          link: "https://example.com/voice-scholarship",
+          source: "Alumni News",
           publishedAt: "3 days ago"
         }
       ];
@@ -59,9 +59,12 @@ export function NewsFeed() {
   }, []);
 
   return (
-    <div className="news-ticker-container overflow-hidden bg-glee-purple/10 h-8 flex items-center">
+    <div className="news-ticker-container overflow-hidden bg-gradient-to-r from-glee-purple/5 to-glee-gold/5 h-9 flex items-center border-b border-gray-200 dark:border-gray-800">
       {loading ? (
-        <div className="px-4 text-muted-foreground">Loading news...</div>
+        <div className="px-4 text-muted-foreground flex items-center">
+          <Music className="animate-pulse h-4 w-4 mr-2 text-glee-purple" />
+          <span>Loading news...</span>
+        </div>
       ) : (
         <div className="ticker-wrapper whitespace-nowrap flex items-center animate-marquee">
           {news.map((item, index) => (
@@ -70,13 +73,14 @@ export function NewsFeed() {
                 href={item.link} 
                 target="_blank" 
                 rel="noopener noreferrer"
-                className="ticker-item inline-block px-4 hover:text-glee-purple transition-colors"
+                className="ticker-item inline-flex items-center px-4 hover:text-glee-purple transition-colors"
               >
+                <Music className="h-3.5 w-3.5 mr-2 text-glee-purple" />
                 <span className="font-medium">{item.title}</span>
                 <span className="text-muted-foreground ml-2 text-xs">({item.source})</span>
               </a>
               {index < news.length - 1 && (
-                <ArrowRight className="h-4 w-4 text-glee-purple mx-2" />
+                <ArrowRight className="h-3 w-3 text-glee-purple/50 mx-2" />
               )}
             </React.Fragment>
           ))}
@@ -87,13 +91,14 @@ export function NewsFeed() {
                 href={item.link} 
                 target="_blank" 
                 rel="noopener noreferrer"
-                className="ticker-item inline-block px-4 hover:text-glee-purple transition-colors"
+                className="ticker-item inline-flex items-center px-4 hover:text-glee-purple transition-colors"
               >
+                <Music className="h-3.5 w-3.5 mr-2 text-glee-purple" />
                 <span className="font-medium">{item.title}</span>
                 <span className="text-muted-foreground ml-2 text-xs">({item.source})</span>
               </a>
               {index < news.length - 1 && (
-                <ArrowRight className="h-4 w-4 text-glee-purple mx-2" />
+                <ArrowRight className="h-3 w-3 text-glee-purple/50 mx-2" />
               )}
             </React.Fragment>
           ))}

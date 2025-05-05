@@ -22,6 +22,7 @@ import {
 } from "@/components/ui/sheet";
 import { SidebarNav } from "./SidebarNav";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { NewsFeed } from "@/components/news/NewsFeed";
 
 export const Header = () => {
   const { user, profile, logout } = useAuth();
@@ -59,6 +60,7 @@ export const Header = () => {
 
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+      <NewsFeed />
       <div className="container flex h-16 items-center justify-between">
         <div className="flex items-center gap-2">
           <Sheet>
@@ -75,7 +77,7 @@ export const Header = () => {
                   Glee World
                 </SheetTitle>
                 <SheetDescription>
-                  College Choir Digital Hub
+                  Spelman College Choir Digital Hub
                 </SheetDescription>
               </SheetHeader>
               <SidebarNav className="mt-8" />
@@ -112,6 +114,15 @@ export const Header = () => {
                 <DropdownMenuItem asChild>
                   <button
                     className="flex w-full cursor-pointer items-center"
+                    onClick={() => navigate("/profile")}
+                  >
+                    <User className="mr-2 h-4 w-4" />
+                    My Profile
+                  </button>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                  <button
+                    className="flex w-full cursor-pointer items-center"
                     onClick={() => navigate("/dashboard")}
                   >
                     Dashboard
@@ -129,8 +140,12 @@ export const Header = () => {
               </DropdownMenuContent>
             </DropdownMenu>
           ) : (
-            <Button size="sm" onClick={() => navigate("/login")}>
-              Login
+            <Button 
+              size="sm" 
+              className="bg-glee-purple hover:bg-glee-purple/90"
+              onClick={() => navigate("/login")}
+            >
+              Member Login
             </Button>
           )}
         </div>
