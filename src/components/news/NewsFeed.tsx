@@ -1,14 +1,6 @@
 
 import React, { useState, useEffect } from "react";
-import { Newspaper } from "lucide-react";
-import { 
-  Popover,
-  PopoverContent,
-  PopoverTrigger 
-} from "@/components/ui/popover";
-import { Button } from "@/components/ui/button";
-import { Separator } from "@/components/ui/separator";
-import { ScrollArea } from "@/components/ui/scroll-area";
+import { ArrowRight } from "lucide-react";
 
 type NewsItem = {
   title: string;
@@ -67,49 +59,46 @@ export function NewsFeed() {
   }, []);
 
   return (
-    <Popover>
-      <PopoverTrigger asChild>
-        <Button variant="ghost" size="sm" className="flex items-center gap-1.5 text-sm">
-          <Newspaper className="h-4 w-4 text-glee-purple" />
-          <span>HBCU Choral News</span>
-        </Button>
-      </PopoverTrigger>
-      <PopoverContent className="w-80 p-0" align="end">
-        <div className="p-3 font-semibold bg-muted/50">
-          <h3 className="flex items-center gap-2">
-            <Newspaper className="h-4 w-4" />
-            HBCU Choral News
-          </h3>
+    <div className="news-ticker-container overflow-hidden bg-glee-purple/10 h-8 flex items-center">
+      {loading ? (
+        <div className="px-4 text-muted-foreground">Loading news...</div>
+      ) : (
+        <div className="ticker-wrapper whitespace-nowrap flex items-center animate-marquee">
+          {news.map((item, index) => (
+            <React.Fragment key={index}>
+              <a 
+                href={item.link} 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="ticker-item inline-block px-4 hover:text-glee-purple transition-colors"
+              >
+                <span className="font-medium">{item.title}</span>
+                <span className="text-muted-foreground ml-2 text-xs">({item.source})</span>
+              </a>
+              {index < news.length - 1 && (
+                <ArrowRight className="h-4 w-4 text-glee-purple mx-2" />
+              )}
+            </React.Fragment>
+          ))}
+          {/* Duplicate the news items to create a seamless loop */}
+          {news.map((item, index) => (
+            <React.Fragment key={`dup-${index}`}>
+              <a 
+                href={item.link} 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="ticker-item inline-block px-4 hover:text-glee-purple transition-colors"
+              >
+                <span className="font-medium">{item.title}</span>
+                <span className="text-muted-foreground ml-2 text-xs">({item.source})</span>
+              </a>
+              {index < news.length - 1 && (
+                <ArrowRight className="h-4 w-4 text-glee-purple mx-2" />
+              )}
+            </React.Fragment>
+          ))}
         </div>
-        <Separator />
-        <ScrollArea className="h-60">
-          {loading ? (
-            <div className="p-4 text-center text-muted-foreground">
-              Loading news...
-            </div>
-          ) : (
-            <div className="p-0">
-              {news.map((item, index) => (
-                <div key={index} className="p-3 hover:bg-muted/50 transition-colors">
-                  <a 
-                    href={item.link} 
-                    target="_blank" 
-                    rel="noopener noreferrer"
-                    className="block"
-                  >
-                    <h4 className="font-medium line-clamp-2 text-sm">{item.title}</h4>
-                    <div className="flex items-center justify-between mt-1 text-xs text-muted-foreground">
-                      <span>{item.source}</span>
-                      <span>{item.publishedAt}</span>
-                    </div>
-                  </a>
-                  {index < news.length - 1 && <Separator className="mt-3" />}
-                </div>
-              ))}
-            </div>
-          )}
-        </ScrollArea>
-      </PopoverContent>
-    </Popover>
+      )}
+    </div>
   );
 }

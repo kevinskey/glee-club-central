@@ -13,6 +13,7 @@ export default function LandingPage() {
     <div className="flex min-h-screen flex-col">
       {/* Header */}
       <header className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+        <NewsFeed />
         <div className="container flex h-16 items-center justify-between">
           <div className="flex items-center gap-2">
             <Music className="h-5 w-5 text-glee-purple" />
@@ -22,7 +23,6 @@ export default function LandingPage() {
           </div>
           <div className="flex items-center gap-4">
             <Clock />
-            <NewsFeed />
             <Button onClick={() => navigate("/login")}>Login</Button>
           </div>
         </div>
