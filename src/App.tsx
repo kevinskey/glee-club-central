@@ -20,9 +20,9 @@ import SchedulePage from "./pages/schedule/SchedulePage";
 import MediaLibraryPage from "./pages/media-library/MediaLibraryPage";
 import AudioManagementPage from "./pages/audio-management/AudioManagementPage";
 import SubmitRecordingPage from "./pages/recordings/SubmitRecordingPage";
+import HandbookPage from "./pages/handbook/HandbookPage";
 
 // Placeholder pages for other sections
-const HandbookPage = () => <div className="px-4 py-8">Club Handbook Page - Coming Soon</div>;
 const MerchPage = () => <div className="px-4 py-8">Buy Glee Merch Page - Coming Soon</div>;
 const AttendancePage = () => <div className="px-4 py-8">Check Attendance Record Page - Coming Soon</div>;
 
