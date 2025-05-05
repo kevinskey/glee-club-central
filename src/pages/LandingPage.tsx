@@ -2,7 +2,7 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Music } from "lucide-react";
+import { Music, FileText, Calendar, Headphones, Mic } from "lucide-react";
 
 export default function LandingPage() {
   const navigate = useNavigate();
@@ -124,5 +124,3 @@ export default function LandingPage() {
     </div>
   );
 }
-
-import { FileText } from "lucide-react";
