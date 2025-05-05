@@ -1,10 +1,11 @@
+
 // Modifications to pass the current sheet music ID to SetlistDrawer
 import { SetlistDrawer } from "@/components/setlist/SetlistDrawer";
 import { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import { Document, Page, pdfjs } from 'react-pdf';
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Download, ListMusic } from "lucide-react";
+import { ArrowLeft, ArrowRight, Download, ListMusic } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
