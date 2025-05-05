@@ -46,9 +46,6 @@ export function UploadMediaModal({
     ? setControlledOpen 
     : setInternalOpen;
 
-  // Check if user is admin
-  const isAdmin = profile?.role === "admin";
-
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
       const selectedFile = e.target.files[0];
@@ -68,17 +65,6 @@ export function UploadMediaModal({
   };
 
   const handleUpload = async () => {
-    // Check if user is admin
-    if (!isAdmin) {
-      toast({
-        title: "Access denied",
-        description: "Only administrators can upload media files",
-        variant: "destructive",
-      });
-      setOpen(false);
-      return;
-    }
-
     if (!file || !title) {
       toast({
         title: "Missing information",
@@ -158,12 +144,10 @@ export function UploadMediaModal({
     }}>
       {!isControlled && (
         <DialogTrigger asChild>
-          {isAdmin ? (
-            <Button size="sm">
-              <FileUp className="mr-2 h-4 w-4" />
-              Upload Media
-            </Button>
-          ) : null}
+          <Button size="sm">
+            <FileUp className="mr-2 h-4 w-4" />
+            Upload Media
+          </Button>
         </DialogTrigger>
       )}
       <DialogContent className="sm:max-w-[500px]">
