@@ -362,16 +362,16 @@ export default function AudioManagementPage() {
         </CardContent>
       </Card>
 
-      {/* Search and Filter */}
-      <AudioSearchAndFilter 
-        searchQuery={searchQuery}
-        setSearchQuery={setSearchQuery}
-        activeCategory={activeCategory}
-        setActiveCategory={setActiveCategory}
-      />
+      {/* Search and Filter with Tabs Container */}
+      <Tabs defaultValue={activeCategory} value={activeCategory} onValueChange={(val) => setActiveCategory(val as AudioPageCategory)}>
+        <AudioSearchAndFilter 
+          searchQuery={searchQuery}
+          setSearchQuery={setSearchQuery}
+          activeCategory={activeCategory}
+          setActiveCategory={setActiveCategory}
+        />
 
-      {/* Audio Files List/Table for each tab */}
-      <div>
+        {/* Audio Files List/Table for each tab */}
         <TabsContent value="all" className="mt-4">
           <AudioFilesList
             loading={loading}
@@ -419,7 +419,7 @@ export default function AudioManagementPage() {
             onUploadClick={handleOpenUploadModal}
           />
         </TabsContent>
-      </div>
+      </Tabs>
 
       {/* Upload Modal */}
       <UploadAudioModal
