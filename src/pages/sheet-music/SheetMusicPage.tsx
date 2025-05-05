@@ -1,5 +1,6 @@
+
 import React, { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { PageHeader } from "@/components/ui/page-header";
 import { FileText, FolderOpen, Loader2, Upload, Search, Music, Play, Pause, ListMusic, Plus } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
@@ -53,6 +54,7 @@ type SortOption = "newest" | "oldest" | "title" | "composer";
 export default function SheetMusicPage() {
   const { profile } = useAuth();
   const { toast } = useToast();
+  const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const [audioLoading, setAudioLoading] = useState(true);
   const [musicFiles, setMusicFiles] = useState<SheetMusic[]>([]);
@@ -390,7 +392,7 @@ export default function SheetMusicPage() {
           <Button 
             variant="outline" 
             className="text-sm gap-1"
-            onClick={() => window.location.href = "/dashboard/audio-management"}
+            onClick={() => navigate("/dashboard/audio-management")}
           >
             <Upload className="h-4 w-4" /> Manage Audio
           </Button>
