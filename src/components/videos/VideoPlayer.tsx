@@ -9,6 +9,9 @@ interface VideoPlayerProps {
 }
 
 export function VideoPlayer({ videoId, title, description }: VideoPlayerProps) {
+  // Construct a proper YouTube embed URL with additional parameters
+  const youtubeEmbedUrl = `https://www.youtube.com/embed/${videoId}?autoplay=0&origin=${window.location.origin}&rel=0`;
+  
   return (
     <Card className="overflow-hidden">
       <CardHeader className="p-4 md:p-6">
@@ -18,7 +21,7 @@ export function VideoPlayer({ videoId, title, description }: VideoPlayerProps) {
       <CardContent className="p-0">
         <div className="relative aspect-video w-full overflow-hidden">
           <iframe
-            src={`https://www.youtube.com/embed/${videoId}?autoplay=0&origin=${window.location.origin}`}
+            src={youtubeEmbedUrl}
             title={title}
             frameBorder="0"
             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"

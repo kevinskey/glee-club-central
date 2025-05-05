@@ -23,7 +23,7 @@ export function VideoGrid({ videos, selectedVideoId, onSelectVideo }: VideoGridP
     <div className="space-y-4 overflow-auto pr-2" style={{ maxHeight: "calc(100vh - 400px)" }}>
       <h3 className="font-medium">More Videos</h3>
       
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-1">
+      <div className="grid grid-cols-1 gap-4">
         {videos.map((video) => (
           <VideoCard
             key={video.id}

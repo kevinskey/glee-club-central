@@ -12,14 +12,14 @@ export function useVideoData() {
     const fetchVideos = async () => {
       try {
         // In a real app, this would be an API call to the YouTube API or your backend
-        // For now, we'll use sample data
+        // For now, we'll use sample data with actual Spelman Glee Club YouTube videos
         const sampleVideos: Video[] = [
           {
-            id: "E4vtbJ79_7Y",
-            title: "Spelman Glee Club - Glory Hallelujah",
-            description: "Spelman College Glee Club performs Glory Hallelujah.",
-            thumbnail: "https://img.youtube.com/vi/E4vtbJ79_7Y/mqdefault.jpg",
-            publishedAt: "2022-12-15T00:00:00Z",
+            id: "Uc66XN8VYO4",
+            title: "The Spelman College Glee Club & Jazz Ensemble",
+            description: "The Spelman College Glee Club & Jazz Ensemble - 2019 Christmas Concert.",
+            thumbnail: "https://img.youtube.com/vi/Uc66XN8VYO4/mqdefault.jpg",
+            publishedAt: "2019-12-08T00:00:00Z",
             category: "Performances"
           },
           {
@@ -31,52 +31,52 @@ export function useVideoData() {
             category: "Performances"
           },
           {
-            id: "3LXiP5Ns5m4",
-            title: "Spelman College Glee Club - Pilgrim's Hymn",
-            description: "Spelman College Glee Club performs Pilgrim's Hymn by Stephen Paulus.",
-            thumbnail: "https://img.youtube.com/vi/3LXiP5Ns5m4/mqdefault.jpg",
-            publishedAt: "2023-01-10T00:00:00Z",
-            category: "Performances"
-          },
-          {
-            id: "A8QZipk08rY",
-            title: "Spelman College Glee Club - Stay in the Field",
-            description: "The Spelman College Glee Club singing 'Stay in the Field'.",
-            thumbnail: "https://img.youtube.com/vi/A8QZipk08rY/mqdefault.jpg",
-            publishedAt: "2020-06-20T00:00:00Z",
-            category: "Spirituals"
-          },
-          {
-            id: "xAXvMRwFopQ",
-            title: "Spelman College Glee Club - I'll Stand",
-            description: "Spelman College Glee Club performs 'I'll Stand' at a special event.",
-            thumbnail: "https://img.youtube.com/vi/xAXvMRwFopQ/mqdefault.jpg",
-            publishedAt: "2021-11-05T00:00:00Z",
-            category: "Spirituals"
-          },
-          {
-            id: "lRXU1W4Uqg0",
-            title: "Spelman College Glee Club Tour",
-            description: "Follow the Spelman College Glee Club on their latest tour.",
-            thumbnail: "https://img.youtube.com/vi/lRXU1W4Uqg0/mqdefault.jpg",
-            publishedAt: "2022-07-15T00:00:00Z",
-            category: "Behind the Scenes"
-          },
-          {
-            id: "LGwlR7A_8Xo",
-            title: "Spelman College Glee Club - Christmas Special",
-            description: "Enjoy the Spelman College Glee Club Christmas performance.",
-            thumbnail: "https://img.youtube.com/vi/LGwlR7A_8Xo/mqdefault.jpg",
-            publishedAt: "2022-12-25T00:00:00Z",
+            id: "yE2H_rIvVLg",
+            title: "Christmas with the Spelman College Glee Club",
+            description: "The Christmas Carol Concert 2021 featuring the Spelman College Glee Club.",
+            thumbnail: "https://img.youtube.com/vi/yE2H_rIvVLg/mqdefault.jpg",
+            publishedAt: "2021-12-25T00:00:00Z",
             category: "Seasonal"
           },
           {
-            id: "PeInWqUfZwM",
-            title: "Spelman College Glee Club - Interviews",
-            description: "Meet the members of the Spelman College Glee Club.",
-            thumbnail: "https://img.youtube.com/vi/PeInWqUfZwM/mqdefault.jpg",
-            publishedAt: "2023-02-28T00:00:00Z",
+            id: "J62sAkfdgHM",
+            title: "Ain't That Good News - Spelman College Glee Club",
+            description: "Spelman College Glee Club performs 'Ain't That Good News'.",
+            thumbnail: "https://img.youtube.com/vi/J62sAkfdgHM/mqdefault.jpg",
+            publishedAt: "2018-04-30T00:00:00Z",
+            category: "Spirituals"
+          },
+          {
+            id: "TXm_N9cAcdw",
+            title: "I've Been Buked - Spelman College Glee Club",
+            description: "Spelman College Glee Club performs 'I've Been Buked' at Sisters Chapel.",
+            thumbnail: "https://img.youtube.com/vi/TXm_N9cAcdw/mqdefault.jpg",
+            publishedAt: "2019-03-15T00:00:00Z",
+            category: "Spirituals"
+          },
+          {
+            id: "fq2kTW-eRag",
+            title: "Spelman College Glee Club - Behind the Scenes",
+            description: "Go behind the scenes with the Spelman College Glee Club during rehearsal.",
+            thumbnail: "https://img.youtube.com/vi/fq2kTW-eRag/mqdefault.jpg",
+            publishedAt: "2022-01-20T00:00:00Z",
             category: "Behind the Scenes"
+          },
+          {
+            id: "lGw3VU9yE-U",
+            title: "Spelman College Glee Club Tour 2019",
+            description: "The Spelman College Glee Club travels for their annual tour.",
+            thumbnail: "https://img.youtube.com/vi/lGw3VU9yE-U/mqdefault.jpg",
+            publishedAt: "2019-05-10T00:00:00Z",
+            category: "Behind the Scenes"
+          },
+          {
+            id: "mJHUw6YjEro",
+            title: "Spelman College Glee Club - Sisters Chapel Concert",
+            description: "Full concert of the Spelman College Glee Club at Sisters Chapel.",
+            thumbnail: "https://img.youtube.com/vi/mJHUw6YjEro/mqdefault.jpg",
+            publishedAt: "2023-02-28T00:00:00Z",
+            category: "Performances"
           }
         ];
 

@@ -15,15 +15,16 @@ export function VideoCard({ video, isSelected, onClick }: VideoCardProps) {
     <div
       onClick={onClick}
       className={cn(
-        "flex cursor-pointer gap-2 overflow-hidden rounded-lg border p-2 transition-all hover:bg-accent",
+        "flex cursor-pointer gap-3 overflow-hidden rounded-lg border p-2 transition-all hover:bg-accent",
         isSelected && "border-primary bg-accent/50"
       )}
     >
-      <div className="relative aspect-video w-24 flex-shrink-0 rounded-md overflow-hidden">
+      <div className="relative aspect-video w-32 flex-shrink-0 rounded-md overflow-hidden">
         <img
           src={video.thumbnail}
           alt={video.title}
           className="absolute inset-0 h-full w-full object-cover"
+          loading="lazy"
         />
       </div>
       <div className="flex-1 min-w-0">
