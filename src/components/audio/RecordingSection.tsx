@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { Mic, MicOff, Download } from 'lucide-react';
+import { Mic, MicOff, Download, Share2, Play, Pause } from 'lucide-react';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { Button } from '@/components/ui/button';
@@ -10,6 +10,7 @@ import { useRecordingSave } from '@/hooks/useRecordingSave';
 import { RecordingControls } from './RecordingControls';
 import { AudioSaveControls } from './AudioSaveControls';
 import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/popover';
+import { SocialShareButtons } from '../recordings/SocialShareButtons';
 
 interface RecordingSectionProps {
   onRecordingSaved: (category?: Exclude<AudioPageCategory, "all">) => void;
@@ -106,7 +107,33 @@ export function RecordingSection({ onRecordingSaved }: RecordingSectionProps) {
             <div className="space-y-4">
               <Separator />
               <div className="flex flex-col space-y-4">
-                {/* Audio playback and save controls */}
+                {/* Audio player */}
+                <div className="flex flex-col space-y-2">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <Button 
+                        variant="outline" 
+                        size="icon" 
+                        onClick={togglePlayback}
+                        className="h-8 w-8"
+                      >
+                        {isPlaying ? (
+                          <Pause className="h-4 w-4" />
+                        ) : (
+                          <Play className="h-4 w-4" />
+                        )}
+                      </Button>
+                      <span className="text-sm font-medium">
+                        {recordingName}
+                      </span>
+                    </div>
+                    <audio ref={audioRef} className="hidden" />
+                  </div>
+
+                  {/* Audio waveform visualization could be added here in the future */}
+                </div>
+
+                {/* Audio save controls */}
                 <AudioSaveControls 
                   audioRef={audioRef}
                   isPlaying={isPlaying}
@@ -121,12 +148,13 @@ export function RecordingSection({ onRecordingSaved }: RecordingSectionProps) {
                   discardRecording={discardRecording}
                 />
                 
-                {/* Download button */}
-                <div className="flex justify-end mt-4">
+                {/* Action buttons */}
+                <div className="flex justify-end gap-2 mt-4">
+                  {/* Download button */}
                   <Popover>
                     <PopoverTrigger asChild>
                       <Button variant="outline" className="gap-2">
-                        <Download className="h-4 w-4" /> Download Recording
+                        <Download className="h-4 w-4" /> Download
                       </Button>
                     </PopoverTrigger>
                     <PopoverContent className="w-80 p-4">
@@ -141,6 +169,29 @@ export function RecordingSection({ onRecordingSaved }: RecordingSectionProps) {
                         >
                           <Download className="h-4 w-4" /> Download
                         </Button>
+                      </div>
+                    </PopoverContent>
+                  </Popover>
+
+                  {/* Share button */}
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button variant="outline" className="gap-2">
+                        <Share2 className="h-4 w-4" /> Share
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-80 p-4">
+                      <div className="space-y-2">
+                        <h4 className="font-medium">Share Recording</h4>
+                        <p className="text-sm text-muted-foreground">
+                          Share this recording with others or on social media.
+                        </p>
+                        {audioURL && (
+                          <SocialShareButtons 
+                            url={audioURL} 
+                            title={recordingName || "My Recording"}
+                          />
+                        )}
                       </div>
                     </PopoverContent>
                   </Popover>

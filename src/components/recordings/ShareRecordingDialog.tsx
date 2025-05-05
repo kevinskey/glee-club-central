@@ -9,11 +9,10 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Share2, Copy, Check } from "lucide-react";
+import { Share2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { AudioFile } from "@/types/audio";
+import { SocialShareButtons } from "./SocialShareButtons";
 
 interface ShareRecordingDialogProps {
   open: boolean;
@@ -27,21 +26,7 @@ export function ShareRecordingDialog({
   recording,
 }: ShareRecordingDialogProps) {
   const { toast } = useToast();
-  const [copied, setCopied] = useState(false);
-  
   const shareLink = recording.file_url;
-  
-  const handleCopyLink = () => {
-    navigator.clipboard.writeText(shareLink);
-    setCopied(true);
-    
-    toast({
-      title: "Link copied",
-      description: "Share link has been copied to clipboard",
-    });
-    
-    setTimeout(() => setCopied(false), 2000);
-  };
   
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -51,32 +36,15 @@ export function ShareRecordingDialog({
             <Share2 className="h-5 w-5" /> Share Recording
           </DialogTitle>
           <DialogDescription>
-            Share "{recording.title}" with others using a link
+            Share "{recording.title}" with others using a link or on social media
           </DialogDescription>
         </DialogHeader>
         
-        <div className="flex items-center space-x-2 pt-4">
-          <div className="grid flex-1 gap-2">
-            <Label htmlFor="link" className="sr-only">Link</Label>
-            <Input
-              id="link"
-              value={shareLink}
-              readOnly
-              className="w-full"
-            />
-          </div>
-          <Button 
-            type="button" 
-            size="icon"
-            onClick={handleCopyLink}
-          >
-            {copied ? (
-              <Check className="h-4 w-4" />
-            ) : (
-              <Copy className="h-4 w-4" />
-            )}
-            <span className="sr-only">Copy</span>
-          </Button>
+        <div className="pt-4">
+          <SocialShareButtons 
+            url={shareLink} 
+            title={recording.title}
+          />
         </div>
         
         <DialogFooter className="sm:justify-start">

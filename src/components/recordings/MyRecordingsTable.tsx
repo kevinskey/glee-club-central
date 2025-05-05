@@ -1,5 +1,5 @@
 
-import React from "react";
+import React, { useState, useRef } from "react";
 import { 
   Table, 
   TableBody, 
@@ -10,7 +10,7 @@ import {
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Download, Trash2, Share2, Loader2, FileAudio } from "lucide-react";
+import { Download, Trash2, Share2, Loader2, FileAudio, Play, Pause } from "lucide-react";
 import { AudioFile } from "@/types/audio";
 
 interface MyRecordingsTableProps {
@@ -26,6 +26,30 @@ export function MyRecordingsTable({
   onDelete,
   onShare 
 }: MyRecordingsTableProps) {
+  const [playingId, setPlayingId] = useState<string | null>(null);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+
+  // Handle play/pause
+  const handlePlayPause = (recording: AudioFile) => {
+    if (audioRef.current) {
+      if (playingId === recording.id) {
+        // Pause current recording
+        audioRef.current.pause();
+        setPlayingId(null);
+      } else {
+        // Play new recording
+        audioRef.current.src = recording.file_url;
+        audioRef.current.play();
+        setPlayingId(recording.id);
+      }
+    }
+  };
+
+  // Handle audio ending
+  const handleAudioEnded = () => {
+    setPlayingId(null);
+  };
+
   // Helper function to handle download
   const handleDownload = (recording: AudioFile) => {
     // Create an anchor element
@@ -63,18 +87,39 @@ export function MyRecordingsTable({
 
   return (
     <div className="rounded-md border">
+      {/* Hidden audio element for playback */}
+      <audio 
+        ref={audioRef} 
+        onEnded={handleAudioEnded}
+        className="hidden"
+      />
+      
       <Table>
         <TableHeader>
           <TableRow>
-            <TableHead className="w-[40%]">Title</TableHead>
-            <TableHead className="w-[35%]">Description</TableHead>
+            <TableHead className="w-[10%]">Play</TableHead>
+            <TableHead className="w-[30%]">Title</TableHead>
+            <TableHead className="w-[30%]">Description</TableHead>
             <TableHead className="w-[15%]">Date Uploaded</TableHead>
-            <TableHead className="w-[10%] text-right">Actions</TableHead>
+            <TableHead className="w-[15%] text-right">Actions</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
           {recordings.map((recording) => (
             <TableRow key={recording.id}>
+              <TableCell>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => handlePlayPause(recording)}
+                >
+                  {playingId === recording.id ? (
+                    <Pause className="h-4 w-4" />
+                  ) : (
+                    <Play className="h-4 w-4" />
+                  )}
+                </Button>
+              </TableCell>
               <TableCell className="font-medium">{recording.title}</TableCell>
               <TableCell>{recording.description || "-"}</TableCell>
               <TableCell>{recording.created_at}</TableCell>
