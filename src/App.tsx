@@ -14,6 +14,7 @@ import LoginPage from "./pages/LoginPage";
 import NotFound from "./pages/NotFound";
 import DashboardPage from "./pages/DashboardPage";
 import SheetMusicPage from "./pages/sheet-music/SheetMusicPage";
+import ViewSheetMusicPage from "./pages/sheet-music/ViewSheetMusicPage";
 import PracticePage from "./pages/practice/PracticePage";
 import SchedulePage from "./pages/schedule/SchedulePage";
 
@@ -48,6 +49,7 @@ const App = () => (
             >
               <Route index element={<DashboardPage />} />
               <Route path="sheet-music" element={<SheetMusicPage />} />
+              <Route path="sheet-music/:id" element={<ViewSheetMusicPage />} />
               <Route path="practice" element={<PracticePage />} />
               <Route path="recordings" element={<RecordingsPage />} />
               <Route path="dues" element={<DuesPage />} />
