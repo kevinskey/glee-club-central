@@ -11,7 +11,6 @@ interface SheetMusic {
   title: string;
   composer: string;
   file_url: string;
-  voice_part: string;
 }
 
 export default function ViewSheetMusicPage() {
@@ -75,7 +74,7 @@ export default function ViewSheetMusicPage() {
     <div className="container px-0 md:px-8 py-4 md:py-8">
       <PDFViewer 
         url={music.file_url} 
-        title={`${music.title} by ${music.composer} (${music.voice_part.replace(/(\d+)/g, ' $1')})`} 
+        title={`${music.title} by ${music.composer}`} 
       />
     </div>
   );

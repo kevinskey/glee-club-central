@@ -1,6 +1,6 @@
 
 import React, { useState } from "react";
-import { FileUp } from "lucide-react";
+import { FileUp, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -13,7 +13,6 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
@@ -27,7 +26,6 @@ export function UploadSheetMusicModal({ onUploadComplete }: UploadSheetMusicModa
   const [uploading, setUploading] = useState(false);
   const [title, setTitle] = useState("");
   const [composer, setComposer] = useState("");
-  const [voicePart, setVoicePart] = useState<string | undefined>();
   const [file, setFile] = useState<File | null>(null);
   const { toast } = useToast();
   const { profile } = useAuth();
@@ -61,7 +59,7 @@ export function UploadSheetMusicModal({ onUploadComplete }: UploadSheetMusicModa
   };
 
   const handleUpload = async () => {
-    if (!file || !title || !composer || !voicePart) {
+    if (!file || !title || !composer) {
       toast({
         title: "Missing information",
         description: "Please fill in all fields and select a PDF file",
@@ -76,7 +74,7 @@ export function UploadSheetMusicModal({ onUploadComplete }: UploadSheetMusicModa
       // 1. Upload file to Supabase Storage
       const fileExt = file.name.split('.').pop();
       const fileName = `${Date.now()}-${Math.random().toString(36).substring(2, 15)}.${fileExt}`;
-      const filePath = `${voicePart}/${fileName}`;
+      const filePath = fileName;
 
       const { error: uploadError, data } = await supabase.storage
         .from('sheet-music')
@@ -97,7 +95,6 @@ export function UploadSheetMusicModal({ onUploadComplete }: UploadSheetMusicModa
         .insert({
           title,
           composer,
-          voice_part: voicePart,
           file_path: filePath,
           file_url: publicURL.publicUrl,
           uploaded_by: profile?.id
@@ -130,18 +127,8 @@ export function UploadSheetMusicModal({ onUploadComplete }: UploadSheetMusicModa
   const resetForm = () => {
     setTitle("");
     setComposer("");
-    setVoicePart(undefined);
     setFile(null);
   };
-
-  const voiceParts = [
-    { value: "Soprano1", label: "Soprano 1" },
-    { value: "Soprano2", label: "Soprano 2" },
-    { value: "Alto1", label: "Alto 1" },
-    { value: "Alto2", label: "Alto 2" },
-    { value: "Tenor", label: "Tenor" },
-    { value: "Bass", label: "Bass" },
-  ];
 
   return (
     <Dialog open={open} onOpenChange={(isOpen) => {
@@ -181,21 +168,6 @@ export function UploadSheetMusicModal({ onUploadComplete }: UploadSheetMusicModa
               onChange={(e) => setComposer(e.target.value)}
               required
             />
-          </div>
-          <div className="grid gap-2">
-            <Label htmlFor="voice-part">Voice Part</Label>
-            <Select value={voicePart} onValueChange={setVoicePart} required>
-              <SelectTrigger id="voice-part">
-                <SelectValue placeholder="Select voice part" />
-              </SelectTrigger>
-              <SelectContent>
-                {voiceParts.map((part) => (
-                  <SelectItem key={part.value} value={part.value}>
-                    {part.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
           </div>
           <div className="grid gap-2">
             <Label htmlFor="pdf-file">PDF File</Label>

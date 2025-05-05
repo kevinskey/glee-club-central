@@ -39,6 +39,36 @@ export type Database = {
         }
         Relationships: []
       }
+      sheet_music: {
+        Row: {
+          composer: string
+          created_at: string
+          file_path: string
+          file_url: string
+          id: string
+          title: string
+          uploaded_by: string
+        }
+        Insert: {
+          composer: string
+          created_at?: string
+          file_path: string
+          file_url: string
+          id?: string
+          title: string
+          uploaded_by: string
+        }
+        Update: {
+          composer?: string
+          created_at?: string
+          file_path?: string
+          file_url?: string
+          id?: string
+          title?: string
+          uploaded_by?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
