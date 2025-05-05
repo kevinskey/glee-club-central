@@ -15,11 +15,11 @@ import NotFound from "./pages/NotFound";
 import DashboardPage from "./pages/DashboardPage";
 import SheetMusicPage from "./pages/sheet-music/SheetMusicPage";
 import PracticePage from "./pages/practice/PracticePage";
+import SchedulePage from "./pages/schedule/SchedulePage";
 
 // Placeholder pages for other sections
 const RecordingsPage = () => <div className="px-4 py-8">Recording Submissions Page - Coming Soon</div>;
 const DuesPage = () => <div className="px-4 py-8">Pay Dues Page - Coming Soon</div>;
-const SchedulePage = () => <div className="px-4 py-8">Glee Club Schedule Page - Coming Soon</div>;
 const HandbookPage = () => <div className="px-4 py-8">Club Handbook Page - Coming Soon</div>;
 const MerchPage = () => <div className="px-4 py-8">Buy Glee Merch Page - Coming Soon</div>;
 const AttendancePage = () => <div className="px-4 py-8">Check Attendance Record Page - Coming Soon</div>;
