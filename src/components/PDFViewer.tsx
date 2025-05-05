@@ -206,10 +206,7 @@ export const PDFViewer = ({ url, title, sheetMusicId }: PDFViewerProps) => {
           onError={handleError}
           error={error}
           title={title}
-        >
-          {/* Allow annotation rendering within PDFDocument */}
-          {showAnnotations && annotations.length > 0 && children}
-        </PDFDocument>
+        />
       </div>
       
       {/* Footer Controls */}
