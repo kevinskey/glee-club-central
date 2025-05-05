@@ -7,11 +7,13 @@ import { v4 as uuidv4 } from "uuid";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, Music, Upload } from "lucide-react";
+import { Loader2, Music, Upload, ListMusic, AudioLines, Audio } from "lucide-react";
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Label } from "@/components/ui/label";
 import {
   Sheet,
   SheetContent,
@@ -20,9 +22,12 @@ import {
   SheetTitle,
 } from "@/components/ui/sheet";
 
+type AudioCategory = "part_tracks" | "recordings" | "my_tracks";
+
 const formSchema = z.object({
   title: z.string().min(2, { message: "Title must be at least 2 characters." }),
   description: z.string().optional(),
+  category: z.enum(['part_tracks', 'recordings', 'my_tracks']),
   audioFile: z
     .instanceof(File, { message: "Audio file is required." })
     .refine((file) => file.size <= 20000000, {
@@ -42,12 +47,14 @@ interface UploadAudioModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onUploadComplete: () => void;
+  defaultCategory?: AudioCategory;
 }
 
 export function UploadAudioModal({
   open,
   onOpenChange,
   onUploadComplete,
+  defaultCategory = "recordings",
 }: UploadAudioModalProps) {
   const { user } = useAuth();
   const { toast } = useToast();
@@ -58,6 +65,7 @@ export function UploadAudioModal({
     defaultValues: {
       title: "",
       description: "",
+      category: defaultCategory,
     },
   });
 
@@ -65,8 +73,11 @@ export function UploadAudioModal({
   React.useEffect(() => {
     if (!open) {
       form.reset();
+    } else {
+      // Set the category when the modal opens
+      form.setValue("category", defaultCategory);
     }
-  }, [open, form]);
+  }, [open, form, defaultCategory]);
 
   const onSubmit = async (data: FormValues) => {
     if (!user) {
@@ -111,6 +122,7 @@ export function UploadAudioModal({
         file_url: publicUrlData.publicUrl,
         file_path: filePath,
         uploaded_by: user.id,
+        category: data.category,
       });
 
       if (insertError) {
@@ -137,6 +149,42 @@ export function UploadAudioModal({
     }
   };
 
+  // Get display name for category
+  const getCategoryName = (category: AudioCategory): string => {
+    switch (category) {
+      case "part_tracks":
+        return "Part Tracks";
+      case "recordings":
+        return "Recordings";
+      case "my_tracks":
+        return "My Tracks";
+    }
+  };
+  
+  // Get description for category
+  const getCategoryDescription = (category: AudioCategory): string => {
+    switch (category) {
+      case "part_tracks":
+        return "Individual vocal parts for practice";
+      case "recordings":
+        return "Full choir recordings and performances";
+      case "my_tracks":
+        return "Personal recordings and practice files";
+    }
+  };
+  
+  // Get icon for category
+  const getCategoryIcon = (category: AudioCategory) => {
+    switch (category) {
+      case "part_tracks":
+        return <ListMusic className="h-4 w-4" />;
+      case "recordings":
+        return <AudioLines className="h-4 w-4" />;
+      case "my_tracks":
+        return <Audio className="h-4 w-4" />;
+    }
+  };
+
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent className="sm:max-w-md overflow-y-auto">
@@ -155,6 +203,55 @@ export function UploadAudioModal({
               onSubmit={form.handleSubmit(onSubmit)}
               className="space-y-6"
             >
+              <FormField
+                control={form.control}
+                name="category"
+                render={({ field }) => (
+                  <FormItem className="space-y-3">
+                    <FormLabel>Category</FormLabel>
+                    <FormControl>
+                      <RadioGroup
+                        onValueChange={field.onChange}
+                        defaultValue={field.value}
+                        className="flex flex-col space-y-3"
+                      >
+                        <div className="flex items-center space-x-2 rounded-md border p-3 hover:bg-accent">
+                          <RadioGroupItem value="part_tracks" id="part_tracks" />
+                          <Label htmlFor="part_tracks" className="flex flex-1 items-center gap-2 cursor-pointer">
+                            <ListMusic className="h-4 w-4" />
+                            <div>
+                              <div className="font-medium">Part Tracks</div>
+                              <div className="text-xs text-muted-foreground">Individual vocal parts for practice</div>
+                            </div>
+                          </Label>
+                        </div>
+                        <div className="flex items-center space-x-2 rounded-md border p-3 hover:bg-accent">
+                          <RadioGroupItem value="recordings" id="recordings" />
+                          <Label htmlFor="recordings" className="flex flex-1 items-center gap-2 cursor-pointer">
+                            <AudioLines className="h-4 w-4" />
+                            <div>
+                              <div className="font-medium">Recordings</div>
+                              <div className="text-xs text-muted-foreground">Full choir recordings and performances</div>
+                            </div>
+                          </Label>
+                        </div>
+                        <div className="flex items-center space-x-2 rounded-md border p-3 hover:bg-accent">
+                          <RadioGroupItem value="my_tracks" id="my_tracks" />
+                          <Label htmlFor="my_tracks" className="flex flex-1 items-center gap-2 cursor-pointer">
+                            <Audio className="h-4 w-4" />
+                            <div>
+                              <div className="font-medium">My Tracks</div>
+                              <div className="text-xs text-muted-foreground">Personal recordings and practice files</div>
+                            </div>
+                          </Label>
+                        </div>
+                      </RadioGroup>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
               <FormField
                 control={form.control}
                 name="title"
