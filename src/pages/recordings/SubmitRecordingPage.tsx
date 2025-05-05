@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect } from "react";
 import { PageHeader } from "@/components/ui/page-header";
-import { Upload, FileAudio, Share2 } from "lucide-react";
+import { Upload, FileAudio, Mic, Share2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
@@ -10,10 +10,8 @@ import { MyRecordingsTable } from "@/components/recordings/MyRecordingsTable";
 import { UploadRecordingModal } from "@/components/recordings/UploadRecordingModal";
 import { ShareRecordingDialog } from "@/components/recordings/ShareRecordingDialog";
 import { supabase } from "@/integrations/supabase/client";
-import { AudioFile } from "@/types/audio";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Form, FormField, FormItem, FormLabel, FormControl } from "@/components/ui/form";
-import { useForm } from "react-hook-form";
+import { AudioFile, AudioPageCategory } from "@/types/audio";
+import { RecordingSection } from "@/components/audio/RecordingSection";
 
 export default function SubmitRecordingPage() {
   const { toast } = useToast();
@@ -23,6 +21,7 @@ export default function SubmitRecordingPage() {
   const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
   const [selectedRecording, setSelectedRecording] = useState<AudioFile | null>(null);
   const [isShareDialogOpen, setIsShareDialogOpen] = useState(false);
+  const [activeTab, setActiveTab] = useState("record");
   
   const fetchMyRecordings = async () => {
     if (!user) return;
@@ -111,8 +110,18 @@ export default function SubmitRecordingPage() {
     setIsShareDialogOpen(true);
   };
 
+  const handleRecordingSaved = (category?: Exclude<AudioPageCategory, "all">) => {
+    fetchMyRecordings();
+    setActiveTab("my-recordings");
+    toast({
+      title: "Recording saved",
+      description: "Your recording has been successfully saved.",
+    });
+  };
+
   const handleUploadComplete = () => {
     fetchMyRecordings();
+    setActiveTab("my-recordings");
   };
 
   useEffect(() => {
@@ -125,23 +134,40 @@ export default function SubmitRecordingPage() {
     <div className="space-y-8">
       <PageHeader
         title="Submit Recordings"
-        description="Upload and manage your vocal recordings"
+        description="Record or upload your vocal recordings"
         icon={<FileAudio className="h-6 w-6" />}
         actions={
-          <Button 
-            onClick={() => setIsUploadModalOpen(true)}
-            className="gap-2"
-          >
-            <Upload className="h-4 w-4" /> Upload Recording
-          </Button>
+          <div className="flex gap-2">
+            <Button 
+              onClick={() => setIsUploadModalOpen(true)}
+              variant="outline"
+              className="gap-2"
+            >
+              <Upload className="h-4 w-4" /> Upload
+            </Button>
+            <Button 
+              onClick={() => setActiveTab("record")}
+              className="gap-2"
+            >
+              <Mic className="h-4 w-4" /> Record
+            </Button>
+          </div>
         }
       />
       
-      <Tabs defaultValue="my-recordings" className="space-y-4">
-        <TabsList>
-          <TabsTrigger value="my-recordings">My Recordings</TabsTrigger>
-          <TabsTrigger value="shared">Shared With Me</TabsTrigger>
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
+        <TabsList className="grid grid-cols-2 w-full max-w-md mx-auto">
+          <TabsTrigger value="record" className="gap-2">
+            <Mic className="h-4 w-4" /> Record Audio
+          </TabsTrigger>
+          <TabsTrigger value="my-recordings" className="gap-2">
+            <FileAudio className="h-4 w-4" /> My Recordings
+          </TabsTrigger>
         </TabsList>
+        
+        <TabsContent value="record" className="space-y-4">
+          <RecordingSection onRecordingSaved={handleRecordingSaved} />
+        </TabsContent>
         
         <TabsContent value="my-recordings" className="space-y-4">
           <MyRecordingsTable 
@@ -150,12 +176,6 @@ export default function SubmitRecordingPage() {
             onDelete={handleDeleteRecording}
             onShare={handleShareRecording}
           />
-        </TabsContent>
-        
-        <TabsContent value="shared" className="space-y-4">
-          <div className="text-center py-8 text-muted-foreground">
-            Shared recordings functionality coming soon.
-          </div>
         </TabsContent>
       </Tabs>
 

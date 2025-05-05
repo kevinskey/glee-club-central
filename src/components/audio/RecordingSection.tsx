@@ -1,13 +1,15 @@
 
-import React from 'react';
-import { Mic, MicOff } from 'lucide-react';
+import React, { useState } from 'react';
+import { Mic, MicOff, Download } from 'lucide-react';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
+import { Button } from '@/components/ui/button';
 import { AudioPageCategory } from '@/types/audio';
 import { useAudioRecorder } from '@/hooks/useAudioRecorder';
 import { useRecordingSave } from '@/hooks/useRecordingSave';
 import { RecordingControls } from './RecordingControls';
 import { AudioSaveControls } from './AudioSaveControls';
+import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/popover';
 
 interface RecordingSectionProps {
   onRecordingSaved: (category?: Exclude<AudioPageCategory, "all">) => void;
@@ -47,6 +49,18 @@ export function RecordingSection({ onRecordingSaved }: RecordingSectionProps) {
     }
   });
 
+  // Download recording
+  const handleDownloadRecording = () => {
+    if (audioURL) {
+      const downloadLink = document.createElement('a');
+      downloadLink.href = audioURL;
+      downloadLink.download = `${recordingName || 'recording'}.wav`;
+      document.body.appendChild(downloadLink);
+      downloadLink.click();
+      document.body.removeChild(downloadLink);
+    }
+  };
+
   // Handle save recording
   const handleSaveRecording = async () => {
     const savedCategory = await saveRecording(audioURL);
@@ -64,19 +78,19 @@ export function RecordingSection({ onRecordingSaved }: RecordingSectionProps) {
   };
 
   return (
-    <Card>
-      <CardHeader>
+    <Card className="border-2 border-primary/20">
+      <CardHeader className="bg-primary/5">
         <CardTitle className="flex items-center gap-2">
           {microphoneActive ? (
             <Mic className="h-5 w-5 text-green-500" />
           ) : (
             <MicOff className="h-5 w-5 text-gray-500" />
           )} 
-          Record Audio
+          Record New Audio
         </CardTitle>
       </CardHeader>
-      <CardContent>
-        <div className="space-y-4">
+      <CardContent className="p-6">
+        <div className="space-y-6">
           {/* Recording controls */}
           <RecordingControls 
             microphoneActive={microphoneActive}
@@ -106,6 +120,31 @@ export function RecordingSection({ onRecordingSaved }: RecordingSectionProps) {
                   handleSaveRecording={handleSaveRecording}
                   discardRecording={discardRecording}
                 />
+                
+                {/* Download button */}
+                <div className="flex justify-end mt-4">
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button variant="outline" className="gap-2">
+                        <Download className="h-4 w-4" /> Download Recording
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-80 p-4">
+                      <div className="space-y-2">
+                        <h4 className="font-medium">Download Recording</h4>
+                        <p className="text-sm text-muted-foreground">
+                          This will download the recording to your device as a WAV file.
+                        </p>
+                        <Button 
+                          onClick={handleDownloadRecording}
+                          className="w-full gap-2 mt-2"
+                        >
+                          <Download className="h-4 w-4" /> Download
+                        </Button>
+                      </div>
+                    </PopoverContent>
+                  </Popover>
+                </div>
               </div>
             </div>
           )}
