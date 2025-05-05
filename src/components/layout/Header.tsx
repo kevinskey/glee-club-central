@@ -21,10 +21,41 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 import { SidebarNav } from "./SidebarNav";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 
 export const Header = () => {
-  const { user, logout } = useAuth();
+  const { user, profile, logout } = useAuth();
   const navigate = useNavigate();
+
+  // Get user initials for the avatar
+  const getUserInitials = () => {
+    if (profile?.first_name && profile?.last_name) {
+      return `${profile.first_name[0]}${profile.last_name[0]}`.toUpperCase();
+    } else if (user?.email) {
+      return user.email[0].toUpperCase();
+    }
+    return "U";
+  };
+
+  // Get display name
+  const getDisplayName = () => {
+    if (profile?.first_name && profile?.last_name) {
+      return `${profile.first_name} ${profile.last_name}`;
+    } else if (user?.email) {
+      return user.email.split('@')[0];
+    }
+    return "User";
+  };
+
+  // Get role description
+  const getRoleDescription = () => {
+    if (profile?.role === "admin") {
+      return "Admin";
+    } else if (profile?.role === "member") {
+      return `Member (${profile.voice_part || ''})`;
+    }
+    return "Member";
+  };
 
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
@@ -66,17 +97,16 @@ export const Header = () => {
           {user ? (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button
-                  variant="ghost"
-                  className="relative h-9 w-9 rounded-full bg-glee-purple text-white"
-                >
-                  <User className="h-5 w-5" />
+                <Button variant="ghost" className="relative h-9 w-9 rounded-full">
+                  <Avatar className="h-9 w-9 bg-glee-purple text-white">
+                    <AvatarFallback>{getUserInitials()}</AvatarFallback>
+                  </Avatar>
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
-                <DropdownMenuLabel>{user.name}</DropdownMenuLabel>
+                <DropdownMenuLabel>{getDisplayName()}</DropdownMenuLabel>
                 <DropdownMenuLabel className="text-xs font-normal text-muted-foreground">
-                  {user.role === "admin" ? "Admin" : `Member (${user.voicePart || ""})`}
+                  {getRoleDescription()}
                 </DropdownMenuLabel>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem asChild>
@@ -90,7 +120,7 @@ export const Header = () => {
                 <DropdownMenuItem asChild>
                   <button
                     className="flex w-full cursor-pointer items-center text-destructive"
-                    onClick={logout}
+                    onClick={() => logout()}
                   >
                     <LogOut className="mr-2 h-4 w-4" />
                     Logout
@@ -107,4 +137,4 @@ export const Header = () => {
       </div>
     </header>
   );
-};
+}
