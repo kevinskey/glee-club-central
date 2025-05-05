@@ -1,5 +1,5 @@
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { Header } from "@/components/layout/Header";
 import { Button } from "@/components/ui/button";
@@ -8,6 +8,7 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { User, Mail, Music, Edit, Save } from "lucide-react";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useForm } from "react-hook-form";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/components/ui/use-toast";
@@ -25,6 +26,17 @@ export default function ProfilePage() {
       voice_part: profile?.voice_part || "",
     },
   });
+
+  // Update form values when profile changes
+  useEffect(() => {
+    if (profile) {
+      form.reset({
+        first_name: profile.first_name || "",
+        last_name: profile.last_name || "",
+        voice_part: profile.voice_part || "",
+      });
+    }
+  }, [profile, form]);
 
   // Get user initials for the avatar
   const getUserInitials = () => {
@@ -101,6 +113,17 @@ export default function ProfilePage() {
     }
   };
 
+  // Voice part options based on the schema
+  const voicePartOptions = [
+    { value: "", label: "Not specified" },
+    { value: "Soprano1", label: "Soprano 1" },
+    { value: "Soprano2", label: "Soprano 2" },
+    { value: "Alto1", label: "Alto 1" },
+    { value: "Alto2", label: "Alto 2" },
+    { value: "Tenor", label: "Tenor" },
+    { value: "Bass", label: "Bass" },
+  ];
+
   return (
     <div className="min-h-screen bg-background">
       <Header />
@@ -156,12 +179,23 @@ export default function ProfilePage() {
                         render={({ field }) => (
                           <FormItem>
                             <FormLabel>Voice Part</FormLabel>
-                            <FormControl>
-                              <Input 
-                                placeholder="Voice part (Soprano1, Soprano2, Alto1, Alto2, etc.)" 
-                                {...field} 
-                              />
-                            </FormControl>
+                            <Select 
+                              onValueChange={field.onChange} 
+                              defaultValue={field.value}
+                            >
+                              <FormControl>
+                                <SelectTrigger>
+                                  <SelectValue placeholder="Select your voice part" />
+                                </SelectTrigger>
+                              </FormControl>
+                              <SelectContent>
+                                {voicePartOptions.map((option) => (
+                                  <SelectItem key={option.value} value={option.value}>
+                                    {option.label}
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
                             <FormMessage />
                           </FormItem>
                         )}
