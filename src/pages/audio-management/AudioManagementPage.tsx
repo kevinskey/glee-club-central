@@ -38,6 +38,7 @@ import {
 } from "@/components/ui/tabs";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
+import { AudioCategory } from "@/components/audio/audioCategoryUtils";
 
 interface AudioFile {
   id: string;
@@ -47,10 +48,10 @@ interface AudioFile {
   file_path: string;
   created_at: string;
   uploaded_by: string;
-  category: string;
+  category: string;  // Added category property to fix the TypeScript error
 }
 
-type AudioCategory = "part_tracks" | "recordings" | "my_tracks" | "all";
+type AudioPageCategory = AudioCategory | "all";
 
 export default function AudioManagementPage() {
   const { user } = useAuth();
@@ -62,8 +63,8 @@ export default function AudioManagementPage() {
   const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
-  const [activeCategory, setActiveCategory] = useState<AudioCategory>("all");
-  const [uploadCategory, setUploadCategory] = useState<Exclude<AudioCategory, "all">>("part_tracks");
+  const [activeCategory, setActiveCategory] = useState<AudioPageCategory>("all");
+  const [uploadCategory, setUploadCategory] = useState<Exclude<AudioPageCategory, "all">>("part_tracks");
   
   // Fetch audio files
   const fetchAudioFiles = async () => {
@@ -77,7 +78,7 @@ export default function AudioManagementPage() {
       if (error) throw error;
 
       if (data) {
-        // Format dates for display
+        // Format dates for display and ensure category exists
         const formattedData = data.map((item) => ({
           ...item,
           created_at: new Date(item.created_at).toLocaleDateString(),
@@ -105,7 +106,7 @@ export default function AudioManagementPage() {
   }, []);
 
   // Filter audio files based on search and category
-  const applyFilters = (files: AudioFile[], category: AudioCategory, query: string) => {
+  const applyFilters = (files: AudioFile[], category: AudioPageCategory, query: string) => {
     let results = files;
     
     // Apply category filter
@@ -195,7 +196,7 @@ export default function AudioManagementPage() {
   };
   
   // Check if the current category has no files
-  const categoryHasNoFiles = (category: AudioCategory) => {
+  const categoryHasNoFiles = (category: AudioPageCategory) => {
     if (category === "all") {
       return audioFiles.length === 0;
     }
@@ -203,7 +204,7 @@ export default function AudioManagementPage() {
   };
   
   // Get the icon for each category
-  const getCategoryIcon = (category: AudioCategory) => {
+  const getCategoryIcon = (category: AudioPageCategory) => {
     switch (category) {
       case "part_tracks":
         return <ListMusic className="h-16 w-16 text-muted-foreground" />;
@@ -217,7 +218,7 @@ export default function AudioManagementPage() {
   };
   
   // Get display name for each category
-  const getCategoryName = (category: AudioCategory): string => {
+  const getCategoryName = (category: AudioPageCategory): string => {
     switch (category) {
       case "part_tracks":
         return "Part Tracks";
@@ -231,7 +232,7 @@ export default function AudioManagementPage() {
   };
   
   // Handle opening the upload modal
-  const handleOpenUploadModal = (category?: Exclude<AudioCategory, "all">) => {
+  const handleOpenUploadModal = (category?: Exclude<AudioPageCategory, "all">) => {
     if (category) {
       setUploadCategory(category);
     }
@@ -239,7 +240,7 @@ export default function AudioManagementPage() {
   };
 
   // Fix type comparison error by using different comparison logic
-  function renderAudioFiles(category: AudioCategory) {
+  function renderAudioFiles(category: AudioPageCategory) {
     if (loading) {
       return (
         <div className="flex h-[200px] w-full items-center justify-center">
@@ -271,7 +272,7 @@ export default function AudioManagementPage() {
                 : `Upload ${getCategoryName(category).toLowerCase()} for choir members to access`}
             </p>
             <Button 
-              onClick={() => handleOpenUploadModal(category === "all" ? "recordings" : (category as Exclude<AudioCategory, "all">))}
+              onClick={() => handleOpenUploadModal(category === "all" ? "recordings" : (category as Exclude<AudioPageCategory, "all">))}
               className="gap-2"
             >
               <Upload className="h-4 w-4" /> 
@@ -353,7 +354,7 @@ export default function AudioManagementPage() {
 
       {/* Tabs and Search */}
       <div className="flex flex-col gap-4">
-        <Tabs defaultValue="all" value={activeCategory} onValueChange={(val) => setActiveCategory(val as AudioCategory)}>
+        <Tabs defaultValue="all" value={activeCategory} onValueChange={(val) => setActiveCategory(val as AudioPageCategory)}>
           <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center">
             <TabsList className="mb-2 sm:mb-0">
               <TabsTrigger value="all">All</TabsTrigger>
