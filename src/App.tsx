@@ -22,8 +22,6 @@ import AudioManagementPage from "./pages/audio-management/AudioManagementPage";
 import SubmitRecordingPage from "./pages/recordings/SubmitRecordingPage";
 
 // Placeholder pages for other sections
-const RecordingsPage = () => <div className="px-4 py-8">Recording Submissions Page - Coming Soon</div>;
-const DuesPage = () => <div className="px-4 py-8">Pay Dues Page - Coming Soon</div>;
 const HandbookPage = () => <div className="px-4 py-8">Club Handbook Page - Coming Soon</div>;
 const MerchPage = () => <div className="px-4 py-8">Buy Glee Merch Page - Coming Soon</div>;
 const AttendancePage = () => <div className="px-4 py-8">Check Attendance Record Page - Coming Soon</div>;
@@ -55,7 +53,6 @@ const App = () => (
               <Route path="sheet-music/:id" element={<ViewSheetMusicPage />} />
               <Route path="practice" element={<PracticePage />} />
               <Route path="recordings" element={<SubmitRecordingPage />} />
-              <Route path="dues" element={<DuesPage />} />
               <Route path="schedule" element={<SchedulePage />} />
               <Route path="handbook" element={<HandbookPage />} />
               <Route path="merch" element={<MerchPage />} />

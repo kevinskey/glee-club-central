@@ -30,6 +30,7 @@ export default function SubmitRecordingPage() {
         .from('audio_files')
         .select('*')
         .eq('uploaded_by', user.id)
+        .eq('category', 'my_tracks')
         .order('created_at', { ascending: false });
       
       if (error) throw error;
@@ -39,7 +40,6 @@ export default function SubmitRecordingPage() {
         const formattedData = data.map((item: any) => ({
           ...item,
           created_at: new Date(item.created_at).toLocaleDateString(),
-          // Default category to "my_tracks" for these recordings
           category: item.category || "my_tracks"
         }));
         
