@@ -14,8 +14,9 @@ interface SheetMusic {
   arranger?: string;
   voice_part?: string;
   file_url: string;
+  file_path: string;
   created_at: string;
-  user_id: string;
+  uploaded_by: string; // This matches what's in the database
 }
 
 export default function ViewSheetMusicPage() {
