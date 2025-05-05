@@ -48,21 +48,21 @@ export function MediaFileCard({ file }: MediaFileCardProps) {
     <div className="flex flex-col rounded-lg border p-3 md:p-4 hover:shadow-md transition-shadow h-full">
       <div className="flex items-center gap-3 mb-3">
         {getFileIcon()}
-        <h3 className="text-base md:text-lg font-medium line-clamp-1">{file.title}</h3>
+        <h3 className="text-base md:text-lg font-medium line-clamp-1 break-words">{file.title}</h3>
       </div>
       <div className="flex-1">
         {file.description && (
-          <p className="text-xs md:text-sm text-muted-foreground mb-3 line-clamp-2">{file.description}</p>
+          <p className="text-xs md:text-sm text-muted-foreground mb-3 line-clamp-2 break-words">{file.description}</p>
         )}
         <p className="text-xs text-muted-foreground mt-1 mb-3">
           Added {formatDate(file.created_at)}
         </p>
       </div>
-      <div>
+      <div className="w-full">
         <Button 
           variant="default" 
           onClick={handleOpenFile}
-          className="w-full text-xs md:text-sm"
+          className="w-full text-xs md:text-sm truncate"
           size="sm"
         >
           Open File

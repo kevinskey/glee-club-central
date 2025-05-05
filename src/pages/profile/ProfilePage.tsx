@@ -13,6 +13,9 @@ import { useForm } from "react-hook-form";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/components/ui/use-toast";
 
+// Define the valid voice part types
+type VoicePart = "not_specified" | "Soprano1" | "Soprano2" | "Alto1" | "Alto2" | "Tenor" | "Bass";
+
 export default function ProfilePage() {
   const { user, profile } = useAuth();
   const [isEditing, setIsEditing] = useState(false);
@@ -23,7 +26,7 @@ export default function ProfilePage() {
     defaultValues: {
       first_name: profile?.first_name || "",
       last_name: profile?.last_name || "",
-      voice_part: profile?.voice_part || "not_specified",
+      voice_part: (profile?.voice_part as VoicePart) || "not_specified",
     },
   });
 
@@ -33,7 +36,7 @@ export default function ProfilePage() {
       form.reset({
         first_name: profile.first_name || "",
         last_name: profile.last_name || "",
-        voice_part: profile.voice_part || "not_specified",
+        voice_part: (profile.voice_part as VoicePart) || "not_specified",
       });
     }
   }, [profile, form]);
@@ -111,7 +114,7 @@ export default function ProfilePage() {
       form.reset({
         first_name: profile?.first_name || "",
         last_name: profile?.last_name || "",
-        voice_part: profile?.voice_part || "not_specified",
+        voice_part: (profile?.voice_part as VoicePart) || "not_specified",
       });
       setIsEditing(true);
     }
@@ -131,7 +134,7 @@ export default function ProfilePage() {
   return (
     <div className="min-h-screen bg-background">
       <Header />
-      <main className="container py-8">
+      <main className="container py-8 px-4 sm:px-6">
         <div className="mx-auto max-w-3xl">
           <Card className="mb-8">
             <CardHeader className="text-center">
@@ -140,7 +143,7 @@ export default function ProfilePage() {
                   <AvatarFallback>{getUserInitials()}</AvatarFallback>
                 </Avatar>
               </div>
-              <CardTitle className="text-2xl">{getDisplayName()}</CardTitle>
+              <CardTitle className="text-2xl break-words">{getDisplayName()}</CardTitle>
               <CardDescription>
                 {profile?.role === "admin" ? "Administrator" : "Choir Member"}
               </CardDescription>
@@ -206,16 +209,16 @@ export default function ProfilePage() {
                       />
                       <div>
                         <p className="text-sm font-medium">Email</p>
-                        <p className="text-sm text-muted-foreground mt-1">{user?.email || "Not provided"}</p>
+                        <p className="text-sm text-muted-foreground mt-1 break-words">{user?.email || "Not provided"}</p>
                         <p className="text-xs text-muted-foreground mt-1">Email cannot be changed</p>
                       </div>
                     </div>
                   </CardContent>
-                  <CardFooter className="flex justify-between">
-                    <Button variant="outline" onClick={handleEditToggle}>
+                  <CardFooter className="flex flex-col sm:flex-row justify-between gap-2">
+                    <Button variant="outline" onClick={handleEditToggle} className="w-full sm:w-auto">
                       Cancel
                     </Button>
-                    <Button type="submit" className="bg-glee-purple hover:bg-glee-purple/90">
+                    <Button type="submit" className="bg-glee-purple hover:bg-glee-purple/90 w-full sm:w-auto">
                       <Save className="mr-2 h-4 w-4" />
                       Save Changes
                     </Button>
@@ -227,10 +230,10 @@ export default function ProfilePage() {
                 <CardContent className="space-y-6">
                   <div className="space-y-4">
                     <div className="flex items-center gap-3 p-3 border rounded-md">
-                      <User className="h-5 w-5 text-muted-foreground" />
-                      <div>
+                      <User className="h-5 w-5 text-muted-foreground flex-shrink-0" />
+                      <div className="min-w-0 flex-1">
                         <p className="text-sm font-medium">Name</p>
-                        <p className="text-sm text-muted-foreground">
+                        <p className="text-sm text-muted-foreground break-words">
                           {profile?.first_name && profile?.last_name
                             ? `${profile.first_name} ${profile.last_name}`
                             : "Not provided"}
@@ -239,27 +242,27 @@ export default function ProfilePage() {
                     </div>
                     
                     <div className="flex items-center gap-3 p-3 border rounded-md">
-                      <Mail className="h-5 w-5 text-muted-foreground" />
-                      <div>
+                      <Mail className="h-5 w-5 text-muted-foreground flex-shrink-0" />
+                      <div className="min-w-0 flex-1">
                         <p className="text-sm font-medium">Email</p>
-                        <p className="text-sm text-muted-foreground">{user?.email || "Not provided"}</p>
+                        <p className="text-sm text-muted-foreground break-words">{user?.email || "Not provided"}</p>
                       </div>
                     </div>
                     
                     <div className="flex items-center gap-3 p-3 border rounded-md">
-                      <Music className="h-5 w-5 text-muted-foreground" />
-                      <div>
+                      <Music className="h-5 w-5 text-muted-foreground flex-shrink-0" />
+                      <div className="min-w-0 flex-1">
                         <p className="text-sm font-medium">Voice Part</p>
                         <p className="text-sm text-muted-foreground">{getVoicePart()}</p>
                       </div>
                     </div>
                   </div>
                 </CardContent>
-                <CardFooter className="flex justify-between">
-                  <Button variant="outline" onClick={() => window.history.back()}>
+                <CardFooter className="flex flex-col sm:flex-row justify-between gap-2">
+                  <Button variant="outline" onClick={() => window.history.back()} className="w-full sm:w-auto">
                     Back to Dashboard
                   </Button>
-                  <Button onClick={handleEditToggle} className="bg-glee-purple hover:bg-glee-purple/90">
+                  <Button onClick={handleEditToggle} className="bg-glee-purple hover:bg-glee-purple/90 w-full sm:w-auto">
                     <Edit className="mr-2 h-4 w-4" />
                     Edit Profile
                   </Button>
