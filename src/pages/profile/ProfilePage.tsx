@@ -1,26 +1,23 @@
 
 import React, { useState, useEffect } from "react";
-import { useForm } from "react-hook-form";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/contexts/AuthContext";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Button } from "@/components/ui/button";
+import { useForm } from "react-hook-form";
 import {
   Form,
   FormControl,
-  FormDescription,
   FormField,
   FormItem,
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
 import {
   Select,
   SelectContent,
@@ -28,424 +25,507 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { useToast } from "@/hooks/use-toast";
-import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { useAuth } from "@/contexts/AuthContext";
-import { supabase } from "@/integrations/supabase/client";
-import { PageHeader } from "@/components/ui/page-header";
-import { UserCircle, Upload, Shield, AlertCircle } from "lucide-react";
 
-// Define the form schema with Zod
-const formSchema = z.object({
-  first_name: z.string().min(2, "First name must be at least 2 characters."),
-  last_name: z.string().min(2, "Last name must be at least 2 characters."),
-  email: z.string().email("Please enter a valid email address."),
-  phone: z.string().optional(),
-  address: z.string().optional(),
-  school: z.string().optional(),
-  bio: z.string().optional(),
-  voice_part: z.enum(["soprano", "alto", "tenor", "bass", "baritone", "not_specified"]).optional(),
-  role: z.enum(["member", "director", "admin"]).optional(),
+// Define types for the profile data
+type VoicePart = "soprano" | "alto" | "tenor" | "bass" | "baritone" | "";
+type UserRole = "member" | "librarian" | "director" | "admin";
+
+interface Profile {
+  id: string;
+  user_id: string;
+  username?: string;
+  full_name?: string;
+  email?: string;
+  voice_part?: VoicePart;
+  biography?: string;
+  role?: UserRole;
+  avatar_url?: string;
+  updated_at?: string;
+}
+
+// Form schemas
+const profileFormSchema = z.object({
+  username: z.string().min(2, {
+    message: "Username must be at least 2 characters.",
+  }),
+  full_name: z.string().min(2, {
+    message: "Full name must be at least 2 characters.",
+  }),
+  biography: z.string().optional(),
+  voice_part: z.string().optional(),
 });
 
-type ProfileFormValues = z.infer<typeof formSchema>;
+const PasswordChangeSchema = z.object({
+  currentPassword: z.string().min(6, {
+    message: "Current password must be at least 6 characters.",
+  }),
+  newPassword: z.string().min(6, {
+    message: "New password must be at least 6 characters.",
+  }),
+  confirmPassword: z.string().min(6, {
+    message: "Confirm password must be at least 6 characters.",
+  }),
+}).refine((data) => data.newPassword === data.confirmPassword, {
+  message: "Passwords don't match",
+  path: ["confirmPassword"],
+});
 
 export default function ProfilePage() {
+  const { user } = useAuth();
   const { toast } = useToast();
-  const { user, profile } = useAuth();
-  const [isLoading, setIsLoading] = useState(false);
-  const [isUploading, setIsUploading] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [profile, setProfile] = useState<Profile | null>(null);
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
+  const [uploading, setUploading] = useState(false);
 
-  // Get initials for avatar fallback
-  const getInitials = () => {
-    if (profile) {
-      return `${profile.first_name?.[0] || ""}${profile.last_name?.[0] || ""}`;
-    }
-    return "GC"; // Glee Club default
-  };
-
-  useEffect(() => {
-    // Set avatar URL if profile exists and has avatar_url
-    if (profile && profile.avatar_url) {
-      setAvatarUrl(profile.avatar_url);
-    }
-  }, [profile]);
-
-  // Setup form with default values from profile
-  const form = useForm<ProfileFormValues>({
-    resolver: zodResolver(formSchema),
+  // Initialize the profile form
+  const profileForm = useForm<z.infer<typeof profileFormSchema>>({
+    resolver: zodResolver(profileFormSchema),
     defaultValues: {
-      first_name: profile?.first_name || "",
-      last_name: profile?.last_name || "",
-      email: "",
-      phone: "",
-      address: "",
-      school: "",
-      bio: "",
-      voice_part: profile?.voice_part as any || "not_specified",
-      role: profile?.role as any || "member",
+      username: "",
+      full_name: "",
+      biography: "",
+      voice_part: "",
     },
   });
 
-  // Update form values when profile data is available
+  // Initialize the password form
+  const passwordForm = useForm<z.infer<typeof PasswordChangeSchema>>({
+    resolver: zodResolver(PasswordChangeSchema),
+    defaultValues: {
+      currentPassword: "",
+      newPassword: "",
+      confirmPassword: "",
+    },
+  });
+
+  // Fetch user profile on component mount
+  useEffect(() => {
+    if (user) {
+      getProfile();
+    }
+  }, [user]);
+
+  // Update form values when profile data is loaded
   useEffect(() => {
     if (profile) {
-      form.reset({
-        first_name: profile.first_name || "",
-        last_name: profile.last_name || "",
-        email: "",
-        phone: "",
-        address: "",
-        school: "",
-        bio: "",
-        voice_part: profile.voice_part as any || "not_specified",
-        role: profile.role as any || "member",
+      profileForm.reset({
+        username: profile.username || "",
+        full_name: profile.full_name || "",
+        biography: profile.biography || "",
+        voice_part: profile.voice_part || "",
       });
+      
+      // Set avatar URL if available
+      if (profile.avatar_url) {
+        setAvatarUrl(profile.avatar_url);
+      }
     }
-  }, [profile, form]);
+  }, [profile]);
 
-  // Handle form submission
-  const onSubmit = async (data: ProfileFormValues) => {
-    if (!user) {
+  const getProfile = async () => {
+    try {
+      setLoading(true);
+      
+      if (!user) throw new Error("No user");
+
+      const { data, error } = await supabase
+        .from("profiles")
+        .select("*")
+        .eq("user_id", user.id)
+        .single();
+
+      if (error) {
+        throw error;
+      }
+
+      if (data) {
+        setProfile(data as Profile);
+      }
+    } catch (error: any) {
+      console.error("Error loading user data:", error.message);
       toast({
-        title: "Authentication error",
-        description: "You must be logged in to update your profile.",
+        title: "Error loading profile",
+        description: error.message,
         variant: "destructive",
       });
-      return;
+    } finally {
+      setLoading(false);
     }
+  };
 
-    setIsLoading(true);
-
+  // Handle avatar upload
+  const uploadAvatar = async (event: React.ChangeEvent<HTMLInputElement>) => {
     try {
-      // Update profile in database
+      setUploading(true);
+
+      if (!user) throw new Error("No user");
+      if (!event.target.files || event.target.files.length === 0) {
+        throw new Error("You must select an image to upload.");
+      }
+
+      const file = event.target.files[0];
+      const fileExt = file.name.split('.').pop();
+      const filePath = `${user.id}/${Math.random()}.${fileExt}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from('avatars')
+        .upload(filePath, file);
+
+      if (uploadError) {
+        throw uploadError;
+      }
+
+      // Get public URL
+      const { data } = supabase.storage
+        .from('avatars')
+        .getPublicUrl(filePath);
+      
+      const avatarUrl = data.publicUrl;
+
+      // Update profile with new avatar URL
+      const { error: updateError } = await supabase
+        .from('profiles')
+        .update({ avatar_url: avatarUrl })
+        .eq('user_id', user.id);
+
+      if (updateError) {
+        throw updateError;
+      }
+
+      setAvatarUrl(avatarUrl);
+      toast({
+        title: "Avatar updated",
+        description: "Your profile picture has been updated successfully.",
+      });
+
+      // Refresh profile data
+      getProfile();
+    } catch (error: any) {
+      console.error("Error uploading avatar:", error.message);
+      toast({
+        title: "Error uploading avatar",
+        description: error.message,
+        variant: "destructive",
+      });
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  // Handle profile form submission
+  const onProfileSubmit = async (values: z.infer<typeof profileFormSchema>) => {
+    try {
+      setLoading(true);
+      
+      if (!user) throw new Error("No user");
+
       const { error } = await supabase
         .from("profiles")
         .update({
-          first_name: data.first_name,
-          last_name: data.last_name,
-          voice_part: data.voice_part,
+          username: values.username,
+          full_name: values.full_name,
+          biography: values.biography,
+          voice_part: values.voice_part as VoicePart,
           updated_at: new Date().toISOString(),
         })
-        .eq("id", user.id);
+        .eq("user_id", user.id);
 
       if (error) throw error;
 
       toast({
         title: "Profile updated",
-        description: "Your profile has been successfully updated.",
+        description: "Your profile has been updated successfully.",
       });
+      
+      // Refresh profile data
+      getProfile();
     } catch (error: any) {
-      console.error("Error updating profile:", error);
+      console.error("Error updating profile:", error.message);
       toast({
-        title: "Update failed",
-        description: error.message || "An unexpected error occurred",
+        title: "Error updating profile",
+        description: error.message,
         variant: "destructive",
       });
     } finally {
-      setIsLoading(false);
+      setLoading(false);
     }
   };
 
-  // Handle avatar upload
-  const handleAvatarUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+  // Handle password form submission
+  const onPasswordSubmit = async (values: z.infer<typeof PasswordChangeSchema>) => {
     try {
-      if (!event.target.files || event.target.files.length === 0) {
-        throw new Error("You must select an image to upload.");
-      }
+      setLoading(true);
+      
+      if (!user) throw new Error("No user");
 
-      if (!user) {
-        throw new Error("You must be logged in to upload an avatar.");
-      }
+      // Update password logic 
+      // Note: Supabase doesn't have a direct method to update password with old password verification
+      // In a real app, you'd need to verify the current password server-side first
+      
+      const { error } = await supabase.auth.updateUser({
+        password: values.newPassword,
+      });
 
-      setIsUploading(true);
-      const file = event.target.files[0];
-      const fileExt = file.name.split(".").pop();
-      const filePath = `${user.id}/avatar.${fileExt}`;
-
-      // Upload image to storage
-      const { error: uploadError } = await supabase.storage
-        .from("avatars")
-        .upload(filePath, file, { upsert: true });
-
-      if (uploadError) throw uploadError;
-
-      // Get public URL
-      const { data } = supabase.storage.from("avatars").getPublicUrl(filePath);
-      const avatarUrl = data.publicUrl;
-
-      // Update profile with avatar URL
-      const { error: updateError } = await supabase
-        .from("profiles")
-        .update({ updated_at: new Date().toISOString() })
-        .eq("id", user.id);
-
-      if (updateError) throw updateError;
-
-      setAvatarUrl(avatarUrl);
+      if (error) throw error;
 
       toast({
-        title: "Avatar updated",
-        description: "Your profile picture has been updated successfully.",
+        title: "Password updated",
+        description: "Your password has been updated successfully.",
+      });
+      
+      // Reset the form
+      passwordForm.reset({
+        currentPassword: "",
+        newPassword: "",
+        confirmPassword: "",
       });
     } catch (error: any) {
+      console.error("Error updating password:", error.message);
       toast({
-        title: "Upload failed",
-        description: error.message || "An unexpected error occurred",
+        title: "Error updating password",
+        description: error.message,
         variant: "destructive",
       });
     } finally {
-      setIsUploading(false);
+      setLoading(false);
     }
   };
 
-  // Voice part display options
-  const getVoicePartDisplay = (voicePart: string | undefined) => {
-    switch (voicePart) {
-      case "soprano":
-        return "Soprano";
-      case "alto":
-        return "Alto";
-      case "tenor":
-        return "Tenor";
-      case "bass":
-        return "Bass";
-      case "baritone":
-        return "Baritone";
-      default:
-        return "Not Specified";
-    }
+  // Check if user has director/admin privileges
+  const hasAdminPrivileges = () => {
+    return profile?.role === "director" || profile?.role === "admin";
   };
-
-  // Role display and badge
-  const getRoleBadge = (role: string | undefined) => {
-    if (role === "director") {
-      return (
-        <Badge variant="outline" className="ml-2 bg-glee-purple/10 text-glee-purple border-glee-purple">
-          <Shield className="w-3 h-3 mr-1" /> Director
-        </Badge>
-      );
-    } else if (role === "admin") {
-      return (
-        <Badge variant="outline" className="ml-2 bg-amber-50 text-amber-600 border-amber-200">
-          <Shield className="w-3 h-3 mr-1" /> Admin
-        </Badge>
-      );
-    }
-    return (
-      <Badge variant="outline" className="ml-2">
-        Member
-      </Badge>
-    );
-  };
-
-  if (!user) {
-    return (
-      <div className="flex justify-center items-center h-[70vh]">
-        <div className="text-center">
-          <AlertCircle className="mx-auto h-12 w-12 text-muted-foreground" />
-          <h2 className="mt-4 text-lg font-semibold">Authentication Required</h2>
-          <p className="mt-2 text-muted-foreground">Please log in to view your profile.</p>
-        </div>
-      </div>
-    );
-  }
 
   return (
-    <div className="space-y-6">
-      <PageHeader
-        title="My Profile"
-        description="View and manage your personal information"
-        icon={<UserCircle className="h-6 w-6" />}
-      />
-
-      <div className="flex flex-col md:flex-row gap-6">
-        <div className="w-full md:w-1/3 space-y-6">
-          <Card>
-            <CardHeader className="pb-2">
-              <CardTitle>Profile Picture</CardTitle>
-              <CardDescription>Update your profile image</CardDescription>
-            </CardHeader>
-            <CardContent className="flex flex-col items-center justify-center py-6">
-              <Avatar className="h-24 w-24 mb-4">
-                <AvatarImage src={avatarUrl || ""} alt={profile?.first_name} />
-                <AvatarFallback className="text-xl bg-glee-purple text-white">
-                  {getInitials()}
-                </AvatarFallback>
-              </Avatar>
-              
-              <label htmlFor="avatar-upload">
-                <Button 
-                  variant="outline" 
-                  className="cursor-pointer gap-2"
-                  disabled={isUploading}
-                >
-                  <Upload className="h-4 w-4" />
-                  {isUploading ? "Uploading..." : "Upload Picture"}
-                </Button>
-                <input
-                  id="avatar-upload"
-                  type="file"
-                  accept="image/*"
-                  className="hidden"
-                  onChange={handleAvatarUpload}
-                  disabled={isUploading}
-                />
-              </label>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader className="pb-2">
-              <CardTitle>Account Details</CardTitle>
-              <CardDescription>Your membership information</CardDescription>
-            </CardHeader>
-            <CardContent className="pt-2">
-              <div className="space-y-4">
-                <div>
-                  <h3 className="text-sm font-medium leading-none">Voice Part</h3>
-                  <p className="text-sm text-muted-foreground mt-1">
-                    {getVoicePartDisplay(profile?.voice_part)}
-                  </p>
-                </div>
-                <div>
-                  <h3 className="text-sm font-medium leading-none">Role</h3>
-                  <p className="text-sm text-muted-foreground mt-1 flex items-center">
-                    {profile?.role === "director" ? "Director" : 
-                     profile?.role === "admin" ? "Administrator" : "Member"}
-                    {getRoleBadge(profile?.role)}
-                  </p>
-                </div>
-                <div>
-                  <h3 className="text-sm font-medium leading-none">Member Since</h3>
-                  <p className="text-sm text-muted-foreground mt-1">
-                    {profile?.created_at
-                      ? new Date(profile.created_at).toLocaleDateString()
-                      : "Not available"}
-                  </p>
+    <div className="container mx-auto py-6 space-y-8">
+      <div className="flex flex-col gap-4">
+        <h1 className="text-3xl font-bold">My Profile</h1>
+        
+        {/* Profile Overview Card */}
+        <Card>
+          <CardHeader>
+            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
+              {/* Avatar with upload option */}
+              <div className="relative">
+                <Avatar className="w-20 h-20">
+                  <AvatarImage 
+                    src={avatarUrl || "/placeholder.svg"} 
+                    alt="Profile picture" 
+                  />
+                  <AvatarFallback>
+                    {profile?.full_name?.charAt(0) || profile?.username?.charAt(0) || user?.email?.charAt(0) || "U"}
+                  </AvatarFallback>
+                </Avatar>
+                <div className="absolute -bottom-2 -right-2">
+                  <label htmlFor="avatar-upload" className="cursor-pointer">
+                    <div className="bg-primary text-primary-foreground p-1 rounded-full">
+                      <svg 
+                        xmlns="http://www.w3.org/2000/svg" 
+                        width="16" 
+                        height="16" 
+                        viewBox="0 0 24 24" 
+                        fill="none" 
+                        stroke="currentColor" 
+                        strokeWidth="2" 
+                        strokeLinecap="round" 
+                        strokeLinejoin="round"
+                      >
+                        <path d="M12 20h9"></path>
+                        <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path>
+                      </svg>
+                    </div>
+                  </label>
+                  <input 
+                    id="avatar-upload" 
+                    type="file" 
+                    accept="image/*" 
+                    className="sr-only" 
+                    onChange={uploadAvatar}
+                    disabled={uploading} 
+                  />
                 </div>
               </div>
-            </CardContent>
-          </Card>
-        </div>
-
-        <div className="w-full md:w-2/3">
-          <Tabs defaultValue="personal">
-            <TabsList className="mb-4">
-              <TabsTrigger value="personal">Personal Information</TabsTrigger>
-              <TabsTrigger value="choir">Choir Settings</TabsTrigger>
-            </TabsList>
-            
-            <TabsContent value="personal">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Personal Information</CardTitle>
-                  <CardDescription>
-                    Update your personal details here
-                  </CardDescription>
-                </CardHeader>
-                <Form {...form}>
-                  <form onSubmit={form.handleSubmit(onSubmit)}>
-                    <CardContent className="space-y-4">
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <FormField
-                          control={form.control}
-                          name="first_name"
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel>First Name</FormLabel>
-                              <FormControl>
-                                <Input placeholder="First name" {...field} />
-                              </FormControl>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-                        
-                        <FormField
-                          control={form.control}
-                          name="last_name"
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel>Last Name</FormLabel>
-                              <FormControl>
-                                <Input placeholder="Last name" {...field} />
-                              </FormControl>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-                      </div>
-                    </CardContent>
-                    <CardFooter>
-                      <Button type="submit" disabled={isLoading} className="ml-auto">
-                        {isLoading ? "Saving..." : "Save Changes"}
-                      </Button>
-                    </CardFooter>
+              
+              {/* User info */}
+              <div>
+                <h3 className="font-bold text-xl">{profile?.full_name || profile?.username || "User"}</h3>
+                <p className="text-muted-foreground">{profile?.voice_part || "No voice part set"}</p>
+                <p className="text-muted-foreground">{profile?.role?.charAt(0).toUpperCase() + profile?.role?.slice(1) || "Member"}</p>
+              </div>
+            </div>
+          </CardHeader>
+        </Card>
+        
+        {/* Profile Edit Tabs */}
+        <Tabs defaultValue="profile" className="w-full">
+          <TabsList className="grid w-full grid-cols-2">
+            <TabsTrigger value="profile">Profile</TabsTrigger>
+            <TabsTrigger value="security">Security</TabsTrigger>
+          </TabsList>
+          
+          {/* Profile Tab */}
+          <TabsContent value="profile">
+            <Card>
+              <CardHeader>
+                <h3 className="text-lg font-medium">Edit Profile Information</h3>
+              </CardHeader>
+              <CardContent>
+                <Form {...profileForm}>
+                  <form onSubmit={profileForm.handleSubmit(onProfileSubmit)} className="space-y-4">
+                    <FormField
+                      control={profileForm.control}
+                      name="username"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Username</FormLabel>
+                          <FormControl>
+                            <Input placeholder="username" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    
+                    <FormField
+                      control={profileForm.control}
+                      name="full_name"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Full Name</FormLabel>
+                          <FormControl>
+                            <Input placeholder="Full name" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    
+                    <FormField
+                      control={profileForm.control}
+                      name="voice_part"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Voice Part</FormLabel>
+                          <Select 
+                            onValueChange={field.onChange} 
+                            defaultValue={field.value}
+                          >
+                            <FormControl>
+                              <SelectTrigger>
+                                <SelectValue placeholder="Select voice part" />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                              <SelectItem value="">No voice part</SelectItem>
+                              <SelectItem value="soprano">Soprano</SelectItem>
+                              <SelectItem value="alto">Alto</SelectItem>
+                              <SelectItem value="tenor">Tenor</SelectItem>
+                              <SelectItem value="baritone">Baritone</SelectItem>
+                              <SelectItem value="bass">Bass</SelectItem>
+                            </SelectContent>
+                          </Select>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    
+                    <FormField
+                      control={profileForm.control}
+                      name="biography"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>About Me</FormLabel>
+                          <FormControl>
+                            <Input placeholder="A short bio..." {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    
+                    <Button type="submit" disabled={loading}>
+                      {loading ? "Saving..." : "Save Profile"}
+                    </Button>
                   </form>
                 </Form>
-              </Card>
-            </TabsContent>
-            
-            <TabsContent value="choir">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Choir Settings</CardTitle>
-                  <CardDescription>
-                    Update your choir-specific information
-                  </CardDescription>
-                </CardHeader>
-                <Form {...form}>
-                  <form onSubmit={form.handleSubmit(onSubmit)}>
-                    <CardContent className="space-y-4">
-                      <FormField
-                        control={form.control}
-                        name="voice_part"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Voice Part</FormLabel>
-                            <Select 
-                              onValueChange={field.onChange} 
-                              defaultValue={field.value}
-                            >
-                              <FormControl>
-                                <SelectTrigger>
-                                  <SelectValue placeholder="Select your voice part" />
-                                </SelectTrigger>
-                              </FormControl>
-                              <SelectContent>
-                                <SelectItem value="soprano">Soprano</SelectItem>
-                                <SelectItem value="alto">Alto</SelectItem>
-                                <SelectItem value="tenor">Tenor</SelectItem>
-                                <SelectItem value="baritone">Baritone</SelectItem>
-                                <SelectItem value="bass">Bass</SelectItem>
-                                <SelectItem value="not_specified">Not Specified</SelectItem>
-                              </SelectContent>
-                            </Select>
-                            <FormDescription>
-                              Your primary singing voice classification
-                            </FormDescription>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                    </CardContent>
-                    <CardFooter>
-                      <Button type="submit" disabled={isLoading} className="ml-auto">
-                        {isLoading ? "Saving..." : "Save Changes"}
-                      </Button>
-                    </CardFooter>
+              </CardContent>
+            </Card>
+          </TabsContent>
+          
+          {/* Security Tab */}
+          <TabsContent value="security">
+            <Card>
+              <CardHeader>
+                <h3 className="text-lg font-medium">Change Password</h3>
+              </CardHeader>
+              <CardContent>
+                <Form {...passwordForm}>
+                  <form onSubmit={passwordForm.handleSubmit(onPasswordSubmit)} className="space-y-4">
+                    <FormField
+                      control={passwordForm.control}
+                      name="currentPassword"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Current Password</FormLabel>
+                          <FormControl>
+                            <Input 
+                              type="password" 
+                              placeholder="Enter current password" 
+                              {...field} 
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    
+                    <FormField
+                      control={passwordForm.control}
+                      name="newPassword"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>New Password</FormLabel>
+                          <FormControl>
+                            <Input 
+                              type="password" 
+                              placeholder="Enter new password" 
+                              {...field} 
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    
+                    <FormField
+                      control={passwordForm.control}
+                      name="confirmPassword"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Confirm New Password</FormLabel>
+                          <FormControl>
+                            <Input 
+                              type="password" 
+                              placeholder="Confirm new password" 
+                              {...field} 
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    
+                    <Button type="submit" disabled={loading}>
+                      {loading ? "Updating..." : "Update Password"}
+                    </Button>
                   </form>
                 </Form>
-              </Card>
-            </TabsContent>
-          </Tabs>
-        </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+        </Tabs>
       </div>
     </div>
   );

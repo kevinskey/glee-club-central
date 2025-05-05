@@ -37,7 +37,7 @@ export const PDFDocument = ({
     // Add parameters optimized for score reading
     if (isMobile) {
       // Mobile optimization: fit width for score reading
-      viewerUrl += "toolbar=0&navpanes=0&view=FitH&scrollbar=1";
+      viewerUrl += "toolbar=0&navpanes=0&view=FitH&scrollbar=0";
     } else {
       // Desktop: Optimize for score reading
       viewerUrl += "toolbar=0&navpanes=1&view=FitH&scrollbar=1";
@@ -82,12 +82,12 @@ export const PDFDocument = ({
         style={{ 
           transform: `scale(${zoom / 100})`,
           transformOrigin: 'top center',
-          width: `${100 / (zoom / 100)}%`,
-          height: `${100 / (zoom / 100)}%`,
           position: 'absolute',
           top: 0,
           left: '50%',
           transform: `translateX(-50%) scale(${zoom / 100})`,
+          width: `${100 / (zoom / 100)}%`,
+          height: `${100 / (zoom / 100)}%`
         }}
         onLoad={onLoad}
         onError={onError}

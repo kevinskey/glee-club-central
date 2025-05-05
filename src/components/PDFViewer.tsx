@@ -140,30 +140,9 @@ export const PDFViewer = ({ url, title, sheetMusicId }: PDFViewerProps) => {
   
   return (
     <div className="relative flex flex-col w-full rounded-lg border border-border overflow-hidden">
-      {/* Desktop Controls */}
-      {!isMobile && (
-        <PDFControls
-          currentPage={currentPage}
-          totalPages={totalPages}
-          onPrevPage={handlePrevPage}
-          onNextPage={handleNextPage}
-          onZoomIn={handleZoomIn}
-          onZoomOut={handleZoomOut}
-          onDownload={() => window.open(url, "_blank")}
-          showAnnotations={showAnnotations}
-          toggleAnnotations={toggleAnnotations}
-          isSetlistOpen={isSetlistOpen}
-          toggleSetlist={toggleSetlist}
-          url={url}
-          hasAnnotationSupport={!!sheetMusicId}
-          user={user}
-        />
-      )}
-      
-      {/* ForScore-style controls - Annotations at the top for mobile */}
+      {/* ForScore-style controls - All controls at the top for mobile */}
       {isMobile && (
         <div className="sticky top-0 z-30 w-full">
-          {/* Mobile main controls */}
           <PDFMobileControls
             user={user}
             hasAnnotationSupport={!!sheetMusicId}
@@ -180,8 +159,8 @@ export const PDFViewer = ({ url, title, sheetMusicId }: PDFViewerProps) => {
             url={url}
           />
           
-          {/* Annotation toolbar at the top for mobile */}
-          {isMobile && showAnnotations && (
+          {/* Annotation toolbar at the top for mobile in ForScore style */}
+          {showAnnotations && (
             <PDFAnnotationManager
               showAnnotations={showAnnotations}
               containerRef={containerRef}
@@ -197,19 +176,39 @@ export const PDFViewer = ({ url, title, sheetMusicId }: PDFViewerProps) => {
         </div>
       )}
       
-      {/* Desktop Annotation Manager */}
+      {/* Desktop Controls */}
       {!isMobile && (
-        <PDFAnnotationManager
-          showAnnotations={showAnnotations}
-          containerRef={containerRef}
-          canvasWidth={canvasWidth}
-          canvasHeight={canvasHeight}
-          zoom={zoom}
-          user={user}
-          sheetMusicId={sheetMusicId}
-          annotations={annotations}
-          setAnnotations={setAnnotations}
-        />
+        <>
+          <PDFControls
+            currentPage={currentPage}
+            totalPages={totalPages}
+            onPrevPage={handlePrevPage}
+            onNextPage={handleNextPage}
+            onZoomIn={handleZoomIn}
+            onZoomOut={handleZoomOut}
+            onDownload={() => window.open(url, "_blank")}
+            showAnnotations={showAnnotations}
+            toggleAnnotations={toggleAnnotations}
+            isSetlistOpen={isSetlistOpen}
+            toggleSetlist={toggleSetlist}
+            url={url}
+            hasAnnotationSupport={!!sheetMusicId}
+            user={user}
+          />
+          
+          {/* Desktop Annotation Manager */}
+          <PDFAnnotationManager
+            showAnnotations={showAnnotations}
+            containerRef={containerRef}
+            canvasWidth={canvasWidth}
+            canvasHeight={canvasHeight}
+            zoom={zoom}
+            user={user}
+            sheetMusicId={sheetMusicId}
+            annotations={annotations}
+            setAnnotations={setAnnotations}
+          />
+        </>
       )}
       
       {/* PDF Document Container */}
@@ -217,7 +216,7 @@ export const PDFViewer = ({ url, title, sheetMusicId }: PDFViewerProps) => {
         ref={containerRef} 
         className="relative w-full flex justify-center bg-gray-100 overflow-hidden" 
         style={{ 
-          height: isMobile ? "calc(100vh - 250px)" : "70vh",
+          height: isMobile ? "calc(100vh - 180px)" : "70vh",
           position: "relative"
         }}
       >

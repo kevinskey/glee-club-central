@@ -36,34 +36,8 @@ export const PDFMobileControls = ({
 }: PDFMobileControlsProps) => {
   return (
     <div className="flex flex-col gap-1 w-full max-w-full bg-background/95 shadow-sm z-30">
-      {/* Mobile top controls */}
-      {user && (
-        <div className="flex justify-center gap-2 p-2 border-b w-full overflow-x-auto">
-          {hasAnnotationSupport && (
-            <Button
-              variant={showAnnotations ? "default" : "outline"}
-              size="sm"
-              onClick={toggleAnnotations}
-              className={`flex items-center gap-1 ${showAnnotations ? "bg-glee-purple hover:bg-glee-purple/90 text-white" : ""} min-w-0 flex-shrink-0`}
-            >
-              <Pen className="h-4 w-4 flex-shrink-0" />
-              <span className="truncate max-w-[80px]">{showAnnotations ? "Hide Notes" : "Add Notes"}</span>
-            </Button>
-          )}
-          <Button
-            variant={isSetlistOpen ? "default" : "outline"}
-            size="sm"
-            onClick={toggleSetlist}
-            className={`flex items-center gap-1 ${isSetlistOpen ? "bg-glee-purple hover:bg-glee-purple/90 text-white" : ""} min-w-0 flex-shrink-0`}
-          >
-            <ListMusic className="h-4 w-4 flex-shrink-0" />
-            <span className="truncate max-w-[60px]">Setlist</span>
-          </Button>
-        </div>
-      )}
-      
-      {/* Page navigation and zoom controls */}
-      <div className="flex justify-between items-center p-2 bg-background/95 border-b w-full">
+      {/* Mobile top controls - ForScore style */}
+      <div className="flex justify-between items-center p-2 border-b w-full">
         {/* Page navigation controls */}
         <div className="flex items-center gap-1">
           <Button
@@ -88,6 +62,32 @@ export const PDFMobileControls = ({
             <ArrowRight className="h-4 w-4" />
           </Button>
         </div>
+        
+        {/* Tools controls */}
+        {user && (
+          <div className="flex items-center gap-1 overflow-x-auto hide-scrollbar">
+            {hasAnnotationSupport && (
+              <Button
+                variant={showAnnotations ? "default" : "outline"}
+                size="sm"
+                onClick={toggleAnnotations}
+                className={`h-8 px-3 ${showAnnotations ? "bg-glee-purple hover:bg-glee-purple/90 text-white" : ""} flex-shrink-0`}
+              >
+                <Pen className="h-4 w-4 mr-1" />
+                <span className="text-xs">{showAnnotations ? "Notes" : "Notes"}</span>
+              </Button>
+            )}
+            <Button
+              variant={isSetlistOpen ? "default" : "outline"}
+              size="sm"
+              onClick={toggleSetlist}
+              className={`h-8 px-3 ${isSetlistOpen ? "bg-glee-purple hover:bg-glee-purple/90 text-white" : ""} flex-shrink-0`}
+            >
+              <ListMusic className="h-4 w-4 mr-1" />
+              <span className="text-xs">Setlist</span>
+            </Button>
+          </div>
+        )}
         
         {/* Zoom controls */}
         <div className="flex items-center gap-1">
