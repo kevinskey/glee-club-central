@@ -68,7 +68,7 @@ export const PDFDocument = ({
   }
 
   return (
-    <div className="relative w-full h-full overflow-auto flex justify-center">
+    <div className="relative w-full h-full flex justify-center overflow-hidden">
       {isLoading && (
         <div className="absolute inset-0 flex items-center justify-center bg-background/80 z-30">
           <Loader2 className="h-8 w-8 animate-spin text-primary" />
@@ -78,16 +78,21 @@ export const PDFDocument = ({
       <iframe 
         ref={iframeRef}
         src={getPdfViewerUrl()}
-        className="w-full h-full max-w-3xl mx-auto" 
+        className="w-full h-full border-0" 
         style={{ 
           transform: `scale(${zoom / 100})`,
           transformOrigin: 'top center',
           width: `${100 / (zoom / 100)}%`,
-          height: `${100 / (zoom / 100)}%`
+          height: `${100 / (zoom / 100)}%`,
+          position: 'absolute',
+          top: 0,
+          left: '50%',
+          transform: `translateX(-50%) scale(${zoom / 100})`,
         }}
         onLoad={onLoad}
         onError={onError}
         title={title}
+        frameBorder="0"
       />
       
       {children}

@@ -96,7 +96,7 @@ export const PDFAnnotationManager = ({
   };
 
   return (
-    <div className="annotation-manager-container">
+    <div className="annotation-manager-container w-full">
       <PDFAnnotationToolbar
         isOpen={showAnnotations}
         activeTool={activeTool}

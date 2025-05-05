@@ -3,11 +3,11 @@ import React, { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { PageHeader } from "@/components/ui/page-header";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Button } from "@/components/ui/button";
 import {
   Form,
   FormControl,
+  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -17,15 +17,10 @@ import {
   Card,
   CardContent,
   CardDescription,
+  CardFooter,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import {
-  Tabs,
-  TabsContent,
-  TabsList,
-  TabsTrigger,
-} from "@/components/ui/tabs";
 import {
   Select,
   SelectContent,
@@ -33,484 +28,425 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
-import { supabase } from "@/integrations/supabase/client";
+import { Badge } from "@/components/ui/badge";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useAuth } from "@/contexts/AuthContext";
-import { User } from "@supabase/supabase-js";
-import { UserCircle2, ShieldCheck, Settings } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { PageHeader } from "@/components/ui/page-header";
+import { UserCircle, Upload, Shield, AlertCircle } from "lucide-react";
 
-// Updated profile schema with optional fields and voice part
-const profileSchema = z.object({
-  first_name: z.string().min(1, "First name is required"),
-  last_name: z.string().min(1, "Last name is required"),
-  voice_part: z.string().optional(),
-  email: z.string().email("Invalid email").optional(),
+// Define the form schema with Zod
+const formSchema = z.object({
+  first_name: z.string().min(2, "First name must be at least 2 characters."),
+  last_name: z.string().min(2, "Last name must be at least 2 characters."),
+  email: z.string().email("Please enter a valid email address."),
   phone: z.string().optional(),
   address: z.string().optional(),
   school: z.string().optional(),
   bio: z.string().optional(),
+  voice_part: z.enum(["soprano", "alto", "tenor", "bass", "baritone", "not_specified"]).optional(),
+  role: z.enum(["member", "director", "admin"]).optional(),
 });
 
-type ProfileFormValues = z.infer<typeof profileSchema>;
-
-interface Profile {
-  id: string;
-  created_at: string;
-  updated_at: string;
-  first_name: string;
-  last_name: string;
-  voice_part: string;
-  email?: string;
-  phone?: string;
-  address?: string;
-  school?: string;
-  bio?: string;
-  full_name?: string;
-  avatar_url?: string;
-  role: string;
-}
+type ProfileFormValues = z.infer<typeof formSchema>;
 
 export default function ProfilePage() {
   const { toast } = useToast();
-  const { user, profile: authProfile, refreshProfile } = useAuth();
-  const [avatar, setAvatar] = useState<File | null>(null);
-  const [uploading, setUploading] = useState(false);
-  const [loading, setLoading] = useState(false);
+  const { user, profile } = useAuth();
+  const [isLoading, setIsLoading] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
 
-  // Create a form with default values
+  // Get initials for avatar fallback
+  const getInitials = () => {
+    if (profile) {
+      return `${profile.first_name?.[0] || ""}${profile.last_name?.[0] || ""}`;
+    }
+    return "GC"; // Glee Club default
+  };
+
+  useEffect(() => {
+    // Set avatar URL if profile exists and has avatar_url
+    if (profile && profile.avatar_url) {
+      setAvatarUrl(profile.avatar_url);
+    }
+  }, [profile]);
+
+  // Setup form with default values from profile
   const form = useForm<ProfileFormValues>({
-    resolver: zodResolver(profileSchema),
+    resolver: zodResolver(formSchema),
     defaultValues: {
-      first_name: "",
-      last_name: "",
-      voice_part: "",
+      first_name: profile?.first_name || "",
+      last_name: profile?.last_name || "",
       email: "",
       phone: "",
       address: "",
       school: "",
       bio: "",
+      voice_part: profile?.voice_part as any || "not_specified",
+      role: profile?.role as any || "member",
     },
   });
 
-  // Initialize form with user data
+  // Update form values when profile data is available
   useEffect(() => {
-    if (authProfile) {
-      // Set form values when profile data is available
+    if (profile) {
       form.reset({
-        first_name: authProfile.first_name || "",
-        last_name: authProfile.last_name || "",
-        voice_part: authProfile.voice_part || "",
-        email: authProfile.email || "",
-        phone: authProfile.phone || "",
-        address: authProfile.address || "",
-        school: authProfile.school || "",
-        bio: authProfile.bio || "",
+        first_name: profile.first_name || "",
+        last_name: profile.last_name || "",
+        email: "",
+        phone: "",
+        address: "",
+        school: "",
+        bio: "",
+        voice_part: profile.voice_part as any || "not_specified",
+        role: profile.role as any || "member",
       });
     }
-  }, [authProfile, form]);
+  }, [profile, form]);
 
-  // Function to handle form submission
-  const onSubmit = async (values: ProfileFormValues) => {
-    setLoading(true);
+  // Handle form submission
+  const onSubmit = async (data: ProfileFormValues) => {
+    if (!user) {
+      toast({
+        title: "Authentication error",
+        description: "You must be logged in to update your profile.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsLoading(true);
+
     try {
-      if (!user) {
-        throw new Error("No user found");
-      }
-
-      // Update user profile in the database
+      // Update profile in database
       const { error } = await supabase
         .from("profiles")
         .update({
-          first_name: values.first_name,
-          last_name: values.last_name,
-          voice_part: values.voice_part,
-          email: values.email,
-          phone: values.phone,
-          address: values.address,
-          school: values.school,
-          bio: values.bio,
+          first_name: data.first_name,
+          last_name: data.last_name,
+          voice_part: data.voice_part,
           updated_at: new Date().toISOString(),
         })
         .eq("id", user.id);
 
       if (error) throw error;
 
-      // Upload avatar if selected
-      if (avatar) {
-        await uploadAvatar(user);
-      }
-
-      // Refresh profile data
-      await refreshProfile();
-
       toast({
         title: "Profile updated",
-        description: "Your profile has been updated successfully.",
+        description: "Your profile has been successfully updated.",
       });
     } catch (error: any) {
       console.error("Error updating profile:", error);
       toast({
-        title: "Error updating profile",
-        description: error.message || "An error occurred while updating your profile.",
+        title: "Update failed",
+        description: error.message || "An unexpected error occurred",
         variant: "destructive",
       });
     } finally {
-      setLoading(false);
+      setIsLoading(false);
     }
   };
 
-  // Function to handle avatar upload
-  const uploadAvatar = async (user: User) => {
+  // Handle avatar upload
+  const handleAvatarUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     try {
-      setUploading(true);
+      if (!event.target.files || event.target.files.length === 0) {
+        throw new Error("You must select an image to upload.");
+      }
 
-      if (!avatar) return;
+      if (!user) {
+        throw new Error("You must be logged in to upload an avatar.");
+      }
 
-      // Upload the avatar image
-      const fileExt = avatar.name.split(".").pop();
-      const fileName = `${user.id}-${Math.random()}.${fileExt}`;
-      const filePath = `avatars/${fileName}`;
+      setIsUploading(true);
+      const file = event.target.files[0];
+      const fileExt = file.name.split(".").pop();
+      const filePath = `${user.id}/avatar.${fileExt}`;
 
-      // Upload to storage
+      // Upload image to storage
       const { error: uploadError } = await supabase.storage
         .from("avatars")
-        .upload(filePath, avatar);
+        .upload(filePath, file, { upsert: true });
 
       if (uploadError) throw uploadError;
 
-      // Get the public URL
-      const { data: urlData } = supabase.storage
-        .from("avatars")
-        .getPublicUrl(filePath);
+      // Get public URL
+      const { data } = supabase.storage.from("avatars").getPublicUrl(filePath);
+      const avatarUrl = data.publicUrl;
 
       // Update profile with avatar URL
       const { error: updateError } = await supabase
         .from("profiles")
-        .update({
-          avatar_url: urlData.publicUrl,
-        })
+        .update({ updated_at: new Date().toISOString() })
         .eq("id", user.id);
 
       if (updateError) throw updateError;
 
-      setAvatar(null);
-    } catch (error: any) {
-      console.error("Error uploading avatar:", error);
+      setAvatarUrl(avatarUrl);
+
       toast({
-        title: "Error uploading avatar",
-        description: error.message || "An error occurred while uploading your avatar.",
+        title: "Avatar updated",
+        description: "Your profile picture has been updated successfully.",
+      });
+    } catch (error: any) {
+      toast({
+        title: "Upload failed",
+        description: error.message || "An unexpected error occurred",
         variant: "destructive",
       });
     } finally {
-      setUploading(false);
+      setIsUploading(false);
     }
   };
 
-  const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files[0]) {
-      setAvatar(e.target.files[0]);
+  // Voice part display options
+  const getVoicePartDisplay = (voicePart: string | undefined) => {
+    switch (voicePart) {
+      case "soprano":
+        return "Soprano";
+      case "alto":
+        return "Alto";
+      case "tenor":
+        return "Tenor";
+      case "bass":
+        return "Bass";
+      case "baritone":
+        return "Baritone";
+      default:
+        return "Not Specified";
     }
   };
+
+  // Role display and badge
+  const getRoleBadge = (role: string | undefined) => {
+    if (role === "director") {
+      return (
+        <Badge variant="outline" className="ml-2 bg-glee-purple/10 text-glee-purple border-glee-purple">
+          <Shield className="w-3 h-3 mr-1" /> Director
+        </Badge>
+      );
+    } else if (role === "admin") {
+      return (
+        <Badge variant="outline" className="ml-2 bg-amber-50 text-amber-600 border-amber-200">
+          <Shield className="w-3 h-3 mr-1" /> Admin
+        </Badge>
+      );
+    }
+    return (
+      <Badge variant="outline" className="ml-2">
+        Member
+      </Badge>
+    );
+  };
+
+  if (!user) {
+    return (
+      <div className="flex justify-center items-center h-[70vh]">
+        <div className="text-center">
+          <AlertCircle className="mx-auto h-12 w-12 text-muted-foreground" />
+          <h2 className="mt-4 text-lg font-semibold">Authentication Required</h2>
+          <p className="mt-2 text-muted-foreground">Please log in to view your profile.</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
       <PageHeader
         title="My Profile"
-        description="Manage your personal information and account settings"
-        icon={<UserCircle2 className="h-6 w-6" />}
+        description="View and manage your personal information"
+        icon={<UserCircle className="h-6 w-6" />}
       />
 
-      <Tabs defaultValue="account">
-        <TabsList className="mb-4">
-          <TabsTrigger value="account" className="flex items-center gap-2">
-            <UserCircle2 className="h-4 w-4" /> Account
-          </TabsTrigger>
-          <TabsTrigger value="permissions" className="flex items-center gap-2">
-            <ShieldCheck className="h-4 w-4" /> Permissions
-          </TabsTrigger>
-          <TabsTrigger value="settings" className="flex items-center gap-2">
-            <Settings className="h-4 w-4" /> Settings
-          </TabsTrigger>
-        </TabsList>
-        
-        <TabsContent value="account">
-          <div className="grid gap-6 md:grid-cols-2">
-            {/* Profile Information Card */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Profile Information</CardTitle>
-                <CardDescription>
-                  Update your personal information
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
+      <div className="flex flex-col md:flex-row gap-6">
+        <div className="w-full md:w-1/3 space-y-6">
+          <Card>
+            <CardHeader className="pb-2">
+              <CardTitle>Profile Picture</CardTitle>
+              <CardDescription>Update your profile image</CardDescription>
+            </CardHeader>
+            <CardContent className="flex flex-col items-center justify-center py-6">
+              <Avatar className="h-24 w-24 mb-4">
+                <AvatarImage src={avatarUrl || ""} alt={profile?.first_name} />
+                <AvatarFallback className="text-xl bg-glee-purple text-white">
+                  {getInitials()}
+                </AvatarFallback>
+              </Avatar>
+              
+              <label htmlFor="avatar-upload">
+                <Button 
+                  variant="outline" 
+                  className="cursor-pointer gap-2"
+                  disabled={isUploading}
+                >
+                  <Upload className="h-4 w-4" />
+                  {isUploading ? "Uploading..." : "Upload Picture"}
+                </Button>
+                <input
+                  id="avatar-upload"
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={handleAvatarUpload}
+                  disabled={isUploading}
+                />
+              </label>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader className="pb-2">
+              <CardTitle>Account Details</CardTitle>
+              <CardDescription>Your membership information</CardDescription>
+            </CardHeader>
+            <CardContent className="pt-2">
+              <div className="space-y-4">
+                <div>
+                  <h3 className="text-sm font-medium leading-none">Voice Part</h3>
+                  <p className="text-sm text-muted-foreground mt-1">
+                    {getVoicePartDisplay(profile?.voice_part)}
+                  </p>
+                </div>
+                <div>
+                  <h3 className="text-sm font-medium leading-none">Role</h3>
+                  <p className="text-sm text-muted-foreground mt-1 flex items-center">
+                    {profile?.role === "director" ? "Director" : 
+                     profile?.role === "admin" ? "Administrator" : "Member"}
+                    {getRoleBadge(profile?.role)}
+                  </p>
+                </div>
+                <div>
+                  <h3 className="text-sm font-medium leading-none">Member Since</h3>
+                  <p className="text-sm text-muted-foreground mt-1">
+                    {profile?.created_at
+                      ? new Date(profile.created_at).toLocaleDateString()
+                      : "Not available"}
+                  </p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        <div className="w-full md:w-2/3">
+          <Tabs defaultValue="personal">
+            <TabsList className="mb-4">
+              <TabsTrigger value="personal">Personal Information</TabsTrigger>
+              <TabsTrigger value="choir">Choir Settings</TabsTrigger>
+            </TabsList>
+            
+            <TabsContent value="personal">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Personal Information</CardTitle>
+                  <CardDescription>
+                    Update your personal details here
+                  </CardDescription>
+                </CardHeader>
                 <Form {...form}>
-                  <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-                    <div className="flex flex-col items-center gap-4 mb-6">
-                      <Avatar className="h-24 w-24">
-                        <AvatarImage src={authProfile?.avatar_url || ""} />
-                        <AvatarFallback>
-                          {authProfile?.first_name?.[0]}{authProfile?.last_name?.[0]}
-                        </AvatarFallback>
-                      </Avatar>
-                      <div>
-                        <Input
-                          id="avatar"
-                          type="file"
-                          accept="image/*"
-                          onChange={handleAvatarChange}
+                  <form onSubmit={form.handleSubmit(onSubmit)}>
+                    <CardContent className="space-y-4">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <FormField
+                          control={form.control}
+                          name="first_name"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>First Name</FormLabel>
+                              <FormControl>
+                                <Input placeholder="First name" {...field} />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
                         />
-                        {avatar && (
-                          <p className="mt-2 text-sm">{avatar.name}</p>
-                        )}
+                        
+                        <FormField
+                          control={form.control}
+                          name="last_name"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Last Name</FormLabel>
+                              <FormControl>
+                                <Input placeholder="Last name" {...field} />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
                       </div>
-                    </div>
-
-                    <div className="grid gap-4 md:grid-cols-2">
-                      <FormField
-                        control={form.control}
-                        name="first_name"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>First Name</FormLabel>
-                            <FormControl>
-                              <Input {...field} />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                      <FormField
-                        control={form.control}
-                        name="last_name"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Last Name</FormLabel>
-                            <FormControl>
-                              <Input {...field} />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                    </div>
-
-                    <FormField
-                      control={form.control}
-                      name="voice_part"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Voice Part</FormLabel>
-                          <Select
-                            onValueChange={field.onChange}
-                            defaultValue={field.value}
-                            value={field.value}
-                          >
-                            <FormControl>
-                              <SelectTrigger>
-                                <SelectValue placeholder="Select voice part" />
-                              </SelectTrigger>
-                            </FormControl>
-                            <SelectContent>
-                              <SelectItem value="soprano">Soprano</SelectItem>
-                              <SelectItem value="alto">Alto</SelectItem>
-                              <SelectItem value="tenor">Tenor</SelectItem>
-                              <SelectItem value="bass">Bass</SelectItem>
-                              <SelectItem value="not_specified">Not specified</SelectItem>
-                            </SelectContent>
-                          </Select>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-
-                    <FormField
-                      control={form.control}
-                      name="email"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Email</FormLabel>
-                          <FormControl>
-                            <Input {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-
-                    <FormField
-                      control={form.control}
-                      name="phone"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Phone</FormLabel>
-                          <FormControl>
-                            <Input {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-
-                    <Button type="submit" className="w-full" disabled={loading || uploading}>
-                      {loading || uploading ? "Saving..." : "Save Changes"}
-                    </Button>
+                    </CardContent>
+                    <CardFooter>
+                      <Button type="submit" disabled={isLoading} className="ml-auto">
+                        {isLoading ? "Saving..." : "Save Changes"}
+                      </Button>
+                    </CardFooter>
                   </form>
                 </Form>
-              </CardContent>
-            </Card>
-
-            {/* Additional Information Card */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Additional Information</CardTitle>
-                <CardDescription>
-                  Provide additional details for better choir management
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
+              </Card>
+            </TabsContent>
+            
+            <TabsContent value="choir">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Choir Settings</CardTitle>
+                  <CardDescription>
+                    Update your choir-specific information
+                  </CardDescription>
+                </CardHeader>
                 <Form {...form}>
-                  <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-                    <FormField
-                      control={form.control}
-                      name="address"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Address</FormLabel>
-                          <FormControl>
-                            <Textarea {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-
-                    <FormField
-                      control={form.control}
-                      name="school"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>School/University</FormLabel>
-                          <FormControl>
-                            <Input {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-
-                    <FormField
-                      control={form.control}
-                      name="bio"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Bio</FormLabel>
-                          <FormControl>
-                            <Textarea 
-                              {...field} 
-                              placeholder="Tell us a bit about yourself, your musical experience, etc."
-                              className="min-h-[100px]"
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-
-                    <Button type="submit" className="w-full" disabled={loading || uploading}>
-                      {loading || uploading ? "Saving..." : "Save Changes"}
-                    </Button>
+                  <form onSubmit={form.handleSubmit(onSubmit)}>
+                    <CardContent className="space-y-4">
+                      <FormField
+                        control={form.control}
+                        name="voice_part"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Voice Part</FormLabel>
+                            <Select 
+                              onValueChange={field.onChange} 
+                              defaultValue={field.value}
+                            >
+                              <FormControl>
+                                <SelectTrigger>
+                                  <SelectValue placeholder="Select your voice part" />
+                                </SelectTrigger>
+                              </FormControl>
+                              <SelectContent>
+                                <SelectItem value="soprano">Soprano</SelectItem>
+                                <SelectItem value="alto">Alto</SelectItem>
+                                <SelectItem value="tenor">Tenor</SelectItem>
+                                <SelectItem value="baritone">Baritone</SelectItem>
+                                <SelectItem value="bass">Bass</SelectItem>
+                                <SelectItem value="not_specified">Not Specified</SelectItem>
+                              </SelectContent>
+                            </Select>
+                            <FormDescription>
+                              Your primary singing voice classification
+                            </FormDescription>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </CardContent>
+                    <CardFooter>
+                      <Button type="submit" disabled={isLoading} className="ml-auto">
+                        {isLoading ? "Saving..." : "Save Changes"}
+                      </Button>
+                    </CardFooter>
                   </form>
                 </Form>
-              </CardContent>
-            </Card>
-          </div>
-        </TabsContent>
-        
-        <TabsContent value="permissions">
-          <Card>
-            <CardHeader>
-              <CardTitle>Permissions</CardTitle>
-              <CardDescription>
-                Your account role and permissions in the choir application
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                <div className="flex items-center gap-4">
-                  <div className="bg-primary/10 p-3 rounded-full">
-                    <ShieldCheck className="h-6 w-6 text-primary" />
-                  </div>
-                  <div>
-                    <h3 className="font-medium">Current Role</h3>
-                    <p className="text-sm text-muted-foreground">
-                      {authProfile?.role === "admin" ? "Administrator" : 
-                       authProfile?.role === "director" ? "Choir Director" : "Choir Member"}
-                    </p>
-                  </div>
-                </div>
-                
-                <div className="border-t pt-4">
-                  <h3 className="font-medium mb-2">Your Permissions</h3>
-                  <ul className="space-y-2 text-sm">
-                    <li className="flex items-center gap-2">
-                      <div className="h-2 w-2 rounded-full bg-green-500" />
-                      <span>Access to sheet music</span>
-                    </li>
-                    <li className="flex items-center gap-2">
-                      <div className="h-2 w-2 rounded-full bg-green-500" />
-                      <span>Access to audio recordings</span>
-                    </li>
-                    <li className="flex items-center gap-2">
-                      <div className="h-2 w-2 rounded-full bg-green-500" />
-                      <span>Ability to create setlists</span>
-                    </li>
-                    {(authProfile?.role === "admin" || authProfile?.role === "director") && (
-                      <>
-                        <li className="flex items-center gap-2">
-                          <div className="h-2 w-2 rounded-full bg-green-500" />
-                          <span>Upload and manage sheet music</span>
-                        </li>
-                        <li className="flex items-center gap-2">
-                          <div className="h-2 w-2 rounded-full bg-green-500" />
-                          <span>Upload and manage audio recordings</span>
-                        </li>
-                      </>
-                    )}
-                    {authProfile?.role === "admin" && (
-                      <li className="flex items-center gap-2">
-                        <div className="h-2 w-2 rounded-full bg-green-500" />
-                        <span>Manage user accounts and permissions</span>
-                      </li>
-                    )}
-                  </ul>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-        
-        <TabsContent value="settings">
-          <Card>
-            <CardHeader>
-              <CardTitle>App Settings</CardTitle>
-              <CardDescription>
-                Manage your application preferences
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                <p className="text-sm text-muted-foreground">
-                  App settings will be available in a future update. Stay tuned!
-                </p>
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-      </Tabs>
+              </Card>
+            </TabsContent>
+          </Tabs>
+        </div>
+      </div>
     </div>
   );
 }

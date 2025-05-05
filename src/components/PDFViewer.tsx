@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
@@ -216,8 +215,11 @@ export const PDFViewer = ({ url, title, sheetMusicId }: PDFViewerProps) => {
       {/* PDF Document Container */}
       <div 
         ref={containerRef} 
-        className="relative w-full flex justify-center" 
-        style={{ height: isMobile ? "calc(100vh - 250px)" : "70vh" }}
+        className="relative w-full flex justify-center bg-gray-100 overflow-hidden" 
+        style={{ 
+          height: isMobile ? "calc(100vh - 250px)" : "70vh",
+          position: "relative"
+        }}
       >
         <PDFDocument
           url={url}
