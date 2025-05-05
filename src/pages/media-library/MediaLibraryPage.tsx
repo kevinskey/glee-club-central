@@ -1,22 +1,16 @@
 
 import React, { useEffect, useState } from "react";
 import { PageHeader } from "@/components/ui/page-header";
-import { FileText, FolderOpen, Loader2, Upload } from "lucide-react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { FolderOpen, Loader2, Upload } from "lucide-react";
+import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { UploadMediaModal } from "@/components/UploadMediaModal";
-
-interface MediaFile {
-  id: string;
-  title: string;
-  description: string | null;
-  file_url: string;
-  file_type: string;
-  created_at: string;
-}
+import { MediaFile } from "@/types/media";
+import { MediaFilesSection } from "@/components/media/MediaFilesSection";
+import { getMediaTypeLabel } from "@/utils/mediaUtils";
 
 export default function MediaLibraryPage() {
   const { profile } = useAuth();
@@ -62,11 +56,6 @@ export default function MediaLibraryPage() {
     fetchMediaLibrary();
   }, []);
 
-  // Handle opening media
-  const handleOpenMedia = (file: MediaFile) => {
-    window.open(file.file_url, "_blank");
-  };
-
   // Check if user is an admin
   const isAdmin = profile?.role === "admin";
 
@@ -74,7 +63,7 @@ export default function MediaLibraryPage() {
     <div>
       <PageHeader
         title="Media Library"
-        description="Browse and download media files"
+        description="Browse and download media files by category"
         icon={<FolderOpen className="h-6 w-6" />}
         actions={
           // Only show upload button for admin users in the header
@@ -103,15 +92,7 @@ export default function MediaLibraryPage() {
       )}
 
       <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <FolderOpen className="h-5 w-5" /> Media Collection
-          </CardTitle>
-          <CardDescription>
-            Shared media files for all choir members
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
+        <CardContent className="pt-6">
           {loading ? (
             <div className="flex h-[200px] w-full items-center justify-center">
               <Loader2 className="h-8 w-8 animate-spin text-primary" />
@@ -119,33 +100,33 @@ export default function MediaLibraryPage() {
           ) : (
             <div className="space-y-4">
               {mediaFiles.length > 0 ? (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                  {mediaFiles.map((file) => (
-                    <div
-                      key={file.id}
-                      className="flex flex-col rounded-lg border p-4 hover:shadow-md transition-shadow"
-                    >
-                      <div className="flex-1">
-                        <h3 className="text-lg font-medium">{file.title}</h3>
-                        {file.description && (
-                          <p className="text-sm text-muted-foreground mt-1">{file.description}</p>
-                        )}
-                        <p className="text-xs text-muted-foreground mt-2">
-                          Added {file.created_at}
-                        </p>
-                      </div>
-                      <div className="mt-4">
-                        <Button 
-                          variant="default" 
-                          onClick={() => handleOpenMedia(file)}
-                          className="w-full"
-                        >
-                          Open File
-                        </Button>
-                      </div>
-                    </div>
-                  ))}
-                </div>
+                <>
+                  <MediaFilesSection 
+                    files={mediaFiles} 
+                    mediaType="pdf" 
+                    title={getMediaTypeLabel("pdf")} 
+                  />
+                  <MediaFilesSection 
+                    files={mediaFiles} 
+                    mediaType="audio" 
+                    title={getMediaTypeLabel("audio")} 
+                  />
+                  <MediaFilesSection 
+                    files={mediaFiles} 
+                    mediaType="image" 
+                    title={getMediaTypeLabel("image")} 
+                  />
+                  <MediaFilesSection 
+                    files={mediaFiles} 
+                    mediaType="video" 
+                    title={getMediaTypeLabel("video")} 
+                  />
+                  <MediaFilesSection 
+                    files={mediaFiles} 
+                    mediaType="other" 
+                    title={getMediaTypeLabel("other")} 
+                  />
+                </>
               ) : (
                 <div className="flex flex-col items-center justify-center rounded-lg border border-dashed p-8 text-center">
                   <FolderOpen className="mb-4 h-12 w-12 text-muted-foreground" />

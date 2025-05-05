@@ -21,7 +21,7 @@ export function useAudioFiles() {
 
       if (data) {
         // Format dates for display and ensure category exists
-        const formattedData = data.map((item) => ({
+        const formattedData = data.map((item: any) => ({
           ...item,
           created_at: new Date(item.created_at).toLocaleDateString(),
           // Default category to "recordings" for legacy files
