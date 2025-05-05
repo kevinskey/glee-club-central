@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Pen, Eraser, Save, X, Square } from "lucide-react";
 import { Toggle } from "@/components/ui/toggle";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 export type AnnotationTool = "pen" | "eraser" | "square" | null;
 
@@ -31,14 +32,15 @@ export const PDFAnnotationToolbar = ({
   onPenSizeChange,
 }: PDFAnnotationToolbarProps) => {
   const colors = ["#000000", "#FF0000", "#0000FF", "#00FF00", "#FFFF00", "#FF00FF"];
+  const isMobile = useIsMobile();
 
   if (!isOpen) return null;
 
   return (
     <div className="p-2 border-b bg-muted/30">
-      <div className="flex flex-wrap gap-2 items-center">
+      <div className={`flex ${isMobile ? "flex-wrap" : ""} gap-2 items-center`}>
         <TooltipProvider>
-          <div className="flex items-center gap-1 border-r pr-2">
+          <div className={`flex items-center gap-1 ${isMobile ? "w-full justify-center mb-1" : "border-r pr-2"}`}>
             <Tooltip>
               <TooltipTrigger asChild>
                 <Toggle
@@ -92,7 +94,7 @@ export const PDFAnnotationToolbar = ({
           </div>
 
           {activeTool === "pen" && (
-            <div className="flex items-center gap-2 border-r pr-2">
+            <div className={`flex items-center gap-2 ${isMobile ? "w-full justify-center mb-1" : "border-r pr-2"}`}>
               <div className="flex gap-1">
                 {colors.map((color) => (
                   <Tooltip key={color}>
@@ -128,7 +130,7 @@ export const PDFAnnotationToolbar = ({
             </div>
           )}
 
-          <div className="flex items-center gap-1">
+          <div className={`flex items-center gap-1 ${isMobile ? "w-full justify-center" : ""}`}>
             <Tooltip>
               <TooltipTrigger asChild>
                 <Button

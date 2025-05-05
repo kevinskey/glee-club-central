@@ -321,7 +321,7 @@ export const PDFViewer = ({ url, title, sheetMusicId }: PDFViewerProps) => {
         </div>
       </div>
       
-      {/* Annotation toolbar */}
+      {/* Annotation toolbar - Now positioned at the top even on mobile */}
       {showAnnotations && (
         <PDFAnnotationToolbar
           isOpen={showAnnotations}
@@ -336,7 +336,33 @@ export const PDFViewer = ({ url, title, sheetMusicId }: PDFViewerProps) => {
         />
       )}
       
-      <div ref={containerRef} className="relative w-full flex justify-center" style={{ height: isMobile ? "calc(100vh - 200px)" : "70vh" }}>
+      {/* Mobile annotation and setlist toggle buttons at the top for better visibility */}
+      {isMobile && user && (
+        <div className="flex justify-center gap-2 p-2 border-b">
+          {sheetMusicId && (
+            <Button
+              variant={showAnnotations ? "default" : "outline"}
+              size="sm"
+              onClick={toggleAnnotations}
+              className="flex items-center gap-1"
+            >
+              <Pen className="h-4 w-4" />
+              {showAnnotations ? "Hide Annotations" : "Annotate"}
+            </Button>
+          )}
+          <Button
+            variant={isSetlistOpen ? "default" : "outline"}
+            size="sm"
+            onClick={toggleSetlist}
+            className="flex items-center gap-1"
+          >
+            <ListMusic className="h-4 w-4" />
+            Setlist
+          </Button>
+        </div>
+      )}
+      
+      <div ref={containerRef} className="relative w-full flex justify-center" style={{ height: isMobile ? "calc(100vh - 220px)" : "70vh" }}>
         {isLoading && (
           <div className="absolute inset-0 flex items-center justify-center bg-background/80 z-30">
             <Loader2 className="h-8 w-8 animate-spin text-primary" />
@@ -399,8 +425,33 @@ export const PDFViewer = ({ url, title, sheetMusicId }: PDFViewerProps) => {
           Back
         </Button>
         
+        {/* Mobile navigation and zoom controls */}
         {isMobile && (
           <div className="flex gap-1">
+            {/* Page navigation controls for mobile */}
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handlePrevPage}
+              disabled={currentPage <= 1}
+              className="text-xs px-2"
+            >
+              <ArrowLeft className="h-4 w-4" />
+            </Button>
+            <span className="flex items-center justify-center text-xs px-2">
+              {currentPage}
+            </span>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleNextPage}
+              disabled={currentPage >= totalPages}
+              className="text-xs px-2"
+            >
+              <ArrowRight className="h-4 w-4" />
+            </Button>
+            
+            {/* Zoom controls */}
             <Button
               variant="outline"
               size="sm"
@@ -425,30 +476,6 @@ export const PDFViewer = ({ url, title, sheetMusicId }: PDFViewerProps) => {
             >
               <Download className="h-4 w-4" />
             </Button>
-            
-            {/* Mobile annotation toggle */}
-            {user && sheetMusicId && (
-              <Button
-                variant={showAnnotations ? "default" : "outline"}
-                size="sm"
-                onClick={toggleAnnotations}
-                className="text-xs px-2"
-              >
-                <Pen className="h-4 w-4" />
-              </Button>
-            )}
-            
-            {/* Mobile setlist toggle */}
-            {user && (
-              <Button
-                variant={isSetlistOpen ? "default" : "outline"}
-                size="sm"
-                onClick={toggleSetlist}
-                className="text-xs px-2"
-              >
-                <ListMusic className="h-4 w-4" />
-              </Button>
-            )}
           </div>
         )}
       </div>
