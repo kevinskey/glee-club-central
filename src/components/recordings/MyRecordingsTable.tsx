@@ -26,6 +26,19 @@ export function MyRecordingsTable({
   onDelete,
   onShare 
 }: MyRecordingsTableProps) {
+  // Helper function to handle download
+  const handleDownload = (recording: AudioFile) => {
+    // Create an anchor element
+    const a = document.createElement("a");
+    a.href = recording.file_url;
+    // Set download attribute to force download instead of navigation
+    a.download = `${recording.title}.wav`;
+    // Append to body, click and remove
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+  };
+
   if (isLoading) {
     return (
       <div className="flex h-[200px] w-full items-center justify-center">
@@ -70,7 +83,7 @@ export function MyRecordingsTable({
                   <Button
                     variant="outline"
                     size="sm"
-                    onClick={() => window.open(recording.file_url, "_blank")}
+                    onClick={() => handleDownload(recording)}
                   >
                     <Download className="h-4 w-4" />
                     <span className="sr-only">Download</span>

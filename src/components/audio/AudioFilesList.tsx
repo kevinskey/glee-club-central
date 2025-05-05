@@ -33,6 +33,19 @@ export function AudioFilesList({
   confirmDelete,
   onUploadClick
 }: AudioFilesListProps) {
+  // Helper function to handle download
+  const handleDownload = (file: AudioFile) => {
+    // Create an anchor element
+    const a = document.createElement("a");
+    a.href = file.file_url;
+    // Set download attribute to force download instead of navigation
+    a.download = `${file.title}.wav`;
+    // Append to body, click and remove
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+  };
+
   if (loading) {
     return (
       <div className="flex h-[200px] w-full items-center justify-center">
@@ -93,7 +106,7 @@ export function AudioFilesList({
                   <Button
                     variant="outline"
                     size="sm"
-                    onClick={() => window.open(file.file_url, "_blank")}
+                    onClick={() => handleDownload(file)}
                   >
                     <Download className="h-4 w-4" />
                     <span className="sr-only">Download</span>
