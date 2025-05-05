@@ -1,90 +1,101 @@
 
 import React from "react";
-import { Link, useLocation } from "react-router-dom";
-import { 
-  BookOpen, 
-  Calendar, 
-  CheckSquare, 
-  CreditCard, 
-  FileText, 
-  Headphones, 
-  Mic, 
-  ShoppingBag
-} from "lucide-react";
+import { NavLink } from "react-router-dom";
 import { cn } from "@/lib/utils";
-import { useAuth } from "@/contexts/AuthContext";
+import {
+  BookOpen,
+  Calendar,
+  CreditCard,
+  FileText,
+  FolderOpen,
+  Home,
+  LibraryBig,
+  Mic2,
+  ShieldCheck,
+  ShoppingBag,
+} from "lucide-react";
+import { Button } from "@/components/ui/button";
 
-interface SidebarNavProps extends React.HTMLAttributes<HTMLElement> {}
+const navItems = [
+  {
+    title: "Dashboard",
+    href: "/dashboard",
+    icon: Home,
+  },
+  {
+    title: "Sheet Music",
+    href: "/dashboard/sheet-music",
+    icon: FileText,
+  },
+  {
+    title: "Media Library",
+    href: "/dashboard/media-library",
+    icon: FolderOpen,
+  },
+  {
+    title: "Practice",
+    href: "/dashboard/practice",
+    icon: LibraryBig,
+  },
+  {
+    title: "Submit Recordings",
+    href: "/dashboard/recordings",
+    icon: Mic2,
+  },
+  {
+    title: "Pay Dues",
+    href: "/dashboard/dues",
+    icon: CreditCard,
+  },
+  {
+    title: "Schedule",
+    href: "/dashboard/schedule",
+    icon: Calendar,
+  },
+  {
+    title: "Club Handbook",
+    href: "/dashboard/handbook",
+    icon: BookOpen,
+  },
+  {
+    title: "Glee Merch",
+    href: "/dashboard/merch",
+    icon: ShoppingBag,
+  },
+  {
+    title: "Attendance Records",
+    href: "/dashboard/attendance",
+    icon: ShieldCheck,
+  },
+];
+
+interface SidebarNavProps extends React.HTMLAttributes<HTMLDivElement> {}
 
 export function SidebarNav({ className, ...props }: SidebarNavProps) {
-  const { user } = useAuth();
-  const location = useLocation();
-
-  // Navigation items with icons
-  const items = [
-    {
-      title: "Sheet Music Library",
-      href: "/dashboard/sheet-music",
-      icon: FileText,
-    },
-    {
-      title: "Practice on Your Own",
-      href: "/dashboard/practice",
-      icon: Headphones,
-    },
-    {
-      title: "Recording Submissions",
-      href: "/dashboard/recordings",
-      icon: Mic,
-    },
-    {
-      title: "Pay Dues",
-      href: "/dashboard/dues",
-      icon: CreditCard,
-    },
-    {
-      title: "Glee Club Schedule",
-      href: "/dashboard/schedule",
-      icon: Calendar,
-    },
-    {
-      title: "Club Handbook",
-      href: "/dashboard/handbook",
-      icon: BookOpen,
-    },
-    {
-      title: "Buy Glee Merch",
-      href: "/dashboard/merch",
-      icon: ShoppingBag,
-    },
-    {
-      title: "Check Attendance",
-      href: "/dashboard/attendance",
-      icon: CheckSquare,
-    },
-  ];
-
   return (
     <nav className={cn("flex flex-col space-y-1", className)} {...props}>
-      {items.map((item) => {
-        const Icon = item.icon;
-        return (
-          <Link
-            key={item.href}
-            to={item.href}
-            className={cn(
-              "flex items-center gap-3 rounded-md px-3 py-2 text-sm transition-colors",
-              location.pathname === item.href
-                ? "bg-accent text-accent-foreground"
-                : "hover:bg-muted hover:text-muted-foreground",
-              "hover:bg-accent/50"
-            )}
-          >
-            <Icon className="h-4 w-4" />
-            <span>{item.title}</span>
-          </Link>
-        );
-      })}
+      {navItems.map((item) => (
+        <NavLink
+          key={item.href}
+          to={item.href}
+          end={item.href === "/dashboard"}
+          className={({ isActive }) => 
+            cn("group flex items-center rounded-md px-3 py-2 text-sm font-medium hover:bg-accent hover:text-accent-foreground",
+               isActive ? "bg-accent text-accent-foreground" : "text-muted-foreground"
+            )
+          }
+        >
+          {({ isActive }) => (
+            <>
+              <item.icon className={cn(
+                "mr-2 h-4 w-4",
+                isActive ? "text-primary" : "text-muted-foreground group-hover:text-accent-foreground"
+              )} />
+              <span>{item.title}</span>
+            </>
+          )}
+        </NavLink>
+      ))}
     </nav>
   );
 }
