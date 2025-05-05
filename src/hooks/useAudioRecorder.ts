@@ -162,6 +162,7 @@ export function useAudioRecorder() {
     recordingTime,
     audioURL,
     isPlaying,
+    setIsPlaying, // Export this function as well to fix the error
     audioRef,
     initializeMicrophone,
     startRecording,

@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Square, Mic, MicOff, Play, Save } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -22,6 +21,7 @@ export function RecordingSection({ onRecordingSaved }: RecordingSectionProps) {
     recordingTime,
     audioURL,
     isPlaying,
+    setIsPlaying,
     audioRef,
     initializeMicrophone,
     startRecording,
