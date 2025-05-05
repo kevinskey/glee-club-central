@@ -52,8 +52,8 @@ const FeatureCard = ({
 };
 
 export default function DashboardPage() {
-  const { user } = useAuth();
-  const greeting = user ? `Hello, ${user?.name.split(" ")[0]}!` : "Hello!";
+  const { user, profile } = useAuth();
+  const greeting = profile ? `Hello, ${profile.first_name || ''}!` : "Hello!";
 
   const features = [
     {

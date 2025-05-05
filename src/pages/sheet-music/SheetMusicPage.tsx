@@ -139,9 +139,9 @@ const musicData: Record<string, MusicFolder> = {
 };
 
 export default function SheetMusicPage() {
-  const { user } = useAuth();
+  const { profile } = useAuth();
   const [activeTab, setActiveTab] = React.useState<string>(
-    user?.voicePart ? user.voicePart : "Soprano1"
+    profile?.voice_part ? profile.voice_part : "Soprano1"
   );
   
   // Handle file download
@@ -182,7 +182,7 @@ export default function SheetMusicPage() {
                       Sheet music for {folder.name} singers
                     </CardDescription>
                   </div>
-                  {user?.role === "admin" && (
+                  {profile?.role === "admin" && (
                     <Button size="sm">Upload New Sheet Music</Button>
                   )}
                 </CardHeader>
@@ -215,7 +215,7 @@ export default function SheetMusicPage() {
                         <p className="mb-4 text-sm text-muted-foreground">
                           There's no sheet music uploaded for this voice part yet.
                         </p>
-                        {user?.role === "admin" && (
+                        {profile?.role === "admin" && (
                           <Button>Upload Sheet Music</Button>
                         )}
                       </div>
