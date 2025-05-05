@@ -7,7 +7,7 @@ import { v4 as uuidv4 } from "uuid";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, Music, Upload, ListMusic, AudioLines, Audio } from "lucide-react";
+import { Loader2, Music, Upload, ListMusic, AudioLines, FileAudio } from "lucide-react";
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -181,7 +181,7 @@ export function UploadAudioModal({
       case "recordings":
         return <AudioLines className="h-4 w-4" />;
       case "my_tracks":
-        return <Audio className="h-4 w-4" />;
+        return <FileAudio className="h-4 w-4" />; // Changed from Audio to FileAudio
     }
   };
 

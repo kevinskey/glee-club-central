@@ -1,10 +1,9 @@
-
 import React, { useState, useEffect } from "react";
 import { PageHeader } from "@/components/ui/page-header";
 import { 
   Music, Upload, Loader2, Trash2, 
   FileAudio, Search, Download,
-  ListMusic, AudioLines, Audio
+  ListMusic, AudioLines
 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -45,6 +44,7 @@ interface AudioFile {
   title: string;
   description: string | null;
   file_url: string;
+  file_path: string;
   created_at: string;
   uploaded_by: string;
   category: string;
@@ -78,7 +78,7 @@ export default function AudioManagementPage() {
 
       if (data) {
         // Format dates for display
-        const formattedData = data.map((item: AudioFile) => ({
+        const formattedData = data.map((item) => ({
           ...item,
           created_at: new Date(item.created_at).toLocaleDateString(),
           // Default category to "recordings" for legacy files
@@ -210,7 +210,7 @@ export default function AudioManagementPage() {
       case "recordings":
         return <AudioLines className="h-16 w-16 text-muted-foreground" />;
       case "my_tracks":
-        return <Audio className="h-16 w-16 text-muted-foreground" />;
+        return <FileAudio className="h-16 w-16 text-muted-foreground" />;
       default:
         return <FileAudio className="h-16 w-16 text-muted-foreground" />;
     }
@@ -237,6 +237,103 @@ export default function AudioManagementPage() {
     }
     setIsUploadModalOpen(true);
   };
+
+  // Fix type comparison error by using different comparison logic
+  function renderAudioFiles(category: AudioCategory) {
+    if (loading) {
+      return (
+        <div className="flex h-[200px] w-full items-center justify-center">
+          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        </div>
+      );
+    }
+    
+    // Check if there are no audio files for this category or search
+    const hasNoFiles = category === "all" 
+      ? filteredFiles.length === 0
+      : !filteredFiles.some(file => file.category === category);
+      
+    if (hasNoFiles) {
+      const isSearching = searchQuery.trim().length > 0;
+      
+      return (
+        <Card className="border-dashed">
+          <CardContent className="flex flex-col items-center justify-center py-10 px-4 text-center">
+            {getCategoryIcon(category)}
+            <h3 className="text-xl font-medium mb-2">
+              {isSearching 
+                ? "No matching audio files found" 
+                : `No ${getCategoryName(category).toLowerCase()} found`}
+            </h3>
+            <p className="text-muted-foreground mb-6">
+              {isSearching 
+                ? "Try a different search term" 
+                : `Upload ${getCategoryName(category).toLowerCase()} for choir members to access`}
+            </p>
+            <Button 
+              onClick={() => handleOpenUploadModal(category === "all" ? "recordings" : (category as Exclude<AudioCategory, "all">))}
+              className="gap-2"
+            >
+              <Upload className="h-4 w-4" /> 
+              Upload {category === "all" ? "Audio" : getCategoryName(category)}
+            </Button>
+          </CardContent>
+        </Card>
+      );
+    }
+
+    // Filter files for this category if not "all"
+    const displayFiles = category === "all" 
+      ? filteredFiles 
+      : filteredFiles.filter(file => file.category === category);
+
+    return (
+      <div className="rounded-md border">
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead className="w-[30%]">Title</TableHead>
+              <TableHead className="w-[40%]">Description</TableHead>
+              <TableHead className="w-[15%]">Date Uploaded</TableHead>
+              <TableHead className="w-[15%] text-right">Actions</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {displayFiles.map((file) => (
+              <TableRow key={file.id}>
+                <TableCell className="font-medium">{file.title}</TableCell>
+                <TableCell>{file.description || "-"}</TableCell>
+                <TableCell>{file.created_at}</TableCell>
+                <TableCell className="text-right">
+                  <div className="flex justify-end gap-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => window.open(file.file_url, "_blank")}
+                    >
+                      <Download className="h-4 w-4" />
+                      <span className="sr-only">Download</span>
+                    </Button>
+                    
+                    {canDeleteFile(file.uploaded_by) && (
+                      <Button
+                        variant="destructive"
+                        size="sm"
+                        onClick={() => confirmDelete(file.id)}
+                      >
+                        <Trash2 className="h-4 w-4" />
+                        <span className="sr-only">Delete</span>
+                      </Button>
+                    )}
+                  </div>
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -322,101 +419,4 @@ export default function AudioManagementPage() {
       </AlertDialog>
     </div>
   );
-
-  // Helper function to render audio files content
-  function renderAudioFiles(category: AudioCategory) {
-    if (loading) {
-      return (
-        <div className="flex h-[200px] w-full items-center justify-center">
-          <Loader2 className="h-8 w-8 animate-spin text-primary" />
-        </div>
-      );
-    }
-    
-    // Check if there are no audio files for this category or search
-    const hasNoFiles = category === "all" 
-      ? filteredFiles.length === 0
-      : !filteredFiles.some(file => category === "all" || file.category === category);
-      
-    if (hasNoFiles) {
-      const isSearching = searchQuery.trim().length > 0;
-      
-      return (
-        <Card className="border-dashed">
-          <CardContent className="flex flex-col items-center justify-center py-10 px-4 text-center">
-            {getCategoryIcon(category)}
-            <h3 className="text-xl font-medium mb-2">
-              {isSearching 
-                ? "No matching audio files found" 
-                : `No ${getCategoryName(category).toLowerCase()} found`}
-            </h3>
-            <p className="text-muted-foreground mb-6">
-              {isSearching 
-                ? "Try a different search term" 
-                : `Upload ${getCategoryName(category).toLowerCase()} for choir members to access`}
-            </p>
-            <Button 
-              onClick={() => handleOpenUploadModal(category === "all" ? "recordings" : category as Exclude<AudioCategory, "all">)}
-              className="gap-2"
-            >
-              <Upload className="h-4 w-4" /> 
-              Upload {category === "all" ? "Audio" : getCategoryName(category)}
-            </Button>
-          </CardContent>
-        </Card>
-      );
-    }
-
-    // Filter files for this category if not "all"
-    const displayFiles = category === "all" 
-      ? filteredFiles 
-      : filteredFiles.filter(file => file.category === category);
-
-    return (
-      <div className="rounded-md border">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead className="w-[30%]">Title</TableHead>
-              <TableHead className="w-[40%]">Description</TableHead>
-              <TableHead className="w-[15%]">Date Uploaded</TableHead>
-              <TableHead className="w-[15%] text-right">Actions</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {displayFiles.map((file) => (
-              <TableRow key={file.id}>
-                <TableCell className="font-medium">{file.title}</TableCell>
-                <TableCell>{file.description || "-"}</TableCell>
-                <TableCell>{file.created_at}</TableCell>
-                <TableCell className="text-right">
-                  <div className="flex justify-end gap-2">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => window.open(file.file_url, "_blank")}
-                    >
-                      <Download className="h-4 w-4" />
-                      <span className="sr-only">Download</span>
-                    </Button>
-                    
-                    {canDeleteFile(file.uploaded_by) && (
-                      <Button
-                        variant="destructive"
-                        size="sm"
-                        onClick={() => confirmDelete(file.id)}
-                      >
-                        <Trash2 className="h-4 w-4" />
-                        <span className="sr-only">Delete</span>
-                      </Button>
-                    )}
-                  </div>
-                </TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </div>
-    );
-  }
 }
