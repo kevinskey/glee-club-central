@@ -8,7 +8,7 @@ import {
   Book,
   ShoppingBag,
   UserCheck,
-  Library,
+  FileImage,
   AudioLines
 } from "lucide-react";
 import { NavItem } from "./NavItem";
@@ -77,7 +77,7 @@ export function SidebarNav({ className }: { className?: string }) {
           <NavItem
             href="/dashboard/media-library"
             title="Media Library"
-            icon={Library}
+            icon={FileImage}
           />
         </li>
         <li>
