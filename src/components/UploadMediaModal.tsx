@@ -170,7 +170,7 @@ export function UploadMediaModal({
         <DialogHeader>
           <DialogTitle>Upload Media File</DialogTitle>
           <DialogDescription>
-            Upload files to the media library for all choir members to access.
+            Upload any file type to the media library. Maximum file size is 25MB.
           </DialogDescription>
         </DialogHeader>
         <div className="grid gap-4 py-4">

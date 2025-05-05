@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { PageHeader } from "@/components/ui/page-header";
 import { FilesIcon, Upload, Search, Filter, Calendar } from "lucide-react";
@@ -20,19 +19,6 @@ import {
   SelectTrigger, 
   SelectValue 
 } from "@/components/ui/select";
-import {
-  Command,
-  CommandEmpty,
-  CommandGroup,
-  CommandInput,
-  CommandItem,
-  CommandList,
-} from "@/components/ui/command";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
 
 export default function MediaLibraryPage() {
   const { toast } = useToast();
@@ -48,7 +34,6 @@ export default function MediaLibraryPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedMediaType, setSelectedMediaType] = useState<MediaType | "all">("all");
   const [dateFilter, setDateFilter] = useState<"newest" | "oldest">("newest");
-  const [isFilterOpen, setIsFilterOpen] = useState(false);
   
   const isAdmin = profile?.role === "admin";
   
@@ -172,17 +157,18 @@ export default function MediaLibraryPage() {
         title="Media Library"
         description="Access all your media files in one place"
         icon={<FilesIcon className="h-6 w-6" />}
-        actions={
-          isAdmin ? (
-            <Button 
-              onClick={() => setIsUploadModalOpen(true)}
-              className="gap-2"
-            >
-              <Upload className="h-4 w-4" /> Upload Media
-            </Button>
-          ) : null
-        }
       />
+      
+      {/* Upload Button - Prominently displayed at the top */}
+      <div className="flex justify-end">
+        <Button 
+          onClick={() => setIsUploadModalOpen(true)}
+          className="flex items-center gap-2"
+          size="lg"
+        >
+          <Upload className="h-5 w-5" /> Upload Media File
+        </Button>
+      </div>
       
       {/* Search and Filter Bar */}
       <div className="flex flex-col md:flex-row gap-4">
@@ -239,7 +225,15 @@ export default function MediaLibraryPage() {
         <>
           {filteredMediaFiles.length === 0 ? (
             <div className="text-center py-12 text-muted-foreground">
-              No media files found matching your criteria.
+              <p>No media files found matching your criteria.</p>
+              <Button 
+                onClick={() => setIsUploadModalOpen(true)}
+                variant="outline" 
+                className="mt-4"
+              >
+                <Upload className="mr-2 h-4 w-4" />
+                Upload Your First Media File
+              </Button>
             </div>
           ) : (
             <>
