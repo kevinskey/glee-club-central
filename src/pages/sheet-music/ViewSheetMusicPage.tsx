@@ -6,6 +6,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { PDFViewer } from "@/components/PDFViewer";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 interface SheetMusic {
   id: string;
@@ -25,6 +26,7 @@ export default function ViewSheetMusicPage() {
   const { toast } = useToast();
   const [music, setMusic] = useState<SheetMusic | null>(null);
   const [loading, setLoading] = useState(true);
+  const isMobile = useIsMobile();
 
   useEffect(() => {
     const fetchSheetMusic = async () => {
@@ -88,19 +90,24 @@ export default function ViewSheetMusicPage() {
   }
 
   return (
-    <div className="container px-0 md:px-8 py-4 md:py-8">
-      <div className="mb-4 flex items-center justify-between">
-        <h1 className="text-2xl font-bold flex items-center gap-2">
-          <FileText className="h-6 w-6 text-primary" />
-          {music.title} <span className="text-muted-foreground font-normal">by {music.composer}</span>
+    <div className={`container ${isMobile ? 'px-2 py-2' : 'px-0 md:px-8 py-4 md:py-8'}`}>
+      <div className="mb-4 flex items-center justify-between flex-wrap gap-2">
+        <h1 className={`${isMobile ? 'text-xl' : 'text-2xl'} font-bold flex items-center gap-2`}>
+          <FileText className={`${isMobile ? 'h-5 w-5' : 'h-6 w-6'} text-primary`} />
+          <span className="truncate">{music.title}</span>
+          <span className="text-muted-foreground font-normal text-sm md:text-base truncate">
+            by {music.composer}
+          </span>
         </h1>
-        <Button 
-          variant="outline" 
-          onClick={handleDownload}
-          className="gap-2"
-        >
-          <Download className="h-4 w-4" /> Download PDF
-        </Button>
+        {!isMobile && (
+          <Button 
+            variant="outline" 
+            onClick={handleDownload}
+            className="gap-2"
+          >
+            <Download className="h-4 w-4" /> Download PDF
+          </Button>
+        )}
       </div>
       <PDFViewer 
         url={music.file_url} 
