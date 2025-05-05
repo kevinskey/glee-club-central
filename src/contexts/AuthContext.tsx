@@ -29,6 +29,7 @@ interface AuthContextType {
   loginWithGoogle: () => Promise<void>;
   loginWithApple: () => Promise<void>;
   logout: () => Promise<void>;
+  resendVerificationEmail: (email: string) => Promise<void>;
 }
 
 // Create auth context
@@ -67,9 +68,48 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   // Set up auth state listener and check for existing session
   useEffect(() => {
+    // Handle URL fragment parameters (used after email confirmation)
+    const handleEmailConfirmation = async () => {
+      // Check if we have a hash fragment from email confirmation
+      const hashParams = new URLSearchParams(window.location.hash.substring(1));
+      const accessToken = hashParams.get("access_token");
+      const refreshToken = hashParams.get("refresh_token");
+      const type = hashParams.get("type");
+
+      // If we have tokens from email confirmation
+      if (accessToken && refreshToken && type === "recovery") {
+        // Set the session using the tokens
+        const { data, error } = await supabase.auth.setSession({
+          access_token: accessToken,
+          refresh_token: refreshToken,
+        });
+
+        if (error) {
+          console.error("Error setting session from email link:", error);
+          toast({
+            title: "Authentication failed",
+            description: "There was a problem with your authentication link. Please try logging in again.",
+            variant: "destructive",
+          });
+        } else if (data && data.session) {
+          toast({
+            title: "Authentication successful",
+            description: "You have been successfully authenticated.",
+          });
+
+          // Clean the URL to remove the hash fragment
+          window.history.replaceState(null, "", window.location.pathname);
+        }
+      }
+    };
+
+    // Call once on initial load to handle email confirmations
+    handleEmailConfirmation();
+
     // Set up auth state listener first
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (event, currentSession) => {
+        console.log("Auth state change event:", event);
         setSession(currentSession);
         setUser(currentSession?.user ?? null);
         
@@ -83,9 +123,20 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           setProfile(null);
         }
 
-        // Handle specific auth events if needed
+        // Handle specific auth events
         if (event === 'SIGNED_OUT') {
           setProfile(null);
+        } else if (event === 'SIGNED_IN') {
+          toast({
+            title: "Signed in successfully",
+            description: "Welcome back!",
+          });
+          navigate("/dashboard");
+        } else if (event === 'USER_UPDATED') {
+          toast({
+            title: "Account updated",
+            description: "Your account has been updated successfully.",
+          });
         }
       }
     );
@@ -104,7 +155,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return () => {
       subscription.unsubscribe();
     };
-  }, []);
+  }, [navigate, toast]);
 
   // Login function
   const login = async (email: string, password: string) => {
@@ -146,6 +197,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             first_name: firstName,
             last_name: lastName,
           },
+          emailRedirectTo: `${window.location.origin}/login`,
         },
       });
       
@@ -153,7 +205,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       
       toast({
         title: "Registration successful",
-        description: "Welcome to Glee World! Please check your email to confirm your account.",
+        description: "Please check your email to confirm your account.",
       });
       
     } catch (error: any) {
@@ -164,6 +216,32 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       });
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  // Resend verification email
+  const resendVerificationEmail = async (email: string) => {
+    try {
+      const { error } = await supabase.auth.resend({
+        type: 'signup',
+        email,
+        options: {
+          emailRedirectTo: `${window.location.origin}/login`,
+        }
+      });
+      
+      if (error) throw error;
+      
+      toast({
+        title: "Verification email sent",
+        description: "Please check your inbox for the verification link.",
+      });
+    } catch (error: any) {
+      toast({
+        title: "Failed to send verification email",
+        description: error.message || "Unable to send verification email. Please try again.",
+        variant: "destructive",
+      });
     }
   };
 
@@ -244,6 +322,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     loginWithGoogle,
     loginWithApple,
     logout,
+    resendVerificationEmail,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

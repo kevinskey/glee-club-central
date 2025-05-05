@@ -1,7 +1,7 @@
 
-import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { Music, Mail, Lock, User, AppleIcon } from "lucide-react";
+import React, { useState, useEffect } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
+import { Music, Mail, Lock, User, AppleIcon, AlertCircle, RefreshCw } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -31,6 +31,7 @@ import {
   TabsTrigger,
 } from "@/components/ui/tabs";
 import { Separator } from "@/components/ui/separator";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 // Define login form schema
 const loginSchema = z.object({
@@ -54,16 +55,45 @@ type LoginFormData = z.infer<typeof loginSchema>;
 type SignupFormData = z.infer<typeof signupSchema>;
 
 export default function LoginPage() {
-  const { login, signUp, loginWithGoogle, loginWithApple, isLoading, isAuthenticated } = useAuth();
+  const { login, signUp, loginWithGoogle, loginWithApple, isLoading, isAuthenticated, resendVerificationEmail } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
   const [activeTab, setActiveTab] = useState<"login" | "signup">("login");
+  const [verificationEmail, setVerificationEmail] = useState<string>("");
+  const [showVerificationAlert, setShowVerificationAlert] = useState<boolean>(false);
+  const [resendingVerification, setResendingVerification] = useState<boolean>(false);
+
+  // Check URL for verification related params
+  useEffect(() => {
+    const searchParams = new URLSearchParams(window.location.search);
+    const error = searchParams.get('error');
+    const errorDescription = searchParams.get('error_description');
+    
+    // If there's an email verification error, show the verification alert
+    if (error === 'unauthorized' || (errorDescription && errorDescription.includes('Email link is invalid'))) {
+      setShowVerificationAlert(true);
+    }
+
+    // Extract email from the URL if present (Supabase sometimes includes it)
+    const email = searchParams.get('email');
+    if (email) {
+      setVerificationEmail(email);
+    }
+
+    // Clean the URL to remove the query parameters
+    if (error || errorDescription) {
+      window.history.replaceState(null, "", window.location.pathname);
+    }
+  }, []);
 
   // Redirect if already logged in
-  React.useEffect(() => {
+  useEffect(() => {
     if (isAuthenticated) {
-      navigate("/dashboard");
+      // Get the intended destination from location state, or default to dashboard
+      const from = location.state?.from?.pathname || "/dashboard";
+      navigate(from);
     }
-  }, [isAuthenticated, navigate]);
+  }, [isAuthenticated, navigate, location.state]);
 
   // Initialize forms
   const loginForm = useForm<LoginFormData>({
@@ -92,7 +122,21 @@ export default function LoginPage() {
 
   const onSignupSubmit = async (data: SignupFormData) => {
     await signUp(data.email, data.password, data.firstName, data.lastName);
-    setActiveTab("login");
+    setVerificationEmail(data.email);
+    setShowVerificationAlert(true);
+  };
+
+  // Handle resend verification email
+  const handleResendVerification = async () => {
+    if (!verificationEmail) {
+      const email = loginForm.getValues("email") || signupForm.getValues("email");
+      if (!email) return;
+      setVerificationEmail(email);
+    }
+    
+    setResendingVerification(true);
+    await resendVerificationEmail(verificationEmail);
+    setResendingVerification(false);
   };
 
   return (
@@ -102,6 +146,34 @@ export default function LoginPage() {
           <Music className="h-10 w-10" />
           <span className="font-playfair text-3xl font-bold">Glee World</span>
         </div>
+
+        {showVerificationAlert && (
+          <Alert className="mb-4 w-full border-amber-500">
+            <AlertCircle className="h-4 w-4 text-amber-500" />
+            <AlertTitle className="text-amber-500">Verification required</AlertTitle>
+            <AlertDescription className="space-y-4">
+              <p>Please check your email ({verificationEmail || "your inbox"}) and click the verification link to complete registration.</p>
+              <div className="flex items-center gap-2">
+                <span>Didn't receive an email?</span>
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  onClick={handleResendVerification}
+                  disabled={resendingVerification}
+                >
+                  {resendingVerification ? (
+                    <>
+                      <RefreshCw className="mr-2 h-4 w-4 animate-spin" />
+                      Sending...
+                    </>
+                  ) : (
+                    "Resend"
+                  )}
+                </Button>
+              </div>
+            </AlertDescription>
+          </Alert>
+        )}
 
         <Card className="w-full">
           <CardHeader className="space-y-1">
