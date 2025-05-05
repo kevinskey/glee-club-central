@@ -1,5 +1,5 @@
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import {
@@ -80,24 +80,38 @@ interface SidebarNavProps extends React.HTMLAttributes<HTMLDivElement> {}
 export function SidebarNav({ className, ...props }: SidebarNavProps) {
   const navigate = useNavigate();
   const [value, setValue] = useState("");
+  const [isOpen, setIsOpen] = useState(false);
 
   // Navigation handler for mobile dropdown
   const handleNavigation = (value: string) => {
     setValue(value);
     navigate(value);
+    // Immediately close the dropdown when an item is selected
+    setIsOpen(false);
   };
 
   return (
     <nav className={cn("flex flex-col space-y-1", className)} {...props}>
       {/* Mobile view: Dropdown menu */}
       <div className="md:hidden w-full mb-4">
-        <Select value={value} onValueChange={handleNavigation}>
+        <Select 
+          value={value} 
+          onValueChange={handleNavigation} 
+          open={isOpen}
+          onOpenChange={setIsOpen}
+        >
           <SelectTrigger>
             <SelectValue placeholder="Navigate to..." />
           </SelectTrigger>
           <SelectContent>
             {navItems.map((item) => (
-              <SelectItem key={item.href} value={item.href}>
+              <SelectItem 
+                key={item.href} 
+                value={item.href}
+                onSelect={() => {
+                  handleNavigation(item.href);
+                }}
+              >
                 <div className="flex items-center">
                   <item.icon className="mr-2 h-4 w-4" />
                   <span>{item.title}</span>

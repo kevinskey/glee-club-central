@@ -1,7 +1,7 @@
 
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { Loader2, FilePdf, Download } from "lucide-react";
+import { Loader2, FileText, Download } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { PDFViewer } from "@/components/PDFViewer";
 import { useToast } from "@/hooks/use-toast";
@@ -11,50 +11,59 @@ interface SheetMusic {
   id: string;
   title: string;
   composer: string;
+  arranger?: string;
+  voice_part?: string;
   file_url: string;
+  created_at: string;
+  user_id: string;
 }
 
 export default function ViewSheetMusicPage() {
-  const { id } = useParams();
+  const { id } = useParams<{ id: string }>();
+  const navigate = useNavigate();
+  const { toast } = useToast();
   const [music, setMusic] = useState<SheetMusic | null>(null);
   const [loading, setLoading] = useState(true);
-  const { toast } = useToast();
-  const navigate = useNavigate();
 
   useEffect(() => {
-    async function fetchSheetMusic() {
+    const fetchSheetMusic = async () => {
+      if (!id) {
+        navigate("/dashboard/sheet-music");
+        return;
+      }
+
       try {
         const { data, error } = await supabase
-          .from('sheet_music')
-          .select('*')
-          .eq('id', id)
+          .from("sheet_music")
+          .select("*")
+          .eq("id", id)
           .single();
 
-        if (error) throw error;
+        if (error) {
+          throw error;
+        }
 
-        if (!data) {
+        if (data) {
+          setMusic(data as SheetMusic);
+        } else {
           toast({
-            title: "Sheet music not found",
+            title: "Not found",
             description: "The requested sheet music could not be found.",
             variant: "destructive",
           });
-          navigate('/dashboard/sheet-music');
-          return;
+          navigate("/dashboard/sheet-music");
         }
-
-        setMusic(data as SheetMusic);
       } catch (error: any) {
-        console.error("Error fetching sheet music:", error);
         toast({
           title: "Error",
-          description: "Failed to load sheet music. Please try again later.",
+          description: error.message || "Failed to load sheet music.",
           variant: "destructive",
         });
-        navigate('/dashboard/sheet-music');
+        navigate("/dashboard/sheet-music");
       } finally {
         setLoading(false);
       }
-    }
+    };
 
     fetchSheetMusic();
   }, [id, toast, navigate]);
@@ -81,7 +90,7 @@ export default function ViewSheetMusicPage() {
     <div className="container px-0 md:px-8 py-4 md:py-8">
       <div className="mb-4 flex items-center justify-between">
         <h1 className="text-2xl font-bold flex items-center gap-2">
-          <FilePdf className="h-6 w-6 text-primary" />
+          <FileText className="h-6 w-6 text-primary" />
           {music.title} <span className="text-muted-foreground font-normal">by {music.composer}</span>
         </h1>
         <Button 
