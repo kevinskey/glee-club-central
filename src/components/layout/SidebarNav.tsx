@@ -56,7 +56,7 @@ export function SidebarNav({ className }: { className?: string }) {
         <li>
           <NavItem
             href="/dashboard/handbook"
-            title="Handbook"
+            title="Glee Club Handbook"
             icon={Book}
           />
         </li>

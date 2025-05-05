@@ -93,7 +93,7 @@ export default function DashboardPage() {
       color: "bg-red-500/10",
     },
     {
-      title: "Club Handbook",
+      title: "Glee Club Handbook",
       description: "Read the official Glee Club handbook and guidelines",
       icon: <BookOpen className="h-6 w-6" />,
       href: "/dashboard/handbook",

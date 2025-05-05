@@ -43,7 +43,7 @@ export default function HandbookPage() {
   return (
     <div className="space-y-6">
       <PageHeader
-        title="Club Handbook"
+        title="Glee Club Handbook"
         description="Official guidelines, policies, and information for members"
         icon={<BookOpen className="h-6 w-6" />}
       />
