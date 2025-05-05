@@ -10,6 +10,7 @@ import { Link } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 
+// Important: configure PDF.js worker source
 pdfjs.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.js`;
 
 interface SheetMusic {
@@ -26,6 +27,7 @@ export default function ViewSheetMusicPage() {
   const [numPages, setNumPages] = useState<number | null>(null);
   const [pageNumber, setPageNumber] = useState(1);
   const [sheetMusic, setSheetMusic] = useState<SheetMusic | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
   
   // Add state for setlist drawer
   const [isSetlistDrawerOpen, setIsSetlistDrawerOpen] = useState(false);
@@ -41,6 +43,7 @@ export default function ViewSheetMusicPage() {
     }
 
     const fetchSheetMusic = async () => {
+      setIsLoading(true);
       try {
         const { data, error } = await supabase
           .from('sheet_music')
@@ -60,6 +63,8 @@ export default function ViewSheetMusicPage() {
           description: error.message || "An unexpected error occurred",
           variant: "destructive",
         });
+      } finally {
+        setIsLoading(false);
       }
     };
 
@@ -68,6 +73,17 @@ export default function ViewSheetMusicPage() {
 
   function onDocumentLoadSuccess({ numPages: nextNumPages }: { numPages: number }) {
     setNumPages(nextNumPages);
+    setIsLoading(false);
+  }
+
+  function onDocumentLoadError(error: Error) {
+    console.error("Error loading PDF:", error);
+    setIsLoading(false);
+    toast({
+      title: "Error loading PDF",
+      description: "Could not load the PDF file. Please try again later.",
+      variant: "destructive",
+    });
   }
 
   const goToPrevPage = () => {
@@ -99,7 +115,9 @@ export default function ViewSheetMusicPage() {
       />
       
       {sheetMusic === null ? (
-        <p>Loading sheet music...</p>
+        <div className="flex items-center justify-center h-64">
+          <p className="text-muted-foreground">Loading sheet music...</p>
+        </div>
       ) : (
         <div className="flex flex-col gap-4">
           <div className="flex items-center justify-between">
@@ -123,14 +141,39 @@ export default function ViewSheetMusicPage() {
             </div>
           </div>
           
-          <div className="border rounded-md overflow-hidden">
+          <div className="border rounded-md overflow-hidden relative">
+            {isLoading && (
+              <div className="absolute inset-0 flex items-center justify-center bg-background/80 z-10">
+                <div className="flex flex-col items-center gap-2">
+                  <div className="h-6 w-6 border-2 border-primary border-t-transparent rounded-full animate-spin"></div>
+                  <p className="text-sm text-muted-foreground">Loading PDF...</p>
+                </div>
+              </div>
+            )}
+            
             <Document
               file={sheetMusic.file_url}
               onLoadSuccess={onDocumentLoadSuccess}
-              className="max-w-full"
+              onLoadError={onDocumentLoadError}
+              loading={
+                <div className="flex justify-center p-8">
+                  <div className="h-6 w-6 border-2 border-primary border-t-transparent rounded-full animate-spin"></div>
+                </div>
+              }
+              className="max-w-full flex justify-center"
+              options={{ 
+                cMapUrl: 'https://unpkg.com/pdfjs-dist@3.4.120/cmaps/',
+                cMapPacked: true,
+              }}
             >
-              <Page pageNumber={pageNumber} width={1000} />
+              <Page 
+                pageNumber={pageNumber} 
+                width={Math.min(window.innerWidth * 0.8, 800)}
+                renderTextLayer={false}
+                renderAnnotationLayer={false}
+              />
             </Document>
+            
             <div className="flex items-center justify-center space-x-4 py-2 bg-gray-100">
               <Button
                 variant="outline"
