@@ -18,6 +18,7 @@ import ViewSheetMusicPage from "./pages/sheet-music/ViewSheetMusicPage";
 import PracticePage from "./pages/practice/PracticePage";
 import SchedulePage from "./pages/schedule/SchedulePage";
 import MediaLibraryPage from "./pages/media-library/MediaLibraryPage";
+import AudioManagementPage from "./pages/audio-management/AudioManagementPage";
 
 // Placeholder pages for other sections
 const RecordingsPage = () => <div className="px-4 py-8">Recording Submissions Page - Coming Soon</div>;
@@ -59,6 +60,7 @@ const App = () => (
               <Route path="merch" element={<MerchPage />} />
               <Route path="attendance" element={<AttendancePage />} />
               <Route path="media-library" element={<MediaLibraryPage />} />
+              <Route path="audio-management" element={<AudioManagementPage />} />
             </Route>
 
             {/* Catch-all redirect to 404 */}
