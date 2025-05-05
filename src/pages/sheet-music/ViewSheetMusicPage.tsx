@@ -17,7 +17,7 @@ interface SheetMusic {
   file_url: string;
   file_path: string;
   created_at: string;
-  uploaded_by: string; // This matches what's in the database
+  uploaded_by: string;
 }
 
 export default function ViewSheetMusicPage() {
@@ -71,12 +71,6 @@ export default function ViewSheetMusicPage() {
     fetchSheetMusic();
   }, [id, toast, navigate]);
 
-  const handleDownload = () => {
-    if (music) {
-      window.open(music.file_url, "_blank");
-    }
-  };
-
   if (loading) {
     return (
       <div className="flex h-[50vh] items-center justify-center">
@@ -90,24 +84,15 @@ export default function ViewSheetMusicPage() {
   }
 
   return (
-    <div className={`container ${isMobile ? 'px-2 py-2' : 'px-0 md:px-8 py-4 md:py-8'}`}>
-      <div className="mb-4 flex items-center justify-between flex-wrap gap-2">
-        <h1 className={`${isMobile ? 'text-xl' : 'text-2xl'} font-bold flex items-center gap-2`}>
-          <FileText className={`${isMobile ? 'h-5 w-5' : 'h-6 w-6'} text-primary`} />
+    <div className="container max-w-4xl mx-auto px-4">
+      <div className={`mb-2 flex items-center justify-between flex-wrap gap-2 ${isMobile ? 'hidden' : ''}`}>
+        <h1 className="text-2xl font-bold flex items-center gap-2">
+          <FileText className="h-6 w-6 text-primary" />
           <span className="truncate">{music.title}</span>
           <span className="text-muted-foreground font-normal text-sm md:text-base truncate">
             by {music.composer}
           </span>
         </h1>
-        {!isMobile && (
-          <Button 
-            variant="outline" 
-            onClick={handleDownload}
-            className="gap-2"
-          >
-            <Download className="h-4 w-4" /> Download PDF
-          </Button>
-        )}
       </div>
       <PDFViewer 
         url={music.file_url} 
