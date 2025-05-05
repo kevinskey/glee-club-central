@@ -77,22 +77,36 @@ export default function SheetMusicPage() {
         description="Browse and download sheet music"
         icon={<FileText className="h-6 w-6" />}
         actions={
-          // Only show upload button for admin users
           isAdmin && (
-            <UploadSheetMusicModal onUploadComplete={fetchSheetMusic} />
+            <Button 
+              onClick={() => setIsUploadModalOpen(true)}
+              className="gap-2"
+            >
+              <Upload className="h-4 w-4" /> Upload PDF
+            </Button>
           )
         }
       />
 
       {isAdmin && (
-        <div className="mb-6 flex justify-center">
-          <Button 
-            size="lg" 
-            className="gap-2 px-6 py-6 text-lg"
-            onClick={() => setIsUploadModalOpen(true)}
-          >
-            <Upload className="h-5 w-5" /> Upload New Sheet Music
-          </Button>
+        <div className="mb-6">
+          <Card>
+            <CardHeader>
+              <CardTitle>Sheet Music Management</CardTitle>
+              <CardDescription>
+                As an administrator, you can upload new sheet music for choir members
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <Button 
+                size="lg" 
+                className="gap-2 w-full py-6"
+                onClick={() => setIsUploadModalOpen(true)}
+              >
+                <Upload className="h-5 w-5" /> Upload New Sheet Music PDF
+              </Button>
+            </CardContent>
+          </Card>
         </div>
       )}
 
