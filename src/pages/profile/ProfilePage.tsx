@@ -23,7 +23,7 @@ export default function ProfilePage() {
     defaultValues: {
       first_name: profile?.first_name || "",
       last_name: profile?.last_name || "",
-      voice_part: profile?.voice_part || "",
+      voice_part: profile?.voice_part || "not_specified",
     },
   });
 
@@ -33,7 +33,7 @@ export default function ProfilePage() {
       form.reset({
         first_name: profile.first_name || "",
         last_name: profile.last_name || "",
-        voice_part: profile.voice_part || "",
+        voice_part: profile.voice_part || "not_specified",
       });
     }
   }, [profile, form]);
@@ -61,6 +61,10 @@ export default function ProfilePage() {
   // Get voice part
   const getVoicePart = () => {
     if (profile?.voice_part) {
+      // Map "not_specified" to a user-friendly display value
+      if (profile.voice_part === "not_specified") {
+        return "Not specified";
+      }
       return profile.voice_part;
     }
     return "Not specified";
@@ -107,15 +111,15 @@ export default function ProfilePage() {
       form.reset({
         first_name: profile?.first_name || "",
         last_name: profile?.last_name || "",
-        voice_part: profile?.voice_part || "",
+        voice_part: profile?.voice_part || "not_specified",
       });
       setIsEditing(true);
     }
   };
 
-  // Voice part options based on the schema
+  // Voice part options based on the schema - using 'not_specified' as a valid non-empty string value
   const voicePartOptions = [
-    { value: "", label: "Not specified" },
+    { value: "not_specified", label: "Not specified" },
     { value: "Soprano1", label: "Soprano 1" },
     { value: "Soprano2", label: "Soprano 2" },
     { value: "Alto1", label: "Alto 1" },
