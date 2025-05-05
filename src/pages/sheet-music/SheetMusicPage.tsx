@@ -67,9 +67,6 @@ export default function SheetMusicPage() {
     window.open(file.file_url, "_blank");
   };
 
-  // Check if user is an admin
-  const isAdmin = profile?.role === "admin";
-
   return (
     <div>
       <PageHeader
@@ -77,38 +74,34 @@ export default function SheetMusicPage() {
         description="Browse and download sheet music"
         icon={<FileText className="h-6 w-6" />}
         actions={
-          isAdmin && (
-            <Button 
-              onClick={() => setIsUploadModalOpen(true)}
-              className="gap-2"
-            >
-              <Upload className="h-4 w-4" /> Upload PDF
-            </Button>
-          )
+          <Button 
+            onClick={() => setIsUploadModalOpen(true)}
+            className="gap-2"
+          >
+            <Upload className="h-4 w-4" /> Upload PDF
+          </Button>
         }
       />
 
-      {isAdmin && (
-        <div className="mb-6">
-          <Card>
-            <CardHeader>
-              <CardTitle>Sheet Music Management</CardTitle>
-              <CardDescription>
-                As an administrator, you can upload new sheet music for choir members
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <Button 
-                size="lg" 
-                className="gap-2 w-full py-6"
-                onClick={() => setIsUploadModalOpen(true)}
-              >
-                <Upload className="h-5 w-5" /> Upload New Sheet Music PDF
-              </Button>
-            </CardContent>
-          </Card>
-        </div>
-      )}
+      <div className="mb-6">
+        <Card>
+          <CardHeader>
+            <CardTitle>Sheet Music Management</CardTitle>
+            <CardDescription>
+              Upload new sheet music for everyone in the choir
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Button 
+              size="lg" 
+              className="gap-2 w-full py-6"
+              onClick={() => setIsUploadModalOpen(true)}
+            >
+              <Upload className="h-5 w-5" /> Upload New Sheet Music PDF
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
 
       <Card>
         <CardHeader>
@@ -161,18 +154,14 @@ export default function SheetMusicPage() {
                   <FolderOpen className="mb-4 h-12 w-12 text-muted-foreground" />
                   <h3 className="mb-2 text-lg font-medium">No sheet music yet</h3>
                   <p className="mb-4 text-sm text-muted-foreground">
-                    {isAdmin 
-                      ? "Upload your first sheet music using the button below."
-                      : "There's no sheet music uploaded yet."}
+                    Be the first to upload sheet music for the choir.
                   </p>
-                  {isAdmin && (
-                    <Button 
-                      onClick={() => setIsUploadModalOpen(true)}
-                      className="gap-2"
-                    >
-                      <Upload className="h-4 w-4" /> Upload Sheet Music
-                    </Button>
-                  )}
+                  <Button 
+                    onClick={() => setIsUploadModalOpen(true)}
+                    className="gap-2"
+                  >
+                    <Upload className="h-4 w-4" /> Upload Sheet Music
+                  </Button>
                 </div>
               )}
             </div>
@@ -180,13 +169,11 @@ export default function SheetMusicPage() {
         </CardContent>
       </Card>
 
-      {isAdmin && (
-        <UploadSheetMusicModal 
-          onUploadComplete={fetchSheetMusic}
-          open={isUploadModalOpen}
-          onOpenChange={setIsUploadModalOpen}
-        />
-      )}
+      <UploadSheetMusicModal 
+        onUploadComplete={fetchSheetMusic}
+        open={isUploadModalOpen}
+        onOpenChange={setIsUploadModalOpen}
+      />
     </div>
   );
 }

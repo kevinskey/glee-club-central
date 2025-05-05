@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { FileUp, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -16,7 +16,6 @@ import {
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
-import { useNavigate } from "react-router-dom";
 
 interface UploadSheetMusicModalProps {
   onUploadComplete: () => void;
@@ -36,7 +35,6 @@ export function UploadSheetMusicModal({
   const [file, setFile] = useState<File | null>(null);
   const { toast } = useToast();
   const { profile } = useAuth();
-  const navigate = useNavigate();
   
   // Determine if we're in controlled or uncontrolled mode
   const isControlled = controlledOpen !== undefined && setControlledOpen !== undefined;
@@ -44,19 +42,6 @@ export function UploadSheetMusicModal({
   const setOpen = isControlled 
     ? setControlledOpen 
     : setInternalOpen;
-
-  // Check if user is admin on component mount
-  useEffect(() => {
-    if (profile && profile.role !== "admin") {
-      // If not admin, redirect to dashboard
-      toast({
-        title: "Access denied",
-        description: "You don't have permission to upload sheet music",
-        variant: "destructive",
-      });
-      navigate("/dashboard");
-    }
-  }, [profile, navigate, toast]);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
@@ -87,17 +72,6 @@ export function UploadSheetMusicModal({
   };
 
   const handleUpload = async () => {
-    // Double check if user is admin
-    if (profile?.role !== "admin") {
-      toast({
-        title: "Access denied",
-        description: "Only administrators can upload sheet music",
-        variant: "destructive",
-      });
-      setOpen(false);
-      return;
-    }
-
     if (!file || !title || !composer) {
       toast({
         title: "Missing information",
@@ -169,11 +143,6 @@ export function UploadSheetMusicModal({
     setFile(null);
   };
 
-  // If not admin, don't render the component
-  if (profile && profile.role !== "admin") {
-    return null;
-  }
-
   return (
     <Dialog open={open} onOpenChange={(isOpen) => {
       setOpen(isOpen);
@@ -191,7 +160,7 @@ export function UploadSheetMusicModal({
         <DialogHeader>
           <DialogTitle>Upload Sheet Music</DialogTitle>
           <DialogDescription>
-            Upload PDF sheet music for choir members to access.
+            Upload PDF sheet music for everyone in the choir.
           </DialogDescription>
         </DialogHeader>
         <div className="grid gap-4 py-4">
