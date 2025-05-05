@@ -387,11 +387,13 @@ export default function SheetMusicPage() {
           <h2 className="text-xl font-semibold flex items-center gap-2">
             <Music className="h-5 w-5" /> Audio Library
           </h2>
-          <Link to="/dashboard/audio-management">
-            <Button variant="outline" className="text-sm gap-1">
-              <Upload className="h-4 w-4" /> Manage Audio
-            </Button>
-          </Link>
+          <Button 
+            variant="outline" 
+            className="text-sm gap-1"
+            onClick={() => window.location.href = "/dashboard/audio-management"}
+          >
+            <Upload className="h-4 w-4" /> Manage Audio
+          </Button>
         </div>
 
         {audioLoading ? (
