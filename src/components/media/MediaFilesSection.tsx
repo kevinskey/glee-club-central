@@ -19,9 +19,9 @@ export function MediaFilesSection({ files, mediaType, title }: MediaFilesSection
   }
 
   return (
-    <div className="mb-8">
-      <h2 className="text-2xl font-bold mb-4">{title}</h2>
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+    <div className="mb-6 md:mb-8">
+      <h2 className="text-xl md:text-2xl font-bold mb-3 md:mb-4">{title}</h2>
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-4">
         {filteredFiles.map((file) => (
           <MediaFileCard key={file.id} file={file} />
         ))}

@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { FileUp, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -17,7 +17,7 @@ import {
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
-import { useNavigate } from "react-router-dom";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 interface UploadMediaModalProps {
   onUploadComplete: () => void;
@@ -37,7 +37,7 @@ export function UploadMediaModal({
   const [file, setFile] = useState<File | null>(null);
   const { toast } = useToast();
   const { profile } = useAuth();
-  const navigate = useNavigate();
+  const isMobile = useIsMobile();
   
   // Determine if we're in controlled or uncontrolled mode
   const isControlled = controlledOpen !== undefined && setControlledOpen !== undefined;
@@ -150,14 +150,14 @@ export function UploadMediaModal({
           </Button>
         </DialogTrigger>
       )}
-      <DialogContent className="sm:max-w-[500px]">
+      <DialogContent className={`${isMobile ? 'w-[calc(100%-2rem)]' : 'sm:max-w-[500px]'} overflow-y-auto max-h-[90vh]`}>
         <DialogHeader>
           <DialogTitle>Upload Media File</DialogTitle>
           <DialogDescription>
             Upload any file type to the media library. Maximum file size is 25MB.
           </DialogDescription>
         </DialogHeader>
-        <div className="grid gap-4 py-4">
+        <div className="grid gap-4 py-3">
           <div className="grid gap-2">
             <Label htmlFor="title">Title</Label>
             <Input
@@ -175,7 +175,7 @@ export function UploadMediaModal({
               placeholder="Brief description of the file"
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              rows={3}
+              rows={isMobile ? 2 : 3}
             />
           </div>
           <div className="grid gap-2">
@@ -185,19 +185,20 @@ export function UploadMediaModal({
               type="file"
               onChange={handleFileChange}
               required
+              className="text-sm"
             />
             {file && (
-              <p className="text-sm text-muted-foreground mt-1">
+              <p className="text-xs text-muted-foreground mt-1 break-all">
                 {file.name} ({(file.size / 1024 / 1024).toFixed(2)} MB)
               </p>
             )}
           </div>
         </div>
-        <DialogFooter>
-          <Button variant="outline" onClick={() => setOpen(false)} disabled={uploading}>
+        <DialogFooter className={isMobile ? 'flex-col space-y-2' : ''}>
+          <Button variant="outline" onClick={() => setOpen(false)} disabled={uploading} className={isMobile ? 'w-full' : ''}>
             Cancel
           </Button>
-          <Button onClick={handleUpload} disabled={uploading}>
+          <Button onClick={handleUpload} disabled={uploading} className={isMobile ? 'w-full' : ''}>
             {uploading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
             {uploading ? "Uploading..." : "Upload"}
           </Button>

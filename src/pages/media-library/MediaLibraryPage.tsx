@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { PageHeader } from "@/components/ui/page-header";
 import { FilesIcon, Upload, Search, Filter, Calendar } from "lucide-react";
@@ -12,6 +13,7 @@ import { UploadMediaModal } from "@/components/UploadMediaModal";
 import { Separator } from "@/components/ui/separator";
 import { useAuth } from "@/contexts/AuthContext";
 import { Input } from "@/components/ui/input";
+import { useIsMobile } from "@/hooks/use-mobile";
 import { 
   Select, 
   SelectContent, 
@@ -24,6 +26,7 @@ export default function MediaLibraryPage() {
   const { toast } = useToast();
   const { audioFiles } = useAudioFiles();
   const { user } = useAuth();
+  const isMobile = useIsMobile();
   
   const [isLoading, setIsLoading] = useState(true);
   const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
@@ -150,7 +153,7 @@ export default function MediaLibraryPage() {
   const mediaTypes: MediaType[] = ["pdf", "audio", "image", "video", "other"];
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-6 md:space-y-8">
       <PageHeader
         title="Media Library"
         description="Access all your media files in one place"
@@ -162,15 +165,16 @@ export default function MediaLibraryPage() {
         <Button 
           onClick={() => setIsUploadModalOpen(true)}
           className="flex items-center gap-2"
-          size="lg"
+          size={isMobile ? "default" : "lg"}
         >
-          <Upload className="h-5 w-5" /> Upload Media File
+          <Upload className={`${isMobile ? "h-4 w-4" : "h-5 w-5"}`} /> 
+          {isMobile ? "Upload" : "Upload Media File"}
         </Button>
       </div>
       
-      {/* Search and Filter Bar */}
-      <div className="flex flex-col md:flex-row gap-4">
-        <div className="relative flex-grow">
+      {/* Search and Filter Bar - Responsive layout */}
+      <div className="flex flex-col gap-4">
+        <div className="relative w-full">
           <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
           <Input
             placeholder="Search media files..."
@@ -180,12 +184,12 @@ export default function MediaLibraryPage() {
           />
         </div>
         
-        <div className="flex gap-2">
+        <div className="flex flex-col sm:flex-row gap-2 w-full">
           <Select
             value={selectedMediaType}
             onValueChange={(value) => handleMediaTypeChange(value as MediaType | "all")}
           >
-            <SelectTrigger className="w-[140px]">
+            <SelectTrigger className="w-full sm:w-[140px]">
               <Filter className="h-4 w-4 mr-2" />
               <SelectValue placeholder="Filter by type" />
             </SelectTrigger>
@@ -203,7 +207,7 @@ export default function MediaLibraryPage() {
             value={dateFilter}
             onValueChange={(value) => handleDateFilterChange(value as "newest" | "oldest")}
           >
-            <SelectTrigger className="w-[140px]">
+            <SelectTrigger className="w-full sm:w-[140px]">
               <Calendar className="h-4 w-4 mr-2" />
               <SelectValue placeholder="Sort by date" />
             </SelectTrigger>
@@ -216,13 +220,13 @@ export default function MediaLibraryPage() {
       </div>
       
       {isLoading ? (
-        <div className="flex justify-center py-12">
+        <div className="flex justify-center py-8">
           <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
         </div>
       ) : (
         <>
           {filteredMediaFiles.length === 0 ? (
-            <div className="text-center py-12 text-muted-foreground">
+            <div className="text-center py-10 text-muted-foreground">
               <p>No media files found matching your criteria.</p>
               <Button 
                 onClick={() => setIsUploadModalOpen(true)}
@@ -251,7 +255,7 @@ export default function MediaLibraryPage() {
                         mediaType={mediaType}
                         title={getMediaTypeLabel(mediaType)}
                       />
-                      <Separator className="my-8" />
+                      <Separator className="my-6 md:my-8" />
                     </React.Fragment>
                   );
                 })
