@@ -3,6 +3,8 @@ import React from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Music, FileText, Calendar, Headphones, Mic } from "lucide-react";
+import { Clock } from "@/components/ui/clock";
+import { NewsFeed } from "@/components/news/NewsFeed";
 
 export default function LandingPage() {
   const navigate = useNavigate();
@@ -18,7 +20,11 @@ export default function LandingPage() {
               Glee World
             </span>
           </div>
-          <Button onClick={() => navigate("/login")}>Login</Button>
+          <div className="flex items-center gap-4">
+            <Clock />
+            <NewsFeed />
+            <Button onClick={() => navigate("/login")}>Login</Button>
+          </div>
         </div>
       </header>
 
