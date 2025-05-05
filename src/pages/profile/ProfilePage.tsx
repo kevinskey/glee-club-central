@@ -1,277 +1,331 @@
 
 import React, { useState, useEffect } from "react";
 import { useAuth } from "@/contexts/AuthContext";
-import { Header } from "@/components/layout/Header";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { User, Mail, Music, Edit, Save } from "lucide-react";
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { useForm } from "react-hook-form";
 import { supabase } from "@/integrations/supabase/client";
-import { useToast } from "@/components/ui/use-toast";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { UserRound, AtSign, Phone, MapPin, School, Pencil, Save } from "lucide-react";
+import { PageHeader } from "@/components/ui/page-header";
+import { useToast } from "@/hooks/use-toast";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
-// Define the valid voice part types
-type VoicePart = "not_specified" | "Soprano1" | "Soprano2" | "Alto1" | "Alto2" | "Tenor" | "Bass";
+type VoicePart = "Soprano1" | "Soprano2" | "Alto1" | "Alto2" | "Tenor" | "Bass" | "not_specified";
 
 export default function ProfilePage() {
-  const { user, profile } = useAuth();
-  const [isEditing, setIsEditing] = useState(false);
+  const { user } = useAuth();
   const { toast } = useToast();
-
-  // Define form with react-hook-form
-  const form = useForm({
-    defaultValues: {
-      first_name: profile?.first_name || "",
-      last_name: profile?.last_name || "",
-      voice_part: (profile?.voice_part as VoicePart) || "not_specified",
-    },
-  });
-
-  // Update form values when profile changes
+  
+  // Form state
+  const [isEditing, setIsEditing] = useState(false);
+  const [fullName, setFullName] = useState("");
+  const [email, setEmail] = useState("");
+  const [phone, setPhone] = useState("");
+  const [address, setAddress] = useState("");
+  const [school, setSchool] = useState("");
+  const [bio, setBio] = useState("");
+  const [voicePart, setVoicePart] = useState<VoicePart>("not_specified");
+  const [isLoading, setIsLoading] = useState(false);
+  const [avatarUrl, setAvatarUrl] = useState("");
+  
   useEffect(() => {
-    if (profile) {
-      form.reset({
-        first_name: profile.first_name || "",
-        last_name: profile.last_name || "",
-        voice_part: (profile.voice_part as VoicePart) || "not_specified",
-      });
+    if (user) {
+      fetchProfile();
     }
-  }, [profile, form]);
-
-  // Get user initials for the avatar
-  const getUserInitials = () => {
-    if (profile?.first_name && profile?.last_name) {
-      return `${profile.first_name[0]}${profile.last_name[0]}`.toUpperCase();
-    } else if (user?.email) {
-      return user.email[0].toUpperCase();
-    }
-    return "U";
-  };
-
-  // Get display name
-  const getDisplayName = () => {
-    if (profile?.first_name && profile?.last_name) {
-      return `${profile.first_name} ${profile.last_name}`;
-    } else if (user?.email) {
-      return user.email.split('@')[0];
-    }
-    return "User";
-  };
-
-  // Get voice part
-  const getVoicePart = () => {
-    if (profile?.voice_part) {
-      // Map "not_specified" to a user-friendly display value
-      if (profile.voice_part === "not_specified") {
-        return "Not specified";
-      }
-      return profile.voice_part;
-    }
-    return "Not specified";
-  };
-
-  const onSubmit = async (data) => {
+  }, [user]);
+  
+  const fetchProfile = async () => {
+    if (!user) return;
+    
     try {
-      if (!user) return;
-
-      const { error } = await supabase
-        .from("profiles")
-        .update({
-          first_name: data.first_name,
-          last_name: data.last_name,
-          voice_part: data.voice_part,
-        })
-        .eq("id", user.id);
-
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', user.id)
+        .single();
+        
       if (error) throw error;
-
-      toast({
-        title: "Profile updated",
-        description: "Your profile has been updated successfully.",
-      });
       
-      setIsEditing(false);
-      
-      // Force reload to update profile data
-      window.location.reload();
+      if (data) {
+        setFullName(data.full_name || '');
+        setEmail(data.email || user.email || '');
+        setPhone(data.phone || '');
+        setAddress(data.address || '');
+        setSchool(data.school || '');
+        setBio(data.bio || '');
+        // Convert null or empty voice part to "not_specified"
+        setVoicePart((data.voice_part || "not_specified") as VoicePart);
+        setAvatarUrl(data.avatar_url || '');
+      }
     } catch (error) {
+      console.error('Error fetching profile:', error);
       toast({
-        title: "Update failed",
-        description: error.message || "Failed to update profile",
+        title: "Error fetching profile",
+        description: "There was an error loading your profile information.",
         variant: "destructive",
       });
     }
   };
-
-  const handleEditToggle = () => {
-    if (isEditing) {
-      setIsEditing(false);
-    } else {
-      // Reset form with current values when entering edit mode
-      form.reset({
-        first_name: profile?.first_name || "",
-        last_name: profile?.last_name || "",
-        voice_part: (profile?.voice_part as VoicePart) || "not_specified",
+  
+  const handleSaveProfile = async () => {
+    if (!user) return;
+    
+    setIsLoading(true);
+    
+    try {
+      const { error } = await supabase
+        .from('profiles')
+        .upsert({
+          id: user.id,
+          full_name: fullName,
+          email: email || user.email,
+          phone,
+          address,
+          school,
+          bio,
+          voice_part: voicePart === "not_specified" ? null : voicePart,
+          updated_at: new Date().toISOString(),
+        });
+        
+      if (error) throw error;
+      
+      toast({
+        title: "Profile updated",
+        description: "Your profile information has been saved successfully.",
       });
-      setIsEditing(true);
+      
+      setIsEditing(false);
+    } catch (error: any) {
+      console.error('Error updating profile:', error);
+      toast({
+        title: "Update failed",
+        description: error.message || "There was an error updating your profile.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
     }
   };
-
-  // Voice part options based on the schema - using 'not_specified' as a valid non-empty string value
-  const voicePartOptions = [
-    { value: "not_specified", label: "Not specified" },
-    { value: "Soprano1", label: "Soprano 1" },
-    { value: "Soprano2", label: "Soprano 2" },
-    { value: "Alto1", label: "Alto 1" },
-    { value: "Alto2", label: "Alto 2" },
-    { value: "Tenor", label: "Tenor" },
-    { value: "Bass", label: "Bass" },
-  ];
-
+  
+  const getInitials = (name: string) => {
+    return name
+      .split(' ')
+      .map(part => part[0])
+      .join('')
+      .toUpperCase()
+      .substring(0, 2);
+  };
+  
   return (
-    <div className="min-h-screen bg-background">
-      <Header />
-      <main className="container py-8 px-4 sm:px-6">
-        <div className="mx-auto max-w-3xl">
-          <Card className="mb-8">
-            <CardHeader className="text-center">
-              <div className="flex justify-center mb-4">
-                <Avatar className="h-24 w-24 bg-glee-purple text-white text-2xl">
-                  <AvatarFallback>{getUserInitials()}</AvatarFallback>
-                </Avatar>
-              </div>
-              <CardTitle className="text-2xl break-words">{getDisplayName()}</CardTitle>
+    <div className="max-w-3xl mx-auto">
+      <PageHeader
+        title="My Profile"
+        description="Manage your personal information and settings"
+        icon={<UserRound className="h-6 w-6" />}
+      />
+      
+      <div className="space-y-6">
+        {/* Profile Card */}
+        <Card>
+          <CardHeader className="flex flex-row items-center gap-4">
+            <Avatar className="h-16 w-16">
+              <AvatarImage src={avatarUrl} alt={fullName} />
+              <AvatarFallback>{getInitials(fullName || "Glee Member")}</AvatarFallback>
+            </Avatar>
+            <div>
+              <CardTitle className="text-2xl">{fullName || "Set Your Name"}</CardTitle>
               <CardDescription>
-                {profile?.role === "admin" ? "Administrator" : "Choir Member"}
+                {voicePart === "not_specified" ? "Voice part not specified" : voicePart}
               </CardDescription>
-            </CardHeader>
-            
-            {isEditing ? (
-              <Form {...form}>
-                <form onSubmit={form.handleSubmit(onSubmit)}>
-                  <CardContent className="space-y-6">
-                    <div className="space-y-4">
-                      <FormField
-                        control={form.control}
-                        name="first_name"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>First Name</FormLabel>
-                            <FormControl>
-                              <Input placeholder="First name" {...field} />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                      <FormField
-                        control={form.control}
-                        name="last_name"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Last Name</FormLabel>
-                            <FormControl>
-                              <Input placeholder="Last name" {...field} />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                      <FormField
-                        control={form.control}
-                        name="voice_part"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Voice Part</FormLabel>
-                            <Select 
-                              onValueChange={field.onChange} 
-                              defaultValue={field.value}
-                            >
-                              <FormControl>
-                                <SelectTrigger>
-                                  <SelectValue placeholder="Select your voice part" />
-                                </SelectTrigger>
-                              </FormControl>
-                              <SelectContent>
-                                {voicePartOptions.map((option) => (
-                                  <SelectItem key={option.value} value={option.value}>
-                                    {option.label}
-                                  </SelectItem>
-                                ))}
-                              </SelectContent>
-                            </Select>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                      <div>
-                        <p className="text-sm font-medium">Email</p>
-                        <p className="text-sm text-muted-foreground mt-1 break-words">{user?.email || "Not provided"}</p>
-                        <p className="text-xs text-muted-foreground mt-1">Email cannot be changed</p>
-                      </div>
-                    </div>
-                  </CardContent>
-                  <CardFooter className="flex flex-col sm:flex-row justify-between gap-2">
-                    <Button variant="outline" onClick={handleEditToggle} className="w-full sm:w-auto">
-                      Cancel
-                    </Button>
-                    <Button type="submit" className="bg-glee-purple hover:bg-glee-purple/90 w-full sm:w-auto">
-                      <Save className="mr-2 h-4 w-4" />
-                      Save Changes
-                    </Button>
-                  </CardFooter>
-                </form>
-              </Form>
-            ) : (
-              <>
-                <CardContent className="space-y-6">
-                  <div className="space-y-4">
-                    <div className="flex items-center gap-3 p-3 border rounded-md">
-                      <User className="h-5 w-5 text-muted-foreground flex-shrink-0" />
-                      <div className="min-w-0 flex-1">
-                        <p className="text-sm font-medium">Name</p>
-                        <p className="text-sm text-muted-foreground break-words">
-                          {profile?.first_name && profile?.last_name
-                            ? `${profile.first_name} ${profile.last_name}`
-                            : "Not provided"}
-                        </p>
-                      </div>
-                    </div>
-                    
-                    <div className="flex items-center gap-3 p-3 border rounded-md">
-                      <Mail className="h-5 w-5 text-muted-foreground flex-shrink-0" />
-                      <div className="min-w-0 flex-1">
-                        <p className="text-sm font-medium">Email</p>
-                        <p className="text-sm text-muted-foreground break-words">{user?.email || "Not provided"}</p>
-                      </div>
-                    </div>
-                    
-                    <div className="flex items-center gap-3 p-3 border rounded-md">
-                      <Music className="h-5 w-5 text-muted-foreground flex-shrink-0" />
-                      <div className="min-w-0 flex-1">
-                        <p className="text-sm font-medium">Voice Part</p>
-                        <p className="text-sm text-muted-foreground">{getVoicePart()}</p>
-                      </div>
-                    </div>
-                  </div>
-                </CardContent>
-                <CardFooter className="flex flex-col sm:flex-row justify-between gap-2">
-                  <Button variant="outline" onClick={() => window.history.back()} className="w-full sm:w-auto">
-                    Back to Dashboard
-                  </Button>
-                  <Button onClick={handleEditToggle} className="bg-glee-purple hover:bg-glee-purple/90 w-full sm:w-auto">
-                    <Edit className="mr-2 h-4 w-4" />
+            </div>
+            <div className="ml-auto">
+              <Button 
+                variant={isEditing ? "outline" : "default"} 
+                onClick={() => setIsEditing(!isEditing)}
+                className="flex items-center gap-2"
+              >
+                {isEditing ? (
+                  <>Cancel</>
+                ) : (
+                  <>
+                    <Pencil className="h-4 w-4" />
                     Edit Profile
-                  </Button>
-                </CardFooter>
-              </>
+                  </>
+                )}
+              </Button>
+            </div>
+          </CardHeader>
+          
+          <CardContent className="space-y-4">
+            {isEditing ? (
+              <div className="space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium" htmlFor="fullName">Full Name</label>
+                    <Input
+                      id="fullName"
+                      value={fullName}
+                      onChange={(e) => setFullName(e.target.value)}
+                      placeholder="Your full name"
+                    />
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium" htmlFor="email">Email</label>
+                    <Input
+                      id="email"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      placeholder="Your email address"
+                      type="email"
+                      disabled={!!user?.email}
+                    />
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium" htmlFor="phone">Phone Number</label>
+                    <Input
+                      id="phone"
+                      value={phone}
+                      onChange={(e) => setPhone(e.target.value)}
+                      placeholder="Your phone number"
+                    />
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium" htmlFor="voicePart">Voice Part</label>
+                    <Select
+                      value={voicePart}
+                      onValueChange={(value) => setVoicePart(value as VoicePart)}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select your voice part" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="not_specified">Not specified</SelectItem>
+                        <SelectItem value="Soprano1">Soprano 1</SelectItem>
+                        <SelectItem value="Soprano2">Soprano 2</SelectItem>
+                        <SelectItem value="Alto1">Alto 1</SelectItem>
+                        <SelectItem value="Alto2">Alto 2</SelectItem>
+                        <SelectItem value="Tenor">Tenor</SelectItem>
+                        <SelectItem value="Bass">Bass</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium" htmlFor="address">Address</label>
+                    <Input
+                      id="address"
+                      value={address}
+                      onChange={(e) => setAddress(e.target.value)}
+                      placeholder="Your address"
+                    />
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium" htmlFor="school">School/Department</label>
+                    <Input
+                      id="school"
+                      value={school}
+                      onChange={(e) => setSchool(e.target.value)}
+                      placeholder="Your school or department"
+                    />
+                  </div>
+                </div>
+                
+                <div className="space-y-2">
+                  <label className="text-sm font-medium" htmlFor="bio">Bio</label>
+                  <Textarea
+                    id="bio"
+                    value={bio}
+                    onChange={(e) => setBio(e.target.value)}
+                    placeholder="Tell us a bit about yourself"
+                    rows={4}
+                  />
+                </div>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="space-y-1">
+                    <p className="text-sm text-muted-foreground flex items-center">
+                      <AtSign className="mr-2 h-4 w-4" />
+                      Email
+                    </p>
+                    <p>{email || "Not provided"}</p>
+                  </div>
+                  
+                  <div className="space-y-1">
+                    <p className="text-sm text-muted-foreground flex items-center">
+                      <Phone className="mr-2 h-4 w-4" />
+                      Phone
+                    </p>
+                    <p>{phone || "Not provided"}</p>
+                  </div>
+                  
+                  {address && (
+                    <div className="space-y-1">
+                      <p className="text-sm text-muted-foreground flex items-center">
+                        <MapPin className="mr-2 h-4 w-4" />
+                        Address
+                      </p>
+                      <p>{address}</p>
+                    </div>
+                  )}
+                  
+                  {school && (
+                    <div className="space-y-1">
+                      <p className="text-sm text-muted-foreground flex items-center">
+                        <School className="mr-2 h-4 w-4" />
+                        School/Department
+                      </p>
+                      <p>{school}</p>
+                    </div>
+                  )}
+                </div>
+                
+                {bio && (
+                  <div className="space-y-1 pt-2">
+                    <p className="text-sm text-muted-foreground">Bio</p>
+                    <p>{bio}</p>
+                  </div>
+                )}
+              </div>
             )}
-          </Card>
-        </div>
-      </main>
+          </CardContent>
+          
+          {isEditing && (
+            <CardFooter>
+              <Button 
+                onClick={handleSaveProfile} 
+                disabled={isLoading}
+                className="ml-auto flex items-center gap-2"
+              >
+                <Save className="h-4 w-4" />
+                Save Changes
+              </Button>
+            </CardFooter>
+          )}
+        </Card>
+        
+        {/* Additional profile sections can be added here */}
+      </div>
     </div>
   );
 }

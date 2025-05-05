@@ -5,6 +5,7 @@ import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { PDFAnnotationToolbar, AnnotationTool } from "../PDFAnnotationToolbar";
 import { PDFAnnotationCanvas, Annotation } from "../PDFAnnotationCanvas";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 interface PDFAnnotationManagerProps {
   showAnnotations: boolean;
@@ -34,6 +35,7 @@ export const PDFAnnotationManager = ({
   const [penColor, setPenColor] = useState("#FF0000"); // Default to red
   const [penSize, setPenSize] = useState(3);
   const [isSaving, setIsSaving] = useState(false);
+  const isMobile = useIsMobile();
 
   if (!showAnnotations) return null;
 
@@ -105,6 +107,7 @@ export const PDFAnnotationManager = ({
         onPenColorChange={setPenColor}
         penSize={penSize}
         onPenSizeChange={setPenSize}
+        isMobile={isMobile}
       />
       
       {showAnnotations && (

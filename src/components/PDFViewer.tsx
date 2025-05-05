@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
@@ -160,20 +161,7 @@ export const PDFViewer = ({ url, title, sheetMusicId }: PDFViewerProps) => {
         />
       )}
       
-      {/* Annotation Manager (includes toolbar) */}
-      <PDFAnnotationManager
-        showAnnotations={showAnnotations}
-        containerRef={containerRef}
-        canvasWidth={canvasWidth}
-        canvasHeight={canvasHeight}
-        zoom={zoom}
-        user={user}
-        sheetMusicId={sheetMusicId}
-        annotations={annotations}
-        setAnnotations={setAnnotations}
-      />
-      
-      {/* Mobile Controls (Top) */}
+      {/* Mobile Controls at the top */}
       {isMobile && (
         <div className="sticky top-0 z-10 w-full">
           <PDFMobileControls
@@ -191,14 +179,44 @@ export const PDFViewer = ({ url, title, sheetMusicId }: PDFViewerProps) => {
             onZoomIn={handleZoomIn}
             url={url}
           />
+          
+          {/* Annotation Manager for mobile always at the top */}
+          {isMobile && showAnnotations && (
+            <PDFAnnotationManager
+              showAnnotations={showAnnotations}
+              containerRef={containerRef}
+              canvasWidth={canvasWidth}
+              canvasHeight={canvasHeight}
+              zoom={zoom}
+              user={user}
+              sheetMusicId={sheetMusicId}
+              annotations={annotations}
+              setAnnotations={setAnnotations}
+            />
+          )}
         </div>
+      )}
+      
+      {/* Desktop Annotation Manager */}
+      {!isMobile && (
+        <PDFAnnotationManager
+          showAnnotations={showAnnotations}
+          containerRef={containerRef}
+          canvasWidth={canvasWidth}
+          canvasHeight={canvasHeight}
+          zoom={zoom}
+          user={user}
+          sheetMusicId={sheetMusicId}
+          annotations={annotations}
+          setAnnotations={setAnnotations}
+        />
       )}
       
       {/* PDF Document Container */}
       <div 
         ref={containerRef} 
         className="relative w-full flex justify-center" 
-        style={{ height: isMobile ? "calc(100vh - 220px)" : "70vh" }}
+        style={{ height: isMobile ? "calc(100vh - 250px)" : "70vh" }}
       >
         <PDFDocument
           url={url}

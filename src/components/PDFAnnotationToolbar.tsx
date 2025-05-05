@@ -4,7 +4,6 @@ import { Button } from "@/components/ui/button";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Pen, Eraser, Save, X, Square } from "lucide-react";
 import { Toggle } from "@/components/ui/toggle";
-import { useIsMobile } from "@/hooks/use-mobile";
 
 export type AnnotationTool = "pen" | "eraser" | "square" | null;
 
@@ -18,6 +17,7 @@ interface PDFAnnotationToolbarProps {
   onPenColorChange: (color: string) => void;
   penSize: number;
   onPenSizeChange: (size: number) => void;
+  isMobile?: boolean;
 }
 
 export const PDFAnnotationToolbar = ({
@@ -30,9 +30,9 @@ export const PDFAnnotationToolbar = ({
   onPenColorChange,
   penSize,
   onPenSizeChange,
+  isMobile = false,
 }: PDFAnnotationToolbarProps) => {
   const colors = ["#000000", "#FF0000", "#0000FF", "#00FF00", "#FFFF00", "#FF00FF"];
-  const isMobile = useIsMobile();
 
   if (!isOpen) return null;
 
