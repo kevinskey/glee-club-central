@@ -10,7 +10,7 @@ import {
   UserCheck,
   FileImage,
   AudioLines,
-  Music2
+  Video
 } from "lucide-react";
 import { NavItem } from "./NavItem";
 
@@ -44,6 +44,13 @@ export function SidebarNav({ className }: { className?: string }) {
             href="/dashboard/recordings"
             title="Recordings"
             icon={AudioLines}
+          />
+        </li>
+        <li>
+          <NavItem
+            href="/dashboard/videos"
+            title="Videos"
+            icon={Video}
           />
         </li>
         <li>

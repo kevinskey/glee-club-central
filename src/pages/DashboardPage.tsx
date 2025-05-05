@@ -11,7 +11,8 @@ import {
   Mic, 
   ShoppingBag,
   Bell,
-  Music2
+  Video,
+  FileImage
 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { PageHeader } from "@/components/ui/page-header";
@@ -79,6 +80,13 @@ export default function DashboardPage() {
       color: "bg-green-500/10",
     },
     {
+      title: "Videos",
+      description: "Watch performances and recordings from the Glee Club",
+      icon: <Video className="h-6 w-6" />,
+      href: "/dashboard/videos",
+      color: "bg-purple-500/10",
+    },
+    {
       title: "Pay Dues",
       description: "View and pay your choir membership dues",
       icon: <CreditCard className="h-6 w-6" />,
@@ -112,6 +120,13 @@ export default function DashboardPage() {
       icon: <CheckSquare className="h-6 w-6" />,
       href: "/dashboard/attendance",
       color: "bg-teal-500/10",
+    },
+    {
+      title: "Media Library",
+      description: "View and download photos and media from past events",
+      icon: <FileImage className="h-6 w-6" />,
+      href: "/dashboard/media-library",
+      color: "bg-orange-500/10",
     },
   ];
 
