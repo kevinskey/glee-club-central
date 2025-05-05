@@ -8,7 +8,7 @@ import {
   SelectValue
 } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
-import { ListMusic, Plus, Loader2, AlertCircle } from "lucide-react";
+import { ListMusic, Plus, Loader2, AlertCircle, Grid2X2, List } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
 
 interface Setlist {
@@ -23,7 +23,7 @@ interface SetlistSelectorProps {
   setlists: Setlist[];
   activeSetlist: Setlist | null;
   isLoading: boolean;
-  isError?: boolean; // Added error state prop
+  isError?: boolean;
   onSelect: (setlist: Setlist) => void;
   onDelete: (setlistId: string) => void;
   onCreateNew: () => void;
@@ -33,7 +33,7 @@ export const SetlistSelector = ({
   setlists,
   activeSetlist,
   isLoading,
-  isError = false, // Default to false
+  isError = false,
   onSelect,
   onDelete,
   onCreateNew

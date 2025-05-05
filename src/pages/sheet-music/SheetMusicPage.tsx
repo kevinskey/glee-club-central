@@ -1,8 +1,7 @@
-
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { PageHeader } from "@/components/ui/page-header";
-import { FileText, FolderOpen, Loader2, Upload, Search, Music, Play, Pause } from "lucide-react";
+import { FileText, FolderOpen, Loader2, Upload, Search, Music, Play, Pause, ListMusic } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -10,6 +9,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { UploadSheetMusicModal } from "@/components/UploadSheetMusicModal";
+import { SetlistDrawer } from "@/components/setlist/SetlistDrawer";
 import {
   Select,
   SelectContent,
@@ -59,6 +59,7 @@ export default function SheetMusicPage() {
   const [audioFiles, setAudioFiles] = useState<AudioFile[]>([]);
   const [filteredFiles, setFilteredFiles] = useState<SheetMusic[]>([]);
   const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
+  const [isSetlistDrawerOpen, setIsSetlistDrawerOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [sortOrder, setSortOrder] = useState<SortOption>("newest");
   const [currentAudio, setCurrentAudio] = useState<AudioFile | null>(null);
@@ -272,14 +273,24 @@ export default function SheetMusicPage() {
       <Tabs defaultValue="grid" className="w-full">
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-xl font-semibold">Sheet Music Collection</h2>
-          <TabsList>
-            <TabsTrigger value="grid" className="flex items-center gap-1">
-              <FolderOpen className="h-4 w-4" /> Grid View
-            </TabsTrigger>
-            <TabsTrigger value="table" className="flex items-center gap-1">
-              <FileText className="h-4 w-4" /> Table View
-            </TabsTrigger>
-          </TabsList>
+          <div className="flex items-center gap-2">
+            <Button 
+              variant="outline"
+              size="sm"
+              className="flex items-center gap-1"
+              onClick={() => setIsSetlistDrawerOpen(true)}
+            >
+              <ListMusic className="h-4 w-4" /> Setlists
+            </Button>
+            <TabsList>
+              <TabsTrigger value="grid" className="flex items-center gap-1">
+                <FolderOpen className="h-4 w-4" /> Grid View
+              </TabsTrigger>
+              <TabsTrigger value="table" className="flex items-center gap-1">
+                <FileText className="h-4 w-4" /> Table View
+              </TabsTrigger>
+            </TabsList>
+          </div>
         </div>
         
         {loading ? (
@@ -421,10 +432,16 @@ export default function SheetMusicPage() {
         )}
       </div>
 
+      {/* Modals and Drawers */}
       <UploadSheetMusicModal 
         onUploadComplete={fetchSheetMusic}
         open={isUploadModalOpen}
         onOpenChange={setIsUploadModalOpen}
+      />
+
+      <SetlistDrawer
+        open={isSetlistDrawerOpen}
+        onOpenChange={setIsSetlistDrawerOpen}
       />
     </div>
   );
