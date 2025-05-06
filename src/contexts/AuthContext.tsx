@@ -166,6 +166,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     // Set up auth state listener
     const { data: authListener } = supabase.auth.onAuthStateChange(async (event, session) => {
+      console.log("Auth state change event:", event);
       if (event === 'SIGNED_IN' && session) {
         setUser(session.user);
         // Use setTimeout to avoid potential deadlocks
@@ -225,6 +226,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       // Clean up existing auth state
       cleanupAuthState();
       
+      console.log("Starting Google sign-in...");
+      
       // Try global sign out first
       try {
         await supabase.auth.signOut({ scope: 'global' });
@@ -233,15 +236,19 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         console.log("Global sign out failed, continuing with Google sign in");
       }
       
-      const { error } = await supabase.auth.signInWithOAuth({
+      const { data, error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
           redirectTo: window.location.origin + '/dashboard'
         }
       });
 
-      if (error) throw error;
+      if (error) {
+        console.error("Google sign-in error:", error);
+        throw error;
+      }
       
+      console.log("Google sign-in initiated:", data);
       // No need to set user and profile here as it will be handled by onAuthStateChange
     } catch (error: any) {
       console.error('Error signing in with Google:', error);
