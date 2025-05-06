@@ -16,7 +16,7 @@ export function HeroSection() {
   ];
   
   return (
-    <section className="relative bg-glee-dark py-24 md:py-32 overflow-hidden">
+    <section className="relative bg-glee-dark py-28 md:py-40 overflow-hidden">
       <div className="absolute inset-0 opacity-50 bg-blend-overlay bg-black">
         <BackgroundSlideshow 
           images={backgroundImages} 
@@ -25,17 +25,17 @@ export function HeroSection() {
         />
       </div>
       <div className="container relative z-10 mx-auto md:grid-cols-1 items-center">
-        <div className="text-white space-y-6 md:pr-6 max-w-2xl mx-auto text-center md:text-left md:mx-0">
+        <div className="text-white space-y-8 md:pr-6 max-w-2xl mx-auto text-center md:text-left md:mx-0">
           <h1 className="font-playfair tracking-tight">
-            <span className="block text-3xl md:text-4xl lg:text-5xl font-bold">Spelman College</span>
+            <span className="block text-3xl md:text-4xl lg:text-5xl font-bold mb-2">Spelman College</span>
             <span className="animate-gradient bg-clip-text text-transparent text-5xl md:text-6xl lg:text-7xl font-bold">
               Glee Club
             </span>
           </h1>
-          <p className="text-lg md:text-xl leading-relaxed opacity-90">
+          <p className="text-lg md:text-xl leading-relaxed opacity-90 mt-4">
             A distinguished ensemble with a rich heritage of musical excellence, directed by Dr. Kevin Phillip Johnson.
           </p>
-          <div className="pt-4 flex flex-col sm:flex-row gap-4 justify-center md:justify-start">
+          <div className="pt-6 flex flex-col sm:flex-row gap-5 justify-center md:justify-start">
             <Button 
               size="lg" 
               className="bg-glee-purple hover:bg-glee-purple/90 text-white"
