@@ -7,7 +7,7 @@ import { useCalendarEvents, CalendarEvent } from "@/hooks/useCalendarEvents";
 import { AddEventForm } from "@/components/calendar/AddEventForm";
 import { toast } from "sonner";
 
-// Newly created components
+// Components
 import { CalendarContainer } from "@/components/calendar/CalendarContainer";
 import { EventList } from "@/components/calendar/EventList";
 import { EventDetails } from "@/components/calendar/EventDetails";
@@ -19,7 +19,7 @@ export default function CalendarPage() {
   const [isAddEventOpen, setIsAddEventOpen] = useState(false);
   const { events, loading, addEvent, deleteEvent } = useCalendarEvents();
   
-  // Filter events for the selected date - memoized with useCallback
+  // Filter events for the selected date - memoized
   const eventsOnSelectedDate = useMemo(() => {
     if (!date) return [];
     
@@ -31,7 +31,7 @@ export default function CalendarPage() {
   }, [date, events]);
     
   // Get days with events for highlighting in the calendar
-  const daysWithEvents = events.map(event => event.date);
+  const daysWithEvents = useMemo(() => events.map(event => event.date), [events]);
   
   // Handle event selection
   const handleEventSelect = useCallback((event: CalendarEvent) => {
@@ -44,14 +44,15 @@ export default function CalendarPage() {
     
     if (newEvent) {
       setIsAddEventOpen(false);
+      toast.success("Event added successfully");
       
-      // If the new event is on the currently selected date, update the calendar
+      // If the new event is on the currently selected date, select it
       if (date && 
           formValues.date.getDate() === date.getDate() && 
           formValues.date.getMonth() === date.getMonth() && 
           formValues.date.getFullYear() === date.getFullYear()) {
-        // Just refresh the same date to trigger a re-render
-        setDate(new Date(formValues.date));
+        // Set the date again to trigger a refresh
+        setDate(new Date(date));
       }
     }
   };
@@ -67,7 +68,7 @@ export default function CalendarPage() {
   };
   
   // Get badge color based on event type
-  const getEventTypeColor = (type: string) => {
+  const getEventTypeColor = useCallback((type: string) => {
     switch (type) {
       case "concert":
         return "bg-glee-purple hover:bg-glee-purple/90";
@@ -80,7 +81,7 @@ export default function CalendarPage() {
       default:
         return "bg-gray-500 hover:bg-gray-500/90";
     }
-  };
+  }, []);
   
   return (
     <div className="flex min-h-screen flex-col">

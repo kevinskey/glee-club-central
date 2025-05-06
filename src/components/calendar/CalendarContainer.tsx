@@ -1,5 +1,5 @@
 
-import React from "react";
+import React, { memo } from "react";
 import { Calendar } from "@/components/ui/calendar";
 import { format } from "date-fns";
 import { CalendarEvent } from "@/hooks/useCalendarEvents";
@@ -11,7 +11,7 @@ interface CalendarContainerProps {
   loading: boolean;
 }
 
-export const CalendarContainer = ({
+export const CalendarContainer = memo(({
   date,
   setDate,
   daysWithEvents,
@@ -44,4 +44,6 @@ export const CalendarContainer = ({
       />
     </div>
   );
-};
+});
+
+CalendarContainer.displayName = "CalendarContainer";

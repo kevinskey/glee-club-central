@@ -43,6 +43,13 @@ export const EventList = React.memo(({
       )}
     </div>
   );
+}, (prevProps, nextProps) => {
+  // Implement custom compare function for memoization
+  return (
+    prevProps.date?.getTime() === nextProps.date?.getTime() &&
+    prevProps.events.length === nextProps.events.length &&
+    prevProps.selectedEvent?.id === nextProps.selectedEvent?.id
+  );
 });
 
 EventList.displayName = "EventList";

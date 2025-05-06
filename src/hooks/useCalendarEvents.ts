@@ -24,21 +24,30 @@ export function useCalendarEvents() {
   const { getSampleEvents } = useSampleEvents();
   const fetchingRef = useRef(false);
   const [fetchError, setFetchError] = useState(false);
+  const initialFetchDoneRef = useRef(false);
 
   // Fetch events from Supabase
   const fetchEvents = useCallback(async () => {
-    // Prevent multiple simultaneous fetch attempts
+    // Skip if already fetching
     if (fetchingRef.current) return;
     fetchingRef.current = true;
     
-    setLoading(true);
     try {
       // Use sample data if not authenticated
       if (!user) {
-        console.log("No user authenticated, using sample events");
-        setEvents(getSampleEvents());
-        setFetchError(false);
+        if (!initialFetchDoneRef.current) {
+          console.log("No user authenticated, using sample events");
+          const sampleEvents = getSampleEvents();
+          setEvents(sampleEvents);
+          setFetchError(false);
+          initialFetchDoneRef.current = true;
+          setLoading(false);
+        }
         return;
+      }
+
+      if (!initialFetchDoneRef.current) {
+        setLoading(true);
       }
 
       console.log("Attempting to fetch calendar events from Supabase");
@@ -55,7 +64,9 @@ export function useCalendarEvents() {
           setFetchError(true);
         }
         // Fall back to sample data
-        setEvents(getSampleEvents());
+        if (!initialFetchDoneRef.current) {
+          setEvents(getSampleEvents());
+        }
         return;
       }
 
@@ -82,10 +93,13 @@ export function useCalendarEvents() {
         toast.error("Failed to load calendar events");
         setFetchError(true);
       }
-      setEvents(getSampleEvents());
+      if (!initialFetchDoneRef.current) {
+        setEvents(getSampleEvents());
+      }
     } finally {
       setLoading(false);
       fetchingRef.current = false;
+      initialFetchDoneRef.current = true;
     }
   }, [user, getSampleEvents, fetchError]);
 
@@ -102,7 +116,7 @@ export function useCalendarEvents() {
     fetchEvents();
     
     // Increase the polling interval to reduce frequency of updates
-    const intervalTime = fetchError ? 60000 : 15000; // 15 seconds normally, 1 minute if error
+    const intervalTime = fetchError ? 120000 : 30000; // 30 seconds normally, 2 minutes if error
     
     // Only set up polling if authenticated
     if (user) {
