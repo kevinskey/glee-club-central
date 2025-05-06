@@ -57,8 +57,8 @@ export default function LandingPage() {
             }}
           ></div>
         </div>
-        <div className="container relative z-10 mx-auto grid md:grid-cols-2 gap-8 items-center">
-          <div className="text-white space-y-6 md:pr-6">
+        <div className="container relative z-10 mx-auto md:grid-cols-1 items-center">
+          <div className="text-white space-y-6 md:pr-6 max-w-2xl mx-auto text-center md:text-left md:mx-0">
             <h1 className="font-playfair text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight">
               <span className="block">Spelman College</span>
               <span className="bg-gradient-to-r from-glee-gold to-glee-purple bg-clip-text text-transparent">
@@ -68,7 +68,7 @@ export default function LandingPage() {
             <p className="text-lg md:text-xl leading-relaxed opacity-90">
               A distinguished ensemble with a rich heritage of musical excellence, directed by Dr. Kevin Phillip Johnson.
             </p>
-            <div className="pt-4 flex flex-col sm:flex-row gap-4">
+            <div className="pt-4 flex flex-col sm:flex-row gap-4 justify-center md:justify-start">
               <Button 
                 size="lg" 
                 className="bg-glee-purple hover:bg-glee-purple/90 text-white"
@@ -83,17 +83,6 @@ export default function LandingPage() {
               >
                 Performance Schedule
               </Button>
-            </div>
-          </div>
-          <div className="hidden md:block relative">
-            <div className="absolute -right-16 -top-16 w-80 h-80 bg-glee-purple/30 rounded-full blur-3xl"></div>
-            <div className="absolute -left-16 -bottom-16 w-80 h-80 bg-glee-gold/20 rounded-full blur-3xl"></div>
-            <div className="relative bg-white/10 backdrop-blur-sm border border-white/10 rounded-lg overflow-hidden">
-              <img 
-                src="/lovable-uploads/3ad02de0-04d1-4a5e-9279-898e9c317d80.png" 
-                alt="Spelman College Glee Club" 
-                className="w-full h-auto object-cover rounded-lg" 
-              />
             </div>
           </div>
         </div>
