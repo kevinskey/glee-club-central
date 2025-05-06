@@ -2,7 +2,7 @@
 import type { Config } from "tailwindcss";
 
 export default {
-	darkMode: ["class", ":root"],
+	darkMode: ["class", '[data-theme="dark"]'],
 	content: [
 		"./pages/**/*.{ts,tsx}",
 		"./components/**/*.{ts,tsx}",
@@ -63,13 +63,13 @@ export default {
 					border: 'hsl(var(--sidebar-border))',
 					ring: 'hsl(var(--sidebar-ring))'
 				},
-				// Updated colors for Carolina blue theme
+				// Custom colors for glee theme
 				glee: {
 					purple: '#4B9CD3', // Carolina Blue
 					gold: '#FFFFFF',    // White
 					light: '#F5FAFF',   // Very light blue background
 					dark: '#212529',    // Black for accents
-					accent: '#FFD700',  // Gold accent (maintained)
+					accent: '#FF7F00',  // Orange accent color as requested
 				}
 			},
 			fontFamily: {

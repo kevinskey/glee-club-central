@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { ArrowLeft, CalendarIcon, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { ThemeToggle } from "@/components/ui/theme-toggle";
 
 interface CalendarPageHeaderProps {
   onAddEventClick: () => void;
@@ -30,6 +31,7 @@ export const CalendarPageHeader = ({ onAddEventClick }: CalendarPageHeaderProps)
           <span>Performance <span className="text-glee-purple">Calendar</span></span>
         </h1>
         <div className="flex items-center gap-3 mt-4 sm:mt-0">
+          <ThemeToggle />
           <Button
             onClick={onAddEventClick}
             className="bg-glee-purple hover:bg-glee-purple/90 text-white hidden sm:flex"

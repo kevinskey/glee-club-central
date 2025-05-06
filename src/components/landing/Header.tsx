@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -6,6 +5,7 @@ import { Music, Menu, X } from "lucide-react";
 import { Clock } from "@/components/ui/clock";
 import { NewsFeed } from "@/components/news/NewsFeed";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { ThemeToggle } from "@/components/ui/theme-toggle";
 
 interface HeaderProps {
   initialShowNewsFeed?: boolean;
@@ -45,6 +45,7 @@ export function Header({ initialShowNewsFeed = true }: HeaderProps) {
         
         {/* Desktop navigation */}
         <div className="hidden md:flex items-center gap-4">
+          <ThemeToggle />
           <Clock />
           <Button 
             variant="outline" 
@@ -73,9 +74,10 @@ export function Header({ initialShowNewsFeed = true }: HeaderProps) {
       
       {/* Mobile menu */}
       {mobileMenuOpen && (
-        <div className="md:hidden bg-white border-t border-gray-200">
+        <div className="md:hidden bg-background border-t border-border">
           <div className="container py-4 px-4 flex flex-col gap-4">
-            <div className="flex justify-center">
+            <div className="flex justify-center gap-4">
+              <ThemeToggle />
               <Clock />
             </div>
             <Button 
