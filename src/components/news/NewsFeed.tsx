@@ -1,109 +1,51 @@
 
 import React, { useState, useEffect } from "react";
-import { ArrowRight, Music, BookOpen } from "lucide-react";
+import { X } from "lucide-react";
 
-type NewsItem = {
-  title: string;
-  link: string;
-  source: string;
-  publishedAt: string;
-};
+interface NewsFeedProps {
+  onClose?: () => void;
+}
 
-export function NewsFeed() {
-  const [news, setNews] = useState<NewsItem[]>([]);
-  const [loading, setLoading] = useState(true);
+export const NewsFeed: React.FC<NewsFeedProps> = ({ onClose }) => {
+  const [isVisible, setIsVisible] = useState(true);
   
-  // Since we can't use an actual Google News API in our client-side code,
-  // we'll use placeholder data for demonstration
+  const handleClose = () => {
+    setIsVisible(false);
+    if (onClose) onClose();
+  };
+  
+  // Auto-hide after 5 seconds (default behavior if no onClose provided)
   useEffect(() => {
-    // Simulating fetch delay
-    const timer = setTimeout(() => {
-      const mockNews: NewsItem[] = [
-        {
-          title: "Spelman College Glee Club Celebrates 100 Years of Excellence",
-          link: "https://example.com/spelman-glee-club",
-          source: "HBCU Times",
-          publishedAt: "2 hours ago"
-        },
-        {
-          title: "Dr. Kevin Johnson Leads Masterclass at National Choral Convention",
-          link: "https://example.com/johnson-masterclass",
-          source: "Choral Director",
-          publishedAt: "5 hours ago"
-        },
-        {
-          title: "Spring Concert Series Announced - Tickets Now Available",
-          link: "https://example.com/spring-concert",
-          source: "Campus Events",
-          publishedAt: "1 day ago"
-        },
-        {
-          title: "Glee Club to Perform at Governor's Arts Celebration",
-          link: "https://example.com/governors-arts",
-          source: "State Arts Council",
-          publishedAt: "2 days ago"
-        },
-        {
-          title: "New Scholarship Established for Voice Students",
-          link: "https://example.com/voice-scholarship",
-          source: "Alumni News",
-          publishedAt: "3 days ago"
-        }
-      ];
+    if (isVisible && !onClose) {
+      const timer = setTimeout(() => {
+        setIsVisible(false);
+      }, 5000);
       
-      setNews(mockNews);
-      setLoading(false);
-    }, 1000);
-    
-    return () => clearTimeout(timer);
-  }, []);
-
+      return () => clearTimeout(timer);
+    }
+  }, [isVisible, onClose]);
+  
+  if (!isVisible) return null;
+  
   return (
-    <div className="news-ticker-container overflow-hidden bg-gradient-to-r from-glee-purple/5 to-glee-gold/5 h-9 flex items-center border-b border-gray-200 dark:border-gray-800">
-      {loading ? (
-        <div className="px-4 text-muted-foreground flex items-center">
-          <Music className="animate-pulse h-4 w-4 mr-2 text-glee-purple" />
-          <span>Loading news...</span>
+    <div className="bg-glee-purple text-white py-1 relative">
+      <div className="container flex items-center justify-center text-sm">
+        <div className="flex-1 overflow-hidden">
+          <div className="flex whitespace-nowrap animate-marquee">
+            <span className="mx-4">📣 Welcome to the Spelman College Glee Club Digital Hub!</span>
+            <span className="mx-4">🎵 Upcoming concert: Spring Showcase on May 15th</span>
+            <span className="mx-4">📝 Members: Submit your recordings by Thursday</span>
+            <span className="mx-4">🎓 Congratulations to our graduating seniors!</span>
+          </div>
         </div>
-      ) : (
-        <div className="ticker-wrapper whitespace-nowrap flex items-center animate-marquee">
-          {news.map((item, index) => (
-            <React.Fragment key={index}>
-              <a 
-                href={item.link} 
-                target="_blank" 
-                rel="noopener noreferrer"
-                className="ticker-item inline-flex items-center px-4 hover:text-glee-purple transition-colors"
-              >
-                <Music className="h-3.5 w-3.5 mr-2 text-glee-purple" />
-                <span className="font-medium">{item.title}</span>
-                <span className="text-muted-foreground ml-2 text-xs">({item.source})</span>
-              </a>
-              {index < news.length - 1 && (
-                <ArrowRight className="h-3 w-3 text-glee-purple/50 mx-2" />
-              )}
-            </React.Fragment>
-          ))}
-          {/* Duplicate the news items to create a seamless loop */}
-          {news.map((item, index) => (
-            <React.Fragment key={`dup-${index}`}>
-              <a 
-                href={item.link} 
-                target="_blank" 
-                rel="noopener noreferrer"
-                className="ticker-item inline-flex items-center px-4 hover:text-glee-purple transition-colors"
-              >
-                <Music className="h-3.5 w-3.5 mr-2 text-glee-purple" />
-                <span className="font-medium">{item.title}</span>
-                <span className="text-muted-foreground ml-2 text-xs">({item.source})</span>
-              </a>
-              {index < news.length - 1 && (
-                <ArrowRight className="h-3 w-3 text-glee-purple/50 mx-2" />
-              )}
-            </React.Fragment>
-          ))}
-        </div>
-      )}
+        <button 
+          onClick={handleClose} 
+          className="p-1 rounded-full hover:bg-white/10 transition-colors"
+          aria-label="Close news feed"
+        >
+          <X className="h-4 w-4" />
+        </button>
+      </div>
     </div>
   );
-}
+};
