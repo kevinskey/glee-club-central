@@ -1,4 +1,3 @@
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -85,6 +84,7 @@
   /* Add consistent text spacing */
   p {
     @apply leading-relaxed;
+    line-height: 1.8; /* Increased from default leading-relaxed (1.625) */
   }
   
   h1, h2, h3, h4, h5, h6 {
@@ -195,8 +195,18 @@
     line-height: 1.8;
   }
   
+  /* Improved paragraph spacing with bottom margin */
   .prose-spacing p {
     margin-bottom: 1.25em;
+    line-height: 1.8;
+  }
+  
+  /* New utility for increased paragraph spacing */
+  .paragraph-spacing {
+    line-height: 1.8;
+  }
+  
+  .paragraph-spacing-loose {
+    line-height: 2;
   }
 }
-
