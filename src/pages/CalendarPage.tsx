@@ -1,4 +1,3 @@
-
 import React, { useState, useCallback, useMemo } from "react";
 import { Header } from "@/components/landing/Header";
 import { Footer } from "@/components/landing/Footer";
@@ -107,6 +106,7 @@ export default function CalendarPage() {
                 setDate={setDate}
                 daysWithEvents={daysWithEvents}
                 loading={loading}
+                events={events}
               />
             </div>
             
