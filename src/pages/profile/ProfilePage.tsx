@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
@@ -261,7 +260,7 @@ export default function ProfilePage() {
       } = {
         first_name: firstName,
         last_name: lastName,
-        voice_part: values.voice_part as VoicePart || null,
+        voice_part: values.voice_part === "none" ? null : values.voice_part as VoicePart || null,
         updated_at: new Date().toISOString(),
       };
 
@@ -473,7 +472,7 @@ export default function ProfilePage() {
                               </SelectTrigger>
                             </FormControl>
                             <SelectContent>
-                              <SelectItem value="">No voice part</SelectItem>
+                              <SelectItem value="none">No voice part</SelectItem>
                               <SelectItem value="soprano">Soprano</SelectItem>
                               <SelectItem value="alto">Alto</SelectItem>
                               <SelectItem value="tenor">Tenor</SelectItem>
