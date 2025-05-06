@@ -60,9 +60,9 @@ export default function LandingPage() {
         </div>
         <div className="container relative z-10 mx-auto md:grid-cols-1 items-center">
           <div className="text-white space-y-6 md:pr-6 max-w-2xl mx-auto text-center md:text-left md:mx-0">
-            <h1 className="font-playfair text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight">
-              <span className="block">Spelman College</span>
-              <span className="animate-gradient bg-clip-text text-transparent">
+            <h1 className="font-playfair tracking-tight">
+              <span className="block text-3xl md:text-4xl lg:text-5xl font-bold">Spelman College</span>
+              <span className="animate-gradient bg-clip-text text-transparent text-5xl md:text-6xl lg:text-7xl font-bold">
                 Glee Club
               </span>
             </h1>
