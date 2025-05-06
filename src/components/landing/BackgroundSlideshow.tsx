@@ -9,29 +9,20 @@ interface BackgroundSlideshowProps {
 
 export function BackgroundSlideshow({
   images,
-  duration = 5000,
-  transition = 3000,
+  duration = 7000,
+  transition = 0,
 }: BackgroundSlideshowProps) {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
-  const [nextImageIndex, setNextImageIndex] = useState(1);
-  const [isTransitioning, setIsTransitioning] = useState(false);
 
   useEffect(() => {
     if (images.length <= 1) return;
 
     const intervalId = setInterval(() => {
-      setIsTransitioning(true);
-      
-      setTimeout(() => {
-        setCurrentImageIndex(nextImageIndex);
-        setNextImageIndex((nextImageIndex + 1) % images.length);
-        setIsTransitioning(false);
-      }, transition);
-      
-    }, duration + transition);
+      setCurrentImageIndex((prevIndex) => (prevIndex + 1) % images.length);
+    }, duration);
 
     return () => clearInterval(intervalId);
-  }, [currentImageIndex, nextImageIndex, images, duration, transition]);
+  }, [images, duration]);
 
   if (images.length === 0) return null;
   if (images.length === 1) {
@@ -46,17 +37,9 @@ export function BackgroundSlideshow({
   return (
     <div className="absolute inset-0 overflow-hidden">
       <div
-        className="absolute inset-0 bg-cover bg-center transition-opacity duration-3000 ease-in-out"
+        className="absolute inset-0 bg-cover bg-center"
         style={{
           backgroundImage: `url('${images[currentImageIndex]}')`,
-          opacity: isTransitioning ? 0 : 1,
-        }}
-      />
-      <div
-        className="absolute inset-0 bg-cover bg-center transition-opacity duration-3000 ease-in-out"
-        style={{
-          backgroundImage: `url('${images[nextImageIndex]}')`,
-          opacity: isTransitioning ? 1 : 0,
         }}
       />
     </div>
