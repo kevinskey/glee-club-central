@@ -27,25 +27,18 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 
-// Define sound types - using regular audio files instead of data URLs
+// Define sound types with correct paths to the audio files
 const SOUNDS = {
   click: "/sounds/click.wav",
-  woodblock: "/sounds/woodblock.wav",
+  woodblock: "/sounds/woodblock.wav", 
   beep: "/sounds/beep.wav",
 };
 
-// Preload audio files
-const preloadAudio = (url: string): HTMLAudioElement => {
-  const audio = new Audio(url);
-  audio.preload = "auto";
-  return audio;
-};
-
-// Create audio elements ahead of time
-const audioElements = {
-  click: preloadAudio(SOUNDS.click),
-  woodblock: preloadAudio(SOUNDS.woodblock),
-  beep: preloadAudio(SOUNDS.beep),
+// Create audio elements for each sound
+const audioElements: Record<keyof typeof SOUNDS, HTMLAudioElement> = {
+  click: new Audio(SOUNDS.click),
+  woodblock: new Audio(SOUNDS.woodblock),
+  beep: new Audio(SOUNDS.beep),
 };
 
 export function Metronome() {
@@ -59,9 +52,9 @@ export function Metronome() {
   
   // Update volume when it changes
   useEffect(() => {
-    audioElements.click.volume = volume;
-    audioElements.woodblock.volume = volume;
-    audioElements.beep.volume = volume;
+    Object.values(audioElements).forEach(audio => {
+      audio.volume = volume;
+    });
   }, [volume]);
   
   // Calculate interval from tempo (beats per minute)
@@ -73,8 +66,8 @@ export function Metronome() {
   useEffect(() => {
     const playBeat = () => {
       try {
-        // Play the selected sound
-        const sound = audioElements[soundType].cloneNode() as HTMLAudioElement;
+        // Clone the audio to allow overlapping sounds
+        const sound = new Audio(SOUNDS[soundType]);
         sound.volume = volume;
         sound.play()
           .then(() => console.log("Metronome sound played successfully"))
