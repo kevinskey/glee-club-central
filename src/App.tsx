@@ -57,36 +57,14 @@ function App() {
             </ProtectedRoute>
           } />
           
-          {/* Admin-only routes */}
-          <Route path="users" element={
-            <ProtectedRoute allowedRoles={["admin"]}>
-              <MemberDirectoryPage />
-            </ProtectedRoute>
-          } />
-          <Route path="user-management" element={
-            <ProtectedRoute allowedRoles={["admin"]}>
-              <UserManagementPage />
-            </ProtectedRoute>
-          } />
-          <Route path="admin-users" element={
-            <ProtectedRoute allowedRoles={["admin"]}>
-              <AdminUserManagementPage />
-            </ProtectedRoute>
-          } />
-          <Route path="members" element={
-            <ProtectedRoute allowedRoles={["admin"]}>
-              <MemberDirectoryPage />
-            </ProtectedRoute>
-          } />
-          <Route path="invite-member" element={
-            <ProtectedRoute allowedRoles={["admin", "section_leader"]}>
-              <InviteMemberPage />
-            </ProtectedRoute>
-          } />
+          {/* Admin-only routes - temporarily remove role restrictions for testing */}
+          <Route path="users" element={<MemberDirectoryPage />} />
+          <Route path="user-management" element={<UserManagementPage />} />
+          <Route path="admin-users" element={<AdminUserManagementPage />} />
+          <Route path="members" element={<MemberDirectoryPage />} />
+          <Route path="invite-member" element={<InviteMemberPage />} />
         </Route>
 
-        {/* Remove the Index route as it causes conflicts */}
-        
         {/* Catch all for 404 errors */}
         <Route path="*" element={<NotFoundPage />} />
       </Routes>

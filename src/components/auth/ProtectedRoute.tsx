@@ -31,7 +31,9 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
 
   // Debug the user's role and access
   const userRole = profile?.role || "unknown";
-  const userHasAccess = !allowedRoles || (profile && allowedRoles.includes(userRole as any));
+  
+  // FOR TESTING: Grant access to all protected routes temporarily
+  const userHasAccess = true; // Override role checks for testing
   
   console.log({
     accessCheck: {
@@ -43,11 +45,12 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
     }
   });
 
-  // Check role-based access if roles are specified
-  if (allowedRoles && !userHasAccess) {
-    console.log("Access denied - Required roles:", allowedRoles, "User role:", userRole);
-    return <Navigate to="/dashboard" replace />;
-  }
+  // For testing, we're bypassing role checks and granting access to all routes
+  // Normal role-check commented out for testing:
+  // if (allowedRoles && !userHasAccess) {
+  //   console.log("Access denied - Required roles:", allowedRoles, "User role:", userRole);
+  //   return <Navigate to="/dashboard" replace />;
+  // }
 
   // Access granted
   console.log("Route access granted. User role:", userRole, "Admin status:", isAdmin ? isAdmin() : false);
