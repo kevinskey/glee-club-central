@@ -64,8 +64,8 @@ export function PerformanceSection() {
   return (
     <section className="py-8 md:py-12 bg-gradient-to-b from-white to-glee-light dark:from-glee-dark dark:to-black">
       <div className="container px-4 md:px-8 mx-auto">
-        <div className="max-w-4xl mx-auto text-center mb-6 md:mb-8">
-          <h2 className="text-2xl md:text-3xl lg:text-4xl font-playfair font-bold mb-4 md:mb-6 flex items-center justify-center gap-2">
+        <div className="mb-6 md:mb-8">
+          <h2 className="text-2xl md:text-3xl lg:text-4xl font-playfair font-bold mb-4 md:mb-6 flex items-center gap-2">
             <Calendar className="h-6 w-6 md:h-8 md:w-8 text-glee-purple" />
             <span>Upcoming <span className="text-glee-purple">Performances</span></span>
           </h2>
