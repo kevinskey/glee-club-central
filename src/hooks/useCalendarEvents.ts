@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
@@ -9,7 +10,7 @@ export interface CalendarEvent {
   date: Date;
   time: string;
   location: string;
-  description: string;
+  description: string | null;
   type: "concert" | "rehearsal" | "tour" | "special";
 }
 
@@ -28,8 +29,10 @@ export function useCalendarEvents() {
         return;
       }
 
+      // The issue was that the calendar_events table wasn't in the TypeScript types
+      // Using any to bypass TypeScript limitation until types are refreshed
       const { data, error } = await supabase
-        .from("calendar_events")
+        .from("calendar_events" as any)
         .select("*")
         .order("date", { ascending: true });
 
@@ -45,8 +48,10 @@ export function useCalendarEvents() {
         const formattedEvents = data.map(event => ({
           ...event,
           date: new Date(event.date),
-          id: event.id
-        }));
+          id: event.id,
+          description: event.description || ""
+        })) as CalendarEvent[];
+        
         setEvents(formattedEvents);
       }
     } catch (err) {
@@ -71,8 +76,9 @@ export function useCalendarEvents() {
         date: event.date.toISOString().split('T')[0]
       };
 
+      // Using any to bypass TypeScript limitation
       const { data, error } = await supabase
-        .from("calendar_events")
+        .from("calendar_events" as any)
         .insert([newEvent])
         .select()
         .single();
@@ -88,7 +94,7 @@ export function useCalendarEvents() {
       return {
         ...data,
         date: new Date(data.date)
-      };
+      } as CalendarEvent;
     } catch (err) {
       console.error("Error in addEvent:", err);
       toast.error("Failed to save event");
@@ -104,8 +110,9 @@ export function useCalendarEvents() {
         return false;
       }
 
+      // Using any to bypass TypeScript limitation
       const { error } = await supabase
-        .from("calendar_events")
+        .from("calendar_events" as any)
         .update({
           ...event,
           date: event.date.toISOString().split('T')[0],
@@ -137,8 +144,9 @@ export function useCalendarEvents() {
         return false;
       }
 
+      // Using any to bypass TypeScript limitation
       const { error } = await supabase
-        .from("calendar_events")
+        .from("calendar_events" as any)
         .delete()
         .eq("id", eventId);
 
