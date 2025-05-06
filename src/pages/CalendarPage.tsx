@@ -17,6 +17,7 @@ import { Badge } from "@/components/ui/badge";
 import { format } from "date-fns";
 import { AddEventForm } from "@/components/calendar/AddEventForm";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { ThemeToggle } from "@/components/ui/theme-toggle";
 
 interface Event {
   id: number;
@@ -164,20 +165,24 @@ export default function CalendarPage() {
               <CalendarIcon className="h-6 w-6 sm:h-7 sm:w-7 md:h-8 md:w-8 text-glee-purple" />
               <span>Performance <span className="text-glee-purple">Calendar</span></span>
             </h1>
-            <Button 
-              onClick={() => setIsAddEventOpen(true)}
-              className="bg-glee-purple hover:bg-glee-purple/90 hidden sm:flex"
-            >
-              <Plus className="mr-2 h-4 w-4" />
-              Add Event
-            </Button>
+            <div className="flex items-center gap-3">
+              <ThemeToggle variant="toggle" size="sm" />
+              <Button 
+                onClick={() => setIsAddEventOpen(true)}
+                className="bg-glee-purple hover:bg-glee-purple/90 hidden sm:flex"
+              >
+                <Plus className="mr-2 h-4 w-4" />
+                Add Event
+              </Button>
+            </div>
           </div>
           
           {/* Mobile Add Event Button */}
-          <div className="flex justify-center sm:hidden mb-4">
+          <div className="flex justify-between sm:hidden mb-4 items-center">
+            <ThemeToggle variant="toggle" size="sm" className="ml-auto mr-3" />
             <Button 
               onClick={() => setIsAddEventOpen(true)}
-              className="bg-glee-purple hover:bg-glee-purple/90 w-full"
+              className="bg-glee-purple hover:bg-glee-purple/90"
             >
               <Plus className="mr-2 h-4 w-4" />
               Add Event
