@@ -39,19 +39,19 @@ export function HeroSection() {
           </p>
           <div className="pt-2 sm:pt-3 md:pt-4 lg:pt-5 flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center md:justify-start">
             <Button 
-              size={isMobile ? "sm" : "default"} 
-              className="bg-glee-purple hover:bg-glee-purple/90 text-white text-sm sm:text-base py-[0.6rem] px-[1.1rem]"
-              onClick={() => navigate("/login")}
-            >
-              Member Portal
-            </Button>
-            <Button 
               variant="outline" 
               size={isMobile ? "sm" : "default"} 
               className="border-white/20 bg-white/5 text-white hover:bg-white/10 text-sm sm:text-base py-[0.6rem] px-[1.1rem]"
               onClick={() => navigate("/fan-page")}
             >
               Guest Login
+            </Button>
+            <Button 
+              size={isMobile ? "sm" : "default"} 
+              className="bg-glee-purple hover:bg-glee-purple/90 text-white text-sm sm:text-base py-[0.6rem] px-[1.1rem]"
+              onClick={() => navigate("/login")}
+            >
+              Member Portal
             </Button>
           </div>
         </div>
