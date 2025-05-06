@@ -19,22 +19,26 @@ export function BackgroundSlideshow({
   useEffect(() => {
     if (images.length <= 1) return;
 
+    // Set up the main interval for changing images
     const intervalId = setInterval(() => {
+      // Start transition
       setIsTransitioning(true);
       
-      setTimeout(() => {
+      // After transition completes, update the indices
+      const transitionTimerId = setTimeout(() => {
         setCurrentImageIndex((prevIndex) => (prevIndex + 1) % images.length);
-        setNextImageIndex((prevIndex) => (prevIndex + 2) % images.length);
+        setNextImageIndex((prevIndex) => (prevIndex + 1) % images.length);
         setIsTransitioning(false);
       }, transition);
       
+      return () => clearTimeout(transitionTimerId);
     }, duration);
 
-    // Initialize next image index
+    // Initialize next image index on mount
     setNextImageIndex((currentImageIndex + 1) % images.length);
 
     return () => clearInterval(intervalId);
-  }, [images, duration, transition]);
+  }, [images, duration, transition, currentImageIndex]);
 
   if (images.length === 0) return null;
   if (images.length === 1) {
@@ -58,7 +62,7 @@ export function BackgroundSlideshow({
       <div
         className="absolute inset-0 bg-cover bg-center transition-opacity duration-1500"
         style={{
-          backgroundImage: `url('${images[(currentImageIndex + 1) % images.length]}')`,
+          backgroundImage: `url('${images[nextImageIndex]}')`,
           opacity: isTransitioning ? 1 : 0,
         }}
       />
