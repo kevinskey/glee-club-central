@@ -1,4 +1,3 @@
-
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -20,8 +19,8 @@ export function HeroSection() {
       <div className="absolute inset-0 opacity-50 bg-blend-overlay bg-black">
         <BackgroundSlideshow 
           images={backgroundImages} 
-          duration={7000} 
-          transition={1500}
+          duration={10000} 
+          transition={2000}
         />
       </div>
       <div className="container relative z-10 mx-auto px-8 md:px-12 md:grid-cols-1 items-center">

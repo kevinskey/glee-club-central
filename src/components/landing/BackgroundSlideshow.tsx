@@ -9,8 +9,8 @@ interface BackgroundSlideshowProps {
 
 export function BackgroundSlideshow({
   images,
-  duration = 7000,
-  transition = 1500,
+  duration = 10000, // Increased from 7000ms to 10000ms (10 seconds)
+  transition = 2000, // Increased from 1500ms to 2000ms (2 seconds)
 }: BackgroundSlideshowProps) {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [nextImageIndex, setNextImageIndex] = useState(1);
@@ -53,14 +53,14 @@ export function BackgroundSlideshow({
   return (
     <div className="absolute inset-0 overflow-hidden">
       <div
-        className="absolute inset-0 bg-cover bg-center transition-opacity duration-1500"
+        className="absolute inset-0 bg-cover bg-center transition-opacity duration-[2000ms]" // Updated to match new transition time
         style={{
           backgroundImage: `url('${images[currentImageIndex]}')`,
           opacity: isTransitioning ? 0 : 1,
         }}
       />
       <div
-        className="absolute inset-0 bg-cover bg-center transition-opacity duration-1500"
+        className="absolute inset-0 bg-cover bg-center transition-opacity duration-[2000ms]" // Updated to match new transition time
         style={{
           backgroundImage: `url('${images[nextImageIndex]}')`,
           opacity: isTransitioning ? 1 : 0,
