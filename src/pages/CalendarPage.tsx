@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { 
@@ -18,81 +19,17 @@ import { format } from "date-fns";
 import { AddEventForm } from "@/components/calendar/AddEventForm";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
-
-interface Event {
-  id: number;
-  title: string;
-  date: Date;
-  time: string;
-  location: string;
-  description: string;
-  type: "concert" | "rehearsal" | "tour" | "special";
-}
-
-// Sample events data - same as what's used in the PerformanceSection
-const initialEvents: Event[] = [
-  {
-    id: 1,
-    title: "Fall Showcase",
-    date: new Date(2025, 5, 15), // June 15, 2025
-    time: "7:00 PM - 9:00 PM",
-    location: "Sisters Chapel",
-    description: "Our annual showcase featuring classical and contemporary pieces.",
-    type: "concert"
-  },
-  {
-    id: 2,
-    title: "Holiday Concert",
-    date: new Date(2025, 11, 10), // December 10, 2025
-    time: "8:00 PM - 10:00 PM",
-    location: "Atlanta Symphony Hall",
-    description: "Celebrating the season with festive music and traditional carols.",
-    type: "concert"
-  },
-  {
-    id: 3,
-    title: "Spring Tour",
-    date: new Date(2026, 2, 5), // March 5, 2026
-    time: "Various Times",
-    location: "Various Venues",
-    description: "Our annual tour across the southeastern United States.",
-    type: "tour"
-  },
-  {
-    id: 4,
-    title: "Commencement Performance",
-    date: new Date(2026, 4, 20), // May 20, 2026
-    time: "10:00 AM - 11:30 AM",
-    location: "Spelman College Oval",
-    description: "Special performance for the graduating class of 2026.",
-    type: "special"
-  },
-  {
-    id: 5,
-    title: "Weekly Rehearsal",
-    date: new Date(2025, 5, 8), // June 8, 2025
-    time: "6:00 PM - 8:00 PM",
-    location: "Music Building, Room 101",
-    description: "Regular weekly choir rehearsal.",
-    type: "rehearsal"
-  },
-  {
-    id: 6,
-    title: "Weekly Rehearsal",
-    date: new Date(2025, 5, 22), // June 22, 2025
-    time: "6:00 PM - 8:00 PM",
-    location: "Music Building, Room 101",
-    description: "Regular weekly choir rehearsal.",
-    type: "rehearsal"
-  }
-];
+import { useCalendarEvents, CalendarEvent } from "@/hooks/useCalendarEvents";
+import { useAuth } from "@/contexts/AuthContext";
+import { toast } from "sonner";
 
 export default function CalendarPage() {
   const navigate = useNavigate();
   const [date, setDate] = useState<Date | undefined>(new Date());
-  const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
-  const [events, setEvents] = useState<Event[]>(initialEvents);
+  const [selectedEvent, setSelectedEvent] = useState<CalendarEvent | null>(null);
   const [isAddEventOpen, setIsAddEventOpen] = useState(false);
+  const { events, loading, addEvent, deleteEvent } = useCalendarEvents();
+  const { user } = useAuth();
   
   // Filter events for the selected date
   const eventsOnSelectedDate = date 
@@ -107,26 +44,34 @@ export default function CalendarPage() {
   const daysWithEvents = events.map(event => event.date);
   
   // Handle event selection
-  const handleEventSelect = (event: Event) => {
+  const handleEventSelect = (event: CalendarEvent) => {
     setSelectedEvent(event);
   };
 
   // Handle adding new event
-  const handleAddEvent = (formValues: Omit<Event, "id">) => {
-    const newEvent = {
-      ...formValues,
-      id: events.length + 1,
-    };
+  const handleAddEvent = async (formValues: Omit<CalendarEvent, "id">) => {
+    const newEvent = await addEvent(formValues);
     
-    setEvents([...events, newEvent]);
-    setIsAddEventOpen(false);
+    if (newEvent) {
+      setIsAddEventOpen(false);
+      
+      // If the new event is on the currently selected date, update the calendar
+      if (date && 
+          formValues.date.getDate() === date.getDate() && 
+          formValues.date.getMonth() === date.getMonth() && 
+          formValues.date.getFullYear() === date.getFullYear()) {
+        setDate(new Date(formValues.date));
+      }
+    }
+  };
+
+  // Handle deleting an event
+  const handleDeleteEvent = async () => {
+    if (!selectedEvent) return;
     
-    // If the new event is on the currently selected date, update the calendar
-    if (date && 
-        formValues.date.getDate() === date.getDate() && 
-        formValues.date.getMonth() === date.getMonth() && 
-        formValues.date.getFullYear() === date.getFullYear()) {
-      setDate(new Date(formValues.date));
+    if (await deleteEvent(selectedEvent.id)) {
+      setSelectedEvent(null);
+      toast.success("Event deleted successfully");
     }
   };
   
@@ -189,114 +134,129 @@ export default function CalendarPage() {
             </Button>
           </div>
           
-          <div className="flex flex-col lg:flex-row gap-8">
-            {/* Calendar */}
-            <div className="w-full lg:w-1/2">
-              <div className="border rounded-lg p-4 bg-white dark:bg-gray-800 shadow-sm">
-                <Calendar
-                  mode="single"
-                  selected={date}
-                  onSelect={setDate}
-                  className="mx-auto"
-                  modifiers={{
-                    event: daysWithEvents
-                  }}
-                  modifiersStyles={{
-                    event: {
-                      fontWeight: 'bold',
-                      textDecoration: 'underline',
-                      color: 'var(--glee-purple)'
-                    }
-                  }}
-                  components={{
-                    IconLeft: () => <ChevronLeft className="h-4 w-4" />,
-                    IconRight: () => <ChevronRight className="h-4 w-4" />,
-                  }}
-                />
-              </div>
+          {loading ? (
+            <div className="flex justify-center items-center py-10">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-glee-purple"></div>
             </div>
-            
-            {/* Event details */}
-            <div className="w-full lg:w-1/2">
-              <div className="border rounded-lg p-6 h-full bg-white dark:bg-gray-800 shadow-sm">
-                {date && (
-                  <div className="mb-4">
-                    <h2 className="text-xl font-medium mb-1">
-                      Events on {format(date, 'MMMM d, yyyy')}
-                    </h2>
-                    {eventsOnSelectedDate.length === 0 ? (
-                      <p className="text-muted-foreground">No events scheduled for this date.</p>
-                    ) : (
-                      <div className="space-y-4 mt-4">
-                        {eventsOnSelectedDate.map((event) => (
-                          <div 
-                            key={event.id}
-                            className={`p-4 border rounded-lg cursor-pointer transition-colors ${
-                              selectedEvent?.id === event.id 
-                                ? 'border-glee-purple bg-glee-purple/5' 
-                                : 'hover:bg-gray-50 dark:hover:bg-gray-800'
-                            }`}
-                            onClick={() => handleEventSelect(event)}
+          ) : (
+            <div className="flex flex-col lg:flex-row gap-8">
+              {/* Calendar */}
+              <div className="w-full lg:w-1/2">
+                <div className="border rounded-lg p-4 bg-white dark:bg-gray-800 shadow-sm">
+                  <Calendar
+                    mode="single"
+                    selected={date}
+                    onSelect={setDate}
+                    className="mx-auto"
+                    modifiers={{
+                      event: daysWithEvents
+                    }}
+                    modifiersStyles={{
+                      event: {
+                        fontWeight: 'bold',
+                        textDecoration: 'underline',
+                        color: 'var(--glee-purple)'
+                      }
+                    }}
+                    components={{
+                      IconLeft: () => <ChevronLeft className="h-4 w-4" />,
+                      IconRight: () => <ChevronRight className="h-4 w-4" />,
+                    }}
+                  />
+                </div>
+              </div>
+              
+              {/* Event details */}
+              <div className="w-full lg:w-1/2">
+                <div className="border rounded-lg p-6 h-full bg-white dark:bg-gray-800 shadow-sm">
+                  {date && (
+                    <div className="mb-4">
+                      <h2 className="text-xl font-medium mb-1">
+                        Events on {format(date, 'MMMM d, yyyy')}
+                      </h2>
+                      {eventsOnSelectedDate.length === 0 ? (
+                        <p className="text-muted-foreground">No events scheduled for this date.</p>
+                      ) : (
+                        <div className="space-y-4 mt-4">
+                          {eventsOnSelectedDate.map((event) => (
+                            <div 
+                              key={event.id}
+                              className={`p-4 border rounded-lg cursor-pointer transition-colors ${
+                                selectedEvent?.id === event.id 
+                                  ? 'border-glee-purple bg-glee-purple/5' 
+                                  : 'hover:bg-gray-50 dark:hover:bg-gray-800'
+                              }`}
+                              onClick={() => handleEventSelect(event)}
+                            >
+                              <div className="flex justify-between items-start">
+                                <h3 className="font-medium text-lg">{event.title}</h3>
+                                <Badge className={`${getEventTypeColor(event.type)} text-white`}>
+                                  {event.type.charAt(0).toUpperCase() + event.type.slice(1)}
+                                </Badge>
+                              </div>
+                              <div className="mt-2 text-sm text-muted-foreground">
+                                <div className="flex items-center gap-1 mb-1">
+                                  <Clock className="h-4 w-4" />
+                                  <span>{event.time}</span>
+                                </div>
+                                <div className="flex items-center gap-1">
+                                  <MapPin className="h-4 w-4" />
+                                  <span>{event.location}</span>
+                                </div>
+                              </div>
+                              {selectedEvent?.id === event.id && (
+                                <p className="mt-3 text-sm">{event.description}</p>
+                              )}
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  )}
+                  
+                  {selectedEvent && (
+                    <div className="mt-6 pt-6 border-t">
+                      <h3 className="text-xl font-medium mb-3">{selectedEvent.title}</h3>
+                      <div className="space-y-2 text-sm text-muted-foreground mb-4">
+                        <div className="flex items-center gap-2">
+                          <CalendarIcon className="h-4 w-4" />
+                          <span>{format(selectedEvent.date, 'MMMM d, yyyy')}</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <Clock className="h-4 w-4" />
+                          <span>{selectedEvent.time}</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <MapPin className="h-4 w-4" />
+                          <span>{selectedEvent.location}</span>
+                        </div>
+                      </div>
+                      <p className="text-sm">{selectedEvent.description}</p>
+                      
+                      {/* Event actions */}
+                      <div className="mt-6 flex gap-3">
+                        <Button className="bg-glee-purple hover:bg-glee-purple/90">
+                          Add to Calendar
+                        </Button>
+                        <Button variant="outline">
+                          Share Event
+                        </Button>
+                        {user && user.id && (
+                          <Button 
+                            variant="outline" 
+                            className="text-red-500 hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-900/20"
+                            onClick={handleDeleteEvent}
                           >
-                            <div className="flex justify-between items-start">
-                              <h3 className="font-medium text-lg">{event.title}</h3>
-                              <Badge className={`${getEventTypeColor(event.type)} text-white`}>
-                                {event.type.charAt(0).toUpperCase() + event.type.slice(1)}
-                              </Badge>
-                            </div>
-                            <div className="mt-2 text-sm text-muted-foreground">
-                              <div className="flex items-center gap-1 mb-1">
-                                <Clock className="h-4 w-4" />
-                                <span>{event.time}</span>
-                              </div>
-                              <div className="flex items-center gap-1">
-                                <MapPin className="h-4 w-4" />
-                                <span>{event.location}</span>
-                              </div>
-                            </div>
-                            {selectedEvent?.id === event.id && (
-                              <p className="mt-3 text-sm">{event.description}</p>
-                            )}
-                          </div>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                )}
-                
-                {selectedEvent && (
-                  <div className="mt-6 pt-6 border-t">
-                    <h3 className="text-xl font-medium mb-3">{selectedEvent.title}</h3>
-                    <div className="space-y-2 text-sm text-muted-foreground mb-4">
-                      <div className="flex items-center gap-2">
-                        <CalendarIcon className="h-4 w-4" />
-                        <span>{format(selectedEvent.date, 'MMMM d, yyyy')}</span>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <Clock className="h-4 w-4" />
-                        <span>{selectedEvent.time}</span>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <MapPin className="h-4 w-4" />
-                        <span>{selectedEvent.location}</span>
+                            Delete
+                          </Button>
+                        )}
                       </div>
                     </div>
-                    <p className="text-sm">{selectedEvent.description}</p>
-                    
-                    {/* Additional actions could go here */}
-                    <div className="mt-6 flex gap-3">
-                      <Button className="bg-glee-purple hover:bg-glee-purple/90">
-                        Add to Calendar
-                      </Button>
-                      <Button variant="outline">
-                        Share Event
-                      </Button>
-                    </div>
-                  </div>
-                )}
+                  )}
+                </div>
               </div>
             </div>
-          </div>
+          )}
         </div>
       </main>
       <Footer />

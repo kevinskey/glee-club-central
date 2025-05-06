@@ -39,6 +39,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { toast } from "sonner";
 import { useLoadScript } from "@react-google-maps/api";
+import { useAuth } from "@/contexts/AuthContext";
 
 const formSchema = z.object({
   title: z.string().min(2, { message: "Title must be at least 2 characters" }),
@@ -74,10 +75,10 @@ interface AddEventFormProps {
 }
 
 export function AddEventForm({ onAddEvent, onCancel }: AddEventFormProps) {
-  const [customTime, setCustomTime] = useState<string>("");
   const [locationInputFocused, setLocationInputFocused] = useState(false);
   const locationInputRef = useRef<HTMLInputElement>(null);
   const autocompleteRef = useRef<google.maps.places.Autocomplete | null>(null);
+  const { user } = useAuth();
 
   // Load Google Maps Places API
   const { isLoaded, loadError } = useLoadScript({
@@ -120,19 +121,17 @@ export function AddEventForm({ onAddEvent, onCancel }: AddEventFormProps) {
   }, [isLoaded, loadError, locationInputFocused, form]);
 
   function onSubmit(values: FormValues) {
+    if (!user) {
+      toast.error("You must be logged in to save events");
+      return;
+    }
+    
     onAddEvent(values);
     form.reset();
-    toast.success("Event added successfully");
   }
-
-  const handleCustomTimeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setCustomTime(e.target.value);
-    form.setValue("time", e.target.value);
-  };
 
   const handleSelectTime = (time: string) => {
     form.setValue("time", time);
-    setCustomTime(time);
   };
 
   return (
@@ -328,7 +327,7 @@ export function AddEventForm({ onAddEvent, onCancel }: AddEventFormProps) {
             Cancel
           </Button>
           <Button type="submit" className="bg-glee-purple hover:bg-glee-purple/90">
-            Add Event
+            Save Event
           </Button>
         </div>
       </form>
