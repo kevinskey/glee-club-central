@@ -12,7 +12,13 @@ import {
   Users, 
   UsersRound, 
   UserCog,
-  Shield 
+  Shield,
+  Archive,
+  Book,
+  Mail,
+  Package,
+  List,
+  Bell
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { NavLink } from "./NavLink";
@@ -40,6 +46,30 @@ export const SidebarNav: React.FC<SidebarNavProps> = ({ className }) => {
       <NavLink href="/dashboard/profile" icon={<FileText className="h-5 w-5" />}>
         My Profile
       </NavLink>
+      <NavLink href="/fan-page" icon={<Users className="h-5 w-5" />}>
+        Fan Page
+      </NavLink>
+      <NavLink href="/dashboard/media-library" icon={<Archive className="h-5 w-5" />}>
+        Media Library
+      </NavLink>
+      <NavLink href="/dashboard/sheet-music" icon={<Book className="h-5 w-5" />}>
+        Sheet Music
+      </NavLink>
+      <NavLink href="/dashboard/messaging" icon={<Mail className="h-5 w-5" />}>
+        Messaging
+      </NavLink>
+      <NavLink href="/dashboard/recordings" icon={<Mic className="h-5 w-5" />}>
+        Recordings
+      </NavLink>
+      <NavLink href="/dashboard/practice" icon={<Music className="h-5 w-5" />}>
+        Practice
+      </NavLink>
+      <NavLink href="/dashboard/audio-management" icon={<Library className="h-5 w-5" />}>
+        Audio Management
+      </NavLink>
+      <NavLink href="/dashboard/videos" icon={<Video className="h-5 w-5" />}>
+        Videos
+      </NavLink>
       
       {/* Only show admin tools if the user is an admin */}
       {adminStatus && (
@@ -54,14 +84,17 @@ export const SidebarNav: React.FC<SidebarNavProps> = ({ className }) => {
             <NavLink href="/dashboard/user-management" icon={<UserCog className="h-5 w-5" />}>
               User Management
             </NavLink>
-            <NavLink href="/dashboard/admin-users" icon={<UserCog className="h-5 w-5" />}>
+            <NavLink href="/dashboard/admin-users" icon={<UsersRound className="h-5 w-5" />}>
               WordPress-style Users
             </NavLink>
             <NavLink href="/dashboard/sections" icon={<Shield className="h-5 w-5" />}>
               Section Management
             </NavLink>
-            <NavLink href="/dashboard/invite-member" icon={<UsersRound className="h-5 w-5" />}>
+            <NavLink href="/dashboard/invite-member" icon={<Bell className="h-5 w-5" />}>
               Invite Members
+            </NavLink>
+            <NavLink href="/dashboard/handbook" icon={<Book className="h-5 w-5" />}>
+              Handbook
             </NavLink>
           </div>
         </>
