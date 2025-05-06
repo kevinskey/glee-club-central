@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import {
   SheetHeader,
@@ -137,8 +138,8 @@ export function MemberDetailsSheet({ member }: MemberDetailsSheetProps) {
               )}
               {member.role === "admin" && <Badge className="bg-purple-500">Admin</Badge>}
               {member.role === "section_leader" && <Badge className="bg-blue-500">Section Leader</Badge>}
-              {member.role === "director" && <Badge className="bg-orange-500">Director</Badge>}
-              {member.role === "accompanist" && <Badge className="bg-teal-500">Accompanist</Badge>}
+              {member.role === "Director" && <Badge className="bg-orange-500">Director</Badge>}
+              {member.role === "Accompanist" && <Badge className="bg-teal-500">Accompanist</Badge>}
             </div>
           </div>
         </div>
