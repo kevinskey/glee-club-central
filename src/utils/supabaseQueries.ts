@@ -51,7 +51,7 @@ export interface MemberNote {
 export async function fetchAttendanceRecords(memberId: string): Promise<AttendanceRecord[]> {
   try {
     // Use direct RPC query with type parameters
-    const { data, error } = await supabase.rpc<AttendanceRecord[], { p_member_id: string }>('get_attendance_records', { 
+    const { data, error } = await supabase.rpc('get_attendance_records', { 
       p_member_id: memberId 
     });
     
@@ -61,7 +61,7 @@ export async function fetchAttendanceRecords(memberId: string): Promise<Attendan
     if (!data) return [];
     
     // Process and return the data
-    return Array.isArray(data) ? data : [];
+    return Array.isArray(data) ? data as AttendanceRecord[] : [];
   } catch (error) {
     console.error("Error fetching attendance:", error);
     return [];
@@ -72,7 +72,7 @@ export async function fetchAttendanceRecords(memberId: string): Promise<Attendan
 export async function fetchPaymentRecords(memberId: string): Promise<PaymentRecord[]> {
   try {
     // Use direct RPC query with type parameters
-    const { data, error } = await supabase.rpc<PaymentRecord[], { p_member_id: string }>('get_payment_records', { 
+    const { data, error } = await supabase.rpc('get_payment_records', { 
       p_member_id: memberId 
     });
     
@@ -82,7 +82,7 @@ export async function fetchPaymentRecords(memberId: string): Promise<PaymentReco
     if (!data) return [];
     
     // Process and return the data
-    return Array.isArray(data) ? data : [];
+    return Array.isArray(data) ? data as PaymentRecord[] : [];
   } catch (error) {
     console.error("Error fetching payments:", error);
     return [];
@@ -93,7 +93,7 @@ export async function fetchPaymentRecords(memberId: string): Promise<PaymentReco
 export async function fetchMemberNotes(memberId: string): Promise<MemberNote[]> {
   try {
     // Use direct RPC query with type parameters
-    const { data, error } = await supabase.rpc<MemberNote[], { p_member_id: string }>('get_member_notes', { 
+    const { data, error } = await supabase.rpc('get_member_notes', { 
       p_member_id: memberId 
     });
     
@@ -103,7 +103,7 @@ export async function fetchMemberNotes(memberId: string): Promise<MemberNote[]> 
     if (!data) return [];
     
     // Process and return the data
-    return Array.isArray(data) ? data : [];
+    return Array.isArray(data) ? data as MemberNote[] : [];
   } catch (error) {
     console.error("Error fetching notes:", error);
     return [];
@@ -114,12 +114,12 @@ export async function fetchMemberNotes(memberId: string): Promise<MemberNote[]> 
 export async function fetchSections(): Promise<Section[]> {
   try {
     // Use RPC query with type parameters
-    const { data, error } = await supabase.rpc<Section[], {}>('get_sections');
+    const { data, error } = await supabase.rpc('get_sections');
     
     if (error) throw error;
     
     // Process and return the data
-    return data ?? [];
+    return data as Section[] || [];
   } catch (error) {
     console.error("Error fetching sections:", error);
     return [];
@@ -129,12 +129,12 @@ export async function fetchSections(): Promise<Section[]> {
 // Helper function to fetch section data with member count
 export async function fetchSectionsWithMemberCount(): Promise<Section[]> {
   try {
-    const { data, error } = await supabase.rpc<Section[], {}>('get_sections_with_member_count');
+    const { data, error } = await supabase.rpc('get_sections_with_member_count');
     
     if (error) throw error;
     
     // Process and return the data
-    return data ?? [];
+    return data as Section[] || [];
   } catch (error) {
     console.error("Error fetching sections:", error);
     return [];
@@ -144,12 +144,12 @@ export async function fetchSectionsWithMemberCount(): Promise<Section[]> {
 // Helper function to fetch members with section data
 export async function fetchMembers(): Promise<Profile[]> {
   try {
-    const { data, error } = await supabase.rpc<Profile[], {}>('get_members_with_sections');
+    const { data, error } = await supabase.rpc('get_members_with_sections');
     
     if (error) throw error;
     
     // Make sure to cast the data to ensure it has all required Profile properties
-    const members = data ? data.map(member => {
+    const members = data ? (data as any[]).map(member => {
       return {
         ...member,
         email: member.email || null,
