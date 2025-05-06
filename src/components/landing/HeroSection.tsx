@@ -2,20 +2,27 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
+import { BackgroundSlideshow } from "./BackgroundSlideshow";
 
 export function HeroSection() {
   const navigate = useNavigate();
   
+  const backgroundImages = [
+    "/lovable-uploads/a2e734d0-cb83-4b32-be93-9f3f0da03fc4.png",
+    "/lovable-uploads/e06ff100-0add-4adc-834f-50ef81098d35.png",
+    "/lovable-uploads/8aa13e63-fb9a-4c52-95cf-86b458c58f1c.png",
+    "/lovable-uploads/10bab1e7-0f4e-402f-ab65-feb4710b5eaf.png",
+    "/lovable-uploads/642b93d7-fc15-4c2c-a7df-fe81aadb2f3b.png"
+  ];
+  
   return (
     <section className="relative bg-glee-dark py-24 md:py-32 overflow-hidden">
-      <div className="absolute inset-0 opacity-40 bg-blend-overlay bg-black">
-        <div 
-          className="absolute inset-0 bg-cover bg-center" 
-          style={{ 
-            backgroundImage: "url('/lovable-uploads/3ad02de0-04d1-4a5e-9279-898e9c317d80.png')", 
-            filter: "blur(1px)"
-          }}
-        ></div>
+      <div className="absolute inset-0 opacity-50 bg-blend-overlay bg-black">
+        <BackgroundSlideshow 
+          images={backgroundImages} 
+          duration={3000} 
+          transition={1000} 
+        />
       </div>
       <div className="container relative z-10 mx-auto md:grid-cols-1 items-center">
         <div className="text-white space-y-6 md:pr-6 max-w-2xl mx-auto text-center md:text-left md:mx-0">
