@@ -72,6 +72,9 @@ export function useMediaUpload(onComplete: () => void) {
           ? `${title} ${i + 1}` 
           : title;
 
+        // Log the user ID to validate it's a proper UUID
+        console.log("User ID being used:", user.id);
+
         // Insert record in database with the correct user ID
         const { error: dbError } = await supabase
           .from('media_library')
@@ -81,10 +84,13 @@ export function useMediaUpload(onComplete: () => void) {
             file_path: filePath,
             file_url: publicURL.publicUrl,
             file_type: file.type,
-            uploaded_by: user.id // Using user.id directly from auth context
+            uploaded_by: user.id  // Ensure this is a valid UUID
           });
 
-        if (dbError) throw dbError;
+        if (dbError) {
+          console.error("Database insertion error:", dbError);
+          throw dbError;
+        }
         
         successCount++;
         
