@@ -1,4 +1,3 @@
-
 import React, { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -40,7 +39,7 @@ export type SectionFormValues = z.infer<typeof sectionFormSchema>;
 
 interface SectionFormProps {
   section: Section | null;
-  leaders: { id: string; name: string }[];
+  leaders: { id: string; name?: string }[];
   onSubmit: (values: SectionFormValues) => Promise<void>;
 }
 
