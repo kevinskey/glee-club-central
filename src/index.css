@@ -1,4 +1,3 @@
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -85,7 +84,7 @@
   /* Add consistent text spacing */
   p {
     @apply leading-extra-relaxed;
-    line-height: 2; /* Increased from previous 1.8 */
+    line-height: 2.2; /* Increased from previous 2.0 to double spacing */
   }
   
   h1, h2, h3, h4, h5, h6 {
@@ -193,22 +192,21 @@
   }
   
   .leading-extra-relaxed {
-    line-height: 2;
+    line-height: 2.2; /* Updated from 2.0 to double spacing */
   }
   
   /* Improved paragraph spacing with bottom margin */
   .prose-spacing p {
-    margin-bottom: 1.5em;
-    line-height: 2;
+    margin-bottom: 1.8em; /* Increased bottom margin */
+    line-height: 2.2; /* Updated to double spacing */
   }
   
   /* New utility for increased paragraph spacing */
   .paragraph-spacing {
-    line-height: 2;
+    line-height: 2.2; /* Updated to double spacing */
   }
   
   .paragraph-spacing-loose {
-    line-height: 2.2;
+    line-height: 2.4; /* Increased from 2.2 */
   }
 }
-

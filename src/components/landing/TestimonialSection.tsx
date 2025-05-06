@@ -11,7 +11,7 @@ export function TestimonialSection() {
           <blockquote className="text-lg sm:text-xl md:text-2xl lg:text-3xl font-playfair italic mb-4 sm:mb-6 md:mb-8 prose-spacing">
             "The Spelman College Glee Club represents the pinnacle of collegiate choral excellence, with a century-long tradition of magnificent performances."
           </blockquote>
-          <div className="text-sm sm:text-base md:text-lg font-medium text-gray-700 dark:text-gray-700 mt-4">
+          <div className="text-sm sm:text-base md:text-lg font-medium text-gray-700 dark:text-gray-700 mt-5">
             — The New York Times
           </div>
         </div>
