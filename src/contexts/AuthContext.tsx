@@ -48,8 +48,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   // Fetch user profile data
   const fetchProfile = async (userId: string) => {
     try {
-      // Use our RPC function to get profile data safely
-      // Use a direct PostgreSQL query to avoid TypeScript errors
       const { data: profileData, error } = await supabase.from('profiles')
         .select('*')
         .eq('id', userId)
@@ -64,7 +62,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         return null;
       }
 
-      // Ensure the profile has all required fields with defaults if missing
+      // Create a profile with defaults for missing properties
       const profileWithDefaults: Profile = {
         id: profileData.id,
         first_name: profileData.first_name,
@@ -72,7 +70,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         email: user?.email || null, // Use email from auth user
         phone: profileData.phone || null, 
         role: (profileData.role as UserRole) || 'member',
-        voice_part: profileData.voice_part as VoicePart,
+        voice_part: profileData.voice_part as VoicePart || null,
         avatar_url: profileData.avatar_url || null, 
         status: (profileData.status as MemberStatus) || 'pending', 
         section_id: profileData.section_id || null, 

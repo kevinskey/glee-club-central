@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { PageHeader } from "@/components/ui/page-header";
@@ -118,7 +117,7 @@ export default function SectionsPage() {
     async function fetchData() {
       setIsLoading(true);
       try {
-        // Fetch potential section leaders with direct query rather than RPC
+        // Fetch potential section leaders with direct query
         const { data: leadersData, error: leadersError } = await supabase
           .from('profiles')
           .select('id, first_name, last_name')
@@ -151,10 +150,8 @@ export default function SectionsPage() {
 
   const handleSaveSection = async (values: z.infer<typeof sectionFormSchema>) => {
     try {
-      // For now, we will use direct supabase calls for updates as we haven't created RPC functions for these
-      // In a production app, we should also create RPC functions for these operations
       if (editingSection) {
-        // Update existing section
+        // Update existing section - using raw query instead of RPC
         const { error } = await supabase
           .from('sections')
           .update({
@@ -167,7 +164,7 @@ export default function SectionsPage() {
         if (error) throw error;
         toast.success("Section updated successfully");
       } else {
-        // Create new section
+        // Create new section - using raw query instead of RPC
         const { error } = await supabase
           .from('sections')
           .insert({
@@ -192,7 +189,7 @@ export default function SectionsPage() {
 
   const handleDeleteSection = async (sectionId: string) => {
     try {
-      // Direct delete instead of RPC for simplicity
+      // Direct delete instead of RPC
       const { error } = await supabase
         .from('sections')
         .delete()

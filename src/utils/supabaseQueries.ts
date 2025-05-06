@@ -47,12 +47,14 @@ export interface MemberNote {
   };
 }
 
-// Helper function to query attendance records safely using RPC functions
+// Helper function to query attendance records safely
 export async function fetchAttendanceRecords(memberId: string): Promise<AttendanceRecord[]> {
   try {
-    const { data, error } = await supabase.rpc('get_attendance_records', { 
-      p_member_id: memberId 
-    });
+    // Use direct query with type safety instead of RPC function
+    const { data, error } = await supabase
+      .from('attendance_records')
+      .select('*')
+      .eq('member_id', memberId);
       
     if (error) throw error;
     return data || [];
@@ -65,9 +67,11 @@ export async function fetchAttendanceRecords(memberId: string): Promise<Attendan
 // Helper function to query payment records safely
 export async function fetchPaymentRecords(memberId: string): Promise<PaymentRecord[]> {
   try {
-    const { data, error } = await supabase.rpc('get_payment_records', { 
-      p_member_id: memberId 
-    });
+    // Use direct query with type safety instead of RPC function
+    const { data, error } = await supabase
+      .from('payment_records')
+      .select('*')
+      .eq('member_id', memberId);
       
     if (error) throw error;
     return data || [];
@@ -80,9 +84,11 @@ export async function fetchPaymentRecords(memberId: string): Promise<PaymentReco
 // Helper function to query member notes safely
 export async function fetchMemberNotes(memberId: string): Promise<MemberNote[]> {
   try {
-    const { data, error } = await supabase.rpc('get_member_notes', { 
-      p_member_id: memberId 
-    });
+    // Use direct query with type safety instead of RPC function
+    const { data, error } = await supabase
+      .from('member_notes')
+      .select('*')
+      .eq('member_id', memberId);
       
     if (error) throw error;
     return data || [];
@@ -95,7 +101,10 @@ export async function fetchMemberNotes(memberId: string): Promise<MemberNote[]> 
 // Helper function to fetch sections
 export async function fetchSections(): Promise<Section[]> {
   try {
-    const { data, error } = await supabase.rpc('get_sections');
+    // Use SQL query to get sections
+    const { data, error } = await supabase
+      .from('sections')
+      .select('*');
       
     if (error) throw error;
     return data || [];
@@ -108,10 +117,26 @@ export async function fetchSections(): Promise<Section[]> {
 // Helper function to fetch section data with member count
 export async function fetchSectionsWithMemberCount(): Promise<Section[]> {
   try {
-    const { data, error } = await supabase.rpc('get_sections_with_member_count');
+    const { data, error } = await supabase
+      .from('sections')
+      .select(`
+        id, 
+        name, 
+        description, 
+        section_leader_id,
+        profiles:profiles(count)
+      `)
+      .select();
 
     if (error) throw error;
-    return data || [];
+    
+    // Process the data to add member_count property
+    const processedData = data.map(section => ({
+      ...section,
+      member_count: section.profiles?.length || 0
+    }));
+    
+    return processedData || [];
   } catch (error) {
     console.error("Error fetching sections:", error);
     return [];
@@ -121,7 +146,14 @@ export async function fetchSectionsWithMemberCount(): Promise<Section[]> {
 // Helper function to fetch members with section data
 export async function fetchMembers(): Promise<Profile[]> {
   try {
-    const { data, error } = await supabase.rpc('get_members_with_sections');
+    const { data, error } = await supabase
+      .from('profiles')
+      .select(`
+        *,
+        sections:section_id (
+          name
+        )
+      `);
     
     if (error) throw error;
     
@@ -129,8 +161,14 @@ export async function fetchMembers(): Promise<Profile[]> {
     const members = (data || []).map(member => {
       return {
         ...member,
+        email: member.email || null,
+        phone: member.phone || null,
         role: member.role || 'member',
-        status: member.status || 'pending'
+        voice_part: member.voice_part || null,
+        avatar_url: member.avatar_url || null,
+        status: member.status || 'pending',
+        section_id: member.section_id || null,
+        join_date: member.join_date || null
       } as Profile;
     });
     
