@@ -1,4 +1,3 @@
-
 import React, { createContext, useState, useEffect, useContext } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -48,14 +47,17 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   // Fetch user profile data
   const fetchProfile = async (userId: string) => {
     try {
-      const { data, error } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('id', userId)
-        .single();
+      // Use our RPC function to get profile data safely
+      const { data, error } = await supabase.rpc('get_user_profile', { 
+        p_user_id: userId 
+      });
 
       if (error) {
         console.error('Error fetching profile:', error);
+        return null;
+      }
+
+      if (!data) {
         return null;
       }
 
@@ -65,13 +67,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         first_name: data.first_name,
         last_name: data.last_name,
         email: user?.email || null, // Use email from auth user
-        phone: data.phone || null, // This may not exist in the table yet
+        phone: data.phone || null, 
         role: (data.role as UserRole) || 'member',
         voice_part: data.voice_part as VoicePart,
-        avatar_url: data.avatar_url || null, // This may not exist in the table yet
-        status: (data.status as MemberStatus) || 'pending', // This may not exist in the table yet
-        section_id: data.section_id || null, // This may not exist in the table yet
-        join_date: data.join_date || null // This may not exist in the table yet
+        avatar_url: data.avatar_url || null, 
+        status: (data.status as MemberStatus) || 'pending', 
+        section_id: data.section_id || null, 
+        join_date: data.join_date || null 
       };
       
       return profileData;

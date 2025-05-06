@@ -29,11 +29,6 @@ import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { MemberDetailsSheet } from "@/components/members/MemberDetailsSheet";
 import { fetchSections, fetchMembers, Section } from "@/utils/supabaseQueries";
 
-interface Section {
-  id: string;
-  name: string;
-}
-
 export default function MemberDirectoryPage() {
   const { isAdmin, isSectionLeader } = useAuth();
   const [members, setMembers] = useState<Profile[]>([]);

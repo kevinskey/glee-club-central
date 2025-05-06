@@ -118,15 +118,15 @@ export default function SectionsPage() {
       setIsLoading(true);
       try {
         // Fetch potential section leaders (admins and section leaders)
-        const { data: leadersData, error: leadersError } = await supabase.rpc('get_potential_section_leaders');
+        const { data, error: leadersError } = await supabase.rpc('get_potential_section_leaders');
 
         if (leadersError) throw leadersError;
 
         // Format leaders for dropdown
-        const formattedLeaders = leadersData.map((leader: any) => ({
+        const formattedLeaders = data ? data.map((leader: any) => ({
           id: leader.id,
           name: `${leader.first_name || ''} ${leader.last_name || ''}`.trim()
-        }));
+        })) : [];
 
         setLeaders(formattedLeaders);
 
