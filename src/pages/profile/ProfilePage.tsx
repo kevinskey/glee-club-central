@@ -167,8 +167,9 @@ const ProfilePage: React.FC = () => {
         throw uploadError;
       }
 
-      // Properly access storage URL properties
-      const storageUrl = `${supabase.storageUrl}/object/public/avatars/${uploadData.path}`;
+      // Use the SUPABASE_URL defined in the client
+      const SUPABASE_BASE_URL = "https://dzzptovqfqausipsgabw.supabase.co";
+      const storageUrl = `${SUPABASE_BASE_URL}/storage/v1/object/public/avatars/${uploadData.path}`;
       setAvatarUrl(storageUrl);
 
       // Step 2: Call the function to update the user's avatar
