@@ -54,6 +54,9 @@ export const SidebarNav: React.FC<SidebarNavProps> = ({ className }) => {
             <NavLink href="/dashboard/user-management" icon={<UserCog className="h-5 w-5" />}>
               User Management
             </NavLink>
+            <NavLink href="/dashboard/admin-users" icon={<UserCog className="h-5 w-5" />}>
+              WordPress-style Users
+            </NavLink>
             <NavLink href="/dashboard/sections" icon={<Shield className="h-5 w-5" />}>
               Section Management
             </NavLink>

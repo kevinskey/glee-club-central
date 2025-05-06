@@ -17,6 +17,7 @@ import UserManagementPage from '@/pages/UserManagementPage';
 import NotFoundPage from '@/pages/NotFoundPage';
 import InviteMemberPage from '@/pages/InviteMemberPage';
 import FanPage from '@/pages/FanPage';
+import AdminUserManagementPage from '@/pages/AdminUserManagementPage';
 
 import { Outlet } from "react-router-dom";
 import { DashboardLayout } from '@/components/layout/DashboardLayout';
@@ -64,6 +65,11 @@ function App() {
           <Route path="user-management" element={
             <ProtectedRoute allowedRoles={["admin"]}>
               <UserManagementPage />
+            </ProtectedRoute>
+          } />
+          <Route path="admin-users" element={
+            <ProtectedRoute allowedRoles={["admin"]}>
+              <AdminUserManagementPage />
             </ProtectedRoute>
           } />
           <Route path="members" element={
