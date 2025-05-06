@@ -32,7 +32,7 @@ export function useCalendarEvents() {
 
       // Using explicit type casting to handle the TypeScript limitations
       const { data, error } = await supabase
-        .from("calendar_events" as any)
+        .from("calendar_events")
         .select("*")
         .order("date", { ascending: true });
 
@@ -55,7 +55,7 @@ export function useCalendarEvents() {
           time: event.time,
           location: event.location,
           description: event.description || "",
-          type: event.type,
+          type: event.type as "concert" | "rehearsal" | "tour" | "special",
           image_url: event.image_url
         }));
         
@@ -85,7 +85,7 @@ export function useCalendarEvents() {
 
       // Using explicit type casting
       const { data, error } = await supabase
-        .from("calendar_events" as any)
+        .from("calendar_events")
         .insert([newEvent])
         .select()
         .single();
@@ -109,7 +109,7 @@ export function useCalendarEvents() {
         time: typedData.time,
         location: typedData.location,
         description: typedData.description || "",
-        type: typedData.type,
+        type: typedData.type as "concert" | "rehearsal" | "tour" | "special",
         image_url: typedData.image_url
       };
     } catch (err) {

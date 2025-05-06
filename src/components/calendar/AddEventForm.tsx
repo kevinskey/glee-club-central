@@ -79,6 +79,7 @@ export function AddEventForm({ onAddEvent, onCancel }: AddEventFormProps) {
   const [locationInputFocused, setLocationInputFocused] = useState(false);
   const [selectedImage, setSelectedImage] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [isUploading, setIsUploading] = useState(false);
   const locationInputRef = useRef<HTMLInputElement>(null);
   const autocompleteRef = useRef<google.maps.places.Autocomplete | null>(null);
   const { user } = useAuth();
@@ -126,6 +127,18 @@ export function AddEventForm({ onAddEvent, onCancel }: AddEventFormProps) {
   const handleImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
+      // Validate file type
+      if (!file.type.match('image.*')) {
+        toast.error('Please select an image file');
+        return;
+      }
+      
+      // Validate file size (5MB max)
+      if (file.size > 5 * 1024 * 1024) {
+        toast.error('Image file size must be less than 5MB');
+        return;
+      }
+      
       setSelectedImage(file);
       const reader = new FileReader();
       reader.onloadend = () => {
@@ -141,44 +154,58 @@ export function AddEventForm({ onAddEvent, onCancel }: AddEventFormProps) {
       return;
     }
     
-    // Handle image upload if there's a selected image
-    let imageUrl = values.image_url;
+    setIsUploading(true);
     
-    if (selectedImage) {
-      try {
-        const fileName = `${Date.now()}-${selectedImage.name}`;
-        const { data: uploadData, error: uploadError } = await supabase.storage
-          .from('event-images')
-          .upload(fileName, selectedImage);
+    try {
+      // Handle image upload if there's a selected image
+      let imageUrl = values.image_url;
+      
+      if (selectedImage) {
+        try {
+          // Create a unique filename with timestamp and original name
+          const fileExt = selectedImage.name.split('.').pop();
+          const fileName = `${Date.now()}-${Math.random().toString(36).substring(2, 15)}.${fileExt}`;
           
-        if (uploadError) {
-          console.error('Image upload error:', uploadError);
+          // Upload the file to Supabase storage
+          const { data: uploadData, error: uploadError } = await supabase.storage
+            .from('event-images')
+            .upload(fileName, selectedImage);
+            
+          if (uploadError) {
+            console.error('Image upload error:', uploadError);
+            toast.error('Failed to upload image: ' + uploadError.message);
+            return;
+          }
+          
+          // Get the public URL for the uploaded image
+          const { data: { publicUrl } } = supabase.storage
+            .from('event-images')
+            .getPublicUrl(fileName);
+            
+          imageUrl = publicUrl;
+        } catch (err) {
+          console.error('Error uploading image:', err);
           toast.error('Failed to upload image');
           return;
         }
-        
-        // Get the public URL for the uploaded image
-        const { data: { publicUrl } } = supabase.storage
-          .from('event-images')
-          .getPublicUrl(fileName);
-          
-        imageUrl = publicUrl;
-      } catch (err) {
-        console.error('Error uploading image:', err);
-        toast.error('Failed to upload image');
-        return;
       }
+      
+      // Add the image URL to the event data
+      onAddEvent({
+        ...values, 
+        image_url: imageUrl
+      });
+      
+      // Reset form and state
+      form.reset();
+      setSelectedImage(null);
+      setImagePreview(null);
+    } catch (error) {
+      console.error("Error submitting form:", error);
+      toast.error("An error occurred while saving the event");
+    } finally {
+      setIsUploading(false);
     }
-    
-    // Add the image URL to the event data
-    onAddEvent({
-      ...values, 
-      image_url: imageUrl
-    });
-    
-    form.reset();
-    setSelectedImage(null);
-    setImagePreview(null);
   }
 
   const handleSelectTime = (time: string) => {
@@ -368,6 +395,7 @@ export function AddEventForm({ onAddEvent, onCancel }: AddEventFormProps) {
                     accept="image/*" 
                     onChange={handleImageChange}
                     className="bg-white dark:bg-gray-700"
+                    disabled={isUploading}
                   />
                   
                   {imagePreview && (
@@ -385,7 +413,9 @@ export function AddEventForm({ onAddEvent, onCancel }: AddEventFormProps) {
                         onClick={() => {
                           setSelectedImage(null);
                           setImagePreview(null);
+                          field.onChange("");
                         }}
+                        disabled={isUploading}
                       >
                         Remove Image
                       </Button>
@@ -394,7 +424,7 @@ export function AddEventForm({ onAddEvent, onCancel }: AddEventFormProps) {
                 </div>
               </FormControl>
               <FormDescription>
-                Upload an image for this event (optional)
+                Upload an image for this event (max 5MB)
               </FormDescription>
               <FormMessage />
             </FormItem>
@@ -420,11 +450,18 @@ export function AddEventForm({ onAddEvent, onCancel }: AddEventFormProps) {
         />
 
         <div className="flex justify-end gap-2">
-          <Button type="button" variant="outline" onClick={onCancel} className="bg-white dark:bg-gray-700">
+          <Button type="button" variant="outline" onClick={onCancel} className="bg-white dark:bg-gray-700" disabled={isUploading}>
             Cancel
           </Button>
-          <Button type="submit" className="bg-glee-purple hover:bg-glee-purple/90">
-            Save Event
+          <Button type="submit" className="bg-glee-purple hover:bg-glee-purple/90" disabled={isUploading}>
+            {isUploading ? (
+              <>
+                <span className="mr-2">Uploading...</span>
+                <div className="h-4 w-4 rounded-full border-2 border-white border-t-transparent animate-spin"></div>
+              </>
+            ) : (
+              'Save Event'
+            )}
           </Button>
         </div>
       </form>
