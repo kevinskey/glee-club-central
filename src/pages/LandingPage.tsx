@@ -7,11 +7,13 @@ import { FeaturesSection } from "@/components/landing/FeaturesSection";
 import { TestimonialSection } from "@/components/landing/TestimonialSection";
 import { CTASection } from "@/components/landing/CTASection";
 import { Footer } from "@/components/landing/Footer";
+import { NewsFeed } from "@/components/news/NewsFeed";
 
 export default function LandingPage() {
   return (
     <div className="flex min-h-screen flex-col">
-      <Header initialShowNewsFeed={true} />
+      <NewsFeed />
+      <Header initialShowNewsFeed={false} />
       <HeroSection />
       <PerformanceSection />
       <FeaturesSection />
