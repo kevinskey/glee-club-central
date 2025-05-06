@@ -39,6 +39,7 @@ import {
 import { toast } from "sonner";
 import { useLoadScript } from "@react-google-maps/api";
 import { useAuth } from "@/contexts/AuthContext";
+import { supabase } from "@/integrations/supabase/client";
 
 const formSchema = z.object({
   title: z.string().min(2, { message: "Title must be at least 2 characters" }),
