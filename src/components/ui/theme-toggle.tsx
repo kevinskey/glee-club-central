@@ -1,7 +1,7 @@
 
 import React from "react";
 import { Moon, Sun } from "lucide-react";
-import { useTheme } from "@/providers/ThemeProvider";
+import { useTheme, Theme } from "@/providers/ThemeProvider";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
