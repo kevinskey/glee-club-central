@@ -93,11 +93,11 @@ export default function LoginPage() {
         setShowConfigHelp(true);
       } 
       else if (error.message?.includes("provider is not enabled")) {
-        errorMsg = `${provider.charAt(0).toUpperCase() + provider.slice(1)} login is not enabled. Please contact support.`;
+        setAuthError(`${provider.charAt(0).toUpperCase() + provider.slice(1)} login is not enabled. Please contact support.`);
         setShowConfigHelp(true);
       } 
       else if (error.message?.includes("403")) {
-        errorMsg = `${provider.charAt(0).toUpperCase() + provider.slice(1)} login failed. Please check that ${provider} login is enabled in the Supabase console.`;
+        setAuthError(`${provider.charAt(0).toUpperCase() + provider.slice(1)} login failed. Please check that ${provider} login is enabled in the Supabase console.`);
         setShowConfigHelp(true);
       }
       else {
@@ -132,7 +132,7 @@ export default function LoginPage() {
           )}
           
           {showConfigHelp && (
-            <Alert variant="info" className="mb-4">
+            <Alert className="mb-4">
               <Info className="h-4 w-4" />
               <AlertTitle>Configuration Help</AlertTitle>
               <AlertDescription className="mt-2 text-sm">
