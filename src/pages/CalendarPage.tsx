@@ -5,6 +5,7 @@ import { Footer } from "@/components/landing/Footer";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { useCalendarEvents, CalendarEvent } from "@/hooks/useCalendarEvents";
 import { AddEventForm } from "@/components/calendar/AddEventForm";
+import { EditEventForm } from "@/components/calendar/EditEventForm";
 import { toast } from "sonner";
 
 // Components
@@ -17,7 +18,8 @@ export default function CalendarPage() {
   const [date, setDate] = useState<Date | undefined>(new Date());
   const [selectedEvent, setSelectedEvent] = useState<CalendarEvent | null>(null);
   const [isAddEventOpen, setIsAddEventOpen] = useState(false);
-  const { events, loading, addEvent, deleteEvent } = useCalendarEvents();
+  const [isEditEventOpen, setIsEditEventOpen] = useState(false);
+  const { events, loading, addEvent, updateEvent, deleteEvent } = useCalendarEvents();
   
   // Filter events for the selected date - memoized
   const eventsOnSelectedDate = useMemo(() => {
@@ -54,6 +56,13 @@ export default function CalendarPage() {
         // Set the date again to trigger a refresh
         setDate(new Date(date));
       }
+    }
+  };
+
+  // Handle editing an event
+  const handleEditEvent = () => {
+    if (selectedEvent) {
+      setIsEditEventOpen(true);
     }
   };
 
@@ -121,7 +130,8 @@ export default function CalendarPage() {
                     {selectedEvent && (
                       <EventDetails 
                         selectedEvent={selectedEvent} 
-                        onDeleteEvent={handleDeleteEvent} 
+                        onDeleteEvent={handleDeleteEvent}
+                        onEditEvent={handleEditEvent} 
                       />
                     )}
                   </>
@@ -145,6 +155,22 @@ export default function CalendarPage() {
           />
         </DialogContent>
       </Dialog>
+
+      {/* Edit Event Dialog */}
+      {selectedEvent && (
+        <Dialog open={isEditEventOpen} onOpenChange={setIsEditEventOpen}>
+          <DialogContent className="sm:max-w-[600px] bg-white dark:bg-gray-800">
+            <DialogHeader>
+              <DialogTitle>Edit Event</DialogTitle>
+            </DialogHeader>
+            <EditEventForm 
+              event={selectedEvent}
+              onUpdateEvent={updateEvent}
+              onCancel={() => setIsEditEventOpen(false)} 
+            />
+          </DialogContent>
+        </Dialog>
+      )}
     </div>
   );
 }

@@ -1,7 +1,7 @@
 
 import React from "react";
 import { format } from "date-fns";
-import { CalendarIcon, Clock, MapPin } from "lucide-react";
+import { CalendarIcon, Clock, MapPin, Edit, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { CalendarEvent } from "@/hooks/useCalendarEvents";
 import { useAuth } from "@/contexts/AuthContext";
@@ -9,11 +9,13 @@ import { useAuth } from "@/contexts/AuthContext";
 interface EventDetailsProps {
   selectedEvent: CalendarEvent;
   onDeleteEvent: () => Promise<void>;
+  onEditEvent?: () => void;
 }
 
 export const EventDetails = ({ 
   selectedEvent, 
-  onDeleteEvent 
+  onDeleteEvent,
+  onEditEvent
 }: EventDetailsProps) => {
   const { user } = useAuth();
 
@@ -50,7 +52,7 @@ export const EventDetails = ({
       <p className="text-sm">{selectedEvent.description}</p>
 
       {/* Event actions */}
-      <div className="mt-6 flex gap-3">
+      <div className="mt-6 flex flex-wrap gap-3">
         <Button className="bg-glee-purple hover:bg-glee-purple/90">
           Add to Calendar
         </Button>
@@ -58,13 +60,24 @@ export const EventDetails = ({
           Share Event
         </Button>
         {user && user.id && (
-          <Button
-            variant="outline"
-            className="text-red-500 hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-900/20"
-            onClick={onDeleteEvent}
-          >
-            Delete
-          </Button>
+          <>
+            {onEditEvent && (
+              <Button
+                variant="outline"
+                className="text-blue-500 hover:bg-blue-50 hover:text-blue-600 dark:hover:bg-blue-900/20"
+                onClick={onEditEvent}
+              >
+                <Edit className="w-4 h-4 mr-1" /> Edit
+              </Button>
+            )}
+            <Button
+              variant="outline"
+              className="text-red-500 hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-900/20"
+              onClick={onDeleteEvent}
+            >
+              <Trash2 className="w-4 h-4 mr-1" /> Delete
+            </Button>
+          </>
         )}
       </div>
     </div>
