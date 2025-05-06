@@ -50,7 +50,7 @@ export interface MemberNote {
 // Helper function to query attendance records safely
 export async function fetchAttendanceRecords(memberId: string): Promise<AttendanceRecord[]> {
   try {
-    // Use direct RPC query with type parameters
+    // Use direct RPC query
     const { data, error } = await supabase.rpc('get_attendance_records', { 
       p_member_id: memberId 
     });
@@ -71,7 +71,7 @@ export async function fetchAttendanceRecords(memberId: string): Promise<Attendan
 // Helper function to query payment records safely
 export async function fetchPaymentRecords(memberId: string): Promise<PaymentRecord[]> {
   try {
-    // Use direct RPC query with type parameters
+    // Use direct RPC query
     const { data, error } = await supabase.rpc('get_payment_records', { 
       p_member_id: memberId 
     });
@@ -92,7 +92,7 @@ export async function fetchPaymentRecords(memberId: string): Promise<PaymentReco
 // Helper function to query member notes safely
 export async function fetchMemberNotes(memberId: string): Promise<MemberNote[]> {
   try {
-    // Use direct RPC query with type parameters
+    // Use direct RPC query
     const { data, error } = await supabase.rpc('get_member_notes', { 
       p_member_id: memberId 
     });
@@ -113,7 +113,7 @@ export async function fetchMemberNotes(memberId: string): Promise<MemberNote[]> 
 // Helper function to fetch sections
 export async function fetchSections(): Promise<Section[]> {
   try {
-    // Use RPC query with type parameters
+    // Use RPC query
     const { data, error } = await supabase.rpc('get_sections');
     
     if (error) throw error;
