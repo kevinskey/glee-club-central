@@ -1,3 +1,4 @@
+
 import React, { createContext, useState, useEffect, useContext } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -5,7 +6,7 @@ import { useNavigate } from "react-router-dom";
 
 // Define voice part as an enum
 export type VoicePart = "soprano" | "alto" | "tenor" | "bass";
-export type UserRole = "admin" | "section_leader" | "member";
+export type UserRole = "admin" | "section_leader" | "member" | "student_conductor" | "accompanist" | "singer";
 export type MemberStatus = "active" | "inactive" | "alumni" | "pending";
 
 export interface Profile {

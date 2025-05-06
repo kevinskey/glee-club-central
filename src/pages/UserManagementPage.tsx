@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { PageHeader } from "@/components/ui/page-header";
@@ -113,6 +112,12 @@ export default function UserManagementPage() {
         return <Badge className="bg-blue-500">Section Leader</Badge>;
       case "member":
         return <Badge variant="outline">Member</Badge>;
+      case "student_conductor":
+        return <Badge className="bg-green-500">Student Conductor</Badge>;
+      case "accompanist":
+        return <Badge className="bg-amber-500">Accompanist</Badge>;
+      case "singer":
+        return <Badge className="bg-sky-500">Singer</Badge>;
       default:
         return <Badge variant="outline">{role}</Badge>;
     }
@@ -178,6 +183,9 @@ export default function UserManagementPage() {
                   <SelectItem value="all">All Roles</SelectItem>
                   <SelectItem value="admin">Admin</SelectItem>
                   <SelectItem value="section_leader">Section Leader</SelectItem>
+                  <SelectItem value="student_conductor">Student Conductor</SelectItem>
+                  <SelectItem value="accompanist">Accompanist</SelectItem>
+                  <SelectItem value="singer">Singer</SelectItem>
                   <SelectItem value="member">Member</SelectItem>
                 </SelectContent>
               </Select>
@@ -305,6 +313,9 @@ export default function UserManagementPage() {
                                           <SelectContent>
                                             <SelectItem value="admin">Admin</SelectItem>
                                             <SelectItem value="section_leader">Section Leader</SelectItem>
+                                            <SelectItem value="student_conductor">Student Conductor</SelectItem>
+                                            <SelectItem value="accompanist">Accompanist</SelectItem>
+                                            <SelectItem value="singer">Singer</SelectItem>
                                             <SelectItem value="member">Member</SelectItem>
                                           </SelectContent>
                                         </Select>
@@ -374,6 +385,15 @@ export default function UserManagementPage() {
                             </DropdownMenuItem>
                             <DropdownMenuItem onClick={() => handleRoleChange(user.id, "section_leader")}>
                               Set as Section Leader
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => handleRoleChange(user.id, "student_conductor")}>
+                              Set as Student Conductor
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => handleRoleChange(user.id, "accompanist")}>
+                              Set as Accompanist
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => handleRoleChange(user.id, "singer")}>
+                              Set as Singer
                             </DropdownMenuItem>
                             <DropdownMenuItem onClick={() => handleRoleChange(user.id, "member")}>
                               Set as Member
