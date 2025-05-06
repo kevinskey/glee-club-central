@@ -178,6 +178,10 @@
   }
   
   /* Custom transition durations */
+  .duration-1500 {
+    transition-duration: 1500ms;
+  }
+  
   .duration-3000 {
     transition-duration: 3000ms;
   }

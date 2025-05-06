@@ -20,6 +20,7 @@ export function HeroSection() {
         <BackgroundSlideshow 
           images={backgroundImages} 
           duration={7000} 
+          transition={1500}
         />
       </div>
       <div className="container relative z-10 mx-auto px-8 md:px-12 md:grid-cols-1 items-center">
