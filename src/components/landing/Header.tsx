@@ -9,6 +9,12 @@ import { useIsMobile } from "@/hooks/use-mobile";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { Metronome } from "@/components/ui/metronome";
 import { Icons } from "@/components/Icons";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 interface HeaderProps {
   initialShowNewsFeed?: boolean;
@@ -40,17 +46,39 @@ export function Header({ initialShowNewsFeed = true }: HeaderProps) {
       {showNewsFeed && <NewsFeed onClose={() => setShowNewsFeed(false)} />}
       <div className="container px-4 md:px-8 flex h-16 items-center justify-between">
         <div className="flex items-center gap-2">
-          <Icons.logo className="h-5 w-5 text-glee-purple" />
-          <span className="font-playfair text-lg font-semibold text-glee-purple">
-            Glee World
-          </span>
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <div className="flex items-center gap-2 cursor-pointer" onClick={() => navigate("/")}>
+                  <Icons.logo className="h-5 w-5 text-glee-purple" />
+                  <span className="font-playfair text-lg font-semibold text-glee-purple">
+                    Glee World
+                  </span>
+                </div>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>Go to homepage</p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
           <Metronome />
         </div>
         
         {/* Desktop navigation */}
         <div className="hidden md:flex items-center gap-3">
           <ThemeToggle />
-          <Clock />
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <div>
+                  <Clock />
+                </div>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>Current time</p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
           <Button 
             variant="outline" 
             size="sm"
@@ -70,17 +98,26 @@ export function Header({ initialShowNewsFeed = true }: HeaderProps) {
         
         {/* Mobile menu button */}
         <div className="md:hidden flex items-center">
-          <button 
-            onClick={toggleMobileMenu}
-            className="p-2 text-glee-purple"
-            aria-label={mobileMenuOpen ? "Close menu" : "Open menu"}
-          >
-            {mobileMenuOpen ? (
-              <X className="h-5 w-5" />
-            ) : (
-              <Menu className="h-5 w-5" />
-            )}
-          </button>
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <button 
+                  onClick={toggleMobileMenu}
+                  className="p-2 text-glee-purple"
+                  aria-label={mobileMenuOpen ? "Close menu" : "Open menu"}
+                >
+                  {mobileMenuOpen ? (
+                    <X className="h-5 w-5" />
+                  ) : (
+                    <Menu className="h-5 w-5" />
+                  )}
+                </button>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>{mobileMenuOpen ? "Close menu" : "Open menu"}</p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
         </div>
       </div>
       
@@ -90,7 +127,18 @@ export function Header({ initialShowNewsFeed = true }: HeaderProps) {
           <div className="container py-4 px-4 flex flex-col gap-4">
             <div className="flex justify-center gap-4">
               <ThemeToggle />
-              <Clock />
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <div>
+                      <Clock />
+                    </div>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>Current time</p>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
             </div>
             <Button 
               variant="outline" 

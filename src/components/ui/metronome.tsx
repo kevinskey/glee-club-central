@@ -20,6 +20,12 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 // Define sound types - using regular audio files instead of data URLs
 const SOUNDS = {
@@ -119,92 +125,101 @@ export function Metronome() {
   };
   
   return (
-    <div className="flex items-center">
-      <Popover>
-        <PopoverTrigger asChild>
-          <Button
-            variant="ghost"
-            size="icon"
-            className="relative h-8 w-8 rounded-full transition-colors hover:bg-accent/10"
-          >
-            <Music className="h-4 w-4 text-glee-purple" />
-            <span className="sr-only">Open metronome</span>
-          </Button>
-        </PopoverTrigger>
-        <PopoverContent className="w-64 p-4" align="end">
-          <div className="space-y-4">
-            <div className="flex items-center justify-between">
-              <h4 className="text-sm font-medium">Metronome</h4>
-              <Button
-                size="sm"
-                variant="ghost"
-                className={`h-8 w-8 rounded-full p-0 ${
-                  isPlaying ? "text-glee-purple" : "text-muted-foreground"
-                }`}
-                onClick={togglePlay}
-              >
-                {isPlaying ? (
-                  <Pause className="h-4 w-4" />
-                ) : (
-                  <Play className="h-4 w-4" />
-                )}
-                <span className="sr-only">
-                  {isPlaying ? "Pause" : "Play"} metronome
-                </span>
-              </Button>
-            </div>
-            
-            <div className="space-y-2">
-              <div className="flex items-center justify-between">
-                <span className="text-sm">Tempo</span>
-                <span className="text-sm font-medium">{tempo} BPM</span>
-              </div>
-              <Slider
-                value={[tempo]}
-                min={40}
-                max={240}
-                step={1}
-                onValueChange={(value) => setTempo(value[0])}
-                className="[&_.absolute]:bg-glee-purple"
-              />
-            </div>
-            
-            <div className="space-y-2">
-              <label className="text-sm">Sound Type</label>
-              <Select
-                value={soundType}
-                onValueChange={(value: keyof typeof SOUNDS) => setSoundType(value)}
-              >
-                <SelectTrigger className="h-8 text-sm">
-                  <SelectValue placeholder="Select sound" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="click">Click</SelectItem>
-                  <SelectItem value="woodblock">Woodblock</SelectItem>
-                  <SelectItem value="beep">Beep</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            
-            <div className="space-y-2">
-              <div className="flex items-center justify-between">
-                <span className="flex items-center text-sm">
-                  <Volume2 className="mr-1 h-3 w-3" /> Volume
-                </span>
-                <span className="text-sm font-medium">{Math.round(volume * 100)}%</span>
-              </div>
-              <Slider
-                value={[volume * 100]}
-                min={0}
-                max={100}
-                step={1}
-                onValueChange={(value) => setVolume(value[0] / 100)}
-                className="[&_.absolute]:bg-glee-purple"
-              />
-            </div>
+    <TooltipProvider>
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <div className="flex items-center">
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="relative h-8 w-8 rounded-full transition-colors hover:bg-accent/10"
+                >
+                  <Music className="h-4 w-4 text-glee-purple" />
+                  <span className="sr-only">Open metronome</span>
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-64 p-4" align="end">
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <h4 className="text-sm font-medium">Metronome</h4>
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      className={`h-8 w-8 rounded-full p-0 ${
+                        isPlaying ? "text-glee-purple" : "text-muted-foreground"
+                      }`}
+                      onClick={togglePlay}
+                    >
+                      {isPlaying ? (
+                        <Pause className="h-4 w-4" />
+                      ) : (
+                        <Play className="h-4 w-4" />
+                      )}
+                      <span className="sr-only">
+                        {isPlaying ? "Pause" : "Play"} metronome
+                      </span>
+                    </Button>
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm">Tempo</span>
+                      <span className="text-sm font-medium">{tempo} BPM</span>
+                    </div>
+                    <Slider
+                      value={[tempo]}
+                      min={40}
+                      max={240}
+                      step={1}
+                      onValueChange={(value) => setTempo(value[0])}
+                      className="[&_.absolute]:bg-glee-purple"
+                    />
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <label className="text-sm">Sound Type</label>
+                    <Select
+                      value={soundType}
+                      onValueChange={(value: keyof typeof SOUNDS) => setSoundType(value)}
+                    >
+                      <SelectTrigger className="h-8 text-sm">
+                        <SelectValue placeholder="Select sound" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="click">Click</SelectItem>
+                        <SelectItem value="woodblock">Woodblock</SelectItem>
+                        <SelectItem value="beep">Beep</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between">
+                      <span className="flex items-center text-sm">
+                        <Volume2 className="mr-1 h-3 w-3" /> Volume
+                      </span>
+                      <span className="text-sm font-medium">{Math.round(volume * 100)}%</span>
+                    </div>
+                    <Slider
+                      value={[volume * 100]}
+                      min={0}
+                      max={100}
+                      step={1}
+                      onValueChange={(value) => setVolume(value[0] / 100)}
+                      className="[&_.absolute]:bg-glee-purple"
+                    />
+                  </div>
+                </div>
+              </PopoverContent>
+            </Popover>
           </div>
-        </PopoverContent>
-      </Popover>
-    </div>
+        </TooltipTrigger>
+        <TooltipContent>
+          <p>Metronome</p>
+        </TooltipContent>
+      </Tooltip>
+    </TooltipProvider>
   );
 }
