@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -61,7 +62,7 @@ export default function LandingPage() {
           <div className="text-white space-y-6 md:pr-6 max-w-2xl mx-auto text-center md:text-left md:mx-0">
             <h1 className="font-playfair text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight">
               <span className="block">Spelman College</span>
-              <span className="bg-gradient-to-r from-glee-gold to-glee-purple bg-clip-text text-transparent">
+              <span className="bg-gradient-to-r from-glee-accent to-glee-purple bg-clip-text text-transparent">
                 Glee Club
               </span>
             </h1>
@@ -133,7 +134,7 @@ export default function LandingPage() {
             
             <Card className="bg-white/50 dark:bg-white/5 backdrop-blur-sm border border-gray-200 dark:border-white/10 overflow-hidden hover:shadow-md transition-all duration-300">
               <CardContent className="p-0">
-                <div className="h-40 bg-gradient-to-br from-glee-gold/80 to-glee-gold/20 flex items-center justify-center">
+                <div className="h-40 bg-gradient-to-br from-glee-accent/80 to-glee-accent/20 flex items-center justify-center">
                   <Headphones className="h-16 w-16 text-white/90" />
                 </div>
                 <div className="p-6">
@@ -147,7 +148,7 @@ export default function LandingPage() {
             
             <Card className="bg-white/50 dark:bg-white/5 backdrop-blur-sm border border-gray-200 dark:border-white/10 overflow-hidden hover:shadow-md transition-all duration-300">
               <CardContent className="p-0">
-                <div className="h-40 bg-gradient-to-br from-glee-purple/60 to-glee-gold/40 flex items-center justify-center">
+                <div className="h-40 bg-gradient-to-br from-glee-purple/60 to-glee-accent/40 flex items-center justify-center">
                   <Calendar className="h-16 w-16 text-white/90" />
                 </div>
                 <div className="p-6">

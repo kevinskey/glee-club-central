@@ -63,12 +63,13 @@ export default {
 					border: 'hsl(var(--sidebar-border))',
 					ring: 'hsl(var(--sidebar-ring))'
 				},
-				// Custom colors for Glee World
+				// Custom colors for Spelman College
 				glee: {
-					purple: '#6A0DAD',
-					gold: '#FFD700',
-					light: '#F9F7FF',
-					dark: '#2D1A45',
+					purple: '#0B4EA2', // Spelman Blue
+					gold: '#FFFFFF',    // White
+					light: '#E6EDF5',   // Light blue
+					dark: '#072A57',    // Dark blue (for backgrounds)
+					accent: '#C4A747',  // Gold accent
 				}
 			},
 			fontFamily: {
