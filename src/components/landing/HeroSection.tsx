@@ -16,7 +16,7 @@ export function HeroSection() {
   ];
   
   return (
-    <section className="relative bg-glee-dark py-28 md:py-40 overflow-hidden">
+    <section className="relative bg-glee-dark py-24 md:py-36 overflow-hidden">
       <div className="absolute inset-0 opacity-50 bg-blend-overlay bg-black">
         <BackgroundSlideshow 
           images={backgroundImages} 
@@ -24,7 +24,7 @@ export function HeroSection() {
           transition={3000} 
         />
       </div>
-      <div className="container relative z-10 mx-auto md:grid-cols-1 items-center">
+      <div className="container relative z-10 mx-auto px-8 md:px-12 md:grid-cols-1 items-center">
         <div className="text-white space-y-8 md:pr-6 max-w-2xl mx-auto text-center md:text-left md:mx-0">
           <h1 className="font-playfair tracking-tight">
             <span className="block text-3xl md:text-4xl lg:text-5xl font-bold mb-2">Spelman College</span>
