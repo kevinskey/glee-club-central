@@ -24,13 +24,23 @@ export function CTASection() {
           <p className="text-sm sm:text-base md:text-lg mb-5 sm:mb-6 md:mb-8 opacity-90">
             Access sheet music, submit recordings, check schedules, and connect with fellow members.
           </p>
-          <Button 
-            size={isMobile ? "default" : "lg"} 
-            className="bg-white text-glee-dark hover:bg-white/90"
-            onClick={() => navigate("/login")}
-          >
-            Member Portal
-          </Button>
+          <div className="flex flex-col sm:flex-row justify-center gap-4">
+            <Button 
+              size={isMobile ? "default" : "lg"} 
+              variant="outline"
+              className="bg-white/10 text-white border-white hover:bg-white/20"
+              onClick={() => navigate("/fan-page")}
+            >
+              Guest Access
+            </Button>
+            <Button 
+              size={isMobile ? "default" : "lg"} 
+              className="bg-white text-glee-dark hover:bg-white/90"
+              onClick={() => navigate("/login")}
+            >
+              Member Portal
+            </Button>
+          </div>
         </div>
       </div>
     </section>

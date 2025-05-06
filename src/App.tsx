@@ -20,21 +20,7 @@ import FanPage from '@/pages/FanPage';
 
 import { Outlet } from "react-router-dom";
 import { DashboardLayout } from '@/components/layout/DashboardLayout';
-
-// A wrapper for routes that require authentication
-function ProtectedRoute({ children }: { children: React.ReactNode }) {
-  const { isAuthenticated, isLoading } = useAuth();
-
-  if (isLoading) {
-    return <div>Loading...</div>; // Or a more appropriate loading indicator
-  }
-
-  return isAuthenticated ? (
-    <>{children}</>
-  ) : (
-    <Navigate to="/login" replace />
-  );
-}
+import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
 
 function App() {
   const { isAuthenticated, isLoading } = useAuth();
@@ -42,6 +28,7 @@ function App() {
   return (
     <BrowserRouter>
       <Routes>
+        {/* Public routes */}
         <Route path="/" element={<LandingPage />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />
@@ -49,6 +36,7 @@ function App() {
         <Route path="/reset-password" element={<ResetPasswordPage />} />
         <Route path="/fan-page" element={<FanPage />} />
         
+        {/* Protected routes with role-based access */}
         <Route path="/dashboard" element={
           <ProtectedRoute>
             <DashboardLayout>
@@ -61,8 +49,18 @@ function App() {
           <Route path="profile" element={<ProfilePage />} />
           <Route path="sections" element={<SectionsPage />} />
           <Route path="members" element={<MemberDirectoryPage />} />
-          <Route path="users" element={<UserManagementPage />} />
-          <Route path="invite-member" element={<InviteMemberPage />} />
+          {/* Admin-only route */}
+          <Route path="users" element={
+            <ProtectedRoute allowedRoles={["admin"]}>
+              <UserManagementPage />
+            </ProtectedRoute>
+          } />
+          {/* Section Leader or Admin route */}
+          <Route path="invite-member" element={
+            <ProtectedRoute allowedRoles={["admin", "section_leader"]}>
+              <InviteMemberPage />
+            </ProtectedRoute>
+          } />
         </Route>
 
         <Route path="*" element={<NotFoundPage />} />

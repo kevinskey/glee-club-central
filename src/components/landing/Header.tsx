@@ -51,6 +51,12 @@ export function Header({ initialShowNewsFeed = true }: HeaderProps) {
           <Button 
             variant="outline" 
             className="text-glee-purple border-glee-purple hover:bg-glee-purple/10" 
+            onClick={() => navigate("/fan-page")}
+          >
+            Guest Access
+          </Button>
+          <Button 
+            className="bg-glee-purple hover:bg-glee-purple/90" 
             onClick={() => navigate("/login")}
           >
             Member Portal
@@ -84,6 +90,15 @@ export function Header({ initialShowNewsFeed = true }: HeaderProps) {
             <Button 
               variant="outline" 
               className="text-glee-purple border-glee-purple hover:bg-glee-purple/10 w-full" 
+              onClick={() => {
+                navigate("/fan-page");
+                setMobileMenuOpen(false);
+              }}
+            >
+              Guest Access
+            </Button>
+            <Button 
+              className="bg-glee-purple hover:bg-glee-purple/90 w-full" 
               onClick={() => {
                 navigate("/login");
                 setMobileMenuOpen(false);

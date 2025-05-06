@@ -22,13 +22,22 @@ export function Footer() {
             <a href="#" className="text-sm sm:text-base text-gray-600 dark:text-gray-600 hover:text-glee-purple transition-colors">About</a>
             <a href="#" className="text-sm sm:text-base text-gray-600 dark:text-gray-600 hover:text-glee-purple transition-colors">Performances</a>
             <a href="#" className="text-sm sm:text-base text-gray-600 dark:text-gray-600 hover:text-glee-purple transition-colors">Contact</a>
-            <Button 
-              variant="ghost" 
-              className="text-glee-purple hover:text-glee-purple/80"
-              onClick={() => navigate("/login")}
-            >
-              Member Portal
-            </Button>
+            <div className="flex gap-3 mt-3 sm:mt-0">
+              <Button 
+                variant="ghost" 
+                className="text-glee-purple hover:text-glee-purple/80"
+                onClick={() => navigate("/fan-page")}
+              >
+                Guest Access
+              </Button>
+              <Button 
+                variant="ghost" 
+                className="text-glee-purple hover:text-glee-purple/80"
+                onClick={() => navigate("/login")}
+              >
+                Member Portal
+              </Button>
+            </div>
           </div>
         </div>
         
