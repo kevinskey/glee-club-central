@@ -62,6 +62,7 @@ export default function LoginPage() {
     setSocialLoading(provider);
     try {
       if (provider === 'google') {
+        console.log("Starting Google sign-in...");
         await signInWithGoogle();
         // Toast will be shown on successful redirect back
       } else if (provider === 'apple') {
@@ -75,6 +76,8 @@ export default function LoginPage() {
       let errorMsg = error.message || `${provider} login failed.`;
       if (error.message?.includes("provider is not enabled")) {
         errorMsg = `${provider.charAt(0).toUpperCase() + provider.slice(1)} login is not enabled. Please contact support.`;
+      } else if (error.message?.includes("403")) {
+        errorMsg = `${provider.charAt(0).toUpperCase() + provider.slice(1)} login failed. Please check that ${provider} login is enabled in the Supabase console.`;
       }
       
       toast.error(errorMsg);

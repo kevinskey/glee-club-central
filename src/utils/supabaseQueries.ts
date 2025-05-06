@@ -60,7 +60,7 @@ export async function fetchAttendanceRecords(memberId: string): Promise<Attendan
     if (!data) return [];
     
     // Process and return the data
-    return Array.isArray(data) ? data : [];
+    return Array.isArray(data) ? data as AttendanceRecord[] : [];
   } catch (error) {
     console.error("Error fetching attendance:", error);
     return [];
@@ -80,7 +80,7 @@ export async function fetchPaymentRecords(memberId: string): Promise<PaymentReco
     if (!data) return [];
     
     // Process and return the data
-    return Array.isArray(data) ? data : [];
+    return Array.isArray(data) ? data as PaymentRecord[] : [];
   } catch (error) {
     console.error("Error fetching payments:", error);
     return [];
@@ -100,7 +100,7 @@ export async function fetchMemberNotes(memberId: string): Promise<MemberNote[]> 
     if (!data) return [];
     
     // Process and return the data
-    return Array.isArray(data) ? data : [];
+    return Array.isArray(data) ? data as MemberNote[] : [];
   } catch (error) {
     console.error("Error fetching notes:", error);
     return [];
@@ -117,7 +117,7 @@ export async function fetchSections(): Promise<Section[]> {
     if (error) throw error;
     
     // Process and return the data
-    return data || [];
+    return data as Section[] || [];
   } catch (error) {
     console.error("Error fetching sections:", error);
     return [];
@@ -133,7 +133,7 @@ export async function fetchSectionsWithMemberCount(): Promise<Section[]> {
     if (error) throw error;
     
     // Process and return the data
-    return data || [];
+    return data as Section[] || [];
   } catch (error) {
     console.error("Error fetching sections:", error);
     return [];
@@ -149,7 +149,7 @@ export async function fetchMembers(): Promise<Profile[]> {
     if (error) throw error;
     
     // Make sure to cast the data to ensure it has all required Profile properties
-    const members = data ? data.map((member) => {
+    const members = data ? (data as any[]).map((member) => {
       return {
         ...member,
         email: member.email || null,

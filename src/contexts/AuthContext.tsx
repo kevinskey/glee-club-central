@@ -1,4 +1,3 @@
-
 import React, { createContext, useState, useEffect, useContext } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -239,7 +238,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       const { data, error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
-          redirectTo: `${window.location.origin}/dashboard`
+          redirectTo: `${window.location.origin}/dashboard`,
+          queryParams: {
+            access_type: 'offline',
+            prompt: 'consent'
+          }
         }
       });
 
@@ -252,7 +255,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       // No need to set user and profile here as it will be handled by onAuthStateChange
     } catch (error: any) {
       console.error('Error signing in with Google:', error);
-      toast.error(error.message || 'Error signing in with Google');
+      // Don't show toast here - let the calling component handle it
       throw error;
     }
   };
@@ -283,7 +286,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       // No need to set user and profile here as it will be handled by onAuthStateChange
     } catch (error: any) {
       console.error('Error signing in with Apple:', error);
-      toast.error(error.message || 'Error signing in with Apple');
+      // Don't show toast here - let the calling component handle it
       throw error;
     }
   };

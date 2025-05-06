@@ -70,7 +70,7 @@ export function useSections() {
         toast.success("Section updated successfully");
       } else {
         // Create new section - using RPC function
-        const { data, error } = await supabase
+        const { error } = await supabase
           .rpc('create_section', {
             p_name: values.name,
             p_description: values.description || null,
