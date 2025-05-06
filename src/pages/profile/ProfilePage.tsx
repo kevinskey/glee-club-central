@@ -189,28 +189,32 @@ export default function ProfilePage() {
       
       const avatarUrl = data.publicUrl;
 
-      // Check if avatar_url field exists in the profiles table
-      // If it doesn't exist, the update might fail and we need to handle it
-      // One approach is to update using the Supabase RPC function to handle this dynamically
-      const { error: updateError } = await supabase.rpc('update_profile_avatar', {
-        user_id: user.id,
-        avatar_url_value: avatarUrl
-      }).catch(() => {
-        // If the RPC doesn't exist, fall back to regular update
-        // This might still fail if the column doesn't exist
-        return supabase
+      try {
+        // First attempt: Try using the RPC function
+        const { error: rpcError } = await supabase.rpc(
+          'update_profile_avatar',
+          {
+            user_id: user.id,
+            avatar_url_value: avatarUrl
+          }
+        );
+        
+        if (rpcError) {
+          throw rpcError;
+        }
+      } catch (rpcFailure) {
+        // Second attempt: If RPC fails, try direct update with type assertion
+        const { error: updateError } = await supabase
           .from('profiles')
           .update({
-            // Use type assertion to tell TypeScript this is a valid field
-            // even though it's not in the strict type definition
             avatar_url: avatarUrl as any,
             updated_at: new Date().toISOString()
           })
           .eq('id', user.id);
-      });
-
-      if (updateError) {
-        throw updateError;
+          
+        if (updateError) {
+          throw updateError;
+        }
       }
 
       setAvatarUrl(avatarUrl);
