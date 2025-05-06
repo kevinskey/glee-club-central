@@ -30,7 +30,7 @@ export function HeroSection() {
         <div className="text-white space-y-4 sm:space-y-5 md:space-y-6 lg:space-y-8 md:pr-6 max-w-xs sm:max-w-sm md:max-w-lg lg:max-w-2xl mx-auto text-center md:text-left md:mx-0">
           <h1 className="font-playfair tracking-tight">
             <span className="block text-xl sm:text-2xl md:text-3xl lg:text-[3rem] xl:text-[3.8rem] font-bold mb-1 sm:mb-2">Spelman College</span>
-            <span className="animate-gradient bg-clip-text text-transparent text-2xl sm:text-3xl md:text-[3rem] lg:text-[3.8rem] xl:text-[5.3rem] font-bold">
+            <span className="animate-gradient bg-clip-text text-transparent text-3xl sm:text-4xl md:text-[3.5rem] lg:text-[4.5rem] xl:text-[6.5rem] font-bold">
               Glee Club
             </span>
           </h1>
