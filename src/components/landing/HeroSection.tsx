@@ -58,20 +58,19 @@ export function HeroSection() {
       <div className="fixed bottom-4 left-24 md:bottom-8 md:left-28 lg:left-32 z-10 w-12.5 md:w-17.5 lg:w-20 animate-fade-in">
         <img 
           src="/lovable-uploads/9a044e72-80dc-40a6-b716-2d5c2d35b878.png" 
-          alt="Spelman Glee Club 100 Crest" 
+          alt="Spelman Glee Club Crest" 
           className="w-full h-auto drop-shadow-lg"
         />
       </div>
 
-      {/* Right side image */}
+      {/* Right side image - Glee100 image */}
       <div className="absolute bottom-4 right-4 md:bottom-8 md:right-8 lg:right-12 z-10 w-16 md:w-24 lg:w-28 animate-fade-in">
         <img 
-          src="/lovable-uploads/3ad02de0-04d1-4a5e-9279-898e9c317d80.png" 
-          alt="Spelman Glee Club Logo" 
+          src="/lovable-uploads/9a044e72-80dc-40a6-b716-2d5c2d35b878.png" 
+          alt="Spelman Glee Club 100 Crest" 
           className="w-full h-auto drop-shadow-lg"
         />
       </div>
     </section>
   );
 }
-
