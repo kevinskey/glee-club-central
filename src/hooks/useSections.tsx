@@ -23,7 +23,9 @@ export function useSections() {
     setIsLoading(true);
     try {
       // Fetch potential section leaders with direct query
-      const { data: leadersData, error: leadersError } = await supabase.rpc<SectionLeader[], null>('get_potential_section_leaders');
+      const { data: leadersData, error: leadersError } = await supabase
+        .rpc('get_potential_section_leaders')
+        .returns<SectionLeader[]>();
 
       if (leadersError) throw leadersError;
 
@@ -54,31 +56,26 @@ export function useSections() {
     try {
       if (editingSection) {
         // Update existing section - using RPC function
-        const { error } = await supabase.rpc<void, {
-          p_id: string;
-          p_name: string;
-          p_description: string | null;
-          p_section_leader_id: string | null;
-        }>('update_section', {
-          p_id: editingSection.id,
-          p_name: values.name,
-          p_description: values.description || null,
-          p_section_leader_id: values.section_leader_id || null
-        });
+        const { error } = await supabase
+          .rpc('update_section', {
+            p_id: editingSection.id,
+            p_name: values.name,
+            p_description: values.description || null,
+            p_section_leader_id: values.section_leader_id || null
+          })
+          .returns<void>();
 
         if (error) throw error;
         toast.success("Section updated successfully");
       } else {
         // Create new section - using RPC function
-        const { error } = await supabase.rpc<string, {
-          p_name: string;
-          p_description: string | null;
-          p_section_leader_id: string | null;
-        }>('create_section', {
-          p_name: values.name,
-          p_description: values.description || null,
-          p_section_leader_id: values.section_leader_id || null
-        });
+        const { error } = await supabase
+          .rpc('create_section', {
+            p_name: values.name,
+            p_description: values.description || null,
+            p_section_leader_id: values.section_leader_id || null
+          })
+          .returns<string>();
 
         if (error) throw error;
         toast.success("Section created successfully");
@@ -101,11 +98,11 @@ export function useSections() {
   const handleDeleteSection = async (sectionId: string) => {
     try {
       // Use RPC function to delete section
-      const { error } = await supabase.rpc<void, {
-        p_section_id: string;
-      }>('delete_section', {
-        p_section_id: sectionId
-      });
+      const { error } = await supabase
+        .rpc('delete_section', {
+          p_section_id: sectionId
+        })
+        .returns<void>();
 
       if (error) throw error;
 
