@@ -89,16 +89,16 @@ export function PerformanceSection() {
                           alt={event.title}
                           className="w-full h-full object-cover"
                         />
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-black/20 flex flex-col justify-end p-4 md:p-6">
-                          <h3 className="text-white font-bold text-lg md:text-xl group-hover:text-glee-purple transition-colors font-playfair tracking-wide mb-3 md:mb-4">
-                            {event.title}
-                          </h3>
-                          <div className="flex flex-col md:flex-row items-start md:items-center gap-2 md:gap-3">
-                            <span className="px-4 py-1.5 bg-glee-purple/80 backdrop-blur-sm rounded-full text-white text-xs md:text-sm font-medium tracking-wider mb-2 md:mb-0">
-                              {format(event.date, 'MMM d, yyyy')}
-                            </span>
-                            <span className="px-4 py-1.5 bg-black/50 backdrop-blur-sm rounded-full text-white/90 text-xs md:text-sm">
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent flex flex-col justify-end">
+                          <div className="p-4 md:p-5 bg-black/60 backdrop-blur-sm flex flex-wrap items-center justify-between gap-x-3 gap-y-1">
+                            <h3 className="font-bold text-white text-sm md:text-base font-playfair order-1">
+                              {event.title}
+                            </h3>
+                            <span className="text-white/80 text-xs md:text-sm order-2">
                               {event.location}
+                            </span>
+                            <span className="text-glee-purple bg-glee-purple/20 px-2 py-0.5 rounded-full text-xs md:text-sm font-medium order-3 whitespace-nowrap">
+                              {format(event.date, 'MMM d, yyyy')}
                             </span>
                           </div>
                         </div>
