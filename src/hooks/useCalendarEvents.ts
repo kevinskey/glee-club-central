@@ -25,6 +25,7 @@ export function useCalendarEvents() {
   const fetchingRef = useRef(false);
   const [fetchError, setFetchError] = useState(false);
   const initialFetchDoneRef = useRef(false);
+  const lastUserIdRef = useRef<string | null>(null);
 
   // Fetch events from Supabase
   const fetchEvents = useCallback(async () => {
@@ -33,9 +34,16 @@ export function useCalendarEvents() {
     fetchingRef.current = true;
     
     try {
+      // Check if the user has changed since the last fetch
+      const currentUserId = user?.id || null;
+      const userChanged = currentUserId !== lastUserIdRef.current;
+      
+      // Update the last user ID reference
+      lastUserIdRef.current = currentUserId;
+      
       // Use sample data if not authenticated
       if (!user) {
-        if (!initialFetchDoneRef.current) {
+        if (!initialFetchDoneRef.current || userChanged) {
           console.log("No user authenticated, using sample events");
           const sampleEvents = getSampleEvents();
           setEvents(sampleEvents);
@@ -46,11 +54,11 @@ export function useCalendarEvents() {
         return;
       }
 
-      if (!initialFetchDoneRef.current) {
+      if (!initialFetchDoneRef.current || userChanged) {
         setLoading(true);
       }
 
-      console.log("Attempting to fetch calendar events from Supabase");
+      console.log("Attempting to fetch calendar events from Supabase for user:", user.id);
       const { data, error } = await supabase
         .from("calendar_events")
         .select("*")
@@ -64,7 +72,7 @@ export function useCalendarEvents() {
           setFetchError(true);
         }
         // Fall back to sample data
-        if (!initialFetchDoneRef.current) {
+        if (!initialFetchDoneRef.current || userChanged) {
           setEvents(getSampleEvents());
         }
         return;
@@ -93,7 +101,7 @@ export function useCalendarEvents() {
         toast.error("Failed to load calendar events");
         setFetchError(true);
       }
-      if (!initialFetchDoneRef.current) {
+      if (!initialFetchDoneRef.current || userChanged) {
         setEvents(getSampleEvents());
       }
     } finally {
@@ -113,20 +121,33 @@ export function useCalendarEvents() {
 
   // Load events on component mount or when user changes
   useEffect(() => {
-    fetchEvents();
+    // Reset state when user changes
+    const currentUserId = user?.id || null;
+    const previousUserId = lastUserIdRef.current;
+    
+    if (currentUserId !== previousUserId) {
+      console.log("User changed, resetting events state");
+      initialFetchDoneRef.current = false;
+      fetchEvents();
+    } else if (!initialFetchDoneRef.current) {
+      fetchEvents();
+    }
     
     // Increase the polling interval to reduce frequency of updates
     const intervalTime = fetchError ? 120000 : 30000; // 30 seconds normally, 2 minutes if error
     
     // Only set up polling if authenticated
     if (user) {
-      console.log(`Setting up events polling with interval: ${intervalTime}ms`);
+      console.log(`Setting up events polling with interval: ${intervalTime}ms for user: ${user.id}`);
       const interval = setInterval(() => {
         console.log("Polling for calendar events updates");
         fetchEvents();
       }, intervalTime);
       
-      return () => clearInterval(interval);
+      return () => {
+        console.log("Clearing events polling interval");
+        clearInterval(interval);
+      };
     }
   }, [user?.id, fetchEvents, fetchError]);
 

@@ -45,11 +45,30 @@ export const EventList = React.memo(({
   );
 }, (prevProps, nextProps) => {
   // Implement custom compare function for memoization
-  return (
-    prevProps.date?.getTime() === nextProps.date?.getTime() &&
-    prevProps.events.length === nextProps.events.length &&
-    prevProps.selectedEvent?.id === nextProps.selectedEvent?.id
-  );
+  if (!prevProps.date && !nextProps.date) return true;
+  if (!prevProps.date || !nextProps.date) return false;
+  
+  // Compare date values
+  const dateEqual = prevProps.date.getTime() === nextProps.date.getTime();
+  
+  // Compare events length
+  const eventsLengthEqual = prevProps.events.length === nextProps.events.length;
+  
+  // Compare selectedEvent
+  const selectedEventEqual = 
+    (!prevProps.selectedEvent && !nextProps.selectedEvent) ||
+    (prevProps.selectedEvent?.id === nextProps.selectedEvent?.id);
+  
+  // Compare events content if lengths match
+  let eventsContentEqual = true;
+  if (eventsLengthEqual && prevProps.events.length > 0) {
+    eventsContentEqual = prevProps.events.every((event, index) => {
+      const nextEvent = nextProps.events[index];
+      return event.id === nextEvent.id;
+    });
+  }
+  
+  return dateEqual && eventsLengthEqual && selectedEventEqual && eventsContentEqual;
 });
 
 EventList.displayName = "EventList";
