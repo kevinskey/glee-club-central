@@ -62,7 +62,7 @@ export default function LandingPage() {
           <div className="text-white space-y-6 md:pr-6 max-w-2xl mx-auto text-center md:text-left md:mx-0">
             <h1 className="font-playfair text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight">
               <span className="block">Spelman College</span>
-              <span className="bg-gradient-to-r from-glee-accent to-glee-purple bg-clip-text text-transparent">
+              <span className="animate-gradient bg-clip-text text-transparent">
                 Glee Club
               </span>
             </h1>
