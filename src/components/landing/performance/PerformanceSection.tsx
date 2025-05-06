@@ -89,15 +89,16 @@ export function PerformanceSection() {
                           alt={event.title}
                           className="w-full h-full object-cover"
                         />
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent flex flex-col justify-end">
-                          <div className="p-4 md:p-5 bg-black/60 backdrop-blur-sm flex flex-wrap items-center justify-between gap-x-3 gap-y-1">
-                            <h3 className="font-bold text-white text-sm md:text-base font-playfair order-1">
-                              {event.title}
-                            </h3>
-                            <span className="text-white/80 text-xs md:text-sm order-2">
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent flex flex-col justify-center items-center">
+                          <h3 className="font-bold text-white text-2xl md:text-4xl lg:text-5xl font-playfair mb-auto mt-8 md:mt-12 text-center px-4 md:px-6 drop-shadow-lg">
+                            {event.title}
+                          </h3>
+                          
+                          <div className="p-4 md:p-5 bg-black/60 backdrop-blur-sm flex flex-wrap items-center justify-between gap-x-3 gap-y-1 px-6 md:px-8 w-full mt-auto">
+                            <span className="text-white/80 text-xs md:text-sm order-1">
                               {event.location}
                             </span>
-                            <span className="text-glee-purple bg-glee-purple/20 px-2 py-0.5 rounded-full text-xs md:text-sm font-medium order-3 whitespace-nowrap">
+                            <span className="text-glee-purple bg-glee-purple/20 px-2 py-0.5 rounded-full text-xs md:text-sm font-medium order-2 whitespace-nowrap ml-auto">
                               {format(event.date, 'MMM d, yyyy')}
                             </span>
                           </div>
