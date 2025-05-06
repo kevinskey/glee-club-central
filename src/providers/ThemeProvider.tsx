@@ -1,6 +1,7 @@
 
 import React, { createContext, useState, useContext, useEffect } from "react";
 import { Toaster } from "@/components/ui/sonner";
+import { toast } from "sonner";
 
 type Theme = "light" | "dark";
 
@@ -14,8 +15,12 @@ const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
   const [theme, setTheme] = useState<Theme>("light");
+  const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
+    // Mark component as mounted
+    setMounted(true);
+    
     // Get theme from localStorage on initial render
     const savedTheme = localStorage.getItem("theme") as Theme;
     
@@ -28,22 +33,51 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   useEffect(() => {
+    // Only update DOM after component is mounted to prevent hydration mismatch
+    if (!mounted) return;
+    
     // Update data attribute on body when theme changes
     document.body.setAttribute("data-theme", theme);
     
-    // Apply the appropriate class to body
+    // Apply the appropriate class to documentElement (html)
     if (theme === "dark") {
       document.documentElement.classList.add("dark");
     } else {
       document.documentElement.classList.remove("dark");
     }
     
+    // Update meta theme-color for mobile browsers
+    const metaThemeColor = document.querySelector('meta[name="theme-color"]');
+    if (metaThemeColor) {
+      // Set appropriate color for mobile status bar
+      metaThemeColor.setAttribute(
+        "content", 
+        theme === "dark" ? "#121212" : "#FFFFFF"
+      );
+    } else {
+      // Create meta theme-color if it doesn't exist
+      const meta = document.createElement('meta');
+      meta.name = "theme-color";
+      meta.content = theme === "dark" ? "#121212" : "#FFFFFF";
+      document.head.appendChild(meta);
+    }
+    
     // Save theme to localStorage
     localStorage.setItem("theme", theme);
-  }, [theme]);
+  }, [theme, mounted]);
 
   const toggleTheme = () => {
-    setTheme(prevTheme => prevTheme === "light" ? "dark" : "light");
+    setTheme(prevTheme => {
+      const newTheme = prevTheme === "light" ? "dark" : "light";
+      
+      // Show theme change notification
+      toast.success(`Switched to ${newTheme} mode`, {
+        duration: 2000,
+        className: "theme-toggle-toast",
+      });
+      
+      return newTheme;
+    });
   };
 
   return (

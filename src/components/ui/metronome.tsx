@@ -34,28 +34,15 @@ const SOUNDS = {
   beep: "/sounds/beep.wav",
 };
 
-// Create audio elements for each sound
-const audioElements: Record<keyof typeof SOUNDS, HTMLAudioElement> = {
-  click: new Audio(SOUNDS.click),
-  woodblock: new Audio(SOUNDS.woodblock),
-  beep: new Audio(SOUNDS.beep),
-};
-
 export function Metronome() {
   const [isPlaying, setIsPlaying] = useState(false);
   const [tempo, setTempo] = useState(100);
   const [soundType, setSoundType] = useState<keyof typeof SOUNDS>("click");
   const [volume, setVolume] = useState(0.5);
+  const [isOpen, setIsOpen] = useState(false);
   
   const intervalRef = useRef<number | null>(null);
   const lastBeatTimeRef = useRef<number>(0);
-  
-  // Update volume when it changes
-  useEffect(() => {
-    Object.values(audioElements).forEach(audio => {
-      audio.volume = volume;
-    });
-  }, [volume]);
   
   // Calculate interval from tempo (beats per minute)
   const getIntervalFromTempo = (bpm: number) => {
@@ -66,7 +53,7 @@ export function Metronome() {
   useEffect(() => {
     const playBeat = () => {
       try {
-        // Clone the audio to allow overlapping sounds
+        // Create a new audio instance each time for better mobile support
         const sound = new Audio(SOUNDS[soundType]);
         sound.volume = volume;
         sound.play()
@@ -117,12 +104,30 @@ export function Metronome() {
     setIsPlaying(!isPlaying);
   };
   
+  // Close the popover when clicking outside on mobile
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (isOpen && event.target instanceof Element) {
+        const popoverContent = document.querySelector('[data-radix-popper-content-wrapper]');
+        if (popoverContent && !popoverContent.contains(event.target)) {
+          setIsOpen(false);
+        }
+      }
+    };
+    
+    document.addEventListener('mousedown', handleClickOutside);
+    
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [isOpen]);
+
   return (
     <TooltipProvider>
       <Tooltip>
         <TooltipTrigger asChild>
           <div className="flex items-center">
-            <Popover>
+            <Popover open={isOpen} onOpenChange={setIsOpen}>
               <PopoverTrigger asChild>
                 <Button
                   variant="ghost"
