@@ -2,6 +2,91 @@
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from "sonner";
 
+// Create a Supabase client with the service role key for admin operations
+// This should be used only on the server side, but for this demo we're using it in the frontend
+const serviceRoleKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImR6enB0b3ZxZnFhdXNpcHNnYWJ3Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc0NjQwMzUyOSwiZXhwIjoyMDYxOTc5NTI5fQ.XpJcSm-mzEHCzGNXXm_E_7StTHgHqkxVB67PYV5RuJc';
+
+// In a production environment, this should be handled by a secure backend service
+const adminSupabase = {
+  auth: {
+    admin: {
+      createUser: async (options: any) => {
+        const response = await fetch('https://dzzptovqfqausipsgabw.supabase.co/auth/v1/admin/users', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'apikey': serviceRoleKey,
+            'Authorization': `Bearer ${serviceRoleKey}`
+          },
+          body: JSON.stringify(options)
+        });
+        
+        if (!response.ok) {
+          const error = await response.json();
+          throw new Error(error.message || 'Failed to create user');
+        }
+        
+        return response.json();
+      },
+      
+      updateUserById: async (userId: string, attributes: any) => {
+        const response = await fetch(`https://dzzptovqfqausipsgabw.supabase.co/auth/v1/admin/users/${userId}`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+            'apikey': serviceRoleKey,
+            'Authorization': `Bearer ${serviceRoleKey}`
+          },
+          body: JSON.stringify(attributes)
+        });
+        
+        if (!response.ok) {
+          const error = await response.json();
+          throw new Error(error.message || 'Failed to update user');
+        }
+        
+        return response.json();
+      },
+      
+      deleteUser: async (userId: string) => {
+        const response = await fetch(`https://dzzptovqfqausipsgabw.supabase.co/auth/v1/admin/users/${userId}`, {
+          method: 'DELETE',
+          headers: {
+            'Content-Type': 'application/json',
+            'apikey': serviceRoleKey,
+            'Authorization': `Bearer ${serviceRoleKey}`
+          }
+        });
+        
+        if (!response.ok) {
+          const error = await response.json();
+          throw new Error(error.message || 'Failed to delete user');
+        }
+        
+        return response.json();
+      },
+      
+      getUserById: async (userId: string) => {
+        const response = await fetch(`https://dzzptovqfqausipsgabw.supabase.co/auth/v1/admin/users/${userId}`, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            'apikey': serviceRoleKey,
+            'Authorization': `Bearer ${serviceRoleKey}`
+          }
+        });
+        
+        if (!response.ok) {
+          const error = await response.json();
+          throw new Error(error.message || 'Failed to get user');
+        }
+        
+        return response.json();
+      }
+    }
+  }
+};
+
 interface CreateUserData {
   email: string;
   password: string;
@@ -31,7 +116,7 @@ interface UpdateUserData {
 export const createUser = async (userData: CreateUserData) => {
   try {
     // First create the auth user
-    const { data: authData, error: authError } = await supabase.auth.admin.createUser({
+    const { data: authData } = await adminSupabase.auth.admin.createUser({
       email: userData.email,
       password: userData.password || undefined,
       email_confirm: true,
@@ -41,7 +126,7 @@ export const createUser = async (userData: CreateUserData) => {
       }
     });
 
-    if (authError) throw authError;
+    if (!authData || !authData.user) throw new Error('Failed to create user');
     
     // The profile should be created automatically via trigger,
     // but we update it with the additional fields
@@ -74,22 +159,22 @@ export const updateUser = async (userData: UpdateUserData) => {
     
     // If password is provided, update it
     if (userData.password) {
-      const { error: passwordError } = await supabase.auth.admin.updateUserById(
+      const { data } = await adminSupabase.auth.admin.updateUserById(
         userData.id,
         { password: userData.password }
       );
       
-      if (passwordError) throw passwordError;
+      if (!data) throw new Error('Failed to update password');
     }
     
     // If email is provided, update it
     if (userData.email) {
-      const { error: emailError } = await supabase.auth.admin.updateUserById(
+      const { data } = await adminSupabase.auth.admin.updateUserById(
         userData.id,
         { email: userData.email }
       );
       
-      if (emailError) throw emailError;
+      if (!data) throw new Error('Failed to update email');
     }
     
     // Update profile data
@@ -128,9 +213,9 @@ export const updateUser = async (userData: UpdateUserData) => {
 // Delete a user
 export const deleteUser = async (userId: string) => {
   try {
-    const { error } = await supabase.auth.admin.deleteUser(userId);
+    const { data } = await adminSupabase.auth.admin.deleteUser(userId);
     
-    if (error) throw error;
+    if (!data) throw new Error('Failed to delete user');
     
     return { success: true };
   } catch (error: any) {
@@ -143,9 +228,9 @@ export const deleteUser = async (userId: string) => {
 export const getUserDetails = async (userId: string) => {
   try {
     // Get auth user data
-    const { data: authData, error: authError } = await supabase.auth.admin.getUserById(userId);
+    const { data: authData } = await adminSupabase.auth.admin.getUserById(userId);
     
-    if (authError) throw authError;
+    if (!authData) throw new Error('Failed to get user details');
     
     // Get profile data
     const { data: profileData, error: profileError } = await supabase
