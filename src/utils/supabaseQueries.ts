@@ -52,7 +52,6 @@ export async function fetchAttendanceRecords(memberId: string): Promise<Attendan
   try {
     // Use direct RPC query with proper type parameters
     const { data, error } = await supabase
-      .from('profiles')
       .rpc('get_attendance_records', { p_member_id: memberId });
     
     if (error) throw error;
@@ -73,7 +72,6 @@ export async function fetchPaymentRecords(memberId: string): Promise<PaymentReco
   try {
     // Use direct RPC query with proper type parameters
     const { data, error } = await supabase
-      .from('profiles')
       .rpc('get_payment_records', { p_member_id: memberId });
     
     if (error) throw error;
@@ -94,7 +92,6 @@ export async function fetchMemberNotes(memberId: string): Promise<MemberNote[]> 
   try {
     // Use direct RPC query with proper type parameters
     const { data, error } = await supabase
-      .from('profiles')
       .rpc('get_member_notes', { p_member_id: memberId });
     
     if (error) throw error;
@@ -115,7 +112,6 @@ export async function fetchSections(): Promise<Section[]> {
   try {
     // Use RPC query with proper type parameters
     const { data, error } = await supabase
-      .from('profiles')
       .rpc('get_sections');
     
     if (error) throw error;
@@ -132,7 +128,6 @@ export async function fetchSections(): Promise<Section[]> {
 export async function fetchSectionsWithMemberCount(): Promise<Section[]> {
   try {
     const { data, error } = await supabase
-      .from('profiles')
       .rpc('get_sections_with_member_count');
     
     if (error) throw error;
@@ -149,13 +144,12 @@ export async function fetchSectionsWithMemberCount(): Promise<Section[]> {
 export async function fetchMembers(): Promise<Profile[]> {
   try {
     const { data, error } = await supabase
-      .from('profiles')
       .rpc('get_members_with_sections');
     
     if (error) throw error;
     
     // Make sure to cast the data to ensure it has all required Profile properties
-    const members = data ? data.map(member => {
+    const members = data ? data.map((member) => {
       return {
         ...member,
         email: member.email || null,

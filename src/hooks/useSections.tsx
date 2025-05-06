@@ -25,7 +25,9 @@ export function useSections() {
       // Fetch potential section leaders with direct query
       const { data: leadersData, error: leadersError } = await supabase
         .from('profiles')
-        .rpc('get_potential_section_leaders');
+        .select('id, first_name, last_name')
+        .eq('role', 'section_leader')
+        .order('first_name');
 
       if (leadersError) throw leadersError;
 
@@ -57,7 +59,6 @@ export function useSections() {
       if (editingSection) {
         // Update existing section - using RPC function
         const { error } = await supabase
-          .from('profiles')
           .rpc('update_section', {
             p_id: editingSection.id,
             p_name: values.name,
@@ -70,7 +71,6 @@ export function useSections() {
       } else {
         // Create new section - using RPC function
         const { data, error } = await supabase
-          .from('profiles')
           .rpc('create_section', {
             p_name: values.name,
             p_description: values.description || null,
@@ -99,7 +99,6 @@ export function useSections() {
     try {
       // Use RPC function to delete section
       const { error } = await supabase
-        .from('profiles')
         .rpc('delete_section', {
           p_id: sectionId
         });

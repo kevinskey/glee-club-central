@@ -63,14 +63,21 @@ export default function LoginPage() {
     try {
       if (provider === 'google') {
         await signInWithGoogle();
+        // Toast will be shown on successful redirect back
       } else if (provider === 'apple') {
         await signInWithApple();
       }
       // No need to navigate here as it will be handled by the auth state change
     } catch (error: any) {
       console.error(`${provider} login error:`, error);
-      toast.error(error.message || `${provider} login failed.`);
-    } finally {
+      
+      // Improved error message for better user experience
+      let errorMsg = error.message || `${provider} login failed.`;
+      if (error.message?.includes("provider is not enabled")) {
+        errorMsg = `${provider.charAt(0).toUpperCase() + provider.slice(1)} login is not enabled. Please contact support.`;
+      }
+      
+      toast.error(errorMsg);
       setSocialLoading(null);
     }
   }
