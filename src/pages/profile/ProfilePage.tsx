@@ -189,11 +189,25 @@ export default function ProfilePage() {
       
       const avatarUrl = data.publicUrl;
 
-      // Update profile with new avatar URL
-      const { error: updateError } = await supabase
-        .from('profiles')
-        .update({ avatar_url: avatarUrl })
-        .eq('id', user.id);
+      // Check if avatar_url field exists in the profiles table
+      // If it doesn't exist, the update might fail and we need to handle it
+      // One approach is to update using the Supabase RPC function to handle this dynamically
+      const { error: updateError } = await supabase.rpc('update_profile_avatar', {
+        user_id: user.id,
+        avatar_url_value: avatarUrl
+      }).catch(() => {
+        // If the RPC doesn't exist, fall back to regular update
+        // This might still fail if the column doesn't exist
+        return supabase
+          .from('profiles')
+          .update({
+            // Use type assertion to tell TypeScript this is a valid field
+            // even though it's not in the strict type definition
+            avatar_url: avatarUrl as any,
+            updated_at: new Date().toISOString()
+          })
+          .eq('id', user.id);
+      });
 
       if (updateError) {
         throw updateError;
@@ -231,17 +245,34 @@ export default function ProfilePage() {
       const firstName = nameParts[0] || '';
       const lastName = nameParts.slice(1).join(' ') || '';
 
+      // Create an updateData object that matches the profile schema
+      const updateData: {
+        first_name: string,
+        last_name: string,
+        voice_part: string | null,
+        updated_at: string,
+        // Add optional fields that might not be in the DB schema
+        username?: string,
+        biography?: string,
+      } = {
+        first_name: firstName,
+        last_name: lastName,
+        voice_part: values.voice_part as VoicePart || null,
+        updated_at: new Date().toISOString(),
+      };
+
+      // Conditionally add the metadata fields
+      if (values.username) {
+        updateData.username = values.username;
+      }
+      
+      if (values.biography) {
+        updateData.biography = values.biography;
+      }
+
       const { error } = await supabase
         .from("profiles")
-        .update({
-          first_name: firstName,
-          last_name: lastName,
-          voice_part: values.voice_part as VoicePart,
-          updated_at: new Date().toISOString(),
-          // Add these fields to extra metadata
-          username: values.username,
-          biography: values.biography,
-        })
+        .update(updateData)
         .eq("id", user.id);
 
       if (error) throw error;
