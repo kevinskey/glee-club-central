@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
@@ -28,7 +29,17 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 // Define types for the profile data
 type VoicePart = "soprano" | "alto" | "tenor" | "bass" | "baritone" | "";
-type UserRole = "member" | "librarian" | "director" | "admin";
+type UserRole = 
+  | "member" 
+  | "librarian" 
+  | "director" 
+  | "admin" 
+  | "student_director" 
+  | "s1_section_leader" 
+  | "s2_section_leader" 
+  | "a1_section_leader" 
+  | "a2_section_leader" 
+  | "accompanist";
 
 // Update Profile interface to match the database structure
 interface Profile {
@@ -39,10 +50,10 @@ interface Profile {
   role: string | null;
   created_at: string;
   updated_at: string;
-  avatar_url?: string; // Added as optional property
-  biography?: string; // Added as optional property
-  username?: string; // Added as optional property
-  email?: string; // Added as optional property
+  avatar_url?: string; 
+  biography?: string;
+  username?: string;
+  email?: string;
 }
 
 // Form schemas
@@ -206,9 +217,9 @@ export default function ProfilePage() {
         const { error: updateError } = await supabase
           .from('profiles')
           .update({
-            avatar_url: avatarUrl as any,
+            avatar_url: avatarUrl,
             updated_at: new Date().toISOString()
-          })
+          } as any)
           .eq('id', user.id);
           
         if (updateError) {
@@ -404,7 +415,7 @@ export default function ProfilePage() {
                 <p className="text-muted-foreground">{profile?.voice_part || "No voice part set"}</p>
                 <p className="text-muted-foreground">
                   {profile?.role 
-                    ? profile.role.charAt(0).toUpperCase() + profile.role.slice(1) 
+                    ? formatRole(profile.role)
                     : "Member"}
                 </p>
               </div>
@@ -583,4 +594,22 @@ export default function ProfilePage() {
       </div>
     </div>
   );
+}
+
+// Helper function to format role names for display
+function formatRole(role: string): string {
+  const roleMap: Record<string, string> = {
+    'member': 'Member',
+    'librarian': 'Librarian',
+    'director': 'Director',
+    'admin': 'Administrator',
+    'student_director': 'Student Director',
+    's1_section_leader': 'S1 Section Leader',
+    's2_section_leader': 'S2 Section Leader',
+    'a1_section_leader': 'A1 Section Leader',
+    'a2_section_leader': 'A2 Section Leader',
+    'accompanist': 'Accompanist'
+  };
+  
+  return roleMap[role] || role.charAt(0).toUpperCase() + role.slice(1);
 }
