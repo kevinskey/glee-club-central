@@ -61,8 +61,8 @@ import {
 } from "@/components/ui/alert-dialog";
 import { supabase } from "@/integrations/supabase/client";
 import { 
-  fetchSectionsWithMemberCount, 
-  Section as SectionType 
+  fetchSectionsWithMemberCount,
+  Section 
 } from "@/utils/supabaseQueries";
 
 interface SectionLeader {
@@ -79,11 +79,11 @@ const sectionFormSchema = z.object({
 
 export default function SectionsPage() {
   const { isAdmin } = useAuth();
-  const [sections, setSections] = useState<SectionType[]>([]);
+  const [sections, setSections] = useState<Section[]>([]);
   const [leaders, setLeaders] = useState<SectionLeader[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [openDialog, setOpenDialog] = useState(false);
-  const [editingSection, setEditingSection] = useState<SectionType | null>(null);
+  const [editingSection, setEditingSection] = useState<Section | null>(null);
 
   const form = useForm<z.infer<typeof sectionFormSchema>>({
     resolver: zodResolver(sectionFormSchema),
@@ -118,15 +118,12 @@ export default function SectionsPage() {
       setIsLoading(true);
       try {
         // Fetch potential section leaders (admins and section leaders)
-        const { data: leadersData, error: leadersError } = await supabase
-          .from("profiles")
-          .select("id, first_name, last_name")
-          .in("role", ["admin", "section_leader"]);
+        const { data: leadersData, error: leadersError } = await supabase.rpc('get_potential_section_leaders');
 
         if (leadersError) throw leadersError;
 
         // Format leaders for dropdown
-        const formattedLeaders = leadersData.map(leader => ({
+        const formattedLeaders = leadersData.map((leader: any) => ({
           id: leader.id,
           name: `${leader.first_name || ''} ${leader.last_name || ''}`.trim()
         }));

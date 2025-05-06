@@ -64,14 +64,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         id: data.id,
         first_name: data.first_name,
         last_name: data.last_name,
-        email: data.email || null,
-        phone: data.phone || null,
+        email: user?.email || null, // Use email from auth user
+        phone: data.phone || null, // This may not exist in the table yet
         role: (data.role as UserRole) || 'member',
         voice_part: data.voice_part as VoicePart,
-        avatar_url: data.avatar_url || null,
-        status: (data.status as MemberStatus) || 'pending',
-        section_id: data.section_id || null,
-        join_date: data.join_date || null
+        avatar_url: data.avatar_url || null, // This may not exist in the table yet
+        status: (data.status as MemberStatus) || 'pending', // This may not exist in the table yet
+        section_id: data.section_id || null, // This may not exist in the table yet
+        join_date: data.join_date || null // This may not exist in the table yet
       };
       
       return profileData;

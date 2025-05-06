@@ -47,7 +47,7 @@ export interface MemberNote {
   };
 }
 
-// Helper function to query attendance records safely using raw SQL query
+// Helper function to query attendance records safely using RPC functions
 export async function fetchAttendanceRecords(memberId: string): Promise<AttendanceRecord[]> {
   try {
     // Use RPC function to avoid TypeScript errors with untyped tables
@@ -137,7 +137,7 @@ export async function fetchMembers(): Promise<Profile[]> {
         ...member,
         role: member.role || 'member',
         status: member.status || 'pending'
-      } as unknown as Profile;
+      } as Profile;
     });
     
     return members;
