@@ -1,3 +1,4 @@
+
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -53,8 +54,8 @@ export function HeroSection() {
         </div>
       </div>
       
-      {/* Glee Club Crest - Increased by 25% from reduced size */}
-      <div className="absolute bottom-4 right-4 md:bottom-8 md:right-8 z-10 w-12.5 md:w-17.5 lg:w-20 animate-fade-in">
+      {/* Glee Club Crest - Moved left and fixed position based on screen size */}
+      <div className="fixed bottom-4 left-24 md:bottom-8 md:left-28 lg:left-32 z-10 w-12.5 md:w-17.5 lg:w-20 animate-fade-in">
         <img 
           src="/lovable-uploads/9a044e72-80dc-40a6-b716-2d5c2d35b878.png" 
           alt="Spelman Glee Club 100 Crest" 
