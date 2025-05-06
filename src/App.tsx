@@ -18,6 +18,7 @@ import RecordingsPage from './pages/RecordingsPage'
 import ProfilePage from './pages/ProfilePage'
 import { DashboardLayout } from './components/layout/DashboardLayout'
 import { ProtectedRoute } from './components/auth/ProtectedRoute'
+import { ThemeProvider } from './providers/ThemeProvider'
 
 // Add messaging page import
 import MessagingPage from "./pages/messaging/MessagingPage";
@@ -25,88 +26,90 @@ import MessagingPage from "./pages/messaging/MessagingPage";
 function App() {
   return (
     <AuthProvider>
-      <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<LandingPage />} />
-          <Route path="/login" element={<LoginPage />} />
-          <Route path="/register" element={<RegisterPage />} />
-          <Route
-            path="/dashboard"
-            element={
-              <ProtectedRoute>
-                <DashboardLayout>
-                  <DashboardPage />
-                </DashboardLayout>
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/calendar"
-            element={
-              <ProtectedRoute>
-                <DashboardLayout>
-                  <CalendarPage />
-                </DashboardLayout>
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/sheet-music"
-            element={
-              <ProtectedRoute>
-                <DashboardLayout>
-                  <SheetMusicPage />
-                </DashboardLayout>
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/media-library"
-            element={
-              <ProtectedRoute>
-                <DashboardLayout>
-                  <MediaLibraryPage />
-                </DashboardLayout>
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/recordings"
-            element={
-              <ProtectedRoute>
-                <DashboardLayout>
-                  <RecordingsPage />
-                </DashboardLayout>
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/profile"
-            element={
-              <ProtectedRoute>
-                <DashboardLayout>
-                  <ProfilePage />
-                </DashboardLayout>
-              </ProtectedRoute>
-            }
-          />
-          
-          {/* Add messaging route */}
-          <Route
-            path="/messaging"
-            element={
-              <ProtectedRoute>
-                <DashboardLayout>
-                  <MessagingPage />
-                </DashboardLayout>
-              </ProtectedRoute>
-            }
-          />
+      <ThemeProvider>
+        <BrowserRouter>
+          <Routes>
+            <Route path="/" element={<LandingPage />} />
+            <Route path="/login" element={<LoginPage />} />
+            <Route path="/register" element={<RegisterPage />} />
+            <Route
+              path="/dashboard"
+              element={
+                <ProtectedRoute>
+                  <DashboardLayout>
+                    <DashboardPage />
+                  </DashboardLayout>
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/calendar"
+              element={
+                <ProtectedRoute>
+                  <DashboardLayout>
+                    <CalendarPage />
+                  </DashboardLayout>
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/sheet-music"
+              element={
+                <ProtectedRoute>
+                  <DashboardLayout>
+                    <SheetMusicPage />
+                  </DashboardLayout>
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/media-library"
+              element={
+                <ProtectedRoute>
+                  <DashboardLayout>
+                    <MediaLibraryPage />
+                  </DashboardLayout>
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/recordings"
+              element={
+                <ProtectedRoute>
+                  <DashboardLayout>
+                    <RecordingsPage />
+                  </DashboardLayout>
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/profile"
+              element={
+                <ProtectedRoute>
+                  <DashboardLayout>
+                    <ProfilePage />
+                  </DashboardLayout>
+                </ProtectedRoute>
+              }
+            />
+            
+            {/* Add messaging route */}
+            <Route
+              path="/messaging"
+              element={
+                <ProtectedRoute>
+                  <DashboardLayout>
+                    <MessagingPage />
+                  </DashboardLayout>
+                </ProtectedRoute>
+              }
+            />
 
-          {/* Catch-all route for 404 */}
-          <Route path="*" element={<Navigate to="/" />} />
-        </Routes>
-      </BrowserRouter>
+            {/* Catch-all route for 404 */}
+            <Route path="*" element={<Navigate to="/" />} />
+          </Routes>
+        </BrowserRouter>
+      </ThemeProvider>
     </AuthProvider>
   )
 }
