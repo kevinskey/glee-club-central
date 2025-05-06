@@ -1,11 +1,10 @@
+
 import React from "react";
 import {
   Calendar,
-  Dashboard,
-  FileText,
   LayoutDashboard,
+  FileText,
   ListChecks,
-  LucideIcon,
   Music,
   Settings,
   User,
@@ -22,30 +21,31 @@ import { NavLink } from "./NavLink";
 interface SidebarNavItem {
   title: string;
   href: string;
-  icon: LucideIcon;
+  icon: React.ReactNode;
   disabled?: boolean;
 }
 
 interface SidebarNavGroup {
   title: string;
-  icon: LucideIcon;
+  icon: React.ReactNode;
   items: SidebarNavItem[];
 }
 
 type SidebarNavProps = {
-  items: (SidebarNavItem | SidebarNavGroup)[];
+  items?: (SidebarNavItem | SidebarNavGroup)[];
+  className?: string;
 };
 
-export const SidebarNav = ({ items }: SidebarNavProps) => {
+export const SidebarNav: React.FC<SidebarNavProps> = ({ items = navigationItems, className }) => {
   return (
-    <div className="flex flex-col space-y-2">
+    <div className={`flex flex-col space-y-2 ${className || ''}`}>
       {items.map((item, index) => {
         if ("items" in item) {
           return (
             <Accordion type="single" collapsible key={index}>
               <AccordionItem value={item.title}>
                 <AccordionTrigger className="flex items-center space-x-2 py-2 font-medium">
-                  <item.icon className="h-5 w-5" />
+                  {item.icon}
                   <span>{item.title}</span>
                 </AccordionTrigger>
                 <AccordionContent className="pl-4">
@@ -86,32 +86,32 @@ const navigationItems: (SidebarNavItem | SidebarNavGroup)[] = [
   {
     title: "Dashboard",
     href: "/dashboard",
-    icon: Dashboard,
+    icon: <LayoutDashboard className="h-5 w-5" />,
   },
   {
     title: "Sheet Music",
     href: "/sheet-music",
-    icon: FileText,
+    icon: <FileText className="h-5 w-5" />,
   },
   {
     title: "Recordings",
     href: "/recordings",
-    icon: Mic,
+    icon: <Mic className="h-5 w-5" />,
   },
   {
     title: "Media Library",
     href: "/media-library",
-    icon: Video,
+    icon: <Video className="h-5 w-5" />,
   },
   {
     title: "Calendar",
     href: "/calendar",
-    icon: Calendar,
+    icon: <Calendar className="h-5 w-5" />,
   },
   {
     title: "Tasks",
     href: "/tasks",
-    icon: ListChecks,
+    icon: <ListChecks className="h-5 w-5" />,
     disabled: true,
   },
   {
@@ -121,17 +121,17 @@ const navigationItems: (SidebarNavItem | SidebarNavGroup)[] = [
   },
   {
     title: "Admin",
-    icon: Settings,
+    icon: <Settings className="h-5 w-5" />,
     items: [
       {
         title: "Users",
         href: "/admin/users",
-        icon: User,
+        icon: <User className="h-5 w-5" />,
       },
       {
         title: "Settings",
         href: "/admin/settings",
-        icon: Settings,
+        icon: <Settings className="h-5 w-5" />,
       },
     ],
   },

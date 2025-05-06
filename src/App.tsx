@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from 'react'
 import {
   BrowserRouter,
@@ -16,7 +17,7 @@ import SheetMusicPage from './pages/SheetMusicPage'
 import MediaLibraryPage from './pages/media-library/MediaLibraryPage'
 import RecordingsPage from './pages/RecordingsPage'
 import ProfilePage from './pages/ProfilePage'
-import DashboardLayout from './components/layout/DashboardLayout'
+import { DashboardLayout } from './components/layout/DashboardLayout'
 
 // Add messaging page import
 import MessagingPage from "./pages/messaging/MessagingPage";
@@ -109,19 +110,19 @@ function App() {
 }
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
-  const { user, loading } = useAuth()
+  const { user, isLoading } = useAuth()
   const location = useLocation()
   const [render, setRender] = useState(false)
 
   useEffect(() => {
-    if (!loading) setRender(true)
-  }, [loading])
+    if (!isLoading) setRender(true)
+  }, [isLoading])
 
   if (!render) {
     return <div></div> // or a loading spinner
   }
 
-  if (loading) {
+  if (isLoading) {
     return <div>Loading...</div>
   }
 
