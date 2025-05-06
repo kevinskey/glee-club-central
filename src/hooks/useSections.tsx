@@ -24,13 +24,13 @@ export function useSections() {
     try {
       // Fetch potential section leaders with direct query
       const { data: leadersData, error: leadersError } = await supabase
-        .rpc('get_potential_section_leaders', {})
+        .rpc('get_potential_section_leaders')
         .returns<SectionLeader[]>();
 
       if (leadersError) throw leadersError;
 
       // Format leaders for dropdown
-      const formattedLeaders = leadersData ? (leadersData as any[]).map((leader) => ({
+      const formattedLeaders = leadersData ? leadersData.map((leader) => ({
         id: leader.id,
         name: `${leader.first_name || ''} ${leader.last_name || ''}`.trim()
       })) : [];
