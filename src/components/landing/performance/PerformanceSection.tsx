@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { Calendar } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { PerformanceEventItem, PerformanceEventDetails, PerformanceEventType } from "./PerformanceEvent";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 // Sample performance events data
 const performanceEvents: PerformanceEventType[] = [
@@ -43,6 +44,7 @@ const performanceEvents: PerformanceEventType[] = [
 
 export function PerformanceSection() {
   const navigate = useNavigate();
+  const isMobile = useIsMobile();
   const [selectedEvent, setSelectedEvent] = useState<PerformanceEventType>(performanceEvents[0]);
   
   // Handle event selection with a more explicit function
@@ -52,23 +54,23 @@ export function PerformanceSection() {
   };
   
   return (
-    <section className="py-20 bg-gradient-to-b from-white to-glee-light dark:from-glee-dark dark:to-black">
-      <div className="container mx-auto">
-        <div className="max-w-3xl mx-auto text-center mb-16">
-          <h2 className="text-3xl md:text-4xl font-playfair font-bold mb-6 flex items-center justify-center gap-2">
-            <Calendar className="h-8 w-8 text-glee-purple" />
+    <section className="py-12 md:py-20 bg-gradient-to-b from-white to-glee-light dark:from-glee-dark dark:to-black">
+      <div className="container px-4 md:px-8 mx-auto">
+        <div className="max-w-3xl mx-auto text-center mb-8 md:mb-16">
+          <h2 className="text-2xl md:text-3xl lg:text-4xl font-playfair font-bold mb-4 md:mb-6 flex items-center justify-center gap-2">
+            <Calendar className="h-6 w-6 md:h-8 md:w-8 text-glee-purple" />
             <span>Upcoming <span className="text-glee-purple">Performances</span></span>
           </h2>
-          <p className="text-lg text-gray-600 dark:text-gray-300">
+          <p className="text-base md:text-lg text-gray-600 dark:text-gray-300">
             Join us for our upcoming performances and experience the musical excellence 
             of the Spelman College Glee Club.
           </p>
         </div>
         
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-start">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8 items-start">
           {/* Left column - Calendar of events */}
           <div className="space-y-4">
-            <h3 className="text-2xl font-playfair font-semibold mb-6">Performance Calendar</h3>
+            <h3 className="text-xl md:text-2xl font-playfair font-semibold mb-4 md:mb-6">Performance Calendar</h3>
             <div className="space-y-2">
               {performanceEvents.map((event) => (
                 <PerformanceEventItem 
@@ -79,10 +81,11 @@ export function PerformanceSection() {
                 />
               ))}
             </div>
-            <div className="mt-6">
+            <div className="mt-4 md:mt-6">
               <Button 
                 onClick={() => navigate("/dashboard/schedule")}
                 className="bg-glee-purple hover:bg-glee-purple/90 text-white"
+                size={isMobile ? "default" : "lg"}
               >
                 View Full Schedule
               </Button>
