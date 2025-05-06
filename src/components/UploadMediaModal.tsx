@@ -18,6 +18,7 @@ import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { toast } from "@/components/ui/sonner";
 
 interface UploadMediaModalProps {
   onUploadComplete: () => void;
@@ -34,7 +35,8 @@ export function UploadMediaModal({
   const [uploading, setUploading] = useState(false);
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
-  const [file, setFile] = useState<File | null>(null);
+  const [files, setFiles] = useState<File[]>([]);
+  const [uploadProgress, setUploadProgress] = useState(0);
   const { toast } = useToast();
   const { profile } = useAuth();
   const isMobile = useIsMobile();
@@ -47,71 +49,90 @@ export function UploadMediaModal({
     : setInternalOpen;
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files[0]) {
-      const selectedFile = e.target.files[0];
+    if (e.target.files && e.target.files.length > 0) {
+      const selectedFiles = Array.from(e.target.files);
       
-      // Validate file size (max 25MB)
-      if (selectedFile.size > 25 * 1024 * 1024) {
+      // Validate file size (max 25MB per file)
+      const oversizedFiles = selectedFiles.filter(file => file.size > 25 * 1024 * 1024);
+      
+      if (oversizedFiles.length > 0) {
         toast({
-          title: "File too large",
-          description: "File size should be less than 25MB",
+          title: "File(s) too large",
+          description: "Each file must be less than 25MB",
           variant: "destructive",
         });
         return;
       }
       
-      setFile(selectedFile);
+      setFiles(selectedFiles);
     }
   };
 
   const handleUpload = async () => {
-    if (!file || !title) {
+    if (files.length === 0 || !title) {
       toast({
         title: "Missing information",
-        description: "Please fill in the title and select a file",
+        description: "Please fill in the title and select at least one file",
         variant: "destructive",
       });
       return;
     }
 
     setUploading(true);
+    setUploadProgress(0);
 
     try {
-      // 1. Upload file to Supabase Storage
-      const fileExt = file.name.split('.').pop();
-      const fileName = `${Date.now()}-${Math.random().toString(36).substring(2, 15)}.${fileExt}`;
-      const filePath = fileName;
+      let successCount = 0;
+      
+      for (let i = 0; i < files.length; i++) {
+        const file = files[i];
+        // Generate a unique filename
+        const fileExt = file.name.split('.').pop();
+        const fileName = `${Date.now()}-${Math.random().toString(36).substring(2, 15)}.${fileExt}`;
+        const filePath = fileName;
 
-      const { error: uploadError, data } = await supabase.storage
-        .from('media-library')
-        .upload(filePath, file);
+        // Upload file to Supabase Storage
+        const { error: uploadError } = await supabase.storage
+          .from('media-library')
+          .upload(filePath, file);
 
-      if (uploadError) throw uploadError;
+        if (uploadError) throw uploadError;
 
-      // 2. Get public URL
-      const { data: publicURL } = supabase.storage
-        .from('media-library')
-        .getPublicUrl(filePath);
+        // Get public URL
+        const { data: publicURL } = supabase.storage
+          .from('media-library')
+          .getPublicUrl(filePath);
 
-      if (!publicURL) throw new Error("Failed to get public URL");
+        if (!publicURL) throw new Error("Failed to get public URL");
 
-      // 3. Insert record in database
-      const { error: dbError } = await supabase
-        .from('media_library')
-        .insert({
-          title,
-          description: description || null,
-          file_path: filePath,
-          file_url: publicURL.publicUrl,
-          file_type: file.type,
-          uploaded_by: profile?.id
-        });
+        // Generate a file-specific title if multiple files
+        const fileTitle = files.length > 1 
+          ? `${title} ${i + 1}` 
+          : title;
 
-      if (dbError) throw dbError;
+        // Insert record in database
+        const { error: dbError } = await supabase
+          .from('media_library')
+          .insert({
+            title: fileTitle,
+            description: description || null,
+            file_path: filePath,
+            file_url: publicURL.publicUrl,
+            file_type: file.type,
+            uploaded_by: profile?.id
+          });
+
+        if (dbError) throw dbError;
+        
+        successCount++;
+        
+        // Update progress
+        setUploadProgress(Math.round((i + 1) / files.length * 100));
+      }
 
       toast({
         title: "Upload successful",
-        description: `${title} has been uploaded successfully`,
+        description: `${successCount} file(s) have been uploaded successfully`,
       });
       
       // Close modal and refresh data
@@ -128,13 +149,15 @@ export function UploadMediaModal({
       });
     } finally {
       setUploading(false);
+      setUploadProgress(0);
     }
   };
 
   const resetForm = () => {
     setTitle("");
     setDescription("");
-    setFile(null);
+    setFiles([]);
+    setUploadProgress(0);
   };
 
   return (
@@ -152,9 +175,9 @@ export function UploadMediaModal({
       )}
       <DialogContent className={`${isMobile ? 'w-[calc(100%-2rem)]' : 'sm:max-w-[500px]'} overflow-y-auto max-h-[90vh]`}>
         <DialogHeader>
-          <DialogTitle>Upload Media File</DialogTitle>
+          <DialogTitle>Upload Media Files</DialogTitle>
           <DialogDescription>
-            Upload any file type to the media library. Maximum file size is 25MB.
+            Upload multiple files to the media library. Maximum file size is 25MB per file.
           </DialogDescription>
         </DialogHeader>
         <div className="grid gap-4 py-3">
@@ -167,32 +190,57 @@ export function UploadMediaModal({
               onChange={(e) => setTitle(e.target.value)}
               required
             />
+            {files.length > 1 && (
+              <p className="text-xs text-muted-foreground">
+                For multiple files, numbers will be appended to the title (e.g., {title} 1, {title} 2)
+              </p>
+            )}
           </div>
           <div className="grid gap-2">
             <Label htmlFor="description">Description (Optional)</Label>
             <Textarea
               id="description"
-              placeholder="Brief description of the file"
+              placeholder="Brief description of the file(s)"
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               rows={isMobile ? 2 : 3}
             />
           </div>
           <div className="grid gap-2">
-            <Label htmlFor="file">File</Label>
+            <Label htmlFor="files">Files</Label>
             <Input
-              id="file"
+              id="files"
               type="file"
               onChange={handleFileChange}
               required
               className="text-sm"
+              multiple
             />
-            {file && (
-              <p className="text-xs text-muted-foreground mt-1 break-all">
-                {file.name} ({(file.size / 1024 / 1024).toFixed(2)} MB)
-              </p>
+            {files.length > 0 && (
+              <div className="text-xs text-muted-foreground mt-1">
+                <p>{files.length} file(s) selected:</p>
+                <ul className="mt-1 ml-4 list-disc space-y-1">
+                  {files.slice(0, 5).map((file, index) => (
+                    <li key={index} className="break-all">
+                      {file.name} ({(file.size / 1024 / 1024).toFixed(2)} MB)
+                    </li>
+                  ))}
+                  {files.length > 5 && <li>...and {files.length - 5} more</li>}
+                </ul>
+              </div>
             )}
           </div>
+          {uploading && uploadProgress > 0 && (
+            <div className="w-full bg-gray-200 rounded-full h-2.5 dark:bg-gray-700">
+              <div 
+                className="bg-primary h-2.5 rounded-full" 
+                style={{ width: `${uploadProgress}%` }}
+              ></div>
+              <p className="text-xs text-muted-foreground mt-1">
+                Uploading... {uploadProgress}%
+              </p>
+            </div>
+          )}
         </div>
         <DialogFooter className={isMobile ? 'flex-col space-y-2' : ''}>
           <Button variant="outline" onClick={() => setOpen(false)} disabled={uploading} className={isMobile ? 'w-full' : ''}>
@@ -200,7 +248,7 @@ export function UploadMediaModal({
           </Button>
           <Button onClick={handleUpload} disabled={uploading} className={isMobile ? 'w-full' : ''}>
             {uploading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-            {uploading ? "Uploading..." : "Upload"}
+            {uploading ? `Uploading ${files.length} file(s)...` : `Upload ${files.length || 0} file(s)`}
           </Button>
         </DialogFooter>
       </DialogContent>
