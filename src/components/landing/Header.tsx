@@ -45,18 +45,20 @@ export function Header({ initialShowNewsFeed = true }: HeaderProps) {
         </div>
         
         {/* Desktop navigation */}
-        <div className="hidden md:flex items-center gap-4">
+        <div className="hidden md:flex items-center gap-3">
           <ThemeToggle />
           <Clock />
           <Button 
             variant="outline" 
-            className="text-glee-purple border-glee-purple hover:bg-glee-purple/10" 
+            size="sm"
+            className="text-glee-purple border-glee-purple hover:bg-glee-purple/10 h-8 px-3 text-xs" 
             onClick={() => navigate("/fan-page")}
           >
             Guest Access
           </Button>
           <Button 
-            className="bg-glee-purple hover:bg-glee-purple/90" 
+            size="sm"
+            className="bg-glee-purple hover:bg-glee-purple/90 h-8 px-3 text-xs" 
             onClick={() => navigate("/login")}
           >
             Member Portal
@@ -71,9 +73,9 @@ export function Header({ initialShowNewsFeed = true }: HeaderProps) {
             aria-label={mobileMenuOpen ? "Close menu" : "Open menu"}
           >
             {mobileMenuOpen ? (
-              <X className="h-6 w-6" />
+              <X className="h-5 w-5" />
             ) : (
-              <Menu className="h-6 w-6" />
+              <Menu className="h-5 w-5" />
             )}
           </button>
         </div>
@@ -89,7 +91,8 @@ export function Header({ initialShowNewsFeed = true }: HeaderProps) {
             </div>
             <Button 
               variant="outline" 
-              className="text-glee-purple border-glee-purple hover:bg-glee-purple/10 w-full" 
+              size="sm"
+              className="text-glee-purple border-glee-purple hover:bg-glee-purple/10 w-full h-8 text-xs" 
               onClick={() => {
                 navigate("/fan-page");
                 setMobileMenuOpen(false);
@@ -98,7 +101,8 @@ export function Header({ initialShowNewsFeed = true }: HeaderProps) {
               Guest Access
             </Button>
             <Button 
-              className="bg-glee-purple hover:bg-glee-purple/90 w-full" 
+              size="sm"
+              className="bg-glee-purple hover:bg-glee-purple/90 w-full h-8 text-xs" 
               onClick={() => {
                 navigate("/login");
                 setMobileMenuOpen(false);

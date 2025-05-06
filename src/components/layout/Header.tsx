@@ -1,3 +1,4 @@
+
 import React from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
@@ -107,8 +108,8 @@ export const Header = () => {
         <div className="flex items-center gap-2">
           <Sheet>
             <SheetTrigger asChild>
-              <Button variant="ghost" size="icon" className="md:hidden">
-                <Menu className="h-5 w-5" />
+              <Button variant="ghost" size="icon" className="md:hidden h-8 w-8">
+                <Menu className="h-4 w-4" />
                 <span className="sr-only">Toggle menu</span>
               </Button>
             </SheetTrigger>
@@ -208,9 +209,9 @@ export const Header = () => {
               variant="ghost"
               size="sm"
               onClick={() => navigate("/")}
-              className="ml-2 hidden md:flex items-center gap-1"
+              className="ml-2 hidden md:flex items-center gap-1 h-8 px-2 text-xs"
             >
-              <Home className="h-4 w-4" />
+              <Home className="h-3 w-3" />
               <span>Back to Home</span>
             </Button>
           )}
@@ -223,14 +224,14 @@ export const Header = () => {
           {user ? (
             <DropdownMenuProvider>
               <DropdownMenuTrigger asChild>
-                <Button variant="ghost" className="relative h-9 w-9 rounded-full">
-                  <Avatar className="h-9 w-9 bg-glee-purple text-white">
+                <Button variant="ghost" className="relative h-8 w-8 rounded-full p-0">
+                  <Avatar className="h-8 w-8 bg-glee-purple text-white">
                     <AvatarFallback>{getUserInitials()}</AvatarFallback>
                   </Avatar>
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
-                <DropdownMenuLabel>{getDisplayName()}</DropdownMenuLabel>
+                <DropdownMenuLabel className="text-sm">{getDisplayName()}</DropdownMenuLabel>
                 <DropdownMenuLabel className="text-xs font-normal text-muted-foreground">
                   {getRoleDescription()}
                 </DropdownMenuLabel>
@@ -277,7 +278,7 @@ export const Header = () => {
           ) : (
             <Button 
               size="sm" 
-              className="bg-glee-purple hover:bg-glee-purple/90"
+              className="bg-glee-purple hover:bg-glee-purple/90 h-8 px-3 text-xs"
               onClick={() => navigate("/login")}
             >
               Member Login

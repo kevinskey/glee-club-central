@@ -21,9 +21,9 @@ export const CalendarPageHeader = ({ onAddEventClick }: CalendarPageHeaderProps)
           variant="ghost"
           size="sm"
           onClick={() => navigate(-1)}
-          className="mb-4 sm:mb-0 self-start"
+          className="mb-4 sm:mb-0 self-start h-8 px-2"
         >
-          <ArrowLeft className="mr-2 h-4 w-4" />
+          <ArrowLeft className="mr-1 h-3 w-3" />
           Back
         </Button>
         <h1 className="text-2xl sm:text-3xl md:text-4xl font-playfair font-bold flex items-center gap-2">
@@ -34,9 +34,9 @@ export const CalendarPageHeader = ({ onAddEventClick }: CalendarPageHeaderProps)
           <ThemeToggle />
           <Button
             onClick={onAddEventClick}
-            className="bg-glee-purple hover:bg-glee-purple/90 text-white hidden sm:flex"
+            className="bg-glee-purple hover:bg-glee-purple/90 text-white hidden sm:flex h-8 px-3 text-xs"
           >
-            <Plus className="mr-2 h-4 w-4" />
+            <Plus className="mr-1 h-3 w-3" />
             Add Event
           </Button>
         </div>
@@ -46,9 +46,9 @@ export const CalendarPageHeader = ({ onAddEventClick }: CalendarPageHeaderProps)
       <div className="flex justify-end sm:hidden mb-4">
         <Button
           onClick={onAddEventClick}
-          className="bg-glee-purple hover:bg-glee-purple/90 w-full sm:w-auto text-white"
+          className="bg-glee-purple hover:bg-glee-purple/90 w-full sm:w-auto text-white h-8 text-xs"
         >
-          <Plus className="mr-2 h-4 w-4" />
+          <Plus className="mr-1 h-3 w-3" />
           Add Event
         </Button>
       </div>
