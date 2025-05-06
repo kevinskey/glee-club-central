@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+
+import React, { useState, useCallback, memo } from "react";
 import { useNavigate } from "react-router-dom";
 import { 
   Calendar as CalendarIcon, 
@@ -7,7 +8,8 @@ import {
   MapPin,
   Clock,
   ArrowLeft,
-  Plus
+  Plus,
+  AlertCircle
 } from "lucide-react";
 import { Calendar } from "@/components/ui/calendar";
 import { Button } from "@/components/ui/button";
@@ -22,6 +24,49 @@ import { useCalendarEvents, CalendarEvent } from "@/hooks/useCalendarEvents";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
 
+// Memoized event component to reduce re-renders
+const EventItem = memo(({ 
+  event, 
+  isSelected, 
+  onSelect, 
+  typeColor 
+}: { 
+  event: CalendarEvent; 
+  isSelected: boolean; 
+  onSelect: (event: CalendarEvent) => void; 
+  typeColor: string; 
+}) => (
+  <div 
+    key={event.id}
+    className={`p-4 border rounded-lg cursor-pointer ${
+      isSelected 
+        ? 'border-glee-purple bg-glee-purple/5' 
+        : 'hover:bg-gray-50 dark:hover:bg-gray-800'
+    }`}
+    onClick={() => onSelect(event)}
+  >
+    <div className="flex justify-between items-start">
+      <h3 className="font-medium text-lg">{event.title}</h3>
+      <Badge className={`${typeColor} text-white`}>
+        {event.type.charAt(0).toUpperCase() + event.type.slice(1)}
+      </Badge>
+    </div>
+    <div className="mt-2 text-sm text-muted-foreground">
+      <div className="flex items-center gap-1 mb-1">
+        <Clock className="h-4 w-4" />
+        <span>{event.time}</span>
+      </div>
+      <div className="flex items-center gap-1">
+        <MapPin className="h-4 w-4" />
+        <span>{event.location}</span>
+      </div>
+    </div>
+    {isSelected && (
+      <p className="mt-3 text-sm">{event.description}</p>
+    )}
+  </div>
+));
+
 export default function CalendarPage() {
   const navigate = useNavigate();
   const [date, setDate] = useState<Date | undefined>(new Date());
@@ -30,22 +75,24 @@ export default function CalendarPage() {
   const { events, loading, addEvent, deleteEvent } = useCalendarEvents();
   const { user } = useAuth();
   
-  // Filter events for the selected date
-  const eventsOnSelectedDate = date 
-    ? events.filter(event => 
-        event.date.getDate() === date.getDate() && 
-        event.date.getMonth() === date.getMonth() && 
-        event.date.getFullYear() === date.getFullYear()
-      )
-    : [];
+  // Filter events for the selected date - memoized with useCallback
+  const eventsOnSelectedDate = useCallback(() => {
+    if (!date) return [];
+    
+    return events.filter(event => 
+      event.date.getDate() === date.getDate() && 
+      event.date.getMonth() === date.getMonth() && 
+      event.date.getFullYear() === date.getFullYear()
+    );
+  }, [date, events]);
     
   // Get days with events for highlighting in the calendar
   const daysWithEvents = events.map(event => event.date);
   
   // Handle event selection
-  const handleEventSelect = (event: CalendarEvent) => {
+  const handleEventSelect = useCallback((event: CalendarEvent) => {
     setSelectedEvent(event);
-  };
+  }, []);
 
   // Handle adding new event
   const handleAddEvent = async (formValues: Omit<CalendarEvent, "id">) => {
@@ -59,6 +106,7 @@ export default function CalendarPage() {
           formValues.date.getDate() === date.getDate() && 
           formValues.date.getMonth() === date.getMonth() && 
           formValues.date.getFullYear() === date.getFullYear()) {
+        // Just refresh the same date to trigger a re-render
         setDate(new Date(formValues.date));
       }
     }
@@ -89,6 +137,9 @@ export default function CalendarPage() {
         return "bg-gray-500 hover:bg-gray-500/90";
     }
   };
+
+  // Current events to show
+  const currentEvents = eventsOnSelectedDate();
   
   return (
     <div className="flex min-h-screen flex-col">
@@ -157,10 +208,6 @@ export default function CalendarPage() {
                         color: 'var(--glee-purple)'
                       }
                     }}
-                    components={{
-                      IconLeft: () => <ChevronLeft className="h-4 w-4" />,
-                      IconRight: () => <ChevronRight className="h-4 w-4" />,
-                    }}
                   />
                 </div>
               </div>
@@ -173,40 +220,18 @@ export default function CalendarPage() {
                       <h2 className="text-xl font-medium mb-1">
                         Events on {format(date, 'MMMM d, yyyy')}
                       </h2>
-                      {eventsOnSelectedDate.length === 0 ? (
+                      {currentEvents.length === 0 ? (
                         <p className="text-muted-foreground">No events scheduled for this date.</p>
                       ) : (
                         <div className="space-y-4 mt-4">
-                          {eventsOnSelectedDate.map((event) => (
-                            <div 
+                          {currentEvents.map((event) => (
+                            <EventItem 
                               key={event.id}
-                              className={`p-4 border rounded-lg cursor-pointer transition-colors ${
-                                selectedEvent?.id === event.id 
-                                  ? 'border-glee-purple bg-glee-purple/5' 
-                                  : 'hover:bg-gray-50 dark:hover:bg-gray-800'
-                              }`}
-                              onClick={() => handleEventSelect(event)}
-                            >
-                              <div className="flex justify-between items-start">
-                                <h3 className="font-medium text-lg">{event.title}</h3>
-                                <Badge className={`${getEventTypeColor(event.type)} text-white`}>
-                                  {event.type.charAt(0).toUpperCase() + event.type.slice(1)}
-                                </Badge>
-                              </div>
-                              <div className="mt-2 text-sm text-muted-foreground">
-                                <div className="flex items-center gap-1 mb-1">
-                                  <Clock className="h-4 w-4" />
-                                  <span>{event.time}</span>
-                                </div>
-                                <div className="flex items-center gap-1">
-                                  <MapPin className="h-4 w-4" />
-                                  <span>{event.location}</span>
-                                </div>
-                              </div>
-                              {selectedEvent?.id === event.id && (
-                                <p className="mt-3 text-sm">{event.description}</p>
-                              )}
-                            </div>
+                              event={event}
+                              isSelected={selectedEvent?.id === event.id}
+                              onSelect={handleEventSelect}
+                              typeColor={getEventTypeColor(event.type)}
+                            />
                           ))}
                         </div>
                       )}
