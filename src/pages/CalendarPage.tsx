@@ -7,7 +7,8 @@ import {
   ChevronRight, 
   MapPin,
   Clock,
-  ArrowLeft
+  ArrowLeft,
+  Plus
 } from "lucide-react";
 import { Calendar } from "@/components/ui/calendar";
 import { Button } from "@/components/ui/button";
@@ -15,6 +16,8 @@ import { Header } from "@/components/landing/Header";
 import { Footer } from "@/components/landing/Footer";
 import { Badge } from "@/components/ui/badge";
 import { format } from "date-fns";
+import { AddEventForm } from "@/components/calendar/AddEventForm";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 
 interface Event {
   id: number;
@@ -27,7 +30,7 @@ interface Event {
 }
 
 // Sample events data - same as what's used in the PerformanceSection
-const events: Event[] = [
+const initialEvents: Event[] = [
   {
     id: 1,
     title: "Fall Showcase",
@@ -88,6 +91,8 @@ export default function CalendarPage() {
   const navigate = useNavigate();
   const [date, setDate] = useState<Date | undefined>(new Date());
   const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
+  const [events, setEvents] = useState<Event[]>(initialEvents);
+  const [isAddEventOpen, setIsAddEventOpen] = useState(false);
   
   // Filter events for the selected date
   const eventsOnSelectedDate = date 
@@ -104,6 +109,25 @@ export default function CalendarPage() {
   // Handle event selection
   const handleEventSelect = (event: Event) => {
     setSelectedEvent(event);
+  };
+
+  // Handle adding new event
+  const handleAddEvent = (formValues: Omit<Event, "id">) => {
+    const newEvent = {
+      ...formValues,
+      id: events.length + 1,
+    };
+    
+    setEvents([...events, newEvent]);
+    setIsAddEventOpen(false);
+    
+    // If the new event is on the currently selected date, update the calendar
+    if (date && 
+        formValues.date.getDate() === date.getDate() && 
+        formValues.date.getMonth() === date.getMonth() && 
+        formValues.date.getFullYear() === date.getFullYear()) {
+      setDate(new Date(formValues.date));
+    }
   };
   
   // Get badge color based on event type
@@ -141,7 +165,24 @@ export default function CalendarPage() {
               <CalendarIcon className="h-6 w-6 sm:h-7 sm:w-7 md:h-8 md:w-8 text-glee-purple" />
               <span>Performance <span className="text-glee-purple">Calendar</span></span>
             </h1>
-            <div className="hidden sm:block w-[100px]"></div> {/* Spacer for alignment */}
+            <Button 
+              onClick={() => setIsAddEventOpen(true)}
+              className="bg-glee-purple hover:bg-glee-purple/90 hidden sm:flex"
+            >
+              <Plus className="mr-2 h-4 w-4" />
+              Add Event
+            </Button>
+          </div>
+          
+          {/* Mobile Add Event Button */}
+          <div className="flex justify-center sm:hidden mb-4">
+            <Button 
+              onClick={() => setIsAddEventOpen(true)}
+              className="bg-glee-purple hover:bg-glee-purple/90 w-full"
+            >
+              <Plus className="mr-2 h-4 w-4" />
+              Add Event
+            </Button>
           </div>
           
           <div className="flex flex-col lg:flex-row gap-8">
@@ -255,6 +296,19 @@ export default function CalendarPage() {
         </div>
       </main>
       <Footer />
+
+      {/* Add Event Dialog */}
+      <Dialog open={isAddEventOpen} onOpenChange={setIsAddEventOpen}>
+        <DialogContent className="sm:max-w-[600px]">
+          <DialogHeader>
+            <DialogTitle>Add New Event</DialogTitle>
+          </DialogHeader>
+          <AddEventForm 
+            onAddEvent={handleAddEvent} 
+            onCancel={() => setIsAddEventOpen(false)} 
+          />
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
