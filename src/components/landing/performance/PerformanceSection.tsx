@@ -64,14 +64,14 @@ export function PerformanceSection() {
   return (
     <section className="py-8 md:py-12 bg-gradient-to-b from-white to-glee-light dark:from-glee-dark dark:to-black">
       <div className="container px-4 md:px-8 mx-auto">
-        <div className="mb-4 md:mb-6">
-          <h2 className="text-xl md:text-2xl lg:text-3xl font-playfair font-bold mb-3 md:mb-4 flex items-center gap-2">
+        <div className="mb-3 md:mb-4">
+          <h2 className="text-xl md:text-2xl lg:text-3xl font-playfair font-bold mb-2 md:mb-3 flex items-center gap-2">
             <Calendar className="h-5 w-5 md:h-6 md:w-6 text-glee-purple" />
             <span className="flex items-center min-h-[2rem] md:min-h-[2.5rem]">Upcoming <span className="text-glee-purple">Performances</span></span>
           </h2>
           
           {/* Performance Carousel - Full Width */}
-          <div className="relative mt-6 -mx-4 sm:-mx-8 md:-mx-12 lg:-mx-16">
+          <div className="relative mt-4 -mx-4 sm:-mx-8 md:-mx-12 lg:-mx-16">
             <Carousel
               opts={{ 
                 loop: true,
