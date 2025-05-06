@@ -98,7 +98,10 @@ export const SetlistSelector = ({
           value={activeSetlist?.id || ""}
           onValueChange={(value) => {
             const selected = setlists.find(s => s.id === value);
-            if (selected) onSelect(selected);
+            if (selected) {
+              onSelect(selected);
+              // The Select component will auto-close by default
+            }
           }}
         >
           <SelectTrigger className="w-full">

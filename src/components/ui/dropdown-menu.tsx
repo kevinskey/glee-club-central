@@ -1,3 +1,4 @@
+
 import * as React from "react"
 import * as DropdownMenuPrimitive from "@radix-ui/react-dropdown-menu"
 import { Check, ChevronRight, Circle } from "lucide-react"
@@ -72,23 +73,58 @@ const DropdownMenuContent = React.forwardRef<
 ))
 DropdownMenuContent.displayName = DropdownMenuPrimitive.Content.displayName
 
+// Create a context to provide access to the close function
+const DropdownMenuContext = React.createContext<{
+  close: () => void
+}>({
+  close: () => {},
+})
+
+// Hook to use the dropdown menu context
+const useDropdownMenu = () => React.useContext(DropdownMenuContext)
+
 const DropdownMenuItem = React.forwardRef<
   React.ElementRef<typeof DropdownMenuPrimitive.Item>,
   React.ComponentPropsWithoutRef<typeof DropdownMenuPrimitive.Item> & {
     inset?: boolean
   }
->(({ className, inset, ...props }, ref) => (
-  <DropdownMenuPrimitive.Item
-    ref={ref}
-    className={cn(
-      "relative flex cursor-default select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none transition-colors focus:bg-accent focus:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50",
-      inset && "pl-8",
-      className
-    )}
-    {...props}
-  />
-))
+>(({ className, inset, onClick, ...props }, ref) => {
+  const { close } = useDropdownMenu()
+  
+  const handleClick = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (onClick) onClick(e)
+    close() // Close the dropdown when item is clicked
+  }
+  
+  return (
+    <DropdownMenuPrimitive.Item
+      ref={ref}
+      className={cn(
+        "relative flex cursor-default select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none transition-colors focus:bg-accent focus:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50",
+        inset && "pl-8",
+        className
+      )}
+      onClick={handleClick}
+      {...props}
+    />
+  )
+})
 DropdownMenuItem.displayName = DropdownMenuPrimitive.Item.displayName
+
+// Wrapper component that provides the context
+const DropdownMenuProvider = ({ children }: { children: React.ReactNode }) => {
+  const [open, setOpen] = React.useState(false)
+  
+  return (
+    <DropdownMenu open={open} onOpenChange={setOpen}>
+      <DropdownMenuContext.Provider value={{ close: () => setOpen(false) }}>
+        {children}
+      </DropdownMenuContext.Provider>
+    </DropdownMenu>
+  )
+}
+
+DropdownMenuProvider.displayName = "DropdownMenuProvider"
 
 const DropdownMenuCheckboxItem = React.forwardRef<
   React.ElementRef<typeof DropdownMenuPrimitive.CheckboxItem>,
@@ -195,4 +231,6 @@ export {
   DropdownMenuSubContent,
   DropdownMenuSubTrigger,
   DropdownMenuRadioGroup,
+  DropdownMenuProvider,
+  useDropdownMenu,
 }

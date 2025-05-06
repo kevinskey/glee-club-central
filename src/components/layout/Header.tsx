@@ -11,6 +11,7 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
+  DropdownMenuProvider,
 } from "@/components/ui/dropdown-menu";
 import {
   Sheet,
@@ -184,7 +185,7 @@ export const Header = () => {
 
         <div className="flex items-center gap-2">
           {user ? (
-            <DropdownMenu>
+            <DropdownMenuProvider>
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" className="relative h-9 w-9 rounded-full">
                   <Avatar className="h-9 w-9 bg-glee-purple text-white">
@@ -225,7 +226,7 @@ export const Header = () => {
                   </button>
                 </DropdownMenuItem>
               </DropdownMenuContent>
-            </DropdownMenu>
+            </DropdownMenuProvider>
           ) : (
             <Button 
               size="sm" 
