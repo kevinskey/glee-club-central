@@ -67,7 +67,7 @@ export function PerformanceSection() {
         <div className="mb-4 md:mb-6">
           <h2 className="text-xl md:text-2xl lg:text-3xl font-playfair font-bold mb-3 md:mb-4 flex items-center gap-2">
             <Calendar className="h-5 w-5 md:h-6 md:w-6 text-glee-purple" />
-            <span>Upcoming <span className="text-glee-purple">Performances</span></span>
+            <span className="flex items-center min-h-[2rem] md:min-h-[2.5rem]">Upcoming <span className="text-glee-purple">Performances</span></span>
           </h2>
           
           {/* Performance Carousel - Full Width */}
@@ -94,7 +94,7 @@ export function PerformanceSection() {
                         }}
                       >
                         <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent flex flex-col justify-center items-center">
-                          <h3 className="font-bold text-white text-xl md:text-2xl lg:text-3xl font-playfair text-center px-4 md:px-6 drop-shadow-lg my-auto">
+                          <h3 className="font-bold text-white text-xl md:text-2xl lg:text-3xl font-playfair text-center px-4 md:px-6 drop-shadow-lg my-auto flex items-center min-h-[3rem] md:min-h-[3.5rem]">
                             {event.title}
                           </h3>
                           
@@ -123,7 +123,7 @@ export function PerformanceSection() {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8 items-start mt-8">
           {/* Left column - Calendar of events */}
           <div className="space-y-4">
-            <h3 className="text-lg md:text-xl font-playfair font-semibold mb-3 md:mb-4">Performance Calendar</h3>
+            <h3 className="text-lg md:text-xl font-playfair font-semibold mb-3 md:mb-4 flex items-center min-h-[1.75rem] md:min-h-[2rem]">Performance Calendar</h3>
             <div className="space-y-2">
               {performanceEvents.map((event) => (
                 <PerformanceEventItem 

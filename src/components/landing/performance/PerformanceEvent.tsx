@@ -34,7 +34,7 @@ export function PerformanceEventItem({
       onClick={() => onSelect(event)}
     >
       <div className="flex justify-between items-center gap-3">
-        <div className="font-medium text-base md:text-lg font-playfair">{event.title}</div>
+        <div className="font-medium text-base md:text-lg font-playfair flex items-center min-h-[1.5rem]">{event.title}</div>
         <div className="text-xs sm:text-sm bg-glee-purple/10 text-glee-purple px-3 py-1.5 rounded-full font-medium tracking-wide inline-flex items-center whitespace-nowrap">
           <Calendar className="h-3 w-3 mr-1.5" />
           {format(event.date, 'MMM d, yyyy')}
@@ -68,7 +68,7 @@ export function PerformanceEventDetails({ event }: PerformanceEventDetailsProps)
           <div className="inline-block px-4 py-1.5 bg-glee-purple text-white text-xs uppercase tracking-wider font-bold rounded-full mb-3 md:mb-4">
             Featured Event
           </div>
-          <h3 className="text-xl md:text-2xl lg:text-3xl font-playfair font-bold text-white mb-2 md:mb-3">
+          <h3 className="text-xl md:text-2xl lg:text-3xl font-playfair font-bold text-white mb-2 md:mb-3 flex items-center min-h-[2.5rem]">
             {event.title}
           </h3>
           <div className="text-white/90 flex items-center gap-3 mt-2 md:mt-3">

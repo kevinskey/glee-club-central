@@ -44,7 +44,7 @@ export const CalendarPageHeader = ({ onAddEventClick }: CalendarPageHeaderProps)
           </Tooltip>
         </TooltipProvider>
         
-        <h1 className="text-2xl sm:text-3xl md:text-4xl font-playfair font-bold flex items-center gap-2">
+        <h1 className="text-2xl sm:text-3xl md:text-4xl font-playfair font-bold flex items-center gap-2 min-h-[2.5rem] sm:min-h-[2.75rem] md:min-h-[3rem]">
           <TooltipProvider>
             <Tooltip>
               <TooltipTrigger asChild>
