@@ -1,3 +1,4 @@
+
 import React from "react";
 import { 
   LayoutDashboard, 
@@ -10,23 +11,19 @@ import {
   MessageSquare, 
   Users, 
   UsersRound, 
-  UserCog 
+  UserCog,
+  Shield 
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { NavLink } from "./NavLink";
+import { useAuth } from "@/contexts/AuthContext";
 
 interface SidebarNavProps {
   className?: string;
 }
 
 export const SidebarNav: React.FC<SidebarNavProps> = ({ className }) => {
-  const adminNavItems = [
-    {
-      title: "User Management",
-      href: "/dashboard/users",
-      icon: UserCog,
-    },
-  ];
+  const { isAdmin } = useAuth();
 
   return (
     <nav className={cn("flex flex-col space-y-1", className)}>
@@ -51,6 +48,29 @@ export const SidebarNav: React.FC<SidebarNavProps> = ({ className }) => {
       <NavLink href="/messaging" icon={<MessageSquare className="h-5 w-5" />}>
         Messaging
       </NavLink>
+      
+      {/* Admin navigation section */}
+      {isAdmin() && (
+        <>
+          <div className="mt-6 pt-6 border-t border-border">
+            <h4 className="mb-2 px-2 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+              Admin Tools
+            </h4>
+            <NavLink href="/dashboard/users" icon={<UserCog className="h-5 w-5" />}>
+              User Management
+            </NavLink>
+            <NavLink href="/dashboard/members" icon={<Users className="h-5 w-5" />}>
+              Member Directory
+            </NavLink>
+            <NavLink href="/dashboard/sections" icon={<Shield className="h-5 w-5" />}>
+              Section Management
+            </NavLink>
+            <NavLink href="/dashboard/invite-member" icon={<UsersRound className="h-5 w-5" />}>
+              Invite Members
+            </NavLink>
+          </div>
+        </>
+      )}
     </nav>
   );
 };

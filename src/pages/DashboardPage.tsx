@@ -12,11 +12,15 @@ import {
   ShoppingBag,
   Bell,
   Video,
-  FileImage
+  FileImage,
+  UserCog,
+  Users,
+  Shield
 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { PageHeader } from "@/components/ui/page-header";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Separator } from "@/components/ui/separator";
 
 interface FeatureCardProps {
   title: string;
@@ -54,7 +58,7 @@ const FeatureCard = ({
 };
 
 export default function DashboardPage() {
-  const { user, profile } = useAuth();
+  const { user, profile, isAdmin } = useAuth();
   const greeting = profile ? `Hello, ${profile.first_name || ''}!` : "Hello!";
 
   const features = [
@@ -130,6 +134,38 @@ export default function DashboardPage() {
     },
   ];
 
+  // Admin-only features
+  const adminFeatures = [
+    {
+      title: "User Management",
+      description: "Manage users, roles, and permissions",
+      icon: <UserCog className="h-6 w-6" />,
+      href: "/dashboard/users",
+      color: "bg-red-600/10",
+    },
+    {
+      title: "Member Directory",
+      description: "Access and manage the complete member directory",
+      icon: <Users className="h-6 w-6" />,
+      href: "/dashboard/members",
+      color: "bg-blue-600/10",
+    },
+    {
+      title: "Section Management",
+      description: "Manage choir sections and assignments",
+      icon: <Shield className="h-6 w-6" />,
+      href: "/dashboard/sections",
+      color: "bg-purple-600/10",
+    },
+    {
+      title: "Invite Members",
+      description: "Send invitations to join the Glee Club",
+      icon: <Users className="h-6 w-6" />,
+      href: "/dashboard/invite-member",
+      color: "bg-green-600/10",
+    },
+  ];
+
   return (
     <div>
       <PageHeader
@@ -137,6 +173,28 @@ export default function DashboardPage() {
         description="Welcome to the Glee World digital choir hub"
         icon={<Bell className="h-6 w-6" />}
       />
+
+      {isAdmin() && (
+        <>
+          <div className="mb-6">
+            <h2 className="text-2xl font-semibold mb-2">Admin Tools</h2>
+            <p className="text-muted-foreground mb-4">Access administrative features and management tools</p>
+            <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+              {adminFeatures.map((feature) => (
+                <FeatureCard
+                  key={feature.title}
+                  title={feature.title}
+                  description={feature.description}
+                  icon={feature.icon}
+                  href={feature.href}
+                  color={feature.color}
+                />
+              ))}
+            </div>
+          </div>
+          <Separator className="my-8" />
+        </>
+      )}
 
       <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
         {features.map((feature) => (
