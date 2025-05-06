@@ -24,6 +24,7 @@ import SubmitRecordingPage from "./pages/recordings/SubmitRecordingPage";
 import HandbookPage from "./pages/handbook/HandbookPage";
 import VideosPage from "./pages/videos/VideosPage";
 import ProfilePage from "./pages/profile/ProfilePage";
+import CalendarPage from "./pages/CalendarPage";
 
 // Placeholder pages for other sections
 const MerchPage = () => <div className="px-4 py-8">Buy Glee Merch Page - Coming Soon</div>;
@@ -42,6 +43,7 @@ const App = () => (
             <Routes>
               <Route path="/" element={<LandingPage />} />
               <Route path="/login" element={<LoginPage />} />
+              <Route path="/calendar" element={<CalendarPage />} />
               
               {/* Protected Dashboard Routes */}
               <Route

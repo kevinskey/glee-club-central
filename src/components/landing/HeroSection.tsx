@@ -49,6 +49,7 @@ export function HeroSection() {
               variant="outline" 
               size={isMobile ? "default" : "lg"} 
               className="border-white/20 bg-white/5 text-white hover:bg-white/10"
+              onClick={() => navigate("/calendar")}
             >
               Performance Schedule
             </Button>
