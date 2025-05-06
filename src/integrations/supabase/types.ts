@@ -91,7 +91,10 @@ export type Database = {
           file_path: string
           file_type: string
           file_url: string
+          folder: string | null
           id: string
+          is_public: boolean | null
+          tags: string[] | null
           title: string
           uploaded_by: string
         }
@@ -101,7 +104,10 @@ export type Database = {
           file_path: string
           file_type: string
           file_url: string
+          folder?: string | null
           id?: string
+          is_public?: boolean | null
+          tags?: string[] | null
           title: string
           uploaded_by: string
         }
@@ -111,7 +117,10 @@ export type Database = {
           file_path?: string
           file_type?: string
           file_url?: string
+          folder?: string | null
           id?: string
+          is_public?: boolean | null
+          tags?: string[] | null
           title?: string
           uploaded_by?: string
         }
@@ -233,6 +242,45 @@ export type Database = {
           id?: string
           title?: string
           uploaded_by?: string
+        }
+        Relationships: []
+      }
+      user_messages: {
+        Row: {
+          content: string
+          created_at: string
+          id: string
+          message_type: string
+          recipient: string
+          sent_at: string | null
+          status: string
+          subject: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          content: string
+          created_at?: string
+          id?: string
+          message_type: string
+          recipient: string
+          sent_at?: string | null
+          status?: string
+          subject?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          id?: string
+          message_type?: string
+          recipient?: string
+          sent_at?: string | null
+          status?: string
+          subject?: string | null
+          updated_at?: string
+          user_id?: string
         }
         Relationships: []
       }

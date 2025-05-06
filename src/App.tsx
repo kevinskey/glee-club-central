@@ -1,91 +1,135 @@
+import React, { useEffect, useState } from 'react'
+import {
+  BrowserRouter,
+  Routes,
+  Route,
+  Navigate,
+  useLocation,
+} from 'react-router-dom'
+import { useAuth } from './contexts/AuthContext'
+import LandingPage from './pages/LandingPage'
+import LoginPage from './pages/LoginPage'
+import RegisterPage from './pages/RegisterPage'
+import DashboardPage from './pages/DashboardPage'
+import CalendarPage from './pages/CalendarPage'
+import SheetMusicPage from './pages/SheetMusicPage'
+import MediaLibraryPage from './pages/media-library/MediaLibraryPage'
+import RecordingsPage from './pages/RecordingsPage'
+import ProfilePage from './pages/ProfilePage'
+import DashboardLayout from './components/layout/DashboardLayout'
 
-import { Toaster } from "@/components/ui/toaster";
-import { Toaster as Sonner } from "@/components/ui/sonner";
-import { TooltipProvider } from "@/components/ui/tooltip";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
-import { AuthProvider } from "@/contexts/AuthContext";
-import { ThemeProvider } from "@/providers/ThemeProvider";
-import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
-import { DashboardLayout } from "@/components/layout/DashboardLayout";
+// Add messaging page import
+import MessagingPage from "./pages/messaging/MessagingPage";
 
-// Pages
-import LandingPage from "./pages/LandingPage";
-import LoginPage from "./pages/LoginPage";
-import NotFound from "./pages/NotFound";
-import DashboardPage from "./pages/DashboardPage";
-import SheetMusicPage from "./pages/sheet-music/SheetMusicPage";
-import ViewSheetMusicPage from "./pages/sheet-music/ViewSheetMusicPage";
-import PracticePage from "./pages/practice/PracticePage";
-import SchedulePage from "./pages/schedule/SchedulePage";
-import MediaLibraryPage from "./pages/media-library/MediaLibraryPage";
-import AudioManagementPage from "./pages/audio-management/AudioManagementPage";
-import SubmitRecordingPage from "./pages/recordings/SubmitRecordingPage";
-import HandbookPage from "./pages/handbook/HandbookPage";
-import VideosPage from "./pages/videos/VideosPage";
-import ProfilePage from "./pages/profile/ProfilePage";
-import CalendarPage from "./pages/CalendarPage";
+function App() {
+  return (
+    <BrowserRouter>
+      <Routes>
+        <Route path="/" element={<LandingPage />} />
+        <Route path="/login" element={<LoginPage />} />
+        <Route path="/register" element={<RegisterPage />} />
+        <Route
+          path="/dashboard"
+          element={
+            <ProtectedRoute>
+              <DashboardLayout>
+                <DashboardPage />
+              </DashboardLayout>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/calendar"
+          element={
+            <ProtectedRoute>
+              <DashboardLayout>
+                <CalendarPage />
+              </DashboardLayout>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/sheet-music"
+          element={
+            <ProtectedRoute>
+              <DashboardLayout>
+                <SheetMusicPage />
+              </DashboardLayout>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/media-library"
+          element={
+            <ProtectedRoute>
+              <DashboardLayout>
+                <MediaLibraryPage />
+              </DashboardLayout>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/recordings"
+          element={
+            <ProtectedRoute>
+              <DashboardLayout>
+                <RecordingsPage />
+              </DashboardLayout>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/profile"
+          element={
+            <ProtectedRoute>
+              <DashboardLayout>
+                <ProfilePage />
+              </DashboardLayout>
+            </ProtectedRoute>
+          }
+        />
+        
+        {/* Add messaging route */}
+        <Route
+          path="/messaging"
+          element={
+            <ProtectedRoute>
+              <DashboardLayout>
+                <MessagingPage />
+              </DashboardLayout>
+            </ProtectedRoute>
+          }
+        />
 
-// Placeholder pages for other sections
-const MerchPage = () => <div className="px-4 py-8">Buy Glee Merch Page - Coming Soon</div>;
-const AttendancePage = () => <div className="px-4 py-8">Check Attendance Record Page - Coming Soon</div>;
+        {/* Catch-all route for 404 */}
+        <Route path="*" element={<Navigate to="/" />} />
+      </Routes>
+    </BrowserRouter>
+  )
+}
 
-const queryClient = new QueryClient();
+function ProtectedRoute({ children }: { children: React.ReactNode }) {
+  const { user, loading } = useAuth()
+  const location = useLocation()
+  const [render, setRender] = useState(false)
 
-const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <ThemeProvider>
-      <TooltipProvider>
-        <BrowserRouter>
-          <AuthProvider>
-            <Toaster />
-            <Sonner />
-            <Routes>
-              <Route path="/" element={<LandingPage />} />
-              <Route path="/login" element={<LoginPage />} />
-              <Route path="/calendar" element={<CalendarPage />} />
-              
-              {/* Protected Dashboard Routes */}
-              <Route
-                path="/dashboard"
-                element={
-                  <ProtectedRoute>
-                    <DashboardLayout />
-                  </ProtectedRoute>
-                }
-              >
-                <Route index element={<DashboardPage />} />
-                <Route path="sheet-music" element={<SheetMusicPage />} />
-                <Route path="sheet-music/:id" element={<ViewSheetMusicPage />} />
-                <Route path="practice" element={<PracticePage />} />
-                <Route path="recordings" element={<SubmitRecordingPage />} />
-                <Route path="schedule" element={<SchedulePage />} />
-                <Route path="handbook" element={<HandbookPage />} />
-                <Route path="merch" element={<MerchPage />} />
-                <Route path="attendance" element={<AttendancePage />} />
-                <Route path="media-library" element={<MediaLibraryPage />} />
-                <Route path="audio-management" element={<AudioManagementPage />} />
-                <Route path="videos" element={<VideosPage />} />
-              </Route>
+  useEffect(() => {
+    if (!loading) setRender(true)
+  }, [loading])
 
-              {/* Profile Page */}
-              <Route
-                path="/profile"
-                element={
-                  <ProtectedRoute>
-                    <ProfilePage />
-                  </ProtectedRoute>
-                }
-              />
+  if (!render) {
+    return <div></div> // or a loading spinner
+  }
 
-              {/* Catch-all redirect to 404 */}
-              <Route path="*" element={<NotFound />} />
-            </Routes>
-          </AuthProvider>
-        </BrowserRouter>
-      </TooltipProvider>
-    </ThemeProvider>
-  </QueryClientProvider>
-);
+  if (loading) {
+    return <div>Loading...</div>
+  }
 
-export default App;
+  if (!user) {
+    return <Navigate to="/login" replace state={{ path: location.pathname }} />
+  }
+
+  return <>{children}</>
+}
+
+export default App
