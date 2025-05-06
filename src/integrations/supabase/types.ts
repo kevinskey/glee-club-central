@@ -9,6 +9,48 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      attendance_records: {
+        Row: {
+          calendar_event_id: string | null
+          created_at: string
+          id: string
+          member_id: string
+          notes: string | null
+          status: string
+        }
+        Insert: {
+          calendar_event_id?: string | null
+          created_at?: string
+          id?: string
+          member_id: string
+          notes?: string | null
+          status: string
+        }
+        Update: {
+          calendar_event_id?: string | null
+          created_at?: string
+          id?: string
+          member_id?: string
+          notes?: string | null
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "attendance_records_calendar_event_id_fkey"
+            columns: ["calendar_event_id"]
+            isOneToOne: false
+            referencedRelation: "calendar_events"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "attendance_records_member_id_fkey"
+            columns: ["member_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       audio_files: {
         Row: {
           category: string
@@ -126,6 +168,86 @@ export type Database = {
         }
         Relationships: []
       }
+      member_notes: {
+        Row: {
+          created_at: string
+          created_by: string
+          id: string
+          member_id: string
+          note: string
+        }
+        Insert: {
+          created_at?: string
+          created_by: string
+          id?: string
+          member_id: string
+          note: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string
+          id?: string
+          member_id?: string
+          note?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "member_notes_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "member_notes_member_id_fkey"
+            columns: ["member_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      payment_records: {
+        Row: {
+          amount: number
+          created_at: string
+          description: string | null
+          id: string
+          member_id: string
+          payment_date: string
+          payment_method: string
+          status: string
+        }
+        Insert: {
+          amount: number
+          created_at?: string
+          description?: string | null
+          id?: string
+          member_id: string
+          payment_date: string
+          payment_method: string
+          status: string
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          description?: string | null
+          id?: string
+          member_id?: string
+          payment_date?: string
+          payment_method?: string
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "payment_records_member_id_fkey"
+            columns: ["member_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       pdf_annotations: {
         Row: {
           annotations: Json
@@ -163,33 +285,88 @@ export type Database = {
       }
       profiles: {
         Row: {
+          avatar_url: string | null
           created_at: string
           first_name: string | null
           id: string
+          join_date: string | null
           last_name: string | null
+          phone: string | null
           role: string | null
+          section_id: string | null
+          status: string | null
           updated_at: string
           voice_part: string | null
         }
         Insert: {
+          avatar_url?: string | null
           created_at?: string
           first_name?: string | null
           id: string
+          join_date?: string | null
           last_name?: string | null
+          phone?: string | null
           role?: string | null
+          section_id?: string | null
+          status?: string | null
           updated_at?: string
           voice_part?: string | null
         }
         Update: {
+          avatar_url?: string | null
           created_at?: string
           first_name?: string | null
           id?: string
+          join_date?: string | null
           last_name?: string | null
+          phone?: string | null
           role?: string | null
+          section_id?: string | null
+          status?: string | null
           updated_at?: string
           voice_part?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "profiles_section_id_fkey"
+            columns: ["section_id"]
+            isOneToOne: false
+            referencedRelation: "sections"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      sections: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          name: string
+          section_leader_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          name: string
+          section_leader_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          name?: string
+          section_leader_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sections_section_leader_id_fkey"
+            columns: ["section_leader_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       setlists: {
         Row: {

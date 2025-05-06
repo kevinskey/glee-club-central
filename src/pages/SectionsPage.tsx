@@ -134,7 +134,7 @@ export default function SectionsPage() {
 
         setLeaders(formattedLeaders);
 
-        // Fetch sections with member count
+        // Use our custom function to fetch sections data safely
         const sectionsData = await fetchSectionsWithMemberCount();
         setSections(sectionsData);
       } catch (error: any) {
@@ -151,27 +151,23 @@ export default function SectionsPage() {
   const handleSaveSection = async (values: z.infer<typeof sectionFormSchema>) => {
     try {
       if (editingSection) {
-        // Update existing section - using raw query instead of RPC
-        const { error } = await supabase
-          .from('sections')
-          .update({
-            name: values.name,
-            description: values.description || null,
-            section_leader_id: values.section_leader_id || null
-          })
-          .eq('id', editingSection.id);
+        // Update existing section - using RPC function
+        const { error } = await supabase.rpc('update_section', {
+          p_id: editingSection.id,
+          p_name: values.name,
+          p_description: values.description || null,
+          p_section_leader_id: values.section_leader_id || null
+        });
 
         if (error) throw error;
         toast.success("Section updated successfully");
       } else {
-        // Create new section - using raw query instead of RPC
-        const { error } = await supabase
-          .from('sections')
-          .insert({
-            name: values.name,
-            description: values.description || null,
-            section_leader_id: values.section_leader_id || null
-          });
+        // Create new section - using RPC function
+        const { error } = await supabase.rpc('create_section', {
+          p_name: values.name,
+          p_description: values.description || null,
+          p_section_leader_id: values.section_leader_id || null
+        });
 
         if (error) throw error;
         toast.success("Section created successfully");
@@ -189,19 +185,12 @@ export default function SectionsPage() {
 
   const handleDeleteSection = async (sectionId: string) => {
     try {
-      // Direct delete instead of RPC
-      const { error } = await supabase
-        .from('sections')
-        .delete()
-        .eq('id', sectionId);
+      // Use RPC function to delete section
+      const { error } = await supabase.rpc('delete_section', {
+        p_section_id: sectionId
+      });
 
       if (error) throw error;
-
-      // Update profiles to remove this section_id
-      await supabase
-        .from('profiles')
-        .update({ section_id: null })
-        .eq('section_id', sectionId);
 
       // Update local state
       setSections(sections.filter(section => section.id !== sectionId));
