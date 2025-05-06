@@ -19,9 +19,11 @@ import ProfilePage from './pages/ProfilePage'
 import { DashboardLayout } from './components/layout/DashboardLayout'
 import { ProtectedRoute } from './components/auth/ProtectedRoute'
 import { ThemeProvider } from './providers/ThemeProvider'
-
-// Add messaging page import
 import MessagingPage from "./pages/messaging/MessagingPage";
+import ForgotPasswordPage from './pages/ForgotPasswordPage'
+import ResetPasswordPage from './pages/ResetPasswordPage'
+import MemberDirectoryPage from './pages/MemberDirectoryPage'
+import SectionsPage from './pages/SectionsPage'
 
 function App() {
   return (
@@ -32,6 +34,9 @@ function App() {
             <Route path="/" element={<LandingPage />} />
             <Route path="/login" element={<LoginPage />} />
             <Route path="/register" element={<RegisterPage />} />
+            <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+            <Route path="/reset-password" element={<ResetPasswordPage />} />
+            
             <Route
               path="/dashboard"
               element={
@@ -42,6 +47,7 @@ function App() {
                 </ProtectedRoute>
               }
             />
+            
             <Route
               path="/calendar"
               element={
@@ -52,6 +58,7 @@ function App() {
                 </ProtectedRoute>
               }
             />
+            
             <Route
               path="/sheet-music"
               element={
@@ -62,6 +69,7 @@ function App() {
                 </ProtectedRoute>
               }
             />
+            
             <Route
               path="/media-library"
               element={
@@ -72,6 +80,7 @@ function App() {
                 </ProtectedRoute>
               }
             />
+            
             <Route
               path="/recordings"
               element={
@@ -82,6 +91,7 @@ function App() {
                 </ProtectedRoute>
               }
             />
+            
             <Route
               path="/profile"
               element={
@@ -93,13 +103,35 @@ function App() {
               }
             />
             
-            {/* Add messaging route */}
             <Route
               path="/messaging"
               element={
                 <ProtectedRoute>
                   <DashboardLayout>
                     <MessagingPage />
+                  </DashboardLayout>
+                </ProtectedRoute>
+              }
+            />
+            
+            {/* Member Management Routes */}
+            <Route
+              path="/members"
+              element={
+                <ProtectedRoute>
+                  <DashboardLayout>
+                    <MemberDirectoryPage />
+                  </DashboardLayout>
+                </ProtectedRoute>
+              }
+            />
+            
+            <Route
+              path="/sections"
+              element={
+                <ProtectedRoute>
+                  <DashboardLayout>
+                    <SectionsPage />
                   </DashboardLayout>
                 </ProtectedRoute>
               }

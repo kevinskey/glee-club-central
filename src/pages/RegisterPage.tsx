@@ -1,10 +1,11 @@
 
-import React from "react";
+import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { useNavigate } from "react-router-dom";
+import { VoicePart } from "@/contexts/AuthContext";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -12,7 +13,9 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Music } from "lucide-react";
-import { useToast } from "@/hooks/use-toast";
+import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 const formSchema = z
   .object({
@@ -23,7 +26,9 @@ const formSchema = z
     confirmPassword: z.string(),
     firstName: z.string().min(1, { message: "First name is required" }),
     lastName: z.string().min(1, { message: "Last name is required" }),
-    agreeTerms: z.boolean().refine(val => val === true, { // Changed from literal to boolean with refine
+    phone: z.string().optional(),
+    voicePart: z.enum(["soprano", "alto", "tenor", "bass"]),
+    agreeTerms: z.boolean().refine(val => val === true, {
       message: "You must agree to the terms",
     }),
   })
@@ -32,11 +37,13 @@ const formSchema = z
     path: ["confirmPassword"],
   });
 
+type FormValues = z.infer<typeof formSchema>;
+
 export default function RegisterPage() {
-  const { toast } = useToast();
   const navigate = useNavigate();
+  const [isLoading, setIsLoading] = useState(false);
   
-  const form = useForm<z.infer<typeof formSchema>>({
+  const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       email: "",
@@ -44,29 +51,51 @@ export default function RegisterPage() {
       confirmPassword: "",
       firstName: "",
       lastName: "",
+      phone: "",
+      voicePart: "soprano",
       agreeTerms: false,
     },
   });
 
-  async function onSubmit(values: z.infer<typeof formSchema>) {
+  async function onSubmit(values: FormValues) {
+    setIsLoading(true);
     try {
-      // Registration logic would go here
-      console.log(values);
-      
-      toast({
-        title: "Registration successful!",
-        description: "Please check your email to verify your account.",
+      // Register the user with Supabase
+      const { data: authData, error: authError } = await supabase.auth.signUp({
+        email: values.email,
+        password: values.password,
+        options: {
+          data: {
+            first_name: values.firstName,
+            last_name: values.lastName,
+          },
+        },
       });
+
+      if (authError) throw authError;
+
+      // Update additional profile information
+      if (authData.user) {
+        const { error: profileError } = await supabase
+          .from("profiles")
+          .update({
+            phone: values.phone,
+            voice_part: values.voicePart,
+          })
+          .eq("id", authData.user.id);
+        
+        if (profileError) throw profileError;
+      }
+      
+      toast.success("Registration successful! Please check your email to verify your account.");
       
       // Redirect to login page
       navigate("/login");
-    } catch (error) {
+    } catch (error: any) {
       console.error("Registration error:", error);
-      toast({
-        variant: "destructive",
-        title: "Registration failed",
-        description: "There was a problem with your registration.",
-      });
+      toast.error(error.message || "Registration failed. Please try again.");
+    } finally {
+      setIsLoading(false);
     }
   }
 
@@ -128,6 +157,42 @@ export default function RegisterPage() {
               />
               <FormField
                 control={form.control}
+                name="phone"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Phone (Optional)</FormLabel>
+                    <FormControl>
+                      <Input placeholder="(555) 123-4567" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="voicePart"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Voice Part</FormLabel>
+                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select your voice part" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value="soprano">Soprano</SelectItem>
+                        <SelectItem value="alto">Alto</SelectItem>
+                        <SelectItem value="tenor">Tenor</SelectItem>
+                        <SelectItem value="bass">Bass</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
                 name="password"
                 render={({ field }) => (
                   <FormItem>
@@ -172,8 +237,15 @@ export default function RegisterPage() {
                   </FormItem>
                 )}
               />
-              <Button type="submit" className="w-full">
-                Create Account
+              <Button type="submit" className="w-full" disabled={isLoading}>
+                {isLoading ? (
+                  <>
+                    <span className="mr-2">Creating account...</span>
+                    <div className="h-4 w-4 rounded-full border-2 border-white border-t-transparent animate-spin"></div>
+                  </>
+                ) : (
+                  "Create Account"
+                )}
               </Button>
             </form>
           </Form>

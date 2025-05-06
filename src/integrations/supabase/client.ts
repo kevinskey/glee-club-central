@@ -17,3 +17,9 @@ Object.defineProperty(supabase, 'storageUrl', {
     return `${SUPABASE_URL}/storage/v1`;
   }
 });
+
+// Add avatarUrl helper function
+export const getAvatarUrl = (path: string | null) => {
+  if (!path) return null;
+  return `${SUPABASE_URL}/storage/v1/object/public/avatars/${path}`;
+};

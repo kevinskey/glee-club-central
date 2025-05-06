@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { useNavigate, Link, useLocation } from "react-router-dom";
 import { z } from "zod";
@@ -25,7 +26,7 @@ const loginSchema = z.object({
 });
 
 export default function LoginPage() {
-  const { signIn } = useAuth(); // Using signIn instead of login
+  const { signIn } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   const [isLoading, setIsLoading] = useState(false);
@@ -44,12 +45,12 @@ export default function LoginPage() {
   async function onSubmit(values: z.infer<typeof loginSchema>) {
     setIsLoading(true);
     try {
-      await signIn(values.email, values.password); // Using signIn instead of login
+      await signIn(values.email, values.password);
       toast.success("Login successful!");
       navigate(from, { replace: true });
-    } catch (error) {
+    } catch (error: any) {
       console.error("Login error:", error);
-      toast.error("Login failed. Please check your credentials.");
+      toast.error(error.message || "Login failed. Please check your credentials.");
     } finally {
       setIsLoading(false);
     }
@@ -96,6 +97,14 @@ export default function LoginPage() {
                   </FormItem>
                 )}
               />
+              <div className="text-right">
+                <Link 
+                  to="/forgot-password" 
+                  className="text-sm text-glee-purple hover:underline"
+                >
+                  Forgot password?
+                </Link>
+              </div>
               <Button type="submit" className="w-full" disabled={isLoading}>
                 {isLoading ? (
                   <>

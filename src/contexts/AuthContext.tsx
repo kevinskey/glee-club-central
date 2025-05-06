@@ -1,13 +1,26 @@
 
 import React, { createContext, useState, useEffect, useContext } from "react";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
+import { useNavigate } from "react-router-dom";
 
-interface Profile {
+// Define voice part as an enum
+export type VoicePart = "soprano" | "alto" | "tenor" | "bass";
+export type UserRole = "admin" | "section_leader" | "member";
+export type MemberStatus = "active" | "inactive" | "alumni" | "pending";
+
+export interface Profile {
   id: string;
-  first_name?: string;
-  last_name?: string;
-  avatar_url?: string;
-  role: "admin" | "member";
-  voice_part?: string; // Adding voice_part which was missing
+  first_name?: string | null;
+  last_name?: string | null;
+  email?: string | null;
+  phone?: string | null;
+  role: UserRole;
+  voice_part?: VoicePart | null;
+  avatar_url?: string | null;
+  status: MemberStatus;
+  section_id?: string | null;
+  join_date?: string | null;
 }
 
 export interface AuthContextType {
@@ -17,9 +30,12 @@ export interface AuthContextType {
   isLoading: boolean;
   signIn: (email: string, password: string) => Promise<void>;
   signOut: () => Promise<void>;
-  // Adding missing methods referenced in components
   login: (email: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
+  refreshProfile: () => Promise<void>;
+  updateProfile: (updates: Partial<Profile>) => Promise<void>;
+  isAdmin: () => boolean;
+  isSectionLeader: () => boolean;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -29,78 +45,153 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [profile, setProfile] = useState<Profile | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
+  // Fetch user profile data
+  const fetchProfile = async (userId: string) => {
+    try {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', userId)
+        .single();
+
+      if (error) {
+        console.error('Error fetching profile:', error);
+        return null;
+      }
+
+      return data as Profile;
+    } catch (error) {
+      console.error('Unexpected error fetching profile:', error);
+      return null;
+    }
+  };
+
+  // Refresh profile data
+  const refreshProfile = async () => {
+    if (!user) return;
+    
+    const profile = await fetchProfile(user.id);
+    if (profile) {
+      setProfile(profile);
+    }
+  };
+
+  // Update profile data
+  const updateProfile = async (updates: Partial<Profile>) => {
+    if (!user) throw new Error('User must be logged in to update profile');
+    
+    try {
+      const { error } = await supabase
+        .from('profiles')
+        .update(updates)
+        .eq('id', user.id);
+
+      if (error) throw error;
+      
+      toast.success('Profile updated successfully');
+      await refreshProfile();
+    } catch (error: any) {
+      console.error('Error updating profile:', error);
+      toast.error(error.message || 'Error updating profile');
+      throw error;
+    }
+  };
+
+  // Check session on initial load
   useEffect(() => {
-    // Simulate checking for a user session
-    const checkUser = async () => {
+    const checkSession = async () => {
+      setIsLoading(true);
+      
       try {
-        // In a real app, you'd check for an existing session here
-        const storedUser = localStorage.getItem("user");
+        // Check for active session
+        const { data: { session }, error } = await supabase.auth.getSession();
         
-        if (storedUser) {
-          const parsedUser = JSON.parse(storedUser);
-          setUser(parsedUser);
-          
-          // Simulate fetching profile data
-          setProfile({
-            id: parsedUser.id,
-            first_name: parsedUser.first_name || "Demo",
-            last_name: parsedUser.last_name || "User",
-            role: parsedUser.role || "member",
-            voice_part: parsedUser.voice_part || "Soprano", // Adding default voice part
-          });
+        if (error) {
+          throw error;
+        }
+
+        if (session) {
+          setUser(session.user);
+          const profile = await fetchProfile(session.user.id);
+          if (profile) {
+            setProfile(profile);
+          }
         }
       } catch (error) {
-        console.error("Error checking user session:", error);
+        console.error('Error checking session:', error);
       } finally {
         setIsLoading(false);
       }
     };
-    
-    checkUser();
+
+    checkSession();
+
+    // Set up auth state listener
+    const { data: authListener } = supabase.auth.onAuthStateChange(async (event, session) => {
+      if (event === 'SIGNED_IN' && session) {
+        setUser(session.user);
+        const profile = await fetchProfile(session.user.id);
+        if (profile) {
+          setProfile(profile);
+        }
+      } else if (event === 'SIGNED_OUT') {
+        setUser(null);
+        setProfile(null);
+      }
+    });
+
+    return () => {
+      authListener.subscription.unsubscribe();
+    };
   }, []);
 
+  // Sign in with email and password
   const signIn = async (email: string, password: string) => {
     try {
-      // In a real app, you'd authenticate with a backend here
-      const mockUser = {
-        id: "123",
+      const { data, error } = await supabase.auth.signInWithPassword({
         email,
-        first_name: "Demo",
-        last_name: "User",
-        role: "member",
-        voice_part: "Soprano", // Adding voice part
-      };
-      
-      // Save to local storage to persist the session
-      localStorage.setItem("user", JSON.stringify(mockUser));
-      
-      setUser(mockUser);
-      setProfile({
-        id: mockUser.id,
-        first_name: mockUser.first_name,
-        last_name: mockUser.last_name,
-        role: mockUser.role as "admin" | "member",
-        voice_part: mockUser.voice_part,
+        password,
       });
-    } catch (error) {
-      console.error("Error signing in:", error);
+
+      if (error) throw error;
+
+      setUser(data.user);
+      const profile = await fetchProfile(data.user.id);
+      if (profile) {
+        setProfile(profile);
+      }
+    } catch (error: any) {
+      console.error('Error signing in:', error);
+      toast.error(error.message || 'Error signing in');
       throw error;
     }
   };
 
+  // Sign out
   const signOut = async () => {
     try {
-      // In a real app, you'd sign out from the backend here
-      localStorage.removeItem("user");
+      const { error } = await supabase.auth.signOut();
+      if (error) throw error;
+      
       setUser(null);
       setProfile(null);
-    } catch (error) {
-      console.error("Error signing out:", error);
+    } catch (error: any) {
+      console.error('Error signing out:', error);
+      toast.error(error.message || 'Error signing out');
       throw error;
     }
   };
 
-  // Aliases for compatibility with components using different method names
+  // Role checking functions
+  const isAdmin = () => {
+    return profile?.role === 'admin';
+  };
+
+  const isSectionLeader = () => {
+    return profile?.role === 'section_leader';
+  };
+
+  // Aliases for compatibility
   const login = signIn;
   const logout = signOut;
 
@@ -111,9 +202,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     isLoading,
     signIn,
     signOut,
-    // Adding aliases for compatibility
     login,
     logout,
+    refreshProfile,
+    updateProfile,
+    isAdmin,
+    isSectionLeader,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
