@@ -33,14 +33,15 @@ export function useCalendarEvents() {
     if (fetchingRef.current) return;
     fetchingRef.current = true;
     
+    // Check if the user has changed since the last fetch
+    // Define userChanged here so it's available throughout the function scope
+    const currentUserId = user?.id || null;
+    const userChanged = currentUserId !== lastUserIdRef.current;
+    
+    // Update the last user ID reference
+    lastUserIdRef.current = currentUserId;
+    
     try {
-      // Check if the user has changed since the last fetch
-      const currentUserId = user?.id || null;
-      const userChanged = currentUserId !== lastUserIdRef.current;
-      
-      // Update the last user ID reference
-      lastUserIdRef.current = currentUserId;
-      
       // Use sample data if not authenticated
       if (!user) {
         if (!initialFetchDoneRef.current || userChanged) {
