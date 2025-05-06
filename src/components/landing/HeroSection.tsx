@@ -26,7 +26,7 @@ export function HeroSection() {
           transition={2000}
         />
       </div>
-      <div className="container relative z-10 mx-auto px-4 sm:px-6 md:px-8 lg:px-12 items-center pt-8 sm:pt-10 md:pt-12 lg:pt-16">
+      <div className="container relative z-10 mx-auto px-4 sm:px-6 md:px-8 lg:px-12 items-center pt-4 sm:pt-6 md:pt-8 lg:pt-10">
         <div className="text-white space-y-4 sm:space-y-5 md:space-y-6 lg:space-y-8 md:pr-6 max-w-xs sm:max-w-sm md:max-w-lg lg:max-w-2xl mx-auto text-center md:text-left md:mx-0">
           <h1 className="font-playfair tracking-tight">
             <span className="block text-xl sm:text-2xl md:text-3xl lg:text-[3rem] xl:text-[3.8rem] font-bold mb-1 sm:mb-2">Spelman College</span>
