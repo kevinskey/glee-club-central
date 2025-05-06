@@ -5,6 +5,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider } from "@/contexts/AuthContext";
+import { ThemeProvider } from "@/providers/ThemeProvider";
 import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 
@@ -32,54 +33,56 @@ const queryClient = new QueryClient();
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <BrowserRouter>
-        <AuthProvider>
-          <Toaster />
-          <Sonner />
-          <Routes>
-            <Route path="/" element={<LandingPage />} />
-            <Route path="/login" element={<LoginPage />} />
-            
-            {/* Protected Dashboard Routes */}
-            <Route
-              path="/dashboard"
-              element={
-                <ProtectedRoute>
-                  <DashboardLayout />
-                </ProtectedRoute>
-              }
-            >
-              <Route index element={<DashboardPage />} />
-              <Route path="sheet-music" element={<SheetMusicPage />} />
-              <Route path="sheet-music/:id" element={<ViewSheetMusicPage />} />
-              <Route path="practice" element={<PracticePage />} />
-              <Route path="recordings" element={<SubmitRecordingPage />} />
-              <Route path="schedule" element={<SchedulePage />} />
-              <Route path="handbook" element={<HandbookPage />} />
-              <Route path="merch" element={<MerchPage />} />
-              <Route path="attendance" element={<AttendancePage />} />
-              <Route path="media-library" element={<MediaLibraryPage />} />
-              <Route path="audio-management" element={<AudioManagementPage />} />
-              <Route path="videos" element={<VideosPage />} />
-            </Route>
+    <ThemeProvider>
+      <TooltipProvider>
+        <BrowserRouter>
+          <AuthProvider>
+            <Toaster />
+            <Sonner />
+            <Routes>
+              <Route path="/" element={<LandingPage />} />
+              <Route path="/login" element={<LoginPage />} />
+              
+              {/* Protected Dashboard Routes */}
+              <Route
+                path="/dashboard"
+                element={
+                  <ProtectedRoute>
+                    <DashboardLayout />
+                  </ProtectedRoute>
+                }
+              >
+                <Route index element={<DashboardPage />} />
+                <Route path="sheet-music" element={<SheetMusicPage />} />
+                <Route path="sheet-music/:id" element={<ViewSheetMusicPage />} />
+                <Route path="practice" element={<PracticePage />} />
+                <Route path="recordings" element={<SubmitRecordingPage />} />
+                <Route path="schedule" element={<SchedulePage />} />
+                <Route path="handbook" element={<HandbookPage />} />
+                <Route path="merch" element={<MerchPage />} />
+                <Route path="attendance" element={<AttendancePage />} />
+                <Route path="media-library" element={<MediaLibraryPage />} />
+                <Route path="audio-management" element={<AudioManagementPage />} />
+                <Route path="videos" element={<VideosPage />} />
+              </Route>
 
-            {/* Profile Page */}
-            <Route
-              path="/profile"
-              element={
-                <ProtectedRoute>
-                  <ProfilePage />
-                </ProtectedRoute>
-              }
-            />
+              {/* Profile Page */}
+              <Route
+                path="/profile"
+                element={
+                  <ProtectedRoute>
+                    <ProfilePage />
+                  </ProtectedRoute>
+                }
+              />
 
-            {/* Catch-all redirect to 404 */}
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-        </AuthProvider>
-      </BrowserRouter>
-    </TooltipProvider>
+              {/* Catch-all redirect to 404 */}
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </AuthProvider>
+        </BrowserRouter>
+      </TooltipProvider>
+    </ThemeProvider>
   </QueryClientProvider>
 );
 

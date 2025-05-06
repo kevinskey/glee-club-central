@@ -31,6 +31,7 @@ import {
 import { SidebarNav } from "./SidebarNav";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { NewsFeed } from "@/components/news/NewsFeed";
+import { ThemeToggle } from "@/components/ui/theme-toggle";
 
 export const Header = () => {
   const { user, profile, logout } = useAuth();
@@ -184,6 +185,9 @@ export const Header = () => {
         </div>
 
         <div className="flex items-center gap-2">
+          {/* Theme Toggle */}
+          <ThemeToggle variant="button" size="sm" />
+          
           {user ? (
             <DropdownMenuProvider>
               <DropdownMenuTrigger asChild>
