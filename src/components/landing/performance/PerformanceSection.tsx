@@ -1,7 +1,6 @@
-
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Calendar } from "lucide-react";
+import { Calendar, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { PerformanceEventItem, PerformanceEventDetails, PerformanceEventType } from "./PerformanceEvent";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -13,6 +12,7 @@ import {
   CarouselPrevious,
 } from "@/components/ui/carousel";
 import { format } from "date-fns";
+import { useAuth } from "@/contexts/AuthContext";
 
 // Sample performance events data
 const performanceEvents: PerformanceEventType[] = [
@@ -54,6 +54,7 @@ export function PerformanceSection() {
   const navigate = useNavigate();
   const isMobile = useIsMobile();
   const [selectedEvent, setSelectedEvent] = useState<PerformanceEventType>(performanceEvents[0]);
+  const { user } = useAuth();
   
   // Handle event selection with a more explicit function
   const handleEventSelect = (event: PerformanceEventType) => {
@@ -61,14 +62,31 @@ export function PerformanceSection() {
     setSelectedEvent(event);
   };
   
+  const handleAddPerformance = () => {
+    navigate("/dashboard/schedule");
+  };
+  
   return (
     <section className="py-8 md:py-12 bg-gradient-to-b from-white to-glee-light dark:from-glee-dark dark:to-black">
       <div className="container px-4 md:px-8 mx-auto">
         <div className="mb-3 md:mb-4">
-          <h2 className="text-xl md:text-2xl lg:text-3xl font-playfair font-bold mb-2 md:mb-3 flex items-center gap-2">
-            <Calendar className="h-5 w-5 md:h-6 md:w-6 text-glee-purple" />
-            <span className="flex items-center min-h-[2rem] md:min-h-[2.5rem]">Upcoming <span className="text-glee-purple">Performances</span></span>
-          </h2>
+          <div className="flex items-center justify-between mb-2 md:mb-3">
+            <h2 className="text-xl md:text-2xl lg:text-3xl font-playfair font-bold flex items-center gap-2">
+              <Calendar className="h-5 w-5 md:h-6 md:w-6 text-glee-purple" />
+              <span className="flex items-center min-h-[2rem] md:min-h-[2.5rem]">Upcoming <span className="text-glee-purple">Performances</span></span>
+            </h2>
+            
+            {user && (user.role === "admin" || user.role === "moderator") && (
+              <Button 
+                onClick={handleAddPerformance}
+                size="sm"
+                className="bg-glee-purple hover:bg-glee-purple/90 text-white h-8 px-3"
+              >
+                <Plus className="mr-1 h-3 w-3" />
+                Add Performance
+              </Button>
+            )}
+          </div>
           
           {/* Performance Carousel - Full Width */}
           <div className="relative mt-4 -mx-4 sm:-mx-8 md:-mx-12 lg:-mx-16">
