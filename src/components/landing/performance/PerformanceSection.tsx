@@ -73,7 +73,10 @@ export function PerformanceSection() {
           {/* Performance Carousel - Full Width */}
           <div className="relative mt-6 -mx-4 sm:-mx-8 md:-mx-12 lg:-mx-16">
             <Carousel
-              opts={{ loop: true }}
+              opts={{ 
+                loop: true,
+                containScroll: "trimSnaps" 
+              }}
               className="w-full"
             >
               <CarouselContent>
@@ -83,12 +86,13 @@ export function PerformanceSection() {
                       <div 
                         className="relative overflow-hidden aspect-[16/9] cursor-pointer hover:opacity-95 transition-opacity group"
                         onClick={() => handleEventSelect(event)}
+                        style={{
+                          backgroundImage: `url(${event.image})`,
+                          backgroundSize: 'cover',
+                          backgroundPosition: 'center',
+                          backgroundRepeat: 'no-repeat'
+                        }}
                       >
-                        <img 
-                          src={event.image}
-                          alt={event.title}
-                          className="w-full h-full object-cover"
-                        />
                         <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent flex flex-col justify-center items-center">
                           <h3 className="font-bold text-white text-2xl md:text-4xl lg:text-5xl font-playfair text-center px-4 md:px-6 drop-shadow-lg my-auto">
                             {event.title}
