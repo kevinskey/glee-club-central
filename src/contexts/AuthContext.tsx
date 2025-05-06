@@ -1,3 +1,4 @@
+
 import React, { createContext, useState, useEffect, useContext } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -63,14 +64,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         id: data.id,
         first_name: data.first_name,
         last_name: data.last_name,
-        email: data.email,
-        phone: data.phone,
+        email: data.email || null,
+        phone: data.phone || null,
         role: (data.role as UserRole) || 'member',
         voice_part: data.voice_part as VoicePart,
-        avatar_url: data.avatar_url,
+        avatar_url: data.avatar_url || null,
         status: (data.status as MemberStatus) || 'pending',
-        section_id: data.section_id,
-        join_date: data.join_date
+        section_id: data.section_id || null,
+        join_date: data.join_date || null
       };
       
       return profileData;

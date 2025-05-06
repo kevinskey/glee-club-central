@@ -27,7 +27,7 @@ import { Badge } from "@/components/ui/badge";
 import { Link } from "react-router-dom";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { MemberDetailsSheet } from "@/components/members/MemberDetailsSheet";
-import { fetchSections, fetchMembers, Section } from "@/utils/supabaseQueries";
+import { fetchSections, fetchMembers, Section as SectionType } from "@/utils/supabaseQueries";
 
 interface Section {
   id: string;
@@ -38,7 +38,7 @@ export default function MemberDirectoryPage() {
   const { isAdmin, isSectionLeader } = useAuth();
   const [members, setMembers] = useState<Profile[]>([]);
   const [filteredMembers, setFilteredMembers] = useState<Profile[]>([]);
-  const [sections, setSections] = useState<Section[]>([]);
+  const [sections, setSections] = useState<SectionType[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [voiceFilter, setVoiceFilter] = useState<string>("all");
   const [sectionFilter, setSectionFilter] = useState<string>("all");

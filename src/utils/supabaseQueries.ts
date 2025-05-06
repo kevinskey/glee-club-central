@@ -50,7 +50,7 @@ export interface MemberNote {
 // Helper function to query attendance records safely using raw SQL query
 export async function fetchAttendanceRecords(memberId: string): Promise<AttendanceRecord[]> {
   try {
-    // Use raw SQL query to avoid TypeScript errors with untyped tables
+    // Use RPC function to avoid TypeScript errors with untyped tables
     const { data, error } = await supabase.rpc('get_attendance_records', { 
       p_member_id: memberId 
     });
@@ -66,7 +66,7 @@ export async function fetchAttendanceRecords(memberId: string): Promise<Attendan
 // Helper function to query payment records safely
 export async function fetchPaymentRecords(memberId: string): Promise<PaymentRecord[]> {
   try {
-    // Use raw SQL query to avoid TypeScript errors with untyped tables
+    // Use RPC function to avoid TypeScript errors with untyped tables
     const { data, error } = await supabase.rpc('get_payment_records', { 
       p_member_id: memberId 
     });
@@ -82,7 +82,7 @@ export async function fetchPaymentRecords(memberId: string): Promise<PaymentReco
 // Helper function to query member notes safely
 export async function fetchMemberNotes(memberId: string): Promise<MemberNote[]> {
   try {
-    // Use raw SQL query to avoid TypeScript errors with untyped tables
+    // Use RPC function to avoid TypeScript errors with untyped tables
     const { data, error } = await supabase.rpc('get_member_notes', { 
       p_member_id: memberId 
     });
@@ -98,7 +98,7 @@ export async function fetchMemberNotes(memberId: string): Promise<MemberNote[]> 
 // Helper function to fetch sections
 export async function fetchSections(): Promise<Section[]> {
   try {
-    // Use raw SQL query to avoid TypeScript errors with untyped tables
+    // Use RPC function to avoid TypeScript errors with untyped tables
     const { data, error } = await supabase.rpc('get_sections');
       
     if (error) throw error;
@@ -112,7 +112,7 @@ export async function fetchSections(): Promise<Section[]> {
 // Helper function to fetch section data with member count
 export async function fetchSectionsWithMemberCount(): Promise<Section[]> {
   try {
-    // Use raw SQL query to avoid TypeScript errors with untyped tables
+    // Use RPC function to avoid TypeScript errors with untyped tables
     const { data, error } = await supabase.rpc('get_sections_with_member_count');
 
     if (error) throw error;
@@ -126,7 +126,7 @@ export async function fetchSectionsWithMemberCount(): Promise<Section[]> {
 // Helper function to fetch members with section data
 export async function fetchMembers(): Promise<Profile[]> {
   try {
-    // Use raw query to avoid TypeScript errors with untyped tables
+    // Use RPC query to avoid TypeScript errors with untyped tables
     const { data, error } = await supabase.rpc('get_members_with_sections');
     
     if (error) throw error;

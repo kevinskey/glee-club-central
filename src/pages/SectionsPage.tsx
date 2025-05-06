@@ -62,22 +62,15 @@ import {
 import { supabase } from "@/integrations/supabase/client";
 import { 
   fetchSectionsWithMemberCount, 
-  Section 
+  Section as SectionType 
 } from "@/utils/supabaseQueries";
-
-interface Section {
-  id: string;
-  name: string;
-  description: string | null;
-  section_leader_id: string | null;
-  member_count?: number;
-}
 
 interface SectionLeader {
   id: string;
   name: string;
 }
 
+// Use a schema that matches our expected section data structure
 const sectionFormSchema = z.object({
   name: z.string().min(1, "Section name is required"),
   description: z.string().optional(),
@@ -86,11 +79,11 @@ const sectionFormSchema = z.object({
 
 export default function SectionsPage() {
   const { isAdmin } = useAuth();
-  const [sections, setSections] = useState<Section[]>([]);
+  const [sections, setSections] = useState<SectionType[]>([]);
   const [leaders, setLeaders] = useState<SectionLeader[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [openDialog, setOpenDialog] = useState(false);
-  const [editingSection, setEditingSection] = useState<Section | null>(null);
+  const [editingSection, setEditingSection] = useState<SectionType | null>(null);
 
   const form = useForm<z.infer<typeof sectionFormSchema>>({
     resolver: zodResolver(sectionFormSchema),
@@ -159,7 +152,7 @@ export default function SectionsPage() {
       // For now, we will use direct supabase calls for updates as we haven't created RPC functions for these
       // In a production app, we should also create RPC functions for these operations
       if (editingSection) {
-        // Update existing section - use raw query
+        // Update existing section - use rpc function
         const { error } = await supabase.rpc('update_section', {
           p_id: editingSection.id,
           p_name: values.name,
@@ -170,7 +163,7 @@ export default function SectionsPage() {
         if (error) throw error;
         toast.success("Section updated successfully");
       } else {
-        // Create new section - use raw query
+        // Create new section - use rpc function
         const { error } = await supabase.rpc('create_section', {
           p_name: values.name,
           p_description: values.description || null,
@@ -193,7 +186,7 @@ export default function SectionsPage() {
 
   const handleDeleteSection = async (sectionId: string) => {
     try {
-      // Use raw query to handle section deletion
+      // Use rpc function to handle section deletion
       const { error } = await supabase.rpc('delete_section', {
         p_section_id: sectionId
       });
