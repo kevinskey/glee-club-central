@@ -1,5 +1,5 @@
 
-import React from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -31,18 +31,40 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { toast } from "sonner";
+import { useLoadScript } from "@react-google-maps/api";
 
 const formSchema = z.object({
   title: z.string().min(2, { message: "Title must be at least 2 characters" }),
   date: z.date({ required_error: "Please select a date" }),
-  time: z.string().min(1, { message: "Please enter a time" }),
+  time: z.string().min(1, { message: "Please select a time" }),
   location: z.string().min(1, { message: "Please enter a location" }),
   description: z.string().optional(),
   type: z.enum(["concert", "rehearsal", "tour", "special"], {
     required_error: "Please select an event type",
   }),
 });
+
+// Common time options for events
+const timeOptions = [
+  "8:00 AM", "9:00 AM", "10:00 AM", "11:00 AM", "12:00 PM",
+  "1:00 PM", "2:00 PM", "3:00 PM", "4:00 PM", "5:00 PM",
+  "6:00 PM", "7:00 PM", "8:00 PM", "9:00 PM", "10:00 PM"
+];
+
+// Common time range options
+const timeRangeOptions = [
+  "8:00 AM - 10:00 AM", "9:00 AM - 11:00 AM", "10:00 AM - 12:00 PM",
+  "12:00 PM - 2:00 PM", "1:00 PM - 3:00 PM", "2:00 PM - 4:00 PM",
+  "3:00 PM - 5:00 PM", "4:00 PM - 6:00 PM", "5:00 PM - 7:00 PM",
+  "6:00 PM - 8:00 PM", "7:00 PM - 9:00 PM", "8:00 PM - 10:00 PM"
+];
 
 type FormValues = z.infer<typeof formSchema>;
 
@@ -52,6 +74,17 @@ interface AddEventFormProps {
 }
 
 export function AddEventForm({ onAddEvent, onCancel }: AddEventFormProps) {
+  const [customTime, setCustomTime] = useState<string>("");
+  const [locationInputFocused, setLocationInputFocused] = useState(false);
+  const locationInputRef = useRef<HTMLInputElement>(null);
+  const autocompleteRef = useRef<google.maps.places.Autocomplete | null>(null);
+
+  // Load Google Maps Places API
+  const { isLoaded, loadError } = useLoadScript({
+    googleMapsApiKey: "YOUR_GOOGLE_MAPS_API_KEY", // Replace with your actual API key
+    libraries: ["places"] as any,
+  });
+
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -63,11 +96,44 @@ export function AddEventForm({ onAddEvent, onCancel }: AddEventFormProps) {
     },
   });
 
+  // Initialize Google Maps Places Autocomplete
+  useEffect(() => {
+    if (isLoaded && !loadError && locationInputRef.current && locationInputFocused) {
+      autocompleteRef.current = new window.google.maps.places.Autocomplete(
+        locationInputRef.current,
+        { types: ["establishment", "geocode"] }
+      );
+
+      autocompleteRef.current.addListener("place_changed", () => {
+        const place = autocompleteRef.current?.getPlace();
+        if (place?.formatted_address) {
+          form.setValue("location", place.formatted_address);
+        }
+      });
+
+      return () => {
+        if (autocompleteRef.current) {
+          google.maps.event.clearInstanceListeners(autocompleteRef.current);
+        }
+      };
+    }
+  }, [isLoaded, loadError, locationInputFocused, form]);
+
   function onSubmit(values: FormValues) {
     onAddEvent(values);
     form.reset();
     toast.success("Event added successfully");
   }
+
+  const handleCustomTimeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setCustomTime(e.target.value);
+    form.setValue("time", e.target.value);
+  };
+
+  const handleSelectTime = (time: string) => {
+    form.setValue("time", time);
+    setCustomTime(time);
+  };
 
   return (
     <Form {...form}>
@@ -134,9 +200,49 @@ export function AddEventForm({ onAddEvent, onCancel }: AddEventFormProps) {
               <FormItem>
                 <FormLabel>Time</FormLabel>
                 <FormControl>
-                  <div className="flex items-center">
-                    <Clock className="mr-2 h-4 w-4 text-muted-foreground" />
-                    <Input placeholder="7:00 PM - 9:00 PM" {...field} />
+                  <div className="relative flex items-center">
+                    <Clock className="absolute left-3 h-4 w-4 text-muted-foreground" />
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Input
+                          placeholder="Select or type a time"
+                          value={field.value}
+                          onChange={(e) => field.onChange(e.target.value)}
+                          className="pl-9 pr-10"
+                          type="text"
+                        />
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent className="w-72 max-h-80 overflow-y-auto">
+                        <div className="p-2">
+                          <p className="mb-2 text-sm font-medium">Specific Times</p>
+                          <div className="grid grid-cols-2 gap-1">
+                            {timeOptions.map((time) => (
+                              <DropdownMenuItem 
+                                key={time} 
+                                onClick={() => handleSelectTime(time)}
+                                className="cursor-pointer"
+                              >
+                                {time}
+                              </DropdownMenuItem>
+                            ))}
+                          </div>
+                          <div className="mt-3 border-t pt-2">
+                            <p className="mb-2 text-sm font-medium">Time Ranges</p>
+                            <div className="grid grid-cols-1 gap-1">
+                              {timeRangeOptions.map((timeRange) => (
+                                <DropdownMenuItem 
+                                  key={timeRange} 
+                                  onClick={() => handleSelectTime(timeRange)}
+                                  className="cursor-pointer"
+                                >
+                                  {timeRange}
+                                </DropdownMenuItem>
+                              ))}
+                            </div>
+                          </div>
+                        </div>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
                   </div>
                 </FormControl>
                 <FormMessage />
@@ -152,11 +258,21 @@ export function AddEventForm({ onAddEvent, onCancel }: AddEventFormProps) {
             <FormItem>
               <FormLabel>Location</FormLabel>
               <FormControl>
-                <div className="flex items-center">
-                  <MapPin className="mr-2 h-4 w-4 text-muted-foreground" />
-                  <Input placeholder="Sisters Chapel" {...field} />
+                <div className="flex items-center relative">
+                  <MapPin className="absolute left-3 h-4 w-4 text-muted-foreground" />
+                  <Input 
+                    placeholder="Enter location" 
+                    {...field}
+                    className="pl-9"
+                    ref={locationInputRef}
+                    onFocus={() => setLocationInputFocused(true)}
+                    onBlur={() => setLocationInputFocused(false)}
+                  />
                 </div>
               </FormControl>
+              {loadError && (
+                <p className="text-sm text-red-500">Error loading Maps API. Using regular input.</p>
+              )}
               <FormMessage />
             </FormItem>
           )}
