@@ -10,7 +10,7 @@ export function useMediaUpload(onComplete: () => void) {
   const [description, setDescription] = useState("");
   const [files, setFiles] = useState<File[]>([]);
   const [uploadProgress, setUploadProgress] = useState(0);
-  const { profile } = useAuth();
+  const { profile, user } = useAuth();
 
   const resetForm = () => {
     setTitle("");
@@ -31,6 +31,14 @@ export function useMediaUpload(onComplete: () => void) {
 
   const handleUpload = async () => {
     if (!validateUpload()) return;
+    
+    // Check if user is authenticated
+    if (!user || !user.id) {
+      toast("Authentication required", {
+        description: "You must be logged in to upload files",
+      });
+      return;
+    }
 
     setUploading(true);
     setUploadProgress(0);
@@ -64,7 +72,7 @@ export function useMediaUpload(onComplete: () => void) {
           ? `${title} ${i + 1}` 
           : title;
 
-        // Insert record in database
+        // Insert record in database with the correct user ID
         const { error: dbError } = await supabase
           .from('media_library')
           .insert({
@@ -73,7 +81,7 @@ export function useMediaUpload(onComplete: () => void) {
             file_path: filePath,
             file_url: publicURL.publicUrl,
             file_type: file.type,
-            uploaded_by: profile?.id
+            uploaded_by: user.id // Using user.id directly from auth context
           });
 
         if (dbError) throw dbError;
