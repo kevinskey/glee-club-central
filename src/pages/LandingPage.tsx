@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -6,10 +5,48 @@ import { Music, FileText, Calendar, Headphones, Mic, BookOpen, ArrowRight } from
 import { Clock } from "@/components/ui/clock";
 import { NewsFeed } from "@/components/news/NewsFeed";
 import { Card, CardContent } from "@/components/ui/card";
+import { format } from "date-fns";
+
+// Sample performance events with dates and images
+const performanceEvents = [
+  {
+    id: 1,
+    title: "Fall Showcase",
+    date: new Date(2025, 5, 15), // June 15, 2025
+    location: "Sisters Chapel",
+    description: "Our annual showcase featuring classical and contemporary pieces.",
+    image: "/lovable-uploads/3ad02de0-04d1-4a5e-9279-898e9c317d80.png"
+  },
+  {
+    id: 2,
+    title: "Holiday Concert",
+    date: new Date(2025, 11, 10), // December 10, 2025
+    location: "Atlanta Symphony Hall",
+    description: "Celebrating the season with festive music and traditional carols.",
+    image: "/lovable-uploads/3ad02de0-04d1-4a5e-9279-898e9c317d80.png"
+  },
+  {
+    id: 3,
+    title: "Spring Tour",
+    date: new Date(2026, 2, 5), // March 5, 2026
+    location: "Various Venues",
+    description: "Our annual tour across the southeastern United States.",
+    image: "/lovable-uploads/3ad02de0-04d1-4a5e-9279-898e9c317d80.png"
+  },
+  {
+    id: 4,
+    title: "Commencement Performance",
+    date: new Date(2026, 4, 20), // May 20, 2026
+    location: "Spelman College Oval",
+    description: "Special performance for the graduating class of 2026.",
+    image: "/lovable-uploads/3ad02de0-04d1-4a5e-9279-898e9c317d80.png"
+  }
+];
 
 export default function LandingPage() {
   const navigate = useNavigate();
   const [showNewsFeed, setShowNewsFeed] = useState(true);
+  const [selectedEvent, setSelectedEvent] = useState(performanceEvents[0]);
   
   // Auto-hide the news feed after a shorter duration (2 seconds instead of default)
   useEffect(() => {
@@ -101,6 +138,93 @@ export default function LandingPage() {
               continues its legacy of musical excellence and cultural significance, performing 
               diverse repertoire from classical to contemporary works.
             </p>
+          </div>
+        </div>
+      </section>
+
+      {/* Calendar Performance Section */}
+      <section className="py-20 bg-gradient-to-b from-white to-glee-light dark:from-glee-dark dark:to-black">
+        <div className="container mx-auto">
+          <div className="max-w-3xl mx-auto text-center mb-16">
+            <h2 className="text-3xl md:text-4xl font-playfair font-bold mb-6 flex items-center justify-center gap-2">
+              <Calendar className="h-8 w-8 text-glee-purple" />
+              <span>Upcoming <span className="text-glee-purple">Performances</span></span>
+            </h2>
+            <p className="text-lg text-gray-600 dark:text-gray-300">
+              Join us for our upcoming performances and experience the musical excellence 
+              of the Spelman College Glee Club.
+            </p>
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-start">
+            {/* Left column - Calendar of events */}
+            <div className="space-y-4">
+              <h3 className="text-2xl font-playfair font-semibold mb-6">Performance Calendar</h3>
+              <div className="space-y-2">
+                {performanceEvents.map((event) => (
+                  <div 
+                    key={event.id}
+                    className={`p-4 rounded-lg border transition-all cursor-pointer
+                      ${selectedEvent.id === event.id 
+                        ? 'border-glee-purple bg-glee-purple/5 dark:bg-glee-purple/20' 
+                        : 'border-gray-200 hover:border-glee-purple/50 hover:bg-glee-purple/5 dark:border-gray-800 dark:hover:border-glee-purple/30'}`}
+                    onClick={() => setSelectedEvent(event)}
+                  >
+                    <div className="flex justify-between items-center">
+                      <div className="font-medium text-lg">{event.title}</div>
+                      <div className="text-sm text-gray-500 dark:text-gray-400">
+                        {format(event.date, 'MMMM d, yyyy')}
+                      </div>
+                    </div>
+                    <div className="text-sm text-gray-600 dark:text-gray-300 mt-1">{event.location}</div>
+                  </div>
+                ))}
+              </div>
+              <div className="mt-6">
+                <Button 
+                  onClick={() => navigate("/dashboard/schedule")}
+                  className="bg-glee-purple hover:bg-glee-purple/90 text-white"
+                >
+                  View Full Schedule
+                </Button>
+              </div>
+            </div>
+            
+            {/* Right column - Selected event image and details */}
+            <div className="mt-8 md:mt-0">
+              <div className="rounded-xl overflow-hidden border border-gray-200 dark:border-gray-800 shadow-md">
+                <div className="aspect-video relative">
+                  <img 
+                    src={selectedEvent.image} 
+                    alt={selectedEvent.title} 
+                    className="w-full h-full object-cover"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent flex flex-col justify-end p-6">
+                    <h3 className="text-2xl font-playfair font-bold text-white">
+                      {selectedEvent.title}
+                    </h3>
+                    <div className="text-white/90 flex items-center gap-2 mt-2">
+                      <Calendar className="h-4 w-4" />
+                      <span>{format(selectedEvent.date, 'MMMM d, yyyy')}</span>
+                    </div>
+                  </div>
+                </div>
+                <div className="p-4">
+                  <div className="font-medium text-lg">Location: {selectedEvent.location}</div>
+                  <p className="mt-2 text-gray-600 dark:text-gray-300">
+                    {selectedEvent.description}
+                  </p>
+                  <div className="mt-4">
+                    <Button 
+                      variant="outline" 
+                      className="border-glee-purple text-glee-purple hover:bg-glee-purple/10"
+                    >
+                      Learn More
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </section>
