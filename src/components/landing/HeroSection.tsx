@@ -20,7 +20,7 @@ export function HeroSection() {
       <div className="absolute inset-0 opacity-50 bg-blend-overlay bg-black">
         <BackgroundSlideshow 
           images={backgroundImages} 
-          duration={3000} 
+          duration={5000} 
           transition={1000} 
         />
       </div>
