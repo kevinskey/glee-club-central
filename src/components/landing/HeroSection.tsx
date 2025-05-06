@@ -18,7 +18,7 @@ export function HeroSection() {
   ];
   
   return (
-    <section className="relative bg-glee-dark py-16 md:py-24 lg:py-36 min-h-[500px] md:min-h-[600px] lg:min-h-[700px] overflow-hidden">
+    <section className="relative bg-glee-dark py-12 sm:py-16 md:py-20 lg:py-24 xl:py-32 min-h-[400px] sm:min-h-[450px] md:min-h-[500px] lg:min-h-[600px] xl:min-h-[650px] overflow-hidden">
       <div className="absolute inset-0 opacity-50 bg-blend-overlay bg-black">
         <BackgroundSlideshow 
           images={backgroundImages} 
@@ -26,18 +26,18 @@ export function HeroSection() {
           transition={2000}
         />
       </div>
-      <div className="container relative z-10 mx-auto px-4 md:px-8 lg:px-12 md:grid-cols-1 items-center">
-        <div className="text-white space-y-6 md:space-y-8 md:pr-6 max-w-2xl mx-auto text-center md:text-left md:mx-0">
+      <div className="container relative z-10 mx-auto px-4 sm:px-6 md:px-8 lg:px-12 items-center">
+        <div className="text-white space-y-4 sm:space-y-5 md:space-y-6 lg:space-y-8 md:pr-6 max-w-xs sm:max-w-sm md:max-w-lg lg:max-w-2xl mx-auto text-center md:text-left md:mx-0">
           <h1 className="font-playfair tracking-tight">
-            <span className="block text-2xl md:text-3xl lg:text-5xl font-bold mb-2">Spelman College</span>
-            <span className="animate-gradient bg-clip-text text-transparent text-4xl md:text-5xl lg:text-7xl font-bold">
+            <span className="block text-xl sm:text-2xl md:text-3xl lg:text-4xl xl:text-5xl font-bold mb-1 sm:mb-2">Spelman College</span>
+            <span className="animate-gradient bg-clip-text text-transparent text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-7xl font-bold">
               Glee Club
             </span>
           </h1>
-          <p className="text-base md:text-lg lg:text-xl leading-relaxed opacity-90 mt-4">
+          <p className="text-sm sm:text-base md:text-lg lg:text-xl leading-relaxed opacity-90 mt-2 sm:mt-3 md:mt-4">
             A distinguished ensemble with a rich heritage of musical excellence, directed by Dr. Kevin Phillip Johnson.
           </p>
-          <div className="pt-4 md:pt-6 flex flex-col sm:flex-row gap-4 justify-center md:justify-start">
+          <div className="pt-3 sm:pt-4 md:pt-5 lg:pt-6 flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center md:justify-start">
             <Button 
               size={isMobile ? "default" : "lg"} 
               className="bg-glee-purple hover:bg-glee-purple/90 text-white"
@@ -57,7 +57,7 @@ export function HeroSection() {
       </div>
       
       {/* Glee Club Crest - Left side */}
-      <div className="hidden md:block fixed bottom-4 left-4 md:bottom-8 md:left-28 lg:left-32 z-10 w-12 md:w-16 lg:w-20 animate-fade-in">
+      <div className="hidden md:block fixed bottom-4 left-4 md:bottom-6 md:left-24 lg:bottom-8 lg:left-32 z-10 w-10 sm:w-12 md:w-14 lg:w-16 xl:w-20 animate-fade-in">
         <img 
           src="/lovable-uploads/9a044e72-80dc-40a6-b716-2d5c2d35b878.png" 
           alt="Spelman Glee Club Crest" 
@@ -66,7 +66,7 @@ export function HeroSection() {
       </div>
 
       {/* Right side image - Glee100 image */}
-      <div className="hidden md:block absolute bottom-4 right-4 md:bottom-8 md:right-8 lg:right-12 z-10 w-12 md:w-20 lg:w-28 animate-fade-in">
+      <div className="hidden md:block absolute bottom-4 right-4 md:bottom-6 md:right-6 lg:bottom-8 lg:right-8 xl:right-12 z-10 w-10 sm:w-12 md:w-16 lg:w-20 xl:w-28 animate-fade-in">
         <img 
           src="/lovable-uploads/9a044e72-80dc-40a6-b716-2d5c2d35b878.png" 
           alt="Spelman Glee Club 100 Crest" 

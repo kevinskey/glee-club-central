@@ -9,7 +9,7 @@ export function CTASection() {
   const isMobile = useIsMobile();
   
   return (
-    <section className="relative py-12 md:py-16 bg-glee-dark text-white overflow-hidden">
+    <section className="relative py-10 sm:py-12 md:py-16 bg-glee-dark text-white overflow-hidden">
       <div className="absolute inset-0 opacity-20">
         <div 
           className="absolute inset-0 bg-cover bg-center" 
@@ -18,10 +18,10 @@ export function CTASection() {
           }}
         ></div>
       </div>
-      <div className="container px-4 md:px-8 relative z-10">
-        <div className="max-w-3xl mx-auto text-center">
-          <h2 className="text-2xl md:text-3xl font-playfair font-bold mb-4 md:mb-6">Join Our Digital Choir Community</h2>
-          <p className="text-base md:text-lg mb-6 md:mb-8 opacity-90">
+      <div className="container px-4 sm:px-6 md:px-8 relative z-10">
+        <div className="max-w-xs sm:max-w-sm md:max-w-lg lg:max-w-2xl xl:max-w-3xl mx-auto text-center">
+          <h2 className="text-xl sm:text-2xl md:text-3xl font-playfair font-bold mb-3 sm:mb-4 md:mb-5">Join Our Digital Choir Community</h2>
+          <p className="text-sm sm:text-base md:text-lg mb-5 sm:mb-6 md:mb-8 opacity-90">
             Access sheet music, submit recordings, check schedules, and connect with fellow members.
           </p>
           <Button 
