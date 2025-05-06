@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -58,6 +59,12 @@ export default function LandingPage() {
       return () => clearTimeout(timer);
     }
   }, [showNewsFeed]);
+  
+  // Handle event selection with a more explicit function
+  const handleEventSelect = (event) => {
+    console.log("Selected event:", event.title);
+    setSelectedEvent(event);
+  };
   
   return (
     <div className="flex min-h-screen flex-col">
@@ -168,7 +175,7 @@ export default function LandingPage() {
                       ${selectedEvent.id === event.id 
                         ? 'border-glee-purple bg-glee-purple/5 dark:bg-glee-purple/20' 
                         : 'border-gray-200 hover:border-glee-purple/50 hover:bg-glee-purple/5 dark:border-gray-800 dark:hover:border-glee-purple/30'}`}
-                    onClick={() => setSelectedEvent(event)}
+                    onClick={() => handleEventSelect(event)}
                   >
                     <div className="flex justify-between items-center">
                       <div className="font-medium text-lg">{event.title}</div>
@@ -197,7 +204,8 @@ export default function LandingPage() {
                   <img 
                     src={selectedEvent.image} 
                     alt={selectedEvent.title} 
-                    className="w-full h-full object-cover"
+                    className="w-full h-full object-cover transition-opacity duration-300"
+                    key={selectedEvent.id} // Add key to force re-render when image changes
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent flex flex-col justify-end p-6">
                     <h3 className="text-2xl font-playfair font-bold text-white">
