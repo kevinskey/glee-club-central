@@ -1,4 +1,3 @@
-
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -21,7 +20,7 @@ export function HeroSection() {
         <BackgroundSlideshow 
           images={backgroundImages} 
           duration={5000} 
-          transition={1000} 
+          transition={3000} 
         />
       </div>
       <div className="container relative z-10 mx-auto md:grid-cols-1 items-center">

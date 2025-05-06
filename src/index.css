@@ -176,4 +176,9 @@
     from { opacity: 1; }
     to { opacity: 0; }
   }
+  
+  /* Custom transition durations */
+  .duration-3000 {
+    transition-duration: 3000ms;
+  }
 }
