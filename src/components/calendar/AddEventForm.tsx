@@ -81,7 +81,7 @@ export function AddEventForm({ onAddEvent, onCancel }: AddEventFormProps) {
 
   // Load Google Maps Places API
   const { isLoaded, loadError } = useLoadScript({
-    googleMapsApiKey: "YOUR_GOOGLE_MAPS_API_KEY", // Replace with your actual API key
+    googleMapsApiKey: "AIzaSyAEzAWJoMrD9BKIirYD_2sEOWhb4UffL2s", // Replace with your actual API key
     libraries: ["places"] as any,
   });
 
