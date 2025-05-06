@@ -24,7 +24,7 @@ export function useSections() {
     try {
       // Fetch potential section leaders with direct query
       const { data: leadersData, error: leadersError } = await supabase
-        .rpc('get_potential_section_leaders')
+        .rpc('get_potential_section_leaders', {})
         .returns<SectionLeader[]>();
 
       if (leadersError) throw leadersError;
@@ -57,15 +57,24 @@ export function useSections() {
       if (editingSection) {
         // Update existing section - using RPC function
         const { error } = await supabase
-          .rpc('update_section')
+          .rpc('update_section', {
+            p_id: editingSection.id,
+            p_name: values.name,
+            p_description: values.description || null,
+            p_section_leader_id: values.section_leader_id || null
+          })
           .returns<void>();
 
         if (error) throw error;
         toast.success("Section updated successfully");
       } else {
         // Create new section - using RPC function
-        const { error } = await supabase
-          .rpc('create_section')
+        const { data, error } = await supabase
+          .rpc('create_section', {
+            p_name: values.name,
+            p_description: values.description || null,
+            p_section_leader_id: values.section_leader_id || null
+          })
           .returns<string>();
 
         if (error) throw error;
@@ -90,7 +99,9 @@ export function useSections() {
     try {
       // Use RPC function to delete section
       const { error } = await supabase
-        .rpc('delete_section')
+        .rpc('delete_section', {
+          p_id: sectionId
+        })
         .returns<void>();
 
       if (error) throw error;

@@ -52,7 +52,7 @@ export async function fetchAttendanceRecords(memberId: string): Promise<Attendan
   try {
     // Use direct RPC query
     const { data, error } = await supabase
-      .rpc('get_attendance_records')
+      .rpc('get_attendance_records', { p_member_id: memberId })
       .returns<AttendanceRecord[]>();
     
     if (error) throw error;
@@ -73,7 +73,7 @@ export async function fetchPaymentRecords(memberId: string): Promise<PaymentReco
   try {
     // Use direct RPC query
     const { data, error } = await supabase
-      .rpc('get_payment_records')
+      .rpc('get_payment_records', { p_member_id: memberId })
       .returns<PaymentRecord[]>();
     
     if (error) throw error;
@@ -94,7 +94,7 @@ export async function fetchMemberNotes(memberId: string): Promise<MemberNote[]> 
   try {
     // Use direct RPC query
     const { data, error } = await supabase
-      .rpc('get_member_notes')
+      .rpc('get_member_notes', { p_member_id: memberId })
       .returns<MemberNote[]>();
     
     if (error) throw error;
@@ -115,7 +115,7 @@ export async function fetchSections(): Promise<Section[]> {
   try {
     // Use RPC query
     const { data, error } = await supabase
-      .rpc('get_sections')
+      .rpc('get_sections', {})
       .returns<Section[]>();
     
     if (error) throw error;
@@ -132,7 +132,7 @@ export async function fetchSections(): Promise<Section[]> {
 export async function fetchSectionsWithMemberCount(): Promise<Section[]> {
   try {
     const { data, error } = await supabase
-      .rpc('get_sections_with_member_count')
+      .rpc('get_sections_with_member_count', {})
       .returns<Section[]>();
     
     if (error) throw error;
@@ -149,7 +149,7 @@ export async function fetchSectionsWithMemberCount(): Promise<Section[]> {
 export async function fetchMembers(): Promise<Profile[]> {
   try {
     const { data, error } = await supabase
-      .rpc('get_members_with_sections')
+      .rpc('get_members_with_sections', {})
       .returns<any[]>();
     
     if (error) throw error;
