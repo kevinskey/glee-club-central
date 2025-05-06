@@ -66,14 +66,7 @@ export function HeroSection() {
         />
       </div>
 
-      {/* Right side image - Glee100 image */}
-      <div className="hidden md:block absolute bottom-4 right-4 md:bottom-6 md:right-6 lg:bottom-8 lg:right-8 xl:right-12 z-10 w-10 sm:w-12 md:w-16 lg:w-20 xl:w-28 animate-fade-in">
-        <img 
-          src="/lovable-uploads/9a044e72-80dc-40a6-b716-2d5c2d35b878.png" 
-          alt="Spelman Glee Club 100 Crest" 
-          className="w-full h-auto drop-shadow-lg"
-        />
-      </div>
+      {/* Right side image - Removed Glee100 image */}
     </section>
   );
 }
