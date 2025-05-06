@@ -48,6 +48,7 @@ function App() {
           <Route index element={<DashboardPage />} />
           <Route path="calendar" element={<CalendarPage />} />
           <Route path="profile" element={<ProfilePage />} />
+          <Route path="schedule" element={<CalendarPage />} /> {/* Redirect schedule to calendar */}
           
           {/* Admin and section leader routes */}
           <Route path="sections" element={
@@ -84,6 +85,9 @@ function App() {
           } />
         </Route>
 
+        {/* Remove the Index route as it causes conflicts */}
+        
+        {/* Catch all for 404 errors */}
         <Route path="*" element={<NotFoundPage />} />
       </Routes>
     </BrowserRouter>
