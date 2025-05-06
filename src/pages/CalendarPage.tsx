@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { 
@@ -149,7 +148,7 @@ export default function CalendarPage() {
   return (
     <div className="flex min-h-screen flex-col">
       <Header />
-      <main className="flex-1">
+      <main className="flex-1 bg-gray-50 dark:bg-gray-900">
         <div className="container py-8 sm:py-10 md:py-12">
           <div className="flex flex-col sm:flex-row items-center justify-between mb-6">
             <Button 
@@ -188,7 +187,7 @@ export default function CalendarPage() {
           <div className="flex flex-col lg:flex-row gap-8">
             {/* Calendar */}
             <div className="w-full lg:w-1/2">
-              <div className="border rounded-lg p-4 bg-white dark:bg-gray-900">
+              <div className="border rounded-lg p-4 bg-white dark:bg-gray-800 shadow-sm">
                 <Calendar
                   mode="single"
                   selected={date}
@@ -214,7 +213,7 @@ export default function CalendarPage() {
             
             {/* Event details */}
             <div className="w-full lg:w-1/2">
-              <div className="border rounded-lg p-6 h-full bg-white dark:bg-gray-900">
+              <div className="border rounded-lg p-6 h-full bg-white dark:bg-gray-800 shadow-sm">
                 {date && (
                   <div className="mb-4">
                     <h2 className="text-xl font-medium mb-1">
@@ -299,7 +298,7 @@ export default function CalendarPage() {
 
       {/* Add Event Dialog */}
       <Dialog open={isAddEventOpen} onOpenChange={setIsAddEventOpen}>
-        <DialogContent className="sm:max-w-[600px]">
+        <DialogContent className="sm:max-w-[600px] bg-white dark:bg-gray-800">
           <DialogHeader>
             <DialogTitle>Add New Event</DialogTitle>
           </DialogHeader>

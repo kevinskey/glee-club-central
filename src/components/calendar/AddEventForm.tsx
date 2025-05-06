@@ -145,7 +145,7 @@ export function AddEventForm({ onAddEvent, onCancel }: AddEventFormProps) {
             <FormItem>
               <FormLabel>Event Title</FormLabel>
               <FormControl>
-                <Input placeholder="Fall Showcase" {...field} />
+                <Input placeholder="Fall Showcase" {...field} className="bg-white dark:bg-gray-700" />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -165,7 +165,7 @@ export function AddEventForm({ onAddEvent, onCancel }: AddEventFormProps) {
                       <Button
                         variant={"outline"}
                         className={cn(
-                          "w-full pl-3 text-left font-normal",
+                          "w-full pl-3 text-left font-normal bg-white dark:bg-gray-700",
                           !field.value && "text-muted-foreground"
                         )}
                       >
@@ -178,7 +178,7 @@ export function AddEventForm({ onAddEvent, onCancel }: AddEventFormProps) {
                       </Button>
                     </FormControl>
                   </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0" align="start">
+                  <PopoverContent className="w-auto p-0 bg-white dark:bg-gray-800" align="start">
                     <Calendar
                       mode="single"
                       selected={field.value}
@@ -208,11 +208,11 @@ export function AddEventForm({ onAddEvent, onCancel }: AddEventFormProps) {
                           placeholder="Select or type a time"
                           value={field.value}
                           onChange={(e) => field.onChange(e.target.value)}
-                          className="pl-9 pr-10"
+                          className="pl-9 pr-10 bg-white dark:bg-gray-700"
                           type="text"
                         />
                       </DropdownMenuTrigger>
-                      <DropdownMenuContent className="w-72 max-h-80 overflow-y-auto">
+                      <DropdownMenuContent className="w-72 max-h-80 overflow-y-auto bg-white dark:bg-gray-800">
                         <div className="p-2">
                           <p className="mb-2 text-sm font-medium">Specific Times</p>
                           <div className="grid grid-cols-2 gap-1">
@@ -263,7 +263,7 @@ export function AddEventForm({ onAddEvent, onCancel }: AddEventFormProps) {
                   <Input 
                     placeholder="Enter location" 
                     {...field}
-                    className="pl-9"
+                    className="pl-9 bg-white dark:bg-gray-700"
                     ref={locationInputRef}
                     onFocus={() => setLocationInputFocused(true)}
                     onBlur={() => setLocationInputFocused(false)}
@@ -286,11 +286,11 @@ export function AddEventForm({ onAddEvent, onCancel }: AddEventFormProps) {
               <FormLabel>Event Type</FormLabel>
               <Select onValueChange={field.onChange} defaultValue={field.value}>
                 <FormControl>
-                  <SelectTrigger>
+                  <SelectTrigger className="bg-white dark:bg-gray-700">
                     <SelectValue placeholder="Select event type" />
                   </SelectTrigger>
                 </FormControl>
-                <SelectContent>
+                <SelectContent className="bg-white dark:bg-gray-800">
                   <SelectItem value="concert">Concert</SelectItem>
                   <SelectItem value="rehearsal">Rehearsal</SelectItem>
                   <SelectItem value="tour">Tour</SelectItem>
@@ -314,7 +314,7 @@ export function AddEventForm({ onAddEvent, onCancel }: AddEventFormProps) {
               <FormControl>
                 <Textarea
                   placeholder="Event details and additional information"
-                  className="resize-none"
+                  className="resize-none bg-white dark:bg-gray-700"
                   {...field}
                 />
               </FormControl>
@@ -324,7 +324,7 @@ export function AddEventForm({ onAddEvent, onCancel }: AddEventFormProps) {
         />
 
         <div className="flex justify-end gap-2">
-          <Button type="button" variant="outline" onClick={onCancel}>
+          <Button type="button" variant="outline" onClick={onCancel} className="bg-white dark:bg-gray-700">
             Cancel
           </Button>
           <Button type="submit" className="bg-glee-purple hover:bg-glee-purple/90">
