@@ -6,7 +6,7 @@ import { Loader2 } from "lucide-react";
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
-  allowedRoles?: Array<"admin" | "member">;
+  allowedRoles?: Array<"admin" | "member" | "section_leader">;
 }
 
 export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
@@ -30,7 +30,7 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
   }
 
   // Check role-based access if roles are specified
-  if (allowedRoles && profile && !allowedRoles.includes(profile.role as "admin" | "member")) {
+  if (allowedRoles && profile && !allowedRoles.includes(profile.role as "admin" | "member" | "section_leader")) {
     return <Navigate to="/dashboard" replace />;
   }
 
