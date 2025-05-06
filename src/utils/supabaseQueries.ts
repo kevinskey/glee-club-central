@@ -52,7 +52,7 @@ export async function fetchAttendanceRecords(memberId: string): Promise<Attendan
   try {
     // Use direct RPC query with proper type parameters
     const { data, error } = await supabase
-      .rpc('get_attendance_records', { p_member_id: memberId } as any);
+      .rpc('get_attendance_records', { p_member_id: memberId });
     
     if (error) throw error;
     
@@ -72,7 +72,7 @@ export async function fetchPaymentRecords(memberId: string): Promise<PaymentReco
   try {
     // Use direct RPC query with proper type parameters
     const { data, error } = await supabase
-      .rpc('get_payment_records', { p_member_id: memberId } as any);
+      .rpc('get_payment_records', { p_member_id: memberId });
     
     if (error) throw error;
     
@@ -92,7 +92,7 @@ export async function fetchMemberNotes(memberId: string): Promise<MemberNote[]> 
   try {
     // Use direct RPC query with proper type parameters
     const { data, error } = await supabase
-      .rpc('get_member_notes', { p_member_id: memberId } as any);
+      .rpc('get_member_notes', { p_member_id: memberId });
     
     if (error) throw error;
     
@@ -112,7 +112,7 @@ export async function fetchSections(): Promise<Section[]> {
   try {
     // Use RPC query with proper type parameters
     const { data, error } = await supabase
-      .rpc('get_sections' as any);
+      .rpc('get_sections');
     
     if (error) throw error;
     
@@ -128,7 +128,7 @@ export async function fetchSections(): Promise<Section[]> {
 export async function fetchSectionsWithMemberCount(): Promise<Section[]> {
   try {
     const { data, error } = await supabase
-      .rpc('get_sections_with_member_count' as any);
+      .rpc('get_sections_with_member_count');
     
     if (error) throw error;
     
@@ -144,7 +144,7 @@ export async function fetchSectionsWithMemberCount(): Promise<Section[]> {
 export async function fetchMembers(): Promise<Profile[]> {
   try {
     const { data, error } = await supabase
-      .rpc('get_members_with_sections' as any);
+      .rpc('get_members_with_sections');
     
     if (error) throw error;
     
@@ -167,5 +167,72 @@ export async function fetchMembers(): Promise<Profile[]> {
   } catch (error) {
     console.error("Error fetching members:", error);
     return [];
+  }
+}
+
+// New function to fetch all users using the new database function
+export async function fetchAllUsers(): Promise<any[]> {
+  try {
+    const { data, error } = await supabase
+      .rpc('get_all_users');
+    
+    if (error) throw error;
+    return data || [];
+  } catch (error) {
+    console.error("Error fetching all users:", error);
+    return [];
+  }
+}
+
+// New function to fetch user by ID using the new database function
+export async function fetchUserById(userId: string): Promise<any | null> {
+  try {
+    const { data, error } = await supabase
+      .rpc('get_user_by_id', { p_user_id: userId });
+    
+    if (error) throw error;
+    
+    if (data && Array.isArray(data) && data.length > 0) {
+      return data[0];
+    }
+    
+    return null;
+  } catch (error) {
+    console.error("Error fetching user:", error);
+    return null;
+  }
+}
+
+// New function to update user role
+export async function updateUserRole(userId: string, role: string): Promise<boolean> {
+  try {
+    const { error } = await supabase
+      .rpc('handle_user_role', { 
+        p_user_id: userId,
+        p_role: role
+      });
+    
+    if (error) throw error;
+    return true;
+  } catch (error) {
+    console.error("Error updating user role:", error);
+    return false;
+  }
+}
+
+// New function to update user status
+export async function updateUserStatus(userId: string, status: string): Promise<boolean> {
+  try {
+    const { error } = await supabase
+      .rpc('update_user_status', { 
+        p_user_id: userId,
+        p_status: status
+      });
+    
+    if (error) throw error;
+    return true;
+  } catch (error) {
+    console.error("Error updating user status:", error);
+    return false;
   }
 }

@@ -1,4 +1,3 @@
-
 import React from "react";
 import { 
   LayoutDashboard, 
@@ -8,7 +7,10 @@ import {
   Mic, 
   Video, 
   Library, 
-  MessageSquare 
+  MessageSquare, 
+  Users, 
+  UsersRound, 
+  UserCog 
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { NavLink } from "./NavLink";
@@ -18,6 +20,14 @@ interface SidebarNavProps {
 }
 
 export const SidebarNav: React.FC<SidebarNavProps> = ({ className }) => {
+  const adminNavItems = [
+    {
+      title: "User Management",
+      href: "/dashboard/users",
+      icon: UserCog,
+    },
+  ];
+
   return (
     <nav className={cn("flex flex-col space-y-1", className)}>
       <NavLink href="/dashboard" icon={<LayoutDashboard className="h-5 w-5" />}>

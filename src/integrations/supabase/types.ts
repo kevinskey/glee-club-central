@@ -466,7 +466,50 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      get_all_users: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          id: string
+          email: string
+          first_name: string
+          last_name: string
+          phone: string
+          role: string
+          voice_part: string
+          avatar_url: string
+          status: string
+          section_id: string
+          join_date: string
+          created_at: string
+          last_sign_in_at: string
+        }[]
+      }
+      get_user_by_id: {
+        Args: { p_user_id: string }
+        Returns: {
+          id: string
+          email: string
+          first_name: string
+          last_name: string
+          phone: string
+          role: string
+          voice_part: string
+          avatar_url: string
+          status: string
+          section_id: string
+          join_date: string
+          created_at: string
+          last_sign_in_at: string
+        }[]
+      }
+      handle_user_role: {
+        Args: { p_user_id: string; p_role: string }
+        Returns: undefined
+      }
+      update_user_status: {
+        Args: { p_user_id: string; p_status: string }
+        Returns: undefined
+      }
     }
     Enums: {
       [_ in never]: never
