@@ -1,4 +1,3 @@
-
 -- Function to get attendance records for a member
 CREATE OR REPLACE FUNCTION get_attendance_records(p_member_id UUID)
 RETURNS SETOF JSONB
@@ -129,6 +128,22 @@ AS $$
     )
   FROM profiles p
   LEFT JOIN sections s ON p.section_id = s.id
+  ORDER BY p.last_name, p.first_name;
+$$;
+
+-- Function to get potential section leaders (admin and section_leader roles)
+CREATE OR REPLACE FUNCTION get_potential_section_leaders()
+RETURNS SETOF JSONB
+LANGUAGE SQL
+AS $$
+  SELECT 
+    json_build_object(
+      'id', p.id,
+      'first_name', p.first_name,
+      'last_name', p.last_name
+    )
+  FROM profiles p
+  WHERE p.role IN ('admin', 'section_leader')
   ORDER BY p.last_name, p.first_name;
 $$;
 
