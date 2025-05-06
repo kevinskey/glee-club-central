@@ -1,3 +1,4 @@
+
 import React, { createContext, useState, useEffect, useContext } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -48,35 +49,37 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const fetchProfile = async (userId: string) => {
     try {
       // Use our RPC function to get profile data safely
-      const { data, error } = await supabase.rpc('get_user_profile', { 
-        p_user_id: userId 
-      });
+      // Use a direct PostgreSQL query to avoid TypeScript errors
+      const { data: profileData, error } = await supabase.from('profiles')
+        .select('*')
+        .eq('id', userId)
+        .single();
 
       if (error) {
         console.error('Error fetching profile:', error);
         return null;
       }
-
-      if (!data) {
+      
+      if (!profileData) {
         return null;
       }
 
       // Ensure the profile has all required fields with defaults if missing
-      const profileData: Profile = {
-        id: data.id,
-        first_name: data.first_name,
-        last_name: data.last_name,
+      const profileWithDefaults: Profile = {
+        id: profileData.id,
+        first_name: profileData.first_name,
+        last_name: profileData.last_name,
         email: user?.email || null, // Use email from auth user
-        phone: data.phone || null, 
-        role: (data.role as UserRole) || 'member',
-        voice_part: data.voice_part as VoicePart,
-        avatar_url: data.avatar_url || null, 
-        status: (data.status as MemberStatus) || 'pending', 
-        section_id: data.section_id || null, 
-        join_date: data.join_date || null 
+        phone: profileData.phone || null, 
+        role: (profileData.role as UserRole) || 'member',
+        voice_part: profileData.voice_part as VoicePart,
+        avatar_url: profileData.avatar_url || null, 
+        status: (profileData.status as MemberStatus) || 'pending', 
+        section_id: profileData.section_id || null, 
+        join_date: profileData.join_date || null 
       };
       
-      return profileData;
+      return profileWithDefaults;
     } catch (error) {
       console.error('Unexpected error fetching profile:', error);
       return null;

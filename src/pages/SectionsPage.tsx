@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { PageHeader } from "@/components/ui/page-header";
@@ -117,13 +118,17 @@ export default function SectionsPage() {
     async function fetchData() {
       setIsLoading(true);
       try {
-        // Fetch potential section leaders (admins and section leaders)
-        const { data, error: leadersError } = await supabase.rpc('get_potential_section_leaders');
+        // Fetch potential section leaders with direct query rather than RPC
+        const { data: leadersData, error: leadersError } = await supabase
+          .from('profiles')
+          .select('id, first_name, last_name')
+          .in('role', ['admin', 'section_leader'])
+          .order('last_name', { ascending: true });
 
         if (leadersError) throw leadersError;
 
         // Format leaders for dropdown
-        const formattedLeaders = data ? data.map((leader: any) => ({
+        const formattedLeaders = leadersData ? leadersData.map((leader) => ({
           id: leader.id,
           name: `${leader.first_name || ''} ${leader.last_name || ''}`.trim()
         })) : [];
@@ -149,23 +154,27 @@ export default function SectionsPage() {
       // For now, we will use direct supabase calls for updates as we haven't created RPC functions for these
       // In a production app, we should also create RPC functions for these operations
       if (editingSection) {
-        // Update existing section - use rpc function
-        const { error } = await supabase.rpc('update_section', {
-          p_id: editingSection.id,
-          p_name: values.name,
-          p_description: values.description || null,
-          p_section_leader_id: values.section_leader_id || null
-        });
+        // Update existing section
+        const { error } = await supabase
+          .from('sections')
+          .update({
+            name: values.name,
+            description: values.description || null,
+            section_leader_id: values.section_leader_id || null
+          })
+          .eq('id', editingSection.id);
 
         if (error) throw error;
         toast.success("Section updated successfully");
       } else {
-        // Create new section - use rpc function
-        const { error } = await supabase.rpc('create_section', {
-          p_name: values.name,
-          p_description: values.description || null,
-          p_section_leader_id: values.section_leader_id || null
-        });
+        // Create new section
+        const { error } = await supabase
+          .from('sections')
+          .insert({
+            name: values.name,
+            description: values.description || null,
+            section_leader_id: values.section_leader_id || null
+          });
 
         if (error) throw error;
         toast.success("Section created successfully");
@@ -183,12 +192,19 @@ export default function SectionsPage() {
 
   const handleDeleteSection = async (sectionId: string) => {
     try {
-      // Use rpc function to handle section deletion
-      const { error } = await supabase.rpc('delete_section', {
-        p_section_id: sectionId
-      });
+      // Direct delete instead of RPC for simplicity
+      const { error } = await supabase
+        .from('sections')
+        .delete()
+        .eq('id', sectionId);
 
       if (error) throw error;
+
+      // Update profiles to remove this section_id
+      await supabase
+        .from('profiles')
+        .update({ section_id: null })
+        .eq('section_id', sectionId);
 
       // Update local state
       setSections(sections.filter(section => section.id !== sectionId));
