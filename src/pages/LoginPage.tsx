@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { useNavigate, Link, useLocation } from "react-router-dom";
 import { z } from "zod";
@@ -84,7 +83,6 @@ export default function LoginPage() {
       } else if (provider === 'apple') {
         await signInWithApple();
       }
-      // No need to navigate here as it will be handled by the auth state change
     } catch (error: any) {
       console.error(`${provider} login error:`, error);
       
@@ -99,11 +97,11 @@ export default function LoginPage() {
       else if (error.message?.includes("redirect_uri_mismatch") || 
           error.message?.includes("invalid request") ||
           error.message?.includes("400")) {
-        setAuthError(`${provider} login configuration error. Please contact the administrator to verify OAuth settings.`);
+        setAuthError(`${provider} login configuration error. Please check your Supabase URL configuration settings.`);
         setShowConfigHelp(true);
       } 
       else if (error.message?.includes("provider is not enabled")) {
-        setAuthError(`${provider.charAt(0).toUpperCase() + provider.slice(1)} login is not enabled. Please contact support.`);
+        setAuthError(`${provider.charAt(0).toUpperCase() + provider.slice(1)} login is not enabled. Please enable it in the Supabase console.`);
         setShowConfigHelp(true);
       } 
       else if (error.message?.includes("403")) {
