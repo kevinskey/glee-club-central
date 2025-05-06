@@ -34,22 +34,22 @@ export const EventDetails = ({
         </div>
       )}
 
-      <h3 className="text-xl font-medium mb-3">{selectedEvent.title}</h3>
-      <div className="space-y-2 text-sm text-muted-foreground mb-4">
+      <h3 className="text-xl font-semibold mb-3 text-gray-800 dark:text-white">{selectedEvent.title}</h3>
+      <div className="space-y-3 text-base mb-4 text-gray-700 dark:text-gray-300">
         <div className="flex items-center gap-2">
-          <CalendarIcon className="h-4 w-4" />
-          <span>{format(selectedEvent.date, 'MMMM d, yyyy')}</span>
+          <CalendarIcon className="h-4 w-4 text-gray-600 dark:text-gray-400" />
+          <span className="font-medium">{format(selectedEvent.date, 'MMMM d, yyyy')}</span>
         </div>
         <div className="flex items-center gap-2">
-          <Clock className="h-4 w-4" />
-          <span>{selectedEvent.time}</span>
+          <Clock className="h-4 w-4 text-gray-600 dark:text-gray-400" />
+          <span className="font-medium">{selectedEvent.time}</span>
         </div>
         <div className="flex items-center gap-2">
-          <MapPin className="h-4 w-4" />
-          <span>{selectedEvent.location}</span>
+          <MapPin className="h-4 w-4 text-gray-600 dark:text-gray-400" />
+          <span className="font-medium">{selectedEvent.location}</span>
         </div>
       </div>
-      <p className="text-sm">{selectedEvent.description}</p>
+      <p className="text-base text-gray-700 dark:text-gray-300">{selectedEvent.description}</p>
 
       {/* Event actions */}
       <div className="mt-6 flex flex-wrap gap-3">

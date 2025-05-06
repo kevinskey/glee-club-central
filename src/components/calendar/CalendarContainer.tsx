@@ -41,6 +41,14 @@ export const CalendarContainer = memo(({
             color: 'var(--glee-purple)'
           }
         }}
+        styles={{
+          day: { fontWeight: 'medium' },
+          caption_label: { fontWeight: 'bold', fontSize: '1rem' }
+        }}
+        classNames={{
+          day_selected: "bg-glee-purple text-white hover:bg-glee-purple hover:text-white font-bold",
+          day_today: "border border-glee-purple text-glee-purple font-bold"
+        }}
       />
     </div>
   );

@@ -23,11 +23,11 @@ export const EventList = React.memo(({
 
   return (
     <div className="mb-4">
-      <h2 className="text-xl font-medium mb-1">
+      <h2 className="text-xl font-semibold mb-3 text-gray-800 dark:text-white">
         Events on {format(date, 'MMMM d, yyyy')}
       </h2>
       {events.length === 0 ? (
-        <p className="text-muted-foreground">No events scheduled for this date.</p>
+        <p className="text-base text-gray-700 dark:text-gray-300">No events scheduled for this date.</p>
       ) : (
         <div className="space-y-4 mt-4">
           {events.map((event) => (
