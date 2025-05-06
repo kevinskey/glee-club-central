@@ -23,8 +23,8 @@ const formSchema = z
     confirmPassword: z.string(),
     firstName: z.string().min(1, { message: "First name is required" }),
     lastName: z.string().min(1, { message: "Last name is required" }),
-    agreeTerms: z.literal(true, {
-      errorMap: () => ({ message: "You must agree to the terms" }),
+    agreeTerms: z.boolean().refine(val => val === true, { // Changed from literal to boolean with refine
+      message: "You must agree to the terms",
     }),
   })
   .refine((data) => data.password === data.confirmPassword, {

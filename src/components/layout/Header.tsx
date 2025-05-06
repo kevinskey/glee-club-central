@@ -1,4 +1,3 @@
-
 import React from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
@@ -34,7 +33,7 @@ import { NewsFeed } from "@/components/news/NewsFeed";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
 
 export const Header = () => {
-  const { user, profile, logout } = useAuth();
+  const { user, profile, signOut } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   
@@ -181,7 +180,7 @@ export const Header = () => {
                       <Button
                         variant="ghost"
                         className="w-full justify-start text-sm text-destructive hover:text-destructive hover:bg-destructive/10"
-                        onClick={() => logout()}
+                        onClick={() => signOut()}
                       >
                         <LogOut className="mr-2 h-4 w-4" />
                         Logout
@@ -267,7 +266,7 @@ export const Header = () => {
                 <DropdownMenuItem asChild>
                   <button
                     className="flex w-full cursor-pointer items-center text-destructive"
-                    onClick={() => logout()}
+                    onClick={() => signOut()}
                   >
                     <LogOut className="mr-2 h-4 w-4" />
                     Logout

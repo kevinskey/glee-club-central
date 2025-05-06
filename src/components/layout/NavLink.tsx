@@ -7,7 +7,7 @@ import { LucideIcon } from "lucide-react";
 interface NavLinkProps {
   href: string;
   children: React.ReactNode;
-  icon?: LucideIcon | React.ReactNode;
+  icon?: React.ReactNode; // Changed from LucideIcon to ReactNode for compatibility
   disabled?: boolean;
   className?: string;
 }

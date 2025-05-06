@@ -7,15 +7,19 @@ interface Profile {
   last_name?: string;
   avatar_url?: string;
   role: "admin" | "member";
+  voice_part?: string; // Adding voice_part which was missing
 }
 
 export interface AuthContextType {
   user: any | null;
   profile: Profile | null;
   isAuthenticated: boolean;
-  isLoading: boolean; // Add this property
+  isLoading: boolean;
   signIn: (email: string, password: string) => Promise<void>;
   signOut: () => Promise<void>;
+  // Adding missing methods referenced in components
+  login: (email: string, password: string) => Promise<void>;
+  logout: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -42,6 +46,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             first_name: parsedUser.first_name || "Demo",
             last_name: parsedUser.last_name || "User",
             role: parsedUser.role || "member",
+            voice_part: parsedUser.voice_part || "Soprano", // Adding default voice part
           });
         }
       } catch (error) {
@@ -63,6 +68,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         first_name: "Demo",
         last_name: "User",
         role: "member",
+        voice_part: "Soprano", // Adding voice part
       };
       
       // Save to local storage to persist the session
@@ -74,6 +80,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         first_name: mockUser.first_name,
         last_name: mockUser.last_name,
         role: mockUser.role as "admin" | "member",
+        voice_part: mockUser.voice_part,
       });
     } catch (error) {
       console.error("Error signing in:", error);
@@ -93,6 +100,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
+  // Aliases for compatibility with components using different method names
+  const login = signIn;
+  const logout = signOut;
+
   const value = {
     user,
     profile,
@@ -100,6 +111,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     isLoading,
     signIn,
     signOut,
+    // Adding aliases for compatibility
+    login,
+    logout,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
