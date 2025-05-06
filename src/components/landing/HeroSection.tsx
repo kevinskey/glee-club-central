@@ -18,7 +18,7 @@ export function HeroSection() {
   ];
   
   return (
-    <section className="relative bg-glee-dark py-10 sm:py-14 md:py-16 lg:py-20 xl:py-24 min-h-[550px] overflow-hidden">
+    <section className="relative bg-glee-dark py-6 sm:py-10 md:py-12 lg:py-14 xl:py-16 min-h-[385px] overflow-hidden">
       <div className="absolute inset-0 opacity-50 bg-blend-overlay bg-black">
         <BackgroundSlideshow 
           images={backgroundImages} 
@@ -26,18 +26,18 @@ export function HeroSection() {
           transition={2000}
         />
       </div>
-      <div className="container relative z-10 mx-auto px-4 sm:px-6 md:px-8 lg:px-12 items-center pt-4 sm:pt-6 md:pt-8 lg:pt-10">
-        <div className="text-white space-y-4 sm:space-y-5 md:space-y-6 lg:space-y-8 md:pr-6 max-w-xs sm:max-w-sm md:max-w-lg lg:max-w-2xl mx-auto text-center md:text-left md:mx-0">
+      <div className="container relative z-10 mx-auto px-4 sm:px-6 md:px-8 lg:px-12 items-center pt-3 sm:pt-4 md:pt-6 lg:pt-8">
+        <div className="text-white space-y-3 sm:space-y-4 md:space-y-5 lg:space-y-6 md:pr-6 max-w-xs sm:max-w-sm md:max-w-lg lg:max-w-2xl mx-auto text-center md:text-left md:mx-0">
           <h1 className="font-playfair tracking-tight">
             <span className="block text-xl sm:text-2xl md:text-3xl lg:text-[3rem] xl:text-[3.8rem] font-bold mb-1 sm:mb-2">Spelman College</span>
             <span className="animate-gradient bg-clip-text text-transparent text-3xl sm:text-4xl md:text-[3.5rem] lg:text-[4.5rem] xl:text-[6.5rem] font-bold">
               Glee Club
             </span>
           </h1>
-          <p className="text-sm sm:text-base md:text-[1.34rem] lg:text-[1.52rem] leading-relaxed opacity-90 mt-2 sm:mt-3 md:mt-4">
+          <p className="text-sm sm:text-base md:text-[1.34rem] lg:text-[1.52rem] leading-relaxed opacity-90 mt-1 sm:mt-2 md:mt-3">
             A distinguished ensemble with a rich heritage of musical excellence, directed by Dr. Kevin Phillip Johnson.
           </p>
-          <div className="pt-3 sm:pt-4 md:pt-5 lg:pt-6 flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center md:justify-start">
+          <div className="pt-2 sm:pt-3 md:pt-4 lg:pt-5 flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center md:justify-start">
             <Button 
               size={isMobile ? "default" : "lg"} 
               className="bg-glee-purple hover:bg-glee-purple/90 text-white text-[1.13rem] py-[0.7rem] px-[1.3rem]"
@@ -58,7 +58,7 @@ export function HeroSection() {
       </div>
 
       {/* Right side image - Smaller seal with more padding */}
-      <div className="hidden md:block absolute bottom-6 right-8 md:bottom-8 md:right-10 lg:bottom-10 lg:right-12 xl:right-16 z-10 w-8 sm:w-10 md:w-12 lg:w-14 xl:w-16 animate-fade-in">
+      <div className="hidden md:block absolute bottom-4 right-6 md:bottom-6 md:right-8 lg:bottom-8 lg:right-10 xl:right-12 z-10 w-8 sm:w-10 md:w-12 lg:w-14 xl:w-16 animate-fade-in">
         <img 
           src="/lovable-uploads/9a044e72-80dc-40a6-b716-2d5c2d35b878.png" 
           alt="Spelman Glee Club 100 Crest" 
