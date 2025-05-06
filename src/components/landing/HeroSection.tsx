@@ -29,18 +29,18 @@ export function HeroSection() {
       <div className="container relative z-10 mx-auto px-4 sm:px-6 md:px-8 lg:px-12 items-center">
         <div className="text-white space-y-4 sm:space-y-5 md:space-y-6 lg:space-y-8 md:pr-6 max-w-xs sm:max-w-sm md:max-w-lg lg:max-w-2xl mx-auto text-center md:text-left md:mx-0">
           <h1 className="font-playfair tracking-tight">
-            <span className="block text-xl sm:text-2xl md:text-3xl lg:text-4xl xl:text-5xl font-bold mb-1 sm:mb-2">Spelman College</span>
-            <span className="animate-gradient bg-clip-text text-transparent text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-7xl font-bold">
+            <span className="block text-xl sm:text-2xl md:text-3xl lg:text-[2.76rem] xl:text-[3.45rem] font-bold mb-1 sm:mb-2">Spelman College</span>
+            <span className="animate-gradient bg-clip-text text-transparent text-2xl sm:text-3xl md:text-[2.76rem] lg:text-[3.45rem] xl:text-[4.83rem] font-bold">
               Glee Club
             </span>
           </h1>
-          <p className="text-sm sm:text-base md:text-lg lg:text-xl leading-relaxed opacity-90 mt-2 sm:mt-3 md:mt-4">
+          <p className="text-sm sm:text-base md:text-[1.22rem] lg:text-[1.38rem] leading-relaxed opacity-90 mt-2 sm:mt-3 md:mt-4">
             A distinguished ensemble with a rich heritage of musical excellence, directed by Dr. Kevin Phillip Johnson.
           </p>
           <div className="pt-3 sm:pt-4 md:pt-5 lg:pt-6 flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center md:justify-start">
             <Button 
               size={isMobile ? "default" : "lg"} 
-              className="bg-glee-purple hover:bg-glee-purple/90 text-white"
+              className="bg-glee-purple hover:bg-glee-purple/90 text-white text-[1.03rem] py-[0.6rem] px-[1.15rem]"
               onClick={() => navigate("/login")}
             >
               Member Portal
@@ -48,7 +48,7 @@ export function HeroSection() {
             <Button 
               variant="outline" 
               size={isMobile ? "default" : "lg"} 
-              className="border-white/20 bg-white/5 text-white hover:bg-white/10"
+              className="border-white/20 bg-white/5 text-white hover:bg-white/10 text-[1.03rem] py-[0.6rem] px-[1.15rem]"
               onClick={() => navigate("/calendar")}
             >
               Performance Schedule
