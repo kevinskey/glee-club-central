@@ -1,82 +1,26 @@
 
-import React, { useState, useCallback, memo } from "react";
-import { useNavigate } from "react-router-dom";
-import { 
-  Calendar as CalendarIcon, 
-  ChevronLeft, 
-  ChevronRight, 
-  MapPin,
-  Clock,
-  ArrowLeft,
-  Plus,
-  AlertCircle
-} from "lucide-react";
-import { Calendar } from "@/components/ui/calendar";
-import { Button } from "@/components/ui/button";
+import React, { useState, useCallback, useMemo } from "react";
 import { Header } from "@/components/landing/Header";
 import { Footer } from "@/components/landing/Footer";
-import { Badge } from "@/components/ui/badge";
-import { format } from "date-fns";
-import { AddEventForm } from "@/components/calendar/AddEventForm";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { useCalendarEvents, CalendarEvent } from "@/hooks/useCalendarEvents";
-import { useAuth } from "@/contexts/AuthContext";
+import { AddEventForm } from "@/components/calendar/AddEventForm";
 import { toast } from "sonner";
 
-// Memoized event component to reduce re-renders
-const EventItem = memo(({ 
-  event, 
-  isSelected, 
-  onSelect, 
-  typeColor 
-}: { 
-  event: CalendarEvent; 
-  isSelected: boolean; 
-  onSelect: (event: CalendarEvent) => void; 
-  typeColor: string; 
-}) => (
-  <div 
-    key={event.id}
-    className={`p-4 border rounded-lg cursor-pointer ${
-      isSelected 
-        ? 'border-glee-purple bg-glee-purple/5' 
-        : 'hover:bg-gray-50 dark:hover:bg-gray-800'
-    }`}
-    onClick={() => onSelect(event)}
-  >
-    <div className="flex justify-between items-start">
-      <h3 className="font-medium text-lg">{event.title}</h3>
-      <Badge className={`${typeColor} text-white`}>
-        {event.type.charAt(0).toUpperCase() + event.type.slice(1)}
-      </Badge>
-    </div>
-    <div className="mt-2 text-sm text-muted-foreground">
-      <div className="flex items-center gap-1 mb-1">
-        <Clock className="h-4 w-4" />
-        <span>{event.time}</span>
-      </div>
-      <div className="flex items-center gap-1">
-        <MapPin className="h-4 w-4" />
-        <span>{event.location}</span>
-      </div>
-    </div>
-    {isSelected && (
-      <p className="mt-3 text-sm">{event.description}</p>
-    )}
-  </div>
-));
+// Newly created components
+import { CalendarContainer } from "@/components/calendar/CalendarContainer";
+import { EventList } from "@/components/calendar/EventList";
+import { EventDetails } from "@/components/calendar/EventDetails";
+import { CalendarPageHeader } from "@/components/calendar/CalendarPageHeader";
 
 export default function CalendarPage() {
-  const navigate = useNavigate();
   const [date, setDate] = useState<Date | undefined>(new Date());
   const [selectedEvent, setSelectedEvent] = useState<CalendarEvent | null>(null);
   const [isAddEventOpen, setIsAddEventOpen] = useState(false);
   const { events, loading, addEvent, deleteEvent } = useCalendarEvents();
-  const { user } = useAuth();
   
   // Filter events for the selected date - memoized with useCallback
-  const eventsOnSelectedDate = useCallback(() => {
+  const eventsOnSelectedDate = useMemo(() => {
     if (!date) return [];
     
     return events.filter(event => 
@@ -137,161 +81,53 @@ export default function CalendarPage() {
         return "bg-gray-500 hover:bg-gray-500/90";
     }
   };
-
-  // Current events to show
-  const currentEvents = eventsOnSelectedDate();
   
   return (
     <div className="flex min-h-screen flex-col">
       <Header />
       <main className="flex-1 bg-gray-50 dark:bg-gray-900">
         <div className="container py-8 sm:py-10 md:py-12">
-          <div className="flex flex-col sm:flex-row items-center justify-between mb-6">
-            <Button 
-              variant="ghost" 
-              size="sm" 
-              onClick={() => navigate(-1)}
-              className="mb-4 sm:mb-0"
-            >
-              <ArrowLeft className="mr-2 h-4 w-4" />
-              Back
-            </Button>
-            <h1 className="text-2xl sm:text-3xl md:text-4xl font-playfair font-bold flex items-center gap-2">
-              <CalendarIcon className="h-6 w-6 sm:h-7 sm:w-7 md:h-8 md:w-8 text-glee-purple" />
-              <span>Performance <span className="text-glee-purple">Calendar</span></span>
-            </h1>
-            <div className="flex items-center gap-3">
-              <ThemeToggle variant="toggle" size="sm" />
-              <Button 
-                onClick={() => setIsAddEventOpen(true)}
-                className="bg-glee-purple hover:bg-glee-purple/90 hidden sm:flex"
-              >
-                <Plus className="mr-2 h-4 w-4" />
-                Add Event
-              </Button>
-            </div>
-          </div>
+          <CalendarPageHeader onAddEventClick={() => setIsAddEventOpen(true)} />
           
-          {/* Mobile Add Event Button */}
-          <div className="flex justify-between sm:hidden mb-4 items-center">
-            <ThemeToggle variant="toggle" size="sm" className="ml-auto mr-3" />
-            <Button 
-              onClick={() => setIsAddEventOpen(true)}
-              className="bg-glee-purple hover:bg-glee-purple/90"
-            >
-              <Plus className="mr-2 h-4 w-4" />
-              Add Event
-            </Button>
-          </div>
-          
-          {loading ? (
-            <div className="flex justify-center items-center py-10">
-              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-glee-purple"></div>
+          <div className="flex flex-col lg:flex-row gap-8">
+            {/* Calendar */}
+            <div className="w-full lg:w-1/2">
+              <CalendarContainer 
+                date={date}
+                setDate={setDate}
+                daysWithEvents={daysWithEvents}
+                loading={loading}
+              />
             </div>
-          ) : (
-            <div className="flex flex-col lg:flex-row gap-8">
-              {/* Calendar */}
-              <div className="w-full lg:w-1/2">
-                <div className="border rounded-lg p-4 bg-white dark:bg-gray-800 shadow-sm">
-                  <Calendar
-                    mode="single"
-                    selected={date}
-                    onSelect={setDate}
-                    className="mx-auto"
-                    modifiers={{
-                      event: daysWithEvents
-                    }}
-                    modifiersStyles={{
-                      event: {
-                        fontWeight: 'bold',
-                        textDecoration: 'underline',
-                        color: 'var(--glee-purple)'
-                      }
-                    }}
-                  />
-                </div>
-              </div>
-              
-              {/* Event details */}
-              <div className="w-full lg:w-1/2">
-                <div className="border rounded-lg p-6 h-full bg-white dark:bg-gray-800 shadow-sm">
-                  {date && (
-                    <div className="mb-4">
-                      <h2 className="text-xl font-medium mb-1">
-                        Events on {format(date, 'MMMM d, yyyy')}
-                      </h2>
-                      {currentEvents.length === 0 ? (
-                        <p className="text-muted-foreground">No events scheduled for this date.</p>
-                      ) : (
-                        <div className="space-y-4 mt-4">
-                          {currentEvents.map((event) => (
-                            <EventItem 
-                              key={event.id}
-                              event={event}
-                              isSelected={selectedEvent?.id === event.id}
-                              onSelect={handleEventSelect}
-                              typeColor={getEventTypeColor(event.type)}
-                            />
-                          ))}
-                        </div>
-                      )}
-                    </div>
-                  )}
-                  
-                  {selectedEvent && (
-                    <div className="mt-6 pt-6 border-t">
-                      {/* Show event image if available */}
-                      {selectedEvent.image_url && (
-                        <div className="mb-4">
-                          <img 
-                            src={selectedEvent.image_url} 
-                            alt={selectedEvent.title} 
-                            className="w-full h-auto max-h-60 object-cover rounded-lg shadow-sm"
-                          />
-                        </div>
-                      )}
-                      
-                      <h3 className="text-xl font-medium mb-3">{selectedEvent.title}</h3>
-                      <div className="space-y-2 text-sm text-muted-foreground mb-4">
-                        <div className="flex items-center gap-2">
-                          <CalendarIcon className="h-4 w-4" />
-                          <span>{format(selectedEvent.date, 'MMMM d, yyyy')}</span>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <Clock className="h-4 w-4" />
-                          <span>{selectedEvent.time}</span>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <MapPin className="h-4 w-4" />
-                          <span>{selectedEvent.location}</span>
-                        </div>
-                      </div>
-                      <p className="text-sm">{selectedEvent.description}</p>
-                      
-                      {/* Event actions */}
-                      <div className="mt-6 flex gap-3">
-                        <Button className="bg-glee-purple hover:bg-glee-purple/90">
-                          Add to Calendar
-                        </Button>
-                        <Button variant="outline">
-                          Share Event
-                        </Button>
-                        {user && user.id && (
-                          <Button 
-                            variant="outline" 
-                            className="text-red-500 hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-900/20"
-                            onClick={handleDeleteEvent}
-                          >
-                            Delete
-                          </Button>
-                        )}
-                      </div>
-                    </div>
-                  )}
-                </div>
+            
+            {/* Event details */}
+            <div className="w-full lg:w-1/2">
+              <div className="border rounded-lg p-6 h-full bg-white dark:bg-gray-800 shadow-sm">
+                {loading ? (
+                  <div className="flex justify-center items-center py-10">
+                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-glee-purple"></div>
+                  </div>
+                ) : (
+                  <>
+                    <EventList 
+                      date={date}
+                      events={eventsOnSelectedDate}
+                      selectedEvent={selectedEvent}
+                      onSelectEvent={handleEventSelect}
+                      getEventTypeColor={getEventTypeColor}
+                    />
+                    
+                    {selectedEvent && (
+                      <EventDetails 
+                        selectedEvent={selectedEvent} 
+                        onDeleteEvent={handleDeleteEvent} 
+                      />
+                    )}
+                  </>
+                )}
               </div>
             </div>
-          )}
+          </div>
         </div>
       </main>
       <Footer />
