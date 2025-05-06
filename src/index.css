@@ -1,3 +1,4 @@
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -83,8 +84,8 @@
   
   /* Add consistent text spacing */
   p {
-    @apply leading-relaxed;
-    line-height: 1.8; /* Increased from default leading-relaxed (1.625) */
+    @apply leading-extra-relaxed;
+    line-height: 2; /* Increased from previous 1.8 */
   }
   
   h1, h2, h3, h4, h5, h6 {
@@ -93,15 +94,15 @@
   
   /* Adjust line heights based on text size */
   .text-xs, .text-sm {
-    @apply leading-normal;
-  }
-  
-  .text-base, .text-lg {
     @apply leading-relaxed;
   }
   
+  .text-base, .text-lg {
+    @apply leading-extra-relaxed;
+  }
+  
   .text-xl, .text-2xl, .text-3xl {
-    @apply leading-snug;
+    @apply leading-relaxed;
   }
   
   .text-4xl, .text-5xl, .text-6xl {
@@ -192,21 +193,22 @@
   }
   
   .leading-extra-relaxed {
-    line-height: 1.8;
+    line-height: 2;
   }
   
   /* Improved paragraph spacing with bottom margin */
   .prose-spacing p {
-    margin-bottom: 1.25em;
-    line-height: 1.8;
+    margin-bottom: 1.5em;
+    line-height: 2;
   }
   
   /* New utility for increased paragraph spacing */
   .paragraph-spacing {
-    line-height: 1.8;
+    line-height: 2;
   }
   
   .paragraph-spacing-loose {
-    line-height: 2;
+    line-height: 2.2;
   }
 }
+
