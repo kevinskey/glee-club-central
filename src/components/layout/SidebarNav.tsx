@@ -18,7 +18,8 @@ import {
   Mail,
   Package,
   List,
-  Bell
+  Bell,
+  User
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { NavLink } from "./NavLink";
@@ -43,7 +44,7 @@ export const SidebarNav: React.FC<SidebarNavProps> = ({ className }) => {
       <NavLink href="/dashboard/calendar" icon={<Calendar className="h-5 w-5" />}>
         Calendar
       </NavLink>
-      <NavLink href="/dashboard/profile" icon={<FileText className="h-5 w-5" />}>
+      <NavLink href="/dashboard/profile" icon={<User className="h-5 w-5" />}>
         My Profile
       </NavLink>
       <NavLink href="/fan-page" icon={<Users className="h-5 w-5" />}>
@@ -101,4 +102,4 @@ export const SidebarNav: React.FC<SidebarNavProps> = ({ className }) => {
       )}
     </nav>
   );
-};
+}

@@ -11,6 +11,7 @@ import ResetPasswordPage from '@/pages/ResetPasswordPage';
 import DashboardPage from '@/pages/DashboardPage';
 import CalendarPage from '@/pages/CalendarPage';
 import ProfilePage from '@/pages/ProfilePage';
+import MemberProfilePage from '@/pages/profile/MemberProfilePage';
 import SectionsPage from '@/pages/SectionsPage';
 import MemberDirectoryPage from '@/pages/MemberDirectoryPage';
 import UserManagementPage from '@/pages/UserManagementPage';
@@ -47,7 +48,8 @@ function App() {
         }>
           <Route index element={<DashboardPage />} />
           <Route path="calendar" element={<CalendarPage />} />
-          <Route path="profile" element={<ProfilePage />} />
+          <Route path="profile" element={<MemberProfilePage />} />
+          <Route path="profile/:id" element={<MemberProfilePage />} />
           <Route path="schedule" element={<CalendarPage />} /> {/* Redirect schedule to calendar */}
           
           {/* Admin and section leader routes */}
