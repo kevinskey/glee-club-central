@@ -52,7 +52,7 @@ export async function fetchAttendanceRecords(memberId: string): Promise<Attendan
   try {
     // Use direct RPC query with proper type parameters
     const { data, error } = await supabase
-      .rpc<AttendanceRecord[]>('get_attendance_records', { p_member_id: memberId })
+      .rpc<AttendanceRecord[], { p_member_id: string }>('get_attendance_records', { p_member_id: memberId })
     
     if (error) throw error;
     
@@ -72,7 +72,7 @@ export async function fetchPaymentRecords(memberId: string): Promise<PaymentReco
   try {
     // Use direct RPC query with proper type parameters
     const { data, error } = await supabase
-      .rpc<PaymentRecord[]>('get_payment_records', { p_member_id: memberId })
+      .rpc<PaymentRecord[], { p_member_id: string }>('get_payment_records', { p_member_id: memberId })
     
     if (error) throw error;
     
@@ -92,7 +92,7 @@ export async function fetchMemberNotes(memberId: string): Promise<MemberNote[]> 
   try {
     // Use direct RPC query with proper type parameters
     const { data, error } = await supabase
-      .rpc<MemberNote[]>('get_member_notes', { p_member_id: memberId })
+      .rpc<MemberNote[], { p_member_id: string }>('get_member_notes', { p_member_id: memberId })
     
     if (error) throw error;
     
@@ -112,7 +112,7 @@ export async function fetchSections(): Promise<Section[]> {
   try {
     // Use RPC query with proper type parameters
     const { data, error } = await supabase
-      .rpc<Section[]>('get_sections')
+      .rpc<Section[], null>('get_sections', null)
     
     if (error) throw error;
     
@@ -128,7 +128,7 @@ export async function fetchSections(): Promise<Section[]> {
 export async function fetchSectionsWithMemberCount(): Promise<Section[]> {
   try {
     const { data, error } = await supabase
-      .rpc<Section[]>('get_sections_with_member_count')
+      .rpc<Section[], null>('get_sections_with_member_count', null)
     
     if (error) throw error;
     
@@ -144,7 +144,7 @@ export async function fetchSectionsWithMemberCount(): Promise<Section[]> {
 export async function fetchMembers(): Promise<Profile[]> {
   try {
     const { data, error } = await supabase
-      .rpc<any[]>('get_members_with_sections')
+      .rpc<any[], null>('get_members_with_sections', null)
     
     if (error) throw error;
     

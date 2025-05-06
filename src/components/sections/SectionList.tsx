@@ -16,7 +16,7 @@ import { DeleteSectionDialog } from "./DeleteSectionDialog";
 
 interface SectionListProps {
   sections: Section[];
-  leaders: { id: string; name: string }[];
+  leaders: { id: string; name?: string }[];
   isLoading: boolean;
   onEdit: (section: Section) => void;
   onDelete: (sectionId: string) => void;
@@ -64,7 +64,7 @@ export function SectionList({
           {sections.map((section) => {
             // Find leader name
             const leader = leaders.find(l => l.id === section.section_leader_id);
-            const leaderName = leader ? leader.name : "None";
+            const leaderName = leader ? (leader.name || "Unnamed") : "None";
 
             return (
               <TableRow key={section.id}>
