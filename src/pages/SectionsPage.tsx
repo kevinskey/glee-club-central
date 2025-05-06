@@ -1,7 +1,6 @@
 
 import React, { useState, useEffect } from "react";
 import { useAuth } from "@/contexts/AuthContext";
-import { supabase } from "@/integrations/supabase/client";
 import { PageHeader } from "@/components/ui/page-header";
 import { UsersRound, Plus, Pencil, Trash2 } from "lucide-react";
 import {
@@ -61,6 +60,8 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+import { supabase } from "@/integrations/supabase/client";
+import { fetchSectionsWithMemberCount } from "@/utils/supabaseQueries";
 
 interface Section {
   id: string;
@@ -138,28 +139,8 @@ export default function SectionsPage() {
         setLeaders(formattedLeaders);
 
         // Fetch sections with member count
-        const { data: sectionsData, error: sectionsError } = await supabase
-          .from("sections")
-          .select(`
-            id,
-            name,
-            description,
-            section_leader_id,
-            profiles!section_id (id)
-          `);
-
-        if (sectionsError) throw sectionsError;
-
-        // Count members in each section
-        const sectionsWithCount = sectionsData.map(section => ({
-          id: section.id,
-          name: section.name,
-          description: section.description,
-          section_leader_id: section.section_leader_id,
-          member_count: section.profiles ? section.profiles.length : 0,
-        }));
-
-        setSections(sectionsWithCount);
+        const sectionsData = await fetchSectionsWithMemberCount();
+        setSections(sectionsData);
       } catch (error: any) {
         console.error("Error fetching sections:", error);
         toast.error(error.message || "Failed to load sections");
@@ -204,27 +185,8 @@ export default function SectionsPage() {
       }
 
       // Refresh sections
-      const { data: refreshedData, error: refreshError } = await supabase
-        .from("sections")
-        .select(`
-          id,
-          name,
-          description,
-          section_leader_id,
-          profiles!section_id (id)
-        `);
-
-      if (refreshError) throw refreshError;
-
-      const sectionsWithCount = refreshedData.map(section => ({
-        id: section.id,
-        name: section.name,
-        description: section.description,
-        section_leader_id: section.section_leader_id,
-        member_count: section.profiles ? section.profiles.length : 0,
-      }));
-
-      setSections(sectionsWithCount);
+      const refreshedData = await fetchSectionsWithMemberCount();
+      setSections(refreshedData);
       setOpenDialog(false);
     } catch (error: any) {
       console.error("Error saving section:", error);

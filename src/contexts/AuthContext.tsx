@@ -59,7 +59,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         return null;
       }
 
-      return data as Profile;
+      // Type assertion to handle the mismatch between database schema and our Profile type
+      const profileData = data as unknown as Profile;
+      
+      // Set default status if missing
+      if (!profileData.status) {
+        profileData.status = 'pending';
+      }
+      
+      return profileData;
     } catch (error) {
       console.error('Unexpected error fetching profile:', error);
       return null;

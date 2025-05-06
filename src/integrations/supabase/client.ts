@@ -23,3 +23,6 @@ export const getAvatarUrl = (path: string | null) => {
   if (!path) return null;
   return `${SUPABASE_URL}/storage/v1/object/public/avatars/${path}`;
 };
+
+// Since we can't directly modify the types.ts file automatically, we need to inform
+// the user about the need to regenerate types or create a custom types workaround

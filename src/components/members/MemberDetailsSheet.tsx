@@ -1,5 +1,5 @@
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   SheetHeader,
   SheetTitle,
@@ -10,10 +10,8 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Profile, useAuth } from "@/contexts/AuthContext";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { supabase } from "@/integrations/supabase/client";
-import { toast } from "sonner";
 import { Pencil, UserCog, CalendarClock, DollarSign } from "lucide-react";
-import { format } from "date-fns";
+import { fetchAttendanceRecords, fetchPaymentRecords, fetchMemberNotes } from "@/utils/supabaseQueries";
 
 interface MemberDetailsSheetProps {
   member: Profile;
@@ -31,79 +29,46 @@ export function MemberDetailsSheet({ member }: MemberDetailsSheetProps) {
     notes: true,
   });
 
-  // Function to load attendance data
-  React.useEffect(() => {
-    async function loadAttendanceData() {
-      if (member && (isAdmin() || member.role === "section_leader")) {
+  // Function to load data
+  useEffect(() => {
+    async function loadData() {
+      if (!member) return;
+
+      // Load attendance data
+      if (isAdmin() || member.role === "section_leader") {
         try {
           setIsLoading(prev => ({ ...prev, attendance: true }));
-          const { data, error } = await supabase
-            .from("attendance")
-            .select(`
-              *,
-              calendar_events (title, date, time, location)
-            `)
-            .eq("member_id", member.id)
-            .order("created_at", { ascending: false })
-            .limit(10);
-            
-          if (error) throw error;
-          setAttendanceData(data || []);
-        } catch (error: any) {
-          console.error("Error fetching attendance:", error);
+          const attendanceRecords = await fetchAttendanceRecords(member.id);
+          setAttendanceData(attendanceRecords);
         } finally {
           setIsLoading(prev => ({ ...prev, attendance: false }));
         }
       }
-    }
-    
-    async function loadPaymentsData() {
-      if (member && (isAdmin() || member.role === "section_leader")) {
+      
+      // Load payments data
+      if (isAdmin() || member.role === "section_leader") {
         try {
           setIsLoading(prev => ({ ...prev, payments: true }));
-          const { data, error } = await supabase
-            .from("payments")
-            .select("*")
-            .eq("member_id", member.id)
-            .order("payment_date", { ascending: false })
-            .limit(10);
-            
-          if (error) throw error;
-          setPaymentsData(data || []);
-        } catch (error: any) {
-          console.error("Error fetching payments:", error);
+          const paymentRecords = await fetchPaymentRecords(member.id);
+          setPaymentsData(paymentRecords);
         } finally {
           setIsLoading(prev => ({ ...prev, payments: false }));
         }
       }
-    }
-    
-    async function loadNotesData() {
-      if (member && isAdmin()) {
+      
+      // Load notes data
+      if (isAdmin()) {
         try {
           setIsLoading(prev => ({ ...prev, notes: true }));
-          const { data, error } = await supabase
-            .from("member_notes")
-            .select(`
-              *,
-              created_by_profile:profiles!created_by (first_name, last_name)
-            `)
-            .eq("member_id", member.id)
-            .order("created_at", { ascending: false });
-            
-          if (error) throw error;
-          setNotesData(data || []);
-        } catch (error: any) {
-          console.error("Error fetching notes:", error);
+          const noteRecords = await fetchMemberNotes(member.id);
+          setNotesData(noteRecords);
         } finally {
           setIsLoading(prev => ({ ...prev, notes: false }));
         }
       }
     }
     
-    loadAttendanceData();
-    loadPaymentsData();
-    loadNotesData();
+    loadData();
   }, [member, isAdmin]);
 
   const getStatusBadge = (status: string) => {
@@ -206,14 +171,14 @@ export function MemberDetailsSheet({ member }: MemberDetailsSheetProps) {
               </div>
             ) : attendanceData.length > 0 ? (
               <div className="space-y-3">
-                {/* @ts-ignore */}
                 {attendanceData.map((record: any) => (
                   <div key={record.id} className="border rounded-md p-3">
                     <div className="flex justify-between">
                       <div>
-                        <p className="font-medium">{record.calendar_events.title}</p>
+                        <p className="font-medium">{record.calendar_events?.title || "Event"}</p>
                         <p className="text-sm text-muted-foreground">
-                          {new Date(record.calendar_events.date).toLocaleDateString()} at {record.calendar_events.time}
+                          {record.calendar_events?.date ? new Date(record.calendar_events.date).toLocaleDateString() : "No date"} 
+                          {record.calendar_events?.time ? ` at ${record.calendar_events.time}` : ""}
                         </p>
                       </div>
                       <Badge 
@@ -245,12 +210,11 @@ export function MemberDetailsSheet({ member }: MemberDetailsSheetProps) {
               </div>
             ) : paymentsData.length > 0 ? (
               <div className="space-y-3">
-                {/* @ts-ignore */}
                 {paymentsData.map((payment: any) => (
                   <div key={payment.id} className="border rounded-md p-3">
                     <div className="flex justify-between items-center">
                       <div>
-                        <p className="font-medium">${payment.amount.toFixed(2)}</p>
+                        <p className="font-medium">${Number(payment.amount).toFixed(2)}</p>
                         <p className="text-sm text-muted-foreground">
                           {payment.payment_method} • {new Date(payment.payment_date).toLocaleDateString()}
                         </p>

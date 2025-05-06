@@ -30,8 +30,9 @@ import {
 import { Profile, VoicePart, MemberStatus } from "@/contexts/AuthContext";
 import { Badge } from "@/components/ui/badge";
 import { Link } from "react-router-dom";
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
+import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { MemberDetailsSheet } from "@/components/members/MemberDetailsSheet";
+import { fetchSections, fetchMembers } from "@/utils/supabaseQueries";
 
 interface Section {
   id: string;
@@ -51,42 +52,29 @@ export default function MemberDirectoryPage() {
   const [selectedMember, setSelectedMember] = useState<Profile | null>(null);
 
   useEffect(() => {
-    async function fetchMembers() {
+    async function loadData() {
       try {
         setIsLoading(true);
         
-        // Fetch all sections
-        const { data: sectionsData, error: sectionsError } = await supabase
-          .from("sections")
-          .select("id, name");
-          
-        if (sectionsError) throw sectionsError;
+        // Fetch all sections using our utility function
+        const sectionsData = await fetchSections();
         setSections(sectionsData || []);
         
-        // Fetch members based on role
-        let query = supabase
-          .from("profiles")
-          .select(`
-            id, 
-            first_name, 
-            last_name, 
-            email, 
-            phone,
-            voice_part,
-            avatar_url,
-            role,
-            status,
-            section_id,
-            join_date,
-            sections (id, name)
-          `);
-          
-        const { data, error } = await query;
-          
-        if (error) throw error;
+        // Fetch members using our utility function
+        const membersData = await fetchMembers();
         
-        setMembers(data || []);
-        setFilteredMembers(data || []);
+        // Type assertion to ensure correct type
+        const typedMembers = membersData.map(member => {
+          // Ensure each member has required properties
+          return {
+            ...member,
+            role: member.role || 'member',
+            status: member.status || 'pending'
+          } as unknown as Profile;
+        });
+        
+        setMembers(typedMembers || []);
+        setFilteredMembers(typedMembers || []);
       } catch (error: any) {
         console.error("Error fetching members:", error);
         toast.error(error.message || "Failed to load member data");
@@ -95,7 +83,7 @@ export default function MemberDirectoryPage() {
       }
     }
     
-    fetchMembers();
+    loadData();
   }, [isAdmin, isSectionLeader]);
   
   useEffect(() => {
