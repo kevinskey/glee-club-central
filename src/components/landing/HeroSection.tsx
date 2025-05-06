@@ -43,15 +43,15 @@ export function HeroSection() {
               className="bg-glee-purple hover:bg-glee-purple/90 text-white text-[1.13rem] py-[0.7rem] px-[1.3rem]"
               onClick={() => navigate("/login")}
             >
-              Member Login
+              Member Portal
             </Button>
             <Button 
               variant="outline" 
               size={isMobile ? "default" : "lg"} 
               className="border-white/20 bg-white/5 text-white hover:bg-white/10 text-[1.13rem] py-[0.7rem] px-[1.3rem]"
-              onClick={() => navigate("/calendar")}
+              onClick={() => navigate("/fan-page")}
             >
-              Performance Schedule
+              Guest Login
             </Button>
           </div>
         </div>

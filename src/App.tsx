@@ -16,6 +16,7 @@ import MemberDirectoryPage from '@/pages/MemberDirectoryPage';
 import UserManagementPage from '@/pages/UserManagementPage';
 import NotFoundPage from '@/pages/NotFoundPage';
 import InviteMemberPage from '@/pages/InviteMemberPage';
+import FanPage from '@/pages/FanPage';
 
 import { Outlet } from "react-router-dom";
 import { DashboardLayout } from '@/components/layout/DashboardLayout';
@@ -46,6 +47,7 @@ function App() {
         <Route path="/register" element={<RegisterPage />} />
         <Route path="/forgot-password" element={<ForgotPasswordPage />} />
         <Route path="/reset-password" element={<ResetPasswordPage />} />
+        <Route path="/fan-page" element={<FanPage />} />
         
         <Route path="/dashboard" element={
           <ProtectedRoute>

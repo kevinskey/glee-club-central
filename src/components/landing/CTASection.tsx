@@ -29,7 +29,7 @@ export function CTASection() {
             className="bg-white text-glee-dark hover:bg-white/90"
             onClick={() => navigate("/login")}
           >
-            Member Login
+            Member Portal
           </Button>
         </div>
       </div>

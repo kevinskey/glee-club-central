@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -52,7 +53,7 @@ export function Header({ initialShowNewsFeed = true }: HeaderProps) {
             className="text-glee-purple border-glee-purple hover:bg-glee-purple/10" 
             onClick={() => navigate("/login")}
           >
-            Member Login
+            Member Portal
           </Button>
         </div>
         
@@ -88,7 +89,7 @@ export function Header({ initialShowNewsFeed = true }: HeaderProps) {
                 setMobileMenuOpen(false);
               }}
             >
-              Member Login
+              Member Portal
             </Button>
           </div>
         </div>

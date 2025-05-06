@@ -27,7 +27,7 @@ export function Footer() {
               className="text-glee-purple hover:text-glee-purple/80"
               onClick={() => navigate("/login")}
             >
-              Member Login
+              Member Portal
             </Button>
           </div>
         </div>
