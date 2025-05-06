@@ -1,7 +1,7 @@
 
 -- SQL to create a function for safely updating a profile with an avatar URL
 -- This function will handle the update even if avatar_url column doesn't exist
-CREATE OR REPLACE FUNCTION update_profile_avatar(user_id uuid, avatar_url_value text)
+CREATE OR REPLACE FUNCTION update_profile_avatar(p_user_id uuid, p_avatar_url text)
 RETURNS void
 LANGUAGE plpgsql
 AS $$
@@ -15,14 +15,14 @@ BEGIN
   ) THEN
     -- Column exists, update it
     UPDATE profiles
-    SET avatar_url = avatar_url_value,
+    SET avatar_url = p_avatar_url,
         updated_at = now()
-    WHERE id = user_id;
+    WHERE id = p_user_id;
   ELSE
     -- Column doesn't exist, just update the timestamp
     UPDATE profiles
     SET updated_at = now()
-    WHERE id = user_id;
+    WHERE id = p_user_id;
   END IF;
 END;
 $$;
