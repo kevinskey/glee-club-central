@@ -50,8 +50,8 @@ export interface MemberNote {
 // Helper function to query attendance records safely
 export async function fetchAttendanceRecords(memberId: string): Promise<AttendanceRecord[]> {
   try {
-    // Use direct RPC query
-    const { data, error } = await supabase.rpc('get_attendance_records', { 
+    // Use direct RPC query with type parameters
+    const { data, error } = await supabase.rpc<AttendanceRecord[]>('get_attendance_records', { 
       p_member_id: memberId 
     });
     
@@ -71,8 +71,8 @@ export async function fetchAttendanceRecords(memberId: string): Promise<Attendan
 // Helper function to query payment records safely
 export async function fetchPaymentRecords(memberId: string): Promise<PaymentRecord[]> {
   try {
-    // Use direct RPC query
-    const { data, error } = await supabase.rpc('get_payment_records', { 
+    // Use direct RPC query with type parameters
+    const { data, error } = await supabase.rpc<PaymentRecord[]>('get_payment_records', { 
       p_member_id: memberId 
     });
     
@@ -92,8 +92,8 @@ export async function fetchPaymentRecords(memberId: string): Promise<PaymentReco
 // Helper function to query member notes safely
 export async function fetchMemberNotes(memberId: string): Promise<MemberNote[]> {
   try {
-    // Use direct RPC query
-    const { data, error } = await supabase.rpc('get_member_notes', { 
+    // Use direct RPC query with type parameters
+    const { data, error } = await supabase.rpc<MemberNote[]>('get_member_notes', { 
       p_member_id: memberId 
     });
     
@@ -113,8 +113,8 @@ export async function fetchMemberNotes(memberId: string): Promise<MemberNote[]> 
 // Helper function to fetch sections
 export async function fetchSections(): Promise<Section[]> {
   try {
-    // Use RPC query
-    const { data, error } = await supabase.rpc('get_sections');
+    // Use RPC query with type parameters
+    const { data, error } = await supabase.rpc<Section[]>('get_sections');
     
     if (error) throw error;
     
@@ -129,7 +129,7 @@ export async function fetchSections(): Promise<Section[]> {
 // Helper function to fetch section data with member count
 export async function fetchSectionsWithMemberCount(): Promise<Section[]> {
   try {
-    const { data, error } = await supabase.rpc('get_sections_with_member_count');
+    const { data, error } = await supabase.rpc<Section[]>('get_sections_with_member_count');
     
     if (error) throw error;
     
@@ -144,7 +144,7 @@ export async function fetchSectionsWithMemberCount(): Promise<Section[]> {
 // Helper function to fetch members with section data
 export async function fetchMembers(): Promise<Profile[]> {
   try {
-    const { data, error } = await supabase.rpc('get_members_with_sections');
+    const { data, error } = await supabase.rpc<Profile[]>('get_members_with_sections');
     
     if (error) throw error;
     
