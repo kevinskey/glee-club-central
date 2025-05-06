@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { PageHeader } from "@/components/ui/page-header";
@@ -61,7 +60,10 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { supabase } from "@/integrations/supabase/client";
-import { fetchSectionsWithMemberCount } from "@/utils/supabaseQueries";
+import { 
+  fetchSectionsWithMemberCount, 
+  Section 
+} from "@/utils/supabaseQueries";
 
 interface Section {
   id: string;
@@ -154,33 +156,28 @@ export default function SectionsPage() {
 
   const handleSaveSection = async (values: z.infer<typeof sectionFormSchema>) => {
     try {
+      // For now, we will use direct supabase calls for updates as we haven't created RPC functions for these
+      // In a production app, we should also create RPC functions for these operations
       if (editingSection) {
-        // Update existing section
-        const { error } = await supabase
-          .from("sections")
-          .update({
-            name: values.name,
-            description: values.description,
-            section_leader_id: values.section_leader_id || null,
-          })
-          .eq("id", editingSection.id);
+        // Update existing section - use raw query
+        const { error } = await supabase.rpc('update_section', {
+          p_id: editingSection.id,
+          p_name: values.name,
+          p_description: values.description || null,
+          p_section_leader_id: values.section_leader_id || null
+        });
 
         if (error) throw error;
-
         toast.success("Section updated successfully");
       } else {
-        // Create new section
-        const { data, error } = await supabase
-          .from("sections")
-          .insert({
-            name: values.name,
-            description: values.description,
-            section_leader_id: values.section_leader_id || null,
-          })
-          .select();
+        // Create new section - use raw query
+        const { error } = await supabase.rpc('create_section', {
+          p_name: values.name,
+          p_description: values.description || null,
+          p_section_leader_id: values.section_leader_id || null
+        });
 
         if (error) throw error;
-
         toast.success("Section created successfully");
       }
 
@@ -196,21 +193,12 @@ export default function SectionsPage() {
 
   const handleDeleteSection = async (sectionId: string) => {
     try {
-      // First, update profiles to remove this section_id
-      const { error: profileUpdateError } = await supabase
-        .from("profiles")
-        .update({ section_id: null })
-        .eq("section_id", sectionId);
+      // Use raw query to handle section deletion
+      const { error } = await supabase.rpc('delete_section', {
+        p_section_id: sectionId
+      });
 
-      if (profileUpdateError) throw profileUpdateError;
-
-      // Then delete the section
-      const { error: deleteError } = await supabase
-        .from("sections")
-        .delete()
-        .eq("id", sectionId);
-
-      if (deleteError) throw deleteError;
+      if (error) throw error;
 
       // Update local state
       setSections(sections.filter(section => section.id !== sectionId));

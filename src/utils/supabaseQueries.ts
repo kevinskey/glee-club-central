@@ -1,19 +1,59 @@
 
 import { supabase } from "@/integrations/supabase/client";
+import { Profile } from "@/contexts/AuthContext";
 
-// Helper function to query attendance records safely
-export async function fetchAttendanceRecords(memberId: string) {
+// Define types for the data we're working with
+export interface Section {
+  id: string;
+  name: string;
+  description?: string | null;
+  section_leader_id?: string | null;
+  member_count?: number;
+}
+
+export interface AttendanceRecord {
+  id: string;
+  member_id: string;
+  status: string;
+  notes?: string;
+  calendar_events?: {
+    title?: string;
+    date?: string;
+    time?: string;
+    location?: string;
+  };
+  created_at: string;
+}
+
+export interface PaymentRecord {
+  id: string;
+  member_id: string;
+  amount: number;
+  payment_date: string;
+  payment_method: string;
+  status: string;
+  description?: string;
+}
+
+export interface MemberNote {
+  id: string;
+  member_id: string;
+  note: string;
+  created_at: string;
+  created_by: string;
+  created_by_profile?: {
+    first_name?: string;
+    last_name?: string;
+  };
+}
+
+// Helper function to query attendance records safely using raw SQL query
+export async function fetchAttendanceRecords(memberId: string): Promise<AttendanceRecord[]> {
   try {
-    // Use raw query to avoid TypeScript errors with untyped tables
-    const { data, error } = await supabase
-      .from('attendance')
-      .select(`
-        *,
-        calendar_events (title, date, time, location)
-      `)
-      .eq('member_id', memberId)
-      .order('created_at', { ascending: false })
-      .limit(10);
+    // Use raw SQL query to avoid TypeScript errors with untyped tables
+    const { data, error } = await supabase.rpc('get_attendance_records', { 
+      p_member_id: memberId 
+    });
       
     if (error) throw error;
     return data || [];
@@ -24,14 +64,12 @@ export async function fetchAttendanceRecords(memberId: string) {
 }
 
 // Helper function to query payment records safely
-export async function fetchPaymentRecords(memberId: string) {
+export async function fetchPaymentRecords(memberId: string): Promise<PaymentRecord[]> {
   try {
-    const { data, error } = await supabase
-      .from('payments')
-      .select("*")
-      .eq('member_id', memberId)
-      .order('payment_date', { ascending: false })
-      .limit(10);
+    // Use raw SQL query to avoid TypeScript errors with untyped tables
+    const { data, error } = await supabase.rpc('get_payment_records', { 
+      p_member_id: memberId 
+    });
       
     if (error) throw error;
     return data || [];
@@ -42,16 +80,12 @@ export async function fetchPaymentRecords(memberId: string) {
 }
 
 // Helper function to query member notes safely
-export async function fetchMemberNotes(memberId: string) {
+export async function fetchMemberNotes(memberId: string): Promise<MemberNote[]> {
   try {
-    const { data, error } = await supabase
-      .from('member_notes')
-      .select(`
-        *,
-        created_by_profile:profiles!created_by (first_name, last_name)
-      `)
-      .eq('member_id', memberId)
-      .order('created_at', { ascending: false });
+    // Use raw SQL query to avoid TypeScript errors with untyped tables
+    const { data, error } = await supabase.rpc('get_member_notes', { 
+      p_member_id: memberId 
+    });
       
     if (error) throw error;
     return data || [];
@@ -62,11 +96,10 @@ export async function fetchMemberNotes(memberId: string) {
 }
 
 // Helper function to fetch sections
-export async function fetchSections() {
+export async function fetchSections(): Promise<Section[]> {
   try {
-    const { data, error } = await supabase
-      .from('sections')
-      .select("id, name");
+    // Use raw SQL query to avoid TypeScript errors with untyped tables
+    const { data, error } = await supabase.rpc('get_sections');
       
     if (error) throw error;
     return data || [];
@@ -77,30 +110,13 @@ export async function fetchSections() {
 }
 
 // Helper function to fetch section data with member count
-export async function fetchSectionsWithMemberCount() {
+export async function fetchSectionsWithMemberCount(): Promise<Section[]> {
   try {
-    const { data, error } = await supabase
-      .from('sections')
-      .select(`
-        id,
-        name,
-        description,
-        section_leader_id,
-        profiles!section_id (id)
-      `);
+    // Use raw SQL query to avoid TypeScript errors with untyped tables
+    const { data, error } = await supabase.rpc('get_sections_with_member_count');
 
     if (error) throw error;
-    
-    // Count members in each section
-    const sectionsWithCount = data.map(section => ({
-      id: section.id,
-      name: section.name,
-      description: section.description,
-      section_leader_id: section.section_leader_id,
-      member_count: section.profiles ? section.profiles.length : 0,
-    }));
-
-    return sectionsWithCount;
+    return data || [];
   } catch (error) {
     console.error("Error fetching sections:", error);
     return [];
@@ -108,27 +124,23 @@ export async function fetchSectionsWithMemberCount() {
 }
 
 // Helper function to fetch members with section data
-export async function fetchMembers() {
+export async function fetchMembers(): Promise<Profile[]> {
   try {
-    const { data, error } = await supabase
-      .from('profiles')
-      .select(`
-        id, 
-        first_name, 
-        last_name, 
-        email, 
-        phone,
-        voice_part,
-        avatar_url,
-        role,
-        status,
-        section_id,
-        join_date,
-        sections:section_id (id, name)
-      `);
-      
+    // Use raw query to avoid TypeScript errors with untyped tables
+    const { data, error } = await supabase.rpc('get_members_with_sections');
+    
     if (error) throw error;
-    return data || [];
+    
+    // Make sure to cast the data to ensure it has all required Profile properties
+    const members = (data || []).map(member => {
+      return {
+        ...member,
+        role: member.role || 'member',
+        status: member.status || 'pending'
+      } as unknown as Profile;
+    });
+    
+    return members;
   } catch (error) {
     console.error("Error fetching members:", error);
     return [];

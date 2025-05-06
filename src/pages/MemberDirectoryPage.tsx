@@ -1,12 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { useAuth } from "@/contexts/AuthContext";
-import { supabase } from "@/integrations/supabase/client";
 import { PageHeader } from "@/components/ui/page-header";
 import { Users, Search, Download, UserPlus } from "lucide-react";
-import {
-  Card,
-  CardContent,
-} from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -31,7 +27,7 @@ import { Badge } from "@/components/ui/badge";
 import { Link } from "react-router-dom";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { MemberDetailsSheet } from "@/components/members/MemberDetailsSheet";
-import { fetchSections, fetchMembers } from "@/utils/supabaseQueries";
+import { fetchSections, fetchMembers, Section } from "@/utils/supabaseQueries";
 
 interface Section {
   id: string;
@@ -57,23 +53,12 @@ export default function MemberDirectoryPage() {
         
         // Fetch all sections using our utility function
         const sectionsData = await fetchSections();
-        setSections(sectionsData || []);
+        setSections(sectionsData);
         
         // Fetch members using our utility function
         const membersData = await fetchMembers();
-        
-        // Type assertion to ensure correct type
-        const typedMembers = membersData.map(member => {
-          // Ensure each member has required properties
-          return {
-            ...member,
-            role: member.role || 'member',
-            status: member.status || 'pending'
-          } as unknown as Profile;
-        });
-        
-        setMembers(typedMembers || []);
-        setFilteredMembers(typedMembers || []);
+        setMembers(membersData);
+        setFilteredMembers(membersData);
       } catch (error: any) {
         console.error("Error fetching members:", error);
         toast.error(error.message || "Failed to load member data");

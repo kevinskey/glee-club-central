@@ -11,7 +11,14 @@ import { Badge } from "@/components/ui/badge";
 import { Profile, useAuth } from "@/contexts/AuthContext";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Pencil, UserCog, CalendarClock, DollarSign } from "lucide-react";
-import { fetchAttendanceRecords, fetchPaymentRecords, fetchMemberNotes } from "@/utils/supabaseQueries";
+import { 
+  fetchAttendanceRecords,
+  fetchPaymentRecords,
+  fetchMemberNotes,
+  AttendanceRecord,
+  PaymentRecord,
+  MemberNote
+} from "@/utils/supabaseQueries";
 
 interface MemberDetailsSheetProps {
   member: Profile;
@@ -20,9 +27,9 @@ interface MemberDetailsSheetProps {
 export function MemberDetailsSheet({ member }: MemberDetailsSheetProps) {
   const { isAdmin } = useAuth();
   const [isEditMode, setIsEditMode] = useState(false);
-  const [attendanceData, setAttendanceData] = useState([]);
-  const [paymentsData, setPaymentsData] = useState([]);
-  const [notesData, setNotesData] = useState([]);
+  const [attendanceData, setAttendanceData] = useState<AttendanceRecord[]>([]);
+  const [paymentsData, setPaymentsData] = useState<PaymentRecord[]>([]);
+  const [notesData, setNotesData] = useState<MemberNote[]>([]);
   const [isLoading, setIsLoading] = useState({
     attendance: true,
     payments: true,

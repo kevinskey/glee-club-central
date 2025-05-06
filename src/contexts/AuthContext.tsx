@@ -1,4 +1,3 @@
-
 import React, { createContext, useState, useEffect, useContext } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -59,13 +58,20 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         return null;
       }
 
-      // Type assertion to handle the mismatch between database schema and our Profile type
-      const profileData = data as unknown as Profile;
-      
-      // Set default status if missing
-      if (!profileData.status) {
-        profileData.status = 'pending';
-      }
+      // Ensure the profile has all required fields with defaults if missing
+      const profileData: Profile = {
+        id: data.id,
+        first_name: data.first_name,
+        last_name: data.last_name,
+        email: data.email,
+        phone: data.phone,
+        role: (data.role as UserRole) || 'member',
+        voice_part: data.voice_part as VoicePart,
+        avatar_url: data.avatar_url,
+        status: (data.status as MemberStatus) || 'pending',
+        section_id: data.section_id,
+        join_date: data.join_date
+      };
       
       return profileData;
     } catch (error) {
