@@ -5,6 +5,7 @@ import { format, isAfter, startOfToday } from "date-fns";
 import { CalendarEvent } from "@/hooks/useCalendarEvents";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Clock, MapPin } from "lucide-react";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 interface CalendarContainerProps {
   date: Date | undefined;
@@ -30,26 +31,28 @@ export const CalendarContainer = memo(({
   loading,
   events
 }: CalendarContainerProps) => {
+  const isMobile = useIsMobile();
+  
   // Get upcoming events
-  const upcomingEvents = getUpcomingEvents(events);
+  const upcomingEvents = getUpcomingEvents(events, isMobile ? 2 : 3);
 
   if (loading) {
     return (
-      <div className="border rounded-lg p-4 bg-white dark:bg-gray-800 shadow-sm flex justify-center items-center h-[25rem]">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-glee-purple"></div>
+      <div className="border rounded-lg p-4 bg-white dark:bg-gray-800 shadow-sm flex justify-center items-center h-[20rem] md:h-[25rem]">
+        <div className="animate-spin rounded-full h-10 w-10 md:h-12 md:w-12 border-b-2 border-glee-purple"></div>
       </div>
     );
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 md:space-y-6">
       {/* Calendar */}
-      <div className="border rounded-lg p-4 bg-white dark:bg-gray-800 shadow-sm">
+      <div className="border rounded-lg p-2 md:p-4 bg-white dark:bg-gray-800 shadow-sm">
         <Calendar
           mode="single"
           selected={date}
           onSelect={setDate}
-          className="mx-auto"
+          className={isMobile ? "scale-[0.85] mx-auto -mx-2 transform-origin-center" : "mx-auto"}
           modifiers={{
             event: daysWithEvents
           }}
@@ -72,18 +75,18 @@ export const CalendarContainer = memo(({
 
       {/* Upcoming Events */}
       <Card className="bg-white dark:bg-gray-800 shadow-sm">
-        <CardHeader className="pb-2">
-          <CardTitle className="text-lg font-bold">Upcoming Events</CardTitle>
+        <CardHeader className={isMobile ? "pb-1 pt-3 px-3" : "pb-2"}>
+          <CardTitle className={`text-base md:text-lg font-bold ${isMobile ? "mb-0" : ""}`}>Upcoming Events</CardTitle>
         </CardHeader>
-        <CardContent>
+        <CardContent className={isMobile ? "p-3 pt-2" : ""}>
           {upcomingEvents.length === 0 ? (
             <p className="text-sm text-gray-500 dark:text-gray-400">No upcoming events scheduled.</p>
           ) : (
-            <div className="space-y-3">
+            <div className="space-y-2 md:space-y-3">
               {upcomingEvents.map(event => (
                 <div 
                   key={event.id} 
-                  className="p-3 border rounded-md cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700"
+                  className="p-2 md:p-3 border rounded-md cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700"
                   onClick={() => setDate(event.date)}
                 >
                   <div className="flex justify-between items-start">
@@ -94,13 +97,13 @@ export const CalendarContainer = memo(({
                   </div>
                   <div className="text-xs text-gray-600 dark:text-gray-300 mt-1 space-y-1">
                     <div className="flex items-center gap-1">
-                      <span>{format(event.date, 'MMM d, yyyy')}</span>
+                      <span>{format(event.date, 'MMM d')}</span>
                       <span>•</span>
                       <span>{event.time}</span>
                     </div>
                     <div className="flex items-center gap-1">
                       <MapPin className="h-3 w-3" />
-                      <span>{event.location}</span>
+                      <span className="truncate max-w-[180px] md:max-w-full">{event.location}</span>
                     </div>
                   </div>
                 </div>

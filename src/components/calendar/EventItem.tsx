@@ -3,6 +3,7 @@ import React, { memo } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Clock, MapPin } from "lucide-react";
 import { CalendarEvent } from "@/hooks/useCalendarEvents";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 interface EventItemProps {
   event: CalendarEvent;
@@ -17,36 +18,42 @@ export const EventItem = memo(({
   isSelected,
   onSelect,
   typeColor
-}: EventItemProps) => (
-  <div
-    key={event.id}
-    className={`p-4 border rounded-lg cursor-pointer transition-colors ${
-      isSelected
-        ? 'border-glee-purple bg-glee-purple/10 dark:bg-glee-purple/20'
-        : 'hover:bg-gray-50 dark:hover:bg-gray-800/70'
-    }`}
-    onClick={() => onSelect(event)}
-  >
-    <div className="flex justify-between items-start">
-      <h3 className="font-medium text-lg text-gray-800 dark:text-white">{event.title}</h3>
-      <Badge className={`${typeColor} text-white font-medium`}>
-        {event.type.charAt(0).toUpperCase() + event.type.slice(1)}
-      </Badge>
-    </div>
-    <div className="mt-2 text-sm text-gray-700 dark:text-gray-200">
-      <div className="flex items-center gap-1 mb-2">
-        <Clock className="h-4 w-4 text-gray-600 dark:text-gray-400" />
-        <span className="font-medium">{event.time}</span>
+}: EventItemProps) => {
+  const isMobile = useIsMobile();
+  
+  return (
+    <div
+      key={event.id}
+      className={`p-3 md:p-4 border rounded-lg cursor-pointer transition-colors ${
+        isSelected
+          ? 'border-glee-purple bg-glee-purple/10 dark:bg-glee-purple/20'
+          : 'hover:bg-gray-50 dark:hover:bg-gray-800/70'
+      }`}
+      onClick={() => onSelect(event)}
+    >
+      <div className="flex justify-between items-start">
+        <h3 className={`font-medium ${isMobile ? 'text-base' : 'text-lg'} text-gray-800 dark:text-white`}>
+          {event.title}
+        </h3>
+        <Badge className={`${typeColor} text-white font-medium text-xs`}>
+          {event.type.charAt(0).toUpperCase() + event.type.slice(1)}
+        </Badge>
       </div>
-      <div className="flex items-center gap-1">
-        <MapPin className="h-4 w-4 text-gray-600 dark:text-gray-400" />
-        <span className="font-medium">{event.location}</span>
+      <div className={`mt-2 text-xs ${!isMobile && 'sm:text-sm'} text-gray-700 dark:text-gray-200`}>
+        <div className="flex items-center gap-1 mb-2">
+          <Clock className="h-3 w-3 md:h-4 md:w-4 text-gray-600 dark:text-gray-400" />
+          <span className="font-medium">{event.time}</span>
+        </div>
+        <div className="flex items-center gap-1">
+          <MapPin className="h-3 w-3 md:h-4 md:w-4 text-gray-600 dark:text-gray-400" />
+          <span className="font-medium truncate">{event.location}</span>
+        </div>
       </div>
+      {isSelected && (
+        <p className="mt-3 text-xs md:text-sm text-gray-700 dark:text-gray-200">{event.description}</p>
+      )}
     </div>
-    {isSelected && (
-      <p className="mt-3 text-sm text-gray-700 dark:text-gray-200">{event.description}</p>
-    )}
-  </div>
-));
+  );
+});
 
 EventItem.displayName = "EventItem";

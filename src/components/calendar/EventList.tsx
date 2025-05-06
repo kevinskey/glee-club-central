@@ -3,6 +3,7 @@ import React from "react";
 import { format } from "date-fns";
 import { CalendarEvent } from "@/hooks/useCalendarEvents";
 import { EventItem } from "./EventItem";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 interface EventListProps {
   date: Date | undefined;
@@ -19,17 +20,19 @@ export const EventList = React.memo(({
   onSelectEvent,
   getEventTypeColor
 }: EventListProps) => {
+  const isMobile = useIsMobile();
+  
   if (!date) return null;
 
   return (
     <div className="mb-4">
-      <h2 className="text-xl font-semibold mb-3 text-gray-800 dark:text-white">
-        Events on {format(date, 'MMMM d, yyyy')}
+      <h2 className={`${isMobile ? 'text-lg' : 'text-xl'} font-semibold mb-2 md:mb-3 text-gray-800 dark:text-white`}>
+        Events on {format(date, isMobile ? 'MMM d, yyyy' : 'MMMM d, yyyy')}
       </h2>
       {events.length === 0 ? (
-        <p className="text-base text-gray-700 dark:text-gray-300">No events scheduled for this date.</p>
+        <p className="text-sm md:text-base text-gray-700 dark:text-gray-300">No events scheduled for this date.</p>
       ) : (
-        <div className="space-y-4 mt-4">
+        <div className="space-y-3 md:space-y-4 mt-3 md:mt-4">
           {events.map((event) => (
             <EventItem
               key={event.id}
