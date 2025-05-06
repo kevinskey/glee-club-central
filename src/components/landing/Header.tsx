@@ -73,7 +73,7 @@ export function Header({ initialShowNewsFeed = true }: HeaderProps) {
       
       {/* Mobile menu */}
       {mobileMenuOpen && (
-        <div className="md:hidden bg-white dark:bg-glee-dark border-t border-gray-200 dark:border-gray-800">
+        <div className="md:hidden bg-white dark:bg-white border-t border-gray-200 dark:border-gray-200">
           <div className="container py-4 px-4 flex flex-col gap-4">
             <div className="flex justify-center">
               <Clock />

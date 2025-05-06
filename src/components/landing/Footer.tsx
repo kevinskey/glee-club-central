@@ -8,7 +8,7 @@ export function Footer() {
   const navigate = useNavigate();
   
   return (
-    <footer className="border-t py-6 sm:py-8 md:py-10 lg:py-12 bg-white dark:bg-glee-dark">
+    <footer className="border-t py-6 sm:py-8 md:py-10 lg:py-12 bg-white dark:bg-white">
       <div className="container px-4 sm:px-6 md:px-8">
         <div className="flex flex-col md:flex-row justify-between items-center">
           <div className="flex items-center mb-5 sm:mb-6 md:mb-0">
@@ -19,9 +19,9 @@ export function Footer() {
           </div>
           
           <div className="flex flex-col sm:flex-row items-center gap-3 sm:gap-4 md:gap-6 lg:gap-8">
-            <a href="#" className="text-sm sm:text-base text-gray-600 dark:text-gray-300 hover:text-glee-purple transition-colors">About</a>
-            <a href="#" className="text-sm sm:text-base text-gray-600 dark:text-gray-300 hover:text-glee-purple transition-colors">Performances</a>
-            <a href="#" className="text-sm sm:text-base text-gray-600 dark:text-gray-300 hover:text-glee-purple transition-colors">Contact</a>
+            <a href="#" className="text-sm sm:text-base text-gray-600 dark:text-gray-600 hover:text-glee-purple transition-colors">About</a>
+            <a href="#" className="text-sm sm:text-base text-gray-600 dark:text-gray-600 hover:text-glee-purple transition-colors">Performances</a>
+            <a href="#" className="text-sm sm:text-base text-gray-600 dark:text-gray-600 hover:text-glee-purple transition-colors">Contact</a>
             <Button 
               variant="ghost" 
               className="text-glee-purple hover:text-glee-purple/80"
@@ -32,7 +32,7 @@ export function Footer() {
           </div>
         </div>
         
-        <div className="mt-5 sm:mt-6 md:mt-8 pt-5 sm:pt-6 md:pt-8 border-t border-gray-200 dark:border-gray-800 text-center text-gray-500 dark:text-gray-400 text-xs sm:text-sm">
+        <div className="mt-5 sm:mt-6 md:mt-8 pt-5 sm:pt-6 md:pt-8 border-t border-gray-200 dark:border-gray-200 text-center text-gray-500 dark:text-gray-500 text-xs sm:text-sm">
           <p>© {new Date().getFullYear()} Spelman College Glee Club. All rights reserved.</p>
         </div>
       </div>

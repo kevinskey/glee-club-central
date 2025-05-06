@@ -63,13 +63,13 @@ export default {
 					border: 'hsl(var(--sidebar-border))',
 					ring: 'hsl(var(--sidebar-ring))'
 				},
-				// Custom colors for Spelman College
+				// Updated colors for Carolina blue theme
 				glee: {
-					purple: '#0B4EA2', // Spelman Blue
+					purple: '#4B9CD3', // Carolina Blue
 					gold: '#FFFFFF',    // White
-					light: '#E6EDF5',   // Light blue
-					dark: '#072A57',    // Dark blue (for backgrounds)
-					accent: '#C4A747',  // Gold accent
+					light: '#F5FAFF',   // Very light blue background
+					dark: '#212529',    // Black for accents
+					accent: '#FFD700',  // Gold accent (maintained)
 				}
 			},
 			fontFamily: {

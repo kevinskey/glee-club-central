@@ -26,7 +26,7 @@ export function CTASection() {
           </p>
           <Button 
             size={isMobile ? "default" : "lg"} 
-            className="bg-white text-glee-purple hover:bg-white/90"
+            className="bg-white text-glee-dark hover:bg-white/90"
             onClick={() => navigate("/login")}
           >
             Member Login

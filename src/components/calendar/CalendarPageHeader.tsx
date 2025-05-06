@@ -34,7 +34,7 @@ export const CalendarPageHeader = ({ onAddEventClick }: CalendarPageHeaderProps)
           <ThemeToggle variant="toggle" size="sm" />
           <Button
             onClick={onAddEventClick}
-            className="bg-glee-purple hover:bg-glee-purple/90 hidden sm:flex"
+            className="bg-glee-purple hover:bg-glee-purple/90 text-white hidden sm:flex"
           >
             <Plus className="mr-2 h-4 w-4" />
             Add Event
@@ -46,7 +46,7 @@ export const CalendarPageHeader = ({ onAddEventClick }: CalendarPageHeaderProps)
       <div className="flex justify-end sm:hidden mb-4">
         <Button
           onClick={onAddEventClick}
-          className="bg-glee-purple hover:bg-glee-purple/90 w-full sm:w-auto"
+          className="bg-glee-purple hover:bg-glee-purple/90 w-full sm:w-auto text-white"
         >
           <Plus className="mr-2 h-4 w-4" />
           Add Event
