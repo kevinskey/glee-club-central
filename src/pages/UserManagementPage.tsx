@@ -183,9 +183,8 @@ export default function UserManagementPage() {
                   <SelectItem value="all">All Roles</SelectItem>
                   <SelectItem value="admin">Admin</SelectItem>
                   <SelectItem value="section_leader">Section Leader</SelectItem>
-                  <SelectItem value="student_conductor">Student Conductor</SelectItem>
-                  <SelectItem value="accompanist">Accompanist</SelectItem>
-                  <SelectItem value="singer">Singer</SelectItem>
+                  <SelectItem value="Director">Director</SelectItem>
+                  <SelectItem value="Accompanist">Accompanist</SelectItem>
                   <SelectItem value="member">Member</SelectItem>
                 </SelectContent>
               </Select>
@@ -422,7 +421,21 @@ export default function UserManagementPage() {
           </div>
           
           <div className="mt-4 text-sm text-gray-500">
-            Total: {filteredUsers.length} users
+            Total: {users.filter(user => {
+              // Search filter
+              const matchesSearch = searchTerm === "" || 
+                user.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                user.first_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                user.last_name?.toLowerCase().includes(searchTerm.toLowerCase());
+                
+              // Role filter
+              const matchesRole = roleFilter === "all" || user.role === roleFilter;
+              
+              // Status filter
+              const matchesStatus = statusFilter === "all" || user.status === statusFilter;
+              
+              return matchesSearch && matchesRole && matchesStatus;
+            }).length} users
           </div>
         </CardContent>
       </Card>

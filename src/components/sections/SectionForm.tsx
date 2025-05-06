@@ -1,3 +1,4 @@
+
 import React, { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -115,7 +116,7 @@ export function SectionForm({ section, leaders, onSubmit }: SectionFormProps) {
               <FormItem>
                 <FormLabel>Section Leader (Optional)</FormLabel>
                 <Select 
-                  value={field.value || ""} 
+                  value={field.value || "none"} 
                   onValueChange={field.onChange}
                 >
                   <FormControl>
@@ -124,7 +125,7 @@ export function SectionForm({ section, leaders, onSubmit }: SectionFormProps) {
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
-                    <SelectItem value="">None</SelectItem>
+                    <SelectItem value="none">None</SelectItem>
                     {leaders.map((leader) => (
                       <SelectItem key={leader.id} value={leader.id}>
                         {leader.name}

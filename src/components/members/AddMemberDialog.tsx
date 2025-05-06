@@ -190,7 +190,7 @@ export const AddMemberDialog: React.FC<AddMemberDialogProps> = ({
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        <SelectItem value="">None</SelectItem>
+                        <SelectItem value="none">None</SelectItem>
                         <SelectItem value="soprano_1">Soprano 1</SelectItem>
                         <SelectItem value="soprano_2">Soprano 2</SelectItem>
                         <SelectItem value="alto_1">Alto 1</SelectItem>
@@ -220,7 +220,7 @@ export const AddMemberDialog: React.FC<AddMemberDialogProps> = ({
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        <SelectItem value="">None</SelectItem>
+                        <SelectItem value="none">None</SelectItem>
                         {sections.map((section) => (
                           <SelectItem key={section.id} value={section.id}>
                             {section.name}
@@ -253,8 +253,8 @@ export const AddMemberDialog: React.FC<AddMemberDialogProps> = ({
                       <SelectContent>
                         <SelectItem value="member">Member</SelectItem>
                         <SelectItem value="section_leader">Section Leader</SelectItem>
-                        <SelectItem value="director">Director</SelectItem>
-                        <SelectItem value="accompanist">Accompanist</SelectItem>
+                        <SelectItem value="Director">Director</SelectItem>
+                        <SelectItem value="Accompanist">Accompanist</SelectItem>
                         <SelectItem value="admin">Admin</SelectItem>
                       </SelectContent>
                     </Select>
