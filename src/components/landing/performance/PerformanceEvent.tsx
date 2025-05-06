@@ -36,12 +36,12 @@ export function PerformanceEventItem({
       <div className="flex justify-between items-center gap-3">
         <div className="font-medium text-base md:text-lg font-playfair">{event.title}</div>
         <div className="text-xs sm:text-sm bg-glee-purple/10 text-glee-purple px-3 py-1.5 rounded-full font-medium tracking-wide inline-flex items-center whitespace-nowrap">
-          <Calendar className="h-3 w-3 mr-1" />
+          <Calendar className="h-3 w-3 mr-1.5" />
           {format(event.date, 'MMM d, yyyy')}
         </div>
       </div>
-      <div className="text-xs md:text-sm text-gray-600 dark:text-gray-300 mt-2 flex items-center">
-        <MapPin className="h-3 w-3 mr-1 text-gray-500 dark:text-gray-400" />
+      <div className="text-xs md:text-sm text-gray-600 dark:text-gray-300 mt-3 flex items-center">
+        <MapPin className="h-3 w-3 mr-1.5 text-gray-500 dark:text-gray-400" />
         {event.location}
       </div>
     </div>
@@ -64,30 +64,30 @@ export function PerformanceEventDetails({ event }: PerformanceEventDetailsProps)
           className="w-full h-full object-cover transition-opacity duration-300"
           key={event.id} // Force re-render when image changes
         />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent flex flex-col justify-end p-4 md:p-6">
-          <div className="inline-block px-3 py-1 bg-glee-purple text-white text-xs uppercase tracking-wider font-bold rounded-full mb-2">
+        <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent flex flex-col justify-end p-5 md:p-7">
+          <div className="inline-block px-4 py-1.5 bg-glee-purple text-white text-xs uppercase tracking-wider font-bold rounded-full mb-3 md:mb-4">
             Featured Event
           </div>
-          <h3 className="text-xl md:text-2xl font-playfair font-bold text-white">
+          <h3 className="text-xl md:text-2xl lg:text-3xl font-playfair font-bold text-white mb-2 md:mb-3">
             {event.title}
           </h3>
-          <div className="text-white/90 flex items-center gap-2 mt-2">
-            <div className="flex items-center gap-1 bg-black/30 backdrop-blur-sm px-2 py-1 rounded-full">
-              <Calendar className="h-3 w-3 md:h-4 md:w-4" />
+          <div className="text-white/90 flex items-center gap-3 mt-2 md:mt-3">
+            <div className="flex items-center gap-1.5 bg-black/40 backdrop-blur-sm px-4 py-1.5 rounded-full">
+              <Calendar className="h-3.5 w-3.5 md:h-4 md:w-4" />
               <span className="text-sm md:text-base font-medium">{format(event.date, 'MMMM d, yyyy')}</span>
             </div>
           </div>
         </div>
       </div>
-      <div className="p-4">
-        <div className="font-medium text-base md:text-lg flex items-center gap-2 text-gray-800 dark:text-white">
+      <div className="p-5 md:p-7">
+        <div className="font-medium text-base md:text-lg flex items-center gap-2 text-gray-800 dark:text-white mb-3 md:mb-4">
           <MapPin className="h-4 w-4 text-glee-purple" />
           {event.location}
         </div>
-        <p className="mt-2 text-sm md:text-base text-gray-600 dark:text-gray-300">
+        <p className="mt-2 mb-5 md:mb-6 text-sm md:text-base text-gray-600 dark:text-gray-300">
           {event.description}
         </p>
-        <div className="mt-4 flex gap-2">
+        <div className="mt-4 md:mt-6 flex gap-3">
           <Button 
             variant="default" 
             className="bg-glee-purple hover:bg-glee-purple/90 text-white"
