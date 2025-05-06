@@ -43,7 +43,7 @@ export function HeroSection() {
               className="bg-glee-purple hover:bg-glee-purple/90 text-white text-[1.13rem] py-[0.7rem] px-[1.3rem]"
               onClick={() => navigate("/login")}
             >
-              Member Portal
+              Member Login
             </Button>
             <Button 
               variant="outline" 
