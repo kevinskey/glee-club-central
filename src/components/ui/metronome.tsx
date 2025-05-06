@@ -21,11 +21,11 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 
-// Update sound paths to use raw strings instead of relative paths
+// Define sound types with correct public URLs
 const SOUNDS = {
-  click: "sounds/metronome-click.mp3",
-  woodblock: "sounds/metronome-woodblock.mp3",
-  beep: "sounds/metronome-beep.mp3",
+  click: "/sounds/metronome-click.mp3",
+  woodblock: "/sounds/metronome-woodblock.mp3",
+  beep: "/sounds/metronome-beep.mp3",
 };
 
 export function Metronome() {
@@ -40,8 +40,14 @@ export function Metronome() {
   
   // Effect to create audio element
   useEffect(() => {
+    // Create a new audio element with the full URL path
     audioRef.current = new Audio(SOUNDS[soundType]);
     audioRef.current.volume = volume;
+    
+    // Preload the audio for better performance
+    if (audioRef.current) {
+      audioRef.current.load();
+    }
     
     // Log successful audio creation
     console.log("Audio element created with source:", SOUNDS[soundType]);
@@ -63,12 +69,16 @@ export function Metronome() {
   useEffect(() => {
     const playBeat = () => {
       if (audioRef.current) {
-        // Clone the audio to allow overlapping sounds
-        const sound = audioRef.current.cloneNode() as HTMLAudioElement;
-        sound.volume = volume;
-        sound.play()
-          .then(() => console.log("Metronome sound played successfully"))
-          .catch(err => console.error("Error playing metronome:", err));
+        try {
+          // Clone the audio to allow overlapping sounds
+          const sound = audioRef.current.cloneNode() as HTMLAudioElement;
+          sound.volume = volume;
+          sound.play()
+            .then(() => console.log("Metronome sound played successfully"))
+            .catch(err => console.error("Error playing metronome:", err));
+        } catch (error) {
+          console.error("Error playing metronome:", error);
+        }
       }
     };
     
