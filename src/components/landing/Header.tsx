@@ -2,12 +2,13 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Music, Menu, X } from "lucide-react";
+import { Menu, X } from "lucide-react";
 import { Clock } from "@/components/ui/clock";
 import { NewsFeed } from "@/components/news/NewsFeed";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { Metronome } from "@/components/ui/metronome";
+import { Icons } from "@/components/Icons";
 
 interface HeaderProps {
   initialShowNewsFeed?: boolean;
@@ -39,16 +40,16 @@ export function Header({ initialShowNewsFeed = true }: HeaderProps) {
       {showNewsFeed && <NewsFeed onClose={() => setShowNewsFeed(false)} />}
       <div className="container px-4 md:px-8 flex h-16 items-center justify-between">
         <div className="flex items-center gap-2">
-          <Music className="h-5 w-5 text-glee-purple" />
+          <Icons.logo className="h-5 w-5 text-glee-purple" />
           <span className="font-playfair text-lg font-semibold text-glee-purple">
             Glee World
           </span>
+          <Metronome />
         </div>
         
         {/* Desktop navigation */}
         <div className="hidden md:flex items-center gap-3">
           <ThemeToggle />
-          <Metronome />
           <Clock />
           <Button 
             variant="outline" 
@@ -89,7 +90,6 @@ export function Header({ initialShowNewsFeed = true }: HeaderProps) {
           <div className="container py-4 px-4 flex flex-col gap-4">
             <div className="flex justify-center gap-4">
               <ThemeToggle />
-              <Metronome />
               <Clock />
             </div>
             <Button 

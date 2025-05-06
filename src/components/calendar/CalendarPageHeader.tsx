@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { Metronome } from "@/components/ui/metronome";
+import { Icons } from "@/components/Icons";
 
 interface CalendarPageHeaderProps {
   onAddEventClick: () => void;
@@ -30,10 +31,10 @@ export const CalendarPageHeader = ({ onAddEventClick }: CalendarPageHeaderProps)
         <h1 className="text-2xl sm:text-3xl md:text-4xl font-playfair font-bold flex items-center gap-2">
           <CalendarIcon className="h-6 w-6 sm:h-7 sm:w-7 md:h-8 md:w-8 text-glee-purple" />
           <span>Performance <span className="text-glee-purple">Calendar</span></span>
+          <Metronome />
         </h1>
         <div className="flex items-center gap-3 mt-4 sm:mt-0">
           <ThemeToggle />
-          <Metronome />
           <Button
             onClick={onAddEventClick}
             className="bg-glee-purple hover:bg-glee-purple/90 text-white hidden sm:flex h-8 px-3 text-xs"

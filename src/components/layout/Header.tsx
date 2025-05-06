@@ -3,7 +3,7 @@ import React from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
-import { Menu, User, LogOut, Music, ChevronRight, Home } from "lucide-react";
+import { Menu, User, LogOut, ChevronRight, Home } from "lucide-react";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { Metronome } from "@/components/ui/metronome";
 import {
@@ -33,6 +33,7 @@ import {
 import { SidebarNav } from "./SidebarNav";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { NewsFeed } from "@/components/news/NewsFeed";
+import { Icons } from "@/components/Icons";
 
 export const Header = () => {
   const { user, profile, signOut } = useAuth();
@@ -117,7 +118,7 @@ export const Header = () => {
             <SheetContent side="left" className="pr-0 overflow-y-auto">
               <SheetHeader>
                 <SheetTitle className="flex items-center gap-2 text-glee-purple">
-                  <Music className="h-5 w-5" />
+                  <Icons.logo className="h-5 w-5" />
                   Glee World
                 </SheetTitle>
                 <SheetDescription>
@@ -198,11 +199,12 @@ export const Header = () => {
             onClick={() => navigate("/dashboard")}
             className="flex items-center gap-2"
           >
-            <Music className="h-5 w-5 text-glee-purple" />
+            <Icons.logo className="h-5 w-5 text-glee-purple" />
             <span className="font-playfair text-lg font-semibold text-glee-purple">
               Glee World
             </span>
           </Button>
+          <Metronome />
           
           {/* Add Home link in desktop view if on dashboard */}
           {isOnDashboard && (
@@ -219,9 +221,8 @@ export const Header = () => {
         </div>
 
         <div className="flex items-center gap-2">
-          {/* Add Theme Toggle and Metronome Buttons */}
+          {/* Add Theme Toggle Button */}
           <ThemeToggle />
-          <Metronome />
           
           {user ? (
             <DropdownMenuProvider>

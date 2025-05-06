@@ -6,8 +6,7 @@ import {
   Play, 
   Pause, 
   Music, 
-  Volume2,
-  ChevronDown
+  Volume2
 } from "lucide-react";
 import { 
   Select,
@@ -22,10 +21,11 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 
+// Update sound paths to use raw strings instead of relative paths
 const SOUNDS = {
-  click: "/sounds/metronome-click.mp3",
-  woodblock: "/sounds/metronome-woodblock.mp3",
-  beep: "/sounds/metronome-beep.mp3",
+  click: "sounds/metronome-click.mp3",
+  woodblock: "sounds/metronome-woodblock.mp3",
+  beep: "sounds/metronome-beep.mp3",
 };
 
 export function Metronome() {
@@ -42,6 +42,10 @@ export function Metronome() {
   useEffect(() => {
     audioRef.current = new Audio(SOUNDS[soundType]);
     audioRef.current.volume = volume;
+    
+    // Log successful audio creation
+    console.log("Audio element created with source:", SOUNDS[soundType]);
+    
     return () => {
       if (audioRef.current) {
         audioRef.current.pause();
@@ -62,7 +66,9 @@ export function Metronome() {
         // Clone the audio to allow overlapping sounds
         const sound = audioRef.current.cloneNode() as HTMLAudioElement;
         sound.volume = volume;
-        sound.play().catch(err => console.error("Error playing metronome:", err));
+        sound.play()
+          .then(() => console.log("Metronome sound played successfully"))
+          .catch(err => console.error("Error playing metronome:", err));
       }
     };
     
