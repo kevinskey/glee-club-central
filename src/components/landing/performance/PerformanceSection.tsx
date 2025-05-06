@@ -90,7 +90,7 @@ export function PerformanceSection() {
                           className="w-full h-full object-cover"
                         />
                         <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent flex flex-col justify-center items-center">
-                          <h3 className="font-bold text-white text-2xl md:text-4xl lg:text-5xl font-playfair mb-auto mt-8 md:mt-12 text-center px-4 md:px-6 drop-shadow-lg">
+                          <h3 className="font-bold text-white text-2xl md:text-4xl lg:text-5xl font-playfair text-center px-4 md:px-6 drop-shadow-lg my-auto">
                             {event.title}
                           </h3>
                           
