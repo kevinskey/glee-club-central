@@ -48,20 +48,22 @@ function App() {
           <Route path="calendar" element={<CalendarPage />} />
           <Route path="profile" element={<ProfilePage />} />
           
-          {/* Admin-only routes */}
+          {/* Admin and section leader routes */}
           <Route path="sections" element={
             <ProtectedRoute allowedRoles={["admin", "section_leader"]}>
               <SectionsPage />
             </ProtectedRoute>
           } />
-          <Route path="members" element={
-            <ProtectedRoute allowedRoles={["admin"]}>
-              <MemberDirectoryPage />
-            </ProtectedRoute>
-          } />
+          
+          {/* Admin-only routes */}
           <Route path="users" element={
             <ProtectedRoute allowedRoles={["admin"]}>
               <UserManagementPage />
+            </ProtectedRoute>
+          } />
+          <Route path="members" element={
+            <ProtectedRoute allowedRoles={["admin"]}>
+              <MemberDirectoryPage />
             </ProtectedRoute>
           } />
           <Route path="invite-member" element={

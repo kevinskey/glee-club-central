@@ -23,34 +23,26 @@ interface SidebarNavProps {
 }
 
 export const SidebarNav: React.FC<SidebarNavProps> = ({ className }) => {
-  const { isAdmin } = useAuth();
-
+  const { isAdmin, profile } = useAuth();
+  
+  // Debug the admin status
+  const adminStatus = isAdmin ? isAdmin() : false;
+  console.log("SidebarNav - Admin status:", adminStatus, "User role:", profile?.role);
+  
   return (
     <nav className={cn("flex flex-col space-y-1", className)}>
       <NavLink href="/dashboard" icon={<LayoutDashboard className="h-5 w-5" />}>
         Dashboard
       </NavLink>
-      <NavLink href="/sheet-music" icon={<Music className="h-5 w-5" />}>
-        Sheet Music
-      </NavLink>
-      <NavLink href="/calendar" icon={<Calendar className="h-5 w-5" />}>
+      <NavLink href="/dashboard/calendar" icon={<Calendar className="h-5 w-5" />}>
         Calendar
       </NavLink>
-      <NavLink href="/media-library" icon={<Library className="h-5 w-5" />}>
-        Media Library
-      </NavLink>
-      <NavLink href="/recordings" icon={<Mic className="h-5 w-5" />}>
-        Recordings
-      </NavLink>
-      <NavLink href="/profile" icon={<FileText className="h-5 w-5" />}>
+      <NavLink href="/dashboard/profile" icon={<FileText className="h-5 w-5" />}>
         My Profile
       </NavLink>
-      <NavLink href="/messaging" icon={<MessageSquare className="h-5 w-5" />}>
-        Messaging
-      </NavLink>
       
-      {/* Admin navigation section */}
-      {isAdmin() && (
+      {/* Only show admin tools if the user is an admin */}
+      {adminStatus && (
         <>
           <div className="mt-6 pt-6 border-t border-border">
             <h4 className="mb-2 px-2 text-xs font-semibold text-muted-foreground uppercase tracking-wider">

@@ -29,14 +29,28 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
     return <Navigate to="/login" state={{ from: location }} replace />;
   }
 
+  // Debug the user's role and access
+  const userRole = profile?.role || "unknown";
+  const userHasAccess = !allowedRoles || (profile && allowedRoles.includes(userRole as any));
+  
+  console.log({
+    accessCheck: {
+      userRole,
+      allowedRoles,
+      hasAccess: userHasAccess,
+      isAdmin: isAdmin ? isAdmin() : false,
+      profileData: profile
+    }
+  });
+
   // Check role-based access if roles are specified
-  if (allowedRoles && profile && !allowedRoles.includes(profile.role as any)) {
-    console.log("Access denied - Required roles:", allowedRoles, "User role:", profile.role);
+  if (allowedRoles && !userHasAccess) {
+    console.log("Access denied - Required roles:", allowedRoles, "User role:", userRole);
     return <Navigate to="/dashboard" replace />;
   }
 
-  // Log authorization status
-  console.log("Route access granted. User role:", profile?.role, "Admin status:", isAdmin?.());
+  // Access granted
+  console.log("Route access granted. User role:", userRole, "Admin status:", isAdmin ? isAdmin() : false);
 
   return <>{children}</>;
 };
