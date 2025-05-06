@@ -54,8 +54,8 @@ export function HeroSection() {
         </div>
       </div>
       
-      {/* Glee Club Crest - Reduced by 50% */}
-      <div className="absolute bottom-4 right-4 md:bottom-8 md:right-8 z-10 w-10 md:w-14 lg:w-16 animate-fade-in">
+      {/* Glee Club Crest - Increased by 25% from reduced size */}
+      <div className="absolute bottom-4 right-4 md:bottom-8 md:right-8 z-10 w-12.5 md:w-17.5 lg:w-20 animate-fade-in">
         <img 
           src="/lovable-uploads/9a044e72-80dc-40a6-b716-2d5c2d35b878.png" 
           alt="Spelman Glee Club 100 Crest" 
