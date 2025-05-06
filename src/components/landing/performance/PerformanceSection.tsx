@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Calendar } from "lucide-react";
@@ -89,13 +90,16 @@ export function PerformanceSection() {
                           className="w-full h-full object-cover"
                         />
                         <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-black/20 flex flex-col justify-end p-4 md:p-6">
-                          <h3 className="text-white font-bold text-lg md:text-xl group-hover:text-glee-purple transition-colors">
+                          <h3 className="text-white font-bold text-lg md:text-xl group-hover:text-glee-purple transition-colors font-playfair tracking-wide">
                             {event.title}
                           </h3>
-                          <div className="text-white/90 text-sm md:text-base">
-                            <span>{format(event.date, 'MMMM d, yyyy')}</span>
-                            <span className="mx-1">•</span>
-                            <span>{event.location}</span>
+                          <div className="flex items-center mt-2 space-x-2">
+                            <span className="px-3 py-1 bg-glee-purple/80 backdrop-blur-sm rounded-full text-white text-xs md:text-sm font-medium tracking-wider">
+                              {format(event.date, 'MMM d, yyyy')}
+                            </span>
+                            <span className="px-3 py-1 bg-black/40 backdrop-blur-sm rounded-full text-white/90 text-xs md:text-sm">
+                              {event.location}
+                            </span>
                           </div>
                         </div>
                       </div>

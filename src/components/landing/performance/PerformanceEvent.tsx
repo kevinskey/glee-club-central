@@ -1,7 +1,7 @@
 
 import React from "react";
 import { format } from "date-fns";
-import { Calendar } from "lucide-react";
+import { Calendar, Clock, MapPin } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useIsMobile } from "@/hooks/use-mobile";
 
@@ -34,12 +34,16 @@ export function PerformanceEventItem({
       onClick={() => onSelect(event)}
     >
       <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-1">
-        <div className="font-medium text-base md:text-lg">{event.title}</div>
-        <div className="text-xs sm:text-sm text-gray-500 dark:text-gray-400">
-          {format(event.date, 'MMMM d, yyyy')}
+        <div className="font-medium text-base md:text-lg font-playfair">{event.title}</div>
+        <div className="text-xs sm:text-sm bg-glee-purple/10 text-glee-purple px-2 py-1 rounded-full font-medium tracking-wide inline-flex items-center">
+          <Calendar className="h-3 w-3 mr-1" />
+          {format(event.date, 'MMM d, yyyy')}
         </div>
       </div>
-      <div className="text-xs md:text-sm text-gray-600 dark:text-gray-300 mt-1">{event.location}</div>
+      <div className="text-xs md:text-sm text-gray-600 dark:text-gray-300 mt-2 flex items-center">
+        <MapPin className="h-3 w-3 mr-1 text-gray-500 dark:text-gray-400" />
+        {event.location}
+      </div>
     </div>
   );
 }
@@ -60,22 +64,37 @@ export function PerformanceEventDetails({ event }: PerformanceEventDetailsProps)
           className="w-full h-full object-cover transition-opacity duration-300"
           key={event.id} // Force re-render when image changes
         />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent flex flex-col justify-end p-4 md:p-6">
+        <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent flex flex-col justify-end p-4 md:p-6">
+          <div className="inline-block px-3 py-1 bg-glee-purple text-white text-xs uppercase tracking-wider font-bold rounded-full mb-2">
+            Featured Event
+          </div>
           <h3 className="text-xl md:text-2xl font-playfair font-bold text-white">
             {event.title}
           </h3>
           <div className="text-white/90 flex items-center gap-2 mt-2">
-            <Calendar className="h-3 w-3 md:h-4 md:w-4" />
-            <span className="text-sm md:text-base">{format(event.date, 'MMMM d, yyyy')}</span>
+            <div className="flex items-center gap-1 bg-black/30 backdrop-blur-sm px-2 py-1 rounded-full">
+              <Calendar className="h-3 w-3 md:h-4 md:w-4" />
+              <span className="text-sm md:text-base font-medium">{format(event.date, 'MMMM d, yyyy')}</span>
+            </div>
           </div>
         </div>
       </div>
       <div className="p-4">
-        <div className="font-medium text-base md:text-lg">Location: {event.location}</div>
+        <div className="font-medium text-base md:text-lg flex items-center gap-2 text-gray-800 dark:text-white">
+          <MapPin className="h-4 w-4 text-glee-purple" />
+          {event.location}
+        </div>
         <p className="mt-2 text-sm md:text-base text-gray-600 dark:text-gray-300">
           {event.description}
         </p>
-        <div className="mt-4">
+        <div className="mt-4 flex gap-2">
+          <Button 
+            variant="default" 
+            className="bg-glee-purple hover:bg-glee-purple/90 text-white"
+            size={isMobile ? "default" : "lg"}
+          >
+            Get Tickets
+          </Button>
           <Button 
             variant="outline" 
             className="border-glee-purple text-glee-purple hover:bg-glee-purple/10"
