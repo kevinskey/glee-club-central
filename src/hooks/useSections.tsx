@@ -64,7 +64,7 @@ export function useSections() {
             p_name: values.name,
             p_description: values.description || null,
             p_section_leader_id: values.section_leader_id || null
-          });
+          } as any);
 
         if (error) throw error;
         toast.success("Section updated successfully");
@@ -75,7 +75,7 @@ export function useSections() {
             p_name: values.name,
             p_description: values.description || null,
             p_section_leader_id: values.section_leader_id || null
-          });
+          } as any);
 
         if (error) throw error;
         toast.success("Section created successfully");
@@ -101,7 +101,7 @@ export function useSections() {
       const { error } = await supabase
         .rpc('delete_section', {
           p_id: sectionId
-        });
+        } as any);
 
       if (error) throw error;
 
