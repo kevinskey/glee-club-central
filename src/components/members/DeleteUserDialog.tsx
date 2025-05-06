@@ -1,0 +1,68 @@
+
+import React from "react";
+import { Trash2 } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { User } from "@/hooks/useUserManagement";
+
+interface DeleteUserDialogProps {
+  user: User | null;
+  isOpen: boolean;
+  onOpenChange: (open: boolean) => void;
+  onDeleteConfirm: () => Promise<void>;
+}
+
+export const DeleteUserDialog: React.FC<DeleteUserDialogProps> = ({
+  user,
+  isOpen,
+  onOpenChange,
+  onDeleteConfirm,
+}) => {
+  return (
+    <Dialog open={isOpen} onOpenChange={onOpenChange}>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Are you sure you want to delete this user?</DialogTitle>
+          <DialogDescription>
+            This action cannot be undone. This will permanently delete the user
+            account and remove their data from our servers.
+          </DialogDescription>
+        </DialogHeader>
+        {user && (
+          <div className="flex items-center space-x-3 py-4">
+            <Avatar>
+              {user.avatar_url ? (
+                <AvatarImage src={user.avatar_url} alt={`${user.first_name} ${user.last_name}`} />
+              ) : (
+                <AvatarFallback>
+                  {user.first_name?.[0]}{user.last_name?.[0]}
+                </AvatarFallback>
+              )}
+            </Avatar>
+            <div>
+              <p className="font-medium">{`${user.first_name || ''} ${user.last_name || ''}`}</p>
+              <p className="text-sm text-muted-foreground">{user.email}</p>
+            </div>
+          </div>
+        )}
+        <DialogFooter>
+          <Button variant="outline" onClick={() => onOpenChange(false)}>
+            Cancel
+          </Button>
+          <Button variant="destructive" onClick={onDeleteConfirm}>
+            <Trash2 className="mr-2 h-4 w-4" />
+            Delete
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+};
