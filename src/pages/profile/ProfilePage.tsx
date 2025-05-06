@@ -31,17 +31,19 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 type VoicePart = "soprano" | "alto" | "tenor" | "bass" | "baritone" | "";
 type UserRole = "member" | "librarian" | "director" | "admin";
 
+// Update Profile interface to match the database structure
 interface Profile {
   id: string;
-  user_id: string;
-  username?: string;
-  full_name?: string;
-  email?: string;
-  voice_part?: VoicePart;
-  biography?: string;
-  role?: UserRole;
-  avatar_url?: string;
-  updated_at?: string;
+  first_name: string | null;
+  last_name: string | null;
+  voice_part: string | null;
+  role: string | null;
+  created_at: string;
+  updated_at: string;
+  avatar_url?: string; // Added as optional property
+  biography?: string; // Added as optional property
+  username?: string; // Added as optional property
+  email?: string; // Added as optional property
 }
 
 // Form schemas
@@ -112,7 +114,9 @@ export default function ProfilePage() {
     if (profile) {
       profileForm.reset({
         username: profile.username || "",
-        full_name: profile.full_name || "",
+        full_name: profile.first_name && profile.last_name 
+          ? `${profile.first_name} ${profile.last_name}` 
+          : "",
         biography: profile.biography || "",
         voice_part: profile.voice_part || "",
       });
@@ -133,7 +137,7 @@ export default function ProfilePage() {
       const { data, error } = await supabase
         .from("profiles")
         .select("*")
-        .eq("user_id", user.id)
+        .eq("id", user.id)
         .single();
 
       if (error) {
@@ -141,6 +145,7 @@ export default function ProfilePage() {
       }
 
       if (data) {
+        // The data from Supabase is already compatible with our Profile interface
         setProfile(data as Profile);
       }
     } catch (error: any) {
@@ -188,7 +193,7 @@ export default function ProfilePage() {
       const { error: updateError } = await supabase
         .from('profiles')
         .update({ avatar_url: avatarUrl })
-        .eq('user_id', user.id);
+        .eq('id', user.id);
 
       if (updateError) {
         throw updateError;
@@ -221,16 +226,23 @@ export default function ProfilePage() {
       
       if (!user) throw new Error("No user");
 
+      // Split full name into first and last name
+      const nameParts = values.full_name.trim().split(' ');
+      const firstName = nameParts[0] || '';
+      const lastName = nameParts.slice(1).join(' ') || '';
+
       const { error } = await supabase
         .from("profiles")
         .update({
-          username: values.username,
-          full_name: values.full_name,
-          biography: values.biography,
+          first_name: firstName,
+          last_name: lastName,
           voice_part: values.voice_part as VoicePart,
           updated_at: new Date().toISOString(),
+          // Add these fields to extra metadata
+          username: values.username,
+          biography: values.biography,
         })
-        .eq("user_id", user.id);
+        .eq("id", user.id);
 
       if (error) throw error;
 
@@ -315,7 +327,7 @@ export default function ProfilePage() {
                     alt="Profile picture" 
                   />
                   <AvatarFallback>
-                    {profile?.full_name?.charAt(0) || profile?.username?.charAt(0) || user?.email?.charAt(0) || "U"}
+                    {profile?.first_name?.charAt(0) || profile?.username?.charAt(0) || user?.email?.charAt(0) || "U"}
                   </AvatarFallback>
                 </Avatar>
                 <div className="absolute -bottom-2 -right-2">
@@ -350,9 +362,17 @@ export default function ProfilePage() {
               
               {/* User info */}
               <div>
-                <h3 className="font-bold text-xl">{profile?.full_name || profile?.username || "User"}</h3>
+                <h3 className="font-bold text-xl">
+                  {profile?.first_name && profile?.last_name
+                    ? `${profile.first_name} ${profile.last_name}`
+                    : profile?.username || "User"}
+                </h3>
                 <p className="text-muted-foreground">{profile?.voice_part || "No voice part set"}</p>
-                <p className="text-muted-foreground">{profile?.role?.charAt(0).toUpperCase() + profile?.role?.slice(1) || "Member"}</p>
+                <p className="text-muted-foreground">
+                  {profile?.role 
+                    ? profile.role.charAt(0).toUpperCase() + profile.role.slice(1) 
+                    : "Member"}
+                </p>
               </div>
             </div>
           </CardHeader>
