@@ -96,8 +96,9 @@ export function Header({ initialShowNewsFeed = true }: HeaderProps) {
           </Button>
         </div>
         
-        {/* Mobile menu button */}
-        <div className="md:hidden flex items-center">
+        {/* Mobile menu and theme toggle */}
+        <div className="md:hidden flex items-center gap-2">
+          <ThemeToggle />
           <TooltipProvider>
             <Tooltip>
               <TooltipTrigger asChild>
@@ -125,8 +126,7 @@ export function Header({ initialShowNewsFeed = true }: HeaderProps) {
       {mobileMenuOpen && (
         <div className="md:hidden bg-background border-t border-border">
           <div className="container py-4 px-4 flex flex-col gap-4">
-            <div className="flex justify-center gap-4">
-              <ThemeToggle />
+            <div className="flex justify-center">
               <TooltipProvider>
                 <Tooltip>
                   <TooltipTrigger asChild>

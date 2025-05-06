@@ -1,3 +1,4 @@
+
 import React from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
@@ -134,6 +135,11 @@ export const Header = () => {
                       </SheetDescription>
                     </SheetHeader>
                     
+                    {/* Theme toggle button added to mobile menu top */}
+                    <div className="mt-4 flex justify-end">
+                      <ThemeToggle />
+                    </div>
+                    
                     {/* Add Home link at the top of mobile menu if on dashboard */}
                     {isOnDashboard && (
                       <div className="my-4 border-b pb-4">
@@ -255,7 +261,7 @@ export const Header = () => {
         </div>
 
         <div className="flex items-center gap-2">
-          {/* Add Theme Toggle Button */}
+          {/* Theme toggle visible on all screen sizes */}
           <ThemeToggle />
           
           {user ? (
