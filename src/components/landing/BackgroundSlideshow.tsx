@@ -47,8 +47,12 @@ export function BackgroundSlideshow({
   if (images.length === 1) {
     return (
       <div 
-        className="absolute inset-0 bg-cover bg-center"
-        style={{ backgroundImage: `url('${images[0]}')` }}
+        className="absolute inset-0 bg-center"
+        style={{ 
+          backgroundImage: `url('${images[0]}')`,
+          backgroundSize: 'cover', // Ensuring image covers the container
+          backgroundRepeat: 'no-repeat'
+        }}
       />
     );
   }
@@ -56,17 +60,21 @@ export function BackgroundSlideshow({
   return (
     <div className="absolute inset-0 overflow-hidden">
       <div
-        className="absolute inset-0 bg-cover bg-center transition-opacity"
+        className="absolute inset-0 bg-center transition-opacity"
         style={{
           backgroundImage: `url('${images[currentImageIndex]}')`,
+          backgroundSize: 'cover', // Ensuring image covers the container
+          backgroundRepeat: 'no-repeat',
           opacity: isTransitioning ? 0 : 1,
           transitionDuration: `${transition}ms`,
         }}
       />
       <div
-        className="absolute inset-0 bg-cover bg-center transition-opacity"
+        className="absolute inset-0 bg-center transition-opacity"
         style={{
           backgroundImage: `url('${images[nextImageIndex]}')`,
+          backgroundSize: 'cover', // Ensuring image covers the container
+          backgroundRepeat: 'no-repeat',
           opacity: isTransitioning ? 1 : 0,
           transitionDuration: `${transition}ms`,
         }}
