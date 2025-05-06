@@ -1,5 +1,6 @@
 
 import { supabase } from '@/integrations/supabase/client';
+import { Profile, UserRole, MemberStatus, VoicePart } from '@/contexts/AuthContext';
 
 export interface Section {
   id: string;
@@ -123,7 +124,7 @@ export async function fetchSections(): Promise<Section[]> {
 /**
  * Fetch all members
  */
-export async function fetchMembers() {
+export async function fetchMembers(): Promise<Profile[]> {
   try {
     const { data, error } = await supabase
       .from('profiles')
@@ -131,7 +132,16 @@ export async function fetchMembers() {
       .order('last_name');
     
     if (error) throw error;
-    return data || [];
+    
+    // Transform data to match Profile interface
+    const profiles = (data || []).map(member => ({
+      ...member,
+      role: member.role as UserRole,
+      status: member.status as MemberStatus,
+      voice_part: member.voice_part as VoicePart | null
+    }));
+    
+    return profiles;
   } catch (error) {
     console.error('Error fetching members:', error);
     return [];
@@ -150,7 +160,14 @@ export async function fetchAttendanceRecords(memberId: string): Promise<Attendan
       .order('created_at', { ascending: false });
     
     if (error) throw error;
-    return data || [];
+    
+    // Cast status to the correct type
+    const typedRecords: AttendanceRecord[] = (data || []).map(record => ({
+      ...record,
+      status: record.status as 'present' | 'absent' | 'late' | 'excused'
+    }));
+    
+    return typedRecords;
   } catch (error) {
     console.error(`Error fetching attendance records for member ${memberId}:`, error);
     return [];
@@ -169,7 +186,14 @@ export async function fetchPaymentRecords(memberId: string): Promise<PaymentReco
       .order('payment_date', { ascending: false });
     
     if (error) throw error;
-    return data || [];
+    
+    // Cast status to the correct type
+    const typedRecords: PaymentRecord[] = (data || []).map(record => ({
+      ...record,
+      status: record.status as 'pending' | 'completed' | 'failed'
+    }));
+    
+    return typedRecords;
   } catch (error) {
     console.error(`Error fetching payment records for member ${memberId}:`, error);
     return [];
