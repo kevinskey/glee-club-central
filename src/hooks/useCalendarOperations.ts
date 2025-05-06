@@ -3,14 +3,21 @@ import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { CalendarEvent } from "./useCalendarEvents";
+import { useAuth } from "@/contexts/AuthContext";
 
 export function useCalendarOperations(refreshEvents: () => Promise<void>) {
   const [isProcessing, setIsProcessing] = useState(false);
+  const { user } = useAuth();
 
   // Add a new event
   const addEvent = async (event: Omit<CalendarEvent, "id">) => {
     setIsProcessing(true);
     try {
+      if (!user) {
+        toast.error("You must be logged in to save events");
+        return null;
+      }
+
       if (!event.date) {
         toast.error("Event date is required");
         return null;
@@ -23,7 +30,8 @@ export function useCalendarOperations(refreshEvents: () => Promise<void>) {
         location: event.location,
         description: event.description,
         type: event.type,
-        image_url: event.image_url
+        image_url: event.image_url,
+        user_id: user.id
       };
 
       const { data, error } = await supabase
@@ -66,6 +74,11 @@ export function useCalendarOperations(refreshEvents: () => Promise<void>) {
   const updateEvent = async (event: CalendarEvent) => {
     setIsProcessing(true);
     try {
+      if (!user) {
+        toast.error("You must be logged in to update events");
+        return false;
+      }
+
       if (!event.date) {
         toast.error("Event date is required");
         return false;
@@ -83,7 +96,7 @@ export function useCalendarOperations(refreshEvents: () => Promise<void>) {
           image_url: event.image_url,
           updated_at: new Date().toISOString()
         })
-        .eq("id", event.id);
+        .eq("id", event.id.toString());
 
       if (error) {
         console.error("Error updating event:", error);
@@ -107,10 +120,15 @@ export function useCalendarOperations(refreshEvents: () => Promise<void>) {
   const deleteEvent = async (eventId: string | number) => {
     setIsProcessing(true);
     try {
+      if (!user) {
+        toast.error("You must be logged in to delete events");
+        return false;
+      }
+
       const { error } = await supabase
         .from("calendar_events")
         .delete()
-        .eq("id", eventId);
+        .eq("id", eventId.toString());
 
       if (error) {
         console.error("Error deleting event:", error);
