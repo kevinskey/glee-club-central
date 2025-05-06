@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -12,10 +11,11 @@ import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
-import { Music } from "lucide-react";
+import { Music, AlertCircle } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
 const formSchema = z
   .object({
@@ -42,6 +42,7 @@ type FormValues = z.infer<typeof formSchema>;
 export default function RegisterPage() {
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
+  const [authError, setAuthError] = useState<string | null>(null);
   
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
@@ -59,8 +60,10 @@ export default function RegisterPage() {
 
   async function onSubmit(values: FormValues) {
     setIsLoading(true);
+    setAuthError(null);
+    
     try {
-      // Register the user with Supabase
+      // Register the user with Supabase with explicit email confirmation
       const { data: authData, error: authError } = await supabase.auth.signUp({
         email: values.email,
         password: values.password,
@@ -69,12 +72,13 @@ export default function RegisterPage() {
             first_name: values.firstName,
             last_name: values.lastName,
           },
+          emailRedirectTo: `${window.location.origin}/login`,
         },
       });
 
       if (authError) throw authError;
 
-      // Update additional profile information
+      // Update additional profile information if user was created
       if (authData.user) {
         const { error: profileError } = await supabase
           .from("profiles")
@@ -84,15 +88,27 @@ export default function RegisterPage() {
           })
           .eq("id", authData.user.id);
         
-        if (profileError) throw profileError;
+        if (profileError) {
+          console.error("Error updating profile:", profileError);
+          // Continue without throwing, as the main signup was successful
+        }
+        
+        // Check if email confirmation is needed
+        if (authData.session) {
+          // User is automatically signed in (email confirmation disabled in Supabase)
+          toast.success("Registration successful! You are now logged in.");
+          navigate("/dashboard");
+        } else {
+          // Email confirmation is enabled
+          toast.success("Registration successful! Please check your email to verify your account.");
+          navigate("/login", { 
+            state: { message: "Please check your email to verify your account before logging in." } 
+          });
+        }
       }
-      
-      toast.success("Registration successful! Please check your email to verify your account.");
-      
-      // Redirect to login page
-      navigate("/login");
     } catch (error: any) {
       console.error("Registration error:", error);
+      setAuthError(error.message || "Registration failed. Please try again.");
       toast.error(error.message || "Registration failed. Please try again.");
     } finally {
       setIsLoading(false);
@@ -112,6 +128,15 @@ export default function RegisterPage() {
           </CardDescription>
         </CardHeader>
         <CardContent>
+          {authError && (
+            <Alert variant="destructive" className="mb-4">
+              <AlertCircle className="h-4 w-4" />
+              <AlertDescription className="ml-2">
+                {authError}
+              </AlertDescription>
+            </Alert>
+          )}
+          
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
               <div className="grid grid-cols-2 gap-4">

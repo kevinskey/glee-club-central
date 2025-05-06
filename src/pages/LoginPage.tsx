@@ -35,6 +35,9 @@ export default function LoginPage() {
   const [socialLoading, setSocialLoading] = useState<string | null>(null);
   const [authError, setAuthError] = useState<string | null>(null);
   const [showConfigHelp, setShowConfigHelp] = useState(false);
+  const [verificationMessage, setVerificationMessage] = useState<string | null>(
+    location.state?.message || null
+  );
   
   // Get return URL from location state or default to dashboard
   const from = location.state?.from?.pathname || "/dashboard";
@@ -57,7 +60,13 @@ export default function LoginPage() {
     } catch (error: any) {
       console.error("Login error:", error);
       setAuthError(error.message || "Login failed. Please check your credentials.");
-      toast.error(error.message || "Login failed. Please check your credentials.");
+      
+      // Check for email verification errors
+      if (error.message?.includes("Email not confirmed")) {
+        setAuthError("Please verify your email address before logging in. Check your inbox for a verification link.");
+      } else {
+        toast.error(error.message || "Login failed. Please check your credentials.");
+      }
     } finally {
       setIsLoading(false);
     }
@@ -123,6 +132,15 @@ export default function LoginPage() {
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
+          {verificationMessage && (
+            <Alert className="mb-4">
+              <Info className="h-4 w-4" />
+              <AlertDescription className="ml-2">
+                {verificationMessage}
+              </AlertDescription>
+            </Alert>
+          )}
+
           {authError && (
             <Alert variant="destructive" className="mb-4">
               <AlertCircle className="h-4 w-4" />
