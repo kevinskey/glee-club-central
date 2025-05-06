@@ -100,8 +100,9 @@ export function useCalendarEvents() {
   // Load events on component mount or when user changes
   useEffect(() => {
     fetchEvents();
-    // Set a longer retry interval if there was a previous error
-    const intervalTime = fetchError ? 30000 : 5000;
+    
+    // Increase the polling interval to reduce frequency of updates
+    const intervalTime = fetchError ? 60000 : 15000; // 15 seconds normally, 1 minute if error
     
     // Only set up polling if authenticated
     if (user) {

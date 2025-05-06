@@ -1,5 +1,5 @@
 
-import React, { useState } from "react";
+import React from "react";
 import { Calendar } from "@/components/ui/calendar";
 import { format } from "date-fns";
 import { CalendarEvent } from "@/hooks/useCalendarEvents";
@@ -38,7 +38,6 @@ export const CalendarContainer = ({
         modifiersStyles={{
           event: {
             fontWeight: 'bold',
-            textDecoration: 'underline',
             color: 'var(--glee-purple)'
           }
         }}

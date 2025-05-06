@@ -12,7 +12,7 @@ interface EventListProps {
   getEventTypeColor: (type: string) => string;
 }
 
-export const EventList = ({
+export const EventList = React.memo(({
   date,
   events,
   selectedEvent,
@@ -43,4 +43,6 @@ export const EventList = ({
       )}
     </div>
   );
-};
+});
+
+EventList.displayName = "EventList";
