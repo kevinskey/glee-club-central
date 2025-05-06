@@ -33,9 +33,9 @@ export function PerformanceEventItem({
           : 'border-gray-200 hover:border-glee-purple/50 hover:bg-glee-purple/5 dark:border-gray-800 dark:hover:border-glee-purple/30'}`}
       onClick={() => onSelect(event)}
     >
-      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-1">
+      <div className="flex justify-between items-center gap-3">
         <div className="font-medium text-base md:text-lg font-playfair">{event.title}</div>
-        <div className="text-xs sm:text-sm bg-glee-purple/10 text-glee-purple px-2 py-1 rounded-full font-medium tracking-wide inline-flex items-center">
+        <div className="text-xs sm:text-sm bg-glee-purple/10 text-glee-purple px-3 py-1.5 rounded-full font-medium tracking-wide inline-flex items-center whitespace-nowrap">
           <Calendar className="h-3 w-3 mr-1" />
           {format(event.date, 'MMM d, yyyy')}
         </div>
