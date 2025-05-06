@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Calendar } from "lucide-react";
@@ -64,8 +65,8 @@ export function PerformanceSection() {
     <section className="py-8 md:py-12 bg-gradient-to-b from-white to-glee-light dark:from-glee-dark dark:to-black">
       <div className="container px-4 md:px-8 mx-auto">
         <div className="mb-4 md:mb-6">
-          <h2 className="text-2xl md:text-3xl lg:text-4xl font-playfair font-bold mb-4 md:mb-6 flex items-center gap-2">
-            <Calendar className="h-6 w-6 md:h-8 md:w-8 text-glee-purple" />
+          <h2 className="text-xl md:text-2xl lg:text-3xl font-playfair font-bold mb-3 md:mb-4 flex items-center gap-2">
+            <Calendar className="h-5 w-5 md:h-6 md:w-6 text-glee-purple" />
             <span>Upcoming <span className="text-glee-purple">Performances</span></span>
           </h2>
           
@@ -93,7 +94,7 @@ export function PerformanceSection() {
                         }}
                       >
                         <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent flex flex-col justify-center items-center">
-                          <h3 className="font-bold text-white text-2xl md:text-4xl lg:text-5xl font-playfair text-center px-4 md:px-6 drop-shadow-lg my-auto">
+                          <h3 className="font-bold text-white text-xl md:text-2xl lg:text-3xl font-playfair text-center px-4 md:px-6 drop-shadow-lg my-auto">
                             {event.title}
                           </h3>
                           
@@ -122,7 +123,7 @@ export function PerformanceSection() {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8 items-start mt-8">
           {/* Left column - Calendar of events */}
           <div className="space-y-4">
-            <h3 className="text-xl md:text-2xl font-playfair font-semibold mb-4 md:mb-6">Performance Calendar</h3>
+            <h3 className="text-lg md:text-xl font-playfair font-semibold mb-3 md:mb-4">Performance Calendar</h3>
             <div className="space-y-2">
               {performanceEvents.map((event) => (
                 <PerformanceEventItem 

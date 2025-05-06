@@ -1,4 +1,5 @@
 
+
 import React from "react";
 import { cn } from "@/lib/utils";
 
@@ -18,16 +19,16 @@ export function PageHeader({
   actions 
 }: PageHeaderProps) {
   return (
-    <div className={cn("mb-8 space-y-2", className)}>
+    <div className={cn("mb-6 space-y-2", className)}>
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           {icon && <div className="text-primary">{icon}</div>}
-          <h1 className="text-3xl font-bold tracking-tight text-foreground">{title}</h1>
+          <h1 className="text-2xl font-bold tracking-tight text-foreground">{title}</h1>
         </div>
         {actions && <div>{actions}</div>}
       </div>
       {description && (
-        <p className="text-lg text-muted-foreground">{description}</p>
+        <p className="text-base text-muted-foreground">{description}</p>
       )}
     </div>
   );
