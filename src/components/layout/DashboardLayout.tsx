@@ -1,11 +1,14 @@
 
 import React from "react";
-import { Outlet } from "react-router-dom";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Header } from "./Header";
 import { SidebarNav } from "./SidebarNav";
 
-export const DashboardLayout = () => {
+interface DashboardLayoutProps {
+  children: React.ReactNode;
+}
+
+export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
   const isMobile = useIsMobile();
 
   return (
@@ -18,7 +21,7 @@ export const DashboardLayout = () => {
           </aside>
         )}
         <main className="flex-1 pb-12 md:pb-16 overflow-x-hidden">
-          <Outlet />
+          {children}
         </main>
       </div>
     </div>
