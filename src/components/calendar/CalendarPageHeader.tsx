@@ -5,6 +5,7 @@ import { ArrowLeft, CalendarIcon, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
+import { Metronome } from "@/components/ui/metronome";
 
 interface CalendarPageHeaderProps {
   onAddEventClick: () => void;
@@ -32,6 +33,7 @@ export const CalendarPageHeader = ({ onAddEventClick }: CalendarPageHeaderProps)
         </h1>
         <div className="flex items-center gap-3 mt-4 sm:mt-0">
           <ThemeToggle />
+          <Metronome />
           <Button
             onClick={onAddEventClick}
             className="bg-glee-purple hover:bg-glee-purple/90 text-white hidden sm:flex h-8 px-3 text-xs"

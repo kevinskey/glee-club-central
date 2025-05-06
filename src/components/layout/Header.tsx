@@ -5,6 +5,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Menu, User, LogOut, Music, ChevronRight, Home } from "lucide-react";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
+import { Metronome } from "@/components/ui/metronome";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -218,8 +219,9 @@ export const Header = () => {
         </div>
 
         <div className="flex items-center gap-2">
-          {/* Add Theme Toggle Button */}
+          {/* Add Theme Toggle and Metronome Buttons */}
           <ThemeToggle />
+          <Metronome />
           
           {user ? (
             <DropdownMenuProvider>

@@ -7,6 +7,7 @@ import { Clock } from "@/components/ui/clock";
 import { NewsFeed } from "@/components/news/NewsFeed";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
+import { Metronome } from "@/components/ui/metronome";
 
 interface HeaderProps {
   initialShowNewsFeed?: boolean;
@@ -47,6 +48,7 @@ export function Header({ initialShowNewsFeed = true }: HeaderProps) {
         {/* Desktop navigation */}
         <div className="hidden md:flex items-center gap-3">
           <ThemeToggle />
+          <Metronome />
           <Clock />
           <Button 
             variant="outline" 
@@ -87,6 +89,7 @@ export function Header({ initialShowNewsFeed = true }: HeaderProps) {
           <div className="container py-4 px-4 flex flex-col gap-4">
             <div className="flex justify-center gap-4">
               <ThemeToggle />
+              <Metronome />
               <Clock />
             </div>
             <Button 
