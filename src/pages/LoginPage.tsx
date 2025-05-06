@@ -17,10 +17,10 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Music, Mail, AlertCircle } from "lucide-react";
+import { Music, Mail, AlertCircle, Info } from "lucide-react";
 import { toast } from "sonner";
 import { Separator } from "@/components/ui/separator";
-import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 const loginSchema = z.object({
   email: z.string().email({ message: "Please enter a valid email address" }),
@@ -34,6 +34,7 @@ export default function LoginPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [socialLoading, setSocialLoading] = useState<string | null>(null);
   const [authError, setAuthError] = useState<string | null>(null);
+  const [showConfigHelp, setShowConfigHelp] = useState(false);
   
   // Get return URL from location state or default to dashboard
   const from = location.state?.from?.pathname || "/dashboard";
@@ -77,20 +78,33 @@ export default function LoginPage() {
     } catch (error: any) {
       console.error(`${provider} login error:`, error);
       
+      // Handle connection refused error
+      if (error.message?.includes("Network Error") || 
+          error.message?.includes("refused to connect") ||
+          error.message?.includes("Failed to fetch")) {
+        setAuthError(`Unable to connect to ${provider.charAt(0).toUpperCase() + provider.slice(1)} authentication service. This is likely due to a configuration issue.`);
+        setShowConfigHelp(true);
+      }
       // Handle redirect_uri_mismatch error specifically
-      let errorMsg = error.message || `${provider} login failed.`;
-      if (error.message?.includes("redirect_uri_mismatch") || 
+      else if (error.message?.includes("redirect_uri_mismatch") || 
           error.message?.includes("invalid request") ||
           error.message?.includes("400")) {
-        errorMsg = `${provider} login configuration error. Please contact the administrator to verify OAuth settings.`;
-        setAuthError("The OAuth provider (Google) has not been configured correctly. The redirect URI in the Google Cloud Console needs to match the one Supabase is expecting.");
-      } else if (error.message?.includes("provider is not enabled")) {
+        setAuthError(`${provider} login configuration error. Please contact the administrator to verify OAuth settings.`);
+        setShowConfigHelp(true);
+      } 
+      else if (error.message?.includes("provider is not enabled")) {
         errorMsg = `${provider.charAt(0).toUpperCase() + provider.slice(1)} login is not enabled. Please contact support.`;
-      } else if (error.message?.includes("403")) {
+        setShowConfigHelp(true);
+      } 
+      else if (error.message?.includes("403")) {
         errorMsg = `${provider.charAt(0).toUpperCase() + provider.slice(1)} login failed. Please check that ${provider} login is enabled in the Supabase console.`;
+        setShowConfigHelp(true);
+      }
+      else {
+        setAuthError(error.message || `${provider} login failed.`);
       }
       
-      toast.error(errorMsg);
+      toast.error(error.message || `${provider} login failed.`);
       setSocialLoading(null);
     }
   }
@@ -113,6 +127,23 @@ export default function LoginPage() {
               <AlertCircle className="h-4 w-4" />
               <AlertDescription className="ml-2">
                 {authError}
+              </AlertDescription>
+            </Alert>
+          )}
+          
+          {showConfigHelp && (
+            <Alert variant="info" className="mb-4">
+              <Info className="h-4 w-4" />
+              <AlertTitle>Configuration Help</AlertTitle>
+              <AlertDescription className="mt-2 text-sm">
+                <p>To fix social login issues:</p>
+                <ol className="list-decimal pl-5 mt-2 space-y-1">
+                  <li>Verify Google OAuth credentials in the Google Cloud Console.</li>
+                  <li>Ensure your app's URL is added to Authorized JavaScript origins.</li>
+                  <li>Add the Supabase redirect URL to Authorized redirect URIs.</li>
+                  <li>Configure Site URL and Redirect URLs in Supabase Auth settings.</li>
+                </ol>
+                <p className="mt-2">Meanwhile, you can use email/password login below.</p>
               </AlertDescription>
             </Alert>
           )}
