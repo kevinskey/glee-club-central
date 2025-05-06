@@ -1,9 +1,9 @@
 
 import React from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
-import { Menu, User, LogOut, Music, ChevronRight } from "lucide-react";
+import { Menu, User, LogOut, Music, ChevronRight, Home } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -36,6 +36,10 @@ import { ThemeToggle } from "@/components/ui/theme-toggle";
 export const Header = () => {
   const { user, profile, logout } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
+  
+  // Check if user is on dashboard or a sub-page of dashboard
+  const isOnDashboard = location.pathname.includes('/dashboard');
 
   // Get user initials for the avatar
   const getUserInitials = () => {
@@ -120,6 +124,22 @@ export const Header = () => {
                 </SheetDescription>
               </SheetHeader>
               
+              {/* Add Home link at the top of mobile menu if on dashboard */}
+              {isOnDashboard && (
+                <div className="my-4 border-b pb-4">
+                  <SheetClose asChild>
+                    <Button
+                      variant="outline"
+                      className="w-full justify-start text-sm"
+                      onClick={() => navigate("/")}
+                    >
+                      <Home className="mr-2 h-4 w-4" />
+                      Back to Home Page
+                    </Button>
+                  </SheetClose>
+                </div>
+              )}
+              
               {/* Mobile accordion-style navigation */}
               <div className="mt-6 flex flex-col space-y-2">
                 {navigationSections.map((section, index) => (
@@ -182,6 +202,19 @@ export const Header = () => {
               Glee World
             </span>
           </Button>
+          
+          {/* Add Home link in desktop view if on dashboard */}
+          {isOnDashboard && (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => navigate("/")}
+              className="ml-2 hidden md:flex items-center gap-1"
+            >
+              <Home className="h-4 w-4" />
+              <span>Back to Home</span>
+            </Button>
+          )}
         </div>
 
         <div className="flex items-center gap-2">
@@ -203,6 +236,17 @@ export const Header = () => {
                   {getRoleDescription()}
                 </DropdownMenuLabel>
                 <DropdownMenuSeparator />
+                {isOnDashboard && (
+                  <DropdownMenuItem asChild>
+                    <button
+                      className="flex w-full cursor-pointer items-center"
+                      onClick={() => navigate("/")}
+                    >
+                      <Home className="mr-2 h-4 w-4" />
+                      Back to Home
+                    </button>
+                  </DropdownMenuItem>
+                )}
                 <DropdownMenuItem asChild>
                   <button
                     className="flex w-full cursor-pointer items-center"
