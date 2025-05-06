@@ -70,6 +70,8 @@ export const createUser = async (userData: CreateUserData) => {
 // Update an existing user
 export const updateUser = async (userData: UpdateUserData) => {
   try {
+    console.log("Updating user with data:", userData);
+    
     // If password is provided, update it
     if (userData.password) {
       const { error: passwordError } = await supabase.auth.admin.updateUserById(
@@ -91,31 +93,29 @@ export const updateUser = async (userData: UpdateUserData) => {
     }
     
     // Update profile data
-    const profileData = {
-      first_name: userData.first_name,
-      last_name: userData.last_name,
-      role: userData.role,
-      status: userData.status,
-      voice_part: userData.voice_part,
-      phone: userData.phone,
-      section_id: userData.section_id
-    };
+    const profileData: any = {};
     
-    // Remove undefined fields
-    Object.keys(profileData).forEach(key => {
-      if (profileData[key as keyof typeof profileData] === undefined) {
-        delete profileData[key as keyof typeof profileData];
-      }
-    });
+    // Only add fields that are defined
+    if (userData.first_name !== undefined) profileData.first_name = userData.first_name;
+    if (userData.last_name !== undefined) profileData.last_name = userData.last_name;
+    if (userData.role !== undefined) profileData.role = userData.role;
+    if (userData.status !== undefined) profileData.status = userData.status;
+    if (userData.voice_part !== undefined) profileData.voice_part = userData.voice_part;
+    if (userData.phone !== undefined) profileData.phone = userData.phone;
+    if (userData.section_id !== undefined) profileData.section_id = userData.section_id === 'none' ? null : userData.section_id;
     
     // Only update if there are profile fields to update
     if (Object.keys(profileData).length > 0) {
+      console.log("Updating profile with:", profileData);
       const { error: profileError } = await supabase
         .from('profiles')
         .update(profileData)
         .eq('id', userData.id);
       
-      if (profileError) throw profileError;
+      if (profileError) {
+        console.error("Profile update error:", profileError);
+        throw profileError;
+      }
     }
     
     return { success: true };

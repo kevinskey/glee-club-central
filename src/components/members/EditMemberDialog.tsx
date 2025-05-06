@@ -31,6 +31,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Section } from "@/utils/supabaseQueries";
 import { Profile, VoicePart, MemberStatus, UserRole } from "@/contexts/AuthContext";
+import { updateUser } from '@/utils/adminUserOperations';
 
 const formSchema = z.object({
   first_name: z.string().min(1, "First name is required"),
@@ -94,24 +95,43 @@ export const EditMemberDialog: React.FC<EditMemberDialogProps> = ({
     if (!member) return;
     
     try {
-      // In a real implementation, this would call an API to update the user
-      const updatedMember: Profile = {
-        ...member,
+      // Use adminUserOperations.updateUser to update the user
+      const updateData = {
+        id: member.id,
+        email: data.email,
         first_name: data.first_name,
         last_name: data.last_name,
-        email: data.email,
+        role: data.role,
+        status: data.status,
+        voice_part: data.voice_part,
         phone: data.phone,
-        voice_part: data.voice_part as VoicePart,
-        section_id: data.section_id,
-        role: data.role as UserRole,
-        status: data.status as MemberStatus,
+        section_id: data.section_id === 'none' ? null : data.section_id
       };
       
-      // Pass the updated member to the parent component
-      onUpdateMember(updatedMember);
+      const result = await updateUser(updateData);
       
-      // Close the dialog
-      onOpenChange(false);
+      if (result.success) {
+        // Create updated member object for the UI
+        const updatedMember: Profile = {
+          ...member,
+          first_name: data.first_name,
+          last_name: data.last_name,
+          email: data.email,
+          phone: data.phone,
+          voice_part: data.voice_part as VoicePart,
+          section_id: data.section_id === 'none' ? null : data.section_id,
+          role: data.role as UserRole,
+          status: data.status as MemberStatus,
+        };
+        
+        // Pass the updated member to the parent component
+        onUpdateMember(updatedMember);
+        
+        toast.success("Member updated successfully");
+        
+        // Close the dialog
+        onOpenChange(false);
+      }
     } catch (error: any) {
       toast.error(error.message || "Failed to update member");
     }
@@ -210,12 +230,12 @@ export const EditMemberDialog: React.FC<EditMemberDialogProps> = ({
                       </FormControl>
                       <SelectContent>
                         <SelectItem value="none">None</SelectItem>
-                        <SelectItem value="soprano_1">Soprano 1</SelectItem>
-                        <SelectItem value="soprano_2">Soprano 2</SelectItem>
-                        <SelectItem value="alto_1">Alto 1</SelectItem>
-                        <SelectItem value="alto_2">Alto 2</SelectItem>
-                        <SelectItem value="tenor">Tenor</SelectItem>
-                        <SelectItem value="bass">Bass</SelectItem>
+                        <SelectItem value="Soprano 1">Soprano 1</SelectItem>
+                        <SelectItem value="Soprano 2">Soprano 2</SelectItem>
+                        <SelectItem value="Alto 1">Alto 1</SelectItem>
+                        <SelectItem value="Alto 2">Alto 2</SelectItem>
+                        <SelectItem value="Tenor">Tenor</SelectItem>
+                        <SelectItem value="Bass">Bass</SelectItem>
                       </SelectContent>
                     </Select>
                     <FormMessage />

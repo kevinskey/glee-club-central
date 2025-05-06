@@ -32,7 +32,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { useMessaging } from "@/hooks/useMessaging";
-import { createUser } from "@/utils/adminUserOperations";
+import { createUser, deleteUser } from "@/utils/adminUserOperations";
 
 // User form schema for validation
 const userFormSchema = z.object({
@@ -262,12 +262,15 @@ export default function AdminUserManagementPage() {
     try {
       if (!userToDelete) return;
       
-      // This would call a function to delete the user via Supabase
-      // For now just show a toast to demonstrate the flow
-      toast.success(`User ${userToDelete.email} would be deleted`);
-      console.log("Delete user:", userToDelete);
-      setIsDeleteDialogOpen(false);
-      setUserToDelete(null);
+      // Call the deleteUser function
+      const result = await deleteUser(userToDelete.id);
+      
+      if (result.success) {
+        toast.success(`User ${userToDelete.email} deleted successfully`);
+        fetchUsers(); // Refresh the user list
+        setIsDeleteDialogOpen(false);
+        setUserToDelete(null);
+      }
     } catch (error: any) {
       toast.error(error.message || "Error deleting user");
     }
