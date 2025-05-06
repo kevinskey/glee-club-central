@@ -142,7 +142,7 @@
   /* Animated gradient for Glee Club text */
   .animate-gradient {
     background-size: 200% 200%;
-    animation: gradient 3s ease infinite;
+    animation: gradient 8s ease infinite; /* Changed from 3s to 8s */
     background-image: linear-gradient(45deg, white, #0B4EA2, white);
   }
   
