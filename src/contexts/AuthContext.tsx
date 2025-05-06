@@ -1,3 +1,4 @@
+
 import React, { createContext, useState, useEffect, useContext } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -28,6 +29,8 @@ export interface AuthContextType {
   isAuthenticated: boolean;
   isLoading: boolean;
   signIn: (email: string, password: string) => Promise<void>;
+  signInWithGoogle: () => Promise<void>;
+  signInWithApple: () => Promise<void>;
   signOut: () => Promise<void>;
   login: (email: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
@@ -36,6 +39,24 @@ export interface AuthContextType {
   isAdmin: () => boolean;
   isSectionLeader: () => boolean;
 }
+
+// Helper function to clean up auth state before login/logout operations
+const cleanupAuthState = () => {
+  // Remove standard auth tokens
+  localStorage.removeItem('supabase.auth.token');
+  // Remove all Supabase auth keys from localStorage
+  Object.keys(localStorage).forEach((key) => {
+    if (key.startsWith('supabase.auth.') || key.includes('sb-')) {
+      localStorage.removeItem(key);
+    }
+  });
+  // Remove from sessionStorage if in use
+  Object.keys(sessionStorage || {}).forEach((key) => {
+    if (key.startsWith('supabase.auth.') || key.includes('sb-')) {
+      sessionStorage.removeItem(key);
+    }
+  });
+};
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
@@ -147,10 +168,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const { data: authListener } = supabase.auth.onAuthStateChange(async (event, session) => {
       if (event === 'SIGNED_IN' && session) {
         setUser(session.user);
-        const profile = await fetchProfile(session.user.id);
-        if (profile) {
-          setProfile(profile);
-        }
+        // Use setTimeout to avoid potential deadlocks
+        setTimeout(async () => {
+          const profile = await fetchProfile(session.user.id);
+          if (profile) {
+            setProfile(profile);
+          }
+        }, 0);
       } else if (event === 'SIGNED_OUT') {
         setUser(null);
         setProfile(null);
@@ -165,6 +189,17 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   // Sign in with email and password
   const signIn = async (email: string, password: string) => {
     try {
+      // Clean up existing auth state
+      cleanupAuthState();
+      
+      // Try global sign out first
+      try {
+        await supabase.auth.signOut({ scope: 'global' });
+      } catch (err) {
+        // Continue even if this fails
+        console.log("Global sign out failed, continuing with sign in");
+      }
+      
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password,
@@ -183,15 +218,83 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       throw error;
     }
   };
+  
+  // Sign in with Google
+  const signInWithGoogle = async () => {
+    try {
+      // Clean up existing auth state
+      cleanupAuthState();
+      
+      // Try global sign out first
+      try {
+        await supabase.auth.signOut({ scope: 'global' });
+      } catch (err) {
+        // Continue even if this fails
+        console.log("Global sign out failed, continuing with Google sign in");
+      }
+      
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+          redirectTo: window.location.origin + '/dashboard'
+        }
+      });
+
+      if (error) throw error;
+      
+      // No need to set user and profile here as it will be handled by onAuthStateChange
+    } catch (error: any) {
+      console.error('Error signing in with Google:', error);
+      toast.error(error.message || 'Error signing in with Google');
+      throw error;
+    }
+  };
+  
+  // Sign in with Apple
+  const signInWithApple = async () => {
+    try {
+      // Clean up existing auth state
+      cleanupAuthState();
+      
+      // Try global sign out first
+      try {
+        await supabase.auth.signOut({ scope: 'global' });
+      } catch (err) {
+        // Continue even if this fails
+        console.log("Global sign out failed, continuing with Apple sign in");
+      }
+      
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: 'apple',
+        options: {
+          redirectTo: window.location.origin + '/dashboard'
+        }
+      });
+
+      if (error) throw error;
+      
+      // No need to set user and profile here as it will be handled by onAuthStateChange
+    } catch (error: any) {
+      console.error('Error signing in with Apple:', error);
+      toast.error(error.message || 'Error signing in with Apple');
+      throw error;
+    }
+  };
 
   // Sign out
   const signOut = async () => {
     try {
+      // Clean up auth state first
+      cleanupAuthState();
+      
       const { error } = await supabase.auth.signOut();
       if (error) throw error;
       
       setUser(null);
       setProfile(null);
+      
+      // Force page reload for a clean state
+      window.location.href = '/login';
     } catch (error: any) {
       console.error('Error signing out:', error);
       toast.error(error.message || 'Error signing out');
@@ -218,6 +321,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     isAuthenticated: !!user,
     isLoading,
     signIn,
+    signInWithGoogle,
+    signInWithApple,
     signOut,
     login,
     logout,

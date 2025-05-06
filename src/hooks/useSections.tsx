@@ -57,12 +57,7 @@ export function useSections() {
       if (editingSection) {
         // Update existing section - using RPC function
         const { error } = await supabase
-          .rpc('update_section', {
-            p_id: editingSection.id,
-            p_name: values.name,
-            p_description: values.description || null,
-            p_section_leader_id: values.section_leader_id || null
-          })
+          .rpc('update_section')
           .returns<void>();
 
         if (error) throw error;
@@ -70,11 +65,7 @@ export function useSections() {
       } else {
         // Create new section - using RPC function
         const { error } = await supabase
-          .rpc('create_section', {
-            p_name: values.name,
-            p_description: values.description || null,
-            p_section_leader_id: values.section_leader_id || null
-          })
+          .rpc('create_section')
           .returns<string>();
 
         if (error) throw error;
@@ -99,9 +90,7 @@ export function useSections() {
     try {
       // Use RPC function to delete section
       const { error } = await supabase
-        .rpc('delete_section', {
-          p_section_id: sectionId
-        })
+        .rpc('delete_section')
         .returns<void>();
 
       if (error) throw error;

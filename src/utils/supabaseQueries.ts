@@ -52,7 +52,7 @@ export async function fetchAttendanceRecords(memberId: string): Promise<Attendan
   try {
     // Use direct RPC query
     const { data, error } = await supabase
-      .rpc('get_attendance_records', { p_member_id: memberId })
+      .rpc('get_attendance_records')
       .returns<AttendanceRecord[]>();
     
     if (error) throw error;
@@ -73,7 +73,7 @@ export async function fetchPaymentRecords(memberId: string): Promise<PaymentReco
   try {
     // Use direct RPC query
     const { data, error } = await supabase
-      .rpc('get_payment_records', { p_member_id: memberId })
+      .rpc('get_payment_records')
       .returns<PaymentRecord[]>();
     
     if (error) throw error;
@@ -94,7 +94,7 @@ export async function fetchMemberNotes(memberId: string): Promise<MemberNote[]> 
   try {
     // Use direct RPC query
     const { data, error } = await supabase
-      .rpc('get_member_notes', { p_member_id: memberId })
+      .rpc('get_member_notes')
       .returns<MemberNote[]>();
     
     if (error) throw error;
