@@ -81,6 +81,32 @@
   body {
     @apply bg-background text-foreground;
   }
+  
+  /* Add consistent text spacing */
+  p {
+    @apply leading-relaxed;
+  }
+  
+  h1, h2, h3, h4, h5, h6 {
+    @apply leading-tight tracking-normal;
+  }
+  
+  /* Adjust line heights based on text size */
+  .text-xs, .text-sm {
+    @apply leading-normal;
+  }
+  
+  .text-base, .text-lg {
+    @apply leading-relaxed;
+  }
+  
+  .text-xl, .text-2xl, .text-3xl {
+    @apply leading-snug;
+  }
+  
+  .text-4xl, .text-5xl, .text-6xl {
+    @apply leading-tight;
+  }
 }
 
 @layer utilities {
@@ -159,4 +185,18 @@
   .duration-3000 {
     transition-duration: 3000ms;
   }
+  
+  /* Additional line spacing utilities */
+  .leading-extra-tight {
+    line-height: 1.1;
+  }
+  
+  .leading-extra-relaxed {
+    line-height: 1.8;
+  }
+  
+  .prose-spacing p {
+    margin-bottom: 1.25em;
+  }
 }
+
