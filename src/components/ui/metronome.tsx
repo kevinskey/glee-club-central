@@ -21,11 +21,25 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 
-// Define sound types with correct public URLs
+// Define sound types - using regular audio files instead of data URLs
 const SOUNDS = {
-  click: "/sounds/metronome-click.mp3",
-  woodblock: "/sounds/metronome-woodblock.mp3",
-  beep: "/sounds/metronome-beep.mp3",
+  click: "/sounds/click.wav",
+  woodblock: "/sounds/woodblock.wav",
+  beep: "/sounds/beep.wav",
+};
+
+// Preload audio files
+const preloadAudio = (url: string): HTMLAudioElement => {
+  const audio = new Audio(url);
+  audio.preload = "auto";
+  return audio;
+};
+
+// Create audio elements ahead of time
+const audioElements = {
+  click: preloadAudio(SOUNDS.click),
+  woodblock: preloadAudio(SOUNDS.woodblock),
+  beep: preloadAudio(SOUNDS.beep),
 };
 
 export function Metronome() {
@@ -34,31 +48,15 @@ export function Metronome() {
   const [soundType, setSoundType] = useState<keyof typeof SOUNDS>("click");
   const [volume, setVolume] = useState(0.5);
   
-  const audioRef = useRef<HTMLAudioElement | null>(null);
   const intervalRef = useRef<number | null>(null);
   const lastBeatTimeRef = useRef<number>(0);
   
-  // Effect to create audio element
+  // Update volume when it changes
   useEffect(() => {
-    // Create a new audio element with the full URL path
-    audioRef.current = new Audio(SOUNDS[soundType]);
-    audioRef.current.volume = volume;
-    
-    // Preload the audio for better performance
-    if (audioRef.current) {
-      audioRef.current.load();
-    }
-    
-    // Log successful audio creation
-    console.log("Audio element created with source:", SOUNDS[soundType]);
-    
-    return () => {
-      if (audioRef.current) {
-        audioRef.current.pause();
-        audioRef.current = null;
-      }
-    };
-  }, [soundType, volume]);
+    audioElements.click.volume = volume;
+    audioElements.woodblock.volume = volume;
+    audioElements.beep.volume = volume;
+  }, [volume]);
   
   // Calculate interval from tempo (beats per minute)
   const getIntervalFromTempo = (bpm: number) => {
@@ -68,17 +66,15 @@ export function Metronome() {
   // Handle play/pause
   useEffect(() => {
     const playBeat = () => {
-      if (audioRef.current) {
-        try {
-          // Clone the audio to allow overlapping sounds
-          const sound = audioRef.current.cloneNode() as HTMLAudioElement;
-          sound.volume = volume;
-          sound.play()
-            .then(() => console.log("Metronome sound played successfully"))
-            .catch(err => console.error("Error playing metronome:", err));
-        } catch (error) {
-          console.error("Error playing metronome:", error);
-        }
+      try {
+        // Play the selected sound
+        const sound = audioElements[soundType].cloneNode() as HTMLAudioElement;
+        sound.volume = volume;
+        sound.play()
+          .then(() => console.log("Metronome sound played successfully"))
+          .catch(err => console.error("Error playing metronome:", err));
+      } catch (error) {
+        console.error("Error playing metronome:", error);
       }
     };
     
@@ -115,7 +111,7 @@ export function Metronome() {
         intervalRef.current = null;
       }
     };
-  }, [isPlaying, tempo, volume]);
+  }, [isPlaying, tempo, volume, soundType]);
   
   // Toggle play/pause
   const togglePlay = () => {
