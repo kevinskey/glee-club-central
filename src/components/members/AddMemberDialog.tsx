@@ -191,8 +191,10 @@ export const AddMemberDialog: React.FC<AddMemberDialogProps> = ({
                       </FormControl>
                       <SelectContent>
                         <SelectItem value="">None</SelectItem>
-                        <SelectItem value="soprano">Soprano</SelectItem>
-                        <SelectItem value="alto">Alto</SelectItem>
+                        <SelectItem value="soprano_1">Soprano 1</SelectItem>
+                        <SelectItem value="soprano_2">Soprano 2</SelectItem>
+                        <SelectItem value="alto_1">Alto 1</SelectItem>
+                        <SelectItem value="alto_2">Alto 2</SelectItem>
                         <SelectItem value="tenor">Tenor</SelectItem>
                         <SelectItem value="bass">Bass</SelectItem>
                       </SelectContent>
@@ -251,7 +253,7 @@ export const AddMemberDialog: React.FC<AddMemberDialogProps> = ({
                       <SelectContent>
                         <SelectItem value="member">Member</SelectItem>
                         <SelectItem value="section_leader">Section Leader</SelectItem>
-                        <SelectItem value="student_conductor">Student Conductor</SelectItem>
+                        <SelectItem value="director">Director</SelectItem>
                         <SelectItem value="accompanist">Accompanist</SelectItem>
                         <SelectItem value="admin">Admin</SelectItem>
                       </SelectContent>

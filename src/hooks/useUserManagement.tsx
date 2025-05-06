@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { toast } from "sonner";
 import { fetchAllUsers, updateUserRole, updateUserStatus, fetchUserById } from "@/utils/supabaseQueries";
@@ -125,6 +124,21 @@ export function useUserManagement() {
     }
   };
 
+  // Format voice part for display
+  const formatVoicePart = (voicePart: string | null): string => {
+    if (!voicePart) return "Not set";
+    
+    switch (voicePart) {
+      case "soprano_1": return "Soprano 1";
+      case "soprano_2": return "Soprano 2";
+      case "alto_1": return "Alto 1";
+      case "alto_2": return "Alto 2";
+      case "tenor": return "Tenor";
+      case "bass": return "Bass";
+      default: return voicePart;
+    }
+  };
+
   return {
     users,
     selectedUser,
@@ -135,6 +149,7 @@ export function useUserManagement() {
     fetchUsers,
     getUserDetails,
     changeUserRole,
-    changeUserStatus
+    changeUserStatus,
+    formatVoicePart
   };
 }

@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import {
   SheetHeader,
@@ -35,6 +34,21 @@ export function MemberDetailsSheet({ member }: MemberDetailsSheetProps) {
     payments: true,
     notes: true,
   });
+
+  // Helper function to format voice part display
+  const formatVoicePart = (voicePart: string | null): string => {
+    if (!voicePart) return "Not set";
+    
+    switch (voicePart) {
+      case "soprano_1": return "Soprano 1";
+      case "soprano_2": return "Soprano 2";
+      case "alto_1": return "Alto 1";
+      case "alto_2": return "Alto 2";
+      case "tenor": return "Tenor";
+      case "bass": return "Bass";
+      default: return voicePart;
+    }
+  };
 
   // Function to load data
   useEffect(() => {
@@ -119,10 +133,12 @@ export function MemberDetailsSheet({ member }: MemberDetailsSheetProps) {
             <div className="flex flex-wrap gap-2 mt-1">
               {getStatusBadge(member.status)}
               {member.voice_part && (
-                <Badge variant="secondary">{member.voice_part}</Badge>
+                <Badge variant="secondary">{formatVoicePart(member.voice_part)}</Badge>
               )}
               {member.role === "admin" && <Badge className="bg-purple-500">Admin</Badge>}
               {member.role === "section_leader" && <Badge className="bg-blue-500">Section Leader</Badge>}
+              {member.role === "director" && <Badge className="bg-orange-500">Director</Badge>}
+              {member.role === "accompanist" && <Badge className="bg-teal-500">Accompanist</Badge>}
             </div>
           </div>
         </div>

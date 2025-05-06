@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { PageHeader } from "@/components/ui/page-header";
@@ -390,8 +389,10 @@ export default function MemberDirectoryPage() {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">All Voice Parts</SelectItem>
-                  <SelectItem value="soprano">Soprano</SelectItem>
-                  <SelectItem value="alto">Alto</SelectItem>
+                  <SelectItem value="soprano_1">Soprano 1</SelectItem>
+                  <SelectItem value="soprano_2">Soprano 2</SelectItem>
+                  <SelectItem value="alto_1">Alto 1</SelectItem>
+                  <SelectItem value="alto_2">Alto 2</SelectItem>
                   <SelectItem value="tenor">Tenor</SelectItem>
                   <SelectItem value="bass">Bass</SelectItem>
                 </SelectContent>
