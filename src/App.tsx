@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
@@ -13,8 +14,11 @@ import ProfilePage from '@/pages/ProfilePage';
 import SectionsPage from '@/pages/SectionsPage';
 import MemberDirectoryPage from '@/pages/MemberDirectoryPage';
 import UserManagementPage from '@/pages/UserManagementPage';
-import NotFound from '@/pages/NotFoundPage';
+import NotFoundPage from '@/pages/NotFoundPage';
 import InviteMemberPage from '@/pages/InviteMemberPage';
+
+import { Outlet } from "react-router-dom";
+import { DashboardLayout } from '@/components/layout/DashboardLayout';
 
 // A wrapper for routes that require authentication
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
@@ -25,23 +29,11 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
   }
 
   return isAuthenticated ? (
-    children
+    <>{children}</>
   ) : (
     <Navigate to="/login" replace />
   );
 }
-
-// Layout component for dashboard routes
-function DashboardLayout() {
-  return (
-    <div>
-      {/* Your dashboard layout components, e.g., Sidebar, Navbar, etc. */}
-      <Outlet />
-    </div>
-  );
-}
-
-import { Outlet } from "react-router-dom";
 
 function App() {
   const { isAuthenticated, isLoading } = useAuth();
@@ -55,20 +47,23 @@ function App() {
         <Route path="/forgot-password" element={<ForgotPasswordPage />} />
         <Route path="/reset-password" element={<ResetPasswordPage />} />
         
-        <Route element={<ProtectedRoute />}>
-          {/* Dashboard routes */}
-          <Route path="/dashboard" element={<DashboardLayout />}>
-            <Route index element={<DashboardPage />} />
-            <Route path="calendar" element={<CalendarPage />} />
-            <Route path="profile" element={<ProfilePage />} />
-            <Route path="sections" element={<SectionsPage />} />
-            <Route path="members" element={<MemberDirectoryPage />} />
-            <Route path="users" element={<UserManagementPage />} />
-            <Route path="invite-member" element={<InviteMemberPage />} />
-          </Route>
+        <Route path="/dashboard" element={
+          <ProtectedRoute>
+            <DashboardLayout>
+              <Outlet />
+            </DashboardLayout>
+          </ProtectedRoute>
+        }>
+          <Route index element={<DashboardPage />} />
+          <Route path="calendar" element={<CalendarPage />} />
+          <Route path="profile" element={<ProfilePage />} />
+          <Route path="sections" element={<SectionsPage />} />
+          <Route path="members" element={<MemberDirectoryPage />} />
+          <Route path="users" element={<UserManagementPage />} />
+          <Route path="invite-member" element={<InviteMemberPage />} />
         </Route>
 
-        <Route path="*" element={<NotFound />} />
+        <Route path="*" element={<NotFoundPage />} />
       </Routes>
     </BrowserRouter>
   );

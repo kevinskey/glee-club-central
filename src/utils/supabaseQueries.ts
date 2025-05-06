@@ -50,9 +50,11 @@ export interface MemberNote {
 // Helper function to query attendance records safely
 export async function fetchAttendanceRecords(memberId: string): Promise<AttendanceRecord[]> {
   try {
-    // Use direct RPC query with proper type parameters
+    // Use direct query instead of RPC for now
     const { data, error } = await supabase
-      .rpc('get_attendance_records', { p_member_id: memberId });
+      .from('attendance_records')
+      .select('*')
+      .eq('member_id', memberId);
     
     if (error) throw error;
     
@@ -60,7 +62,7 @@ export async function fetchAttendanceRecords(memberId: string): Promise<Attendan
     if (!data) return [];
     
     // Process and return the data
-    return Array.isArray(data) ? data as AttendanceRecord[] : [];
+    return data as AttendanceRecord[];
   } catch (error) {
     console.error("Error fetching attendance:", error);
     return [];
@@ -70,9 +72,11 @@ export async function fetchAttendanceRecords(memberId: string): Promise<Attendan
 // Helper function to query payment records safely
 export async function fetchPaymentRecords(memberId: string): Promise<PaymentRecord[]> {
   try {
-    // Use direct RPC query with proper type parameters
+    // Use direct query instead of RPC
     const { data, error } = await supabase
-      .rpc('get_payment_records', { p_member_id: memberId });
+      .from('payment_records')
+      .select('*')
+      .eq('member_id', memberId);
     
     if (error) throw error;
     
@@ -80,7 +84,7 @@ export async function fetchPaymentRecords(memberId: string): Promise<PaymentReco
     if (!data) return [];
     
     // Process and return the data
-    return Array.isArray(data) ? data as PaymentRecord[] : [];
+    return data as PaymentRecord[];
   } catch (error) {
     console.error("Error fetching payments:", error);
     return [];
@@ -90,9 +94,11 @@ export async function fetchPaymentRecords(memberId: string): Promise<PaymentReco
 // Helper function to query member notes safely
 export async function fetchMemberNotes(memberId: string): Promise<MemberNote[]> {
   try {
-    // Use direct RPC query with proper type parameters
+    // Use direct query instead of RPC
     const { data, error } = await supabase
-      .rpc('get_member_notes', { p_member_id: memberId });
+      .from('member_notes')
+      .select('*, created_by_profile:profiles(first_name, last_name)')
+      .eq('member_id', memberId);
     
     if (error) throw error;
     
@@ -100,7 +106,7 @@ export async function fetchMemberNotes(memberId: string): Promise<MemberNote[]> 
     if (!data) return [];
     
     // Process and return the data
-    return Array.isArray(data) ? data as MemberNote[] : [];
+    return data as MemberNote[];
   } catch (error) {
     console.error("Error fetching notes:", error);
     return [];
@@ -110,9 +116,10 @@ export async function fetchMemberNotes(memberId: string): Promise<MemberNote[]> 
 // Helper function to fetch sections
 export async function fetchSections(): Promise<Section[]> {
   try {
-    // Use RPC query with proper type parameters
+    // Use direct query instead of RPC
     const { data, error } = await supabase
-      .rpc('get_sections');
+      .from('sections')
+      .select('*');
     
     if (error) throw error;
     
@@ -127,8 +134,22 @@ export async function fetchSections(): Promise<Section[]> {
 // Helper function to fetch section data with member count
 export async function fetchSectionsWithMemberCount(): Promise<Section[]> {
   try {
+    // Use direct query instead of RPC
     const { data, error } = await supabase
-      .rpc('get_sections_with_member_count');
+      .from('sections')
+      .select('*, profiles:profiles(id)')
+      .then((result) => {
+        if (result.error) throw result.error;
+        
+        // Transform data to include member count
+        const sections = result.data?.map(section => ({
+          ...section,
+          member_count: section.profiles ? section.profiles.length : 0
+        })) || [];
+        
+        // Remove the profiles array 
+        return { data: sections.map(({ profiles, ...rest }) => rest), error: null };
+      });
     
     if (error) throw error;
     
@@ -143,8 +164,11 @@ export async function fetchSectionsWithMemberCount(): Promise<Section[]> {
 // Helper function to fetch members with section data
 export async function fetchMembers(): Promise<Profile[]> {
   try {
+    // Use direct query instead of RPC
     const { data, error } = await supabase
-      .rpc('get_members_with_sections');
+      .from('profiles')
+      .select('*, sections:sections(name)')
+      .eq('role', 'member');
     
     if (error) throw error;
     

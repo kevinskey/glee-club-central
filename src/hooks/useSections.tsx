@@ -57,24 +57,26 @@ export function useSections() {
   const handleSaveSection = async (values: SectionFormValues) => {
     try {
       if (editingSection) {
-        // Update existing section - using RPC function
+        // Update existing section - using direct query
         const { error } = await supabase
-          .rpc('update_section', {
-            p_id: editingSection.id,
-            p_name: values.name,
-            p_description: values.description || null,
-            p_section_leader_id: values.section_leader_id || null
-          });
+          .from('sections')
+          .update({
+            name: values.name,
+            description: values.description || null,
+            section_leader_id: values.section_leader_id || null
+          })
+          .eq('id', editingSection.id);
 
         if (error) throw error;
         toast.success("Section updated successfully");
       } else {
-        // Create new section - using RPC function
+        // Create new section
         const { error } = await supabase
-          .rpc('create_section', {
-            p_name: values.name,
-            p_description: values.description || null,
-            p_section_leader_id: values.section_leader_id || null
+          .from('sections')
+          .insert({
+            name: values.name,
+            description: values.description || null,
+            section_leader_id: values.section_leader_id || null
           });
 
         if (error) throw error;
@@ -97,11 +99,11 @@ export function useSections() {
 
   const handleDeleteSection = async (sectionId: string) => {
     try {
-      // Use RPC function to delete section
+      // Use direct query to delete section
       const { error } = await supabase
-        .rpc('delete_section', {
-          p_id: sectionId
-        });
+        .from('sections')
+        .delete()
+        .eq('id', sectionId);
 
       if (error) throw error;
 
