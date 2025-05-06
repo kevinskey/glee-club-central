@@ -118,6 +118,7 @@ export function AddEventForm({ onAddEvent, onCancel }: AddEventFormProps) {
                       selected={field.value}
                       onSelect={field.onChange}
                       initialFocus
+                      className="pointer-events-auto"
                     />
                   </PopoverContent>
                 </Popover>
