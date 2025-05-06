@@ -52,7 +52,9 @@ export const createUser = async (userData: CreateUserData) => {
         status: userData.status,
         voice_part: userData.voice_part,
         phone: userData.phone,
-        section_id: userData.section_id
+        section_id: userData.section_id,
+        first_name: userData.first_name,
+        last_name: userData.last_name
       })
       .eq('id', authData.user.id);
     

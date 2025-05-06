@@ -32,6 +32,8 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Section } from "@/utils/supabaseQueries";
 import { Profile, VoicePart, MemberStatus, UserRole } from "@/contexts/AuthContext";
+import { useMessaging } from "@/hooks/useMessaging";
+import { createUser } from "@/utils/adminUserOperations";
 
 const formSchema = z.object({
   first_name: z.string().min(1, "First name is required"),
@@ -41,7 +43,7 @@ const formSchema = z.object({
   voice_part: z.string().optional(),
   section_id: z.string().optional(),
   status: z.string().default("active"),
-  role: z.string().default("member"),
+  role: z.string().default("Member"),
 });
 
 type FormValues = z.infer<typeof formSchema>;
@@ -59,6 +61,8 @@ export const AddMemberDialog: React.FC<AddMemberDialogProps> = ({
   sections,
   onAddMember,
 }) => {
+  const { sendEmail } = useMessaging();
+  
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -69,38 +73,85 @@ export const AddMemberDialog: React.FC<AddMemberDialogProps> = ({
       voice_part: "",
       section_id: "",
       status: "active",
-      role: "member",
+      role: "Member",
     },
   });
 
   const onSubmit = async (data: FormValues) => {
     try {
-      // In a real implementation, this would call an API to create the user
-      // For now, we'll just create a mock user with a generated ID
-      const newMember: Profile = {
-        id: uuidv4(),
-        first_name: data.first_name,
-        last_name: data.last_name,
-        email: data.email,
-        phone: data.phone || null,
-        voice_part: data.voice_part as VoicePart || null,
-        section_id: data.section_id || null,
-        role: data.role as UserRole,
-        status: data.status as MemberStatus,
-        join_date: new Date().toISOString().split('T')[0],
-        avatar_url: null,
-      };
+      // In a real implementation, we'll create the user via Supabase
+      // Generate a random password that will be changed later
+      const tempPassword = Math.random().toString(36).slice(-8);
       
-      // Pass the new member to the parent component
-      onAddMember(newMember);
-      
-      // Close the dialog
-      onOpenChange(false);
-      
-      // Reset the form
-      form.reset();
+      try {
+        // Create the user in Supabase
+        const result = await createUser({
+          email: data.email,
+          password: tempPassword,
+          first_name: data.first_name,
+          last_name: data.last_name,
+          role: data.role,
+          status: data.status as MemberStatus,
+          voice_part: data.voice_part as VoicePart || null,
+          phone: data.phone || null,
+          section_id: data.section_id || null,
+        });
+        
+        // For the UI, create a member profile with the returned ID
+        const newMember: Profile = {
+          id: result.userId,
+          first_name: data.first_name,
+          last_name: data.last_name,
+          email: data.email,
+          phone: data.phone || null,
+          voice_part: data.voice_part as VoicePart || null,
+          section_id: data.section_id || null,
+          role: data.role as UserRole,
+          status: data.status as MemberStatus,
+          join_date: new Date().toISOString().split('T')[0],
+          avatar_url: null,
+        };
+        
+        // Pass the new member to the parent component
+        onAddMember(newMember);
+        
+        // Send welcome email with password reset instructions
+        await sendWelcomeEmail(data.email, data.first_name, tempPassword);
+        
+        // Close the dialog
+        onOpenChange(false);
+        
+        // Reset the form
+        form.reset();
+        
+        toast.success("Member added successfully. Welcome email sent!");
+      } catch (error: any) {
+        console.error("Error creating user:", error);
+        toast.error(error.message || "Failed to add member");
+      }
     } catch (error: any) {
       toast.error(error.message || "Failed to add member");
+    }
+  };
+
+  // Send welcome email to the new member
+  const sendWelcomeEmail = async (email: string, firstName: string, tempPassword: string) => {
+    try {
+      const emailContent = `
+        <h2>Welcome to the Spelman College Glee Club!</h2>
+        <p>Dear ${firstName},</p>
+        <p>You have been added as a member to the Spelman College Glee Club system. To get started, please login using the following temporary password:</p>
+        <p><strong>${tempPassword}</strong></p>
+        <p>For security reasons, please change your password immediately after your first login.</p>
+        <p>If you have any questions, please contact your administrator.</p>
+        <p>Best regards,<br>Spelman College Glee Club</p>
+      `;
+      
+      await sendEmail(email, "Welcome to Spelman College Glee Club", emailContent);
+    } catch (error) {
+      console.error("Error sending welcome email:", error);
+      // We don't want to stop the flow if email fails, so just log it
+      toast.error("Member added, but welcome email could not be sent");
     }
   };
 
@@ -191,12 +242,12 @@ export const AddMemberDialog: React.FC<AddMemberDialogProps> = ({
                       </FormControl>
                       <SelectContent>
                         <SelectItem value="none">None</SelectItem>
-                        <SelectItem value="soprano_1">Soprano 1</SelectItem>
-                        <SelectItem value="soprano_2">Soprano 2</SelectItem>
-                        <SelectItem value="alto_1">Alto 1</SelectItem>
-                        <SelectItem value="alto_2">Alto 2</SelectItem>
-                        <SelectItem value="tenor">Tenor</SelectItem>
-                        <SelectItem value="bass">Bass</SelectItem>
+                        <SelectItem value="Soprano 1">Soprano 1</SelectItem>
+                        <SelectItem value="Soprano 2">Soprano 2</SelectItem>
+                        <SelectItem value="Alto 1">Alto 1</SelectItem>
+                        <SelectItem value="Alto 2">Alto 2</SelectItem>
+                        <SelectItem value="Tenor">Tenor</SelectItem>
+                        <SelectItem value="Bass">Bass</SelectItem>
                       </SelectContent>
                     </Select>
                     <FormMessage />
@@ -251,11 +302,11 @@ export const AddMemberDialog: React.FC<AddMemberDialogProps> = ({
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        <SelectItem value="member">Member</SelectItem>
-                        <SelectItem value="section_leader">Section Leader</SelectItem>
+                        <SelectItem value="Member">Member</SelectItem>
+                        <SelectItem value="Section Leader">Section Leader</SelectItem>
                         <SelectItem value="Director">Director</SelectItem>
                         <SelectItem value="Accompanist">Accompanist</SelectItem>
-                        <SelectItem value="admin">Admin</SelectItem>
+                        <SelectItem value="Admin">Admin</SelectItem>
                       </SelectContent>
                     </Select>
                     <FormMessage />
