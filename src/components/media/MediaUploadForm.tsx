@@ -1,11 +1,12 @@
 
-import React, { useState } from "react";
+import React from "react";
 import { Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { toast } from "@/components/ui/sonner";
 
 interface MediaUploadFormProps {
   title: string;
@@ -43,7 +44,6 @@ export function MediaUploadForm({
       
       if (oversizedFiles.length > 0) {
         toast({
-          title: "File(s) too large",
           description: "Each file must be less than 25MB",
           variant: "destructive",
         });
@@ -102,8 +102,6 @@ export function MediaUploadForm({
     </>
   );
 }
-
-import { toast } from "@/components/ui/sonner";
 
 interface FileInputProps {
   files: File[];
