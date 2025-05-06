@@ -35,7 +35,7 @@ export function HeroSection() {
             </span>
           </h1>
           <p className="text-sm sm:text-base md:text-[1.34rem] lg:text-[1.52rem] leading-relaxed opacity-90 mt-1 sm:mt-2 md:mt-3">
-            A distinguished ensemble with a rich heritage of musical excellence, directed by Dr. Kevin Phillip Johnson.
+            A distinguished ensemble with a rich heritage of musical excellence, directed by <span className="whitespace-nowrap">Dr. Kevin Phillip Johnson.</span>
           </p>
           <div className="pt-2 sm:pt-3 md:pt-4 lg:pt-5 flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center md:justify-start">
             <Button 
