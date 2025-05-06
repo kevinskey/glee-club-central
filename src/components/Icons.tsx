@@ -17,11 +17,12 @@ export const Icons = {
       className={cn("h-6 w-6", props.className)}
       {...props}
     >
-      {/* Metronome icon */}
-      <path d="M10 2v13.5" />
-      <path d="m14 13.5 7 4.5V6l-7 4.5" />
-      <path d="M2 19h20" />
-      <path d="M5 15v-3h6v3c0 2.5-2.5 3.5-3 4-2.5-2.5 0-8 0-8" />
+      {/* Cartoon singing lips logo */}
+      <path d="M12 18.5c-3.5 0-6.5-1.5-8-4 1.5 0 3-1 4-2 1 1.5 2.5 2 4 2s3-.5 4-2c1 1 2.5 2 4 2-1.5 2.5-4.5 4-8 4z" />
+      <path d="M12 13c-1.5 0-2.5-.5-3.5-1.5 1 1 2 1.5 3.5 1.5s2.5-.5 3.5-1.5c-1 1-2 1.5-3.5 1.5z" />
+      <path d="M10 10c.5-1 1.5-1 2-1s1.5 0 2 1" />
+      <path d="M10 16c.5 1 1.5 1.5 2 1.5s1.5-.5 2-1.5" />
+      <ellipse cx="12" cy="14" rx="8" ry="7" />
     </svg>
   ),
 };
