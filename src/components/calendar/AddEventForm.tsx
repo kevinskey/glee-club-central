@@ -1,4 +1,3 @@
-
 import React, { useState, useRef, useEffect } from "react";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
@@ -50,6 +49,7 @@ const formSchema = z.object({
   type: z.enum(["concert", "rehearsal", "tour", "special"], {
     required_error: "Please select an event type",
   }),
+  image_url: z.string().optional().nullable(),
 });
 
 // Common time options for events
@@ -76,6 +76,8 @@ interface AddEventFormProps {
 
 export function AddEventForm({ onAddEvent, onCancel }: AddEventFormProps) {
   const [locationInputFocused, setLocationInputFocused] = useState(false);
+  const [selectedImage, setSelectedImage] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
   const locationInputRef = useRef<HTMLInputElement>(null);
   const autocompleteRef = useRef<google.maps.places.Autocomplete | null>(null);
   const { user } = useAuth();
@@ -120,14 +122,62 @@ export function AddEventForm({ onAddEvent, onCancel }: AddEventFormProps) {
     }
   }, [isLoaded, loadError, locationInputFocused, form]);
 
-  function onSubmit(values: FormValues) {
+  const handleImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      setSelectedImage(file);
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setImagePreview(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  async function onSubmit(values: z.infer<typeof formSchema>) {
     if (!user) {
       toast.error("You must be logged in to save events");
       return;
     }
     
-    onAddEvent(values);
+    // Handle image upload if there's a selected image
+    let imageUrl = values.image_url;
+    
+    if (selectedImage) {
+      try {
+        const fileName = `${Date.now()}-${selectedImage.name}`;
+        const { data: uploadData, error: uploadError } = await supabase.storage
+          .from('event-images')
+          .upload(fileName, selectedImage);
+          
+        if (uploadError) {
+          console.error('Image upload error:', uploadError);
+          toast.error('Failed to upload image');
+          return;
+        }
+        
+        // Get the public URL for the uploaded image
+        const { data: { publicUrl } } = supabase.storage
+          .from('event-images')
+          .getPublicUrl(fileName);
+          
+        imageUrl = publicUrl;
+      } catch (err) {
+        console.error('Error uploading image:', err);
+        toast.error('Failed to upload image');
+        return;
+      }
+    }
+    
+    // Add the image URL to the event data
+    onAddEvent({
+      ...values, 
+      image_url: imageUrl
+    });
+    
     form.reset();
+    setSelectedImage(null);
+    setImagePreview(null);
   }
 
   const handleSelectTime = (time: string) => {
@@ -298,6 +348,52 @@ export function AddEventForm({ onAddEvent, onCancel }: AddEventFormProps) {
               </Select>
               <FormDescription>
                 This determines how the event will be displayed.
+              </FormDescription>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="image_url"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Event Image (Optional)</FormLabel>
+              <FormControl>
+                <div className="space-y-2">
+                  <Input 
+                    type="file" 
+                    accept="image/*" 
+                    onChange={handleImageChange}
+                    className="bg-white dark:bg-gray-700"
+                  />
+                  
+                  {imagePreview && (
+                    <div className="mt-2">
+                      <img 
+                        src={imagePreview} 
+                        alt="Preview" 
+                        className="w-full max-h-40 object-cover rounded-md" 
+                      />
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        className="mt-1 text-red-500 hover:text-red-700"
+                        onClick={() => {
+                          setSelectedImage(null);
+                          setImagePreview(null);
+                        }}
+                      >
+                        Remove Image
+                      </Button>
+                    </div>
+                  )}
+                </div>
+              </FormControl>
+              <FormDescription>
+                Upload an image for this event (optional)
               </FormDescription>
               <FormMessage />
             </FormItem>

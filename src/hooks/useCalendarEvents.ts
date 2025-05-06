@@ -12,6 +12,7 @@ export interface CalendarEvent {
   location: string;
   description: string | null;
   type: "concert" | "rehearsal" | "tour" | "special";
+  image_url?: string | null;
 }
 
 export function useCalendarEvents() {
@@ -29,8 +30,7 @@ export function useCalendarEvents() {
         return;
       }
 
-      // The issue was that the calendar_events table wasn't in the TypeScript types
-      // Using any to bypass TypeScript limitation until types are refreshed
+      // Using explicit type casting to handle the TypeScript limitations
       const { data, error } = await supabase
         .from("calendar_events" as any)
         .select("*")
@@ -45,12 +45,19 @@ export function useCalendarEvents() {
       }
 
       if (data) {
-        const formattedEvents = data.map(event => ({
-          ...event,
-          date: new Date(event.date),
+        // Cast data to any first to avoid TypeScript errors
+        const typedData = data as any[];
+        
+        const formattedEvents = typedData.map(event => ({
           id: event.id,
-          description: event.description || ""
-        })) as CalendarEvent[];
+          title: event.title,
+          date: new Date(event.date),
+          time: event.time,
+          location: event.location,
+          description: event.description || "",
+          type: event.type,
+          image_url: event.image_url
+        }));
         
         setEvents(formattedEvents);
       }
@@ -76,7 +83,7 @@ export function useCalendarEvents() {
         date: event.date.toISOString().split('T')[0]
       };
 
-      // Using any to bypass TypeScript limitation
+      // Using explicit type casting
       const { data, error } = await supabase
         .from("calendar_events" as any)
         .insert([newEvent])
@@ -91,10 +98,20 @@ export function useCalendarEvents() {
 
       toast.success("Event saved successfully");
       fetchEvents();
+      
+      // Cast the result to avoid TypeScript errors
+      const typedData = data as any;
+      
       return {
-        ...data,
-        date: new Date(data.date)
-      } as CalendarEvent;
+        id: typedData.id,
+        title: typedData.title,
+        date: new Date(typedData.date),
+        time: typedData.time,
+        location: typedData.location,
+        description: typedData.description || "",
+        type: typedData.type,
+        image_url: typedData.image_url
+      };
     } catch (err) {
       console.error("Error in addEvent:", err);
       toast.error("Failed to save event");
@@ -110,12 +127,17 @@ export function useCalendarEvents() {
         return false;
       }
 
-      // Using any to bypass TypeScript limitation
+      // Using explicit type casting
       const { error } = await supabase
         .from("calendar_events" as any)
         .update({
-          ...event,
+          title: event.title,
           date: event.date.toISOString().split('T')[0],
+          time: event.time,
+          location: event.location,
+          description: event.description,
+          type: event.type,
+          image_url: event.image_url,
           updated_at: new Date().toISOString()
         })
         .eq("id", event.id);
@@ -144,7 +166,7 @@ export function useCalendarEvents() {
         return false;
       }
 
-      // Using any to bypass TypeScript limitation
+      // Using explicit type casting
       const { error } = await supabase
         .from("calendar_events" as any)
         .delete()
@@ -181,7 +203,8 @@ export function useCalendarEvents() {
         time: "7:00 PM - 9:00 PM",
         location: "Sisters Chapel",
         description: "Our annual showcase featuring classical and contemporary pieces.",
-        type: "concert"
+        type: "concert",
+        image_url: "/lovable-uploads/3ad02de0-04d1-4a5e-9279-898e9c317d80.png"
       },
       {
         id: 2,
@@ -190,7 +213,8 @@ export function useCalendarEvents() {
         time: "8:00 PM - 10:00 PM",
         location: "Atlanta Symphony Hall",
         description: "Celebrating the season with festive music and traditional carols.",
-        type: "concert"
+        type: "concert",
+        image_url: "/lovable-uploads/3ad02de0-04d1-4a5e-9279-898e9c317d80.png"
       },
       {
         id: 3,
@@ -199,7 +223,8 @@ export function useCalendarEvents() {
         time: "Various Times",
         location: "Various Venues",
         description: "Our annual tour across the southeastern United States.",
-        type: "tour"
+        type: "tour",
+        image_url: "/lovable-uploads/3ad02de0-04d1-4a5e-9279-898e9c317d80.png"
       },
       {
         id: 4,
@@ -208,7 +233,8 @@ export function useCalendarEvents() {
         time: "10:00 AM - 11:30 AM",
         location: "Spelman College Oval",
         description: "Special performance for the graduating class of 2026.",
-        type: "special"
+        type: "special",
+        image_url: "/lovable-uploads/3ad02de0-04d1-4a5e-9279-898e9c317d80.png"
       },
       {
         id: 5,

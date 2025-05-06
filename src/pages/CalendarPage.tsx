@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { 
@@ -216,6 +215,17 @@ export default function CalendarPage() {
                   
                   {selectedEvent && (
                     <div className="mt-6 pt-6 border-t">
+                      {/* Show event image if available */}
+                      {selectedEvent.image_url && (
+                        <div className="mb-4">
+                          <img 
+                            src={selectedEvent.image_url} 
+                            alt={selectedEvent.title} 
+                            className="w-full h-auto max-h-60 object-cover rounded-lg shadow-sm"
+                          />
+                        </div>
+                      )}
+                      
                       <h3 className="text-xl font-medium mb-3">{selectedEvent.title}</h3>
                       <div className="space-y-2 text-sm text-muted-foreground mb-4">
                         <div className="flex items-center gap-2">
