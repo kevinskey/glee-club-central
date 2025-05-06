@@ -22,25 +22,30 @@ export function BackgroundSlideshow({
     // Calculate the next image index
     const calculateNextIndex = (current: number) => (current + 1) % images.length;
 
-    // Setup the main timer for changing images
-    const intervalId = setInterval(() => {
+    // Function to handle image transition
+    const handleTransition = () => {
       setIsTransitioning(true);
-
-      // Update indices after transition completes
-      const transitionTimerId = setTimeout(() => {
+      
+      // After transition completes, update the current image
+      const transitionTimer = setTimeout(() => {
         setCurrentImageIndex(nextImageIndex);
         setNextImageIndex(calculateNextIndex(nextImageIndex));
         setIsTransitioning(false);
       }, transition);
+      
+      return transitionTimer;
+    };
 
-      return () => clearTimeout(transitionTimerId);
-    }, duration);
-
-    // Initial setup
+    // Set up interval for consistent timing
+    const intervalId = setInterval(handleTransition, duration);
+    
+    // Initial setup for nextImageIndex
     setNextImageIndex(calculateNextIndex(currentImageIndex));
 
     // Cleanup function
-    return () => clearInterval(intervalId);
+    return () => {
+      clearInterval(intervalId);
+    };
   }, [images.length, duration, transition, currentImageIndex, nextImageIndex]);
 
   if (images.length === 0) return null;
