@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -49,12 +48,12 @@ export default function LandingPage() {
 
       {/* Hero section */}
       <section className="relative bg-glee-dark py-24 md:py-32 overflow-hidden">
-        <div className="absolute inset-0 opacity-30 bg-blend-overlay bg-black">
+        <div className="absolute inset-0 opacity-40 bg-blend-overlay bg-black">
           <div 
             className="absolute inset-0 bg-cover bg-center" 
             style={{ 
-              backgroundImage: "url('/lovable-uploads/0926c663-31fd-4ea3-848a-93dae7f14340.png')", 
-              filter: "blur(2px)"
+              backgroundImage: "url('/lovable-uploads/3ad02de0-04d1-4a5e-9279-898e9c317d80.png')", 
+              filter: "blur(1px)"
             }}
           ></div>
         </div>
@@ -91,7 +90,7 @@ export default function LandingPage() {
             <div className="absolute -left-16 -bottom-16 w-80 h-80 bg-glee-gold/20 rounded-full blur-3xl"></div>
             <div className="relative bg-white/10 backdrop-blur-sm border border-white/10 rounded-lg overflow-hidden">
               <img 
-                src="/lovable-uploads/0926c663-31fd-4ea3-848a-93dae7f14340.png" 
+                src="/lovable-uploads/3ad02de0-04d1-4a5e-9279-898e9c317d80.png" 
                 alt="Spelman College Glee Club" 
                 className="w-full h-auto object-cover rounded-lg" 
               />
@@ -204,7 +203,7 @@ export default function LandingPage() {
           <div 
             className="absolute inset-0 bg-cover bg-center" 
             style={{ 
-              backgroundImage: "url('/lovable-uploads/0926c663-31fd-4ea3-848a-93dae7f14340.png')", 
+              backgroundImage: "url('/lovable-uploads/3ad02de0-04d1-4a5e-9279-898e9c317d80.png')", 
             }}
           ></div>
         </div>
