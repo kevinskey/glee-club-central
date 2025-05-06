@@ -17,9 +17,10 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Music, Mail } from "lucide-react";
+import { Music, Mail, AlertCircle } from "lucide-react";
 import { toast } from "sonner";
 import { Separator } from "@/components/ui/separator";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
 const loginSchema = z.object({
   email: z.string().email({ message: "Please enter a valid email address" }),
@@ -32,6 +33,7 @@ export default function LoginPage() {
   const location = useLocation();
   const [isLoading, setIsLoading] = useState(false);
   const [socialLoading, setSocialLoading] = useState<string | null>(null);
+  const [authError, setAuthError] = useState<string | null>(null);
   
   // Get return URL from location state or default to dashboard
   const from = location.state?.from?.pathname || "/dashboard";
@@ -46,12 +48,14 @@ export default function LoginPage() {
 
   async function onSubmit(values: z.infer<typeof loginSchema>) {
     setIsLoading(true);
+    setAuthError(null);
     try {
       await signIn(values.email, values.password);
       toast.success("Login successful!");
       navigate(from, { replace: true });
     } catch (error: any) {
       console.error("Login error:", error);
+      setAuthError(error.message || "Login failed. Please check your credentials.");
       toast.error(error.message || "Login failed. Please check your credentials.");
     } finally {
       setIsLoading(false);
@@ -60,6 +64,7 @@ export default function LoginPage() {
 
   async function handleSocialLogin(provider: 'google' | 'apple') {
     setSocialLoading(provider);
+    setAuthError(null);
     try {
       if (provider === 'google') {
         console.log("Starting Google sign-in...");
@@ -72,9 +77,14 @@ export default function LoginPage() {
     } catch (error: any) {
       console.error(`${provider} login error:`, error);
       
-      // Improved error message for better user experience
+      // Handle redirect_uri_mismatch error specifically
       let errorMsg = error.message || `${provider} login failed.`;
-      if (error.message?.includes("provider is not enabled")) {
+      if (error.message?.includes("redirect_uri_mismatch") || 
+          error.message?.includes("invalid request") ||
+          error.message?.includes("400")) {
+        errorMsg = `${provider} login configuration error. Please contact the administrator to verify OAuth settings.`;
+        setAuthError("The OAuth provider (Google) has not been configured correctly. The redirect URI in the Google Cloud Console needs to match the one Supabase is expecting.");
+      } else if (error.message?.includes("provider is not enabled")) {
         errorMsg = `${provider.charAt(0).toUpperCase() + provider.slice(1)} login is not enabled. Please contact support.`;
       } else if (error.message?.includes("403")) {
         errorMsg = `${provider.charAt(0).toUpperCase() + provider.slice(1)} login failed. Please check that ${provider} login is enabled in the Supabase console.`;
@@ -98,6 +108,15 @@ export default function LoginPage() {
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
+          {authError && (
+            <Alert variant="destructive" className="mb-4">
+              <AlertCircle className="h-4 w-4" />
+              <AlertDescription className="ml-2">
+                {authError}
+              </AlertDescription>
+            </Alert>
+          )}
+          
           {/* Social Login Buttons */}
           <div className="space-y-3">
             <Button 
