@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { toast } from "@/components/ui/sonner";
+import { toast } from "sonner";
 
 interface MediaUploadFormProps {
   title: string;
@@ -43,9 +43,8 @@ export function MediaUploadForm({
       const oversizedFiles = selectedFiles.filter(file => file.size > 25 * 1024 * 1024);
       
       if (oversizedFiles.length > 0) {
-        toast({
+        toast("File size error", {
           description: "Each file must be less than 25MB",
-          variant: "destructive",
         });
         return;
       }

@@ -1,8 +1,8 @@
 
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
+import { toast } from "sonner";
 
 export function useMediaUpload(onComplete: () => void) {
   const [uploading, setUploading] = useState(false);
@@ -10,7 +10,6 @@ export function useMediaUpload(onComplete: () => void) {
   const [description, setDescription] = useState("");
   const [files, setFiles] = useState<File[]>([]);
   const [uploadProgress, setUploadProgress] = useState(0);
-  const { toast } = useToast();
   const { profile } = useAuth();
 
   const resetForm = () => {
@@ -22,10 +21,8 @@ export function useMediaUpload(onComplete: () => void) {
 
   const validateUpload = () => {
     if (files.length === 0 || !title) {
-      toast({
-        title: "Missing information",
+      toast("Missing information", {
         description: "Please fill in the title and select at least one file",
-        variant: "destructive",
       });
       return false;
     }
@@ -87,8 +84,7 @@ export function useMediaUpload(onComplete: () => void) {
         setUploadProgress(Math.round((i + 1) / files.length * 100));
       }
 
-      toast({
-        title: "Upload successful",
+      toast("Upload successful", {
         description: `${successCount} file(s) have been uploaded successfully`,
       });
       
@@ -97,10 +93,8 @@ export function useMediaUpload(onComplete: () => void) {
       
     } catch (error: any) {
       console.error("Upload error:", error);
-      toast({
-        title: "Upload failed",
+      toast("Upload failed", {
         description: error.message || "An unexpected error occurred",
-        variant: "destructive",
       });
     } finally {
       setUploading(false);
