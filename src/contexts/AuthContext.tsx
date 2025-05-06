@@ -1,4 +1,3 @@
-
 import React, { createContext, useState, useEffect, useContext } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -315,11 +314,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   // Role checking functions
   const isAdmin = () => {
-    return profile?.role === 'admin';
+    const adminStatus = profile?.role === 'admin';
+    console.log("isAdmin check:", adminStatus, "User role:", profile?.role);
+    return adminStatus;
   };
 
   const isSectionLeader = () => {
-    return profile?.role === 'section_leader';
+    const sectionLeaderStatus = profile?.role === 'section_leader';
+    console.log("isSectionLeader check:", sectionLeaderStatus, "User role:", profile?.role);
+    return sectionLeaderStatus;
   };
 
   // Aliases for compatibility

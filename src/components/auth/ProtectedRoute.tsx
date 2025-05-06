@@ -13,7 +13,7 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
   children,
   allowedRoles,
 }) => {
-  const { isAuthenticated, isLoading, profile } = useAuth();
+  const { isAuthenticated, isLoading, profile, isAdmin } = useAuth();
   const location = useLocation();
 
   if (isLoading) {
@@ -30,9 +30,13 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
   }
 
   // Check role-based access if roles are specified
-  if (allowedRoles && profile && !allowedRoles.includes(profile.role as "admin" | "member" | "section_leader" | "student_conductor" | "accompanist" | "singer")) {
+  if (allowedRoles && profile && !allowedRoles.includes(profile.role as any)) {
+    console.log("Access denied - Required roles:", allowedRoles, "User role:", profile.role);
     return <Navigate to="/dashboard" replace />;
   }
+
+  // Log authorization status
+  console.log("Route access granted. User role:", profile?.role, "Admin status:", isAdmin?.());
 
   return <>{children}</>;
 };
