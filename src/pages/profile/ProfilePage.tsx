@@ -1,4 +1,5 @@
-import React, { useState, useEffect, useCallback } from "react";
+
+import React, { useState, useEffect } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
 import {
@@ -13,7 +14,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/components/ui/use-toast";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { Edit, Check, User, Mail, ArrowLeft } from "lucide-react";
+import { Edit, ArrowLeft } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery } from "@tanstack/react-query";
@@ -35,7 +36,6 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-  DialogClose,
 } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
 
@@ -56,6 +56,19 @@ const formSchema = z.object({
 });
 
 type FormValues = z.infer<typeof formSchema>;
+
+// Define a proper profile type that includes all fields
+interface ProfileData {
+  id: string;
+  first_name: string | null;
+  last_name: string | null;
+  role: string | null;
+  voice_part?: string | null;
+  created_at: string;
+  updated_at: string;
+  bio?: string | null;
+  avatar_url?: string | null;
+}
 
 const ProfilePage: React.FC = () => {
   const { user, profile } = useAuth();
@@ -97,12 +110,13 @@ const ProfilePage: React.FC = () => {
       return null;
     }
 
-    return data;
+    return data as ProfileData;
   };
 
-  const { data: fetchedProfile, isLoading } = useQuery("profile", fetchProfile, {
-    enabled: !!user,
-    initialData: profile || undefined,
+  // Fix the useQuery call - only pass key and function
+  const { data: fetchedProfile, isLoading } = useQuery({
+    queryKey: ["profile"],
+    queryFn: fetchProfile,
   });
 
   useEffect(() => {
@@ -153,14 +167,15 @@ const ProfilePage: React.FC = () => {
         throw uploadError;
       }
 
-      const avatarUrl = `${supabase.supabaseUrl}/storage/v1/object/public/${uploadData.Key}`;
-      setAvatarUrl(avatarUrl);
+      // Properly access storage URL properties
+      const storageUrl = `${supabase.storageUrl}/object/public/avatars/${uploadData.path}`;
+      setAvatarUrl(storageUrl);
 
       // Step 2: Call the function to update the user's avatar
       const { error: updateError } = await supabase
         .from('profiles')
         .update({
-          avatar_url: avatarUrl,
+          avatar_url: storageUrl,
           updated_at: new Date().toISOString()
         })
         .eq('id', user.id);
