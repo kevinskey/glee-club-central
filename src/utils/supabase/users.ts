@@ -44,12 +44,16 @@ export async function fetchUserById(userId: string) {
  */
 export const updateUserRole = async (userId: string, role: string): Promise<boolean> => {
   try {
+    // Make sure we're sending the exact value expected by the database
+    if (role === "admin") role = "administrator";
+    
     console.log(`Calling handle_user_role with user_id: ${userId}, role: ${role}`);
     
-    // Check if role is valid against the database constraints
-    if (!["administrator", "section_leader", "singer", "student_conductor", "accompanist", "non_singer"].includes(role)) {
+    // Validate against allowed roles
+    const validRoles = ["administrator", "section_leader", "singer", "student_conductor", "accompanist", "non_singer"];
+    if (!validRoles.includes(role)) {
       console.error(`Invalid role value: ${role}`);
-      throw new Error(`Invalid role: ${role}`);
+      throw new Error(`Invalid role: ${role}. Must be one of: ${validRoles.join(", ")}`);
     }
     
     // Call the RPC function with the provided parameters

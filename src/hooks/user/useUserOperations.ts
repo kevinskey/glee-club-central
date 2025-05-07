@@ -48,6 +48,10 @@ export function useUserOperations(
     setError(null);
     try {
       console.log(`useUserOperations: Changing role for user ${userId} to ${role}`);
+      
+      // Make sure we're using the correct role value
+      if (role === "admin") role = "administrator";
+      
       const success = await updateUserRole(userId, role);
       if (success) {
         // Update local state with the new role and appropriate display name

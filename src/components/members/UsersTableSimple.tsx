@@ -112,6 +112,7 @@ export const UsersTableSimple: React.FC<UsersTableSimpleProps> = ({
                   <DropdownMenuItem
                     onClick={() => {
                       console.log("Setting user as Administrator");
+                      // Use the exact value expected by the database
                       onRoleChange(user.id, 'administrator');
                     }}
                   >

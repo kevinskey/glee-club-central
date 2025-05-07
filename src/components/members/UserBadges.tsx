@@ -8,6 +8,7 @@ export const getRoleBadge = (role: string) => {
 
   switch (role) {
     case "administrator":
+    case "admin":
       className = "bg-red-500";
       displayName = "Administrator";
       break;
