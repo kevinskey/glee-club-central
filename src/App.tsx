@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
@@ -65,6 +64,7 @@ function App() {
           <Route path="admin-users" element={<AdminUserManagementPage />} />
           <Route path="members" element={<MemberDirectoryPage />} />
           <Route path="invite-member" element={<InviteMemberPage />} />
+          <Route path="/dashboard/members/:id" element={<MemberProfilePage />} />
         </Route>
 
         {/* Catch all for 404 errors */}
