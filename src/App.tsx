@@ -12,7 +12,6 @@ import DashboardPage from '@/pages/DashboardPage';
 import CalendarPage from '@/pages/CalendarPage';
 import ProfilePage from '@/pages/ProfilePage';
 import MemberProfilePage from '@/pages/profile/MemberProfilePage';
-import SectionsPage from '@/pages/SectionsPage';
 import AdminUserManagementPage from '@/pages/AdminUserManagementPage';
 import NotFoundPage from '@/pages/NotFoundPage';
 import InviteMemberPage from '@/pages/InviteMemberPage';
@@ -49,13 +48,6 @@ function App() {
           <Route path="profile" element={<MemberProfilePage />} />
           <Route path="profile/:id" element={<MemberProfilePage />} />
           <Route path="schedule" element={<CalendarPage />} /> {/* Redirect schedule to calendar */}
-          
-          {/* Admin and section leader routes */}
-          <Route path="sections" element={
-            <ProtectedRoute allowedRoles={["admin", "section_leader"]}>
-              <SectionsPage />
-            </ProtectedRoute>
-          } />
           
           {/* Admin-only routes */}
           <Route path="member-management" element={<AdminUserManagementPage />} />

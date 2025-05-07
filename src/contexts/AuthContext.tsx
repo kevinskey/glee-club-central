@@ -1,4 +1,3 @@
-
 import React, { createContext, useState, useEffect, useContext } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -19,7 +18,6 @@ export interface Profile {
   voice_part?: VoicePart | null;
   avatar_url?: string | null;
   status: MemberStatus;
-  section_id?: string | null;
   join_date?: string | null;
 }
 
@@ -93,7 +91,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         voice_part: profileData.voice_part as VoicePart || null,
         avatar_url: profileData.avatar_url || null, 
         status: (profileData.status as MemberStatus) || 'pending', 
-        section_id: profileData.section_id || null, 
         join_date: profileData.join_date || null 
       };
       
