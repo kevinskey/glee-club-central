@@ -48,7 +48,6 @@ export const EditMemberDialog: React.FC<EditMemberDialogProps> = ({
           ...member,
           first_name: data.first_name,
           last_name: data.last_name,
-          email: member.email, // Keep the existing email
           phone: data.phone,
           voice_part: data.voice_part as VoicePart,
           role: data.role as UserRole,

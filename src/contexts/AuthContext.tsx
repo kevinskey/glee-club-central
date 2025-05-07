@@ -4,9 +4,9 @@ import { Session, User as SupabaseUser } from '@supabase/supabase-js';
 import { toast } from 'sonner';
 
 // Define types for user roles and status
-export type UserRole = 'administrator' | 'section_leader' | 'singer' | 'student_conductor' | 'accompanist' | 'member' | 'non_singer';
-export type MemberStatus = 'active' | 'inactive' | 'pending' | 'alumni' | 'deleted';
-export type VoicePart = 'soprano_1' | 'soprano_2' | 'alto_1' | 'alto_2' | 'tenor' | 'bass' | null;
+export type VoicePart = "soprano_1" | "soprano_2" | "alto_1" | "alto_2" | "tenor" | "bass" | null;
+export type MemberStatus = "active" | "inactive" | "pending" | "alumni" | "deleted";
+export type UserRole = "administrator" | "section_leader" | "singer" | "student_conductor" | "accompanist" | "non_singer";
 
 // Define Profile type for additional user information
 export interface Profile {
@@ -14,17 +14,18 @@ export interface Profile {
   first_name?: string | null;
   last_name?: string | null;
   phone?: string | null;
-  voice_part?: VoicePart;
   role: UserRole;
+  voice_part?: VoicePart;
   avatar_url?: string | null;
   status: MemberStatus;
   join_date?: string | null;
+  created_at?: string;
+  last_sign_in_at?: string | null;
   class_year?: string | null;
-  dues_paid?: boolean;
+  dues_paid?: boolean | null;
   notes?: string | null;
   special_roles?: string | null;
-  created_at?: string;
-  updated_at?: string;
+  email?: string | null; // Added email field
 }
 
 interface AuthContextType {

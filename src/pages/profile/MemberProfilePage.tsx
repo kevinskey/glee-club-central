@@ -34,7 +34,7 @@ import { AdminNotesTab } from "@/components/profile/AdminNotesTab";
 import { getStatusBadge, getRoleBadge } from "@/components/members/UserBadges";
 import { useQuery } from "@tanstack/react-query";
 import { useParams } from "react-router-dom";
-import { fetchUserById } from "@/utils/supabaseQueries";
+import { fetchUserById } from "@/utils/supabase/users";
 
 export default function MemberProfilePage() {
   const { user, profile, isAdmin } = useAuth();
@@ -91,6 +91,13 @@ export default function MemberProfilePage() {
       default: return voicePart;
     }
   };
+
+  // Get the email from the profile, safely handling the case where it might not exist
+  const profileEmail = memberProfile?.email || profile?.email || "No email available";
+  
+  // Handle last sign in time safely
+  const lastSignIn = memberProfile?.last_sign_in_at || profile?.last_sign_in_at;
+  const lastSignInDisplay = lastSignIn ? new Date(lastSignIn).toLocaleString() : "Never";
 
   return (
     <div>

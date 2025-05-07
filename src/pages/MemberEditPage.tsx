@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useForm } from "react-hook-form";
@@ -26,8 +27,8 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/components/ui/use-toast";
 import {
-  UserFormSchema,
-  UserFormValues,
+  userFormSchema,
+  UserFormValues
 } from "@/components/members/form/userFormSchema";
 import { updateUser } from "@/utils/admin";
 
@@ -41,7 +42,7 @@ export default function MemberEditPage() {
   const { toast } = useToast();
 
   const form = useForm<UserFormValues>({
-    resolver: zodResolver(UserFormSchema),
+    resolver: zodResolver(userFormSchema),
     defaultValues: {
       first_name: "",
       last_name: "",
@@ -85,13 +86,14 @@ export default function MemberEditPage() {
     }
   }, [id, toast]);
 
-  const handleSave = async (data: any) => {
+  const handleSave = async (data: UserFormValues) => {
     setIsSubmitting(true);
     try {
       if (!user) return;
 
-      // Build the user updates with all fields, including the added ones
+      // Build the user updates with all fields
       const userUpdates = {
+        id: user.id,
         first_name: data.first_name,
         last_name: data.last_name,
         email: data.email,
@@ -106,11 +108,8 @@ export default function MemberEditPage() {
         special_roles: data.special_roles,
       };
 
-      // Omit id from updates to prevent it from being changed
-      const { id: _, ...updates } = userUpdates;
-
       // Call the update function
-      const result = await updateUser(user.id, updates);
+      const result = await updateUser(userUpdates);
 
       if (result) {
         toast({
@@ -265,9 +264,22 @@ export default function MemberEditPage() {
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Voice Part</FormLabel>
-                      <FormControl>
-                        <Input placeholder="Voice Part" {...field} />
-                      </FormControl>
+                      <Select onValueChange={field.onChange} defaultValue={field.value || ''}>
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select voice part" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          <SelectItem value="">Not set</SelectItem>
+                          <SelectItem value="soprano_1">Soprano 1</SelectItem>
+                          <SelectItem value="soprano_2">Soprano 2</SelectItem>
+                          <SelectItem value="alto_1">Alto 1</SelectItem>
+                          <SelectItem value="alto_2">Alto 2</SelectItem>
+                          <SelectItem value="tenor">Tenor</SelectItem>
+                          <SelectItem value="bass">Bass</SelectItem>
+                        </SelectContent>
+                      </Select>
                       <FormMessage />
                     </FormItem>
                   )}
@@ -306,7 +318,7 @@ export default function MemberEditPage() {
                     <FormItem>
                       <FormLabel>Join Date</FormLabel>
                       <FormControl>
-                        <Input placeholder="Join Date" {...field} />
+                        <Input type="date" {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -322,7 +334,7 @@ export default function MemberEditPage() {
                     <FormItem>
                       <FormLabel>Class Year</FormLabel>
                       <FormControl>
-                        <Input placeholder="Class Year" {...field} />
+                        <Input placeholder="Class Year" {...field} value={field.value || ''} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -338,7 +350,7 @@ export default function MemberEditPage() {
                       </div>
                       <FormControl>
                         <Checkbox
-                          checked={field.value}
+                          checked={field.value || false}
                           onCheckedChange={field.onChange}
                         />
                       </FormControl>
@@ -355,7 +367,7 @@ export default function MemberEditPage() {
                   <FormItem>
                     <FormLabel>Notes</FormLabel>
                     <FormControl>
-                      <Textarea placeholder="Notes" {...field} />
+                      <Textarea placeholder="Notes" {...field} value={field.value || ''} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -369,7 +381,7 @@ export default function MemberEditPage() {
                   <FormItem>
                     <FormLabel>Special Roles</FormLabel>
                     <FormControl>
-                      <Input placeholder="Special Roles" {...field} />
+                      <Input placeholder="Special Roles" {...field} value={field.value || ''} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>

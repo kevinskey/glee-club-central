@@ -1,20 +1,6 @@
-
 import React from "react";
-import { useNavigate, useLocation } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
-import { Button } from "@/components/ui/button";
-import { Menu, User, LogOut, ChevronRight, Home } from "lucide-react";
-import { ThemeToggle } from "@/components/ui/theme-toggle";
-import { Metronome } from "@/components/ui/metronome";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-  DropdownMenuProvider,
-} from "@/components/ui/dropdown-menu";
 import {
   Sheet,
   SheetContent,
@@ -22,330 +8,81 @@ import {
   SheetHeader,
   SheetTitle,
   SheetTrigger,
-  SheetClose,
 } from "@/components/ui/sheet";
-import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from "@/components/ui/accordion";
-import { SidebarNav } from "./SidebarNav";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { NewsFeed } from "@/components/news/NewsFeed";
-import { Icons } from "@/components/Icons";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
+import { Menu } from "lucide-react";
+import { NavItem } from "./NavItem";
+import { Users } from "lucide-react";
 
-export const Header = () => {
-  const { user, profile, signOut } = useAuth();
-  const navigate = useNavigate();
-  const location = useLocation();
-  
-  // Check if user is on dashboard or a sub-page of dashboard
-  const isOnDashboard = location.pathname.includes('/dashboard');
+export function Header() {
+  const { profile, signOut } = useAuth();
 
-  // Get user initials for the avatar
-  const getUserInitials = () => {
-    if (profile?.first_name && profile?.last_name) {
-      return `${profile.first_name[0]}${profile.last_name[0]}`.toUpperCase();
-    } else if (user?.email) {
-      return user.email[0].toUpperCase();
+  // Fix the UserRole import and ensure the comparison is made correctly
+  const renderAdminLinks = () => {
+    if (profile?.role === "administrator") {
+      return (
+        <NavItem href="/dashboard/member-management" icon={<Users size={16} />}>
+          Member Management
+        </NavItem>
+      );
     }
-    return "U";
-  };
-
-  // Get display name
-  const getDisplayName = () => {
-    if (profile?.first_name && profile?.last_name) {
-      return `${profile.first_name} ${profile.last_name}`;
-    } else if (user?.email) {
-      return user.email.split('@')[0];
-    }
-    return "User";
-  };
-
-  // Get role description
-  const getRoleDescription = () => {
-    if (profile?.role === "admin") {
-      return "Admin";
-    } else if (profile?.role === "member") {
-      return `Member (${profile.voice_part || ''})`;
-    }
-    return "Member";
-  };
-
-  // Navigation sections for mobile menu
-  const navigationSections = [
-    {
-      title: "Main Navigation",
-      items: [
-        { label: "Dashboard", path: "/dashboard" },
-        { label: "Sheet Music", path: "/dashboard/sheet-music" },
-        { label: "Practice & Sight Reading", path: "/dashboard/practice" },
-        { label: "Recordings", path: "/dashboard/recordings" },
-        { label: "Videos", path: "/dashboard/videos" }
-      ]
-    },
-    {
-      title: "Additional Resources",
-      items: [
-        { label: "Schedule", path: "/dashboard/schedule" },
-        { label: "Glee Club Handbook", path: "/dashboard/handbook" },
-        { label: "Merch", path: "/dashboard/merch" },
-        { label: "Attendance", path: "/dashboard/attendance" },
-        { label: "Media Library", path: "/dashboard/media-library" }
-      ]
-    }
-  ];
-
-  // Handle navigation with auto-close for mobile menu
-  const handleNavigation = (path: string, closeMenu?: () => void) => {
-    navigate(path);
-    if (closeMenu) closeMenu();
+    return null;
   };
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-      <NewsFeed />
+    <header className="bg-background sticky top-0 z-50 w-full border-b">
       <div className="container flex h-16 items-center justify-between">
-        <div className="flex items-center gap-2">
-          <TooltipProvider>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Sheet>
-                  <SheetTrigger asChild>
-                    <Button variant="ghost" size="icon" className="md:hidden h-8 w-8">
-                      <Menu className="h-4 w-4" />
-                      <span className="sr-only">Toggle menu</span>
-                    </Button>
-                  </SheetTrigger>
-                  <SheetContent side="left" className="pr-0 overflow-y-auto">
-                    <SheetHeader>
-                      <SheetTitle className="flex items-center gap-2 text-glee-purple">
-                        <Icons.logo className="h-5 w-5" />
-                        Glee World
-                      </SheetTitle>
-                      <SheetDescription>
-                        Spelman College Choir Digital Hub
-                      </SheetDescription>
-                    </SheetHeader>
-                    
-                    {/* Theme toggle button added to mobile menu top */}
-                    <div className="mt-4 flex justify-end">
-                      <ThemeToggle />
-                    </div>
-                    
-                    {/* Add Home link at the top of mobile menu if on dashboard */}
-                    {isOnDashboard && (
-                      <div className="my-4 border-b pb-4">
-                        <SheetClose asChild>
-                          <Button
-                            variant="outline"
-                            className="w-full justify-start text-sm"
-                            onClick={() => navigate("/")}
-                          >
-                            <Home className="mr-2 h-4 w-4" />
-                            Back to Home Page
-                          </Button>
-                        </SheetClose>
-                      </div>
-                    )}
-                    
-                    {/* Mobile accordion-style navigation */}
-                    <div className="mt-6 flex flex-col space-y-2">
-                      {navigationSections.map((section, index) => (
-                        <Accordion 
-                          key={index} 
-                          type="single" 
-                          collapsible 
-                          className="w-full"
-                        >
-                          <AccordionItem value={`section-${index}`} className="border-b-0">
-                            <AccordionTrigger className="py-3 font-medium text-left">
-                              {section.title}
-                            </AccordionTrigger>
-                            <AccordionContent>
-                              <ul className="space-y-1 pl-1">
-                                {section.items.map((item, itemIndex) => (
-                                  <li key={itemIndex}>
-                                    <SheetClose asChild>
-                                      <Button
-                                        variant="ghost" 
-                                        className="w-full justify-start text-sm"
-                                        onClick={() => navigate(item.path)}
-                                      >
-                                        <ChevronRight className="mr-2 h-4 w-4" />
-                                        {item.label}
-                                      </Button>
-                                    </SheetClose>
-                                  </li>
-                                ))}
-                              </ul>
-                            </AccordionContent>
-                          </AccordionItem>
-                        </Accordion>
-                      ))}
-                      
-                      {user && (
-                        <div className="mt-4 pt-4 border-t">
-                          <SheetClose asChild>
-                            <Button
-                              variant="ghost"
-                              className="w-full justify-start text-sm text-destructive hover:text-destructive hover:bg-destructive/10"
-                              onClick={() => signOut()}
-                            >
-                              <LogOut className="mr-2 h-4 w-4" />
-                              Logout
-                            </Button>
-                          </SheetClose>
-                        </div>
-                      )}
-                    </div>
-                  </SheetContent>
-                </Sheet>
-              </TooltipTrigger>
-              <TooltipContent>
-                <p>Open menu</p>
-              </TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
-          
-          <TooltipProvider>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button
-                  variant="ghost"
-                  onClick={() => navigate("/dashboard")}
-                  className="flex items-center gap-2"
-                >
-                  <Icons.logo className="h-5 w-5 text-glee-purple" />
-                  <span className="font-playfair text-lg font-semibold text-glee-purple">
-                    Glee World
-                  </span>
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent>
-                <p>Go to dashboard</p>
-              </TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
-          
-          <Metronome />
-          
-          {/* Add Home link in desktop view if on dashboard */}
-          {isOnDashboard && (
-            <TooltipProvider>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => navigate("/")}
-                    className="ml-2 hidden md:flex items-center gap-1 h-8 px-2 text-xs"
-                  >
-                    <Home className="h-3 w-3" />
-                    <span>Back to Home</span>
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent>
-                  <p>Return to home page</p>
-                </TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
-          )}
-        </div>
-
-        <div className="flex items-center gap-2">
-          {/* Theme toggle visible on all screen sizes */}
-          <ThemeToggle />
-          
-          {user ? (
-            <TooltipProvider>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <DropdownMenuProvider>
-                    <DropdownMenuTrigger asChild>
-                      <Button variant="ghost" className="relative h-8 w-8 rounded-full p-0">
-                        <Avatar className="h-8 w-8 bg-glee-purple text-white">
-                          <AvatarFallback>{getUserInitials()}</AvatarFallback>
-                        </Avatar>
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end">
-                      <DropdownMenuLabel className="text-sm">{getDisplayName()}</DropdownMenuLabel>
-                      <DropdownMenuLabel className="text-xs font-normal text-muted-foreground">
-                        {getRoleDescription()}
-                      </DropdownMenuLabel>
-                      <DropdownMenuSeparator />
-                      {isOnDashboard && (
-                        <DropdownMenuItem asChild>
-                          <button
-                            className="flex w-full cursor-pointer items-center"
-                            onClick={() => navigate("/")}
-                          >
-                            <Home className="mr-2 h-4 w-4" />
-                            Back to Home
-                          </button>
-                        </DropdownMenuItem>
-                      )}
-                      <DropdownMenuItem asChild>
-                        <button
-                          className="flex w-full cursor-pointer items-center"
-                          onClick={() => navigate("/profile")}
-                        >
-                          <User className="mr-2 h-4 w-4" />
-                          My Profile
-                        </button>
-                      </DropdownMenuItem>
-                      <DropdownMenuItem asChild>
-                        <button
-                          className="flex w-full cursor-pointer items-center"
-                          onClick={() => navigate("/dashboard")}
-                        >
-                          Dashboard
-                        </button>
-                      </DropdownMenuItem>
-                      <DropdownMenuItem asChild>
-                        <button
-                          className="flex w-full cursor-pointer items-center text-destructive"
-                          onClick={() => signOut()}
-                        >
-                          <LogOut className="mr-2 h-4 w-4" />
-                          Logout
-                        </button>
-                      </DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenuProvider>
-                </TooltipTrigger>
-                <TooltipContent>
-                  <p>User profile & settings</p>
-                </TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
-          ) : (
-            <TooltipProvider>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button 
-                    size="sm" 
-                    className="bg-glee-purple hover:bg-glee-purple/90 h-8 px-3 text-xs"
-                    onClick={() => navigate("/login")}
-                  >
-                    Member Login
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent>
-                  <p>Sign in to your account</p>
-                </TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
-          )}
-        </div>
+        <Link to="/" className="font-bold">
+          Glee Club
+        </Link>
+        <Sheet>
+          <SheetTrigger>
+            <Menu className="h-6 w-6 lg:hidden" />
+          </SheetTrigger>
+          <SheetContent side="left" className="w-full sm:w-[400px]">
+            <SheetHeader>
+              <SheetTitle>Menu</SheetTitle>
+              <SheetDescription>
+                Navigate through the application.
+              </SheetDescription>
+            </SheetHeader>
+            <div className="grid gap-4 py-4">
+              <NavItem href="/dashboard" icon={<Users size={16} />}>
+                Dashboard
+              </NavItem>
+              {renderAdminLinks()}
+              <NavItem href="/dashboard/profile" icon={<Users size={16} />}>
+                Profile
+              </NavItem>
+              <NavItem href="/dashboard/member-directory" icon={<Users size={16} />}>
+                Member Directory
+              </NavItem>
+              <button
+                onClick={signOut}
+                className="flex items-center gap-2 rounded-md p-2 text-sm font-medium hover:bg-secondary"
+              >
+                Sign Out
+              </button>
+            </div>
+          </SheetContent>
+        </Sheet>
+        <nav className="hidden lg:flex gap-6">
+          <NavItem href="/dashboard" icon={<Users size={16} />}>
+            Dashboard
+          </NavItem>
+          {renderAdminLinks()}
+          <NavItem href="/dashboard/profile" icon={<Users size={16} />}>
+            Profile
+          </NavItem>
+          <NavItem href="/dashboard/member-directory" icon={<Users size={16} />}>
+            Member Directory
+          </NavItem>
+          <button
+            onClick={signOut}
+            className="flex items-center gap-2 rounded-md p-2 text-sm font-medium hover:bg-secondary"
+          >
+            Sign Out
+          </button>
+        </nav>
       </div>
     </header>
   );

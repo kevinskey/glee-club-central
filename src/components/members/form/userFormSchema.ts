@@ -19,6 +19,14 @@ export const userFormSchema = z.object({
   ),
   phone: z.string().optional().nullable(),
   password: z.string().optional(),
+  join_date: z.string().optional().nullable(),
+  class_year: z.string().optional().nullable(),
+  dues_paid: z.boolean().optional().nullable(),
+  notes: z.string().optional().nullable(),
+  special_roles: z.string().optional().nullable(),
 });
+
+// Export using the exact name the MemberEditPage is importing
+export const UserFormSchema = userFormSchema;
 
 export type UserFormValues = z.infer<typeof userFormSchema>;
