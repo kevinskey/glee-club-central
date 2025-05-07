@@ -15,7 +15,7 @@ import {
   User, 
   Calendar, 
   Music, 
-  TShirt, 
+  Shirt, 
   Wallet, 
   Camera, 
   FileText,
@@ -139,7 +139,7 @@ export default function MemberProfilePage() {
               <TabsTrigger value="overview"><User className="h-4 w-4 mr-2" />Overview</TabsTrigger>
               <TabsTrigger value="participation"><Calendar className="h-4 w-4 mr-2" />Participation</TabsTrigger>
               <TabsTrigger value="music"><Music className="h-4 w-4 mr-2" />Music</TabsTrigger>
-              <TabsTrigger value="wardrobe"><TShirt className="h-4 w-4 mr-2" />Wardrobe</TabsTrigger>
+              <TabsTrigger value="wardrobe"><Shirt className="h-4 w-4 mr-2" />Wardrobe</TabsTrigger>
               <TabsTrigger value="financial"><Wallet className="h-4 w-4 mr-2" />Financial</TabsTrigger>
               <TabsTrigger value="media"><Camera className="h-4 w-4 mr-2" />Media</TabsTrigger>
               {isAdmin() && (

@@ -9,7 +9,7 @@ import {
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { User } from "@/hooks/useUserManagement";
-import { TShirt, Check, X } from "lucide-react";
+import { Shirt, Check, X } from "lucide-react";
 
 interface WardrobeTabProps {
   profile: User;
@@ -48,7 +48,7 @@ export function WardrobeTab({ profile }: WardrobeTabProps) {
             <div>
               <h3 className="text-sm font-medium text-muted-foreground mb-1">T-Shirt Size</h3>
               <div className="flex items-center">
-                <TShirt className="h-4 w-4 mr-2 text-muted-foreground" />
+                <Shirt className="h-4 w-4 mr-2 text-muted-foreground" />
                 <p>{wardrobeInfo.tShirtSize}</p>
               </div>
             </div>

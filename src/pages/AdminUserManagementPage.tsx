@@ -1,4 +1,5 @@
 
+// Just updating line 150 where there's an error with the password property
 import React, { useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { PageHeader } from "@/components/ui/page-header";
@@ -133,7 +134,7 @@ export default function AdminUserManagementPage() {
       if (!selectedUser) return;
       
       // Update user data
-      const updateData = {
+      const updateData: any = {
         id: selectedUser.id,
         email: data.email,
         first_name: data.first_name,
