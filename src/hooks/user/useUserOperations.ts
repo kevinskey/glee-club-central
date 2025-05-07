@@ -13,7 +13,34 @@ export function useUserOperations(
   const [isUpdating, setIsUpdating] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Update user role
+  /**
+   * Update user state after a successful operation
+   */
+  const updateUserState = (userId: string, updates: Partial<User>) => {
+    // Update users list
+    setUsers(users.map(user => 
+      user.id === userId ? { ...user, ...updates } : user
+    ));
+    
+    // Update selected user if it's the one being modified
+    if (selectedUser && selectedUser.id === userId) {
+      setSelectedUser({ ...selectedUser, ...updates });
+    }
+  };
+
+  /**
+   * Handle operation errors
+   */
+  const handleOperationError = (error: any, message: string) => {
+    const errorMessage = error.message || message;
+    setError(errorMessage);
+    toast.error(errorMessage);
+    return false;
+  };
+
+  /**
+   * Update user role
+   */
   const changeUserRole = async (userId: string, role: string) => {
     setIsUpdating(true);
     setError(null);
@@ -21,36 +48,21 @@ export function useUserOperations(
       const success = await updateUserRole(userId, role);
       if (success) {
         toast.success(`User role updated to ${role}`);
-        
-        // Update local state
-        setUsers(users.map(user => 
-          user.id === userId ? { 
-            ...user, 
-            role
-          } : user
-        ));
-        
-        if (selectedUser && selectedUser.id === userId) {
-          setSelectedUser({ 
-            ...selectedUser, 
-            role
-          });
-        }
-        
+        updateUserState(userId, { role });
         return true;
       } else {
         throw new Error("Failed to update user role");
       }
     } catch (err: any) {
-      setError(err.message || "Failed to update user role");
-      toast.error("Failed to update user role");
-      return false;
+      return handleOperationError(err, "Failed to update user role");
     } finally {
       setIsUpdating(false);
     }
   };
 
-  // Update user status
+  /**
+   * Update user status
+   */
   const changeUserStatus = async (userId: string, status: string) => {
     setIsUpdating(true);
     setError(null);
@@ -58,30 +70,21 @@ export function useUserOperations(
       const success = await updateUserStatus(userId, status);
       if (success) {
         toast.success(`User status updated to ${status}`);
-        
-        // Update local state
-        setUsers(users.map(user => 
-          user.id === userId ? { ...user, status } : user
-        ));
-        
-        if (selectedUser && selectedUser.id === userId) {
-          setSelectedUser({ ...selectedUser, status });
-        }
-        
+        updateUserState(userId, { status });
         return true;
       } else {
         throw new Error("Failed to update user status");
       }
     } catch (err: any) {
-      setError(err.message || "Failed to update user status");
-      toast.error("Failed to update user status");
-      return false;
+      return handleOperationError(err, "Failed to update user status");
     } finally {
       setIsUpdating(false);
     }
   };
 
-  // Activate a pending user
+  /**
+   * Activate a pending user
+   */
   const activateUser = async (userId: string) => {
     return await changeUserStatus(userId, 'active');
   };
