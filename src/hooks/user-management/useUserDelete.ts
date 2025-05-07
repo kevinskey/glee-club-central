@@ -9,21 +9,28 @@ export function useUserDelete(onSuccess: () => void) {
   const [userToDelete, setUserToDelete] = useState<User | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // Handle delete user
+  // Handle delete user with improved error handling
   const handleDeleteUser = async () => {
+    if (!userToDelete) {
+      toast.error("No user selected for deletion");
+      return;
+    }
+    
     setIsSubmitting(true);
     try {
-      if (!userToDelete) return;
-      
+      console.log("Attempting to delete user:", userToDelete.email);
       const result = await deleteUser(userToDelete.id);
       
       if (result.success) {
-        toast.success(`User ${userToDelete.email} deleted successfully`);
+        toast.success(`User ${userToDelete.first_name} ${userToDelete.last_name} deleted successfully`);
         onSuccess();
         setIsDeleteDialogOpen(false);
         setUserToDelete(null);
+      } else {
+        throw new Error("Failed to delete user");
       }
     } catch (error: any) {
+      console.error("Error deleting user:", error);
       toast.error(error.message || "Error deleting user");
     } finally {
       setIsSubmitting(false);
@@ -32,6 +39,7 @@ export function useUserDelete(onSuccess: () => void) {
 
   // Open delete user dialog
   const openDeleteUserDialog = (user: User) => {
+    console.log("Opening delete dialog for user:", user.email);
     setUserToDelete(user);
     setIsDeleteDialogOpen(true);
   };

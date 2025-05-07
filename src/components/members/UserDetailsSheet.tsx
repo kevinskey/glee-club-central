@@ -17,6 +17,7 @@ import { Link } from "react-router-dom";
 import { EditUserForm } from "./EditUserForm";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ProfileTabContent } from "./ProfileTabContent";
+import { Trash2 } from "lucide-react";
 
 interface UserDetailsSheetProps {
   user: User | null;
@@ -24,6 +25,7 @@ interface UserDetailsSheetProps {
   onOpenChange: (open: boolean) => void;
   onRoleChange: (userId: string, role: string) => Promise<void>;
   onStatusChange: (userId: string, status: string) => Promise<void>;
+  onDeleteClick?: (user: User) => void;
   isUpdating: boolean;
   formatDate: (date?: string | null) => string;
 }
@@ -34,6 +36,7 @@ export const UserDetailsSheet: React.FC<UserDetailsSheetProps> = ({
   onOpenChange,
   onRoleChange,
   onStatusChange,
+  onDeleteClick,
   isUpdating,
   formatDate,
 }) => {
@@ -178,6 +181,21 @@ export const UserDetailsSheet: React.FC<UserDetailsSheetProps> = ({
                   </Button>
                 </div>
               </div>
+
+              {onDeleteClick && (
+                <div>
+                  <h3 className="text-sm font-medium mb-2">Danger Zone</h3>
+                  <Button 
+                    variant="destructive" 
+                    size="sm"
+                    onClick={() => onDeleteClick(user)}
+                    disabled={isUpdating}
+                  >
+                    <Trash2 className="mr-2 h-4 w-4" />
+                    Delete User
+                  </Button>
+                </div>
+              )}
             </div>
           </TabsContent>
         </Tabs>

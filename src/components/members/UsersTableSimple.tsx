@@ -17,7 +17,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Loader2, Eye, MoreHorizontal } from "lucide-react";
+import { Loader2, Eye, MoreHorizontal, Trash2 } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { getRoleBadge, getStatusBadge } from "@/components/members/UserBadges";
 import { User } from "@/hooks/useUserManagement";
@@ -28,6 +28,7 @@ interface UsersTableSimpleProps {
   onViewDetails: (user: User) => void;
   onRoleChange?: (userId: string, role: string) => Promise<void>;
   onStatusChange?: (userId: string, status: string) => Promise<void>;
+  onDeleteClick?: (user: User) => void;
   formatDate: (dateString?: string | null) => string;
 }
 
@@ -37,6 +38,7 @@ export const UsersTableSimple: React.FC<UsersTableSimpleProps> = ({
   onViewDetails,
   onRoleChange,
   onStatusChange,
+  onDeleteClick,
   formatDate,
 }) => {
   return (
@@ -102,7 +104,7 @@ export const UsersTableSimple: React.FC<UsersTableSimpleProps> = ({
                       <Eye className="h-4 w-4 mr-2" />
                       View
                     </Button>
-                    {onRoleChange && onStatusChange && (
+                    {onRoleChange && onStatusChange && onDeleteClick && (
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
                           <Button variant="ghost" size="icon">
@@ -137,6 +139,14 @@ export const UsersTableSimple: React.FC<UsersTableSimpleProps> = ({
                             onClick={() => onStatusChange(user.id, 'inactive')}
                           >
                             Set Status to Inactive
+                          </DropdownMenuItem>
+                          <DropdownMenuSeparator />
+                          <DropdownMenuItem
+                            onClick={() => onDeleteClick(user)}
+                            className="text-destructive focus:text-destructive"
+                          >
+                            <Trash2 className="h-4 w-4 mr-2" />
+                            Delete User
                           </DropdownMenuItem>
                         </DropdownMenuContent>
                       </DropdownMenu>

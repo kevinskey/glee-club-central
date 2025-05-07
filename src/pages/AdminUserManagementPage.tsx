@@ -9,6 +9,7 @@ import { UsersTableSimple } from "@/components/members/UsersTableSimple";
 import { UserDialogs } from "@/components/members/UserDialogs";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
+import { DeleteUserDialog } from "@/components/members/DeleteUserDialog";
 
 export default function AdminUserManagementPage() {
   const { isAdmin } = useAuth();
@@ -124,6 +125,7 @@ export default function AdminUserManagementPage() {
             onRoleChange={handleRoleChange}
             onStatusChange={handleStatusChange}
             formatDate={formatDate}
+            onDeleteClick={openDeleteUserDialog}
           />
           
           <div className="mt-4 text-sm text-gray-500">
@@ -145,6 +147,14 @@ export default function AdminUserManagementPage() {
         onCreateUser={handleCreateUser}
         onEditUser={handleEditUser}
         onDeleteUser={handleDeleteUser}
+      />
+      
+      <DeleteUserDialog 
+        user={userToDelete}
+        isOpen={isDeleteDialogOpen}
+        onOpenChange={setIsDeleteDialogOpen}
+        onDeleteConfirm={handleDeleteUser}
+        isSubmitting={isSubmitting}
       />
     </div>
   );
