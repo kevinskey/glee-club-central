@@ -9,7 +9,15 @@ import {
   TableRow 
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
-import { Loader2, Eye } from "lucide-react";
+import { 
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Loader2, Eye, MoreHorizontal } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { getRoleBadge, getStatusBadge } from "@/components/members/UserBadges";
 import { User } from "@/hooks/useUserManagement";
@@ -27,6 +35,8 @@ export const UsersTableSimple: React.FC<UsersTableSimpleProps> = ({
   users,
   isLoading,
   onViewDetails,
+  onRoleChange,
+  onStatusChange,
   formatDate,
 }) => {
   return (
@@ -83,14 +93,55 @@ export const UsersTableSimple: React.FC<UsersTableSimpleProps> = ({
                 <TableCell>{getStatusBadge(user.status)}</TableCell>
                 <TableCell>{formatDate(user.join_date)}</TableCell>
                 <TableCell className="text-right">
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => onViewDetails(user)}
-                  >
-                    <Eye className="h-4 w-4 mr-2" />
-                    View
-                  </Button>
+                  <div className="flex justify-end">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => onViewDetails(user)}
+                    >
+                      <Eye className="h-4 w-4 mr-2" />
+                      View
+                    </Button>
+                    {onRoleChange && onStatusChange && (
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button variant="ghost" size="icon">
+                            <MoreHorizontal className="h-4 w-4" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          <DropdownMenuLabel>Quick Actions</DropdownMenuLabel>
+                          <DropdownMenuSeparator />
+                          <DropdownMenuItem
+                            onClick={() => onRoleChange(user.id, 'administrator')}
+                          >
+                            Set as Administrator
+                          </DropdownMenuItem>
+                          <DropdownMenuItem
+                            onClick={() => onRoleChange(user.id, 'section_leader')}
+                          >
+                            Set as Section Leader
+                          </DropdownMenuItem>
+                          <DropdownMenuItem
+                            onClick={() => onRoleChange(user.id, 'singer')}
+                          >
+                            Set as Singer
+                          </DropdownMenuItem>
+                          <DropdownMenuSeparator />
+                          <DropdownMenuItem
+                            onClick={() => onStatusChange(user.id, 'active')}
+                          >
+                            Set Status to Active
+                          </DropdownMenuItem>
+                          <DropdownMenuItem
+                            onClick={() => onStatusChange(user.id, 'inactive')}
+                          >
+                            Set Status to Inactive
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    )}
+                  </div>
                 </TableCell>
               </TableRow>
             ))

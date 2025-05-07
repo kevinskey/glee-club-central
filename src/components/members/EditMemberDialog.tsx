@@ -95,7 +95,7 @@ export const EditMemberDialog: React.FC<EditMemberDialogProps> = ({
     if (!member) return;
     
     try {
-      // Use adminUserOperations.updateUser to update the user
+      // Use updateUser to update the user
       const updateData = {
         id: member.id,
         // We'll no longer send email and password fields since they require admin privileges
@@ -122,6 +122,8 @@ export const EditMemberDialog: React.FC<EditMemberDialogProps> = ({
           section_id: data.section_id === 'none' ? null : data.section_id,
           role: data.role as UserRole,
           status: data.status as MemberStatus,
+          // Add role display name update
+          role_display_name: formatRoleDisplayName(data.role),
         };
         
         // Pass the updated member to the parent component
@@ -134,6 +136,23 @@ export const EditMemberDialog: React.FC<EditMemberDialogProps> = ({
       }
     } catch (error: any) {
       toast.error(error.message || "Failed to update member");
+    }
+  };
+
+  // Helper function to format role display names
+  const formatRoleDisplayName = (role: string): string => {
+    switch (role) {
+      case 'administrator': return 'Administrator';
+      case 'section_leader': return 'Section Leader';
+      case 'singer': return 'Singer';
+      case 'student_conductor': return 'Student Conductor';
+      case 'accompanist': return 'Accompanist';
+      case 'non_singer': return 'Non-Singer';
+      case 'admin': return 'Administrator';
+      case 'member': return 'Member';
+      case 'Director': return 'Director';
+      case 'Accompanist': return 'Accompanist';
+      default: return role;
     }
   };
 

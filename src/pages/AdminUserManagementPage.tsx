@@ -45,7 +45,7 @@ export default function AdminUserManagementPage() {
   // Filter users when dependencies change
   useEffect(() => {
     filterUsers(users);
-  }, [users, searchTerm, roleFilter, statusFilter]);
+  }, [users, searchTerm, roleFilter, statusFilter, filterUsers]);
 
   // Handle unauthorized access
   if (!isAdmin()) {
@@ -63,10 +63,14 @@ export default function AdminUserManagementPage() {
   // Fix: Convert the return types to void by not returning the boolean values
   const handleRoleChange = async (userId: string, role: string): Promise<void> => {
     await changeUserRole(userId, role);
+    // Re-fetch users to get updated data after role change
+    await fetchUsers();
   };
 
   const handleStatusChange = async (userId: string, status: string): Promise<void> => {
     await changeUserStatus(userId, status);
+    // Re-fetch users to get updated data after status change
+    await fetchUsers();
   };
 
   return (

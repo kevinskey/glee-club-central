@@ -24,11 +24,20 @@ export function useUserOperations(
         
         // Update local state
         setUsers(users.map(user => 
-          user.id === userId ? { ...user, role } : user
+          user.id === userId ? { 
+            ...user, 
+            role,
+            // Update the role_display_name based on the new role value
+            role_display_name: formatRoleDisplayName(role)
+          } : user
         ));
         
         if (selectedUser && selectedUser.id === userId) {
-          setSelectedUser({ ...selectedUser, role });
+          setSelectedUser({ 
+            ...selectedUser, 
+            role,
+            role_display_name: formatRoleDisplayName(role) 
+          });
         }
         
         return true;
@@ -72,6 +81,23 @@ export function useUserOperations(
       return false;
     } finally {
       setIsUpdating(false);
+    }
+  };
+
+  // Helper function to format role display names
+  const formatRoleDisplayName = (role: string): string => {
+    switch (role) {
+      case 'administrator': return 'Administrator';
+      case 'section_leader': return 'Section Leader';
+      case 'singer': return 'Singer';
+      case 'student_conductor': return 'Student Conductor';
+      case 'accompanist': return 'Accompanist';
+      case 'non_singer': return 'Non-Singer';
+      case 'admin': return 'Administrator';
+      case 'member': return 'Member';
+      case 'Director': return 'Director';
+      case 'Accompanist': return 'Accompanist';
+      default: return role;
     }
   };
 
