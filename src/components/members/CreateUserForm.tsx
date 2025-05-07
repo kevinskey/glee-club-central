@@ -8,7 +8,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { SheetClose, SheetFooter } from "@/components/ui/sheet";
 import { userFormSchema, UserFormValues } from "./form/userFormSchema";
 import { AccountTabContent } from "./form/AccountTabContent";
-import { ProfileTabContent } from "./ProfileTabContent";
+import { ProfileFormFields } from "./form/ProfileFormFields";
 
 interface CreateUserFormProps {
   onSubmit: (data: UserFormValues) => Promise<void>;
@@ -52,7 +52,7 @@ export const CreateUserForm: React.FC<CreateUserFormProps> = ({
           </TabsContent>
           
           <TabsContent value="profile" className="space-y-4 mt-4">
-            <ProfileTabContent form={form} />
+            <ProfileFormFields form={form} />
           </TabsContent>
         </Tabs>
 

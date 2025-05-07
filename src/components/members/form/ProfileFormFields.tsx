@@ -18,11 +18,11 @@ import {
 import { Input } from "@/components/ui/input";
 import { UserFormValues } from "./userFormSchema";
 
-interface ProfileTabContentProps {
+interface ProfileFormFieldsProps {
   form: UseFormReturn<UserFormValues>;
 }
 
-export const ProfileTabContent: React.FC<ProfileTabContentProps> = ({ form }) => {
+export const ProfileFormFields: React.FC<ProfileFormFieldsProps> = ({ form }) => {
   return (
     <>
       <div className="grid grid-cols-2 gap-4">
