@@ -1,30 +1,19 @@
-
-import React from "react";
-import { useParams, useNavigate } from "react-router-dom";
-import { useQuery } from "@tanstack/react-query";
-import { zodResolver } from "@hookform/resolvers/zod";
+import React, { useState, useEffect } from "react";
+import { useNavigate, useParams } from "react-router-dom";
 import { useForm } from "react-hook-form";
-import { z } from "zod";
-import { useAuth } from "@/contexts/AuthContext";
-import { Button } from "@/components/ui/button";
-import { PageHeader } from "@/components/ui/page-header";
-import { Card, CardContent } from "@/components/ui/card";
-import { 
-  Form, 
-  FormControl, 
-  FormField, 
-  FormItem, 
-  FormLabel, 
-  FormMessage 
+import { zodResolver } from "@hookform/resolvers/zod";
+import { toast } from "sonner";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { ArrowLeft, Save, User } from "lucide-react";
-import { fetchUserById } from "@/utils/supabaseQueries";
-import { Textarea } from "@/components/ui/textarea";
-import { Switch } from "@/components/ui/switch";
-import { toast } from "sonner";
-import { updateUser } from "@/utils/admin";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Button } from "@/components/ui/button";
+import { useAuth } from "@/contexts/AuthContext";
 import {
   Select,
   SelectContent,
@@ -32,425 +21,368 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-
-const formSchema = z.object({
-  email: z.string().email("Please enter a valid email address"),
-  first_name: z.string().min(1, "First name is required"),
-  last_name: z.string().min(1, "Last name is required"),
-  phone: z.string().nullable().optional(),
-  role: z.string(),
-  status: z.string(),
-  voice_part: z.string().nullable().optional(),
-  class_year: z.string().nullable().optional(),
-  join_date: z.string().nullable().optional(),
-  dues_paid: z.boolean().default(false),
-  notes: z.string().nullable().optional(),
-  special_roles: z.string().nullable().optional(),
-});
-
-type FormValues = z.infer<typeof formSchema>;
+import { Textarea } from "@/components/ui/textarea";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useToast } from "@/components/ui/use-toast";
+import {
+  UserFormSchema,
+  UserFormValues,
+} from "@/components/members/form/userFormSchema";
+import { updateUser } from "@/utils/admin";
 
 export default function MemberEditPage() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { isAdmin, user } = useAuth();
-  
-  // Check if user can edit this profile
-  const isOwnProfile = user?.id === id;
-  const canEditAllFields = isAdmin();
-  
-  if (!isAdmin() && !isOwnProfile) {
-    navigate('/dashboard');
-    toast.error("You don't have permission to edit this profile");
-    return null;
-  }
-  
-  // Fetch member data
-  const { data: member, isLoading } = useQuery({
-    queryKey: ['userProfile', id],
-    queryFn: () => fetchUserById(id as string),
-    enabled: !!id,
-  });
-  
-  // Setup form with default values
-  const form = useForm<FormValues>({
-    resolver: zodResolver(formSchema),
+  const { user: authUser } = useAuth();
+  const [user, setUser] = useState<any>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const { toast } = useToast();
+
+  const form = useForm<UserFormValues>({
+    resolver: zodResolver(UserFormSchema),
     defaultValues: {
-      email: member?.email || "",
-      first_name: member?.first_name || "",
-      last_name: member?.last_name || "",
-      phone: member?.phone || "",
-      role: member?.role || "singer",
-      status: member?.status || "active",
-      voice_part: member?.voice_part || null,
-      class_year: member?.class_year || "",
-      join_date: member?.join_date || "",
-      dues_paid: member?.dues_paid || false,
-      notes: member?.notes || "",
-      special_roles: member?.special_roles || "",
+      first_name: "",
+      last_name: "",
+      email: "",
+      phone: "",
+      role: "singer",
+      voice_part: "",
+      status: "pending",
+      join_date: "",
+      class_year: "",
+      dues_paid: false,
+      notes: "",
+      special_roles: "",
     },
-    values: {
-      email: member?.email || "",
-      first_name: member?.first_name || "",
-      last_name: member?.last_name || "",
-      phone: member?.phone || "",
-      role: member?.role || "singer",
-      status: member?.status || "active",
-      voice_part: member?.voice_part || null,
-      class_year: member?.class_year || "",
-      join_date: member?.join_date || "",
-      dues_paid: member?.dues_paid || false,
-      notes: member?.notes || "",
-      special_roles: member?.special_roles || "",
-    }
+    mode: "onChange",
   });
-  
-  // Handle form submission
-  const onSubmit = async (data: FormValues) => {
-    if (!id) return;
-    
-    try {
-      const updateData = {
-        id,
-        ...data,
-      };
-      
-      // Filter out fields that non-admin users can't change
-      if (!canEditAllFields) {
-        delete (updateData as any).role;
-        delete (updateData as any).status;
+
+  useEffect(() => {
+    const fetchUser = async () => {
+      setIsLoading(true);
+      try {
+        const response = await fetch(`/api/users/${id}`);
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        const userData = await response.json();
+        setUser(userData);
+      } catch (error: any) {
+        toast({
+          title: "Error fetching user",
+          description: error.message,
+          variant: "destructive",
+        });
+      } finally {
+        setIsLoading(false);
       }
-      
-      const result = await updateUser(updateData);
-      
-      if (result.success) {
-        toast.success("Profile updated successfully");
-        navigate(`/dashboard/members/${id}`);
+    };
+
+    if (id) {
+      fetchUser();
+    }
+  }, [id, toast]);
+
+  const handleSave = async (data: any) => {
+    setIsSubmitting(true);
+    try {
+      if (!user) return;
+
+      // Build the user updates with all fields, including the added ones
+      const userUpdates = {
+        first_name: data.first_name,
+        last_name: data.last_name,
+        email: data.email,
+        phone: data.phone,
+        role: data.role,
+        voice_part: data.voice_part,
+        status: data.status,
+        join_date: data.join_date,
+        class_year: data.class_year,
+        dues_paid: data.dues_paid,
+        notes: data.notes,
+        special_roles: data.special_roles,
+      };
+
+      // Omit id from updates to prevent it from being changed
+      const { id: _, ...updates } = userUpdates;
+
+      // Call the update function
+      const result = await updateUser(user.id, updates);
+
+      if (result) {
+        toast({
+          title: "User updated",
+          description: "User details have been updated successfully.",
+        });
+        navigate("/dashboard/member-management");
       } else {
-        toast.error("Failed to update profile");
+        toast({
+          title: "Failed to update user",
+          description: "There was an error updating the user. Please try again.",
+          variant: "destructive",
+        });
       }
     } catch (error: any) {
-      console.error("Error updating profile:", error);
-      toast.error(error.message || "An error occurred while updating the profile");
+      toast({
+        title: "Error updating user",
+        description: error.message,
+        variant: "destructive",
+      });
+    } finally {
+      setIsSubmitting(false);
     }
   };
-  
+
   if (isLoading) {
-    return (
-      <div className="flex items-center justify-center h-[calc(100vh-100px)]">
-        <div className="h-8 w-8 rounded-full border-2 border-primary border-t-transparent animate-spin mb-2"></div>
-        <p className="ml-2">Loading profile...</p>
-      </div>
-    );
+    return <div>Loading...</div>;
   }
-  
-  if (!member) {
-    return (
-      <div className="p-6 text-center">
-        <h2 className="text-xl font-bold mb-2">Profile not found</h2>
-        <p className="mb-4">The requested profile could not be found.</p>
-        <Button onClick={() => navigate('/dashboard/members')}>Return to Members</Button>
-      </div>
-    );
+
+  if (!user) {
+    return <div>User not found</div>;
   }
+
+  useEffect(() => {
+    if (user) {
+      form.reset({
+        first_name: user.first_name || "",
+        last_name: user.last_name || "",
+        email: user.email || "",
+        phone: user.phone || "",
+        role: user.role || "singer",
+        voice_part: user.voice_part || "",
+        status: user.status || "pending",
+        join_date: user.join_date || "",
+        class_year: user.class_year || "",
+        dues_paid: user.dues_paid || false,
+        notes: user.notes || "",
+        special_roles: user.special_roles || "",
+      });
+    }
+  }, [user, form]);
 
   return (
-    <div className="container mx-auto px-4 py-6">
-      <div className="flex items-center justify-between mb-6">
-        <Button variant="ghost" onClick={() => navigate(-1)}>
-          <ArrowLeft className="mr-2 h-4 w-4" />
-          Back
-        </Button>
-      </div>
-      
-      <PageHeader
-        title={`Edit Profile: ${member.first_name} ${member.last_name}`}
-        description="Update member information and settings"
-        icon={<User className="h-6 w-6" />}
-      />
-
-      <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-          <Card>
-            <CardContent className="p-6">
-              <Tabs defaultValue="basic" className="w-full">
-                <TabsList className="mb-6 grid grid-cols-2 md:grid-cols-3 lg:w-fit">
-                  <TabsTrigger value="basic">Basic Info</TabsTrigger>
-                  <TabsTrigger value="membership">Membership</TabsTrigger>
-                  <TabsTrigger value="notes">Notes & Roles</TabsTrigger>
-                </TabsList>
-                
-                <TabsContent value="basic" className="space-y-6">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <FormField
-                      control={form.control}
-                      name="first_name"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>First Name</FormLabel>
-                          <FormControl>
-                            <Input placeholder="First name" {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    
-                    <FormField
-                      control={form.control}
-                      name="last_name"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Last Name</FormLabel>
-                          <FormControl>
-                            <Input placeholder="Last name" {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </div>
-                  
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <FormField
-                      control={form.control}
-                      name="email"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Email</FormLabel>
-                          <FormControl>
-                            <Input 
-                              type="email" 
-                              placeholder="Email address" 
-                              {...field} 
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    
-                    <FormField
-                      control={form.control}
-                      name="phone"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Phone Number</FormLabel>
-                          <FormControl>
-                            <Input 
-                              placeholder="Phone number" 
-                              {...field} 
-                              value={field.value || ''} 
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </div>
-                </TabsContent>
-                
-                <TabsContent value="membership" className="space-y-6">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <FormField
-                      control={form.control}
-                      name="voice_part"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Voice Part</FormLabel>
-                          <Select 
-                            onValueChange={field.onChange} 
-                            value={field.value || ''} 
-                          >
-                            <FormControl>
-                              <SelectTrigger>
-                                <SelectValue placeholder="Select voice part" />
-                              </SelectTrigger>
-                            </FormControl>
-                            <SelectContent>
-                              <SelectItem value="">Not specified</SelectItem>
-                              <SelectItem value="soprano_1">Soprano 1</SelectItem>
-                              <SelectItem value="soprano_2">Soprano 2</SelectItem>
-                              <SelectItem value="alto_1">Alto 1</SelectItem>
-                              <SelectItem value="alto_2">Alto 2</SelectItem>
-                              <SelectItem value="tenor">Tenor</SelectItem>
-                              <SelectItem value="bass">Bass</SelectItem>
-                            </SelectContent>
-                          </Select>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    
-                    <FormField
-                      control={form.control}
-                      name="class_year"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Class Year</FormLabel>
-                          <FormControl>
-                            <Input placeholder="Class year" {...field} value={field.value || ''} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </div>
-                  
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    {canEditAllFields && (
-                      <FormField
-                        control={form.control}
-                        name="role"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Role</FormLabel>
-                            <Select onValueChange={field.onChange} value={field.value}>
-                              <FormControl>
-                                <SelectTrigger>
-                                  <SelectValue placeholder="Select role" />
-                                </SelectTrigger>
-                              </FormControl>
-                              <SelectContent>
-                                <SelectItem value="administrator">Administrator</SelectItem>
-                                <SelectItem value="section_leader">Section Leader</SelectItem>
-                                <SelectItem value="student_conductor">Student Conductor</SelectItem>
-                                <SelectItem value="singer">Singer</SelectItem>
-                                <SelectItem value="accompanist">Accompanist</SelectItem>
-                                <SelectItem value="non_singer">Non-Singer</SelectItem>
-                              </SelectContent>
-                            </Select>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                    )}
-                    
-                    {canEditAllFields && (
-                      <FormField
-                        control={form.control}
-                        name="status"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Status</FormLabel>
-                            <Select onValueChange={field.onChange} value={field.value}>
-                              <FormControl>
-                                <SelectTrigger>
-                                  <SelectValue placeholder="Select status" />
-                                </SelectTrigger>
-                              </FormControl>
-                              <SelectContent>
-                                <SelectItem value="active">Active</SelectItem>
-                                <SelectItem value="inactive">Inactive</SelectItem>
-                                <SelectItem value="alumni">Alumni</SelectItem>
-                                <SelectItem value="on_leave">On Leave</SelectItem>
-                                <SelectItem value="pending">Pending</SelectItem>
-                              </SelectContent>
-                            </Select>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                    )}
-                  </div>
-                  
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <FormField
-                      control={form.control}
-                      name="join_date"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Join Date</FormLabel>
-                          <FormControl>
-                            <Input 
-                              type="date" 
-                              {...field}
-                              value={field.value || ''} 
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    
-                    <FormField
-                      control={form.control}
-                      name="dues_paid"
-                      render={({ field }) => (
-                        <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
-                          <div className="space-y-0.5">
-                            <FormLabel className="text-base">
-                              Dues Paid
-                            </FormLabel>
-                          </div>
-                          <FormControl>
-                            <Switch
-                              checked={field.value}
-                              onCheckedChange={field.onChange}
-                            />
-                          </FormControl>
-                        </FormItem>
-                      )}
-                    />
-                  </div>
-                </TabsContent>
-                
-                <TabsContent value="notes" className="space-y-6">
-                  <FormField
-                    control={form.control}
-                    name="notes"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Notes</FormLabel>
-                        <FormControl>
-                          <Textarea 
-                            placeholder="Add notes about this member" 
-                            className="min-h-[120px]" 
-                            {...field}
-                            value={field.value || ''} 
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  
-                  {canEditAllFields && (
-                    <FormField
-                      control={form.control}
-                      name="special_roles"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Special Roles</FormLabel>
-                          <FormControl>
-                            <Textarea 
-                              placeholder="Add any special roles or responsibilities" 
-                              className="min-h-[100px]" 
-                              {...field}
-                              value={field.value || ''} 
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
+    <div className="container mx-auto py-10">
+      <Card>
+        <CardHeader>
+          <CardTitle>Edit Member</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <Form {...form}>
+            <form
+              onSubmit={form.handleSubmit(handleSave)}
+              className="space-y-8"
+            >
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <FormField
+                  control={form.control}
+                  name="first_name"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>First Name</FormLabel>
+                      <FormControl>
+                        <Input placeholder="First Name" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
                   )}
-                </TabsContent>
-              </Tabs>
-            </CardContent>
-          </Card>
-          
-          <div className="flex justify-end space-x-4">
-            <Button variant="outline" type="button" onClick={() => navigate(-1)}>
-              Cancel
-            </Button>
-            <Button type="submit">
-              <Save className="mr-2 h-4 w-4" />
-              Save Changes
-            </Button>
-          </div>
-        </form>
-      </Form>
+                />
+                <FormField
+                  control={form.control}
+                  name="last_name"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Last Name</FormLabel>
+                      <FormControl>
+                        <Input placeholder="Last Name" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <FormField
+                  control={form.control}
+                  name="email"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Email</FormLabel>
+                      <FormControl>
+                        <Input placeholder="Email" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="phone"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Phone</FormLabel>
+                      <FormControl>
+                        <Input placeholder="Phone" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <FormField
+                  control={form.control}
+                  name="role"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Role</FormLabel>
+                      <Select onValueChange={field.onChange} defaultValue={field.value}>
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select a role" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          <SelectItem value="administrator">Administrator</SelectItem>
+                          <SelectItem value="section_leader">Section Leader</SelectItem>
+                          <SelectItem value="singer">Singer</SelectItem>
+                          <SelectItem value="student_conductor">Student Conductor</SelectItem>
+                          <SelectItem value="accompanist">Accompanist</SelectItem>
+                          <SelectItem value="non_singer">Non-Singer</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="voice_part"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Voice Part</FormLabel>
+                      <FormControl>
+                        <Input placeholder="Voice Part" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <FormField
+                  control={form.control}
+                  name="status"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Status</FormLabel>
+                      <Select onValueChange={field.onChange} defaultValue={field.value}>
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select a status" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          <SelectItem value="active">Active</SelectItem>
+                          <SelectItem value="inactive">Inactive</SelectItem>
+                          <SelectItem value="pending">Pending</SelectItem>
+                          <SelectItem value="alumni">Alumni</SelectItem>
+                          <SelectItem value="deleted">Deleted</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="join_date"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Join Date</FormLabel>
+                      <FormControl>
+                        <Input placeholder="Join Date" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <FormField
+                  control={form.control}
+                  name="class_year"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Class Year</FormLabel>
+                      <FormControl>
+                        <Input placeholder="Class Year" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="dues_paid"
+                  render={({ field }) => (
+                    <FormItem className="flex flex-row items-center justify-between rounded-md border p-4 space-y-0">
+                      <div className="space-y-0.5">
+                        <FormLabel>Dues Paid</FormLabel>
+                      </div>
+                      <FormControl>
+                        <Checkbox
+                          checked={field.value}
+                          onCheckedChange={field.onChange}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+
+              <FormField
+                control={form.control}
+                name="notes"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Notes</FormLabel>
+                    <FormControl>
+                      <Textarea placeholder="Notes" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="special_roles"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Special Roles</FormLabel>
+                    <FormControl>
+                      <Input placeholder="Special Roles" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <Button type="submit" disabled={isSubmitting}>
+                {isSubmitting ? "Updating..." : "Update"}
+              </Button>
+            </form>
+          </Form>
+        </CardContent>
+      </Card>
     </div>
   );
 }

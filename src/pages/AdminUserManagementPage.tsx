@@ -75,7 +75,7 @@ export default function AdminUserManagementPage() {
     );
   }
 
-  // Handle role change with improved error handling, feedback, and UI refresh
+  // Handle role change with improved error handling
   const handleRoleChange = async (userId: string, role: string): Promise<void> => {
     try {
       console.log(`AdminUserManagementPage: Changing role for ${userId} to ${role}`);
@@ -96,7 +96,7 @@ export default function AdminUserManagementPage() {
     }
   };
 
-  // Handle status change with improved feedback and UI refresh
+  // Handle status change with improved feedback
   const handleStatusChange = async (userId: string, status: string): Promise<void> => {
     try {
       const success = await changeUserStatus(userId, status);
@@ -115,7 +115,7 @@ export default function AdminUserManagementPage() {
     }
   };
 
-  // Handle delete user with immediate UI update
+  // Handle delete user with immediate UI update and error prevention
   const handleUserDelete = async () => {
     try {
       await handleDeleteUser();

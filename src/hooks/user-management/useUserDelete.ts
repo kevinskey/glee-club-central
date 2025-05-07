@@ -24,7 +24,6 @@ export function useUserDelete(onSuccess: () => void) {
       // Store user info before API call
       const firstName = userToDelete.first_name || '';
       const lastName = userToDelete.last_name || '';
-      const email = userToDelete.email || '';
       const userId = userToDelete.id;
       
       const result = await deleteUser(userId);
@@ -33,7 +32,7 @@ export function useUserDelete(onSuccess: () => void) {
       setIsDeleteDialogOpen(false);
       
       if (result && result.success) {
-        // Small delay before showing success toast and triggering refresh
+        // Small delay before showing toast and triggering refresh
         setTimeout(() => {
           if (result.alreadyDeleted) {
             toast.info(`User ${firstName} ${lastName} was already deleted`);
@@ -41,6 +40,8 @@ export function useUserDelete(onSuccess: () => void) {
             toast.success(`User ${firstName} ${lastName} deleted successfully`);
           }
           
+          // Reset state before calling onSuccess to prevent re-render issues
+          setUserToDelete(null);
           // Call onSuccess callback to refresh user list
           onSuccess();
         }, 300);
@@ -48,8 +49,8 @@ export function useUserDelete(onSuccess: () => void) {
     } catch (error: any) {
       console.error("Error deleting user:", error);
       toast.error(error.message || "Error deleting user");
+      setIsDeleteDialogOpen(false);
     } finally {
-      setUserToDelete(null);
       setIsSubmitting(false);
     }
   }, [userToDelete, onSuccess]);

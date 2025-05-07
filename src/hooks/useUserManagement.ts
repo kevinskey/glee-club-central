@@ -1,53 +1,161 @@
 
-import { useState, useCallback } from "react";
-import { useUserData } from "./user/useUserData";
-import { useUserOperations } from "./user/useUserOperations";
-import { formatVoicePart } from "./user/userUtils";
+import { useState, useEffect, useCallback } from "react";
+import { toast } from "sonner";
+import { fetchAllUsers, updateUserRole, updateUserStatus, fetchUserById } from "@/utils/supabase/users";
 
-export type { User } from "./user/useUserData";
+export type User = {
+  id: string;
+  email?: string | null;
+  first_name?: string | null;
+  last_name?: string | null;
+  phone?: string | null;
+  role: string;
+  role_display_name?: string | null;
+  voice_part?: string | null;
+  voice_part_display?: string | null;
+  avatar_url?: string | null;
+  status: string;
+  join_date?: string | null;
+  created_at?: string;
+  last_sign_in_at?: string | null;
+  class_year?: string | null;
+  dues_paid?: boolean | null;
+  notes?: string | null;
+  special_roles?: string | null;
+};
 
 export function useUserManagement() {
-  const {
+  const [users, setUsers] = useState<User[]>([]);
+  const [selectedUser, setSelectedUser] = useState<User | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isUpdating, setIsUpdating] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  // Fetch all users - using useCallback to prevent unnecessary re-renders
+  const fetchUsers = useCallback(async () => {
+    setIsLoading(true);
+    setError(null);
+    try {
+      const data = await fetchAllUsers();
+      console.log("Fetched users data:", data); // Debug log
+      setUsers(data as User[]);
+    } catch (err: any) {
+      setError(err.message || "Failed to load users");
+      toast.error("Failed to load users");
+      // Still set users to empty array on error to prevent UI from being stuck
+      setUsers([]);
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
+
+  // Load users on mount
+  useEffect(() => {
+    fetchUsers();
+  }, [fetchUsers]);
+
+  // Get user details
+  const getUserDetails = async (userId: string) => {
+    setIsLoading(true);
+    setError(null);
+    try {
+      const user = await fetchUserById(userId);
+      setSelectedUser(user as User);
+      return user;
+    } catch (err: any) {
+      setError(err.message || "Failed to load user details");
+      toast.error("Failed to load user details");
+      return null;
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Update user role
+  const changeUserRole = async (userId: string, role: string) => {
+    setIsUpdating(true);
+    setError(null);
+    try {
+      const success = await updateUserRole(userId, role);
+      if (success) {
+        toast.success(`User role updated to ${role}`);
+        
+        // Update local state
+        setUsers(users.map(user => 
+          user.id === userId ? { ...user, role } : user
+        ));
+        
+        if (selectedUser && selectedUser.id === userId) {
+          setSelectedUser({ ...selectedUser, role });
+        }
+        
+        return true;
+      } else {
+        throw new Error("Failed to update user role");
+      }
+    } catch (err: any) {
+      setError(err.message || "Failed to update user role");
+      toast.error("Failed to update user role");
+      return false;
+    } finally {
+      setIsUpdating(false);
+    }
+  };
+
+  // Update user status
+  const changeUserStatus = async (userId: string, status: string) => {
+    setIsUpdating(true);
+    setError(null);
+    try {
+      const success = await updateUserStatus(userId, status);
+      if (success) {
+        toast.success(`User status updated to ${status}`);
+        
+        // Update local state
+        setUsers(users.map(user => 
+          user.id === userId ? { ...user, status } : user
+        ));
+        
+        if (selectedUser && selectedUser.id === userId) {
+          setSelectedUser({ ...selectedUser, status });
+        }
+        
+        return true;
+      } else {
+        throw new Error("Failed to update user status");
+      }
+    } catch (err: any) {
+      setError(err.message || "Failed to update user status");
+      toast.error("Failed to update user status");
+      return false;
+    } finally {
+      setIsUpdating(false);
+    }
+  };
+
+  // Activate a pending user
+  const activateUser = async (userId: string) => {
+    return await changeUserStatus(userId, 'active');
+  };
+
+  // Format voice part for display - now we can use the voice_part_display field from database
+  const formatVoicePart = (voicePart: string | null): string => {
+    if (!voicePart) return "Not set";
+    return voicePart;
+  };
+
+  return {
     users,
     selectedUser,
     setSelectedUser,
     isLoading,
-    error: dataError,
-    fetchUsers,
-    getUserDetails
-  } = useUserData();
-
-  const {
     isUpdating,
-    error: operationError,
-    changeUserRole,
-    changeUserStatus,
-    activateUser
-  } = useUserOperations(users, useState(users)[1], selectedUser, setSelectedUser);
-
-  // Filter out users with 'deleted' status - using memoized function to avoid re-renders
-  const activeUsers = users.filter(user => user.status !== 'deleted');
-
-  return {
-    // User data
-    users: activeUsers,
-    allUsers: users, // In case we need access to deleted users
-    selectedUser,
-    setSelectedUser,
-    isLoading,
-    isUpdating,
-    error: dataError || operationError,
-    
-    // Data operations
+    error,
     fetchUsers,
     getUserDetails,
-    
-    // User operations
     changeUserRole,
     changeUserStatus,
     activateUser,
-    
-    // Formatting utilities
     formatVoicePart
   };
 }

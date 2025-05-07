@@ -43,21 +43,22 @@ export const DeleteUserDialog: React.FC<DeleteUserDialogProps> = ({
     }
   };
 
-  // Force prevent dialog closing during submission
-  const safeOnOpenChange = (open: boolean) => {
-    if (isSubmitting && !open) {
-      // Prevent dialog from closing during submission
-      return;
-    }
-    onOpenChange(open);
-  };
-
   return (
-    <Dialog open={isOpen} onOpenChange={safeOnOpenChange}>
+    <Dialog open={isOpen} onOpenChange={(open) => {
+      // Prevent closing dialog by user action during submission
+      if (isSubmitting && !open) {
+        return;
+      }
+      onOpenChange(open);
+    }}>
       <DialogContent 
-        className="z-[100] bg-background sm:max-w-md w-[calc(100%-2rem)] p-4 sm:p-6"
+        className="z-50 bg-background sm:max-w-md w-[calc(100%-2rem)] p-4 sm:p-6"
         onInteractOutside={(e) => {
           // Prevent closing dialog by outside click during submission
+          if (isSubmitting) e.preventDefault();
+        }}
+        onEscapeKeyDown={(e) => {
+          // Prevent closing dialog by escape key during submission
           if (isSubmitting) e.preventDefault();
         }}
       >
