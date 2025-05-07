@@ -3,41 +3,71 @@ import React from "react";
 import { Badge } from "@/components/ui/badge";
 
 export const getRoleBadge = (role: string) => {
+  let className = "";
+  let displayName = "";
+
   switch (role) {
     case "administrator":
-    case "admin":
-      return <Badge className="bg-purple-500">Administrator</Badge>;
+      className = "bg-red-500";
+      displayName = "Administrator";
+      break;
     case "section_leader":
-      return <Badge className="bg-blue-500">Section Leader</Badge>;
-    case "member":
+      className = "bg-amber-500";
+      displayName = "Section Leader";
+      break;
     case "singer":
-      return <Badge className="bg-green-500">Singer</Badge>;
+      className = "bg-green-500";
+      displayName = "Singer";
+      break;
     case "student_conductor":
-      return <Badge className="bg-amber-500">Student Conductor</Badge>;
-    case "Director":
-    case "director":
-      return <Badge className="bg-violet-500">Director</Badge>;
-    case "Accompanist":
+      className = "bg-purple-500";
+      displayName = "Student Conductor";
+      break;
     case "accompanist":
-      return <Badge className="bg-orange-500">Accompanist</Badge>;
+      className = "bg-blue-500";
+      displayName = "Accompanist";
+      break;
     case "non_singer":
-      return <Badge className="bg-gray-500">Non-Singer</Badge>;
+      className = "bg-slate-500";
+      displayName = "Non-Singer";
+      break;
     default:
-      return <Badge variant="outline">{role}</Badge>;
+      className = "bg-gray-500";
+      displayName = role.charAt(0).toUpperCase() + role.slice(1).replace(/_/g, ' ');
   }
+
+  return <Badge className={className}>{displayName}</Badge>;
 };
 
 export const getStatusBadge = (status: string) => {
+  let className = "";
+  let displayName = "";
+
   switch (status) {
     case "active":
-      return <Badge className="bg-green-500">Active</Badge>;
+      className = "bg-emerald-500";
+      displayName = "Active";
+      break;
     case "inactive":
-      return <Badge variant="outline">Inactive</Badge>;
-    case "alumni":
-      return <Badge className="bg-blue-500">Alumni</Badge>;
+      className = "bg-gray-500";
+      displayName = "Inactive";
+      break;
     case "pending":
-      return <Badge className="bg-yellow-500">Pending</Badge>;
+      className = "bg-yellow-500";
+      displayName = "Pending";
+      break;
+    case "alumni":
+      className = "bg-blue-500";
+      displayName = "Alumni";
+      break;
+    case "deleted":
+      className = "bg-red-500";
+      displayName = "Deleted";
+      break;
     default:
-      return <Badge variant="outline">{status}</Badge>;
+      className = "bg-slate-500";
+      displayName = status.charAt(0).toUpperCase() + status.slice(1);
   }
+
+  return <Badge className={className}>{displayName}</Badge>;
 };

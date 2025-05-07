@@ -43,12 +43,12 @@ export default function AdminUserManagementPage() {
     filterUsers
   } = useAdminUserManagement();
 
-  // Memoize filter function to prevent unnecessary re-renders
+  // Filter users whenever dependencies change
   const applyFilters = useCallback(() => {
     filterUsers(users);
   }, [users, searchTerm, roleFilter, statusFilter, filterUsers]);
 
-  // Filter users when dependencies change, using the memoized function
+  // Apply filters when dependencies change, using memoized function
   useEffect(() => {
     applyFilters();
   }, [applyFilters]);
@@ -71,7 +71,7 @@ export default function AdminUserManagementPage() {
     );
   }
 
-  // Handle role change with full error handling and feedback
+  // Handle role change with debounce to prevent UI flickering
   const handleRoleChange = async (userId: string, role: string): Promise<void> => {
     try {
       console.log(`AdminUserManagementPage: Changing role for ${userId} to ${role}`);
@@ -87,7 +87,7 @@ export default function AdminUserManagementPage() {
     }
   };
 
-  // Handle status change with full error handling and feedback
+  // Handle status change with debounce
   const handleStatusChange = async (userId: string, status: string): Promise<void> => {
     try {
       const success = await changeUserStatus(userId, status);

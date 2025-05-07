@@ -1,4 +1,5 @@
-import { useState, useEffect } from "react";
+
+import { useState, useEffect, useCallback } from "react";
 import { toast } from "sonner";
 import { fetchAllUsers, fetchUserById } from '@/utils/supabase/users';
 
@@ -25,8 +26,8 @@ export function useUserData() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  // Fetch all users
-  const fetchUsers = async () => {
+  // Use memoized fetchUsers to prevent unnecessary re-renders
+  const fetchUsers = useCallback(async () => {
     setIsLoading(true);
     setError(null);
     try {
@@ -41,10 +42,10 @@ export function useUserData() {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, []);
 
-  // Get user details
-  const getUserDetails = async (userId: string) => {
+  // Get user details with memoized callback
+  const getUserDetails = useCallback(async (userId: string) => {
     setIsLoading(true);
     setError(null);
     try {
@@ -58,12 +59,12 @@ export function useUserData() {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, []);
 
-  // Load users on mount
+  // Load users on mount only once
   useEffect(() => {
     fetchUsers();
-  }, []);
+  }, [fetchUsers]);
 
   return {
     users,

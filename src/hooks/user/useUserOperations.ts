@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { toast } from "sonner";
 import { updateUserRole, updateUserStatus } from "@/utils/supabase/users";
 import { User } from "./useUserData";
@@ -16,7 +16,7 @@ export function useUserOperations(
   /**
    * Update user state after a successful operation
    */
-  const updateUserState = (userId: string, updates: Partial<User>) => {
+  const updateUserState = useCallback((userId: string, updates: Partial<User>) => {
     console.log(`Updating user state for ${userId} with:`, updates);
     
     // Update users list
@@ -26,24 +26,24 @@ export function useUserOperations(
     
     // Update selected user if it's the one being modified
     if (selectedUser && selectedUser.id === userId) {
-      setSelectedUser({ ...selectedUser, ...updates });
+      setSelectedUser(prevUser => prevUser ? { ...prevUser, ...updates } : null);
     }
-  };
+  }, [selectedUser, setSelectedUser, setUsers]);
 
   /**
    * Handle operation errors
    */
-  const handleOperationError = (error: any, message: string) => {
+  const handleOperationError = useCallback((error: any, message: string) => {
     const errorMessage = error.message || message;
     setError(errorMessage);
     toast.error(errorMessage);
     return false;
-  };
+  }, []);
 
   /**
    * Update user role
    */
-  const changeUserRole = async (userId: string, role: string) => {
+  const changeUserRole = useCallback(async (userId: string, role: string) => {
     setIsUpdating(true);
     setError(null);
     try {
@@ -68,7 +68,7 @@ export function useUserOperations(
     } finally {
       setIsUpdating(false);
     }
-  };
+  }, [handleOperationError, updateUserState]);
 
   /**
    * Get display name for role
@@ -88,7 +88,7 @@ export function useUserOperations(
   /**
    * Update user status
    */
-  const changeUserStatus = async (userId: string, status: string) => {
+  const changeUserStatus = useCallback(async (userId: string, status: string) => {
     setIsUpdating(true);
     setError(null);
     try {
@@ -106,14 +106,14 @@ export function useUserOperations(
     } finally {
       setIsUpdating(false);
     }
-  };
+  }, [handleOperationError, updateUserState]);
 
   /**
    * Activate a pending user
    */
-  const activateUser = async (userId: string) => {
+  const activateUser = useCallback(async (userId: string) => {
     return await changeUserStatus(userId, 'active');
-  };
+  }, [changeUserStatus]);
 
   return {
     isUpdating,
