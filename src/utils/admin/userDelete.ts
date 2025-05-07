@@ -7,7 +7,6 @@ export const deleteUser = async (userId: string) => {
     console.log(`Attempting to delete user with ID: ${userId}`);
     
     // For development, we'll just update the status to 'deleted'
-    // In a production environment, this would be handled by a secure backend service
     const { error } = await supabase
       .from('profiles')
       .update({ status: 'deleted' })

@@ -24,15 +24,15 @@ export function useUserDelete(onSuccess: () => void) {
       if (result && result.success) {
         // First close the dialog to prevent UI glitching
         setIsDeleteDialogOpen(false);
-        toast.success(`User ${userToDelete.first_name} ${userToDelete.last_name} deleted successfully`);
         
         // Clear user state
         setUserToDelete(null);
         
         // Add small delay before triggering data refresh to prevent UI glitches
         setTimeout(() => {
+          toast.success(`User ${userToDelete.first_name} ${userToDelete.last_name} deleted successfully`);
           onSuccess();
-        }, 100);
+        }, 200);
       } else {
         throw new Error("Failed to delete user");
       }

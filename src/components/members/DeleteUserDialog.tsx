@@ -28,7 +28,7 @@ export const DeleteUserDialog: React.FC<DeleteUserDialogProps> = ({
   onDeleteConfirm,
   isSubmitting = false,
 }) => {
-  // Handle delete confirmation
+  // Handle delete confirmation with improved state management
   const handleDelete = async () => {
     if (isSubmitting) return;
     
@@ -41,12 +41,15 @@ export const DeleteUserDialog: React.FC<DeleteUserDialogProps> = ({
     }
   };
 
+  // Prevent dialog from being closed during submission
+  const handleOpenChange = (open: boolean) => {
+    if (!isSubmitting) {
+      onOpenChange(open);
+    }
+  };
+
   return (
-    <Dialog open={isOpen} onOpenChange={(open) => {
-      if (!isSubmitting) {
-        onOpenChange(open);
-      }
-    }}>
+    <Dialog open={isOpen} onOpenChange={handleOpenChange}>
       <DialogContent>
         <DialogHeader>
           <DialogTitle>Are you sure you want to delete this user?</DialogTitle>
@@ -75,7 +78,7 @@ export const DeleteUserDialog: React.FC<DeleteUserDialogProps> = ({
         <DialogFooter>
           <Button 
             variant="outline" 
-            onClick={() => onOpenChange(false)}
+            onClick={() => handleOpenChange(false)}
             disabled={isSubmitting}
           >
             Cancel
