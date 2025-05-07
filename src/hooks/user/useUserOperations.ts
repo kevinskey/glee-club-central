@@ -1,7 +1,7 @@
 
 import { useState } from "react";
 import { toast } from "sonner";
-import { updateUserRole, updateUserStatus } from "@/utils/supabaseQueries";
+import { updateUserRole, updateUserStatus } from "@/utils/supabase/users";
 import { User } from "./useUserData";
 
 export function useUserOperations(

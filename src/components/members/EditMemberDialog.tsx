@@ -9,7 +9,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Profile, VoicePart, MemberStatus, UserRole } from "@/contexts/AuthContext";
-import { Section } from "@/utils/supabaseQueries";
+import { Section } from "@/utils/supabase/types";
 import { updateUser } from '@/utils/admin/userUpdate';
 import { MemberEditForm } from "./form/MemberEditForm";
 

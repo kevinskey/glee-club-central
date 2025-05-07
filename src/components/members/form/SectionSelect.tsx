@@ -1,4 +1,3 @@
-
 import React from "react";
 import {
   FormControl,
@@ -15,7 +14,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { UseFormReturn } from "react-hook-form";
-import { Section } from "@/utils/supabaseQueries";
+import { Section } from "@/utils/supabase/types";
 
 interface SectionSelectProps {
   form: UseFormReturn<any>;

@@ -8,7 +8,7 @@ import { Form } from "@/components/ui/form";
 import { Button } from "@/components/ui/button";
 import { DialogFooter } from "@/components/ui/dialog";
 import { Profile } from "@/contexts/AuthContext";
-import { Section } from "@/utils/supabaseQueries";
+import { Section } from "@/utils/supabase/types";
 import { PersonalInfoFields } from "./PersonalInfoFields";
 import { VoicePartSelect } from "./VoicePartSelect";
 import { SectionSelect } from "./SectionSelect";

@@ -1,7 +1,6 @@
-
 import { useState, useEffect } from "react";
 import { toast } from "sonner";
-import { fetchAllUsers, fetchUserById } from "@/utils/supabaseQueries";
+import { fetchAllUsers, fetchUserById } from '@/utils/supabase/users';
 
 export type User = {
   id: string;
