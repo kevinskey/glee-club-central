@@ -50,16 +50,16 @@ export function useUserOperations(
       console.log(`useUserOperations: Changing role for user ${userId} to ${role}`);
       
       // Make sure we're using the correct role value
-      if (role === "admin") role = "administrator";
+      const normalizedRole = role === "admin" ? "administrator" : role;
       
-      const success = await updateUserRole(userId, role);
+      const success = await updateUserRole(userId, normalizedRole);
       if (success) {
         // Update local state with the new role and appropriate display name
-        const roleDisplayName = getDisplayRole(role);
-        console.log(`Role updated successfully to ${role}, display name: ${roleDisplayName}`);
+        const roleDisplayName = getDisplayRole(normalizedRole);
+        console.log(`Role updated successfully to ${normalizedRole}, display name: ${roleDisplayName}`);
         
         updateUserState(userId, { 
-          role,
+          role: normalizedRole,
           role_display_name: roleDisplayName
         });
         toast.success(`User role updated to ${roleDisplayName}`);

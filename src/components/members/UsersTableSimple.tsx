@@ -20,7 +20,7 @@ import {
 import { Loader2, Eye, MoreHorizontal, Trash2 } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { getRoleBadge, getStatusBadge } from "@/components/members/UserBadges";
-import { User } from "@/hooks/useUserManagement";
+import { User } from "@/hooks/user/useUserData";
 
 interface UsersTableSimpleProps {
   users: User[];
@@ -86,7 +86,9 @@ export const UsersTableSimple: React.FC<UsersTableSimpleProps> = ({
           </div>
         </TableCell>
         <TableCell>{user.voice_part_display || "Not set"}</TableCell>
-        <TableCell>{getRoleBadge(user.role)}</TableCell>
+        <TableCell>
+          {getRoleBadge(user.role)}
+        </TableCell>
         <TableCell>{getStatusBadge(user.status)}</TableCell>
         <TableCell>{formatDate(user.join_date)}</TableCell>
         <TableCell className="text-right">

@@ -66,7 +66,7 @@ export const SelectField: React.FC<SelectFieldProps> = ({
 };
 
 export const RoleSelect: React.FC<{ form: UseFormReturn<any> }> = ({ form }) => {
-  // Updated to match exact values expected by the database
+  // Using the exact values expected by the database
   const roleOptions = [
     { value: "singer", label: "Singer" },
     { value: "section_leader", label: "Section Leader" },

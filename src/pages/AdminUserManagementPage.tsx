@@ -71,7 +71,7 @@ export default function AdminUserManagementPage() {
     );
   }
 
-  // Handle role change with debounce to prevent UI flickering
+  // Handle role change with improved error handling and feedback
   const handleRoleChange = async (userId: string, role: string): Promise<void> => {
     try {
       console.log(`AdminUserManagementPage: Changing role for ${userId} to ${role}`);
@@ -80,6 +80,9 @@ export default function AdminUserManagementPage() {
       if (!success) {
         toast.error(`Failed to update user role to ${role}`);
         console.error("Role change returned false");
+      } else {
+        // Force a refresh of user data after role change is successful
+        await fetchUsers();
       }
     } catch (error) {
       console.error("Role change error:", error);
@@ -87,12 +90,15 @@ export default function AdminUserManagementPage() {
     }
   };
 
-  // Handle status change with debounce
+  // Handle status change with improved feedback
   const handleStatusChange = async (userId: string, status: string): Promise<void> => {
     try {
       const success = await changeUserStatus(userId, status);
       if (!success) {
         toast.error(`Failed to update user status to ${status}`);
+      } else {
+        // Force a refresh of user data after status change is successful
+        await fetchUsers();
       }
     } catch (error) {
       console.error("Status change error:", error);

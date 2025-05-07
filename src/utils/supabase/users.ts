@@ -45,21 +45,21 @@ export async function fetchUserById(userId: string) {
 export const updateUserRole = async (userId: string, role: string): Promise<boolean> => {
   try {
     // Make sure we're sending the exact value expected by the database
-    if (role === "admin") role = "administrator";
+    const normalizedRole = role === "admin" ? "administrator" : role;
     
-    console.log(`Calling handle_user_role with user_id: ${userId}, role: ${role}`);
+    console.log(`Calling handle_user_role with user_id: ${userId}, role: ${normalizedRole}`);
     
     // Validate against allowed roles
     const validRoles = ["administrator", "section_leader", "singer", "student_conductor", "accompanist", "non_singer"];
-    if (!validRoles.includes(role)) {
-      console.error(`Invalid role value: ${role}`);
-      throw new Error(`Invalid role: ${role}. Must be one of: ${validRoles.join(", ")}`);
+    if (!validRoles.includes(normalizedRole)) {
+      console.error(`Invalid role value: ${normalizedRole}`);
+      throw new Error(`Invalid role: ${normalizedRole}. Must be one of: ${validRoles.join(", ")}`);
     }
     
     // Call the RPC function with the provided parameters
     const { data, error } = await supabase.rpc('handle_user_role', { 
       p_user_id: userId, 
-      p_role: role 
+      p_role: normalizedRole 
     });
     
     if (error) {

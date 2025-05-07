@@ -1,4 +1,3 @@
-
 import React from "react";
 import { Badge } from "@/components/ui/badge";
 
@@ -6,6 +5,8 @@ export const getRoleBadge = (role: string) => {
   let className = "";
   let displayName = "";
 
+  // Use the role_display_name if available in the user object
+  // Otherwise format based on role value
   switch (role) {
     case "administrator":
     case "admin":
