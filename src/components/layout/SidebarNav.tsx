@@ -1,97 +1,157 @@
+import React from "react"
+import {
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "@/components/ui/sheet"
+import { Separator } from "@/components/ui/separator"
+import { ScrollArea } from "@/components/ui/scroll-area"
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion"
+import { useSidebar } from "@/hooks/use-sidebar"
+import { useAuth } from "@/contexts/AuthContext"
+import { Home, Settings, Users } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
-import React from "react";
-import { 
-  LayoutDashboard, 
-  Music, 
-  Calendar, 
-  FileText, 
-  Mic, 
-  Video, 
-  Library, 
-  MessageSquare, 
-  Users, 
-  UserCog,
-  Archive,
-  Book,
-  Mail,
-  Package,
-  List,
-  Bell,
-  User
-} from "lucide-react";
-import { cn } from "@/lib/utils";
-import { NavLink } from "./NavLink";
-import { useAuth } from "@/contexts/AuthContext";
-
-interface SidebarNavProps {
-  className?: string;
+interface MenuItemProps {
+  title: string;
+  icon: React.ComponentType<React.SVGProps<SVGSVGElement>>;
+  href: string;
+  requiredRoles?: string[];
+  onClick?: () => void;
 }
 
-export const SidebarNav: React.FC<SidebarNavProps> = ({ className }) => {
-  const { isAdmin, profile } = useAuth();
-  
-  // Debug the admin status
-  const adminStatus = isAdmin ? isAdmin() : false;
-  console.log("SidebarNav - Admin status:", adminStatus, "User role:", profile?.role);
-  
+interface MenuSectionProps {
+  title: string;
+  icon: React.ComponentType<React.SVGProps<SVGSVGElement>>;
+  href: string;
+  submenu?: MenuItemProps[];
+  requiredRoles?: string[];
+}
+
+export function SidebarNav() {
+  const { isOpen, onOpen, onClose } = useSidebar()
+  const { isAdmin } = useAuth()
+  const navigate = useNavigate();
+
+  const renderMenuItem = (item: MenuItemProps) => {
+    if (item.requiredRoles && !item.requiredRoles.every(role => isAdmin())) {
+      return null;
+    }
+
+    return (
+      <a
+        key={item.title}
+        href={item.href}
+        className="group flex w-full items-center space-x-2 rounded-md p-2 text-sm font-medium hover:underline"
+        onClick={() => {
+          onClose();
+          if (item.onClick) {
+            item.onClick();
+          }
+        }}
+      >
+        <item.icon className="h-4 w-4" />
+        <span>{item.title}</span>
+      </a>
+    );
+  };
+
+  const renderMenuSection = (section: MenuSectionProps) => {
+    if (section.requiredRoles && !section.requiredRoles.every(role => isAdmin())) {
+      return null;
+    }
+
+    if (section.submenu && section.submenu.length > 0) {
+      return (
+        <AccordionItem value={section.title} key={section.title}>
+          <AccordionTrigger className="group flex items-center justify-between rounded-md p-2 text-sm font-medium hover:underline">
+            <div className="flex items-center space-x-2">
+              <section.icon className="h-4 w-4" />
+              <span>{section.title}</span>
+            </div>
+          </AccordionTrigger>
+          <AccordionContent>
+            <div className="grid pt-2 text-sm">
+              {section.submenu.map(item => renderMenuItem(item))}
+            </div>
+          </AccordionContent>
+        </AccordionItem>
+      );
+    }
+
+    return renderMenuItem({
+      title: section.title,
+      icon: section.icon,
+      href: section.href,
+      requiredRoles: section.requiredRoles,
+    });
+  };
+
+  const menuItems = [
+    {
+      title: "Home",
+      icon: Home,
+      href: "/dashboard",
+    },
+    {
+      title: "Members",
+      icon: Users,
+      href: "/dashboard/members",
+      submenu: [
+        {
+          title: "Directory",
+          href: "/dashboard/members",
+        },
+        {
+          title: "Add Member",
+          href: "/dashboard/members/add",
+          requiredRoles: ["administrator"],
+        },
+        {
+          title: "Management",
+          href: "/dashboard/admin/user-management",
+          requiredRoles: ["administrator"],
+        },
+      ],
+    },
+    {
+      title: "Settings",
+      icon: Settings,
+      href: "/dashboard/settings",
+    },
+  ];
+
   return (
-    <nav className={cn("flex flex-col space-y-1", className)}>
-      <NavLink href="/dashboard" icon={<LayoutDashboard className="h-5 w-5" />}>
-        Dashboard
-      </NavLink>
-      <NavLink href="/dashboard/calendar" icon={<Calendar className="h-5 w-5" />}>
-        Calendar
-      </NavLink>
-      <NavLink href="/dashboard/profile" icon={<User className="h-5 w-5" />}>
-        My Profile
-      </NavLink>
-      <NavLink href="/dashboard/member-directory" icon={<Users className="h-5 w-5" />}>
-        Member Directory
-      </NavLink>
-      <NavLink href="/dashboard/member-management" icon={<UserCog className="h-5 w-5" />}>
-        Member Management
-      </NavLink>
-      <NavLink href="/fan-page" icon={<Users className="h-5 w-5" />}>
-        Fan Page
-      </NavLink>
-      <NavLink href="/dashboard/media-library" icon={<Archive className="h-5 w-5" />}>
-        Media Library
-      </NavLink>
-      <NavLink href="/dashboard/sheet-music" icon={<Book className="h-5 w-5" />}>
-        Sheet Music
-      </NavLink>
-      <NavLink href="/dashboard/messaging" icon={<Mail className="h-5 w-5" />}>
-        Messaging
-      </NavLink>
-      <NavLink href="/dashboard/recordings" icon={<Mic className="h-5 w-5" />}>
-        Recordings
-      </NavLink>
-      <NavLink href="/dashboard/practice" icon={<Music className="h-5 w-5" />}>
-        Practice
-      </NavLink>
-      <NavLink href="/dashboard/audio-management" icon={<Library className="h-5 w-5" />}>
-        Audio Management
-      </NavLink>
-      <NavLink href="/dashboard/videos" icon={<Video className="h-5 w-5" />}>
-        Videos
-      </NavLink>
-      
-      {/* Only show admin tools if the user is an admin */}
-      {adminStatus && (
-        <>
-          <div className="mt-6 pt-6 border-t border-border">
-            <h4 className="mb-2 px-2 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-              Admin Tools
-            </h4>
-            <NavLink href="/dashboard/invite-member" icon={<Bell className="h-5 w-5" />}>
-              Invite Members
-            </NavLink>
-            <NavLink href="/dashboard/handbook" icon={<Book className="h-5 w-5" />}>
-              Handbook
-            </NavLink>
+    <Sheet open={isOpen} onOpenChange={onClose}>
+      <SheetTrigger asChild>
+        <button className="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:pointer-events-none data-[state=open]:bg-accent data-[state=open]:text-muted-foreground sm:hidden">
+          Open Menu
+        </button>
+      </SheetTrigger>
+      <SheetContent side="left" className="w-full sm:w-64">
+        <SheetHeader className="text-left">
+          <SheetTitle>Menu</SheetTitle>
+          <SheetDescription>
+            Navigate through your dashboard.
+          </SheetDescription>
+        </SheetHeader>
+        <Separator className="my-2" />
+        <ScrollArea className="my-4">
+          <div className="flex flex-col space-y-1">
+            <Accordion type="single" collapsible>
+              {menuItems.map(section => renderMenuSection(section))}
+            </Accordion>
           </div>
-        </>
-      )}
-    </nav>
-  );
+        </ScrollArea>
+      </SheetContent>
+    </Sheet>
+  )
 }

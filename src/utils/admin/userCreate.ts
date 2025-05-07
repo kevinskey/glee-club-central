@@ -1,44 +1,62 @@
 
-import { supabase } from '@/integrations/supabase/client';
-import adminSupabase from './adminSupabase';
-import { CreateUserData } from './types';
+// Create a new user with enhanced fields for Glee Club
+import { createClient } from "@supabase/supabase-js";
+import { supabase } from "@/integrations/supabase/client";
+import { CreateUserData } from "./types";
 
-// Create a new user
-export const createUser = async (userData: CreateUserData) => {
+export const createUser = async (data: CreateUserData) => {
   try {
-    // First create the auth user using the standard signup flow
-    const result = await adminSupabase.auth.admin.createUser({
-      email: userData.email,
-      password: userData.password || "",
+    // First, create the auth user
+    const { data: authData, error: authError } = await supabase.auth.admin.createUser({
+      email: data.email,
+      password: data.password,
+      email_confirm: true,
       user_metadata: {
-        first_name: userData.first_name,
-        last_name: userData.last_name
+        first_name: data.first_name,
+        last_name: data.last_name,
       }
     });
 
-    // Fix: Access the user object directly from the result instead of through result.data
-    if (!result || !result.user) throw new Error('Failed to create user');
-    
-    // The profile should be created automatically via trigger,
-    // but we update it with the additional fields
+    if (authError) {
+      console.error("Error creating user auth:", authError);
+      throw new Error(authError.message);
+    }
+
+    const userId = authData.user?.id;
+
+    if (!userId) {
+      throw new Error("Failed to create user: No user ID returned");
+    }
+
+    // Now update the profile with additional fields
     const { error: profileError } = await supabase
       .from('profiles')
       .update({
-        role: userData.role,
-        status: userData.status,
-        voice_part: userData.voice_part,
-        phone: userData.phone,
-        section_id: userData.section_id,
-        first_name: userData.first_name,
-        last_name: userData.last_name
+        first_name: data.first_name,
+        last_name: data.last_name,
+        role: data.role,
+        status: data.status,
+        voice_part: data.voice_part,
+        phone: data.phone,
+        class_year: data.class_year,
+        join_date: data.join_date,
+        dues_paid: data.dues_paid,
+        notes: data.notes,
+        special_roles: data.special_roles
       })
-      .eq('id', result.user.id);
-    
-    if (profileError) throw profileError;
-    
-    return { success: true, userId: result.user.id };
+      .eq('id', userId);
+
+    if (profileError) {
+      console.error("Error updating user profile:", profileError);
+      throw new Error(profileError.message);
+    }
+
+    return {
+      success: true,
+      userId,
+    };
   } catch (error: any) {
-    console.error('Error creating user:', error);
-    throw new Error(error.message || 'Failed to create user');
+    console.error("Error in createUser:", error);
+    throw new Error(error.message || "Failed to create user");
   }
 };

@@ -8,6 +8,11 @@ export interface CreateUserData {
   role: string;
   status: string;
   voice_part?: string | null;
+  class_year?: string | null;
+  join_date?: string | null;
+  dues_paid?: boolean;
+  notes?: string | null;
+  special_roles?: string | null;
   phone?: string | null;
   section_id?: string | null;
 }
@@ -20,6 +25,11 @@ export interface UpdateUserData {
   role?: string;
   status?: string;
   voice_part?: string | null;
+  class_year?: string | null;
+  join_date?: string | null;
+  dues_paid?: boolean;
+  notes?: string | null;
+  special_roles?: string | null;
   phone?: string | null;
   section_id?: string | null;
   password?: string;

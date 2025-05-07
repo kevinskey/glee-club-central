@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
@@ -11,7 +10,9 @@ import ResetPasswordPage from '@/pages/ResetPasswordPage';
 import DashboardPage from '@/pages/DashboardPage';
 import CalendarPage from '@/pages/CalendarPage';
 import ProfilePage from '@/pages/ProfilePage';
-import MemberProfilePage from '@/pages/profile/MemberProfilePage';
+import MemberProfilePage from '@/pages/MemberProfilePage';
+import MemberEditPage from '@/pages/MemberEditPage';
+import MemberAddPage from '@/pages/MemberAddPage';
 import AdminUserManagementPage from '@/pages/AdminUserManagementPage';
 import MemberDirectoryPage from '@/pages/MemberDirectoryPage';
 import NotFoundPage from '@/pages/NotFoundPage';
@@ -55,6 +56,8 @@ function App() {
           <Route path="member-management" element={<AdminUserManagementPage />} />
           <Route path="invite-member" element={<InviteMemberPage />} />
           <Route path="/dashboard/members/:id" element={<MemberProfilePage />} />
+          <Route path="/dashboard/members/edit/:id" element={<MemberEditPage />} />
+          <Route path="/dashboard/members/add" element={<MemberAddPage />} />
         </Route>
 
         {/* Catch all for 404 errors */}

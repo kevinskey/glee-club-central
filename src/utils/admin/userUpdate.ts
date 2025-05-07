@@ -1,55 +1,67 @@
 
+// Update an existing user
 import { supabase } from '@/integrations/supabase/client';
 import { UpdateUserData } from './types';
 
-// Update an existing user
-export const updateUser = async (userData: UpdateUserData) => {
+export const updateUser = async (data: UpdateUserData) => {
   try {
-    console.log("Updating user with data:", userData);
+    console.log("Updating user with data:", data);
     
-    // First check if the user exists using get_user_by_id function instead of profiles lookup
-    const { data: userCheck, error: userCheckError } = await supabase.rpc('get_user_by_id', {
-      p_user_id: userData.id
+    if (!data.id) {
+      console.error('Invalid user ID provided');
+      throw new Error('Invalid user ID');
+    }
+    
+    // Prepare profile update
+    const profileUpdate: Record<string, any> = {
+      first_name: data.first_name,
+      last_name: data.last_name,
+      phone: data.phone,
+      role: data.role,
+      status: data.status,
+      voice_part: data.voice_part,
+      class_year: data.class_year,
+      join_date: data.join_date,
+      dues_paid: data.dues_paid,
+      notes: data.notes,
+      special_roles: data.special_roles
+    };
+    
+    // Filter out undefined values
+    Object.keys(profileUpdate).forEach(key => {
+      if (profileUpdate[key] === undefined) {
+        delete profileUpdate[key];
+      }
     });
     
-    if (userCheckError) {
-      console.error("Error checking if user exists:", userCheckError);
-      throw new Error(userCheckError.message || "Failed to check user existence");
+    // Update the profile
+    const { error: profileError } = await supabase
+      .from('profiles')
+      .update(profileUpdate)
+      .eq('id', data.id);
+    
+    if (profileError) {
+      console.error('Error updating user profile:', profileError);
+      throw profileError;
     }
     
-    if (!userCheck || userCheck.length === 0) {
-      console.error("User not found with ID:", userData.id);
-      throw new Error("User not found");
-    }
-    
-    // Update profile data
-    const profileData: any = {};
-    
-    // Only add fields that are defined
-    if (userData.first_name !== undefined) profileData.first_name = userData.first_name;
-    if (userData.last_name !== undefined) profileData.last_name = userData.last_name;
-    if (userData.role !== undefined) profileData.role = userData.role;
-    if (userData.status !== undefined) profileData.status = userData.status;
-    if (userData.voice_part !== undefined) profileData.voice_part = userData.voice_part;
-    if (userData.phone !== undefined) profileData.phone = userData.phone;
-    
-    // Only update if there are profile fields to update
-    if (Object.keys(profileData).length > 0) {
-      console.log("Updating profile with:", profileData);
-      const { error: profileError } = await supabase
-        .from('profiles')
-        .update(profileData)
-        .eq('id', userData.id);
+    // Check if we need to update email or password
+    if (data.email || data.password) {
+      const authUpdate: Record<string, any> = {};
       
-      if (profileError) {
-        console.error("Profile update error:", profileError);
-        throw profileError;
+      if (data.email) authUpdate.email = data.email;
+      if (data.password) authUpdate.password = data.password;
+      
+      const { error: authError } = await supabase.auth.admin.updateUserById(
+        data.id,
+        authUpdate
+      );
+      
+      if (authError) {
+        console.error('Error updating auth user:', authError);
+        throw authError;
       }
     }
-    
-    // Note: We've removed the email/password update part since it requires admin privileges
-    // If email/password updates are needed, they should be handled through a server-side 
-    // function with appropriate permissions
     
     return { success: true };
   } catch (error: any) {
