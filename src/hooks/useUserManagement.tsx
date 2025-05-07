@@ -40,6 +40,8 @@ export function useUserManagement() {
     } catch (err: any) {
       setError(err.message || "Failed to load users");
       toast.error("Failed to load users");
+      // Still set users to empty array on error to prevent UI from being stuck
+      setUsers([]);
     } finally {
       setIsLoading(false);
     }

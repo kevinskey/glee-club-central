@@ -60,6 +60,15 @@ export default function AdminUserManagementPage() {
     );
   }
 
+  // Fix: Convert the return types to void by not returning the boolean values
+  const handleRoleChange = async (userId: string, role: string): Promise<void> => {
+    await changeUserRole(userId, role);
+  };
+
+  const handleStatusChange = async (userId: string, status: string): Promise<void> => {
+    await changeUserStatus(userId, status);
+  };
+
   return (
     <div className="space-y-6">
       <PageHeader
@@ -86,8 +95,8 @@ export default function AdminUserManagementPage() {
             users={filteredUsers}
             isLoading={isLoading}
             onViewDetails={openEditUserDialog}
-            onRoleChange={changeUserRole}
-            onStatusChange={changeUserStatus}
+            onRoleChange={handleRoleChange}
+            onStatusChange={handleStatusChange}
             formatDate={formatDate}
           />
           
