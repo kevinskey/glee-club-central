@@ -16,7 +16,7 @@ import MemberProfilePage from "@/pages/profile/MemberProfilePage";
 import MemberEditPage from "@/pages/MemberEditPage";
 import EditMemberPage from "@/pages/EditMemberPage";
 
-// Create a placeholder for UpdatePasswordPage
+// Import UpdatePasswordPage
 import UpdatePasswordPage from "@/pages/UpdatePasswordPage";
 
 const router = createBrowserRouter([
@@ -38,7 +38,11 @@ const router = createBrowserRouter([
   },
   {
     path: "/dashboard",
-    element: <ProtectedRoute><DashboardLayout /></ProtectedRoute>,
+    element: (
+      <ProtectedRoute>
+        <DashboardLayout />
+      </ProtectedRoute>
+    ),
     children: [
       {
         path: "",
