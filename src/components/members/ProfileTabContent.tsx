@@ -33,8 +33,8 @@ export const ProfileTabContent: React.FC<ProfileTabContentProps> = ({ user, form
       </div>
       
       <div>
-        <h3 className="text-sm font-medium text-muted-foreground">Section</h3>
-        <p className="font-medium">{user.section_name || "Not assigned"}</p>
+        <h3 className="text-sm font-medium text-muted-foreground">Voice Part</h3>
+        <p className="font-medium">{user.voice_part_display || "Not assigned"}</p>
       </div>
       
       <div>
