@@ -435,13 +435,11 @@ export type Database = {
           voice_part: string
           avatar_url: string
           status: string
-          section_id: string
           join_date: string
           created_at: string
           last_sign_in_at: string
           role_display_name: string
           voice_part_display: string
-          section_name: string
         }[]
       }
       get_current_user_role: {
@@ -460,13 +458,11 @@ export type Database = {
           voice_part: string
           avatar_url: string
           status: string
-          section_id: string
           join_date: string
           created_at: string
           last_sign_in_at: string
           role_display_name: string
           voice_part_display: string
-          section_name: string
         }[]
       }
       handle_user_role: {

@@ -15,8 +15,6 @@ export type User = {
   voice_part_display?: string | null;
   avatar_url?: string | null;
   status: string;
-  section_id?: string | null;
-  section_name?: string | null;
   join_date?: string | null;
   created_at?: string;
   last_sign_in_at?: string | null;
