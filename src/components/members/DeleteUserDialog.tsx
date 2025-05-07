@@ -36,13 +36,12 @@ export const DeleteUserDialog: React.FC<DeleteUserDialogProps> = ({
     if (isSubmitting) return;
     
     try {
-      // Close the dialog immediately to prevent UI freezing
-      onOpenChange(false);
-      
-      // Then process the deletion
       await onDeleteConfirm();
+      // The dialog closing is now handled by the hook after successful deletion
     } catch (error) {
       console.error("Error in delete confirmation:", error);
+      // In case of error, we can close the dialog here
+      onOpenChange(false);
     }
   };
 

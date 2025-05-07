@@ -115,7 +115,7 @@ export default function AdminUserManagementPage() {
     }
   };
 
-  // Handle delete user with optimized UI update
+  // Handle delete user with immediate UI update
   const handleUserDelete = async () => {
     try {
       await handleDeleteUser();

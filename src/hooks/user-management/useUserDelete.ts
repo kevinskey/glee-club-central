@@ -25,8 +25,10 @@ export function useUserDelete(onSuccess: () => void) {
         // Store user info before clearing state
         const firstName = userToDelete.first_name || '';
         const lastName = userToDelete.last_name || '';
+        const email = userToDelete.email || '';
         
-        // Clear user state
+        // Close dialog and clear user state
+        setIsDeleteDialogOpen(false);
         setUserToDelete(null);
         setIsSubmitting(false);
         
