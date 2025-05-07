@@ -61,4 +61,4 @@ export function useUserDelete(onSuccess: () => void) {
     handleDeleteUser,
     openDeleteUserDialog
   };
-}, []);
+}
