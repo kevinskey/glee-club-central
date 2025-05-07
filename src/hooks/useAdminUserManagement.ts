@@ -1,12 +1,13 @@
+
 import { useState } from "react";
-import { User, useUserManagement } from "@/hooks/useUserManagement";
-import { useMessaging } from "@/hooks/useMessaging";
-import { createUser, deleteUser, updateUser } from "@/utils/admin";
-import { toast } from "sonner";
-import { UserFormValues } from "@/components/members/form/userFormSchema";
+import { useUserManagement } from "@/hooks/useUserManagement";
+import { useUserFilter } from "@/hooks/user-management/useUserFilter";
+import { useUserCreate } from "@/hooks/user-management/useUserCreate";
+import { useUserEdit } from "@/hooks/user-management/useUserEdit";
+import { useUserDelete } from "@/hooks/user-management/useUserDelete";
+import { formatDate, openEditUserDialog as openEditDialog } from "@/hooks/user-management/userUtils";
 
 export function useAdminUserManagement() {
-  const { sendEmail } = useMessaging();
   const {
     users,
     selectedUser,
@@ -17,178 +18,50 @@ export function useAdminUserManagement() {
     changeUserStatus
   } = useUserManagement();
 
-  const [searchTerm, setSearchTerm] = useState("");
-  const [roleFilter, setRoleFilter] = useState("");
-  const [statusFilter, setStatusFilter] = useState("");
-  const [filteredUsers, setFilteredUsers] = useState<User[]>([]);
-  const [isCreateUserOpen, setIsCreateUserOpen] = useState(false);
-  const [isEditUserOpen, setIsEditUserOpen] = useState(false);
-  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
-  const [userToDelete, setUserToDelete] = useState<User | null>(null);
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  // Incorporate the filter hook
+  const {
+    searchTerm,
+    setSearchTerm,
+    roleFilter,
+    setRoleFilter,
+    statusFilter,
+    setStatusFilter,
+    filteredUsers,
+    filterUsers
+  } = useUserFilter(users);
 
-  // Filter users based on search term, role and status filters
-  const filterUsers = (users: User[]) => {
-    const filtered = users.filter(user => {
-      // Search filter
-      const matchesSearch = searchTerm === "" ||
-        user.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        user.first_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        user.last_name?.toLowerCase().includes(searchTerm.toLowerCase());
+  // Incorporate the create user hook
+  const {
+    isCreateUserOpen,
+    setIsCreateUserOpen,
+    isSubmitting: isCreateSubmitting,
+    handleCreateUser
+  } = useUserCreate(fetchUsers);
 
-      // Role filter
-      const matchesRole = roleFilter === "" || user.role === roleFilter;
+  // Incorporate the edit user hook
+  const {
+    isEditUserOpen,
+    setIsEditUserOpen,
+    isSubmitting: isEditSubmitting,
+    handleEditUser
+  } = useUserEdit(selectedUser, fetchUsers);
 
-      // Status filter
-      const matchesStatus = statusFilter === "" || user.status === statusFilter;
+  // Incorporate the delete user hook
+  const {
+    isDeleteDialogOpen,
+    setIsDeleteDialogOpen,
+    userToDelete,
+    isSubmitting: isDeleteSubmitting,
+    handleDeleteUser,
+    openDeleteUserDialog
+  } = useUserDelete(fetchUsers);
 
-      return matchesSearch && matchesRole && matchesStatus;
-    });
-    
-    setFilteredUsers(filtered);
-  };
+  // Combined submitting state for UI purposes
+  const isSubmitting = isCreateSubmitting || isEditSubmitting || isDeleteSubmitting;
 
-  // Format date for display
-  const formatDate = (dateString?: string | null) => {
-    if (!dateString) return "N/A";
-    return new Date(dateString).toLocaleDateString();
-  };
-
-  // Send welcome email to new users
-  const sendWelcomeEmail = async (email: string, firstName: string, tempPassword: string) => {
-    try {
-      const emailContent = `
-        <h2>Welcome to the Spelman College Glee Club!</h2>
-        <p>Dear ${firstName},</p>
-        <p>You have been added as a member to the Spelman College Glee Club system. To get started, please login using the following temporary password:</p>
-        <p><strong>${tempPassword}</strong></p>
-        <p>For security reasons, please change your password immediately after your first login.</p>
-        <p>If you have any questions, please contact your administrator.</p>
-        <p>Best regards,<br>Spelman College Glee Club</p>
-      `;
-      
-      await sendEmail(email, "Welcome to Spelman College Glee Club", emailContent);
-    } catch (error) {
-      console.error("Error sending welcome email:", error);
-      toast.error("User created, but welcome email could not be sent");
-    }
-  };
-
-  // Handle create user submission
-  const handleCreateUser = async (data: UserFormValues) => {
-    setIsSubmitting(true);
-    try {
-      console.log("Creating user with data:", data);
-      
-      // Generate a temporary random password if not provided
-      const tempPassword = data.password || Math.random().toString(36).slice(-8);
-      
-      // Create the user in Supabase
-      const result = await createUser({
-        email: data.email,
-        password: tempPassword,
-        first_name: data.first_name,
-        last_name: data.last_name,
-        role: data.role,
-        status: data.status,
-        voice_part: data.voice_part || null,
-        phone: data.phone || null,
-      });
-      
-      if (result.success) {
-        // Send welcome email with password reset instructions
-        await sendWelcomeEmail(data.email, data.first_name, tempPassword);
-        
-        toast.success(`User ${data.email} created successfully. Welcome email sent.`);
-        
-        // Refresh the user list
-        fetchUsers();
-        setIsCreateUserOpen(false);
-      }
-    } catch (error: any) {
-      console.error("Error creating user:", error);
-      toast.error(error.message || "Error creating user");
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
-
-  // Handle edit user submission
-  const handleEditUser = async (data: UserFormValues) => {
-    setIsSubmitting(true);
-    try {
-      if (!selectedUser) {
-        toast.error("No user selected for update");
-        return;
-      }
-      
-      console.log("Selected user:", selectedUser);
-      
-      // Update user data
-      const updateData: any = {
-        id: selectedUser.id,
-        email: data.email,
-        first_name: data.first_name,
-        last_name: data.last_name,
-        role: data.role,
-        status: data.status,
-        voice_part: data.voice_part,
-        phone: data.phone,
-      };
-      
-      // Add password only if provided
-      if (data.password) {
-        updateData.password = data.password;
-      }
-      
-      console.log("Sending update with data:", updateData);
-      
-      const result = await updateUser(updateData);
-      
-      if (result.success) {
-        toast.success(`User ${data.first_name} ${data.last_name} updated successfully`);
-        await fetchUsers(); // Refresh user list with await to ensure it completes
-        setIsEditUserOpen(false);
-      }
-    } catch (error: any) {
-      console.error("Error updating user:", error);
-      toast.error(`Update failed: ${error.message || "Unknown error"}`);
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
-
-  // Handle delete user
-  const handleDeleteUser = async () => {
-    setIsSubmitting(true);
-    try {
-      if (!userToDelete) return;
-      
-      const result = await deleteUser(userToDelete.id);
-      
-      if (result.success) {
-        toast.success(`User ${userToDelete.email} deleted successfully`);
-        fetchUsers();
-        setIsDeleteDialogOpen(false);
-        setUserToDelete(null);
-      }
-    } catch (error: any) {
-      toast.error(error.message || "Error deleting user");
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
-
-  // Open edit user dialog
-  const openEditUserDialog = (user: User) => {
-    setSelectedUser(user);
-    setIsEditUserOpen(true);
-  };
-
-  // Open delete user dialog
-  const openDeleteUserDialog = (user: User) => {
-    setUserToDelete(user);
-    setIsDeleteDialogOpen(true);
+  // Open edit user dialog wrapper that uses the utility function
+  const openEditUserDialog = (user: any) => {
+    openEditDialog(user, setSelectedUser, setIsEditUserOpen);
   };
 
   return {
