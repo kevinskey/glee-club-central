@@ -52,15 +52,18 @@ export const updateUserRole = async (userId: string, role: string): Promise<bool
       return false;
     }
     
-    const { error } = await supabase.rpc('handle_user_role', { 
+    // Call the RPC function with the provided parameters
+    const { data, error } = await supabase.rpc('handle_user_role', { 
       p_user_id: userId, 
       p_role: role 
     });
     
     if (error) {
       console.error('Error from handle_user_role RPC:', error);
-      throw error;
+      return false;
     }
+    
+    console.log('Role update success, response:', data);
     return true;
   } catch (error: any) {
     console.error('Error updating user role:', error);
@@ -73,12 +76,19 @@ export const updateUserRole = async (userId: string, role: string): Promise<bool
  */
 export const updateUserStatus = async (userId: string, status: string): Promise<boolean> => {
   try {
-    const { error } = await supabase.rpc('update_user_status', { 
+    console.log(`Calling update_user_status with user_id: ${userId}, status: ${status}`);
+    
+    const { data, error } = await supabase.rpc('update_user_status', { 
       p_user_id: userId, 
       p_status: status 
     });
     
-    if (error) throw error;
+    if (error) {
+      console.error('Error from update_user_status RPC:', error);
+      return false;
+    }
+    
+    console.log('Status update success, response:', data);
     return true;
   } catch (error: any) {
     console.error('Error updating user status:', error);

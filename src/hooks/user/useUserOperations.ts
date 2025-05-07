@@ -17,6 +17,8 @@ export function useUserOperations(
    * Update user state after a successful operation
    */
   const updateUserState = (userId: string, updates: Partial<User>) => {
+    console.log(`Updating user state for ${userId} with:`, updates);
+    
     // Update users list
     setUsers(users.map(user => 
       user.id === userId ? { ...user, ...updates } : user
@@ -45,13 +47,18 @@ export function useUserOperations(
     setIsUpdating(true);
     setError(null);
     try {
-      console.log(`Changing role for user ${userId} to ${role}`);
+      console.log(`useUserOperations: Changing role for user ${userId} to ${role}`);
       const success = await updateUserRole(userId, role);
       if (success) {
         toast.success(`User role updated to ${role}`);
+        
+        // Update local state with the new role and appropriate display name
+        const roleDisplayName = getDisplayRole(role);
+        console.log(`Role updated successfully, updating state with display name: ${roleDisplayName}`);
+        
         updateUserState(userId, { 
           role,
-          role_display_name: getDisplayRole(role)
+          role_display_name: roleDisplayName
         });
         return true;
       } else {
@@ -86,6 +93,7 @@ export function useUserOperations(
     setIsUpdating(true);
     setError(null);
     try {
+      console.log(`Changing status for user ${userId} to ${status}`);
       const success = await updateUserStatus(userId, status);
       if (success) {
         toast.success(`User status updated to ${status}`);

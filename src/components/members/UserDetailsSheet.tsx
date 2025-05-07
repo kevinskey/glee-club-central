@@ -77,6 +77,13 @@ export const UserDetailsSheet: React.FC<UserDetailsSheetProps> = ({
     }
   };
   
+  // Handle role change with debug logging
+  const handleRoleChange = async (role: string) => {
+    if (!user) return;
+    console.log(`UserDetailsSheet: Requesting role change for ${user.id} to ${role}`);
+    await onRoleChange(user.id, role);
+  };
+  
   return (
     <Sheet open={isOpen} onOpenChange={onOpenChange}>
       <SheetContent className="sm:max-w-md md:max-w-lg overflow-y-auto">
@@ -119,7 +126,7 @@ export const UserDetailsSheet: React.FC<UserDetailsSheetProps> = ({
                     variant="outline" 
                     size="sm"
                     disabled={user.role === "singer" || isUpdating}
-                    onClick={() => onRoleChange(user.id, "singer")}
+                    onClick={() => handleRoleChange("singer")}
                   >
                     Singer
                   </Button>
@@ -127,7 +134,7 @@ export const UserDetailsSheet: React.FC<UserDetailsSheetProps> = ({
                     variant="outline" 
                     size="sm"
                     disabled={user.role === "section_leader" || isUpdating}
-                    onClick={() => onRoleChange(user.id, "section_leader")}
+                    onClick={() => handleRoleChange("section_leader")}
                   >
                     Section Leader
                   </Button>
@@ -135,7 +142,7 @@ export const UserDetailsSheet: React.FC<UserDetailsSheetProps> = ({
                     variant="outline" 
                     size="sm"
                     disabled={user.role === "administrator" || isUpdating}
-                    onClick={() => onRoleChange(user.id, "administrator")}
+                    onClick={() => handleRoleChange("administrator")}
                   >
                     Administrator
                   </Button>
