@@ -19,16 +19,6 @@ interface MemberCardProps {
 }
 
 export function MemberCard({ member }: MemberCardProps) {
-  // Function to safely cast the member to a Profile type
-  const asProfile = (member: Profile | User): Profile => {
-    return {
-      ...member,
-      role: member.role as UserRole,
-      status: member.status as MemberStatus,
-      voice_part: member.voice_part as VoicePart,
-    };
-  };
-
   // Format voice part for display
   const formatVoicePart = (voicePart: string | null | undefined): string => {
     if (!voicePart) return "Not assigned";
@@ -44,12 +34,32 @@ export function MemberCard({ member }: MemberCardProps) {
     }
   };
 
+  // Format role for display
+  const formatRole = (role: string | null | undefined): string => {
+    if (!role) return "Member";
+    
+    switch (role) {
+      case "administrator": return "Administrator";
+      case "section_leader": return "Section Leader";
+      case "student_conductor": return "Student Conductor";
+      case "accompanist": return "Accompanist";
+      case "singer": return "Singer";
+      default: return role.charAt(0).toUpperCase() + role.slice(1).replace('_', ' ');
+    }
+  };
+
+  // Check if the member has required data
+  if (!member || !member.id) {
+    console.error("Invalid member data:", member);
+    return null;
+  }
+
   return (
     <Card className="overflow-hidden">
       <CardHeader className="p-4">
         <CardTitle>{member.first_name || 'Unnamed'} {member.last_name || 'Member'}</CardTitle>
         <CardDescription>
-          {member.role ? member.role.charAt(0).toUpperCase() + member.role.slice(1).replace('_', ' ') : 'Member'}
+          {formatRole(member.role)}
         </CardDescription>
       </CardHeader>
       <CardContent className="p-4 pt-0">

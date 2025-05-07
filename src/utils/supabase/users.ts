@@ -34,9 +34,15 @@ export async function fetchUserById(userId: string) {
       throw error;
     }
     
-    // Return the first (and should be only) result
+    // Return the first result from the array
     const user = data && data.length > 0 ? data[0] : null;
     console.log(`Fetched user data:`, user);
+    
+    if (!user) {
+      console.error(`User with ID ${userId} not found`);
+      throw new Error(`User with ID ${userId} not found`);
+    }
+    
     return user;
   } catch (error) {
     console.error(`Error fetching user ${userId}:`, error);
@@ -98,5 +104,28 @@ export async function updateUserProfile(userId: string, profileData: Partial<Pro
   } catch (error) {
     console.error(`Error updating profile for user ${userId}:`, error);
     return false;
+  }
+}
+
+// Search users by email
+export async function searchUserByEmail(email: string) {
+  console.log(`Searching for user with email: ${email}`);
+  try {
+    const { data, error } = await supabase
+      .from('profiles')
+      .select('*')
+      .eq('email', email)
+      .single();
+    
+    if (error && error.code !== 'PGRST116') { // PGRST116 is "no rows returned" error
+      console.error(`Error searching user by email:`, error);
+      throw error;
+    }
+    
+    console.log(`Search result for email ${email}:`, data);
+    return data;
+  } catch (error) {
+    console.error(`Error searching for user with email ${email}:`, error);
+    throw error;
   }
 }

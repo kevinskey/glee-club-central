@@ -3,7 +3,7 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { PageHeader } from "@/components/ui/page-header";
-import { Users, UserPlus, Filter } from "lucide-react";
+import { Users, UserPlus, Filter, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
@@ -20,6 +20,7 @@ import { Spinner } from "@/components/ui/spinner";
 import { useUserManagement, User } from "@/hooks/useUserManagement";
 import { MemberCard } from "@/components/members/MemberCard";
 import { Profile, UserRole, MemberStatus, VoicePart } from "@/contexts/AuthContext";
+import { toast } from "sonner";
 
 export default function MemberDirectoryPage() {
   const navigate = useNavigate();
@@ -94,6 +95,18 @@ export default function MemberDirectoryPage() {
     };
   };
 
+  // Handle activate user
+  const handleActivateUser = async (userId: string) => {
+    try {
+      await activateUser(userId);
+      toast.success("User activated successfully");
+      fetchUsers(); // Refresh the list
+    } catch (error) {
+      console.error("Error activating user:", error);
+      toast.error("Failed to activate user");
+    }
+  };
+
   return (
     <div className="container mx-auto py-6">
       <PageHeader
@@ -112,7 +125,7 @@ export default function MemberDirectoryPage() {
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="w-full pl-10"
               />
-              <Users className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             </div>
             
             <div className="flex items-center gap-2">

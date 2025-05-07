@@ -15,7 +15,7 @@ import { toast } from "sonner";
 export default function EditMemberPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { isEditing, setIsEditing, isLoading, editMember } = useMemberEdit();
+  const { isEditing, setIsEditing, isLoading: isSaving, editMember } = useMemberEdit();
   
   // Fetch the member details with better error handling
   const { 
@@ -64,9 +64,9 @@ export default function EditMemberPage() {
         // Navigate back to member profile
         navigate(`/dashboard/members/${id}`);
       });
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error updating member:", error);
-      toast.error("Failed to update member");
+      toast.error(`Failed to update member: ${error.message || "Unknown error"}`);
     }
   };
   
@@ -87,7 +87,9 @@ export default function EditMemberPage() {
       <div className="p-6">
         <h2 className="text-xl font-bold text-red-600">Error loading member</h2>
         <p className="text-gray-500 mb-4">There was a problem loading the member details.</p>
+        <p className="text-sm text-red-500 mb-4">{(error as Error).message}</p>
         <Button onClick={() => navigate(-1)}>Go Back</Button>
+        <Button onClick={() => refetch()} className="ml-2">Try Again</Button>
       </div>
     );
   }
@@ -96,8 +98,9 @@ export default function EditMemberPage() {
     return (
       <div className="p-6">
         <h2 className="text-xl font-bold">Member not found</h2>
-        <p className="text-gray-500 mb-4">Could not find the requested member.</p>
-        <Button onClick={() => navigate(-1)}>Go Back</Button>
+        <p className="text-gray-500 mb-4">Could not find the requested member with ID: {id}</p>
+        <p className="text-sm mb-4">The member might not exist or you don't have permission to view it.</p>
+        <Button onClick={() => navigate("/dashboard/member-directory")}>Back to Directory</Button>
       </div>
     );
   }
@@ -119,7 +122,7 @@ export default function EditMemberPage() {
       
       <EditMemberForm
         member={member}
-        isLoading={isLoading}
+        isLoading={isSaving}
         onSubmit={handleSubmit}
         onCancel={handleCancel}
       />

@@ -55,6 +55,10 @@ const router = createBrowserRouter([
         element: <AdminUserManagementPage />,
       },
       {
+        path: "member-directory",
+        element: <MemberDirectoryPage />,
+      },
+      {
         path: "members",
         element: <MemberDirectoryPage />,
       },
