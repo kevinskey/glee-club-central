@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+
+import React from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import {
   Tabs,
@@ -19,7 +20,7 @@ import {
   FileText,
 } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
-import { fetchUserById } from "@/utils/supabaseQueries";
+import { fetchUserById } from "@/utils/supabase/users";
 import { ProfileOverviewTab } from "@/components/members/profile/ProfileOverviewTab";
 import { ParticipationTab } from "@/components/members/profile/ParticipationTab";
 import { MusicAccessTab } from "@/components/members/profile/MusicAccessTab";

@@ -32,7 +32,6 @@ export const updateUser = async (userData: UpdateUserData) => {
     if (userData.status !== undefined) profileData.status = userData.status;
     if (userData.voice_part !== undefined) profileData.voice_part = userData.voice_part;
     if (userData.phone !== undefined) profileData.phone = userData.phone;
-    if (userData.section_id !== undefined) profileData.section_id = userData.section_id === 'none' ? null : userData.section_id;
     
     // Only update if there are profile fields to update
     if (Object.keys(profileData).length > 0) {

@@ -1,15 +1,6 @@
 
 // Common types used across supabase query modules
 
-export interface Section {
-  id: string;
-  name: string;
-  description?: string | null;
-  section_leader_id?: string | null;
-  section_leader_name?: string | null;
-  member_count?: number;
-}
-
 export interface AttendanceRecord {
   id: string;
   member_id: string;

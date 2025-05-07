@@ -9,7 +9,6 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Profile, VoicePart, MemberStatus, UserRole } from "@/contexts/AuthContext";
-import { Section } from "@/utils/supabase/types";
 import { updateUser } from '@/utils/admin/userUpdate';
 import { MemberEditForm } from "./form/MemberEditForm";
 
@@ -17,7 +16,6 @@ interface EditMemberDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   member: Profile | null;
-  sections: Section[];
   onUpdateMember: (member: Profile) => void;
 }
 
@@ -25,7 +23,6 @@ export const EditMemberDialog: React.FC<EditMemberDialogProps> = ({
   open,
   onOpenChange,
   member,
-  sections,
   onUpdateMember,
 }) => {
   const onSubmit = async (data: any) => {
@@ -40,8 +37,7 @@ export const EditMemberDialog: React.FC<EditMemberDialogProps> = ({
         role: data.role,
         status: data.status,
         voice_part: data.voice_part,
-        phone: data.phone,
-        section_id: data.section_id === 'none' ? null : data.section_id
+        phone: data.phone
       };
       
       const result = await updateUser(updateData);
@@ -55,7 +51,6 @@ export const EditMemberDialog: React.FC<EditMemberDialogProps> = ({
           email: member.email, // Keep the existing email
           phone: data.phone,
           voice_part: data.voice_part as VoicePart,
-          section_id: data.section_id === 'none' ? null : data.section_id,
           role: data.role as UserRole,
           status: data.status as MemberStatus,
         };
@@ -86,7 +81,6 @@ export const EditMemberDialog: React.FC<EditMemberDialogProps> = ({
         </DialogHeader>
         <MemberEditForm 
           member={member}
-          sections={sections}
           onSubmit={onSubmit}
           onCancel={() => onOpenChange(false)}
         />

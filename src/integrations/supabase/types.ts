@@ -293,7 +293,6 @@ export type Database = {
           last_name: string | null
           phone: string | null
           role: string | null
-          section_id: string | null
           status: string | null
           updated_at: string
           voice_part: string | null
@@ -307,7 +306,6 @@ export type Database = {
           last_name?: string | null
           phone?: string | null
           role?: string | null
-          section_id?: string | null
           status?: string | null
           updated_at?: string
           voice_part?: string | null
@@ -321,52 +319,11 @@ export type Database = {
           last_name?: string | null
           phone?: string | null
           role?: string | null
-          section_id?: string | null
           status?: string | null
           updated_at?: string
           voice_part?: string | null
         }
-        Relationships: [
-          {
-            foreignKeyName: "profiles_section_id_fkey"
-            columns: ["section_id"]
-            isOneToOne: false
-            referencedRelation: "sections"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      sections: {
-        Row: {
-          created_at: string
-          description: string | null
-          id: string
-          name: string
-          section_leader_id: string | null
-        }
-        Insert: {
-          created_at?: string
-          description?: string | null
-          id?: string
-          name: string
-          section_leader_id?: string | null
-        }
-        Update: {
-          created_at?: string
-          description?: string | null
-          id?: string
-          name?: string
-          section_leader_id?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "sections_section_leader_id_fkey"
-            columns: ["section_leader_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       setlists: {
         Row: {

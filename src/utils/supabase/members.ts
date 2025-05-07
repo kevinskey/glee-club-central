@@ -8,10 +8,9 @@ import { MemberNote } from './types';
  */
 export async function fetchMembers(): Promise<Profile[]> {
   try {
-    // Fix the relationship query by specifying which relationship to use
     const { data, error } = await supabase
       .from('profiles')
-      .select('*, sections!profiles_section_id_fkey(name)')
+      .select('*')
       .order('last_name');
     
     if (error) throw error;
@@ -23,8 +22,7 @@ export async function fetchMembers(): Promise<Profile[]> {
       ...member,
       role: member.role as UserRole,
       status: member.status as MemberStatus,
-      voice_part: member.voice_part as VoicePart | null,
-      section_name: member.sections?.name
+      voice_part: member.voice_part as VoicePart | null
     }));
     
     console.log("fetchMembers transformed profiles:", profiles); // Debug log

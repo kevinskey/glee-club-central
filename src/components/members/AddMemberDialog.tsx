@@ -1,9 +1,9 @@
+
 import React from "react";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
-import { v4 as uuidv4 } from "uuid";
 import {
   Dialog,
   DialogContent,
@@ -29,7 +29,6 @@ import {
 } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Section } from "@/utils/supabaseQueries";
 import { Profile, VoicePart, MemberStatus, UserRole } from "@/contexts/AuthContext";
 import { useMessaging } from "@/hooks/useMessaging";
 import { createUser } from "@/utils/adminUserOperations";
@@ -40,7 +39,6 @@ const formSchema = z.object({
   email: z.string().email("Invalid email address"),
   phone: z.string().optional(),
   voice_part: z.string().optional(),
-  section_id: z.string().optional(),
   status: z.string().default("active"),
   role: z.string().default("Member"),
 });
@@ -50,14 +48,12 @@ type FormValues = z.infer<typeof formSchema>;
 interface AddMemberDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  sections: Section[];
   onAddMember: (member: Profile) => void;
 }
 
 export const AddMemberDialog: React.FC<AddMemberDialogProps> = ({
   open,
   onOpenChange,
-  sections,
   onAddMember,
 }) => {
   const { sendEmail } = useMessaging();
@@ -70,7 +66,6 @@ export const AddMemberDialog: React.FC<AddMemberDialogProps> = ({
       email: "",
       phone: "",
       voice_part: "",
-      section_id: "",
       status: "active",
       role: "Member",
     },
@@ -93,7 +88,6 @@ export const AddMemberDialog: React.FC<AddMemberDialogProps> = ({
           status: data.status as MemberStatus,
           voice_part: data.voice_part as VoicePart || null,
           phone: data.phone || null,
-          section_id: data.section_id || null,
         });
         
         // For the UI, create a member profile with the returned ID
@@ -104,7 +98,6 @@ export const AddMemberDialog: React.FC<AddMemberDialogProps> = ({
           email: data.email,
           phone: data.phone || null,
           voice_part: data.voice_part as VoicePart || null,
-          section_id: data.section_id || null,
           role: data.role as UserRole,
           status: data.status as MemberStatus,
           join_date: new Date().toISOString().split('T')[0],
@@ -256,37 +249,6 @@ export const AddMemberDialog: React.FC<AddMemberDialogProps> = ({
               
               <FormField
                 control={form.control}
-                name="section_id"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Section</FormLabel>
-                    <Select
-                      onValueChange={field.onChange}
-                      defaultValue={field.value}
-                    >
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select Section" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        <SelectItem value="none">None</SelectItem>
-                        {sections.map((section) => (
-                          <SelectItem key={section.id} value={section.id}>
-                            {section.name}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
-            
-            <div className="grid grid-cols-2 gap-4">
-              <FormField
-                control={form.control}
                 name="role"
                 render={({ field }) => (
                   <FormItem>
@@ -312,34 +274,34 @@ export const AddMemberDialog: React.FC<AddMemberDialogProps> = ({
                   </FormItem>
                 )}
               />
-              
-              <FormField
-                control={form.control}
-                name="status"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Status</FormLabel>
-                    <Select
-                      onValueChange={field.onChange}
-                      defaultValue={field.value}
-                    >
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select Status" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        <SelectItem value="active">Active</SelectItem>
-                        <SelectItem value="inactive">Inactive</SelectItem>
-                        <SelectItem value="alumni">Alumni</SelectItem>
-                        <SelectItem value="pending">Pending</SelectItem>
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
             </div>
+            
+            <FormField
+              control={form.control}
+              name="status"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Status</FormLabel>
+                  <Select
+                    onValueChange={field.onChange}
+                    defaultValue={field.value}
+                  >
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select Status" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      <SelectItem value="active">Active</SelectItem>
+                      <SelectItem value="inactive">Inactive</SelectItem>
+                      <SelectItem value="alumni">Alumni</SelectItem>
+                      <SelectItem value="pending">Pending</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
             
             <DialogFooter className="pt-4">
               <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>

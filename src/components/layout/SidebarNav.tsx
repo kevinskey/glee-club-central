@@ -11,7 +11,6 @@ import {
   MessageSquare, 
   Users, 
   UserCog,
-  Shield,
   Archive,
   Book,
   Mail,
@@ -80,9 +79,6 @@ export const SidebarNav: React.FC<SidebarNavProps> = ({ className }) => {
             </h4>
             <NavLink href="/dashboard/member-management" icon={<UserCog className="h-5 w-5" />}>
               Member Management
-            </NavLink>
-            <NavLink href="/dashboard/sections" icon={<Shield className="h-5 w-5" />}>
-              Section Management
             </NavLink>
             <NavLink href="/dashboard/invite-member" icon={<Bell className="h-5 w-5" />}>
               Invite Members
