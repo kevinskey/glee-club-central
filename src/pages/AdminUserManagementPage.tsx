@@ -11,7 +11,7 @@ import { useUserManagement, User } from "@/hooks/useUserManagement";
 import { useMessaging } from "@/hooks/useMessaging";
 import { createUser, deleteUser, updateUser } from "@/utils/admin";
 import { UserFilters } from "@/components/members/UserFilters";
-import { UsersTableSimple } from "@/components/members/UsersTableSimple"; // Use the simple table instead
+import { UsersTableSimple } from "@/components/members/UsersTableSimple";
 import { CreateUserForm } from "@/components/members/CreateUserForm";
 import { EditUserForm } from "@/components/members/EditUserForm";
 import { DeleteUserDialog } from "@/components/members/DeleteUserDialog";

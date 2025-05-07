@@ -484,6 +484,10 @@ export type Database = {
           last_sign_in_at: string
         }[]
       }
+      get_current_user_role: {
+        Args: Record<PropertyKey, never>
+        Returns: string
+      }
       get_user_by_id: {
         Args: { p_user_id: string }
         Returns: {
@@ -505,6 +509,10 @@ export type Database = {
       handle_user_role: {
         Args: { p_user_id: string; p_role: string }
         Returns: undefined
+      }
+      is_admin: {
+        Args: Record<PropertyKey, never>
+        Returns: boolean
       }
       update_user_status: {
         Args: { p_user_id: string; p_status: string }
