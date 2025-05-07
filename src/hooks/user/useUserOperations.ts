@@ -20,7 +20,7 @@ export function useUserOperations(
     console.log(`Updating user state for ${userId} with:`, updates);
     
     // Update users list
-    setUsers(users.map(user => 
+    setUsers(prevUsers => prevUsers.map(user => 
       user.id === userId ? { ...user, ...updates } : user
     ));
     
@@ -50,16 +50,15 @@ export function useUserOperations(
       console.log(`useUserOperations: Changing role for user ${userId} to ${role}`);
       const success = await updateUserRole(userId, role);
       if (success) {
-        toast.success(`User role updated to ${role}`);
-        
         // Update local state with the new role and appropriate display name
         const roleDisplayName = getDisplayRole(role);
-        console.log(`Role updated successfully, updating state with display name: ${roleDisplayName}`);
+        console.log(`Role updated successfully to ${role}, display name: ${roleDisplayName}`);
         
         updateUserState(userId, { 
           role,
           role_display_name: roleDisplayName
         });
+        toast.success(`User role updated to ${roleDisplayName}`);
         return true;
       } else {
         throw new Error("Failed to update user role");
@@ -82,7 +81,7 @@ export function useUserOperations(
       case "student_conductor": return "Student Conductor";
       case "accompanist": return "Accompanist";
       case "non_singer": return "Non-Singer";
-      default: return role;
+      default: return role.charAt(0).toUpperCase() + role.slice(1).replace(/_/g, ' ');
     }
   };
 

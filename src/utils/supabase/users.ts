@@ -13,7 +13,6 @@ export async function fetchAllUsers() {
       throw error;
     }
     
-    console.log("fetchAllUsers raw data:", data); // Debug log
     return data || [];
   } catch (error) {
     console.error('Error fetching all users:', error);
@@ -46,10 +45,11 @@ export async function fetchUserById(userId: string) {
 export const updateUserRole = async (userId: string, role: string): Promise<boolean> => {
   try {
     console.log(`Calling handle_user_role with user_id: ${userId}, role: ${role}`);
+    
     // Check if role is valid against the database constraints
     if (!["administrator", "section_leader", "singer", "student_conductor", "accompanist", "non_singer"].includes(role)) {
       console.error(`Invalid role value: ${role}`);
-      return false;
+      throw new Error(`Invalid role: ${role}`);
     }
     
     // Call the RPC function with the provided parameters
@@ -60,14 +60,14 @@ export const updateUserRole = async (userId: string, role: string): Promise<bool
     
     if (error) {
       console.error('Error from handle_user_role RPC:', error);
-      return false;
+      throw error;
     }
     
     console.log('Role update success, response:', data);
     return true;
   } catch (error: any) {
     console.error('Error updating user role:', error);
-    return false;
+    throw error; // Rethrow so it can be caught by the caller
   }
 };
 
@@ -78,6 +78,12 @@ export const updateUserStatus = async (userId: string, status: string): Promise<
   try {
     console.log(`Calling update_user_status with user_id: ${userId}, status: ${status}`);
     
+    // Validate status
+    if (!["active", "inactive", "pending", "alumni", "deleted"].includes(status)) {
+      console.error(`Invalid status value: ${status}`);
+      throw new Error(`Invalid status: ${status}`);
+    }
+    
     const { data, error } = await supabase.rpc('update_user_status', { 
       p_user_id: userId, 
       p_status: status 
@@ -85,13 +91,13 @@ export const updateUserStatus = async (userId: string, status: string): Promise<
     
     if (error) {
       console.error('Error from update_user_status RPC:', error);
-      return false;
+      throw error;
     }
     
     console.log('Status update success, response:', data);
     return true;
   } catch (error: any) {
     console.error('Error updating user status:', error);
-    return false;
+    throw error; // Rethrow so it can be caught by the caller
   }
 };

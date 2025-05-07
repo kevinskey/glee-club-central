@@ -115,17 +115,26 @@ export const UsersTableSimple: React.FC<UsersTableSimpleProps> = ({
                           <DropdownMenuLabel>Quick Actions</DropdownMenuLabel>
                           <DropdownMenuSeparator />
                           <DropdownMenuItem
-                            onClick={() => onRoleChange(user.id, 'administrator')}
+                            onClick={() => {
+                              console.log("Setting user as Administrator");
+                              onRoleChange(user.id, 'administrator');
+                            }}
                           >
                             Set as Administrator
                           </DropdownMenuItem>
                           <DropdownMenuItem
-                            onClick={() => onRoleChange(user.id, 'section_leader')}
+                            onClick={() => {
+                              console.log("Setting user as Section Leader");
+                              onRoleChange(user.id, 'section_leader');
+                            }}
                           >
                             Set as Section Leader
                           </DropdownMenuItem>
                           <DropdownMenuItem
-                            onClick={() => onRoleChange(user.id, 'singer')}
+                            onClick={() => {
+                              console.log("Setting user as Singer");
+                              onRoleChange(user.id, 'singer');
+                            }}
                           >
                             Set as Singer
                           </DropdownMenuItem>

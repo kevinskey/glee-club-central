@@ -56,7 +56,7 @@ export default function AdminUserManagementPage() {
   // On mount, fetch users once
   useEffect(() => {
     fetchUsers();
-  }, []);
+  }, [fetchUsers]);
 
   // Handle unauthorized access
   if (!isAdmin()) {
@@ -76,12 +76,10 @@ export default function AdminUserManagementPage() {
     try {
       console.log(`AdminUserManagementPage: Changing role for ${userId} to ${role}`);
       const success = await changeUserRole(userId, role);
+      
       if (!success) {
         toast.error(`Failed to update user role to ${role}`);
-      } else {
-        console.log("Role update succeeded, fetching updated users...");
-        // Re-fetch users to get updated data after role change
-        await fetchUsers();
+        console.error("Role change returned false");
       }
     } catch (error) {
       console.error("Role change error:", error);
@@ -95,9 +93,6 @@ export default function AdminUserManagementPage() {
       const success = await changeUserStatus(userId, status);
       if (!success) {
         toast.error(`Failed to update user status to ${status}`);
-      } else {
-        // Re-fetch users to get updated data after status change
-        await fetchUsers();
       }
     } catch (error) {
       console.error("Status change error:", error);

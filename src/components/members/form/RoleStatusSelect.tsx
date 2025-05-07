@@ -66,12 +66,14 @@ export const SelectField: React.FC<SelectFieldProps> = ({
 };
 
 export const RoleSelect: React.FC<{ form: UseFormReturn<any> }> = ({ form }) => {
+  // Using the exact values expected by the database and handle_user_role function
   const roleOptions = [
-    { value: "member", label: "Member" },
+    { value: "singer", label: "Singer" },
     { value: "section_leader", label: "Section Leader" },
-    { value: "Director", label: "Director" },
-    { value: "Accompanist", label: "Accompanist" },
-    { value: "admin", label: "Admin" },
+    { value: "administrator", label: "Administrator" },
+    { value: "student_conductor", label: "Student Conductor" },
+    { value: "accompanist", label: "Accompanist" },
+    { value: "non_singer", label: "Non-Singer" },
   ];
 
   return <SelectField form={form} name="role" label="Role" options={roleOptions} />;
