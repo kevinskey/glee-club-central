@@ -126,9 +126,10 @@ export async function fetchSections(): Promise<Section[]> {
  */
 export async function fetchMembers(): Promise<Profile[]> {
   try {
+    // Fix the relationship query by specifying which relationship to use
     const { data, error } = await supabase
       .from('profiles')
-      .select('*, sections(name)')
+      .select('*, sections!profiles_section_id_fkey(name)')
       .order('last_name');
     
     if (error) throw error;
