@@ -1,3 +1,4 @@
+
 import React from "react";
 import { Link } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
@@ -9,9 +10,8 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
-import { Menu } from "lucide-react";
+import { Menu, Users, LucideIcon } from "lucide-react";
 import { NavItem } from "./NavItem";
-import { Users } from "lucide-react";
 
 export function Header() {
   const { profile, signOut } = useAuth();
@@ -20,7 +20,7 @@ export function Header() {
   const renderAdminLinks = () => {
     if (profile?.role === "administrator") {
       return (
-        <NavItem href="/dashboard/member-management" icon={<Users size={16} />}>
+        <NavItem href="/dashboard/member-management" icon={Users}>
           Member Management
         </NavItem>
       );
@@ -46,14 +46,14 @@ export function Header() {
               </SheetDescription>
             </SheetHeader>
             <div className="grid gap-4 py-4">
-              <NavItem href="/dashboard" icon={<Users size={16} />}>
+              <NavItem href="/dashboard" icon={Users}>
                 Dashboard
               </NavItem>
               {renderAdminLinks()}
-              <NavItem href="/dashboard/profile" icon={<Users size={16} />}>
+              <NavItem href="/dashboard/profile" icon={Users}>
                 Profile
               </NavItem>
-              <NavItem href="/dashboard/member-directory" icon={<Users size={16} />}>
+              <NavItem href="/dashboard/member-directory" icon={Users}>
                 Member Directory
               </NavItem>
               <button
@@ -66,14 +66,14 @@ export function Header() {
           </SheetContent>
         </Sheet>
         <nav className="hidden lg:flex gap-6">
-          <NavItem href="/dashboard" icon={<Users size={16} />}>
+          <NavItem href="/dashboard" icon={Users}>
             Dashboard
           </NavItem>
           {renderAdminLinks()}
-          <NavItem href="/dashboard/profile" icon={<Users size={16} />}>
+          <NavItem href="/dashboard/profile" icon={Users}>
             Profile
           </NavItem>
-          <NavItem href="/dashboard/member-directory" icon={<Users size={16} />}>
+          <NavItem href="/dashboard/member-directory" icon={Users}>
             Member Directory
           </NavItem>
           <button

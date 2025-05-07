@@ -1,33 +1,22 @@
 
 import React from "react";
-import { Link, useLocation } from "react-router-dom";
-import { cn } from "@/lib/utils";
+import { Link } from "react-router-dom";
 import { LucideIcon } from "lucide-react";
 
 interface NavItemProps {
   href: string;
-  title: string;
+  children: React.ReactNode;
   icon: LucideIcon;
 }
 
-export function NavItem({ href, title, icon: Icon }: NavItemProps) {
-  const location = useLocation();
-  
-  // Enhanced active path detection
-  const isActive = 
-    location.pathname === href || 
-    (href !== '/dashboard' && location.pathname.startsWith(`${href}`));
-  
+export function NavItem({ href, children, icon: Icon }: NavItemProps) {
   return (
     <Link
       to={href}
-      className={cn(
-        "flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-all hover:bg-accent",
-        isActive ? "bg-accent text-accent-foreground" : "text-muted-foreground"
-      )}
+      className="flex items-center gap-2 rounded-md p-2 text-sm font-medium hover:bg-secondary"
     >
       <Icon className="h-4 w-4" />
-      <span>{title}</span>
+      {children}
     </Link>
   );
 }
