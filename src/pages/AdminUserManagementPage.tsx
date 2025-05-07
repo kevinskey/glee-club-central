@@ -1,3 +1,4 @@
+
 import React, { useEffect } from "react";
 import { PageHeader } from "@/components/ui/page-header";
 import { UserCog } from "lucide-react";
@@ -7,6 +8,7 @@ import { UserManagementToolbar } from "@/components/members/UserManagementToolba
 import { UsersTableSimple } from "@/components/members/UsersTableSimple";
 import { UserDialogs } from "@/components/members/UserDialogs";
 import { useAuth } from "@/contexts/AuthContext";
+import { toast } from "sonner";
 
 export default function AdminUserManagementPage() {
   const { isAdmin } = useAuth();
@@ -59,17 +61,35 @@ export default function AdminUserManagementPage() {
     );
   }
 
-  // Fix: Convert the return types to void by not returning the boolean values
+  // Handle role change with full error handling and feedback
   const handleRoleChange = async (userId: string, role: string): Promise<void> => {
-    await changeUserRole(userId, role);
-    // Re-fetch users to get updated data after role change
-    await fetchUsers();
+    try {
+      console.log(`AdminUserManagementPage: Changing role for ${userId} to ${role}`);
+      const success = await changeUserRole(userId, role);
+      if (!success) {
+        toast.error(`Failed to update user role to ${role}`);
+      }
+      // Re-fetch users to get updated data after role change
+      await fetchUsers();
+    } catch (error) {
+      console.error("Role change error:", error);
+      toast.error("An error occurred while updating user role");
+    }
   };
 
+  // Handle status change with full error handling and feedback
   const handleStatusChange = async (userId: string, status: string): Promise<void> => {
-    await changeUserStatus(userId, status);
-    // Re-fetch users to get updated data after status change
-    await fetchUsers();
+    try {
+      const success = await changeUserStatus(userId, status);
+      if (!success) {
+        toast.error(`Failed to update user status to ${status}`);
+      }
+      // Re-fetch users to get updated data after status change
+      await fetchUsers();
+    } catch (error) {
+      console.error("Status change error:", error);
+      toast.error("An error occurred while updating user status");
+    }
   };
 
   return (

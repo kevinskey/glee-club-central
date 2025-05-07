@@ -45,12 +45,16 @@ export async function fetchUserById(userId: string) {
  */
 export const updateUserRole = async (userId: string, role: string): Promise<boolean> => {
   try {
+    console.log(`Calling handle_user_role with user_id: ${userId}, role: ${role}`);
     const { error } = await supabase.rpc('handle_user_role', { 
       p_user_id: userId, 
       p_role: role 
     });
     
-    if (error) throw error;
+    if (error) {
+      console.error('Error from handle_user_role RPC:', error);
+      throw error;
+    }
     return true;
   } catch (error: any) {
     console.error('Error updating user role:', error);

@@ -45,10 +45,14 @@ export function useUserOperations(
     setIsUpdating(true);
     setError(null);
     try {
+      console.log(`Changing role for user ${userId} to ${role}`);
       const success = await updateUserRole(userId, role);
       if (success) {
         toast.success(`User role updated to ${role}`);
-        updateUserState(userId, { role });
+        updateUserState(userId, { 
+          role,
+          role_display_name: getDisplayRole(role)
+        });
         return true;
       } else {
         throw new Error("Failed to update user role");
@@ -57,6 +61,21 @@ export function useUserOperations(
       return handleOperationError(err, "Failed to update user role");
     } finally {
       setIsUpdating(false);
+    }
+  };
+
+  /**
+   * Get display name for role
+   */
+  const getDisplayRole = (role: string): string => {
+    switch (role) {
+      case "administrator": return "Administrator";
+      case "section_leader": return "Section Leader";
+      case "singer": return "Singer";
+      case "student_conductor": return "Student Conductor";
+      case "accompanist": return "Accompanist";
+      case "non_singer": return "Non-Singer";
+      default: return role;
     }
   };
 
