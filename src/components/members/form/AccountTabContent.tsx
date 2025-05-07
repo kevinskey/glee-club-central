@@ -78,12 +78,12 @@ export const AccountTabContent: React.FC<AccountTabContentProps> = ({ form }) =>
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent>
-                  <SelectItem value="admin">Admin</SelectItem>
+                  <SelectItem value="singer">Singer</SelectItem>
                   <SelectItem value="section_leader">Section Leader</SelectItem>
                   <SelectItem value="student_conductor">Student Conductor</SelectItem>
                   <SelectItem value="accompanist">Accompanist</SelectItem>
-                  <SelectItem value="singer">Singer</SelectItem>
-                  <SelectItem value="member">Member</SelectItem>
+                  <SelectItem value="non_singer">Non-Singer</SelectItem>
+                  <SelectItem value="administrator">Administrator</SelectItem>
                 </SelectContent>
               </Select>
               <FormMessage />

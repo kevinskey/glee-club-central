@@ -6,7 +6,7 @@ export const userFormSchema = z.object({
   first_name: z.string().min(1, "First name is required"),
   last_name: z.string().min(1, "Last name is required"),
   role: z.string().refine(value => 
-    ["admin", "section_leader", "student_conductor", "accompanist", "singer", "member"].includes(value), 
+    ["singer", "section_leader", "student_conductor", "accompanist", "non_singer", "administrator"].includes(value), 
     "Invalid role"
   ),
   status: z.string().refine(value => 

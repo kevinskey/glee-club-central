@@ -4,20 +4,18 @@ import { Badge } from "@/components/ui/badge";
 
 export const getRoleBadge = (role: string) => {
   switch (role) {
-    case "admin":
-      return <Badge className="bg-purple-500">Admin</Badge>;
+    case "administrator":
+      return <Badge className="bg-purple-500">Administrator</Badge>;
     case "section_leader":
       return <Badge className="bg-blue-500">Section Leader</Badge>;
-    case "member":
-      return <Badge variant="outline">Member</Badge>;
-    case "student_conductor":
-      return <Badge className="bg-green-500">Student Conductor</Badge>;
-    case "accompanist":
-      return <Badge className="bg-amber-500">Accompanist</Badge>;
     case "singer":
-      return <Badge className="bg-sky-500">Singer</Badge>;
-    case "Director":
-      return <Badge className="bg-red-500">Director</Badge>;
+      return <Badge className="bg-green-500">Singer</Badge>;
+    case "student_conductor":
+      return <Badge className="bg-amber-500">Student Conductor</Badge>;
+    case "accompanist":
+      return <Badge className="bg-orange-500">Accompanist</Badge>;
+    case "non_singer":
+      return <Badge className="bg-gray-500">Non-Singer</Badge>;
     default:
       return <Badge variant="outline">{role}</Badge>;
   }

@@ -25,7 +25,7 @@ export const CreateUserForm: React.FC<CreateUserFormProps> = ({
       email: "",
       first_name: "",
       last_name: "",
-      role: "member",
+      role: "singer",
       status: "active",
       voice_part: null,
       phone: null,

@@ -74,12 +74,12 @@ export const UserDetailsSheet: React.FC<UserDetailsSheetProps> = ({
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="admin">Administrator</SelectItem>
+                    <SelectItem value="singer">Singer</SelectItem>
                     <SelectItem value="section_leader">Section Leader</SelectItem>
                     <SelectItem value="student_conductor">Student Conductor</SelectItem>
                     <SelectItem value="accompanist">Accompanist</SelectItem>
-                    <SelectItem value="singer">Singer</SelectItem>
-                    <SelectItem value="member">Member</SelectItem>
+                    <SelectItem value="non_singer">Non-Singer</SelectItem>
+                    <SelectItem value="administrator">Administrator</SelectItem>
                   </SelectContent>
                 </Select>
               </div>

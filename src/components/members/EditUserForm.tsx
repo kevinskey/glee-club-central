@@ -41,7 +41,7 @@ type UserFormValues = z.infer<typeof userFormSchema>;
 interface EditUserFormProps {
   user: User;
   onSubmit: (data: UserFormValues) => Promise<void>;
-  isSubmitting?: boolean; // Added isSubmitting prop as optional
+  isSubmitting?: boolean;
 }
 
 export const EditUserForm: React.FC<EditUserFormProps> = ({ user, onSubmit, isSubmitting = false }) => {
@@ -51,7 +51,7 @@ export const EditUserForm: React.FC<EditUserFormProps> = ({ user, onSubmit, isSu
       email: user.email || "",
       first_name: user.first_name || "",
       last_name: user.last_name || "",
-      role: user.role || "member",
+      role: user.role || "singer",
       status: user.status || "active",
       voice_part: user.voice_part || null,
       phone: user.phone || null,
@@ -121,12 +121,12 @@ export const EditUserForm: React.FC<EditUserFormProps> = ({ user, onSubmit, isSu
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        <SelectItem value="admin">Admin</SelectItem>
+                        <SelectItem value="singer">Singer</SelectItem>
                         <SelectItem value="section_leader">Section Leader</SelectItem>
                         <SelectItem value="student_conductor">Student Conductor</SelectItem>
                         <SelectItem value="accompanist">Accompanist</SelectItem>
-                        <SelectItem value="singer">Singer</SelectItem>
-                        <SelectItem value="member">Member</SelectItem>
+                        <SelectItem value="non_singer">Non-Singer</SelectItem>
+                        <SelectItem value="administrator">Administrator</SelectItem>
                       </SelectContent>
                     </Select>
                     <FormMessage />
