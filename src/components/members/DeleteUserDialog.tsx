@@ -28,7 +28,7 @@ export const DeleteUserDialog: React.FC<DeleteUserDialogProps> = ({
   onDeleteConfirm,
   isSubmitting = false,
 }) => {
-  // Handle delete confirmation with improved state management
+  // Handle delete confirmation with improved error handling
   const handleDelete = async (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
@@ -40,13 +40,20 @@ export const DeleteUserDialog: React.FC<DeleteUserDialogProps> = ({
       // The dialog closing is now handled by the hook after successful deletion
     } catch (error) {
       console.error("Error in delete confirmation:", error);
-      // In case of error, we can close the dialog here
-      onOpenChange(false);
     }
   };
 
+  // Force prevent dialog closing during submission
+  const safeOnOpenChange = (open: boolean) => {
+    if (isSubmitting && !open) {
+      // Prevent dialog from closing during submission
+      return;
+    }
+    onOpenChange(open);
+  };
+
   return (
-    <Dialog open={isOpen} onOpenChange={isSubmitting ? () => {} : onOpenChange}>
+    <Dialog open={isOpen} onOpenChange={safeOnOpenChange}>
       <DialogContent 
         className="z-[100] bg-background sm:max-w-md w-[calc(100%-2rem)] p-4 sm:p-6"
         onInteractOutside={(e) => {
@@ -74,7 +81,7 @@ export const DeleteUserDialog: React.FC<DeleteUserDialogProps> = ({
             </Avatar>
             <div>
               <p className="font-medium">{`${user.first_name || ''} ${user.last_name || ''}`}</p>
-              <p className="text-sm text-muted-foreground">{user.email}</p>
+              <p className="text-sm text-muted-foreground">{user.email || 'No email available'}</p>
             </div>
           </div>
         )}

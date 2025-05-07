@@ -125,6 +125,9 @@ export default function AdminUserManagementPage() {
       }, 500);
     } catch (error) {
       console.error("Error handling user delete:", error);
+      toast.error("Failed to delete user. Please try again.");
+      // Still fetch users to ensure UI is in sync with backend
+      fetchUsers();
     }
   };
 

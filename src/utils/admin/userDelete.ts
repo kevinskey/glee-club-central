@@ -11,6 +11,23 @@ export const deleteUser = async (userId: string) => {
       throw new Error('Invalid user ID');
     }
     
+    // First, check if the user exists
+    const { data: checkUser, error: checkError } = await supabase
+      .from('profiles')
+      .select('id, status')
+      .eq('id', userId)
+      .single();
+      
+    if (checkError || !checkUser) {
+      console.error('Error checking user existence:', checkError || 'User not found');
+      throw new Error('User not found or could not be accessed');
+    }
+    
+    if (checkUser.status === 'deleted') {
+      console.log(`User ${userId} is already marked as deleted`);
+      return { success: true, userId, alreadyDeleted: true };
+    }
+    
     // For development, we'll just update the status to 'deleted'
     const { error, data } = await supabase
       .from('profiles')

@@ -13,37 +13,43 @@ export function useUserDelete(onSuccess: () => void) {
   const handleDeleteUser = useCallback(async () => {
     if (!userToDelete) {
       toast.error("No user selected for deletion");
+      setIsDeleteDialogOpen(false);
       return;
     }
     
     setIsSubmitting(true);
     try {
       console.log("Attempting to delete user:", userToDelete.email);
-      const result = await deleteUser(userToDelete.id);
+      
+      // Store user info before API call
+      const firstName = userToDelete.first_name || '';
+      const lastName = userToDelete.last_name || '';
+      const email = userToDelete.email || '';
+      const userId = userToDelete.id;
+      
+      const result = await deleteUser(userId);
+      
+      // Close dialog immediately to improve UX
+      setIsDeleteDialogOpen(false);
       
       if (result && result.success) {
-        // Store user info before clearing state
-        const firstName = userToDelete.first_name || '';
-        const lastName = userToDelete.last_name || '';
-        const email = userToDelete.email || '';
-        
-        // Close dialog and clear user state
-        setIsDeleteDialogOpen(false);
-        setUserToDelete(null);
-        setIsSubmitting(false);
-        
-        // Add small delay before showing toast and triggering refresh
+        // Small delay before showing success toast and triggering refresh
         setTimeout(() => {
-          toast.success(`User ${firstName} ${lastName} deleted successfully`);
+          if (result.alreadyDeleted) {
+            toast.info(`User ${firstName} ${lastName} was already deleted`);
+          } else {
+            toast.success(`User ${firstName} ${lastName} deleted successfully`);
+          }
+          
           // Call onSuccess callback to refresh user list
           onSuccess();
         }, 300);
-      } else {
-        throw new Error("Failed to delete user");
       }
     } catch (error: any) {
       console.error("Error deleting user:", error);
       toast.error(error.message || "Error deleting user");
+    } finally {
+      setUserToDelete(null);
       setIsSubmitting(false);
     }
   }, [userToDelete, onSuccess]);
