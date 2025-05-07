@@ -4,6 +4,7 @@ import {
   RouterProvider,
   Route,
   createRoutesFromElements,
+  Outlet,
 } from "react-router-dom";
 import DashboardPage from "@/pages/DashboardPage";
 import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
@@ -40,7 +41,9 @@ const router = createBrowserRouter([
     path: "/dashboard",
     element: (
       <ProtectedRoute>
-        <DashboardLayout />
+        <DashboardLayout>
+          <Outlet />
+        </DashboardLayout>
       </ProtectedRoute>
     ),
     children: [
