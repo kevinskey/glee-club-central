@@ -1,3 +1,4 @@
+
 import React from "react";
 import {
   Card,
@@ -8,15 +9,26 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Profile } from "@/contexts/AuthContext";
+import { Profile, UserRole, MemberStatus, VoicePart } from "@/contexts/AuthContext";
 import { Edit } from "lucide-react";
 import { Link } from "react-router-dom";
+import { User } from "@/hooks/useUserManagement";
 
 interface MemberCardProps {
-  member: Profile;
+  member: Profile | User;
 }
 
 export function MemberCard({ member }: MemberCardProps) {
+  // Function to safely cast the member to a Profile type
+  const asProfile = (member: Profile | User): Profile => {
+    return {
+      ...member,
+      role: member.role as UserRole,
+      status: member.status as MemberStatus,
+      voice_part: member.voice_part as VoicePart,
+    };
+  };
+
   return (
     <Card className="overflow-hidden">
       <CardHeader className="p-4">

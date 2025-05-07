@@ -1,3 +1,4 @@
+
 import {
   createBrowserRouter,
   RouterProvider,
@@ -9,11 +10,14 @@ import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
 import LoginPage from "@/pages/LoginPage";
 import RegisterPage from "@/pages/RegisterPage";
 import ResetPasswordPage from "@/pages/ResetPasswordPage";
-import UpdatePasswordPage from "@/pages/UpdatePasswordPage";
-import DashboardLayout from "@/components/layout/DashboardLayout";
+import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import AdminUserManagementPage from "@/pages/AdminUserManagementPage";
 import MemberProfilePage from "@/pages/profile/MemberProfilePage";
 import MemberEditPage from "@/pages/MemberEditPage";
+import EditMemberPage from "@/pages/EditMemberPage";
+
+// Create a placeholder for UpdatePasswordPage
+import UpdatePasswordPage from "@/pages/UpdatePasswordPage";
 
 const router = createBrowserRouter([
   {

@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
@@ -19,6 +18,7 @@ import {
 import { toast } from "sonner";
 import { useUserManagement, User } from "@/hooks/useUserManagement";
 import { MemberCard } from "@/components/members/MemberCard";
+import { Profile, UserRole, MemberStatus, VoicePart } from "@/contexts/AuthContext";
 
 export default function MemberDirectoryPage() {
   const navigate = useNavigate();
@@ -106,6 +106,16 @@ export default function MemberDirectoryPage() {
     setVoicePartFilter("all");
     setStatusFilter("all");
     setClassYearFilter("all");
+  };
+
+  // Type conversion function to safely cast User to Profile
+  const convertUserToProfile = (user: User): Profile => {
+    return {
+      ...user,
+      role: user.role as UserRole,
+      status: user.status as MemberStatus, 
+      voice_part: user.voice_part as VoicePart,
+    };
   };
 
   return (
@@ -296,11 +306,7 @@ export default function MemberDirectoryPage() {
               {filteredUsers.map(member => (
                 <MemberCard
                   key={member.id}
-                  member={member}
-                  displayMode={displayMode}
-                  isAdmin={isAdmin()}
-                  onActivate={handleActivateUser}
-                  onClick={() => navigate(`/dashboard/members/${member.id}`)}
+                  member={convertUserToProfile(member)}
                 />
               ))}
             </div>

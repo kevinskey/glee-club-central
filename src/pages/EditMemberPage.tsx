@@ -3,7 +3,7 @@ import React, { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { fetchUserById } from "@/utils/supabase/users";
-import { Profile } from "@/contexts/AuthContext";
+import { Profile, UserRole, MemberStatus, VoicePart } from "@/contexts/AuthContext";
 import { PageHeader } from "@/components/ui/page-header";
 import { EditMemberForm } from "@/components/members/EditMemberForm";
 import { useMemberEdit, EditMemberFormValues } from "@/hooks/use-member-edit";
@@ -18,7 +18,7 @@ export default function EditMemberPage() {
   
   // Fetch the member details
   const { 
-    data: member, 
+    data: memberData, 
     isLoading: isLoadingMember,
     error,
     refetch
@@ -27,6 +27,14 @@ export default function EditMemberPage() {
     queryFn: () => fetchUserById(id as string),
     enabled: !!id,
   });
+  
+  // Convert the fetched data to a Profile type
+  const member: Profile | null = memberData ? {
+    ...memberData,
+    role: memberData.role as UserRole,
+    status: memberData.status as MemberStatus,
+    voice_part: memberData.voice_part as VoicePart
+  } : null;
   
   const handleSubmit = async (data: EditMemberFormValues) => {
     if (!id) return;
