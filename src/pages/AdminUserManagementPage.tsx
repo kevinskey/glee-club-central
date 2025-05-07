@@ -1,42 +1,51 @@
-import React, { useState, useEffect } from "react";
+
+import React, { useEffect } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { PageHeader } from "@/components/ui/page-header";
-import { UserCog, UserPlus } from "lucide-react";
+import { UserCog } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { toast } from "sonner";
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from "@/components/ui/sheet";
-import { useUserManagement, User } from "@/hooks/useUserManagement";
-import { useMessaging } from "@/hooks/useMessaging";
-import { createUser, deleteUser, updateUser } from "@/utils/admin";
-import { UserFilters } from "@/components/members/UserFilters";
 import { UsersTableSimple } from "@/components/members/UsersTableSimple";
-import { CreateUserForm } from "@/components/members/CreateUserForm";
-import { EditUserForm } from "@/components/members/EditUserForm";
-import { DeleteUserDialog } from "@/components/members/DeleteUserDialog";
+import { UserManagementToolbar } from "@/components/members/UserManagementToolbar";
+import { UserDialogs } from "@/components/members/UserDialogs";
+import { useAdminUserManagement } from "@/hooks/useAdminUserManagement";
 
 export default function AdminUserManagementPage() {
   const { isAdmin } = useAuth();
-  const { sendEmail } = useMessaging();
   const {
     users,
-    selectedUser,
-    setSelectedUser,
+    filteredUsers,
     isLoading,
+    isSubmitting,
+    searchTerm,
+    setSearchTerm,
+    roleFilter,
+    setRoleFilter,
+    statusFilter,
+    setStatusFilter,
+    isCreateUserOpen,
+    setIsCreateUserOpen,
+    isEditUserOpen,
+    setIsEditUserOpen,
+    isDeleteDialogOpen,
+    setIsDeleteDialogOpen,
+    selectedUser,
+    userToDelete,
     fetchUsers,
+    formatDate,
+    handleCreateUser,
+    handleEditUser,
+    handleDeleteUser,
+    openEditUserDialog,
+    openDeleteUserDialog,
     changeUserRole,
-    changeUserStatus
-  } = useUserManagement();
+    changeUserStatus,
+    filterUsers
+  } = useAdminUserManagement();
 
-  const [searchTerm, setSearchTerm] = useState("");
-  const [roleFilter, setRoleFilter] = useState("");
-  const [statusFilter, setStatusFilter] = useState("");
-  const [filteredUsers, setFilteredUsers] = useState<User[]>([]);
-  const [isCreateUserOpen, setIsCreateUserOpen] = useState(false);
-  const [isEditUserOpen, setIsEditUserOpen] = useState(false);
-  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
-  const [userToDelete, setUserToDelete] = useState<User | null>(null);
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  // Filter users when dependencies change
+  useEffect(() => {
+    filterUsers(users);
+  }, [users, searchTerm, roleFilter, statusFilter]);
 
   // Handle unauthorized access
   if (!isAdmin()) {
@@ -51,184 +60,6 @@ export default function AdminUserManagementPage() {
     );
   }
 
-  // Filter users when dependencies change
-  useEffect(() => {
-    const filtered = users.filter(user => {
-      // Search filter
-      const matchesSearch = searchTerm === "" ||
-        user.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        user.first_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        user.last_name?.toLowerCase().includes(searchTerm.toLowerCase());
-
-      // Role filter
-      const matchesRole = roleFilter === "" || user.role === roleFilter;
-
-      // Status filter
-      const matchesStatus = statusFilter === "" || user.status === statusFilter;
-
-      return matchesSearch && matchesRole && matchesStatus;
-    });
-    
-    setFilteredUsers(filtered);
-  }, [users, searchTerm, roleFilter, statusFilter]);
-
-  // Format date
-  const formatDate = (dateString?: string | null) => {
-    if (!dateString) return "N/A";
-    return new Date(dateString).toLocaleDateString();
-  };
-
-  // Handle create user form submission
-  const onCreateUserSubmit = async (data: any) => {
-    setIsSubmitting(true);
-    try {
-      console.log("Creating user with data:", data);
-      
-      // Generate a temporary random password if not provided
-      const tempPassword = data.password || Math.random().toString(36).slice(-8);
-      
-      // Create the user in Supabase
-      const result = await createUser({
-        email: data.email,
-        password: tempPassword,
-        first_name: data.first_name,
-        last_name: data.last_name,
-        role: data.role,
-        status: data.status,
-        voice_part: data.voice_part || null,
-        phone: data.phone || null,
-      });
-      
-      if (result.success) {
-        // Send welcome email with password reset instructions
-        await sendWelcomeEmail(data.email, data.first_name, tempPassword);
-        
-        toast.success(`User ${data.email} created successfully. Welcome email sent.`);
-        
-        // Refresh the user list
-        fetchUsers();
-        setIsCreateUserOpen(false);
-      }
-    } catch (error: any) {
-      console.error("Error creating user:", error);
-      toast.error(error.message || "Error creating user");
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
-
-  // Send welcome email to the new user
-  const sendWelcomeEmail = async (email: string, firstName: string, tempPassword: string) => {
-    try {
-      const emailContent = `
-        <h2>Welcome to the Spelman College Glee Club!</h2>
-        <p>Dear ${firstName},</p>
-        <p>You have been added as a member to the Spelman College Glee Club system. To get started, please login using the following temporary password:</p>
-        <p><strong>${tempPassword}</strong></p>
-        <p>For security reasons, please change your password immediately after your first login.</p>
-        <p>If you have any questions, please contact your administrator.</p>
-        <p>Best regards,<br>Spelman College Glee Club</p>
-      `;
-      
-      await sendEmail(email, "Welcome to Spelman College Glee Club", emailContent);
-    } catch (error) {
-      console.error("Error sending welcome email:", error);
-      // We don't want to stop the flow if email fails, so just log it
-      toast.error("User created, but welcome email could not be sent");
-    }
-  };
-
-  // Handle edit user form submission
-  const onEditUserSubmit = async (data: any) => {
-    setIsSubmitting(true);
-    try {
-      if (!selectedUser) return;
-      
-      // Update user data
-      const updateData: any = {
-        id: selectedUser.id,
-        email: data.email,
-        first_name: data.first_name,
-        last_name: data.last_name,
-        role: data.role,
-        status: data.status,
-        voice_part: data.voice_part,
-        phone: data.phone,
-      };
-      
-      // Add password only if provided
-      if (data.password) {
-        updateData.password = data.password;
-      }
-      
-      const result = await updateUser(updateData);
-      
-      if (result.success) {
-        toast.success(`User ${selectedUser.email} updated successfully`);
-        fetchUsers(); // Refresh user list
-        setIsEditUserOpen(false);
-      }
-    } catch (error: any) {
-      toast.error(error.message || "Error updating user");
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
-
-  // Handle delete user
-  const handleDeleteUser = async () => {
-    setIsSubmitting(true);
-    try {
-      if (!userToDelete) return;
-      
-      // Call the deleteUser function
-      const result = await deleteUser(userToDelete.id);
-      
-      if (result.success) {
-        toast.success(`User ${userToDelete.email} deleted successfully`);
-        fetchUsers(); // Refresh the user list
-        setIsDeleteDialogOpen(false);
-        setUserToDelete(null);
-      }
-    } catch (error: any) {
-      toast.error(error.message || "Error deleting user");
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
-
-  // Edit user
-  const handleEditUser = (user: User) => {
-    setSelectedUser(user);
-    setIsEditUserOpen(true);
-  };
-
-  // Delete user click
-  const handleDeleteUserClick = (user: User) => {
-    setUserToDelete(user);
-    setIsDeleteDialogOpen(true);
-  };
-  
-  // Handle role change
-  const handleRoleChange = async (userId: string, role: string) => {
-    try {
-      await changeUserRole(userId, role);
-      fetchUsers(); // Refresh after change
-    } catch (error) {
-      console.error("Error changing role:", error);
-    }
-  };
-  
-  // Handle status change
-  const handleStatusChange = async (userId: string, status: string) => {
-    try {
-      await changeUserStatus(userId, status);
-      fetchUsers(); // Refresh after change
-    } catch (error) {
-      console.error("Error changing status:", error);
-    }
-  };
-
   return (
     <div className="space-y-6">
       <PageHeader
@@ -239,37 +70,24 @@ export default function AdminUserManagementPage() {
 
       <Card>
         <CardContent className="p-6">
-          <div className="flex flex-col md:flex-row gap-4 mb-6 justify-between">
-            <UserFilters 
-              searchTerm={searchTerm}
-              setSearchTerm={setSearchTerm}
-              roleFilter={roleFilter}
-              setRoleFilter={setRoleFilter}
-              statusFilter={statusFilter}
-              setStatusFilter={setStatusFilter}
-            />
-            
-            <div className="flex flex-wrap gap-2">
-              <Button onClick={() => setIsCreateUserOpen(true)}>
-                <UserPlus className="mr-2 h-4 w-4" />
-                Add New User
-              </Button>
-              <Button
-                variant="outline"
-                onClick={fetchUsers}
-                disabled={isLoading}
-              >
-                {isLoading ? "Refreshing..." : "Refresh"}
-              </Button>
-            </div>
-          </div>
+          <UserManagementToolbar
+            searchTerm={searchTerm}
+            setSearchTerm={setSearchTerm}
+            roleFilter={roleFilter}
+            setRoleFilter={setRoleFilter}
+            statusFilter={statusFilter}
+            setStatusFilter={setStatusFilter}
+            onCreateUserClick={() => setIsCreateUserOpen(true)}
+            onRefreshClick={fetchUsers}
+            isLoading={isLoading}
+          />
 
           <UsersTableSimple 
             users={filteredUsers}
             isLoading={isLoading}
-            onViewDetails={handleEditUser}
-            onRoleChange={handleRoleChange}
-            onStatusChange={handleStatusChange}
+            onViewDetails={openEditUserDialog}
+            onRoleChange={changeUserRole}
+            onStatusChange={changeUserStatus}
             formatDate={formatDate}
           />
           
@@ -279,47 +97,19 @@ export default function AdminUserManagementPage() {
         </CardContent>
       </Card>
 
-      {/* Create User Sheet */}
-      <Sheet open={isCreateUserOpen} onOpenChange={setIsCreateUserOpen}>
-        <SheetContent className="sm:max-w-md md:max-w-lg overflow-y-auto">
-          <SheetHeader>
-            <SheetTitle>Add New User</SheetTitle>
-            <SheetDescription>
-              Create a new user account. All users will receive an email invitation.
-            </SheetDescription>
-          </SheetHeader>
-          
-          <CreateUserForm onSubmit={onCreateUserSubmit} isSubmitting={isSubmitting} />
-        </SheetContent>
-      </Sheet>
-
-      {/* Edit User Sheet */}
-      <Sheet open={isEditUserOpen} onOpenChange={setIsEditUserOpen}>
-        <SheetContent className="sm:max-w-md md:max-w-lg overflow-y-auto">
-          <SheetHeader>
-            <SheetTitle>Edit User</SheetTitle>
-            <SheetDescription>
-              Update user information and permissions
-            </SheetDescription>
-          </SheetHeader>
-
-          {selectedUser && (
-            <EditUserForm 
-              user={selectedUser}
-              onSubmit={onEditUserSubmit}
-              isSubmitting={isSubmitting}
-            />
-          )}
-        </SheetContent>
-      </Sheet>
-
-      {/* Delete User Dialog */}
-      <DeleteUserDialog 
-        user={userToDelete}
-        isOpen={isDeleteDialogOpen}
-        onOpenChange={setIsDeleteDialogOpen}
-        onDeleteConfirm={handleDeleteUser}
+      <UserDialogs
+        isCreateUserOpen={isCreateUserOpen}
+        setIsCreateUserOpen={setIsCreateUserOpen}
+        isEditUserOpen={isEditUserOpen}
+        setIsEditUserOpen={setIsEditUserOpen}
+        isDeleteDialogOpen={isDeleteDialogOpen}
+        setIsDeleteDialogOpen={setIsDeleteDialogOpen}
+        selectedUser={selectedUser}
+        userToDelete={userToDelete}
         isSubmitting={isSubmitting}
+        onCreateUser={handleCreateUser}
+        onEditUser={handleEditUser}
+        onDeleteUser={handleDeleteUser}
       />
     </div>
   );
