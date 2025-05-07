@@ -7,6 +7,18 @@ export const updateUser = async (userData: UpdateUserData) => {
   try {
     console.log("Updating user with data:", userData);
     
+    // First check if the user exists
+    const { data: userCheck, error: userCheckError } = await supabase
+      .from('profiles')
+      .select('id')
+      .eq('id', userData.id)
+      .single();
+    
+    if (userCheckError || !userCheck) {
+      console.error("User not found:", userCheckError);
+      throw new Error("User not found");
+    }
+    
     // Use the standard update methods
     if (userData.password || userData.email) {
       const updateData: any = {};
@@ -20,7 +32,10 @@ export const updateUser = async (userData: UpdateUserData) => {
       }
       
       // Use the standard updateUser method
-      const { data, error } = await supabase.auth.updateUser(updateData);
+      const { data, error } = await supabase.auth.admin.updateUserById(
+        userData.id,
+        updateData
+      );
       
       if (error) {
         console.error("Auth update error:", error);

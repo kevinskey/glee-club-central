@@ -11,6 +11,7 @@ import { User } from "@/hooks/useUserManagement";
 import { userFormSchema, UserFormValues } from "./form/userFormSchema";
 import { EditAccountTabContent } from "./form/EditAccountTabContent";
 import { EditProfileTabContent } from "./form/EditProfileTabContent";
+import { toast } from "sonner";
 
 interface EditUserFormProps {
   user: User;
@@ -37,9 +38,19 @@ export const EditUserForm: React.FC<EditUserFormProps> = ({
     },
   });
 
+  const handleFormSubmit = async (data: UserFormValues) => {
+    try {
+      console.log("Form submitted with data:", data);
+      await onSubmit(data);
+    } catch (error: any) {
+      console.error("Form submission error:", error);
+      toast.error("Failed to update user: " + (error.message || "Unknown error"));
+    }
+  };
+
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6 py-6">
+      <form onSubmit={form.handleSubmit(handleFormSubmit)} className="space-y-6 py-6">
         <Tabs defaultValue="account" className="w-full">
           <TabsList className="grid grid-cols-2">
             <TabsTrigger value="account">Account</TabsTrigger>

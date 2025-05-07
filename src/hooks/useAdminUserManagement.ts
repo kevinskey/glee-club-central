@@ -137,14 +137,17 @@ export function useAdminUserManagement() {
         updateData.password = data.password;
       }
       
+      console.log("Sending update with data:", updateData);
+      
       const result = await updateUser(updateData);
       
       if (result.success) {
-        toast.success(`User ${selectedUser.email} updated successfully`);
-        fetchUsers(); // Refresh user list
+        toast.success(`User ${data.first_name} ${data.last_name} updated successfully`);
+        await fetchUsers(); // Refresh user list with await to ensure it completes
         setIsEditUserOpen(false);
       }
     } catch (error: any) {
+      console.error("Error updating user:", error);
       toast.error(error.message || "Error updating user");
     } finally {
       setIsSubmitting(false);
