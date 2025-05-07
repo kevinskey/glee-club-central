@@ -1,4 +1,3 @@
-
 import React, { useEffect } from "react";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
@@ -122,8 +121,6 @@ export const EditMemberDialog: React.FC<EditMemberDialogProps> = ({
           section_id: data.section_id === 'none' ? null : data.section_id,
           role: data.role as UserRole,
           status: data.status as MemberStatus,
-          // Add role display name update
-          role_display_name: formatRoleDisplayName(data.role),
         };
         
         // Pass the updated member to the parent component
@@ -139,7 +136,7 @@ export const EditMemberDialog: React.FC<EditMemberDialogProps> = ({
     }
   };
 
-  // Helper function to format role display names
+  // We'll keep the helper function but not use it to set the role_display_name
   const formatRoleDisplayName = (role: string): string => {
     switch (role) {
       case 'administrator': return 'Administrator';
