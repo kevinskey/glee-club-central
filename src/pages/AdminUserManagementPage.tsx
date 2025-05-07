@@ -25,6 +25,8 @@ export default function AdminUserManagementPage() {
     setSelectedUser,
     isLoading,
     fetchUsers,
+    changeUserRole,
+    changeUserStatus
   } = useUserManagement();
 
   const [searchTerm, setSearchTerm] = useState("");
