@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -27,7 +28,7 @@ const formSchema = z
     firstName: z.string().min(1, { message: "First name is required" }),
     lastName: z.string().min(1, { message: "Last name is required" }),
     phone: z.string().optional(),
-    voicePart: z.enum(["soprano", "alto", "tenor", "bass"]),
+    voicePart: z.enum(["soprano_1", "soprano_2", "alto_1", "alto_2", "tenor", "bass"]),
     agreeTerms: z.boolean().refine(val => val === true, {
       message: "You must agree to the terms",
     }),
@@ -53,7 +54,7 @@ export default function RegisterPage() {
       firstName: "",
       lastName: "",
       phone: "",
-      voicePart: "soprano",
+      voicePart: "soprano_1",
       agreeTerms: false,
     },
   });
@@ -63,6 +64,17 @@ export default function RegisterPage() {
     setAuthError(null);
     
     try {
+      // Clean up existing auth state to prevent potential issues
+      cleanupAuthState();
+      
+      // Try global sign out first to avoid conflicts
+      try {
+        await supabase.auth.signOut({ scope: 'global' });
+      } catch (err) {
+        // Continue even if this fails
+        console.log("Global sign out failed, continuing with sign up");
+      }
+      
       // Register the user with Supabase with explicit email confirmation
       const { data: authData, error: authError } = await supabase.auth.signUp({
         email: values.email,
@@ -83,7 +95,7 @@ export default function RegisterPage() {
         const { error: profileError } = await supabase
           .from("profiles")
           .update({
-            phone: values.phone,
+            phone: values.phone || null,
             voice_part: values.voicePart,
           })
           .eq("id", authData.user.id);
@@ -114,6 +126,24 @@ export default function RegisterPage() {
       setIsLoading(false);
     }
   }
+  
+  // Helper function to clean up auth state
+  const cleanupAuthState = () => {
+    // Remove standard auth tokens
+    localStorage.removeItem('supabase.auth.token');
+    // Remove all Supabase auth keys from localStorage
+    Object.keys(localStorage).forEach((key) => {
+      if (key.startsWith('supabase.auth.') || key.includes('sb-')) {
+        localStorage.removeItem(key);
+      }
+    });
+    // Remove from sessionStorage if in use
+    Object.keys(sessionStorage || {}).forEach((key) => {
+      if (key.startsWith('supabase.auth.') || key.includes('sb-')) {
+        sessionStorage.removeItem(key);
+      }
+    });
+  };
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-background px-4 py-12">
@@ -206,8 +236,10 @@ export default function RegisterPage() {
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        <SelectItem value="soprano">Soprano</SelectItem>
-                        <SelectItem value="alto">Alto</SelectItem>
+                        <SelectItem value="soprano_1">Soprano 1</SelectItem>
+                        <SelectItem value="soprano_2">Soprano 2</SelectItem>
+                        <SelectItem value="alto_1">Alto 1</SelectItem>
+                        <SelectItem value="alto_2">Alto 2</SelectItem>
                         <SelectItem value="tenor">Tenor</SelectItem>
                         <SelectItem value="bass">Bass</SelectItem>
                       </SelectContent>
