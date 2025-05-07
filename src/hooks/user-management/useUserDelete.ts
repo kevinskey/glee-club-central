@@ -21,7 +21,7 @@ export function useUserDelete(onSuccess: () => void) {
       console.log("Attempting to delete user:", userToDelete.email);
       const result = await deleteUser(userToDelete.id);
       
-      if (result.success) {
+      if (result && result.success) {
         // First close the dialog to prevent UI glitching
         setIsDeleteDialogOpen(false);
         toast.success(`User ${userToDelete.first_name} ${userToDelete.last_name} deleted successfully`);

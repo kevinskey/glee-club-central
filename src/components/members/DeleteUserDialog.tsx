@@ -28,7 +28,7 @@ export const DeleteUserDialog: React.FC<DeleteUserDialogProps> = ({
   onDeleteConfirm,
   isSubmitting = false,
 }) => {
-  // Handle delete confirmation with proper UI update sequence
+  // Handle delete confirmation
   const handleDelete = async () => {
     if (isSubmitting) return;
     
