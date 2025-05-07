@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
@@ -15,7 +16,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { toast } from "sonner";
+import { Spinner } from "@/components/ui/spinner";
 import { useUserManagement, User } from "@/hooks/useUserManagement";
 import { MemberCard } from "@/components/members/MemberCard";
 import { Profile, UserRole, MemberStatus, VoicePart } from "@/contexts/AuthContext";
@@ -34,70 +35,46 @@ export default function MemberDirectoryPage() {
   const [roleFilter, setRoleFilter] = useState("all");
   const [voicePartFilter, setVoicePartFilter] = useState("all");
   const [statusFilter, setStatusFilter] = useState("all");
-  const [classYearFilter, setClassYearFilter] = useState("all");
   const [filteredUsers, setFilteredUsers] = useState<User[]>([]);
-  const [displayMode, setDisplayMode] = useState<"grid" | "list">("grid");
-  
-  // Available class years (dynamically generated from users data)
-  const classYears = Array.from(
-    new Set(
-      users
-        .map(user => user.class_year)
-        .filter(Boolean)
-        .sort((a, b) => Number(b) - Number(a))
-    )
-  );
-  
-  // Filter users when dependencies change
-  useEffect(() => {
-    const filtered = users.filter(user => {
-      // Only show active users in the directory by default
-      if (user.status === 'deleted') return false;
-      
-      // Search filter - check each field that might contain the search term
-      const matchesSearch = searchTerm === "" || 
-        (user.email && user.email.toLowerCase().includes(searchTerm.toLowerCase())) ||
-        (user.first_name && user.first_name.toLowerCase().includes(searchTerm.toLowerCase())) ||
-        (user.last_name && user.last_name.toLowerCase().includes(searchTerm.toLowerCase()));
-      
-      // Role filter
-      const matchesRole = roleFilter === "all" || user.role === roleFilter;
-      
-      // Voice part filter
-      const matchesVoicePart = voicePartFilter === "all" || user.voice_part === voicePartFilter;
-      
-      // Status filter
-      const matchesStatus = statusFilter === "all" || user.status === statusFilter;
-      
-      // Class year filter
-      const matchesClassYear = classYearFilter === "all" || user.class_year === classYearFilter;
-      
-      return matchesSearch && matchesRole && matchesVoicePart && matchesStatus && matchesClassYear;
-    });
-    
-    // Sort by last name
-    const sorted = [...filtered].sort((a, b) => {
-      return (a.last_name || '').localeCompare(b.last_name || '');
-    });
-    
-    setFilteredUsers(sorted);
-  }, [users, searchTerm, roleFilter, voicePartFilter, statusFilter, classYearFilter]);
   
   // Fetch users when component mounts
   useEffect(() => {
+    console.log("MemberDirectoryPage: Fetching users");
     fetchUsers();
   }, [fetchUsers]);
   
-  // Handle activating a pending user
-  const handleActivateUser = async (userId: string) => {
-    try {
-      await activateUser(userId);
-      toast.success("User activated successfully");
-      fetchUsers();
-    } catch (error) {
-      toast.error("Failed to activate user");
+  // Filter users when dependencies change
+  useEffect(() => {
+    console.log("MemberDirectoryPage: Filtering users", users.length);
+    
+    if (!users || users.length === 0) {
+      setFilteredUsers([]);
+      return;
     }
-  };
+    
+    const filtered = users.filter(user => {
+      // Search filter - check name and email fields
+      const searchMatch = 
+        searchTerm === "" || 
+        (user.first_name && user.first_name.toLowerCase().includes(searchTerm.toLowerCase())) || 
+        (user.last_name && user.last_name.toLowerCase().includes(searchTerm.toLowerCase())) || 
+        (user.email && user.email.toLowerCase().includes(searchTerm.toLowerCase()));
+      
+      // Role filter
+      const roleMatch = roleFilter === "all" || user.role === roleFilter;
+      
+      // Voice part filter
+      const voiceMatch = voicePartFilter === "all" || user.voice_part === voicePartFilter;
+      
+      // Status filter
+      const statusMatch = statusFilter === "all" || user.status === statusFilter;
+      
+      return searchMatch && roleMatch && voiceMatch && statusMatch;
+    });
+    
+    console.log("MemberDirectoryPage: Filtered users", filtered.length);
+    setFilteredUsers(filtered);
+  }, [users, searchTerm, roleFilter, voicePartFilter, statusFilter]);
   
   // Reset all filters
   const resetFilters = () => {
@@ -105,7 +82,6 @@ export default function MemberDirectoryPage() {
     setRoleFilter("all");
     setVoicePartFilter("all");
     setStatusFilter("all");
-    setClassYearFilter("all");
   };
 
   // Type conversion function to safely cast User to Profile
@@ -119,10 +95,10 @@ export default function MemberDirectoryPage() {
   };
 
   return (
-    <div className="container mx-auto px-4 py-6">
+    <div className="container mx-auto py-6">
       <PageHeader
         title="Member Directory"
-        description="View and manage all Glee Club members"
+        description="View all Glee Club members"
         icon={<Users className="h-6 w-6" />}
       />
 
@@ -189,11 +165,11 @@ export default function MemberDirectoryPage() {
                     <DropdownMenuItem onClick={() => setStatusFilter("inactive")}>
                       Inactive
                     </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => setStatusFilter("pending")}>
+                      Pending
+                    </DropdownMenuItem>
                     <DropdownMenuItem onClick={() => setStatusFilter("alumni")}>
                       Alumni
-                    </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => setStatusFilter("on_leave")}>
-                      On Leave
                     </DropdownMenuItem>
                   </DropdownMenuGroup>
                   
@@ -216,33 +192,19 @@ export default function MemberDirectoryPage() {
                     <DropdownMenuItem onClick={() => setRoleFilter("accompanist")}>
                       Accompanist
                     </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => setRoleFilter("administrator")}>
+                      Administrator
+                    </DropdownMenuItem>
                   </DropdownMenuGroup>
-                  
-                  {classYears.length > 0 && (
-                    <>
-                      <DropdownMenuSeparator />
-                      <DropdownMenuGroup>
-                        <DropdownMenuLabel className="text-xs text-muted-foreground">Class Year</DropdownMenuLabel>
-                        <DropdownMenuItem onClick={() => setClassYearFilter("all")}>
-                          All Years
-                        </DropdownMenuItem>
-                        {classYears.map(year => (
-                          <DropdownMenuItem key={year} onClick={() => setClassYearFilter(year)}>
-                            {year}
-                          </DropdownMenuItem>
-                        ))}
-                      </DropdownMenuGroup>
-                    </>
-                  )}
                   
                   <DropdownMenuSeparator />
                   <DropdownMenuItem onClick={resetFilters}>
-                    Reset All Filters
+                    Reset Filters
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
               
-              {isAdmin && (
+              {isAdmin() && (
                 <Button onClick={() => navigate("/dashboard/members/add")}>
                   <UserPlus className="mr-2 h-4 w-4" />
                   Add Member
@@ -251,58 +213,24 @@ export default function MemberDirectoryPage() {
             </div>
           </div>
           
-          <div className="flex justify-between items-center mb-4">
-            <div className="text-sm text-muted-foreground">
-              Showing {filteredUsers.length} members
-              {/* Display active filters */}
-              {(roleFilter !== "all" || voicePartFilter !== "all" || statusFilter !== "all" || classYearFilter !== "all") && (
-                <span className="ml-2">
-                  (Filtered by: 
-                  {roleFilter !== "all" && <span className="ml-1">Role</span>}
-                  {voicePartFilter !== "all" && <span className="ml-1">Voice</span>}
-                  {statusFilter !== "all" && <span className="ml-1">Status</span>}
-                  {classYearFilter !== "all" && <span className="ml-1">Year</span>}
-                  )
-                </span>
-              )}
-            </div>
-            
-            <div className="flex space-x-2">
-              <Button
-                size="sm"
-                variant={displayMode === "grid" ? "default" : "outline"}
-                onClick={() => setDisplayMode("grid")}
-              >
-                Grid
-              </Button>
-              <Button
-                size="sm"
-                variant={displayMode === "list" ? "default" : "outline"}
-                onClick={() => setDisplayMode("list")}
-              >
-                List
-              </Button>
-            </div>
-          </div>
-          
           {isLoading ? (
             <div className="flex justify-center py-12">
               <div className="flex flex-col items-center">
-                <div className="h-8 w-8 rounded-full border-2 border-primary border-t-transparent animate-spin mb-2"></div>
-                <p>Loading members...</p>
+                <Spinner size="lg" />
+                <p className="mt-4">Loading members...</p>
               </div>
             </div>
           ) : filteredUsers.length === 0 ? (
             <div className="text-center py-12">
               <p className="text-muted-foreground">No members found matching your criteria</p>
-              {(roleFilter !== "all" || voicePartFilter !== "all" || statusFilter !== "all" || classYearFilter !== "all" || searchTerm !== "") && (
+              {(roleFilter !== "all" || voicePartFilter !== "all" || statusFilter !== "all" || searchTerm !== "") && (
                 <Button variant="outline" onClick={resetFilters} className="mt-4">
                   Reset Filters
                 </Button>
               )}
             </div>
           ) : (
-            <div className={displayMode === "grid" ? "grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4" : "space-y-4"}>
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
               {filteredUsers.map(member => (
                 <MemberCard
                   key={member.id}

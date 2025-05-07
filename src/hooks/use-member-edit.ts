@@ -7,7 +7,7 @@ import { toast } from "sonner";
 export interface EditMemberFormValues {
   first_name: string;
   last_name: string;
-  email?: string;
+  email?: string | null;
   phone?: string | null;
   voice_part?: string | null;
   role: string;
@@ -31,6 +31,9 @@ export function useMemberEdit() {
     setIsLoading(true);
     
     try {
+      console.log("Updating member with ID:", memberId);
+      console.log("Update data:", formData);
+      
       // Create profile update object
       const profileUpdate: Partial<Profile> = {
         first_name: formData.first_name,

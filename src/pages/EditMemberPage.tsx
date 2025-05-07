@@ -10,13 +10,14 @@ import { useMemberEdit, EditMemberFormValues } from "@/hooks/use-member-edit";
 import { ArrowLeft, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
+import { toast } from "sonner";
 
 export default function EditMemberPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { isEditing, setIsEditing, isLoading, editMember } = useMemberEdit();
   
-  // Fetch the member details
+  // Fetch the member details with better error handling
   const { 
     data: memberData, 
     isLoading: isLoadingMember,
@@ -24,8 +25,19 @@ export default function EditMemberPage() {
     refetch
   } = useQuery({
     queryKey: ['member', id],
-    queryFn: () => fetchUserById(id as string),
+    queryFn: async () => {
+      if (!id) throw new Error("No member ID provided");
+      try {
+        const data = await fetchUserById(id);
+        console.log("Fetched member data:", data);
+        return data;
+      } catch (err) {
+        console.error("Error fetching member:", err);
+        throw err;
+      }
+    },
     enabled: !!id,
+    retry: 1,
   });
   
   // Convert the fetched data to a Profile type
@@ -37,14 +49,25 @@ export default function EditMemberPage() {
   } : null;
   
   const handleSubmit = async (data: EditMemberFormValues) => {
-    if (!id) return;
+    if (!id) {
+      toast.error("Missing member ID");
+      return;
+    }
     
-    await editMember(id, data, (updatedMember) => {
-      // After successful update
-      refetch();
-      // Navigate back to member profile
-      navigate(`/dashboard/members/${id}`);
-    });
+    console.log("Submitting member update:", data);
+    
+    try {
+      await editMember(id, data, (updatedMember) => {
+        // After successful update
+        toast.success("Member updated successfully");
+        refetch();
+        // Navigate back to member profile
+        navigate(`/dashboard/members/${id}`);
+      });
+    } catch (error) {
+      console.error("Error updating member:", error);
+      toast.error("Failed to update member");
+    }
   };
   
   const handleCancel = () => {

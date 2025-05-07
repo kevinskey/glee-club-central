@@ -10,7 +10,7 @@ import {
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Profile, UserRole, MemberStatus, VoicePart } from "@/contexts/AuthContext";
-import { Edit } from "lucide-react";
+import { Edit, Eye } from "lucide-react";
 import { Link } from "react-router-dom";
 import { User } from "@/hooks/useUserManagement";
 
@@ -29,19 +29,39 @@ export function MemberCard({ member }: MemberCardProps) {
     };
   };
 
+  // Format voice part for display
+  const formatVoicePart = (voicePart: string | null | undefined): string => {
+    if (!voicePart) return "Not assigned";
+    
+    switch (voicePart) {
+      case "soprano_1": return "Soprano 1";
+      case "soprano_2": return "Soprano 2";
+      case "alto_1": return "Alto 1";
+      case "alto_2": return "Alto 2";
+      case "tenor": return "Tenor";
+      case "bass": return "Bass";
+      default: return voicePart;
+    }
+  };
+
   return (
     <Card className="overflow-hidden">
       <CardHeader className="p-4">
-        <CardTitle>{member.first_name} {member.last_name}</CardTitle>
-        <CardDescription>{member.role}</CardDescription>
+        <CardTitle>{member.first_name || 'Unnamed'} {member.last_name || 'Member'}</CardTitle>
+        <CardDescription>
+          {member.role ? member.role.charAt(0).toUpperCase() + member.role.slice(1).replace('_', ' ') : 'Member'}
+        </CardDescription>
       </CardHeader>
       <CardContent className="p-4 pt-0">
-        <p>Email: {member.email}</p>
-        <p>Voice Part: {member.voice_part || 'Not Assigned'}</p>
+        <p className="mb-1">Email: {member.email || 'No email'}</p>
+        <p>Voice Part: {formatVoicePart(member.voice_part)}</p>
       </CardContent>
       <CardFooter className="p-4 pt-0 flex justify-between">
         <Link to={`/dashboard/members/${member.id}`}>
-          <Button variant="outline" size="sm">View Profile</Button>
+          <Button variant="outline" size="sm">
+            <Eye className="h-4 w-4 mr-1" />
+            View
+          </Button>
         </Link>
         <Link to={`/dashboard/members/edit/${member.id}`}>
           <Button variant="ghost" size="sm">

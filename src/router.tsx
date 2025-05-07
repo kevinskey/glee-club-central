@@ -16,9 +16,8 @@ import AdminUserManagementPage from "@/pages/AdminUserManagementPage";
 import MemberProfilePage from "@/pages/profile/MemberProfilePage";
 import MemberEditPage from "@/pages/MemberEditPage";
 import EditMemberPage from "@/pages/EditMemberPage";
-
-// Import UpdatePasswordPage
 import UpdatePasswordPage from "@/pages/UpdatePasswordPage";
+import MemberDirectoryPage from "@/pages/MemberDirectoryPage";
 
 const router = createBrowserRouter([
   {
@@ -54,6 +53,10 @@ const router = createBrowserRouter([
       {
         path: "member-management",
         element: <AdminUserManagementPage />,
+      },
+      {
+        path: "members",
+        element: <MemberDirectoryPage />,
       },
       {
         path: "profile",
