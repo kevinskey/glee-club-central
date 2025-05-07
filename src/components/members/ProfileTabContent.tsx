@@ -1,103 +1,46 @@
 
 import React from "react";
-import { UseFormReturn } from "react-hook-form";
-import {
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { Input } from "@/components/ui/input";
-import { UserFormValues } from "./form/userFormSchema";
+import { User } from "@/hooks/useUserManagement";
 
 interface ProfileTabContentProps {
-  form: UseFormReturn<UserFormValues>;
+  user: User;
+  formatDate: (date?: string | null) => string;
 }
 
-export const ProfileTabContent: React.FC<ProfileTabContentProps> = ({ form }) => {
+export const ProfileTabContent: React.FC<ProfileTabContentProps> = ({ user, formatDate }) => {
   return (
-    <>
-      <div className="grid grid-cols-2 gap-4">
-        <FormField
-          control={form.control}
-          name="first_name"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>First Name</FormLabel>
-              <FormControl>
-                <Input placeholder="First name" {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        
-        <FormField
-          control={form.control}
-          name="last_name"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Last Name</FormLabel>
-              <FormControl>
-                <Input placeholder="Last name" {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+    <div className="space-y-4">
+      <div>
+        <h3 className="text-sm font-medium text-muted-foreground">Email</h3>
+        <p className="font-medium">{user.email || "Not set"}</p>
       </div>
       
-      <FormField
-        control={form.control}
-        name="phone"
-        render={({ field }) => (
-          <FormItem>
-            <FormLabel>Phone Number</FormLabel>
-            <FormControl>
-              <Input placeholder="Phone number" {...field} value={field.value || ''} />
-            </FormControl>
-            <FormMessage />
-          </FormItem>
-        )}
-      />
+      <div>
+        <h3 className="text-sm font-medium text-muted-foreground">Phone</h3>
+        <p className="font-medium">{user.phone || "Not set"}</p>
+      </div>
       
-      <FormField
-        control={form.control}
-        name="voice_part"
-        render={({ field }) => (
-          <FormItem>
-            <FormLabel>Voice Part</FormLabel>
-            <Select
-              value={field.value || ''}
-              onValueChange={(value) => field.onChange(value === 'none' ? null : value)}
-            >
-              <FormControl>
-                <SelectTrigger>
-                  <SelectValue placeholder="Select voice part" />
-                </SelectTrigger>
-              </FormControl>
-              <SelectContent>
-                <SelectItem value="none">Not specified</SelectItem>
-                <SelectItem value="soprano_1">Soprano 1</SelectItem>
-                <SelectItem value="soprano_2">Soprano 2</SelectItem>
-                <SelectItem value="alto_1">Alto 1</SelectItem>
-                <SelectItem value="alto_2">Alto 2</SelectItem>
-                <SelectItem value="tenor">Tenor</SelectItem>
-                <SelectItem value="bass">Bass</SelectItem>
-              </SelectContent>
-            </Select>
-            <FormMessage />
-          </FormItem>
-        )}
-      />
-    </>
+      <div className="grid grid-cols-2 gap-4">
+        <div>
+          <h3 className="text-sm font-medium text-muted-foreground">Created</h3>
+          <p className="font-medium">{formatDate(user.created_at)}</p>
+        </div>
+        
+        <div>
+          <h3 className="text-sm font-medium text-muted-foreground">Last Login</h3>
+          <p className="font-medium">{formatDate(user.last_sign_in_at)}</p>
+        </div>
+      </div>
+      
+      <div>
+        <h3 className="text-sm font-medium text-muted-foreground">Section</h3>
+        <p className="font-medium">{user.section_name || "Not assigned"}</p>
+      </div>
+      
+      <div>
+        <h3 className="text-sm font-medium text-muted-foreground">Join Date</h3>
+        <p className="font-medium">{formatDate(user.join_date)}</p>
+      </div>
+    </div>
   );
 };
