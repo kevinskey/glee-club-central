@@ -50,7 +50,7 @@ export const DeleteUserDialog: React.FC<DeleteUserDialogProps> = ({
 
   return (
     <Dialog open={isOpen} onOpenChange={handleOpenChange}>
-      <DialogContent>
+      <DialogContent className="z-50 bg-background">
         <DialogHeader>
           <DialogTitle>Are you sure you want to delete this user?</DialogTitle>
           <DialogDescription>

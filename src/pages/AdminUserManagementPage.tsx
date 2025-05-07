@@ -9,6 +9,7 @@ import { UsersTableSimple } from "@/components/members/UsersTableSimple";
 import { UserDialogs } from "@/components/members/UserDialogs";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 export default function AdminUserManagementPage() {
   const { isAdmin } = useAuth();
@@ -110,6 +111,10 @@ export default function AdminUserManagementPage() {
   const handleUserDelete = async () => {
     try {
       await handleDeleteUser();
+      // Force refresh after successful delete
+      setTimeout(() => {
+        fetchUsers();
+      }, 500);
     } catch (error) {
       console.error("Error handling user delete:", error);
     }
@@ -137,17 +142,21 @@ export default function AdminUserManagementPage() {
             isLoading={isLoading}
           />
 
-          <UsersTableSimple 
-            users={filteredUsers}
-            isLoading={isLoading}
-            onViewDetails={openEditUserDialog}
-            onRoleChange={handleRoleChange}
-            onStatusChange={handleStatusChange}
-            formatDate={formatDate}
-            onDeleteClick={openDeleteUserDialog}
-          />
+          <ScrollArea className="w-full">
+            <div className="w-full min-w-max">
+              <UsersTableSimple 
+                users={filteredUsers}
+                isLoading={isLoading}
+                onViewDetails={openEditUserDialog}
+                onRoleChange={handleRoleChange}
+                onStatusChange={handleStatusChange}
+                formatDate={formatDate}
+                onDeleteClick={openDeleteUserDialog}
+              />
+            </div>
+          </ScrollArea>
           
-          <div className="mt-4 text-sm text-gray-500">
+          <div className="mt-4 text-sm text-gray-500" key={`user-count-${filteredUsers.length}`}>
             Total: {filteredUsers.length} users
           </div>
         </CardContent>

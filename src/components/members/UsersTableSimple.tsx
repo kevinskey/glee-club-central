@@ -97,6 +97,7 @@ export const UsersTableSimple: React.FC<UsersTableSimpleProps> = ({
               variant="ghost"
               size="sm"
               onClick={() => onViewDetails(user)}
+              className="mr-1"
             >
               <Eye className="h-4 w-4 mr-2" />
               View
@@ -108,11 +109,12 @@ export const UsersTableSimple: React.FC<UsersTableSimpleProps> = ({
                     <MoreHorizontal className="h-4 w-4" />
                   </Button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent align="end">
+                <DropdownMenuContent align="end" className="z-50 bg-background border shadow-md">
                   <DropdownMenuLabel>Quick Actions</DropdownMenuLabel>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem
-                    onClick={() => {
+                    onClick={(e) => {
+                      e.stopPropagation();
                       console.log("Setting user as Administrator");
                       // Use the exact value expected by the database
                       onRoleChange(user.id, 'administrator');
@@ -121,7 +123,8 @@ export const UsersTableSimple: React.FC<UsersTableSimpleProps> = ({
                     Set as Administrator
                   </DropdownMenuItem>
                   <DropdownMenuItem
-                    onClick={() => {
+                    onClick={(e) => {
+                      e.stopPropagation();
                       console.log("Setting user as Section Leader");
                       onRoleChange(user.id, 'section_leader');
                     }}
@@ -129,7 +132,8 @@ export const UsersTableSimple: React.FC<UsersTableSimpleProps> = ({
                     Set as Section Leader
                   </DropdownMenuItem>
                   <DropdownMenuItem
-                    onClick={() => {
+                    onClick={(e) => {
+                      e.stopPropagation();
                       console.log("Setting user as Singer");
                       onRoleChange(user.id, 'singer');
                     }}
@@ -138,18 +142,27 @@ export const UsersTableSimple: React.FC<UsersTableSimpleProps> = ({
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem
-                    onClick={() => onStatusChange(user.id, 'active')}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onStatusChange(user.id, 'active');
+                    }}
                   >
                     Set Status to Active
                   </DropdownMenuItem>
                   <DropdownMenuItem
-                    onClick={() => onStatusChange(user.id, 'inactive')}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onStatusChange(user.id, 'inactive');
+                    }}
                   >
                     Set Status to Inactive
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem
-                    onClick={() => onDeleteClick(user)}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onDeleteClick(user);
+                    }}
                     className="text-destructive focus:text-destructive"
                   >
                     <Trash2 className="h-4 w-4 mr-2" />
@@ -165,7 +178,7 @@ export const UsersTableSimple: React.FC<UsersTableSimpleProps> = ({
   }, [users, isLoading, onViewDetails, onRoleChange, onStatusChange, onDeleteClick, formatDate]);
 
   return (
-    <div className="rounded-md border">
+    <div className="rounded-md border overflow-auto">
       <Table>
         <TableHeader>
           <TableRow>
