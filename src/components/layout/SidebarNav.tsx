@@ -1,3 +1,4 @@
+
 import React from "react"
 import {
   Sheet,
@@ -17,12 +18,12 @@ import {
 } from "@/components/ui/accordion"
 import { useSidebar } from "@/hooks/use-sidebar"
 import { useAuth } from "@/contexts/AuthContext"
-import { Home, Settings, Users } from "lucide-react";
+import { Home, Settings, Users, LucideIcon } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
 interface MenuItemProps {
   title: string;
-  icon: React.ComponentType<React.SVGProps<SVGSVGElement>>;
+  icon: LucideIcon;
   href: string;
   requiredRoles?: string[];
   onClick?: () => void;
@@ -30,7 +31,7 @@ interface MenuItemProps {
 
 interface MenuSectionProps {
   title: string;
-  icon: React.ComponentType<React.SVGProps<SVGSVGElement>>;
+  icon: LucideIcon;
   href: string;
   submenu?: MenuItemProps[];
   requiredRoles?: string[];
@@ -51,8 +52,10 @@ export function SidebarNav() {
         key={item.title}
         href={item.href}
         className="group flex w-full items-center space-x-2 rounded-md p-2 text-sm font-medium hover:underline"
-        onClick={() => {
+        onClick={(e) => {
+          e.preventDefault();
           onClose();
+          navigate(item.href);
           if (item.onClick) {
             item.onClick();
           }
@@ -95,7 +98,7 @@ export function SidebarNav() {
     });
   };
 
-  const menuItems = [
+  const menuItems: MenuSectionProps[] = [
     {
       title: "Home",
       icon: Home,
@@ -108,16 +111,19 @@ export function SidebarNav() {
       submenu: [
         {
           title: "Directory",
-          href: "/dashboard/members",
+          icon: Users,
+          href: "/dashboard/member-directory",
         },
         {
           title: "Add Member",
+          icon: Users,
           href: "/dashboard/members/add",
           requiredRoles: ["administrator"],
         },
         {
           title: "Management",
-          href: "/dashboard/admin/user-management",
+          icon: Users,
+          href: "/dashboard/member-management",
           requiredRoles: ["administrator"],
         },
       ],

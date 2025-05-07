@@ -286,39 +286,51 @@ export type Database = {
       profiles: {
         Row: {
           avatar_url: string | null
+          class_year: string | null
           created_at: string
+          dues_paid: boolean | null
           first_name: string | null
           id: string
           join_date: string | null
           last_name: string | null
+          notes: string | null
           phone: string | null
           role: string | null
+          special_roles: string | null
           status: string | null
           updated_at: string
           voice_part: string | null
         }
         Insert: {
           avatar_url?: string | null
+          class_year?: string | null
           created_at?: string
+          dues_paid?: boolean | null
           first_name?: string | null
           id: string
           join_date?: string | null
           last_name?: string | null
+          notes?: string | null
           phone?: string | null
           role?: string | null
+          special_roles?: string | null
           status?: string | null
           updated_at?: string
           voice_part?: string | null
         }
         Update: {
           avatar_url?: string | null
+          class_year?: string | null
           created_at?: string
+          dues_paid?: boolean | null
           first_name?: string | null
           id?: string
           join_date?: string | null
           last_name?: string | null
+          notes?: string | null
           phone?: string | null
           role?: string | null
+          special_roles?: string | null
           status?: string | null
           updated_at?: string
           voice_part?: string | null

@@ -1,6 +1,27 @@
 
 import { supabase } from '@/integrations/supabase/client';
 
+export type User = {
+  id: string;
+  email?: string | null;
+  first_name?: string | null;
+  last_name?: string | null;
+  phone?: string | null;
+  role: string;
+  role_display_name?: string | null;
+  voice_part?: string | null;
+  voice_part_display?: string | null;
+  avatar_url?: string | null;
+  status: string;
+  join_date?: string | null;
+  created_at?: string;
+  last_sign_in_at?: string | null;
+  class_year?: string | null;
+  dues_paid?: boolean | null;
+  notes?: string | null;
+  special_roles?: string | null;
+};
+
 /**
  * Fetch all users with RLS bypassing function
  */

@@ -1,62 +1,60 @@
 
 import React, { useState } from "react";
-import { useParams, useNavigate } from "react-router-dom";
-import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "@/contexts/AuthContext";
-import { toast } from "sonner";
-import { format } from "date-fns";
 import {
   Tabs,
   TabsContent,
   TabsList,
   TabsTrigger,
 } from "@/components/ui/tabs";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import { PageHeader } from "@/components/ui/page-header";
 import { 
   User, 
-  CalendarDays, 
+  Calendar, 
   Music, 
-  SquareUser,
-  Banknote,
-  ArrowLeft,
+  Shirt, 
+  Wallet, 
+  Camera, 
+  FileText,
   Edit,
-  Trash2
+  ArrowLeft
 } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { useNavigate } from "react-router-dom";
+import { ProfileOverviewTab } from "@/components/profile/ProfileOverviewTab";
+import { ParticipationTab } from "@/components/profile/ParticipationTab";
+import { MusicAccessTab } from "@/components/profile/MusicAccessTab";
+import { WardrobeTab } from "@/components/profile/WardrobeTab";
+import { FinancialInfoTab } from "@/components/profile/FinancialInfoTab";
+import { MediaConsentTab } from "@/components/profile/MediaConsentTab";
+import { AdminNotesTab } from "@/components/profile/AdminNotesTab";
 import { getStatusBadge, getRoleBadge } from "@/components/members/UserBadges";
-import { fetchUserById } from "@/utils/supabaseQueries";
-import { DeleteUserDialog } from "@/components/members/DeleteUserDialog";
-import { useUserDelete } from "@/hooks/user-management/useUserDelete";
+import { useQuery } from "@tanstack/react-query";
+import { useParams } from "react-router-dom";
+import { fetchUserById } from "@/utils/supabase/users";
+import { User as UserType } from "@/hooks/user/useUserData";
 
 export default function MemberProfilePage() {
   const { user, profile, isAdmin } = useAuth();
   const navigate = useNavigate();
   const { id } = useParams();
-  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   
   // Determine if we're viewing our own profile or someone else's
   const isViewingSelf = !id || id === user?.id;
   const userId = id || user?.id;
   
-  const { data: memberProfile, isLoading, refetch } = useQuery({
+  const { data: memberProfile, isLoading } = useQuery({
     queryKey: ['userProfile', userId],
     queryFn: () => fetchUserById(userId as string),
     enabled: !!userId,
   });
-
+  
   // For admin view of other profiles
   const canEdit = isAdmin() || isViewingSelf;
-  const canDelete = isAdmin() && !isViewingSelf;
-
-  // Set up user deletion
-  const { userToDelete, isSubmitting, handleDeleteUser, openDeleteUserDialog } = useUserDelete(() => {
-    toast.success("Member deleted successfully");
-    navigate('/dashboard/members');
-  });
-
+  
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-[calc(100vh-100px)]">
@@ -66,7 +64,7 @@ export default function MemberProfilePage() {
     );
   }
 
-  const displayProfile = isViewingSelf ? profile : memberProfile;
+  const displayProfile = isViewingSelf ? profile : (memberProfile as UserType);
   
   if (!displayProfile) {
     return (
@@ -77,260 +75,171 @@ export default function MemberProfilePage() {
       </div>
     );
   }
-  
-  const handleDeleteClick = () => {
-    if (memberProfile) {
-      openDeleteUserDialog(memberProfile);
-      setIsDeleteDialogOpen(true);
-    }
-  };
 
   const formatVoicePart = (voicePart: string | null | undefined) => {
-    if (!voicePart) return "Not specified";
+    if (!voicePart) return "Not set";
     
-    const voicePartMap: Record<string, string> = {
-      "soprano_1": "Soprano 1",
-      "soprano_2": "Soprano 2",
-      "alto_1": "Alto 1",
-      "alto_2": "Alto 2",
-      "tenor": "Tenor",
-      "bass": "Bass"
-    };
-    
-    return voicePartMap[voicePart] || voicePart;
+    switch (voicePart) {
+      case "soprano_1": return "Soprano 1";
+      case "soprano_2": return "Soprano 2";
+      case "alto_1": return "Alto 1";
+      case "alto_2": return "Alto 2";
+      case "tenor_1": return "Tenor 1";
+      case "tenor_2": return "Tenor 2";
+      case "bass_1": return "Bass 1";
+      case "bass_2": return "Bass 2";
+      default: return voicePart;
+    }
   };
 
-  const formatDate = (dateString?: string | null) => {
-    if (!dateString) return "Not specified";
-    try {
-      return format(new Date(dateString), 'PPP');
-    } catch (e) {
-      return dateString;
-    }
+  const formatClassYear = (classYear: string | null | undefined) => {
+    return classYear || "Not set";
   };
 
   return (
-    <div className="container mx-auto px-4 py-6">
+    <div>
       <div className="flex items-center justify-between mb-6">
         <Button variant="ghost" onClick={() => navigate(-1)}>
           <ArrowLeft className="mr-2 h-4 w-4" />
           Back
         </Button>
         
-        <div className="flex gap-2">
-          {canEdit && (
-            <Button 
-              onClick={() => navigate(`/dashboard/members/edit/${userId}`)}
-              className="bg-blue-600 hover:bg-blue-700"
-            >
-              <Edit className="mr-2 h-4 w-4" />
-              Edit Profile
-            </Button>
-          )}
-          
-          {canDelete && (
-            <Button 
-              variant="destructive"
-              onClick={handleDeleteClick}
-            >
-              <Trash2 className="mr-2 h-4 w-4" />
-              Delete Member
-            </Button>
-          )}
-        </div>
+        {canEdit && (
+          <Button onClick={() => navigate(`/dashboard/profile/edit/${userId}`)}>
+            <Edit className="mr-2 h-4 w-4" />
+            Edit Profile
+          </Button>
+        )}
       </div>
       
       <PageHeader
         title={`${displayProfile.first_name || ''} ${displayProfile.last_name || ''}`}
-        description={`${formatVoicePart(displayProfile.voice_part)} - Member since ${formatDate(displayProfile.join_date)}`}
+        description={`${formatVoicePart(displayProfile.voice_part)} - Member since ${displayProfile.join_date ? new Date(displayProfile.join_date).toLocaleDateString() : 'N/A'}`}
         icon={<User className="h-6 w-6" />}
       />
 
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-        {/* Profile Sidebar */}
-        <div className="md:col-span-1">
-          <Card className="p-6 flex flex-col items-center">
-            <Avatar className="h-32 w-32 mb-4">
-              {displayProfile.avatar_url ? (
-                <AvatarImage src={displayProfile.avatar_url} alt={`${displayProfile.first_name} ${displayProfile.last_name}`} />
-              ) : (
-                <AvatarFallback className="text-xl">
-                  {displayProfile.first_name?.[0]}{displayProfile.last_name?.[0]}
-                </AvatarFallback>
-              )}
-            </Avatar>
-            <h2 className="text-xl font-bold mb-1 text-center">{`${displayProfile.first_name || ''} ${displayProfile.last_name || ''}`}</h2>
-            <p className="text-muted-foreground mb-3">{formatVoicePart(displayProfile.voice_part)}</p>
-            <div className="flex flex-wrap gap-2 justify-center">
-              {getRoleBadge(displayProfile.role)}
-              {getStatusBadge(displayProfile.status)}
-            </div>
-            
-            {/* Quick Info */}
-            <div className="mt-6 w-full space-y-3">
-              <div className="flex items-center text-sm">
-                <User className="h-4 w-4 mr-2 text-muted-foreground" />
-                <span className="text-muted-foreground">Member ID:</span>
-                <span className="ml-auto font-medium truncate max-w-[120px]" title={displayProfile.id}>
-                  {displayProfile.id?.substring(0, 8)}...
-                </span>
-              </div>
-              
-              <div className="flex items-center text-sm">
-                <CalendarDays className="h-4 w-4 mr-2 text-muted-foreground" />
-                <span className="text-muted-foreground">Joined:</span>
-                <span className="ml-auto font-medium">{formatDate(displayProfile.join_date)}</span>
-              </div>
-              
-              <div className="flex items-center text-sm">
-                <Music className="h-4 w-4 mr-2 text-muted-foreground" />
-                <span className="text-muted-foreground">Voice Part:</span>
-                <span className="ml-auto font-medium">{formatVoicePart(displayProfile.voice_part)}</span>
-              </div>
-              
-              <div className="flex items-center text-sm">
-                <SquareUser className="h-4 w-4 mr-2 text-muted-foreground" />
-                <span className="text-muted-foreground">Class Year:</span>
-                <span className="ml-auto font-medium">{displayProfile.class_year || "Not specified"}</span>
-              </div>
-              
-              <div className="flex items-center text-sm">
-                <Banknote className="h-4 w-4 mr-2 text-muted-foreground" />
-                <span className="text-muted-foreground">Dues Paid:</span>
-                <span className="ml-auto font-medium">
-                  {displayProfile.dues_paid ? (
-                    <Badge variant="success">Paid</Badge>
-                  ) : (
-                    <Badge variant="destructive">Unpaid</Badge>
-                  )}
-                </span>
-              </div>
-            </div>
-          </Card>
-        </div>
+      <div className="flex flex-col md:flex-row gap-6 mb-6">
+        <Card className="p-6 flex flex-col items-center md:w-1/4">
+          <Avatar className="h-32 w-32 mb-4">
+            {displayProfile.avatar_url ? (
+              <AvatarImage src={displayProfile.avatar_url} alt={`${displayProfile.first_name} ${displayProfile.last_name}`} />
+            ) : (
+              <AvatarFallback>
+                {displayProfile.first_name?.[0]}{displayProfile.last_name?.[0]}
+              </AvatarFallback>
+            )}
+          </Avatar>
+          <h2 className="text-xl font-bold mb-1">{`${displayProfile.first_name || ''} ${displayProfile.last_name || ''}`}</h2>
+          <p className="text-muted-foreground mb-3">{formatVoicePart(displayProfile.voice_part)}</p>
+          <div className="flex flex-wrap gap-2 justify-center">
+            {getRoleBadge(displayProfile.role)}
+            {getStatusBadge(displayProfile.status || 'pending')}
+          </div>
+        </Card>
 
-        {/* Main Content */}
-        <div className="md:col-span-3">
-          <Tabs defaultValue="profile" className="w-full">
-            <TabsList className="mb-4 grid grid-cols-3 md:grid-cols-4">
-              <TabsTrigger value="profile">Profile</TabsTrigger>
-              <TabsTrigger value="participation">Participation</TabsTrigger>
-              <TabsTrigger value="music">Music</TabsTrigger>
-              <TabsTrigger value="notes">{isAdmin() ? 'Admin Notes' : 'Notes'}</TabsTrigger>
+        <div className="md:w-3/4">
+          <Tabs defaultValue="overview" className="w-full">
+            <TabsList className="mb-4 grid grid-cols-3 md:grid-cols-7 lg:w-fit">
+              <TabsTrigger value="overview"><User className="h-4 w-4 mr-2" />Overview</TabsTrigger>
+              <TabsTrigger value="participation"><Calendar className="h-4 w-4 mr-2" />Participation</TabsTrigger>
+              <TabsTrigger value="music"><Music className="h-4 w-4 mr-2" />Music</TabsTrigger>
+              <TabsTrigger value="wardrobe"><Shirt className="h-4 w-4 mr-2" />Wardrobe</TabsTrigger>
+              <TabsTrigger value="financial"><Wallet className="h-4 w-4 mr-2" />Financial</TabsTrigger>
+              <TabsTrigger value="media"><Camera className="h-4 w-4 mr-2" />Media</TabsTrigger>
+              {isAdmin() && (
+                <TabsTrigger value="admin"><FileText className="h-4 w-4 mr-2" />Admin Notes</TabsTrigger>
+              )}
             </TabsList>
 
-            <TabsContent value="profile">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Profile Information</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div>
-                      <h3 className="font-semibold mb-4">Contact Information</h3>
-                      <div className="space-y-3">
-                        <div>
-                          <p className="text-sm text-muted-foreground">Email</p>
-                          <p className="font-medium">{displayProfile.email || "Not provided"}</p>
-                        </div>
-                        <div>
-                          <p className="text-sm text-muted-foreground">Phone</p>
-                          <p className="font-medium">{displayProfile.phone || "Not provided"}</p>
-                        </div>
-                      </div>
-                    </div>
-                    
-                    <div>
-                      <h3 className="font-semibold mb-4">Membership Details</h3>
-                      <div className="space-y-3">
-                        <div>
-                          <p className="text-sm text-muted-foreground">Status</p>
-                          <p className="font-medium">{displayProfile.status || "Unknown"}</p>
-                        </div>
-                        <div>
-                          <p className="text-sm text-muted-foreground">Role</p>
-                          <p className="font-medium">{displayProfile.role || "Member"}</p>
-                        </div>
-                        <div>
-                          <p className="text-sm text-muted-foreground">Last Active</p>
-                          <p className="font-medium">{formatDate(displayProfile.last_sign_in_at)}</p>
-                        </div>
-                      </div>
-                    </div>
+            <TabsContent value="overview">
+              <div className="bg-white p-6 rounded-lg shadow-sm">
+                <h3 className="text-lg font-medium mb-4">Member Information</h3>
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <p className="text-sm text-muted-foreground">Email</p>
+                    <p>{displayProfile.email || "Not set"}</p>
                   </div>
-                </CardContent>
-              </Card>
-            </TabsContent>
-            
-            <TabsContent value="participation">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Participation History</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-muted-foreground">
-                    Attendance and participation records for this member will appear here.
-                  </p>
-                </CardContent>
-              </Card>
-            </TabsContent>
-            
-            <TabsContent value="music">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Music Access & Voice Part</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="mb-6">
-                    <h3 className="font-semibold mb-2">Voice Part</h3>
+                  
+                  <div>
+                    <p className="text-sm text-muted-foreground">Phone</p>
+                    <p>{displayProfile.phone || "Not set"}</p>
+                  </div>
+                  
+                  <div>
+                    <p className="text-sm text-muted-foreground">Voice Part</p>
                     <p>{formatVoicePart(displayProfile.voice_part)}</p>
                   </div>
                   
                   <div>
-                    <h3 className="font-semibold mb-2">Sheet Music Access</h3>
-                    <p className="text-muted-foreground">
-                      Assigned sheet music and access rights will appear here.
-                    </p>
-                  </div>
-                </CardContent>
-              </Card>
-            </TabsContent>
-            
-            <TabsContent value="notes">
-              <Card>
-                <CardHeader>
-                  <CardTitle>{isAdmin() ? 'Administrative Notes' : 'Notes'}</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="mb-4">
-                    <p className="text-muted-foreground">
-                      {displayProfile.notes || "No notes available for this member."}
-                    </p>
+                    <p className="text-sm text-muted-foreground">Class Year</p>
+                    <p>{formatClassYear(displayProfile.class_year)}</p>
                   </div>
                   
-                  {isAdmin() && (
-                    <div className="mt-6">
-                      <h3 className="font-semibold mb-2">Special Roles</h3>
-                      <p className="text-muted-foreground">
-                        {displayProfile.special_roles || "No special roles assigned."}
-                      </p>
+                  <div>
+                    <p className="text-sm text-muted-foreground">Join Date</p>
+                    <p>{displayProfile.join_date ? new Date(displayProfile.join_date).toLocaleDateString() : "Not set"}</p>
+                  </div>
+                  
+                  <div>
+                    <p className="text-sm text-muted-foreground">Dues Paid</p>
+                    <p>{displayProfile.dues_paid ? "Yes" : "No"}</p>
+                  </div>
+                  
+                  <div className="md:col-span-2">
+                    <p className="text-sm text-muted-foreground">Last Sign In</p>
+                    <p>{displayProfile.last_sign_in_at ? new Date(displayProfile.last_sign_in_at).toLocaleString() : "Never"}</p>
+                  </div>
+                </div>
+                
+                {isAdmin() && (
+                  <>
+                    <h3 className="text-lg font-medium mt-6 mb-4">Administrative Information</h3>
+                    
+                    <div className="grid grid-cols-1 gap-4">
+                      <div>
+                        <p className="text-sm text-muted-foreground">Special Roles</p>
+                        <p>{displayProfile.special_roles || "None"}</p>
+                      </div>
+                      
+                      <div>
+                        <p className="text-sm text-muted-foreground">Notes</p>
+                        <p className="whitespace-pre-wrap">{displayProfile.notes || "No notes"}</p>
+                      </div>
                     </div>
-                  )}
-                </CardContent>
-              </Card>
+                  </>
+                )}
+              </div>
             </TabsContent>
+            
+            <TabsContent value="participation">
+              <ParticipationTab memberId={displayProfile.id} />
+            </TabsContent>
+            
+            <TabsContent value="music">
+              <MusicAccessTab memberId={displayProfile.id} voicePart={displayProfile.voice_part} />
+            </TabsContent>
+            
+            <TabsContent value="wardrobe">
+              <WardrobeTab profile={displayProfile} />
+            </TabsContent>
+            
+            <TabsContent value="financial">
+              <FinancialInfoTab memberId={displayProfile.id} />
+            </TabsContent>
+            
+            <TabsContent value="media">
+              <MediaConsentTab profile={displayProfile} />
+            </TabsContent>
+            
+            {isAdmin() && (
+              <TabsContent value="admin">
+                <AdminNotesTab memberId={displayProfile.id} />
+              </TabsContent>
+            )}
           </Tabs>
         </div>
       </div>
-      
-      {/* Delete User Dialog */}
-      <DeleteUserDialog
-        user={userToDelete}
-        isOpen={isDeleteDialogOpen}
-        onOpenChange={setIsDeleteDialogOpen}
-        onDeleteConfirm={handleDeleteUser}
-        isSubmitting={isSubmitting}
-      />
     </div>
   );
 }

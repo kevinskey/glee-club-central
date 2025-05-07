@@ -18,6 +18,10 @@ export type User = {
   join_date?: string | null;
   created_at?: string;
   last_sign_in_at?: string | null;
+  class_year?: string | null;
+  dues_paid?: boolean | null;
+  notes?: string | null;
+  special_roles?: string | null;
 };
 
 export function useUserData() {
