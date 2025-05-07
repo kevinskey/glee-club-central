@@ -1,280 +1,184 @@
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+
+import React, { createContext, useState, useEffect, useContext } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { AuthError, Session, User as AuthUser } from '@supabase/supabase-js';
+import { Session, User as SupabaseUser } from '@supabase/supabase-js';
 import { toast } from 'sonner';
 
-export type VoicePart = 'soprano_1' | 'soprano_2' | 'alto_1' | 'alto_2' | 'tenor' | 'bass' | null;
-export type UserRole = 'administrator' | 'section_leader' | 'singer' | 'student_conductor' | 'accompanist' | 'non_singer' | string;
-export type MemberStatus = 'active' | 'inactive' | 'pending' | 'alumni' | 'deleted';
-
-export interface Profile {
-  id: string;
-  email?: string | null;
-  first_name?: string | null;
-  last_name?: string | null;
-  role: UserRole;
-  voice_part?: VoicePart;
-  status?: MemberStatus;
-  avatar_url?: string | null;
-  phone?: string | null;
-  join_date?: string | null;
-  class_year?: string | null;
-  dues_paid?: boolean | null;
-  notes?: string | null;
-  special_roles?: string | null;
-}
-
 interface AuthContextType {
-  user: AuthUser | null;
+  user: SupabaseUser | null;
   session: Session | null;
-  profile: Profile | null;
   isLoading: boolean;
-  error: string | null;
+  isAuthenticated: boolean; // Added missing property
   signIn: (email: string, password: string) => Promise<void>;
+  signUp: (email: string, password: string) => Promise<void>;
   signOut: () => Promise<void>;
-  signUp: (email: string, password: string, firstName: string, lastName: string) => Promise<void>;
   resetPassword: (email: string) => Promise<void>;
   updatePassword: (password: string) => Promise<void>;
-  updateProfile: (updates: Partial<Profile>) => Promise<void>;
-  refreshProfile: () => Promise<void>;
+  signInWithGoogle: () => Promise<void>; // Added missing property
+  signInWithApple: () => Promise<void>;  // Added missing property
   isAdmin: () => boolean;
 }
 
-const AuthContext = createContext<AuthContextType | undefined>(undefined);
+const AuthContext = createContext<AuthContextType>({
+  user: null,
+  session: null,
+  isLoading: true,
+  isAuthenticated: false, // Added missing property
+  signIn: async () => {},
+  signUp: async () => {},
+  signOut: async () => {},
+  resetPassword: async () => {},
+  updatePassword: async () => {},
+  signInWithGoogle: async () => {}, // Added missing property
+  signInWithApple: async () => {},  // Added missing property
+  isAdmin: () => false,
+});
 
-export function AuthProvider({ children }: { children: ReactNode }) {
-  const [user, setUser] = useState<AuthUser | null>(null);
+export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const [user, setUser] = useState<SupabaseUser | null>(null);
   const [session, setSession] = useState<Session | null>(null);
-  const [profile, setProfile] = useState<Profile | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    const getSession = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      setSession(session);
-      setUser(session?.user || null);
-      if (session?.user) {
-        await fetchProfile(session.user.id);
-      } else {
+    // Get session data
+    const getInitialSession = async () => {
+      try {
+        const { data: { session }, error } = await supabase.auth.getSession();
+        
+        if (error) {
+          throw error;
+        }
+        
+        setSession(session);
+        setUser(session?.user ?? null);
+      } catch (error: any) {
+        console.error('Error getting initial session:', error.message);
+      } finally {
         setIsLoading(false);
       }
     };
-
-    getSession();
-
-    supabase.auth.onAuthStateChange(async (_event, session) => {
-      setSession(session);
-      setUser(session?.user || null);
-      if (session?.user) {
-        await fetchProfile(session.user.id);
-      } else {
-        setProfile(null);
+    
+    getInitialSession();
+    
+    // Listen for auth changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      (event, session) => {
+        console.info('Auth state change event:', event);
+        setSession(session);
+        setUser(session?.user ?? null);
         setIsLoading(false);
       }
-    });
+    );
+    
+    return () => {
+      subscription.unsubscribe();
+    };
   }, []);
-
-  const fetchProfile = async (userId: string) => {
-    setIsLoading(true);
-    try {
-      const { data, error } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('id', userId)
-        .single();
-
-      if (error) {
-        throw error;
-      }
-
-      setProfile(data as Profile);
-    } catch (err: any) {
-      setError(err.message);
-      console.error("Error fetching profile:", err);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
+  
   const signIn = async (email: string, password: string) => {
-    setIsLoading(true);
     try {
-      const { data, error } = await supabase.auth.signInWithPassword({
-        email,
-        password,
-      });
-      if (error) {
-        throw error;
-      }
-      setSession(data.session);
-      setUser(data.user);
-    } catch (err: any) {
-      setError(err.message);
-      toast.error(err.message);
-    } finally {
-      setIsLoading(false);
+      const { error } = await supabase.auth.signInWithPassword({ email, password });
+      if (error) throw error;
+    } catch (error: any) {
+      toast.error(error.message);
+      throw error;
     }
   };
-
+  
+  const signInWithGoogle = async () => {
+    try {
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+      });
+      if (error) throw error;
+    } catch (error: any) {
+      toast.error(error.message);
+      throw error;
+    }
+  };
+  
+  const signInWithApple = async () => {
+    try {
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: 'apple',
+      });
+      if (error) throw error;
+    } catch (error: any) {
+      toast.error(error.message);
+      throw error;
+    }
+  };
+  
+  const signUp = async (email: string, password: string) => {
+    try {
+      const { error } = await supabase.auth.signUp({ email, password });
+      if (error) throw error;
+      toast.success('Sign up successful! Check your email for confirmation.');
+    } catch (error: any) {
+      toast.error(error.message);
+      throw error;
+    }
+  };
+  
   const signOut = async () => {
-    setIsLoading(true);
     try {
       const { error } = await supabase.auth.signOut();
-      if (error) {
-        throw error;
-      }
-      setSession(null);
-      setUser(null);
-      setProfile(null);
-    } catch (err: any) {
-      setError(err.message);
-      toast.error(err.message);
-    } finally {
-      setIsLoading(false);
+      if (error) throw error;
+    } catch (error: any) {
+      toast.error(error.message);
+      throw error;
     }
   };
-
-  const signUp = async (email: string, password: string, firstName: string, lastName: string) => {
-    setIsLoading(true);
-    try {
-      const { data, error } = await supabase.auth.signUp({
-        email,
-        password,
-        options: {
-          data: {
-            first_name: firstName,
-            last_name: lastName,
-          },
-        },
-      });
-      if (error) {
-        throw error;
-      }
-
-      // Create a user profile in the profiles table
-      const { error: profileError } = await supabase
-        .from('profiles')
-        .insert({
-          id: data.user?.id,
-          first_name: firstName,
-          last_name: lastName,
-          email: email,
-          role: 'singer', // Default role
-          status: 'pending', // Default status
-        });
-
-      if (profileError) {
-        throw profileError;
-      }
-
-      setSession(data.session);
-      setUser(data.user);
-    } catch (err: any) {
-      setError(err.message);
-      toast.error(err.message);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
+  
   const resetPassword = async (email: string) => {
-    setIsLoading(true);
     try {
-      const { error } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: `${window.location.origin}/reset-password`,
-      });
-      if (error) {
-        throw error;
-      }
-      toast.success('Password reset email sent.');
-    } catch (err: any) {
-      setError(err.message);
-      toast.error(err.message);
-    } finally {
-      setIsLoading(false);
+      const { error } = await supabase.auth.resetPasswordForEmail(email);
+      if (error) throw error;
+      toast.success('Password reset link sent to your email!');
+    } catch (error: any) {
+      toast.error(error.message);
+      throw error;
     }
   };
-
+  
   const updatePassword = async (password: string) => {
-    setIsLoading(true);
     try {
-      const { data, error } = await supabase.auth.updateUser({ password });
-      if (error) {
-        throw error;
-      }
-      toast.success('Password updated successfully.');
-    } catch (err: any) {
-      setError(err.message);
-      toast.error(err.message);
-    } finally {
-      setIsLoading(false);
+      const { error } = await supabase.auth.updateUser({ password });
+      if (error) throw error;
+      toast.success('Password updated successfully!');
+    } catch (error: any) {
+      toast.error(error.message);
+      throw error;
     }
   };
-
-  const updateProfile = async (updates: Partial<Profile>) => {
-    setIsLoading(true);
-    try {
-      if (!user?.id) {
-        throw new Error('User not authenticated.');
-      }
-
-      const { error } = await supabase
-        .from('profiles')
-        .update(updates)
-        .eq('id', user.id);
-
-      if (error) {
-        throw error;
-      }
-
-      // Optimistically update the local profile state
-      setProfile((prevProfile) =>
-        prevProfile ? { ...prevProfile, ...updates } : { ...updates } as Profile
-      );
-      toast.success('Profile updated successfully.');
-    } catch (err: any) {
-      setError(err.message);
-      toast.error(err.message);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const refreshProfile = async () => {
-    if (user?.id) {
-      await fetchProfile(user.id);
-    }
-  };
-
+  
   const isAdmin = () => {
-    return profile?.role === 'administrator';
+    return user?.app_metadata?.role === 'admin' || user?.email?.endsWith('@spelman.edu');
   };
 
   const value = {
     user,
     session,
-    profile,
     isLoading,
-    error,
+    isAuthenticated: !!user, // Added missing property
     signIn,
-    signOut,
     signUp,
+    signOut,
     resetPassword,
     updatePassword,
-    updateProfile,
-    refreshProfile,
-    isAdmin,
+    signInWithGoogle, // Added missing property
+    signInWithApple,  // Added missing property
+    isAdmin
   };
 
   return (
     <AuthContext.Provider value={value}>
-      {!isLoading && children}
+      {children}
     </AuthContext.Provider>
   );
-}
+};
 
-export const useAuth = (): AuthContextType => {
+export const useAuth = () => {
   const context = useContext(AuthContext);
   if (context === undefined) {
     throw new Error('useAuth must be used within an AuthProvider');
