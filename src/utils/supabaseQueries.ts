@@ -1,4 +1,3 @@
-
 import { supabase } from '@/integrations/supabase/client';
 import { Profile, UserRole, MemberStatus, VoicePart } from '@/contexts/AuthContext';
 
@@ -267,35 +266,35 @@ export async function fetchUserById(userId: string) {
 /**
  * Update user role through RLS bypassing function
  */
-export async function updateUserRole(userId: string, role: string): Promise<boolean> {
+export const updateUserRole = async (userId: string, role: string): Promise<boolean> => {
   try {
-    const { error } = await supabase.rpc('handle_user_role', {
-      p_user_id: userId,
-      p_role: role
+    const { error } = await supabase.rpc('handle_user_role', { 
+      p_user_id: userId, 
+      p_role: role 
     });
     
     if (error) throw error;
     return true;
-  } catch (error) {
-    console.error(`Error updating role for user ${userId}:`, error);
+  } catch (error: any) {
+    console.error('Error updating user role:', error);
     return false;
   }
-}
+};
 
 /**
  * Update user status through RLS bypassing function
  */
-export async function updateUserStatus(userId: string, status: string): Promise<boolean> {
+export const updateUserStatus = async (userId: string, status: string): Promise<boolean> => {
   try {
-    const { error } = await supabase.rpc('update_user_status', {
-      p_user_id: userId,
-      p_status: status
+    const { error } = await supabase.rpc('update_user_status', { 
+      p_user_id: userId, 
+      p_status: status 
     });
     
     if (error) throw error;
     return true;
-  } catch (error) {
-    console.error(`Error updating status for user ${userId}:`, error);
+  } catch (error: any) {
+    console.error('Error updating user status:', error);
     return false;
   }
-}
+};

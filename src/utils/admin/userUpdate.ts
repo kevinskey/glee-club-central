@@ -22,30 +22,6 @@ export const updateUser = async (userData: UpdateUserData) => {
       throw new Error("User not found");
     }
     
-    // Use the standard update methods
-    if (userData.password || userData.email) {
-      const updateData: any = {};
-      
-      if (userData.password) {
-        updateData.password = userData.password;
-      }
-      
-      if (userData.email) {
-        updateData.email = userData.email;
-      }
-      
-      // Use the standard updateUser method
-      const { data, error } = await supabase.auth.admin.updateUserById(
-        userData.id,
-        updateData
-      );
-      
-      if (error) {
-        console.error("Auth update error:", error);
-        throw error;
-      }
-    }
-    
     // Update profile data
     const profileData: any = {};
     
@@ -71,6 +47,10 @@ export const updateUser = async (userData: UpdateUserData) => {
         throw profileError;
       }
     }
+    
+    // Note: We've removed the email/password update part since it requires admin privileges
+    // If email/password updates are needed, they should be handled through a server-side 
+    // function with appropriate permissions
     
     return { success: true };
   } catch (error: any) {

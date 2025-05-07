@@ -31,7 +31,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Section } from "@/utils/supabaseQueries";
 import { Profile, VoicePart, MemberStatus, UserRole } from "@/contexts/AuthContext";
-import { updateUser } from '@/utils/adminUserOperations';
+import { updateUser } from '@/utils/admin/userUpdate';
 
 const formSchema = z.object({
   first_name: z.string().min(1, "First name is required"),
@@ -98,7 +98,7 @@ export const EditMemberDialog: React.FC<EditMemberDialogProps> = ({
       // Use adminUserOperations.updateUser to update the user
       const updateData = {
         id: member.id,
-        email: data.email,
+        // We'll no longer send email and password fields since they require admin privileges
         first_name: data.first_name,
         last_name: data.last_name,
         role: data.role,
@@ -116,7 +116,7 @@ export const EditMemberDialog: React.FC<EditMemberDialogProps> = ({
           ...member,
           first_name: data.first_name,
           last_name: data.last_name,
-          email: data.email,
+          email: member.email, // Keep the existing email
           phone: data.phone,
           voice_part: data.voice_part as VoicePart,
           section_id: data.section_id === 'none' ? null : data.section_id,
