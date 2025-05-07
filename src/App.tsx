@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
@@ -12,12 +13,10 @@ import CalendarPage from '@/pages/CalendarPage';
 import ProfilePage from '@/pages/ProfilePage';
 import MemberProfilePage from '@/pages/profile/MemberProfilePage';
 import SectionsPage from '@/pages/SectionsPage';
-import MemberDirectoryPage from '@/pages/MemberDirectoryPage';
-import UserManagementPage from '@/pages/UserManagementPage';
+import AdminUserManagementPage from '@/pages/AdminUserManagementPage';
 import NotFoundPage from '@/pages/NotFoundPage';
 import InviteMemberPage from '@/pages/InviteMemberPage';
 import FanPage from '@/pages/FanPage';
-import AdminUserManagementPage from '@/pages/AdminUserManagementPage';
 
 import { Outlet } from "react-router-dom";
 import { DashboardLayout } from '@/components/layout/DashboardLayout';
@@ -58,11 +57,8 @@ function App() {
             </ProtectedRoute>
           } />
           
-          {/* Admin-only routes - temporarily remove role restrictions for testing */}
-          <Route path="users" element={<MemberDirectoryPage />} />
-          <Route path="user-management" element={<UserManagementPage />} />
-          <Route path="admin-users" element={<AdminUserManagementPage />} />
-          <Route path="members" element={<MemberDirectoryPage />} />
+          {/* Admin-only routes */}
+          <Route path="member-management" element={<AdminUserManagementPage />} />
           <Route path="invite-member" element={<InviteMemberPage />} />
           <Route path="/dashboard/members/:id" element={<MemberProfilePage />} />
         </Route>

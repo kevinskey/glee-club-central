@@ -10,7 +10,6 @@ import {
   Library, 
   MessageSquare, 
   Users, 
-  UsersRound, 
   UserCog,
   Shield,
   Archive,
@@ -79,14 +78,8 @@ export const SidebarNav: React.FC<SidebarNavProps> = ({ className }) => {
             <h4 className="mb-2 px-2 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
               Admin Tools
             </h4>
-            <NavLink href="/dashboard/users" icon={<Users className="h-5 w-5" />}>
-              Member Directory
-            </NavLink>
-            <NavLink href="/dashboard/user-management" icon={<UserCog className="h-5 w-5" />}>
-              User Management
-            </NavLink>
-            <NavLink href="/dashboard/admin-users" icon={<UsersRound className="h-5 w-5" />}>
-              WordPress-style Users
+            <NavLink href="/dashboard/member-management" icon={<UserCog className="h-5 w-5" />}>
+              Member Management
             </NavLink>
             <NavLink href="/dashboard/sections" icon={<Shield className="h-5 w-5" />}>
               Section Management

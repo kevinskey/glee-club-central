@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { PageHeader } from "@/components/ui/page-header";
@@ -233,8 +232,8 @@ export default function AdminUserManagementPage() {
   return (
     <div className="space-y-6">
       <PageHeader
-        title="User Management"
-        description="Create, edit, and manage users with advanced controls"
+        title="Member Management"
+        description="Create, edit, and manage Glee Club members with advanced controls"
         icon={<UserCog className="h-6 w-6" />}
       />
 

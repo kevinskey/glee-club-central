@@ -137,18 +137,11 @@ export default function DashboardPage() {
   // Admin-only features
   const adminFeatures = [
     {
-      title: "User Management",
+      title: "Member Management",
       description: "Manage users, roles, and permissions",
       icon: <UserCog className="h-6 w-6" />,
-      href: "/dashboard/users",
+      href: "/dashboard/member-management",
       color: "bg-red-600/10",
-    },
-    {
-      title: "Member Directory",
-      description: "Access and manage the complete member directory",
-      icon: <Users className="h-6 w-6" />,
-      href: "/dashboard/members",
-      color: "bg-blue-600/10",
     },
     {
       title: "Section Management",
