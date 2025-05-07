@@ -1,4 +1,5 @@
-import React from "react";
+
+import React, { useEffect } from "react";
 import { PageHeader } from "@/components/ui/page-header";
 import { UserCog } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
@@ -6,8 +7,10 @@ import { useAdminUserManagement } from "@/hooks/useAdminUserManagement";
 import { UserManagementToolbar } from "@/components/members/UserManagementToolbar";
 import { UsersTableSimple } from "@/components/members/UsersTableSimple";
 import { UserDialogs } from "@/components/members/UserDialogs";
+import { useAuth } from "@/contexts/AuthContext";
 
 export default function AdminUserManagementPage() {
+  const { isAdmin } = useAuth();
   const {
     users,
     filteredUsers,
