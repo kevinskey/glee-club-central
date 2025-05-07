@@ -1,128 +1,77 @@
 
 import { supabase } from '@/integrations/supabase/client';
+import { Profile } from '@/contexts/AuthContext';
 
-export type User = {
-  id: string;
-  email?: string | null;
-  first_name?: string | null;
-  last_name?: string | null;
-  phone?: string | null;
-  role: string;
-  role_display_name?: string | null;
-  voice_part?: string | null;
-  voice_part_display?: string | null;
-  avatar_url?: string | null;
-  status: string;
-  join_date?: string | null;
-  created_at?: string;
-  last_sign_in_at?: string | null;
-  class_year?: string | null;
-  dues_paid?: boolean | null;
-  notes?: string | null;
-  special_roles?: string | null;
-};
-
-/**
- * Fetch all users with RLS bypassing function
- */
+// Fetch all users from the database
 export async function fetchAllUsers() {
   try {
-    const { data, error } = await supabase.rpc('get_all_users');
+    const { data, error } = await supabase
+      .rpc('get_all_users');
     
-    if (error) {
-      console.error('Error in fetchAllUsers:', error);
-      throw error;
-    }
-    
-    return data || [];
+    if (error) throw error;
+    return data;
   } catch (error) {
     console.error('Error fetching all users:', error);
-    return [];
+    throw error;
   }
 }
 
-/**
- * Fetch user by ID with RLS bypassing function
- */
+// Fetch a single user by ID
 export async function fetchUserById(userId: string) {
   try {
-    const { data, error } = await supabase.rpc('get_user_by_id', {
-      p_user_id: userId
-    });
+    const { data, error } = await supabase
+      .rpc('get_user_by_id', { p_user_id: userId });
     
     if (error) throw error;
     
-    // This RPC returns an array with one item, so we need to return the first item
+    // Return the first (and should be only) result
     return data && data.length > 0 ? data[0] : null;
   } catch (error) {
-    console.error(`Error fetching user with ID ${userId}:`, error);
-    return null;
+    console.error(`Error fetching user ${userId}:`, error);
+    throw error;
   }
 }
 
-/**
- * Update user role through RLS bypassing function
- */
-export const updateUserRole = async (userId: string, role: string): Promise<boolean> => {
+// Update user role
+export async function updateUserRole(userId: string, role: string) {
   try {
-    // Make sure we're sending the exact value expected by the database
-    const normalizedRole = role === "admin" ? "administrator" : role;
+    const { error } = await supabase
+      .rpc('handle_user_role', { p_user_id: userId, p_role: role });
     
-    console.log(`Calling handle_user_role with user_id: ${userId}, role: ${normalizedRole}`);
-    
-    // Validate against allowed roles
-    const validRoles = ["administrator", "section_leader", "singer", "student_conductor", "accompanist", "non_singer"];
-    if (!validRoles.includes(normalizedRole)) {
-      console.error(`Invalid role value: ${normalizedRole}`);
-      throw new Error(`Invalid role: ${normalizedRole}. Must be one of: ${validRoles.join(", ")}`);
-    }
-    
-    // Call the RPC function with the provided parameters
-    const { data, error } = await supabase.rpc('handle_user_role', { 
-      p_user_id: userId, 
-      p_role: normalizedRole 
-    });
-    
-    if (error) {
-      console.error('Error from handle_user_role RPC:', error);
-      throw error;
-    }
-    
-    console.log('Role update success, response:', data);
+    if (error) throw error;
     return true;
-  } catch (error: any) {
-    console.error('Error updating user role:', error);
-    throw error; // Rethrow so it can be caught by the caller
+  } catch (error) {
+    console.error(`Error updating role for user ${userId}:`, error);
+    return false;
   }
-};
+}
 
-/**
- * Update user status through RLS bypassing function
- */
-export const updateUserStatus = async (userId: string, status: string): Promise<boolean> => {
+// Update user status
+export async function updateUserStatus(userId: string, status: string) {
   try {
-    console.log(`Calling update_user_status with user_id: ${userId}, status: ${status}`);
+    const { error } = await supabase
+      .rpc('update_user_status', { p_user_id: userId, p_status: status });
     
-    // Validate status
-    if (!["active", "inactive", "pending", "alumni", "deleted"].includes(status)) {
-      console.error(`Invalid status value: ${status}`);
-      throw new Error(`Invalid status: ${status}`);
-    }
-    
-    const { data, error } = await supabase.rpc('update_user_status', { 
-      p_user_id: userId, 
-      p_status: status 
-    });
-    
-    if (error) {
-      console.error('Error from update_user_status RPC:', error);
-      throw error;
-    }
-    
-    console.log('Status update success, response:', data);
+    if (error) throw error;
     return true;
-  } catch (error: any) {
-    console.error('Error updating user status:', error);
-    throw error; // Rethrow so it can be caught by the caller
+  } catch (error) {
+    console.error(`Error updating status for user ${userId}:`, error);
+    return false;
   }
-};
+}
+
+// Update profile information
+export async function updateUserProfile(userId: string, profileData: Partial<Profile>) {
+  try {
+    const { error } = await supabase
+      .from('profiles')
+      .update(profileData)
+      .eq('id', userId);
+      
+    if (error) throw error;
+    return true;
+  } catch (error) {
+    console.error(`Error updating profile for user ${userId}:`, error);
+    return false;
+  }
+}

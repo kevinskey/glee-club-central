@@ -108,7 +108,7 @@ export default function MemberProfilePage() {
         </Button>
         
         {canEdit && (
-          <Button onClick={() => navigate(`/dashboard/profile/edit/${userId}`)}>
+          <Button onClick={() => navigate(`/dashboard/members/edit/${userId}`)}>
             <Edit className="mr-2 h-4 w-4" />
             Edit Profile
           </Button>
