@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+
+import React, { useState, useEffect } from "react";
 import { useNavigate, Link, useLocation } from "react-router-dom";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -27,7 +28,7 @@ const loginSchema = z.object({
 });
 
 export default function LoginPage() {
-  const { signIn, signInWithGoogle, signInWithApple } = useAuth();
+  const { signIn, signInWithGoogle, signInWithApple, isAuthenticated } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   const [isLoading, setIsLoading] = useState(false);
@@ -40,6 +41,13 @@ export default function LoginPage() {
   
   // Get return URL from location state or default to dashboard
   const from = location.state?.from?.pathname || "/dashboard";
+
+  // If user is already authenticated, redirect to dashboard
+  useEffect(() => {
+    if (isAuthenticated) {
+      navigate('/dashboard', { replace: true });
+    }
+  }, [isAuthenticated, navigate]);
 
   const form = useForm<z.infer<typeof loginSchema>>({
     resolver: zodResolver(loginSchema),
@@ -55,6 +63,7 @@ export default function LoginPage() {
     try {
       await signIn(values.email, values.password);
       toast.success("Login successful!");
+      // Use navigate instead of window.location for smoother experience
       navigate(from, { replace: true });
     } catch (error: any) {
       console.error("Login error:", error);
@@ -122,7 +131,7 @@ export default function LoginPage() {
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
           <div className="flex justify-center mb-4">
-            <Music className="h-12 w-12 text-glee-purple" />
+            <Music className="h-12 w-12 text-primary" />
           </div>
           <CardTitle className="text-2xl font-bold">Member Login</CardTitle>
           <CardDescription>
@@ -254,7 +263,7 @@ export default function LoginPage() {
               <div className="text-right">
                 <Link 
                   to="/forgot-password" 
-                  className="text-sm text-glee-purple hover:underline"
+                  className="text-sm text-primary hover:underline"
                 >
                   Forgot password?
                 </Link>
@@ -278,7 +287,7 @@ export default function LoginPage() {
         <CardFooter className="flex justify-center">
           <p className="text-sm text-muted-foreground">
             Don't have an account?{" "}
-            <Link to="/register" className="text-glee-purple hover:underline">
+            <Link to="/register" className="text-primary hover:underline">
               Create one
             </Link>
           </p>

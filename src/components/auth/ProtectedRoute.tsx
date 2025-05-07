@@ -1,6 +1,6 @@
 
-import React from 'react';
-import { Navigate } from 'react-router-dom';
+import React, { useEffect } from 'react';
+import { Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { Spinner } from '@/components/ui/spinner';
 
@@ -10,7 +10,8 @@ interface ProtectedRouteProps {
 }
 
 export function ProtectedRoute({ children, requiredRoles }: ProtectedRouteProps) {
-  const { isAuthenticated, isLoading, user } = useAuth();
+  const { isAuthenticated, isLoading, profile } = useAuth();
+  const location = useLocation();
   
   if (isLoading) {
     return (
@@ -21,12 +22,13 @@ export function ProtectedRoute({ children, requiredRoles }: ProtectedRouteProps)
   }
   
   if (!isAuthenticated) {
-    return <Navigate to="/login" replace />;
+    // Save the location the user was trying to access
+    return <Navigate to="/login" state={{ from: location }} replace />;
   }
   
   // Check for required roles if specified
-  if (requiredRoles?.length && user?.app_metadata?.role) {
-    const hasRequiredRole = requiredRoles.includes(user.app_metadata.role);
+  if (requiredRoles?.length && profile?.role) {
+    const hasRequiredRole = requiredRoles.includes(profile.role);
     if (!hasRequiredRole) {
       return <Navigate to="/dashboard" replace />;
     }

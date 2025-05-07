@@ -1,3 +1,4 @@
+
 import React, { createContext, useState, useEffect, useContext } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Session, User as SupabaseUser } from '@supabase/supabase-js';
@@ -60,6 +61,24 @@ const AuthContext = createContext<AuthContextType>({
   isAdmin: () => false,
 });
 
+// Helper function to clean up auth state from localStorage
+const cleanupAuthState = () => {
+  // Remove standard auth tokens
+  localStorage.removeItem('supabase.auth.token');
+  // Remove all Supabase auth keys from localStorage
+  Object.keys(localStorage).forEach((key) => {
+    if (key.startsWith('supabase.auth.') || key.includes('sb-')) {
+      localStorage.removeItem(key);
+    }
+  });
+  // Remove from sessionStorage if in use
+  Object.keys(sessionStorage || {}).forEach((key) => {
+    if (key.startsWith('supabase.auth.') || key.includes('sb-')) {
+      sessionStorage.removeItem(key);
+    }
+  });
+};
+
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<SupabaseUser | null>(null);
   const [session, setSession] = useState<Session | null>(null);
@@ -83,7 +102,28 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   useEffect(() => {
-    // Get session data
+    // Set up auth state listener FIRST
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      async (event, session) => {
+        console.info('Auth state change event:', event);
+        setSession(session);
+        setUser(session?.user ?? null);
+        
+        // Fetch profile if user exists after auth change
+        if (session?.user?.id) {
+          // Use setTimeout to prevent potential deadlocks
+          setTimeout(() => {
+            fetchProfile(session.user!.id);
+          }, 0);
+        } else {
+          setProfile(null);
+        }
+        
+        setIsLoading(false);
+      }
+    );
+    
+    // THEN check for existing session
     const getInitialSession = async () => {
       try {
         const { data: { session }, error } = await supabase.auth.getSession();
@@ -108,24 +148,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     
     getInitialSession();
     
-    // Listen for auth changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, session) => {
-        console.info('Auth state change event:', event);
-        setSession(session);
-        setUser(session?.user ?? null);
-        
-        // Fetch profile if user exists after auth change
-        if (session?.user?.id) {
-          await fetchProfile(session.user.id);
-        } else {
-          setProfile(null);
-        }
-        
-        setIsLoading(false);
-      }
-    );
-    
     return () => {
       subscription.unsubscribe();
     };
@@ -133,67 +155,107 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   
   const signIn = async (email: string, password: string) => {
     try {
+      // Clean up existing state
+      cleanupAuthState();
+      
+      // Attempt global sign out first
+      try {
+        await supabase.auth.signOut({ scope: 'global' });
+      } catch (err) {
+        // Continue even if this fails
+      }
+      
       const { error } = await supabase.auth.signInWithPassword({ email, password });
       if (error) throw error;
+      toast.success('Sign in successful!');
     } catch (error: any) {
-      toast.error(error.message);
+      console.error('Sign in error:', error);
+      toast.error(error.message || 'Failed to sign in');
       throw error;
     }
   };
   
   const signInWithGoogle = async () => {
     try {
+      // Clean up existing state
+      cleanupAuthState();
+      
       const { error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
+        options: {
+          redirectTo: window.location.origin + '/dashboard'
+        }
       });
       if (error) throw error;
     } catch (error: any) {
-      toast.error(error.message);
+      toast.error(error.message || 'Failed to sign in with Google');
       throw error;
     }
   };
   
   const signInWithApple = async () => {
     try {
+      // Clean up existing state
+      cleanupAuthState();
+      
       const { error } = await supabase.auth.signInWithOAuth({
         provider: 'apple',
+        options: {
+          redirectTo: window.location.origin + '/dashboard'
+        }
       });
       if (error) throw error;
     } catch (error: any) {
-      toast.error(error.message);
+      toast.error(error.message || 'Failed to sign in with Apple');
       throw error;
     }
   };
   
   const signUp = async (email: string, password: string) => {
     try {
+      // Clean up existing state
+      cleanupAuthState();
+      
       const { error } = await supabase.auth.signUp({ email, password });
       if (error) throw error;
       toast.success('Sign up successful! Check your email for confirmation.');
     } catch (error: any) {
-      toast.error(error.message);
+      toast.error(error.message || 'Failed to sign up');
       throw error;
     }
   };
   
   const signOut = async () => {
     try {
-      const { error } = await supabase.auth.signOut();
+      // Clean up auth state
+      cleanupAuthState();
+      
+      // Attempt global sign out
+      const { error } = await supabase.auth.signOut({ scope: 'global' });
       if (error) throw error;
-      setProfile(null); // Clear profile on signout
+      
+      // Clear state
+      setUser(null);
+      setSession(null);
+      setProfile(null);
+      
+      // Force page reload for a clean state
+      window.location.href = '/login';
     } catch (error: any) {
-      toast.error(error.message);
+      toast.error(error.message || 'Failed to sign out');
       throw error;
     }
   };
   
   const resetPassword = async (email: string) => {
     try {
-      const { error } = await supabase.auth.resetPasswordForEmail(email);
+      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: window.location.origin + '/reset-password',
+      });
       if (error) throw error;
       toast.success('Password reset link sent to your email!');
     } catch (error: any) {
-      toast.error(error.message);
+      toast.error(error.message || 'Failed to send reset password link');
       throw error;
     }
   };
@@ -204,13 +266,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       if (error) throw error;
       toast.success('Password updated successfully!');
     } catch (error: any) {
-      toast.error(error.message);
+      toast.error(error.message || 'Failed to update password');
       throw error;
     }
   };
   
   const isAdmin = () => {
-    return user?.app_metadata?.role === 'admin' || user?.email?.endsWith('@spelman.edu') || profile?.role === 'administrator';
+    return profile?.role === 'administrator';
   };
 
   const value = {
