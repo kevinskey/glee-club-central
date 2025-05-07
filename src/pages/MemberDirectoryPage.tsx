@@ -31,8 +31,8 @@ export default function MemberDirectoryPage() {
   } = useUserManagement();
   
   const [searchTerm, setSearchTerm] = useState("");
-  const [roleFilter, setRoleFilter] = useState("");
-  const [statusFilter, setStatusFilter] = useState("");
+  const [roleFilter, setRoleFilter] = useState("all");
+  const [statusFilter, setStatusFilter] = useState("all");
   const [filteredUsers, setFilteredUsers] = useState<User[]>([]);
   
   // Filter users when dependencies change
@@ -47,10 +47,10 @@ export default function MemberDirectoryPage() {
         (user.last_name && user.last_name.toLowerCase().includes(searchTerm.toLowerCase()));
       
       // Role filter
-      const matchesRole = roleFilter === "" || user.role === roleFilter;
+      const matchesRole = roleFilter === "all" || user.role === roleFilter;
       
       // Status filter
-      const matchesStatus = statusFilter === "" || user.status === statusFilter;
+      const matchesStatus = statusFilter === "all" || user.status === statusFilter;
       
       return matchesSearch && matchesRole && matchesStatus;
     });
@@ -132,7 +132,7 @@ export default function MemberDirectoryPage() {
                   <SelectValue placeholder="Filter by role" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">All Roles</SelectItem>
+                  <SelectItem value="all">All Roles</SelectItem>
                   <SelectItem value="admin">Administrators</SelectItem>
                   <SelectItem value="section_leader">Section Leaders</SelectItem>
                   <SelectItem value="student_conductor">Student Conductors</SelectItem>
@@ -149,7 +149,7 @@ export default function MemberDirectoryPage() {
                   <SelectValue placeholder="Filter by status" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">All Statuses</SelectItem>
+                  <SelectItem value="all">All Statuses</SelectItem>
                   <SelectItem value="active">Active</SelectItem>
                   <SelectItem value="inactive">Inactive</SelectItem>
                   <SelectItem value="pending">Pending</SelectItem>

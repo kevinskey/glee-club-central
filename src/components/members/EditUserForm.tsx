@@ -1,3 +1,4 @@
+
 import React from "react";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
@@ -216,7 +217,7 @@ export const EditUserForm: React.FC<EditUserFormProps> = ({ user, onSubmit, isSu
                 <FormItem>
                   <FormLabel>Voice Part</FormLabel>
                   <Select
-                    value={field.value || ''}
+                    value={field.value || 'not_specified'}
                     onValueChange={field.onChange}
                   >
                     <FormControl>
@@ -225,7 +226,7 @@ export const EditUserForm: React.FC<EditUserFormProps> = ({ user, onSubmit, isSu
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      <SelectItem value="">Not specified</SelectItem>
+                      <SelectItem value="not_specified">Not specified</SelectItem>
                       <SelectItem value="soprano">Soprano</SelectItem>
                       <SelectItem value="alto">Alto</SelectItem>
                       <SelectItem value="tenor">Tenor</SelectItem>

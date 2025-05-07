@@ -241,7 +241,7 @@ export const AddMemberDialog: React.FC<AddMemberDialogProps> = ({
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        <SelectItem value="none">None</SelectItem>
+                        <SelectItem value="not_specified">None</SelectItem>
                         <SelectItem value="Soprano 1">Soprano 1</SelectItem>
                         <SelectItem value="Soprano 2">Soprano 2</SelectItem>
                         <SelectItem value="Alto 1">Alto 1</SelectItem>
@@ -271,7 +271,7 @@ export const AddMemberDialog: React.FC<AddMemberDialogProps> = ({
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        <SelectItem value="none">None</SelectItem>
+                        <SelectItem value="not_specified">None</SelectItem>
                         {sections.map((section) => (
                           <SelectItem key={section.id} value={section.id}>
                             {section.name}

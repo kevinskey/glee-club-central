@@ -116,7 +116,7 @@ export function SectionForm({ section, leaders, onSubmit }: SectionFormProps) {
               <FormItem>
                 <FormLabel>Section Leader (Optional)</FormLabel>
                 <Select 
-                  value={field.value || "none"} 
+                  value={field.value || "no_leader"} 
                   onValueChange={field.onChange}
                 >
                   <FormControl>
@@ -125,7 +125,7 @@ export function SectionForm({ section, leaders, onSubmit }: SectionFormProps) {
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
-                    <SelectItem value="none">None</SelectItem>
+                    <SelectItem value="no_leader">None</SelectItem>
                     {leaders.map((leader) => (
                       <SelectItem key={leader.id} value={leader.id}>
                         {leader.name}
