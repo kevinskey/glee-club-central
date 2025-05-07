@@ -9,7 +9,7 @@ import { toast } from "sonner";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from "@/components/ui/sheet";
 import { useUserManagement, User } from "@/hooks/useUserManagement";
 import { useMessaging } from "@/hooks/useMessaging";
-import { createUser, deleteUser, updateUser } from "@/utils/adminUserOperations";
+import { createUser, deleteUser, updateUser } from "@/utils/admin";
 import { UserFilters } from "@/components/members/UserFilters";
 import { UsersTable } from "@/components/members/UsersTable";
 import { CreateUserForm } from "@/components/members/CreateUserForm";
