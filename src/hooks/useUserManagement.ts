@@ -25,9 +25,13 @@ export function useUserManagement() {
     activateUser
   } = useUserOperations(users, useState(users)[1], selectedUser, setSelectedUser);
 
+  // Filter out users with 'deleted' status
+  const activeUsers = users.filter(user => user.status !== 'deleted');
+
   return {
     // User data
-    users,
+    users: activeUsers,
+    allUsers: users, // In case we need access to deleted users
     selectedUser,
     setSelectedUser,
     isLoading,

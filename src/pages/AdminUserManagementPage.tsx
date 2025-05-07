@@ -48,6 +48,11 @@ export default function AdminUserManagementPage() {
   useEffect(() => {
     filterUsers(users);
   }, [users, searchTerm, roleFilter, statusFilter, filterUsers]);
+  
+  // On mount, fetch users
+  useEffect(() => {
+    fetchUsers();
+  }, [fetchUsers]);
 
   // Handle unauthorized access
   if (!isAdmin()) {
@@ -93,6 +98,17 @@ export default function AdminUserManagementPage() {
     } catch (error) {
       console.error("Status change error:", error);
       toast.error("An error occurred while updating user status");
+    }
+  };
+
+  // Handle delete user with proper UI refresh
+  const handleUserDelete = async () => {
+    try {
+      await handleDeleteUser();
+      // Explicitly fetch users after successful deletion to update UI
+      fetchUsers();
+    } catch (error) {
+      console.error("Error handling user delete:", error);
     }
   };
 
@@ -146,15 +162,7 @@ export default function AdminUserManagementPage() {
         isSubmitting={isSubmitting}
         onCreateUser={handleCreateUser}
         onEditUser={handleEditUser}
-        onDeleteUser={handleDeleteUser}
-      />
-      
-      <DeleteUserDialog 
-        user={userToDelete}
-        isOpen={isDeleteDialogOpen}
-        onOpenChange={setIsDeleteDialogOpen}
-        onDeleteConfirm={handleDeleteUser}
-        isSubmitting={isSubmitting}
+        onDeleteUser={handleUserDelete}
       />
     </div>
   );

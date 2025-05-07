@@ -24,12 +24,14 @@ export function useUserDelete(onSuccess: () => void) {
       if (result.success) {
         toast.success(`User ${userToDelete.first_name} ${userToDelete.last_name} deleted successfully`);
         
-        // Explicitly call the onSuccess callback to trigger UI refresh
-        onSuccess();
-        
-        // Close the dialog and reset state
+        // Close the dialog first to prevent UI locks
         setIsDeleteDialogOpen(false);
         setUserToDelete(null);
+        
+        // Call onSuccess callback after state updates to trigger UI refresh
+        setTimeout(() => {
+          onSuccess();
+        }, 0);
       } else {
         throw new Error("Failed to delete user");
       }

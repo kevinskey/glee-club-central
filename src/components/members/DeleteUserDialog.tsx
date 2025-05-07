@@ -1,4 +1,3 @@
-
 import React from "react";
 import { Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -18,7 +17,7 @@ interface DeleteUserDialogProps {
   isOpen: boolean;
   onOpenChange: (open: boolean) => void;
   onDeleteConfirm: () => Promise<void>;
-  isSubmitting?: boolean; // Added isSubmitting prop as optional
+  isSubmitting?: boolean;
 }
 
 export const DeleteUserDialog: React.FC<DeleteUserDialogProps> = ({
@@ -28,6 +27,17 @@ export const DeleteUserDialog: React.FC<DeleteUserDialogProps> = ({
   onDeleteConfirm,
   isSubmitting = false,
 }) => {
+  // Handle delete confirmation with proper error handling
+  const handleDelete = async () => {
+    try {
+      await onDeleteConfirm();
+      // Dialog closing is handled in the onDeleteConfirm function
+    } catch (error) {
+      console.error("Error in delete confirmation:", error);
+      // Keep dialog open on error
+    }
+  };
+
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
       <DialogContent>
@@ -56,12 +66,16 @@ export const DeleteUserDialog: React.FC<DeleteUserDialogProps> = ({
           </div>
         )}
         <DialogFooter>
-          <Button variant="outline" onClick={() => onOpenChange(false)}>
+          <Button 
+            variant="outline" 
+            onClick={() => onOpenChange(false)}
+            disabled={isSubmitting}
+          >
             Cancel
           </Button>
           <Button 
             variant="destructive" 
-            onClick={onDeleteConfirm} 
+            onClick={handleDelete} 
             disabled={isSubmitting}
           >
             <Trash2 className="mr-2 h-4 w-4" />
