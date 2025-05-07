@@ -53,7 +53,7 @@ export const DeleteUserDialog: React.FC<DeleteUserDialogProps> = ({
 
   return (
     <Dialog open={isOpen} onOpenChange={handleOpenChange}>
-      <DialogContent className="z-[100] bg-background">
+      <DialogContent className="z-[100] bg-background sm:max-w-md w-[calc(100%-2rem)] p-4 sm:p-6">
         <DialogHeader>
           <DialogTitle>Are you sure you want to delete this user?</DialogTitle>
           <DialogDescription>
@@ -78,11 +78,12 @@ export const DeleteUserDialog: React.FC<DeleteUserDialogProps> = ({
             </div>
           </div>
         )}
-        <DialogFooter>
+        <DialogFooter className="flex flex-col sm:flex-row gap-2 sm:gap-0">
           <Button 
             variant="outline" 
             onClick={() => handleOpenChange(false)}
             disabled={isSubmitting}
+            className="w-full sm:w-auto"
           >
             Cancel
           </Button>
@@ -90,6 +91,7 @@ export const DeleteUserDialog: React.FC<DeleteUserDialogProps> = ({
             variant="destructive" 
             onClick={handleDelete} 
             disabled={isSubmitting}
+            className="w-full sm:w-auto"
           >
             <Trash2 className="mr-2 h-4 w-4" />
             {isSubmitting ? "Deleting..." : "Delete"}

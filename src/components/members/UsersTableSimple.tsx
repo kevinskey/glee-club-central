@@ -30,6 +30,7 @@ interface UsersTableSimpleProps {
   onStatusChange?: (userId: string, status: string) => Promise<void>;
   onDeleteClick?: (user: User) => void;
   formatDate: (dateString?: string | null) => string;
+  isMobile?: boolean;
 }
 
 export const UsersTableSimple: React.FC<UsersTableSimpleProps> = ({
@@ -40,6 +41,7 @@ export const UsersTableSimple: React.FC<UsersTableSimpleProps> = ({
   onStatusChange,
   onDeleteClick,
   formatDate,
+  isMobile = false,
 }) => {
   // Memoize the table content to prevent unnecessary re-renders
   const tableContent = useMemo(() => {
@@ -80,32 +82,56 @@ export const UsersTableSimple: React.FC<UsersTableSimpleProps> = ({
               )}
             </Avatar>
             <div>
-              <p className="font-medium">{user.first_name} {user.last_name}</p>
-              <p className="text-xs text-muted-foreground">{user.email}</p>
+              <p className="font-medium text-sm">{user.first_name} {user.last_name}</p>
+              <p className="text-xs text-muted-foreground hidden sm:block">{user.email}</p>
             </div>
           </div>
         </TableCell>
-        <TableCell>{user.voice_part_display || "Not set"}</TableCell>
-        <TableCell>
-          {getRoleBadge(user.role)}
-        </TableCell>
-        <TableCell>{getStatusBadge(user.status)}</TableCell>
-        <TableCell>{formatDate(user.join_date)}</TableCell>
+        {!isMobile && (
+          <>
+            <TableCell className="hidden md:table-cell">{user.voice_part_display || "Not set"}</TableCell>
+            <TableCell>{getRoleBadge(user.role)}</TableCell>
+            <TableCell>{getStatusBadge(user.status)}</TableCell>
+            <TableCell className="hidden md:table-cell">{formatDate(user.join_date)}</TableCell>
+          </>
+        )}
+        {isMobile && (
+          <TableCell>
+            <div className="flex flex-col">
+              <div className="flex items-center space-x-2 mb-1">
+                {getRoleBadge(user.role)}
+                {getStatusBadge(user.status)}
+              </div>
+              <p className="text-xs text-muted-foreground">{user.email}</p>
+            </div>
+          </TableCell>
+        )}
         <TableCell className="text-right">
           <div className="flex justify-end">
             <Button
               variant="ghost"
               size="sm"
-              onClick={() => onViewDetails(user)}
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                onViewDetails(user);
+              }}
               className="mr-1"
             >
               <Eye className="h-4 w-4 mr-2" />
-              View
+              {!isMobile && "View"}
             </Button>
             {onRoleChange && onStatusChange && onDeleteClick && (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" size="icon">
+                  <Button 
+                    variant="ghost" 
+                    size="icon"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                    }}
+                  >
                     <MoreHorizontal className="h-4 w-4" />
                   </Button>
                 </DropdownMenuTrigger>
@@ -181,18 +207,24 @@ export const UsersTableSimple: React.FC<UsersTableSimpleProps> = ({
         </TableCell>
       </TableRow>
     ));
-  }, [users, isLoading, onViewDetails, onRoleChange, onStatusChange, onDeleteClick, formatDate]);
+  }, [users, isLoading, onViewDetails, onRoleChange, onStatusChange, onDeleteClick, formatDate, isMobile]);
 
   return (
-    <div className="rounded-md border overflow-auto">
+    <div className="rounded-md border overflow-hidden">
       <Table>
         <TableHeader>
           <TableRow>
-            <TableHead className="w-[250px]">Name</TableHead>
-            <TableHead>Voice Part</TableHead>
-            <TableHead>Role</TableHead>
-            <TableHead>Status</TableHead>
-            <TableHead>Join Date</TableHead>
+            <TableHead className="w-[200px]">Name</TableHead>
+            {!isMobile ? (
+              <>
+                <TableHead className="hidden md:table-cell">Voice Part</TableHead>
+                <TableHead>Role</TableHead>
+                <TableHead>Status</TableHead>
+                <TableHead className="hidden md:table-cell">Join Date</TableHead>
+              </>
+            ) : (
+              <TableHead>Details</TableHead>
+            )}
             <TableHead className="text-right">Action</TableHead>
           </TableRow>
         </TableHeader>

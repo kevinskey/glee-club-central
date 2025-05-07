@@ -10,9 +10,12 @@ import { UserDialogs } from "@/components/members/UserDialogs";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 export default function AdminUserManagementPage() {
   const { isAdmin } = useAuth();
+  const isMobile = useIsMobile();
+  
   const {
     users,
     filteredUsers,
@@ -130,7 +133,7 @@ export default function AdminUserManagementPage() {
       />
 
       <Card>
-        <CardContent className="p-6">
+        <CardContent className={`p-2 sm:p-4 md:p-6`}>
           <UserManagementToolbar
             searchTerm={searchTerm}
             setSearchTerm={setSearchTerm}
@@ -141,21 +144,25 @@ export default function AdminUserManagementPage() {
             onCreateUserClick={() => setIsCreateUserOpen(true)}
             onRefreshClick={fetchUsers}
             isLoading={isLoading}
+            isMobile={isMobile}
           />
 
-          <ScrollArea className="relative w-full">
-            <div className="w-full min-w-max">
-              <UsersTableSimple 
-                users={filteredUsers}
-                isLoading={isLoading}
-                onViewDetails={openEditUserDialog}
-                onRoleChange={handleRoleChange}
-                onStatusChange={handleStatusChange}
-                formatDate={formatDate}
-                onDeleteClick={openDeleteUserDialog}
-              />
-            </div>
-          </ScrollArea>
+          <div className="w-full overflow-hidden">
+            <ScrollArea className="w-full">
+              <div className={`min-w-[600px] w-full`}>
+                <UsersTableSimple 
+                  users={filteredUsers}
+                  isLoading={isLoading}
+                  onViewDetails={openEditUserDialog}
+                  onRoleChange={handleRoleChange}
+                  onStatusChange={handleStatusChange}
+                  formatDate={formatDate}
+                  onDeleteClick={openDeleteUserDialog}
+                  isMobile={isMobile}
+                />
+              </div>
+            </ScrollArea>
+          </div>
           
           <div className="mt-4 text-sm text-gray-500" key={`user-count-${filteredUsers.length}`}>
             Total: {filteredUsers.length} users
@@ -180,3 +187,4 @@ export default function AdminUserManagementPage() {
     </div>
   );
 }
+
