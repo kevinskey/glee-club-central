@@ -36,7 +36,6 @@ export const UsersTableSimple: React.FC<UsersTableSimpleProps> = ({
           <TableRow>
             <TableHead className="w-[250px]">Name</TableHead>
             <TableHead>Voice Part</TableHead>
-            <TableHead>Section</TableHead>
             <TableHead>Role</TableHead>
             <TableHead>Status</TableHead>
             <TableHead>Join Date</TableHead>
@@ -46,7 +45,7 @@ export const UsersTableSimple: React.FC<UsersTableSimpleProps> = ({
         <TableBody>
           {isLoading ? (
             <TableRow>
-              <TableCell colSpan={7} className="h-24 text-center">
+              <TableCell colSpan={6} className="h-24 text-center">
                 <div className="flex justify-center items-center h-full">
                   <Loader2 className="h-6 w-6 text-primary animate-spin" />
                   <span className="ml-2">Loading members...</span>
@@ -55,7 +54,7 @@ export const UsersTableSimple: React.FC<UsersTableSimpleProps> = ({
             </TableRow>
           ) : users.length === 0 ? (
             <TableRow>
-              <TableCell colSpan={7} className="h-24 text-center">
+              <TableCell colSpan={6} className="h-24 text-center">
                 No members found.
               </TableCell>
             </TableRow>
@@ -80,7 +79,6 @@ export const UsersTableSimple: React.FC<UsersTableSimpleProps> = ({
                   </div>
                 </TableCell>
                 <TableCell>{user.voice_part_display || "Not set"}</TableCell>
-                <TableCell>{user.section_name || "Not assigned"}</TableCell>
                 <TableCell>{getRoleBadge(user.role)}</TableCell>
                 <TableCell>{getStatusBadge(user.status)}</TableCell>
                 <TableCell>{formatDate(user.join_date)}</TableCell>

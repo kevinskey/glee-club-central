@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { PageHeader } from "@/components/ui/page-header";
@@ -98,7 +97,6 @@ export default function AdminUserManagementPage() {
         status: data.status,
         voice_part: data.voice_part || null,
         phone: data.phone || null,
-        section_id: data.section_id || null,
       });
       
       if (result.success) {
@@ -156,7 +154,6 @@ export default function AdminUserManagementPage() {
         status: data.status,
         voice_part: data.voice_part,
         phone: data.phone,
-        section_id: data.section_id,
       };
       
       // Add password only if provided

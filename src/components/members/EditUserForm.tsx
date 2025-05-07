@@ -34,7 +34,6 @@ const userFormSchema = z.object({
   voice_part: z.string().optional().nullable(),
   phone: z.string().optional().nullable(),
   password: z.string().optional(),
-  section_id: z.string().optional().nullable(),
 });
 
 type UserFormValues = z.infer<typeof userFormSchema>;
@@ -57,7 +56,6 @@ export const EditUserForm: React.FC<EditUserFormProps> = ({ user, onSubmit, isSu
       voice_part: user.voice_part || null,
       phone: user.phone || null,
       password: "",
-      section_id: user.section_id || null,
     },
   });
 

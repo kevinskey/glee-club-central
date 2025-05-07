@@ -112,11 +112,6 @@ export const UserDetailsSheet: React.FC<UserDetailsSheetProps> = ({
             </div>
             
             <div className="space-y-1">
-              <p className="text-sm font-medium">Section</p>
-              <p className="text-sm">{user.section_name || "Not assigned"}</p>
-            </div>
-            
-            <div className="space-y-1">
               <p className="text-sm font-medium">Phone</p>
               <p className="text-sm">{user.phone || "Not provided"}</p>
             </div>

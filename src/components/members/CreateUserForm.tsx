@@ -30,7 +30,6 @@ export const CreateUserForm: React.FC<CreateUserFormProps> = ({
       voice_part: null,
       phone: null,
       password: "",
-      section_id: null,
     },
   });
 

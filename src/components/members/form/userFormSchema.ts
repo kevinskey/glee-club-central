@@ -19,7 +19,6 @@ export const userFormSchema = z.object({
   ),
   phone: z.string().optional().nullable(),
   password: z.string().optional(),
-  section_id: z.string().optional().nullable(),
 });
 
 export type UserFormValues = z.infer<typeof userFormSchema>;
