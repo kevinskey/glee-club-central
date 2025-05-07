@@ -6,6 +6,7 @@ import {
   Mail, 
   Phone, 
   Calendar, 
+  Music, // Added Music import
   User as UserIcon 
 } from "lucide-react";
 

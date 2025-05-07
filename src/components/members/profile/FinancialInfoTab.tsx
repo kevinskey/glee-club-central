@@ -1,7 +1,7 @@
 
 import React from "react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Check, CreditCard, Clock, Banknote, AlertTriangle } from "lucide-react";
+import { Check, CreditCard, Clock, Banknote, AlertTriangle, X } from "lucide-react"; // Added X import
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { useQuery } from "@tanstack/react-query";

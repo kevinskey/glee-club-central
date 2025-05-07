@@ -1,11 +1,19 @@
 
 import React, { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { 
+  User, 
+  Mail, 
+  Phone, 
+  Calendar, 
+  FileText, 
+  Upload, 
+  Clock 
+} from "lucide-react";
+import { Textarea } from "@/components/ui/textarea";
+import { Button } from "@/components/ui/button";
 import { useQuery } from "@tanstack/react-query";
 import { fetchMemberNotes } from "@/utils/supabaseQueries";
-import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/input";
-import { FileText, Upload, Clock } from "lucide-react";
 
 interface AdminNotesTabProps {
   memberId: string;

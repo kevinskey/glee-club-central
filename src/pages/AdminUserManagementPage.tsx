@@ -11,7 +11,7 @@ import { useUserManagement, User } from "@/hooks/useUserManagement";
 import { useMessaging } from "@/hooks/useMessaging";
 import { createUser, deleteUser, updateUser } from "@/utils/admin";
 import { UserFilters } from "@/components/members/UserFilters";
-import { UsersTable } from "@/components/members/UsersTable";
+import { UsersTableSimple } from "@/components/members/UsersTableSimple"; // Use the simple table instead
 import { CreateUserForm } from "@/components/members/CreateUserForm";
 import { EditUserForm } from "@/components/members/EditUserForm";
 import { DeleteUserDialog } from "@/components/members/DeleteUserDialog";
@@ -207,6 +207,26 @@ export default function AdminUserManagementPage() {
     setUserToDelete(user);
     setIsDeleteDialogOpen(true);
   };
+  
+  // Handle role change
+  const handleRoleChange = async (userId: string, role: string) => {
+    try {
+      await changeUserRole(userId, role);
+      fetchUsers(); // Refresh after change
+    } catch (error) {
+      console.error("Error changing role:", error);
+    }
+  };
+  
+  // Handle status change
+  const handleStatusChange = async (userId: string, status: string) => {
+    try {
+      await changeUserStatus(userId, status);
+      fetchUsers(); // Refresh after change
+    } catch (error) {
+      console.error("Error changing status:", error);
+    }
+  };
 
   return (
     <div className="space-y-6">
@@ -243,11 +263,13 @@ export default function AdminUserManagementPage() {
             </div>
           </div>
 
-          <UsersTable 
+          {/* Use the UsersTableSimple component that matches the expected props */}
+          <UsersTableSimple 
             users={filteredUsers}
             isLoading={isLoading}
-            handleEditUser={handleEditUser}
-            handleDeleteUserClick={handleDeleteUserClick}
+            onViewDetails={handleEditUser}
+            onRoleChange={handleRoleChange}
+            onStatusChange={handleStatusChange}
             formatDate={formatDate}
           />
           
