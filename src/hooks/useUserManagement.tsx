@@ -32,6 +32,7 @@ export function useUserManagement() {
     setError(null);
     try {
       const data = await fetchAllUsers();
+      console.log("Fetched users data:", data); // Debug log
       setUsers(data as User[]);
     } catch (err: any) {
       setError(err.message || "Failed to load users");
@@ -125,6 +126,11 @@ export function useUserManagement() {
     }
   };
 
+  // Activate a pending user
+  const activateUser = async (userId: string) => {
+    return await changeUserStatus(userId, 'active');
+  };
+
   // Format voice part for display
   const formatVoicePart = (voicePart: string | null): string => {
     if (!voicePart) return "Not set";
@@ -151,6 +157,7 @@ export function useUserManagement() {
     getUserDetails,
     changeUserRole,
     changeUserStatus,
+    activateUser,
     formatVoicePart
   };
 }
