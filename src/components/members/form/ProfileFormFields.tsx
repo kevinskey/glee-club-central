@@ -77,7 +77,7 @@ export const ProfileFormFields: React.FC<ProfileFormFieldsProps> = ({ form }) =>
             <FormLabel>Voice Part</FormLabel>
             <Select
               value={field.value || ''}
-              onValueChange={(value) => field.onChange(value === '' ? null : value)}
+              onValueChange={(value) => field.onChange(value === 'none' ? null : value)}
             >
               <FormControl>
                 <SelectTrigger>
@@ -85,7 +85,7 @@ export const ProfileFormFields: React.FC<ProfileFormFieldsProps> = ({ form }) =>
                 </SelectTrigger>
               </FormControl>
               <SelectContent>
-                <SelectItem value="">Not specified</SelectItem>
+                <SelectItem value="none">Not specified</SelectItem>
                 <SelectItem value="soprano_1">Soprano 1</SelectItem>
                 <SelectItem value="soprano_2">Soprano 2</SelectItem>
                 <SelectItem value="alto_1">Alto 1</SelectItem>
