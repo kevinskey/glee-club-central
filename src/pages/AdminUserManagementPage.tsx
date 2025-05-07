@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { PageHeader } from "@/components/ui/page-header";
@@ -82,6 +83,8 @@ export default function AdminUserManagementPage() {
   const onCreateUserSubmit = async (data: any) => {
     setIsSubmitting(true);
     try {
+      console.log("Creating user with data:", data);
+      
       // Generate a temporary random password if not provided
       const tempPassword = data.password || Math.random().toString(36).slice(-8);
       
@@ -106,10 +109,10 @@ export default function AdminUserManagementPage() {
         
         // Refresh the user list
         fetchUsers();
+        setIsCreateUserOpen(false);
       }
-      
-      setIsCreateUserOpen(false);
     } catch (error: any) {
+      console.error("Error creating user:", error);
       toast.error(error.message || "Error creating user");
     } finally {
       setIsSubmitting(false);
@@ -264,7 +267,6 @@ export default function AdminUserManagementPage() {
             </div>
           </div>
 
-          {/* Use the UsersTableSimple component that matches the expected props */}
           <UsersTableSimple 
             users={filteredUsers}
             isLoading={isLoading}

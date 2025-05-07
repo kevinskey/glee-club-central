@@ -49,12 +49,12 @@ export const AccountTabContent: React.FC<AccountTabContentProps> = ({ form }) =>
             <FormControl>
               <Input 
                 type="password" 
-                placeholder="Enter a password" 
+                placeholder="Leave blank to generate random password" 
                 {...field} 
               />
             </FormControl>
             <FormDescription>
-              Password is required for new users. Leave blank when editing to keep current password.
+              If left blank, a random password will be generated
             </FormDescription>
             <FormMessage />
           </FormItem>
@@ -78,7 +78,7 @@ export const AccountTabContent: React.FC<AccountTabContentProps> = ({ form }) =>
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent>
-                  <SelectItem value="admin">Administrator</SelectItem>
+                  <SelectItem value="admin">Admin</SelectItem>
                   <SelectItem value="section_leader">Section Leader</SelectItem>
                   <SelectItem value="student_conductor">Student Conductor</SelectItem>
                   <SelectItem value="accompanist">Accompanist</SelectItem>

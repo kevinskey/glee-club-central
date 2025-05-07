@@ -16,7 +16,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
-import { UserFormValues } from "./userFormSchema";
+import { UserFormValues } from "./form/userFormSchema";
 
 interface ProfileTabContentProps {
   form: UseFormReturn<UserFormValues>;
