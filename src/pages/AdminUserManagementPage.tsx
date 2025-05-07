@@ -68,9 +68,11 @@ export default function AdminUserManagementPage() {
       const success = await changeUserRole(userId, role);
       if (!success) {
         toast.error(`Failed to update user role to ${role}`);
+      } else {
+        console.log("Role update succeeded, fetching updated users...");
+        // Re-fetch users to get updated data after role change
+        await fetchUsers();
       }
-      // Re-fetch users to get updated data after role change
-      await fetchUsers();
     } catch (error) {
       console.error("Role change error:", error);
       toast.error("An error occurred while updating user role");
@@ -83,9 +85,10 @@ export default function AdminUserManagementPage() {
       const success = await changeUserStatus(userId, status);
       if (!success) {
         toast.error(`Failed to update user status to ${status}`);
+      } else {
+        // Re-fetch users to get updated data after status change
+        await fetchUsers();
       }
-      // Re-fetch users to get updated data after status change
-      await fetchUsers();
     } catch (error) {
       console.error("Status change error:", error);
       toast.error("An error occurred while updating user status");

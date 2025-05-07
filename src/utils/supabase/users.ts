@@ -46,6 +46,12 @@ export async function fetchUserById(userId: string) {
 export const updateUserRole = async (userId: string, role: string): Promise<boolean> => {
   try {
     console.log(`Calling handle_user_role with user_id: ${userId}, role: ${role}`);
+    // Check if role is valid against the database constraints
+    if (!["administrator", "section_leader", "singer", "student_conductor", "accompanist", "non_singer"].includes(role)) {
+      console.error(`Invalid role value: ${role}`);
+      return false;
+    }
+    
     const { error } = await supabase.rpc('handle_user_role', { 
       p_user_id: userId, 
       p_role: role 
