@@ -107,11 +107,10 @@ export async function updateUserProfile(userId: string, profileData: Partial<Pro
   }
 }
 
-// Search users by email - Fixed to avoid excessive type instantiation
-export async function searchUserByEmail(email: string) {
+// Search users by email with fixed type signature to prevent infinite type recursion
+export async function searchUserByEmail(email: string): Promise<any> {
   console.log(`Searching for user with email: ${email}`);
   try {
-    // Explicitly specify the return type to avoid recursive type inference
     const { data, error } = await supabase
       .from('profiles')
       .select('*')
@@ -124,7 +123,7 @@ export async function searchUserByEmail(email: string) {
     }
     
     console.log(`Search result for email ${email}:`, data);
-    return data as any; // Use type assertion to break recursive type inference
+    return data;
   } catch (error) {
     console.error(`Error searching for user with email ${email}:`, error);
     throw error;
