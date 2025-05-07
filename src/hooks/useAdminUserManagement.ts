@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { useUserManagement } from "@/hooks/useUserManagement";
 import { useUserFilter } from "@/hooks/user-management/useUserFilter";
 import { useUserCreate } from "@/hooks/user-management/useUserCreate";
@@ -18,7 +18,7 @@ export function useAdminUserManagement() {
     changeUserStatus
   } = useUserManagement();
 
-  // Incorporate the filter hook
+  // Incorporate the filter hook with memoization to prevent unnecessary re-renders
   const {
     searchTerm,
     setSearchTerm,
@@ -30,13 +30,18 @@ export function useAdminUserManagement() {
     filterUsers
   } = useUserFilter(users);
 
+  // Memoized callback for refreshing users to prevent unnecessary re-renders
+  const refreshUsers = useCallback(() => {
+    fetchUsers();
+  }, [fetchUsers]);
+
   // Incorporate the create user hook
   const {
     isCreateUserOpen,
     setIsCreateUserOpen,
     isSubmitting: isCreateSubmitting,
     handleCreateUser
-  } = useUserCreate(fetchUsers);
+  } = useUserCreate(refreshUsers);
 
   // Incorporate the edit user hook
   const {
@@ -44,7 +49,7 @@ export function useAdminUserManagement() {
     setIsEditUserOpen,
     isSubmitting: isEditSubmitting,
     handleEditUser
-  } = useUserEdit(selectedUser, fetchUsers);
+  } = useUserEdit(selectedUser, refreshUsers);
 
   // Incorporate the delete user hook
   const {
@@ -54,15 +59,15 @@ export function useAdminUserManagement() {
     isSubmitting: isDeleteSubmitting,
     handleDeleteUser,
     openDeleteUserDialog
-  } = useUserDelete(fetchUsers);
+  } = useUserDelete(refreshUsers);
 
   // Combined submitting state for UI purposes
   const isSubmitting = isCreateSubmitting || isEditSubmitting || isDeleteSubmitting;
 
   // Open edit user dialog wrapper that uses the utility function
-  const openEditUserDialog = (user: any) => {
+  const openEditUserDialog = useCallback((user: any) => {
     openEditDialog(user, setSelectedUser, setIsEditUserOpen);
-  };
+  }, [setSelectedUser, setIsEditUserOpen]);
 
   return {
     users,

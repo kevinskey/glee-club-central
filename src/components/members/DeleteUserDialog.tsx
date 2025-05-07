@@ -1,3 +1,4 @@
+
 import React from "react";
 import { Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -27,11 +28,13 @@ export const DeleteUserDialog: React.FC<DeleteUserDialogProps> = ({
   onDeleteConfirm,
   isSubmitting = false,
 }) => {
-  // Handle delete confirmation with proper error handling
+  // Handle delete confirmation with proper UI update sequence
   const handleDelete = async () => {
+    if (isSubmitting) return;
+    
     try {
       await onDeleteConfirm();
-      // Dialog closing is handled in the onDeleteConfirm function
+      // Dialog closing is now handled in the onDeleteConfirm function
     } catch (error) {
       console.error("Error in delete confirmation:", error);
       // Keep dialog open on error
@@ -39,7 +42,11 @@ export const DeleteUserDialog: React.FC<DeleteUserDialogProps> = ({
   };
 
   return (
-    <Dialog open={isOpen} onOpenChange={onOpenChange}>
+    <Dialog open={isOpen} onOpenChange={(open) => {
+      if (!isSubmitting) {
+        onOpenChange(open);
+      }
+    }}>
       <DialogContent>
         <DialogHeader>
           <DialogTitle>Are you sure you want to delete this user?</DialogTitle>

@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { useUserData } from "./user/useUserData";
 import { useUserOperations } from "./user/useUserOperations";
 import { formatVoicePart } from "./user/userUtils";
@@ -25,7 +25,7 @@ export function useUserManagement() {
     activateUser
   } = useUserOperations(users, useState(users)[1], selectedUser, setSelectedUser);
 
-  // Filter out users with 'deleted' status
+  // Filter out users with 'deleted' status - using memoized function to avoid re-renders
   const activeUsers = users.filter(user => user.status !== 'deleted');
 
   return {

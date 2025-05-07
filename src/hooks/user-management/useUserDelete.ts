@@ -9,7 +9,7 @@ export function useUserDelete(onSuccess: () => void) {
   const [userToDelete, setUserToDelete] = useState<User | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // Handle delete user with improved error handling
+  // Handle delete user with improved error handling and UI updates
   const handleDeleteUser = async () => {
     if (!userToDelete) {
       toast.error("No user selected for deletion");
@@ -22,16 +22,17 @@ export function useUserDelete(onSuccess: () => void) {
       const result = await deleteUser(userToDelete.id);
       
       if (result.success) {
+        // First close the dialog to prevent UI glitching
+        setIsDeleteDialogOpen(false);
         toast.success(`User ${userToDelete.first_name} ${userToDelete.last_name} deleted successfully`);
         
-        // Close the dialog first to prevent UI locks
-        setIsDeleteDialogOpen(false);
+        // Clear user state
         setUserToDelete(null);
         
-        // Call onSuccess callback after state updates to trigger UI refresh
+        // Add small delay before triggering data refresh to prevent UI glitches
         setTimeout(() => {
           onSuccess();
-        }, 0);
+        }, 100);
       } else {
         throw new Error("Failed to delete user");
       }

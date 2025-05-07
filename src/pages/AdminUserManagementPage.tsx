@@ -1,5 +1,5 @@
 
-import React, { useEffect } from "react";
+import React, { useEffect, useCallback } from "react";
 import { PageHeader } from "@/components/ui/page-header";
 import { UserCog } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
@@ -9,7 +9,6 @@ import { UsersTableSimple } from "@/components/members/UsersTableSimple";
 import { UserDialogs } from "@/components/members/UserDialogs";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
-import { DeleteUserDialog } from "@/components/members/DeleteUserDialog";
 
 export default function AdminUserManagementPage() {
   const { isAdmin } = useAuth();
@@ -44,15 +43,20 @@ export default function AdminUserManagementPage() {
     filterUsers
   } = useAdminUserManagement();
 
-  // Filter users when dependencies change
-  useEffect(() => {
+  // Memoize filter function to prevent unnecessary re-renders
+  const applyFilters = useCallback(() => {
     filterUsers(users);
   }, [users, searchTerm, roleFilter, statusFilter, filterUsers]);
+
+  // Filter users when dependencies change, using the memoized function
+  useEffect(() => {
+    applyFilters();
+  }, [applyFilters]);
   
-  // On mount, fetch users
+  // On mount, fetch users once
   useEffect(() => {
     fetchUsers();
-  }, [fetchUsers]);
+  }, []);
 
   // Handle unauthorized access
   if (!isAdmin()) {
@@ -101,12 +105,10 @@ export default function AdminUserManagementPage() {
     }
   };
 
-  // Handle delete user with proper UI refresh
+  // Handle delete user with optimized UI update
   const handleUserDelete = async () => {
     try {
       await handleDeleteUser();
-      // Explicitly fetch users after successful deletion to update UI
-      fetchUsers();
     } catch (error) {
       console.error("Error handling user delete:", error);
     }
