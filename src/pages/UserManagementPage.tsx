@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { PageHeader } from "@/components/ui/page-header";
@@ -10,6 +9,7 @@ import { useUserManagement, User } from "@/hooks/useUserManagement";
 import { UserFilters } from "@/components/members/UserFilters";
 import { UsersTableSimple } from "@/components/members/UsersTableSimple";
 import { UserDetailsSheet } from "@/components/members/UserDetailsSheet";
+import { formatDate } from "@/hooks/user/userUtils";
 
 export default function UserManagementPage() {
   const { isAdmin } = useAuth();
@@ -63,12 +63,6 @@ export default function UserManagementPage() {
     
     setFilteredUsers(filtered);
   }, [users, searchTerm, roleFilter, statusFilter]);
-  
-  // Format date
-  const formatDate = (dateString?: string | null) => {
-    if (!dateString) return "N/A";
-    return new Date(dateString).toLocaleDateString();
-  };
   
   // Handle role change
   const handleRoleChange = async (userId: string, role: string) => {
