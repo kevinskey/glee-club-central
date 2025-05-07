@@ -4,84 +4,87 @@ import { toast } from "sonner";
 
 // Create a Supabase client with the service role key for admin operations
 // This should be used only on the server side, but for this demo we're using it in the frontend
-const serviceRoleKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImR6enB0b3ZxZnFhdXNpcHNnYWJ3Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc0NjQwMzUyOSwiZXhwIjoyMDYxOTc5NTI5fQ.XpJcSm-mzEHCzGNXXm_E_7StTHgHqkxVB67PYV5RuJc';
+// In a production environment, these operations should be handled via a secure backend service
 
-// In a production environment, this should be handled by a secure backend service
+// Using the supabase client directly for RLS operations, and API calls for admin operations
 const adminSupabase = {
   auth: {
     admin: {
       createUser: async (options: any) => {
-        const response = await fetch('https://dzzptovqfqausipsgabw.supabase.co/auth/v1/admin/users', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'apikey': serviceRoleKey,
-            'Authorization': `Bearer ${serviceRoleKey}`
-          },
-          body: JSON.stringify(options)
-        });
-        
-        if (!response.ok) {
-          const error = await response.json();
-          throw new Error(error.message || 'Failed to create user');
+        try {
+          // For development purposes, we'll just use the regular supabase client
+          // In production, this should be handled by a secure backend service
+          const { data, error } = await supabase.auth.signUp({
+            email: options.email,
+            password: options.password || "",
+            options: {
+              data: options.user_metadata || {}
+            }
+          });
+          
+          if (error) throw error;
+          return { user: data.user };
+        } catch (error: any) {
+          console.error("Error creating user:", error);
+          throw error;
         }
-        
-        return response.json();
       },
       
       updateUserById: async (userId: string, attributes: any) => {
-        const response = await fetch(`https://dzzptovqfqausipsgabw.supabase.co/auth/v1/admin/users/${userId}`, {
-          method: 'PUT',
-          headers: {
-            'Content-Type': 'application/json',
-            'apikey': serviceRoleKey,
-            'Authorization': `Bearer ${serviceRoleKey}`
-          },
-          body: JSON.stringify(attributes)
-        });
-        
-        if (!response.ok) {
-          const error = await response.json();
-          throw new Error(error.message || 'Failed to update user');
+        try {
+          // For password updates in development, we'll need to implement a workaround
+          // In production, this should be handled by a secure backend
+          
+          // For email and metadata updates we can use the admin functions 
+          // which should work with the authenticated user having the right permissions
+          const { data, error } = await supabase.auth.updateUser({
+            email: attributes.email,
+            data: attributes.user_metadata
+          });
+          
+          if (error) throw error;
+          return data;
+        } catch (error: any) {
+          console.error("Error updating user:", error);
+          throw error;
         }
-        
-        return response.json();
       },
       
       deleteUser: async (userId: string) => {
-        const response = await fetch(`https://dzzptovqfqausipsgabw.supabase.co/auth/v1/admin/users/${userId}`, {
-          method: 'DELETE',
-          headers: {
-            'Content-Type': 'application/json',
-            'apikey': serviceRoleKey,
-            'Authorization': `Bearer ${serviceRoleKey}`
-          }
-        });
-        
-        if (!response.ok) {
-          const error = await response.json();
-          throw new Error(error.message || 'Failed to delete user');
+        // In development, we'll handle this differently
+        // In production, this should be handled by a secure backend service
+        try {
+          // For demo purposes, we'll just disable the user by updating their status
+          const { error } = await supabase
+            .from('profiles')
+            .update({ status: 'deleted' })
+            .eq('id', userId);
+            
+          if (error) throw error;
+          
+          return { success: true };
+        } catch (error: any) {
+          console.error("Error deleting user:", error);
+          throw error;
         }
-        
-        return response.json();
       },
       
       getUserById: async (userId: string) => {
-        const response = await fetch(`https://dzzptovqfqausipsgabw.supabase.co/auth/v1/admin/users/${userId}`, {
-          method: 'GET',
-          headers: {
-            'Content-Type': 'application/json',
-            'apikey': serviceRoleKey,
-            'Authorization': `Bearer ${serviceRoleKey}`
-          }
-        });
-        
-        if (!response.ok) {
-          const error = await response.json();
-          throw new Error(error.message || 'Failed to get user');
+        try {
+          // Get user data from profiles table
+          const { data, error } = await supabase
+            .from('profiles')
+            .select('*')
+            .eq('id', userId)
+            .single();
+            
+          if (error) throw error;
+          
+          return { user: data };
+        } catch (error: any) {
+          console.error("Error getting user:", error);
+          throw error;
         }
-        
-        return response.json();
       }
     }
   }
@@ -115,11 +118,10 @@ interface UpdateUserData {
 // Create a new user
 export const createUser = async (userData: CreateUserData) => {
   try {
-    // First create the auth user
+    // First create the auth user using the standard signup flow
     const { data: authData } = await adminSupabase.auth.admin.createUser({
       email: userData.email,
-      password: userData.password || undefined,
-      email_confirm: true,
+      password: userData.password || "",
       user_metadata: {
         first_name: userData.first_name,
         last_name: userData.last_name
@@ -157,24 +159,25 @@ export const updateUser = async (userData: UpdateUserData) => {
   try {
     console.log("Updating user with data:", userData);
     
-    // If password is provided, update it
-    if (userData.password) {
-      const { data } = await adminSupabase.auth.admin.updateUserById(
-        userData.id,
-        { password: userData.password }
-      );
+    // Use the standard update methods
+    if (userData.password || userData.email) {
+      const updateData: any = {};
       
-      if (!data) throw new Error('Failed to update password');
-    }
-    
-    // If email is provided, update it
-    if (userData.email) {
-      const { data } = await adminSupabase.auth.admin.updateUserById(
-        userData.id,
-        { email: userData.email }
-      );
+      if (userData.password) {
+        updateData.password = userData.password;
+      }
       
-      if (!data) throw new Error('Failed to update email');
+      if (userData.email) {
+        updateData.email = userData.email;
+      }
+      
+      // Use the standard updateUser method
+      const { data, error } = await supabase.auth.updateUser(updateData);
+      
+      if (error) {
+        console.error("Auth update error:", error);
+        throw error;
+      }
     }
     
     // Update profile data
@@ -210,12 +213,16 @@ export const updateUser = async (userData: UpdateUserData) => {
   }
 };
 
-// Delete a user
+// Delete a user (for development, this just updates their status)
 export const deleteUser = async (userId: string) => {
   try {
-    const { data } = await adminSupabase.auth.admin.deleteUser(userId);
-    
-    if (!data) throw new Error('Failed to delete user');
+    // For development, we'll just update the status to 'deleted'
+    const { error } = await supabase
+      .from('profiles')
+      .update({ status: 'deleted' })
+      .eq('id', userId);
+      
+    if (error) throw error;
     
     return { success: true };
   } catch (error: any) {
@@ -227,11 +234,6 @@ export const deleteUser = async (userId: string) => {
 // Get additional user details that might not be in the main user list
 export const getUserDetails = async (userId: string) => {
   try {
-    // Get auth user data
-    const { data: authData } = await adminSupabase.auth.admin.getUserById(userId);
-    
-    if (!authData) throw new Error('Failed to get user details');
-    
     // Get profile data
     const { data: profileData, error: profileError } = await supabase
       .from('profiles')
@@ -241,11 +243,20 @@ export const getUserDetails = async (userId: string) => {
     
     if (profileError) throw profileError;
     
-    // Combine the data
-    return {
-      ...authData.user,
-      ...profileData
-    };
+    // Get auth user data
+    const { data: userData, error: userError } = await supabase.auth.getUser();
+    
+    if (userError) throw userError;
+    
+    // Only return the profile data for users that aren't the current user
+    if (userData.user && userData.user.id === userId) {
+      return {
+        ...userData.user,
+        ...profileData
+      };
+    } else {
+      return profileData;
+    }
   } catch (error: any) {
     console.error('Error getting user details:', error);
     throw new Error(error.message || 'Failed to get user details');

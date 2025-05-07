@@ -1,5 +1,4 @@
 
-// Just updating line 150 where there's an error with the password property
 import React, { useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { PageHeader } from "@/components/ui/page-header";
@@ -35,6 +34,7 @@ export default function AdminUserManagementPage() {
   const [isEditUserOpen, setIsEditUserOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [userToDelete, setUserToDelete] = useState<User | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Handle unauthorized access
   if (!isAdmin()) {
@@ -74,8 +74,9 @@ export default function AdminUserManagementPage() {
 
   // Handle create user form submission
   const onCreateUserSubmit = async (data: any) => {
+    setIsSubmitting(true);
     try {
-      // Generate a temporary random password
+      // Generate a temporary random password if not provided
       const tempPassword = data.password || Math.random().toString(36).slice(-8);
       
       // Create the user in Supabase
@@ -104,6 +105,8 @@ export default function AdminUserManagementPage() {
       setIsCreateUserOpen(false);
     } catch (error: any) {
       toast.error(error.message || "Error creating user");
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -130,6 +133,7 @@ export default function AdminUserManagementPage() {
 
   // Handle edit user form submission
   const onEditUserSubmit = async (data: any) => {
+    setIsSubmitting(true);
     try {
       if (!selectedUser) return;
       
@@ -160,11 +164,14 @@ export default function AdminUserManagementPage() {
       }
     } catch (error: any) {
       toast.error(error.message || "Error updating user");
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
   // Handle delete user
   const handleDeleteUser = async () => {
+    setIsSubmitting(true);
     try {
       if (!userToDelete) return;
       
@@ -179,6 +186,8 @@ export default function AdminUserManagementPage() {
       }
     } catch (error: any) {
       toast.error(error.message || "Error deleting user");
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -197,7 +206,7 @@ export default function AdminUserManagementPage() {
   return (
     <div className="space-y-6">
       <PageHeader
-        title="WordPress-style User Management"
+        title="User Management"
         description="Create, edit, and manage users with advanced controls"
         icon={<UserCog className="h-6 w-6" />}
       />
@@ -253,7 +262,7 @@ export default function AdminUserManagementPage() {
             </SheetDescription>
           </SheetHeader>
           
-          <CreateUserForm onSubmit={onCreateUserSubmit} />
+          <CreateUserForm onSubmit={onCreateUserSubmit} isSubmitting={isSubmitting} />
         </SheetContent>
       </Sheet>
 
@@ -271,6 +280,7 @@ export default function AdminUserManagementPage() {
             <EditUserForm 
               user={selectedUser}
               onSubmit={onEditUserSubmit}
+              isSubmitting={isSubmitting}
             />
           )}
         </SheetContent>
@@ -282,6 +292,7 @@ export default function AdminUserManagementPage() {
         isOpen={isDeleteDialogOpen}
         onOpenChange={setIsDeleteDialogOpen}
         onDeleteConfirm={handleDeleteUser}
+        isSubmitting={isSubmitting}
       />
     </div>
   );
