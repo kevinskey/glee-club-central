@@ -1,4 +1,3 @@
-
 import React from "react";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
@@ -42,9 +41,10 @@ type UserFormValues = z.infer<typeof userFormSchema>;
 interface EditUserFormProps {
   user: User;
   onSubmit: (data: UserFormValues) => Promise<void>;
+  isSubmitting?: boolean; // Added isSubmitting prop as optional
 }
 
-export const EditUserForm: React.FC<EditUserFormProps> = ({ user, onSubmit }) => {
+export const EditUserForm: React.FC<EditUserFormProps> = ({ user, onSubmit, isSubmitting = false }) => {
   const form = useForm<UserFormValues>({
     resolver: zodResolver(userFormSchema),
     defaultValues: {
@@ -243,7 +243,9 @@ export const EditUserForm: React.FC<EditUserFormProps> = ({ user, onSubmit }) =>
           <SheetClose asChild>
             <Button variant="outline" type="button">Cancel</Button>
           </SheetClose>
-          <Button type="submit">Update User</Button>
+          <Button type="submit" disabled={isSubmitting}>
+            {isSubmitting ? "Updating..." : "Update User"}
+          </Button>
         </SheetFooter>
       </form>
     </Form>

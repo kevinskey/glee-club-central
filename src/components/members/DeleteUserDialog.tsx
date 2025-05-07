@@ -18,6 +18,7 @@ interface DeleteUserDialogProps {
   isOpen: boolean;
   onOpenChange: (open: boolean) => void;
   onDeleteConfirm: () => Promise<void>;
+  isSubmitting?: boolean; // Added isSubmitting prop as optional
 }
 
 export const DeleteUserDialog: React.FC<DeleteUserDialogProps> = ({
@@ -25,6 +26,7 @@ export const DeleteUserDialog: React.FC<DeleteUserDialogProps> = ({
   isOpen,
   onOpenChange,
   onDeleteConfirm,
+  isSubmitting = false,
 }) => {
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
@@ -57,9 +59,13 @@ export const DeleteUserDialog: React.FC<DeleteUserDialogProps> = ({
           <Button variant="outline" onClick={() => onOpenChange(false)}>
             Cancel
           </Button>
-          <Button variant="destructive" onClick={onDeleteConfirm}>
+          <Button 
+            variant="destructive" 
+            onClick={onDeleteConfirm} 
+            disabled={isSubmitting}
+          >
             <Trash2 className="mr-2 h-4 w-4" />
-            Delete
+            {isSubmitting ? "Deleting..." : "Delete"}
           </Button>
         </DialogFooter>
       </DialogContent>
