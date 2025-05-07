@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { User, useUserManagement } from "@/hooks/useUserManagement";
 import { useMessaging } from "@/hooks/useMessaging";
@@ -118,7 +117,12 @@ export function useAdminUserManagement() {
   const handleEditUser = async (data: UserFormValues) => {
     setIsSubmitting(true);
     try {
-      if (!selectedUser) return;
+      if (!selectedUser) {
+        toast.error("No user selected for update");
+        return;
+      }
+      
+      console.log("Selected user:", selectedUser);
       
       // Update user data
       const updateData: any = {
@@ -148,7 +152,7 @@ export function useAdminUserManagement() {
       }
     } catch (error: any) {
       console.error("Error updating user:", error);
-      toast.error(error.message || "Error updating user");
+      toast.error(`Update failed: ${error.message || "Unknown error"}`);
     } finally {
       setIsSubmitting(false);
     }

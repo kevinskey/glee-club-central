@@ -7,15 +7,18 @@ export const updateUser = async (userData: UpdateUserData) => {
   try {
     console.log("Updating user with data:", userData);
     
-    // First check if the user exists
-    const { data: userCheck, error: userCheckError } = await supabase
-      .from('profiles')
-      .select('id')
-      .eq('id', userData.id)
-      .single();
+    // First check if the user exists using get_user_by_id function instead of profiles lookup
+    const { data: userCheck, error: userCheckError } = await supabase.rpc('get_user_by_id', {
+      p_user_id: userData.id
+    });
     
-    if (userCheckError || !userCheck) {
-      console.error("User not found:", userCheckError);
+    if (userCheckError) {
+      console.error("Error checking if user exists:", userCheckError);
+      throw new Error(userCheckError.message || "Failed to check user existence");
+    }
+    
+    if (!userCheck || userCheck.length === 0) {
+      console.error("User not found with ID:", userData.id);
       throw new Error("User not found");
     }
     
