@@ -45,6 +45,9 @@ export const SidebarNav: React.FC<SidebarNavProps> = ({ className }) => {
       <NavLink href="/dashboard/profile" icon={<User className="h-5 w-5" />}>
         My Profile
       </NavLink>
+      <NavLink href="/dashboard/member-directory" icon={<Users className="h-5 w-5" />}>
+        Member Directory
+      </NavLink>
       <NavLink href="/fan-page" icon={<Users className="h-5 w-5" />}>
         Fan Page
       </NavLink>

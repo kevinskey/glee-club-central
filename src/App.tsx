@@ -13,6 +13,7 @@ import CalendarPage from '@/pages/CalendarPage';
 import ProfilePage from '@/pages/ProfilePage';
 import MemberProfilePage from '@/pages/profile/MemberProfilePage';
 import AdminUserManagementPage from '@/pages/AdminUserManagementPage';
+import MemberDirectoryPage from '@/pages/MemberDirectoryPage';
 import NotFoundPage from '@/pages/NotFoundPage';
 import InviteMemberPage from '@/pages/InviteMemberPage';
 import FanPage from '@/pages/FanPage';
@@ -49,7 +50,8 @@ function App() {
           <Route path="profile/:id" element={<MemberProfilePage />} />
           <Route path="schedule" element={<CalendarPage />} /> {/* Redirect schedule to calendar */}
           
-          {/* Admin-only routes */}
+          {/* Member directory and management */}
+          <Route path="member-directory" element={<MemberDirectoryPage />} />
           <Route path="member-management" element={<AdminUserManagementPage />} />
           <Route path="invite-member" element={<InviteMemberPage />} />
           <Route path="/dashboard/members/:id" element={<MemberProfilePage />} />
