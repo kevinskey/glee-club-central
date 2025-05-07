@@ -48,7 +48,7 @@ export const UsersTableSimple: React.FC<UsersTableSimpleProps> = ({
     if (isLoading) {
       return (
         <TableRow>
-          <TableCell colSpan={6} className="h-24 text-center">
+          <TableCell colSpan={isMobile ? 3 : 6} className="h-24 text-center">
             <div className="flex justify-center items-center h-full">
               <Loader2 className="h-6 w-6 text-primary animate-spin" />
               <span className="ml-2">Loading members...</span>
@@ -61,7 +61,7 @@ export const UsersTableSimple: React.FC<UsersTableSimpleProps> = ({
     if (users.length === 0) {
       return (
         <TableRow>
-          <TableCell colSpan={6} className="h-24 text-center">
+          <TableCell colSpan={isMobile ? 3 : 6} className="h-24 text-center">
             No members found.
           </TableCell>
         </TableRow>

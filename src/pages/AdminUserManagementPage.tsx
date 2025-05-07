@@ -153,7 +153,7 @@ export default function AdminUserManagementPage() {
 
           <div className="w-full overflow-hidden">
             <ScrollArea className="w-full">
-              <div className={`min-w-[600px] w-full`}>
+              <div className={isMobile ? "min-w-[320px] w-full" : "min-w-[600px] w-full"}>
                 <UsersTableSimple 
                   users={filteredUsers}
                   isLoading={isLoading}

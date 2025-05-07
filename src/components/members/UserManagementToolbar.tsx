@@ -38,8 +38,8 @@ export function UserManagementToolbar({
 }: UserManagementToolbarProps) {
   return (
     <div className="mb-6 space-y-4">
-      <div className="flex flex-col md:flex-row md:items-center justify-between space-y-4 md:space-y-0 md:space-x-4">
-        <div className="relative w-full md:max-w-sm">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between space-y-4 sm:space-y-0 sm:space-x-4">
+        <div className="relative w-full sm:max-w-sm">
           <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
           <Input
             placeholder="Search members..."
@@ -49,11 +49,11 @@ export function UserManagementToolbar({
           />
         </div>
         
-        <div className="flex flex-col sm:flex-row gap-2">
+        <div className="flex flex-row gap-2">
           <Button 
             variant="outline" 
             onClick={onCreateUserClick}
-            className="w-full sm:w-auto"
+            className="flex-1 sm:flex-none"
           >
             <PlusCircle className="mr-2 h-4 w-4" />
             {!isMobile ? "Add Member" : "Add"}
@@ -63,7 +63,7 @@ export function UserManagementToolbar({
             variant="outline" 
             onClick={onRefreshClick} 
             disabled={isLoading}
-            className="w-full sm:w-auto"
+            className="flex-1 sm:flex-none"
           >
             <RefreshCw className={`mr-2 h-4 w-4 ${isLoading ? "animate-spin" : ""}`} />
             {!isMobile ? "Refresh" : ""}
@@ -71,13 +71,13 @@ export function UserManagementToolbar({
         </div>
       </div>
 
-      <div className="flex flex-col sm:flex-row gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <Select value={roleFilter} onValueChange={setRoleFilter}>
-          <SelectTrigger className="w-full sm:w-[180px]">
+          <SelectTrigger>
             <SelectValue placeholder="All Roles" />
           </SelectTrigger>
           <SelectContent className="z-[110] bg-background">
-            <SelectItem value="">All Roles</SelectItem>
+            <SelectItem value="all">All Roles</SelectItem>
             <SelectItem value="administrator">Administrator</SelectItem>
             <SelectItem value="section_leader">Section Leader</SelectItem>
             <SelectItem value="student_conductor">Student Conductor</SelectItem>
@@ -87,11 +87,11 @@ export function UserManagementToolbar({
         </Select>
 
         <Select value={statusFilter} onValueChange={setStatusFilter}>
-          <SelectTrigger className="w-full sm:w-[180px]">
+          <SelectTrigger>
             <SelectValue placeholder="All Status" />
           </SelectTrigger>
           <SelectContent className="z-[110] bg-background">
-            <SelectItem value="">All Status</SelectItem>
+            <SelectItem value="all">All Status</SelectItem>
             <SelectItem value="active">Active</SelectItem>
             <SelectItem value="inactive">Inactive</SelectItem>
             <SelectItem value="pending">Pending</SelectItem>
