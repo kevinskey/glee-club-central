@@ -51,7 +51,6 @@ export const UserFilters: React.FC<UserFiltersProps> = ({
               <SelectValue placeholder="Filter by role" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">All Roles</SelectItem>
               <SelectItem value="admin">Admin</SelectItem>
               <SelectItem value="section_leader">Section Leader</SelectItem>
               <SelectItem value="student_conductor">Student Conductor</SelectItem>
@@ -71,7 +70,6 @@ export const UserFilters: React.FC<UserFiltersProps> = ({
               <SelectValue placeholder="Filter by status" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">All Statuses</SelectItem>
               <SelectItem value="active">Active</SelectItem>
               <SelectItem value="inactive">Inactive</SelectItem>
               <SelectItem value="alumni">Alumni</SelectItem>

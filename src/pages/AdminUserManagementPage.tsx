@@ -1,5 +1,5 @@
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { PageHeader } from "@/components/ui/page-header";
 import { UserCog, UserPlus } from "lucide-react";
@@ -28,8 +28,9 @@ export default function AdminUserManagementPage() {
   } = useUserManagement();
 
   const [searchTerm, setSearchTerm] = useState("");
-  const [roleFilter, setRoleFilter] = useState("all");
-  const [statusFilter, setStatusFilter] = useState("all");
+  const [roleFilter, setRoleFilter] = useState("");
+  const [statusFilter, setStatusFilter] = useState("");
+  const [filteredUsers, setFilteredUsers] = useState<User[]>([]);
   const [isCreateUserOpen, setIsCreateUserOpen] = useState(false);
   const [isEditUserOpen, setIsEditUserOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
@@ -49,22 +50,26 @@ export default function AdminUserManagementPage() {
     );
   }
 
-  // Filter users
-  const filteredUsers = users.filter(user => {
-    // Search filter
-    const matchesSearch = searchTerm === "" ||
-      user.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      user.first_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      user.last_name?.toLowerCase().includes(searchTerm.toLowerCase());
+  // Filter users when dependencies change
+  useEffect(() => {
+    const filtered = users.filter(user => {
+      // Search filter
+      const matchesSearch = searchTerm === "" ||
+        user.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        user.first_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        user.last_name?.toLowerCase().includes(searchTerm.toLowerCase());
 
-    // Role filter
-    const matchesRole = roleFilter === "all" || user.role === roleFilter;
+      // Role filter
+      const matchesRole = roleFilter === "" || user.role === roleFilter;
 
-    // Status filter
-    const matchesStatus = statusFilter === "all" || user.status === statusFilter;
+      // Status filter
+      const matchesStatus = statusFilter === "" || user.status === statusFilter;
 
-    return matchesSearch && matchesRole && matchesStatus;
-  });
+      return matchesSearch && matchesRole && matchesStatus;
+    });
+    
+    setFilteredUsers(filtered);
+  }, [users, searchTerm, roleFilter, statusFilter]);
 
   // Format date
   const formatDate = (dateString?: string | null) => {

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { PageHeader } from "@/components/ui/page-header";
 import { Users, Search, UserCheck, UserX, UserCog } from "lucide-react";
@@ -48,8 +48,9 @@ export default function UserManagementPage() {
   } = useUserManagement();
   
   const [searchTerm, setSearchTerm] = useState("");
-  const [roleFilter, setRoleFilter] = useState("all");
-  const [statusFilter, setStatusFilter] = useState("all");
+  const [roleFilter, setRoleFilter] = useState("");
+  const [statusFilter, setStatusFilter] = useState("");
+  const [filteredUsers, setFilteredUsers] = useState<User[]>([]);
   
   // Handle unauthorized access
   if (!isAdmin()) {
@@ -64,22 +65,26 @@ export default function UserManagementPage() {
     );
   }
   
-  // Filter users
-  const filteredUsers = users.filter(user => {
-    // Search filter
-    const matchesSearch = searchTerm === "" || 
-      user.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      user.first_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      user.last_name?.toLowerCase().includes(searchTerm.toLowerCase());
+  // Filter users when dependencies change
+  useEffect(() => {
+    const filtered = users.filter(user => {
+      // Search filter
+      const matchesSearch = searchTerm === "" || 
+        user.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        user.first_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        user.last_name?.toLowerCase().includes(searchTerm.toLowerCase());
+        
+      // Role filter
+      const matchesRole = roleFilter === "" || user.role === roleFilter;
       
-    // Role filter
-    const matchesRole = roleFilter === "all" || user.role === roleFilter;
+      // Status filter
+      const matchesStatus = statusFilter === "" || user.status === statusFilter;
+      
+      return matchesSearch && matchesRole && matchesStatus;
+    });
     
-    // Status filter
-    const matchesStatus = statusFilter === "all" || user.status === statusFilter;
-    
-    return matchesSearch && matchesRole && matchesStatus;
-  });
+    setFilteredUsers(filtered);
+  }, [users, searchTerm, roleFilter, statusFilter]);
   
   // Format date
   const formatDate = (dateString?: string | null) => {
@@ -180,7 +185,7 @@ export default function UserManagementPage() {
                   <SelectValue placeholder="Filter by role" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">All Roles</SelectItem>
+                  <SelectItem value="">All Roles</SelectItem>
                   <SelectItem value="admin">Admin</SelectItem>
                   <SelectItem value="section_leader">Section Leader</SelectItem>
                   <SelectItem value="Director">Director</SelectItem>
@@ -199,7 +204,7 @@ export default function UserManagementPage() {
                   <SelectValue placeholder="Filter by status" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">All Statuses</SelectItem>
+                  <SelectItem value="">All Statuses</SelectItem>
                   <SelectItem value="active">Active</SelectItem>
                   <SelectItem value="inactive">Inactive</SelectItem>
                   <SelectItem value="alumni">Alumni</SelectItem>
@@ -421,21 +426,7 @@ export default function UserManagementPage() {
           </div>
           
           <div className="mt-4 text-sm text-gray-500">
-            Total: {users.filter(user => {
-              // Search filter
-              const matchesSearch = searchTerm === "" || 
-                user.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                user.first_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                user.last_name?.toLowerCase().includes(searchTerm.toLowerCase());
-                
-              // Role filter
-              const matchesRole = roleFilter === "all" || user.role === roleFilter;
-              
-              // Status filter
-              const matchesStatus = statusFilter === "all" || user.status === statusFilter;
-              
-              return matchesSearch && matchesRole && matchesStatus;
-            }).length} users
+            Total: {filteredUsers.length} users
           </div>
         </CardContent>
       </Card>
