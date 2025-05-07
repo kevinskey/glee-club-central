@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { toast } from "sonner";
 import { fetchAllUsers, updateUserRole, updateUserStatus, fetchUserById } from "@/utils/supabaseQueries";
@@ -10,10 +9,13 @@ export type User = {
   last_name?: string | null;
   phone?: string | null;
   role: string;
+  role_display_name?: string | null;
   voice_part?: string | null;
+  voice_part_display?: string | null;
   avatar_url?: string | null;
   status: string;
   section_id?: string | null;
+  section_name?: string | null;
   join_date?: string | null;
   created_at?: string;
   last_sign_in_at?: string | null;
@@ -131,19 +133,10 @@ export function useUserManagement() {
     return await changeUserStatus(userId, 'active');
   };
 
-  // Format voice part for display
+  // Format voice part for display - now we can use the voice_part_display field from database
   const formatVoicePart = (voicePart: string | null): string => {
     if (!voicePart) return "Not set";
-    
-    switch (voicePart) {
-      case "soprano_1": return "Soprano 1";
-      case "soprano_2": return "Soprano 2";
-      case "alto_1": return "Alto 1";
-      case "alto_2": return "Alto 2";
-      case "tenor": return "Tenor";
-      case "bass": return "Bass";
-      default: return voicePart;
-    }
+    return voicePart;
   };
 
   return {

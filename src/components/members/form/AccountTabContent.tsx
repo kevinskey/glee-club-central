@@ -1,16 +1,22 @@
 
 import React from "react";
+import { UseFormReturn } from "react-hook-form";
 import {
+  FormControl,
+  FormDescription,
   FormField,
   FormItem,
   FormLabel,
-  FormControl,
-  FormDescription,
   FormMessage,
 } from "@/components/ui/form";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
-import { FormSelectField } from "./FormSelectField";
-import { UseFormReturn } from "react-hook-form";
 import { UserFormValues } from "./userFormSchema";
 
 interface AccountTabContentProps {
@@ -18,24 +24,8 @@ interface AccountTabContentProps {
 }
 
 export const AccountTabContent: React.FC<AccountTabContentProps> = ({ form }) => {
-  const roleOptions = [
-    { value: "admin", label: "Admin" },
-    { value: "section_leader", label: "Section Leader" },
-    { value: "student_conductor", label: "Student Conductor" },
-    { value: "accompanist", label: "Accompanist" },
-    { value: "singer", label: "Singer" },
-    { value: "member", label: "Member" }
-  ];
-
-  const statusOptions = [
-    { value: "active", label: "Active" },
-    { value: "inactive", label: "Inactive" },
-    { value: "pending", label: "Pending" },
-    { value: "alumni", label: "Alumni" }
-  ];
-
   return (
-    <div className="space-y-4">
+    <>
       <FormField
         control={form.control}
         name="email"
@@ -57,10 +47,14 @@ export const AccountTabContent: React.FC<AccountTabContentProps> = ({ form }) =>
           <FormItem>
             <FormLabel>Password</FormLabel>
             <FormControl>
-              <Input type="password" placeholder="Create a strong password" {...field} />
+              <Input 
+                type="password" 
+                placeholder="Enter a password" 
+                {...field} 
+              />
             </FormControl>
             <FormDescription>
-              Leave blank to generate a random password
+              Password is required for new users. Leave blank when editing to keep current password.
             </FormDescription>
             <FormMessage />
           </FormItem>
@@ -68,24 +62,62 @@ export const AccountTabContent: React.FC<AccountTabContentProps> = ({ form }) =>
       />
       
       <div className="grid grid-cols-2 gap-4">
-        <FormSelectField
-          form={form}
+        <FormField
+          control={form.control}
           name="role"
-          label="Role"
-          placeholder="Select a role"
-          options={roleOptions}
-          defaultValue="member"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Role</FormLabel>
+              <Select
+                value={field.value}
+                onValueChange={field.onChange}
+              >
+                <FormControl>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select a role" />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent>
+                  <SelectItem value="admin">Administrator</SelectItem>
+                  <SelectItem value="section_leader">Section Leader</SelectItem>
+                  <SelectItem value="student_conductor">Student Conductor</SelectItem>
+                  <SelectItem value="accompanist">Accompanist</SelectItem>
+                  <SelectItem value="singer">Singer</SelectItem>
+                  <SelectItem value="member">Member</SelectItem>
+                </SelectContent>
+              </Select>
+              <FormMessage />
+            </FormItem>
+          )}
         />
         
-        <FormSelectField
-          form={form}
+        <FormField
+          control={form.control}
           name="status"
-          label="Status"
-          placeholder="Select status"
-          options={statusOptions}
-          defaultValue="active"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Status</FormLabel>
+              <Select
+                value={field.value}
+                onValueChange={field.onChange}
+              >
+                <FormControl>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select status" />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent>
+                  <SelectItem value="active">Active</SelectItem>
+                  <SelectItem value="inactive">Inactive</SelectItem>
+                  <SelectItem value="pending">Pending</SelectItem>
+                  <SelectItem value="alumni">Alumni</SelectItem>
+                </SelectContent>
+              </Select>
+              <FormMessage />
+            </FormItem>
+          )}
         />
       </div>
-    </div>
+    </>
   );
 };

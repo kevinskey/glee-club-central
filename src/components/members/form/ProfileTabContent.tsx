@@ -1,15 +1,21 @@
 
 import React from "react";
+import { UseFormReturn } from "react-hook-form";
 import {
+  FormControl,
   FormField,
   FormItem,
   FormLabel,
-  FormControl,
   FormMessage,
 } from "@/components/ui/form";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
-import { FormSelectField } from "./FormSelectField";
-import { UseFormReturn } from "react-hook-form";
 import { UserFormValues } from "./userFormSchema";
 
 interface ProfileTabContentProps {
@@ -17,16 +23,8 @@ interface ProfileTabContentProps {
 }
 
 export const ProfileTabContent: React.FC<ProfileTabContentProps> = ({ form }) => {
-  const voicePartOptions = [
-    { value: "not_specified", label: "Not specified" },
-    { value: "soprano", label: "Soprano" },
-    { value: "alto", label: "Alto" },
-    { value: "tenor", label: "Tenor" },
-    { value: "bass", label: "Bass" }
-  ];
-
   return (
-    <div className="space-y-4">
+    <>
       <div className="grid grid-cols-2 gap-4">
         <FormField
           control={form.control}
@@ -71,14 +69,35 @@ export const ProfileTabContent: React.FC<ProfileTabContentProps> = ({ form }) =>
         )}
       />
       
-      <FormSelectField
-        form={form}
+      <FormField
+        control={form.control}
         name="voice_part"
-        label="Voice Part"
-        placeholder="Select voice part"
-        options={voicePartOptions}
-        defaultValue="not_specified"
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel>Voice Part</FormLabel>
+            <Select
+              value={field.value || ''}
+              onValueChange={(value) => field.onChange(value === '' ? null : value)}
+            >
+              <FormControl>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select voice part" />
+                </SelectTrigger>
+              </FormControl>
+              <SelectContent>
+                <SelectItem value="">Not specified</SelectItem>
+                <SelectItem value="soprano_1">Soprano 1</SelectItem>
+                <SelectItem value="soprano_2">Soprano 2</SelectItem>
+                <SelectItem value="alto_1">Alto 1</SelectItem>
+                <SelectItem value="alto_2">Alto 2</SelectItem>
+                <SelectItem value="tenor">Tenor</SelectItem>
+                <SelectItem value="bass">Bass</SelectItem>
+              </SelectContent>
+            </Select>
+            <FormMessage />
+          </FormItem>
+        )}
       />
-    </div>
+    </>
   );
 };

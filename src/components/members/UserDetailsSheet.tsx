@@ -36,7 +36,7 @@ export const UserDetailsSheet: React.FC<UserDetailsSheetProps> = ({
     <Sheet open={isOpen} onOpenChange={onOpenChange}>
       <SheetContent>
         <SheetHeader>
-          <SheetTitle>User Details</SheetTitle>
+          <SheetTitle>Member Details</SheetTitle>
         </SheetHeader>
         
         <div className="mt-6 space-y-6">
@@ -74,7 +74,7 @@ export const UserDetailsSheet: React.FC<UserDetailsSheetProps> = ({
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="admin">Admin</SelectItem>
+                    <SelectItem value="admin">Administrator</SelectItem>
                     <SelectItem value="section_leader">Section Leader</SelectItem>
                     <SelectItem value="student_conductor">Student Conductor</SelectItem>
                     <SelectItem value="accompanist">Accompanist</SelectItem>
@@ -108,7 +108,12 @@ export const UserDetailsSheet: React.FC<UserDetailsSheetProps> = ({
             
             <div className="space-y-1">
               <p className="text-sm font-medium">Voice Part</p>
-              <p className="text-sm">{user.voice_part || "Not set"}</p>
+              <p className="text-sm">{user.voice_part_display || "Not set"}</p>
+            </div>
+            
+            <div className="space-y-1">
+              <p className="text-sm font-medium">Section</p>
+              <p className="text-sm">{user.section_name || "Not assigned"}</p>
             </div>
             
             <div className="space-y-1">
