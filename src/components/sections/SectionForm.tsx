@@ -128,7 +128,7 @@ export function SectionForm({ section, leaders, onSubmit }: SectionFormProps) {
                     <SelectItem value="no_leader">None</SelectItem>
                     {leaders.map((leader) => (
                       <SelectItem key={leader.id} value={leader.id}>
-                        {leader.name}
+                        {leader.name || "Unnamed leader"}
                       </SelectItem>
                     ))}
                   </SelectContent>
