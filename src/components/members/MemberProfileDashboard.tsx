@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import {
@@ -60,36 +59,30 @@ export const MemberProfileDashboard: React.FC<MemberProfileDashboardProps> = ({ 
     );
   }
 
+  // We can now use voice_part_display directly from the database
   const formatVoicePart = (voicePart: string | null | undefined) => {
     if (!voicePart) return "Not set";
-    
-    switch (voicePart) {
-      case "soprano_1": return "Soprano 1";
-      case "soprano_2": return "Soprano 2";
-      case "alto_1": return "Alto 1";
-      case "alto_2": return "Alto 2";
-      case "tenor_1": return "Tenor 1";
-      case "tenor_2": return "Tenor 2";
-      case "bass_1": return "Bass 1";
-      case "bass_2": return "Bass 2";
-      default: return voicePart;
-    }
+    return memberProfile.voice_part_display || voicePart;
   };
 
   const getRoleBadge = (role: string) => {
     switch (role) {
       case "admin":
+      case "administrator":
         return <Badge className="bg-red-500">Admin</Badge>;
       case "section_leader":
         return <Badge className="bg-amber-500">Section Leader</Badge>;
       case "member":
+      case "singer":
         return <Badge className="bg-green-500">Member</Badge>;
       case "Director":
+      case "director":
         return <Badge className="bg-purple-500">Director</Badge>;
       case "Accompanist":
+      case "accompanist":
         return <Badge className="bg-blue-500">Accompanist</Badge>;
       default:
-        return <Badge className="bg-slate-500">{role}</Badge>;
+        return <Badge className="bg-slate-500">{memberProfile.role_display_name || role}</Badge>;
     }
   };
 
