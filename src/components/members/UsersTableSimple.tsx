@@ -135,15 +135,20 @@ export const UsersTableSimple: React.FC<UsersTableSimpleProps> = ({
                     <MoreHorizontal className="h-4 w-4" />
                   </Button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="z-[110] bg-background border shadow-md">
+                <DropdownMenuContent 
+                  align="end" 
+                  className="z-[110] bg-background border shadow-md"
+                  onCloseAutoFocus={(e) => {
+                    // Prevent focus issues that can cause UI freeze
+                    e.preventDefault();
+                  }}
+                >
                   <DropdownMenuLabel>Quick Actions</DropdownMenuLabel>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem
                     onClick={(e) => {
                       e.preventDefault();
                       e.stopPropagation();
-                      console.log("Setting user as Administrator");
-                      // Use the exact value expected by the database
                       onRoleChange(user.id, 'administrator');
                     }}
                   >
@@ -153,7 +158,6 @@ export const UsersTableSimple: React.FC<UsersTableSimpleProps> = ({
                     onClick={(e) => {
                       e.preventDefault();
                       e.stopPropagation();
-                      console.log("Setting user as Section Leader");
                       onRoleChange(user.id, 'section_leader');
                     }}
                   >
@@ -163,7 +167,6 @@ export const UsersTableSimple: React.FC<UsersTableSimpleProps> = ({
                     onClick={(e) => {
                       e.preventDefault();
                       e.stopPropagation();
-                      console.log("Setting user as Singer");
                       onRoleChange(user.id, 'singer');
                     }}
                   >

@@ -75,7 +75,7 @@ export default function AdminUserManagementPage() {
     );
   }
 
-  // Handle role change with improved error handling and feedback
+  // Handle role change with improved error handling, feedback, and UI refresh
   const handleRoleChange = async (userId: string, role: string): Promise<void> => {
     try {
       console.log(`AdminUserManagementPage: Changing role for ${userId} to ${role}`);
@@ -83,12 +83,12 @@ export default function AdminUserManagementPage() {
       
       if (!success) {
         toast.error(`Failed to update user role to ${role}`);
-        console.error("Role change returned false");
       } else {
+        toast.success(`User role updated to ${role}`);
         // Force a refresh of user data after role change is successful
         setTimeout(() => {
           fetchUsers();
-        }, 500);
+        }, 300);
       }
     } catch (error) {
       console.error("Role change error:", error);
@@ -96,17 +96,18 @@ export default function AdminUserManagementPage() {
     }
   };
 
-  // Handle status change with improved feedback
+  // Handle status change with improved feedback and UI refresh
   const handleStatusChange = async (userId: string, status: string): Promise<void> => {
     try {
       const success = await changeUserStatus(userId, status);
       if (!success) {
         toast.error(`Failed to update user status to ${status}`);
       } else {
+        toast.success(`User status updated to ${status}`);
         // Force a refresh of user data after status change is successful
         setTimeout(() => {
           fetchUsers();
-        }, 500);
+        }, 300);
       }
     } catch (error) {
       console.error("Status change error:", error);
@@ -118,7 +119,10 @@ export default function AdminUserManagementPage() {
   const handleUserDelete = async () => {
     try {
       await handleDeleteUser();
-      // Refresh will be triggered by the useUserDelete hook
+      // Force a refresh of the user data after successful deletion
+      setTimeout(() => {
+        fetchUsers();
+      }, 500);
     } catch (error) {
       console.error("Error handling user delete:", error);
     }
@@ -187,4 +191,3 @@ export default function AdminUserManagementPage() {
     </div>
   );
 }
-

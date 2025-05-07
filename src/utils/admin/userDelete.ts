@@ -29,7 +29,7 @@ export const deleteUser = async (userId: string) => {
     }
     
     console.log(`Successfully marked user ${userId} as deleted`);
-    return { success: true };
+    return { success: true, userId };
   } catch (error: any) {
     console.error('Error deleting user:', error);
     throw new Error(error.message || 'Failed to delete user');

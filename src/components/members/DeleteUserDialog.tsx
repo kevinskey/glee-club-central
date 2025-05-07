@@ -36,24 +36,25 @@ export const DeleteUserDialog: React.FC<DeleteUserDialogProps> = ({
     if (isSubmitting) return;
     
     try {
+      // Close the dialog immediately to prevent UI freezing
+      onOpenChange(false);
+      
+      // Then process the deletion
       await onDeleteConfirm();
-      // Dialog closing is now handled in the onDeleteConfirm function
     } catch (error) {
       console.error("Error in delete confirmation:", error);
-      // Keep dialog open on error
-    }
-  };
-
-  // Prevent dialog from being closed during submission
-  const handleOpenChange = (open: boolean) => {
-    if (!isSubmitting) {
-      onOpenChange(open);
     }
   };
 
   return (
-    <Dialog open={isOpen} onOpenChange={handleOpenChange}>
-      <DialogContent className="z-[100] bg-background sm:max-w-md w-[calc(100%-2rem)] p-4 sm:p-6">
+    <Dialog open={isOpen} onOpenChange={isSubmitting ? () => {} : onOpenChange}>
+      <DialogContent 
+        className="z-[100] bg-background sm:max-w-md w-[calc(100%-2rem)] p-4 sm:p-6"
+        onInteractOutside={(e) => {
+          // Prevent closing dialog by outside click during submission
+          if (isSubmitting) e.preventDefault();
+        }}
+      >
         <DialogHeader>
           <DialogTitle>Are you sure you want to delete this user?</DialogTitle>
           <DialogDescription>
@@ -81,7 +82,7 @@ export const DeleteUserDialog: React.FC<DeleteUserDialogProps> = ({
         <DialogFooter className="flex flex-col sm:flex-row gap-2 sm:gap-0">
           <Button 
             variant="outline" 
-            onClick={() => handleOpenChange(false)}
+            onClick={() => !isSubmitting && onOpenChange(false)}
             disabled={isSubmitting}
             className="w-full sm:w-auto"
           >
