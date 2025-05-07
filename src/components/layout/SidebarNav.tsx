@@ -48,6 +48,9 @@ export const SidebarNav: React.FC<SidebarNavProps> = ({ className }) => {
       <NavLink href="/dashboard/member-directory" icon={<Users className="h-5 w-5" />}>
         Member Directory
       </NavLink>
+      <NavLink href="/dashboard/member-management" icon={<UserCog className="h-5 w-5" />}>
+        Member Management
+      </NavLink>
       <NavLink href="/fan-page" icon={<Users className="h-5 w-5" />}>
         Fan Page
       </NavLink>
@@ -80,9 +83,6 @@ export const SidebarNav: React.FC<SidebarNavProps> = ({ className }) => {
             <h4 className="mb-2 px-2 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
               Admin Tools
             </h4>
-            <NavLink href="/dashboard/member-management" icon={<UserCog className="h-5 w-5" />}>
-              Member Management
-            </NavLink>
             <NavLink href="/dashboard/invite-member" icon={<Bell className="h-5 w-5" />}>
               Invite Members
             </NavLink>

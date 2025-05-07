@@ -41,16 +41,10 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
       allowedRoles,
       hasAccess: userHasAccess,
       isAdmin: isAdmin ? isAdmin() : false,
+      location: location.pathname,
       profileData: profile
     }
   });
-
-  // For testing, we're bypassing role checks and granting access to all routes
-  // Normal role-check commented out for testing:
-  // if (allowedRoles && !userHasAccess) {
-  //   console.log("Access denied - Required roles:", allowedRoles, "User role:", userRole);
-  //   return <Navigate to="/dashboard" replace />;
-  // }
 
   // Access granted
   console.log("Route access granted. User role:", userRole, "Admin status:", isAdmin ? isAdmin() : false);
