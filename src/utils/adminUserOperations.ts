@@ -119,7 +119,7 @@ interface UpdateUserData {
 export const createUser = async (userData: CreateUserData) => {
   try {
     // First create the auth user using the standard signup flow
-    const { data: authData } = await adminSupabase.auth.admin.createUser({
+    const result = await adminSupabase.auth.admin.createUser({
       email: userData.email,
       password: userData.password || "",
       user_metadata: {
@@ -128,7 +128,8 @@ export const createUser = async (userData: CreateUserData) => {
       }
     });
 
-    if (!authData || !authData.user) throw new Error('Failed to create user');
+    // Fix: Access the user object directly from the result instead of through result.data
+    if (!result || !result.user) throw new Error('Failed to create user');
     
     // The profile should be created automatically via trigger,
     // but we update it with the additional fields
@@ -143,11 +144,11 @@ export const createUser = async (userData: CreateUserData) => {
         first_name: userData.first_name,
         last_name: userData.last_name
       })
-      .eq('id', authData.user.id);
+      .eq('id', result.user.id);
     
     if (profileError) throw profileError;
     
-    return { success: true, userId: authData.user.id };
+    return { success: true, userId: result.user.id };
   } catch (error: any) {
     console.error('Error creating user:', error);
     throw new Error(error.message || 'Failed to create user');
