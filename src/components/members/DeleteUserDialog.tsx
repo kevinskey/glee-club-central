@@ -29,7 +29,10 @@ export const DeleteUserDialog: React.FC<DeleteUserDialogProps> = ({
   isSubmitting = false,
 }) => {
   // Handle delete confirmation with improved state management
-  const handleDelete = async () => {
+  const handleDelete = async (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    
     if (isSubmitting) return;
     
     try {
@@ -50,7 +53,7 @@ export const DeleteUserDialog: React.FC<DeleteUserDialogProps> = ({
 
   return (
     <Dialog open={isOpen} onOpenChange={handleOpenChange}>
-      <DialogContent className="z-50 bg-background">
+      <DialogContent className="z-[100] bg-background">
         <DialogHeader>
           <DialogTitle>Are you sure you want to delete this user?</DialogTitle>
           <DialogDescription>

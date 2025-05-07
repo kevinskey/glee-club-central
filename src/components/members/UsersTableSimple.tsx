@@ -20,7 +20,7 @@ import {
 import { Loader2, Eye, MoreHorizontal, Trash2 } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { getRoleBadge, getStatusBadge } from "@/components/members/UserBadges";
-import { User } from "@/hooks/user/useUserData";
+import { User } from "@/hooks/useUserManagement";
 
 interface UsersTableSimpleProps {
   users: User[];
@@ -109,11 +109,12 @@ export const UsersTableSimple: React.FC<UsersTableSimpleProps> = ({
                     <MoreHorizontal className="h-4 w-4" />
                   </Button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="z-50 bg-background border shadow-md">
+                <DropdownMenuContent align="end" className="z-[110] bg-background border shadow-md">
                   <DropdownMenuLabel>Quick Actions</DropdownMenuLabel>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem
                     onClick={(e) => {
+                      e.preventDefault();
                       e.stopPropagation();
                       console.log("Setting user as Administrator");
                       // Use the exact value expected by the database
@@ -124,6 +125,7 @@ export const UsersTableSimple: React.FC<UsersTableSimpleProps> = ({
                   </DropdownMenuItem>
                   <DropdownMenuItem
                     onClick={(e) => {
+                      e.preventDefault();
                       e.stopPropagation();
                       console.log("Setting user as Section Leader");
                       onRoleChange(user.id, 'section_leader');
@@ -133,6 +135,7 @@ export const UsersTableSimple: React.FC<UsersTableSimpleProps> = ({
                   </DropdownMenuItem>
                   <DropdownMenuItem
                     onClick={(e) => {
+                      e.preventDefault();
                       e.stopPropagation();
                       console.log("Setting user as Singer");
                       onRoleChange(user.id, 'singer');
@@ -143,6 +146,7 @@ export const UsersTableSimple: React.FC<UsersTableSimpleProps> = ({
                   <DropdownMenuSeparator />
                   <DropdownMenuItem
                     onClick={(e) => {
+                      e.preventDefault();
                       e.stopPropagation();
                       onStatusChange(user.id, 'active');
                     }}
@@ -151,6 +155,7 @@ export const UsersTableSimple: React.FC<UsersTableSimpleProps> = ({
                   </DropdownMenuItem>
                   <DropdownMenuItem
                     onClick={(e) => {
+                      e.preventDefault();
                       e.stopPropagation();
                       onStatusChange(user.id, 'inactive');
                     }}
@@ -160,6 +165,7 @@ export const UsersTableSimple: React.FC<UsersTableSimpleProps> = ({
                   <DropdownMenuSeparator />
                   <DropdownMenuItem
                     onClick={(e) => {
+                      e.preventDefault();
                       e.stopPropagation();
                       onDeleteClick(user);
                     }}

@@ -83,7 +83,9 @@ export default function AdminUserManagementPage() {
         console.error("Role change returned false");
       } else {
         // Force a refresh of user data after role change is successful
-        await fetchUsers();
+        setTimeout(() => {
+          fetchUsers();
+        }, 500);
       }
     } catch (error) {
       console.error("Role change error:", error);
@@ -99,7 +101,9 @@ export default function AdminUserManagementPage() {
         toast.error(`Failed to update user status to ${status}`);
       } else {
         // Force a refresh of user data after status change is successful
-        await fetchUsers();
+        setTimeout(() => {
+          fetchUsers();
+        }, 500);
       }
     } catch (error) {
       console.error("Status change error:", error);
@@ -111,10 +115,7 @@ export default function AdminUserManagementPage() {
   const handleUserDelete = async () => {
     try {
       await handleDeleteUser();
-      // Force refresh after successful delete
-      setTimeout(() => {
-        fetchUsers();
-      }, 500);
+      // Refresh will be triggered by the useUserDelete hook
     } catch (error) {
       console.error("Error handling user delete:", error);
     }
@@ -142,7 +143,7 @@ export default function AdminUserManagementPage() {
             isLoading={isLoading}
           />
 
-          <ScrollArea className="w-full">
+          <ScrollArea className="relative w-full">
             <div className="w-full min-w-max">
               <UsersTableSimple 
                 users={filteredUsers}

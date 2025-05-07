@@ -32,11 +32,12 @@ export function useUserDelete(onSuccess: () => void) {
         // Clear user state
         setUserToDelete(null);
         
-        // Add small delay before triggering data refresh to prevent UI glitches
+        // Add small delay before showing toast and triggering refresh
         setTimeout(() => {
           toast.success(`User ${firstName} ${lastName} deleted successfully`);
+          // Call onSuccess callback to refresh user list
           onSuccess();
-        }, 300);
+        }, 500);
       } else {
         throw new Error("Failed to delete user");
       }
@@ -44,7 +45,7 @@ export function useUserDelete(onSuccess: () => void) {
       console.error("Error deleting user:", error);
       toast.error(error.message || "Error deleting user");
       
-      // Make sure we clean up on error too
+      // Close dialog and clean up on error as well
       setIsDeleteDialogOpen(false);
       setUserToDelete(null);
     } finally {
@@ -52,7 +53,7 @@ export function useUserDelete(onSuccess: () => void) {
     }
   };
 
-  // Open delete user dialog
+  // Open delete user dialog with proper state handling
   const openDeleteUserDialog = (user: User) => {
     console.log("Opening delete dialog for user:", user.email);
     setUserToDelete(user);
