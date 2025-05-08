@@ -1,10 +1,25 @@
-
 import { createContext, useState, useContext, useEffect, ReactNode } from "react";
 import { useNavigate } from "react-router-dom";
 import { Session } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
 import type { AuthUser, Profile } from "@/types/auth";
 import { toast } from "sonner";
+
+// Define the AuthContextType interface
+export interface AuthContextType {
+  user: AuthUser | null;
+  userProfile: Profile | null;
+  permissions: PermissionSet | null;
+  loading: boolean;
+  isAuthenticated: boolean;
+  isLoading: boolean;
+  profile: Profile | null;
+  signIn: (email: string, password: string) => Promise<{ error: any }>;
+  signUp: (email: string, password: string, firstName: string, lastName: string) => Promise<{ error: any, data: any }>;
+  signOut: () => Promise<void>;
+  isAdmin: () => boolean;
+  hasPermission: (permission: string) => boolean;
+}
 
 // Create the context
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -218,7 +233,7 @@ export function AuthProvider({ children }: Props) {
   };
 
   // Value object for the context provider
-  const value = {
+  const value: AuthContextType = {
     user,
     userProfile,
     permissions,
@@ -249,6 +264,5 @@ export function useAuth() {
   return context;
 }
 
-// Type exports
-export type { AuthContextType } from "@/types/auth";
-export type { Profile };
+// Export the PermissionSet type
+export type { PermissionSet, Profile };
