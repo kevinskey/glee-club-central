@@ -1,6 +1,7 @@
+
 import React from "react";
 import { PageHeader } from "@/components/ui/page-header";
-import { FileText, Search, Plus, Upload, FolderOpen, ListMusic, Check, TableIcon } from "lucide-react";
+import { FileText, Search, Plus, Upload, FolderOpen, ListMusic, Check, TableIcon, ArrowUpDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
@@ -14,6 +15,14 @@ import { SetlistDrawer } from "@/components/setlist/SetlistDrawer";
 import { useAuth } from "@/contexts/AuthContext";
 import { Checkbox } from "@/components/ui/checkbox";
 import { MultipleDownloadBar } from "@/components/sheet-music/MultipleDownloadBar";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow
+} from "@/components/ui/table";
 
 interface SheetMusic {
   id: string;
@@ -21,7 +30,11 @@ interface SheetMusic {
   composer: string;
   file_url: string;
   created_at: string;
+  voicing?: string;
 }
+
+type SortColumn = 'title' | 'composer' | 'voicing' | 'created_at';
+type SortDirection = 'asc' | 'desc';
 
 export default function SheetMusicPage() {
   const { toast } = useToast();
@@ -36,6 +49,10 @@ export default function SheetMusicPage() {
   const [isSelectionMode, setIsSelectionMode] = useState(false);
   const [searchParams] = useSearchParams();
   const defaultView = searchParams.get("view") === "list" ? "list" : "grid";
+  
+  // Sorting states
+  const [sortColumn, setSortColumn] = useState<SortColumn>('title');
+  const [sortDirection, setSortDirection] = useState<SortDirection>('asc');
 
   // Fetch sheet music data
   const fetchSheetMusic = async () => {
@@ -83,13 +100,44 @@ export default function SheetMusicPage() {
         musicFiles.filter(
           file => 
             file.title.toLowerCase().includes(query) || 
-            file.composer.toLowerCase().includes(query)
+            file.composer.toLowerCase().includes(query) ||
+            (file.voicing && file.voicing.toLowerCase().includes(query))
         )
       );
     } else {
       setFilteredFiles(musicFiles);
     }
   }, [searchQuery, musicFiles]);
+
+  // Sort the filtered files
+  useEffect(() => {
+    const sortedFiles = [...filteredFiles].sort((a, b) => {
+      let valueA = a[sortColumn];
+      let valueB = b[sortColumn];
+      
+      // Handle undefined values
+      if (!valueA) valueA = '';
+      if (!valueB) valueB = '';
+      
+      if (sortDirection === 'asc') {
+        return valueA.toString().localeCompare(valueB.toString());
+      } else {
+        return valueB.toString().localeCompare(valueA.toString());
+      }
+    });
+    
+    setFilteredFiles(sortedFiles);
+  }, [sortColumn, sortDirection]);
+
+  // Toggle sort direction or change sort column
+  const handleSort = (column: SortColumn) => {
+    if (sortColumn === column) {
+      setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
+    } else {
+      setSortColumn(column);
+      setSortDirection('asc');
+    }
+  };
 
   // Toggle file selection
   const toggleFileSelection = (file: SheetMusic) => {
@@ -275,36 +323,82 @@ export default function SheetMusicPage() {
             {/* List View */}
             <TabsContent value="list">
               <div className="rounded-md border">
-                <table className="w-full">
-                  <thead>
-                    <tr className="border-b bg-muted/50">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
                       {isSelectionMode && (
-                        <th className="p-3 w-10"></th>
+                        <TableHead className="w-12"></TableHead>
                       )}
-                      <th className="p-3 text-left text-sm font-medium">Title</th>
-                      <th className="p-3 text-left text-sm font-medium">Composer</th>
-                      <th className="p-3 text-left text-sm font-medium">Date Added</th>
-                      <th className="p-3 text-right text-sm font-medium">Actions</th>
-                    </tr>
-                  </thead>
-                  <tbody>
+                      <TableHead 
+                        className="cursor-pointer hover:bg-muted/50"
+                        onClick={() => handleSort('title')}
+                      >
+                        <div className="flex items-center">
+                          Title
+                          <ArrowUpDown className="ml-2 h-4 w-4" />
+                          {sortColumn === 'title' && (
+                            <span className="ml-1 text-xs">{sortDirection === 'asc' ? '↑' : '↓'}</span>
+                          )}
+                        </div>
+                      </TableHead>
+                      <TableHead 
+                        className="cursor-pointer hover:bg-muted/50"
+                        onClick={() => handleSort('composer')}
+                      >
+                        <div className="flex items-center">
+                          Composer
+                          <ArrowUpDown className="ml-2 h-4 w-4" />
+                          {sortColumn === 'composer' && (
+                            <span className="ml-1 text-xs">{sortDirection === 'asc' ? '↑' : '↓'}</span>
+                          )}
+                        </div>
+                      </TableHead>
+                      <TableHead 
+                        className="cursor-pointer hover:bg-muted/50"
+                        onClick={() => handleSort('voicing')}
+                      >
+                        <div className="flex items-center">
+                          Voicing
+                          <ArrowUpDown className="ml-2 h-4 w-4" />
+                          {sortColumn === 'voicing' && (
+                            <span className="ml-1 text-xs">{sortDirection === 'asc' ? '↑' : '↓'}</span>
+                          )}
+                        </div>
+                      </TableHead>
+                      <TableHead 
+                        className="cursor-pointer hover:bg-muted/50"
+                        onClick={() => handleSort('created_at')}
+                      >
+                        <div className="flex items-center">
+                          Date Added
+                          <ArrowUpDown className="ml-2 h-4 w-4" />
+                          {sortColumn === 'created_at' && (
+                            <span className="ml-1 text-xs">{sortDirection === 'asc' ? '↑' : '↓'}</span>
+                          )}
+                        </div>
+                      </TableHead>
+                      <TableHead className="text-right">Actions</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
                     {filteredFiles.map((file) => (
-                      <tr 
+                      <TableRow 
                         key={file.id} 
-                        className={`border-b hover:bg-muted/50 ${isFileSelected(file.id) ? 'bg-muted/30' : ''}`}
+                        className={`hover:bg-muted/50 ${isFileSelected(file.id) ? 'bg-muted/30' : ''}`}
                       >
                         {isSelectionMode && (
-                          <td className="p-3">
+                          <TableCell>
                             <Checkbox 
                               checked={isFileSelected(file.id)} 
                               onCheckedChange={() => toggleFileSelection(file)}
                             />
-                          </td>
+                          </TableCell>
                         )}
-                        <td className="p-3 text-sm">{file.title}</td>
-                        <td className="p-3 text-sm">{file.composer}</td>
-                        <td className="p-3 text-sm">{file.created_at}</td>
-                        <td className="p-3 text-right">
+                        <TableCell className="font-medium">{file.title}</TableCell>
+                        <TableCell>{file.composer}</TableCell>
+                        <TableCell>{file.voicing || 'N/A'}</TableCell>
+                        <TableCell>{file.created_at}</TableCell>
+                        <TableCell className="text-right">
                           {isSelectionMode ? (
                             <Button 
                               variant="outline" 
@@ -322,11 +416,11 @@ export default function SheetMusicPage() {
                               <Link to={`/dashboard/sheet-music/${file.id}`}>View</Link>
                             </Button>
                           )}
-                        </td>
-                      </tr>
+                        </TableCell>
+                      </TableRow>
                     ))}
-                  </tbody>
-                </table>
+                  </TableBody>
+                </Table>
               </div>
             </TabsContent>
           </>
