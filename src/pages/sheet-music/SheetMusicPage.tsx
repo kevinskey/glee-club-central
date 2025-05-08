@@ -1,8 +1,7 @@
-
 import React, { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { PageHeader } from "@/components/ui/page-header";
-import { FileText, FolderOpen, Loader2, Upload, Search, Music, Play, Pause, ListMusic, Plus } from "lucide-react";
+import { FileText, FolderOpen, Loader2, Upload, Search, Music, Play, Pause, ListMusic, Plus, Check } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -11,6 +10,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { UploadSheetMusicModal } from "@/components/UploadSheetMusicModal";
 import { SetlistDrawer } from "@/components/setlist/SetlistDrawer";
+import { Checkbox } from "@/components/ui/checkbox";
+import { MultipleDownloadBar } from "@/components/sheet-music/MultipleDownloadBar";
 import {
   Select,
   SelectContent,
@@ -66,6 +67,8 @@ export default function SheetMusicPage() {
   const [sortOrder, setSortOrder] = useState<SortOption>("newest");
   const [currentAudio, setCurrentAudio] = useState<AudioFile | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
+  const [selectedFiles, setSelectedFiles] = useState<SheetMusic[]>([]);
+  const [isSelectionMode, setIsSelectionMode] = useState(false);
   const audioRef = React.useRef<HTMLAudioElement | null>(null);
 
   // Fetch sheet music data
@@ -217,6 +220,32 @@ export default function SheetMusicPage() {
     };
   }, []);
 
+  // Toggle file selection
+  const toggleFileSelection = (file: SheetMusic) => {
+    setSelectedFiles(prevSelected => {
+      const isSelected = prevSelected.some(item => item.id === file.id);
+      
+      if (isSelected) {
+        // Remove from selection
+        return prevSelected.filter(item => item.id !== file.id);
+      } else {
+        // Add to selection
+        return [...prevSelected, file];
+      }
+    });
+  };
+
+  // Clear all selections
+  const clearSelection = () => {
+    setSelectedFiles([]);
+    setIsSelectionMode(false);
+  };
+
+  // Check if a file is selected
+  const isFileSelected = (fileId: string) => {
+    return selectedFiles.some(file => file.id === fileId);
+  };
+
   return (
     <div className="space-y-8">
       <PageHeader
@@ -224,12 +253,23 @@ export default function SheetMusicPage() {
         description="Access sheet music and audio recordings"
         icon={<FileText className="h-6 w-6" />}
         actions={
-          <Button 
-            onClick={() => setIsUploadModalOpen(true)}
-            className="gap-2 bg-glee-purple hover:bg-glee-purple/90"
-          >
-            <Upload className="h-4 w-4" /> Upload PDF
-          </Button>
+          <>
+            {!isSelectionMode && (
+              <Button 
+                variant="outline"
+                onClick={() => setIsSelectionMode(true)}
+                className="gap-2 mr-2"
+              >
+                <Check className="h-4 w-4" /> Select Multiple
+              </Button>
+            )}
+            <Button 
+              onClick={() => setIsUploadModalOpen(true)}
+              className="gap-2 bg-glee-purple hover:bg-glee-purple/90"
+            >
+              <Upload className="h-4 w-4" /> Upload PDF
+            </Button>
+          </>
         }
       />
 
@@ -328,17 +368,42 @@ export default function SheetMusicPage() {
             <TabsContent value="grid" className="w-full">
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
                 {filteredFiles.map((file) => (
-                  <Card key={file.id} className="overflow-hidden">
-                    <Link to={`/dashboard/sheet-music/${file.id}`} className="block h-full">
-                      <div className="bg-gray-100 h-40 flex items-center justify-center">
-                        <FileText className="h-16 w-16 text-muted-foreground" />
+                  <Card 
+                    key={file.id} 
+                    className={`overflow-hidden relative ${isFileSelected(file.id) ? 'ring-2 ring-glee-purple' : ''}`}
+                  >
+                    {isSelectionMode ? (
+                      <div 
+                        className="cursor-pointer h-full"
+                        onClick={() => toggleFileSelection(file)}
+                      >
+                        <div className="absolute top-2 left-2 z-10">
+                          <Checkbox 
+                            checked={isFileSelected(file.id)} 
+                            onChange={() => toggleFileSelection(file)}
+                          />
+                        </div>
+                        <div className="bg-gray-100 h-40 flex items-center justify-center">
+                          <FileText className="h-16 w-16 text-muted-foreground" />
+                        </div>
+                        <CardContent className="p-4">
+                          <h3 className="font-medium truncate">{file.title}</h3>
+                          <p className="text-sm text-muted-foreground truncate">{file.composer}</p>
+                          <p className="text-xs text-muted-foreground mt-2">{file.created_at}</p>
+                        </CardContent>
                       </div>
-                      <CardContent className="p-4">
-                        <h3 className="font-medium truncate">{file.title}</h3>
-                        <p className="text-sm text-muted-foreground truncate">{file.composer}</p>
-                        <p className="text-xs text-muted-foreground mt-2">{file.created_at}</p>
-                      </CardContent>
-                    </Link>
+                    ) : (
+                      <Link to={`/dashboard/sheet-music/${file.id}`} className="block h-full">
+                        <div className="bg-gray-100 h-40 flex items-center justify-center">
+                          <FileText className="h-16 w-16 text-muted-foreground" />
+                        </div>
+                        <CardContent className="p-4">
+                          <h3 className="font-medium truncate">{file.title}</h3>
+                          <p className="text-sm text-muted-foreground truncate">{file.composer}</p>
+                          <p className="text-xs text-muted-foreground mt-2">{file.created_at}</p>
+                        </CardContent>
+                      </Link>
+                    )}
                   </Card>
                 ))}
               </div>
@@ -350,6 +415,9 @@ export default function SheetMusicPage() {
                 <Table>
                   <TableHeader>
                     <TableRow>
+                      {isSelectionMode && (
+                        <TableHead className="w-[5%]"></TableHead>
+                      )}
                       <TableHead className="w-[40%]">Title</TableHead>
                       <TableHead className="w-[25%]">Composer</TableHead>
                       <TableHead className="w-[20%]">Upload Date</TableHead>
@@ -358,20 +426,41 @@ export default function SheetMusicPage() {
                   </TableHeader>
                   <TableBody>
                     {filteredFiles.map((file) => (
-                      <TableRow key={file.id}>
+                      <TableRow 
+                        key={file.id}
+                        className={isFileSelected(file.id) ? 'bg-muted/30' : ''}
+                      >
+                        {isSelectionMode && (
+                          <TableCell>
+                            <Checkbox 
+                              checked={isFileSelected(file.id)} 
+                              onCheckedChange={() => toggleFileSelection(file)}
+                            />
+                          </TableCell>
+                        )}
                         <TableCell className="font-medium">{file.title}</TableCell>
                         <TableCell>{file.composer}</TableCell>
                         <TableCell>{file.created_at}</TableCell>
                         <TableCell className="text-right">
-                          <Button 
-                            variant="default" 
-                            size="sm"
-                            asChild
-                          >
-                            <Link to={`/dashboard/sheet-music/${file.id}`}>
-                              View PDF
-                            </Link>
-                          </Button>
+                          {isSelectionMode ? (
+                            <Button 
+                              variant="outline" 
+                              size="sm" 
+                              onClick={() => toggleFileSelection(file)}
+                            >
+                              {isFileSelected(file.id) ? "Deselect" : "Select"}
+                            </Button>
+                          ) : (
+                            <Button 
+                              variant="default" 
+                              size="sm"
+                              asChild
+                            >
+                              <Link to={`/dashboard/sheet-music/${file.id}`}>
+                                View PDF
+                              </Link>
+                            </Button>
+                          )}
                         </TableCell>
                       </TableRow>
                     ))}
@@ -382,6 +471,12 @@ export default function SheetMusicPage() {
           </>
         )}
       </Tabs>
+
+      {/* Multiple Download Bar */}
+      <MultipleDownloadBar 
+        selectedFiles={selectedFiles}
+        onClearSelection={clearSelection}
+      />
 
       {/* Audio Library Section */}
       <div className="pt-6 border-t">
