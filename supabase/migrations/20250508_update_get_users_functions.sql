@@ -168,3 +168,8 @@ BEGIN
   $func$;
 END;
 $$;
+
+-- Execute the functions to update our database functions
+SELECT public.update_get_all_users_function();
+SELECT public.update_get_user_by_id_function();
+

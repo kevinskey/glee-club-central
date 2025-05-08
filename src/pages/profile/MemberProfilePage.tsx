@@ -64,7 +64,51 @@ export default function MemberProfilePage() {
     );
   }
 
-  const displayProfile = isViewingSelf ? profile : memberProfile;
+  // Transform profile (if needed) to ensure it conforms to UserSafe type
+  const ensureUserSafe = (maybeUser: any): UserSafe => {
+    if (!maybeUser) return null as unknown as UserSafe;
+    
+    // Ensure all required fields are present
+    return {
+      ...maybeUser,
+      role_display_name: maybeUser.role_display_name || formatRoleDisplayName(maybeUser.role),
+      voice_part_display: maybeUser.voice_part_display || formatVoicePartDisplay(maybeUser.voice_part),
+      updated_at: maybeUser.updated_at || maybeUser.created_at || new Date().toISOString(),
+    } as UserSafe;
+  };
+  
+  // Format role display name if not provided
+  const formatRoleDisplayName = (role: string): string => {
+    if (!role) return "Unknown";
+    
+    switch (role) {
+      case "administrator": return "Administrator";
+      case "section_leader": return "Section Leader";
+      case "singer": return "Singer";
+      case "student_conductor": return "Student Conductor";
+      case "accompanist": return "Accompanist";
+      case "non_singer": return "Non-Singer";
+      default: return role.charAt(0).toUpperCase() + role.slice(1).replace(/_/g, ' ');
+    }
+  };
+  
+  // Format voice part if not provided
+  const formatVoicePartDisplay = (voicePart: string | null): string => {
+    if (!voicePart) return "Not set";
+    
+    switch (voicePart) {
+      case "soprano_1": return "Soprano 1";
+      case "soprano_2": return "Soprano 2";
+      case "alto_1": return "Alto 1";
+      case "alto_2": return "Alto 2";
+      case "tenor": return "Tenor";
+      case "bass": return "Bass";
+      default: return voicePart;
+    }
+  };
+
+  // Get final display profile, ensuring it meets UserSafe requirements
+  const displayProfile = isViewingSelf ? ensureUserSafe(profile) : ensureUserSafe(memberProfile);
   
   if (!displayProfile) {
     return (
@@ -167,7 +211,7 @@ export default function MemberProfilePage() {
             </TabsContent>
             
             <TabsContent value="wardrobe">
-              <WardrobeTab profile={displayProfile as any} />
+              <WardrobeTab profile={displayProfile} />
             </TabsContent>
             
             <TabsContent value="financial">
@@ -175,7 +219,7 @@ export default function MemberProfilePage() {
             </TabsContent>
             
             <TabsContent value="media">
-              <MediaConsentTab profile={displayProfile as any} />
+              <MediaConsentTab profile={displayProfile} />
             </TabsContent>
             
             {isAdmin() && (
