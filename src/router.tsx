@@ -1,11 +1,5 @@
 
-import {
-  createBrowserRouter,
-  RouterProvider,
-  Route,
-  createRoutesFromElements,
-  Outlet,
-} from "react-router-dom";
+import { createBrowserRouter } from "react-router-dom";
 import DashboardPage from "@/pages/DashboardPage";
 import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
 import LoginPage from "@/pages/LoginPage";
@@ -26,6 +20,7 @@ const router = createBrowserRouter([
   {
     path: "/",
     element: <LandingPage />,
+    errorElement: <NotFoundPage />
   },
   {
     path: "/fan-page",
@@ -51,13 +46,7 @@ const router = createBrowserRouter([
   // Protected dashboard routes
   {
     path: "/dashboard",
-    element: (
-      <ProtectedRoute>
-        <DashboardLayout>
-          <Outlet />
-        </DashboardLayout>
-      </ProtectedRoute>
-    ),
+    element: <ProtectedRoute><DashboardLayout /></ProtectedRoute>,
     children: [
       {
         path: "", // Dashboard home
