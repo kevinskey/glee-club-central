@@ -25,16 +25,27 @@ export const PDFThumbnail = ({ url, title, className = '' }: PDFThumbnailProps) 
     
     // Add hash if needed
     if (!hasHash && !hasQuery) {
-      viewerUrl += '#';
+      viewerUrl += '#page=1';
+    } else {
+      // Determine the correct separator for additional parameters
+      const separator = hasQuery ? '&' : (hasHash ? '&' : '#');
+      
+      // Add page parameter if not already present
+      if (!viewerUrl.includes('page=')) {
+        viewerUrl += separator + 'page=1';
+      }
     }
     
-    // Determine the correct separator for additional parameters
-    const separator = viewerUrl.endsWith('#') || viewerUrl.endsWith('&') || viewerUrl.endsWith('?') 
-      ? '' 
-      : (hasQuery || (hasHash && viewerUrl.includes('='))) ? '&' : '#';
+    // Ensure we have the right separator for additional parameters
+    const needsSeparator = !(viewerUrl.endsWith('&') || viewerUrl.endsWith('#') || viewerUrl.endsWith('?'));
+    const separator = needsSeparator ? (hasQuery || (hasHash && viewerUrl.includes('=')) ? '&' : '#') : '';
     
-    // Add view parameters for thumbnail display
-    return viewerUrl + separator + "page=1&toolbar=0&navpanes=0&view=FitH&scrollbar=0";
+    // Add view parameters if not already present
+    if (!viewerUrl.includes('toolbar=')) {
+      viewerUrl += separator + 'toolbar=0&navpanes=0&view=FitH&scrollbar=0';
+    }
+    
+    return viewerUrl;
   };
 
   return (
@@ -55,6 +66,7 @@ export const PDFThumbnail = ({ url, title, className = '' }: PDFThumbnailProps) 
             onError={() => {
               setIsLoading(false);
               setError("Failed to load thumbnail");
+              console.error("Failed to load PDF thumbnail:", url);
             }}
             title={`${title} thumbnail`}
             frameBorder="0"
