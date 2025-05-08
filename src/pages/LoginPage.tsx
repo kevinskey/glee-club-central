@@ -61,10 +61,11 @@ export default function LoginPage() {
     }
   }, [isAuthenticated, navigate]);
 
-  async function onSubmit(values: z.infer<typeof loginSchema>) {
+  async function onSubmit(values: LoginFormValues) {
     setIsLoading(true);
     setAuthError(null);
     try {
+      console.log("Attempting login with:", values.email);
       const result = await signIn(values.email, values.password);
       
       if (result.error) {
@@ -72,13 +73,6 @@ export default function LoginPage() {
       }
       
       toast.success("Login successful!");
-      
-      // Clean up all auth-related local storage keys before redirect
-      const authKeysCleanup = Object.keys(localStorage).filter(
-        key => key.startsWith('supabase.auth.') || key.includes('sb-')
-      );
-      
-      console.log("Cleaning up auth keys:", authKeysCleanup);
       
       // Force redirect to dashboard - using window.location.href for a full page refresh
       // This ensures a clean state after authentication

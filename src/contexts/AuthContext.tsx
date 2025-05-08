@@ -84,12 +84,15 @@ const getUserPermissions = (role: string): PermissionSet => {
 
 // Helper function to clean up authentication state
 const cleanupAuthState = () => {
+  console.log("Cleaning up auth state...");
+  
   // Remove standard auth tokens
   localStorage.removeItem('supabase.auth.token');
   
   // Remove all Supabase auth keys from localStorage
   Object.keys(localStorage).forEach((key) => {
     if (key.startsWith('supabase.auth.') || key.includes('sb-')) {
+      console.log(`Removing auth key: ${key}`);
       localStorage.removeItem(key);
     }
   });
@@ -98,6 +101,7 @@ const cleanupAuthState = () => {
   try {
     Object.keys(sessionStorage || {}).forEach((key) => {
       if (key.startsWith('supabase.auth.') || key.includes('sb-')) {
+        console.log(`Removing auth key from sessionStorage: ${key}`);
         sessionStorage.removeItem(key);
       }
     });
@@ -118,6 +122,7 @@ export function AuthProvider({ children }: Props) {
     async function checkSession() {
       setLoading(true);
       
+      console.log("Checking auth session...");
       const { data: { session }, error } = await supabase.auth.getSession();
       
       if (error) {
@@ -126,6 +131,7 @@ export function AuthProvider({ children }: Props) {
         return;
       }
 
+      console.log("Auth session check complete:", session ? "Session found" : "No session");
       setSession(session);
       
       if (session?.user) {
@@ -144,7 +150,10 @@ export function AuthProvider({ children }: Props) {
         setSession(session);
 
         if (session?.user) {
-          await fetchUserProfile(session.user.id);
+          // Use setTimeout to prevent potential deadlocks
+          setTimeout(async () => {
+            await fetchUserProfile(session.user.id);
+          }, 0);
         } else {
           setUser(null);
           setUserProfile(null);
@@ -163,6 +172,7 @@ export function AuthProvider({ children }: Props) {
   // Fetch user profile from database
   const fetchUserProfile = async (userId: string) => {
     try {
+      console.log("Fetching user profile for:", userId);
       const { data, error } = await supabase
         .from("profiles")
         .select("*")
@@ -172,6 +182,7 @@ export function AuthProvider({ children }: Props) {
       if (error) throw error;
 
       if (data) {
+        console.log("User profile fetched:", data.first_name, data.last_name);
         setUser({
           id: userId,
           email: session?.user?.email || "",
@@ -182,6 +193,8 @@ export function AuthProvider({ children }: Props) {
         
         // Set permissions based on the role
         setPermissions(getUserPermissions(data.role));
+      } else {
+        console.log("No profile found for user:", userId);
       }
     } catch (error: any) {
       console.error("Error fetching user profile:", error.message);
@@ -193,11 +206,14 @@ export function AuthProvider({ children }: Props) {
   // Sign in with email and password
   const signIn = async (email: string, password: string) => {
     try {
+      console.log("Signing in user:", email);
+      
       // First clean up any existing auth state
       cleanupAuthState();
       
       // Attempt to sign out globally before signing in (helps prevent auth conflicts)
       try {
+        console.log("Attempting global sign out before sign in");
         await supabase.auth.signOut({ scope: 'global' });
       } catch (err) {
         // Continue even if this fails
@@ -210,9 +226,11 @@ export function AuthProvider({ children }: Props) {
       });
 
       if (error) {
+        console.error("Sign in failed:", error.message);
         return { error };
       }
 
+      console.log("Sign in successful");
       return { error: null };
     } catch (error: any) {
       console.error("Error during sign in:", error.message);
@@ -251,6 +269,8 @@ export function AuthProvider({ children }: Props) {
   // Sign out
   const signOut = async () => {
     try {
+      console.log("Signing out user");
+      
       // Clean up auth state first
       cleanupAuthState();
       
@@ -261,6 +281,7 @@ export function AuthProvider({ children }: Props) {
         console.log("Error during sign out, continuing with cleanup", err);
       }
       
+      console.log("Redirecting to login page");
       // Use direct navigation for clean logout experience
       window.location.href = '/login'; 
     } catch (error: any) {
@@ -273,6 +294,7 @@ export function AuthProvider({ children }: Props) {
   // Add the missing methods
   const signInWithGoogle = async () => {
     try {
+      console.log("Starting Google sign in process");
       await supabase.auth.signInWithOAuth({
         provider: 'google',
       });
@@ -284,6 +306,7 @@ export function AuthProvider({ children }: Props) {
 
   const signInWithApple = async () => {
     try {
+      console.log("Starting Apple sign in process");
       await supabase.auth.signInWithOAuth({
         provider: 'apple',
       });
