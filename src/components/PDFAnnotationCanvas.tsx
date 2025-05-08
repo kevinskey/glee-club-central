@@ -1,6 +1,5 @@
 
 import React, { useRef, useEffect, useState } from "react";
-import { AnnotationTool } from "./PDFAnnotationToolbar";
 
 interface Point {
   x: number;
@@ -9,7 +8,7 @@ interface Point {
 
 export interface Annotation {
   id: string;
-  type: AnnotationTool;
+  type: "pen" | "eraser" | "square" | null;
   points: Point[];
   color: string;
   size: number;
@@ -21,7 +20,7 @@ export interface Annotation {
 
 interface PDFAnnotationCanvasProps {
   containerRef: React.RefObject<HTMLDivElement>;
-  activeTool: AnnotationTool;
+  activeTool: "pen" | "eraser" | "square" | null;
   canvasWidth: number;
   canvasHeight: number;
   penColor: string;
