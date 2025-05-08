@@ -18,6 +18,7 @@ import LandingPage from './pages/LandingPage';
 import FanPage from './pages/FanPage';
 import AttendancePage from './pages/AttendancePage';
 import PerformanceChecklistPage from './pages/PerformanceChecklistPage';
+import DashboardPage from './pages/DashboardPage';
 
 function App() {
   return (
@@ -39,7 +40,7 @@ function App() {
           </ProtectedRoute>
         }
       >
-        <Route index element={<CalendarPage />} />
+        <Route index element={<DashboardPage />} />
         <Route path="calendar" element={<CalendarPage />} />
         <Route path="sheet-music" element={<SheetMusicPage />} />
         <Route path="practice" element={<div>Practice Page</div>} />

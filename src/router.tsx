@@ -1,3 +1,4 @@
+
 import { RouteObject } from "react-router-dom";
 import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
 import LoginPage from "@/pages/LoginPage";
@@ -12,6 +13,7 @@ import ProfilePage from "@/pages/ProfilePage";
 import RecordingsPage from "@/pages/RecordingsPage";
 import LandingPage from "@/pages/LandingPage";
 import FanPage from "@/pages/FanPage";
+import DashboardPage from "@/pages/DashboardPage";
 
 // This file is used for reference only - actual routes are now in App.tsx
 // We keep this for future reference or if we want to switch back to RouterProvider
@@ -50,7 +52,7 @@ const routes: RouteObject[] = [
     children: [
       {
         path: "", // Dashboard home
-        element: <CalendarPage />, // Changed from DashboardPage to CalendarPage
+        element: <DashboardPage />, // Using new DashboardPage component
       },
       {
         path: "calendar",
