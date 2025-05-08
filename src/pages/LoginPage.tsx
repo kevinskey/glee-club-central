@@ -27,6 +27,8 @@ const loginSchema = z.object({
   password: z.string().min(6, { message: "Password must be at least 6 characters" }),
 });
 
+type LoginFormValues = z.infer<typeof loginSchema>;
+
 export default function LoginPage() {
   const { signIn, signInWithGoogle, signInWithApple, isAuthenticated } = useAuth();
   const navigate = useNavigate();
@@ -38,6 +40,15 @@ export default function LoginPage() {
   const [verificationMessage, setVerificationMessage] = useState<string | null>(
     location.state?.message || null
   );
+  
+  // Initialize the form properly using useForm
+  const form = useForm<LoginFormValues>({
+    resolver: zodResolver(loginSchema),
+    defaultValues: {
+      email: "",
+      password: "",
+    },
+  });
   
   // Get return URL from location state or default to dashboard
   const from = location.state?.from?.pathname || "/dashboard";
