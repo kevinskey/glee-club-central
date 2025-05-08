@@ -12,40 +12,20 @@ export const PDFThumbnail = ({ url, title, className = '' }: PDFThumbnailProps) 
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  // Build PDF URL that will show just the first page without controls
+  // Create a reliable thumbnail URL for the PDF that shows just the first page
   const getThumbnailUrl = () => {
     if (!url) return "";
     
-    // Check if the URL already contains hash or query parameters
-    const hasHash = url.includes('#');
-    const hasQuery = url.includes('?');
-    
-    // Base URL construction
-    let viewerUrl = url;
-    
-    // Add hash if needed
-    if (!hasHash && !hasQuery) {
-      viewerUrl += '#page=1';
-    } else {
-      // Determine the correct separator for additional parameters
-      const separator = hasQuery ? '&' : (hasHash ? '&' : '#');
+    try {
+      // Make sure we have a clean URL to start with
+      const baseUrl = url.split('#')[0].split('?')[0];
       
-      // Add page parameter if not already present
-      if (!viewerUrl.includes('page=')) {
-        viewerUrl += separator + 'page=1';
-      }
+      // Add parameters to display only the first page with no UI controls
+      return `${baseUrl}#page=1&toolbar=0&navpanes=0&view=FitH&scrollbar=0`;
+    } catch (e) {
+      console.error("Error creating thumbnail URL:", e);
+      return url;
     }
-    
-    // Ensure we have the right separator for additional parameters
-    const needsSeparator = !(viewerUrl.endsWith('&') || viewerUrl.endsWith('#') || viewerUrl.endsWith('?'));
-    const separator = needsSeparator ? (hasQuery || (hasHash && viewerUrl.includes('=')) ? '&' : '#') : '';
-    
-    // Add view parameters if not already present
-    if (!viewerUrl.includes('toolbar=')) {
-      viewerUrl += separator + 'toolbar=0&navpanes=0&view=FitH&scrollbar=0';
-    }
-    
-    return viewerUrl;
   };
 
   return (
