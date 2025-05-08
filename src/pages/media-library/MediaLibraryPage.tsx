@@ -155,7 +155,7 @@ export default function MediaLibraryPage() {
   return (
     <div className="space-y-6 md:space-y-8">
       <PageHeader
-        title="Media Library"
+        title="Media Sources"
         description="Access all your media files in one place"
         icon={<FilesIcon className="h-6 w-6" />}
       />

@@ -84,7 +84,7 @@ export function Sidebar() {
             Merch
           </NavItem>
           <NavItem href="/dashboard/media-library" icon={FileImage}>
-            Media Library
+            Media Sources
           </NavItem>
           <NavItem href="/dashboard/messages" icon={MessageSquare}>
             Messages

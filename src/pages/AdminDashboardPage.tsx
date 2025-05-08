@@ -81,7 +81,7 @@ export default function AdminDashboardPage() {
       path: "/dashboard/admin/wardrobe"
     },
     {
-      title: "Media Library",
+      title: "Media Sources",
       description: "Upload and manage photos and videos",
       icon: Upload,
       path: "/dashboard/media-library"

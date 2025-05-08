@@ -60,7 +60,7 @@ function App() {
         <Route path="dues" element={<div>Dues Payment Page</div>} />
         <Route path="handbook" element={<div>Handbook Page</div>} />
         <Route path="merch" element={<div>Merchandise Page</div>} />
-        <Route path="media-library" element={<div>Media Library Page</div>} />
+        <Route path="media-library" element={<div>Media Sources Page</div>} />
         <Route path="profile" element={<ProfilePage />} />
         <Route path="members" element={<div>Members Page</div>} />
         <Route path="announcements" element={<div>Announcements Page</div>} />

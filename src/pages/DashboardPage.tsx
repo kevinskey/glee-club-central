@@ -14,7 +14,8 @@ import {
   Headphones,
   Video,
   BookOpen,
-  Activity
+  Activity,
+  FileImage
 } from "lucide-react";
 import { Spinner } from "@/components/ui/spinner";
 
@@ -182,9 +183,9 @@ const DashboardPage = () => {
                 <BookOpen className="h-8 w-8 mb-2" />
                 <span>Handbook</span>
               </Link>
-              <Link to="/dashboard/attendance" className="flex flex-col items-center justify-center p-4 border rounded-md hover:bg-accent transition-colors text-center">
-                <Activity className="h-8 w-8 mb-2" />
-                <span>Attendance</span>
+              <Link to="/dashboard/media-library" className="flex flex-col items-center justify-center p-4 border rounded-md hover:bg-accent transition-colors text-center">
+                <FileImage className="h-8 w-8 mb-2" />
+                <span>Media Sources</span>
               </Link>
             </div>
           </CardContent>
