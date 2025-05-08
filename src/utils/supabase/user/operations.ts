@@ -1,6 +1,6 @@
-
 import { supabase } from '@/integrations/supabase/client';
-import { Profile } from './types';
+import { UserSafe } from './types';
+import { Profile } from '@/types/auth';
 
 // Update user role
 export async function updateUserRole(userId: string, role: string): Promise<boolean> {

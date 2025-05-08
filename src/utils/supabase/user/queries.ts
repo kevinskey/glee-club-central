@@ -51,7 +51,7 @@ export async function fetchUserById(userId: string): Promise<UserSafe> {
   }
 }
 
-// Search users by email - using a simple interface to avoid recursive type issues
+// Define a simple user data interface to avoid recursive type issues
 interface SimpleUserData {
   id: string;
   first_name: string | null;
@@ -87,7 +87,7 @@ export const searchUserByEmail = async (email: string): Promise<UserSafe | null>
 
     if (!data) return null;
     
-    // Convert data to UserSafe type
+    // Convert data to SimpleUserData type to avoid recursive type issues
     const userProfile = data as SimpleUserData;
     
     // Create a safe user object without recursive type issues

@@ -1,7 +1,8 @@
 
-// Re-export all query functions from their respective modules
+// This file is kept for backward compatibility
+// In the future, please import directly from the appropriate module in src/utils/supabase/
+// For example: import { fetchSections } from '@/utils/supabase/sections'
+
+export * from './user/index';
 export * from './members';
-export * from './attendance';
-export * from './payments';
-export * from './user';
-export * from './types';
+// Remove re-export of './user' to avoid ambiguity

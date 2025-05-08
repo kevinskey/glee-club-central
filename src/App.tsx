@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { Routes, Route } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 
 import LandingPage from '@/pages/LandingPage';
@@ -28,44 +28,42 @@ function App() {
   const { isLoading } = useAuth();
 
   return (
-    <BrowserRouter>
-      <Routes>
-        {/* Public routes */}
-        <Route path="/" element={<LandingPage />} />
-        <Route path="/login" element={<LoginPage />} />
-        <Route path="/register" element={<RegisterPage />} />
-        <Route path="/forgot-password" element={<ForgotPasswordPage />} />
-        <Route path="/reset-password" element={<ResetPasswordPage />} />
-        <Route path="/fan-page" element={<FanPage />} />
+    <Routes>
+      {/* Public routes */}
+      <Route path="/" element={<LandingPage />} />
+      <Route path="/login" element={<LoginPage />} />
+      <Route path="/register" element={<RegisterPage />} />
+      <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+      <Route path="/reset-password" element={<ResetPasswordPage />} />
+      <Route path="/fan-page" element={<FanPage />} />
+      
+      {/* Protected routes with role-based access */}
+      <Route path="/dashboard" element={
+        <ProtectedRoute>
+          <DashboardLayout>
+            <Outlet />
+          </DashboardLayout>
+        </ProtectedRoute>
+      }>
+        <Route index element={<DashboardPage />} />
+        <Route path="calendar" element={<CalendarPage />} />
+        <Route path="profile" element={<ProfilePage />} />
+        <Route path="profile/:id" element={<MemberProfilePage />} />
+        <Route path="schedule" element={<CalendarPage />} /> {/* Redirect schedule to calendar */}
         
-        {/* Protected routes with role-based access */}
-        <Route path="/dashboard" element={
-          <ProtectedRoute>
-            <DashboardLayout>
-              <Outlet />
-            </DashboardLayout>
-          </ProtectedRoute>
-        }>
-          <Route index element={<DashboardPage />} />
-          <Route path="calendar" element={<CalendarPage />} />
-          <Route path="profile" element={<ProfilePage />} />
-          <Route path="profile/:id" element={<MemberProfilePage />} />
-          <Route path="schedule" element={<CalendarPage />} /> {/* Redirect schedule to calendar */}
-          
-          {/* Member directory and management */}
-          <Route path="members" element={<MemberDirectoryPage />} />
-          <Route path="member-directory" element={<MemberDirectoryPage />} />
-          <Route path="member-management" element={<AdminUserManagementPage />} />
-          <Route path="invite-member" element={<InviteMemberPage />} />
-          <Route path="members/:id" element={<MemberProfilePage />} />
-          <Route path="members/edit/:id" element={<MemberEditPage />} />
-          <Route path="members/add" element={<MemberAddPage />} />
-        </Route>
+        {/* Member directory and management */}
+        <Route path="members" element={<MemberDirectoryPage />} />
+        <Route path="member-directory" element={<MemberDirectoryPage />} />
+        <Route path="member-management" element={<AdminUserManagementPage />} />
+        <Route path="invite-member" element={<InviteMemberPage />} />
+        <Route path="members/:id" element={<MemberProfilePage />} />
+        <Route path="members/edit/:id" element={<MemberEditPage />} />
+        <Route path="members/add" element={<MemberAddPage />} />
+      </Route>
 
-        {/* Catch all for 404 errors */}
-        <Route path="*" element={<NotFoundPage />} />
-      </Routes>
-    </BrowserRouter>
+      {/* Catch all for 404 errors */}
+      <Route path="*" element={<NotFoundPage />} />
+    </Routes>
   );
 }
 

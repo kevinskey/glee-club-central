@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { Session } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
 import { PermissionSet, getUserPermissions } from "@/utils/supabase/user/types";
-import { AuthContextType, AuthUser, Profile } from "@/types/auth";
+import type { AuthContextType, AuthUser, Profile } from "@/types/auth";
 import { toast } from "sonner";
 
 // Create the context
