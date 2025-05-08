@@ -2,11 +2,10 @@
 import React from "react";
 import { Link, useLocation } from "react-router-dom";
 import { cn } from "@/lib/utils";
-import { LucideIcon } from "lucide-react";
 
 interface NavItemProps {
   href: string;
-  icon: LucideIcon;
+  icon: () => React.ReactNode;
   children: React.ReactNode;
   exact?: boolean;
 }
@@ -27,7 +26,7 @@ export function NavItem({ href, icon: Icon, children, exact }: NavItemProps) {
           : "text-muted-foreground hover:bg-accent hover:text-accent-foreground"
       )}
     >
-      <Icon className="h-4 w-4" />
+      {Icon()}
       <span>{children}</span>
     </Link>
   );

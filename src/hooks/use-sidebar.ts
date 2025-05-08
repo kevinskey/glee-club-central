@@ -34,3 +34,8 @@ export function useSidebar(): SidebarState {
     onToggle
   };
 }
+
+// Add this for backward compatibility if needed
+useSidebar.setState = (state: { isOpen: boolean }) => {
+  console.warn("useSidebar.setState is deprecated. Use onOpen/onClose/onToggle instead.");
+};

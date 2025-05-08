@@ -34,13 +34,13 @@ import { useAuth } from "@/contexts/AuthContext";
 export function Sidebar() {
   const { user } = useAuth();
   const { pathname } = useLocation();
-  const { isOpen, close } = useSidebar();
+  const { isOpen, onOpen, onClose, onToggle } = useSidebar();
   const isAdmin = user?.email?.includes("admin") || user?.email === "test@example.com";
 
   // Close sidebar on route change for mobile
   useEffect(() => {
-    close();
-  }, [pathname]);
+    onClose();
+  }, [pathname, onClose]);
 
   const navItems = [
     {
@@ -170,10 +170,11 @@ export function Sidebar() {
               {navItems.map((item) => (
                 <NavItem
                   key={item.href}
-                  title={item.title}
                   href={item.href}
-                  icon={item.icon}
-                />
+                  icon={() => item.icon}
+                >
+                  {item.title}
+                </NavItem>
               ))}
             </div>
             
@@ -186,10 +187,11 @@ export function Sidebar() {
                   {adminNavItems.map((item) => (
                     <NavItem
                       key={item.href}
-                      title={item.title}
                       href={item.href}
-                      icon={item.icon}
-                    />
+                      icon={() => item.icon}
+                    >
+                      {item.title}
+                    </NavItem>
                   ))}
                 </div>
               </>
@@ -222,29 +224,24 @@ export function Sidebar() {
       )}>
         <MobileNavItem
           href="/dashboard"
-          icon={<LayoutDashboard className="h-5 w-5" />}
-          label="Home"
+          title="Home"
         />
         <MobileNavItem
           href="/dashboard/sheet-music"
-          icon={<Music2 className="h-5 w-5" />}
-          label="Music"
+          title="Music"
         />
         <MobileNavItem
           href="/dashboard/setlists"
-          icon={<ListMusic className="h-5 w-5" />}
-          label="Setlists"
+          title="Setlists"
         />
         <MobileNavItem
           href="/dashboard/calendar"
-          icon={<Calendar className="h-5 w-5" />}
-          label="Calendar"
+          title="Calendar"
         />
         <MobileNavItem
           href="#sidebar"
-          icon={<PanelLeft className="h-5 w-5" />}
-          label="Menu"
-          onClick={() => isOpen ? close() : useSidebar.setState({ isOpen: true })}
+          title="Menu"
+          onClick={() => isOpen ? onClose() : onOpen()}
         />
       </nav>
       
@@ -252,7 +249,7 @@ export function Sidebar() {
       {isOpen && (
         <div 
           className="fixed inset-0 z-20 bg-background/80 backdrop-blur-sm lg:hidden"
-          onClick={close}
+          onClick={onClose}
         />
       )}
     </>
