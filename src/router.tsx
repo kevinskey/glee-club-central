@@ -1,5 +1,4 @@
-
-import { createBrowserRouter } from "react-router-dom";
+import { RouteObject } from "react-router-dom";
 import DashboardPage from "@/pages/DashboardPage";
 import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
 import LoginPage from "@/pages/LoginPage";
@@ -15,7 +14,9 @@ import RecordingsPage from "@/pages/RecordingsPage";
 import LandingPage from "@/pages/LandingPage";
 import FanPage from "@/pages/FanPage";
 
-const router = createBrowserRouter([
+// This file is used for reference only - actual routes are now in App.tsx
+// We keep this for future reference or if we want to switch back to RouterProvider
+const routes: RouteObject[] = [
   // Public routes
   {
     path: "/",
@@ -81,6 +82,6 @@ const router = createBrowserRouter([
     path: "*",
     element: <NotFoundPage />,
   }
-]);
+];
 
-export default router;
+export default routes;
