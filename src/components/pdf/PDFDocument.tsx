@@ -1,5 +1,5 @@
 
-import React, { useRef } from "react";
+import React, { useRef, useEffect } from "react";
 import { Loader2 } from "lucide-react";
 
 interface PDFDocumentProps {
@@ -27,29 +27,47 @@ export const PDFDocument = ({
 }: PDFDocumentProps) => {
   const iframeRef = useRef<HTMLIFrameElement>(null);
   
+  // Ensure the URL is properly sanitized
+  const sanitizedUrl = url.trim();
+  
   // Build PDF URL with appropriate parameters
   const getPdfViewerUrl = () => {
     const isMobile = window.innerWidth < 768;
     
-    // Starting with the base URL
-    let viewerUrl = `${url}#`;
+    // Check if the URL already contains a hash fragment
+    const baseUrl = sanitizedUrl.includes('#') 
+      ? sanitizedUrl 
+      : `${sanitizedUrl}#`;
     
     // Add parameters optimized for score reading
-    if (isMobile) {
-      // Mobile optimization: fit width for score reading
-      viewerUrl += "toolbar=0&navpanes=0&view=FitH&scrollbar=0";
-    } else {
-      // Desktop: Optimize for score reading
-      viewerUrl += "toolbar=0&navpanes=1&view=FitH&scrollbar=1";
+    let viewerUrl = baseUrl;
+    
+    // Only append parameters if they're not already in the URL
+    if (!baseUrl.includes('view=')) {
+      if (isMobile) {
+        // Mobile optimization: fit width for score reading
+        viewerUrl += baseUrl.includes('?') || baseUrl.includes('#') ? '&' : '#';
+        viewerUrl += "toolbar=0&navpanes=0&view=FitH&scrollbar=0";
+      } else {
+        // Desktop: Optimize for score reading
+        viewerUrl += baseUrl.includes('?') || baseUrl.includes('#') ? '&' : '#';
+        viewerUrl += "toolbar=0&navpanes=1&view=FitH&scrollbar=1";
+      }
     }
     
-    // Add page parameter if needed
-    if (currentPage > 1) {
-      viewerUrl += `&page=${currentPage}`;
+    // Add page parameter if needed and not already present
+    if (currentPage > 1 && !viewerUrl.includes('page=')) {
+      viewerUrl += viewerUrl.includes('?') || viewerUrl.includes('&') ? '&' : '#';
+      viewerUrl += `page=${currentPage}`;
     }
     
     return viewerUrl;
   };
+
+  // Log for debugging
+  useEffect(() => {
+    console.log("PDF URL being used:", getPdfViewerUrl());
+  }, [url, currentPage, zoom]);
 
   if (error) {
     return (
@@ -57,7 +75,7 @@ export const PDFDocument = ({
         <div>
           <p className="mb-4 text-muted-foreground">{error}</p>
           <button 
-            onClick={() => window.open(url, "_blank")}
+            onClick={() => window.open(sanitizedUrl, "_blank")}
             className="px-4 py-2 border rounded-md hover:bg-muted"
           >
             Download PDF Instead
@@ -92,6 +110,7 @@ export const PDFDocument = ({
         onError={onError}
         title={title}
         frameBorder="0"
+        sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-downloads"
       />
       
       {children}
