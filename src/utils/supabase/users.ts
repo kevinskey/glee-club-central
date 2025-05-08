@@ -108,7 +108,7 @@ export async function updateUserProfile(userId: string, profileData: Partial<Pro
 }
 
 // Search users by email with fixed type signature to prevent infinite type recursion
-export async function searchUserByEmail(email: string): Promise<Profile | null> {
+export async function searchUserByEmail(email: string): Promise<any> {
   console.log(`Searching for user with email: ${email}`);
   try {
     const { data, error } = await supabase
@@ -123,7 +123,7 @@ export async function searchUserByEmail(email: string): Promise<Profile | null> 
     }
     
     console.log(`Search result for email ${email}:`, data);
-    return data;
+    return data as any;
   } catch (error) {
     console.error(`Error searching for user with email ${email}:`, error);
     throw error;

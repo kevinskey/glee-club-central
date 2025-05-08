@@ -18,7 +18,17 @@ import {
 } from "@/components/ui/accordion"
 import { useSidebar } from "@/hooks/use-sidebar"
 import { useAuth } from "@/contexts/AuthContext"
-import { Home, Settings, Users, LucideIcon } from "lucide-react";
+import { 
+  Home, 
+  Settings, 
+  Users, 
+  LucideIcon, 
+  CalendarDays,
+  FileText,
+  Mic,
+  MessageSquare,
+  Music
+} from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
 interface MenuItemProps {
@@ -51,7 +61,7 @@ export function SidebarNav() {
       <a
         key={item.title}
         href={item.href}
-        className="group flex w-full items-center space-x-2 rounded-md p-2 text-sm font-medium hover:underline"
+        className="group flex w-full items-center space-x-2 rounded-md p-2 text-sm font-medium hover:bg-muted hover:underline"
         onClick={(e) => {
           e.preventDefault();
           onClose();
@@ -75,7 +85,7 @@ export function SidebarNav() {
     if (section.submenu && section.submenu.length > 0) {
       return (
         <AccordionItem value={section.title} key={section.title}>
-          <AccordionTrigger className="group flex items-center justify-between rounded-md p-2 text-sm font-medium hover:underline">
+          <AccordionTrigger className="group flex items-center justify-between rounded-md p-2 text-sm font-medium hover:bg-muted hover:no-underline">
             <div className="flex items-center space-x-2">
               <section.icon className="h-4 w-4" />
               <span>{section.title}</span>
@@ -100,33 +110,47 @@ export function SidebarNav() {
 
   const menuItems: MenuSectionProps[] = [
     {
-      title: "Home",
+      title: "Dashboard",
       icon: Home,
       href: "/dashboard",
     },
     {
       title: "Members",
       icon: Users,
-      href: "/dashboard/members",
+      href: "#",
       submenu: [
         {
-          title: "Directory",
+          title: "Member Directory",
           icon: Users,
           href: "/dashboard/member-directory",
         },
         {
-          title: "Add Member",
+          title: "Member Management",
           icon: Users,
-          href: "/dashboard/members/add",
-          requiredRoles: ["administrator"],
-        },
-        {
-          title: "Management",
-          icon: Users,
-          href: "/dashboard/member-management",
+          href: "/dashboard/members-management",
           requiredRoles: ["administrator"],
         },
       ],
+    },
+    {
+      title: "Events",
+      icon: CalendarDays,
+      href: "/dashboard/calendar",
+    },
+    {
+      title: "Sheet Music",
+      icon: FileText,
+      href: "/dashboard/sheet-music",
+    },
+    {
+      title: "Rehearsals",
+      icon: Mic,
+      href: "/dashboard/rehearsals",
+    },
+    {
+      title: "Messages",
+      icon: MessageSquare,
+      href: "/dashboard/messages",
     },
     {
       title: "Settings",
@@ -136,28 +160,46 @@ export function SidebarNav() {
   ];
 
   return (
-    <Sheet open={isOpen} onOpenChange={onClose}>
-      <SheetTrigger asChild>
-        <button className="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:pointer-events-none data-[state=open]:bg-accent data-[state=open]:text-muted-foreground sm:hidden">
-          Open Menu
-        </button>
-      </SheetTrigger>
-      <SheetContent side="left" className="w-full sm:w-64">
-        <SheetHeader className="text-left">
-          <SheetTitle>Menu</SheetTitle>
-          <SheetDescription>
-            Navigate through your dashboard.
-          </SheetDescription>
-        </SheetHeader>
-        <Separator className="my-2" />
-        <ScrollArea className="my-4">
-          <div className="flex flex-col space-y-1">
-            <Accordion type="single" collapsible>
+    <>
+      {/* Mobile Navigation */}
+      <Sheet open={isOpen} onOpenChange={onClose}>
+        <SheetContent side="left" className="w-full sm:w-64">
+          <SheetHeader className="text-left">
+            <SheetTitle>Menu</SheetTitle>
+            <SheetDescription>
+              Navigate through your dashboard.
+            </SheetDescription>
+          </SheetHeader>
+          <Separator className="my-2" />
+          <ScrollArea className="my-4">
+            <div className="flex flex-col space-y-1">
+              <Accordion type="single" collapsible className="w-full">
+                {menuItems.map(section => renderMenuSection(section))}
+              </Accordion>
+            </div>
+          </ScrollArea>
+        </SheetContent>
+      </Sheet>
+
+      {/* Desktop Navigation */}
+      <aside className="fixed hidden md:flex flex-col w-64 h-screen border-r bg-card">
+        <div className="p-4">
+          <h2 className="font-semibold text-lg">Glee World</h2>
+          <p className="text-sm text-muted-foreground">Member Dashboard</p>
+        </div>
+        <Separator />
+        <ScrollArea className="flex-1 pt-2">
+          <div className="flex flex-col space-y-1 p-2">
+            <Accordion type="single" collapsible className="w-full">
               {menuItems.map(section => renderMenuSection(section))}
             </Accordion>
           </div>
         </ScrollArea>
-      </SheetContent>
-    </Sheet>
-  )
+        <Separator />
+        <div className="p-4">
+          <p className="text-xs text-muted-foreground">Spelman College Glee Club</p>
+        </div>
+      </aside>
+    </>
+  );
 }

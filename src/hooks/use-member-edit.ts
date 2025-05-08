@@ -16,7 +16,6 @@ export interface EditMemberFormValues {
   class_year?: string | null;
   dues_paid?: boolean | null;
   notes?: string | null;
-  special_roles?: string | null;
 }
 
 export function useMemberEdit() {
@@ -46,7 +45,6 @@ export function useMemberEdit() {
         class_year: formData.class_year,
         dues_paid: formData.dues_paid,
         notes: formData.notes,
-        special_roles: formData.special_roles
       };
       
       // Update the profile in the database
