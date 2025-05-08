@@ -18,7 +18,6 @@ import MemberEditPage from "@/pages/MemberEditPage";
 import EditMemberPage from "@/pages/EditMemberPage";
 import UpdatePasswordPage from "@/pages/UpdatePasswordPage";
 import MemberDirectoryPage from "@/pages/MemberDirectoryPage";
-import MemberManagementPage from "@/pages/MemberManagementPage";
 
 const router = createBrowserRouter([
   {
