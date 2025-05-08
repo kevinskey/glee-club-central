@@ -1,53 +1,5 @@
 
-import { supabase } from '@/integrations/supabase/client';
-
-// Define explicit interface for user profile to avoid recursive type instantiation
-export interface UserSafe {
-  id: string;
-  first_name: string | null;
-  last_name: string | null;
-  email: string | null;
-  phone: string | null;
-  voice_part: string | null;
-  role: string;
-  role_display_name: string | null;
-  voice_part_display: string | null;
-  avatar_url: string | null;
-  status: string;
-  join_date: string | null;
-  class_year: string | null;
-  dues_paid: boolean | null;
-  special_roles: string | null;
-  notes: string | null;
-  created_at: string;
-  updated_at: string | null;
-  last_sign_in_at: string | null;
-}
-
-// Profile type used throughout the application
-export type Profile = {
-  id: string;
-  first_name: string | null;
-  last_name: string | null;
-  email: string | null;
-  phone: string | null;
-  voice_part: string | null;
-  role: string;
-  status: string;
-  join_date: string | null;
-  class_year: string | null;
-  dues_paid: boolean | null;
-  special_roles: string | null;
-  notes: string | null;
-  avatar_url: string | null;
-  created_at: string;
-  updated_at?: string | null;
-  last_sign_in_at?: string | null;
-  role_display_name?: string | null;
-  voice_part_display?: string | null;
-};
-
-// Define permission set for each role type
+// Permissions
 export interface PermissionSet {
   canEditUsers: boolean;
   canDeleteUsers: boolean;
@@ -62,7 +14,7 @@ export interface PermissionSet {
   canAccessAdminFeatures: boolean;
 }
 
-// Create role-based permission mapping
+// Define permissions for each role
 export const rolePermissions: Record<string, PermissionSet> = {
   administrator: {
     canEditUsers: true,
@@ -108,7 +60,7 @@ export const rolePermissions: Record<string, PermissionSet> = {
     canDeleteUsers: false,
     canEditMusic: true,
     canUploadMusic: true,
-    canEditCalendar: true,
+    canEditCalendar: false,
     canTakeAttendance: true,
     canManagePayments: false,
     canEditOwnProfile: true,
@@ -120,7 +72,7 @@ export const rolePermissions: Record<string, PermissionSet> = {
     canEditUsers: false,
     canDeleteUsers: false,
     canEditMusic: true,
-    canUploadMusic: true,
+    canUploadMusic: false,
     canEditCalendar: false,
     canTakeAttendance: false,
     canManagePayments: false,
@@ -146,5 +98,38 @@ export const rolePermissions: Record<string, PermissionSet> = {
 
 // Helper function to get permissions for a role
 export function getUserPermissions(role: string): PermissionSet {
-  return rolePermissions[role] || rolePermissions.singer; // Default to singer permissions
+  // Default to member role permissions if role not found
+  return rolePermissions[role] || rolePermissions.singer;
+}
+
+// Define a clean interface for UserSafe to avoid recursive type issues
+export interface UserSafe {
+  id: string;
+  email?: string | null;
+  first_name: string | null;
+  last_name: string | null;
+  phone?: string | null;
+  voice_part: string | null;
+  voice_part_display?: string | null;
+  role: string;
+  role_display_name?: string;
+  avatar_url?: string | null;
+  status: string;
+  join_date?: string | null;
+  created_at: string;
+  updated_at?: string | null;
+  class_year?: string | null;
+  dues_paid?: boolean | null;
+  special_roles?: string | null;
+  notes?: string | null;
+  last_sign_in_at?: string | null;
+}
+
+// Note type to track member notes
+export interface MemberNote {
+  id: string;
+  member_id: string;
+  created_by: string;
+  note: string;
+  created_at: string;
 }

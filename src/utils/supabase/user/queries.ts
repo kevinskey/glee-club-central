@@ -51,6 +51,26 @@ export async function fetchUserById(userId: string): Promise<UserSafe> {
   }
 }
 
+// Search users by email - using a simple interface to avoid recursive type issues
+interface SimpleUserData {
+  id: string;
+  first_name: string | null;
+  last_name: string | null;
+  email: string;
+  phone: string | null;
+  voice_part: string | null;
+  role: string;
+  avatar_url: string | null;
+  status: string;
+  join_date: string | null;
+  class_year: string | null;
+  dues_paid: boolean | null;
+  special_roles: string | null;
+  notes: string | null;
+  created_at: string;
+  updated_at: string | null;
+}
+
 // Search users by email without recursive type issues
 export const searchUserByEmail = async (email: string): Promise<UserSafe | null> => {
   try {
@@ -67,26 +87,29 @@ export const searchUserByEmail = async (email: string): Promise<UserSafe | null>
 
     if (!data) return null;
     
+    // Convert data to UserSafe type
+    const userProfile = data as SimpleUserData;
+    
     // Create a safe user object without recursive type issues
     const userSafe: UserSafe = {
-      id: data.id,
-      first_name: data.first_name,
-      last_name: data.last_name,
-      email: email, // Use the email from the query
-      phone: data.phone,
-      voice_part: data.voice_part,
-      role: data.role || 'singer',
-      role_display_name: getRoleDisplayName(data.role || 'singer'),
-      voice_part_display: getVoicePartDisplay(data.voice_part),
-      avatar_url: data.avatar_url,
-      status: data.status || 'pending',
-      join_date: data.join_date,
-      class_year: data.class_year,
-      dues_paid: data.dues_paid,
-      special_roles: data.special_roles,
-      notes: data.notes,
-      created_at: data.created_at,
-      updated_at: data.updated_at || null,
+      id: userProfile.id,
+      first_name: userProfile.first_name,
+      last_name: userProfile.last_name,
+      email,
+      phone: userProfile.phone,
+      voice_part: userProfile.voice_part,
+      role: userProfile.role || 'singer',
+      role_display_name: getRoleDisplayName(userProfile.role || 'singer'),
+      voice_part_display: getVoicePartDisplay(userProfile.voice_part),
+      avatar_url: userProfile.avatar_url,
+      status: userProfile.status || 'pending',
+      join_date: userProfile.join_date,
+      class_year: userProfile.class_year,
+      dues_paid: userProfile.dues_paid,
+      special_roles: userProfile.special_roles,
+      notes: userProfile.notes,
+      created_at: userProfile.created_at,
+      updated_at: userProfile.updated_at || null,
       last_sign_in_at: null // Since this comes from auth.users, not profiles
     };
 
