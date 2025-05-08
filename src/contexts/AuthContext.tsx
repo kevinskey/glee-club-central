@@ -3,8 +3,7 @@ import { createContext, useState, useContext, useEffect, ReactNode } from "react
 import { useNavigate } from "react-router-dom";
 import { Session } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
-import { PermissionSet, getUserPermissions } from "@/utils/supabase/user/types";
-import type { AuthContextType, AuthUser, Profile } from "@/types/auth";
+import type { AuthUser, Profile } from "@/types/auth";
 import { toast } from "sonner";
 
 // Create the context
@@ -13,6 +12,58 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 interface Props {
   children: ReactNode;
 }
+
+// Define permissions type here since we removed the imported one
+interface PermissionSet {
+  canEditUsers: boolean;
+  canDeleteUsers: boolean;
+  canEditMusic: boolean;
+  canUploadMusic: boolean;
+  canEditCalendar: boolean;
+  canTakeAttendance: boolean;
+  canManagePayments: boolean;
+  canEditOwnProfile: boolean;
+  canViewMemberDetails: boolean;
+  canManageWardrobe: boolean;
+  canAccessAdminFeatures: boolean;
+  [key: string]: boolean;
+}
+
+// Helper function to get user permissions based on role
+const getUserPermissions = (role: string): PermissionSet => {
+  const basePermissions: PermissionSet = {
+    canEditUsers: false,
+    canDeleteUsers: false,
+    canEditMusic: false,
+    canUploadMusic: false,
+    canEditCalendar: false,
+    canTakeAttendance: false,
+    canManagePayments: false,
+    canEditOwnProfile: true,
+    canViewMemberDetails: false,
+    canManageWardrobe: false,
+    canAccessAdminFeatures: false
+  };
+
+  switch (role) {
+    case 'administrator':
+      return {
+        ...basePermissions,
+        canEditUsers: true,
+        canDeleteUsers: true,
+        canEditMusic: true,
+        canUploadMusic: true,
+        canEditCalendar: true,
+        canTakeAttendance: true,
+        canManagePayments: true,
+        canViewMemberDetails: true,
+        canManageWardrobe: true,
+        canAccessAdminFeatures: true
+      };
+    default:
+      return basePermissions;
+  }
+};
 
 export function AuthProvider({ children }: Props) {
   const [user, setUser] = useState<AuthUser | null>(null);
@@ -167,7 +218,7 @@ export function AuthProvider({ children }: Props) {
   };
 
   // Value object for the context provider
-  const value: AuthContextType = {
+  const value = {
     user,
     userProfile,
     permissions,
@@ -199,5 +250,5 @@ export function useAuth() {
 }
 
 // Type exports
-export type { AuthContextType };
+export type { AuthContextType } from "@/types/auth";
 export type { Profile };

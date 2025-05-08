@@ -10,7 +10,6 @@ import ForgotPasswordPage from '@/pages/ForgotPasswordPage';
 import ResetPasswordPage from '@/pages/ResetPasswordPage';
 import DashboardPage from '@/pages/DashboardPage';
 import CalendarPage from '@/pages/CalendarPage';
-import ProfilePage from '@/pages/ProfilePage';
 import NotFoundPage from '@/pages/NotFoundPage';
 import FanPage from '@/pages/FanPage';
 
@@ -41,7 +40,6 @@ function App() {
       }>
         <Route index element={<DashboardPage />} />
         <Route path="calendar" element={<CalendarPage />} />
-        <Route path="profile" element={<ProfilePage />} />
         <Route path="schedule" element={<CalendarPage />} /> {/* Redirect schedule to calendar */}
       </Route>
 

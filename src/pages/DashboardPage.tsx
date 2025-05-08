@@ -4,8 +4,7 @@ import { Link } from "react-router-dom";
 import { 
   BookOpen, 
   Calendar, 
-  CheckSquare, 
-  CreditCard, 
+  CreditCard,
   FileText, 
   Headphones, 
   Mic, 
@@ -64,7 +63,7 @@ export default function DashboardPage() {
       description: "Access and download sheet music for your voice part",
       icon: <FileText className="h-6 w-6" />,
       href: "/dashboard/sheet-music",
-      color: "bg-glee-purple/10",
+      color: "bg-purple-500/10",
     },
     {
       title: "Practice & Sight Reading",
@@ -114,13 +113,6 @@ export default function DashboardPage() {
       icon: <ShoppingBag className="h-6 w-6" />,
       href: "/dashboard/merch",
       color: "bg-pink-500/10",
-    },
-    {
-      title: "Check Attendance",
-      description: "View your attendance record for rehearsals and events",
-      icon: <CheckSquare className="h-6 w-6" />,
-      href: "/dashboard/attendance",
-      color: "bg-teal-500/10",
     },
     {
       title: "Media Library",
