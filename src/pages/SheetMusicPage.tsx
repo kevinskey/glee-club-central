@@ -1,3 +1,4 @@
+
 import React from "react";
 import { PageHeader } from "@/components/ui/page-header";
 import { FileText, Search, Plus, Upload, FolderOpen, ListMusic, Check, TableIcon } from "lucide-react";
@@ -145,7 +146,7 @@ export default function SheetMusicPage() {
         }
       />
 
-      {/* Search bar */}
+      {/* Search bar and view toggle */}
       <div className="flex flex-col md:flex-row gap-4">
         <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
@@ -164,6 +165,18 @@ export default function SheetMusicPage() {
           >
             <ListMusic className="h-4 w-4 mr-2" /> Manage Setlists
           </Button>
+          
+          {/* Add visible Table View button */}
+          <Button 
+            variant="outline"
+            asChild
+            className="flex-shrink-0"
+          >
+            <Link to="/dashboard/sheet-music?view=list">
+              <TableIcon className="h-4 w-4 mr-2" /> Table View
+            </Link>
+          </Button>
+          
           <Button 
             onClick={() => setIsUploadModalOpen(true)}
             className="flex-shrink-0 md:hidden"
