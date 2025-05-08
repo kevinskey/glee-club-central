@@ -23,6 +23,7 @@ import AboutPage from './pages/AboutPage';
 import ContactPage from './pages/ContactPage';
 import AdministrationPage from './pages/AdministrationPage';
 import ViewSheetMusicPage from './pages/sheet-music/ViewSheetMusicPage';
+import SetlistsPage from './pages/SetlistsPage';
 
 // Admin Pages
 import AdminDashboardPage from './pages/AdminDashboardPage';
@@ -58,6 +59,7 @@ function App() {
         <Route path="calendar" element={<CalendarPage />} />
         <Route path="sheet-music" element={<SheetMusicPage />} />
         <Route path="sheet-music/:id" element={<ViewSheetMusicPage />} />
+        <Route path="setlists" element={<SetlistsPage />} />
         <Route path="practice" element={<div>Practice Page</div>} />
         <Route path="recordings" element={<RecordingsPage />} />
         <Route path="videos" element={<div>Videos Page</div>} />

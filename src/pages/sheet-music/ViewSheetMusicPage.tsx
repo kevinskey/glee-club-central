@@ -80,12 +80,21 @@ export default function ViewSheetMusicPage() {
 
   return (
     <div className="space-y-4">
-      <Button asChild variant="ghost" className="mb-2">
-        <Link to="/dashboard/sheet-music" className="flex items-center">
-          <ArrowLeft className="mr-2 h-4 w-4" />
-          Back to Music Library
-        </Link>
-      </Button>
+      <div className="flex items-center justify-between mb-2">
+        <Button asChild variant="ghost">
+          <Link to="/dashboard/sheet-music" className="flex items-center">
+            <ArrowLeft className="mr-2 h-4 w-4" />
+            Back to Music Library
+          </Link>
+        </Button>
+        
+        <Button asChild variant="outline" size="sm">
+          <Link to="/dashboard/setlists" className="flex items-center">
+            <ListMusic className="mr-2 h-4 w-4" />
+            View All Setlists
+          </Link>
+        </Button>
+      </div>
         
       {/* Setlist drawer component */}
       <SetlistDrawer
