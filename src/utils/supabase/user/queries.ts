@@ -1,4 +1,3 @@
-
 // This file contains user query functions for Supabase
 
 import { supabase } from "@/integrations/supabase/client";
@@ -21,19 +20,15 @@ export interface UserSearchResult {
  */
 export async function searchUserByEmail(email: string): Promise<UserSearchResult | null> {
   try {
-    // First, find the user in auth.users by email (this is accessible via RPC)
-    const { data: userData, error: authError } = await supabase.auth.admin.listUsers({
-      filter: {
-        email: email
-      }
-    });
+    // Use auth.getUser() to directly query for a user by email
+    const { data: authData, error: authError } = await supabase.auth.admin.getUserByEmail(email);
     
-    if (authError || !userData || userData.users.length === 0) {
+    if (authError || !authData) {
       console.error("Error finding user with email:", email, authError);
       return null;
     }
 
-    const userId = userData.users[0].id;
+    const userId = authData.user.id;
     
     // Now fetch the profile using the user ID
     const { data: profileData, error: profileError } = await supabase
@@ -53,7 +48,7 @@ export async function searchUserByEmail(email: string): Promise<UserSearchResult
     
     return {
       id: profileData.id,
-      email: userData.users[0].email,
+      email: authData.user.email,
       first_name: profileData.first_name,
       last_name: profileData.last_name,
       role: profileData.role,
