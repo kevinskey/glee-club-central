@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { PageHeader } from "@/components/ui/page-header";
@@ -255,19 +254,19 @@ export default function SheetMusicPage() {
             <Button 
               variant="outline"
               asChild
-              className="mr-2 bg-glee-purple/10 hover:bg-glee-purple hover:text-white border-glee-purple/30"
+              className="mr-2 bg-red-600 hover:bg-red-700 text-white"
             >
-              <Link to="/dashboard/setlists" className="flex items-center gap-2">
-                <ListMusic className="h-4 w-4" /> View Setlists
+              <Link to="/dashboard/sheet-music?view=list" className="flex items-center gap-2">
+                <TableIcon className="h-4 w-4" /> Table View
               </Link>
             </Button>
             <Button 
               variant="outline"
               asChild
-              className="mr-2 bg-red-600 hover:bg-red-700 text-white"
+              className="mr-2 bg-glee-purple/10 hover:bg-glee-purple hover:text-white border-glee-purple/30"
             >
-              <Link to="/dashboard/sheet-music?view=list" className="flex items-center gap-2">
-                <TableIcon className="h-4 w-4" /> Table View
+              <Link to="/dashboard/setlists" className="flex items-center gap-2">
+                <ListMusic className="h-4 w-4" /> View Setlists
               </Link>
             </Button>
             <Button 
