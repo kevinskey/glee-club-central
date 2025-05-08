@@ -20,8 +20,9 @@ import {
 import { Spinner } from "@/components/ui/spinner";
 
 const DashboardPage = () => {
-  // Use optional chaining and default value to prevent errors
-  const { profile = {} } = useAuth();
+  // Properly typed default profile object to avoid TypeScript errors
+  const { profile } = useAuth();
+  const profileData = profile || { first_name: 'Member' };
   
   // Sample data for dashboard components
   const upcomingEvents = [
@@ -64,7 +65,7 @@ const DashboardPage = () => {
   return (
     <div className="container mx-auto p-4 space-y-6">
       <PageHeader
-        title={`Welcome, ${profile?.first_name || 'Member'}`}
+        title={`Welcome, ${profileData.first_name}`}
         description="Your Glee Club Dashboard"
         icon={<Home className="h-6 w-6" />}
       />
