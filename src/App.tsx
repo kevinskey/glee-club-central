@@ -11,13 +11,7 @@ import ResetPasswordPage from '@/pages/ResetPasswordPage';
 import DashboardPage from '@/pages/DashboardPage';
 import CalendarPage from '@/pages/CalendarPage';
 import ProfilePage from '@/pages/ProfilePage';
-import MemberProfilePage from '@/pages/MemberProfilePage';
-import MemberEditPage from '@/pages/MemberEditPage';
-import MemberAddPage from '@/pages/MemberAddPage';
-import AdminUserManagementPage from '@/pages/AdminUserManagementPage';
-import MemberDirectoryPage from '@/pages/MemberDirectoryPage';
 import NotFoundPage from '@/pages/NotFoundPage';
-import InviteMemberPage from '@/pages/InviteMemberPage';
 import FanPage from '@/pages/FanPage';
 
 import { Outlet } from "react-router-dom";
@@ -48,17 +42,7 @@ function App() {
         <Route index element={<DashboardPage />} />
         <Route path="calendar" element={<CalendarPage />} />
         <Route path="profile" element={<ProfilePage />} />
-        <Route path="profile/:id" element={<MemberProfilePage />} />
         <Route path="schedule" element={<CalendarPage />} /> {/* Redirect schedule to calendar */}
-        
-        {/* Member directory and management */}
-        <Route path="members" element={<MemberDirectoryPage />} />
-        <Route path="member-directory" element={<MemberDirectoryPage />} />
-        <Route path="member-management" element={<AdminUserManagementPage />} />
-        <Route path="invite-member" element={<InviteMemberPage />} />
-        <Route path="members/:id" element={<MemberProfilePage />} />
-        <Route path="members/edit/:id" element={<MemberEditPage />} />
-        <Route path="members/add" element={<MemberAddPage />} />
       </Route>
 
       {/* Catch all for 404 errors */}
