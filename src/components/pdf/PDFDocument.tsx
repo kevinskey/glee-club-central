@@ -1,6 +1,7 @@
 
-import React, { useRef, useEffect } from "react";
-import { Loader2 } from "lucide-react";
+import React, { useRef, useEffect, useState } from "react";
+import { Loader2, FileText, Download } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 interface PDFDocumentProps {
   url: string;
@@ -26,13 +27,31 @@ export const PDFDocument = ({
   children,
 }: PDFDocumentProps) => {
   const iframeRef = useRef<HTMLIFrameElement>(null);
+  const [fallbackMode, setFallbackMode] = useState(false);
   
   // Ensure the URL is properly sanitized and valid
   const sanitizedUrl = url ? url.trim() : "";
   
+  useEffect(() => {
+    // Reset fallback mode when URL changes
+    setFallbackMode(false);
+  }, [url]);
+
+  // Handle iframe load error - switch to fallback mode
+  const handleIframeError = () => {
+    console.log("PDF iframe failed to load, switching to fallback mode");
+    setFallbackMode(true);
+    onError();
+  };
+
   // Build PDF URL with appropriate parameters
   const getPdfViewerUrl = () => {
     if (!sanitizedUrl) return "";
+    
+    // Use Google PDF Viewer as fallback if the direct embed fails
+    if (fallbackMode) {
+      return `https://docs.google.com/viewer?url=${encodeURIComponent(sanitizedUrl)}&embedded=true`;
+    }
     
     const isMobile = window.innerWidth < 768;
     
@@ -71,7 +90,8 @@ export const PDFDocument = ({
   // Log for debugging
   useEffect(() => {
     console.log("PDF URL being used:", getPdfViewerUrl());
-  }, [url, currentPage, zoom]);
+    console.log("Using fallback mode:", fallbackMode);
+  }, [url, currentPage, zoom, fallbackMode]);
 
   if (!url) {
     return (
@@ -85,13 +105,14 @@ export const PDFDocument = ({
     return (
       <div className="flex h-full items-center justify-center p-8 text-center">
         <div>
+          <FileText className="h-16 w-16 mx-auto text-muted-foreground mb-4" />
           <p className="mb-4 text-muted-foreground">{error}</p>
-          <button 
+          <Button 
             onClick={() => window.open(sanitizedUrl, "_blank")}
             className="px-4 py-2 border rounded-md hover:bg-muted"
           >
-            Download PDF Instead
-          </button>
+            <Download className="h-4 w-4 mr-2" /> Download PDF Instead
+          </Button>
         </div>
       </div>
     );
@@ -119,11 +140,18 @@ export const PDFDocument = ({
           height: `${100 / (zoom / 100)}%`
         }}
         onLoad={onLoad}
-        onError={onError}
+        onError={handleIframeError}
         title={title}
         frameBorder="0"
         sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-downloads"
+        allowFullScreen
       />
+      
+      {fallbackMode && (
+        <div className="absolute top-0 left-0 bg-background/70 text-sm p-2 z-10 rounded-md m-2">
+          Using alternative viewer
+        </div>
+      )}
       
       {children}
     </div>
