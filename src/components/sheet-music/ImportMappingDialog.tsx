@@ -321,7 +321,7 @@ export function ImportMappingDialog({ isOpen, onOpenChange, onImportComplete }: 
                     <SelectValue placeholder="Select column" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">None</SelectItem>
+                    <SelectItem key="no-quantity" value="none">None</SelectItem>
                     {headers.map((header) => (
                       <SelectItem key={header} value={header}>{header}</SelectItem>
                     ))}
