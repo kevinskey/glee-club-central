@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { PageHeader } from "@/components/ui/page-header";
@@ -14,6 +13,7 @@ import { SetlistDrawer } from "@/components/setlist/SetlistDrawer";
 import { useAuth } from "@/contexts/AuthContext";
 import { Checkbox } from "@/components/ui/checkbox";
 import { MultipleDownloadBar } from "@/components/sheet-music/MultipleDownloadBar";
+import { PDFThumbnail } from "@/components/pdf/PDFThumbnail";
 import {
   Select,
   SelectContent,
@@ -281,9 +281,7 @@ export default function SheetMusicPage() {
                             onChange={() => toggleFileSelection(file)}
                           />
                         </div>
-                        <div className="aspect-[3/4] bg-muted flex items-center justify-center">
-                          <FileText className="h-16 w-16 text-muted-foreground" />
-                        </div>
+                        <PDFThumbnail url={file.file_url} title={file.title} />
                         <CardContent className="p-3">
                           <h3 className="font-medium text-sm truncate">{file.title}</h3>
                           <p className="text-xs text-muted-foreground truncate">{file.composer}</p>
@@ -294,9 +292,7 @@ export default function SheetMusicPage() {
                         className="cursor-pointer h-full"
                         onClick={() => viewSheetMusic(file.id)}
                       >
-                        <div className="aspect-[3/4] bg-muted flex items-center justify-center">
-                          <FileText className="h-16 w-16 text-muted-foreground" />
-                        </div>
+                        <PDFThumbnail url={file.file_url} title={file.title} />
                         <CardContent className="p-3">
                           <h3 className="font-medium text-sm truncate">{file.title}</h3>
                           <p className="text-xs text-muted-foreground truncate">{file.composer}</p>
@@ -326,6 +322,7 @@ export default function SheetMusicPage() {
                       {isSelectionMode && (
                         <TableHead className="w-10"></TableHead>
                       )}
+                      <TableHead className="w-12"></TableHead>
                       <TableHead>Title</TableHead>
                       <TableHead>Composer</TableHead>
                       <TableHead>Date Added</TableHead>
@@ -346,6 +343,13 @@ export default function SheetMusicPage() {
                             />
                           </TableCell>
                         )}
+                        <TableCell className="p-0 w-12 h-12">
+                          <PDFThumbnail 
+                            url={file.file_url} 
+                            title={file.title} 
+                            className="w-12 h-12 rounded-sm" 
+                          />
+                        </TableCell>
                         <TableCell className="font-medium">{file.title}</TableCell>
                         <TableCell>{file.composer}</TableCell>
                         <TableCell>{file.created_at}</TableCell>
