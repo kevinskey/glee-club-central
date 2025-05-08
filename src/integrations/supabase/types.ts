@@ -133,6 +133,7 @@ export type Database = {
           created_at: string | null
           has_pdf: boolean | null
           id: string
+          library_number: string | null
           sheet_music_id: string | null
           title: string
           updated_at: string | null
@@ -144,6 +145,7 @@ export type Database = {
           created_at?: string | null
           has_pdf?: boolean | null
           id?: string
+          library_number?: string | null
           sheet_music_id?: string | null
           title: string
           updated_at?: string | null
@@ -155,6 +157,7 @@ export type Database = {
           created_at?: string | null
           has_pdf?: boolean | null
           id?: string
+          library_number?: string | null
           sheet_music_id?: string | null
           title?: string
           updated_at?: string | null

@@ -1,481 +1,311 @@
 
-import React, { useState, useRef, useCallback } from "react";
-import Papa from "papaparse";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
+import React, { useState, useRef } from "react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Card } from "@/components/ui/card";
+import { UploadCloud, AlertCircle, FileUp } from "lucide-react";
+import Papa from "papaparse";
 import { useToast } from "@/hooks/use-toast";
-import { FileSpreadsheet, Upload, AlertTriangle } from "lucide-react";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 
-// Define the structure of choral titles
-interface ChoralTitleData {
-  title: string;
-  composer: string;
-  voicing: string;
-  amount_on_hand?: number;
+interface MappingField {
+  csvField: string | null;
+  appField: string;
+  required: boolean;
+  display: string;
 }
 
-// Props for the import dialog
 interface ImportMappingDialogProps {
   isOpen: boolean;
-  onOpenChange: (open: boolean) => void;
-  onImportComplete: (records: ChoralTitleData[]) => void;
+  onOpenChange: (isOpen: boolean) => void;
+  onImportComplete: (records: any[]) => void;
 }
 
-interface ColumnMapping {
-  title: string | null;
-  composer: string | null;
-  voicing: string | null;
-  amount_on_hand: string | null;
-}
-
-export function ImportMappingDialog({ isOpen, onOpenChange, onImportComplete }: ImportMappingDialogProps) {
+export function ImportMappingDialog({ 
+  isOpen, 
+  onOpenChange, 
+  onImportComplete 
+}: ImportMappingDialogProps) {
   const { toast } = useToast();
-  const [parsedData, setParsedData] = useState<any[]>([]);
-  const [headers, setHeaders] = useState<string[]>([]);
-  const [previewData, setPreviewData] = useState<any[]>([]);
-  const [step, setStep] = useState<'upload' | 'mapping' | 'preview'>('upload');
-  const [columnMapping, setColumnMapping] = useState<ColumnMapping>({
-    title: null,
-    composer: null,
-    voicing: null,
-    amount_on_hand: null
-  });
-  const [isDragging, setIsDragging] = useState<boolean>(false);
+  const [csvHeaders, setCsvHeaders] = useState<string[]>([]);
+  const [csvData, setCsvData] = useState<any[]>([]);
+  const [fileName, setFileName] = useState<string>("");
+  const [fieldMapping, setFieldMapping] = useState<MappingField[]>([
+    { csvField: null, appField: "title", required: true, display: "Title" },
+    { csvField: null, appField: "composer", required: true, display: "Composer" },
+    { csvField: null, appField: "voicing", required: true, display: "Voicing" },
+    { csvField: null, appField: "amount_on_hand", required: false, display: "Quantity" },
+    { csvField: null, appField: "library_number", required: false, display: "Library Number" }
+  ]);
+  const [isDragging, setIsDragging] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const dropZoneRef = useRef<HTMLDivElement>(null);
-
-  const resetDialog = () => {
-    setParsedData([]);
-    setHeaders([]);
-    setPreviewData([]);
-    setStep('upload');
-    setColumnMapping({
-      title: null,
-      composer: null,
-      voicing: null,
-      amount_on_hand: null
-    });
-    if (fileInputRef.current) {
-      fileInputRef.current.value = '';
+  
+  // Reset state when dialog closes
+  React.useEffect(() => {
+    if (!isOpen) {
+      setCsvHeaders([]);
+      setCsvData([]);
+      setFileName("");
+      setFieldMapping(fieldMapping.map(field => ({ ...field, csvField: null })));
     }
-  };
+  }, [isOpen]);
 
-  const parseFile = (file: File) => {
-    const fileReader = new FileReader();
-    fileReader.onload = (e) => {
-      try {
-        const csvData = e.target?.result as string;
-        Papa.parse(csvData, {
-          header: true,
-          skipEmptyLines: true,
-          complete: (results) => {
-            if (results.data.length === 0) {
-              toast({
-                title: "Error",
-                description: "No valid data found in the file",
-                variant: "destructive",
-              });
-              return;
-            }
-
-            // Extract headers from the first row
-            const headers = Object.keys(results.data[0]);
-            setHeaders(headers);
-            setParsedData(results.data);
-
-            // Auto-match columns if possible
-            const autoMapping: ColumnMapping = {
-              title: null,
-              composer: null,
-              voicing: null,
-              amount_on_hand: null
-            };
-
-            headers.forEach(header => {
-              const lowerHeader = header.toLowerCase();
-              if (lowerHeader.includes('title')) autoMapping.title = header;
-              if (lowerHeader.includes('composer')) autoMapping.composer = header;
-              if (lowerHeader.includes('voicing') || lowerHeader.includes('voice') || lowerHeader.includes('arrangement')) autoMapping.voicing = header;
-              if (lowerHeader.includes('amount') || lowerHeader.includes('quantity') || lowerHeader.includes('count') || lowerHeader.includes('copies')) autoMapping.amount_on_hand = header;
-            });
-
-            setColumnMapping(autoMapping);
-            setStep('mapping');
-          },
-          error: (error) => {
-            toast({
-              title: "Parse Error",
-              description: error.message || "Failed to parse the file",
-              variant: "destructive",
-            });
-          }
-        });
-      } catch (error: any) {
-        toast({
-          title: "File Error",
-          description: "Failed to read the file. Please check the format.",
-          variant: "destructive",
-        });
-      }
-    };
-    fileReader.readAsText(file);
-  };
-
-  const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (!file) return;
-    parseFile(file);
-  };
-
-  // Handle drag events
-  const handleDragEnter = useCallback((e: React.DragEvent<HTMLDivElement>) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setIsDragging(true);
-  }, []);
-
-  const handleDragLeave = useCallback((e: React.DragEvent<HTMLDivElement>) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setIsDragging(false);
-  }, []);
-
-  const handleDragOver = useCallback((e: React.DragEvent<HTMLDivElement>) => {
-    e.preventDefault();
-    e.stopPropagation();
-    if (!isDragging) {
-      setIsDragging(true);
-    }
-  }, [isDragging]);
-
-  const handleDrop = useCallback((e: React.DragEvent<HTMLDivElement>) => {
+  const handleFileDrop = (e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault();
     e.stopPropagation();
     setIsDragging(false);
     
-    const files = e.dataTransfer.files;
-    if (files && files.length > 0) {
-      const file = files[0];
-      if (file.type === 'text/csv' || file.name.endsWith('.csv')) {
-        parseFile(file);
-      } else {
-        toast({
-          title: "Invalid File",
-          description: "Please upload a CSV file",
-          variant: "destructive",
-        });
-      }
+    if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+      const file = e.dataTransfer.files[0];
+      processFile(file);
     }
-  }, [toast]);
-
-  const handleMappingChange = (field: keyof ColumnMapping, value: string | null) => {
-    setColumnMapping(prev => ({ ...prev, [field]: value }));
+  };
+  
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files.length > 0) {
+      const file = e.target.files[0];
+      processFile(file);
+    }
   };
 
-  const handlePreviewData = () => {
-    if (!columnMapping.title || !columnMapping.composer || !columnMapping.voicing) {
+  const handleDragEnter = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(true);
+  };
+
+  const handleDragLeave = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(false);
+  };
+
+  const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+  };
+
+  const processFile = (file: File) => {
+    if (!file.name.endsWith('.csv')) {
       toast({
-        title: "Mapping Incomplete",
-        description: "Title, composer, and voicing fields are required for import.",
+        title: "Invalid file type",
+        description: "Only CSV files are supported",
         variant: "destructive",
       });
       return;
     }
 
-    try {
-      const mappedData = parsedData.map((row) => ({
-        title: columnMapping.title ? row[columnMapping.title] : "",
-        composer: columnMapping.composer ? row[columnMapping.composer] : "",
-        voicing: columnMapping.voicing ? row[columnMapping.voicing] : "",
-        amount_on_hand: columnMapping.amount_on_hand && row[columnMapping.amount_on_hand] 
-          ? parseInt(row[columnMapping.amount_on_hand], 10) 
-          : 0
-      }));
-
-      // Filter out rows with missing required fields
-      const validData = mappedData.filter(
-        row => row.title && row.composer && row.voicing
-      );
-
-      if (validData.length === 0) {
+    setFileName(file.name);
+    
+    Papa.parse(file, {
+      header: true,
+      skipEmptyLines: true,
+      complete: (results) => {
+        // Get the headers from the first row
+        const headers = results.meta.fields || [];
+        setCsvHeaders(headers);
+        setCsvData(results.data);
+        
+        // Try to auto-map fields by matching column names
+        const updatedMapping = [...fieldMapping];
+        
+        updatedMapping.forEach((field, index) => {
+          // Look for exact matches first
+          const exactMatch = headers.find(
+            header => header.toLowerCase() === field.appField.toLowerCase()
+          );
+          
+          if (exactMatch) {
+            updatedMapping[index].csvField = exactMatch;
+            return;
+          }
+          
+          // Then try to find partial matches
+          const partialMatch = headers.find(
+            header => header.toLowerCase().includes(field.appField.toLowerCase())
+          );
+          
+          if (partialMatch) {
+            updatedMapping[index].csvField = partialMatch;
+          }
+        });
+        
+        setFieldMapping(updatedMapping);
+      },
+      error: (error) => {
         toast({
-          title: "Validation Error",
-          description: "No valid records found after mapping. Please check your column mapping.",
+          title: "Error parsing CSV",
+          description: error.message,
           variant: "destructive",
         });
-        return;
       }
+    });
+  };
 
-      setPreviewData(validData.slice(0, 5)); // Show first 5 records for preview
-      setStep('preview');
-    } catch (error: any) {
-      toast({
-        title: "Mapping Error",
-        description: error.message || "Failed to map data",
-        variant: "destructive",
-      });
-    }
+  const handleMappingChange = (index: number, value: string) => {
+    const updatedMapping = [...fieldMapping];
+    updatedMapping[index].csvField = value;
+    setFieldMapping(updatedMapping);
   };
 
   const handleImport = () => {
-    if (parsedData.length === 0) {
+    // Check if required fields are mapped
+    const missingRequiredFields = fieldMapping
+      .filter(field => field.required && !field.csvField)
+      .map(field => field.display);
+    
+    if (missingRequiredFields.length > 0) {
       toast({
-        title: "Import Error",
-        description: "No data to import",
+        title: "Missing required fields",
+        description: `Please map the following required fields: ${missingRequiredFields.join(", ")}`,
         variant: "destructive",
       });
       return;
     }
 
-    try {
-      const mappedData = parsedData.map((row) => ({
-        title: columnMapping.title ? row[columnMapping.title] : "",
-        composer: columnMapping.composer ? row[columnMapping.composer] : "",
-        voicing: columnMapping.voicing ? row[columnMapping.voicing] : "",
-        amount_on_hand: columnMapping.amount_on_hand && row[columnMapping.amount_on_hand] 
-          ? parseInt(row[columnMapping.amount_on_hand], 10) 
-          : 0
-      }));
-
-      // Filter out rows with missing required fields
-      const validData = mappedData.filter(
-        row => row.title && row.composer && row.voicing
-      );
-
-      if (validData.length === 0) {
-        toast({
-          title: "Validation Error",
-          description: "No valid records found after mapping. Please check your column mapping.",
-          variant: "destructive",
-        });
-        return;
-      }
-
-      onImportComplete(validData);
-      toast({
-        title: "Import Prepared",
-        description: `${validData.length} records ready for import.`,
+    // Transform data based on mappings
+    const transformedData = csvData.map(row => {
+      const newRow: Record<string, any> = {};
+      
+      fieldMapping.forEach(field => {
+        if (field.csvField) {
+          // For amount_on_hand, ensure it's a number
+          if (field.appField === 'amount_on_hand') {
+            const value = row[field.csvField];
+            newRow[field.appField] = value ? parseInt(value, 10) || 0 : 0;
+          } else {
+            newRow[field.appField] = row[field.csvField] || null;
+          }
+        }
       });
-      onOpenChange(false);
-      resetDialog();
-    } catch (error: any) {
-      toast({
-        title: "Import Error",
-        description: error.message || "Failed to process import",
-        variant: "destructive",
-      });
-    }
+      
+      return newRow;
+    });
+
+    onImportComplete(transformedData);
+    onOpenChange(false);
   };
 
-  const renderStep = () => {
-    switch (step) {
-      case 'upload':
-        return (
-          <div className="space-y-6">
-            <div 
-              ref={dropZoneRef}
-              className={`flex flex-col items-center justify-center p-6 border-2 ${isDragging ? 'border-glee-purple bg-glee-purple/5' : 'border-dashed'} rounded-lg transition-colors`}
-              onDragEnter={handleDragEnter}
-              onDragOver={handleDragOver}
-              onDragLeave={handleDragLeave}
-              onDrop={handleDrop}
-            >
-              <FileSpreadsheet className={`w-12 h-12 mb-4 ${isDragging ? 'text-glee-purple' : 'text-gray-400'}`} />
-              <p className="mb-2 text-sm text-center text-gray-500">
-                {isDragging ? 'Drop your CSV file here' : 'Drag & drop your CSV file here, or click to browse'}
-              </p>
-              <div className="flex items-center gap-2 mt-4">
-                <Input
-                  ref={fileInputRef}
-                  type="file"
-                  accept=".csv"
-                  onChange={handleFileUpload}
-                  className="hidden"
-                  id="file-input"
-                />
-                <Button
-                  type="button"
-                  variant="outline"
-                  className="gap-2"
-                  onClick={() => fileInputRef.current?.click()}
-                >
-                  <Upload className="w-4 h-4" />
-                  Browse Files
-                </Button>
-              </div>
-            </div>
-          </div>
-        );
-
-      case 'mapping':
-        return (
-          <div className="space-y-6">
-            <h3 className="font-medium">Map your CSV columns to the required fields</h3>
-            
-            <div className="grid gap-4">
-              <div className="grid gap-2">
-                <Label htmlFor="title-map" className="flex items-center">
-                  Title <span className="ml-1 text-red-500">*</span>
-                </Label>
-                <Select 
-                  value={columnMapping.title || ""} 
-                  onValueChange={(value) => handleMappingChange('title', value)}
-                >
-                  <SelectTrigger id="title-map">
-                    <SelectValue placeholder="Select column" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {headers.map((header) => (
-                      <SelectItem key={header} value={header}>{header}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div className="grid gap-2">
-                <Label htmlFor="composer-map" className="flex items-center">
-                  Composer <span className="ml-1 text-red-500">*</span>
-                </Label>
-                <Select 
-                  value={columnMapping.composer || ""} 
-                  onValueChange={(value) => handleMappingChange('composer', value)}
-                >
-                  <SelectTrigger id="composer-map">
-                    <SelectValue placeholder="Select column" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {headers.map((header) => (
-                      <SelectItem key={header} value={header}>{header}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div className="grid gap-2">
-                <Label htmlFor="voicing-map" className="flex items-center">
-                  Voicing <span className="ml-1 text-red-500">*</span>
-                </Label>
-                <Select 
-                  value={columnMapping.voicing || ""} 
-                  onValueChange={(value) => handleMappingChange('voicing', value)}
-                >
-                  <SelectTrigger id="voicing-map">
-                    <SelectValue placeholder="Select column" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {headers.map((header) => (
-                      <SelectItem key={header} value={header}>{header}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div className="grid gap-2">
-                <Label htmlFor="amount-map">
-                  Quantity (optional)
-                </Label>
-                <Select 
-                  value={columnMapping.amount_on_hand || ""} 
-                  onValueChange={(value) => handleMappingChange('amount_on_hand', value)}
-                >
-                  <SelectTrigger id="amount-map">
-                    <SelectValue placeholder="Select column" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem key="no-quantity" value="none">None</SelectItem>
-                    {headers.map((header) => (
-                      <SelectItem key={header} value={header}>{header}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-
-            <div className="flex justify-between mt-6">
-              <Button variant="outline" onClick={() => setStep('upload')}>
-                Back
-              </Button>
-              <Button onClick={handlePreviewData} className="bg-glee-purple hover:bg-glee-purple/90">
-                Preview
-              </Button>
-            </div>
-          </div>
-        );
-
-      case 'preview':
-        return (
-          <div className="space-y-6">
-            <div className="flex items-center space-x-2">
-              <h3 className="font-medium">Data Preview</h3>
-              <p className="text-sm text-muted-foreground">
-                (Showing first {Math.min(previewData.length, 5)} of {parsedData.length} records)
-              </p>
-            </div>
-
-            {previewData.length > 0 && (
-              <div className="border rounded-md overflow-auto max-h-60">
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Title</TableHead>
-                      <TableHead>Composer</TableHead>
-                      <TableHead>Voicing</TableHead>
-                      <TableHead>Quantity</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {previewData.map((row, index) => (
-                      <TableRow key={index}>
-                        <TableCell>{row.title}</TableCell>
-                        <TableCell>{row.composer}</TableCell>
-                        <TableCell>{row.voicing}</TableCell>
-                        <TableCell>{row.amount_on_hand}</TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </div>
-            )}
-
-            <div className="flex justify-between mt-6">
-              <Button variant="outline" onClick={() => setStep('mapping')}>
-                Back
-              </Button>
-              <Button onClick={handleImport} className="bg-glee-purple hover:bg-glee-purple/90">
-                Import {parsedData.length} Records
-              </Button>
-            </div>
-          </div>
-        );
-    }
+  const handleBrowseClick = () => {
+    fileInputRef.current?.click();
   };
 
   return (
-    <Dialog open={isOpen} onOpenChange={(open) => {
-      onOpenChange(open);
-      if (!open) resetDialog();
-    }}>
+    <Dialog open={isOpen} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-md md:max-w-lg">
         <DialogHeader>
-          <DialogTitle>Import Choral Titles</DialogTitle>
+          <DialogTitle>Import Choral Titles from CSV</DialogTitle>
+          <DialogDescription>
+            Upload a CSV file and map the columns to the appropriate fields.
+          </DialogDescription>
         </DialogHeader>
-        
-        <div className="py-4">
-          {renderStep()}
-        </div>
 
-        <DialogFooter className="items-center">
-          {step !== 'upload' && (
-            <span className="text-xs text-muted-foreground mr-auto">
-              <AlertTriangle className="inline-block w-3 h-3 mr-1" />
-              Title, composer, and voicing are required fields
-            </span>
-          )}
-        </DialogFooter>
+        {csvHeaders.length === 0 ? (
+          <div 
+            className={`flex flex-col items-center justify-center border-2 border-dashed rounded-lg p-8 transition-colors ${isDragging ? "border-primary bg-primary/5" : "border-muted-foreground/25"}`}
+            onDragEnter={handleDragEnter}
+            onDragLeave={handleDragLeave}
+            onDragOver={handleDragOver}
+            onDrop={handleFileDrop}
+          >
+            <UploadCloud className="h-12 w-12 text-muted-foreground mb-4" />
+            <p className="text-sm text-center text-muted-foreground mb-4">
+              Drag and drop your CSV file here, or click the button below to browse
+            </p>
+            <input
+              type="file"
+              accept=".csv"
+              onChange={handleFileChange}
+              className="hidden"
+              ref={fileInputRef}
+            />
+            <Button 
+              variant="outline" 
+              onClick={handleBrowseClick}
+              className="gap-2"
+            >
+              <FileUp className="h-4 w-4" /> Browse Files
+            </Button>
+          </div>
+        ) : (
+          <>
+            <div className="grid gap-4">
+              <Card className="p-4 bg-muted/50">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <FileUp className="h-5 w-5 text-muted-foreground" />
+                    <span className="font-medium">{fileName}</span>
+                  </div>
+                  <Button 
+                    variant="ghost" 
+                    size="sm"
+                    className="text-xs"
+                    onClick={() => {
+                      setCsvHeaders([]);
+                      setCsvData([]);
+                      setFileName("");
+                    }}
+                  >
+                    Change
+                  </Button>
+                </div>
+                <p className="text-xs text-muted-foreground mt-2">
+                  {csvData.length} records found
+                </p>
+              </Card>
+              
+              <div className="space-y-4">
+                <div className="flex items-center gap-2 text-sm">
+                  <AlertCircle className="h-4 w-4 text-amber-500" />
+                  <span>Map the CSV columns to the appropriate fields</span>
+                </div>
+                
+                <div className="grid gap-3">
+                  {fieldMapping.map((field, index) => (
+                    <div key={index} className="grid grid-cols-2 gap-2 items-center">
+                      <Label htmlFor={`field-${index}`} className="flex items-center gap-1">
+                        {field.display}
+                        {field.required && <span className="text-red-500">*</span>}
+                      </Label>
+                      <Select
+                        value={field.csvField || ""}
+                        onValueChange={(value) => handleMappingChange(index, value)}
+                      >
+                        <SelectTrigger id={`field-${index}`}>
+                          <SelectValue placeholder="Select a CSV column" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="">- Not Mapped -</SelectItem>
+                          {csvHeaders.map((header) => (
+                            <SelectItem key={header} value={header}>
+                              {header}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+            
+            <DialogFooter className="flex justify-between sm:justify-between">
+              <Button 
+                variant="outline" 
+                onClick={() => onOpenChange(false)}
+              >
+                Cancel
+              </Button>
+              <Button 
+                onClick={handleImport}
+                className="bg-glee-purple hover:bg-glee-purple/90"
+              >
+                Import Data
+              </Button>
+            </DialogFooter>
+          </>
+        )}
       </DialogContent>
     </Dialog>
   );
