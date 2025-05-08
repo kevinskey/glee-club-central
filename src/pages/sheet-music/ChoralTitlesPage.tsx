@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { PageHeader } from "@/components/ui/page-header";
@@ -154,35 +153,34 @@ export default function ChoralTitlesPage() {
   // Handle adding new choral title
   const handleAddTitle = async (values: FormValues) => {
     try {
-      const newTitle = {
-        ...values,
-        sheet_music_id: values.sheet_music_id || null,
-      };
-
-      let response;
-      
       if (isEditMode && currentEditId) {
-        // Update existing record - FIX: Ensure all required fields are included
-        response = await supabase
+        // Update existing record - Ensure all required fields are included
+        const { error } = await supabase
           .from('choral_titles')
           .update({
-            title: newTitle.title,            // Required field
-            composer: newTitle.composer,      // Required field  
-            voicing: newTitle.voicing,        // Required field
-            amount_on_hand: newTitle.amount_on_hand,
-            sheet_music_id: newTitle.sheet_music_id,
+            title: values.title,            // Required field
+            composer: values.composer,      // Required field  
+            voicing: values.voicing,        // Required field
+            amount_on_hand: values.amount_on_hand,
+            sheet_music_id: values.sheet_music_id || null,
           })
           .eq('id', currentEditId);
+          
+        if (error) throw error;
       } else {
-        // Insert new record
-        response = await supabase
+        // Insert new record - FIX: Ensure all required fields are included 
+        const { error } = await supabase
           .from('choral_titles')
-          .insert(newTitle);
+          .insert({
+            title: values.title,            // Required field
+            composer: values.composer,      // Required field
+            voicing: values.voicing,        // Required field
+            amount_on_hand: values.amount_on_hand,
+            sheet_music_id: values.sheet_music_id || null,
+          });
+          
+        if (error) throw error;
       }
-
-      const { error } = response;
-      
-      if (error) throw error;
 
       toast({
         title: isEditMode ? "Updated Successfully" : "Added Successfully",
