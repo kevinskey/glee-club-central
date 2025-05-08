@@ -115,20 +115,18 @@ export function Header() {
               </DropdownMenuLabel>
               <DropdownMenuSeparator />
               
-              <DropdownMenuItem 
-                onClick={() => window.location.href = "/dashboard/profile"}
-                className="flex items-center gap-2 cursor-pointer"
-              >
-                <User className="h-4 w-4" />
-                <span>My Profile</span>
+              <DropdownMenuItem asChild>
+                <Link to="/dashboard/profile" className="flex items-center gap-2 cursor-pointer">
+                  <User className="h-4 w-4" />
+                  <span>My Profile</span>
+                </Link>
               </DropdownMenuItem>
               
-              <DropdownMenuItem 
-                onClick={() => window.location.href = "/update-password"}
-                className="flex items-center gap-2 cursor-pointer"
-              >
-                <Settings className="h-4 w-4" />
-                <span>Change Password</span>
+              <DropdownMenuItem asChild>
+                <Link to="/update-password" className="flex items-center gap-2 cursor-pointer">
+                  <Settings className="h-4 w-4" />
+                  <span>Change Password</span>
+                </Link>
               </DropdownMenuItem>
               
               <DropdownMenuSeparator />

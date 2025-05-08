@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Routes, Route, Navigate } from 'react-router-dom';
+import { Routes, Route } from 'react-router-dom';
 import { ProtectedRoute } from './components/auth/ProtectedRoute';
 import { DashboardLayout } from './components/layout/DashboardLayout';
 
@@ -43,6 +43,7 @@ function App() {
         <Route path="sheet-music" element={<SheetMusicPage />} />
         <Route path="profile" element={<ProfilePage />} />
         <Route path="recordings" element={<RecordingsPage />} />
+        <Route path="*" element={<NotFoundPage />} />
       </Route>
       
       {/* Catch-all for 404 */}
