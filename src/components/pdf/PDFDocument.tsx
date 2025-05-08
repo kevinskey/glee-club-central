@@ -28,16 +28,43 @@ export const PDFDocument = ({
 }: PDFDocumentProps) => {
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const [fallbackMode, setFallbackMode] = useState(false);
+  const [pdfAttempted, setPdfAttempted] = useState(false);
   
   // Ensure the URL is properly sanitized and valid
   const sanitizedUrl = url ? url.trim() : "";
   
   useEffect(() => {
-    // Reset fallback mode when URL changes
+    // Reset states when URL changes
     setFallbackMode(false);
+    setPdfAttempted(false);
   }, [url]);
 
-  // Handle iframe load error - switch to fallback mode
+  // Handle iframe load to check if PDF loaded correctly
+  const handleIframeLoad = () => {
+    // Mark that we've attempted to load the PDF
+    setPdfAttempted(true);
+    
+    // Call the parent load handler
+    onLoad();
+    
+    // Check if iframe content is accessible (if not, it might be blocked)
+    try {
+      const iframeDocument = iframeRef.current?.contentDocument || iframeRef.current?.contentWindow?.document;
+      
+      // If we can't access the iframe content and we're not in fallback mode,
+      // that might indicate it's been blocked
+      if (!iframeDocument && !fallbackMode && pdfAttempted) {
+        console.log("PDF iframe content not accessible, switching to fallback mode");
+        setFallbackMode(true);
+      }
+    } catch (e) {
+      // Cross-origin errors will trigger here, indicating we should use fallback
+      console.log("PDF iframe access error, switching to fallback mode:", e);
+      setFallbackMode(true);
+    }
+  };
+
+  // Handle iframe error - switch to fallback mode
   const handleIframeError = () => {
     console.log("PDF iframe failed to load, switching to fallback mode");
     setFallbackMode(true);
@@ -87,11 +114,23 @@ export const PDFDocument = ({
     return viewerUrl;
   };
 
+  // Add a check for iOS devices where PDF handling differs
+  const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+
   // Log for debugging
   useEffect(() => {
     console.log("PDF URL being used:", getPdfViewerUrl());
     console.log("Using fallback mode:", fallbackMode);
+    console.log("Device is iOS:", isIOS);
   }, [url, currentPage, zoom, fallbackMode]);
+
+  // Auto-switch to fallback for iOS devices which often have PDF display issues
+  useEffect(() => {
+    if (isIOS && !fallbackMode) {
+      console.log("iOS device detected, preemptively using fallback mode");
+      setFallbackMode(true);
+    }
+  }, [isIOS]);
 
   if (!url) {
     return (
@@ -139,11 +178,11 @@ export const PDFDocument = ({
           width: `${100 / (zoom / 100)}%`,
           height: `${100 / (zoom / 100)}%`
         }}
-        onLoad={onLoad}
+        onLoad={handleIframeLoad}
         onError={handleIframeError}
         title={title}
         frameBorder="0"
-        sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-downloads"
+        sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-downloads allow-presentation"
         allowFullScreen
       />
       
