@@ -1,27 +1,98 @@
 
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { Navigate } from "react-router-dom";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { PageHeader } from "@/components/ui/page-header";
 import {
-  Users,
-  Calendar,
-  Music,
-  FileText,
-  MessageSquare,
-  CreditCard,
-  Shirt,
   BarChart3,
-  Upload,
+  Calendar,
+  CreditCard,
   Settings,
-  Megaphone
+  Users,
+  Shirt,
+  Music,
+  Bell,
 } from "lucide-react";
-import { Link } from "react-router-dom";
-import { Button } from "@/components/ui/button";
+
+// Import the new components
+import { AnalyticsCard } from "@/components/admin/AnalyticsCard";
+import { AdminMembersList } from "@/components/admin/AdminMembersList";
+import { EventTimeline } from "@/components/admin/EventTimeline";
+import { QuickActions } from "@/components/admin/QuickActions";
+
+// Sample data for demonstration
+const sampleMembers = [
+  {
+    id: "1",
+    name: "Tanya Williams",
+    role: "Singer",
+    voicePart: "Alto 2",
+    duesPaid: true,
+    avatarUrl: ""
+  },
+  {
+    id: "2",
+    name: "James Johnson",
+    role: "Singer",
+    voicePart: "Tenor",
+    duesPaid: false,
+    avatarUrl: ""
+  },
+  {
+    id: "3",
+    name: "Sophia Martinez",
+    role: "Section Leader",
+    voicePart: "Soprano 1",
+    duesPaid: true,
+    avatarUrl: ""
+  },
+  {
+    id: "4",
+    name: "Marcus Brown",
+    role: "Student Conductor",
+    voicePart: "Bass",
+    duesPaid: true,
+    avatarUrl: ""
+  },
+  {
+    id: "5",
+    name: "Olivia Garcia",
+    role: "Singer",
+    voicePart: "Soprano 2",
+    duesPaid: false,
+    avatarUrl: ""
+  }
+];
+
+const sampleEvents = [
+  {
+    id: "1",
+    date: "May 15, 2025",
+    title: "Spring Concert",
+    type: "performance",
+    description: "Annual spring performance at Sisters Chapel"
+  },
+  {
+    id: "2",
+    date: "May 10, 2025",
+    title: "Final Rehearsal",
+    type: "rehearsal",
+    description: "Pre-concert dress rehearsal"
+  },
+  {
+    id: "3",
+    date: "June 5, 2025",
+    title: "Alumni Event",
+    type: "other",
+    description: "Special performance for alumni weekend"
+  }
+];
 
 export default function AdminDashboardPage() {
   const { isAdmin, isLoading, isAuthenticated } = useAuth();
+  const [activeMembers, setActiveMembers] = useState(42);
+  const [duesPercentage, setDuesPercentage] = useState(87);
+  const [upcomingEvents, setUpcomingEvents] = useState(3);
   
   // Redirect if user is not authenticated or not an admin
   if (!isLoading && (!isAuthenticated || !isAdmin())) {
@@ -36,76 +107,6 @@ export default function AdminDashboardPage() {
     );
   }
 
-  // Admin features
-  const adminFeatures = [
-    {
-      title: "Member Management",
-      description: "Manage profiles, roles, and voice parts",
-      icon: Users,
-      path: "/dashboard/admin/members"
-    },
-    {
-      title: "Calendar Manager",
-      description: "Schedule events and rehearsals",
-      icon: Calendar,
-      path: "/dashboard/calendar"
-    },
-    {
-      title: "Repertoire Library",
-      description: "Organize sheet music and recordings",
-      icon: Music,
-      path: "/dashboard/sheet-music"
-    },
-    {
-      title: "Announcements",
-      description: "Post news and updates",
-      icon: Megaphone,
-      path: "/dashboard/announcements"
-    },
-    {
-      title: "Messaging",
-      description: "Send communications to members",
-      icon: MessageSquare,
-      path: "/dashboard/messages"
-    },
-    {
-      title: "Financial Tracking",
-      description: "Manage dues and payments",
-      icon: CreditCard,
-      path: "/dashboard/admin/finances"
-    },
-    {
-      title: "Wardrobe Management",
-      description: "Track and assign uniforms",
-      icon: Shirt,
-      path: "/dashboard/admin/wardrobe"
-    },
-    {
-      title: "Media Sources",
-      description: "Upload and manage photos and videos",
-      icon: Upload,
-      path: "/dashboard/media-library"
-    },
-    {
-      title: "Documentation",
-      description: "Manage handbook and forms",
-      icon: FileText,
-      path: "/dashboard/handbook"
-    },
-    {
-      title: "Analytics",
-      description: "View statistics and reports",
-      icon: BarChart3,
-      path: "/dashboard/admin/analytics"
-    },
-    {
-      title: "Site Settings",
-      description: "Configure site appearance and options",
-      icon: Settings,
-      path: "/dashboard/admin/settings"
-    }
-  ];
-
   return (
     <div className="container mx-auto p-4 space-y-6">
       <PageHeader
@@ -114,68 +115,44 @@ export default function AdminDashboardPage() {
         icon={<Settings className="h-6 w-6" />}
       />
       
-      {/* Quick Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium">Active Members</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">42</div>
-            <p className="text-xs text-muted-foreground">+4 since last month</p>
-          </CardContent>
-        </Card>
-        
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium">Upcoming Events</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">3</div>
-            <p className="text-xs text-muted-foreground">Next: Spring Concert (May 15)</p>
-          </CardContent>
-        </Card>
-        
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium">Dues Collection</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">87%</div>
-            <p className="text-xs text-muted-foreground">35/42 members paid</p>
-          </CardContent>
-        </Card>
+      {/* Analytics Overview */}
+      <div className="grid gap-4 md:grid-cols-3">
+        <AnalyticsCard 
+          title="Active Members" 
+          value={activeMembers} 
+          change={4}
+          description={`${activeMembers} total members`}
+          icon={<Users className="h-5 w-5" />}
+        />
+        <AnalyticsCard 
+          title="Upcoming Events" 
+          value={upcomingEvents}
+          description="Next: Spring Concert (May 15)"
+          icon={<Calendar className="h-5 w-5" />}
+        />
+        <AnalyticsCard 
+          title="Dues Collection" 
+          value={`${duesPercentage}%`}
+          description={`${Math.round(activeMembers * duesPercentage/100)}/${activeMembers} members paid`}
+          icon={<CreditCard className="h-5 w-5" />}
+        />
       </div>
       
-      {/* Admin Features Grid */}
-      <h2 className="text-2xl font-semibold mt-8 mb-4">Administration Tools</h2>
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {adminFeatures.map((feature, index) => (
-          <Card key={index} className="overflow-hidden">
-            <CardHeader className="pb-2">
-              <div className="flex items-center gap-2">
-                <feature.icon className="h-5 w-5 text-primary" />
-                <CardTitle>{feature.title}</CardTitle>
-              </div>
-              <CardDescription>{feature.description}</CardDescription>
-            </CardHeader>
-            <CardContent className="pt-2">
-              <Button asChild variant="outline" className="w-full">
-                <Link to={feature.path}>
-                  Manage
-                </Link>
-              </Button>
-            </CardContent>
-          </Card>
-        ))}
+      {/* Quick Actions Section */}
+      <div className="grid gap-4 md:grid-cols-2">
+        <QuickActions />
+        <EventTimeline events={sampleEvents} />
       </div>
       
-      {/* Recent Activity Section */}
-      <h2 className="text-2xl font-semibold mt-8 mb-4">Recent Activity</h2>
-      <Card>
-        <CardContent className="p-6">
-          <ul className="space-y-4">
-            <li className="flex gap-4 items-start">
+      {/* Members and Activity Section */}
+      <div className="grid gap-4 md:grid-cols-2">
+        <AdminMembersList members={sampleMembers} />
+        
+        {/* Recent Activity */}
+        <div className="space-y-4">
+          <h2 className="text-xl font-semibold">Recent Activity</h2>
+          <div className="space-y-4">
+            <div className="flex gap-4 items-start">
               <div className="bg-primary/10 p-2 rounded">
                 <Users className="h-4 w-4 text-primary" />
               </div>
@@ -184,18 +161,18 @@ export default function AdminDashboardPage() {
                 <p className="text-sm text-muted-foreground">Tanya Williams joined as Alto 2</p>
                 <p className="text-xs text-muted-foreground">2 hours ago</p>
               </div>
-            </li>
-            <li className="flex gap-4 items-start">
+            </div>
+            <div className="flex gap-4 items-start">
               <div className="bg-primary/10 p-2 rounded">
-                <FileText className="h-4 w-4 text-primary" />
+                <Music className="h-4 w-4 text-primary" />
               </div>
               <div>
                 <p className="font-medium">New sheet music uploaded</p>
                 <p className="text-sm text-muted-foreground">Ave Maria - Soprano 1 & 2 parts</p>
                 <p className="text-xs text-muted-foreground">Yesterday</p>
               </div>
-            </li>
-            <li className="flex gap-4 items-start">
+            </div>
+            <div className="flex gap-4 items-start">
               <div className="bg-primary/10 p-2 rounded">
                 <Calendar className="h-4 w-4 text-primary" />
               </div>
@@ -204,10 +181,30 @@ export default function AdminDashboardPage() {
                 <p className="text-sm text-muted-foreground">Spring Concert time changed to 7:30 PM</p>
                 <p className="text-xs text-muted-foreground">2 days ago</p>
               </div>
-            </li>
-          </ul>
-        </CardContent>
-      </Card>
+            </div>
+            <div className="flex gap-4 items-start">
+              <div className="bg-primary/10 p-2 rounded">
+                <Bell className="h-4 w-4 text-primary" />
+              </div>
+              <div>
+                <p className="font-medium">Announcement sent</p>
+                <p className="text-sm text-muted-foreground">Reminder about dues payment deadline</p>
+                <p className="text-xs text-muted-foreground">3 days ago</p>
+              </div>
+            </div>
+            <div className="flex gap-4 items-start">
+              <div className="bg-primary/10 p-2 rounded">
+                <Shirt className="h-4 w-4 text-primary" />
+              </div>
+              <div>
+                <p className="font-medium">Wardrobe update</p>
+                <p className="text-sm text-muted-foreground">Concert dresses assigned to 5 new members</p>
+                <p className="text-xs text-muted-foreground">Last week</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }

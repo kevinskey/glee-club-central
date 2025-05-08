@@ -27,6 +27,8 @@ import AdministrationPage from './pages/AdministrationPage';
 import AdminDashboardPage from './pages/AdminDashboardPage';
 import AdminMembersPage from './pages/AdminMembersPage';
 import AdminFinancesPage from './pages/AdminFinancesPage';
+import AdminSettingsPage from './pages/AdminSettingsPage';
+import AdminAnalyticsPage from './pages/AdminAnalyticsPage';
 
 function App() {
   return (
@@ -73,8 +75,8 @@ function App() {
         <Route path="admin/members" element={<AdminMembersPage />} />
         <Route path="admin/finances" element={<AdminFinancesPage />} />
         <Route path="admin/wardrobe" element={<div>Wardrobe Management Page</div>} />
-        <Route path="admin/analytics" element={<div>Analytics Dashboard Page</div>} />
-        <Route path="admin/settings" element={<div>Site Settings Page</div>} />
+        <Route path="admin/analytics" element={<AdminAnalyticsPage />} />
+        <Route path="admin/settings" element={<AdminSettingsPage />} />
         
         <Route path="*" element={<NotFoundPage />} />
       </Route>
