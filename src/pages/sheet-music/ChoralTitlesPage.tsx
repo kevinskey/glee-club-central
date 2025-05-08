@@ -164,7 +164,7 @@ export default function ChoralTitlesPage() {
             composer: values.composer,      // Required field  
             voicing: values.voicing,        // Required field
             amount_on_hand: values.amount_on_hand,
-            sheet_music_id: values.sheet_music_id || null,
+            sheet_music_id: values.sheet_music_id === "none" ? null : values.sheet_music_id,
           })
           .eq('id', currentEditId);
           
@@ -178,7 +178,7 @@ export default function ChoralTitlesPage() {
             composer: values.composer,      // Required field
             voicing: values.voicing,        // Required field
             amount_on_hand: values.amount_on_hand,
-            sheet_music_id: values.sheet_music_id || null,
+            sheet_music_id: values.sheet_music_id === "none" ? null : values.sheet_music_id,
           });
           
         if (error) throw error;
