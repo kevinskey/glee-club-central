@@ -126,6 +126,50 @@ export type Database = {
         }
         Relationships: []
       }
+      choral_titles: {
+        Row: {
+          amount_on_hand: number | null
+          composer: string
+          created_at: string | null
+          has_pdf: boolean | null
+          id: string
+          sheet_music_id: string | null
+          title: string
+          updated_at: string | null
+          voicing: string
+        }
+        Insert: {
+          amount_on_hand?: number | null
+          composer: string
+          created_at?: string | null
+          has_pdf?: boolean | null
+          id?: string
+          sheet_music_id?: string | null
+          title: string
+          updated_at?: string | null
+          voicing: string
+        }
+        Update: {
+          amount_on_hand?: number | null
+          composer?: string
+          created_at?: string | null
+          has_pdf?: boolean | null
+          id?: string
+          sheet_music_id?: string | null
+          title?: string
+          updated_at?: string | null
+          voicing?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "choral_titles_sheet_music_id_fkey"
+            columns: ["sheet_music_id"]
+            isOneToOne: false
+            referencedRelation: "sheet_music"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       media_library: {
         Row: {
           created_at: string

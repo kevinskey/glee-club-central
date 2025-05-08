@@ -11,6 +11,7 @@ import ResetPasswordPage from './pages/ResetPasswordPage';
 import UpdatePasswordPage from './pages/UpdatePasswordPage';
 import CalendarPage from './pages/CalendarPage';
 import SheetMusicPage from './pages/sheet-music/SheetMusicPage';
+import ChoralTitlesPage from './pages/sheet-music/ChoralTitlesPage';
 import NotFoundPage from './pages/NotFoundPage';
 import ProfilePage from './pages/ProfilePage';
 import RecordingsPage from './pages/RecordingsPage';
@@ -66,6 +67,7 @@ function App() {
         <Route index element={<DashboardPage />} />
         <Route path="calendar" element={<CalendarPage />} />
         <Route path="sheet-music" element={<SheetMusicPage />} />
+        <Route path="sheet-music/choral-titles" element={<ChoralTitlesPage />} />
         <Route path="sheet-music/:id" element={<ViewSheetMusicPage />} />
         <Route path="setlists" element={<SetlistsPage />} />
         <Route path="setlists/:id" element={<ViewSetlistPage />} />

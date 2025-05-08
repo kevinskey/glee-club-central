@@ -256,7 +256,7 @@ export default function SheetMusicPage() {
               asChild
               className="mr-2 bg-red-600 hover:bg-red-700 text-white"
             >
-              <Link to="/dashboard/sheet-music?view=list" className="flex items-center gap-2">
+              <Link to="/dashboard/sheet-music/choral-titles" className="flex items-center gap-2">
                 <TableIcon className="h-4 w-4" /> Table View
               </Link>
             </Button>
