@@ -1,3 +1,4 @@
+
 import { supabase } from '@/integrations/supabase/client';
 
 // Define explicit interface for user profile to avoid recursive type instantiation
@@ -167,15 +168,27 @@ export const searchUserByEmail = async (email: string): Promise<UserSafe | null>
 
     if (!data) return null;
 
-    // Cast to avoid deep type inference
-    const user = data as unknown as Omit<UserSafe, 'role_display_name' | 'voice_part_display'>;
-    
-    // Create a properly typed UserSafe object
+    // Define result explicitly with UserSafe type to avoid deep inference
     const userSafe: UserSafe = {
-      ...user,
-      role_display_name: getRoleDisplayName(user.role),
-      voice_part_display: getVoicePartDisplay(user.voice_part),
-      updated_at: user.updated_at || new Date().toISOString()
+      id: data.id,
+      first_name: data.first_name,
+      last_name: data.last_name,
+      email: data.email,
+      phone: data.phone,
+      voice_part: data.voice_part,
+      role: data.role || 'singer',
+      role_display_name: getRoleDisplayName(data.role || 'singer'),
+      voice_part_display: getVoicePartDisplay(data.voice_part),
+      avatar_url: data.avatar_url,
+      status: data.status || 'pending',
+      join_date: data.join_date,
+      class_year: data.class_year,
+      dues_paid: data.dues_paid,
+      special_roles: data.special_roles,
+      notes: data.notes,
+      created_at: data.created_at,
+      updated_at: data.updated_at || null,
+      last_sign_in_at: data.last_sign_in_at || null
     };
 
     return userSafe;
