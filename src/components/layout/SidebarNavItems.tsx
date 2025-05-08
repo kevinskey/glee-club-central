@@ -119,7 +119,7 @@ export function SidebarNavItems({ items }: SidebarNavItemsProps) {
         <NavItem 
           key={index}
           href={item.href}
-          icon={item.icon}
+          icon={() => item.icon}
         >
           {item.title}
         </NavItem>
