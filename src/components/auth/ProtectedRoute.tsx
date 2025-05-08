@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { Spinner } from '@/components/ui/spinner';
@@ -13,9 +13,20 @@ export function ProtectedRoute({ children, requiredRoles }: ProtectedRouteProps)
   const { isAuthenticated, isLoading, profile } = useAuth();
   const location = useLocation();
   
-  console.log("Protected Route - Auth Status:", { isAuthenticated, isLoading, currentPath: location.pathname });
+  console.log("Protected Route - Auth Status:", { 
+    isAuthenticated, 
+    isLoading, 
+    currentPath: location.pathname,
+    profile: profile ? `${profile.first_name} (${profile.role})` : 'No profile'
+  });
+  
+  // Use an effect to log when the component re-renders with new auth state
+  useEffect(() => {
+    console.log("ProtectedRoute auth state updated:", { isAuthenticated, isLoading });
+  }, [isAuthenticated, isLoading]);
   
   if (isLoading) {
+    console.log("Authentication loading, showing spinner");
     return (
       <div className="flex items-center justify-center min-h-screen">
         <Spinner size="lg" />

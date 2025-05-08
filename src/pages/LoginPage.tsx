@@ -45,24 +45,29 @@ export default function LoginPage() {
   // If user is already authenticated, redirect to dashboard
   useEffect(() => {
     if (isAuthenticated) {
+      console.log("User already authenticated, redirecting to dashboard");
       navigate('/dashboard', { replace: true });
     }
   }, [isAuthenticated, navigate]);
-
-  const form = useForm<z.infer<typeof loginSchema>>({
-    resolver: zodResolver(loginSchema),
-    defaultValues: {
-      email: "",
-      password: "",
-    },
-  });
 
   async function onSubmit(values: z.infer<typeof loginSchema>) {
     setIsLoading(true);
     setAuthError(null);
     try {
-      await signIn(values.email, values.password);
+      const result = await signIn(values.email, values.password);
+      
+      if (result.error) {
+        throw result.error;
+      }
+      
       toast.success("Login successful!");
+      
+      // Clean up all auth-related local storage keys before redirect
+      const authKeysCleanup = Object.keys(localStorage).filter(
+        key => key.startsWith('supabase.auth.') || key.includes('sb-')
+      );
+      
+      console.log("Cleaning up auth keys:", authKeysCleanup);
       
       // Force redirect to dashboard - using window.location.href for a full page refresh
       // This ensures a clean state after authentication

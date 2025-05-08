@@ -1,4 +1,3 @@
-
 import { createContext, useState, useContext, useEffect, ReactNode } from "react";
 import { Session } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
@@ -80,6 +79,30 @@ const getUserPermissions = (role: string): PermissionSet => {
       };
     default:
       return basePermissions;
+  }
+};
+
+// Helper function to clean up authentication state
+const cleanupAuthState = () => {
+  // Remove standard auth tokens
+  localStorage.removeItem('supabase.auth.token');
+  
+  // Remove all Supabase auth keys from localStorage
+  Object.keys(localStorage).forEach((key) => {
+    if (key.startsWith('supabase.auth.') || key.includes('sb-')) {
+      localStorage.removeItem(key);
+    }
+  });
+  
+  // Also check sessionStorage if available
+  try {
+    Object.keys(sessionStorage || {}).forEach((key) => {
+      if (key.startsWith('supabase.auth.') || key.includes('sb-')) {
+        sessionStorage.removeItem(key);
+      }
+    });
+  } catch (e) {
+    console.log("Could not access sessionStorage");
   }
 };
 
@@ -170,6 +193,17 @@ export function AuthProvider({ children }: Props) {
   // Sign in with email and password
   const signIn = async (email: string, password: string) => {
     try {
+      // First clean up any existing auth state
+      cleanupAuthState();
+      
+      // Attempt to sign out globally before signing in (helps prevent auth conflicts)
+      try {
+        await supabase.auth.signOut({ scope: 'global' });
+      } catch (err) {
+        // Continue even if this fails
+        console.log("Global sign out failed during sign in, continuing anyway");
+      }
+      
       const { error } = await supabase.auth.signInWithPassword({
         email,
         password,
@@ -217,11 +251,22 @@ export function AuthProvider({ children }: Props) {
   // Sign out
   const signOut = async () => {
     try {
-      await supabase.auth.signOut();
+      // Clean up auth state first
+      cleanupAuthState();
+      
+      // Then attempt to sign out
+      try {
+        await supabase.auth.signOut({ scope: 'global' });
+      } catch (err) {
+        console.log("Error during sign out, continuing with cleanup", err);
+      }
+      
       // Use direct navigation for clean logout experience
       window.location.href = '/login'; 
     } catch (error: any) {
       console.error("Error during sign out:", error.message);
+      // Force redirect to login even if there was an error
+      window.location.href = '/login';
     }
   };
 
