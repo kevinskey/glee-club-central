@@ -108,7 +108,7 @@ export function SidebarNav() {
     });
   };
 
-  // Simplified menu items structure to remove duplicates
+  // Simplified menu items structure with consistent paths
   const menuItems: MenuSectionProps[] = [
     {
       title: "Dashboard",
@@ -123,12 +123,12 @@ export function SidebarNav() {
         {
           title: "Member Directory",
           icon: Users,
-          href: "/dashboard/member-directory",
+          href: "/dashboard/members",
         },
         {
           title: "Member Management",
           icon: Users,
-          href: "/dashboard/members-management",
+          href: "/dashboard/member-management",
           requiredRoles: ["administrator"],
         },
       ],

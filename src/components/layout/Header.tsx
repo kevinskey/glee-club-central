@@ -30,7 +30,7 @@ export function Header() {
   const { profile, signOut } = useAuth();
   const navigate = useNavigate();
 
-  // Navigation items - simplified to prevent duplicate paths
+  // Navigation items - ensuring unique paths
   const navItems = [
     {
       title: "Dashboard",
@@ -39,7 +39,7 @@ export function Header() {
     },
     {
       title: "Member Directory",
-      href: "/dashboard/member-directory",
+      href: "/dashboard/members",
       icon: Users,
     },
     {
@@ -73,7 +73,7 @@ export function Header() {
   const adminItems = [
     {
       title: "Member Management",
-      href: "/dashboard/members-management",
+      href: "/dashboard/member-management",
       icon: Users,
       adminOnly: true
     },
