@@ -1,8 +1,7 @@
-
 import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { PageHeader } from "@/components/ui/page-header";
-import { FileText, Plus, Upload, FolderOpen, ListMusic, X } from "lucide-react";
+import { FileText, Plus, Upload, FolderOpen, ListMusic, X, TableIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -337,6 +336,16 @@ export default function SheetMusicPage() {
           >
             <ListMusic className="h-4 w-4 mr-2" /> Manage Setlists
           </Button>
+          
+          <Button 
+            variant="outline"
+            asChild
+            className="flex-shrink-0 bg-red-600 hover:bg-red-700 text-white"
+          >
+            <Link to="/dashboard/sheet-music?view=list" className="flex items-center gap-2">
+              <TableIcon className="h-4 w-4" /> Table View
+            </Link>
+          </Button>
         </div>
       </div>
       
@@ -371,7 +380,7 @@ export default function SheetMusicPage() {
               <FolderOpen className="h-4 w-4" /> Grid View
             </TabsTrigger>
             <TabsTrigger value="list" className="flex items-center gap-1">
-              <FileText className="h-4 w-4" /> List View
+              <TableIcon className="h-4 w-4" /> List View
             </TabsTrigger>
           </TabsList>
         </div>
