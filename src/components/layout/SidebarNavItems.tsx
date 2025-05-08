@@ -1,4 +1,3 @@
-
 import React from "react";
 import { NavItem } from "@/components/layout/NavItem";
 import {
@@ -18,6 +17,7 @@ import {
   FileVideo,
   FileImage,
   ClipboardCheck,
+  Star,
 } from "lucide-react";
 
 export const mainNavItems = [
@@ -30,7 +30,7 @@ export const mainNavItems = [
   {
     title: "Dashboard",
     href: "/dashboard",
-    icon: <Home className="h-5 w-5" />,
+    icon: <Star className="h-5 w-5" />,
   },
   {
     title: "Calendar",

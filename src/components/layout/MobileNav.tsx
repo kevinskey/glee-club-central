@@ -8,7 +8,8 @@ import {
   FileMusic,
   ListMusic, 
   Calendar,
-  Menu 
+  Menu,
+  Star 
 } from "lucide-react";
 
 export function MobileNav() {
@@ -21,7 +22,7 @@ export function MobileNav() {
       <MobileNavItem
         href="/dashboard"
         title="Home"
-        icon={<Home className="h-5 w-5" />}
+        icon={<Star className="h-5 w-5" />}
       />
       <MobileNavItem
         href="/dashboard/sheet-music"
