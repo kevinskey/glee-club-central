@@ -2,7 +2,7 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Download, ListMusic } from "lucide-react";
+import { ArrowLeft, Download, ListMusic, TableIcon } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
@@ -88,12 +88,21 @@ export default function ViewSheetMusicPage() {
           </Link>
         </Button>
         
-        <Button asChild variant="outline" size="sm">
-          <Link to="/dashboard/setlists" className="flex items-center">
-            <ListMusic className="mr-2 h-4 w-4" />
-            View All Setlists
-          </Link>
-        </Button>
+        <div className="flex gap-2">
+          <Button asChild variant="outline" size="sm">
+            <Link to="/dashboard/sheet-music?view=list" className="flex items-center">
+              <TableIcon className="mr-2 h-4 w-4" />
+              Table View
+            </Link>
+          </Button>
+          
+          <Button asChild variant="outline" size="sm">
+            <Link to="/dashboard/setlists" className="flex items-center">
+              <ListMusic className="mr-2 h-4 w-4" />
+              View Setlists
+            </Link>
+          </Button>
+        </div>
       </div>
         
       {/* Setlist drawer component */}

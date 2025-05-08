@@ -1,12 +1,11 @@
-
 import React from "react";
 import { PageHeader } from "@/components/ui/page-header";
-import { FileText, Search, Plus, Upload, FolderOpen, ListMusic, Check } from "lucide-react";
+import { FileText, Search, Plus, Upload, FolderOpen, ListMusic, Check, TableIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Link } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
@@ -35,6 +34,8 @@ export default function SheetMusicPage() {
   const [isSetlistDrawerOpen, setIsSetlistDrawerOpen] = useState(false);
   const [selectedFiles, setSelectedFiles] = useState<SheetMusic[]>([]);
   const [isSelectionMode, setIsSelectionMode] = useState(false);
+  const [searchParams] = useSearchParams();
+  const defaultView = searchParams.get("view") === "list" ? "list" : "grid";
 
   // Fetch sheet music data
   const fetchSheetMusic = async () => {
@@ -173,7 +174,7 @@ export default function SheetMusicPage() {
       </div>
       
       {/* Music Library */}
-      <Tabs defaultValue="grid" className="w-full">
+      <Tabs defaultValue={defaultView} className="w-full">
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-xl font-semibold">Your Sheet Music</h2>
           <TabsList>
@@ -181,7 +182,7 @@ export default function SheetMusicPage() {
               <FolderOpen className="h-4 w-4" /> Grid View
             </TabsTrigger>
             <TabsTrigger value="list" className="flex items-center gap-1">
-              <FileText className="h-4 w-4" /> List View
+              <TableIcon className="h-4 w-4" /> List View
             </TabsTrigger>
           </TabsList>
         </div>
