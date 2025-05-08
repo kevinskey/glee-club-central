@@ -1,9 +1,8 @@
-
 import React, { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { fetchUserById } from "@/utils/supabase/users";
-import { Profile, UserRole, MemberStatus, VoicePart } from "@/contexts/AuthContext";
+import { Profile, UserRole, MemberStatus, VoicePart } from "@/types/auth";
 import { PageHeader } from "@/components/ui/page-header";
 import { EditMemberForm } from "@/components/members/EditMemberForm";
 import { useMemberEdit, EditMemberFormValues } from "@/hooks/use-member-edit";

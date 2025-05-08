@@ -28,7 +28,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             id: session.user.id,
             email: session.user.email,
             role: 'singer' // Default role, will be updated from profile
-          });
+          } as AuthUser);
           
           // Fetch user profile
           await fetchUserProfile(session.user.id);
@@ -53,7 +53,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           id: session.user.id,
           email: session.user.email,
           role: 'singer' // Default role, will be updated from profile
-        });
+        } as AuthUser);
         
         // Fetch user profile on auth change
         await fetchUserProfile(session.user.id);
@@ -105,7 +105,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         if (user) {
           setUser({
             ...user,
-            role: data.role
+            role: data.role as AuthUser['role']
           });
         }
         
@@ -216,4 +216,5 @@ export const useAuth = () => {
   return context;
 };
 
-export { AuthUser, Profile };
+// Export types
+export type { AuthUser, Profile };

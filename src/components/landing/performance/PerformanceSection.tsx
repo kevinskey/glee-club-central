@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+import React from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Calendar, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -54,7 +55,7 @@ export function PerformanceSection() {
   const navigate = useNavigate();
   const isMobile = useIsMobile();
   const [selectedEvent, setSelectedEvent] = useState<PerformanceEventType>(performanceEvents[0]);
-  const { user } = useAuth();
+  const { user, userProfile } = useAuth();
   
   // Handle event selection with a more explicit function
   const handleEventSelect = (event: PerformanceEventType) => {
@@ -66,6 +67,9 @@ export function PerformanceSection() {
     navigate("/dashboard/schedule");
   };
   
+  // Update the role comparison to use "administrator" instead of "admin"
+  const isAuthorized = (userProfile?.role === "administrator" || userProfile?.role === "section_leader");
+  
   return (
     <section className="py-8 md:py-12 bg-gradient-to-b from-white to-glee-light dark:from-glee-dark dark:to-black">
       <div className="container px-4 md:px-8 mx-auto">
@@ -76,7 +80,7 @@ export function PerformanceSection() {
               <span className="flex items-center min-h-[2rem] md:min-h-[2.5rem]">Upcoming <span className="text-glee-purple">Performances</span></span>
             </h2>
             
-            {user && (user.role === "admin" || user.role === "moderator") && (
+            {user && isAuthorized && (
               <Button 
                 onClick={handleAddPerformance}
                 size="sm"

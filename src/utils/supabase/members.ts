@@ -1,8 +1,8 @@
-
 import { supabase } from '@/integrations/supabase/client';
 import { User } from "@/hooks/useUserManagement";
-import { Profile, UserRole, MemberStatus, VoicePart } from '@/contexts/AuthContext';
+import { Profile } from '@/contexts/AuthContext';
 import { MemberNote } from './types';
+import { UserRole, MemberStatus, VoicePart } from "@/types/auth";
 
 /**
  * Fetch all members

@@ -6,6 +6,10 @@ export interface AuthUser {
   [key: string]: any; // allow additional properties
 }
 
+export type UserRole = 'administrator' | 'section_leader' | 'singer' | 'student_conductor' | 'accompanist' | 'non_singer';
+export type MemberStatus = 'active' | 'inactive' | 'pending' | 'alumni' | 'on_leave' | 'deleted';
+export type VoicePart = 'soprano_1' | 'soprano_2' | 'alto_1' | 'alto_2' | 'tenor' | 'bass' | null;
+
 export interface Profile {
   id: string;
   email?: string | null;

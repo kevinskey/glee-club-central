@@ -1,4 +1,3 @@
-
 import React from "react";
 import { PageHeader } from "@/components/ui/page-header";
 import { Calendar, Clock, MapPin, Plus } from "lucide-react";
@@ -49,7 +48,7 @@ const events: Event[] = [
 ];
 
 export default function SchedulePage() {
-  const { user } = useAuth();
+  const { user, userProfile } = useAuth();
   
   const getTypeColor = (type: string) => {
     switch (type) {
@@ -64,6 +63,11 @@ export default function SchedulePage() {
     }
   };
 
+  // Update the role comparisons to use "administrator" instead of "admin"
+  const isAdmin = userProfile?.role === "administrator";
+  
+  const canEdit = userProfile?.role === "administrator" || userProfile?.role === "section_leader";
+  
   return (
     <div>
       <PageHeader
@@ -71,7 +75,7 @@ export default function SchedulePage() {
         description="Upcoming rehearsals, performances, and events"
         icon={<Calendar className="h-6 w-6" />}
         actions={
-          user?.role === "admin" && (
+          user?.role === "administrator" && (
             <Button>
               <Plus className="mr-2 h-4 w-4" /> Add Event
             </Button>
@@ -118,7 +122,7 @@ export default function SchedulePage() {
                   </Badge>
                 </div>
                 <p className="mt-4 text-sm">{event.description}</p>
-                {user?.role === "admin" && (
+                {user?.role === "administrator" && (
                   <div className="mt-4 flex justify-end gap-2">
                     <Button variant="outline" size="sm">Edit</Button>
                     <Button variant="outline" size="sm" className="text-destructive hover:bg-destructive/10">

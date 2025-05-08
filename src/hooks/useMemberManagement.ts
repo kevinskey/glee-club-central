@@ -1,9 +1,9 @@
-
 import { useState, useEffect, useCallback } from "react";
 import { fetchMembers } from "@/utils/supabase/members";
 import { updateUserStatus } from "@/utils/supabase/users";
 import { toast } from "sonner";
-import { Profile, UserRole, MemberStatus, VoicePart } from "@/contexts/AuthContext";
+import { Profile } from "@/contexts/AuthContext";
+import { UserRole, MemberStatus, VoicePart } from "@/types/auth";
 
 export type Member = Profile & {
   id: string;

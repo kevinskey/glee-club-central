@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
@@ -19,7 +18,7 @@ import {
 import { Spinner } from "@/components/ui/spinner";
 import { useUserManagement, User } from "@/hooks/useUserManagement";
 import { MemberCard } from "@/components/members/MemberCard";
-import { Profile, UserRole, MemberStatus, VoicePart } from "@/contexts/AuthContext";
+import { Profile, UserRole, MemberStatus, VoicePart } from "@/types/auth";
 import { toast } from "sonner";
 
 export default function MemberDirectoryPage() {

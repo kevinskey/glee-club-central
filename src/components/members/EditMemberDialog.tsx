@@ -8,7 +8,8 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Profile, VoicePart, MemberStatus, UserRole } from "@/contexts/AuthContext";
+import { Profile } from "@/types/auth";
+import { UserRole, MemberStatus, VoicePart } from "@/types/auth";
 import { updateUser } from '@/utils/admin/userUpdate';
 import { MemberEditForm } from "./form/MemberEditForm";
 

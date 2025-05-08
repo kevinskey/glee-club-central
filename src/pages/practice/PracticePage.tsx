@@ -83,6 +83,12 @@ export default function PracticePage() {
     alert(`In a real app, this would play "${media.title}"`);
   };
 
+  // Update the role comparisons to use "administrator" instead of "admin"
+  const canUpload = user?.role === "administrator" || user?.role === "section_leader";
+  
+  // Update any other role comparisons
+  const isAdmin = user?.role === "administrator";
+  
   return (
     <div>
       <PageHeader
@@ -117,7 +123,7 @@ export default function PracticePage() {
                         : "Complete choir recordings for reference"}
                     </CardDescription>
                   </div>
-                  {user?.role === "admin" && (
+                  {canUpload && (
                     <Button size="sm">Upload New Recording</Button>
                   )}
                 </CardHeader>
@@ -154,7 +160,7 @@ export default function PracticePage() {
                         <p className="mb-4 text-sm text-muted-foreground">
                           There are no practice recordings uploaded in this category yet.
                         </p>
-                        {user?.role === "admin" && (
+                        {canUpload && (
                           <Button>Upload Recording</Button>
                         )}
                       </div>

@@ -9,7 +9,8 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Profile, UserRole, MemberStatus, VoicePart } from "@/contexts/AuthContext";
+import { Profile } from "@/types/auth";
+import { UserRole, MemberStatus, VoicePart } from "@/types/auth";
 import { Edit, Eye } from "lucide-react";
 import { Link } from "react-router-dom";
 import { User } from "@/hooks/useUserManagement";
