@@ -1,4 +1,3 @@
-
 import React from "react";
 import { PageHeader } from "@/components/ui/page-header";
 import { FileText, Search, Plus, Upload, FolderOpen, ListMusic, Check, TableIcon } from "lucide-react";
@@ -166,11 +165,10 @@ export default function SheetMusicPage() {
             <ListMusic className="h-4 w-4 mr-2" /> Manage Setlists
           </Button>
           
-          {/* Add visible Table View button */}
           <Button 
             variant="outline"
             asChild
-            className="flex-shrink-0"
+            className="flex-shrink-0 bg-red-600 hover:bg-red-700 text-white"
           >
             <Link to="/dashboard/sheet-music?view=list">
               <TableIcon className="h-4 w-4 mr-2" /> Table View
