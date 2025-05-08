@@ -9,6 +9,7 @@ import { PDFControls } from "./pdf/PDFControls";
 import { PDFMobileControls } from "./pdf/PDFMobileControls";
 import { PDFDocument } from "./pdf/PDFDocument";
 import { PDFAnnotationManager } from "./pdf/PDFAnnotationManager";
+import { Button } from "@/components/ui/button"; // Add missing import for Button component
 
 interface PDFViewerProps {
   url: string;
