@@ -51,7 +51,7 @@ export async function fetchUserById(userId: string): Promise<UserSafe> {
   }
 }
 
-// Search users by email with explicit return type to prevent infinite type recursion
+// Search users by email without recursive type issues
 export const searchUserByEmail = async (email: string): Promise<UserSafe | null> => {
   try {
     const { data, error } = await supabase
@@ -67,12 +67,12 @@ export const searchUserByEmail = async (email: string): Promise<UserSafe | null>
 
     if (!data) return null;
 
-    // Define result explicitly with UserSafe type to avoid deep inference
+    // Define result explicitly with UserSafe type to avoid deep inference issues
     const userSafe: UserSafe = {
       id: data.id,
       first_name: data.first_name,
       last_name: data.last_name,
-      email: data.email,
+      email: data.email || null,
       phone: data.phone,
       voice_part: data.voice_part,
       role: data.role || 'singer',
@@ -87,7 +87,7 @@ export const searchUserByEmail = async (email: string): Promise<UserSafe | null>
       notes: data.notes,
       created_at: data.created_at,
       updated_at: data.updated_at || null,
-      last_sign_in_at: data.last_sign_in_at || null
+      last_sign_in_at: null // Since this comes from auth.users, not profiles
     };
 
     return userSafe;

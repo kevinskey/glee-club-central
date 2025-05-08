@@ -1,240 +1,232 @@
 
-import React, { useMemo } from "react";
-import { 
-  Table, 
-  TableBody, 
-  TableCell, 
-  TableHead, 
-  TableHeader, 
-  TableRow 
+import React from "react";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
 } from "@/components/ui/table";
-import { Button } from "@/components/ui/button";
-import { 
+import { Badge } from "@/components/ui/badge";
+import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Loader2, Eye, MoreHorizontal, Trash2 } from "lucide-react";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { getRoleBadge, getStatusBadge } from "@/components/members/UserBadges";
-import { User } from "@/hooks/useUserManagement";
+import { Button } from "@/components/ui/button";
+import { Eye, MoreHorizontal, Check, Ban, AlertCircle } from "lucide-react";
+import { usePermissions } from "@/hooks/usePermissions";
 
 interface UsersTableSimpleProps {
-  users: User[];
+  users: any[];
   isLoading: boolean;
-  onViewDetails: (user: User) => void;
-  onRoleChange?: (userId: string, role: string) => Promise<void>;
-  onStatusChange?: (userId: string, status: string) => Promise<void>;
-  onDeleteClick?: (user: User) => void;
-  formatDate: (dateString?: string | null) => string;
+  onViewDetails: (user: any) => void;
+  onRoleChange: (userId: string, role: string) => Promise<void>;
+  onStatusChange: (userId: string, status: string) => Promise<void>;
+  formatDate: (date: string | null | undefined) => string;
+  onDeleteClick?: (user: any) => void;
   isMobile?: boolean;
+  isViewOnly?: boolean;
 }
 
-export const UsersTableSimple: React.FC<UsersTableSimpleProps> = ({
+export function UsersTableSimple({
   users,
   isLoading,
   onViewDetails,
   onRoleChange,
   onStatusChange,
-  onDeleteClick,
   formatDate,
+  onDeleteClick,
   isMobile = false,
-}) => {
-  // Memoize the table content to prevent unnecessary re-renders
-  const tableContent = useMemo(() => {
-    if (isLoading) {
-      return (
-        <TableRow>
-          <TableCell colSpan={isMobile ? 3 : 6} className="h-24 text-center">
-            <div className="flex justify-center items-center h-full">
-              <Loader2 className="h-6 w-6 text-primary animate-spin" />
-              <span className="ml-2">Loading members...</span>
-            </div>
-          </TableCell>
-        </TableRow>
-      );
+  isViewOnly = false
+}: UsersTableSimpleProps) {
+  const permissions = usePermissions();
+  
+  // Loading state
+  if (isLoading) {
+    return (
+      <div className="flex flex-col items-center justify-center py-6">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+        <p className="mt-3 text-muted-foreground">Loading users...</p>
+      </div>
+    );
+  }
+  
+  // No users state
+  if (users.length === 0) {
+    return (
+      <div className="flex flex-col items-center justify-center py-6">
+        <AlertCircle className="h-12 w-12 text-muted-foreground" />
+        <h3 className="mt-2 font-semibold">No users found</h3>
+        <p className="text-sm text-muted-foreground">Try adjusting your filters or search criteria.</p>
+      </div>
+    );
+  }
+  
+  // Get status badge
+  const getStatusBadge = (status: string) => {
+    switch (status) {
+      case 'active':
+        return <Badge variant="outline" className="bg-green-500/10 text-green-500 border-green-300">Active</Badge>;
+      case 'inactive':
+        return <Badge variant="outline" className="bg-gray-500/10 text-gray-500 border-gray-300">Inactive</Badge>;
+      case 'pending':
+        return <Badge variant="outline" className="bg-yellow-500/10 text-yellow-500 border-yellow-300">Pending</Badge>;
+      case 'alumni':
+        return <Badge variant="outline" className="bg-blue-500/10 text-blue-500 border-blue-300">Alumni</Badge>;
+      default:
+        return <Badge variant="outline">{status}</Badge>;
     }
-    
-    if (users.length === 0) {
-      return (
-        <TableRow>
-          <TableCell colSpan={isMobile ? 3 : 6} className="h-24 text-center">
-            No members found.
-          </TableCell>
-        </TableRow>
-      );
-    }
-    
-    return users.map((user) => (
-      <TableRow key={user.id}>
-        <TableCell>
-          <div className="flex items-center">
-            <Avatar className="h-8 w-8 mr-3">
-              {user.avatar_url ? (
-                <AvatarImage src={user.avatar_url} alt={`${user.first_name} ${user.last_name}`} />
-              ) : (
-                <AvatarFallback>
-                  {user.first_name?.[0]}{user.last_name?.[0]}
-                </AvatarFallback>
-              )}
-            </Avatar>
-            <div>
-              <p className="font-medium text-sm">{user.first_name} {user.last_name}</p>
-              <p className="text-xs text-muted-foreground hidden sm:block">{user.email}</p>
-            </div>
-          </div>
-        </TableCell>
-        {!isMobile && (
-          <>
-            <TableCell className="hidden md:table-cell">{user.voice_part_display || "Not set"}</TableCell>
-            <TableCell>{getRoleBadge(user.role)}</TableCell>
-            <TableCell>{getStatusBadge(user.status)}</TableCell>
-            <TableCell className="hidden md:table-cell">{formatDate(user.join_date)}</TableCell>
-          </>
-        )}
-        {isMobile && (
-          <TableCell>
-            <div className="flex flex-col">
-              <div className="flex items-center space-x-2 mb-1">
-                {getRoleBadge(user.role)}
-                {getStatusBadge(user.status)}
+  };
+  
+  // Mobile view (simplified table)
+  if (isMobile) {
+    return (
+      <div className="space-y-4">
+        {users.map((user) => (
+          <div
+            key={user.id}
+            className="p-3 border rounded-lg bg-card"
+          >
+            <div className="flex justify-between items-start">
+              <div>
+                <div className="font-medium">
+                  {user.first_name || ''} {user.last_name || ''}
+                </div>
+                <div className="text-sm text-muted-foreground">{user.email}</div>
+                <div className="mt-1 flex flex-wrap gap-2">
+                  <Badge variant="outline">{user.role_display_name || user.role}</Badge>
+                  {getStatusBadge(user.status)}
+                </div>
               </div>
-              <p className="text-xs text-muted-foreground">{user.email}</p>
-            </div>
-          </TableCell>
-        )}
-        <TableCell className="text-right">
-          <div className="flex justify-end">
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={(e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                onViewDetails(user);
-              }}
-              className="mr-1"
-            >
-              <Eye className="h-4 w-4 mr-2" />
-              {!isMobile && "View"}
-            </Button>
-            {onRoleChange && onStatusChange && onDeleteClick && (
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button 
-                    variant="ghost" 
-                    size="icon"
-                    onClick={(e) => {
-                      e.preventDefault();
-                      e.stopPropagation();
-                    }}
-                  >
-                    <MoreHorizontal className="h-4 w-4" />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent 
-                  align="end" 
-                  className="z-[110] bg-background border shadow-md"
-                  onCloseAutoFocus={(e) => {
-                    // Prevent focus issues that can cause UI freeze
-                    e.preventDefault();
-                  }}
+              
+              <div className="flex">
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  onClick={() => onViewDetails(user)} 
+                  className="h-8 w-8 p-0"
                 >
-                  <DropdownMenuLabel>Quick Actions</DropdownMenuLabel>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem
-                    onClick={(e) => {
-                      e.preventDefault();
-                      e.stopPropagation();
-                      onRoleChange(user.id, 'administrator');
-                    }}
-                  >
-                    Set as Administrator
-                  </DropdownMenuItem>
-                  <DropdownMenuItem
-                    onClick={(e) => {
-                      e.preventDefault();
-                      e.stopPropagation();
-                      onRoleChange(user.id, 'section_leader');
-                    }}
-                  >
-                    Set as Section Leader
-                  </DropdownMenuItem>
-                  <DropdownMenuItem
-                    onClick={(e) => {
-                      e.preventDefault();
-                      e.stopPropagation();
-                      onRoleChange(user.id, 'singer');
-                    }}
-                  >
-                    Set as Singer
-                  </DropdownMenuItem>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem
-                    onClick={(e) => {
-                      e.preventDefault();
-                      e.stopPropagation();
-                      onStatusChange(user.id, 'active');
-                    }}
-                  >
-                    Set Status to Active
-                  </DropdownMenuItem>
-                  <DropdownMenuItem
-                    onClick={(e) => {
-                      e.preventDefault();
-                      e.stopPropagation();
-                      onStatusChange(user.id, 'inactive');
-                    }}
-                  >
-                    Set Status to Inactive
-                  </DropdownMenuItem>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem
-                    onClick={(e) => {
-                      e.preventDefault();
-                      e.stopPropagation();
-                      onDeleteClick(user);
-                    }}
-                    className="text-destructive focus:text-destructive"
-                  >
-                    <Trash2 className="h-4 w-4 mr-2" />
-                    Delete User
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-            )}
+                  <Eye className="h-4 w-4" />
+                  <span className="sr-only">View</span>
+                </Button>
+                
+                {!isViewOnly && permissions.canEditUsers && (
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                        <MoreHorizontal className="h-4 w-4" />
+                        <span className="sr-only">More options</span>
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                      {user.status === 'pending' && (
+                        <DropdownMenuItem onClick={() => onStatusChange(user.id, 'active')}>
+                          <Check className="mr-2 h-4 w-4" />
+                          <span>Activate</span>
+                        </DropdownMenuItem>
+                      )}
+                      {user.status === 'active' && (
+                        <DropdownMenuItem onClick={() => onStatusChange(user.id, 'inactive')}>
+                          <Ban className="mr-2 h-4 w-4" />
+                          <span>Deactivate</span>
+                        </DropdownMenuItem>
+                      )}
+                      {onDeleteClick && permissions.canDeleteUsers && (
+                        <DropdownMenuItem 
+                          onClick={() => onDeleteClick(user)}
+                          className="text-red-500 focus:text-red-500"
+                        >
+                          Delete
+                        </DropdownMenuItem>
+                      )}
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                )}
+              </div>
+            </div>
           </div>
-        </TableCell>
-      </TableRow>
-    ));
-  }, [users, isLoading, onViewDetails, onRoleChange, onStatusChange, onDeleteClick, formatDate, isMobile]);
-
+        ))}
+      </div>
+    );
+  }
+  
+  // Desktop view (full table)
   return (
-    <div className="rounded-md border overflow-hidden">
+    <div className="rounded-md border">
       <Table>
         <TableHeader>
           <TableRow>
             <TableHead className="w-[200px]">Name</TableHead>
-            {!isMobile ? (
-              <>
-                <TableHead className="hidden md:table-cell">Voice Part</TableHead>
-                <TableHead>Role</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead className="hidden md:table-cell">Join Date</TableHead>
-              </>
-            ) : (
-              <TableHead>Details</TableHead>
-            )}
-            <TableHead className="text-right">Action</TableHead>
+            <TableHead>Email</TableHead>
+            <TableHead>Role</TableHead>
+            <TableHead>Status</TableHead>
+            <TableHead>Created</TableHead>
+            <TableHead className="text-right">Actions</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
-          {tableContent}
+          {users.map((user) => (
+            <TableRow key={user.id}>
+              <TableCell className="font-medium">
+                {user.first_name || ''} {user.last_name || ''}
+              </TableCell>
+              <TableCell>{user.email}</TableCell>
+              <TableCell>{user.role_display_name || user.role}</TableCell>
+              <TableCell>{getStatusBadge(user.status)}</TableCell>
+              <TableCell>{formatDate(user.created_at)}</TableCell>
+              <TableCell className="text-right">
+                <div className="flex justify-end items-center space-x-2">
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    onClick={() => onViewDetails(user)} 
+                    className="h-8"
+                  >
+                    <Eye className="h-4 w-4 mr-2" />
+                    View
+                  </Button>
+                  
+                  {!isViewOnly && permissions.canEditUsers && (
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                          <MoreHorizontal className="h-4 w-4" />
+                          <span className="sr-only">More options</span>
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end">
+                        {user.status === 'pending' && (
+                          <DropdownMenuItem onClick={() => onStatusChange(user.id, 'active')}>
+                            <Check className="mr-2 h-4 w-4" />
+                            <span>Activate</span>
+                          </DropdownMenuItem>
+                        )}
+                        {user.status === 'active' && (
+                          <DropdownMenuItem onClick={() => onStatusChange(user.id, 'inactive')}>
+                            <Ban className="mr-2 h-4 w-4" />
+                            <span>Deactivate</span>
+                          </DropdownMenuItem>
+                        )}
+                        {onDeleteClick && permissions.canDeleteUsers && (
+                          <DropdownMenuItem 
+                            onClick={() => onDeleteClick(user)}
+                            className="text-red-500 focus:text-red-500"
+                          >
+                            Delete
+                          </DropdownMenuItem>
+                        )}
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  )}
+                </div>
+              </TableCell>
+            </TableRow>
+          ))}
         </TableBody>
       </Table>
     </div>
   );
-};
+}

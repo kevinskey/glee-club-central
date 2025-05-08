@@ -1,6 +1,7 @@
 
-import React from "react";
+import React, { useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
+import { usePermissions } from "@/hooks/usePermissions";
 import {
   Tabs,
   TabsContent,
@@ -18,6 +19,8 @@ import {
   Wallet, 
   Camera, 
   FileText,
+  Lock,
+  AlertCircle
 } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { fetchUserById, UserSafe } from "@/utils/supabase/users";
@@ -28,19 +31,28 @@ import { WardrobeTab } from "@/components/members/profile/WardrobeTab";
 import { FinancialInfoTab } from "@/components/members/profile/FinancialInfoTab";
 import { MediaConsentTab } from "@/components/members/profile/MediaConsentTab";
 import { AdminNotesTab } from "@/components/members/profile/AdminNotesTab";
+import { Button } from "@/components/ui/button";
 
 interface MemberProfileDashboardProps {
   memberId: string;
 }
 
 export const MemberProfileDashboard: React.FC<MemberProfileDashboardProps> = ({ memberId }) => {
-  const { isAdmin } = useAuth();
+  const { user } = useAuth();
+  const permissions = usePermissions();
+  const [isEditing, setIsEditing] = useState(false);
   
   const { data: memberProfile, isLoading } = useQuery({
     queryKey: ['userProfile', memberId],
     queryFn: () => fetchUserById(memberId),
     enabled: !!memberId,
   });
+  
+  // Check if the user can view this profile
+  const canViewProfile = permissions.canViewUserDetails(memberId);
+  
+  // Check if the user can edit this profile
+  const canEditProfile = permissions.canEditUser(memberId);
   
   if (isLoading) {
     return (
@@ -56,6 +68,17 @@ export const MemberProfileDashboard: React.FC<MemberProfileDashboardProps> = ({ 
       <div className="p-6 text-center">
         <h2 className="text-xl font-bold mb-2">Profile not found</h2>
         <p className="mb-4">The requested profile could not be found or you don't have permission to view it.</p>
+      </div>
+    );
+  }
+
+  // If user doesn't have permission to view this profile
+  if (!canViewProfile) {
+    return (
+      <div className="p-6 text-center">
+        <AlertCircle className="h-12 w-12 text-amber-500 mx-auto mb-4" />
+        <h2 className="text-xl font-bold mb-2">Access Restricted</h2>
+        <p className="mb-4">You don't have permission to view this member's profile.</p>
       </div>
     );
   }
@@ -120,51 +143,93 @@ export const MemberProfileDashboard: React.FC<MemberProfileDashboardProps> = ({ 
         </Avatar>
         <h2 className="text-xl font-bold mb-1">{`${memberProfile.first_name || ''} ${memberProfile.last_name || ''}`}</h2>
         <p className="text-muted-foreground mb-3">{formatVoicePart(memberProfile.voice_part)}</p>
-        <div className="flex flex-wrap gap-2 justify-center">
+        <div className="flex flex-wrap gap-2 justify-center mb-4">
           {getRoleBadge(memberProfile.role)}
           {getStatusBadge(memberProfile.status)}
         </div>
+        
+        {canEditProfile && (
+          <Button 
+            variant={isEditing ? "secondary" : "outline"}
+            className="w-full mt-2"
+            onClick={() => setIsEditing(!isEditing)}
+          >
+            {isEditing ? "Cancel Editing" : "Edit Profile"}
+          </Button>
+        )}
+        
+        {!canEditProfile && user?.id !== memberId && (
+          <div className="flex items-center text-sm text-muted-foreground mt-2">
+            <Lock className="h-3 w-3 mr-1" /> View-only access
+          </div>
+        )}
       </Card>
 
       <div className="md:w-3/4">
         <Tabs defaultValue="overview" className="w-full">
           <TabsList className="mb-4 grid grid-cols-3 md:grid-cols-7 lg:w-fit">
             <TabsTrigger value="overview"><User className="h-4 w-4 mr-2" />Overview</TabsTrigger>
-            <TabsTrigger value="participation"><Calendar className="h-4 w-4 mr-2" />Participation</TabsTrigger>
-            <TabsTrigger value="music"><Music className="h-4 w-4 mr-2" />Music</TabsTrigger>
-            <TabsTrigger value="wardrobe"><Shirt className="h-4 w-4 mr-2" />Wardrobe</TabsTrigger>
-            <TabsTrigger value="financial"><Wallet className="h-4 w-4 mr-2" />Financial</TabsTrigger>
-            <TabsTrigger value="media"><Camera className="h-4 w-4 mr-2" />Media</TabsTrigger>
-            {isAdmin() && (
+            
+            {(permissions.canTakeAttendance || user?.id === memberId) && (
+              <TabsTrigger value="participation"><Calendar className="h-4 w-4 mr-2" />Participation</TabsTrigger>
+            )}
+            
+            {(permissions.canEditMusic || user?.id === memberId) && (
+              <TabsTrigger value="music"><Music className="h-4 w-4 mr-2" />Music</TabsTrigger>
+            )}
+            
+            {(permissions.canManageWardrobe || user?.id === memberId) && (
+              <TabsTrigger value="wardrobe"><Shirt className="h-4 w-4 mr-2" />Wardrobe</TabsTrigger>
+            )}
+            
+            {(permissions.canManagePayments || user?.id === memberId) && (
+              <TabsTrigger value="financial"><Wallet className="h-4 w-4 mr-2" />Financial</TabsTrigger>
+            )}
+            
+            {(user?.id === memberId) && (
+              <TabsTrigger value="media"><Camera className="h-4 w-4 mr-2" />Media</TabsTrigger>
+            )}
+            
+            {permissions.canAccessAdminFeatures && (
               <TabsTrigger value="admin"><FileText className="h-4 w-4 mr-2" />Admin Notes</TabsTrigger>
             )}
           </TabsList>
 
           <TabsContent value="overview">
-            <ProfileOverviewTab profile={memberProfile} />
+            <ProfileOverviewTab profile={memberProfile} isEditable={isEditing && canEditProfile} />
           </TabsContent>
           
-          <TabsContent value="participation">
-            <ParticipationTab memberId={memberProfile.id} />
-          </TabsContent>
+          {(permissions.canTakeAttendance || user?.id === memberId) && (
+            <TabsContent value="participation">
+              <ParticipationTab memberId={memberProfile.id} canEdit={permissions.canTakeAttendance} />
+            </TabsContent>
+          )}
           
-          <TabsContent value="music">
-            <MusicAccessTab memberId={memberProfile.id} voicePart={memberProfile.voice_part} />
-          </TabsContent>
+          {(permissions.canEditMusic || user?.id === memberId) && (
+            <TabsContent value="music">
+              <MusicAccessTab memberId={memberProfile.id} voicePart={memberProfile.voice_part} canEdit={permissions.canEditMusic} />
+            </TabsContent>
+          )}
           
-          <TabsContent value="wardrobe">
-            <WardrobeTab profile={memberProfile as any} />
-          </TabsContent>
+          {(permissions.canManageWardrobe || user?.id === memberId) && (
+            <TabsContent value="wardrobe">
+              <WardrobeTab profile={memberProfile as any} canEdit={permissions.canManageWardrobe} />
+            </TabsContent>
+          )}
           
-          <TabsContent value="financial">
-            <FinancialInfoTab memberId={memberProfile.id} />
-          </TabsContent>
+          {(permissions.canManagePayments || user?.id === memberId) && (
+            <TabsContent value="financial">
+              <FinancialInfoTab memberId={memberProfile.id} canEdit={permissions.canManagePayments} />
+            </TabsContent>
+          )}
           
-          <TabsContent value="media">
-            <MediaConsentTab profile={memberProfile as any} />
-          </TabsContent>
+          {(user?.id === memberId) && (
+            <TabsContent value="media">
+              <MediaConsentTab profile={memberProfile as any} canEdit={true} />
+            </TabsContent>
+          )}
           
-          {isAdmin() && (
+          {permissions.canAccessAdminFeatures && (
             <TabsContent value="admin">
               <AdminNotesTab memberId={memberProfile.id} />
             </TabsContent>

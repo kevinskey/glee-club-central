@@ -1,7 +1,7 @@
 
 import React, { useEffect, useCallback } from "react";
 import { PageHeader } from "@/components/ui/page-header";
-import { UserCog } from "lucide-react";
+import { UserCog, Shield } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { useAdminUserManagement } from "@/hooks/useAdminUserManagement";
 import { UserManagementToolbar } from "@/components/members/UserManagementToolbar";
@@ -11,10 +11,14 @@ import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { useNavigate } from "react-router-dom";
+import { usePermissions } from "@/hooks/usePermissions";
 
 export default function AdminUserManagementPage() {
-  const { isAdmin } = useAuth();
+  const { userProfile } = useAuth();
+  const permissions = usePermissions();
   const isMobile = useIsMobile();
+  const navigate = useNavigate();
   
   const {
     users,
@@ -62,14 +66,22 @@ export default function AdminUserManagementPage() {
     fetchUsers();
   }, [fetchUsers]);
 
-  // Handle unauthorized access
-  if (!isAdmin()) {
+  // Handle unauthorized access with redirect
+  useEffect(() => {
+    if (!permissions.canEditUsers && !permissions.canAccessAdminFeatures) {
+      toast.error("You don't have permission to access this page");
+      navigate('/dashboard');
+    }
+  }, [permissions, navigate]);
+
+  // If user doesn't have required permissions
+  if (!permissions.canEditUsers && !permissions.canAccessAdminFeatures) {
     return (
       <div className="flex min-h-[80vh] items-center justify-center">
         <div className="text-center">
-          <UserCog className="mx-auto h-12 w-12 text-muted-foreground" />
+          <Shield className="mx-auto h-12 w-12 text-muted-foreground" />
           <h2 className="mt-4 text-2xl font-bold">Access Denied</h2>
-          <p className="text-muted-foreground">Only administrators can access this page.</p>
+          <p className="text-muted-foreground">You need administrator permissions to access this page.</p>
         </div>
       </div>
     );
@@ -78,6 +90,12 @@ export default function AdminUserManagementPage() {
   // Handle role change with improved error handling
   const handleRoleChange = async (userId: string, role: string): Promise<void> => {
     try {
+      // Check if user has permission to change roles
+      if (!permissions.canEditUsers) {
+        toast.error("You don't have permission to change user roles");
+        return;
+      }
+      
       console.log(`AdminUserManagementPage: Changing role for ${userId} to ${role}`);
       const success = await changeUserRole(userId, role);
       
@@ -99,6 +117,12 @@ export default function AdminUserManagementPage() {
   // Handle status change with improved feedback
   const handleStatusChange = async (userId: string, status: string): Promise<void> => {
     try {
+      // Check if user has permission to change status
+      if (!permissions.canEditUsers) {
+        toast.error("You don't have permission to change user status");
+        return;
+      }
+      
       const success = await changeUserStatus(userId, status);
       if (!success) {
         toast.error(`Failed to update user status to ${status}`);
@@ -118,6 +142,12 @@ export default function AdminUserManagementPage() {
   // Handle delete user with immediate UI update and error prevention
   const handleUserDelete = async () => {
     try {
+      // Check if user has permission to delete users
+      if (!permissions.canDeleteUsers) {
+        toast.error("You don't have permission to delete users");
+        return;
+      }
+      
       await handleDeleteUser();
       // Force a refresh of the user data after successful deletion
       setTimeout(() => {
@@ -130,12 +160,17 @@ export default function AdminUserManagementPage() {
       fetchUsers();
     }
   };
+  
+  // Check if user has view-only access
+  const isViewOnly = !permissions.canEditUsers && permissions.canAccessAdminFeatures;
 
   return (
     <div className="space-y-6">
       <PageHeader
         title="Member Management"
-        description="Create, edit, and manage Glee Club members with advanced controls"
+        description={isViewOnly ? 
+          "View Glee Club members (view-only access)" : 
+          "Create, edit, and manage Glee Club members with advanced controls"}
         icon={<UserCog className="h-6 w-6" />}
       />
 
@@ -148,10 +183,11 @@ export default function AdminUserManagementPage() {
             setRoleFilter={setRoleFilter}
             statusFilter={statusFilter}
             setStatusFilter={setStatusFilter}
-            onCreateUserClick={() => setIsCreateUserOpen(true)}
+            onCreateUserClick={() => permissions.canEditUsers ? setIsCreateUserOpen(true) : toast.error("You don't have permission to create users")}
             onRefreshClick={fetchUsers}
             isLoading={isLoading}
             isMobile={isMobile}
+            canCreate={permissions.canEditUsers}
           />
 
           <div className="w-full overflow-hidden">
@@ -160,37 +196,47 @@ export default function AdminUserManagementPage() {
                 <UsersTableSimple 
                   users={filteredUsers}
                   isLoading={isLoading}
-                  onViewDetails={openEditUserDialog}
+                  onViewDetails={(user) => {
+                    if (permissions.canEditUsers) {
+                      openEditUserDialog(user);
+                    } else {
+                      // Navigate to user profile page instead for view-only users
+                      navigate(`/dashboard/members/${user.id}`);
+                    }
+                  }}
                   onRoleChange={handleRoleChange}
                   onStatusChange={handleStatusChange}
                   formatDate={formatDate}
-                  onDeleteClick={openDeleteUserDialog}
+                  onDeleteClick={permissions.canDeleteUsers ? openDeleteUserDialog : undefined}
                   isMobile={isMobile}
+                  isViewOnly={isViewOnly}
                 />
               </div>
             </ScrollArea>
           </div>
           
           <div className="mt-4 text-sm text-gray-500" key={`user-count-${filteredUsers.length}`}>
-            Total: {filteredUsers.length} users
+            Total: {filteredUsers.length} users {isViewOnly && " (view-only)"}
           </div>
         </CardContent>
       </Card>
 
-      <UserDialogs
-        isCreateUserOpen={isCreateUserOpen}
-        setIsCreateUserOpen={setIsCreateUserOpen}
-        isEditUserOpen={isEditUserOpen}
-        setIsEditUserOpen={setIsEditUserOpen}
-        isDeleteDialogOpen={isDeleteDialogOpen}
-        setIsDeleteDialogOpen={setIsDeleteDialogOpen}
-        selectedUser={selectedUser}
-        userToDelete={userToDelete}
-        isSubmitting={isSubmitting}
-        onCreateUser={handleCreateUser}
-        onEditUser={handleEditUser}
-        onDeleteUser={handleUserDelete}
-      />
+      {permissions.canEditUsers && (
+        <UserDialogs
+          isCreateUserOpen={isCreateUserOpen}
+          setIsCreateUserOpen={setIsCreateUserOpen}
+          isEditUserOpen={isEditUserOpen}
+          setIsEditUserOpen={setIsEditUserOpen}
+          isDeleteDialogOpen={isDeleteDialogOpen}
+          setIsDeleteDialogOpen={setIsDeleteDialogOpen}
+          selectedUser={selectedUser}
+          userToDelete={userToDelete}
+          isSubmitting={isSubmitting}
+          onCreateUser={handleCreateUser}
+          onEditUser={handleEditUser}
+          onDeleteUser={handleUserDelete}
+        />
+      )}
     </div>
   );
 }
