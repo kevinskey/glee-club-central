@@ -16,8 +16,10 @@ import {
   BookOpen,
   Activity
 } from "lucide-react";
+import { Progress } from "@/components/ui/progress";
 
 const DashboardPage = () => {
+  // Use optional chaining to prevent errors if profile is null
   const { profile } = useAuth();
   
   // Sample data for dashboard components
@@ -31,6 +33,28 @@ const DashboardPage = () => {
     { id: 1, title: "New Sheet Music Available", message: "The sheet music for our spring concert is now available." },
     { id: 2, title: "Rehearsal Schedule Update", message: "Please note that rehearsals will now be held on Tuesdays and Thursdays." }
   ];
+  
+  // Add loading indicators
+  const [loading, setLoading] = React.useState(true);
+  
+  // Simulate data loading
+  React.useEffect(() => {
+    // Set a timeout to simulate data loading and then remove the loading state
+    const timer = setTimeout(() => {
+      setLoading(false);
+    }, 500);
+    
+    // Clean up the timer
+    return () => clearTimeout(timer);
+  }, []);
+  
+  if (loading) {
+    return (
+      <div className="container mx-auto p-4 flex justify-center items-center min-h-[60vh]">
+        <Progress spinningCircle size="lg" />
+      </div>
+    );
+  }
   
   return (
     <div className="container mx-auto p-4 space-y-6">
