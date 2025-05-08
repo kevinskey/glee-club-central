@@ -1,5 +1,4 @@
 import { RouteObject } from "react-router-dom";
-import DashboardPage from "@/pages/DashboardPage";
 import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
 import LoginPage from "@/pages/LoginPage";
 import RegisterPage from "@/pages/RegisterPage";
@@ -51,7 +50,7 @@ const routes: RouteObject[] = [
     children: [
       {
         path: "", // Dashboard home
-        element: <DashboardPage />,
+        element: <CalendarPage />, // Changed from DashboardPage to CalendarPage
       },
       {
         path: "calendar",
