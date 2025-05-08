@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { PageHeader } from "@/components/ui/page-header";
-import { FileText, ArrowLeft, Upload, Download, FileSpreadsheet } from "lucide-react";
+import { FileText, ArrowLeft, Upload, Download, FileSpreadsheet, ArrowDownAZ, ArrowUpAZ, ListOrdered } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
@@ -25,6 +25,15 @@ import {
 import { Badge } from "@/components/ui/badge";
 import Papa from "papaparse";
 import { ImportMappingDialog } from "@/components/sheet-music/ImportMappingDialog";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import {
+  Pagination,
+  PaginationContent,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from "@/components/ui/pagination";
 
 interface ChoralTitle {
   id: string;
@@ -34,6 +43,7 @@ interface ChoralTitle {
   amount_on_hand: number;
   has_pdf: boolean;
   sheet_music_id: string | null;
+  library_number: string | null;
   created_at: string;
   updated_at: string;
 }
@@ -51,9 +61,13 @@ const formSchema = z.object({
   voicing: z.string().min(1, "Voicing is required"),
   amount_on_hand: z.coerce.number().int().min(0).default(0),
   sheet_music_id: z.string().nullable().optional(),
+  library_number: z.string().nullable().optional(),
 });
 
 type FormValues = z.infer<typeof formSchema>;
+
+type SortField = 'title' | 'composer' | 'voicing' | 'library_number';
+type SortOrder = 'asc' | 'desc';
 
 export default function ChoralTitlesPage() {
   const { toast } = useToast();
@@ -67,6 +81,12 @@ export default function ChoralTitlesPage() {
   const [isImportDialogOpen, setIsImportDialogOpen] = useState(false);
   const [isEditMode, setIsEditMode] = useState(false);
   const [currentEditId, setCurrentEditId] = useState<string | null>(null);
+  
+  // Sorting and pagination states
+  const [sortField, setSortField] = useState<SortField>('title');
+  const [sortOrder, setSortOrder] = useState<SortOrder>('asc');
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
 
   // Setup form
   const form = useForm<FormValues>({
@@ -77,6 +97,7 @@ export default function ChoralTitlesPage() {
       voicing: "",
       amount_on_hand: 0,
       sheet_music_id: null,
+      library_number: "",
     },
   });
 
@@ -87,7 +108,7 @@ export default function ChoralTitlesPage() {
       const { data, error } = await supabase
         .from('choral_titles')
         .select('*')
-        .order('title', { ascending: true });
+        .order(sortField, { ascending: sortOrder === 'asc' });
 
       if (error) throw error;
 
@@ -141,16 +162,41 @@ export default function ChoralTitlesPage() {
       title => 
         title.title.toLowerCase().includes(query) || 
         title.composer.toLowerCase().includes(query) ||
-        title.voicing.toLowerCase().includes(query)
+        title.voicing.toLowerCase().includes(query) ||
+        (title.library_number && title.library_number.toLowerCase().includes(query))
     );
     setFilteredTitles(filtered);
+    setCurrentPage(1); // Reset to first page on new search
   }, [searchQuery, choralTitles]);
+
+  // Re-fetch data when sort preferences change
+  useEffect(() => {
+    fetchChoralTitles();
+  }, [sortField, sortOrder]);
 
   // Load data on component mount
   useEffect(() => {
     fetchChoralTitles();
     fetchSheetMusic();
   }, []);
+
+  // Handle sorting change
+  const handleSort = (field: SortField) => {
+    if (field === sortField) {
+      setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
+    } else {
+      setSortField(field);
+      setSortOrder('asc');
+    }
+  };
+
+  // Get paginated data
+  const getPaginatedData = () => {
+    const startIndex = (currentPage - 1) * itemsPerPage;
+    return filteredTitles.slice(startIndex, startIndex + itemsPerPage);
+  };
+
+  const totalPages = Math.ceil(filteredTitles.length / itemsPerPage);
 
   // Handle adding new choral title
   const handleAddTitle = async (values: FormValues) => {
@@ -165,6 +211,7 @@ export default function ChoralTitlesPage() {
             voicing: values.voicing,        // Required field
             amount_on_hand: values.amount_on_hand,
             sheet_music_id: values.sheet_music_id === "none" ? null : values.sheet_music_id,
+            library_number: values.library_number || null,
           })
           .eq('id', currentEditId);
           
@@ -179,6 +226,7 @@ export default function ChoralTitlesPage() {
             voicing: values.voicing,        // Required field
             amount_on_hand: values.amount_on_hand,
             sheet_music_id: values.sheet_music_id === "none" ? null : values.sheet_music_id,
+            library_number: values.library_number || null,
           });
           
         if (error) throw error;
@@ -211,6 +259,7 @@ export default function ChoralTitlesPage() {
       voicing: title.voicing,
       amount_on_hand: title.amount_on_hand,
       sheet_music_id: title.sheet_music_id || null,
+      library_number: title.library_number || "",
     });
     
     setIsEditMode(true);
@@ -289,7 +338,8 @@ export default function ChoralTitlesPage() {
       composer: title.composer,
       voicing: title.voicing,
       amount_on_hand: title.amount_on_hand,
-      has_pdf: title.has_pdf ? "Yes" : "No"
+      has_pdf: title.has_pdf ? "Yes" : "No",
+      library_number: title.library_number || ""
     })));
     
     // Create download link
@@ -301,6 +351,11 @@ export default function ChoralTitlesPage() {
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
+  };
+
+  const getSortIcon = (field: string) => {
+    if (field !== sortField) return null;
+    return sortOrder === 'asc' ? <ArrowDownAZ className="h-4 w-4" /> : <ArrowUpAZ className="h-4 w-4" />;
   };
 
   return (
@@ -344,6 +399,7 @@ export default function ChoralTitlesPage() {
                   voicing: "",
                   amount_on_hand: 0,
                   sheet_music_id: null,
+                  library_number: "",
                 });
                 setIsAddDialogOpen(true);
               }}
@@ -355,14 +411,36 @@ export default function ChoralTitlesPage() {
         }
       />
       
-      {/* Search Bar */}
-      <div className="flex items-center gap-4">
+      {/* Search and Sort Controls */}
+      <div className="flex flex-col md:flex-row items-start md:items-center gap-4">
         <Input
-          placeholder="Search titles, composers, or voicing..."
+          placeholder="Search titles, composers, voicing, or library numbers..."
           className="max-w-md"
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
         />
+        
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="outline" className="gap-2">
+              <ListOrdered className="h-4 w-4" /> Sort By
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            <DropdownMenuItem onClick={() => handleSort('title')} className="gap-2">
+              Title {getSortIcon('title')}
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => handleSort('composer')} className="gap-2">
+              Composer {getSortIcon('composer')}
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => handleSort('voicing')} className="gap-2">
+              Voicing {getSortIcon('voicing')}
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => handleSort('library_number')} className="gap-2">
+              Library Number {getSortIcon('library_number')}
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
       </div>
       
       {/* Choral Titles Table */}
@@ -396,17 +474,35 @@ export default function ChoralTitlesPage() {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Title</TableHead>
-                <TableHead>Composer</TableHead>
-                <TableHead>Voicing</TableHead>
+                <TableHead className="cursor-pointer" onClick={() => handleSort('library_number')}>
+                  <div className="flex items-center gap-1">
+                    Library # {getSortIcon('library_number')}
+                  </div>
+                </TableHead>
+                <TableHead className="cursor-pointer" onClick={() => handleSort('title')}>
+                  <div className="flex items-center gap-1">
+                    Title {getSortIcon('title')}
+                  </div>
+                </TableHead>
+                <TableHead className="cursor-pointer" onClick={() => handleSort('composer')}>
+                  <div className="flex items-center gap-1">
+                    Composer {getSortIcon('composer')}
+                  </div>
+                </TableHead>
+                <TableHead className="cursor-pointer" onClick={() => handleSort('voicing')}>
+                  <div className="flex items-center gap-1">
+                    Voicing {getSortIcon('voicing')}
+                  </div>
+                </TableHead>
                 <TableHead className="text-center">Quantity</TableHead>
                 <TableHead className="text-center">PDF Available</TableHead>
                 <TableHead className="text-right">Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
-              {filteredTitles.map((title) => (
+              {getPaginatedData().map((title) => (
                 <TableRow key={title.id}>
+                  <TableCell>{title.library_number || '-'}</TableCell>
                   <TableCell className="font-medium">{title.title}</TableCell>
                   <TableCell>{title.composer}</TableCell>
                   <TableCell>{title.voicing}</TableCell>
@@ -440,6 +536,52 @@ export default function ChoralTitlesPage() {
         </div>
       )}
 
+      {/* Pagination */}
+      {filteredTitles.length > itemsPerPage && (
+        <Pagination>
+          <PaginationContent>
+            <PaginationItem>
+              <PaginationPrevious 
+                onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                className={currentPage === 1 ? "pointer-events-none opacity-50" : ""}
+              />
+            </PaginationItem>
+            
+            {Array.from({ length: Math.min(5, totalPages) }).map((_, i) => {
+              // Show pages around current page
+              let pageToShow;
+              if (totalPages <= 5) {
+                pageToShow = i + 1;
+              } else if (currentPage <= 3) {
+                pageToShow = i + 1;
+              } else if (currentPage >= totalPages - 2) {
+                pageToShow = totalPages - 4 + i;
+              } else {
+                pageToShow = currentPage - 2 + i;
+              }
+              
+              return (
+                <PaginationItem key={i}>
+                  <PaginationLink
+                    isActive={currentPage === pageToShow}
+                    onClick={() => setCurrentPage(pageToShow)}
+                  >
+                    {pageToShow}
+                  </PaginationLink>
+                </PaginationItem>
+              );
+            })}
+            
+            <PaginationItem>
+              <PaginationNext 
+                onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                className={currentPage === totalPages ? "pointer-events-none opacity-50" : ""}
+              />
+            </PaginationItem>
+          </PaginationContent>
+        </Pagination>
+      )}
+
       {/* Add/Edit Dialog */}
       <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
         <DialogContent className="sm:max-w-md">
@@ -449,6 +591,20 @@ export default function ChoralTitlesPage() {
           
           <Form {...form}>
             <form onSubmit={form.handleSubmit(handleAddTitle)} className="space-y-4">
+              <FormField
+                control={form.control}
+                name="library_number"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Library Number</FormLabel>
+                    <FormControl>
+                      <Input {...field} placeholder="Enter library number (optional)" />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              
               <FormField
                 control={form.control}
                 name="title"
@@ -534,7 +690,7 @@ export default function ChoralTitlesPage() {
                   <FormItem>
                     <FormLabel>Associated Sheet Music</FormLabel>
                     <Select
-                      value={field.value || ""}
+                      value={field.value || "none"}
                       onValueChange={field.onChange}
                     >
                       <FormControl>
@@ -543,7 +699,7 @@ export default function ChoralTitlesPage() {
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        <SelectItem value="">None</SelectItem>
+                        <SelectItem value="none">None</SelectItem>
                         {sheetMusicOptions.map((sheet) => (
                           <SelectItem key={sheet.id} value={sheet.id}>
                             {sheet.title} - {sheet.composer}
