@@ -1,3 +1,4 @@
+
 import React from "react";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
@@ -31,7 +32,7 @@ const performanceEvents: PerformanceEventType[] = [
     date: new Date(2025, 11, 10), // December 10, 2025
     location: "Atlanta Symphony Hall",
     description: "Celebrating the season with festive music and traditional carols.",
-    image: "/lovable-uploads/3ad02de0-04d1-4a5e-9279-898e9c317d80.png"
+    image: "/lovable-uploads/8aa13e63-fb9a-4c52-95cf-86b458c58f1c.png" // Updated image for the 2nd slide
   },
   {
     id: 3,
@@ -39,7 +40,7 @@ const performanceEvents: PerformanceEventType[] = [
     date: new Date(2026, 2, 5), // March 5, 2026
     location: "Various Venues",
     description: "Our annual tour across the southeastern United States.",
-    image: "/lovable-uploads/3ad02de0-04d1-4a5e-9279-898e9c317d80.png"
+    image: "/lovable-uploads/642b93d7-fc15-4c2c-a7df-fe81aadb2f3b.png" // Updated image for the 3rd slide
   },
   {
     id: 4,
