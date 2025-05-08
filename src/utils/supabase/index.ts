@@ -5,4 +5,5 @@
 
 export * from './user/index';
 export * from './members';
-// Remove re-export of './user' to avoid ambiguity
+export * from './attendance';
+export * from './payments';
