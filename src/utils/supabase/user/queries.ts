@@ -21,16 +21,17 @@ export interface UserSearchResult {
  */
 export async function searchUserByEmail(email: string): Promise<UserSearchResult | null> {
   try {
-    // First, find the user in auth.users by email using the list users method with a filter
-    const { data: userData, error: authError } = await supabase.auth.admin.listUsers();
+    // First, find the user in auth.users by email using the list users method
+    const { data: authData, error: authError } = await supabase.auth.admin.listUsers();
     
-    if (authError || !userData) {
+    if (authError || !authData) {
       console.error("Error listing users:", authError);
       return null;
     }
 
     // Find the user with the matching email
-    const userMatch = userData.users.find(user => user.email === email);
+    // Explicitly type the users array to avoid the 'never' type error
+    const userMatch = authData.users.find((user: any) => user.email === email);
     
     if (!userMatch) {
       console.log("No user found with email:", email);
