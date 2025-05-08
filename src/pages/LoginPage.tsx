@@ -41,7 +41,7 @@ export default function LoginPage() {
     location.state?.message || null
   );
   
-  // Initialize the form properly using useForm
+  // Initialize the form with useForm hook
   const form = useForm<LoginFormValues>({
     resolver: zodResolver(loginSchema),
     defaultValues: {

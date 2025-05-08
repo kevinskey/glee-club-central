@@ -1,3 +1,4 @@
+
 import { createContext, useState, useContext, useEffect, ReactNode } from "react";
 import { Session } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
@@ -77,6 +78,14 @@ const getUserPermissions = (role: string): PermissionSet => {
         canManageWardrobe: true,
         canAccessAdminFeatures: true
       };
+    case 'section_leader':
+      return {
+        ...basePermissions,
+        canEditMusic: false,
+        canUploadMusic: true,
+        canTakeAttendance: true,
+        canViewMemberDetails: true
+      };
     default:
       return basePermissions;
   }
@@ -145,8 +154,8 @@ export function AuthProvider({ children }: Props) {
 
     // Subscribe to authentication state changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (_event, session) => {
-        console.log("Auth state changed:", _event);
+      async (event, session) => {
+        console.log("Auth state changed:", event);
         setSession(session);
 
         if (session?.user) {
@@ -179,7 +188,25 @@ export function AuthProvider({ children }: Props) {
         .eq("id", userId)
         .single();
 
-      if (error) throw error;
+      if (error) {
+        console.error("Error fetching profile:", error.message);
+        
+        // Check if we got a "No rows matched" error
+        if (error.message.includes("No rows found")) {
+          console.log("No profile found, user may need to complete registration");
+          if (session?.user) {
+            // Create a basic user object even without a profile
+            setUser({
+              id: userId,
+              email: session.user.email || "",
+              role: "singer", // Default role
+            });
+          }
+        }
+        
+        setLoading(false);
+        return;
+      }
 
       if (data) {
         console.log("User profile fetched:", data.first_name, data.last_name);
@@ -220,7 +247,7 @@ export function AuthProvider({ children }: Props) {
         console.log("Global sign out failed during sign in, continuing anyway");
       }
       
-      const { error } = await supabase.auth.signInWithPassword({
+      const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password,
       });
@@ -297,6 +324,9 @@ export function AuthProvider({ children }: Props) {
       console.log("Starting Google sign in process");
       await supabase.auth.signInWithOAuth({
         provider: 'google',
+        options: {
+          redirectTo: `${window.location.origin}/dashboard`
+        }
       });
     } catch (error: any) {
       console.error("Error during Google sign in:", error.message);
@@ -309,6 +339,9 @@ export function AuthProvider({ children }: Props) {
       console.log("Starting Apple sign in process");
       await supabase.auth.signInWithOAuth({
         provider: 'apple',
+        options: {
+          redirectTo: `${window.location.origin}/dashboard`
+        }
       });
     } catch (error: any) {
       console.error("Error during Apple sign in:", error.message);
