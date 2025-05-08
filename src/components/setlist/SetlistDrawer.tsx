@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { 
@@ -22,6 +21,7 @@ interface SetlistDrawerProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   currentSheetMusicId?: string;
+  onSetlistsChange?: () => void;
 }
 
 // Define explicit interface for our setlist data
@@ -33,7 +33,12 @@ interface Setlist {
   sheet_music_ids: string[];
 }
 
-export const SetlistDrawer = ({ open, onOpenChange, currentSheetMusicId }: SetlistDrawerProps) => {
+export const SetlistDrawer = ({ 
+  open, 
+  onOpenChange, 
+  currentSheetMusicId,
+  onSetlistsChange 
+}: SetlistDrawerProps) => {
   const [setlists, setSetlists] = useState<Setlist[]>([]);
   const [activeSetlist, setActiveSetlist] = useState<Setlist | null>(null);
   const [newSetlistName, setNewSetlistName] = useState("");
@@ -125,6 +130,10 @@ export const SetlistDrawer = ({ open, onOpenChange, currentSheetMusicId }: Setli
         setActiveSetlist(newSetlist);
         setIsCreatingNew(false);
         setNewSetlistName("");
+        
+        if (onSetlistsChange) {
+          onSetlistsChange();
+        }
       }
     } catch (error) {
       console.error("Error creating setlist:", error);
@@ -209,6 +218,11 @@ export const SetlistDrawer = ({ open, onOpenChange, currentSheetMusicId }: Setli
         title: "Removed from setlist",
         description: `Removed from "${activeSetlist.name}".`,
       });
+      
+      // Notify parent component about setlists change
+      if (onSetlistsChange) {
+        onSetlistsChange();
+      }
     } catch (error) {
       console.error("Error updating setlist:", error);
       toast({
@@ -247,6 +261,11 @@ export const SetlistDrawer = ({ open, onOpenChange, currentSheetMusicId }: Setli
         title: "Setlist deleted",
         description: "The setlist has been deleted.",
       });
+      
+      // Notify parent component about setlists change
+      if (onSetlistsChange) {
+        onSetlistsChange();
+      }
     } catch (error) {
       console.error("Error deleting setlist:", error);
       toast({

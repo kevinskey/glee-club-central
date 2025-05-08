@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { PageHeader } from "@/components/ui/page-header";
-import { FileText, Search, Plus, Upload, FolderOpen, ListMusic } from "lucide-react";
+import { FileText, Search, Plus, Upload, FolderOpen, ListMusic, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
@@ -31,6 +31,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { Badge } from "@/components/ui/badge";
 
 interface SheetMusic {
   id: string;
@@ -38,6 +39,14 @@ interface SheetMusic {
   composer: string;
   file_url: string;
   created_at: string;
+}
+
+interface Setlist {
+  id: string;
+  name: string;
+  user_id: string;
+  created_at: string;
+  sheet_music_ids: string[];
 }
 
 type SortOption = "newest" | "oldest" | "title" | "composer";
@@ -54,6 +63,11 @@ export default function SheetMusicPage() {
   const [isSetlistDrawerOpen, setIsSetlistDrawerOpen] = useState(false);
   const [selectedFiles, setSelectedFiles] = useState<SheetMusic[]>([]);
   const [sortOrder, setSortOrder] = useState<SortOption>("newest");
+  
+  // New state for setlist filtering
+  const [availableSetlists, setAvailableSetlists] = useState<Setlist[]>([]);
+  const [selectedSetlistId, setSelectedSetlistId] = useState<string | null>(null);
+  const [selectedSetlist, setSelectedSetlist] = useState<Setlist | null>(null);
 
   // Fetch sheet music data
   const fetchSheetMusic = async () => {
@@ -88,10 +102,47 @@ export default function SheetMusicPage() {
     }
   };
 
+  // Fetch available setlists
+  const fetchSetlists = async () => {
+    if (!user) return;
+    
+    try {
+      const { data, error } = await supabase
+        .from('setlists')
+        .select('*')
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+
+      if (data) {
+        setAvailableSetlists(data as Setlist[]);
+      }
+    } catch (error: any) {
+      console.error("Error fetching setlists:", error);
+      toast({
+        title: "Error loading setlists",
+        description: error.message || "An unexpected error occurred",
+        variant: "destructive",
+      });
+    }
+  };
+
   // Load data on initial render
   useEffect(() => {
     fetchSheetMusic();
+    fetchSetlists();
   }, []);
+
+  // Update selected setlist when ID changes
+  useEffect(() => {
+    if (selectedSetlistId) {
+      const setlist = availableSetlists.find(s => s.id === selectedSetlistId) || null;
+      setSelectedSetlist(setlist);
+    } else {
+      setSelectedSetlist(null);
+    }
+  }, [selectedSetlistId, availableSetlists]);
 
   // Filter and sort music files
   useEffect(() => {
@@ -105,6 +156,13 @@ export default function SheetMusicPage() {
           file.title.toLowerCase().includes(query) || 
           file.composer.toLowerCase().includes(query) ||
           file.created_at.toLowerCase().includes(query)
+      );
+    }
+    
+    // Apply setlist filter if selected
+    if (selectedSetlist && selectedSetlist.sheet_music_ids?.length > 0) {
+      result = result.filter(file => 
+        selectedSetlist.sheet_music_ids.includes(file.id)
       );
     }
     
@@ -129,7 +187,7 @@ export default function SheetMusicPage() {
     }
     
     setFilteredFiles(result);
-  }, [searchQuery, musicFiles, sortOrder]);
+  }, [searchQuery, musicFiles, sortOrder, selectedSetlist]);
 
   // Toggle file selection
   const toggleFileSelection = (file: SheetMusic) => {
@@ -149,6 +207,11 @@ export default function SheetMusicPage() {
   // Clear all selections
   const clearSelection = () => {
     setSelectedFiles([]);
+  };
+
+  // Clear setlist filter
+  const clearSetlistFilter = () => {
+    setSelectedSetlistId(null);
   };
 
   // Check if a file is selected
@@ -177,8 +240,8 @@ export default function SheetMusicPage() {
         }
       />
 
-      {/* Search bar */}
-      <div className="flex flex-col md:flex-row gap-4">
+      {/* Search and filter controls */}
+      <div className="flex flex-col md:flex-row gap-4 items-start">
         <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
@@ -188,6 +251,35 @@ export default function SheetMusicPage() {
             className="pl-10"
           />
         </div>
+        
+        {/* Setlist filter dropdown */}
+        <div className="w-full md:w-64">
+          <Select
+            value={selectedSetlistId || ""}
+            onValueChange={(value) => setSelectedSetlistId(value || null)}
+          >
+            <SelectTrigger>
+              <SelectValue placeholder="Filter by setlist" />
+            </SelectTrigger>
+            <SelectContent>
+              {availableSetlists.length === 0 ? (
+                <div className="py-2 px-2 text-sm text-center text-muted-foreground">
+                  No setlists available
+                </div>
+              ) : (
+                availableSetlists.map((setlist) => (
+                  <SelectItem key={setlist.id} value={setlist.id}>
+                    {setlist.name} 
+                    <span className="text-xs text-muted-foreground ml-2">
+                      ({setlist.sheet_music_ids?.length || 0})
+                    </span>
+                  </SelectItem>
+                ))
+              )}
+            </SelectContent>
+          </Select>
+        </div>
+        
         <div className="w-full md:w-48">
           <Select
             value={sortOrder}
@@ -215,6 +307,27 @@ export default function SheetMusicPage() {
         </div>
       </div>
       
+      {/* Active filters display */}
+      {selectedSetlist && (
+        <div className="flex items-center gap-2">
+          <span className="text-sm text-muted-foreground">Active filter:</span>
+          <Badge 
+            variant="outline"
+            className="flex items-center gap-1 pl-2 h-7"
+          >
+            <span>{selectedSetlist.name}</span>
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              className="h-5 w-5 p-0 ml-1" 
+              onClick={clearSetlistFilter}
+            >
+              <X className="h-3 w-3" />
+            </Button>
+          </Badge>
+        </div>
+      )}
+      
       {/* Music Library */}
       <Tabs defaultValue="grid" className="w-full">
         <div className="flex justify-between items-center mb-4">
@@ -240,8 +353,32 @@ export default function SheetMusicPage() {
             <FileText className="mb-4 h-12 w-12 text-muted-foreground" />
             <h3 className="mb-2 text-lg font-medium">No sheet music found</h3>
             <p className="mb-4 text-sm text-muted-foreground">
-              {searchQuery ? "Try a different search term" : "Upload your first piece of sheet music"}
+              {searchQuery || selectedSetlist ? 
+                "Try a different search term or filter" : 
+                "Upload your first piece of sheet music"}
             </p>
+            {(searchQuery || selectedSetlist) && (
+              <div className="flex gap-2 mb-4">
+                {searchQuery && (
+                  <Button 
+                    variant="outline" 
+                    size="sm"
+                    onClick={() => setSearchQuery("")}
+                  >
+                    Clear search
+                  </Button>
+                )}
+                {selectedSetlist && (
+                  <Button 
+                    variant="outline" 
+                    size="sm"
+                    onClick={clearSetlistFilter}
+                  >
+                    Clear setlist filter
+                  </Button>
+                )}
+              </div>
+            )}
             <Button 
               onClick={() => setIsUploadModalOpen(true)}
               className="gap-2 bg-glee-purple hover:bg-glee-purple/90"
@@ -354,6 +491,7 @@ export default function SheetMusicPage() {
       <SetlistDrawer
         open={isSetlistDrawerOpen}
         onOpenChange={setIsSetlistDrawerOpen}
+        onSetlistsChange={fetchSetlists}
       />
     </div>
   );
