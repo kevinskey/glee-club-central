@@ -1,3 +1,4 @@
+
 import React from "react";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
@@ -115,8 +116,8 @@ export function PerformanceSection() {
                           backgroundRepeat: 'no-repeat'
                         }}
                       >
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent flex flex-col justify-center items-center">
-                          <h3 className="font-bold text-white text-xl md:text-2xl lg:text-3xl font-playfair text-center px-4 md:px-6 drop-shadow-lg my-auto flex items-center min-h-[3rem] md:min-h-[3.5rem]">
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent flex flex-col justify-end items-center pb-16">
+                          <h3 className="font-bold text-white text-xl md:text-2xl lg:text-3xl font-playfair text-center px-4 md:px-6 drop-shadow-lg mb-6 md:mb-10">
                             {event.title}
                           </h3>
                           
