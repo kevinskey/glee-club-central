@@ -1,121 +1,216 @@
+// This file contains user query functions for Supabase
 
-import { supabase } from '@/integrations/supabase/client';
-import { UserSafe } from './types';
-import { getRoleDisplayName, getVoicePartDisplay } from './formatters';
+import { supabase } from "@/integrations/supabase/client";
+import type { UserRole, UserPermissions } from "@/utils/supabase/types";
 
-// Fetch all users from the database
-export async function fetchAllUsers(): Promise<UserSafe[]> {
-  console.log("Fetching all users...");
-  try {
-    const { data, error } = await supabase
-      .rpc('get_all_users');
-    
-    if (error) {
-      console.error("Error in fetchAllUsers:", error);
-      throw error;
-    }
-    
-    console.log("Fetched users data:", data);
-    return data as UserSafe[];
-  } catch (error) {
-    console.error('Error fetching all users:', error);
-    throw error;
-  }
-}
-
-// Fetch a single user by ID
-export async function fetchUserById(userId: string): Promise<UserSafe> {
-  console.log(`Fetching user with ID: ${userId}`);
-  try {
-    const { data, error } = await supabase
-      .rpc('get_user_by_id', { p_user_id: userId });
-    
-    if (error) {
-      console.error(`Error fetching user ${userId}:`, error);
-      throw error;
-    }
-    
-    // Return the first result from the array
-    const user = data && data.length > 0 ? data[0] : null;
-    console.log(`Fetched user data:`, user);
-    
-    if (!user) {
-      console.error(`User with ID ${userId} not found`);
-      throw new Error(`User with ID ${userId} not found`);
-    }
-    
-    return user as UserSafe;
-  } catch (error) {
-    console.error(`Error fetching user ${userId}:`, error);
-    throw error;
-  }
-}
-
-// Define a simple user data interface to avoid recursive type issues
-interface SimpleUserData {
+// Define a simpler type for search results to avoid infinite recursion
+type SimpleUserData = {
   id: string;
-  first_name: string | null;
-  last_name: string | null;
   email: string;
-  phone: string | null;
-  voice_part: string | null;
-  role: string;
-  avatar_url: string | null;
-  status: string;
-  join_date: string | null;
-  class_year: string | null;
-  dues_paid: boolean | null;
-  special_roles: string | null;
-  notes: string | null;
-  created_at: string;
-  updated_at: string | null;
-}
+  first_name?: string | null;
+  last_name?: string | null;
+  role?: string | null;
+  status?: string | null;
+  voice_part?: string | null;
+};
 
-// Search users by email without recursive type issues
-export const searchUserByEmail = async (email: string): Promise<UserSafe | null> => {
+/**
+ * Search for a user by their email address
+ */
+export async function searchUserByEmail(email: string): Promise<SimpleUserData | null> {
   try {
     const { data, error } = await supabase
-      .from('profiles')
+      .from('users')
+      .select('id, email, first_name, last_name, role, status, voice_part')
+      .ilike('email', `%${email}%`)
+      .limit(1)
+      .single();
+      
+    if (error) {
+      console.error("Error searching for user by email:", error);
+      return null;
+    }
+    
+    return data;
+  } catch (error) {
+    console.error("Exception searching for user by email:", error);
+    return null;
+  }
+}
+
+/**
+ * Fetch a user's profile by their ID.
+ */
+export async function fetchUserById(userId: string): Promise<UserSafe | null> {
+  try {
+    const { data, error } = await supabase
+      .from('users')
       .select('*')
-      .eq('email', email)
+      .eq('id', userId)
       .single();
 
     if (error) {
-      console.error('Error searching for user by email:', error);
+      console.error("Error fetching user by ID:", error);
       return null;
     }
 
-    if (!data) return null;
-    
-    // Convert data to SimpleUserData type to avoid recursive type issues
-    const userProfile = data as SimpleUserData;
-    
-    // Create a safe user object without recursive type issues
-    const userSafe: UserSafe = {
-      id: userProfile.id,
-      first_name: userProfile.first_name,
-      last_name: userProfile.last_name,
-      email,
-      phone: userProfile.phone,
-      voice_part: userProfile.voice_part,
-      role: userProfile.role || 'singer',
-      role_display_name: getRoleDisplayName(userProfile.role || 'singer'),
-      voice_part_display: getVoicePartDisplay(userProfile.voice_part),
-      avatar_url: userProfile.avatar_url,
-      status: userProfile.status || 'pending',
-      join_date: userProfile.join_date,
-      class_year: userProfile.class_year,
-      dues_paid: userProfile.dues_paid,
-      special_roles: userProfile.special_roles,
-      notes: userProfile.notes,
-      created_at: userProfile.created_at,
-      updated_at: userProfile.updated_at || null,
-      last_sign_in_at: null // Since this comes from auth.users, not profiles
-    };
-
-    return userSafe;
+    return data ? {
+      ...data,
+      created_at: data.created_at ? new Date(data.created_at).toISOString() : null,
+      updated_at: data.updated_at ? new Date(data.updated_at).toISOString() : null,
+    } : null;
   } catch (error) {
-    console.error('Error in searchUserByEmail:', error);
+    console.error("Exception fetching user by ID:", error);
     return null;
   }
-};
+}
+
+/**
+ * Update a user's profile data.
+ */
+export async function updateUserProfile(userId: string, updates: Partial<UserSafe>): Promise<UserSafe | null> {
+  try {
+    // Omit created_at and updated_at from updates to prevent them from being directly modified
+    const { created_at, updated_at, ...allowedUpdates } = updates;
+
+    const { data, error } = await supabase
+      .from('users')
+      .update(allowedUpdates)
+      .eq('id', userId)
+      .select('*')
+      .single();
+
+    if (error) {
+      console.error("Error updating user profile:", error);
+      return null;
+    }
+
+    return data ? {
+      ...data,
+      created_at: data.created_at ? new Date(data.created_at).toISOString() : null,
+      updated_at: data.updated_at ? new Date(data.updated_at).toISOString() : null,
+    } : null;
+  } catch (error) {
+    console.error("Exception updating user profile:", error);
+    return null;
+  }
+}
+
+/**
+ * Fetch all users from the database.
+ */
+export async function fetchAllUsers(): Promise<UserSafe[] | null> {
+  try {
+    const { data, error } = await supabase
+      .from('users')
+      .select('*');
+
+    if (error) {
+      console.error("Error fetching all users:", error);
+      return null;
+    }
+
+    return data ? data.map(user => ({
+      ...user,
+      created_at: user.created_at ? new Date(user.created_at).toISOString() : null,
+      updated_at: user.updated_at ? new Date(user.updated_at).toISOString() : null,
+    })) : null;
+  } catch (error) {
+    console.error("Exception fetching all users:", error);
+    return null;
+  }
+}
+
+/**
+ * Fetch users by role.
+ */
+export async function fetchUsersByRole(role: UserRole): Promise<UserSafe[] | null> {
+  try {
+    const { data, error } = await supabase
+      .from('users')
+      .select('*')
+      .eq('role', role);
+
+    if (error) {
+      console.error("Error fetching users by role:", error);
+      return null;
+    }
+
+    return data ? data.map(user => ({
+      ...user,
+      created_at: user.created_at ? new Date(user.created_at).toISOString() : null,
+      updated_at: user.updated_at ? new Date(user.updated_at).toISOString() : null,
+    })) : null;
+  } catch (error) {
+    console.error("Exception fetching users by role:", error);
+    return null;
+  }
+}
+
+/**
+ * Fetch user permissions by user ID.
+ */
+export async function fetchUserPermissions(userId: string): Promise<UserPermissions | null> {
+  try {
+    const { data: user, error: userError } = await supabase
+      .from('users')
+      .select('role')
+      .eq('id', userId)
+      .single();
+
+    if (userError) {
+      console.error("Error fetching user role:", userError);
+      return null;
+    }
+
+    if (!user) {
+      console.log("User not found for ID:", userId);
+      return null;
+    }
+
+    const role = user.role;
+
+    // Define permissions based on the user's role
+    let permissions: UserPermissions = {
+      canReadUsers: false,
+      canEditUsers: false,
+      canCreateUsers: false,
+      canDeleteUsers: false,
+    };
+
+    switch (role) {
+      case 'administrator':
+        permissions = {
+          canReadUsers: true,
+          canEditUsers: true,
+          canCreateUsers: true,
+          canDeleteUsers: true,
+        };
+        break;
+      case 'section_leader':
+        permissions = {
+          canReadUsers: true,
+          canEditUsers: false,
+          canCreateUsers: false,
+          canDeleteUsers: false,
+        };
+        break;
+      case 'singer':
+        permissions = {
+          canReadUsers: false,
+          canEditUsers: false,
+          canCreateUsers: false,
+          canDeleteUsers: false,
+        };
+        break;
+      default:
+        console.warn("Unknown role:", role);
+        break;
+    }
+
+    return permissions;
+  } catch (error) {
+    console.error("Error fetching user permissions:", error);
+    return null;
+  }
+}

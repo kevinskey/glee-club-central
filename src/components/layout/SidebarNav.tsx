@@ -108,6 +108,7 @@ export function SidebarNav() {
     });
   };
 
+  // Simplified menu items structure to remove duplicates
   const menuItems: MenuSectionProps[] = [
     {
       title: "Dashboard",

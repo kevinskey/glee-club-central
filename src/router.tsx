@@ -13,7 +13,7 @@ import RegisterPage from "@/pages/RegisterPage";
 import ResetPasswordPage from "@/pages/ResetPasswordPage";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import AdminUserManagementPage from "@/pages/AdminUserManagementPage";
-import MemberProfilePage from "@/pages/profile/MemberProfilePage";
+import MemberProfilePage from "@/pages/MemberProfilePage";
 import MemberEditPage from "@/pages/MemberEditPage";
 import EditMemberPage from "@/pages/EditMemberPage";
 import UpdatePasswordPage from "@/pages/UpdatePasswordPage";

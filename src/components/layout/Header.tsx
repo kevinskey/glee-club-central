@@ -30,7 +30,7 @@ export function Header() {
   const { profile, signOut } = useAuth();
   const navigate = useNavigate();
 
-  // Navigation items - migrated from SidebarNav
+  // Navigation items - simplified to prevent duplicate paths
   const navItems = [
     {
       title: "Dashboard",
@@ -73,7 +73,7 @@ export function Header() {
   const adminItems = [
     {
       title: "Member Management",
-      href: "/dashboard/member-management",
+      href: "/dashboard/members-management",
       icon: Users,
       adminOnly: true
     },
