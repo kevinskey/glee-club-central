@@ -33,3 +33,13 @@ export interface MemberNote {
   note: string;
   created_at: string;
 }
+
+export type UserRole = 'administrator' | 'section_leader' | 'singer' | 'student_conductor' | 'accompanist' | 'non_singer';
+
+export interface UserPermissions {
+  canReadUsers: boolean;
+  canEditUsers: boolean;
+  canCreateUsers: boolean;
+  canDeleteUsers: boolean;
+  [key: string]: boolean;
+}

@@ -1,12 +1,14 @@
+
 // This file contains user query functions for Supabase
 
 import { supabase } from "@/integrations/supabase/client";
 import type { UserRole, UserPermissions } from "@/utils/supabase/types";
+import { UserSafe } from "./types";
 
 // Define a simpler type for search results to avoid infinite recursion
 type SimpleUserData = {
   id: string;
-  email: string;
+  email: string | null;
   first_name?: string | null;
   last_name?: string | null;
   role?: string | null;
@@ -20,7 +22,7 @@ type SimpleUserData = {
 export async function searchUserByEmail(email: string): Promise<SimpleUserData | null> {
   try {
     const { data, error } = await supabase
-      .from('users')
+      .from('profiles')
       .select('id, email, first_name, last_name, role, status, voice_part')
       .ilike('email', `%${email}%`)
       .limit(1)
@@ -44,7 +46,7 @@ export async function searchUserByEmail(email: string): Promise<SimpleUserData |
 export async function fetchUserById(userId: string): Promise<UserSafe | null> {
   try {
     const { data, error } = await supabase
-      .from('users')
+      .from('profiles')
       .select('*')
       .eq('id', userId)
       .single();
@@ -56,8 +58,8 @@ export async function fetchUserById(userId: string): Promise<UserSafe | null> {
 
     return data ? {
       ...data,
-      created_at: data.created_at ? new Date(data.created_at).toISOString() : null,
-      updated_at: data.updated_at ? new Date(data.updated_at).toISOString() : null,
+      created_at: data.created_at,
+      updated_at: data.updated_at || null,
     } : null;
   } catch (error) {
     console.error("Exception fetching user by ID:", error);
@@ -74,7 +76,7 @@ export async function updateUserProfile(userId: string, updates: Partial<UserSaf
     const { created_at, updated_at, ...allowedUpdates } = updates;
 
     const { data, error } = await supabase
-      .from('users')
+      .from('profiles')
       .update(allowedUpdates)
       .eq('id', userId)
       .select('*')
@@ -87,8 +89,8 @@ export async function updateUserProfile(userId: string, updates: Partial<UserSaf
 
     return data ? {
       ...data,
-      created_at: data.created_at ? new Date(data.created_at).toISOString() : null,
-      updated_at: data.updated_at ? new Date(data.updated_at).toISOString() : null,
+      created_at: data.created_at,
+      updated_at: data.updated_at || null,
     } : null;
   } catch (error) {
     console.error("Exception updating user profile:", error);
@@ -102,7 +104,7 @@ export async function updateUserProfile(userId: string, updates: Partial<UserSaf
 export async function fetchAllUsers(): Promise<UserSafe[] | null> {
   try {
     const { data, error } = await supabase
-      .from('users')
+      .from('profiles')
       .select('*');
 
     if (error) {
@@ -112,8 +114,8 @@ export async function fetchAllUsers(): Promise<UserSafe[] | null> {
 
     return data ? data.map(user => ({
       ...user,
-      created_at: user.created_at ? new Date(user.created_at).toISOString() : null,
-      updated_at: user.updated_at ? new Date(user.updated_at).toISOString() : null,
+      created_at: user.created_at,
+      updated_at: user.updated_at || null,
     })) : null;
   } catch (error) {
     console.error("Exception fetching all users:", error);
@@ -127,7 +129,7 @@ export async function fetchAllUsers(): Promise<UserSafe[] | null> {
 export async function fetchUsersByRole(role: UserRole): Promise<UserSafe[] | null> {
   try {
     const { data, error } = await supabase
-      .from('users')
+      .from('profiles')
       .select('*')
       .eq('role', role);
 
@@ -138,8 +140,8 @@ export async function fetchUsersByRole(role: UserRole): Promise<UserSafe[] | nul
 
     return data ? data.map(user => ({
       ...user,
-      created_at: user.created_at ? new Date(user.created_at).toISOString() : null,
-      updated_at: user.updated_at ? new Date(user.updated_at).toISOString() : null,
+      created_at: user.created_at,
+      updated_at: user.updated_at || null,
     })) : null;
   } catch (error) {
     console.error("Exception fetching users by role:", error);
@@ -153,7 +155,7 @@ export async function fetchUsersByRole(role: UserRole): Promise<UserSafe[] | nul
 export async function fetchUserPermissions(userId: string): Promise<UserPermissions | null> {
   try {
     const { data: user, error: userError } = await supabase
-      .from('users')
+      .from('profiles')
       .select('role')
       .eq('id', userId)
       .single();
