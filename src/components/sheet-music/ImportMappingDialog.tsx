@@ -1,5 +1,5 @@
 
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useCallback } from "react";
 import Papa from "papaparse";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
@@ -44,7 +44,9 @@ export function ImportMappingDialog({ isOpen, onOpenChange, onImportComplete }: 
     voicing: null,
     amount_on_hand: null
   });
+  const [isDragging, setIsDragging] = useState<boolean>(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const dropZoneRef = useRef<HTMLDivElement>(null);
 
   const resetDialog = () => {
     setParsedData([]);
@@ -62,10 +64,7 @@ export function ImportMappingDialog({ isOpen, onOpenChange, onImportComplete }: 
     }
   };
 
-  const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (!file) return;
-
+  const parseFile = (file: File) => {
     const fileReader = new FileReader();
     fileReader.onload = (e) => {
       try {
@@ -125,6 +124,53 @@ export function ImportMappingDialog({ isOpen, onOpenChange, onImportComplete }: 
     };
     fileReader.readAsText(file);
   };
+
+  const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+    parseFile(file);
+  };
+
+  // Handle drag events
+  const handleDragEnter = useCallback((e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(true);
+  }, []);
+
+  const handleDragLeave = useCallback((e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(false);
+  }, []);
+
+  const handleDragOver = useCallback((e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (!isDragging) {
+      setIsDragging(true);
+    }
+  }, [isDragging]);
+
+  const handleDrop = useCallback((e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(false);
+    
+    const files = e.dataTransfer.files;
+    if (files && files.length > 0) {
+      const file = files[0];
+      if (file.type === 'text/csv' || file.name.endsWith('.csv')) {
+        parseFile(file);
+      } else {
+        toast({
+          title: "Invalid File",
+          description: "Please upload a CSV file",
+          variant: "destructive",
+        });
+      }
+    }
+  }, [toast]);
 
   const handleMappingChange = (field: keyof ColumnMapping, value: string | null) => {
     setColumnMapping(prev => ({ ...prev, [field]: value }));
@@ -230,18 +276,37 @@ export function ImportMappingDialog({ isOpen, onOpenChange, onImportComplete }: 
       case 'upload':
         return (
           <div className="space-y-6">
-            <div className="flex flex-col items-center justify-center p-6 border-2 border-dashed rounded-lg">
-              <FileSpreadsheet className="w-12 h-12 mb-4 text-gray-400" />
+            <div 
+              ref={dropZoneRef}
+              className={`flex flex-col items-center justify-center p-6 border-2 ${isDragging ? 'border-glee-purple bg-glee-purple/5' : 'border-dashed'} rounded-lg transition-colors`}
+              onDragEnter={handleDragEnter}
+              onDragOver={handleDragOver}
+              onDragLeave={handleDragLeave}
+              onDrop={handleDrop}
+            >
+              <FileSpreadsheet className={`w-12 h-12 mb-4 ${isDragging ? 'text-glee-purple' : 'text-gray-400'}`} />
               <p className="mb-2 text-sm text-center text-gray-500">
-                Upload a CSV file with your choral titles data
+                {isDragging ? 'Drop your CSV file here' : 'Drag & drop your CSV file here, or click to browse'}
               </p>
-              <Input
-                ref={fileInputRef}
-                type="file"
-                accept=".csv"
-                onChange={handleFileUpload}
-                className="mt-2"
-              />
+              <div className="flex items-center gap-2 mt-4">
+                <Input
+                  ref={fileInputRef}
+                  type="file"
+                  accept=".csv"
+                  onChange={handleFileUpload}
+                  className="hidden"
+                  id="file-input"
+                />
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="gap-2"
+                  onClick={() => fileInputRef.current?.click()}
+                >
+                  <Upload className="w-4 h-4" />
+                  Browse Files
+                </Button>
+              </div>
             </div>
           </div>
         );
