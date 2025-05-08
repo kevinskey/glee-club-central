@@ -24,6 +24,7 @@ import ContactPage from './pages/ContactPage';
 import AdministrationPage from './pages/AdministrationPage';
 import ViewSheetMusicPage from './pages/sheet-music/ViewSheetMusicPage';
 import SetlistsPage from './pages/SetlistsPage';
+import ViewSetlistPage from './pages/ViewSetlistPage';
 
 // Admin Pages
 import AdminDashboardPage from './pages/AdminDashboardPage';
@@ -45,6 +46,13 @@ function App() {
       <Route path="/about" element={<AboutPage />} />
       <Route path="/contact" element={<ContactPage />} />
       <Route path="/administration" element={<AdministrationPage />} />
+      
+      {/* Setlist fullscreen viewer (outside of dashboard layout) */}
+      <Route path="/setlist/:id" element={
+        <ProtectedRoute>
+          <ViewSetlistPage />
+        </ProtectedRoute>
+      } />
       
       {/* Protected dashboard routes */}
       <Route 

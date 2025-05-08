@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { PageHeader } from "@/components/ui/page-header";
-import { ListMusic, Plus, Search, Trash, Eye } from "lucide-react";
+import { ListMusic, Plus, Search, Trash, Eye, ExternalLink } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -184,6 +184,13 @@ export default function SetlistsPage() {
     navigate(`/dashboard/sheet-music/${sheetMusicId}`);
   };
 
+  const openFullscreenView = (setlistId: string, event?: React.MouseEvent) => {
+    if (event) {
+      event.stopPropagation();
+    }
+    navigate(`/setlist/${setlistId}`);
+  };
+
   const filteredSetlists = setlists.filter(setlist => 
     setlist.name.toLowerCase().includes(searchQuery.toLowerCase())
   );
@@ -248,14 +255,16 @@ export default function SetlistsPage() {
                   <CardHeader>
                     <div className="flex justify-between items-start">
                       <CardTitle className="mr-2">{setlist.name}</CardTitle>
-                      <Button 
-                        variant="ghost" 
-                        size="icon" 
-                        onClick={(e) => deleteSetlist(setlist.id, e)}
-                        className="h-8 w-8 text-destructive hover:text-destructive"
-                      >
-                        <Trash className="h-4 w-4" />
-                      </Button>
+                      <div className="flex">
+                        <Button 
+                          variant="ghost" 
+                          size="icon" 
+                          onClick={(e) => deleteSetlist(setlist.id, e)}
+                          className="h-8 w-8 text-destructive hover:text-destructive"
+                        >
+                          <Trash className="h-4 w-4" />
+                        </Button>
+                      </div>
                     </div>
                     <CardDescription>
                       {new Date(setlist.created_at).toLocaleDateString()}
@@ -266,14 +275,26 @@ export default function SetlistsPage() {
                       {setlist.sheet_music_ids?.length || 0} {(setlist.sheet_music_ids?.length || 0) === 1 ? 'item' : 'items'}
                     </p>
                   </CardContent>
-                  <CardFooter>
+                  <CardFooter className="flex gap-2">
                     <Button 
                       variant="outline" 
-                      className="w-full"
-                      onClick={() => viewSetlistDetails(setlist)}
+                      className="flex-1"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        viewSetlistDetails(setlist);
+                      }}
                     >
-                      <Eye className="h-4 w-4 mr-2" /> View Setlist
+                      <Eye className="h-4 w-4 mr-2" /> View
                     </Button>
+                    {(setlist.sheet_music_ids?.length > 0) && (
+                      <Button 
+                        variant="default" 
+                        className="flex-1"
+                        onClick={(e) => openFullscreenView(setlist.id, e)}
+                      >
+                        <ExternalLink className="h-4 w-4 mr-2" /> Fullscreen
+                      </Button>
+                    )}
                   </CardFooter>
                 </Card>
               ))}
@@ -307,7 +328,7 @@ export default function SetlistsPage() {
                     <TableHead>Name</TableHead>
                     <TableHead>Items</TableHead>
                     <TableHead>Created</TableHead>
-                    <TableHead className="w-[100px]">Actions</TableHead>
+                    <TableHead className="w-[140px]">Actions</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -337,6 +358,16 @@ export default function SetlistsPage() {
                           >
                             <Eye className="h-4 w-4" />
                           </Button>
+                          {(setlist.sheet_music_ids?.length > 0) && (
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="h-8 w-8"
+                              onClick={(e) => openFullscreenView(setlist.id, e)}
+                            >
+                              <ExternalLink className="h-4 w-4" />
+                            </Button>
+                          )}
                           <Button 
                             variant="ghost" 
                             size="icon" 
@@ -356,37 +387,6 @@ export default function SetlistsPage() {
         </TabsContent>
       </Tabs>
 
-      {/* Create Setlist Dialog */}
-      <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Create New Setlist</DialogTitle>
-            <DialogDescription>
-              Create a new setlist to organize your sheet music for performances or practice.
-            </DialogDescription>
-          </DialogHeader>
-          <div className="space-y-4 py-2">
-            <div className="space-y-2">
-              <Label htmlFor="setlist-name">Setlist Name</Label>
-              <Input
-                id="setlist-name"
-                value={newSetlistName}
-                onChange={(e) => setNewSetlistName(e.target.value)}
-                placeholder="Enter a name for your setlist"
-              />
-            </div>
-          </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setIsCreateDialogOpen(false)}>
-              Cancel
-            </Button>
-            <Button onClick={createNewSetlist} disabled={!newSetlistName.trim()}>
-              Create Setlist
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-
       {/* View Setlist Dialog */}
       <Dialog open={isViewDialogOpen} onOpenChange={setIsViewDialogOpen}>
         <DialogContent className="sm:max-w-md">
@@ -401,9 +401,24 @@ export default function SetlistsPage() {
           </DialogHeader>
           
           <div className="py-4">
-            <h3 className="text-sm font-medium mb-2 flex items-center gap-2">
-              <ListMusic className="h-4 w-4" />
-              Items in Setlist
+            <h3 className="text-sm font-medium mb-2 flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <ListMusic className="h-4 w-4" />
+                Items in Setlist
+              </div>
+              
+              {viewSetlist && viewSetlist.sheet_music_ids?.length > 0 && (
+                <Button
+                  size="sm"
+                  onClick={() => {
+                    setIsViewDialogOpen(false);
+                    openFullscreenView(viewSetlist.id);
+                  }}
+                  className="flex items-center gap-1"
+                >
+                  <ExternalLink className="h-4 w-4 mr-1" /> View Full Screen
+                </Button>
+              )}
             </h3>
             
             <ScrollArea className="h-[50vh]">
@@ -455,6 +470,37 @@ export default function SetlistsPage() {
               navigate('/dashboard/sheet-music');
             }}>
               Go to Sheet Music
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Create Setlist Dialog */}
+      <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Create New Setlist</DialogTitle>
+            <DialogDescription>
+              Create a new setlist to organize your sheet music for performances or practice.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-2">
+            <div className="space-y-2">
+              <Label htmlFor="setlist-name">Setlist Name</Label>
+              <Input
+                id="setlist-name"
+                value={newSetlistName}
+                onChange={(e) => setNewSetlistName(e.target.value)}
+                placeholder="Enter a name for your setlist"
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsCreateDialogOpen(false)}>
+              Cancel
+            </Button>
+            <Button onClick={createNewSetlist} disabled={!newSetlistName.trim()}>
+              Create Setlist
             </Button>
           </DialogFooter>
         </DialogContent>
