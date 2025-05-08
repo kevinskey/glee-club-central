@@ -16,7 +16,11 @@ export function useMessaging() {
   const { user } = useAuth();
 
   const sendMessage = async ({ type, to, subject, content }: SendMessageParams) => {
-    if (!user) {
+    // For email sending during registration, we may not have a user yet
+    // So we'll allow sending without checking for user in that case
+    const isRegistrationEmail = !user && type === "email" && subject?.includes("Welcome");
+    
+    if (!user && !isRegistrationEmail) {
       toast.error("You must be logged in to send messages");
       return { success: false };
     }
@@ -25,17 +29,23 @@ export function useMessaging() {
     try {
       const endpoint = type === "email" ? "send-email" : "send-sms";
       
+      console.log(`Sending ${type} via ${endpoint} function...`);
+      
       const { data, error } = await supabase.functions.invoke(endpoint, {
         body: {
           to,
           subject: subject || "",
           content,
-          userId: user.id
+          userId: user?.id || "registration" // Handle case when sending during registration
         }
       });
 
-      if (error) throw error;
+      if (error) {
+        console.error(`Error response from ${endpoint}:`, error);
+        throw error;
+      }
 
+      console.log(`${type} sent successfully:`, data);
       toast.success(`${type === "email" ? "Email" : "SMS"} sent successfully!`);
       return { success: true, data };
     } catch (error: any) {

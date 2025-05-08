@@ -23,15 +23,33 @@ const handler = async (req: Request): Promise<Response> => {
   }
 
   try {
-    const { to, subject, content, userId }: EmailRequest = await req.json();
+    console.log("Received request to send email");
+    
+    // Parse request body
+    let reqBody: EmailRequest;
+    try {
+      reqBody = await req.json();
+      console.log("Request body parsed:", {
+        to: reqBody.to,
+        subject: reqBody.subject,
+        userId: reqBody.userId,
+        contentLength: reqBody.content?.length || 0
+      });
+    } catch (e) {
+      console.error("Failed to parse request body:", e);
+      throw new Error("Invalid request format");
+    }
+    
+    const { to, subject, content, userId } = reqBody;
 
-    if (!to || !subject || !content || !userId) {
-      throw new Error("Missing required fields: to, subject, content, userId");
+    if (!to || !subject || !content) {
+      throw new Error("Missing required fields: to, subject, content");
     }
 
     // Send email via Resend
+    console.log(`Sending email to ${to}`);
     const emailResponse = await resend.emails.send({
-      from: "Choir App <no-reply@yourdomain.com>",
+      from: "Glee World <no-reply@gleeworld.org>",
       to: [to],
       subject: subject,
       html: content,
@@ -40,23 +58,26 @@ const handler = async (req: Request): Promise<Response> => {
     console.log("Email sent successfully:", emailResponse);
 
     // Store the message in the database for tracking
-    const { supabaseClient } = await import("../shared/supabase-client.ts");
-    
-    const { error: dbError } = await supabaseClient
-      .from("user_messages")
-      .insert({
-        user_id: userId,
-        message_type: "email",
-        subject: subject,
-        content: content,
-        recipient: to,
-        status: "sent",
-        sent_at: new Date().toISOString()
-      });
+    if (userId && userId !== "registration") {
+      const { supabaseClient } = await import("../shared/supabase-client.ts");
+      
+      console.log(`Storing message record for user ${userId}`);
+      const { error: dbError } = await supabaseClient
+        .from("user_messages")
+        .insert({
+          user_id: userId,
+          message_type: "email",
+          subject: subject,
+          content: content,
+          recipient: to,
+          status: "sent",
+          sent_at: new Date().toISOString()
+        });
 
-    if (dbError) {
-      console.error("Database error:", dbError);
-      // Continue since email was sent, just log the database error
+      if (dbError) {
+        console.error("Database error:", dbError);
+        // Continue since email was sent, just log the database error
+      }
     }
 
     return new Response(JSON.stringify({ success: true, data: emailResponse }), {

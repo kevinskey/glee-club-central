@@ -1,3 +1,4 @@
+
 import React from "react";
 import { useState } from "react";
 import { Link } from "react-router-dom";
@@ -17,6 +18,7 @@ import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { useMessaging } from "@/hooks/useMessaging";
 
 const formSchema = z
   .object({
@@ -44,6 +46,7 @@ export default function RegisterPage() {
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
   const [authError, setAuthError] = useState<string | null>(null);
+  const { sendEmail } = useMessaging();
   
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
@@ -103,6 +106,23 @@ export default function RegisterPage() {
         if (profileError) {
           console.error("Error updating profile:", profileError);
           // Continue without throwing, as the main signup was successful
+        }
+        
+        // Send welcome email
+        try {
+          await sendEmail(
+            values.email,
+            "Welcome to Glee World!",
+            `<h1>Welcome to Glee World, ${values.firstName}!</h1>
+            <p>Thank you for joining the Spelman College Glee Club's digital hub. We're excited to have you with us!</p>
+            <p>Your account has been created successfully. You can now access all the features of our platform.</p>
+            <p>If you have any questions, please don't hesitate to reach out to our team.</p>
+            <p>Best regards,<br>The Glee Club Team</p>`
+          );
+          console.log("Welcome email sent successfully");
+        } catch (emailError) {
+          console.error("Failed to send welcome email:", emailError);
+          // Don't throw error here, as registration was successful
         }
         
         // Check if email confirmation is needed
