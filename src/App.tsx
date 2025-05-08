@@ -5,7 +5,6 @@ import { ProtectedRoute } from './components/auth/ProtectedRoute';
 import { DashboardLayout } from './components/layout/DashboardLayout';
 
 // Pages
-import DashboardPage from './pages/DashboardPage';
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
 import ResetPasswordPage from './pages/ResetPasswordPage';
@@ -40,7 +39,7 @@ function App() {
           </ProtectedRoute>
         }
       >
-        <Route index element={<DashboardPage />} />
+        <Route index element={<CalendarPage />} />
         <Route path="calendar" element={<CalendarPage />} />
         <Route path="sheet-music" element={<SheetMusicPage />} />
         <Route path="practice" element={<div>Practice Page</div>} />
