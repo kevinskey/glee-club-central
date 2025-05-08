@@ -1,4 +1,3 @@
-
 import React from "react";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
@@ -20,7 +19,7 @@ import { useAuth } from "@/contexts/AuthContext";
 const performanceEvents: PerformanceEventType[] = [
   {
     id: 1,
-    title: "Fall Showcase",
+    title: "Fall Concert 2025",
     date: new Date(2025, 5, 15), // June 15, 2025
     location: "Sisters Chapel",
     description: "Our annual showcase featuring classical and contemporary pieces.",
@@ -28,7 +27,7 @@ const performanceEvents: PerformanceEventType[] = [
   },
   {
     id: 2,
-    title: "Holiday Concert",
+    title: "A Taste of Christmas",
     date: new Date(2025, 11, 10), // December 10, 2025
     location: "Atlanta Symphony Hall",
     description: "Celebrating the season with festive music and traditional carols.",
@@ -36,7 +35,7 @@ const performanceEvents: PerformanceEventType[] = [
   },
   {
     id: 3,
-    title: "Spring Tour",
+    title: "99th Annual Christmas Carol",
     date: new Date(2026, 2, 5), // March 5, 2026
     location: "Various Venues",
     description: "Our annual tour across the southeastern United States.",
