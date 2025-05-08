@@ -2,6 +2,8 @@
 import React, { useRef, useEffect, useState } from "react";
 import { Loader2, FileText, Download } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Toggle } from "@/components/ui/toggle";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 interface PDFDocumentProps {
   url: string;
@@ -29,6 +31,7 @@ export const PDFDocument = ({
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const [fallbackMode, setFallbackMode] = useState(false);
   const [pdfAttempted, setPdfAttempted] = useState(false);
+  const [viewMode, setViewMode] = useState<'scroll' | 'page'>('page');
   
   // Ensure the URL is properly sanitized and valid
   const sanitizedUrl = url ? url.trim() : "";
@@ -101,9 +104,12 @@ export const PDFDocument = ({
     
     // Add view parameters if not already present
     if (!viewerUrl.includes('view=')) {
+      // Set view parameter based on selected view mode
+      const viewParam = viewMode === 'scroll' ? 'FitH' : 'SinglePage';
+      
       viewerUrl += separator + (isMobile 
-        ? "toolbar=0&navpanes=0&view=FitH&scrollbar=0" 
-        : "toolbar=0&navpanes=1&view=FitH&scrollbar=1");
+        ? `toolbar=0&navpanes=0&view=${viewParam}&scrollbar=${viewMode === 'scroll' ? '1' : '0'}` 
+        : `toolbar=0&navpanes=1&view=${viewParam}&scrollbar=${viewMode === 'scroll' ? '1' : '0'}`);
     }
     
     // Add page parameter if needed and not already present
@@ -115,14 +121,15 @@ export const PDFDocument = ({
   };
 
   // Add a check for iOS devices where PDF handling differs
-  const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+  const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !(window as any).MSStream;
 
   // Log for debugging
   useEffect(() => {
     console.log("PDF URL being used:", getPdfViewerUrl());
     console.log("Using fallback mode:", fallbackMode);
     console.log("Device is iOS:", isIOS);
-  }, [url, currentPage, zoom, fallbackMode]);
+    console.log("View mode:", viewMode);
+  }, [url, currentPage, zoom, fallbackMode, viewMode]);
 
   // Auto-switch to fallback for iOS devices which often have PDF display issues
   useEffect(() => {
@@ -131,6 +138,11 @@ export const PDFDocument = ({
       setFallbackMode(true);
     }
   }, [isIOS]);
+
+  // Toggle view mode
+  const toggleViewMode = () => {
+    setViewMode(prev => prev === 'page' ? 'scroll' : 'page');
+  };
 
   if (!url) {
     return (
@@ -158,13 +170,29 @@ export const PDFDocument = ({
   }
 
   return (
-    <div className="relative w-full h-full flex justify-center overflow-hidden">
+    <div className="relative w-full h-full flex flex-col justify-center overflow-hidden">
+      {/* View Mode Toggle */}
+      <div className="absolute top-2 left-2 z-40 bg-background/80 rounded-md shadow-sm">
+        <div className="flex items-center gap-2 p-1">
+          <Toggle
+            pressed={viewMode === 'scroll'}
+            onPressedChange={() => toggleViewMode()}
+            size="sm"
+            className="text-xs h-6 data-[state=on]:bg-glee-purple"
+          >
+            {viewMode === 'scroll' ? 'Scroll View' : 'Page View'}
+          </Toggle>
+        </div>
+      </div>
+      
+      {/* Loading Indicator */}
       {isLoading && (
         <div className="absolute inset-0 flex items-center justify-center bg-background/80 z-30">
           <Loader2 className="h-8 w-8 animate-spin text-primary" />
         </div>
       )}
       
+      {/* PDF Iframe */}
       <iframe 
         ref={iframeRef}
         src={getPdfViewerUrl()}
@@ -176,7 +204,8 @@ export const PDFDocument = ({
           left: '50%',
           transform: `translateX(-50%) scale(${zoom / 100})`,
           width: `${100 / (zoom / 100)}%`,
-          height: `${100 / (zoom / 100)}%`
+          height: `${100 / (zoom / 100)}%`,
+          overflowY: viewMode === 'scroll' ? 'auto' : 'hidden'
         }}
         onLoad={handleIframeLoad}
         onError={handleIframeError}
@@ -186,6 +215,7 @@ export const PDFDocument = ({
         allowFullScreen
       />
       
+      {/* Fallback Mode Indicator */}
       {fallbackMode && (
         <div className="absolute top-0 left-0 bg-background/70 text-sm p-2 z-10 rounded-md m-2">
           Using alternative viewer
