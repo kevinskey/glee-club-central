@@ -9,15 +9,16 @@ import { PDFControls } from "./pdf/PDFControls";
 import { PDFMobileControls } from "./pdf/PDFMobileControls";
 import { PDFDocument } from "./pdf/PDFDocument";
 import { PDFAnnotationManager } from "./pdf/PDFAnnotationManager";
-import { Button } from "@/components/ui/button"; // Add missing import for Button component
+import { Button } from "@/components/ui/button";
 
 interface PDFViewerProps {
   url: string;
   title: string;
   sheetMusicId?: string;
+  fullHeight?: boolean; // Add the fullHeight prop to the interface
 }
 
-export const PDFViewer = ({ url, title, sheetMusicId }: PDFViewerProps) => {
+export const PDFViewer = ({ url, title, sheetMusicId, fullHeight }: PDFViewerProps) => {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [zoom, setZoom] = useState(100); // Zoom level in percentage
@@ -266,12 +267,14 @@ export const PDFViewer = ({ url, title, sheetMusicId }: PDFViewerProps) => {
         </>
       )}
       
-      {/* PDF Document Container */}
+      {/* PDF Document Container - Apply fullHeight prop if provided */}
       <div 
         ref={containerRef} 
         className="relative w-full flex justify-center bg-gray-100 overflow-hidden" 
         style={{ 
-          height: isFullscreen ? "calc(100vh - 60px)" : isMobile ? "calc(100vh - 180px)" : "70vh",
+          height: fullHeight ? "calc(100vh - 60px)" : 
+                  isFullscreen ? "calc(100vh - 60px)" : 
+                  isMobile ? "calc(100vh - 180px)" : "70vh",
           position: "relative"
         }}
       >
