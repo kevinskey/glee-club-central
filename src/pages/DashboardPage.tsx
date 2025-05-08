@@ -101,7 +101,7 @@ export default function DashboardPage() {
       title: "Glee Club Schedule",
       description: "View upcoming rehearsals, concerts, and events",
       icon: <Calendar className="h-6 w-6" />,
-      href: "/dashboard/schedule",
+      href: "/dashboard/calendar",
       color: "bg-red-500/10",
     },
     {
@@ -167,7 +167,7 @@ export default function DashboardPage() {
         icon={<Bell className="h-6 w-6" />}
       />
 
-      {isAdmin() && (
+      {isAdmin && (
         <>
           <div className="mb-6">
             <h2 className="text-2xl font-semibold mb-2">Admin Tools</h2>

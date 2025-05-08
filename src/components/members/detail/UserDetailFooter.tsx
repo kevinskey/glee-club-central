@@ -14,9 +14,9 @@ export const UserDetailFooter: React.FC<UserDetailFooterProps> = ({ userId }) =>
       <SheetClose asChild>
         <Button variant="outline">Close</Button>
       </SheetClose>
-      <Link to={`/dashboard/members/${userId}`}>
-        <Button variant="default">View Full Profile</Button>
-      </Link>
+      <Button variant="default" asChild>
+        <Link to={`/dashboard/members/${userId}`}>View Full Profile</Link>
+      </Button>
     </SheetFooter>
   );
 };
