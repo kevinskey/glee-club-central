@@ -1,32 +1,86 @@
 
 import React from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import {
-  Sheet,
-  SheetContent,
-  SheetDescription,
-  SheetHeader,
-  SheetTitle,
-  SheetTrigger,
-} from "@/components/ui/sheet";
-import { Menu, Users, LucideIcon } from "lucide-react";
-import { NavItem } from "./NavItem";
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+  useDropdownMenu,
+} from "@/components/ui/dropdown-menu";
+import { Button } from "@/components/ui/button";
+import {
+  Menu,
+  Users,
+  Home,
+  Settings,
+  CalendarDays,
+  FileText,
+  Mic,
+  MessageSquare,
+  Music,
+  LogOut,
+  User,
+} from "lucide-react";
 
 export function Header() {
   const { profile, signOut } = useAuth();
+  const navigate = useNavigate();
 
-  // Fix the UserRole import and ensure the comparison is made correctly
-  const renderAdminLinks = () => {
-    if (profile?.role === "administrator") {
-      return (
-        <NavItem href="/dashboard/member-management" icon={Users}>
-          Member Management
-        </NavItem>
-      );
-    }
-    return null;
-  };
+  // Navigation items - migrated from SidebarNav
+  const navItems = [
+    {
+      title: "Dashboard",
+      href: "/dashboard",
+      icon: Home,
+    },
+    {
+      title: "Member Directory",
+      href: "/dashboard/member-directory",
+      icon: Users,
+    },
+    {
+      title: "Calendar",
+      href: "/dashboard/calendar",
+      icon: CalendarDays,
+    },
+    {
+      title: "Sheet Music",
+      href: "/dashboard/sheet-music",
+      icon: FileText,
+    },
+    {
+      title: "Rehearsals",
+      href: "/dashboard/rehearsals",
+      icon: Mic,
+    },
+    {
+      title: "Messages",
+      href: "/dashboard/messages",
+      icon: MessageSquare,
+    },
+    {
+      title: "Profile",
+      href: "/dashboard/profile",
+      icon: User,
+    },
+  ];
+
+  // Admin-only items
+  const adminItems = [
+    {
+      title: "Member Management",
+      href: "/dashboard/member-management",
+      icon: Users,
+      adminOnly: true
+    },
+  ];
+
+  // Determine if user is an admin to show admin-specific links
+  const isAdmin = profile?.role === "administrator";
 
   return (
     <header className="bg-background sticky top-0 z-50 w-full border-b">
@@ -34,54 +88,65 @@ export function Header() {
         <Link to="/" className="font-bold">
           Glee Club
         </Link>
-        <Sheet>
-          <SheetTrigger>
-            <Menu className="h-6 w-6 lg:hidden" />
-          </SheetTrigger>
-          <SheetContent side="left" className="w-full sm:w-[400px]">
-            <SheetHeader>
-              <SheetTitle>Menu</SheetTitle>
-              <SheetDescription>
-                Navigate through the application.
-              </SheetDescription>
-            </SheetHeader>
-            <div className="grid gap-4 py-4">
-              <NavItem href="/dashboard" icon={Users}>
-                Dashboard
-              </NavItem>
-              {renderAdminLinks()}
-              <NavItem href="/dashboard/profile" icon={Users}>
-                Profile
-              </NavItem>
-              <NavItem href="/dashboard/member-directory" icon={Users}>
-                Member Directory
-              </NavItem>
-              <button
+
+        <nav className="flex items-center gap-4">
+          {/* Main Navigation Dropdown */}
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" size="icon">
+                <Menu className="h-5 w-5" />
+                <span className="sr-only">Navigation Menu</span>
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-56">
+              <DropdownMenuLabel>Navigation</DropdownMenuLabel>
+              <DropdownMenuSeparator />
+              
+              {navItems.map((item) => (
+                <DropdownMenuItem 
+                  key={item.href} 
+                  onClick={() => navigate(item.href)}
+                  className="flex items-center gap-2 cursor-pointer"
+                >
+                  <item.icon className="h-4 w-4" />
+                  <span>{item.title}</span>
+                </DropdownMenuItem>
+              ))}
+              
+              {isAdmin && (
+                <>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuLabel>Admin</DropdownMenuLabel>
+                  <DropdownMenuSeparator />
+                  
+                  {adminItems.map((item) => (
+                    <DropdownMenuItem 
+                      key={item.href} 
+                      onClick={() => navigate(item.href)}
+                      className="flex items-center gap-2 cursor-pointer"
+                    >
+                      <item.icon className="h-4 w-4" />
+                      <span>{item.title}</span>
+                    </DropdownMenuItem>
+                  ))}
+                </>
+              )}
+              
+              <DropdownMenuSeparator />
+              <DropdownMenuItem 
                 onClick={signOut}
-                className="flex items-center gap-2 rounded-md p-2 text-sm font-medium hover:bg-secondary"
+                className="flex items-center gap-2 cursor-pointer text-destructive"
               >
-                Sign Out
-              </button>
-            </div>
-          </SheetContent>
-        </Sheet>
-        <nav className="hidden lg:flex gap-6">
-          <NavItem href="/dashboard" icon={Users}>
-            Dashboard
-          </NavItem>
-          {renderAdminLinks()}
-          <NavItem href="/dashboard/profile" icon={Users}>
-            Profile
-          </NavItem>
-          <NavItem href="/dashboard/member-directory" icon={Users}>
-            Member Directory
-          </NavItem>
-          <button
-            onClick={signOut}
-            className="flex items-center gap-2 rounded-md p-2 text-sm font-medium hover:bg-secondary"
-          >
-            Sign Out
-          </button>
+                <LogOut className="h-4 w-4" />
+                <span>Sign Out</span>
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+
+          {/* User's name - could be expanded to include user menu */}
+          <span className="hidden md:inline-flex text-sm">
+            {profile?.first_name} {profile?.last_name}
+          </span>
         </nav>
       </div>
     </header>

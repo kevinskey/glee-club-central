@@ -1,4 +1,3 @@
-
 import { supabase } from '@/integrations/supabase/client';
 
 // Define explicit interface for user profile to avoid recursive type instantiation
@@ -153,24 +152,64 @@ export async function updateUserProfile(userId: string, profileData: Partial<Pro
 }
 
 // Search users by email with explicit return type to prevent infinite type recursion
-export async function searchUserByEmail(email: string): Promise<Profile | null> {
-  console.log(`Searching for user with email: ${email}`);
+export const searchUserByEmail = async (email: string): Promise<UserSafe | null> => {
   try {
     const { data, error } = await supabase
       .from('profiles')
       .select('*')
       .eq('email', email)
       .single();
-    
-    if (error && error.code !== 'PGRST116') { // PGRST116 is "no rows returned" error
-      console.error(`Error searching user by email:`, error);
-      throw error;
+
+    if (error) {
+      console.error('Error searching for user by email:', error);
+      return null;
     }
+
+    if (!data) return null;
+
+    // Cast to avoid deep type inference
+    const user = data as unknown as Omit<UserSafe, 'role_display_name' | 'voice_part_display'>;
     
-    console.log(`Search result for email ${email}:`, data);
-    return data as Profile | null;
+    // Create a properly typed UserSafe object
+    const userSafe: UserSafe = {
+      ...user,
+      role_display_name: getRoleDisplayName(user.role),
+      voice_part_display: getVoicePartDisplay(user.voice_part),
+      updated_at: user.updated_at || new Date().toISOString()
+    };
+
+    return userSafe;
   } catch (error) {
-    console.error(`Error searching for user with email ${email}:`, error);
-    throw error;
+    console.error('Error in searchUserByEmail:', error);
+    return null;
+  }
+};
+
+// Helper functions to format display names
+function getRoleDisplayName(role: string): string {
+  if (!role) return "Unknown";
+  
+  switch (role) {
+    case "administrator": return "Administrator";
+    case "section_leader": return "Section Leader";
+    case "singer": return "Singer";
+    case "student_conductor": return "Student Conductor";
+    case "accompanist": return "Accompanist";
+    case "non_singer": return "Non-Singer";
+    default: return role.charAt(0).toUpperCase() + role.slice(1).replace(/_/g, ' ');
+  }
+}
+
+function getVoicePartDisplay(voicePart: string | null): string {
+  if (!voicePart) return "Not set";
+  
+  switch (voicePart) {
+    case "soprano_1": return "Soprano 1";
+    case "soprano_2": return "Soprano 2";
+    case "alto_1": return "Alto 1";
+    case "alto_2": return "Alto 2";
+    case "tenor": return "Tenor";
+    case "bass": return "Bass";
+    default: return voicePart;
   }
 }
