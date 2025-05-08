@@ -2,27 +2,26 @@
 // This file contains user query functions for Supabase
 
 import { supabase } from "@/integrations/supabase/client";
-import type { UserRole, UserPermissions } from "@/utils/supabase/types";
+import type { UserPermissions } from "@/utils/supabase/types";
 import { UserSafe } from "./types";
 
-// Define a simpler type for search results to avoid infinite recursion
-type SimpleUserData = {
+// Define type for user search results
+export interface UserSearchResult {
   id: string;
   email: string | null;
-  first_name?: string | null;
-  last_name?: string | null;
-  role?: string | null;
-  status?: string | null;
-  voice_part?: string | null;
-};
+  first_name: string | null;
+  last_name: string | null;
+  role: string | null;
+  status: string | null;
+  voice_part: string | null;
+}
 
 /**
  * Search for a user by their email address
  */
-export async function searchUserByEmail(email: string): Promise<SimpleUserData | null> {
+export async function searchUserByEmail(email: string): Promise<UserSearchResult | null> {
   try {
-    // Check if email field actually exists in the profiles table
-    // If email is stored in auth.users instead, we need to use a join or a different approach
+    // Check if the email field exists in profiles or may need to join with auth.users
     const { data, error } = await supabase
       .from('profiles')
       .select('id, email, first_name, last_name, role, status, voice_part')
@@ -31,18 +30,25 @@ export async function searchUserByEmail(email: string): Promise<SimpleUserData |
       
     if (error) {
       console.error("Error searching for user by email:", error);
-      return null; // Explicitly return null on error
+      return null;
     }
     
     if (!data || data.length === 0) {
-      return null; // Return null if no data found
+      return null;
     }
     
-    // Return the first result with the correct type
-    return data[0] as SimpleUserData;
+    return {
+      id: data[0].id,
+      email: data[0].email,
+      first_name: data[0].first_name,
+      last_name: data[0].last_name,
+      role: data[0].role,
+      status: data[0].status,
+      voice_part: data[0].voice_part
+    };
   } catch (error) {
     console.error("Exception searching for user by email:", error);
-    return null; // Return null on exception
+    return null;
   }
 }
 
@@ -132,7 +138,7 @@ export async function fetchAllUsers(): Promise<UserSafe[] | null> {
 /**
  * Fetch users by role.
  */
-export async function fetchUsersByRole(role: UserRole): Promise<UserSafe[] | null> {
+export async function fetchUsersByRole(role: string): Promise<UserSafe[] | null> {
   try {
     const { data, error } = await supabase
       .from('profiles')

@@ -1,4 +1,6 @@
 
+// Define user-related types for the application
+
 // Permissions
 export interface PermissionSet {
   canEditUsers: boolean;

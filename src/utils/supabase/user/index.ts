@@ -8,6 +8,7 @@ export * from './operations';
 export {
   searchUserByEmail,
   fetchUserById,
+  updateUserProfile,
   fetchAllUsers,
   fetchUsersByRole,
   fetchUserPermissions
