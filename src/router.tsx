@@ -52,7 +52,7 @@ const routes: RouteObject[] = [
     children: [
       {
         path: "", // Dashboard home
-        element: <DashboardPage />, // Using new DashboardPage component
+        element: <DashboardPage />, // Using DashboardPage component
       },
       {
         path: "calendar",
