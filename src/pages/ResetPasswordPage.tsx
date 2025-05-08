@@ -4,7 +4,7 @@ import { useNavigate, Link } from "react-router-dom";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
-import { KeyRound, LockKeyhole, ArrowLeft } from "lucide-react";
+import { KeyRound, ArrowLeft } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -90,29 +90,24 @@ export default function ResetPasswordPage() {
   // Invalid link state
   if (validResetLink === false) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-background px-4 py-12">
-        <Card className="w-full max-w-md border-orange-200 shadow-lg">
-          <CardHeader className="text-center space-y-2">
-            <div className="flex justify-center mb-2">
-              <div className="rounded-full bg-red-100 p-3">
-                <LockKeyhole className="h-8 w-8 text-red-600" />
-              </div>
-            </div>
-            <CardTitle className="text-2xl font-bold text-gray-800">Invalid Link</CardTitle>
-            <CardDescription className="text-base">
+      <div className="flex min-h-screen items-center justify-center bg-background p-4">
+        <Card className="w-full max-w-md">
+          <CardHeader>
+            <CardTitle>Invalid Link</CardTitle>
+            <CardDescription>
               The password reset link is invalid or has expired.
             </CardDescription>
           </CardHeader>
-          <CardContent className="text-center pb-4">
-            <p className="mb-6 text-gray-600">
+          <CardContent>
+            <p className="mb-4">
               Please try to reset your password again using the forgot password page.
             </p>
-            <Button asChild className="w-full bg-orange-500 hover:bg-orange-600">
+            <Button asChild className="w-full">
               <Link to="/forgot-password">Try Again</Link>
             </Button>
           </CardContent>
-          <CardFooter className="flex justify-center pt-2 pb-6">
-            <Link to="/login" className="text-sm text-orange-600 hover:underline flex items-center">
+          <CardFooter className="flex justify-center">
+            <Link to="/login" className="text-sm text-primary hover:underline flex items-center">
               <ArrowLeft className="mr-1 h-3 w-3" /> Back to login
             </Link>
           </CardFooter>
@@ -123,39 +118,29 @@ export default function ResetPasswordPage() {
 
   // Valid link - show password reset form
   return (
-    <div className="flex min-h-screen items-center justify-center bg-background px-4 py-12">
-      <Card className="w-full max-w-md border-orange-200 shadow-lg">
-        <CardHeader className="text-center space-y-2">
-          <div className="flex justify-center mb-3">
-            <div className="rounded-full bg-orange-100 p-3">
-              <KeyRound className="h-8 w-8 text-orange-500" />
-            </div>
+    <div className="flex min-h-screen items-center justify-center bg-background p-4">
+      <Card className="w-full max-w-md">
+        <CardHeader className="text-center">
+          <div className="mx-auto mb-4 bg-primary/10 p-2 rounded-full w-fit">
+            <KeyRound className="h-6 w-6 text-primary" />
           </div>
-          <CardTitle className="text-2xl font-bold text-gray-800">Create New Password</CardTitle>
-          <CardDescription className="text-base">
-            Please enter a strong password to secure your account
+          <CardTitle>Reset Password</CardTitle>
+          <CardDescription>
+            Enter a new password for your account
           </CardDescription>
         </CardHeader>
         <CardContent>
           <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-5">
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
               <FormField
                 control={form.control}
                 name="password"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="text-gray-700">New Password</FormLabel>
+                    <FormLabel>New Password</FormLabel>
                     <FormControl>
-                      <Input 
-                        type="password" 
-                        placeholder="Create a strong password" 
-                        className="bg-gray-50" 
-                        {...field} 
-                      />
+                      <Input type="password" placeholder="Enter new password" {...field} />
                     </FormControl>
-                    <div className="text-xs text-muted-foreground mt-2">
-                      Password must contain at least 8 characters, including uppercase, lowercase, and a number
-                    </div>
                     <FormMessage />
                   </FormItem>
                 )}
@@ -165,14 +150,9 @@ export default function ResetPasswordPage() {
                 name="confirmPassword"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="text-gray-700">Confirm New Password</FormLabel>
+                    <FormLabel>Confirm Password</FormLabel>
                     <FormControl>
-                      <Input 
-                        type="password" 
-                        placeholder="Confirm your password" 
-                        className="bg-gray-50" 
-                        {...field} 
-                      />
+                      <Input type="password" placeholder="Confirm new password" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -180,28 +160,18 @@ export default function ResetPasswordPage() {
               />
               <Button 
                 type="submit" 
-                className="w-full bg-orange-500 hover:bg-orange-600 mt-4 h-11" 
+                className="w-full" 
                 disabled={isLoading}
               >
-                {isLoading ? (
-                  <>
-                    <span className="mr-2">Resetting Password...</span>
-                    <div className="h-4 w-4 rounded-full border-2 border-white border-t-transparent animate-spin"></div>
-                  </>
-                ) : (
-                  "Reset Password"
-                )}
+                {isLoading ? "Resetting..." : "Reset Password"}
               </Button>
             </form>
           </Form>
         </CardContent>
-        <CardFooter className="flex justify-center pt-2 pb-6">
-          <p className="text-sm text-gray-600">
-            Remember your password?{" "}
-            <Link to="/login" className="text-orange-600 hover:underline font-medium">
-              Log in
-            </Link>
-          </p>
+        <CardFooter className="flex justify-center">
+          <Link to="/login" className="text-sm text-primary hover:underline">
+            Back to login
+          </Link>
         </CardFooter>
       </Card>
     </div>
