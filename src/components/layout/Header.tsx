@@ -1,6 +1,6 @@
 
 import React from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import {
   DropdownMenu,
@@ -28,7 +28,6 @@ import { useSidebar } from "@/hooks/use-sidebar";
 
 export function Header() {
   const { profile, signOut } = useAuth();
-  const navigate = useNavigate();
   const { onOpen } = useSidebar();
 
   // Navigation items - ensuring unique paths
@@ -117,7 +116,7 @@ export function Header() {
               <DropdownMenuSeparator />
               
               <DropdownMenuItem 
-                onClick={() => navigate("/dashboard/profile")}
+                onClick={() => window.location.href = "/dashboard/profile"}
                 className="flex items-center gap-2 cursor-pointer"
               >
                 <User className="h-4 w-4" />
@@ -125,7 +124,7 @@ export function Header() {
               </DropdownMenuItem>
               
               <DropdownMenuItem 
-                onClick={() => navigate("/update-password")}
+                onClick={() => window.location.href = "/update-password"}
                 className="flex items-center gap-2 cursor-pointer"
               >
                 <Settings className="h-4 w-4" />
@@ -134,7 +133,7 @@ export function Header() {
               
               <DropdownMenuSeparator />
               <DropdownMenuItem 
-                onClick={signOut}
+                onClick={() => signOut()}
                 className="flex items-center gap-2 cursor-pointer text-destructive"
               >
                 <LogOut className="h-4 w-4" />

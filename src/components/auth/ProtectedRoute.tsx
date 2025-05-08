@@ -22,7 +22,7 @@ export function ProtectedRoute({ children, requiredRoles }: ProtectedRouteProps)
   }
   
   if (!isAuthenticated) {
-    // Save the location the user was trying to access
+    // Save the location the user was trying to access and redirect to login
     return <Navigate to="/login" state={{ from: location }} replace />;
   }
   

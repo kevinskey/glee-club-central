@@ -1,5 +1,5 @@
+
 import { createContext, useState, useContext, useEffect, ReactNode } from "react";
-import { useNavigate } from "react-router-dom";
 import { Session } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
 import type { AuthUser, Profile } from "@/types/auth";
@@ -89,7 +89,6 @@ export function AuthProvider({ children }: Props) {
   const [permissions, setPermissions] = useState<PermissionSet | null>(null);
   const [loading, setLoading] = useState(true);
   const [session, setSession] = useState<Session | null>(null);
-  const navigate = useNavigate();
 
   useEffect(() => {
     // On component mount, check for auth state
@@ -134,7 +133,7 @@ export function AuthProvider({ children }: Props) {
     return () => {
       subscription.unsubscribe();
     };
-  }, [navigate]);
+  }, []);
 
   // Fetch user profile from database
   const fetchUserProfile = async (userId: string) => {
@@ -217,7 +216,7 @@ export function AuthProvider({ children }: Props) {
   const signOut = async () => {
     try {
       await supabase.auth.signOut();
-      navigate("/login");
+      window.location.href = '/login'; // Use direct navigation instead of useNavigate
     } catch (error: any) {
       console.error("Error during sign out:", error.message);
     }
