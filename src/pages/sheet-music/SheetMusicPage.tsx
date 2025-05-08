@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { PageHeader } from "@/components/ui/page-header";
@@ -261,6 +262,15 @@ export default function SheetMusicPage() {
               </Link>
             </Button>
             <Button 
+              variant="outline"
+              asChild
+              className="mr-2 bg-red-600 hover:bg-red-700 text-white"
+            >
+              <Link to="/dashboard/sheet-music?view=list" className="flex items-center gap-2">
+                <TableIcon className="h-4 w-4" /> Table View
+              </Link>
+            </Button>
+            <Button 
               onClick={() => setIsUploadModalOpen(true)}
               className="gap-2 bg-glee-purple hover:bg-glee-purple/90"
             >
@@ -335,16 +345,6 @@ export default function SheetMusicPage() {
             onClick={() => setIsSetlistDrawerOpen(true)}
           >
             <ListMusic className="h-4 w-4 mr-2" /> Manage Setlists
-          </Button>
-          
-          <Button 
-            variant="outline"
-            asChild
-            className="flex-shrink-0 bg-red-600 hover:bg-red-700 text-white"
-          >
-            <Link to="/dashboard/sheet-music?view=list" className="flex items-center gap-2">
-              <TableIcon className="h-4 w-4" /> Table View
-            </Link>
           </Button>
         </div>
       </div>
