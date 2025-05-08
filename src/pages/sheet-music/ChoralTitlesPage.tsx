@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { PageHeader } from "@/components/ui/page-header";
@@ -23,6 +24,7 @@ import {
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import Papa from "papaparse";
+import { ImportMappingDialog } from "@/components/sheet-music/ImportMappingDialog";
 
 interface ChoralTitle {
   id: string;
@@ -168,7 +170,7 @@ export default function ChoralTitlesPage() {
           
         if (error) throw error;
       } else {
-        // Insert new record - FIX: Ensure all required fields are included 
+        // Insert new record - Ensure all required fields are included 
         const { error } = await supabase
           .from('choral_titles')
           .insert({
@@ -246,80 +248,37 @@ export default function ChoralTitlesPage() {
     }
   };
 
-  // Handle file import for CSV/Excel
-  const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (!file) return;
-
-    const fileReader = new FileReader();
-    fileReader.onload = async (e) => {
-      const csvData = e.target?.result;
-      if (typeof csvData === 'string') {
-        try {
-          Papa.parse(csvData, {
-            header: true,
-            skipEmptyLines: true,
-            complete: async (results) => {
-              const records = results.data as any[];
-              
-              if (records.length === 0) {
-                toast({
-                  title: "Error",
-                  description: "No valid records found in the file",
-                  variant: "destructive",
-                });
-                return;
-              }
-
-              try {
-                // Format the data according to our schema
-                const formattedRecords = records.map(record => ({
-                  title: record.title || "",
-                  composer: record.composer || "",
-                  voicing: record.voicing || "",
-                  amount_on_hand: parseInt(record.amount_on_hand || "0", 10),
-                  // Optional linking of sheet_music_id would need to be done manually
-                }));
-
-                const { error } = await supabase
-                  .from('choral_titles')
-                  .insert(formattedRecords);
-
-                if (error) throw error;
-
-                toast({
-                  title: "Import Successful",
-                  description: `${formattedRecords.length} records were imported.`,
-                });
-
-                fetchChoralTitles();
-                setIsImportDialogOpen(false);
-              } catch (error: any) {
-                toast({
-                  title: "Import Error",
-                  description: error.message || "Failed to import records",
-                  variant: "destructive",
-                });
-              }
-            },
-            error: (error) => {
-              toast({
-                title: "Parse Error",
-                description: error.message || "Failed to parse the file",
-                variant: "destructive",
-              });
-            }
-          });
-        } catch (error: any) {
-          toast({
-            title: "File Error",
-            description: "Failed to read the file. Please check the format.",
-            variant: "destructive",
-          });
-        }
+  // Handle the mapped CSV import data
+  const handleImportMappedData = async (records: any[]) => {
+    try {
+      if (records.length === 0) {
+        toast({
+          title: "Import Error",
+          description: "No valid records found in the file",
+          variant: "destructive",
+        });
+        return;
       }
-    };
-    fileReader.readAsText(file);
+
+      const { error } = await supabase
+        .from('choral_titles')
+        .insert(records);
+
+      if (error) throw error;
+
+      toast({
+        title: "Import Successful",
+        description: `${records.length} titles were imported.`,
+      });
+
+      fetchChoralTitles();
+    } catch (error: any) {
+      toast({
+        title: "Import Error",
+        description: error.message || "Failed to import records",
+        variant: "destructive",
+      });
+    }
   };
 
   // Export data to CSV
@@ -617,46 +576,12 @@ export default function ChoralTitlesPage() {
         </DialogContent>
       </Dialog>
       
-      {/* CSV Import Dialog */}
-      <Dialog open={isImportDialogOpen} onOpenChange={setIsImportDialogOpen}>
-        <DialogContent className="sm:max-w-md">
-          <DialogHeader>
-            <DialogTitle>Import Choral Titles</DialogTitle>
-          </DialogHeader>
-          
-          <div className="space-y-4">
-            <div>
-              <p className="text-sm text-muted-foreground mb-2">
-                Upload a CSV file with the following columns: title, composer, voicing, amount_on_hand
-              </p>
-              <Input
-                type="file"
-                accept=".csv,.xls,.xlsx"
-                onChange={handleFileUpload}
-              />
-            </div>
-            
-            <div className="bg-muted p-4 rounded-md">
-              <h4 className="font-medium mb-2">CSV Format Example</h4>
-              <pre className="text-xs overflow-x-auto">
-                title,composer,voicing,amount_on_hand<br />
-                "Gloria","Mozart","SATB",25<br />
-                "Hallelujah","Handel","SATB",40
-              </pre>
-            </div>
-            
-            <DialogFooter className="flex justify-end mt-6">
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => setIsImportDialogOpen(false)}
-              >
-                Cancel
-              </Button>
-            </DialogFooter>
-          </div>
-        </DialogContent>
-      </Dialog>
+      {/* CSV Import Dialog with Mapping */}
+      <ImportMappingDialog 
+        isOpen={isImportDialogOpen}
+        onOpenChange={setIsImportDialogOpen}
+        onImportComplete={handleImportMappedData}
+      />
     </div>
   );
 }
