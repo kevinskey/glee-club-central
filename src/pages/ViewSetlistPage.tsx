@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, ListMusic, ChevronLeft, ChevronRight, X, Maximize, Minimize } from "lucide-react";
 import { Link } from "react-router-dom";
@@ -26,12 +26,16 @@ interface SheetMusic {
 export default function ViewSetlistPage() {
   const { id: setlistId } = useParams();
   const navigate = useNavigate();
+  const location = useLocation();
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(true);
   const [setlist, setSetlist] = useState<Setlist | null>(null);
   const [setlistItems, setSetlistItems] = useState<SheetMusic[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isFullscreen, setIsFullscreen] = useState(false);
+  
+  // Determine if we're in the dashboard layout or standalone fullscreen mode
+  const isInDashboard = location.pathname.includes('/dashboard/');
 
   useEffect(() => {
     if (!setlistId) {
@@ -194,7 +198,7 @@ export default function ViewSetlistPage() {
         <div className="flex items-center justify-between p-4 border-b">
           <div className="flex items-center gap-2">
             <Button asChild variant="ghost" size="icon" className="rounded-full">
-              <Link to="/dashboard/setlists">
+              <Link to={isInDashboard ? "/dashboard/setlists" : "/dashboard"}>
                 <X className="h-5 w-5" />
               </Link>
             </Button>
@@ -231,7 +235,7 @@ export default function ViewSetlistPage() {
             url={currentItem.file_url} 
             title={currentItem.title}
             sheetMusicId={currentItem.id}
-            fullHeight
+            fullHeight={true}
           />
         )}
       </div>

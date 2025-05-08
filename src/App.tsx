@@ -68,6 +68,7 @@ function App() {
         <Route path="sheet-music" element={<SheetMusicPage />} />
         <Route path="sheet-music/:id" element={<ViewSheetMusicPage />} />
         <Route path="setlists" element={<SetlistsPage />} />
+        <Route path="setlists/:id" element={<ViewSetlistPage />} />
         <Route path="practice" element={<div>Practice Page</div>} />
         <Route path="recordings" element={<RecordingsPage />} />
         <Route path="videos" element={<div>Videos Page</div>} />

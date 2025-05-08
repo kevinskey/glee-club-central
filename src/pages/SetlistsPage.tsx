@@ -188,7 +188,7 @@ export default function SetlistsPage() {
     if (event) {
       event.stopPropagation();
     }
-    navigate(`/setlist/${setlistId}`);
+    navigate(`/dashboard/setlists/${setlistId}`);
   };
 
   const filteredSetlists = setlists.filter(setlist => 
