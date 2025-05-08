@@ -1,15 +1,17 @@
-import React, { useEffect, useState } from "react";
+
+import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { PageHeader } from "@/components/ui/page-header";
-import { FileText, FolderOpen, Loader2, Upload, Search, Music, Play, Pause, ListMusic, Plus, Check } from "lucide-react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
+import { FileText, Search, Plus, Upload, FolderOpen, ListMusic, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { useAuth } from "@/contexts/AuthContext";
-import { supabase } from "@/integrations/supabase/client";
+import { Card, CardContent } from "@/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 import { UploadSheetMusicModal } from "@/components/UploadSheetMusicModal";
 import { SetlistDrawer } from "@/components/setlist/SetlistDrawer";
+import { useAuth } from "@/contexts/AuthContext";
 import { Checkbox } from "@/components/ui/checkbox";
 import { MultipleDownloadBar } from "@/components/sheet-music/MultipleDownloadBar";
 import {
@@ -27,12 +29,6 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import {
-  Tabs,
-  TabsContent,
-  TabsList,
-  TabsTrigger,
-} from "@/components/ui/tabs";
 
 interface SheetMusic {
   id: string;
@@ -42,34 +38,21 @@ interface SheetMusic {
   created_at: string;
 }
 
-interface AudioFile {
-  id: string;
-  title: string;
-  description: string | null;
-  file_url: string;
-  created_at: string;
-}
-
 type SortOption = "newest" | "oldest" | "title" | "composer";
 
 export default function SheetMusicPage() {
-  const { profile } = useAuth();
   const { toast } = useToast();
+  const { user } = useAuth();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
-  const [audioLoading, setAudioLoading] = useState(true);
   const [musicFiles, setMusicFiles] = useState<SheetMusic[]>([]);
-  const [audioFiles, setAudioFiles] = useState<AudioFile[]>([]);
   const [filteredFiles, setFilteredFiles] = useState<SheetMusic[]>([]);
+  const [searchQuery, setSearchQuery] = useState("");
   const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
   const [isSetlistDrawerOpen, setIsSetlistDrawerOpen] = useState(false);
-  const [searchQuery, setSearchQuery] = useState("");
-  const [sortOrder, setSortOrder] = useState<SortOption>("newest");
-  const [currentAudio, setCurrentAudio] = useState<AudioFile | null>(null);
-  const [isPlaying, setIsPlaying] = useState(false);
   const [selectedFiles, setSelectedFiles] = useState<SheetMusic[]>([]);
   const [isSelectionMode, setIsSelectionMode] = useState(false);
-  const audioRef = React.useRef<HTMLAudioElement | null>(null);
+  const [sortOrder, setSortOrder] = useState<SortOption>("newest");
 
   // Fetch sheet music data
   const fetchSheetMusic = async () => {
@@ -104,42 +87,9 @@ export default function SheetMusicPage() {
     }
   };
 
-  // Fetch audio files
-  const fetchAudioFiles = async () => {
-    setAudioLoading(true);
-    try {
-      const { data, error } = await supabase
-        .from('audio_files')
-        .select('*')
-        .order('created_at', { ascending: false });
-
-      if (error) throw error;
-
-      if (data) {
-        // Format dates for display
-        const formattedData = data.map((item: AudioFile) => ({
-          ...item,
-          created_at: new Date(item.created_at).toLocaleDateString()
-        }));
-        
-        setAudioFiles(formattedData);
-      }
-    } catch (error: any) {
-      console.error("Error fetching audio files:", error);
-      toast({
-        title: "Error loading audio files",
-        description: error.message || "An unexpected error occurred",
-        variant: "destructive",
-      });
-    } finally {
-      setAudioLoading(false);
-    }
-  };
-
   // Load data on initial render
   useEffect(() => {
     fetchSheetMusic();
-    fetchAudioFiles();
   }, []);
 
   // Filter and sort music files
@@ -180,46 +130,6 @@ export default function SheetMusicPage() {
     setFilteredFiles(result);
   }, [searchQuery, musicFiles, sortOrder]);
 
-  // Audio playback control
-  const togglePlayPause = (audioFile: AudioFile) => {
-    if (currentAudio && currentAudio.id === audioFile.id) {
-      // Same audio file - toggle play/pause
-      if (isPlaying) {
-        audioRef.current?.pause();
-      } else {
-        audioRef.current?.play();
-      }
-      setIsPlaying(!isPlaying);
-    } else {
-      // New audio file selected
-      setCurrentAudio(audioFile);
-      setIsPlaying(true);
-      if (audioRef.current) {
-        audioRef.current.src = audioFile.file_url;
-        audioRef.current.play();
-      }
-    }
-  };
-
-  useEffect(() => {
-    // Set up audio element
-    if (!audioRef.current) {
-      audioRef.current = new Audio();
-      
-      audioRef.current.onended = () => {
-        setIsPlaying(false);
-      };
-    }
-
-    return () => {
-      // Clean up on unmount
-      if (audioRef.current) {
-        audioRef.current.pause();
-        audioRef.current = null;
-      }
-    };
-  }, []);
-
   // Toggle file selection
   const toggleFileSelection = (file: SheetMusic) => {
     setSelectedFiles(prevSelected => {
@@ -246,11 +156,16 @@ export default function SheetMusicPage() {
     return selectedFiles.some(file => file.id === fileId);
   };
 
+  // View sheet music
+  const viewSheetMusic = (id: string) => {
+    navigate(`/dashboard/sheet-music/${id}`);
+  };
+
   return (
-    <div className="space-y-8">
+    <div className="space-y-6">
       <PageHeader
-        title="Music Library"
-        description="Access sheet music and audio recordings"
+        title="Sheet Music Library"
+        description="Browse, view, and annotate your sheet music"
         icon={<FileText className="h-6 w-6" />}
         actions={
           <>
@@ -273,18 +188,16 @@ export default function SheetMusicPage() {
         }
       />
 
-      {/* Search bar at the top */}
+      {/* Search bar */}
       <div className="flex flex-col md:flex-row gap-4">
-        <div className="flex-1">
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-            <Input
-              placeholder="Search by title, composer or date..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-10"
-            />
-          </div>
+        <div className="relative flex-1">
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <Input
+            placeholder="Search sheet music..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="pl-10"
+          />
         </div>
         <div className="w-full md:w-48">
           <Select
@@ -302,58 +215,43 @@ export default function SheetMusicPage() {
             </SelectContent>
           </Select>
         </div>
-        <Button 
-          variant="outline" 
-          className="md:hidden gap-2 w-full"
-          onClick={() => setIsUploadModalOpen(true)}
-        >
-          <Upload className="h-4 w-4" /> Upload Sheet Music
-        </Button>
+        <div className="flex gap-2">
+          <Button 
+            variant="outline" 
+            className="flex-shrink-0"
+            onClick={() => setIsSetlistDrawerOpen(true)}
+          >
+            <ListMusic className="h-4 w-4 mr-2" /> Manage Setlists
+          </Button>
+        </div>
       </div>
-
-      {/* Sheet Music Content */}
+      
+      {/* Music Library */}
       <Tabs defaultValue="grid" className="w-full">
         <div className="flex justify-between items-center mb-4">
-          <h2 className="text-xl font-semibold">Sheet Music Collection</h2>
-          <div className="flex items-center gap-2">
-            {/* Add Create Setlist button next to the grid view buttons */}
-            <Button 
-              variant="outline"
-              size="sm"
-              className="flex items-center gap-1"
-              onClick={() => setIsSetlistDrawerOpen(true)}
-            >
-              <Plus className="h-4 w-4" /> Create Setlist
-            </Button>
-            <Button 
-              variant="outline"
-              size="sm"
-              className="flex items-center gap-1 ml-2"
-              onClick={() => setIsSetlistDrawerOpen(true)}
-            >
-              <ListMusic className="h-4 w-4" /> View Setlists
-            </Button>
-            <TabsList>
-              <TabsTrigger value="grid" className="flex items-center gap-1">
-                <FolderOpen className="h-4 w-4" /> Grid View
-              </TabsTrigger>
-              <TabsTrigger value="table" className="flex items-center gap-1">
-                <FileText className="h-4 w-4" /> Table View
-              </TabsTrigger>
-            </TabsList>
-          </div>
+          <h2 className="text-xl font-semibold">Your Sheet Music</h2>
+          <TabsList>
+            <TabsTrigger value="grid" className="flex items-center gap-1">
+              <FolderOpen className="h-4 w-4" /> Grid View
+            </TabsTrigger>
+            <TabsTrigger value="list" className="flex items-center gap-1">
+              <FileText className="h-4 w-4" /> List View
+            </TabsTrigger>
+          </TabsList>
         </div>
         
         {loading ? (
-          <div className="flex h-[200px] w-full items-center justify-center">
-            <Loader2 className="h-8 w-8 animate-spin text-primary" />
+          <div className="grid gap-6 md:grid-cols-3 lg:grid-cols-4">
+            {[1, 2, 3, 4, 5, 6].map((i) => (
+              <div key={i} className="aspect-[3/4] rounded-md bg-muted animate-pulse" />
+            ))}
           </div>
         ) : filteredFiles.length === 0 ? (
           <div className="flex flex-col items-center justify-center rounded-lg border border-dashed p-8 text-center">
             <FileText className="mb-4 h-12 w-12 text-muted-foreground" />
             <h3 className="mb-2 text-lg font-medium">No sheet music found</h3>
             <p className="mb-4 text-sm text-muted-foreground">
-              {searchQuery ? "Try a different search term" : "Be the first to upload sheet music for the choir."}
+              {searchQuery ? "Try a different search term" : "Upload your first piece of sheet music"}
             </p>
             <Button 
               onClick={() => setIsUploadModalOpen(true)}
@@ -365,12 +263,12 @@ export default function SheetMusicPage() {
         ) : (
           <>
             {/* Grid View */}
-            <TabsContent value="grid" className="w-full">
-              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+            <TabsContent value="grid">
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
                 {filteredFiles.map((file) => (
                   <Card 
                     key={file.id} 
-                    className={`overflow-hidden relative ${isFileSelected(file.id) ? 'ring-2 ring-glee-purple' : ''}`}
+                    className={`overflow-hidden relative hover:shadow-md transition-shadow ${isFileSelected(file.id) ? 'ring-2 ring-glee-purple' : ''}`}
                   >
                     {isSelectionMode ? (
                       <div 
@@ -383,51 +281,61 @@ export default function SheetMusicPage() {
                             onChange={() => toggleFileSelection(file)}
                           />
                         </div>
-                        <div className="bg-gray-100 h-40 flex items-center justify-center">
+                        <div className="aspect-[3/4] bg-muted flex items-center justify-center">
                           <FileText className="h-16 w-16 text-muted-foreground" />
                         </div>
-                        <CardContent className="p-4">
-                          <h3 className="font-medium truncate">{file.title}</h3>
-                          <p className="text-sm text-muted-foreground truncate">{file.composer}</p>
-                          <p className="text-xs text-muted-foreground mt-2">{file.created_at}</p>
+                        <CardContent className="p-3">
+                          <h3 className="font-medium text-sm truncate">{file.title}</h3>
+                          <p className="text-xs text-muted-foreground truncate">{file.composer}</p>
                         </CardContent>
                       </div>
                     ) : (
-                      <Link to={`/dashboard/sheet-music/${file.id}`} className="block h-full">
-                        <div className="bg-gray-100 h-40 flex items-center justify-center">
+                      <div 
+                        className="cursor-pointer h-full"
+                        onClick={() => viewSheetMusic(file.id)}
+                      >
+                        <div className="aspect-[3/4] bg-muted flex items-center justify-center">
                           <FileText className="h-16 w-16 text-muted-foreground" />
                         </div>
-                        <CardContent className="p-4">
-                          <h3 className="font-medium truncate">{file.title}</h3>
-                          <p className="text-sm text-muted-foreground truncate">{file.composer}</p>
-                          <p className="text-xs text-muted-foreground mt-2">{file.created_at}</p>
+                        <CardContent className="p-3">
+                          <h3 className="font-medium text-sm truncate">{file.title}</h3>
+                          <p className="text-xs text-muted-foreground truncate">{file.composer}</p>
                         </CardContent>
-                      </Link>
+                      </div>
                     )}
                   </Card>
                 ))}
+
+                {/* Add new sheet music card */}
+                <button
+                  onClick={() => setIsUploadModalOpen(true)} 
+                  className="flex flex-col items-center justify-center rounded-md border-2 border-dashed p-6 hover:border-primary/50 hover:bg-muted/50 transition-colors aspect-[3/4]"
+                >
+                  <Plus className="h-8 w-8 mb-2 text-muted-foreground" />
+                  <p className="text-sm font-medium">Add Music</p>
+                </button>
               </div>
             </TabsContent>
-
-            {/* Table View */}
-            <TabsContent value="table">
+            
+            {/* List View */}
+            <TabsContent value="list">
               <div className="rounded-md border">
                 <Table>
                   <TableHeader>
                     <TableRow>
                       {isSelectionMode && (
-                        <TableHead className="w-[5%]"></TableHead>
+                        <TableHead className="w-10"></TableHead>
                       )}
-                      <TableHead className="w-[40%]">Title</TableHead>
-                      <TableHead className="w-[25%]">Composer</TableHead>
-                      <TableHead className="w-[20%]">Upload Date</TableHead>
-                      <TableHead className="w-[15%] text-right">Actions</TableHead>
+                      <TableHead>Title</TableHead>
+                      <TableHead>Composer</TableHead>
+                      <TableHead>Date Added</TableHead>
+                      <TableHead className="text-right">Actions</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
                     {filteredFiles.map((file) => (
                       <TableRow 
-                        key={file.id}
+                        key={file.id} 
                         className={isFileSelected(file.id) ? 'bg-muted/30' : ''}
                       >
                         {isSelectionMode && (
@@ -452,13 +360,11 @@ export default function SheetMusicPage() {
                             </Button>
                           ) : (
                             <Button 
-                              variant="default" 
-                              size="sm"
-                              asChild
+                              variant="outline" 
+                              size="sm" 
+                              onClick={() => viewSheetMusic(file.id)}
                             >
-                              <Link to={`/dashboard/sheet-music/${file.id}`}>
-                                View PDF
-                              </Link>
+                              View
                             </Button>
                           )}
                         </TableCell>
@@ -478,75 +384,13 @@ export default function SheetMusicPage() {
         onClearSelection={clearSelection}
       />
 
-      {/* Audio Library Section */}
-      <div className="pt-6 border-t">
-        <div className="flex justify-between items-center mb-4">
-          <h2 className="text-xl font-semibold flex items-center gap-2">
-            <Music className="h-5 w-5" /> Audio Library
-          </h2>
-          <Button 
-            variant="outline" 
-            className="text-sm gap-1"
-            onClick={() => navigate("/dashboard/audio-management")}
-          >
-            <Upload className="h-4 w-4" /> Manage Audio
-          </Button>
-        </div>
-
-        {audioLoading ? (
-          <div className="flex h-[100px] w-full items-center justify-center">
-            <Loader2 className="h-6 w-6 animate-spin text-primary" />
-          </div>
-        ) : audioFiles.length === 0 ? (
-          <Card className="bg-muted/50 border-dashed">
-            <CardContent className="flex flex-col items-center justify-center py-6 px-4 text-center">
-              <Music className="h-10 w-10 mb-2 text-muted-foreground" />
-              <h3 className="font-medium">No audio files yet</h3>
-              <p className="text-sm text-muted-foreground">
-                Visit the Audio Management page to upload audio files.
-              </p>
-            </CardContent>
-          </Card>
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {audioFiles.map((audio) => (
-              <Card key={audio.id} className="overflow-hidden">
-                <CardContent className="p-4">
-                  <div className="flex items-center justify-between">
-                    <div className="flex-1 min-w-0">
-                      <h3 className="font-medium truncate">{audio.title}</h3>
-                      {audio.description && (
-                        <p className="text-sm text-muted-foreground truncate">{audio.description}</p>
-                      )}
-                      <p className="text-xs text-muted-foreground mt-1">{audio.created_at}</p>
-                    </div>
-                    <Button
-                      variant="outline"
-                      size="icon"
-                      className="flex-shrink-0 ml-2"
-                      onClick={() => togglePlayPause(audio)}
-                    >
-                      {currentAudio?.id === audio.id && isPlaying ? (
-                        <Pause className="h-4 w-4" />
-                      ) : (
-                        <Play className="h-4 w-4" />
-                      )}
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        )}
-      </div>
-
       {/* Modals and Drawers */}
       <UploadSheetMusicModal 
-        onUploadComplete={fetchSheetMusic}
         open={isUploadModalOpen}
         onOpenChange={setIsUploadModalOpen}
+        onUploadComplete={fetchSheetMusic}
       />
-
+      
       <SetlistDrawer
         open={isSetlistDrawerOpen}
         onOpenChange={setIsSetlistDrawerOpen}

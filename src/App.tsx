@@ -10,7 +10,7 @@ import RegisterPage from './pages/RegisterPage';
 import ResetPasswordPage from './pages/ResetPasswordPage';
 import UpdatePasswordPage from './pages/UpdatePasswordPage';
 import CalendarPage from './pages/CalendarPage';
-import SheetMusicPage from './pages/SheetMusicPage';
+import SheetMusicPage from './pages/sheet-music/SheetMusicPage';
 import NotFoundPage from './pages/NotFoundPage';
 import ProfilePage from './pages/ProfilePage';
 import RecordingsPage from './pages/RecordingsPage';
@@ -22,6 +22,7 @@ import DashboardPage from './pages/DashboardPage';
 import AboutPage from './pages/AboutPage';
 import ContactPage from './pages/ContactPage';
 import AdministrationPage from './pages/AdministrationPage';
+import ViewSheetMusicPage from './pages/sheet-music/ViewSheetMusicPage';
 
 // Admin Pages
 import AdminDashboardPage from './pages/AdminDashboardPage';
@@ -56,6 +57,7 @@ function App() {
         <Route index element={<DashboardPage />} />
         <Route path="calendar" element={<CalendarPage />} />
         <Route path="sheet-music" element={<SheetMusicPage />} />
+        <Route path="sheet-music/:id" element={<ViewSheetMusicPage />} />
         <Route path="practice" element={<div>Practice Page</div>} />
         <Route path="recordings" element={<RecordingsPage />} />
         <Route path="videos" element={<div>Videos Page</div>} />
