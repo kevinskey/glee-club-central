@@ -1,9 +1,48 @@
 
 import { supabase } from '@/integrations/supabase/client';
-import { Profile } from '@/contexts/AuthContext';
+
+// Define explicit interface for user profile to avoid recursive type instantiation
+export interface UserSafe {
+  id: string;
+  first_name: string | null;
+  last_name: string | null;
+  email: string | null;
+  phone: string | null;
+  voice_part: string | null;
+  role: string;
+  status: string;
+  join_date: string | null;
+  class_year: string | null;
+  dues_paid: boolean | null;
+  special_roles: string | null;
+  notes: string | null;
+  avatar_url: string | null;
+  created_at: string;
+  updated_at: string | null;
+}
+
+// Use Profile type from AuthContext but export it here to prevent circular dependencies
+export type Profile = {
+  id: string;
+  first_name: string | null;
+  last_name: string | null;
+  email: string | null;
+  phone: string | null;
+  voice_part: string | null;
+  role: string;
+  status: string;
+  join_date: string | null;
+  class_year: string | null;
+  dues_paid: boolean | null;
+  special_roles: string | null;
+  notes: string | null;
+  avatar_url: string | null;
+  created_at: string;
+  updated_at?: string | null;
+};
 
 // Fetch all users from the database
-export async function fetchAllUsers() {
+export async function fetchAllUsers(): Promise<UserSafe[]> {
   console.log("Fetching all users...");
   try {
     const { data, error } = await supabase
@@ -15,7 +54,7 @@ export async function fetchAllUsers() {
     }
     
     console.log("Fetched users data:", data);
-    return data;
+    return data as UserSafe[];
   } catch (error) {
     console.error('Error fetching all users:', error);
     throw error;
@@ -23,7 +62,7 @@ export async function fetchAllUsers() {
 }
 
 // Fetch a single user by ID
-export async function fetchUserById(userId: string) {
+export async function fetchUserById(userId: string): Promise<UserSafe> {
   console.log(`Fetching user with ID: ${userId}`);
   try {
     const { data, error } = await supabase
@@ -43,7 +82,7 @@ export async function fetchUserById(userId: string) {
       throw new Error(`User with ID ${userId} not found`);
     }
     
-    return user;
+    return user as UserSafe;
   } catch (error) {
     console.error(`Error fetching user ${userId}:`, error);
     throw error;
@@ -107,7 +146,7 @@ export async function updateUserProfile(userId: string, profileData: Partial<Pro
   }
 }
 
-// Search users by email with fixed return type to prevent infinite type recursion
+// Search users by email with explicit return type to prevent infinite type recursion
 export async function searchUserByEmail(email: string): Promise<Profile | null> {
   console.log(`Searching for user with email: ${email}`);
   try {
