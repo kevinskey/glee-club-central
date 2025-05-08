@@ -1,6 +1,4 @@
-
 import React, { useState, useEffect, useRef } from "react";
-import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useAuth } from "@/contexts/AuthContext";
@@ -37,6 +35,20 @@ export const PDFViewer = ({ url, title, sheetMusicId }: PDFViewerProps) => {
   
   const containerRef = useRef<HTMLDivElement>(null);
   const viewerRef = useRef<HTMLDivElement>(null);
+  
+  // Validate URL
+  useEffect(() => {
+    if (!url) {
+      setError("No PDF URL provided");
+      setIsLoading(false);
+    } else {
+      // Reset errors when URL is provided
+      setError(null);
+      setIsLoading(true);
+    }
+    
+    console.log("PDF URL received:", url);
+  }, [url]);
   
   // Handle fullscreen changes
   useEffect(() => {
@@ -95,10 +107,11 @@ export const PDFViewer = ({ url, title, sheetMusicId }: PDFViewerProps) => {
         .select('*')
         .eq('sheet_music_id', sheetMusicId)
         .eq('user_id', user.id)
-        .single();
+        .maybeSingle();
 
-      if (error && error.code !== 'PGRST116') { // PGRST116 is "No rows found" error
-        throw error;
+      if (error) {
+        console.error("Error loading annotations:", error);
+        return;
       }
 
       if (data && data.annotations) {
@@ -134,10 +147,10 @@ export const PDFViewer = ({ url, title, sheetMusicId }: PDFViewerProps) => {
   // Handle PDF loading error
   const handleError = () => {
     setIsLoading(false);
-    setError("Failed to load PDF. Please try again later.");
+    setError("Failed to load PDF. Please try again later or download it directly.");
     toast({
       title: "Error loading PDF",
-      description: "The PDF could not be loaded. Please try again later.",
+      description: "The PDF could not be loaded. Please try downloading it instead.",
       variant: "destructive",
     });
   };

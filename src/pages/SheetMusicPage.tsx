@@ -1,3 +1,4 @@
+
 import React from "react";
 import { PageHeader } from "@/components/ui/page-header";
 import { FileText, Search, Plus, Upload, FolderOpen, ListMusic, Check } from "lucide-react";
@@ -92,6 +93,7 @@ export default function SheetMusicPage() {
   // Toggle file selection
   const toggleFileSelection = (file: SheetMusic) => {
     setSelectedFiles(prevSelected => {
+      // Check if the file is already selected by comparing IDs
       const isSelected = prevSelected.some(item => item.id === file.id);
       
       if (isSelected) {

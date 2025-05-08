@@ -27,38 +27,42 @@ export const PDFDocument = ({
 }: PDFDocumentProps) => {
   const iframeRef = useRef<HTMLIFrameElement>(null);
   
-  // Ensure the URL is properly sanitized
-  const sanitizedUrl = url.trim();
+  // Ensure the URL is properly sanitized and valid
+  const sanitizedUrl = url ? url.trim() : "";
   
   // Build PDF URL with appropriate parameters
   const getPdfViewerUrl = () => {
+    if (!sanitizedUrl) return "";
+    
     const isMobile = window.innerWidth < 768;
     
-    // Check if the URL already contains a hash fragment
-    const baseUrl = sanitizedUrl.includes('#') 
-      ? sanitizedUrl 
-      : `${sanitizedUrl}#`;
+    // Check if the URL already contains a hash fragment or query parameters
+    const hasHash = sanitizedUrl.includes('#');
+    const hasQuery = sanitizedUrl.includes('?');
     
-    // Add parameters optimized for score reading
-    let viewerUrl = baseUrl;
+    // Base URL construction
+    let viewerUrl = sanitizedUrl;
     
-    // Only append parameters if they're not already in the URL
-    if (!baseUrl.includes('view=')) {
-      if (isMobile) {
-        // Mobile optimization: fit width for score reading
-        viewerUrl += baseUrl.includes('?') || baseUrl.includes('#') ? '&' : '#';
-        viewerUrl += "toolbar=0&navpanes=0&view=FitH&scrollbar=0";
-      } else {
-        // Desktop: Optimize for score reading
-        viewerUrl += baseUrl.includes('?') || baseUrl.includes('#') ? '&' : '#';
-        viewerUrl += "toolbar=0&navpanes=1&view=FitH&scrollbar=1";
-      }
+    // Add hash if needed
+    if (!hasHash && !hasQuery) {
+      viewerUrl += '#';
+    }
+    
+    // Determine the correct separator for additional parameters
+    const separator = viewerUrl.endsWith('#') || viewerUrl.endsWith('&') || viewerUrl.endsWith('?') 
+      ? '' 
+      : (hasQuery || (hasHash && viewerUrl.includes('='))) ? '&' : '#';
+    
+    // Add view parameters if not already present
+    if (!viewerUrl.includes('view=')) {
+      viewerUrl += separator + (isMobile 
+        ? "toolbar=0&navpanes=0&view=FitH&scrollbar=0" 
+        : "toolbar=0&navpanes=1&view=FitH&scrollbar=1");
     }
     
     // Add page parameter if needed and not already present
     if (currentPage > 1 && !viewerUrl.includes('page=')) {
-      viewerUrl += viewerUrl.includes('?') || viewerUrl.includes('&') ? '&' : '#';
-      viewerUrl += `page=${currentPage}`;
+      viewerUrl += '&page=' + currentPage;
     }
     
     return viewerUrl;
@@ -68,6 +72,14 @@ export const PDFDocument = ({
   useEffect(() => {
     console.log("PDF URL being used:", getPdfViewerUrl());
   }, [url, currentPage, zoom]);
+
+  if (!url) {
+    return (
+      <div className="flex h-full items-center justify-center p-8 text-center">
+        <p className="text-muted-foreground">No PDF URL provided</p>
+      </div>
+    );
+  }
 
   if (error) {
     return (

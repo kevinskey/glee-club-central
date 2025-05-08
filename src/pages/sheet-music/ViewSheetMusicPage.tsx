@@ -1,6 +1,6 @@
 
 import { useState, useEffect } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, Download, ListMusic } from "lucide-react";
 import { Link } from "react-router-dom";
@@ -20,6 +20,7 @@ interface SheetMusic {
 export default function ViewSheetMusicPage() {
   const { id: sheetMusicId } = useParams();
   const { toast } = useToast();
+  const navigate = useNavigate();
   const [sheetMusic, setSheetMusic] = useState<SheetMusic | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const isMobile = useIsMobile();
@@ -34,22 +35,32 @@ export default function ViewSheetMusicPage() {
         description: "Please select a sheet music to view",
         variant: "destructive",
       });
+      navigate("/dashboard/sheet-music");
       return;
     }
 
     const fetchSheetMusic = async () => {
       setIsLoading(true);
       try {
+        // Use maybeSingle instead of single to avoid errors when no data is found
         const { data, error } = await supabase
           .from('sheet_music')
           .select('*')
           .eq('id', sheetMusicId)
-          .single();
+          .maybeSingle();
 
         if (error) throw error;
 
         if (data) {
           setSheetMusic(data as SheetMusic);
+        } else {
+          // Handle case where sheet music is not found
+          toast({
+            title: "Sheet music not found",
+            description: "The requested sheet music could not be found",
+            variant: "destructive",
+          });
+          navigate("/dashboard/sheet-music");
         }
       } catch (error: any) {
         console.error("Error fetching sheet music:", error);
@@ -58,13 +69,14 @@ export default function ViewSheetMusicPage() {
           description: error.message || "An unexpected error occurred",
           variant: "destructive",
         });
+        navigate("/dashboard/sheet-music");
       } finally {
         setIsLoading(false);
       }
     };
 
     fetchSheetMusic();
-  }, [sheetMusicId, toast]);
+  }, [sheetMusicId, toast, navigate]);
 
   return (
     <div className="space-y-4">
@@ -82,9 +94,13 @@ export default function ViewSheetMusicPage() {
         currentSheetMusicId={sheetMusicId}
       />
       
-      {sheetMusic === null ? (
+      {isLoading ? (
         <div className="flex items-center justify-center h-64">
           <p className="text-muted-foreground">Loading sheet music...</p>
+        </div>
+      ) : sheetMusic === null ? (
+        <div className="flex items-center justify-center h-64">
+          <p className="text-muted-foreground">Sheet music not found</p>
         </div>
       ) : (
         <div className="flex flex-col gap-4">
@@ -101,7 +117,7 @@ export default function ViewSheetMusicPage() {
               >
                 <ListMusic className="h-4 w-4 mr-2" /> Add to Setlist
               </Button>
-              <a href={sheetMusic.file_url} target="_blank" rel="noopener noreferrer">
+              <a href={sheetMusic.file_url} download target="_blank" rel="noopener noreferrer">
                 <Button variant="default" size="sm" className="bg-glee-purple hover:bg-glee-purple/90">
                   <Download className="h-4 w-4 mr-2" /> Download
                 </Button>
@@ -119,4 +135,4 @@ export default function ViewSheetMusicPage() {
       )}
     </div>
   );
-}
+};

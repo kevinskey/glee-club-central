@@ -21,13 +21,22 @@ export function MultipleDownloadBar({ selectedFiles, onClearSelection }: Multipl
       toast.info(`Preparing ${selectedFiles.length} file(s) for download...`);
       
       // For each file, trigger a download
-      selectedFiles.forEach((file) => {
-        const link = document.createElement("a");
-        link.href = file.file_url;
-        link.download = file.title.replace(/\s+/g, "_") + ".pdf";
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
+      selectedFiles.forEach((file, index) => {
+        if (!file.file_url) {
+          console.error(`Missing URL for file: ${file.title}`);
+          return;
+        }
+        
+        setTimeout(() => {
+          // Create link element for download
+          const link = document.createElement("a");
+          link.href = file.file_url;
+          link.setAttribute("download", `${file.title.replace(/\s+/g, "_")}.pdf`);
+          link.setAttribute("target", "_blank");
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+        }, index * 500); // Stagger downloads to avoid browser limitations
       });
       
       toast.success(`${selectedFiles.length} file(s) queued for download`);
