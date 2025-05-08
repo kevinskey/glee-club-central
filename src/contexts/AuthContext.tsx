@@ -125,6 +125,7 @@ export function AuthProvider({ children }: Props) {
           setUser(null);
           setUserProfile(null);
           setPermissions(null);
+          setLoading(false);
         }
       }
     );

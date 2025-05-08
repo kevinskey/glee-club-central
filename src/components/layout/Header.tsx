@@ -13,74 +13,15 @@ import {
 import { Button } from "@/components/ui/button";
 import {
   Menu,
-  Users,
-  Home,
-  Settings,
-  CalendarDays,
-  FileText,
-  Mic,
-  MessageSquare,
-  Music,
-  LogOut,
   User,
+  Settings,
+  LogOut,
 } from "lucide-react";
 import { useSidebar } from "@/hooks/use-sidebar";
 
 export function Header() {
   const { profile, signOut } = useAuth();
   const { onOpen } = useSidebar();
-
-  // Navigation items - ensuring unique paths
-  const navItems = [
-    {
-      title: "Dashboard",
-      href: "/dashboard",
-      icon: Home,
-    },
-    {
-      title: "Member Directory",
-      href: "/dashboard/members",
-      icon: Users,
-    },
-    {
-      title: "Calendar",
-      href: "/dashboard/calendar",
-      icon: CalendarDays,
-    },
-    {
-      title: "Sheet Music",
-      href: "/dashboard/sheet-music",
-      icon: FileText,
-    },
-    {
-      title: "Rehearsals",
-      href: "/dashboard/rehearsals",
-      icon: Mic,
-    },
-    {
-      title: "Messages",
-      href: "/dashboard/messages",
-      icon: MessageSquare,
-    },
-    {
-      title: "Profile",
-      href: "/dashboard/profile",
-      icon: User,
-    },
-  ];
-
-  // Admin-only items
-  const adminItems = [
-    {
-      title: "Member Management",
-      href: "/dashboard/member-management",
-      icon: Users,
-      adminOnly: true
-    },
-  ];
-
-  // Determine if user is an admin to show admin-specific links
-  const isAdmin = profile?.role === "administrator";
 
   return (
     <header className="bg-background sticky top-0 z-50 w-full border-b">

@@ -41,8 +41,16 @@ function App() {
         <Route index element={<DashboardPage />} />
         <Route path="calendar" element={<CalendarPage />} />
         <Route path="sheet-music" element={<SheetMusicPage />} />
-        <Route path="profile" element={<ProfilePage />} />
+        <Route path="practice" element={<div>Practice Page</div>} />
         <Route path="recordings" element={<RecordingsPage />} />
+        <Route path="videos" element={<div>Videos Page</div>} />
+        <Route path="dues" element={<div>Dues Payment Page</div>} />
+        <Route path="handbook" element={<div>Handbook Page</div>} />
+        <Route path="merch" element={<div>Merchandise Page</div>} />
+        <Route path="media-library" element={<div>Media Library Page</div>} />
+        <Route path="profile" element={<ProfilePage />} />
+        <Route path="members" element={<div>Members Page</div>} />
+        <Route path="announcements" element={<div>Announcements Page</div>} />
         <Route path="*" element={<NotFoundPage />} />
       </Route>
       
