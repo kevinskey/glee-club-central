@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { ProtectedRoute } from './components/auth/ProtectedRoute';
@@ -42,8 +43,6 @@ function App() {
         <Route path="sheet-music" element={<SheetMusicPage />} />
         <Route path="profile" element={<ProfilePage />} />
         <Route path="recordings" element={<RecordingsPage />} />
-        {/* Other dashboard routes */}
-        <Route path="*" element={<NotFoundPage />} />
       </Route>
       
       {/* Catch-all for 404 */}
