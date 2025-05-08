@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { PageHeader } from "@/components/ui/page-header";
-import { ListMusic, Plus, Search, Trash, Eye, ExternalLink } from "lucide-react";
+import { ListMusic, Plus, Search, Trash, Eye, ExternalLink, FileText } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -202,9 +202,20 @@ export default function SetlistsPage() {
         description="Manage your sheet music collections for performances and practice"
         icon={<ListMusic className="h-6 w-6" />}
         actions={
-          <Button onClick={() => setIsCreateDialogOpen(true)}>
-            <Plus className="h-4 w-4 mr-2" /> New Setlist
-          </Button>
+          <>
+            <Button 
+              variant="outline"
+              asChild
+              className="mr-2 bg-glee-purple/10 hover:bg-glee-purple hover:text-white border-glee-purple/30"
+            >
+              <Link to="/dashboard/sheet-music" className="flex items-center gap-2">
+                <FileText className="h-4 w-4" /> Sheet Music Library
+              </Link>
+            </Button>
+            <Button onClick={() => setIsCreateDialogOpen(true)}>
+              <Plus className="h-4 w-4 mr-2" /> New Setlist
+            </Button>
+          </>
         }
       />
 
