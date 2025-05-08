@@ -104,7 +104,9 @@ export function MessageHistory() {
                       {message.message_type === "email" ? "Email" : "SMS"} to {message.recipient}
                     </span>
                   </div>
-                  <Badge variant={message.status === "sent" ? "success" : "destructive"}>
+                  <Badge 
+                    variant={message.status === "sent" ? "success" : "destructive"}
+                  >
                     <div className="flex items-center gap-1">
                       {getStatusIcon(message.status)}
                       {message.status}
