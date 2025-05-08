@@ -1,10 +1,8 @@
-
 import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { PageHeader } from "@/components/ui/page-header";
-import { FileText, Search, Plus, Upload, FolderOpen, ListMusic, X } from "lucide-react";
+import { FileText, Plus, Upload, FolderOpen, ListMusic, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
@@ -12,8 +10,6 @@ import { supabase } from "@/integrations/supabase/client";
 import { UploadSheetMusicModal } from "@/components/UploadSheetMusicModal";
 import { SetlistDrawer } from "@/components/setlist/SetlistDrawer";
 import { useAuth } from "@/contexts/AuthContext";
-import { Checkbox } from "@/components/ui/checkbox";
-import { MultipleDownloadBar } from "@/components/sheet-music/MultipleDownloadBar";
 import { PDFThumbnail } from "@/components/pdf/PDFThumbnail";
 import { PDFPreview } from "@/components/pdf/PDFPreview";
 import {
@@ -32,6 +28,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
+import { AdvancedSearch, SearchResultItem, SearchFilter } from "@/components/ui/advanced-search";
 
 interface SheetMusic {
   id: string;
@@ -39,6 +36,11 @@ interface SheetMusic {
   composer: string;
   file_url: string;
   created_at: string;
+}
+
+interface SheetMusicSearchItem extends SearchResultItem {
+  composer: string;
+  file_url: string;
 }
 
 interface Setlist {
@@ -64,10 +66,26 @@ export default function SheetMusicPage() {
   const [selectedFiles, setSelectedFiles] = useState<SheetMusic[]>([]);
   const [sortOrder, setSortOrder] = useState<SortOption>("newest");
   
-  // New state for setlist filtering
+  // State for setlist filtering
   const [availableSetlists, setAvailableSetlists] = useState<Setlist[]>([]);
   const [selectedSetlistId, setSelectedSetlistId] = useState<string | null>(null);
   const [selectedSetlist, setSelectedSetlist] = useState<Setlist | null>(null);
+  
+  // State for composers list (for search filters)
+  const [composers, setComposers] = useState<string[]>([]);
+
+  // Advanced search filters
+  const searchFilters: SearchFilter[] = [
+    {
+      id: "composer",
+      label: "Composer",
+      type: "checkbox",
+      options: composers.map(composer => ({
+        value: composer,
+        label: composer
+      }))
+    }
+  ];
 
   // Fetch sheet music data
   const fetchSheetMusic = async () => {
@@ -89,6 +107,12 @@ export default function SheetMusicPage() {
         
         setMusicFiles(formattedData);
         setFilteredFiles(formattedData);
+        
+        // Extract unique composers for filters
+        const uniqueComposers = Array.from(
+          new Set(formattedData.map(file => file.composer))
+        );
+        setComposers(uniqueComposers);
       }
     } catch (error: any) {
       console.error("Error fetching sheet music:", error);
@@ -144,20 +168,9 @@ export default function SheetMusicPage() {
     }
   }, [selectedSetlistId, availableSetlists]);
 
-  // Filter and sort music files
+  // Apply filters and sort
   useEffect(() => {
     let result = [...musicFiles];
-    
-    // Apply search filter
-    if (searchQuery) {
-      const query = searchQuery.toLowerCase();
-      result = result.filter(
-        file => 
-          file.title.toLowerCase().includes(query) || 
-          file.composer.toLowerCase().includes(query) ||
-          file.created_at.toLowerCase().includes(query)
-      );
-    }
     
     // Apply setlist filter if selected
     if (selectedSetlist && selectedSetlist.sheet_music_ids?.length > 0) {
@@ -187,36 +200,42 @@ export default function SheetMusicPage() {
     }
     
     setFilteredFiles(result);
-  }, [searchQuery, musicFiles, sortOrder, selectedSetlist]);
+  }, [musicFiles, sortOrder, selectedSetlist]);
 
-  // Toggle file selection
-  const toggleFileSelection = (file: SheetMusic) => {
-    setSelectedFiles(prevSelected => {
-      const isSelected = prevSelected.some(item => item.id === file.id);
+  // Handle search results
+  const handleSearchResults = (results: SheetMusicSearchItem[]) => {
+    // We only update filteredFiles if there's actually a search query
+    if (searchQuery) {
+      const matchingFiles = results.map(result => {
+        return musicFiles.find(file => file.id === result.id)!;
+      }).filter(Boolean);
       
-      if (isSelected) {
-        // Remove from selection
-        return prevSelected.filter(item => item.id !== file.id);
-      } else {
-        // Add to selection
-        return [...prevSelected, file];
-      }
-    });
+      setFilteredFiles(matchingFiles);
+    }
   };
 
-  // Clear all selections
-  const clearSelection = () => {
-    setSelectedFiles([]);
+  // Convert music files to search items
+  const musicFilesToSearchItems = (): SheetMusicSearchItem[] => {
+    return filteredFiles.map(file => ({
+      id: file.id,
+      title: file.title,
+      description: `Composer: ${file.composer}`,
+      category: 'Sheet Music',
+      composer: file.composer,
+      file_url: file.file_url,
+      date: file.created_at,
+      icon: <FileText className="h-4 w-4 text-muted-foreground" />
+    }));
+  };
+
+  // Handle search item selection
+  const handleSearchItemSelect = (item: SheetMusicSearchItem) => {
+    navigate(`/dashboard/sheet-music/${item.id}`);
   };
 
   // Clear setlist filter
   const clearSetlistFilter = () => {
     setSelectedSetlistId(null);
-  };
-
-  // Check if a file is selected
-  const isFileSelected = (fileId: string) => {
-    return selectedFiles.some(file => file.id === fileId);
   };
 
   // View sheet music
@@ -243,12 +262,14 @@ export default function SheetMusicPage() {
       {/* Search and filter controls */}
       <div className="flex flex-col md:flex-row gap-4 items-start">
         <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-          <Input
+          <AdvancedSearch
             placeholder="Search sheet music..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-10"
+            items={musicFilesToSearchItems()}
+            filters={searchFilters}
+            onSearch={handleSearchResults}
+            onItemSelect={handleSearchItemSelect}
+            searchKeys={['title', 'description', 'composer']}
+            maxResults={20}
           />
         </div>
         
@@ -330,6 +351,7 @@ export default function SheetMusicPage() {
       
       {/* Music Library */}
       <Tabs defaultValue="grid" className="w-full">
+        
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-xl font-semibold">Your Sheet Music</h2>
           <TabsList>
