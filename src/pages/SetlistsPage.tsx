@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { PageHeader } from "@/components/ui/page-header";
@@ -60,7 +59,7 @@ export default function SetlistsPage() {
         .from('setlists')
         .select('*')
         .eq('user_id', user.id)
-        .order('created_at', { ascending: false }) as any;
+        .order('created_at', { ascending: false });
 
       if (error) throw error;
 

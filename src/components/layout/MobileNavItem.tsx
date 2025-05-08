@@ -1,31 +1,35 @@
 
 import React from "react";
-import { Link } from "react-router-dom";
-import { Button } from "@/components/ui/button";
-import { SheetClose } from "@/components/ui/sheet";
+import { Link, useLocation } from "react-router-dom";
+import { cn } from "@/lib/utils";
 
-interface MobileNavItemProps {
+export interface MobileNavItemProps {
   href: string;
   title: string;
+  icon?: React.ReactNode;
   onClick?: () => void;
 }
 
-export function MobileNavItem({ href, title, onClick }: MobileNavItemProps) {
-  const handleClick = () => {
-    if (onClick) onClick();
-  };
+export function MobileNavItem({
+  href,
+  title,
+  icon,
+  onClick,
+}: MobileNavItemProps) {
+  const { pathname } = useLocation();
+  const isActive = pathname === href;
   
   return (
-    <SheetClose asChild>
-      <Link to={href}>
-        <Button
-          variant="ghost"
-          className="w-full justify-start text-sm"
-          onClick={handleClick}
-        >
-          {title}
-        </Button>
-      </Link>
-    </SheetClose>
+    <Link
+      to={onClick ? "#" : href}
+      onClick={onClick}
+      className={cn(
+        "flex flex-col items-center justify-center gap-1 px-2",
+        isActive ? "text-primary" : "text-muted-foreground"
+      )}
+    >
+      {icon && <span className="h-5 w-5">{icon}</span>}
+      <span className="text-xs">{title}</span>
+    </Link>
   );
 }
