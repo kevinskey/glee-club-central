@@ -59,11 +59,20 @@ export async function updateUserStatus(userId: string, status: string): Promise<
  */
 export async function addMemberNote(memberId: string, note: string): Promise<boolean> {
   try {
+    // Get current user's ID
+    const { data: userData } = await supabase.auth.getUser();
+    const currentUserId = userData.user?.id;
+    
+    if (!currentUserId) {
+      console.error("Cannot add note: No authenticated user");
+      return false;
+    }
+    
     const { error } = await supabase
       .from('member_notes')
       .insert({
         member_id: memberId,
-        created_by: supabase.auth.getUser().then(data => data.data.user?.id || ''),
+        created_by: currentUserId,
         note
       });
       

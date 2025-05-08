@@ -1,4 +1,3 @@
-
 // This file contains user query functions for Supabase
 
 import { supabase } from "@/integrations/supabase/client";
@@ -21,12 +20,10 @@ export interface UserSearchResult {
  */
 export async function searchUserByEmail(email: string): Promise<UserSearchResult | null> {
   try {
-    // Check if the email field exists in profiles or may need to join with auth.users
+    // Join profiles with auth.users to get the email field
+    // Note: This query assumes you've set up appropriate database functions for this to work
     const { data, error } = await supabase
-      .from('profiles')
-      .select('id, email, first_name, last_name, role, status, voice_part')
-      .ilike('email', `%${email}%`)
-      .limit(1);
+      .rpc('get_user_by_email', { p_email: `%${email}%` });
       
     if (error) {
       console.error("Error searching for user by email:", error);
