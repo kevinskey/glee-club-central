@@ -1,10 +1,11 @@
 
 import React from "react";
 import { format } from "date-fns";
-import { CalendarIcon, Clock, MapPin, Edit, Trash2 } from "lucide-react";
+import { CalendarIcon, Clock, MapPin, Edit, Trash2, ExternalLink } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { CalendarEvent } from "@/hooks/useCalendarEvents";
 import { useAuth } from "@/contexts/AuthContext";
+import { getAddToGoogleCalendarUrl } from "@/utils/googleCalendar";
 
 interface EventDetailsProps {
   selectedEvent: CalendarEvent;
@@ -53,12 +54,32 @@ export const EventDetails = ({
 
       {/* Event actions */}
       <div className="mt-6 flex flex-wrap gap-3">
-        <Button className="bg-glee-purple hover:bg-glee-purple/90">
+        <Button 
+          className="bg-glee-purple hover:bg-glee-purple/90"
+          onClick={() => window.open(getAddToGoogleCalendarUrl(selectedEvent), '_blank')}
+        >
+          <CalendarIcon className="mr-2 h-4 w-4" />
           Add to Calendar
         </Button>
-        <Button variant="outline">
+        
+        <Button 
+          variant="outline"
+          onClick={() => {
+            if (navigator.share) {
+              navigator.share({
+                title: selectedEvent.title,
+                text: `${selectedEvent.title} on ${format(selectedEvent.date, 'MMMM d, yyyy')} at ${selectedEvent.location}`,
+                url: window.location.href,
+              }).catch(err => console.log('Error sharing', err));
+            } else {
+              navigator.clipboard.writeText(window.location.href);
+              alert('Link copied to clipboard!');
+            }
+          }}
+        >
           Share Event
         </Button>
+        
         {user && user.id && (
           <>
             {onEditEvent && (

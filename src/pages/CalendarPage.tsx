@@ -1,3 +1,4 @@
+
 import React, { useState, useCallback, useMemo } from "react";
 import { Header } from "@/components/landing/Header";
 import { Footer } from "@/components/landing/Footer";
@@ -6,19 +7,31 @@ import { useCalendarEvents, CalendarEvent } from "@/hooks/useCalendarEvents";
 import { AddEventForm } from "@/components/calendar/AddEventForm";
 import { EditEventForm } from "@/components/calendar/EditEventForm";
 import { toast } from "sonner";
+import { ExternalLink } from "lucide-react";
+import { getViewGoogleCalendarUrl } from "@/utils/googleCalendar";
+import { Switch } from "@/components/ui/switch";
 
 // Components
 import { CalendarContainer } from "@/components/calendar/CalendarContainer";
 import { EventList } from "@/components/calendar/EventList";
 import { EventDetails } from "@/components/calendar/EventDetails";
 import { CalendarPageHeader } from "@/components/calendar/CalendarPageHeader";
+import { Button } from "@/components/ui/button";
 
 export default function CalendarPage() {
   const [date, setDate] = useState<Date | undefined>(new Date());
   const [selectedEvent, setSelectedEvent] = useState<CalendarEvent | null>(null);
   const [isAddEventOpen, setIsAddEventOpen] = useState(false);
   const [isEditEventOpen, setIsEditEventOpen] = useState(false);
-  const { events, loading, addEvent, updateEvent, deleteEvent } = useCalendarEvents();
+  const { 
+    events, 
+    loading, 
+    addEvent, 
+    updateEvent, 
+    deleteEvent,
+    useGoogleCalendar,
+    toggleGoogleCalendar 
+  } = useCalendarEvents();
   
   // Filter events for the selected date - memoized
   const eventsOnSelectedDate = useMemo(() => {
@@ -96,7 +109,31 @@ export default function CalendarPage() {
       <Header />
       <main className="flex-1 bg-gray-50 dark:bg-gray-900">
         <div className="container py-8 sm:py-10 md:py-12">
-          <CalendarPageHeader onAddEventClick={() => setIsAddEventOpen(true)} />
+          <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
+            <CalendarPageHeader onAddEventClick={() => setIsAddEventOpen(true)} />
+            
+            <div className="flex items-center space-x-4">
+              <div className="flex items-center space-x-2">
+                <span className="text-sm font-medium">Google Calendar</span>
+                <Switch 
+                  checked={useGoogleCalendar} 
+                  onCheckedChange={toggleGoogleCalendar} 
+                  className="data-[state=checked]:bg-glee-purple"
+                />
+              </div>
+              
+              {useGoogleCalendar && (
+                <Button 
+                  variant="outline" 
+                  className="flex items-center space-x-2"
+                  onClick={() => window.open(getViewGoogleCalendarUrl(), '_blank')}
+                >
+                  <span>View in Google</span>
+                  <ExternalLink className="h-4 w-4" />
+                </Button>
+              )}
+            </div>
+          </div>
           
           <div className="flex flex-col lg:flex-row gap-8">
             {/* Calendar */}
