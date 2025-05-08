@@ -1,4 +1,3 @@
-
 import { supabase } from '@/integrations/supabase/client';
 
 // Define explicit interface for user profile to avoid recursive type instantiation

@@ -29,7 +29,7 @@ export default function EditMemberPage() {
       if (!id) throw new Error("No member ID provided");
       try {
         const data = await fetchUserById(id);
-        console.log("Fetched member data:", data);
+        console.log("Fetched member data for editing:", data);
         return data;
       } catch (err) {
         console.error("Error fetching member:", err);
@@ -100,7 +100,7 @@ export default function EditMemberPage() {
         <h2 className="text-xl font-bold">Member not found</h2>
         <p className="text-gray-500 mb-4">Could not find the requested member with ID: {id}</p>
         <p className="text-sm mb-4">The member might not exist or you don't have permission to view it.</p>
-        <Button onClick={() => navigate("/dashboard/member-directory")}>Back to Directory</Button>
+        <Button onClick={() => navigate("/dashboard/members")}>Back to Members</Button>
       </div>
     );
   }
