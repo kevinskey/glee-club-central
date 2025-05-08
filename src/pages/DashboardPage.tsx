@@ -14,14 +14,13 @@ import {
   Headphones,
   Video,
   BookOpen,
-  Activity,
-  Loader2
+  Activity
 } from "lucide-react";
 import { Spinner } from "@/components/ui/spinner";
 
 const DashboardPage = () => {
   // Properly define a default for the profile to avoid TypeScript errors
-  const { profile } = useAuth();
+  const { profile, isAuthenticated, isLoading: authLoading } = useAuth();
   const profileData = profile || { first_name: 'Member', last_name: '', role: '', status: '' };
   
   // Sample data for dashboard components
@@ -39,28 +38,39 @@ const DashboardPage = () => {
   // Add loading indicator
   const [loading, setLoading] = useState(true);
   
-  // Simulate data loading
+  // Add debug info to the console
   useEffect(() => {
-    console.log("Dashboard loading...");
+    console.log("Dashboard mounting...");
+    console.log("Auth loading state:", authLoading);
+    console.log("Auth state:", isAuthenticated);
     console.log("Profile data:", profile);
     
     // Set a timeout to simulate data loading and then remove the loading state
     const timer = setTimeout(() => {
+      console.log("Setting loading to false");
       setLoading(false);
       console.log("Dashboard loaded");
-    }, 500);
+    }, 1000); // Increased from 500ms to give more time
     
     // Clean up the timer
-    return () => clearTimeout(timer);
-  }, [profile]);
+    return () => {
+      console.log("Dashboard unmounting, clearing timer");
+      clearTimeout(timer);
+    };
+  }, [profile, authLoading, isAuthenticated]);
   
-  if (loading) {
+  console.log("Current loading state:", loading);
+  
+  if (loading || authLoading) {
+    console.log("Rendering loading spinner");
     return (
       <div className="container mx-auto p-4 flex justify-center items-center min-h-[60vh]">
         <Spinner size="lg" />
       </div>
     );
   }
+
+  console.log("Rendering dashboard content");
   
   return (
     <div className="container mx-auto p-4 space-y-6">
