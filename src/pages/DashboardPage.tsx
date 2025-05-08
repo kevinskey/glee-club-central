@@ -1,5 +1,5 @@
 
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { PageHeader } from "@/components/ui/page-header";
 import { useAuth } from "@/contexts/AuthContext";
@@ -14,13 +14,14 @@ import {
   Headphones,
   Video,
   BookOpen,
-  Activity
+  Activity,
+  Loader2
 } from "lucide-react";
-import { Progress } from "@/components/ui/progress";
+import { Spinner } from "@/components/ui/spinner";
 
 const DashboardPage = () => {
-  // Use optional chaining to prevent errors if profile is null
-  const { profile } = useAuth();
+  // Use optional chaining and default value to prevent errors
+  const { profile = {} } = useAuth();
   
   // Sample data for dashboard components
   const upcomingEvents = [
@@ -34,24 +35,28 @@ const DashboardPage = () => {
     { id: 2, title: "Rehearsal Schedule Update", message: "Please note that rehearsals will now be held on Tuesdays and Thursdays." }
   ];
   
-  // Add loading indicators
-  const [loading, setLoading] = React.useState(true);
+  // Add loading indicator
+  const [loading, setLoading] = useState(true);
   
   // Simulate data loading
-  React.useEffect(() => {
+  useEffect(() => {
+    console.log("Dashboard loading...");
+    console.log("Profile data:", profile);
+    
     // Set a timeout to simulate data loading and then remove the loading state
     const timer = setTimeout(() => {
       setLoading(false);
+      console.log("Dashboard loaded");
     }, 500);
     
     // Clean up the timer
     return () => clearTimeout(timer);
-  }, []);
+  }, [profile]);
   
   if (loading) {
     return (
       <div className="container mx-auto p-4 flex justify-center items-center min-h-[60vh]">
-        <Progress spinningCircle size="lg" />
+        <Spinner size="lg" />
       </div>
     );
   }
@@ -78,15 +83,19 @@ const DashboardPage = () => {
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              {upcomingEvents.map(event => (
-                <div key={event.id} className="border-b pb-3 last:border-0">
-                  <h3 className="font-medium">{event.title}</h3>
-                  <div className="flex justify-between text-sm text-muted-foreground">
-                    <span>{event.date}</span>
-                    <span>{event.time}</span>
+              {upcomingEvents && upcomingEvents.length > 0 ? (
+                upcomingEvents.map(event => (
+                  <div key={event.id} className="border-b pb-3 last:border-0">
+                    <h3 className="font-medium">{event.title}</h3>
+                    <div className="flex justify-between text-sm text-muted-foreground">
+                      <span>{event.date}</span>
+                      <span>{event.time}</span>
+                    </div>
                   </div>
-                </div>
-              ))}
+                ))
+              ) : (
+                <div className="text-muted-foreground">No upcoming events</div>
+              )}
             </div>
             <div className="mt-4">
               <Link 
@@ -112,12 +121,16 @@ const DashboardPage = () => {
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              {announcements.map(announcement => (
-                <div key={announcement.id} className="pb-3 border-b last:border-0">
-                  <h3 className="font-medium">{announcement.title}</h3>
-                  <p className="text-sm text-muted-foreground mt-1">{announcement.message}</p>
-                </div>
-              ))}
+              {announcements && announcements.length > 0 ? (
+                announcements.map(announcement => (
+                  <div key={announcement.id} className="pb-3 border-b last:border-0">
+                    <h3 className="font-medium">{announcement.title}</h3>
+                    <p className="text-sm text-muted-foreground mt-1">{announcement.message}</p>
+                  </div>
+                ))
+              ) : (
+                <div className="text-muted-foreground">No announcements</div>
+              )}
             </div>
           </CardContent>
         </Card>
