@@ -1,3 +1,4 @@
+
 // This file contains user query functions for Supabase
 
 import { supabase } from "@/integrations/supabase/client";
@@ -20,15 +21,23 @@ export interface UserSearchResult {
  */
 export async function searchUserByEmail(email: string): Promise<UserSearchResult | null> {
   try {
-    // Use auth.getUser() to directly query for a user by email
-    const { data: authData, error: authError } = await supabase.auth.admin.getUserByEmail(email);
+    // First, find the user in auth.users by email using the list users method with a filter
+    const { data: userData, error: authError } = await supabase.auth.admin.listUsers();
     
-    if (authError || !authData) {
-      console.error("Error finding user with email:", email, authError);
+    if (authError || !userData) {
+      console.error("Error listing users:", authError);
       return null;
     }
 
-    const userId = authData.user.id;
+    // Find the user with the matching email
+    const userMatch = userData.users.find(user => user.email === email);
+    
+    if (!userMatch) {
+      console.log("No user found with email:", email);
+      return null;
+    }
+
+    const userId = userMatch.id;
     
     // Now fetch the profile using the user ID
     const { data: profileData, error: profileError } = await supabase
@@ -48,7 +57,7 @@ export async function searchUserByEmail(email: string): Promise<UserSearchResult
     
     return {
       id: profileData.id,
-      email: authData.user.email,
+      email: userMatch.email,
       first_name: profileData.first_name,
       last_name: profileData.last_name,
       role: profileData.role,
