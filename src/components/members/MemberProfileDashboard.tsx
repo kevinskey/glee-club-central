@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { usePermissions } from "@/hooks/usePermissions";
@@ -200,31 +201,31 @@ export const MemberProfileDashboard: React.FC<MemberProfileDashboardProps> = ({ 
           
           {(permissions.canTakeAttendance || user?.id === memberId) && (
             <TabsContent value="participation">
-              <ParticipationTab memberId={memberProfile.id} canEdit={permissions.canTakeAttendance} />
+              <ParticipationTab memberId={memberProfile.id} />
             </TabsContent>
           )}
           
           {(permissions.canEditMusic || user?.id === memberId) && (
             <TabsContent value="music">
-              <MusicAccessTab memberId={memberProfile.id} voicePart={memberProfile.voice_part} canEdit={permissions.canEditMusic} />
+              <MusicAccessTab memberId={memberProfile.id} voicePart={memberProfile.voice_part} />
             </TabsContent>
           )}
           
           {(permissions.canManageWardrobe || user?.id === memberId) && (
             <TabsContent value="wardrobe">
-              <WardrobeTab profile={memberProfile as any} canEdit={permissions.canManageWardrobe} />
+              <WardrobeTab profile={memberProfile as any} />
             </TabsContent>
           )}
           
           {(permissions.canManagePayments || user?.id === memberId) && (
             <TabsContent value="financial">
-              <FinancialInfoTab memberId={memberProfile.id} canEdit={permissions.canManagePayments} />
+              <FinancialInfoTab memberId={memberProfile.id} />
             </TabsContent>
           )}
           
           {(user?.id === memberId) && (
             <TabsContent value="media">
-              <MediaConsentTab profile={memberProfile as any} canEdit={true} />
+              <MediaConsentTab profile={memberProfile as any} />
             </TabsContent>
           )}
           
