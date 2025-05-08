@@ -2,7 +2,6 @@
 import React from "react";
 import { useSidebar } from "@/hooks/use-sidebar";
 import { NavItem } from "@/components/layout/NavItem";
-import { NavLink } from "@/components/layout/NavLink";
 import { 
   Bell,
   Calendar, 

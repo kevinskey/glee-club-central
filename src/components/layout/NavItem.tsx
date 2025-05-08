@@ -1,36 +1,34 @@
 
 import React from "react";
 import { Link, useLocation } from "react-router-dom";
-import { LucideIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { LucideIcon } from "lucide-react";
 
 interface NavItemProps {
   href: string;
-  children: React.ReactNode;
   icon: LucideIcon;
-  onClick?: () => void;
+  children: React.ReactNode;
   exact?: boolean;
 }
 
-export function NavItem({ href, children, icon: Icon, onClick, exact = false }: NavItemProps) {
+export function NavItem({ href, icon: Icon, children, exact }: NavItemProps) {
   const location = useLocation();
   const isActive = exact 
-    ? location.pathname === href 
-    : location.pathname.startsWith(href);
+    ? location.pathname === href
+    : location.pathname === href || location.pathname.startsWith(`${href}/`);
   
   return (
     <Link
       to={href}
       className={cn(
-        "flex items-center gap-2 rounded-md p-2 text-sm font-medium transition-colors",
-        isActive 
-          ? "bg-primary text-primary-foreground" 
-          : "hover:bg-secondary text-foreground hover:text-primary"
+        "flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-colors",
+        isActive
+          ? "bg-primary/10 text-primary font-medium"
+          : "text-muted-foreground hover:bg-accent hover:text-accent-foreground"
       )}
-      onClick={onClick}
     >
       <Icon className="h-4 w-4" />
-      {children}
+      <span>{children}</span>
     </Link>
   );
 }
