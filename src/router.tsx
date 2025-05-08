@@ -14,6 +14,8 @@ import RecordingsPage from "@/pages/RecordingsPage";
 import LandingPage from "@/pages/LandingPage";
 import FanPage from "@/pages/FanPage";
 import DashboardPage from "@/pages/DashboardPage";
+import AttendancePage from "@/pages/AttendancePage";
+import PerformanceChecklistPage from "@/pages/PerformanceChecklistPage";
 
 // This file is used for reference only - actual routes are now in App.tsx
 // We keep this for future reference or if we want to switch back to RouterProvider
@@ -69,6 +71,14 @@ const routes: RouteObject[] = [
       {
         path: "recordings",
         element: <RecordingsPage />,
+      },
+      {
+        path: "attendance",
+        element: <AttendancePage />,
+      },
+      {
+        path: "performance-checklist",
+        element: <PerformanceChecklistPage />,
       },
       // The remaining routes will use the "Not Found" page until implemented
       {
