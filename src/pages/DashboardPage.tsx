@@ -20,9 +20,9 @@ import {
 import { Spinner } from "@/components/ui/spinner";
 
 const DashboardPage = () => {
-  // Properly typed default profile object to avoid TypeScript errors
+  // Properly define a default for the profile to avoid TypeScript errors
   const { profile } = useAuth();
-  const profileData = profile || { first_name: 'Member' };
+  const profileData = profile || { first_name: 'Member', last_name: '', role: '', status: '' };
   
   // Sample data for dashboard components
   const upcomingEvents = [
