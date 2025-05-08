@@ -1,3 +1,4 @@
+
 // This file contains user query functions for Supabase
 
 import { supabase } from "@/integrations/supabase/client";
@@ -20,28 +21,43 @@ export interface UserSearchResult {
  */
 export async function searchUserByEmail(email: string): Promise<UserSearchResult | null> {
   try {
-    // Join profiles with auth.users to get the email field
-    // Note: This query assumes you've set up appropriate database functions for this to work
+    // Since we don't have the get_user_by_email RPC function yet,
+    // we'll use a join query directly
     const { data, error } = await supabase
-      .rpc('get_user_by_email', { p_email: `%${email}%` });
-      
+      .from('profiles')
+      .select(`
+        id, 
+        first_name, 
+        last_name, 
+        role, 
+        status, 
+        voice_part,
+        auth_users!inner(email)
+      `)
+      .ilike('auth_users.email', `%${email}%`)
+      .limit(1)
+      .single();
+    
     if (error) {
       console.error("Error searching for user by email:", error);
       return null;
     }
     
-    if (!data || data.length === 0) {
+    if (!data) {
       return null;
     }
     
+    // Extract email from the auth_users join
+    const extractedEmail = data.auth_users?.email;
+    
     return {
-      id: data[0].id,
-      email: data[0].email,
-      first_name: data[0].first_name,
-      last_name: data[0].last_name,
-      role: data[0].role,
-      status: data[0].status,
-      voice_part: data[0].voice_part
+      id: data.id,
+      email: extractedEmail || null,
+      first_name: data.first_name,
+      last_name: data.last_name,
+      role: data.role,
+      status: data.status,
+      voice_part: data.voice_part
     };
   } catch (error) {
     console.error("Exception searching for user by email:", error);
