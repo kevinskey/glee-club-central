@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { PageHeader } from "@/components/ui/page-header";
@@ -250,12 +251,23 @@ export default function SheetMusicPage() {
         description="Browse, view, and annotate your sheet music"
         icon={<FileText className="h-6 w-6" />}
         actions={
-          <Button 
-            onClick={() => setIsUploadModalOpen(true)}
-            className="gap-2 bg-glee-purple hover:bg-glee-purple/90"
-          >
-            <Upload className="h-4 w-4" /> Upload PDF
-          </Button>
+          <>
+            <Button 
+              variant="outline"
+              asChild
+              className="mr-2 bg-glee-purple/10 hover:bg-glee-purple hover:text-white border-glee-purple/30"
+            >
+              <Link to="/dashboard/setlists" className="flex items-center gap-2">
+                <ListMusic className="h-4 w-4" /> View Setlists
+              </Link>
+            </Button>
+            <Button 
+              onClick={() => setIsUploadModalOpen(true)}
+              className="gap-2 bg-glee-purple hover:bg-glee-purple/90"
+            >
+              <Upload className="h-4 w-4" /> Upload PDF
+            </Button>
+          </>
         }
       />
 
