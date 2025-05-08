@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { PageHeader } from "@/components/ui/page-header";
@@ -14,6 +15,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { Checkbox } from "@/components/ui/checkbox";
 import { MultipleDownloadBar } from "@/components/sheet-music/MultipleDownloadBar";
 import { PDFThumbnail } from "@/components/pdf/PDFThumbnail";
+import { PDFPreview } from "@/components/pdf/PDFPreview";
 import {
   Select,
   SelectContent,
@@ -253,17 +255,24 @@ export default function SheetMusicPage() {
             <TabsContent value="grid">
               <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
                 {filteredFiles.map((file) => (
-                  <Card 
-                    key={file.id} 
-                    className="overflow-hidden hover:shadow-md transition-shadow cursor-pointer"
-                    onClick={() => viewSheetMusic(file.id)}
+                  <PDFPreview 
+                    key={file.id}
+                    url={file.file_url} 
+                    title={file.title}
+                    previewWidth={400}
+                    previewHeight={500}
                   >
-                    <PDFThumbnail url={file.file_url} title={file.title} />
-                    <CardContent className="p-3">
-                      <h3 className="font-medium text-sm truncate">{file.title}</h3>
-                      <p className="text-xs text-muted-foreground truncate">{file.composer}</p>
-                    </CardContent>
-                  </Card>
+                    <Card 
+                      className="overflow-hidden hover:shadow-md transition-shadow cursor-pointer"
+                      onClick={() => viewSheetMusic(file.id)}
+                    >
+                      <PDFThumbnail url={file.file_url} title={file.title} />
+                      <CardContent className="p-3">
+                        <h3 className="font-medium text-sm truncate">{file.title}</h3>
+                        <p className="text-xs text-muted-foreground truncate">{file.composer}</p>
+                      </CardContent>
+                    </Card>
+                  </PDFPreview>
                 ))}
 
                 {/* Add new sheet music card */}
@@ -297,11 +306,18 @@ export default function SheetMusicPage() {
                         className="hover:bg-muted/50"
                       >
                         <TableCell className="p-0 w-12 h-12">
-                          <PDFThumbnail 
+                          <PDFPreview 
                             url={file.file_url} 
-                            title={file.title} 
-                            className="w-12 h-12 rounded-sm" 
-                          />
+                            title={file.title}
+                            previewWidth={400}
+                            previewHeight={500}
+                          >
+                            <PDFThumbnail 
+                              url={file.file_url} 
+                              title={file.title} 
+                              className="w-12 h-12 rounded-sm" 
+                            />
+                          </PDFPreview>
                         </TableCell>
                         <TableCell className="font-medium">{file.title}</TableCell>
                         <TableCell>{file.composer}</TableCell>

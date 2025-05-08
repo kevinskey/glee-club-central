@@ -6,9 +6,10 @@ interface PDFThumbnailProps {
   url: string;
   title: string;
   className?: string;
+  onClick?: () => void;
 }
 
-export const PDFThumbnail = ({ url, title, className = '' }: PDFThumbnailProps) => {
+export const PDFThumbnail = ({ url, title, className = '', onClick }: PDFThumbnailProps) => {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [objectUrl, setObjectUrl] = useState<string | null>(null);
@@ -80,7 +81,10 @@ export const PDFThumbnail = ({ url, title, className = '' }: PDFThumbnailProps) 
   }, [url]);
 
   return (
-    <div className={`aspect-[3/4] bg-muted flex items-center justify-center overflow-hidden ${className}`}>
+    <div 
+      className={`aspect-[3/4] bg-muted flex items-center justify-center overflow-hidden ${className}`}
+      onClick={onClick}
+    >
       {isLoading ? (
         <div className="flex items-center justify-center w-full h-full">
           <FileText className="h-12 w-12 text-muted-foreground/50 animate-pulse" />
