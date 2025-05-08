@@ -23,6 +23,11 @@ import AboutPage from './pages/AboutPage';
 import ContactPage from './pages/ContactPage';
 import AdministrationPage from './pages/AdministrationPage';
 
+// Admin Pages
+import AdminDashboardPage from './pages/AdminDashboardPage';
+import AdminMembersPage from './pages/AdminMembersPage';
+import AdminFinancesPage from './pages/AdminFinancesPage';
+
 function App() {
   return (
     <Routes>
@@ -62,6 +67,15 @@ function App() {
         <Route path="attendance" element={<AttendancePage />} />
         <Route path="messages" element={<div>Messages Page</div>} />
         <Route path="performance-checklist" element={<PerformanceChecklistPage />} />
+        
+        {/* Admin routes */}
+        <Route path="admin" element={<AdminDashboardPage />} />
+        <Route path="admin/members" element={<AdminMembersPage />} />
+        <Route path="admin/finances" element={<AdminFinancesPage />} />
+        <Route path="admin/wardrobe" element={<div>Wardrobe Management Page</div>} />
+        <Route path="admin/analytics" element={<div>Analytics Dashboard Page</div>} />
+        <Route path="admin/settings" element={<div>Site Settings Page</div>} />
+        
         <Route path="*" element={<NotFoundPage />} />
       </Route>
       
