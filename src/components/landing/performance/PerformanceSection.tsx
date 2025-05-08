@@ -1,4 +1,3 @@
-
 import React from "react";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
@@ -32,7 +31,7 @@ const performanceEvents: PerformanceEventType[] = [
     date: new Date(2025, 11, 10), // December 10, 2025
     location: "Atlanta Symphony Hall",
     description: "Celebrating the season with festive music and traditional carols.",
-    image: "/lovable-uploads/8aa13e63-fb9a-4c52-95cf-86b458c58f1c.png" // Updated image for the 2nd slide
+    image: "/lovable-uploads/8aa13e63-fb9a-4c52-95cf-86b458c58f1c.png"
   },
   {
     id: 3,
@@ -40,7 +39,7 @@ const performanceEvents: PerformanceEventType[] = [
     date: new Date(2026, 2, 5), // March 5, 2026
     location: "Various Venues",
     description: "Our annual tour across the southeastern United States.",
-    image: "/lovable-uploads/642b93d7-fc15-4c2c-a7df-fe81aadb2f3b.png" // Updated image for the 3rd slide
+    image: "/lovable-uploads/642b93d7-fc15-4c2c-a7df-fe81aadb2f3b.png"
   },
   {
     id: 4,
@@ -116,8 +115,8 @@ export function PerformanceSection() {
                           backgroundRepeat: 'no-repeat'
                         }}
                       >
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent flex flex-col justify-end items-center pb-16">
-                          <h3 className="font-bold text-white text-xl md:text-2xl lg:text-3xl font-playfair text-center px-4 md:px-6 drop-shadow-lg mb-6 md:mb-10">
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent flex flex-col justify-center items-center">
+                          <h3 className="font-bold text-white text-xl md:text-2xl lg:text-3xl font-playfair text-center px-4 md:px-6 drop-shadow-lg my-auto flex items-center min-h-[3rem] md:min-h-[3.5rem]">
                             {event.title}
                           </h3>
                           
