@@ -1,4 +1,3 @@
-
 // This file contains user query functions for Supabase
 
 import { supabase } from "@/integrations/supabase/client";
