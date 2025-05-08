@@ -3,5 +3,5 @@
 export * from './members';
 export * from './attendance';
 export * from './payments';
-export * from './users';
+export * from './user';
 export * from './types';
