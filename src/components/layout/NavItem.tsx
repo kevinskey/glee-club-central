@@ -4,30 +4,42 @@ import { Link, useLocation } from "react-router-dom";
 import { cn } from "@/lib/utils";
 
 interface NavItemProps {
+  title: string;
   href: string;
-  icon: () => React.ReactNode;
-  children: React.ReactNode;
-  exact?: boolean;
+  icon?: React.ReactNode;
+  external?: boolean;
 }
 
-export function NavItem({ href, icon: Icon, children, exact }: NavItemProps) {
+export function NavItem({ title, href, icon, external = false }: NavItemProps) {
   const location = useLocation();
-  const isActive = exact 
-    ? location.pathname === href
-    : location.pathname === href || location.pathname.startsWith(`${href}/`);
+  const isActive = location.pathname === href || location.pathname.startsWith(`${href}/`);
   
-  return (
+  const linkContent = (
+    <>
+      {icon && <span className="mr-2">{icon}</span>}
+      <span>{title}</span>
+    </>
+  );
+  
+  return external ? (
+    <a
+      href={href}
+      className={cn(
+        "flex items-center px-3 py-2 text-sm rounded-md hover:bg-accent hover:text-accent-foreground",
+        isActive && "bg-accent text-accent-foreground"
+      )}
+    >
+      {linkContent}
+    </a>
+  ) : (
     <Link
       to={href}
       className={cn(
-        "flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-colors",
-        isActive
-          ? "bg-primary/10 text-primary font-medium"
-          : "text-muted-foreground hover:bg-accent hover:text-accent-foreground"
+        "flex items-center px-3 py-2 text-sm rounded-md hover:bg-accent hover:text-accent-foreground",
+        isActive && "bg-accent text-accent-foreground"
       )}
     >
-      {Icon()}
-      <span>{children}</span>
+      {linkContent}
     </Link>
   );
 }

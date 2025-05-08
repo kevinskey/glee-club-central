@@ -16,6 +16,7 @@ import {
   User,
   Settings,
   LogOut,
+  Home,
 } from "lucide-react";
 import { useSidebar } from "@/hooks/use-sidebar";
 
@@ -36,8 +37,9 @@ export function Header() {
             <Menu className="h-5 w-5" />
             <span className="sr-only">Toggle sidebar</span>
           </Button>
-          <Link to="/" className="font-bold">
-            Glee Club
+          <Link to="/" className="font-bold flex items-center gap-2 hover:text-primary transition-colors">
+            <Home className="h-5 w-5" />
+            <span>Glee Club</span>
           </Link>
         </div>
 
@@ -67,6 +69,13 @@ export function Header() {
                 <Link to="/update-password" className="flex items-center gap-2 cursor-pointer">
                   <Settings className="h-4 w-4" />
                   <span>Change Password</span>
+                </Link>
+              </DropdownMenuItem>
+              
+              <DropdownMenuItem asChild>
+                <Link to="/" className="flex items-center gap-2 cursor-pointer">
+                  <Home className="h-4 w-4" />
+                  <span>Home Page</span>
                 </Link>
               </DropdownMenuItem>
               

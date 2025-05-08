@@ -1,35 +1,41 @@
 
 import React from "react";
 import { NavItem } from "@/components/layout/NavItem";
-import { 
-  LayoutDashboard, 
-  FileMusic, 
+import {
+  Home,
+  Calendar,
+  Music,
+  FileMusic,
   ListMusic,
-  Calendar, 
-  Headphones, 
-  Video,
+  User,
+  Bell,
+  BookOpen,
   DollarSign,
-  Book,
-  ShoppingBag,
-  FolderOpen,
-  UserCircle,
+  Shirt,
   Users,
-  Megaphone,
+  MessageSquare,
+  Headphones,
+  FileVideo,
+  FileImage,
   ClipboardCheck,
-  MessageCircle
 } from "lucide-react";
 
-export interface NavItemType {
-  title: string;
-  href: string;
-  icon: React.ReactNode;
-}
-
-export const mainNavItems: NavItemType[] = [
+export const mainNavItems = [
+  {
+    title: "Home",
+    href: "/",
+    icon: <Home className="h-5 w-5" />,
+    external: true,
+  },
   {
     title: "Dashboard",
     href: "/dashboard",
-    icon: <LayoutDashboard className="h-5 w-5" />,
+    icon: <Home className="h-5 w-5" />,
+  },
+  {
+    title: "Calendar",
+    href: "/dashboard/calendar",
+    icon: <Calendar className="h-5 w-5" />,
   },
   {
     title: "Sheet Music",
@@ -42,9 +48,9 @@ export const mainNavItems: NavItemType[] = [
     icon: <ListMusic className="h-5 w-5" />,
   },
   {
-    title: "Calendar",
-    href: "/dashboard/calendar",
-    icon: <Calendar className="h-5 w-5" />,
+    title: "Recordings",
+    href: "/dashboard/recordings",
+    icon: <Music className="h-5 w-5" />,
   },
   {
     title: "Practice",
@@ -52,39 +58,24 @@ export const mainNavItems: NavItemType[] = [
     icon: <Headphones className="h-5 w-5" />,
   },
   {
-    title: "Recordings",
-    href: "/dashboard/recordings",
-    icon: <Headphones className="h-5 w-5" />,
-  },
-  {
     title: "Videos",
     href: "/dashboard/videos",
-    icon: <Video className="h-5 w-5" />,
+    icon: <FileVideo className="h-5 w-5" />,
   },
   {
-    title: "Dues Payment",
-    href: "/dashboard/dues",
-    icon: <DollarSign className="h-5 w-5" />,
+    title: "Media Sources",
+    href: "/dashboard/media-library",
+    icon: <FileImage className="h-5 w-5" />,
   },
   {
     title: "Handbook",
     href: "/dashboard/handbook",
-    icon: <Book className="h-5 w-5" />,
+    icon: <BookOpen className="h-5 w-5" />,
   },
   {
-    title: "Merchandise",
-    href: "/dashboard/merch",
-    icon: <ShoppingBag className="h-5 w-5" />,
-  },
-  {
-    title: "Media Library",
-    href: "/dashboard/media-library",
-    icon: <FolderOpen className="h-5 w-5" />,
-  },
-  {
-    title: "Profile",
-    href: "/dashboard/profile",
-    icon: <UserCircle className="h-5 w-5" />,
+    title: "Messages",
+    href: "/dashboard/messages",
+    icon: <MessageSquare className="h-5 w-5" />,
   },
   {
     title: "Members",
@@ -94,7 +85,7 @@ export const mainNavItems: NavItemType[] = [
   {
     title: "Announcements",
     href: "/dashboard/announcements",
-    icon: <Megaphone className="h-5 w-5" />,
+    icon: <Bell className="h-5 w-5" />,
   },
   {
     title: "Attendance",
@@ -102,28 +93,34 @@ export const mainNavItems: NavItemType[] = [
     icon: <ClipboardCheck className="h-5 w-5" />,
   },
   {
-    title: "Messages",
-    href: "/dashboard/messages",
-    icon: <MessageCircle className="h-5 w-5" />,
+    title: "Dues",
+    href: "/dashboard/dues",
+    icon: <DollarSign className="h-5 w-5" />,
+  },
+  {
+    title: "Wardrobe",
+    href: "/dashboard/wardrobe",
+    icon: <Shirt className="h-5 w-5" />,
+  },
+  {
+    title: "Profile",
+    href: "/dashboard/profile",
+    icon: <User className="h-5 w-5" />,
   },
 ];
 
-interface SidebarNavItemsProps {
-  items: NavItemType[];
-}
-
-export function SidebarNavItems({ items }: SidebarNavItemsProps) {
+export function SidebarNavItems({ items }: { items: typeof mainNavItems }) {
   return (
-    <nav className="grid items-start px-2 gap-1">
-      {items.map((item, index) => (
-        <NavItem 
-          key={index}
+    <div className="space-y-1">
+      {items.map((item) => (
+        <NavItem
+          key={item.href}
+          title={item.title}
           href={item.href}
-          icon={() => item.icon}
-        >
-          {item.title}
-        </NavItem>
+          icon={item.icon}
+          external={item.external}
+        />
       ))}
-    </nav>
+    </div>
   );
 }
