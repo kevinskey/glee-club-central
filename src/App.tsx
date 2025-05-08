@@ -19,6 +19,9 @@ import FanPage from './pages/FanPage';
 import AttendancePage from './pages/AttendancePage';
 import PerformanceChecklistPage from './pages/PerformanceChecklistPage';
 import DashboardPage from './pages/DashboardPage';
+import AboutPage from './pages/AboutPage';
+import ContactPage from './pages/ContactPage';
+import AdministrationPage from './pages/AdministrationPage';
 
 function App() {
   return (
@@ -30,6 +33,9 @@ function App() {
       <Route path="/register" element={<RegisterPage />} />
       <Route path="/reset-password" element={<ResetPasswordPage />} />
       <Route path="/update-password" element={<UpdatePasswordPage />} />
+      <Route path="/about" element={<AboutPage />} />
+      <Route path="/contact" element={<ContactPage />} />
+      <Route path="/administration" element={<AdministrationPage />} />
       
       {/* Protected dashboard routes */}
       <Route 
