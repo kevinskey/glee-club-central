@@ -1,3 +1,4 @@
+
 // This file contains user query functions for Supabase
 
 import { supabase } from "@/integrations/supabase/client";
@@ -29,7 +30,7 @@ export async function searchUserByEmail(email: string): Promise<SimpleUserData |
       
     if (error) {
       console.error("Error searching for user by email:", error);
-      return null;
+      return null; // Return null on error, not the error object
     }
     
     return data;
