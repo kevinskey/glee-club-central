@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { PageHeader } from "@/components/ui/page-header";
 import { User, PencilLine } from "lucide-react";
@@ -13,13 +12,13 @@ import { supabase } from "@/integrations/supabase/client";
 
 export default function ProfilePage() {
   const [isEditing, setIsEditing] = useState(false);
-  const [formData, setFormData] = useState({
-    firstName: "John",
-    lastName: "Doe",
-    voicePart: "Tenor",
-    email: "john.doe@example.com"
-  });
   const { user, profile } = useAuth();
+  const [formData, setFormData] = useState({
+    firstName: "",
+    lastName: "",
+    voicePart: "",
+    email: user?.email || ""
+  });
 
   // Initialize form data from profile if available
   React.useEffect(() => {
