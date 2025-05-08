@@ -10,15 +10,18 @@ export interface UserSafe {
   phone: string | null;
   voice_part: string | null;
   role: string;
+  role_display_name: string | null;
+  voice_part_display: string | null;
+  avatar_url: string | null;
   status: string;
   join_date: string | null;
   class_year: string | null;
   dues_paid: boolean | null;
   special_roles: string | null;
   notes: string | null;
-  avatar_url: string | null;
   created_at: string;
   updated_at: string | null;
+  last_sign_in_at: string | null;
 }
 
 // Use Profile type from AuthContext but export it here to prevent circular dependencies
@@ -39,6 +42,9 @@ export type Profile = {
   avatar_url: string | null;
   created_at: string;
   updated_at?: string | null;
+  last_sign_in_at?: string | null;
+  role_display_name?: string | null;
+  voice_part_display?: string | null;
 };
 
 // Fetch all users from the database

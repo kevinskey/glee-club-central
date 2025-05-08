@@ -29,7 +29,8 @@ BEGIN
     class_year text,
     dues_paid boolean,
     notes text,
-    special_roles text
+    special_roles text,
+    updated_at timestamp with time zone
   )
   LANGUAGE plpgsql
   SECURITY DEFINER
@@ -70,7 +71,8 @@ BEGIN
       p.class_year::text,
       p.dues_paid,
       p.notes::text,
-      p.special_roles::text
+      p.special_roles::text,
+      p.updated_at
     FROM
       public.profiles p
     LEFT JOIN
@@ -112,7 +114,8 @@ BEGIN
     class_year text,
     dues_paid boolean,
     notes text,
-    special_roles text
+    special_roles text,
+    updated_at timestamp with time zone
   )
   LANGUAGE plpgsql
   SECURITY DEFINER
@@ -153,7 +156,8 @@ BEGIN
       p.class_year::text,
       p.dues_paid,
       p.notes::text,
-      p.special_roles::text
+      p.special_roles::text,
+      p.updated_at
     FROM
       public.profiles p
     LEFT JOIN

@@ -1,28 +1,9 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { toast } from "sonner";
-import { fetchAllUsers, updateUserRole, updateUserStatus, fetchUserById } from "@/utils/supabase/users";
+import { fetchAllUsers, updateUserRole, updateUserStatus, fetchUserById, UserSafe } from "@/utils/supabase/users";
 
-export type User = {
-  id: string;
-  email?: string | null;
-  first_name?: string | null;
-  last_name?: string | null;
-  phone?: string | null;
-  role: string;
-  role_display_name?: string | null;
-  voice_part?: string | null;
-  voice_part_display?: string | null;
-  avatar_url?: string | null;
-  status: string;
-  join_date?: string | null;
-  created_at?: string;
-  last_sign_in_at?: string | null;
-  class_year?: string | null;
-  dues_paid?: boolean | null;
-  notes?: string | null;
-  special_roles?: string | null;
-};
+export type User = UserSafe;
 
 export function useUserManagement() {
   const [users, setUsers] = useState<User[]>([]);

@@ -20,7 +20,7 @@ import {
   FileText,
 } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
-import { fetchUserById } from "@/utils/supabase/users";
+import { fetchUserById, UserSafe } from "@/utils/supabase/users";
 import { ProfileOverviewTab } from "@/components/members/profile/ProfileOverviewTab";
 import { ParticipationTab } from "@/components/members/profile/ParticipationTab";
 import { MusicAccessTab } from "@/components/members/profile/MusicAccessTab";
@@ -153,7 +153,7 @@ export const MemberProfileDashboard: React.FC<MemberProfileDashboardProps> = ({ 
           </TabsContent>
           
           <TabsContent value="wardrobe">
-            <WardrobeTab profile={memberProfile} />
+            <WardrobeTab profile={memberProfile as any} />
           </TabsContent>
           
           <TabsContent value="financial">
@@ -161,7 +161,7 @@ export const MemberProfileDashboard: React.FC<MemberProfileDashboardProps> = ({ 
           </TabsContent>
           
           <TabsContent value="media">
-            <MediaConsentTab profile={memberProfile} />
+            <MediaConsentTab profile={memberProfile as any} />
           </TabsContent>
           
           {isAdmin() && (

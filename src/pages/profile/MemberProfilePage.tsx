@@ -34,7 +34,7 @@ import { AdminNotesTab } from "@/components/profile/AdminNotesTab";
 import { getStatusBadge, getRoleBadge } from "@/components/members/UserBadges";
 import { useQuery } from "@tanstack/react-query";
 import { useParams } from "react-router-dom";
-import { fetchUserById } from "@/utils/supabase/users";
+import { fetchUserById, UserSafe } from "@/utils/supabase/users";
 
 export default function MemberProfilePage() {
   const { user, profile, isAdmin } = useAuth();
@@ -96,7 +96,7 @@ export default function MemberProfilePage() {
   const profileEmail = memberProfile?.email || profile?.email || "No email available";
   
   // Handle last sign in time safely
-  const lastSignIn = memberProfile?.last_sign_in_at || profile?.last_sign_in_at;
+  const lastSignIn = memberProfile?.last_sign_in_at || (profile as any)?.last_sign_in_at;
   const lastSignInDisplay = lastSignIn ? new Date(lastSignIn).toLocaleString() : "Never";
 
   return (
@@ -167,7 +167,7 @@ export default function MemberProfilePage() {
             </TabsContent>
             
             <TabsContent value="wardrobe">
-              <WardrobeTab profile={displayProfile} />
+              <WardrobeTab profile={displayProfile as any} />
             </TabsContent>
             
             <TabsContent value="financial">
@@ -175,7 +175,7 @@ export default function MemberProfilePage() {
             </TabsContent>
             
             <TabsContent value="media">
-              <MediaConsentTab profile={displayProfile} />
+              <MediaConsentTab profile={displayProfile as any} />
             </TabsContent>
             
             {isAdmin() && (
