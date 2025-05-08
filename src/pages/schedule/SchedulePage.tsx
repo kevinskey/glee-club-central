@@ -1,3 +1,4 @@
+
 import React from "react";
 import { PageHeader } from "@/components/ui/page-header";
 import { Calendar, Clock, MapPin, Plus } from "lucide-react";
@@ -20,30 +21,30 @@ interface Event {
 const events: Event[] = [
   {
     id: "1",
-    title: "Weekly Rehearsal",
-    date: "2023-10-25",
-    time: "6:00 PM - 8:00 PM",
-    location: "Music Building, Room 101",
-    type: "rehearsal",
-    description: "Regular weekly choir rehearsal. Please bring your Ave Maria and Hallelujah sheet music."
+    title: "Fall Concert 2025",
+    date: "2025-10-26",
+    time: "7:00 PM - 9:00 PM",
+    location: "Sisters Chapel",
+    type: "performance",
+    description: "Annual fall concert featuring classical and contemporary pieces."
   },
   {
     id: "2",
-    title: "Fall Concert",
-    date: "2023-11-15",
+    title: "A Taste of Christmas",
+    date: "2025-12-02",
     time: "7:30 PM - 9:30 PM",
-    location: "University Auditorium",
+    location: "Sisters Chapel",
     type: "performance",
-    description: "Annual fall concert. Formal attire required. Call time is 6:00 PM."
+    description: "Celebrating the holiday season with festive music and traditional carols."
   },
   {
     id: "3",
-    title: "Choir Social",
-    date: "2023-10-28",
-    time: "7:00 PM - 10:00 PM",
-    location: "Student Union",
-    type: "social",
-    description: "End of month social gathering. Food and drinks provided."
+    title: "99th Annual Christmas Carol",
+    date: "2025-12-06",
+    time: "Various (Dec 6-8)",
+    location: "Sisters Chapel",
+    type: "performance",
+    description: "Our annual Christmas Carol series running December 6-8, 2025."
   },
 ];
 

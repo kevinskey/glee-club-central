@@ -1,3 +1,4 @@
+
 import React from "react";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
@@ -20,7 +21,7 @@ const performanceEvents: PerformanceEventType[] = [
   {
     id: 1,
     title: "Fall Concert 2025",
-    date: new Date(2025, 5, 15), // June 15, 2025
+    date: new Date(2025, 9, 26), // October 26, 2025
     location: "Sisters Chapel",
     description: "Our annual showcase featuring classical and contemporary pieces.",
     image: "/lovable-uploads/3ad02de0-04d1-4a5e-9279-898e9c317d80.png"
@@ -28,24 +29,24 @@ const performanceEvents: PerformanceEventType[] = [
   {
     id: 2,
     title: "A Taste of Christmas",
-    date: new Date(2025, 11, 10), // December 10, 2025
-    location: "Atlanta Symphony Hall",
+    date: new Date(2025, 11, 2), // December 2, 2025
+    location: "Sisters Chapel",
     description: "Celebrating the season with festive music and traditional carols.",
     image: "/lovable-uploads/8aa13e63-fb9a-4c52-95cf-86b458c58f1c.png"
   },
   {
     id: 3,
     title: "99th Annual Christmas Carol",
-    date: new Date(2026, 2, 5), // March 5, 2026
-    location: "Various Venues",
-    description: "Our annual tour across the southeastern United States.",
+    date: new Date(2025, 11, 6), // December 6, 2025
+    location: "Sisters Chapel",
+    description: "Our annual Christmas celebration with carols and special performances. Running December 6-8, 2025.",
     image: "/lovable-uploads/642b93d7-fc15-4c2c-a7df-fe81aadb2f3b.png"
   },
   {
     id: 4,
     title: "Commencement Performance",
     date: new Date(2026, 4, 20), // May 20, 2026
-    location: "Spelman College Oval",
+    location: "Sisters Chapel",
     description: "Special performance for the graduating class of 2026.",
     image: "/lovable-uploads/3ad02de0-04d1-4a5e-9279-898e9c317d80.png"
   }
