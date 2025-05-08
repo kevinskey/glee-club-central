@@ -57,6 +57,7 @@ export function EditMemberForm({ member, isLoading, onSubmit, onCancel }: EditMe
       voice_part: "",
       role: "singer",
       status: "active",
+      special_roles: "",
     },
   });
   

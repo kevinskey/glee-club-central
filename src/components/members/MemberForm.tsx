@@ -29,6 +29,7 @@ import { format, parseISO } from "date-fns";
 import { Separator } from "@/components/ui/separator";
 import { User } from "@/hooks/useUserManagement";
 import { EditMemberFormValues } from "@/hooks/use-member-edit";
+import { Textarea } from "@/components/ui/textarea";
 
 // Form schema
 const formSchema = z.object({
@@ -42,7 +43,8 @@ const formSchema = z.object({
   role: z.string().min(1, { message: "Role is required" }),
   status: z.string().min(1, { message: "Status is required" }),
   dues_paid: z.boolean().optional().nullable(),
-  notes: z.string().optional().nullable()
+  notes: z.string().optional().nullable(),
+  special_roles: z.string().optional().nullable()
 });
 
 interface MemberFormProps {
@@ -70,7 +72,8 @@ export function MemberForm({
       role: member.role || "singer",
       status: member.status || "active",
       dues_paid: member.dues_paid || false,
-      notes: member.notes || ""
+      notes: member.notes || "",
+      special_roles: member.special_roles || ""
     }
   });
 
@@ -329,20 +332,36 @@ export function MemberForm({
             />
           </div>
           
-          {/* Notes */}
-          <FormField
-            control={form.control}
-            name="notes"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Notes</FormLabel>
-                <FormControl>
-                  <Input {...field} placeholder="Additional notes" />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+          {/* Notes & Special Roles */}
+          <div className="grid grid-cols-1 gap-4">
+            <FormField
+              control={form.control}
+              name="notes"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Notes</FormLabel>
+                  <FormControl>
+                    <Textarea {...field} placeholder="Additional notes" />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            
+            <FormField
+              control={form.control}
+              name="special_roles"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Special Roles</FormLabel>
+                  <FormControl>
+                    <Input {...field} placeholder="Special roles or responsibilities" />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
         </div>
         
         <div className="flex justify-end gap-2">
