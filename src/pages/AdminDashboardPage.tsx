@@ -69,21 +69,21 @@ const sampleEvents = [
     id: "1",
     date: "May 15, 2025",
     title: "Spring Concert",
-    type: "performance",
+    type: "performance" as const,
     description: "Annual spring performance at Sisters Chapel"
   },
   {
     id: "2",
     date: "May 10, 2025",
     title: "Final Rehearsal",
-    type: "rehearsal",
+    type: "rehearsal" as const,
     description: "Pre-concert dress rehearsal"
   },
   {
     id: "3",
     date: "June 5, 2025",
     title: "Alumni Event",
-    type: "other",
+    type: "other" as const,
     description: "Special performance for alumni weekend"
   }
 ];

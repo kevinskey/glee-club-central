@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { useNavigate, Link, useLocation } from "react-router-dom";
 import { z } from "zod";
@@ -62,8 +63,10 @@ export default function LoginPage() {
     try {
       await signIn(values.email, values.password);
       toast.success("Login successful!");
-      // Use navigate instead of window.location for smoother experience
-      navigate(from, { replace: true });
+      
+      // Force redirect to dashboard - using window.location.href for a full page refresh
+      // This ensures a clean state after authentication
+      window.location.href = '/dashboard';
     } catch (error: any) {
       console.error("Login error:", error);
       setAuthError(error.message || "Login failed. Please check your credentials.");
@@ -87,9 +90,10 @@ export default function LoginPage() {
       if (provider === 'google' && signInWithGoogle) {
         console.log("Starting Google sign-in...");
         await signInWithGoogle();
-        // Toast will be shown on successful redirect back
+        // Social login redirects handled by Supabase
       } else if (provider === 'apple' && signInWithApple) {
         await signInWithApple();
+        // Social login redirects handled by Supabase
       } else {
         throw new Error(`${provider} sign-in is not configured`);
       }

@@ -117,6 +117,7 @@ export function AuthProvider({ children }: Props) {
     // Subscribe to authentication state changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (_event, session) => {
+        console.log("Auth state changed:", _event);
         setSession(session);
 
         if (session?.user) {
@@ -217,7 +218,8 @@ export function AuthProvider({ children }: Props) {
   const signOut = async () => {
     try {
       await supabase.auth.signOut();
-      window.location.href = '/login'; // Use direct navigation instead of useNavigate
+      // Use direct navigation for clean logout experience
+      window.location.href = '/login'; 
     } catch (error: any) {
       console.error("Error during sign out:", error.message);
     }
