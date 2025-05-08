@@ -1,3 +1,4 @@
+
 // This file contains user query functions for Supabase
 
 import { supabase } from "@/integrations/supabase/client";
@@ -20,24 +21,25 @@ type SimpleUserData = {
  */
 export async function searchUserByEmail(email: string): Promise<SimpleUserData | null> {
   try {
+    // Check if email field actually exists in the profiles table
+    // If email is stored in auth.users instead, we need to use a join or a different approach
     const { data, error } = await supabase
       .from('profiles')
       .select('id, email, first_name, last_name, role, status, voice_part')
       .ilike('email', `%${email}%`)
-      .limit(1)
-      .single();
+      .limit(1);
       
     if (error) {
       console.error("Error searching for user by email:", error);
       return null; // Explicitly return null on error
     }
     
-    if (!data) {
+    if (!data || data.length === 0) {
       return null; // Return null if no data found
     }
     
-    // Return properly typed data
-    return data as SimpleUserData;
+    // Return the first result with the correct type
+    return data[0] as SimpleUserData;
   } catch (error) {
     console.error("Exception searching for user by email:", error);
     return null; // Return null on exception
