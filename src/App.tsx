@@ -48,17 +48,18 @@ function App() {
         }>
           <Route index element={<DashboardPage />} />
           <Route path="calendar" element={<CalendarPage />} />
-          <Route path="profile" element={<MemberProfilePage />} />
+          <Route path="profile" element={<ProfilePage />} />
           <Route path="profile/:id" element={<MemberProfilePage />} />
           <Route path="schedule" element={<CalendarPage />} /> {/* Redirect schedule to calendar */}
           
           {/* Member directory and management */}
+          <Route path="members" element={<MemberDirectoryPage />} />
           <Route path="member-directory" element={<MemberDirectoryPage />} />
           <Route path="member-management" element={<AdminUserManagementPage />} />
           <Route path="invite-member" element={<InviteMemberPage />} />
-          <Route path="/dashboard/members/:id" element={<MemberProfilePage />} />
-          <Route path="/dashboard/members/edit/:id" element={<MemberEditPage />} />
-          <Route path="/dashboard/members/add" element={<MemberAddPage />} />
+          <Route path="members/:id" element={<MemberProfilePage />} />
+          <Route path="members/edit/:id" element={<MemberEditPage />} />
+          <Route path="members/add" element={<MemberAddPage />} />
         </Route>
 
         {/* Catch all for 404 errors */}
