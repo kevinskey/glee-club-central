@@ -9,7 +9,6 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-  useDropdownMenu,
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
 import {
@@ -25,10 +24,12 @@ import {
   LogOut,
   User,
 } from "lucide-react";
+import { useSidebar } from "@/hooks/use-sidebar";
 
 export function Header() {
   const { profile, signOut } = useAuth();
   const navigate = useNavigate();
+  const { onOpen } = useSidebar();
 
   // Navigation items - ensuring unique paths
   const navItems = [
@@ -85,52 +86,51 @@ export function Header() {
   return (
     <header className="bg-background sticky top-0 z-50 w-full border-b">
       <div className="container flex h-16 items-center justify-between">
-        <Link to="/" className="font-bold">
-          Glee Club
-        </Link>
+        <div className="flex items-center gap-2">
+          <Button 
+            variant="ghost" 
+            size="icon" 
+            className="md:hidden" 
+            onClick={onOpen}
+          >
+            <Menu className="h-5 w-5" />
+            <span className="sr-only">Toggle sidebar</span>
+          </Button>
+          <Link to="/" className="font-bold">
+            Glee Club
+          </Link>
+        </div>
 
         <nav className="flex items-center gap-4">
           {/* Main Navigation Dropdown */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" size="icon">
-                <Menu className="h-5 w-5" />
-                <span className="sr-only">Navigation Menu</span>
+                <User className="h-5 w-5" />
+                <span className="sr-only">User Menu</span>
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-56">
-              <DropdownMenuLabel>Navigation</DropdownMenuLabel>
+              <DropdownMenuLabel>
+                {profile?.first_name} {profile?.last_name}
+              </DropdownMenuLabel>
               <DropdownMenuSeparator />
               
-              {navItems.map((item) => (
-                <DropdownMenuItem 
-                  key={item.href} 
-                  onClick={() => navigate(item.href)}
-                  className="flex items-center gap-2 cursor-pointer"
-                >
-                  <item.icon className="h-4 w-4" />
-                  <span>{item.title}</span>
-                </DropdownMenuItem>
-              ))}
+              <DropdownMenuItem 
+                onClick={() => navigate("/dashboard/profile")}
+                className="flex items-center gap-2 cursor-pointer"
+              >
+                <User className="h-4 w-4" />
+                <span>My Profile</span>
+              </DropdownMenuItem>
               
-              {isAdmin && (
-                <>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuLabel>Admin</DropdownMenuLabel>
-                  <DropdownMenuSeparator />
-                  
-                  {adminItems.map((item) => (
-                    <DropdownMenuItem 
-                      key={item.href} 
-                      onClick={() => navigate(item.href)}
-                      className="flex items-center gap-2 cursor-pointer"
-                    >
-                      <item.icon className="h-4 w-4" />
-                      <span>{item.title}</span>
-                    </DropdownMenuItem>
-                  ))}
-                </>
-              )}
+              <DropdownMenuItem 
+                onClick={() => navigate("/update-password")}
+                className="flex items-center gap-2 cursor-pointer"
+              >
+                <Settings className="h-4 w-4" />
+                <span>Change Password</span>
+              </DropdownMenuItem>
               
               <DropdownMenuSeparator />
               <DropdownMenuItem 
@@ -142,11 +142,6 @@ export function Header() {
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
-
-          {/* User's name - could be expanded to include user menu */}
-          <span className="hidden md:inline-flex text-sm">
-            {profile?.first_name} {profile?.last_name}
-          </span>
         </nav>
       </div>
     </header>
