@@ -162,10 +162,16 @@ export default function ChoralTitlesPage() {
       let response;
       
       if (isEditMode && currentEditId) {
-        // Update existing record
+        // Update existing record - FIX: Ensure all required fields are included
         response = await supabase
           .from('choral_titles')
-          .update(newTitle)
+          .update({
+            title: newTitle.title,            // Required field
+            composer: newTitle.composer,      // Required field  
+            voicing: newTitle.voicing,        // Required field
+            amount_on_hand: newTitle.amount_on_hand,
+            sheet_music_id: newTitle.sheet_music_id,
+          })
           .eq('id', currentEditId);
       } else {
         // Insert new record
