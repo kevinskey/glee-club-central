@@ -24,6 +24,11 @@ export default function UpdatePasswordPage() {
       return;
     }
     
+    if (!updatePassword) {
+      setError("Password update functionality is not available");
+      return;
+    }
+    
     setIsLoading(true);
     try {
       await updatePassword(password);

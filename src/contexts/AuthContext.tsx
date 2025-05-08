@@ -19,6 +19,9 @@ export interface AuthContextType {
   signOut: () => Promise<void>;
   isAdmin: () => boolean;
   hasPermission: (permission: string) => boolean;
+  signInWithGoogle: () => Promise<void>;
+  signInWithApple: () => Promise<void>;
+  updatePassword: (password: string) => Promise<void>;
 }
 
 // Create the context
@@ -220,6 +223,39 @@ export function AuthProvider({ children }: Props) {
     }
   };
 
+  // Add the missing methods
+  const signInWithGoogle = async () => {
+    try {
+      await supabase.auth.signInWithOAuth({
+        provider: 'google',
+      });
+    } catch (error: any) {
+      console.error("Error during Google sign in:", error.message);
+      throw error;
+    }
+  };
+
+  const signInWithApple = async () => {
+    try {
+      await supabase.auth.signInWithOAuth({
+        provider: 'apple',
+      });
+    } catch (error: any) {
+      console.error("Error during Apple sign in:", error.message);
+      throw error;
+    }
+  };
+
+  const updatePassword = async (password: string) => {
+    try {
+      const { error } = await supabase.auth.updateUser({ password });
+      if (error) throw error;
+    } catch (error: any) {
+      console.error("Error updating password:", error.message);
+      throw error;
+    }
+  };
+
   // Check if user is admin
   const isAdmin = () => {
     if (!user) return false;
@@ -245,7 +281,10 @@ export function AuthProvider({ children }: Props) {
     signUp,
     signOut,
     isAdmin,
-    hasPermission
+    hasPermission,
+    signInWithGoogle,
+    signInWithApple,
+    updatePassword
   };
 
   return (

@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { useNavigate, Link, useLocation } from "react-router-dom";
 import { z } from "zod";
@@ -85,12 +84,14 @@ export default function LoginPage() {
     setAuthError(null);
     
     try {
-      if (provider === 'google') {
+      if (provider === 'google' && signInWithGoogle) {
         console.log("Starting Google sign-in...");
         await signInWithGoogle();
         // Toast will be shown on successful redirect back
-      } else if (provider === 'apple') {
+      } else if (provider === 'apple' && signInWithApple) {
         await signInWithApple();
+      } else {
+        throw new Error(`${provider} sign-in is not configured`);
       }
     } catch (error: any) {
       console.error(`${provider} login error:`, error);
