@@ -21,43 +21,44 @@ export interface UserSearchResult {
  */
 export async function searchUserByEmail(email: string): Promise<UserSearchResult | null> {
   try {
-    // Since we don't have the get_user_by_email RPC function yet,
-    // we'll use a join query directly
-    const { data, error } = await supabase
+    // First, find the user in auth.users by email (this is accessible via RPC)
+    const { data: userData, error: authError } = await supabase.auth.admin.listUsers({
+      filter: {
+        email: email
+      }
+    });
+    
+    if (authError || !userData || userData.users.length === 0) {
+      console.error("Error finding user with email:", email, authError);
+      return null;
+    }
+
+    const userId = userData.users[0].id;
+    
+    // Now fetch the profile using the user ID
+    const { data: profileData, error: profileError } = await supabase
       .from('profiles')
-      .select(`
-        id, 
-        first_name, 
-        last_name, 
-        role, 
-        status, 
-        voice_part,
-        auth_users!inner(email)
-      `)
-      .ilike('auth_users.email', `%${email}%`)
-      .limit(1)
+      .select('id, first_name, last_name, role, status, voice_part')
+      .eq('id', userId)
       .single();
     
-    if (error) {
-      console.error("Error searching for user by email:", error);
+    if (profileError) {
+      console.error("Error fetching user profile:", profileError);
       return null;
     }
     
-    if (!data) {
+    if (!profileData) {
       return null;
     }
-    
-    // Extract email from the auth_users join
-    const extractedEmail = data.auth_users?.email;
     
     return {
-      id: data.id,
-      email: extractedEmail || null,
-      first_name: data.first_name,
-      last_name: data.last_name,
-      role: data.role,
-      status: data.status,
-      voice_part: data.voice_part
+      id: profileData.id,
+      email: userData.users[0].email,
+      first_name: profileData.first_name,
+      last_name: profileData.last_name,
+      role: profileData.role,
+      status: profileData.status,
+      voice_part: profileData.voice_part
     };
   } catch (error) {
     console.error("Exception searching for user by email:", error);
