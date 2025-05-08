@@ -113,7 +113,7 @@ export default function SheetMusicPage() {
 
   // Check if a file is selected
   const isFileSelected = (fileId: string) => {
-    return selectedFiles.some(file => file.id === fileId);
+    return selectedFiles.some(file => file.id === file.id);
   };
 
   return (
