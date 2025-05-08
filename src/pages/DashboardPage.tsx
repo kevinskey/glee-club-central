@@ -14,7 +14,7 @@ import {
   Headphones,
   Video,
   BookOpen,
-  Progress
+  Activity
 } from "lucide-react";
 
 const DashboardPage = () => {
@@ -135,7 +135,7 @@ const DashboardPage = () => {
                 <span>Handbook</span>
               </Link>
               <Link to="/dashboard/attendance" className="flex flex-col items-center justify-center p-4 border rounded-md hover:bg-accent transition-colors text-center">
-                <Progress className="h-8 w-8 mb-2" />
+                <Activity className="h-8 w-8 mb-2" />
                 <span>Attendance</span>
               </Link>
             </div>
