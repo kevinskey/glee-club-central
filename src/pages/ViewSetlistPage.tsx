@@ -203,9 +203,9 @@ export default function ViewSetlistPage() {
               </Link>
             </Button>
             <div>
-              <h1 className="text-lg font-bold">{setlist.name}</h1>
+              <h1 className="text-lg font-bold">{setlist?.name}</h1>
               <p className="text-sm text-muted-foreground">
-                {currentIndex + 1} of {setlistItems.length}: {currentItem.title}
+                {currentIndex + 1} of {setlistItems.length}: {setlistItems[currentIndex]?.title}
               </p>
             </div>
           </div>
@@ -230,11 +230,11 @@ export default function ViewSetlistPage() {
       
       {/* Main content */}
       <div className="flex-grow relative">
-        {currentItem && (
+        {setlistItems[currentIndex] && (
           <PDFViewer 
-            url={currentItem.file_url} 
-            title={currentItem.title}
-            sheetMusicId={currentItem.id}
+            url={setlistItems[currentIndex].file_url} 
+            title={setlistItems[currentIndex].title}
+            sheetMusicId={setlistItems[currentIndex].id}
             fullHeight={true}
           />
         )}
@@ -257,7 +257,7 @@ export default function ViewSetlistPage() {
             <p className="text-sm font-medium mb-1">{setlist.name}</p>
           )}
           <p className="text-sm text-muted-foreground">
-            {currentIndex + 1} of {setlistItems.length}: {currentItem.title}
+            {currentIndex + 1} of {setlistItems.length}: {setlistItems[currentIndex]?.title}
           </p>
         </div>
 
