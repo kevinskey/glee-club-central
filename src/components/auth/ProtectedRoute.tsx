@@ -10,7 +10,7 @@ interface ProtectedRouteProps {
 }
 
 export function ProtectedRoute({ children, requiredRoles }: ProtectedRouteProps) {
-  const { isAuthenticated, isLoading, profile } = useAuth();
+  const { isAuthenticated, isLoading, userProfile } = useAuth();
   const location = useLocation();
   
   if (isLoading) {
@@ -27,8 +27,8 @@ export function ProtectedRoute({ children, requiredRoles }: ProtectedRouteProps)
   }
   
   // Check for required roles if specified
-  if (requiredRoles?.length && profile?.role) {
-    const hasRequiredRole = requiredRoles.includes(profile.role);
+  if (requiredRoles?.length && userProfile?.role) {
+    const hasRequiredRole = requiredRoles.includes(userProfile.role);
     if (!hasRequiredRole) {
       return <Navigate to="/dashboard" replace />;
     }

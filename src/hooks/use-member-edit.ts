@@ -1,6 +1,6 @@
 
 import { useState } from "react";
-import { Profile } from "@/contexts/AuthContext";
+import { Profile } from "@/types/auth";
 import { updateUserProfile } from "@/utils/supabase/users";
 import { toast } from "sonner";
 
@@ -39,9 +39,9 @@ export function useMemberEdit() {
         first_name: formData.first_name,
         last_name: formData.last_name,
         phone: formData.phone,
-        voice_part: formData.voice_part as any,
-        role: formData.role as any,
-        status: formData.status as any,
+        voice_part: formData.voice_part || null,
+        role: formData.role,
+        status: formData.status,
         join_date: formData.join_date,
         class_year: formData.class_year,
         dues_paid: formData.dues_paid,

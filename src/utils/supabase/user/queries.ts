@@ -66,13 +66,13 @@ export const searchUserByEmail = async (email: string): Promise<UserSafe | null>
     }
 
     if (!data) return null;
-
-    // Define result explicitly with UserSafe type to avoid deep inference issues
+    
+    // Create a safe user object without recursive type issues
     const userSafe: UserSafe = {
       id: data.id,
       first_name: data.first_name,
       last_name: data.last_name,
-      email: data.email || null,
+      email: email, // Use the email from the query
       phone: data.phone,
       voice_part: data.voice_part,
       role: data.role || 'singer',

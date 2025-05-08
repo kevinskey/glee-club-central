@@ -2,45 +2,8 @@
 import React, { createContext, useState, useEffect, useContext } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { PermissionSet, getUserPermissions } from "@/utils/supabase/user/types";
+import { AuthContextType, AuthUser, Profile } from "@/types/auth";
 import { toast } from "sonner";
-
-// Define types for your application
-export type AuthUser = {
-  id: string;
-  email?: string;
-};
-
-export type UserRole = 'administrator' | 'section_leader' | 'singer' | 'student_conductor' | 'accompanist' | 'non_singer';
-
-export type MemberStatus = 'active' | 'inactive' | 'pending' | 'alumni';
-
-export type VoicePart = 'soprano_1' | 'soprano_2' | 'alto_1' | 'alto_2' | 'tenor' | 'bass' | null;
-
-export type Profile = {
-  id: string;
-  first_name: string | null;
-  last_name: string | null;
-  email?: string | null;
-  role: UserRole;
-  status: MemberStatus;
-  voice_part: VoicePart;
-  phone?: string | null;
-  avatar_url?: string | null;
-  join_date?: string | null;
-};
-
-// Define the shape of your context
-interface AuthContextType {
-  user: AuthUser | null;
-  userProfile: Profile | null;
-  permissions: PermissionSet | null;
-  loading: boolean;
-  signIn: (email: string, password: string) => Promise<{ error: any }>;
-  signUp: (email: string, password: string, firstName: string, lastName: string) => Promise<{ error: any, data: any }>;
-  signOut: () => Promise<void>;
-  isAdmin: () => boolean;
-  hasPermission: (permission: keyof PermissionSet) => boolean;
-}
 
 // Create the context
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -63,7 +26,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         if (session?.user) {
           setUser({
             id: session.user.id,
-            email: session.user.email
+            email: session.user.email,
+            role: 'singer' // Default role, will be updated from profile
           });
           
           // Fetch user profile
@@ -87,7 +51,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       if (session?.user) {
         setUser({
           id: session.user.id,
-          email: session.user.email
+          email: session.user.email,
+          role: 'singer' // Default role, will be updated from profile
         });
         
         // Fetch user profile on auth change
@@ -120,14 +85,29 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           id: data.id,
           first_name: data.first_name,
           last_name: data.last_name,
-          email: data.email,
-          role: data.role as UserRole,
-          status: data.status as MemberStatus,
-          voice_part: data.voice_part as VoicePart,
+          email: user?.email || null,
+          role: data.role,
+          status: data.status,
+          voice_part: data.voice_part,
           phone: data.phone,
           avatar_url: data.avatar_url,
-          join_date: data.join_date
+          join_date: data.join_date,
+          created_at: data.created_at,
+          updated_at: data.updated_at,
+          class_year: data.class_year,
+          dues_paid: data.dues_paid,
+          special_roles: data.special_roles,
+          notes: data.notes,
+          last_sign_in_at: null // Will be set below if available
         };
+        
+        // Update user with the correct role from the profile
+        if (user) {
+          setUser({
+            ...user,
+            role: data.role
+          });
+        }
         
         setUserProfile(profile);
         
@@ -204,9 +184,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
   
   // Check if user has a specific permission
-  const hasPermission = (permission: keyof PermissionSet): boolean => {
+  const hasPermission = (permission: string): boolean => {
     if (!permissions) return false;
-    return !!permissions[permission];
+    return !!permissions[permission as keyof PermissionSet];
   };
   
   const value = {
@@ -214,6 +194,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     userProfile,
     permissions,
     loading,
+    isAuthenticated: !!user,
+    isLoading: loading,
+    profile: userProfile,
     signIn,
     signUp,
     signOut,
@@ -232,3 +215,5 @@ export const useAuth = () => {
   }
   return context;
 };
+
+export { AuthUser, Profile };

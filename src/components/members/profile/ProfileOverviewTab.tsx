@@ -6,29 +6,17 @@ import {
   Mail, 
   Phone, 
   Calendar, 
-  Music, // Added Music import
+  Music,
   User as UserIcon 
 } from "lucide-react";
-
-interface Profile {
-  id: string;
-  email?: string | null;
-  first_name?: string | null;
-  last_name?: string | null;
-  phone?: string | null;
-  role: string;
-  voice_part?: string | null;
-  status: string;
-  join_date?: string | null;
-  year_in_school?: string | null;
-  preferred_name?: string | null;
-}
+import { Profile } from "@/types/auth";
 
 interface ProfileOverviewTabProps {
   profile: Profile;
+  isEditable?: boolean;
 }
 
-export const ProfileOverviewTab: React.FC<ProfileOverviewTabProps> = ({ profile }) => {
+export const ProfileOverviewTab: React.FC<ProfileOverviewTabProps> = ({ profile, isEditable }) => {
   const formatDate = (dateString: string | null | undefined) => {
     if (!dateString) return "Not set";
     return new Date(dateString).toLocaleDateString();
@@ -64,12 +52,6 @@ export const ProfileOverviewTab: React.FC<ProfileOverviewTabProps> = ({ profile 
           </div>
           
           <div className="flex items-center space-x-2">
-            <User className="h-4 w-4 opacity-70" />
-            <span className="font-semibold">Preferred Name:</span>
-            <span>{profile.preferred_name || "Not set"}</span>
-          </div>
-          
-          <div className="flex items-center space-x-2">
             <Mail className="h-4 w-4 opacity-70" />
             <span className="font-semibold">Email:</span>
             <span>{profile.email || "Not set"}</span>
@@ -89,8 +71,8 @@ export const ProfileOverviewTab: React.FC<ProfileOverviewTabProps> = ({ profile 
           
           <div className="flex items-center space-x-2">
             <User className="h-4 w-4 opacity-70" />
-            <span className="font-semibold">Year in School:</span>
-            <span>{profile.year_in_school || "Not set"}</span>
+            <span className="font-semibold">Class Year:</span>
+            <span>{profile.class_year || "Not set"}</span>
           </div>
           
           <div className="flex items-center space-x-2">
