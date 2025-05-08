@@ -370,6 +370,7 @@ export type Database = {
           id: string
           title: string
           uploaded_by: string
+          voicing: string | null
         }
         Insert: {
           composer: string
@@ -379,6 +380,7 @@ export type Database = {
           id?: string
           title: string
           uploaded_by: string
+          voicing?: string | null
         }
         Update: {
           composer?: string
@@ -388,6 +390,7 @@ export type Database = {
           id?: string
           title?: string
           uploaded_by?: string
+          voicing?: string | null
         }
         Relationships: []
       }

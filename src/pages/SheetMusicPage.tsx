@@ -293,6 +293,13 @@ export default function SheetMusicPage() {
                         <CardContent className="p-3">
                           <h3 className="font-medium text-sm truncate">{file.title}</h3>
                           <p className="text-xs text-muted-foreground truncate">{file.composer}</p>
+                          {file.voicing && (
+                            <p className="text-xs text-muted-foreground truncate mt-1">
+                              <span className="inline-flex items-center rounded-md bg-blue-50 px-1.5 py-0.5 text-xs font-medium text-blue-700 ring-1 ring-inset ring-blue-700/10">
+                                {file.voicing}
+                              </span>
+                            </p>
+                          )}
                         </CardContent>
                       </div>
                     ) : (
@@ -303,6 +310,13 @@ export default function SheetMusicPage() {
                         <CardContent className="p-3">
                           <h3 className="font-medium text-sm truncate">{file.title}</h3>
                           <p className="text-xs text-muted-foreground truncate">{file.composer}</p>
+                          {file.voicing && (
+                            <p className="text-xs text-muted-foreground truncate mt-1">
+                              <span className="inline-flex items-center rounded-md bg-blue-50 px-1.5 py-0.5 text-xs font-medium text-blue-700 ring-1 ring-inset ring-blue-700/10">
+                                {file.voicing}
+                              </span>
+                            </p>
+                          )}
                         </CardContent>
                       </Link>
                     )}
@@ -396,7 +410,15 @@ export default function SheetMusicPage() {
                         )}
                         <TableCell className="font-medium">{file.title}</TableCell>
                         <TableCell>{file.composer}</TableCell>
-                        <TableCell>{file.voicing || 'N/A'}</TableCell>
+                        <TableCell>
+                          {file.voicing ? (
+                            <span className="inline-flex items-center rounded-md bg-blue-50 px-2 py-1 text-xs font-medium text-blue-700 ring-1 ring-inset ring-blue-700/10">
+                              {file.voicing}
+                            </span>
+                          ) : (
+                            'N/A'
+                          )}
+                        </TableCell>
                         <TableCell>{file.created_at}</TableCell>
                         <TableCell className="text-right">
                           {isSelectionMode ? (
