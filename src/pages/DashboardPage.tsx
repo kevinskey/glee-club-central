@@ -14,6 +14,7 @@ import {
 import { useAuth } from "@/contexts/AuthContext";
 import { PageHeader } from "@/components/ui/page-header";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Spinner } from "@/components/ui/spinner";
 
 interface FeatureCardProps {
   title: string;
@@ -51,7 +52,17 @@ const FeatureCard = ({
 };
 
 export default function DashboardPage() {
-  const { profile } = useAuth();
+  const { profile, isLoading } = useAuth();
+  
+  // Show loading state while authentication is being checked
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <Spinner size="lg" />
+      </div>
+    );
+  }
+  
   const greeting = profile ? `Hello, ${profile.first_name || ''}!` : "Hello!";
   
   const features = [
@@ -114,7 +125,7 @@ export default function DashboardPage() {
   ];
 
   return (
-    <div>
+    <div className="container mx-auto px-4">
       <PageHeader
         title={greeting}
         description="Welcome to the Glee World digital choir hub"
