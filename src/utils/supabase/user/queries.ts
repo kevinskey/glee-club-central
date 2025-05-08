@@ -30,7 +30,7 @@ export async function searchUserByEmail(email: string): Promise<SimpleUserData |
       
     if (error) {
       console.error("Error searching for user by email:", error);
-      return null; // Return null on error, not the error object
+      return null; // Return null on error
     }
     
     return data;
