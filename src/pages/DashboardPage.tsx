@@ -1,4 +1,3 @@
-
 import React from "react";
 import { Link } from "react-router-dom";
 import { 
@@ -167,7 +166,7 @@ export default function DashboardPage() {
         icon={<Bell className="h-6 w-6" />}
       />
 
-      {isAdmin && (
+      {isAdmin() && (
         <>
           <div className="mb-6">
             <h2 className="text-2xl font-semibold mb-2">Admin Tools</h2>
