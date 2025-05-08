@@ -17,6 +17,8 @@ import ProfilePage from './pages/ProfilePage';
 import RecordingsPage from './pages/RecordingsPage';
 import LandingPage from './pages/LandingPage';
 import FanPage from './pages/FanPage';
+import AttendancePage from './pages/AttendancePage';
+import PerformanceChecklistPage from './pages/PerformanceChecklistPage';
 
 function App() {
   return (
@@ -51,6 +53,9 @@ function App() {
         <Route path="profile" element={<ProfilePage />} />
         <Route path="members" element={<div>Members Page</div>} />
         <Route path="announcements" element={<div>Announcements Page</div>} />
+        <Route path="attendance" element={<AttendancePage />} />
+        <Route path="messages" element={<div>Messages Page</div>} />
+        <Route path="performance-checklist" element={<PerformanceChecklistPage />} />
         <Route path="*" element={<NotFoundPage />} />
       </Route>
       
