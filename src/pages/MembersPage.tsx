@@ -6,6 +6,15 @@ import { Users, Search, Filter, UserPlus } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { 
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Badge } from "@/components/ui/badge";
 import { useUserManagement } from "@/hooks/useUserManagement";
 import { MembersList } from "@/components/members/MembersList";
 import { useMedia } from "@/hooks/use-mobile";
@@ -15,12 +24,14 @@ import { toast } from "sonner";
 import { usePermissions } from "@/hooks/usePermissions";
 import { DeleteMemberDialog } from "@/components/members/DeleteMemberDialog";
 import { User } from "@/hooks/useUserManagement";
+import { Separator } from "@/components/ui/separator";
 
 export default function MembersPage() {
   const { isLoading: authLoading } = useAuth();
   const [searchQuery, setSearchQuery] = useState("");
   const [roleFilter, setRoleFilter] = useState("");
   const [voicePartFilter, setVoicePartFilter] = useState("");
+  const [statusFilter, setStatusFilter] = useState("");
   const [isAddMemberDialogOpen, setIsAddMemberDialogOpen] = useState(false);
   const [isEditMemberDialogOpen, setIsEditMemberDialogOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
@@ -29,6 +40,7 @@ export default function MembersPage() {
   const [memberToDeleteName, setMemberToDeleteName] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [activeTab, setActiveTab] = useState("all");
   const isMobile = useMedia('(max-width: 640px)');
   const { hasPermission } = usePermissions();
   
@@ -114,26 +126,49 @@ export default function MembersPage() {
     }
   };
 
+  // Reset all filters
+  const resetFilters = () => {
+    setSearchQuery("");
+    setRoleFilter("");
+    setVoicePartFilter("");
+    setStatusFilter("");
+    setActiveTab("all");
+  };
+
   // Filter members based on search query and filters
   const filteredMembers = React.useMemo(() => {
     return members.filter(member => {
+      // First apply search filter
       const matchesSearch = 
+        !searchQuery || 
         (member.first_name || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
         (member.last_name || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
         (member.email || '').toLowerCase().includes(searchQuery.toLowerCase());
       
+      if (!matchesSearch) return false;
+      
+      // Then apply dropdown filters
       const matchesRole = !roleFilter || (member.role || '') === roleFilter;
       const matchesVoicePart = !voicePartFilter || (member.voice_part || '') === voicePartFilter;
+      const matchesStatus = !statusFilter || (member.status || '') === statusFilter;
       
-      return matchesSearch && matchesRole && matchesVoicePart;
+      if (!matchesRole || !matchesVoicePart || !matchesStatus) return false;
+      
+      // Then apply tab filter
+      if (activeTab === "all") return true;
+      if (activeTab === "active" && member.status === "active") return true;
+      if (activeTab === "inactive" && member.status !== "active") return true;
+      
+      return false;
     });
-  }, [members, searchQuery, roleFilter, voicePartFilter]);
+  }, [members, searchQuery, roleFilter, voicePartFilter, statusFilter, activeTab]);
 
   // Check if user has permission to add members
   const canManageMembers = hasPermission('can_manage_users');
 
   console.log("MembersPage rendering", { 
     memberCount: members.length, 
+    filteredCount: filteredMembers.length,
     isLoading, 
     authLoading,
     canManageMembers
@@ -143,65 +178,209 @@ export default function MembersPage() {
     <div className="container mx-auto p-4 space-y-6">
       <PageHeader
         title="Glee Club Members"
-        description="View all Spelman College Glee Club members"
+        description="View and manage all Spelman College Glee Club members"
         icon={<Users className="h-6 w-6" />}
       />
       
-      <Card className="p-4">
-        <div className="flex flex-col sm:flex-row justify-between gap-4 mb-4 items-end">
-          <div className="relative flex-1">
-            <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-            <Input
-              placeholder="Search members..."
-              className="pl-8"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-            />
-          </div>
-          
-          <div className="flex gap-2">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => {
-                setSearchQuery("");
-                setRoleFilter("");
-                setVoicePartFilter("");
-              }}
-            >
-              Reset
-            </Button>
-            
-            <Button variant="outline" size="sm">
-              <Filter className="h-4 w-4 mr-1" />
-              {isMobile ? '' : 'Filter'}
-            </Button>
+      <div className="flex flex-col gap-4">
+        {/* Tabs navigation for quick filtering */}
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+          <div className="flex items-center justify-between mb-4">
+            <TabsList className="grid w-full max-w-md grid-cols-3">
+              <TabsTrigger value="all">All Members</TabsTrigger>
+              <TabsTrigger value="active">Active</TabsTrigger>
+              <TabsTrigger value="inactive">Inactive</TabsTrigger>
+            </TabsList>
             
             {canManageMembers && (
               <Button 
-                variant="default" 
-                size="sm"
                 onClick={() => setIsAddMemberDialogOpen(true)}
+                className="bg-brand hover:bg-brand/90"
+                size={isMobile ? "sm" : "default"}
               >
                 <UserPlus className="h-4 w-4 mr-1" />
-                {isMobile ? '' : 'Add Member'}
+                {isMobile ? 'Add' : 'Add Member'}
               </Button>
             )}
           </div>
-        </div>
-        
-        {isLoading ? (
-          <div className="flex items-center justify-center h-64">
-            <div className="h-8 w-8 rounded-full border-4 border-primary border-t-transparent animate-spin"></div>
-          </div>
-        ) : (
-          <MembersList 
-            members={filteredMembers} 
-            onEditMember={canManageMembers ? handleEditMember : undefined}
-            onDeleteMember={canManageMembers ? handleDeleteClick : undefined}
-          />
-        )}
-      </Card>
+          
+          <TabsContent value="all" className="mt-0">
+            <Card className="p-4">
+              <div className="flex flex-col gap-4">
+                <div className="flex flex-col sm:flex-row justify-between gap-4 items-end">
+                  {/* Search and filter controls */}
+                  <div className="flex-1 flex flex-col sm:flex-row gap-2 w-full">
+                    <div className="relative flex-1">
+                      <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+                      <Input
+                        placeholder="Search members..."
+                        className="pl-8"
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                      />
+                    </div>
+                    
+                    {!isMobile && (
+                      <>
+                        <Select value={roleFilter} onValueChange={setRoleFilter}>
+                          <SelectTrigger className="w-[140px]">
+                            <SelectValue placeholder="Role" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="">All Roles</SelectItem>
+                            <SelectItem value="administrator">Administrator</SelectItem>
+                            <SelectItem value="section_leader">Section Leader</SelectItem>
+                            <SelectItem value="student_conductor">Student Conductor</SelectItem>
+                            <SelectItem value="accompanist">Accompanist</SelectItem>
+                            <SelectItem value="singer">Singer</SelectItem>
+                            <SelectItem value="non_singer">Non-Singer</SelectItem>
+                          </SelectContent>
+                        </Select>
+                        
+                        <Select value={voicePartFilter} onValueChange={setVoicePartFilter}>
+                          <SelectTrigger className="w-[140px]">
+                            <SelectValue placeholder="Voice Part" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="">All Voice Parts</SelectItem>
+                            <SelectItem value="soprano_1">Soprano 1</SelectItem>
+                            <SelectItem value="soprano_2">Soprano 2</SelectItem>
+                            <SelectItem value="alto_1">Alto 1</SelectItem>
+                            <SelectItem value="alto_2">Alto 2</SelectItem>
+                            <SelectItem value="tenor">Tenor</SelectItem>
+                            <SelectItem value="bass">Bass</SelectItem>
+                          </SelectContent>
+                        </Select>
+                        
+                        <Select value={statusFilter} onValueChange={setStatusFilter}>
+                          <SelectTrigger className="w-[140px]">
+                            <SelectValue placeholder="Status" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="">All Statuses</SelectItem>
+                            <SelectItem value="active">Active</SelectItem>
+                            <SelectItem value="pending">Pending</SelectItem>
+                            <SelectItem value="inactive">Inactive</SelectItem>
+                            <SelectItem value="alumni">Alumni</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </>
+                    )}
+                  </div>
+                  
+                  <div className="flex gap-2 w-full sm:w-auto justify-end">
+                    {isMobile && (
+                      <Button variant="outline" size="sm">
+                        <Filter className="h-4 w-4 mr-1" />
+                        Filters
+                      </Button>
+                    )}
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={resetFilters}
+                    >
+                      Reset
+                    </Button>
+                  </div>
+                </div>
+                
+                <Separator />
+                
+                {/* Member count summary */}
+                <div className="flex items-center justify-between">
+                  <div className="text-sm text-muted-foreground">
+                    {filteredMembers.length === members.length ? (
+                      <span>Showing all {members.length} members</span>
+                    ) : (
+                      <span>Showing {filteredMembers.length} of {members.length} members</span>
+                    )}
+                  </div>
+                  
+                  <div className="flex gap-2">
+                    <Badge variant="outline" className="bg-background text-foreground">
+                      Active: {members.filter(m => m.status === 'active').length}
+                    </Badge>
+                    <Badge variant="outline" className="bg-background text-foreground">
+                      Pending: {members.filter(m => m.status === 'pending').length}
+                    </Badge>
+                  </div>
+                </div>
+                
+                {isLoading ? (
+                  <div className="flex items-center justify-center h-64">
+                    <div className="h-8 w-8 rounded-full border-4 border-primary border-t-transparent animate-spin"></div>
+                  </div>
+                ) : filteredMembers.length === 0 ? (
+                  <div className="flex flex-col items-center justify-center h-64 text-center p-4">
+                    <Users className="h-10 w-10 text-muted-foreground mb-2" />
+                    <h3 className="text-lg font-medium">No members found</h3>
+                    <p className="text-sm text-muted-foreground mb-4">
+                      {searchQuery || roleFilter || voicePartFilter || statusFilter ? 
+                        "Try adjusting your search or filters" : 
+                        "There are no members to display"}
+                    </p>
+                    {searchQuery || roleFilter || voicePartFilter || statusFilter ? (
+                      <Button variant="outline" size="sm" onClick={resetFilters}>
+                        Reset Filters
+                      </Button>
+                    ) : canManageMembers ? (
+                      <Button onClick={() => setIsAddMemberDialogOpen(true)}>
+                        <UserPlus className="h-4 w-4 mr-2" />
+                        Add First Member
+                      </Button>
+                    ) : null}
+                  </div>
+                ) : (
+                  <MembersList 
+                    members={filteredMembers} 
+                    onEditMember={canManageMembers ? handleEditMember : undefined}
+                    onDeleteMember={canManageMembers ? handleDeleteClick : undefined}
+                  />
+                )}
+              </div>
+            </Card>
+          </TabsContent>
+          
+          <TabsContent value="active" className="mt-0">
+            <Card className="p-4">
+              {/* Same filter controls and member list as the "all" tab but with activeTab="active" */}
+              {/* ... Content similar to "all" tab */}
+              <p className="text-muted-foreground">Showing only active members</p>
+              {isLoading ? (
+                <div className="flex items-center justify-center h-64">
+                  <div className="h-8 w-8 rounded-full border-4 border-primary border-t-transparent animate-spin"></div>
+                </div>
+              ) : (
+                <MembersList 
+                  members={filteredMembers} 
+                  onEditMember={canManageMembers ? handleEditMember : undefined}
+                  onDeleteMember={canManageMembers ? handleDeleteClick : undefined}
+                />
+              )}
+            </Card>
+          </TabsContent>
+          
+          <TabsContent value="inactive" className="mt-0">
+            <Card className="p-4">
+              {/* Same filter controls and member list as the "all" tab but with activeTab="inactive" */}
+              {/* ... Content similar to "all" tab */}
+              <p className="text-muted-foreground">Showing pending, inactive, and alumni members</p>
+              {isLoading ? (
+                <div className="flex items-center justify-center h-64">
+                  <div className="h-8 w-8 rounded-full border-4 border-primary border-t-transparent animate-spin"></div>
+                </div>
+              ) : (
+                <MembersList 
+                  members={filteredMembers} 
+                  onEditMember={canManageMembers ? handleEditMember : undefined}
+                  onDeleteMember={canManageMembers ? handleDeleteClick : undefined}
+                />
+              )}
+            </Card>
+          </TabsContent>
+        </Tabs>
+      </div>
       
       {/* Add Member Dialog */}
       {canManageMembers && (

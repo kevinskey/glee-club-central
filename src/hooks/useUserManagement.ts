@@ -146,7 +146,7 @@ export const useUserManagement = () => {
             email: userData.email
           });
           
-          // Check if response has error - now properly handled with optional chaining
+          // Check if response has error
           if ('error' in response && response.error) {
             console.error("Email update error:", response.error);
             throw response.error;
@@ -164,7 +164,7 @@ export const useUserManagement = () => {
             password: userData.password
           });
           
-          // Check if response has error - now properly handled with optional chaining
+          // Check if response has error
           if ('error' in response && response.error) {
             console.error("Password update error:", response.error);
             throw response.error;
