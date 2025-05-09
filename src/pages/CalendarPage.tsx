@@ -49,6 +49,12 @@ export default function CalendarPage() {
     setSelectedEvent(event);
   }, []);
 
+  // Handle date selection and reset selected event
+  const handleDateSelect = useCallback((newDate: Date | undefined) => {
+    setDate(newDate);
+    setSelectedEvent(null); // Reset selected event when changing dates
+  }, []);
+
   // Handle adding new event
   const handleAddEvent = async (formValues: Omit<CalendarEvent, "id">) => {
     const newEvent = await addEvent(formValues);
@@ -115,7 +121,7 @@ export default function CalendarPage() {
             <div className="w-full lg:w-1/2">
               <CalendarContainer 
                 date={date}
-                setDate={setDate}
+                setDate={handleDateSelect}
                 daysWithEvents={daysWithEvents}
                 loading={loading}
                 events={events}
