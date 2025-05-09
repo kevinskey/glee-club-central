@@ -37,6 +37,25 @@ const DashboardPage = () => {
   // Upcoming events state
   const [upcomingEvents, setUpcomingEvents] = useState([]);
 
+  // Sample announcements data
+  const [announcements, setAnnouncements] = useState([
+    {
+      id: 1,
+      title: "End of Semester Performance",
+      message: "Our final performance will be held on May 15th at Sisters Chapel. All members must attend dress rehearsal."
+    },
+    {
+      id: 2,
+      title: "Dues Reminder",
+      message: "Spring semester dues are due by April 30th. Please make your payments online through the dashboard."
+    },
+    {
+      id: 3,
+      title: "New Sheet Music Available",
+      message: "New arrangements for the Spring concert have been uploaded. Please review before next rehearsal."
+    }
+  ]);
+
   // Add debug info to the console
   useEffect(() => {
     console.log("Dashboard mounting...");
