@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useContext, createContext, useCallback } from 'react';
 import {
   Session,
@@ -182,7 +181,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       if (error) {
         console.error("Sign-up error:", error);
         toast.error("Failed to sign up");
-        return { error };
+        return { error, data: null };
       }
 
       // After successful signup, update the profile table
@@ -286,7 +285,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
-  const value = {
+  const value: AuthContextType = {
     user,
     userProfile: profile, // Set userProfile to be the same as profile
     profile,
