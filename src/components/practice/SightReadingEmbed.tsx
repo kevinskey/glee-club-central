@@ -1,7 +1,7 @@
 
 import React, { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { Play, Pause, Stop, Save } from "lucide-react";
+import { Play, Pause, Square, Save } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { logPracticeSession } from "@/utils/supabase/practiceLogs";
 import { toast } from "sonner";
@@ -120,7 +120,7 @@ export function SightReadingEmbed() {
               className="gap-1" 
               onClick={resetTimer}
             >
-              <Stop className="h-4 w-4" /> 
+              <Square className="h-4 w-4" /> 
               Reset
             </Button>
             <Button 
