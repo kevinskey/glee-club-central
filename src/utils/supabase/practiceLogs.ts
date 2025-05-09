@@ -41,6 +41,12 @@ export const logPracticeSession = async (
   date: string = new Date().toISOString().split("T")[0]
 ): Promise<PracticeLog | null> => {
   try {
+    const { data: userData, error: userError } = await supabase.auth.getUser();
+    
+    if (userError || !userData.user) {
+      throw new Error("User not authenticated");
+    }
+    
     const { data, error } = await supabase
       .from("practice_logs")
       .insert({
@@ -48,6 +54,7 @@ export const logPracticeSession = async (
         category,
         description,
         date,
+        user_id: userData.user.id // Add the user_id here
       })
       .select()
       .single();
