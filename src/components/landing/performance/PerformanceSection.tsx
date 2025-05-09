@@ -1,6 +1,6 @@
 
 import React from "react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Calendar, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -15,9 +15,24 @@ import {
 } from "@/components/ui/carousel";
 import { format } from "date-fns";
 import { useAuth } from "@/contexts/AuthContext";
+import { useCalendarEvents, CalendarEvent } from "@/hooks/useCalendarEvents";
+import { Skeleton } from "@/components/ui/skeleton";
 
-// Sample performance events data
-const performanceEvents: PerformanceEventType[] = [
+// Convert CalendarEvent to PerformanceEventType
+const convertToPerformanceEvent = (event: CalendarEvent): PerformanceEventType => {
+  return {
+    id: typeof event.id === 'number' ? event.id : parseInt(event.id.toString().replace(/\D/g, '')) || Math.floor(Math.random() * 1000),
+    title: event.title,
+    date: event.date,
+    location: event.location,
+    description: event.description || "",
+    // Use event image if available, otherwise use placeholder
+    image: event.image_url || "/lovable-uploads/3ad02de0-04d1-4a5e-9279-898e9c317d80.png"
+  };
+};
+
+// Fallback sample performance events data
+const fallbackEvents: PerformanceEventType[] = [
   {
     id: 1,
     title: "Fall Concert 2025",
@@ -55,8 +70,33 @@ const performanceEvents: PerformanceEventType[] = [
 export function PerformanceSection() {
   const navigate = useNavigate();
   const isMobile = useIsMobile();
-  const [selectedEvent, setSelectedEvent] = useState<PerformanceEventType>(performanceEvents[0]);
+  const [performanceEvents, setPerformanceEvents] = useState<PerformanceEventType[]>(fallbackEvents);
+  const [selectedEvent, setSelectedEvent] = useState<PerformanceEventType | null>(null);
   const { user, userProfile } = useAuth();
+  const { events, loading, useGoogleCalendar, toggleGoogleCalendar } = useCalendarEvents();
+  
+  // Filter events to show only concerts and special performances
+  useEffect(() => {
+    if (events.length > 0) {
+      const filteredEvents = events
+        .filter(event => event.type === 'concert' || event.type === 'special')
+        .map(convertToPerformanceEvent);
+      
+      if (filteredEvents.length > 0) {
+        setPerformanceEvents(filteredEvents);
+        if (!selectedEvent) {
+          setSelectedEvent(filteredEvents[0]);
+        }
+      }
+    }
+  }, [events]);
+  
+  // Initialize selected event once events are loaded
+  useEffect(() => {
+    if (performanceEvents.length > 0 && !selectedEvent) {
+      setSelectedEvent(performanceEvents[0]);
+    }
+  }, [performanceEvents]);
   
   // Handle event selection with a more explicit function
   const handleEventSelect = (event: PerformanceEventType) => {
@@ -85,65 +125,88 @@ export function PerformanceSection() {
             <span className="flex items-center min-h-[2rem] md:min-h-[2.5rem]">Upcoming <span className="text-glee-purple">Performances</span></span>
           </h2>
           
-          {user && isAuthorized && (
-            <Button 
-              onClick={handleAddPerformance}
-              size="sm"
-              className="bg-glee-purple hover:bg-glee-purple/90 text-white h-8 px-3"
-            >
-              <Plus className="mr-1 h-3 w-3" />
-              Add Performance
-            </Button>
-          )}
+          <div className="flex items-center gap-3">
+            {user && (
+              <div className="flex items-center space-x-2">
+                <span className="text-xs md:text-sm hidden md:inline">Google Calendar</span>
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  className={`h-8 px-3 ${useGoogleCalendar ? 'bg-glee-purple text-white hover:bg-glee-purple/90' : 'bg-transparent'}`}
+                  onClick={toggleGoogleCalendar}
+                >
+                  <Calendar className="h-3 w-3 mr-1 md:mr-2" />
+                  <span className="text-xs">{useGoogleCalendar ? 'Using Google' : 'Use Google'}</span>
+                </Button>
+              </div>
+            )}
+            
+            {user && isAuthorized && (
+              <Button 
+                onClick={handleAddPerformance}
+                size="sm"
+                className="bg-glee-purple hover:bg-glee-purple/90 text-white h-8 px-3"
+              >
+                <Plus className="mr-1 h-3 w-3" />
+                Add Performance
+              </Button>
+            )}
+          </div>
         </div>
         
         {/* Performance Carousel - Full Width Across Screen */}
         <div className="relative mt-4 w-full">
-          <Carousel
-            opts={{ 
-              loop: true,
-              containScroll: "trimSnaps" 
-            }}
-            className="w-full"
-          >
-            <CarouselContent>
-              {performanceEvents.map((event) => (
-                <CarouselItem key={event.id} className="md:basis-1/2 lg:basis-1/3 pl-0">
-                  <div className="p-0">
-                    <div 
-                      className="relative overflow-hidden aspect-[16/9] cursor-pointer hover:opacity-95 transition-opacity group"
-                      onClick={() => handleEventSelect(event)}
-                      style={{
-                        backgroundImage: `url(${event.image})`,
-                        backgroundSize: 'cover',
-                        backgroundPosition: 'center',
-                        backgroundRepeat: 'no-repeat'
-                      }}
-                    >
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent flex flex-col justify-center items-center">
-                        <h3 className="font-bold text-white text-xl md:text-2xl lg:text-3xl font-playfair text-center px-4 md:px-6 drop-shadow-lg my-auto flex items-center min-h-[3rem] md:min-h-[3.5rem]">
-                          {event.title}
-                        </h3>
-                        
-                        <div className="p-4 md:p-5 bg-black/60 backdrop-blur-sm flex flex-wrap items-center justify-between gap-x-3 gap-y-1 px-6 md:px-8 w-full mt-auto">
-                          <span className="text-white/80 text-xs md:text-sm order-1">
-                            {event.location}
-                          </span>
-                          <span className="text-glee-purple bg-glee-purple/20 px-2 py-0.5 rounded-full text-xs md:text-sm font-medium order-2 whitespace-nowrap ml-auto">
-                            {format(event.date, 'MMM d, yyyy')}
-                          </span>
+          {loading ? (
+            <div className="w-full">
+              <Skeleton className="w-full h-64 rounded-lg" />
+            </div>
+          ) : (
+            <Carousel
+              opts={{ 
+                loop: true,
+                containScroll: "trimSnaps" 
+              }}
+              className="w-full"
+            >
+              <CarouselContent>
+                {performanceEvents.map((event) => (
+                  <CarouselItem key={event.id} className="md:basis-1/2 lg:basis-1/3 pl-0">
+                    <div className="p-0">
+                      <div 
+                        className="relative overflow-hidden aspect-[16/9] cursor-pointer hover:opacity-95 transition-opacity group"
+                        onClick={() => handleEventSelect(event)}
+                        style={{
+                          backgroundImage: `url(${event.image})`,
+                          backgroundSize: 'cover',
+                          backgroundPosition: 'center',
+                          backgroundRepeat: 'no-repeat'
+                        }}
+                      >
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent flex flex-col justify-center items-center">
+                          <h3 className="font-bold text-white text-xl md:text-2xl lg:text-3xl font-playfair text-center px-4 md:px-6 drop-shadow-lg my-auto flex items-center min-h-[3rem] md:min-h-[3.5rem]">
+                            {event.title}
+                          </h3>
+                          
+                          <div className="p-4 md:p-5 bg-black/60 backdrop-blur-sm flex flex-wrap items-center justify-between gap-x-3 gap-y-1 px-6 md:px-8 w-full mt-auto">
+                            <span className="text-white/80 text-xs md:text-sm order-1">
+                              {event.location}
+                            </span>
+                            <span className="text-glee-purple bg-glee-purple/20 px-2 py-0.5 rounded-full text-xs md:text-sm font-medium order-2 whitespace-nowrap ml-auto">
+                              {format(event.date, 'MMM d, yyyy')}
+                            </span>
+                          </div>
                         </div>
                       </div>
                     </div>
-                  </div>
-                </CarouselItem>
-              ))}
-            </CarouselContent>
-            <div className="hidden md:block">
-              <CarouselPrevious className="left-4 z-10 bg-white/80 hover:bg-white" />
-              <CarouselNext className="right-4 z-10 bg-white/80 hover:bg-white" />
-            </div>
-          </Carousel>
+                  </CarouselItem>
+                ))}
+              </CarouselContent>
+              <div className="hidden md:block">
+                <CarouselPrevious className="left-4 z-10 bg-white/80 hover:bg-white" />
+                <CarouselNext className="right-4 z-10 bg-white/80 hover:bg-white" />
+              </div>
+            </Carousel>
+          )}
         </div>
       </div>
       
@@ -151,17 +214,30 @@ export function PerformanceSection() {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8 items-start">
           {/* Left column - Calendar of events */}
           <div className="space-y-4">
-            <h3 className="text-lg md:text-xl font-playfair font-semibold mb-3 md:mb-4 flex items-center min-h-[1.75rem] md:min-h-[2rem]">Performance Calendar</h3>
-            <div className="space-y-2">
-              {performanceEvents.map((event) => (
-                <PerformanceEventItem 
-                  key={event.id} 
-                  event={event} 
-                  isSelected={selectedEvent.id === event.id}
-                  onSelect={handleEventSelect}
-                />
-              ))}
+            <div className="flex items-center justify-between">
+              <h3 className="text-lg md:text-xl font-playfair font-semibold mb-3 md:mb-4 flex items-center min-h-[1.75rem] md:min-h-[2rem]">
+                Performance Calendar
+              </h3>
             </div>
+            
+            {loading ? (
+              <div className="space-y-3">
+                {[1, 2, 3].map(i => (
+                  <Skeleton key={i} className="w-full h-16 rounded-lg" />
+                ))}
+              </div>
+            ) : (
+              <div className="space-y-2">
+                {performanceEvents.map((event) => (
+                  <PerformanceEventItem 
+                    key={event.id} 
+                    event={event} 
+                    isSelected={selectedEvent?.id === event.id}
+                    onSelect={handleEventSelect}
+                  />
+                ))}
+              </div>
+            )}
             <div className="mt-4 md:mt-6">
               <Button 
                 onClick={navigateToCalendar}
@@ -175,10 +251,21 @@ export function PerformanceSection() {
           
           {/* Right column - Selected event image and details */}
           <div className="mt-8 md:mt-0">
-            <PerformanceEventDetails 
-              event={selectedEvent} 
-              onViewCalendar={navigateToCalendar}
-            />
+            {loading ? (
+              <div className="space-y-4">
+                <Skeleton className="w-full h-40 rounded-lg" />
+                <Skeleton className="w-3/4 h-8 rounded-lg" />
+                <Skeleton className="w-1/2 h-5 rounded-lg" />
+                <Skeleton className="w-full h-24 rounded-lg" />
+              </div>
+            ) : selectedEvent ? (
+              <PerformanceEventDetails 
+                event={selectedEvent} 
+                onViewCalendar={navigateToCalendar}
+              />
+            ) : (
+              <p className="text-center text-gray-500 p-8">Select an event to view details</p>
+            )}
           </div>
         </div>
       </div>

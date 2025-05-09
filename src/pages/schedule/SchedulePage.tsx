@@ -6,22 +6,27 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useAuth } from "@/contexts/AuthContext";
-import { fetchGoogleCalendarEvents } from "@/utils/googleCalendar";
 import { format } from "date-fns";
 import { toast } from "sonner";
 import { useCalendarEvents, CalendarEvent } from "@/hooks/useCalendarEvents";
+import { GoogleCalendarToggle } from "@/components/calendar/GoogleCalendarToggle";
 
 export default function SchedulePage() {
   const { user, userProfile } = useAuth();
   const [loading, setLoading] = useState(true);
-  const { events } = useCalendarEvents();
+  const { events, loading: eventsLoading, useGoogleCalendar, toggleGoogleCalendar } = useCalendarEvents();
+  
+  // Set loading state based on events loading
+  useEffect(() => {
+    setLoading(eventsLoading);
+  }, [eventsLoading]);
   
   const getTypeColor = (type: string) => {
     switch (type) {
       case "rehearsal":
         return "bg-blue-500 hover:bg-blue-600";
       case "concert":
-        return "bg-red-500 hover:bg-red-600";
+        return "bg-glee-purple hover:bg-glee-purple/90";
       case "tour":
         return "bg-green-500 hover:bg-green-600";
       case "special":
@@ -33,7 +38,6 @@ export default function SchedulePage() {
 
   // Update the role comparisons to use "administrator" instead of "admin"
   const isAdmin = userProfile?.role === "administrator";
-  
   const canEdit = userProfile?.role === "administrator" || userProfile?.role === "section_leader";
   
   return (
@@ -43,23 +47,33 @@ export default function SchedulePage() {
         description="Upcoming rehearsals, performances, and events"
         icon={<Calendar className="h-6 w-6" />}
         actions={
-          user?.role === "administrator" && (
-            <Button>
-              <Plus className="mr-2 h-4 w-4" /> Add Event
-            </Button>
-          )
+          <div className="flex items-center gap-3">
+            <GoogleCalendarToggle
+              useGoogleCalendar={useGoogleCalendar}
+              toggleGoogleCalendar={toggleGoogleCalendar}
+            />
+            {isAdmin && (
+              <Button>
+                <Plus className="mr-2 h-4 w-4" /> Add Event
+              </Button>
+            )}
+          </div>
         }
       />
 
       <Card>
-        <CardHeader>
-          <CardTitle>Upcoming Events</CardTitle>
-          <CardDescription>
-            Schedule of rehearsals, performances, and social events from Google Calendar
-          </CardDescription>
+        <CardHeader className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+          <div>
+            <CardTitle>Upcoming Events</CardTitle>
+            <CardDescription>
+              {useGoogleCalendar 
+                ? "Events from Google Calendar" 
+                : "Schedule of rehearsals, performances, and social events"}
+            </CardDescription>
+          </div>
         </CardHeader>
         <CardContent>
-          {loading && events.length === 0 ? (
+          {loading ? (
             <div className="flex justify-center py-8">
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-glee-purple"></div>
             </div>
