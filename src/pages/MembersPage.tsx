@@ -227,7 +227,7 @@ export default function MembersPage() {
                             <SelectValue placeholder="Role" />
                           </SelectTrigger>
                           <SelectContent>
-                            <SelectItem value="">All Roles</SelectItem>
+                            <SelectItem value="all">All Roles</SelectItem>
                             <SelectItem value="administrator">Administrator</SelectItem>
                             <SelectItem value="section_leader">Section Leader</SelectItem>
                             <SelectItem value="student_conductor">Student Conductor</SelectItem>
@@ -242,7 +242,7 @@ export default function MembersPage() {
                             <SelectValue placeholder="Voice Part" />
                           </SelectTrigger>
                           <SelectContent>
-                            <SelectItem value="">All Voice Parts</SelectItem>
+                            <SelectItem value="all">All Voice Parts</SelectItem>
                             <SelectItem value="soprano_1">Soprano 1</SelectItem>
                             <SelectItem value="soprano_2">Soprano 2</SelectItem>
                             <SelectItem value="alto_1">Alto 1</SelectItem>
@@ -257,7 +257,7 @@ export default function MembersPage() {
                             <SelectValue placeholder="Status" />
                           </SelectTrigger>
                           <SelectContent>
-                            <SelectItem value="">All Statuses</SelectItem>
+                            <SelectItem value="all">All Statuses</SelectItem>
                             <SelectItem value="active">Active</SelectItem>
                             <SelectItem value="pending">Pending</SelectItem>
                             <SelectItem value="inactive">Inactive</SelectItem>

@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { Navigate } from "react-router-dom";
@@ -143,8 +144,8 @@ export default function AdminMembersPage() {
       (member.last_name || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
       (member.email || '').toLowerCase().includes(searchQuery.toLowerCase());
     
-    const matchesRole = !roleFilter || (member.role || '') === roleFilter;
-    const matchesStatus = !statusFilter || (member.status || '') === statusFilter;
+    const matchesRole = !roleFilter || roleFilter === "all" || (member.role || '') === roleFilter;
+    const matchesStatus = !statusFilter || statusFilter === "all" || (member.status || '') === statusFilter;
     
     return matchesSearch && matchesRole && matchesStatus;
   });

@@ -73,7 +73,7 @@ export function UserManagementToolbar({
                       <SelectValue placeholder="Filter by role" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="">All Roles</SelectItem>
+                      <SelectItem value="all">All Roles</SelectItem>
                       <SelectItem value="administrator">Administrator</SelectItem>
                       <SelectItem value="section_leader">Section Leader</SelectItem>
                       <SelectItem value="student_conductor">Student Conductor</SelectItem>
@@ -88,7 +88,7 @@ export function UserManagementToolbar({
                       <SelectValue placeholder="Filter by status" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="">All Statuses</SelectItem>
+                      <SelectItem value="all">All Statuses</SelectItem>
                       <SelectItem value="active">Active</SelectItem>
                       <SelectItem value="inactive">Inactive</SelectItem>
                       <SelectItem value="pending">Pending</SelectItem>
@@ -136,7 +136,7 @@ export function UserManagementToolbar({
             <SelectValue placeholder="Role" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="">All Roles</SelectItem>
+            <SelectItem value="all">All Roles</SelectItem>
             <SelectItem value="administrator">Administrator</SelectItem>
             <SelectItem value="section_leader">Section Leader</SelectItem>
             <SelectItem value="student_conductor">Student Conductor</SelectItem>
@@ -151,7 +151,7 @@ export function UserManagementToolbar({
             <SelectValue placeholder="Status" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="">All Statuses</SelectItem>
+            <SelectItem value="all">All Statuses</SelectItem>
             <SelectItem value="active">Active</SelectItem>
             <SelectItem value="inactive">Inactive</SelectItem>
             <SelectItem value="pending">Pending</SelectItem>
