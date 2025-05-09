@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
@@ -52,6 +51,35 @@ export default function LoginPage() {
     }
   }, [isAuthenticated, isLoading, navigate]);
 
+  const handleResendVerification = async (email: string) => {
+    try {
+      setIsSubmitting(true);
+      console.log("Resending verification email to:", email);
+      
+      const { error } = await supabase.auth.resend({
+        type: 'signup',
+        email: email,
+        options: {
+          emailRedirectTo: `${window.location.origin}/login`,
+        }
+      });
+      
+      if (error) {
+        toast.error("Failed to resend verification email");
+        console.error("Error resending verification:", error);
+      } else {
+        toast.success("Verification email sent", {
+          description: "Please check your inbox and spam folder"
+        });
+      }
+    } catch (error) {
+      console.error("Error resending verification:", error);
+      toast.error("Failed to resend verification email");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
   const onSubmit = async (values: LoginFormValues) => {
     setIsSubmitting(true);
     setLoginError(null);
@@ -63,8 +91,10 @@ export default function LoginPage() {
         console.error("Login error:", error);
         
         // Check for specific error messages related to email verification
-        if (error.message?.includes("Email not confirmed")) {
-          setLoginError("Please verify your email address before logging in. Check your inbox for a verification email.");
+        if (error.message?.includes("Email not confirmed") || 
+            error.message?.toLowerCase().includes("email not verified") ||
+            error.message?.toLowerCase().includes("not confirmed")) {
+          setLoginError("Please verify your email address before logging in. Check your inbox and spam folder for a verification email.");
           toast.error("Email not verified", {
             description: "Check your inbox for a verification email",
             action: {
@@ -84,28 +114,6 @@ export default function LoginPage() {
       setLoginError(error.message || "An unexpected error occurred");
     } finally {
       setIsSubmitting(false);
-    }
-  };
-
-  const handleResendVerification = async (email: string) => {
-    try {
-      // We'll use the useMessaging hook, but for simplicity, we'll use supabase directly
-      const { error } = await supabase.auth.resend({
-        type: 'signup',
-        email: email,
-      });
-      
-      if (error) {
-        toast.error("Failed to resend verification email");
-        console.error("Error resending verification:", error);
-      } else {
-        toast.success("Verification email sent", {
-          description: "Please check your inbox"
-        });
-      }
-    } catch (error) {
-      console.error("Error resending verification:", error);
-      toast.error("Failed to resend verification email");
     }
   };
 

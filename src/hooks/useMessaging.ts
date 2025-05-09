@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
@@ -18,7 +17,11 @@ export function useMessaging() {
   const sendMessage = async ({ type, to, subject, content }: SendMessageParams) => {
     // For email sending during registration, we may not have a user yet
     // So we'll allow sending without checking for user in that case
-    const isRegistrationEmail = !user && type === "email" && subject?.includes("Welcome");
+    const isRegistrationEmail = !user && type === "email" && (
+      subject?.includes("Welcome") || 
+      subject?.includes("Verify") || 
+      subject?.includes("verification")
+    );
     
     if (!user && !isRegistrationEmail) {
       toast.error("You must be logged in to send messages");
@@ -29,7 +32,11 @@ export function useMessaging() {
     try {
       const endpoint = type === "email" ? "send-email" : "send-sms";
       
-      console.log(`Sending ${type} via ${endpoint} function...`);
+      console.log(`Sending ${type} via ${endpoint} function...`, {
+        to,
+        subject,
+        contentLength: content?.length || 0
+      });
       
       const { data, error } = await supabase.functions.invoke(endpoint, {
         body: {

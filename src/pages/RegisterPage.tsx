@@ -13,6 +13,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Music, AlertCircle } from "lucide-react";
+import { useMessaging } from "@/hooks/useMessaging";
 
 const registerSchema = z.object({
   firstName: z.string().min(1, {
@@ -42,6 +43,7 @@ export default function RegisterPage() {
   const navigate = useNavigate();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [registerError, setRegisterError] = useState<string | null>(null);
+  const { sendEmail } = useMessaging();
   
   // Initialize the form with useForm hook
   const form = useForm<RegisterFormValues>({
@@ -62,6 +64,34 @@ export default function RegisterPage() {
     }
   }, [isAuthenticated, isLoading, navigate]);
 
+  const sendWelcomeEmail = async (email: string, firstName: string) => {
+    try {
+      console.log("Sending welcome email to:", email);
+      const emailResult = await sendEmail(
+        email,
+        "Welcome to Glee World - Please Verify Your Email",
+        `
+        <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto;">
+          <h2 style="color: #6d28d9; text-align: center;">Welcome to Glee World!</h2>
+          <p>Hello ${firstName},</p>
+          <p>Thank you for registering with Glee World, the central hub for the Spelman College Glee Club.</p>
+          <p>To complete your registration, please verify your email address by clicking the verification link sent to you in a separate email.</p>
+          <p>If you don't see the verification email in your inbox, please check your spam or junk folder.</p>
+          <p>Best regards,<br>The Glee World Team</p>
+        </div>
+        `
+      );
+      
+      if (emailResult.success) {
+        console.log("Welcome email sent successfully");
+      } else {
+        console.error("Failed to send welcome email:", emailResult.error);
+      }
+    } catch (error) {
+      console.error("Error sending welcome email:", error);
+    }
+  };
+
   const onSubmit = async (values: RegisterFormValues) => {
     setIsSubmitting(true);
     setRegisterError(null);
@@ -81,7 +111,15 @@ export default function RegisterPage() {
         toast.success("Registration successful!", {
           description: "Please check your email for a verification link"
         });
-        navigate("/login", { state: { message: "Please check your email for a verification link to complete your registration." } });
+        
+        // Send a welcome email with instructions
+        await sendWelcomeEmail(values.email, values.firstName);
+        
+        navigate("/login", { 
+          state: { 
+            message: "Please check your email for a verification link to complete your registration." 
+          } 
+        });
       }
     } catch (error: any) {
       console.error("Unexpected error during registration:", error);

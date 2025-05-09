@@ -53,6 +53,8 @@ const handler = async (req: Request): Promise<Response> => {
       to: [to],
       subject: subject,
       html: content,
+      // Add these for better deliverability
+      text: content.replace(/<[^>]*>?/gm, ''), // Strip HTML for plain text version
     });
 
     console.log("Email sent successfully:", emailResponse);

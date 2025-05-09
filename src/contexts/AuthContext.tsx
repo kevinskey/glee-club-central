@@ -234,15 +234,38 @@ export function AuthProvider({ children }: Props) {
             first_name: firstName,
             last_name: lastName,
           },
+          emailRedirectTo: `${window.location.origin}/login`, // Ensure redirect URL is set correctly
         },
       });
 
       if (error) {
+        console.error("Sign up error:", error.message);
         return { error, data: null };
+      }
+
+      console.log("Sign up successful, email verification sent");
+
+      // Check if email confirmation is required
+      if (data?.user && data.user.identities?.length === 0) {
+        console.log("User already exists but needs to confirm email");
+        return { 
+          error: { 
+            message: "A user with this email already exists. Please check your email for verification instructions." 
+          }, 
+          data: null 
+        };
       }
 
       // Show welcome toast
       toast.success(`Welcome ${firstName}! Your account is being set up.`);
+      
+      // If we have a user and email confirmation is required
+      if (data?.user && !data.user.email_confirmed_at) {
+        console.log("Email verification required, confirmation email sent");
+        toast.info("Please check your email to verify your account", {
+          duration: 6000,
+        });
+      }
 
       return { error: null, data };
     } catch (error: any) {
