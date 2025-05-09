@@ -139,32 +139,32 @@ function App() {
         
         {/* Admin routes */}
         <Route path="admin" element={
-          <PermissionRoute requireSuperAdmin>
+          <PermissionRoute requireSuperAdmin={false}>
             <AdminDashboardPage />
           </PermissionRoute>
         } />
         <Route path="admin/members" element={
-          <PermissionRoute requireSuperAdmin>
+          <PermissionRoute requireSuperAdmin={false}>
             <AdminMembersPage />
           </PermissionRoute>
         } />
         <Route path="admin/finances" element={
-          <PermissionRoute requireSuperAdmin>
+          <PermissionRoute requireSuperAdmin={false}>
             <AdminFinancesPage />
           </PermissionRoute>
         } />
         <Route path="admin/wardrobe" element={
-          <PermissionRoute requireSuperAdmin>
+          <PermissionRoute requireSuperAdmin={false}>
             <div>Wardrobe Management Page</div>
           </PermissionRoute>
         } />
         <Route path="admin/analytics" element={
-          <PermissionRoute requireSuperAdmin>
+          <PermissionRoute requireSuperAdmin={false}>
             <AdminAnalyticsPage />
           </PermissionRoute>
         } />
         <Route path="admin/settings" element={
-          <PermissionRoute requireSuperAdmin>
+          <PermissionRoute requireSuperAdmin={false}>
             <AdminSettingsPage />
           </PermissionRoute>
         } />

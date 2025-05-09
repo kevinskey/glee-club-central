@@ -7,10 +7,9 @@ import { DesktopSidebar } from "@/components/layout/DesktopSidebar";
 import { MobileNav } from "@/components/layout/MobileNav";
 
 export function Sidebar() {
-  const { user } = useAuth();
+  const { isAdmin } = useAuth();
   const { pathname } = useLocation();
   const { isOpen, onClose } = useSidebar();
-  const isAdmin = user?.email?.includes("admin") || user?.email === "test@example.com";
 
   // Close sidebar on route change for mobile
   useEffect(() => {
@@ -20,7 +19,7 @@ export function Sidebar() {
   return (
     <>
       {/* Desktop Sidebar */}
-      <DesktopSidebar isOpen={isOpen} isAdmin={isAdmin} />
+      <DesktopSidebar isOpen={isOpen} isAdmin={isAdmin()} />
       
       {/* Mobile Navigation */}
       <MobileNav />

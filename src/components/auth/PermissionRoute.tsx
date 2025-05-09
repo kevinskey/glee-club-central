@@ -17,7 +17,7 @@ export function PermissionRoute({
   requiredPermission,
   requireSuperAdmin = false
 }: PermissionRouteProps) {
-  const { isAuthenticated, isLoading } = useAuth();
+  const { isAuthenticated, isLoading, isAdmin } = useAuth();
   const { hasPermission, isSuperAdmin } = usePermissions();
   const location = useLocation();
   
@@ -33,13 +33,15 @@ export function PermissionRoute({
     return <Navigate to="/login" state={{ from: location }} replace />;
   }
   
-  // Check for super admin requirement
-  if (requireSuperAdmin && !isSuperAdmin) {
+  // Check for super admin requirement OR if user is admin
+  if (requireSuperAdmin && !(isSuperAdmin || isAdmin())) {
+    console.log('Access denied: User is not super admin or admin');
     return <Navigate to="/dashboard" state={{ permissionDenied: true }} replace />;
   }
   
   // Check for required permission
   if (requiredPermission && !hasPermission(requiredPermission)) {
+    console.log(`Access denied: Missing permission: ${requiredPermission}`);
     return <Navigate to="/dashboard" state={{ permissionDenied: true }} replace />;
   }
   
