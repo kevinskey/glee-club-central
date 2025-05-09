@@ -9,32 +9,20 @@ import { useAuth } from "@/contexts/AuthContext";
 import { format } from "date-fns";
 import { toast } from "sonner";
 import { useCalendarEvents, CalendarEvent } from "@/hooks/useCalendarEvents";
-import { GoogleCalendarToggle } from "@/components/calendar/GoogleCalendarToggle";
 
 export default function SchedulePage() {
   const { user, userProfile } = useAuth();
   const [loading, setLoading] = useState(true);
-  const [daysAhead, setDaysAhead] = useState(90);
   const { 
     events, 
     loading: eventsLoading, 
-    useGoogleCalendar, 
-    toggleGoogleCalendar,
-    googleCalendarError,
     fetchEvents
-  } = useCalendarEvents(daysAhead);
+  } = useCalendarEvents();
   
   // Set loading state based on events loading
   useEffect(() => {
     setLoading(eventsLoading);
   }, [eventsLoading]);
-  
-  // Handle changing the days ahead
-  const handleDaysAheadChange = (days: number) => {
-    setDaysAhead(days);
-    // Trigger a refetch with the new days ahead
-    fetchEvents();
-  };
   
   const getTypeColor = (type: string) => {
     switch (type) {
@@ -63,14 +51,6 @@ export default function SchedulePage() {
         icon={<Calendar className="h-6 w-6" />}
         actions={
           <div className="flex items-center gap-3">
-            <GoogleCalendarToggle
-              useGoogleCalendar={useGoogleCalendar}
-              toggleGoogleCalendar={toggleGoogleCalendar}
-              googleCalendarError={googleCalendarError}
-              compact
-              daysAhead={daysAhead}
-              onDaysAheadChange={handleDaysAheadChange}
-            />
             {isAdmin && (
               <Button>
                 <Plus className="mr-2 h-4 w-4" /> Add Event
@@ -85,32 +65,14 @@ export default function SchedulePage() {
           <div>
             <CardTitle>Upcoming Events</CardTitle>
             <CardDescription>
-              {useGoogleCalendar 
-                ? `Events from Google Calendar (next ${daysAhead} days)` 
-                : "Schedule of rehearsals, performances, and social events"}
+              Schedule of rehearsals, performances, and social events
             </CardDescription>
           </div>
-          {useGoogleCalendar && googleCalendarError && (
-            <Badge variant="destructive" className="self-start md:self-auto">
-              Google Calendar API Error
-            </Badge>
-          )}
         </CardHeader>
         <CardContent>
           {loading ? (
             <div className="flex justify-center py-8">
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-glee-purple"></div>
-            </div>
-          ) : useGoogleCalendar && googleCalendarError ? (
-            <div className="flex flex-col items-center justify-center py-10 px-4 text-center">
-              <div className="text-amber-500 mb-4">
-                <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
-              </div>
-              <p className="text-base font-medium mb-2 dark:text-white">Unable to load Google Calendar events</p>
-              <p className="text-sm text-muted-foreground mb-4">Please check the Google Calendar API key configuration.</p>
-              <Button onClick={() => toggleGoogleCalendar()}>
-                Switch to Local Calendar
-              </Button>
             </div>
           ) : (
             <div className="space-y-6">

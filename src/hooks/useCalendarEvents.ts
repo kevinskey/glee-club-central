@@ -1,10 +1,10 @@
+
 import { useState, useEffect, useCallback, useRef } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { useSampleEvents } from "./useSampleEvents";
 import { useCalendarOperations } from "./useCalendarOperations";
-import { fetchGoogleCalendarEvents } from "@/utils/googleCalendar";
 
 export interface CalendarEvent {
   id: number | string;
@@ -17,7 +17,7 @@ export interface CalendarEvent {
   image_url?: string | null;
 }
 
-export function useCalendarEvents(daysAhead = 90) {
+export function useCalendarEvents() {
   const [events, setEvents] = useState<CalendarEvent[]>([]);
   const [loading, setLoading] = useState(true);
   const { user } = useAuth();
@@ -26,29 +26,6 @@ export function useCalendarEvents(daysAhead = 90) {
   const [fetchError, setFetchError] = useState(false);
   const initialFetchDoneRef = useRef(false);
   const lastUserIdRef = useRef<string | null>(null);
-  const [useGoogleCalendar, setUseGoogleCalendar] = useState(true);
-  const googleFetchAttemptedRef = useRef(false);
-  const [googleCalendarError, setGoogleCalendarError] = useState<string | null>(null);
-
-  // Fetch events from Google Calendar
-  const fetchGoogleEvents = useCallback(async () => {
-    if (!useGoogleCalendar) return [];
-    
-    try {
-      console.log("Fetching events from Google Calendar");
-      googleFetchAttemptedRef.current = true;
-      setGoogleCalendarError(null);
-      const googleEvents = await fetchGoogleCalendarEvents(undefined, undefined, daysAhead);
-      console.log("Google Calendar events:", googleEvents.length);
-      return googleEvents;
-    } catch (err) {
-      console.error("Error fetching Google Calendar events:", err);
-      const message = err instanceof Error ? err.message : "Failed to load events from Google Calendar";
-      setGoogleCalendarError(message);
-      toast.error("Failed to load events from Google Calendar. Check API key configuration.");
-      return [];
-    }
-  }, [useGoogleCalendar, daysAhead]);
 
   // Fetch events from Supabase
   const fetchEvents = useCallback(async () => {
@@ -64,26 +41,11 @@ export function useCalendarEvents(daysAhead = 90) {
     lastUserIdRef.current = currentUserId;
     
     try {
-      // First, try to fetch Google Calendar events
-      let combinedEvents: CalendarEvent[] = [];
-      
-      if (useGoogleCalendar) {
-        const googleEvents = await fetchGoogleEvents();
-        
-        // Add Google Calendar events
-        if (googleEvents.length > 0) {
-          combinedEvents = [...googleEvents];
-        }
-      }
-      
       // Use sample data if not authenticated
       if (!user) {
         if (!initialFetchDoneRef.current || userChanged) {
-          console.log("No user authenticated, using Google Calendar events or sample events");
-          if (combinedEvents.length === 0) {
-            combinedEvents = getSampleEvents();
-          }
-          setEvents(combinedEvents);
+          console.log("No user authenticated, using sample events");
+          setEvents(getSampleEvents());
           setFetchError(false);
           initialFetchDoneRef.current = true;
           setLoading(false);
@@ -95,7 +57,7 @@ export function useCalendarEvents(daysAhead = 90) {
         setLoading(true);
       }
 
-      // Now fetch events from Supabase to combine with Google events
+      // Now fetch events from Supabase
       console.log("Attempting to fetch calendar events from Supabase for user:", user.id);
       const { data, error } = await supabase
         .from("calendar_events")
@@ -108,6 +70,11 @@ export function useCalendarEvents(daysAhead = 90) {
         if (!fetchError) {
           toast.error("Failed to load calendar events from database");
           setFetchError(true);
+        }
+        
+        // If this is the first fetch, use sample data as fallback
+        if (!initialFetchDoneRef.current || userChanged) {
+          setEvents(getSampleEvents());
         }
       } else {
         setFetchError(false);
@@ -124,20 +91,12 @@ export function useCalendarEvents(daysAhead = 90) {
             image_url: event.image_url
           }));
           
-          // Combine Google Calendar events with Supabase events
-          combinedEvents = [...combinedEvents, ...supabaseEvents];
+          setEvents(supabaseEvents);
+        } else if (!initialFetchDoneRef.current || userChanged) {
+          // Fall back to sample events if no data returned
+          setEvents(getSampleEvents());
         }
       }
-      
-      // If we have no events at all, fall back to sample events
-      if (combinedEvents.length === 0 && (!initialFetchDoneRef.current || userChanged)) {
-        combinedEvents = getSampleEvents();
-      }
-      
-      // Sort combined events by date
-      combinedEvents.sort((a, b) => a.date.getTime() - b.date.getTime());
-      
-      setEvents(combinedEvents);
     } catch (err) {
       console.error("Error in fetchEvents:", err);
       // Only show toast on first error
@@ -153,7 +112,7 @@ export function useCalendarEvents(daysAhead = 90) {
       fetchingRef.current = false;
       initialFetchDoneRef.current = true;
     }
-  }, [user, getSampleEvents, fetchError, fetchGoogleEvents, useGoogleCalendar]);
+  }, [user, getSampleEvents, fetchError]);
 
   // Initialize operations hooks with the fetchEvents callback
   const { 
@@ -162,22 +121,6 @@ export function useCalendarEvents(daysAhead = 90) {
     deleteEvent, 
     isProcessing 
   } = useCalendarOperations(fetchEvents);
-
-  // Toggle between Google Calendar and local calendar
-  const toggleGoogleCalendar = useCallback(() => {
-    setUseGoogleCalendar(prev => {
-      const newValue = !prev;
-      if (newValue) {
-        toast.info("Switching to Google Calendar");
-        fetchEvents(); // Refresh events when switching to Google Calendar
-      } else {
-        setGoogleCalendarError(null); // Clear errors when switching to local
-        toast.info("Switching to local calendar");
-        fetchEvents(); // Refresh events when switching to local calendar
-      }
-      return newValue;
-    });
-  }, [fetchEvents]);
 
   // Load events on component mount or when user changes
   useEffect(() => {
@@ -215,10 +158,6 @@ export function useCalendarEvents(daysAhead = 90) {
     fetchEvents,
     addEvent,
     updateEvent,
-    deleteEvent,
-    useGoogleCalendar,
-    toggleGoogleCalendar,
-    googleCalendarError,
-    daysAhead
+    deleteEvent
   };
 }
