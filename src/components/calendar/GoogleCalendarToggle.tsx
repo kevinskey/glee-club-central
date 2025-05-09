@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Switch } from "@/components/ui/switch";
-import { ExternalLink, Calendar, Google } from "lucide-react";
+import { ExternalLink, Calendar, Globe } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { getViewGoogleCalendarUrl } from "@/utils/googleCalendar";
 import { toast } from "sonner";
@@ -37,7 +37,7 @@ export const GoogleCalendarToggle = ({
       >
         {useGoogleCalendar ? (
           <>
-            <Google className="h-3 w-3" />
+            <Globe className="h-3 w-3" />
             <span className="text-xs">Google</span>
           </>
         ) : (
@@ -55,7 +55,7 @@ export const GoogleCalendarToggle = ({
       <div className="flex items-center space-x-2">
         {useGoogleCalendar ? (
           <Badge variant="outline" className="flex items-center gap-1 bg-glee-purple/10 text-glee-purple border-glee-purple/50 px-2 py-0.5">
-            <Google className="h-3 w-3 mr-1" />
+            <Globe className="h-3 w-3 mr-1" />
             <span className="text-xs">Google Calendar</span>
           </Badge>
         ) : (
