@@ -3,29 +3,22 @@ import React, { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { PageHeader } from "@/components/ui/page-header";
 import { useAuth } from "@/contexts/AuthContext";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { 
   Calendar, 
-  FileText, 
   Home, 
-  Music, 
-  Bell, 
-  UserRound,
-  Headphones,
-  Video,
-  BookOpen,
-  Activity,
-  FileImage
+  Bell
 } from "lucide-react";
 import { Spinner } from "@/components/ui/spinner";
 import { useCalendarEvents } from "@/hooks/useCalendarEvents";
 import { format } from "date-fns";
-import { fetchGoogleCalendarEvents } from "@/utils/googleCalendar";
+import { DashboardModules } from "@/components/dashboard/DashboardModules";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { toast } from "sonner";
 
 const DashboardPage = () => {
   // Properly define a default for the profile to avoid TypeScript errors
-  const { profile, isAuthenticated, isLoading: authLoading } = useAuth();
+  const { profile, isAuthenticated, isLoading: authLoading, permissions } = useAuth();
   const profileData = profile || { first_name: 'Member', last_name: '', role: '', status: '' };
   
   // Get calendar events from the hook
@@ -36,6 +29,7 @@ const DashboardPage = () => {
   
   // Upcoming events state
   const [upcomingEvents, setUpcomingEvents] = useState([]);
+  const location = useLocation();
 
   // Sample announcements data
   const [announcements, setAnnouncements] = useState([
@@ -62,20 +56,26 @@ const DashboardPage = () => {
     console.log("Auth loading state:", authLoading);
     console.log("Auth state:", isAuthenticated);
     console.log("Profile data:", profile);
+    console.log("User permissions:", permissions);
     
     // Set a timeout to simulate data loading and then remove the loading state
     const timer = setTimeout(() => {
       console.log("Setting loading to false");
       setLoading(false);
       console.log("Dashboard loaded");
-    }, 1000); // Increased from 500ms to give more time
+    }, 1000);
+    
+    // Check for permission denied status
+    if (location.state?.permissionDenied) {
+      toast.error("You don't have permission to access that page");
+    }
     
     // Clean up the timer
     return () => {
       console.log("Dashboard unmounting, clearing timer");
       clearTimeout(timer);
     };
-  }, [profile, authLoading, isAuthenticated]);
+  }, [profile, authLoading, isAuthenticated, permissions, location.state]);
 
   // Process and set upcoming events when events are loaded
   useEffect(() => {
@@ -101,24 +101,19 @@ const DashboardPage = () => {
     }
   }, [events, eventsLoading]);
   
-  console.log("Current loading state:", loading);
-  
   if (loading || authLoading || eventsLoading) {
-    console.log("Rendering loading spinner");
     return (
       <div className="container mx-auto p-4 flex justify-center items-center min-h-[60vh]">
         <Spinner size="lg" />
       </div>
     );
   }
-
-  console.log("Rendering dashboard content");
   
   return (
     <div className="container mx-auto p-4 space-y-6">
       <PageHeader
         title={`Welcome, ${profileData.first_name}`}
-        description="Your Glee Club Dashboard"
+        description={`Dashboard - ${profile?.title || 'Member'}`}
         icon={<Home className="h-6 w-6" />}
       />
       
@@ -188,47 +183,14 @@ const DashboardPage = () => {
           </CardContent>
         </Card>
         
-        {/* Quick Access Card */}
+        {/* Role-Based Dashboard Modules */}
         <Card className="md:col-span-3">
           <CardHeader>
-            <CardTitle>Quick Access</CardTitle>
-            <CardDescription>Frequently used features</CardDescription>
+            <CardTitle>Your Dashboard</CardTitle>
+            <CardDescription>Modules available based on your {profile?.title || 'role'}</CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-              <Link to="/dashboard/sheet-music" className="flex flex-col items-center justify-center p-4 border rounded-md hover:bg-accent transition-colors text-center">
-                <FileText className="h-8 w-8 mb-2" />
-                <span>Sheet Music</span>
-              </Link>
-              <Link to="/dashboard/recordings" className="flex flex-col items-center justify-center p-4 border rounded-md hover:bg-accent transition-colors text-center">
-                <Music className="h-8 w-8 mb-2" />
-                <span>Recordings</span>
-              </Link>
-              <Link to="/dashboard/practice" className="flex flex-col items-center justify-center p-4 border rounded-md hover:bg-accent transition-colors text-center">
-                <Headphones className="h-8 w-8 mb-2" />
-                <span>Practice</span>
-              </Link>
-              <Link to="/dashboard/videos" className="flex flex-col items-center justify-center p-4 border rounded-md hover:bg-accent transition-colors text-center">
-                <Video className="h-8 w-8 mb-2" />
-                <span>Videos</span>
-              </Link>
-              <Link to="/dashboard/profile" className="flex flex-col items-center justify-center p-4 border rounded-md hover:bg-accent transition-colors text-center">
-                <UserRound className="h-8 w-8 mb-2" />
-                <span>Profile</span>
-              </Link>
-              <Link to="/dashboard/calendar" className="flex flex-col items-center justify-center p-4 border rounded-md hover:bg-accent transition-colors text-center">
-                <Calendar className="h-8 w-8 mb-2" />
-                <span>Calendar</span>
-              </Link>
-              <Link to="/dashboard/handbook" className="flex flex-col items-center justify-center p-4 border rounded-md hover:bg-accent transition-colors text-center">
-                <BookOpen className="h-8 w-8 mb-2" />
-                <span>Handbook</span>
-              </Link>
-              <Link to="/dashboard/media-library" className="flex flex-col items-center justify-center p-4 border rounded-md hover:bg-accent transition-colors text-center">
-                <FileImage className="h-8 w-8 mb-2" />
-                <span>Media Sources</span>
-              </Link>
-            </div>
+            <DashboardModules />
           </CardContent>
         </Card>
       </div>

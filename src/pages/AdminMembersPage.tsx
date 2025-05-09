@@ -1,9 +1,9 @@
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { Navigate } from "react-router-dom";
 import { PageHeader } from "@/components/ui/page-header";
-import { Users, Plus, Search, Filter } from "lucide-react";
+import { Users, Plus, Search, Filter, UserCog } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import {
@@ -24,65 +24,10 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
-
-// Sample member data for demonstration
-const sampleMembers = [
-  {
-    id: "1",
-    firstName: "Alexis",
-    lastName: "Johnson",
-    email: "alexis.johnson@example.com",
-    role: "singer",
-    voicePart: "soprano_1",
-    status: "active",
-    duesPaid: true,
-    joinDate: "2023-08-15",
-  },
-  {
-    id: "2",
-    firstName: "Jamal",
-    lastName: "Williams",
-    email: "jwilliams@example.com",
-    role: "section_leader",
-    voicePart: "tenor",
-    status: "active",
-    duesPaid: true,
-    joinDate: "2022-09-01",
-  },
-  {
-    id: "3",
-    firstName: "Taylor",
-    lastName: "Smith",
-    email: "tsmith@example.com",
-    role: "singer",
-    voicePart: "alto_1",
-    status: "active",
-    duesPaid: false,
-    joinDate: "2023-01-10",
-  },
-  {
-    id: "4",
-    firstName: "Maya",
-    lastName: "Rodriguez",
-    email: "mrodriguez@example.com",
-    role: "student_conductor",
-    voicePart: "soprano_2",
-    status: "active",
-    duesPaid: true,
-    joinDate: "2022-08-20",
-  },
-  {
-    id: "5",
-    firstName: "Devon",
-    lastName: "Carter",
-    email: "dcarter@example.com",
-    role: "accompanist",
-    voicePart: null,
-    status: "active",
-    duesPaid: true,
-    joinDate: "2021-11-05",
-  },
-];
+import { supabase } from "@/integrations/supabase/client";
+import { User } from "@/hooks/useUserManagement";
+import { UserTitleManagement } from "@/components/admin/UserTitleManagement";
+import { toast } from "sonner";
 
 // Format voice part for display
 const formatVoicePart = (voicePart: string | null): string => {
@@ -115,16 +60,68 @@ const formatRole = (role: string): string => {
 };
 
 export default function AdminMembersPage() {
-  const { isAdmin, isLoading, isAuthenticated } = useAuth();
+  const { isAdmin, isLoading: authLoading, isAuthenticated } = useAuth();
   const [searchQuery, setSearchQuery] = useState("");
-  const [members, setMembers] = useState(sampleMembers);
+  const [members, setMembers] = useState<User[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [selectedUser, setSelectedUser] = useState<User | null>(null);
+  const [isManageRoleOpen, setIsManageRoleOpen] = useState(false);
+
+  // Fetch members
+  useEffect(() => {
+    async function fetchMembers() {
+      try {
+        const { data, error } = await supabase
+          .from('profiles')
+          .select('*');
+          
+        if (error) {
+          throw error;
+        }
+        
+        if (data) {
+          setMembers(data as User[]);
+        }
+      } catch (error) {
+        console.error('Error fetching members:', error);
+        toast.error('Failed to load members');
+      } finally {
+        setIsLoading(false);
+      }
+    }
+    
+    fetchMembers();
+  }, []);
+
+  // Handle refresh after role update
+  const handleRoleUpdateSuccess = async () => {
+    try {
+      setIsLoading(true);
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('*');
+        
+      if (error) {
+        throw error;
+      }
+      
+      if (data) {
+        setMembers(data as User[]);
+        toast.success("Member list refreshed");
+      }
+    } catch (error) {
+      console.error('Error refreshing members:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   // Redirect if user is not authenticated or not an admin
-  if (!isLoading && (!isAuthenticated || !isAdmin())) {
+  if (!authLoading && (!isAuthenticated || !isAdmin())) {
     return <Navigate to="/dashboard" />;
   }
   
-  if (isLoading) {
+  if (authLoading || isLoading) {
     return (
       <div className="flex items-center justify-center min-h-[60vh]">
         <div className="h-8 w-8 rounded-full border-4 border-primary border-t-transparent animate-spin"></div>
@@ -134,10 +131,16 @@ export default function AdminMembersPage() {
 
   // Filter members based on search query
   const filteredMembers = members.filter(member => 
-    member.firstName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    member.lastName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    member.email.toLowerCase().includes(searchQuery.toLowerCase())
+    (member.first_name || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
+    (member.last_name || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
+    (member.email || '').toLowerCase().includes(searchQuery.toLowerCase())
   );
+
+  // Open role management dialog
+  const openRoleManagement = (user: User) => {
+    setSelectedUser(user);
+    setIsManageRoleOpen(true);
+  };
 
   return (
     <div className="container mx-auto p-4 space-y-6">
@@ -176,10 +179,10 @@ export default function AdminMembersPage() {
               <TableRow>
                 <TableHead>Name</TableHead>
                 <TableHead>Role</TableHead>
+                <TableHead>Title</TableHead>
                 <TableHead>Voice Part</TableHead>
                 <TableHead>Status</TableHead>
-                <TableHead>Dues</TableHead>
-                <TableHead>Joined</TableHead>
+                <TableHead>Admin</TableHead>
                 <TableHead className="text-right">Actions</TableHead>
               </TableRow>
             </TableHeader>
@@ -188,29 +191,29 @@ export default function AdminMembersPage() {
                 <TableRow key={member.id}>
                   <TableCell>
                     <div>
-                      <div className="font-medium">{member.firstName} {member.lastName}</div>
+                      <div className="font-medium">{member.first_name} {member.last_name}</div>
                       <div className="text-sm text-muted-foreground">{member.email}</div>
                     </div>
                   </TableCell>
-                  <TableCell>{formatRole(member.role)}</TableCell>
-                  <TableCell>{formatVoicePart(member.voicePart)}</TableCell>
+                  <TableCell>{formatRole(member.role || '')}</TableCell>
+                  <TableCell>
+                    {member.title || 'General Member'}
+                  </TableCell>
+                  <TableCell>{formatVoicePart(member.voice_part || null)}</TableCell>
                   <TableCell>
                     <Badge variant={member.status === "active" ? "default" : "secondary"}>
-                      {member.status.charAt(0).toUpperCase() + member.status.slice(1)}
+                      {(member.status || 'pending').charAt(0).toUpperCase() + (member.status || 'pending').slice(1)}
                     </Badge>
                   </TableCell>
                   <TableCell>
-                    {member.duesPaid ? (
-                      <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
-                        Paid
+                    {member.is_super_admin ? (
+                      <Badge variant="outline" className="bg-primary-50 text-primary border-primary-200">
+                        Super Admin
                       </Badge>
                     ) : (
-                      <Badge variant="outline" className="bg-amber-50 text-amber-700 border-amber-200">
-                        Unpaid
-                      </Badge>
+                      <span className="text-muted-foreground text-sm">No</span>
                     )}
                   </TableCell>
-                  <TableCell>{new Date(member.joinDate).toLocaleDateString()}</TableCell>
                   <TableCell className="text-right">
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
@@ -221,10 +224,13 @@ export default function AdminMembersPage() {
                       <DropdownMenuContent align="end">
                         <DropdownMenuLabel>Member Actions</DropdownMenuLabel>
                         <DropdownMenuSeparator />
+                        <DropdownMenuItem onClick={() => openRoleManagement(member)}>
+                          <UserCog className="mr-2 h-4 w-4" />
+                          Manage Title & Role
+                        </DropdownMenuItem>
                         <DropdownMenuItem>View Profile</DropdownMenuItem>
                         <DropdownMenuItem>Edit Details</DropdownMenuItem>
                         <DropdownMenuItem>Change Voice Part</DropdownMenuItem>
-                        <DropdownMenuItem>Change Role</DropdownMenuItem>
                         <DropdownMenuSeparator />
                         <DropdownMenuItem className="text-destructive">Deactivate</DropdownMenuItem>
                       </DropdownMenuContent>
@@ -232,10 +238,26 @@ export default function AdminMembersPage() {
                   </TableCell>
                 </TableRow>
               ))}
+              
+              {filteredMembers.length === 0 && (
+                <TableRow>
+                  <TableCell colSpan={7} className="h-24 text-center">
+                    No members found matching your search.
+                  </TableCell>
+                </TableRow>
+              )}
             </TableBody>
           </Table>
         </div>
       </Card>
+      
+      {/* Role Management Dialog */}
+      <UserTitleManagement
+        user={selectedUser}
+        isOpen={isManageRoleOpen}
+        setIsOpen={setIsManageRoleOpen}
+        onSuccess={handleRoleUpdateSuccess}
+      />
     </div>
   );
 }

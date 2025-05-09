@@ -371,6 +371,7 @@ export type Database = {
           dues_paid: boolean | null
           first_name: string | null
           id: string
+          is_super_admin: boolean | null
           join_date: string | null
           last_name: string | null
           notes: string | null
@@ -378,6 +379,7 @@ export type Database = {
           role: string | null
           special_roles: string | null
           status: string | null
+          title: Database["public"]["Enums"]["user_title"] | null
           updated_at: string
           voice_part: string | null
         }
@@ -388,6 +390,7 @@ export type Database = {
           dues_paid?: boolean | null
           first_name?: string | null
           id: string
+          is_super_admin?: boolean | null
           join_date?: string | null
           last_name?: string | null
           notes?: string | null
@@ -395,6 +398,7 @@ export type Database = {
           role?: string | null
           special_roles?: string | null
           status?: string | null
+          title?: Database["public"]["Enums"]["user_title"] | null
           updated_at?: string
           voice_part?: string | null
         }
@@ -405,6 +409,7 @@ export type Database = {
           dues_paid?: boolean | null
           first_name?: string | null
           id?: string
+          is_super_admin?: boolean | null
           join_date?: string | null
           last_name?: string | null
           notes?: string | null
@@ -412,10 +417,40 @@ export type Database = {
           role?: string | null
           special_roles?: string | null
           status?: string | null
+          title?: Database["public"]["Enums"]["user_title"] | null
           updated_at?: string
           voice_part?: string | null
         }
         Relationships: []
+      }
+      role_permissions: {
+        Row: {
+          granted: boolean
+          id: string
+          permission: Database["public"]["Enums"]["permission_name"]
+          role_id: string | null
+        }
+        Insert: {
+          granted?: boolean
+          id?: string
+          permission: Database["public"]["Enums"]["permission_name"]
+          role_id?: string | null
+        }
+        Update: {
+          granted?: boolean
+          id?: string
+          permission?: Database["public"]["Enums"]["permission_name"]
+          role_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "role_permissions_role_id_fkey"
+            columns: ["role_id"]
+            isOneToOne: false
+            referencedRelation: "user_roles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       setlists: {
         Row: {
@@ -513,6 +548,24 @@ export type Database = {
         }
         Relationships: []
       }
+      user_roles: {
+        Row: {
+          description: string | null
+          id: string
+          title: Database["public"]["Enums"]["user_title"]
+        }
+        Insert: {
+          description?: string | null
+          id?: string
+          title: Database["public"]["Enums"]["user_title"]
+        }
+        Update: {
+          description?: string | null
+          id?: string
+          title?: Database["public"]["Enums"]["user_title"]
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
@@ -560,9 +613,23 @@ export type Database = {
           voice_part_display: string
         }[]
       }
+      get_user_permissions: {
+        Args: { p_user_id: string }
+        Returns: {
+          permission: Database["public"]["Enums"]["permission_name"]
+          granted: boolean
+        }[]
+      }
       handle_user_role: {
         Args: { p_user_id: string; p_role: string }
         Returns: undefined
+      }
+      has_permission: {
+        Args: {
+          p_user_id: string
+          p_permission: Database["public"]["Enums"]["permission_name"]
+        }
+        Returns: boolean
       }
       is_admin: {
         Args: Record<PropertyKey, never>
@@ -574,7 +641,44 @@ export type Database = {
       }
     }
     Enums: {
-      [_ in never]: never
+      permission_name:
+        | "can_view_financials"
+        | "can_edit_financials"
+        | "can_upload_sheet_music"
+        | "can_view_sheet_music"
+        | "can_edit_attendance"
+        | "can_view_attendance"
+        | "can_view_wardrobe"
+        | "can_edit_wardrobe"
+        | "can_upload_media"
+        | "can_manage_tour"
+        | "can_manage_stage"
+        | "can_view_prayer_box"
+        | "can_post_announcements"
+        | "can_manage_users"
+        | "can_manage_archives"
+        | "can_post_social"
+        | "can_view_travel_logistics"
+        | "can_manage_spiritual_events"
+        | "can_grade_submissions"
+        | "can_upload_documents"
+        | "can_view_events"
+        | "can_submit_absence_form"
+      user_title:
+        | "Super Admin"
+        | "Treasurer"
+        | "Librarian"
+        | "Wardrobe Mistress"
+        | "Secretary"
+        | "President"
+        | "Historian"
+        | "PR Manager"
+        | "Tour Manager"
+        | "Stage Manager"
+        | "Chaplain"
+        | "Section Leader"
+        | "Student Worker"
+        | "General Member"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -689,6 +793,47 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      permission_name: [
+        "can_view_financials",
+        "can_edit_financials",
+        "can_upload_sheet_music",
+        "can_view_sheet_music",
+        "can_edit_attendance",
+        "can_view_attendance",
+        "can_view_wardrobe",
+        "can_edit_wardrobe",
+        "can_upload_media",
+        "can_manage_tour",
+        "can_manage_stage",
+        "can_view_prayer_box",
+        "can_post_announcements",
+        "can_manage_users",
+        "can_manage_archives",
+        "can_post_social",
+        "can_view_travel_logistics",
+        "can_manage_spiritual_events",
+        "can_grade_submissions",
+        "can_upload_documents",
+        "can_view_events",
+        "can_submit_absence_form",
+      ],
+      user_title: [
+        "Super Admin",
+        "Treasurer",
+        "Librarian",
+        "Wardrobe Mistress",
+        "Secretary",
+        "President",
+        "Historian",
+        "PR Manager",
+        "Tour Manager",
+        "Stage Manager",
+        "Chaplain",
+        "Section Leader",
+        "Student Worker",
+        "General Member",
+      ],
+    },
   },
 } as const

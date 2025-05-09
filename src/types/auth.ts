@@ -30,6 +30,8 @@ export interface Profile {
   last_sign_in_at?: string | null;
   voice_part_display?: string | null;
   role_display_name?: string | null;
+  title?: string | null;
+  is_super_admin?: boolean | null;
 }
 
 export interface ProfileOverviewTabProps {
@@ -81,4 +83,5 @@ export interface AuthContextType {
   updatePassword?: (newPassword: string) => Promise<void>;
   signInWithGoogle?: () => void;
   signInWithApple?: () => void;
+  refreshPermissions?: () => Promise<void>;
 }

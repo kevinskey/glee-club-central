@@ -1,15 +1,16 @@
-
 import { createContext, useState, useContext, useEffect, ReactNode } from "react";
 import { Session } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
 import type { AuthUser, Profile } from "@/types/auth";
+import { UserPermissions } from "@/types/permissions";
 import { toast } from "sonner";
+import { fetchUserPermissions } from "@/utils/supabase/permissions";
 
 // Define the AuthContextType interface
 export interface AuthContextType {
   user: AuthUser | null;
   userProfile: Profile | null;
-  permissions: PermissionSet | null;
+  permissions: UserPermissions | null;
   loading: boolean;
   isAuthenticated: boolean;
   isLoading: boolean;
@@ -22,6 +23,7 @@ export interface AuthContextType {
   signInWithGoogle: () => Promise<void>;
   signInWithApple: () => Promise<void>;
   updatePassword: (password: string) => Promise<void>;
+  refreshPermissions: () => Promise<void>;
 }
 
 // Create the context
@@ -30,66 +32,6 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 interface Props {
   children: ReactNode;
 }
-
-// Define permissions type here since we removed the imported one
-interface PermissionSet {
-  canEditUsers: boolean;
-  canDeleteUsers: boolean;
-  canEditMusic: boolean;
-  canUploadMusic: boolean;
-  canEditCalendar: boolean;
-  canTakeAttendance: boolean;
-  canManagePayments: boolean;
-  canEditOwnProfile: boolean;
-  canViewMemberDetails: boolean;
-  canManageWardrobe: boolean;
-  canAccessAdminFeatures: boolean;
-  [key: string]: boolean;
-}
-
-// Helper function to get user permissions based on role
-const getUserPermissions = (role: string): PermissionSet => {
-  const basePermissions: PermissionSet = {
-    canEditUsers: false,
-    canDeleteUsers: false,
-    canEditMusic: false,
-    canUploadMusic: false,
-    canEditCalendar: false,
-    canTakeAttendance: false,
-    canManagePayments: false,
-    canEditOwnProfile: true,
-    canViewMemberDetails: false,
-    canManageWardrobe: false,
-    canAccessAdminFeatures: false
-  };
-
-  switch (role) {
-    case 'administrator':
-      return {
-        ...basePermissions,
-        canEditUsers: true,
-        canDeleteUsers: true,
-        canEditMusic: true,
-        canUploadMusic: true,
-        canEditCalendar: true,
-        canTakeAttendance: true,
-        canManagePayments: true,
-        canViewMemberDetails: true,
-        canManageWardrobe: true,
-        canAccessAdminFeatures: true
-      };
-    case 'section_leader':
-      return {
-        ...basePermissions,
-        canEditMusic: false,
-        canUploadMusic: true,
-        canTakeAttendance: true,
-        canViewMemberDetails: true
-      };
-    default:
-      return basePermissions;
-  }
-};
 
 // Helper function to clean up authentication state
 const cleanupAuthState = () => {
@@ -122,9 +64,25 @@ const cleanupAuthState = () => {
 export function AuthProvider({ children }: Props) {
   const [user, setUser] = useState<AuthUser | null>(null);
   const [userProfile, setUserProfile] = useState<Profile | null>(null);
-  const [permissions, setPermissions] = useState<PermissionSet | null>(null);
+  const [permissions, setPermissions] = useState<UserPermissions | null>(null);
   const [loading, setLoading] = useState(true);
   const [session, setSession] = useState<Session | null>(null);
+
+  // Function to fetch user permissions
+  const fetchPermissions = async (userId: string) => {
+    if (userId) {
+      const userPermissions = await fetchUserPermissions(userId);
+      console.log("User permissions:", userPermissions);
+      setPermissions(userPermissions);
+    }
+  };
+
+  // Function to refresh permissions
+  const refreshPermissions = async () => {
+    if (user?.id) {
+      await fetchPermissions(user.id);
+    }
+  };
 
   useEffect(() => {
     // On component mount, check for auth state
@@ -218,8 +176,8 @@ export function AuthProvider({ children }: Props) {
 
         setUserProfile(data as Profile);
         
-        // Set permissions based on the role
-        setPermissions(getUserPermissions(data.role));
+        // Fetch user permissions based on title
+        await fetchPermissions(userId);
       } else {
         console.log("No profile found for user:", userId);
       }
@@ -362,13 +320,17 @@ export function AuthProvider({ children }: Props) {
   // Check if user is admin
   const isAdmin = () => {
     if (!user) return false;
-    return user.role === "administrator";
+    return user.role === "administrator" || !!(userProfile?.is_super_admin);
   };
 
   // Check if user has specific permission
   const hasPermission = (permission: string) => {
     if (!permissions) return false;
-    return (permissions as any)[permission] === true;
+    
+    // Super Admin has all permissions
+    if (userProfile?.is_super_admin) return true;
+    
+    return permissions[permission] === true;
   };
 
   // Value object for the context provider
@@ -387,7 +349,8 @@ export function AuthProvider({ children }: Props) {
     hasPermission,
     signInWithGoogle,
     signInWithApple,
-    updatePassword
+    updatePassword,
+    refreshPermissions
   };
 
   return (

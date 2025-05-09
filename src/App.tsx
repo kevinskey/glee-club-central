@@ -2,6 +2,7 @@
 import React from 'react';
 import { Routes, Route } from 'react-router-dom';
 import { ProtectedRoute } from './components/auth/ProtectedRoute';
+import { PermissionRoute } from './components/auth/PermissionRoute';
 import { DashboardLayout } from './components/layout/DashboardLayout';
 
 // Pages
@@ -67,32 +68,106 @@ function App() {
       >
         <Route index element={<DashboardPage />} />
         <Route path="calendar" element={<CalendarPage />} />
-        <Route path="sheet-music" element={<SheetMusicPage />} />
-        <Route path="sheet-music/choral-titles" element={<ChoralTitlesPage />} />
+        <Route path="sheet-music" element={
+          <PermissionRoute requiredPermission="can_view_sheet_music">
+            <SheetMusicPage />
+          </PermissionRoute>
+        } />
+        <Route path="sheet-music/choral-titles" element={
+          <PermissionRoute requiredPermission="can_view_sheet_music">
+            <ChoralTitlesPage />
+          </PermissionRoute>
+        } />
         <Route path="sheet-music/:id" element={<ViewSheetMusicPage />} />
         <Route path="setlists" element={<SetlistsPage />} />
         <Route path="setlists/:id" element={<ViewSetlistPage />} />
         <Route path="practice" element={<PracticePage />} />
         <Route path="recordings" element={<RecordingsPage />} />
         <Route path="videos" element={<div>Videos Page</div>} />
-        <Route path="dues" element={<div>Dues Payment Page</div>} />
+        <Route path="dues" element={
+          <PermissionRoute requiredPermission="can_view_financials">
+            <div>Dues Payment Page</div>
+          </PermissionRoute>
+        } />
         <Route path="handbook" element={<div>Handbook Page</div>} />
         <Route path="merch" element={<div>Merchandise Page</div>} />
         <Route path="media-library" element={<div>Media Sources Page</div>} />
         <Route path="profile" element={<ProfilePage />} />
         <Route path="members" element={<div>Members Page</div>} />
-        <Route path="announcements" element={<div>Announcements Page</div>} />
-        <Route path="attendance" element={<AttendancePage />} />
+        <Route path="announcements" element={
+          <PermissionRoute requiredPermission="can_post_announcements">
+            <div>Announcements Page</div>
+          </PermissionRoute>
+        } />
+        <Route path="attendance" element={
+          <PermissionRoute requiredPermission="can_edit_attendance">
+            <AttendancePage />
+          </PermissionRoute>
+        } />
         <Route path="messages" element={<div>Messages Page</div>} />
         <Route path="performance-checklist" element={<PerformanceChecklistPage />} />
+        <Route path="wardrobe-status" element={
+          <PermissionRoute requiredPermission="can_view_wardrobe">
+            <div>Wardrobe Status Page</div>
+          </PermissionRoute>
+        } />
+        <Route path="wardrobe-admin" element={
+          <PermissionRoute requiredPermission="can_edit_wardrobe">
+            <div>Wardrobe Admin Page</div>
+          </PermissionRoute>
+        } />
+        <Route path="tour" element={
+          <PermissionRoute requiredPermission="can_manage_tour">
+            <div>Tour Management Page</div>
+          </PermissionRoute>
+        } />
+        <Route path="stage-plot" element={
+          <PermissionRoute requiredPermission="can_manage_stage">
+            <div>Stage Plot Manager Page</div>
+          </PermissionRoute>
+        } />
+        <Route path="prayer" element={
+          <PermissionRoute requiredPermission="can_view_prayer_box">
+            <div>Prayer Requests Page</div>
+          </PermissionRoute>
+        } />
+        <Route path="finances" element={
+          <PermissionRoute requiredPermission="can_view_financials">
+            <div>Financial Dashboard Page</div>
+          </PermissionRoute>
+        } />
         
         {/* Admin routes */}
-        <Route path="admin" element={<AdminDashboardPage />} />
-        <Route path="admin/members" element={<AdminMembersPage />} />
-        <Route path="admin/finances" element={<AdminFinancesPage />} />
-        <Route path="admin/wardrobe" element={<div>Wardrobe Management Page</div>} />
-        <Route path="admin/analytics" element={<AdminAnalyticsPage />} />
-        <Route path="admin/settings" element={<AdminSettingsPage />} />
+        <Route path="admin" element={
+          <PermissionRoute requireSuperAdmin>
+            <AdminDashboardPage />
+          </PermissionRoute>
+        } />
+        <Route path="admin/members" element={
+          <PermissionRoute requireSuperAdmin>
+            <AdminMembersPage />
+          </PermissionRoute>
+        } />
+        <Route path="admin/finances" element={
+          <PermissionRoute requireSuperAdmin>
+            <AdminFinancesPage />
+          </PermissionRoute>
+        } />
+        <Route path="admin/wardrobe" element={
+          <PermissionRoute requireSuperAdmin>
+            <div>Wardrobe Management Page</div>
+          </PermissionRoute>
+        } />
+        <Route path="admin/analytics" element={
+          <PermissionRoute requireSuperAdmin>
+            <AdminAnalyticsPage />
+          </PermissionRoute>
+        } />
+        <Route path="admin/settings" element={
+          <PermissionRoute requireSuperAdmin>
+            <AdminSettingsPage />
+          </PermissionRoute>
+        } />
         
         <Route path="*" element={<NotFoundPage />} />
       </Route>
