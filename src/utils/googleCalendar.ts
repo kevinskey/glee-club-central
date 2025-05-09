@@ -14,7 +14,7 @@ const GOOGLE_CALENDAR_ID = "00f2c84ca319b84d9b2adafc6434d2dd7c3aa3da4dfc458cc5d6
 // 5. Go to "APIs & Services" > "Credentials"
 // 6. Click "Create credentials" and select "API key"
 // 7. Copy the generated API key and paste it below
-const GOOGLE_CALENDAR_API_KEY = "AIzaSyBNlYH01_9Hc5S1J9vuFmu2nUqBZJNAXxs"; 
+const GOOGLE_CALENDAR_API_KEY = "9zx7bAIxfErcwdDg9Xn2cwup"; 
 
 export interface GoogleCalendarEvent {
   id: string;
