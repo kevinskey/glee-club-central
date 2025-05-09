@@ -3,11 +3,12 @@ import { format, parseISO } from 'date-fns';
 import { CalendarEvent } from '@/hooks/useCalendarEvents';
 
 // This is the public Google Calendar ID for Spelman College Glee Club
-const GOOGLE_CALENDAR_ID = "00f2c84ca319b84d9b2adafc6434d2dd7c3aa3da4dfc458cc5d633926a2e437@group.calendar.google.com";
+// Make sure this is the correct calendar ID for your Google Calendar
+const GOOGLE_CALENDAR_ID = "spelmangleeclub@gmail.com";
 
 // Your Google Calendar API key
 // This should be a valid API key from Google Cloud Console with Google Calendar API enabled
-const GOOGLE_CALENDAR_API_KEY = "AIzaSyCd8BS6BiOBgn89dCvGAsa5qTXT0j0S3Vc"; 
+const GOOGLE_CALENDAR_API_KEY = "AIzaSyCW-3QkDkb_r6du2Lcfn_wNwJdF2YPZusQ"; 
 
 export interface GoogleCalendarEvent {
   id: string;
@@ -42,9 +43,12 @@ export async function fetchGoogleCalendarEvents(
     const response = await fetch(url);
     
     if (!response.ok) {
-      const errorText = await response.text();
-      console.error('Failed to fetch Google Calendar events:', errorText);
-      throw new Error(`Failed to fetch events: ${response.status} - ${errorText}`);
+      const errorData = await response.json();
+      console.error('Failed to fetch Google Calendar events:', errorData);
+      
+      // Get a more specific error message if available
+      const errorMessage = errorData.error?.message || `HTTP error ${response.status}`;
+      throw new Error(`Google Calendar API error: ${errorMessage}`);
     }
     
     const data = await response.json();

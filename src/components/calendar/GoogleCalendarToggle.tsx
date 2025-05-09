@@ -1,11 +1,22 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Switch } from "@/components/ui/switch";
-import { ExternalLink, Calendar, Globe } from "lucide-react";
+import { ExternalLink, Calendar, Globe, Key } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { getViewGoogleCalendarUrl } from "@/utils/googleCalendar";
 import { toast } from "sonner";
 import { Badge } from '@/components/ui/badge';
+import { 
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+  DialogFooter
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 
 interface GoogleCalendarToggleProps {
   useGoogleCalendar: boolean;
@@ -20,6 +31,9 @@ export const GoogleCalendarToggle = ({
   googleCalendarError,
   compact = false
 }: GoogleCalendarToggleProps) => {
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [apiKey, setApiKey] = useState("");
+  
   const handleToggle = () => {
     toggleGoogleCalendar();
     toast.info(
@@ -27,6 +41,20 @@ export const GoogleCalendarToggle = ({
         ? "Switching to local calendar" 
         : "Switching to Google Calendar"
     );
+  };
+
+  const handleKeyConfigClick = () => {
+    setIsDialogOpen(true);
+  };
+
+  const handleSaveKey = () => {
+    // In a real app, we would save this key securely
+    // For now we'll just show a toast to simulate saving
+    toast.success("API Key configuration would be saved in a real app");
+    setIsDialogOpen(false);
+    
+    // Note: In a production app, we would store this in a secure way
+    // and reload the calendar data
   };
 
   if (compact) {
@@ -51,8 +79,43 @@ export const GoogleCalendarToggle = ({
           )}
         </Button>
         {googleCalendarError && useGoogleCalendar && (
-          <Badge variant="destructive" className="text-xs px-1 py-0">API Key Error</Badge>
+          <>
+            <Badge variant="destructive" className="text-xs px-1 py-0">API Error</Badge>
+            <Button variant="ghost" size="sm" className="h-6 w-6 p-0" onClick={handleKeyConfigClick}>
+              <Key className="h-3 w-3" />
+            </Button>
+          </>
         )}
+        
+        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Configure Google Calendar API</DialogTitle>
+              <DialogDescription>
+                Enter your Google Calendar API key to connect to your calendar.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="space-y-2">
+                <Label htmlFor="api-key">Google Calendar API Key</Label>
+                <Input
+                  id="api-key"
+                  placeholder="Enter your Google Calendar API key"
+                  value={apiKey}
+                  onChange={(e) => setApiKey(e.target.value)}
+                />
+              </div>
+              <div className="text-sm text-muted-foreground">
+                <p>You can get your API key from the Google Cloud Console.</p>
+                <p>Make sure the Google Calendar API is enabled for your project.</p>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setIsDialogOpen(false)}>Cancel</Button>
+              <Button onClick={handleSaveKey}>Save</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       </div>
     );
   }
@@ -86,6 +149,18 @@ export const GoogleCalendarToggle = ({
             <ExternalLink className="h-4 w-4" />
           </Button>
         )}
+        
+        {useGoogleCalendar && googleCalendarError && (
+          <Button 
+            variant="outline"
+            size="sm"
+            className="flex items-center space-x-2"
+            onClick={handleKeyConfigClick}
+          >
+            <Key className="h-4 w-4 mr-1" />
+            <span>Configure API Key</span>
+          </Button>
+        )}
       </div>
       
       {googleCalendarError && useGoogleCalendar && (
@@ -94,6 +169,36 @@ export const GoogleCalendarToggle = ({
           <span>Google Calendar API key invalid. Please check configuration.</span>
         </div>
       )}
+      
+      <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Configure Google Calendar API</DialogTitle>
+            <DialogDescription>
+              Enter your Google Calendar API key to connect to your calendar.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="api-key">Google Calendar API Key</Label>
+              <Input
+                id="api-key"
+                placeholder="Enter your Google Calendar API key"
+                value={apiKey}
+                onChange={(e) => setApiKey(e.target.value)}
+              />
+            </div>
+            <div className="text-sm text-muted-foreground">
+              <p>You can get your API key from the Google Cloud Console.</p>
+              <p>Make sure the Google Calendar API is enabled for your project.</p>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsDialogOpen(false)}>Cancel</Button>
+            <Button onClick={handleSaveKey}>Save</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
