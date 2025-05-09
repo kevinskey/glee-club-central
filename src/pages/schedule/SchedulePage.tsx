@@ -106,7 +106,7 @@ export default function SchedulePage() {
               <div className="text-amber-500 mb-4">
                 <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
               </div>
-              <p className="text-base font-medium mb-2">Unable to load Google Calendar events</p>
+              <p className="text-base font-medium mb-2 dark:text-white">Unable to load Google Calendar events</p>
               <p className="text-sm text-muted-foreground mb-4">Please check the Google Calendar API key configuration.</p>
               <Button onClick={() => toggleGoogleCalendar()}>
                 Switch to Local Calendar
@@ -115,17 +115,17 @@ export default function SchedulePage() {
           ) : (
             <div className="space-y-6">
               {events.length === 0 ? (
-                <p className="text-center text-gray-500">No upcoming events found.</p>
+                <p className="text-center text-gray-500 dark:text-white">No upcoming events found.</p>
               ) : (
                 events.slice(0, 10).map((event) => (
                   <div
                     key={event.id}
-                    className="rounded-lg border p-4"
+                    className="rounded-lg border p-4 dark:border-gray-700"
                   >
                     <div className="flex flex-wrap items-start justify-between gap-2">
                       <div>
-                        <h3 className="text-xl font-medium">{event.title}</h3>
-                        <div className="mt-1 flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-muted-foreground">
+                        <h3 className="text-xl font-medium dark:text-white">{event.title}</h3>
+                        <div className="mt-1 flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-muted-foreground dark:text-gray-300">
                           <div className="flex items-center gap-1">
                             <Calendar className="h-4 w-4" />
                             <span>{format(event.date, 'yyyy-MM-dd')}</span>
@@ -146,7 +146,7 @@ export default function SchedulePage() {
                         {event.type.charAt(0).toUpperCase() + event.type.slice(1)}
                       </Badge>
                     </div>
-                    <p className="mt-4 text-sm">{event.description}</p>
+                    <p className="mt-4 text-sm dark:text-white">{event.description}</p>
                     {user?.role === "administrator" && (
                       <div className="mt-4 flex justify-end gap-2">
                         <Button variant="outline" size="sm">Edit</Button>

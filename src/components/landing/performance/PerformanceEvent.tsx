@@ -33,8 +33,8 @@ export const PerformanceEventItem = ({
     >
       <div className="flex items-center justify-between">
         <div className="flex-1 mr-4">
-          <h4 className="font-semibold text-base md:text-lg">{event.title}</h4>
-          <div className="flex items-center text-sm text-gray-600 dark:text-gray-300 mt-1">
+          <h4 className="font-semibold text-base md:text-lg dark:text-white">{event.title}</h4>
+          <div className="flex items-center text-sm text-gray-600 dark:text-white mt-1">
             <Calendar className="h-3.5 w-3.5 mr-1" />
             <span>{format(event.date, "MMMM d, yyyy")}</span>
           </div>
@@ -83,7 +83,7 @@ export const PerformanceEventDetails = ({
         </div>
       </div>
       <div className="p-4 md:p-6">
-        <p className="text-gray-700 dark:text-gray-300">{event.description}</p>
+        <p className="text-gray-700 dark:text-white">{event.description}</p>
         <div className="mt-4 flex flex-wrap gap-3">
           {onViewCalendar && (
             <Button

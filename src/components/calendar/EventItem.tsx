@@ -27,30 +27,30 @@ export const EventItem = memo(({
       className={`p-3 md:p-4 border rounded-lg cursor-pointer transition-colors ${
         isSelected
           ? 'border-glee-purple bg-glee-purple/10 dark:bg-glee-purple/10'
-          : 'hover:bg-gray-50 dark:hover:bg-gray-50/70'
+          : 'hover:bg-gray-50 dark:hover:bg-gray-700'
       }`}
       onClick={() => onSelect(event)}
     >
       <div className="flex justify-between items-start">
-        <h3 className={`font-medium ${isMobile ? 'text-base' : 'text-lg'} text-gray-800 dark:text-gray-800`}>
+        <h3 className={`font-medium ${isMobile ? 'text-base' : 'text-lg'} text-gray-800 dark:text-white`}>
           {event.title}
         </h3>
         <Badge className={`${typeColor} text-white font-medium text-xs`}>
           {event.type.charAt(0).toUpperCase() + event.type.slice(1)}
         </Badge>
       </div>
-      <div className={`mt-2 text-xs ${!isMobile && 'sm:text-sm'} text-gray-700 dark:text-gray-700`}>
+      <div className={`mt-2 text-xs ${!isMobile && 'sm:text-sm'} text-gray-700 dark:text-white`}>
         <div className="flex items-center gap-1 mb-2">
-          <Clock className="h-3 w-3 md:h-4 md:w-4 text-gray-600 dark:text-gray-600" />
+          <Clock className="h-3 w-3 md:h-4 md:w-4 text-gray-600 dark:text-gray-300" />
           <span className="font-medium">{event.time}</span>
         </div>
         <div className="flex items-center gap-1">
-          <MapPin className="h-3 w-3 md:h-4 md:w-4 text-gray-600 dark:text-gray-600" />
+          <MapPin className="h-3 w-3 md:h-4 md:w-4 text-gray-600 dark:text-gray-300" />
           <span className="font-medium truncate">{event.location}</span>
         </div>
       </div>
       {isSelected && (
-        <p className="mt-3 text-xs md:text-sm text-gray-700 dark:text-gray-700">{event.description}</p>
+        <p className="mt-3 text-xs md:text-sm text-gray-700 dark:text-white">{event.description}</p>
       )}
     </div>
   );
