@@ -25,9 +25,14 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import { supabase } from "@/integrations/supabase/client";
-import { User } from "@/hooks/useUserManagement";
+import { User, useUserManagement } from "@/hooks/useUserManagement";
 import { UserTitleManagement } from "@/components/admin/UserTitleManagement";
 import { toast } from "sonner";
+import { AddMemberDialog } from "@/components/members/AddMemberDialog";
+import { UserFormValues } from "@/components/members/form/userFormSchema";
+import { usePermissions } from "@/hooks/usePermissions";
+import { UserManagementToolbar } from "@/components/members/UserManagementToolbar";
+import { useMedia } from "@/hooks/use-mobile";
 
 // Format voice part for display
 const formatVoicePart = (voicePart: string | null): string => {
@@ -61,58 +66,46 @@ const formatRole = (role: string): string => {
 
 export default function AdminMembersPage() {
   const { isAdmin, isLoading: authLoading, isAuthenticated } = useAuth();
+  const { hasPermission } = usePermissions();
   const [searchQuery, setSearchQuery] = useState("");
-  const [members, setMembers] = useState<User[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const [roleFilter, setRoleFilter] = useState("");
+  const [statusFilter, setStatusFilter] = useState("");
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [isManageRoleOpen, setIsManageRoleOpen] = useState(false);
-
-  // Fetch members
+  const [isAddMemberOpen, setIsAddMemberOpen] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const isMobile = useMedia('(max-width: 640px)');
+  
+  const {
+    users: members,
+    isLoading,
+    fetchUsers,
+    addUser
+  } = useUserManagement();
+  
+  // Fetch members on component mount
   useEffect(() => {
-    async function fetchMembers() {
-      try {
-        const { data, error } = await supabase
-          .from('profiles')
-          .select('*');
-          
-        if (error) {
-          throw error;
-        }
-        
-        if (data) {
-          setMembers(data as User[]);
-        }
-      } catch (error) {
-        console.error('Error fetching members:', error);
-        toast.error('Failed to load members');
-      } finally {
-        setIsLoading(false);
-      }
+    if (isAuthenticated && isAdmin()) {
+      fetchUsers();
     }
-    
-    fetchMembers();
-  }, []);
+  }, [isAuthenticated]);
 
   // Handle refresh after role update
   const handleRoleUpdateSuccess = async () => {
+    await fetchUsers();
+    toast.success("Member list refreshed");
+  };
+  
+  // Handle adding a new member
+  const handleAddMember = async (data: UserFormValues) => {
+    setIsSubmitting(true);
     try {
-      setIsLoading(true);
-      const { data, error } = await supabase
-        .from('profiles')
-        .select('*');
-        
-      if (error) {
-        throw error;
+      const success = await addUser(data);
+      if (success) {
+        setIsAddMemberOpen(false);
       }
-      
-      if (data) {
-        setMembers(data as User[]);
-        toast.success("Member list refreshed");
-      }
-    } catch (error) {
-      console.error('Error refreshing members:', error);
     } finally {
-      setIsLoading(false);
+      setIsSubmitting(false);
     }
   };
 
@@ -129,12 +122,18 @@ export default function AdminMembersPage() {
     );
   }
 
-  // Filter members based on search query
-  const filteredMembers = members.filter(member => 
-    (member.first_name || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
-    (member.last_name || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
-    (member.email || '').toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  // Filter members based on search query and filters
+  const filteredMembers = members.filter(member => {
+    const matchesSearch = 
+      (member.first_name || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (member.last_name || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (member.email || '').toLowerCase().includes(searchQuery.toLowerCase());
+    
+    const matchesRole = !roleFilter || (member.role || '') === roleFilter;
+    const matchesStatus = !statusFilter || (member.status || '') === statusFilter;
+    
+    return matchesSearch && matchesRole && matchesStatus;
+  });
 
   // Open role management dialog
   const openRoleManagement = (user: User) => {
@@ -151,27 +150,19 @@ export default function AdminMembersPage() {
       />
       
       <Card className="p-4">
-        <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between mb-6">
-          <div className="relative flex-1">
-            <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-            <Input
-              placeholder="Search members..."
-              className="pl-8"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-            />
-          </div>
-          <div className="flex gap-2">
-            <Button variant="outline" size="sm">
-              <Filter className="h-4 w-4 mr-2" />
-              Filter
-            </Button>
-            <Button size="sm">
-              <Plus className="h-4 w-4 mr-2" />
-              Add Member
-            </Button>
-          </div>
-        </div>
+        <UserManagementToolbar 
+          searchTerm={searchQuery}
+          setSearchTerm={setSearchQuery}
+          roleFilter={roleFilter}
+          setRoleFilter={setRoleFilter}
+          statusFilter={statusFilter}
+          setStatusFilter={setStatusFilter}
+          onCreateUserClick={() => setIsAddMemberOpen(true)}
+          onRefreshClick={fetchUsers}
+          isLoading={isLoading}
+          isMobile={isMobile}
+          canCreate={hasPermission('can_manage_users')}
+        />
         
         <div className="border rounded-md">
           <Table>
@@ -257,6 +248,14 @@ export default function AdminMembersPage() {
         isOpen={isManageRoleOpen}
         setIsOpen={setIsManageRoleOpen}
         onSuccess={handleRoleUpdateSuccess}
+      />
+      
+      {/* Add Member Dialog */}
+      <AddMemberDialog
+        isOpen={isAddMemberOpen}
+        onOpenChange={setIsAddMemberOpen}
+        onMemberAdd={handleAddMember}
+        isSubmitting={isSubmitting}
       />
     </div>
   );
