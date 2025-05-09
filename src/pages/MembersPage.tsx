@@ -1,8 +1,7 @@
-
 import React, { useState, useEffect } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { PageHeader } from "@/components/ui/page-header";
-import { Users, Search, Filter, UserPlus } from "lucide-react";
+import { Users, Search, Filter, UserPlus, ShieldCheck } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -25,6 +24,7 @@ import { usePermissions } from "@/hooks/usePermissions";
 import { DeleteMemberDialog } from "@/components/members/DeleteMemberDialog";
 import { User } from "@/hooks/useUserManagement";
 import { Separator } from "@/components/ui/separator";
+import { MemberPermissionsDialog } from "@/components/members/MemberPermissionsDialog";
 
 export default function MembersPage() {
   const { isLoading: authLoading } = useAuth();
@@ -173,6 +173,12 @@ export default function MembersPage() {
     authLoading,
     canManageMembers
   });
+
+  // Handle managing permissions for a member
+  const handleManagePermissions = (member: User) => {
+    setCurrentMember(member);
+    setIsPermissionsDialogOpen(true);
+  };
 
   return (
     <div className="container mx-auto p-4 space-y-6">
@@ -336,6 +342,7 @@ export default function MembersPage() {
                     members={filteredMembers} 
                     onEditMember={canManageMembers ? handleEditMember : undefined}
                     onDeleteMember={canManageMembers ? handleDeleteClick : undefined}
+                    onManagePermissions={canManageMembers ? handleManagePermissions : undefined}
                   />
                 )}
               </div>
@@ -356,6 +363,7 @@ export default function MembersPage() {
                   members={filteredMembers} 
                   onEditMember={canManageMembers ? handleEditMember : undefined}
                   onDeleteMember={canManageMembers ? handleDeleteClick : undefined}
+                  onManagePermissions={canManageMembers ? handleManagePermissions : undefined}
                 />
               )}
             </Card>
@@ -375,6 +383,7 @@ export default function MembersPage() {
                   members={filteredMembers} 
                   onEditMember={canManageMembers ? handleEditMember : undefined}
                   onDeleteMember={canManageMembers ? handleDeleteClick : undefined}
+                  onManagePermissions={canManageMembers ? handleManagePermissions : undefined}
                 />
               )}
             </Card>
@@ -421,6 +430,16 @@ export default function MembersPage() {
           onConfirm={handleConfirmDelete}
           memberName={memberToDeleteName}
           isDeleting={isDeleting}
+        />
+      )}
+      
+      {/* Permissions Dialog */}
+      {canManageMembers && (
+        <MemberPermissionsDialog
+          user={currentMember}
+          isOpen={isPermissionsDialogOpen}
+          setIsOpen={setIsPermissionsDialogOpen}
+          onSuccess={fetchUsers}
         />
       )}
     </div>
