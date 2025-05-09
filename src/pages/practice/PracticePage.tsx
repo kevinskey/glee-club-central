@@ -1,3 +1,4 @@
+
 import React from "react";
 import { PageHeader } from "@/components/ui/page-header";
 import { Headphones, Music, PlayCircle, Music2 } from "lucide-react";
@@ -73,7 +74,7 @@ const practiceData: Record<string, PracticeMedia[]> = {
 };
 
 export default function PracticePage() {
-  const { user } = useAuth();
+  const { user, userProfile } = useAuth();
   const [activeTab, setActiveTab] = React.useState<string>("warmups");
   
   // Handle media playback
@@ -83,11 +84,9 @@ export default function PracticePage() {
     alert(`In a real app, this would play "${media.title}"`);
   };
 
-  // Update the role comparisons to use "administrator" instead of "admin"
-  const canUpload = user?.role === "administrator" || user?.role === "section_leader";
-  
-  // Update any other role comparisons
-  const isAdmin = user?.role === "administrator";
+  // Update role checks to use correct roles
+  const canUpload = userProfile?.role === "administrator" || userProfile?.role === "section_leader";
+  const isAdmin = userProfile?.role === "administrator";
   
   return (
     <div>

@@ -26,6 +26,7 @@ import AdministrationPage from './pages/AdministrationPage';
 import ViewSheetMusicPage from './pages/sheet-music/ViewSheetMusicPage';
 import SetlistsPage from './pages/SetlistsPage';
 import ViewSetlistPage from './pages/ViewSetlistPage';
+import PracticePage from './pages/practice/PracticePage';
 
 // Admin Pages
 import AdminDashboardPage from './pages/AdminDashboardPage';
@@ -71,7 +72,7 @@ function App() {
         <Route path="sheet-music/:id" element={<ViewSheetMusicPage />} />
         <Route path="setlists" element={<SetlistsPage />} />
         <Route path="setlists/:id" element={<ViewSetlistPage />} />
-        <Route path="practice" element={<div>Practice Page</div>} />
+        <Route path="practice" element={<PracticePage />} />
         <Route path="recordings" element={<RecordingsPage />} />
         <Route path="videos" element={<div>Videos Page</div>} />
         <Route path="dues" element={<div>Dues Payment Page</div>} />
