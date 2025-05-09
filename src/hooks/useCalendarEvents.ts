@@ -44,16 +44,12 @@ export function useCalendarEvents() {
       return googleEvents;
     } catch (err) {
       console.error("Error fetching Google Calendar events:", err);
-      // Only show toast on first error
-      if (!fetchError) {
-        const message = err instanceof Error ? err.message : "Failed to load events from Google Calendar";
-        setGoogleCalendarError(message);
-        toast.error("Failed to load events from Google Calendar. Check API key configuration.");
-        // Don't auto-switch to local calendar to allow user to fix API key
-      }
+      const message = err instanceof Error ? err.message : "Failed to load events from Google Calendar";
+      setGoogleCalendarError(message);
+      toast.error("Failed to load events from Google Calendar. Check API key configuration.");
       return [];
     }
-  }, [useGoogleCalendar, fetchError]);
+  }, [useGoogleCalendar]);
 
   // Fetch events from Supabase
   const fetchEvents = useCallback(async () => {
@@ -176,7 +172,9 @@ export function useCalendarEvents() {
         toast.info("Switching to Google Calendar");
         fetchEvents(); // Refresh events when switching to Google Calendar
       } else {
+        setGoogleCalendarError(null); // Clear errors when switching to local
         toast.info("Switching to local calendar");
+        fetchEvents(); // Refresh events when switching to local calendar
       }
       return newValue;
     });
