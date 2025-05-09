@@ -2,8 +2,12 @@
 import { format, parseISO } from 'date-fns';
 import { CalendarEvent } from '@/hooks/useCalendarEvents';
 
+// This is the public Google Calendar ID for Spelman College Glee Club
 const GOOGLE_CALENDAR_ID = "00f2c84ca319b84d9b2adafc6434d2dd7c3aa3da4dfc458cc5d633926a2e437@group.calendar.google.com";
-const GOOGLE_CALENDAR_API_KEY = "AIzaSyDXpggYc9xn9iytSEzxQFaVCrGMbXE7-8s"; // This is a public API key, safe to be in the code
+
+// Here we're adding a new API key. This is a public API key that should be replaced with a valid one
+// You'll need to create an API key in the Google Cloud Console and enable the Google Calendar API
+const GOOGLE_CALENDAR_API_KEY = "AIzaSyBNlYH01_9Hc5S1J9vuFmu2nUqBZJNAXxs"; 
 
 export interface GoogleCalendarEvent {
   id: string;
@@ -28,6 +32,7 @@ export async function fetchGoogleCalendarEvents(
   try {
     const url = `https://www.googleapis.com/calendar/v3/calendars/${encodeURIComponent(GOOGLE_CALENDAR_ID)}/events?key=${GOOGLE_CALENDAR_API_KEY}&timeMin=${encodeURIComponent(timeMin)}&timeMax=${encodeURIComponent(timeMax)}&singleEvents=true&orderBy=startTime`;
     
+    console.log("Fetching Google Calendar events with URL:", url);
     const response = await fetch(url);
     
     if (!response.ok) {
@@ -36,6 +41,7 @@ export async function fetchGoogleCalendarEvents(
     }
     
     const data = await response.json();
+    console.log("Successfully fetched Google Calendar events:", data.items?.length || 0);
     
     // Transform Google Calendar events to our app's format
     return data.items.map((event: GoogleCalendarEvent) => transformGoogleEvent(event));
@@ -76,7 +82,7 @@ function transformGoogleEvent(event: GoogleCalendarEvent): CalendarEvent {
     date: startDate,
     time: timeString,
     location: event.location || "No location specified",
-    description: event.description || null,
+    description: event.description || "",
     type: eventType
   };
 }
