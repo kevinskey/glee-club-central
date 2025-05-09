@@ -1,97 +1,102 @@
 
 import React from "react";
-import { format } from "date-fns";
-import { CalendarIcon, Clock, MapPin, Edit, Trash2 } from "lucide-react";
-import { Button } from "@/components/ui/button";
 import { CalendarEvent } from "@/hooks/useCalendarEvents";
-import { useAuth } from "@/contexts/AuthContext";
+import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
+import { Calendar, Clock, MapPin, ExternalLink } from "lucide-react";
+import { format } from "date-fns";
+import { useIsMobile } from "@/hooks/use-mobile";
+import { getAddToGoogleCalendarUrl, getViewGoogleCalendarUrl } from "@/utils/googleCalendar";
 
 interface EventDetailsProps {
   selectedEvent: CalendarEvent;
-  onDeleteEvent: () => Promise<void>;
   onEditEvent?: () => void;
+  onDeleteEvent?: () => void;
 }
 
-export const EventDetails = ({ 
-  selectedEvent, 
+export const EventDetails = ({
+  selectedEvent,
+  onEditEvent,
   onDeleteEvent,
-  onEditEvent
 }: EventDetailsProps) => {
-  const { user } = useAuth();
+  const isMobile = useIsMobile();
+  const isGoogleEvent = selectedEvent.source === "google";
 
-  if (!selectedEvent) return null;
+  // Helper function to render button or link label based on device
+  const renderButtonLabel = (text: string, icon: React.ReactNode) => (
+    <div className="flex items-center space-x-1">
+      {icon}
+      {!isMobile && <span>{text}</span>}
+    </div>
+  );
 
   return (
-    <div className="mt-6 pt-6 border-t">
-      {/* Show event image if available */}
-      {selectedEvent.image_url && (
-        <div className="mb-4">
-          <img
-            src={selectedEvent.image_url}
-            alt={selectedEvent.title}
-            className="w-full h-auto max-h-60 object-cover rounded-lg shadow-sm"
-          />
-        </div>
-      )}
-
-      <h3 className="text-xl font-semibold mb-3 text-gray-800 dark:text-white">{selectedEvent.title}</h3>
-      <div className="space-y-3 text-base mb-4 text-gray-700 dark:text-gray-300">
-        <div className="flex items-center gap-2">
-          <CalendarIcon className="h-4 w-4 text-gray-600 dark:text-gray-400" />
-          <span className="font-medium">{format(selectedEvent.date, 'MMMM d, yyyy')}</span>
-        </div>
-        <div className="flex items-center gap-2">
-          <Clock className="h-4 w-4 text-gray-600 dark:text-gray-400" />
-          <span className="font-medium">{selectedEvent.time}</span>
-        </div>
-        <div className="flex items-center gap-2">
-          <MapPin className="h-4 w-4 text-gray-600 dark:text-gray-400" />
-          <span className="font-medium">{selectedEvent.location}</span>
+    <Card className="p-4 mt-4 bg-white dark:bg-gray-800">
+      <div className="mb-4">
+        <h2 className="text-lg md:text-xl font-semibold">{selectedEvent.title}</h2>
+        
+        <div className="mt-2 space-y-2">
+          <div className="flex items-start md:items-center gap-2 text-sm">
+            <Calendar className="h-4 w-4 mt-0.5 md:mt-0" />
+            <span>{format(selectedEvent.date, 'EEEE, MMMM d, yyyy')}</span>
+          </div>
+          
+          <div className="flex items-start md:items-center gap-2 text-sm">
+            <Clock className="h-4 w-4 mt-0.5 md:mt-0" />
+            <span>{selectedEvent.time}</span>
+          </div>
+          
+          <div className="flex items-start md:items-center gap-2 text-sm">
+            <MapPin className="h-4 w-4 mt-0.5 md:mt-0" />
+            <span>{selectedEvent.location}</span>
+          </div>
         </div>
       </div>
-      <p className="text-base text-gray-700 dark:text-gray-300">{selectedEvent.description}</p>
-
-      {/* Event actions */}
-      <div className="mt-6 flex flex-wrap gap-3">
-        <Button 
-          variant="outline"
-          onClick={() => {
-            if (navigator.share) {
-              navigator.share({
-                title: selectedEvent.title,
-                text: `${selectedEvent.title} on ${format(selectedEvent.date, 'MMMM d, yyyy')} at ${selectedEvent.location}`,
-                url: window.location.href,
-              }).catch(err => console.log('Error sharing', err));
-            } else {
-              navigator.clipboard.writeText(window.location.href);
-              alert('Link copied to clipboard!');
-            }
-          }}
-        >
-          Share Event
-        </Button>
-        
-        {user && user.id && (
+      
+      {selectedEvent.description && (
+        <div className="mb-4">
+          <h3 className="font-medium mb-1">Description</h3>
+          <p className="text-sm text-muted-foreground">{selectedEvent.description}</p>
+        </div>
+      )}
+      
+      <div className="flex flex-wrap justify-end gap-2 mt-4">
+        {isGoogleEvent ? (
+          // Google Calendar event actions
+          <>
+            <Button
+              variant="outline"
+              size={isMobile ? "sm" : "default"}
+              onClick={() => window.open(getViewGoogleCalendarUrl(), "_blank")}
+            >
+              {renderButtonLabel("View in Google Calendar", <ExternalLink className="h-4 w-4" />)}
+            </Button>
+          </>
+        ) : (
+          // Local event actions
           <>
             {onEditEvent && (
               <Button
                 variant="outline"
-                className="text-blue-500 hover:bg-blue-50 hover:text-blue-600 dark:hover:bg-blue-900/20"
+                size={isMobile ? "sm" : "default"}
                 onClick={onEditEvent}
               >
-                <Edit className="w-4 h-4 mr-1" /> Edit
+                {renderButtonLabel("Edit", <span className="h-4 w-4">✏️</span>)}
               </Button>
             )}
-            <Button
-              variant="outline"
-              className="text-red-500 hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-900/20"
-              onClick={onDeleteEvent}
-            >
-              <Trash2 className="w-4 h-4 mr-1" /> Delete
-            </Button>
+            
+            {onDeleteEvent && (
+              <Button
+                variant="destructive"
+                size={isMobile ? "sm" : "default"}
+                onClick={onDeleteEvent}
+              >
+                {renderButtonLabel("Delete", <span className="h-4 w-4">🗑️</span>)}
+              </Button>
+            )}
           </>
         )}
       </div>
-    </div>
+    </Card>
   );
 };

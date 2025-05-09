@@ -25,13 +25,30 @@ export interface GoogleCalendarEvent {
   };
 }
 
+// Cache mechanism for Google Calendar events
+const eventCache = {
+  events: [] as CalendarEvent[],
+  lastFetchTime: 0,
+  cacheValidTime: 5 * 60 * 1000, // 5 minutes in milliseconds
+};
+
 // Fetch events from Google Calendar
 export async function fetchGoogleCalendarEvents(
   timeMin: string = new Date().toISOString(),
   timeMax: string = new Date(addDays(new Date(), 90)).toISOString(),  // Default to 90 days ahead
   daysAhead?: number, // New parameter for days ahead
+  forceRefresh: boolean = false, // New parameter to force refresh
 ): Promise<CalendarEvent[]> {
   try {
+    // Check if cache is valid and we're not forcing a refresh
+    const now = Date.now();
+    if (!forceRefresh && 
+        eventCache.events.length > 0 && 
+        now - eventCache.lastFetchTime < eventCache.cacheValidTime) {
+      console.log("Using cached Google Calendar events:", eventCache.events.length);
+      return eventCache.events;
+    }
+
     // Check if API key is available
     if (!GOOGLE_CALENDAR_API_KEY || GOOGLE_CALENDAR_API_KEY.length === 0) {
       console.error('Google Calendar API key is missing');
@@ -62,12 +79,24 @@ export async function fetchGoogleCalendarEvents(
     console.log("Successfully fetched Google Calendar events:", data.items?.length || 0);
     
     // Transform Google Calendar events to our app's format
-    return data.items?.map((event: GoogleCalendarEvent) => transformGoogleEvent(event)) || [];
+    const transformedEvents = data.items?.map((event: GoogleCalendarEvent) => transformGoogleEvent(event)) || [];
+    
+    // Update cache
+    eventCache.events = transformedEvents;
+    eventCache.lastFetchTime = now;
+    
+    return transformedEvents;
     
   } catch (error) {
     console.error('Error fetching Google Calendar events:', error);
     throw error;
   }
+}
+
+// Clear the cache to force a refresh on next fetch
+export function clearGoogleCalendarCache() {
+  eventCache.events = [];
+  eventCache.lastFetchTime = 0;
 }
 
 // Helper function to transform Google Calendar event to app format
@@ -128,8 +157,8 @@ export function getViewGoogleCalendarUrl(): string {
 // Helper function to sync events from Google Calendar to Supabase
 export async function syncGoogleEventsToSupabase(userId: string) {
   try {
-    // First, get Google Calendar events
-    const googleEvents = await fetchGoogleCalendarEvents();
+    // Force refresh from Google Calendar
+    const googleEvents = await fetchGoogleCalendarEvents(undefined, undefined, undefined, true);
     
     // Prepare events for Supabase format
     const eventsToSync = googleEvents.map(event => ({

@@ -74,6 +74,12 @@ export function useCalendarOperations(refreshEvents: () => Promise<void>) {
   const updateEvent = async (event: CalendarEvent) => {
     setIsProcessing(true);
     try {
+      // Check if this is a Google Calendar event
+      if (event.source === "google" || typeof event.id === 'string' && event.id.includes('_')) {
+        toast.info("Google Calendar events can only be edited in Google Calendar");
+        return false;
+      }
+      
       if (!user) {
         toast.error("You must be logged in to update events");
         return false;
@@ -120,6 +126,12 @@ export function useCalendarOperations(refreshEvents: () => Promise<void>) {
   const deleteEvent = async (eventId: string | number) => {
     setIsProcessing(true);
     try {
+      // Check if this is a Google Calendar event
+      if (typeof eventId === 'string' && eventId.includes('_')) {
+        toast.info("Google Calendar events can only be deleted in Google Calendar");
+        return false;
+      }
+      
       if (!user) {
         toast.error("You must be logged in to delete events");
         return false;

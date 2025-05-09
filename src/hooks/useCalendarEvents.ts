@@ -5,7 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { useSampleEvents } from "./useSampleEvents";
 import { useCalendarOperations } from "./useCalendarOperations";
-import { fetchGoogleCalendarEvents, GoogleCalendarEvent } from "@/utils/googleCalendar";
+import { fetchGoogleCalendarEvents, clearGoogleCalendarCache } from "@/utils/googleCalendar";
 
 export interface CalendarEvent {
   id: number | string;
@@ -28,12 +28,23 @@ export function useCalendarEvents() {
   const [fetchError, setFetchError] = useState(false);
   const initialFetchDoneRef = useRef(false);
   const lastUserIdRef = useRef<string | null>(null);
+  const lastFetchTimeRef = useRef<number>(0);
+  const fetchIntervalRef = useRef<number>(60000); // Default 60 seconds
 
   // Fetch events from Supabase
-  const fetchEvents = useCallback(async () => {
+  const fetchEvents = useCallback(async (forceRefresh: boolean = false) => {
     // Skip if already fetching
     if (fetchingRef.current) return;
+    
+    // If not force refreshing, check if it's too soon to fetch again
+    const now = Date.now();
+    if (!forceRefresh && now - lastFetchTimeRef.current < fetchIntervalRef.current) {
+      console.log("Skipping fetch, too soon since last fetch");
+      return;
+    }
+    
     fetchingRef.current = true;
+    lastFetchTimeRef.current = now;
     
     // Check if the user has changed since the last fetch
     const currentUserId = user?.id || null;
@@ -55,8 +66,12 @@ export function useCalendarEvents() {
         return;
       }
 
-      if (!initialFetchDoneRef.current || userChanged) {
+      if (!initialFetchDoneRef.current || userChanged || forceRefresh) {
         setLoading(true);
+        // Clear Google Calendar cache if forcing refresh
+        if (forceRefresh) {
+          clearGoogleCalendarCache();
+        }
       }
 
       // Now fetch events from Supabase
@@ -93,14 +108,14 @@ export function useCalendarEvents() {
             description: event.description || "",
             type: event.type as "concert" | "rehearsal" | "tour" | "special",
             image_url: event.image_url,
-            source: "local"
+            source: "local" as const
           }));
         }
         
         // Try to fetch Google Calendar events
         try {
           console.log("Attempting to fetch Google Calendar events");
-          const googleEvents = await fetchGoogleCalendarEvents(undefined, undefined, 90);
+          const googleEvents = await fetchGoogleCalendarEvents(undefined, undefined, 90, forceRefresh);
           
           // Mark events as coming from Google Calendar
           const formattedGoogleEvents = googleEvents.map(event => ({
@@ -124,7 +139,9 @@ export function useCalendarEvents() {
           });
           
           setEvents(combinedEvents);
-          console.log("Combined events count:", combinedEvents.length);
+          console.log("Combined events count:", combinedEvents.length, 
+            "(Supabase:", supabaseEvents.length, 
+            "Google:", formattedGoogleEvents.length, ")");
           
         } catch (googleErr) {
           console.error("Error fetching Google Calendar events:", googleErr);
@@ -149,13 +166,18 @@ export function useCalendarEvents() {
     }
   }, [user, getSampleEvents, fetchError]);
 
+  // Force refresh function
+  const refreshEvents = useCallback(() => {
+    return fetchEvents(true);
+  }, [fetchEvents]);
+
   // Initialize operations hooks with the fetchEvents callback
   const { 
     addEvent, 
     updateEvent, 
     deleteEvent, 
     isProcessing 
-  } = useCalendarOperations(fetchEvents);
+  } = useCalendarOperations(refreshEvents);
 
   // Load events on component mount or when user changes
   useEffect(() => {
@@ -172,13 +194,13 @@ export function useCalendarEvents() {
     }
     
     // Increase the polling interval to reduce frequency of updates
-    const intervalTime = fetchError ? 120000 : 60000; // 60 seconds normally, 2 minutes if error
+    fetchIntervalRef.current = fetchError ? 120000 : 60000; // 60 seconds normally, 2 minutes if error
     
-    console.log(`Setting up events polling with interval: ${intervalTime}ms`);
+    console.log(`Setting up events polling with interval: ${fetchIntervalRef.current}ms`);
     const interval = setInterval(() => {
       console.log("Polling for calendar events updates");
       fetchEvents();
-    }, intervalTime);
+    }, fetchIntervalRef.current);
     
     return () => {
       console.log("Clearing events polling interval");
@@ -190,7 +212,7 @@ export function useCalendarEvents() {
     events,
     loading,
     isProcessing,
-    fetchEvents,
+    fetchEvents: refreshEvents,
     addEvent,
     updateEvent,
     deleteEvent
