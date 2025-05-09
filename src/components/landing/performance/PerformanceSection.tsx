@@ -67,6 +67,11 @@ export function PerformanceSection() {
   const handleAddPerformance = () => {
     navigate("/dashboard/schedule");
   };
+
+  // Function to navigate to the calendar page
+  const navigateToCalendar = () => {
+    navigate("/calendar");
+  };
   
   // Update the role comparison to use "administrator" instead of "admin"
   const isAuthorized = (userProfile?.role === "administrator" || userProfile?.role === "section_leader");
@@ -159,18 +164,21 @@ export function PerformanceSection() {
             </div>
             <div className="mt-4 md:mt-6">
               <Button 
-                onClick={() => navigate("/dashboard/schedule")}
+                onClick={navigateToCalendar}
                 className="bg-glee-purple hover:bg-glee-purple/90 text-white"
                 size={isMobile ? "default" : "lg"}
               >
-                View Full Schedule
+                View Full Calendar
               </Button>
             </div>
           </div>
           
           {/* Right column - Selected event image and details */}
           <div className="mt-8 md:mt-0">
-            <PerformanceEventDetails event={selectedEvent} />
+            <PerformanceEventDetails 
+              event={selectedEvent} 
+              onViewCalendar={navigateToCalendar}
+            />
           </div>
         </div>
       </div>

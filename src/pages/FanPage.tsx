@@ -2,8 +2,13 @@
 import React from "react";
 import { Header } from "@/components/landing/Header";
 import { Footer } from "@/components/landing/Footer";
+import { useNavigate } from "react-router-dom";
+import { Button } from "@/components/ui/button";
+import { Calendar } from "lucide-react";
 
 export default function FanPage() {
+  const navigate = useNavigate();
+  
   return (
     <div className="flex min-h-screen flex-col">
       <Header initialShowNewsFeed={false} />
@@ -19,7 +24,10 @@ export default function FanPage() {
             
             <div className="grid gap-8 md:grid-cols-2">
               <div className="bg-gray-100 dark:bg-gray-800 p-6 rounded-lg">
-                <h2 className="text-xl font-semibold mb-4">Upcoming Performances</h2>
+                <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
+                  <Calendar className="h-5 w-5 text-glee-purple" />
+                  Upcoming Performances
+                </h2>
                 <ul className="space-y-4">
                   <li className="border-b pb-2">
                     <p className="font-medium">Spring Concert</p>
@@ -34,6 +42,14 @@ export default function FanPage() {
                     <p className="text-sm text-gray-600 dark:text-gray-400">July 22, 2025 - Fox Theatre</p>
                   </li>
                 </ul>
+                <div className="mt-4">
+                  <Button 
+                    onClick={() => navigate('/calendar')}
+                    className="bg-glee-purple hover:bg-glee-purple/90 text-white w-full"
+                  >
+                    View Full Calendar
+                  </Button>
+                </div>
               </div>
               
               <div className="bg-gray-100 dark:bg-gray-800 p-6 rounded-lg">
