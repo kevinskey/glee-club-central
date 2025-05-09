@@ -1,4 +1,3 @@
-
 import React, { useState, useCallback, useMemo } from "react";
 import { Header } from "@/components/landing/Header";
 import { Footer } from "@/components/landing/Footer";
@@ -28,7 +27,8 @@ export default function CalendarPage() {
     updateEvent, 
     deleteEvent,
     useGoogleCalendar,
-    toggleGoogleCalendar 
+    toggleGoogleCalendar,
+    googleCalendarError
   } = useCalendarEvents();
   
   // Filter events for the selected date - memoized
@@ -113,6 +113,7 @@ export default function CalendarPage() {
             <GoogleCalendarToggle 
               useGoogleCalendar={useGoogleCalendar}
               toggleGoogleCalendar={toggleGoogleCalendar}
+              googleCalendarError={googleCalendarError}
             />
           </div>
           
@@ -137,20 +138,40 @@ export default function CalendarPage() {
                   </div>
                 ) : (
                   <>
-                    <EventList 
-                      date={date}
-                      events={eventsOnSelectedDate}
-                      selectedEvent={selectedEvent}
-                      onSelectEvent={handleEventSelect}
-                      getEventTypeColor={getEventTypeColor}
-                    />
-                    
-                    {selectedEvent && (
-                      <EventDetails 
-                        selectedEvent={selectedEvent} 
-                        onDeleteEvent={handleDeleteEvent}
-                        onEditEvent={handleEditEvent} 
-                      />
+                    {useGoogleCalendar && googleCalendarError ? (
+                      <div className="flex flex-col items-center justify-center h-32 text-center">
+                        <div className="text-amber-500 mb-2">
+                          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mx-auto mb-2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+                        </div>
+                        <p className="text-sm mb-2">Unable to load Google Calendar events.</p>
+                        <p className="text-xs text-muted-foreground">Please check the Google Calendar API key in the configuration.</p>
+                        <Button 
+                          variant="outline" 
+                          size="sm" 
+                          className="mt-4"
+                          onClick={() => toggleGoogleCalendar()}
+                        >
+                          Switch to Local Calendar
+                        </Button>
+                      </div>
+                    ) : (
+                      <>
+                        <EventList 
+                          date={date}
+                          events={eventsOnSelectedDate}
+                          selectedEvent={selectedEvent}
+                          onSelectEvent={handleEventSelect}
+                          getEventTypeColor={getEventTypeColor}
+                        />
+                        
+                        {selectedEvent && (
+                          <EventDetails 
+                            selectedEvent={selectedEvent} 
+                            onDeleteEvent={handleDeleteEvent}
+                            onEditEvent={handleEditEvent} 
+                          />
+                        )}
+                      </>
                     )}
                   </>
                 )}

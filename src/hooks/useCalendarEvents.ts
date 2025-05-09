@@ -29,6 +29,7 @@ export function useCalendarEvents() {
   const lastUserIdRef = useRef<string | null>(null);
   const [useGoogleCalendar, setUseGoogleCalendar] = useState(true);
   const googleFetchAttemptedRef = useRef(false);
+  const [googleCalendarError, setGoogleCalendarError] = useState<string | null>(null);
 
   // Fetch events from Google Calendar
   const fetchGoogleEvents = useCallback(async () => {
@@ -37,6 +38,7 @@ export function useCalendarEvents() {
     try {
       console.log("Fetching events from Google Calendar");
       googleFetchAttemptedRef.current = true;
+      setGoogleCalendarError(null);
       const googleEvents = await fetchGoogleCalendarEvents();
       console.log("Google Calendar events:", googleEvents.length);
       return googleEvents;
@@ -44,8 +46,10 @@ export function useCalendarEvents() {
       console.error("Error fetching Google Calendar events:", err);
       // Only show toast on first error
       if (!fetchError) {
-        toast.error("Failed to load events from Google Calendar. Switching to local calendar.");
-        setUseGoogleCalendar(false);
+        const message = err instanceof Error ? err.message : "Failed to load events from Google Calendar";
+        setGoogleCalendarError(message);
+        toast.error("Failed to load events from Google Calendar. Check API key configuration.");
+        // Don't auto-switch to local calendar to allow user to fix API key
       }
       return [];
     }
@@ -67,11 +71,14 @@ export function useCalendarEvents() {
     try {
       // First, try to fetch Google Calendar events
       let combinedEvents: CalendarEvent[] = [];
-      const googleEvents = await fetchGoogleEvents();
       
-      // Add Google Calendar events
-      if (googleEvents.length > 0) {
-        combinedEvents = [...googleEvents];
+      if (useGoogleCalendar) {
+        const googleEvents = await fetchGoogleEvents();
+        
+        // Add Google Calendar events
+        if (googleEvents.length > 0) {
+          combinedEvents = [...googleEvents];
+        }
       }
       
       // Use sample data if not authenticated
@@ -165,9 +172,9 @@ export function useCalendarEvents() {
   const toggleGoogleCalendar = useCallback(() => {
     setUseGoogleCalendar(prev => {
       const newValue = !prev;
-      if (newValue && googleFetchAttemptedRef.current) {
+      if (newValue) {
         toast.info("Switching to Google Calendar");
-        fetchEvents(); // Refresh events when switching back to Google Calendar
+        fetchEvents(); // Refresh events when switching to Google Calendar
       } else {
         toast.info("Switching to local calendar");
       }
@@ -213,6 +220,7 @@ export function useCalendarEvents() {
     updateEvent,
     deleteEvent,
     useGoogleCalendar,
-    toggleGoogleCalendar
+    toggleGoogleCalendar,
+    googleCalendarError
   };
 }
