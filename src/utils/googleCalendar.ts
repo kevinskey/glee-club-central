@@ -7,7 +7,7 @@ const GOOGLE_CALENDAR_ID = "00f2c84ca319b84d9b2adafc6434d2dd7c3aa3da4dfc458cc5d6
 
 // Your Google Calendar API key
 // This should be a valid API key from Google Cloud Console with Google Calendar API enabled
-const GOOGLE_CALENDAR_API_KEY = "AIzaSyCW-3QkDkb_r6du2Lcfn_wNwJdF2YPZusQ"; 
+const GOOGLE_CALENDAR_API_KEY = "AIzaSyCd8BS6BiOBgn89dCvGAsa5qTXT0j0S3Vc"; 
 
 export interface GoogleCalendarEvent {
   id: string;
