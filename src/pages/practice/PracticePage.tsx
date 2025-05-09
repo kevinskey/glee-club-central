@@ -1,12 +1,16 @@
 
 import React from "react";
 import { PageHeader } from "@/components/ui/page-header";
-import { Headphones, Music, PlayCircle, Music2 } from "lucide-react";
+import { Headphones, Music, PlayCircle, Music2, BookOpen, BarChart } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
 import { SightReadingEmbed } from "@/components/practice/SightReadingEmbed";
+import { PracticeLogForm } from "@/components/practice/PracticeLogForm";
+import { PracticeLogsList } from "@/components/practice/PracticeLogsList";
+import { PracticeStats } from "@/components/practice/PracticeStats";
+import { usePracticeLogs } from "@/hooks/usePracticeLogs";
 
 interface PracticeMedia {
   id: string;
@@ -77,6 +81,21 @@ export default function PracticePage() {
   const { user, userProfile } = useAuth();
   const [activeTab, setActiveTab] = React.useState<string>("warmups");
   
+  const { 
+    logs, 
+    isLoading, 
+    stats, 
+    addPracticeLog, 
+    removePracticeLog, 
+    editPracticeLog 
+  } = usePracticeLogs();
+  
+  // Calculate total minutes practiced
+  const totalMinutes = React.useMemo(() => 
+    Object.values(stats).reduce((total, min) => total + min, 0),
+    [stats]
+  );
+  
   // Handle media playback
   const handlePlay = (media: PracticeMedia) => {
     // This would be replaced with actual playback functionality
@@ -92,7 +111,7 @@ export default function PracticePage() {
     <div>
       <PageHeader
         title="Practice on Your Own"
-        description="Access warm-ups, sectional recordings, sight reading practice, and other materials"
+        description="Access warm-ups, sectional recordings, sight reading practice, and track your progress"
         icon={<Headphones className="h-6 w-6" />}
       />
 
@@ -102,6 +121,7 @@ export default function PracticePage() {
           <TabsTrigger value="sectionals">Sectionals</TabsTrigger>
           <TabsTrigger value="full">Full Choir</TabsTrigger>
           <TabsTrigger value="sightreading">Sight Reading</TabsTrigger>
+          <TabsTrigger value="tracker">Practice Tracker</TabsTrigger>
         </TabsList>
 
         {Object.entries(practiceData).map(([key, mediaItems]) => (
@@ -171,7 +191,7 @@ export default function PracticePage() {
           </TabsContent>
         ))}
 
-        {/* Sight Reading Practice Tab - Integration with SightReadingFactory.com */}
+        {/* Sight Reading Practice Tab */}
         <TabsContent value="sightreading">
           <Card>
             <CardHeader className="flex flex-row items-center justify-between">
@@ -189,6 +209,42 @@ export default function PracticePage() {
               <SightReadingEmbed />
             </CardContent>
           </Card>
+        </TabsContent>
+
+        {/* Practice Tracker Tab */}
+        <TabsContent value="tracker">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div className="lg:col-span-2">
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <BookOpen className="h-5 w-5" />
+                    Log Your Practice
+                  </CardTitle>
+                  <CardDescription>
+                    Keep track of your practice sessions to build consistency and see your progress over time
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <PracticeLogForm onSubmit={addPracticeLog} />
+                </CardContent>
+              </Card>
+
+              <div className="mt-6">
+                <h2 className="text-xl font-semibold mb-3">Practice History</h2>
+                <PracticeLogsList 
+                  logs={logs} 
+                  onDelete={removePracticeLog} 
+                  onUpdate={editPracticeLog}
+                  isLoading={isLoading}
+                />
+              </div>
+            </div>
+            
+            <div>
+              <PracticeStats stats={stats} totalMinutes={totalMinutes} />
+            </div>
+          </div>
         </TabsContent>
       </Tabs>
     </div>
