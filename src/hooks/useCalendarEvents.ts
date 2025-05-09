@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useCallback, useRef } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
@@ -18,7 +17,7 @@ export interface CalendarEvent {
   image_url?: string | null;
 }
 
-export function useCalendarEvents() {
+export function useCalendarEvents(daysAhead = 90) {
   const [events, setEvents] = useState<CalendarEvent[]>([]);
   const [loading, setLoading] = useState(true);
   const { user } = useAuth();
@@ -39,7 +38,7 @@ export function useCalendarEvents() {
       console.log("Fetching events from Google Calendar");
       googleFetchAttemptedRef.current = true;
       setGoogleCalendarError(null);
-      const googleEvents = await fetchGoogleCalendarEvents();
+      const googleEvents = await fetchGoogleCalendarEvents(undefined, undefined, daysAhead);
       console.log("Google Calendar events:", googleEvents.length);
       return googleEvents;
     } catch (err) {
@@ -49,7 +48,7 @@ export function useCalendarEvents() {
       toast.error("Failed to load events from Google Calendar. Check API key configuration.");
       return [];
     }
-  }, [useGoogleCalendar]);
+  }, [useGoogleCalendar, daysAhead]);
 
   // Fetch events from Supabase
   const fetchEvents = useCallback(async () => {
@@ -219,6 +218,7 @@ export function useCalendarEvents() {
     deleteEvent,
     useGoogleCalendar,
     toggleGoogleCalendar,
-    googleCalendarError
+    googleCalendarError,
+    daysAhead
   };
 }

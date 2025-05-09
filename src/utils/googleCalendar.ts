@@ -1,5 +1,5 @@
 
-import { format, parseISO } from 'date-fns';
+import { format, parseISO, addDays } from 'date-fns';
 import { CalendarEvent } from '@/hooks/useCalendarEvents';
 
 // This is the public Google Calendar ID for Spelman College Glee Club
@@ -28,13 +28,20 @@ export interface GoogleCalendarEvent {
 // Fetch events from Google Calendar
 export async function fetchGoogleCalendarEvents(
   timeMin: string = new Date().toISOString(),
-  timeMax: string = new Date(new Date().setMonth(new Date().getMonth() + 3)).toISOString(),
+  timeMax: string = new Date(addDays(new Date(), 90)).toISOString(),  // Default to 90 days ahead
+  daysAhead?: number, // New parameter for days ahead
 ): Promise<CalendarEvent[]> {
   try {
     // Check if API key is available
     if (!GOOGLE_CALENDAR_API_KEY || GOOGLE_CALENDAR_API_KEY.length === 0) {
       console.error('Google Calendar API key is missing');
       throw new Error('Google Calendar API key is missing');
+    }
+
+    // If daysAhead is specified, override the timeMax
+    if (daysAhead !== undefined && daysAhead > 0) {
+      timeMax = new Date(addDays(new Date(), daysAhead)).toISOString();
+      console.log(`Fetching Google Calendar events for the next ${daysAhead} days`);
     }
 
     const url = `https://www.googleapis.com/calendar/v3/calendars/${encodeURIComponent(GOOGLE_CALENDAR_ID)}/events?key=${encodeURIComponent(GOOGLE_CALENDAR_API_KEY)}&timeMin=${encodeURIComponent(timeMin)}&timeMax=${encodeURIComponent(timeMax)}&singleEvents=true&orderBy=startTime`;

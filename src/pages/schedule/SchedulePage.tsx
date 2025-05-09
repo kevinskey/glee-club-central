@@ -14,18 +14,27 @@ import { GoogleCalendarToggle } from "@/components/calendar/GoogleCalendarToggle
 export default function SchedulePage() {
   const { user, userProfile } = useAuth();
   const [loading, setLoading] = useState(true);
+  const [daysAhead, setDaysAhead] = useState(90);
   const { 
     events, 
     loading: eventsLoading, 
     useGoogleCalendar, 
     toggleGoogleCalendar,
-    googleCalendarError 
-  } = useCalendarEvents();
+    googleCalendarError,
+    fetchEvents
+  } = useCalendarEvents(daysAhead);
   
   // Set loading state based on events loading
   useEffect(() => {
     setLoading(eventsLoading);
   }, [eventsLoading]);
+  
+  // Handle changing the days ahead
+  const handleDaysAheadChange = (days: number) => {
+    setDaysAhead(days);
+    // Trigger a refetch with the new days ahead
+    fetchEvents();
+  };
   
   const getTypeColor = (type: string) => {
     switch (type) {
@@ -59,6 +68,8 @@ export default function SchedulePage() {
               toggleGoogleCalendar={toggleGoogleCalendar}
               googleCalendarError={googleCalendarError}
               compact
+              daysAhead={daysAhead}
+              onDaysAheadChange={handleDaysAheadChange}
             />
             {isAdmin && (
               <Button>
@@ -75,7 +86,7 @@ export default function SchedulePage() {
             <CardTitle>Upcoming Events</CardTitle>
             <CardDescription>
               {useGoogleCalendar 
-                ? "Events from Google Calendar" 
+                ? `Events from Google Calendar (next ${daysAhead} days)` 
                 : "Schedule of rehearsals, performances, and social events"}
             </CardDescription>
           </div>

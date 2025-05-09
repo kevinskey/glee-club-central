@@ -1,3 +1,4 @@
+
 import React, { useState, useCallback, useMemo } from "react";
 import { Header } from "@/components/landing/Header";
 import { Footer } from "@/components/landing/Footer";
@@ -20,6 +21,8 @@ export default function CalendarPage() {
   const [selectedEvent, setSelectedEvent] = useState<CalendarEvent | null>(null);
   const [isAddEventOpen, setIsAddEventOpen] = useState(false);
   const [isEditEventOpen, setIsEditEventOpen] = useState(false);
+  const [daysAhead, setDaysAhead] = useState(90);
+  
   const { 
     events, 
     loading, 
@@ -28,8 +31,9 @@ export default function CalendarPage() {
     deleteEvent,
     useGoogleCalendar,
     toggleGoogleCalendar,
-    googleCalendarError
-  } = useCalendarEvents();
+    googleCalendarError,
+    fetchEvents
+  } = useCalendarEvents(daysAhead);
   
   // Filter events for the selected date - memoized
   const eventsOnSelectedDate = useMemo(() => {
@@ -49,6 +53,13 @@ export default function CalendarPage() {
   const handleEventSelect = useCallback((event: CalendarEvent) => {
     setSelectedEvent(event);
   }, []);
+
+  // Handle days ahead change
+  const handleDaysAheadChange = (days: number) => {
+    setDaysAhead(days);
+    // Trigger a refetch with the new days ahead
+    fetchEvents();
+  };
 
   // Handle adding new event
   const handleAddEvent = async (formValues: Omit<CalendarEvent, "id">) => {
@@ -114,6 +125,8 @@ export default function CalendarPage() {
               useGoogleCalendar={useGoogleCalendar}
               toggleGoogleCalendar={toggleGoogleCalendar}
               googleCalendarError={googleCalendarError}
+              daysAhead={daysAhead}
+              onDaysAheadChange={handleDaysAheadChange}
             />
           </div>
           
