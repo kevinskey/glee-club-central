@@ -1,3 +1,4 @@
+
 import React from "react";
 import {
   Dialog,
@@ -49,7 +50,7 @@ export const AddMemberDialog: React.FC<AddMemberDialogProps> = ({
       email: "",
       phone: "",
       role: "singer",
-      voice_part: "soprano_1", // Default voice part
+      voice_part: "soprano_1",
       status: "pending",
       password: ""
     }
@@ -57,13 +58,8 @@ export const AddMemberDialog: React.FC<AddMemberDialogProps> = ({
 
   const onSubmit = async (data: UserFormValues) => {
     try {
-      // Call the onMemberAdd function provided by the parent
       await onMemberAdd(data);
-      
-      // Reset form
       form.reset();
-      
-      // No need to explicitly close the dialog here as it should be handled by the parent component
     } catch (error) {
       console.error("Error submitting form:", error);
     }
