@@ -50,7 +50,7 @@ export const useUserManagement = () => {
     
     try {
       // First create the auth user
-      const { user, error: authError } = await adminSupabase.auth.admin.createUser({
+      const { data, error: authError } = await adminSupabase.auth.admin.createUser({
         email: userData.email,
         password: userData.password || Math.random().toString(36).substring(2, 10), // Generate random password if not provided
         user_metadata: {
@@ -63,7 +63,7 @@ export const useUserManagement = () => {
         throw authError;
       }
 
-      if (!user?.id) {
+      if (!data?.user?.id) {
         throw new Error('Failed to create user account');
       }
       
@@ -78,7 +78,7 @@ export const useUserManagement = () => {
           voice_part: userData.voice_part,
           status: userData.status,
         })
-        .eq('id', user.id);
+        .eq('id', data.user.id);
       
       if (profileError) {
         throw profileError;
