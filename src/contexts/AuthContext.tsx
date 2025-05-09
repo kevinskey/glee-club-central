@@ -7,7 +7,7 @@ import {
 import { Database } from '@/integrations/supabase/types';
 import { Profile } from '@/types/auth';
 import { fetchUserPermissions } from '@/utils/supabase/permissions';
-import { supabase } from '@/integrations/supabase/client';
+import { supabase, cleanupAuthState } from '@/integrations/supabase/client';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 
@@ -53,6 +53,45 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   // Initialize auth state and set up listener
   useEffect(() => {
+    console.log("Setting up auth state...");
+    
+    // Set up the auth state change listener first
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      async (event, session) => {
+        console.log("Auth state changed:", event);
+        
+        if (session) {
+          // Defer profile and permissions loading to avoid deadlocks
+          setTimeout(async () => {
+            try {
+              // Get the user profile
+              const { data: profileData } = await supabase
+                .from('profiles')
+                .select('*')
+                .eq('id', session.user.id)
+                .single();
+
+              if (profileData) {
+                setUser({ ...session.user, role: profileData.role || 'singer' });
+                setProfile(profileData);
+                
+                // Fetch user permissions
+                const permissions = await fetchUserPermissions(session.user.id);
+                setPermissions(permissions);
+              }
+            } catch (err) {
+              console.error("Error loading user data after auth change:", err);
+            }
+          }, 0);
+        } else {
+          setUser(null);
+          setProfile(null);
+          setPermissions(null);
+        }
+      }
+    );
+
+    // Then check for an existing session
     const fetchUserData = async () => {
       setLoading(true);
       try {
@@ -93,33 +132,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     fetchUserData();
 
-    // Set up the auth state change listener
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, session) => {
-        console.log("Auth state changed:", event);
-        
-        if (session) {
-          // Get the user profile
-          const { data: profileData } = await supabase
-            .from('profiles')
-            .select('*')
-            .eq('id', session.user.id)
-            .single();
-
-          setUser({ ...session.user, role: profileData?.role || 'singer' });
-          setProfile(profileData || null);
-          
-          // Fetch user permissions
-          const permissions = await fetchUserPermissions(session.user.id);
-          setPermissions(permissions);
-        } else {
-          setUser(null);
-          setProfile(null);
-          setPermissions(null);
-        }
-      }
-    );
-
     return () => {
       subscription.unsubscribe();
     };
@@ -154,12 +166,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const signIn = async (email: string, password: string) => {
     try {
       // Clean up existing auth state to prevent issues
-      localStorage.removeItem('supabase.auth.token');
-      Object.keys(localStorage).forEach((key) => {
-        if (key.startsWith('supabase.auth.') || key.includes('sb-')) {
-          localStorage.removeItem(key);
-        }
-      });
+      cleanupAuthState();
       
       // Try to sign out first to clear any existing sessions
       try {
@@ -168,13 +175,25 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         // Continue even if this fails
       }
       
-      const { error } = await supabase.auth.signInWithPassword({ email, password });
+      const { error, data } = await supabase.auth.signInWithPassword({ 
+        email, 
+        password 
+      });
+      
       if (error) {
         console.error("Sign-in error:", error);
         toast.error("Invalid credentials");
         return { error };
       }
-      toast.success("Signed in successfully!");
+      
+      // Force a page reload to ensure clean state
+      if (data.user) {
+        toast.success("Signed in successfully!");
+        
+        // Use navigate instead of forced reload for smoother experience
+        navigate('/dashboard');
+      }
+      
       return { error: null };
     } catch (err: any) {
       console.error("Unexpected sign-in error:", err);
@@ -185,6 +204,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const signUp = async (email: string, password: string, firstName: string, lastName: string) => {
     try {
+      // Clean up existing auth state first
+      cleanupAuthState();
+      
       const { data, error } = await supabase.auth.signUp({
         email: email,
         password: password,
@@ -232,22 +254,25 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const signOut = async () => {
     try {
       // Clean up auth state first
-      localStorage.removeItem('supabase.auth.token');
-      Object.keys(localStorage).forEach((key) => {
-        if (key.startsWith('supabase.auth.') || key.includes('sb-')) {
-          localStorage.removeItem(key);
-        }
-      });
+      cleanupAuthState();
       
-      await supabase.auth.signOut();
-      navigate('/login');
+      // Perform the sign out
+      await supabase.auth.signOut({ scope: 'global' });
+      
+      // Clear state
       setUser(null);
       setProfile(null);
       setPermissions(null);
+      
+      // Navigate to login
+      navigate('/login');
       toast.success("Signed out successfully!");
     } catch (error) {
       console.error("Error signing out:", error);
       toast.error("Failed to sign out");
+      
+      // Force a hard reload as a last resort
+      window.location.href = '/login';
     }
   };
 
@@ -277,6 +302,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const signInWithGoogle = async () => {
     try {
+      cleanupAuthState();
+      
       const { data, error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
       });
@@ -285,7 +312,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         toast.error("Failed to sign in with Google");
       } else {
         console.log("Google sign-in initiated:", data);
-        toast.success("Signed in with Google successfully!");
       }
     } catch (err: any) {
       console.error("Unexpected Google sign-in error:", err);
@@ -295,6 +321,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const signInWithApple = async () => {
     try {
+      cleanupAuthState();
+      
       const { data, error } = await supabase.auth.signInWithOAuth({
         provider: 'apple',
       });
@@ -303,7 +331,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         toast.error("Failed to sign in with Apple");
       } else {
         console.log("Apple sign-in initiated:", data);
-        toast.success("Signed in with Apple successfully!");
       }
     } catch (err: any) {
       console.error("Unexpected Apple sign-in error:", err);

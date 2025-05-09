@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
@@ -12,7 +13,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Music, AlertCircle } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
+import { supabase, cleanupAuthState } from "@/integrations/supabase/client";
 
 const loginSchema = z.object({
   email: z.string().email({
@@ -85,6 +86,9 @@ export default function LoginPage() {
     setLoginError(null);
 
     try {
+      // Clean up any existing auth state first
+      cleanupAuthState();
+      
       const { error } = await signIn(values.email, values.password);
       
       if (error) {

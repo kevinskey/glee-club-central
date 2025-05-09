@@ -30,5 +30,21 @@ export const getAvatarUrl = (path: string | null) => {
   return `${SUPABASE_URL}/storage/v1/object/public/avatars/${path}`;
 };
 
-// Since we can't directly modify the types.ts file automatically, we need to inform
-// the user about the need to regenerate types or create a custom types workaround
+// Helper function to clean up auth state
+export const cleanupAuthState = () => {
+  localStorage.removeItem('supabase.auth.token');
+  
+  // Remove all Supabase auth keys from localStorage
+  Object.keys(localStorage).forEach((key) => {
+    if (key.startsWith('supabase.auth.') || key.includes('sb-')) {
+      localStorage.removeItem(key);
+    }
+  });
+  
+  // Remove from sessionStorage if being used
+  Object.keys(sessionStorage || {}).forEach((key) => {
+    if (key.startsWith('supabase.auth.') || key.includes('sb-')) {
+      sessionStorage.removeItem(key);
+    }
+  });
+};
