@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { PageHeader } from "@/components/ui/page-header";
@@ -242,7 +243,7 @@ export default function MembersPage() {
                             <SelectValue placeholder="Role" />
                           </SelectTrigger>
                           <SelectContent>
-                            <SelectItem value="all">All Roles</SelectItem>
+                            <SelectItem value="">All Roles</SelectItem>
                             <SelectItem value="administrator">Administrator</SelectItem>
                             <SelectItem value="section_leader">Section Leader</SelectItem>
                             <SelectItem value="student_conductor">Student Conductor</SelectItem>
@@ -257,7 +258,7 @@ export default function MembersPage() {
                             <SelectValue placeholder="Voice Part" />
                           </SelectTrigger>
                           <SelectContent>
-                            <SelectItem value="all">All Voice Parts</SelectItem>
+                            <SelectItem value="">All Voice Parts</SelectItem>
                             <SelectItem value="soprano_1">Soprano 1</SelectItem>
                             <SelectItem value="soprano_2">Soprano 2</SelectItem>
                             <SelectItem value="alto_1">Alto 1</SelectItem>
@@ -272,7 +273,7 @@ export default function MembersPage() {
                             <SelectValue placeholder="Status" />
                           </SelectTrigger>
                           <SelectContent>
-                            <SelectItem value="all">All Statuses</SelectItem>
+                            <SelectItem value="">All Statuses</SelectItem>
                             <SelectItem value="active">Active</SelectItem>
                             <SelectItem value="pending">Pending</SelectItem>
                             <SelectItem value="inactive">Inactive</SelectItem>
@@ -362,7 +363,6 @@ export default function MembersPage() {
           <TabsContent value="active" className="mt-0">
             <Card className="p-4">
               {/* Same filter controls and member list as the "all" tab but with activeTab="active" */}
-              {/* ... Content similar to "all" tab */}
               <p className="text-muted-foreground">Showing only active members</p>
               {isLoading ? (
                 <div className="flex items-center justify-center h-64">
@@ -383,7 +383,6 @@ export default function MembersPage() {
           <TabsContent value="inactive" className="mt-0">
             <Card className="p-4">
               {/* Same filter controls and member list as the "all" tab but with activeTab="inactive" */}
-              {/* ... Content similar to "all" tab */}
               <p className="text-muted-foreground">Showing pending, inactive, and alumni members</p>
               {isLoading ? (
                 <div className="flex items-center justify-center h-64">

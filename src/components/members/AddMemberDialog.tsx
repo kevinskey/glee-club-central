@@ -1,67 +1,61 @@
 
-import React, { useEffect } from "react";
-import {
+import React from 'react';
+import { 
   Dialog,
   DialogContent,
   DialogDescription,
-  DialogFooter,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { Input } from "@/components/ui/input";
+import { 
+  Form, 
+  FormControl, 
+  FormField, 
+  FormItem, 
+  FormLabel, 
+  FormMessage 
+} from "@/components/ui/form";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { UserFormValues, userFormSchema } from "./form/userFormSchema";
+import { userFormSchema, UserFormValues } from "./form/userFormSchema";
+import { RoleStatusSelect } from "./form/RoleStatusSelect";
+import { Loader2 } from "lucide-react";
 
 interface AddMemberDialogProps {
   isOpen: boolean;
   onOpenChange: (open: boolean) => void;
   onMemberAdd: (data: UserFormValues) => Promise<void>;
-  isSubmitting?: boolean;
+  isSubmitting: boolean;
   initialValues?: UserFormValues;
   isEditing?: boolean;
 }
 
-export const AddMemberDialog: React.FC<AddMemberDialogProps> = ({
+export function AddMemberDialog({
   isOpen,
   onOpenChange,
   onMemberAdd,
-  isSubmitting = false,
+  isSubmitting,
   initialValues,
   isEditing = false
-}) => {
+}: AddMemberDialogProps) {
   const form = useForm<UserFormValues>({
     resolver: zodResolver(userFormSchema),
     defaultValues: initialValues || {
       first_name: "",
       last_name: "",
       email: "",
+      password: "",
       phone: "",
       role: "singer",
       voice_part: "soprano_1",
-      status: "pending",
-      password: ""
+      status: "pending"
     }
   });
 
-  // Reset form when dialog opens or initialValues change
-  useEffect(() => {
+  // Reset form when dialog opens/closes or when editing a different user
+  React.useEffect(() => {
     if (isOpen) {
       if (initialValues) {
         form.reset(initialValues);
@@ -70,47 +64,60 @@ export const AddMemberDialog: React.FC<AddMemberDialogProps> = ({
           first_name: "",
           last_name: "",
           email: "",
+          password: "",
           phone: "",
           role: "singer",
           voice_part: "soprano_1",
-          status: "pending",
-          password: ""
+          status: "pending"
         });
       }
     }
   }, [isOpen, initialValues, form]);
 
   const onSubmit = async (data: UserFormValues) => {
-    console.log(`${isEditing ? "Edit" : "Add"}MemberDialog - Submit with data:`, data);
-    try {
-      await onMemberAdd(data);
-    } catch (error) {
-      console.error("Error submitting form:", error);
-    }
+    await onMemberAdd(data);
   };
 
-  const handleOpenChange = (open: boolean) => {
-    if (!isSubmitting) {
-      onOpenChange(open);
-    }
-  };
+  const roleOptions = [
+    { label: "Singer", value: "singer" },
+    { label: "Section Leader", value: "section_leader" },
+    { label: "Administrator", value: "administrator" },
+    { label: "Student Conductor", value: "student_conductor" },
+    { label: "Accompanist", value: "accompanist" },
+    { label: "Non-Singer", value: "non_singer" }
+  ];
+
+  const voicePartOptions = [
+    { label: "Soprano 1", value: "soprano_1" },
+    { label: "Soprano 2", value: "soprano_2" },
+    { label: "Alto 1", value: "alto_1" },
+    { label: "Alto 2", value: "alto_2" },
+    { label: "Tenor", value: "tenor" },
+    { label: "Bass", value: "bass" }
+  ];
+
+  const statusOptions = [
+    { label: "Active", value: "active" },
+    { label: "Pending", value: "pending" },
+    { label: "Inactive", value: "inactive" },
+    { label: "Alumni", value: "alumni" }
+  ];
 
   return (
-    <Dialog open={isOpen} onOpenChange={handleOpenChange}>
-      <DialogContent className="sm:max-w-md">
+    <Dialog open={isOpen} onOpenChange={onOpenChange}>
+      <DialogContent className="max-w-md max-h-[80vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>{isEditing ? "Edit" : "Add New"} Member</DialogTitle>
+          <DialogTitle>{isEditing ? "Edit Member" : "Add New Member"}</DialogTitle>
           <DialogDescription>
             {isEditing 
-              ? "Update member information in the Glee Club."
-              : "Add a new member to the Glee Club with their primary information."
-            }
+              ? "Update member information in the database." 
+              : "Add a new member to the Glee Club."}
           </DialogDescription>
         </DialogHeader>
+
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-            {/* Personal Information */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="grid grid-cols-2 gap-4">
               <FormField
                 control={form.control}
                 name="first_name"
@@ -118,12 +125,13 @@ export const AddMemberDialog: React.FC<AddMemberDialogProps> = ({
                   <FormItem>
                     <FormLabel>First Name</FormLabel>
                     <FormControl>
-                      <Input placeholder="First Name" {...field} />
+                      <Input placeholder="John" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
               />
+
               <FormField
                 control={form.control}
                 name="last_name"
@@ -131,160 +139,114 @@ export const AddMemberDialog: React.FC<AddMemberDialogProps> = ({
                   <FormItem>
                     <FormLabel>Last Name</FormLabel>
                     <FormControl>
-                      <Input placeholder="Last Name" {...field} />
+                      <Input placeholder="Doe" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
               />
             </div>
-            
-            {/* Contact Information */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <FormField
-                control={form.control}
-                name="email"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Email</FormLabel>
-                    <FormControl>
-                      <Input 
-                        type="email" 
-                        placeholder="Email Address" 
-                        {...field} 
-                        disabled={isEditing} // Email can't be changed if editing
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="phone"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Phone Number</FormLabel>
-                    <FormControl>
-                      <Input placeholder="Phone Number" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
-            
-            {/* Role and Voice Part */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <FormField
-                control={form.control}
+
+            <FormField
+              control={form.control}
+              name="email"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Email</FormLabel>
+                  <FormControl>
+                    <Input 
+                      type="email" 
+                      placeholder="john.doe@example.com" 
+                      {...field} 
+                      disabled={isEditing}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="password"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>
+                    {isEditing ? "Password (leave blank to keep current)" : "Password"}
+                  </FormLabel>
+                  <FormControl>
+                    <Input 
+                      type="password" 
+                      placeholder={isEditing ? "••••••••" : "Create password"} 
+                      {...field} 
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="phone"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Phone Number</FormLabel>
+                  <FormControl>
+                    <Input 
+                      placeholder="123-456-7890" 
+                      {...field} 
+                      value={field.value || ""}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <div className="grid grid-cols-2 gap-4">
+              <RoleStatusSelect
+                form={form}
                 name="role"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Role</FormLabel>
-                    <Select onValueChange={field.onChange} defaultValue={field.value}>
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select role" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        <SelectItem value="singer">Singer</SelectItem>
-                        <SelectItem value="section_leader">Section Leader</SelectItem>
-                        <SelectItem value="student_conductor">Student Conductor</SelectItem>
-                        <SelectItem value="accompanist">Accompanist</SelectItem>
-                        <SelectItem value="non_singer">Non-Singer</SelectItem>
-                        <SelectItem value="administrator">Administrator</SelectItem>
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
+                label="Role"
+                options={roleOptions}
               />
-              <FormField
-                control={form.control}
+
+              <RoleStatusSelect
+                form={form}
                 name="voice_part"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Voice Part</FormLabel>
-                    <Select onValueChange={field.onChange} defaultValue={field.value}>
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select voice part" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        <SelectItem value="soprano_1">Soprano 1</SelectItem>
-                        <SelectItem value="soprano_2">Soprano 2</SelectItem>
-                        <SelectItem value="alto_1">Alto 1</SelectItem>
-                        <SelectItem value="alto_2">Alto 2</SelectItem>
-                        <SelectItem value="tenor">Tenor</SelectItem>
-                        <SelectItem value="bass">Bass</SelectItem>
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
+                label="Voice Part"
+                options={voicePartOptions}
               />
             </div>
-            
-            {/* Password and Status */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <FormField
-                control={form.control}
-                name="password"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>{isEditing ? "New Password" : "Initial Password"}</FormLabel>
-                    <FormControl>
-                      <Input 
-                        type="password" 
-                        placeholder={isEditing ? "Leave blank to keep current" : "Set initial password"} 
-                        {...field} 
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="status"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Status</FormLabel>
-                    <Select onValueChange={field.onChange} defaultValue={field.value}>
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select status" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        <SelectItem value="pending">Pending</SelectItem>
-                        <SelectItem value="active">Active</SelectItem>
-                        <SelectItem value="inactive">Inactive</SelectItem>
-                        <SelectItem value="alumni">Alumni</SelectItem>
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
-            
-            <DialogFooter className="sm:justify-between flex gap-2">
-              <Button 
-                type="button" 
-                variant="outline" 
-                onClick={() => !isSubmitting && onOpenChange(false)}
+
+            <RoleStatusSelect
+              form={form}
+              name="status"
+              label="Status"
+              options={statusOptions}
+            />
+
+            <div className="flex justify-end gap-2 pt-4">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => onOpenChange(false)}
                 disabled={isSubmitting}
               >
                 Cancel
               </Button>
               <Button type="submit" disabled={isSubmitting}>
-                {isSubmitting ? (isEditing ? "Updating..." : "Adding...") : (isEditing ? "Update Member" : "Add Member")}
+                {isSubmitting ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    {isEditing ? "Updating..." : "Adding..."}
+                  </>
+                ) : (
+                  isEditing ? "Update Member" : "Add Member"
+                )}
               </Button>
-            </DialogFooter>
+            </div>
           </form>
         </Form>
       </DialogContent>

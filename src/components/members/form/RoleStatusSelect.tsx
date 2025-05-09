@@ -1,5 +1,5 @@
 
-import React from "react";
+import React from 'react';
 import {
   FormControl,
   FormField,
@@ -15,25 +15,21 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { UseFormReturn } from "react-hook-form";
+import { UserFormValues } from './userFormSchema';
 
-interface SelectOption {
-  value: string;
+interface RoleStatusSelectProps {
+  form: UseFormReturn<UserFormValues>;
+  name: "role" | "voice_part" | "status";
   label: string;
+  options: Array<{label: string, value: string}>;
 }
 
-interface SelectFieldProps {
-  form: UseFormReturn<any>;
-  name: string;
-  label: string;
-  options: SelectOption[];
-}
-
-export const SelectField: React.FC<SelectFieldProps> = ({ 
-  form, 
-  name, 
-  label, 
-  options 
-}) => {
+export function RoleStatusSelect({
+  form,
+  name,
+  label,
+  options
+}: RoleStatusSelectProps) {
   return (
     <FormField
       control={form.control}
@@ -42,12 +38,12 @@ export const SelectField: React.FC<SelectFieldProps> = ({
         <FormItem>
           <FormLabel>{label}</FormLabel>
           <Select
-            onValueChange={field.onChange}
             value={field.value}
+            onValueChange={field.onChange}
           >
             <FormControl>
               <SelectTrigger>
-                <SelectValue placeholder={`Select ${label}`} />
+                <SelectValue placeholder={`Select ${label.toLowerCase()}`} />
               </SelectTrigger>
             </FormControl>
             <SelectContent>
@@ -63,29 +59,4 @@ export const SelectField: React.FC<SelectFieldProps> = ({
       )}
     />
   );
-};
-
-export const RoleSelect: React.FC<{ form: UseFormReturn<any> }> = ({ form }) => {
-  // Using the exact values expected by the database and handle_user_role function
-  const roleOptions = [
-    { value: "singer", label: "Singer" },
-    { value: "section_leader", label: "Section Leader" },
-    { value: "administrator", label: "Administrator" },
-    { value: "student_conductor", label: "Student Conductor" },
-    { value: "accompanist", label: "Accompanist" },
-    { value: "non_singer", label: "Non-Singer" },
-  ];
-
-  return <SelectField form={form} name="role" label="Role" options={roleOptions} />;
-};
-
-export const StatusSelect: React.FC<{ form: UseFormReturn<any> }> = ({ form }) => {
-  const statusOptions = [
-    { value: "active", label: "Active" },
-    { value: "inactive", label: "Inactive" },
-    { value: "alumni", label: "Alumni" },
-    { value: "pending", label: "Pending" },
-  ];
-
-  return <SelectField form={form} name="status" label="Status" options={statusOptions} />;
-};
+}

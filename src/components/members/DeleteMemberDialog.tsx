@@ -1,5 +1,5 @@
 
-import React from "react";
+import React from 'react';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -10,6 +10,8 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { Button } from "@/components/ui/button";
+import { Loader2 } from "lucide-react";
 
 interface DeleteMemberDialogProps {
   isOpen: boolean;
@@ -19,37 +21,41 @@ interface DeleteMemberDialogProps {
   isDeleting: boolean;
 }
 
-export const DeleteMemberDialog: React.FC<DeleteMemberDialogProps> = ({
+export function DeleteMemberDialog({
   isOpen,
   onOpenChange,
   onConfirm,
   memberName,
   isDeleting
-}) => {
-  const handleConfirm = async () => {
-    await onConfirm();
-  };
-
+}: DeleteMemberDialogProps) {
   return (
     <AlertDialog open={isOpen} onOpenChange={onOpenChange}>
       <AlertDialogContent>
         <AlertDialogHeader>
-          <AlertDialogTitle>Delete Member</AlertDialogTitle>
+          <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
           <AlertDialogDescription>
-            Are you sure you want to delete {memberName}? This action cannot be undone.
+            This action will remove {memberName} from the system. 
+            This action cannot be undone.
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
           <AlertDialogCancel disabled={isDeleting}>Cancel</AlertDialogCancel>
-          <AlertDialogAction 
-            onClick={handleConfirm}
+          <Button
+            variant="destructive"
+            onClick={onConfirm}
             disabled={isDeleting}
-            className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
           >
-            {isDeleting ? "Deleting..." : "Delete"}
-          </AlertDialogAction>
+            {isDeleting ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                Deleting...
+              </>
+            ) : (
+              "Delete Member"
+            )}
+          </Button>
         </AlertDialogFooter>
       </AlertDialogContent>
     </AlertDialog>
   );
-};
+}

@@ -30,12 +30,21 @@ export default function AdministrationPage() {
                 This area is restricted to authorized club administrators and faculty. If you're an 
                 administrator or faculty member, please log in to access management tools.
               </p>
-              <Button 
-                onClick={() => navigate("/login")}
-                className="bg-glee-purple hover:bg-glee-purple/90 text-white"
-              >
-                Log In to Admin Portal
-              </Button>
+              <div className="flex flex-wrap gap-3">
+                <Button 
+                  onClick={() => navigate("/login")}
+                  className="bg-glee-purple hover:bg-glee-purple/90 text-white"
+                >
+                  Log In to Admin Portal
+                </Button>
+                <Button 
+                  variant="outline"
+                  onClick={() => navigate("/dashboard/members")}
+                  className="border-glee-purple text-glee-purple hover:bg-glee-purple/10"
+                >
+                  <Users className="mr-2 h-4 w-4" /> View Members
+                </Button>
+              </div>
             </div>
             
             <h2 className="text-xl font-semibold mb-4">Administration Features</h2>
@@ -51,7 +60,7 @@ export default function AdministrationPage() {
                   <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
                     Manage member profiles, section assignments, attendance records, and contact information.
                   </p>
-                  <Button variant="outline" className="w-full" onClick={() => navigate("/login")}>
+                  <Button variant="outline" className="w-full" onClick={() => navigate("/dashboard/members")}>
                     Access <ChevronRight className="h-4 w-4 ml-2" />
                   </Button>
                 </CardContent>

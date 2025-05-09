@@ -1,15 +1,15 @@
 
-import * as z from "zod";
+import { z } from 'zod';
 
 export const userFormSchema = z.object({
-  first_name: z.string().min(2, { message: "First name must be at least 2 characters." }),
-  last_name: z.string().min(2, { message: "Last name must be at least 2 characters." }),
-  email: z.string().email({ message: "Please enter a valid email address." }),
+  first_name: z.string().min(1, "First name is required"),
+  last_name: z.string().min(1, "Last name is required"),
+  email: z.string().email("Valid email is required"),
+  password: z.string().optional(),
   phone: z.string().optional(),
   role: z.string().default("singer"),
   voice_part: z.string().default("soprano_1"),
-  status: z.string().default("pending"),
-  password: z.string().optional()
+  status: z.string().default("pending")
 });
 
 export type UserFormValues = z.infer<typeof userFormSchema>;

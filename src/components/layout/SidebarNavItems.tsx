@@ -1,36 +1,28 @@
+
 import React from "react";
-import { NavItem } from "@/components/layout/NavItem";
-import {
-  Home,
-  Calendar,
-  Music,
-  FileMusic,
-  ListMusic,
-  User,
-  Bell,
-  BookOpen,
-  DollarSign,
-  Shirt,
+import { 
+  LayoutDashboard, 
+  Calendar, 
+  FileText, 
+  Music, 
+  Headphones, 
+  Settings,
   Users,
-  MessageSquare,
-  Headphones,
-  FileVideo,
-  FileImage,
-  ClipboardCheck,
-  Star,
+  Bell,
+  Box,
+  Shirt,
+  CheckSquare,
+  BookOpen,
+  ShoppingBag
 } from "lucide-react";
+
+import { NavItem } from "@/components/layout/NavItem";
 
 export const mainNavItems = [
   {
-    title: "Home",
-    href: "/",
-    icon: <Home className="h-5 w-5" />,
-    external: true,
-  },
-  {
     title: "Dashboard",
     href: "/dashboard",
-    icon: <Star className="h-5 w-5" />,
+    icon: <LayoutDashboard className="h-5 w-5" />,
   },
   {
     title: "Calendar",
@@ -40,42 +32,17 @@ export const mainNavItems = [
   {
     title: "Sheet Music",
     href: "/dashboard/sheet-music",
-    icon: <FileMusic className="h-5 w-5" />,
-  },
-  {
-    title: "Setlists",
-    href: "/dashboard/setlists",
-    icon: <ListMusic className="h-5 w-5" />,
-  },
-  {
-    title: "Recordings",
-    href: "/dashboard/recordings",
-    icon: <Music className="h-5 w-5" />,
+    icon: <FileText className="h-5 w-5" />,
   },
   {
     title: "Practice",
     href: "/dashboard/practice",
+    icon: <Music className="h-5 w-5" />,
+  },
+  {
+    title: "Recordings",
+    href: "/dashboard/recordings",
     icon: <Headphones className="h-5 w-5" />,
-  },
-  {
-    title: "Videos",
-    href: "/dashboard/videos",
-    icon: <FileVideo className="h-5 w-5" />,
-  },
-  {
-    title: "Media Sources",
-    href: "/dashboard/media-library",
-    icon: <FileImage className="h-5 w-5" />,
-  },
-  {
-    title: "Handbook",
-    href: "/dashboard/handbook",
-    icon: <BookOpen className="h-5 w-5" />,
-  },
-  {
-    title: "Messages",
-    href: "/dashboard/messages",
-    icon: <MessageSquare className="h-5 w-5" />,
   },
   {
     title: "Members",
@@ -88,37 +55,49 @@ export const mainNavItems = [
     icon: <Bell className="h-5 w-5" />,
   },
   {
-    title: "Attendance",
-    href: "/dashboard/attendance",
-    icon: <ClipboardCheck className="h-5 w-5" />,
-  },
-  {
-    title: "Dues",
-    href: "/dashboard/dues",
-    icon: <DollarSign className="h-5 w-5" />,
+    title: "Setlists",
+    href: "/dashboard/setlists", 
+    icon: <Box className="h-5 w-5" />,
   },
   {
     title: "Wardrobe",
-    href: "/dashboard/wardrobe",
+    href: "/dashboard/wardrobe-status",
     icon: <Shirt className="h-5 w-5" />,
   },
   {
-    title: "Profile",
-    href: "/dashboard/profile",
-    icon: <User className="h-5 w-5" />,
+    title: "Attendance",
+    href: "/dashboard/attendance",
+    icon: <CheckSquare className="h-5 w-5" />,
+  },
+  {
+    title: "Handbook",
+    href: "/dashboard/handbook",
+    icon: <BookOpen className="h-5 w-5" />,
+  },
+  {
+    title: "Merch",
+    href: "/dashboard/merch",
+    icon: <ShoppingBag className="h-5 w-5" />,
   },
 ];
 
-export function SidebarNavItems({ items }: { items: typeof mainNavItems }) {
+export function SidebarNavItems({ 
+  items 
+}: { 
+  items: { 
+    title: string; 
+    href: string; 
+    icon: React.ReactNode 
+  }[] 
+}) {
   return (
-    <div className="space-y-1">
-      {items.map((item) => (
+    <div className="grid gap-1">
+      {items.map((item, index) => (
         <NavItem
-          key={item.href}
-          title={item.title}
+          key={index}
           href={item.href}
+          title={item.title}
           icon={item.icon}
-          external={item.external}
         />
       ))}
     </div>

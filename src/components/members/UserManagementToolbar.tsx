@@ -1,20 +1,9 @@
 
-import React from "react";
-import { Input } from "@/components/ui/input";
+import React from 'react';
 import { Button } from "@/components/ui/button";
-import { 
-  Select, 
-  SelectContent, 
-  SelectItem, 
-  SelectTrigger, 
-  SelectValue 
-} from "@/components/ui/select";
-import { Search, RefreshCw, Plus, Filter } from "lucide-react";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
+import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Search, RefreshCw, Filter, UserPlus } from "lucide-react";
 
 interface UserManagementToolbarProps {
   searchTerm: string;
@@ -27,7 +16,7 @@ interface UserManagementToolbarProps {
   onRefreshClick: () => void;
   isLoading: boolean;
   isMobile: boolean;
-  canCreate?: boolean;
+  canCreate: boolean;
 }
 
 export function UserManagementToolbar({
@@ -41,133 +30,79 @@ export function UserManagementToolbar({
   onRefreshClick,
   isLoading,
   isMobile,
-  canCreate = true
+  canCreate
 }: UserManagementToolbarProps) {
-  // For mobile view with a dropdown filter
-  if (isMobile) {
-    return (
-      <div className="space-y-4 mb-4">
-        <div className="flex gap-2">
-          <div className="relative flex-1">
-            <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-            <Input
-              placeholder="Search members..."
-              className="pl-8"
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-            />
-          </div>
-          
-          <Popover>
-            <PopoverTrigger asChild>
-              <Button variant="outline" className="px-3">
-                <Filter className="h-4 w-4" />
-              </Button>
-            </PopoverTrigger>
-            <PopoverContent className="w-80">
-              <div className="space-y-2">
-                <h4 className="font-medium text-sm">Filter Options</h4>
-                <div className="space-y-2">
-                  <Select value={roleFilter} onValueChange={setRoleFilter}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Filter by role" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">All Roles</SelectItem>
-                      <SelectItem value="administrator">Administrator</SelectItem>
-                      <SelectItem value="section_leader">Section Leader</SelectItem>
-                      <SelectItem value="student_conductor">Student Conductor</SelectItem>
-                      <SelectItem value="accompanist">Accompanist</SelectItem>
-                      <SelectItem value="singer">Singer</SelectItem>
-                      <SelectItem value="non_singer">Non-Singer</SelectItem>
-                    </SelectContent>
-                  </Select>
-                  
-                  <Select value={statusFilter} onValueChange={setStatusFilter}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Filter by status" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">All Statuses</SelectItem>
-                      <SelectItem value="active">Active</SelectItem>
-                      <SelectItem value="inactive">Inactive</SelectItem>
-                      <SelectItem value="pending">Pending</SelectItem>
-                      <SelectItem value="alumni">Alumni</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
-            </PopoverContent>
-          </Popover>
-
-          <Button variant="outline" disabled={isLoading} onClick={onRefreshClick}>
-            <RefreshCw className={`h-4 w-4 ${isLoading ? 'animate-spin' : ''}`} />
-          </Button>
-        </div>
-        
-        <div className="flex justify-end">
-          {canCreate && (
-            <Button onClick={onCreateUserClick}>
-              <Plus className="h-4 w-4 mr-2" />
-              Add Member
-            </Button>
-          )}
-        </div>
-      </div>
-    );
-  }
-  
-  // Desktop view
   return (
-    <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-4 mb-6">
-      <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
-        <div className="relative w-full sm:w-64">
+    <div className="mb-4 flex flex-col space-y-3 sm:space-y-0 sm:flex-row justify-between">
+      <div className="flex flex-1 items-center space-x-2">
+        <div className="relative flex-1 max-w-sm">
           <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
           <Input
             placeholder="Search members..."
-            className="pl-8"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
+            className="pl-8"
           />
         </div>
         
-        <Select value={roleFilter} onValueChange={setRoleFilter}>
-          <SelectTrigger className="w-full sm:w-40">
-            <SelectValue placeholder="Role" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">All Roles</SelectItem>
-            <SelectItem value="administrator">Administrator</SelectItem>
-            <SelectItem value="section_leader">Section Leader</SelectItem>
-            <SelectItem value="student_conductor">Student Conductor</SelectItem>
-            <SelectItem value="accompanist">Accompanist</SelectItem>
-            <SelectItem value="singer">Singer</SelectItem>
-            <SelectItem value="non_singer">Non-Singer</SelectItem>
-          </SelectContent>
-        </Select>
-        
-        <Select value={statusFilter} onValueChange={setStatusFilter}>
-          <SelectTrigger className="w-full sm:w-40">
-            <SelectValue placeholder="Status" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">All Statuses</SelectItem>
-            <SelectItem value="active">Active</SelectItem>
-            <SelectItem value="inactive">Inactive</SelectItem>
-            <SelectItem value="pending">Pending</SelectItem>
-            <SelectItem value="alumni">Alumni</SelectItem>
-          </SelectContent>
-        </Select>
+        {!isMobile && (
+          <>
+            <Select
+              value={roleFilter}
+              onValueChange={setRoleFilter}
+            >
+              <SelectTrigger className="w-[150px]">
+                <SelectValue placeholder="Role" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="">All Roles</SelectItem>
+                <SelectItem value="administrator">Administrator</SelectItem>
+                <SelectItem value="section_leader">Section Leader</SelectItem>
+                <SelectItem value="singer">Singer</SelectItem>
+                <SelectItem value="student_conductor">Student Conductor</SelectItem>
+                <SelectItem value="accompanist">Accompanist</SelectItem>
+                <SelectItem value="non_singer">Non-Singer</SelectItem>
+              </SelectContent>
+            </Select>
+            
+            <Select
+              value={statusFilter}
+              onValueChange={setStatusFilter}
+            >
+              <SelectTrigger className="w-[150px]">
+                <SelectValue placeholder="Status" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="">All Statuses</SelectItem>
+                <SelectItem value="active">Active</SelectItem>
+                <SelectItem value="pending">Pending</SelectItem>
+                <SelectItem value="inactive">Inactive</SelectItem>
+                <SelectItem value="alumni">Alumni</SelectItem>
+              </SelectContent>
+            </Select>
+          </>
+        )}
       </div>
       
-      <div className="flex gap-2 w-full sm:w-auto justify-end">
-        <Button variant="outline" disabled={isLoading} onClick={onRefreshClick}>
-          <RefreshCw className={`h-4 w-4 mr-2 ${isLoading ? 'animate-spin' : ''}`} />
-          Refresh
+      <div className="flex space-x-2">
+        {isMobile && (
+          <Button variant="outline" size="sm">
+            <Filter className="h-4 w-4" />
+          </Button>
+        )}
+        
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={onRefreshClick}
+          disabled={isLoading}
+        >
+          <RefreshCw className={`h-4 w-4 ${isLoading ? 'animate-spin' : ''}`} />
         </Button>
+        
         {canCreate && (
           <Button onClick={onCreateUserClick}>
-            <Plus className="h-4 w-4 mr-2" />
+            <UserPlus className="h-4 w-4 mr-2" />
             Add Member
           </Button>
         )}

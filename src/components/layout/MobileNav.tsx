@@ -1,70 +1,39 @@
 
 import React from "react";
-import { cn } from "@/lib/utils";
+import { Bell, Home, Menu, User, Users } from "lucide-react";
+import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import { Button } from "@/components/ui/button";
+import { Sidebar } from "@/components/layout/Sidebar";
 import { MobileNavItem } from "@/components/layout/MobileNavItem";
-import { useSidebar } from "@/hooks/use-sidebar";
-import { 
-  Home,
-  FileMusic,
-  ListMusic, 
-  Calendar,
-  Menu,
-  Settings
-} from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
-import { usePermissions } from "@/hooks/usePermissions";
 
 export function MobileNav() {
-  const { isOpen, onOpen, onClose } = useSidebar();
-  const { isAdmin, profile } = useAuth();
-  const { isSuperAdmin } = usePermissions();
-  
-  // Log user permissions for debugging
-  console.log('MobileNav permissions:', { 
-    isAdmin: isAdmin(),
-    isSuperAdmin, 
-    profileSuperAdmin: profile?.is_super_admin
-  });
-  
-  const showAdminLink = isAdmin() || isSuperAdmin || profile?.is_super_admin;
+  const { signOut } = useAuth();
   
   return (
-    <nav className={cn(
-      "fixed bottom-0 left-0 right-0 z-30 flex h-16 items-center justify-between border-t bg-background px-4 lg:hidden"
-    )}>
-      <MobileNavItem
-        href="/dashboard"
-        title="Home"
-        icon={<Home className="h-5 w-5" />}
-      />
-      <MobileNavItem
-        href="/dashboard/sheet-music"
-        title="Music"
-        icon={<FileMusic className="h-5 w-5" />}
-      />
-      <MobileNavItem
-        href="/dashboard/setlists"
-        title="Setlists"
-        icon={<ListMusic className="h-5 w-5" />}
-      />
-      <MobileNavItem
-        href="/dashboard/calendar"
-        title="Calendar"
-        icon={<Calendar className="h-5 w-5" />}
-      />
-      {showAdminLink && (
-        <MobileNavItem
-          href="/dashboard/admin"
-          title="Admin"
-          icon={<Settings className="h-5 w-5" />}
-        />
-      )}
-      <MobileNavItem
-        href="#sidebar"
-        title="Menu"
-        icon={<Menu className="h-5 w-5" />}
-        onClick={() => isOpen ? onClose() : onOpen()}
-      />
-    </nav>
+    <>
+      <div className="flex sm:hidden items-center">
+        <Sheet>
+          <SheetTrigger asChild>
+            <Button variant="ghost" size="icon">
+              <Menu className="h-5 w-5" />
+              <span className="sr-only">Toggle Menu</span>
+            </Button>
+          </SheetTrigger>
+          <SheetContent side="left" className="px-0 pt-12">
+            <Sidebar />
+          </SheetContent>
+        </Sheet>
+      </div>
+      
+      <div
+        className="fixed bottom-0 left-0 right-0 border-t bg-background sm:hidden flex justify-around py-2 z-50"
+      >
+        <MobileNavItem href="/dashboard" title="Home" icon={<Home />} />
+        <MobileNavItem href="/dashboard/members" title="Members" icon={<Users />} />
+        <MobileNavItem href="/dashboard/announcements" title="Updates" icon={<Bell />} />
+        <MobileNavItem href="/dashboard/profile" title="Profile" icon={<User />} />
+      </div>
+    </>
   );
 }
