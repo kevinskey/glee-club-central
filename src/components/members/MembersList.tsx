@@ -19,7 +19,7 @@ import {
   DropdownMenuTrigger 
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
-import { Edit, Trash2, User, UserCog, ShieldCheck } from 'lucide-react';
+import { Edit, Trash2, User, ShieldCheck } from 'lucide-react';
 import { User as MemberUser } from '@/hooks/useUserManagement';
 import { formatVoicePart, formatRole } from '@/utils/format';
 
@@ -29,35 +29,6 @@ interface MembersListProps {
   onDeleteMember?: (memberId: string) => void;
   onManagePermissions?: (member: MemberUser) => void;
 }
-
-// Helper functions to format display values
-export const formatVoicePart = (voicePart: string | null): string => {
-  if (!voicePart) return "N/A";
-  
-  const parts: {[key: string]: string} = {
-    soprano_1: "Soprano 1",
-    soprano_2: "Soprano 2",
-    alto_1: "Alto 1",
-    alto_2: "Alto 2",
-    tenor: "Tenor",
-    bass: "Bass"
-  };
-  
-  return parts[voicePart] || voicePart;
-};
-
-export const formatRole = (role: string): string => {
-  const roles: {[key: string]: string} = {
-    administrator: "Administrator",
-    section_leader: "Section Leader",
-    singer: "Singer",
-    student_conductor: "Student Conductor",
-    accompanist: "Accompanist",
-    non_singer: "Non-Singer"
-  };
-  
-  return roles[role] || role;
-};
 
 export function MembersList({ 
   members, 
@@ -76,9 +47,9 @@ export function MembersList({
       case 'inactive':
         return 'secondary';
       case 'pending':
-        return 'warning';
-      case 'alumni':
         return 'outline';
+      case 'alumni':
+        return 'secondary';
       default:
         return 'secondary';
     }

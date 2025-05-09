@@ -1,7 +1,8 @@
+
 import React, { useState, useEffect } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { PageHeader } from "@/components/ui/page-header";
-import { Users, Search, Filter, UserPlus, ShieldCheck } from "lucide-react";
+import { Users, Search, Filter, UserPlus } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -35,6 +36,7 @@ export default function MembersPage() {
   const [isAddMemberDialogOpen, setIsAddMemberDialogOpen] = useState(false);
   const [isEditMemberDialogOpen, setIsEditMemberDialogOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [isPermissionsDialogOpen, setIsPermissionsDialogOpen] = useState(false);
   const [currentMember, setCurrentMember] = useState<User | null>(null);
   const [memberToDelete, setMemberToDelete] = useState<string | null>(null);
   const [memberToDeleteName, setMemberToDeleteName] = useState("");
