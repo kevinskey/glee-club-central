@@ -9,6 +9,11 @@ import { Calendar } from "lucide-react";
 export default function FanPage() {
   const navigate = useNavigate();
   
+  // Function to navigate to calendar page
+  const handleViewCalendar = () => {
+    navigate('/calendar');
+  };
+  
   return (
     <div className="flex min-h-screen flex-col">
       <Header initialShowNewsFeed={false} />
@@ -44,7 +49,7 @@ export default function FanPage() {
                 </ul>
                 <div className="mt-4">
                   <Button 
-                    onClick={() => navigate('/calendar')}
+                    onClick={handleViewCalendar}
                     className="bg-glee-purple hover:bg-glee-purple/90 text-white w-full"
                   >
                     View Full Calendar
