@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { PageHeader } from "@/components/ui/page-header";
 import { User, PencilLine } from "lucide-react";
@@ -12,7 +13,7 @@ import { supabase } from "@/integrations/supabase/client";
 
 export default function ProfilePage() {
   const [isEditing, setIsEditing] = useState(false);
-  const { user, profile } = useAuth();
+  const { user, profile, refreshPermissions } = useAuth();
   const [formData, setFormData] = useState({
     firstName: "",
     lastName: "",
@@ -56,13 +57,22 @@ export default function ProfilePage() {
         })
         .eq("id", user.id);
 
-      if (error) throw error;
+      if (error) {
+        console.error("Profile update error:", error);
+        toast.error("Failed to update profile: " + error.message);
+        return;
+      }
 
+      // Refresh user profile data after successful update
+      if (refreshPermissions) {
+        await refreshPermissions();
+      }
+      
       toast.success("Profile updated successfully!");
       setIsEditing(false);
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error updating profile:", error);
-      toast.error("Failed to update profile.");
+      toast.error("Failed to update profile: " + (error.message || "Unknown error"));
     }
   };
 

@@ -8,11 +8,11 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { formatDate } from "@/lib/utils";
-import { User } from "@/hooks/useUserManagement";
+import { Profile } from "@/types/auth";
 
 interface ProfileOverviewTabProps {
-  profile: User;
-  isEditable?: boolean; // Added isEditable prop
+  profile: Profile;
+  isEditable?: boolean;
 }
 
 export function ProfileOverviewTab({ profile, isEditable }: ProfileOverviewTabProps) {
