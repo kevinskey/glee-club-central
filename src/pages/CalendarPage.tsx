@@ -7,9 +7,7 @@ import { useCalendarEvents, CalendarEvent } from "@/hooks/useCalendarEvents";
 import { AddEventForm } from "@/components/calendar/AddEventForm";
 import { EditEventForm } from "@/components/calendar/EditEventForm";
 import { toast } from "sonner";
-import { ExternalLink } from "lucide-react";
-import { getViewGoogleCalendarUrl } from "@/utils/googleCalendar";
-import { Switch } from "@/components/ui/switch";
+import { GoogleCalendarToggle } from "@/components/calendar/GoogleCalendarToggle";
 
 // Components
 import { CalendarContainer } from "@/components/calendar/CalendarContainer";
@@ -112,27 +110,10 @@ export default function CalendarPage() {
           <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
             <CalendarPageHeader onAddEventClick={() => setIsAddEventOpen(true)} />
             
-            <div className="flex items-center space-x-4">
-              <div className="flex items-center space-x-2">
-                <span className="text-sm font-medium">Google Calendar</span>
-                <Switch 
-                  checked={useGoogleCalendar} 
-                  onCheckedChange={toggleGoogleCalendar} 
-                  className="data-[state=checked]:bg-glee-purple"
-                />
-              </div>
-              
-              {useGoogleCalendar && (
-                <Button 
-                  variant="outline" 
-                  className="flex items-center space-x-2"
-                  onClick={() => window.open(getViewGoogleCalendarUrl(), '_blank')}
-                >
-                  <span>View in Google</span>
-                  <ExternalLink className="h-4 w-4" />
-                </Button>
-              )}
-            </div>
+            <GoogleCalendarToggle 
+              useGoogleCalendar={useGoogleCalendar}
+              toggleGoogleCalendar={toggleGoogleCalendar}
+            />
           </div>
           
           <div className="flex flex-col lg:flex-row gap-8">
