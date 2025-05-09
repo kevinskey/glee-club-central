@@ -1,23 +1,20 @@
 
 import { useAuth } from '@/contexts/AuthContext';
-import { PermissionName } from '@/types/permissions';
 
 export function usePermissions() {
-  const { permissions, isAdmin, profile } = useAuth();
-  
-  const hasPermission = (permission: PermissionName): boolean => {
-    // Super admins have all permissions
-    if (profile?.is_super_admin || isAdmin()) {
-      return true;
-    }
-    
-    // Check if the user has the specific permission
-    return permissions ? permissions[permission] === true : false;
+  const { permissions, profile } = useAuth();
+
+  // Get permission by name
+  const hasPermission = (permissionName: string): boolean => {
+    if (!permissions) return false;
+    return permissions[permissionName] === true;
   };
+  
+  // Check if the user is a super admin
+  const isSuperAdmin = !!profile?.is_super_admin;
   
   return {
     hasPermission,
-    permissions,
-    isSuperAdmin: !!profile?.is_super_admin
+    isSuperAdmin
   };
 }

@@ -13,11 +13,21 @@ import {
   Settings
 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
+import { usePermissions } from "@/hooks/usePermissions";
 
 export function MobileNav() {
   const { isOpen, onOpen, onClose } = useSidebar();
   const { isAdmin, profile } = useAuth();
-  const isSuperAdmin = !!profile?.is_super_admin;
+  const { isSuperAdmin } = usePermissions();
+  
+  // Log user permissions for debugging
+  console.log('MobileNav permissions:', { 
+    isAdmin: isAdmin(),
+    isSuperAdmin, 
+    profileSuperAdmin: profile?.is_super_admin
+  });
+  
+  const showAdminLink = isAdmin() || isSuperAdmin || profile?.is_super_admin;
   
   return (
     <nav className={cn(
@@ -43,7 +53,7 @@ export function MobileNav() {
         title="Calendar"
         icon={<Calendar className="h-5 w-5" />}
       />
-      {(isAdmin() || isSuperAdmin) && (
+      {showAdminLink && (
         <MobileNavItem
           href="/dashboard/admin"
           title="Admin"
