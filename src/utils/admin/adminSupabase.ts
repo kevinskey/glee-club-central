@@ -1,4 +1,3 @@
-
 import { supabase } from '@/integrations/supabase/client';
 
 // Create a Supabase client with the service role key for admin operations
@@ -21,11 +20,11 @@ const adminSupabase = {
             }
           });
           
-          if (error) throw error;
+          if (error) return { error };
           return { user: data.user };
         } catch (error: any) {
           console.error("Error creating user:", error);
-          throw error;
+          return { error };
         }
       },
       
