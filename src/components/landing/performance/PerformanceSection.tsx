@@ -73,7 +73,7 @@ export function PerformanceSection() {
   const [performanceEvents, setPerformanceEvents] = useState<PerformanceEventType[]>(fallbackEvents);
   const [selectedEvent, setSelectedEvent] = useState<PerformanceEventType | null>(null);
   const { user, userProfile } = useAuth();
-  const { events, loading, useGoogleCalendar, toggleGoogleCalendar } = useCalendarEvents();
+  const { events, loading } = useCalendarEvents();
   
   // Filter events to show only concerts and special performances
   useEffect(() => {
@@ -126,21 +126,6 @@ export function PerformanceSection() {
           </h2>
           
           <div className="flex items-center gap-3">
-            {user && (
-              <div className="flex items-center space-x-2">
-                <span className="text-xs md:text-sm hidden md:inline">Google Calendar</span>
-                <Button 
-                  variant="outline" 
-                  size="sm" 
-                  className={`h-8 px-3 ${useGoogleCalendar ? 'bg-glee-purple text-white hover:bg-glee-purple/90' : 'bg-transparent'}`}
-                  onClick={toggleGoogleCalendar}
-                >
-                  <Calendar className="h-3 w-3 mr-1 md:mr-2" />
-                  <span className="text-xs">{useGoogleCalendar ? 'Using Google' : 'Use Google'}</span>
-                </Button>
-              </div>
-            )}
-            
             {user && isAuthorized && (
               <Button 
                 onClick={handleAddPerformance}
