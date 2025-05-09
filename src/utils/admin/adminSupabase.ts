@@ -52,11 +52,14 @@ const adminSupabase = {
             data: attributes.user_metadata
           });
           
-          if (error) throw error;
+          if (error) {
+            return { error };
+          }
+          
           return { user: data.user };
         } catch (error: any) {
           console.error("Error updating user:", error);
-          throw error;
+          return { error };
         }
       },
       
@@ -71,12 +74,14 @@ const adminSupabase = {
             .update({ status: 'deleted' })
             .eq('id', userId);
             
-          if (error) throw error;
+          if (error) {
+            return { error, success: false };
+          }
           
           return { success: true, userId };
         } catch (error: any) {
           console.error("Error deleting user:", error);
-          throw error;
+          return { error, success: false };
         }
       },
       
@@ -90,12 +95,14 @@ const adminSupabase = {
             .eq('id', userId)
             .single();
             
-          if (error) throw error;
+          if (error) {
+            return { error };
+          }
           
           return { user: data };
         } catch (error: any) {
           console.error("Error getting user:", error);
-          throw error;
+          return { error };
         }
       }
     }

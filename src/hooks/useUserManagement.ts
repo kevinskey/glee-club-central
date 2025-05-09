@@ -5,7 +5,6 @@ import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { UserFormValues } from '@/components/members/form/userFormSchema';
 import adminSupabase from '@/utils/admin/adminSupabase';
-import { deleteUser } from '@/utils/admin/userDelete';
 
 // Define the User type to match what profile components expect
 export interface User extends Omit<Profile, 'created_at'> {
@@ -142,25 +141,37 @@ export const useUserManagement = () => {
 
       // If email needs updating, use admin API
       if (userData.email) {
-        const response = await adminSupabase.auth.admin.updateUserById(userId, {
-          email: userData.email
-        });
-        
-        if (response.error) {
-          console.error("Email update error:", response.error);
-          throw response.error;
+        try {
+          const response = await adminSupabase.auth.admin.updateUserById(userId, {
+            email: userData.email
+          });
+          
+          // Check if response has error - now properly handled with optional chaining
+          if ('error' in response && response.error) {
+            console.error("Email update error:", response.error);
+            throw response.error;
+          }
+        } catch (err: any) {
+          console.error("Error updating email:", err);
+          throw new Error(`Failed to update email: ${err.message || 'Unknown error'}`);
         }
       }
 
       // If password provided, update it
       if (userData.password && userData.password.trim() !== '') {
-        const response = await adminSupabase.auth.admin.updateUserById(userId, {
-          password: userData.password
-        });
-        
-        if (response.error) {
-          console.error("Password update error:", response.error);
-          throw response.error;
+        try {
+          const response = await adminSupabase.auth.admin.updateUserById(userId, {
+            password: userData.password
+          });
+          
+          // Check if response has error - now properly handled with optional chaining
+          if ('error' in response && response.error) {
+            console.error("Password update error:", response.error);
+            throw response.error;
+          }
+        } catch (err: any) {
+          console.error("Error updating password:", err);
+          throw new Error(`Failed to update password: ${err.message || 'Unknown error'}`);
         }
       }
 
