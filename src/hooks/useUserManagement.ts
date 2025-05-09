@@ -1,5 +1,5 @@
 
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import { Profile } from '@/types/auth';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
@@ -20,7 +20,8 @@ export const useUserManagement = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<Error | null>(null);
 
-  const fetchUsers = async () => {
+  const fetchUsers = useCallback(async () => {
+    console.log("useUserManagement - fetchUsers called");
     setIsLoading(true);
     setError(null);
     
@@ -30,21 +31,29 @@ export const useUserManagement = () => {
         .from('profiles')
         .select('*');
       
-      if (error) throw error;
+      if (error) {
+        console.error("Supabase error:", error);
+        throw error;
+      }
+      
+      console.log(`Fetched ${data?.length || 0} profiles`);
       
       if (data) {
         setUsers(data as User[]);
       }
+      return data;
     } catch (err: any) {
       console.error('Error fetching users:', err);
       setError(err);
       toast.error('Failed to load users');
+      throw err;
     } finally {
       setIsLoading(false);
     }
-  };
+  }, []);
 
   const addUser = async (userData: UserFormValues): Promise<boolean> => {
+    console.log("useUserManagement - addUser called with:", userData);
     setIsLoading(true);
     setError(null);
     
@@ -63,12 +72,15 @@ export const useUserManagement = () => {
       const { user, error: authError } = response;
       
       if (authError) {
+        console.error("Auth error creating user:", authError);
         throw authError;
       }
 
       if (!user?.id) {
         throw new Error('Failed to create user account');
       }
+      
+      console.log("User created successfully, updating profile:", user.id);
       
       // Update the profile with additional data
       const { error: profileError } = await supabase
@@ -84,6 +96,7 @@ export const useUserManagement = () => {
         .eq('id', user.id);
       
       if (profileError) {
+        console.error("Profile update error:", profileError);
         throw profileError;
       }
 
@@ -95,7 +108,7 @@ export const useUserManagement = () => {
     } catch (err: any) {
       console.error('Error adding user:', err);
       setError(err);
-      toast.error(`Failed to add user: ${err.message}`);
+      toast.error(`Failed to add user: ${err.message || 'Unknown error'}`);
       return false;
     } finally {
       setIsLoading(false);

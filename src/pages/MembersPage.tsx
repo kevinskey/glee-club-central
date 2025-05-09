@@ -31,10 +31,14 @@ export default function MembersPage() {
     addUser
   } = useUserManagement();
   
-  // Fetch members on component mount
+  // Fetch members on component mount with proper dependency array
   useEffect(() => {
-    fetchUsers();
-  }, [fetchUsers]);
+    console.log("MembersPage - Fetching users");
+    fetchUsers().catch(err => {
+      console.error("Error fetching users:", err);
+      toast.error("Failed to load members");
+    });
+  }, []);  // Empty dependency array to run only once on mount
 
   // Handle adding a new member
   const handleAddMember = async (data: UserFormValues) => {
@@ -54,20 +58,29 @@ export default function MembersPage() {
   };
 
   // Filter members based on search query and filters
-  const filteredMembers = members.filter(member => {
-    const matchesSearch = 
-      (member.first_name || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
-      (member.last_name || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
-      (member.email || '').toLowerCase().includes(searchQuery.toLowerCase());
-    
-    const matchesRole = !roleFilter || (member.role || '') === roleFilter;
-    const matchesVoicePart = !voicePartFilter || (member.voice_part || '') === voicePartFilter;
-    
-    return matchesSearch && matchesRole && matchesVoicePart;
-  });
+  const filteredMembers = React.useMemo(() => {
+    return members.filter(member => {
+      const matchesSearch = 
+        (member.first_name || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
+        (member.last_name || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
+        (member.email || '').toLowerCase().includes(searchQuery.toLowerCase());
+      
+      const matchesRole = !roleFilter || (member.role || '') === roleFilter;
+      const matchesVoicePart = !voicePartFilter || (member.voice_part || '') === voicePartFilter;
+      
+      return matchesSearch && matchesRole && matchesVoicePart;
+    });
+  }, [members, searchQuery, roleFilter, voicePartFilter]);
 
   // Check if user has permission to add members
   const canAddMembers = hasPermission('can_manage_users');
+
+  console.log("MembersPage rendering", { 
+    memberCount: members.length, 
+    isLoading, 
+    authLoading,
+    canAddMembers
+  });
 
   return (
     <div className="container mx-auto p-4 space-y-6">

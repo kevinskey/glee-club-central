@@ -1,5 +1,5 @@
 
-import React from "react";
+import React, { useEffect } from "react";
 import {
   Dialog,
   DialogContent,
@@ -56,22 +56,39 @@ export const AddMemberDialog: React.FC<AddMemberDialogProps> = ({
     }
   });
 
+  // Reset form when dialog opens
+  useEffect(() => {
+    if (isOpen) {
+      form.reset({
+        first_name: "",
+        last_name: "",
+        email: "",
+        phone: "",
+        role: "singer",
+        voice_part: "soprano_1",
+        status: "pending",
+        password: ""
+      });
+    }
+  }, [isOpen, form]);
+
   const onSubmit = async (data: UserFormValues) => {
+    console.log("AddMemberDialog - Submit with data:", data);
     try {
       await onMemberAdd(data);
-      form.reset();
     } catch (error) {
       console.error("Error submitting form:", error);
     }
   };
 
+  const handleOpenChange = (open: boolean) => {
+    if (!isSubmitting) {
+      onOpenChange(open);
+    }
+  };
+
   return (
-    <Dialog open={isOpen} onOpenChange={(open) => {
-      if (!isSubmitting) {
-        onOpenChange(open);
-        if (!open) form.reset();
-      }
-    }}>
+    <Dialog open={isOpen} onOpenChange={handleOpenChange}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle>Add New Member</DialogTitle>
@@ -238,7 +255,7 @@ export const AddMemberDialog: React.FC<AddMemberDialogProps> = ({
               <Button 
                 type="button" 
                 variant="outline" 
-                onClick={() => onOpenChange(false)}
+                onClick={() => !isSubmitting && onOpenChange(false)}
                 disabled={isSubmitting}
               >
                 Cancel

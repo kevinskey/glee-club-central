@@ -11,28 +11,38 @@ const adminSupabase = {
     admin: {
       createUser: async (options: any) => {
         try {
+          console.log("adminSupabase - createUser called with:", {
+            email: options.email,
+            hasPassword: Boolean(options.password),
+            metadata: options.user_metadata
+          });
+          
           // For development purposes, we'll just use the regular supabase client
           // In production, this should be handled by a secure backend service
           const { data, error } = await supabase.auth.signUp({
             email: options.email,
-            password: options.password || "",
+            password: options.password || Math.random().toString(36).substring(2, 10),
             options: {
               data: options.user_metadata || {}
             }
           });
           
-          if (error) return { error };
+          if (error) {
+            console.error("Error creating user:", error);
+            return { error };
+          }
+          
+          console.log("User created successfully:", data.user?.id);
           return { user: data.user };
         } catch (error: any) {
-          console.error("Error creating user:", error);
+          console.error("Exception creating user:", error);
           return { error };
         }
       },
       
       updateUserById: async (userId: string, attributes: any) => {
         try {
-          // For password updates in development, we'll need to implement a workaround
-          // In production, this should be handled by a secure backend
+          console.log("adminSupabase - updateUserById called for:", userId);
           
           // For email and metadata updates we can use the admin functions 
           // which should work with the authenticated user having the right permissions
@@ -50,6 +60,7 @@ const adminSupabase = {
       },
       
       deleteUser: async (userId: string) => {
+        console.log("adminSupabase - deleteUser called for:", userId);
         // In development, we'll handle this differently
         // In production, this should be handled by a secure backend service
         try {
@@ -69,6 +80,7 @@ const adminSupabase = {
       },
       
       getUserById: async (userId: string) => {
+        console.log("adminSupabase - getUserById called for:", userId);
         try {
           // Get user data from profiles table
           const { data, error } = await supabase
