@@ -12,9 +12,10 @@ import { User } from "@/hooks/useUserManagement";
 
 interface ProfileOverviewTabProps {
   profile: User;
+  isEditable?: boolean;
 }
 
-export function ProfileOverviewTab({ profile }: ProfileOverviewTabProps) {
+export function ProfileOverviewTab({ profile, isEditable }: ProfileOverviewTabProps) {
   const formatVoicePart = (voicePart: string | null | undefined) => {
     if (!voicePart) return "Not set";
     
