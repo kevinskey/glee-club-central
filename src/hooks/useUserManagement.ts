@@ -1,4 +1,3 @@
-
 import { useState, useCallback } from 'react';
 import { Profile } from '@/types/auth';
 import { supabase } from '@/integrations/supabase/client';
@@ -190,6 +189,39 @@ export const useUserManagement = () => {
     }
   };
 
+  const updateUserRole = async (userId: string, role: string): Promise<boolean> => {
+    console.log("useUserManagement - updateUserRole called for:", userId, "with role:", role);
+    setIsLoading(true);
+    setError(null);
+    
+    try {
+      // Use the handle_user_role RPC function to update the user's role
+      const { error } = await supabase
+        .rpc('handle_user_role', {
+          p_user_id: userId,
+          p_role: role
+        });
+      
+      if (error) {
+        console.error("Role update error:", error);
+        throw error;
+      }
+
+      toast.success(`User role updated successfully!`);
+      
+      // Refresh the user list
+      await fetchUsers();
+      return true;
+    } catch (err: any) {
+      console.error('Error updating user role:', err);
+      setError(err);
+      toast.error(`Failed to update user role: ${err.message || 'Unknown error'}`);
+      return false;
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const deleteUser = async (userId: string): Promise<boolean> => {
     console.log("useUserManagement - deleteUser called for:", userId);
     setIsLoading(true);
@@ -225,6 +257,7 @@ export const useUserManagement = () => {
     fetchUsers,
     addUser,
     updateUser,
+    updateUserRole,
     deleteUser,
   };
 };

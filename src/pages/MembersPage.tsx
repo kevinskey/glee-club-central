@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { PageHeader } from "@/components/ui/page-header";
@@ -26,6 +25,7 @@ import { DeleteMemberDialog } from "@/components/members/DeleteMemberDialog";
 import { User } from "@/hooks/useUserManagement";
 import { Separator } from "@/components/ui/separator";
 import { MemberPermissionsDialog } from "@/components/members/MemberPermissionsDialog";
+import { UserRoleSelector } from "@/components/members/UserRoleSelector";
 
 export default function MembersPage() {
   const { isLoading: authLoading } = useAuth();
@@ -45,6 +45,7 @@ export default function MembersPage() {
   const [activeTab, setActiveTab] = useState("all");
   const isMobile = useMedia('(max-width: 640px)');
   const { hasPermission } = usePermissions();
+  const [isRoleDialogOpen, setIsRoleDialogOpen] = useState(false);
   
   const {
     users: members,
@@ -180,6 +181,12 @@ export default function MembersPage() {
   const handleManagePermissions = (member: User) => {
     setCurrentMember(member);
     setIsPermissionsDialogOpen(true);
+  };
+
+  // Handle changing a member's role
+  const handleChangeRole = (member: User) => {
+    setCurrentMember(member);
+    setIsRoleDialogOpen(true);
   };
 
   return (
@@ -345,6 +352,7 @@ export default function MembersPage() {
                     onEditMember={canManageMembers ? handleEditMember : undefined}
                     onDeleteMember={canManageMembers ? handleDeleteClick : undefined}
                     onManagePermissions={canManageMembers ? handleManagePermissions : undefined}
+                    onChangeRole={canManageMembers ? handleChangeRole : undefined}
                   />
                 )}
               </div>
@@ -366,6 +374,7 @@ export default function MembersPage() {
                   onEditMember={canManageMembers ? handleEditMember : undefined}
                   onDeleteMember={canManageMembers ? handleDeleteClick : undefined}
                   onManagePermissions={canManageMembers ? handleManagePermissions : undefined}
+                  onChangeRole={canManageMembers ? handleChangeRole : undefined}
                 />
               )}
             </Card>
@@ -385,7 +394,8 @@ export default function MembersPage() {
                   members={filteredMembers} 
                   onEditMember={canManageMembers ? handleEditMember : undefined}
                   onDeleteMember={canManageMembers ? handleDeleteClick : undefined}
-                  onManagePermissions={canManageMembers ? handleManagePermissions : undefined}
+                  onManagePermissions={canManagePermissions ? handleManagePermissions : undefined}
+                  onChangeRole={canManageMembers ? handleChangeRole : undefined}
                 />
               )}
             </Card>
@@ -432,6 +442,16 @@ export default function MembersPage() {
           onConfirm={handleConfirmDelete}
           memberName={memberToDeleteName}
           isDeleting={isDeleting}
+        />
+      )}
+      
+      {/* Role Selector Dialog */}
+      {canManageMembers && (
+        <UserRoleSelector
+          user={currentMember}
+          isOpen={isRoleDialogOpen}
+          onOpenChange={setIsRoleDialogOpen}
+          onSuccess={fetchUsers}
         />
       )}
       

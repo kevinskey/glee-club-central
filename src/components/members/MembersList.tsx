@@ -1,15 +1,7 @@
 
 import React from 'react';
-import { 
-  Table, 
-  TableBody, 
-  TableCell, 
-  TableHead, 
-  TableHeader, 
-  TableRow 
-} from "@/components/ui/table";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Badge } from "@/components/ui/badge";
+import { User } from '@/hooks/useUserManagement';
+import { UserCog, Pencil, Trash2, ShieldCheck, Users } from 'lucide-react';
 import { 
   DropdownMenu, 
   DropdownMenuContent, 
@@ -17,140 +9,146 @@ import {
   DropdownMenuLabel, 
   DropdownMenuSeparator, 
   DropdownMenuTrigger 
-} from "@/components/ui/dropdown-menu";
-import { Button } from "@/components/ui/button";
-import { Edit, Trash2, User, ShieldCheck } from 'lucide-react';
-import { User as MemberUser } from '@/hooks/useUserManagement';
-import { formatVoicePart, formatRole } from '@/utils/format';
+} from '@/components/ui/dropdown-menu';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 
 interface MembersListProps {
-  members: MemberUser[];
-  onEditMember?: (member: MemberUser) => void;
+  members: User[];
+  onEditMember?: (member: User) => void;
   onDeleteMember?: (memberId: string) => void;
-  onManagePermissions?: (member: MemberUser) => void;
+  onManagePermissions?: (member: User) => void;
+  onChangeRole?: (member: User) => void;
 }
 
 export function MembersList({ 
   members, 
   onEditMember, 
   onDeleteMember,
-  onManagePermissions 
+  onManagePermissions,
+  onChangeRole 
 }: MembersListProps) {
-  const getInitials = (firstName: string, lastName: string) => {
-    return `${firstName?.charAt(0) || ''}${lastName?.charAt(0) || ''}`.toUpperCase();
+  // Format voice part for display
+  const formatVoicePart = (voicePart: string | null): string => {
+    if (!voicePart) return "Not assigned";
+    
+    const parts: {[key: string]: string} = {
+      soprano_1: "Soprano 1",
+      soprano_2: "Soprano 2",
+      alto_1: "Alto 1",
+      alto_2: "Alto 2",
+      tenor: "Tenor",
+      bass: "Bass"
+    };
+    
+    return parts[voicePart] || voicePart;
   };
   
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'active':
-        return 'default';
-      case 'inactive':
-        return 'secondary';
-      case 'pending':
-        return 'outline';
-      case 'alumni':
-        return 'secondary';
-      default:
-        return 'secondary';
-    }
+  // Format role for display
+  const formatRole = (role: string | null): string => {
+    if (!role) return "Not assigned";
+    
+    const roles: {[key: string]: string} = {
+      administrator: "Administrator",
+      section_leader: "Section Leader",
+      singer: "Singer",
+      student_conductor: "Student Conductor",
+      accompanist: "Accompanist",
+      non_singer: "Non-Singer"
+    };
+    
+    return roles[role] || role;
   };
-
+  
   return (
-    <div className="border rounded-md overflow-hidden">
-      <Table>
-        <TableHeader>
-          <TableRow>
-            <TableHead>Name</TableHead>
-            <TableHead className="hidden sm:table-cell">Role</TableHead>
-            <TableHead className="hidden md:table-cell">Voice Part</TableHead>
-            <TableHead>Status</TableHead>
-            <TableHead className="text-right">Actions</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {members.map((member) => (
-            <TableRow key={member.id}>
-              <TableCell>
-                <div className="flex items-center gap-3">
-                  <Avatar className="h-8 w-8">
-                    {member.avatar_url ? (
-                      <AvatarImage src={member.avatar_url} alt={`${member.first_name || ''} ${member.last_name || ''}`} />
-                    ) : null}
-                    <AvatarFallback>{getInitials(member.first_name || '', member.last_name || '')}</AvatarFallback>
-                  </Avatar>
-                  <div>
-                    <div className="font-medium">{member.first_name} {member.last_name}</div>
-                    <div className="text-sm text-muted-foreground hidden sm:block">{member.email}</div>
-                  </div>
-                </div>
-              </TableCell>
-              <TableCell className="hidden sm:table-cell">
-                {formatRole(member.role || '')}
-              </TableCell>
-              <TableCell className="hidden md:table-cell">
-                {formatVoicePart(member.voice_part)}
-              </TableCell>
-              <TableCell>
-                <Badge variant={getStatusColor(member.status || 'pending')}>
-                  {member.status?.charAt(0).toUpperCase() + member.status?.slice(1) || 'Pending'}
-                </Badge>
-              </TableCell>
-              <TableCell className="text-right">
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" size="sm">
-                      Actions
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end">
-                    <DropdownMenuLabel>Member Actions</DropdownMenuLabel>
-                    <DropdownMenuSeparator />
-                    
-                    {onEditMember && (
-                      <DropdownMenuItem onClick={() => onEditMember(member)}>
-                        <Edit className="mr-2 h-4 w-4" />
-                        Edit Member
-                      </DropdownMenuItem>
-                    )}
-                    
-                    {onManagePermissions && (
-                      <DropdownMenuItem onClick={() => onManagePermissions(member)}>
-                        <ShieldCheck className="mr-2 h-4 w-4" />
-                        Manage Permissions
-                      </DropdownMenuItem>
-                    )}
-                    
-                    <DropdownMenuItem>
-                      <User className="mr-2 h-4 w-4" />
-                      View Profile
-                    </DropdownMenuItem>
-                    
-                    <DropdownMenuSeparator />
-                    
-                    {onDeleteMember && (
-                      <DropdownMenuItem 
-                        className="text-destructive" 
-                        onClick={() => onDeleteMember(member.id)}
-                      >
-                        <Trash2 className="mr-2 h-4 w-4" />
-                        Delete Member
-                      </DropdownMenuItem>
-                    )}
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              </TableCell>
-            </TableRow>
-          ))}
+    <div className="space-y-4">
+      {members.map((member) => (
+        <div 
+          key={member.id}
+          className="flex flex-col sm:flex-row justify-between items-start sm:items-center p-4 border rounded-lg bg-card"
+        >
+          <div className="flex items-center gap-3 mb-3 sm:mb-0">
+            <Avatar className="h-10 w-10 border">
+              <AvatarImage src={member.avatar_url || undefined} alt={`${member.first_name} ${member.last_name}`} />
+              <AvatarFallback>{`${member.first_name?.[0] || ''}${member.last_name?.[0] || ''}`}</AvatarFallback>
+            </Avatar>
+            <div>
+              <h3 className="font-medium">{member.first_name} {member.last_name}</h3>
+              <p className="text-sm text-muted-foreground">{member.email}</p>
+            </div>
+          </div>
           
-          {members.length === 0 && (
-            <TableRow>
-              <TableCell colSpan={5} className="h-24 text-center">
-                No members found.
-              </TableCell>
-            </TableRow>
-          )}
-        </TableBody>
-      </Table>
+          <div className="flex flex-col sm:flex-row gap-2 sm:gap-4 w-full sm:w-auto">
+            <div className="flex flex-wrap gap-2">
+              <Badge variant={member.status === 'active' ? 'default' : 'secondary'} className="whitespace-nowrap">
+                {(member.status || 'Pending').charAt(0).toUpperCase() + (member.status || 'pending').slice(1)}
+              </Badge>
+              <Badge variant="outline" className="whitespace-nowrap">
+                {formatRole(member.role)}
+              </Badge>
+              {member.voice_part && (
+                <Badge variant="outline" className="whitespace-nowrap bg-muted">
+                  {formatVoicePart(member.voice_part)}
+                </Badge>
+              )}
+            </div>
+            
+            <div className="flex justify-end mt-2 sm:mt-0">
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" size="sm">
+                    Actions
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-48">
+                  <DropdownMenuLabel>Member Actions</DropdownMenuLabel>
+                  <DropdownMenuSeparator />
+                  
+                  {onEditMember && (
+                    <DropdownMenuItem onClick={() => onEditMember(member)}>
+                      <Pencil className="mr-2 h-4 w-4" />
+                      Edit Details
+                    </DropdownMenuItem>
+                  )}
+                  
+                  {onChangeRole && (
+                    <DropdownMenuItem onClick={() => onChangeRole(member)}>
+                      <Users className="mr-2 h-4 w-4" />
+                      Change Role
+                    </DropdownMenuItem>
+                  )}
+                  
+                  {onManagePermissions && (
+                    <DropdownMenuItem onClick={() => onManagePermissions(member)}>
+                      <ShieldCheck className="mr-2 h-4 w-4" />
+                      Manage Permissions
+                    </DropdownMenuItem>
+                  )}
+                  
+                  <DropdownMenuSeparator />
+                  
+                  {onDeleteMember && (
+                    <DropdownMenuItem 
+                      className="text-destructive" 
+                      onClick={() => onDeleteMember(member.id)}
+                    >
+                      <Trash2 className="mr-2 h-4 w-4" />
+                      Delete Member
+                    </DropdownMenuItem>
+                  )}
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
+          </div>
+        </div>
+      ))}
+      
+      {members.length === 0 && (
+        <div className="text-center py-8">
+          <p className="text-muted-foreground">No members found</p>
+        </div>
+      )}
     </div>
   );
 }
