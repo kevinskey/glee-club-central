@@ -1,6 +1,6 @@
 
 import { supabase } from '@/integrations/supabase/client';
-import { PermissionName, UserPermissions } from '@/types/permissions';
+import { PermissionName, UserPermissions, UserTitle } from '@/types/permissions';
 import { toast } from 'sonner';
 
 export async function fetchUserPermissions(userId: string): Promise<UserPermissions | null> {
@@ -61,7 +61,7 @@ export async function hasPermission(
   }
 }
 
-export async function updateUserTitle(userId: string, title: string): Promise<boolean> {
+export async function updateUserTitle(userId: string, title: UserTitle): Promise<boolean> {
   try {
     const { error } = await supabase
       .from('profiles')

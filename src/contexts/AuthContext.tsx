@@ -369,5 +369,5 @@ export function useAuth() {
   return context;
 }
 
-// Export the PermissionSet type
-export type { PermissionSet, Profile };
+// Export the Profile type only
+export type { Profile };
