@@ -1,169 +1,100 @@
 
-import React from "react";
-import { useState } from "react";
-import { Link } from "react-router-dom";
+import React, { useState, useEffect } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
-import { useNavigate } from "react-router-dom";
-import { VoicePart } from "@/types/auth";
+import { Link, useNavigate } from "react-router-dom";
+import { toast } from "sonner";
 
+import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Checkbox } from "@/components/ui/checkbox";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
-import { Music, AlertCircle } from "lucide-react";
-import { toast } from "sonner";
-import { supabase } from "@/integrations/supabase/client";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { useMessaging } from "@/hooks/useMessaging";
+import { Music, AlertCircle } from "lucide-react";
 
-const formSchema = z
-  .object({
-    email: z.string().email({ message: "Please enter a valid email address" }),
-    password: z
-      .string()
-      .min(8, { message: "Password must be at least 8 characters" }),
-    confirmPassword: z.string(),
-    firstName: z.string().min(1, { message: "First name is required" }),
-    lastName: z.string().min(1, { message: "Last name is required" }),
-    phone: z.string().optional(),
-    voicePart: z.enum(["soprano_1", "soprano_2", "alto_1", "alto_2", "tenor", "bass"]),
-    agreeTerms: z.boolean().refine(val => val === true, {
-      message: "You must agree to the terms",
-    }),
-  })
-  .refine((data) => data.password === data.confirmPassword, {
-    message: "Passwords do not match",
-    path: ["confirmPassword"],
-  });
+const registerSchema = z.object({
+  firstName: z.string().min(1, {
+    message: "First name is required.",
+  }),
+  lastName: z.string().min(1, {
+    message: "Last name is required.",
+  }),
+  email: z.string().email({
+    message: "Please enter a valid email address.",
+  }),
+  password: z.string().min(6, {
+    message: "Password must be at least 6 characters.",
+  }),
+  confirmPassword: z.string().min(6, {
+    message: "Please confirm your password.",
+  }),
+}).refine((data) => data.password === data.confirmPassword, {
+  message: "Passwords do not match",
+  path: ["confirmPassword"],
+});
 
-type FormValues = z.infer<typeof formSchema>;
+type RegisterFormValues = z.infer<typeof registerSchema>;
 
 export default function RegisterPage() {
+  const { signUp, isAuthenticated, isLoading } = useAuth();
   const navigate = useNavigate();
-  const [isLoading, setIsLoading] = useState(false);
-  const [authError, setAuthError] = useState<string | null>(null);
-  const { sendEmail } = useMessaging();
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [registerError, setRegisterError] = useState<string | null>(null);
   
-  const form = useForm<FormValues>({
-    resolver: zodResolver(formSchema),
+  // Initialize the form with useForm hook
+  const form = useForm<RegisterFormValues>({
+    resolver: zodResolver(registerSchema),
     defaultValues: {
+      firstName: "",
+      lastName: "",
       email: "",
       password: "",
       confirmPassword: "",
-      firstName: "",
-      lastName: "",
-      phone: "",
-      voicePart: "soprano_1",
-      agreeTerms: false,
     },
   });
 
-  async function onSubmit(values: FormValues) {
-    setIsLoading(true);
-    setAuthError(null);
-    
+  // If user is already authenticated, redirect to dashboard
+  useEffect(() => {
+    if (isAuthenticated && !isLoading) {
+      navigate("/dashboard");
+    }
+  }, [isAuthenticated, isLoading, navigate]);
+
+  const onSubmit = async (values: RegisterFormValues) => {
+    setIsSubmitting(true);
+    setRegisterError(null);
+
     try {
-      // Clean up existing auth state to prevent potential issues
-      cleanupAuthState();
-      
-      // Try global sign out first to avoid conflicts
-      try {
-        await supabase.auth.signOut({ scope: 'global' });
-      } catch (err) {
-        // Continue even if this fails
-        console.log("Global sign out failed, continuing with sign up");
-      }
-      
-      // Register the user with Supabase with explicit email confirmation
-      const { data: authData, error: authError } = await supabase.auth.signUp({
-        email: values.email,
-        password: values.password,
-        options: {
-          data: {
-            first_name: values.firstName,
-            last_name: values.lastName,
-          },
-          emailRedirectTo: `${window.location.origin}/login`,
-        },
-      });
+      const { error, data } = await signUp(
+        values.email,
+        values.password,
+        values.firstName,
+        values.lastName
+      );
 
-      if (authError) throw authError;
-
-      // Update additional profile information if user was created
-      if (authData.user) {
-        const { error: profileError } = await supabase
-          .from("profiles")
-          .update({
-            phone: values.phone || null,
-            voice_part: values.voicePart,
-          })
-          .eq("id", authData.user.id);
-        
-        if (profileError) {
-          console.error("Error updating profile:", profileError);
-          // Continue without throwing, as the main signup was successful
-        }
-        
-        // Send welcome email
-        try {
-          await sendEmail(
-            values.email,
-            "Welcome to Glee World!",
-            `<h1>Welcome to Glee World, ${values.firstName}!</h1>
-            <p>Thank you for joining the Spelman College Glee Club's digital hub. We're excited to have you with us!</p>
-            <p>Your account has been created successfully. You can now access all the features of our platform.</p>
-            <p>If you have any questions, please don't hesitate to reach out to our team.</p>
-            <p>Best regards,<br>The Glee Club Team</p>`
-          );
-          console.log("Welcome email sent successfully");
-        } catch (emailError) {
-          console.error("Failed to send welcome email:", emailError);
-          // Don't throw error here, as registration was successful
-        }
-        
-        // Check if email confirmation is needed
-        if (authData.session) {
-          // User is automatically signed in (email confirmation disabled in Supabase)
-          toast.success("Registration successful! You are now logged in.");
-          navigate("/dashboard");
-        } else {
-          // Email confirmation is enabled
-          toast.success("Registration successful! Please check your email to verify your account.");
-          navigate("/login", { 
-            state: { message: "Please check your email to verify your account before logging in." } 
-          });
-        }
+      if (error) {
+        console.error("Registration error:", error);
+        setRegisterError(error.message || "Failed to register account");
+      } else {
+        toast.success("Registration successful!", {
+          description: "Please check your email for a verification link"
+        });
+        navigate("/login", { state: { message: "Please check your email for a verification link to complete your registration." } });
       }
     } catch (error: any) {
-      console.error("Registration error:", error);
-      setAuthError(error.message || "Registration failed. Please try again.");
-      toast.error(error.message || "Registration failed. Please try again.");
+      console.error("Unexpected error during registration:", error);
+      setRegisterError(error.message || "An unexpected error occurred");
     } finally {
-      setIsLoading(false);
+      setIsSubmitting(false);
     }
-  }
-  
-  // Helper function to clean up auth state
-  const cleanupAuthState = () => {
-    // Remove standard auth tokens
-    localStorage.removeItem('supabase.auth.token');
-    // Remove all Supabase auth keys from localStorage
-    Object.keys(localStorage).forEach((key) => {
-      if (key.startsWith('supabase.auth.') || key.includes('sb-')) {
-        localStorage.removeItem(key);
-      }
-    });
-    // Remove from sessionStorage if in use
-    Object.keys(sessionStorage || {}).forEach((key) => {
-      if (key.startsWith('supabase.auth.') || key.includes('sb-')) {
-        sessionStorage.removeItem(key);
-      }
-    });
   };
+
+  // If already authenticated and not loading, don't render the register form
+  if (isAuthenticated && !isLoading) {
+    return null; // Will redirect in the useEffect
+  }
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-background px-4 py-12">
@@ -174,19 +105,18 @@ export default function RegisterPage() {
           </div>
           <CardTitle className="text-2xl font-bold">Create an account</CardTitle>
           <CardDescription>
-            Join the Glee World digital choir platform
+            Join Glee World to access member resources
           </CardDescription>
         </CardHeader>
         <CardContent>
-          {authError && (
+          {registerError && (
             <Alert variant="destructive" className="mb-4">
               <AlertCircle className="h-4 w-4" />
               <AlertDescription className="ml-2">
-                {authError}
+                {registerError}
               </AlertDescription>
             </Alert>
           )}
-          
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
               <div className="grid grid-cols-2 gap-4">
@@ -197,7 +127,7 @@ export default function RegisterPage() {
                     <FormItem>
                       <FormLabel>First Name</FormLabel>
                       <FormControl>
-                        <Input placeholder="John" {...field} />
+                        <Input placeholder="Jane" {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -224,46 +154,8 @@ export default function RegisterPage() {
                   <FormItem>
                     <FormLabel>Email</FormLabel>
                     <FormControl>
-                      <Input placeholder="john.doe@example.com" {...field} />
+                      <Input placeholder="jane.doe@example.com" {...field} />
                     </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="phone"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Phone (Optional)</FormLabel>
-                    <FormControl>
-                      <Input placeholder="(555) 123-4567" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="voicePart"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Voice Part</FormLabel>
-                    <Select onValueChange={field.onChange} defaultValue={field.value}>
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select your voice part" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        <SelectItem value="soprano_1">Soprano 1</SelectItem>
-                        <SelectItem value="soprano_2">Soprano 2</SelectItem>
-                        <SelectItem value="alto_1">Alto 1</SelectItem>
-                        <SelectItem value="alto_2">Alto 2</SelectItem>
-                        <SelectItem value="tenor">Tenor</SelectItem>
-                        <SelectItem value="bass">Bass</SelectItem>
-                      </SelectContent>
-                    </Select>
                     <FormMessage />
                   </FormItem>
                 )}
@@ -294,34 +186,14 @@ export default function RegisterPage() {
                   </FormItem>
                 )}
               />
-              <FormField
-                control={form.control}
-                name="agreeTerms"
-                render={({ field }) => (
-                  <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md p-2">
-                    <FormControl>
-                      <Checkbox
-                        checked={field.value}
-                        onCheckedChange={field.onChange}
-                      />
-                    </FormControl>
-                    <div className="space-y-1 leading-none">
-                      <FormLabel className="text-sm font-normal">
-                        I agree to the Terms of Service and Privacy Policy
-                      </FormLabel>
-                      <FormMessage />
-                    </div>
-                  </FormItem>
-                )}
-              />
-              <Button type="submit" className="w-full" disabled={isLoading}>
-                {isLoading ? (
+              <Button type="submit" className="w-full" disabled={isSubmitting}>
+                {isSubmitting ? (
                   <>
-                    <span className="mr-2">Creating account...</span>
+                    <span className="mr-2">Registering...</span>
                     <div className="h-4 w-4 rounded-full border-2 border-white border-t-transparent animate-spin"></div>
                   </>
                 ) : (
-                  "Create Account"
+                  "Register"
                 )}
               </Button>
             </form>

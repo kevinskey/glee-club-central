@@ -1,96 +1,171 @@
 
-import React, { useState } from "react";
-import { useAuth } from "@/contexts/AuthContext";
-import { useNavigate } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
+import { Link, useNavigate } from "react-router-dom";
+import { toast } from "sonner";
+
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Music, AlertCircle } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+
+const passwordSchema = z.object({
+  password: z.string().min(6, {
+    message: "Password must be at least 6 characters.",
+  }),
+  confirmPassword: z.string().min(6, {
+    message: "Please confirm your password.",
+  }),
+}).refine((data) => data.password === data.confirmPassword, {
+  message: "Passwords do not match",
+  path: ["confirmPassword"],
+});
+
+type PasswordFormValues = z.infer<typeof passwordSchema>;
 
 export default function UpdatePasswordPage() {
-  const [password, setPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
-  const [error, setError] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
-  const { updatePassword } = useAuth();
   const navigate = useNavigate();
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [updateError, setUpdateError] = useState<string | null>(null);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  
+  // Initialize the form with useForm hook
+  const form = useForm<PasswordFormValues>({
+    resolver: zodResolver(passwordSchema),
+    defaultValues: {
+      password: "",
+      confirmPassword: "",
+    },
+  });
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setError("");
+  // Check if the user is already authenticated with a recovery token
+  useEffect(() => {
+    const checkAuth = async () => {
+      const { data } = await supabase.auth.getSession();
+      setIsAuthenticated(!!data.session);
+    };
     
-    if (password !== confirmPassword) {
-      setError("Passwords don't match");
-      return;
-    }
-    
-    if (!updatePassword) {
-      setError("Password update functionality is not available");
-      return;
-    }
-    
-    setIsLoading(true);
+    checkAuth();
+  }, []);
+
+  const onSubmit = async (values: PasswordFormValues) => {
+    setIsSubmitting(true);
+    setUpdateError(null);
+
     try {
-      await updatePassword(password);
-      navigate("/dashboard");
-    } catch (err: any) {
-      setError(err.message || "Failed to update password");
+      const { error } = await supabase.auth.updateUser({
+        password: values.password,
+      });
+      
+      if (error) {
+        console.error("Password update error:", error);
+        setUpdateError(error.message || "Failed to update password");
+      } else {
+        toast.success("Password updated successfully!");
+        navigate("/login", { state: { message: "Your password has been updated. You can now log in with your new password." } });
+      }
+    } catch (error: any) {
+      console.error("Unexpected error during password update:", error);
+      setUpdateError(error.message || "An unexpected error occurred");
     } finally {
-      setIsLoading(false);
+      setIsSubmitting(false);
     }
   };
 
-  return (
-    <div className="flex items-center justify-center min-h-screen bg-muted/40">
-      <div className="w-full max-w-md p-4">
-        <Card>
-          <CardHeader className="space-y-1">
-            <CardTitle className="text-2xl">Update Password</CardTitle>
+  if (!isAuthenticated) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-background px-4 py-12">
+        <Card className="w-full max-w-md">
+          <CardHeader className="text-center">
+            <div className="flex justify-center mb-4">
+              <Music className="h-12 w-12 text-glee-purple" />
+            </div>
+            <CardTitle className="text-2xl font-bold">Reset Link Expired</CardTitle>
             <CardDescription>
-              Enter your new password below
+              This link is invalid or has expired. Please request a new password reset.
             </CardDescription>
           </CardHeader>
-          <CardContent>
-            {error && (
-              <div className="bg-destructive/15 p-3 rounded-md mb-4">
-                <p className="text-destructive text-sm">{error}</p>
-              </div>
-            )}
-            <form onSubmit={handleSubmit}>
-              <div className="grid gap-4">
-                <div className="grid gap-2">
-                  <Label htmlFor="password">New Password</Label>
-                  <Input
-                    id="password"
-                    type="password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    required
-                  />
-                </div>
-                <div className="grid gap-2">
-                  <Label htmlFor="confirm-password">Confirm Password</Label>
-                  <Input
-                    id="confirm-password"
-                    type="password"
-                    value={confirmPassword}
-                    onChange={(e) => setConfirmPassword(e.target.value)}
-                    required
-                  />
-                </div>
-                <Button type="submit" disabled={isLoading}>
-                  {isLoading ? "Updating..." : "Update Password"}
-                </Button>
-              </div>
-            </form>
-          </CardContent>
-          <CardFooter>
-            <Button variant="ghost" onClick={() => navigate("/login")} className="w-full">
-              Back to Login
+          <CardContent className="text-center">
+            <Button asChild className="mt-4">
+              <Link to="/reset-password">
+                Request New Reset Link
+              </Link>
             </Button>
-          </CardFooter>
+          </CardContent>
         </Card>
       </div>
+    );
+  }
+
+  return (
+    <div className="flex min-h-screen items-center justify-center bg-background px-4 py-12">
+      <Card className="w-full max-w-md">
+        <CardHeader className="text-center">
+          <div className="flex justify-center mb-4">
+            <Music className="h-12 w-12 text-glee-purple" />
+          </div>
+          <CardTitle className="text-2xl font-bold">Update Password</CardTitle>
+          <CardDescription>
+            Create a new password for your account
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          {updateError && (
+            <Alert variant="destructive" className="mb-4">
+              <AlertCircle className="h-4 w-4" />
+              <AlertDescription className="ml-2">
+                {updateError}
+              </AlertDescription>
+            </Alert>
+          )}
+          
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+              <FormField
+                control={form.control}
+                name="password"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>New Password</FormLabel>
+                    <FormControl>
+                      <Input type="password" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="confirmPassword"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Confirm New Password</FormLabel>
+                    <FormControl>
+                      <Input type="password" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <Button type="submit" className="w-full" disabled={isSubmitting}>
+                {isSubmitting ? (
+                  <>
+                    <span className="mr-2">Updating...</span>
+                    <div className="h-4 w-4 rounded-full border-2 border-white border-t-transparent animate-spin"></div>
+                  </>
+                ) : (
+                  "Update Password"
+                )}
+              </Button>
+            </form>
+          </Form>
+        </CardContent>
+      </Card>
     </div>
   );
 }
