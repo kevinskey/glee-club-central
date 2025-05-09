@@ -52,7 +52,8 @@ export default function CalendarPage() {
   // Handle date selection and reset selected event
   const handleDateSelect = useCallback((newDate: Date | undefined) => {
     setDate(newDate);
-    setSelectedEvent(null); // Reset selected event when changing dates
+    // Always reset selected event when changing dates to avoid showing events from a different date
+    setSelectedEvent(null);
   }, []);
 
   // Handle adding new event
@@ -68,8 +69,15 @@ export default function CalendarPage() {
           formValues.date.getDate() === date.getDate() && 
           formValues.date.getMonth() === date.getMonth() && 
           formValues.date.getFullYear() === date.getFullYear()) {
-        // Set the date again to trigger a refresh
-        setDate(new Date(date));
+        // Set the date again to trigger a refresh of the events list
+        handleDateSelect(new Date(date));
+        
+        // Optionally select the newly added event
+        if (newEvent) {
+          setTimeout(() => {
+            setSelectedEvent(newEvent);
+          }, 100);
+        }
       }
     }
   };
@@ -88,6 +96,9 @@ export default function CalendarPage() {
     if (await deleteEvent(selectedEvent.id)) {
       setSelectedEvent(null);
       toast.success("Event deleted successfully");
+      
+      // Force refresh to ensure the deleted event is removed from the UI
+      await fetchEvents(true);
     }
   };
   

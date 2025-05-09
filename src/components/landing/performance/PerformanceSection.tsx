@@ -70,6 +70,7 @@ const fallbackEvents: PerformanceEventType[] = [
 export function PerformanceSection() {
   const navigate = useNavigate();
   const isMobile = useIsMobile();
+  const [selectedDate, setSelectedDate] = useState<Date>(new Date());
   const [performanceEvents, setPerformanceEvents] = useState<PerformanceEventType[]>(fallbackEvents);
   const [selectedEvent, setSelectedEvent] = useState<PerformanceEventType | null>(null);
   const { user, userProfile } = useAuth();
@@ -84,24 +85,20 @@ export function PerformanceSection() {
       
       if (filteredEvents.length > 0) {
         setPerformanceEvents(filteredEvents);
+        // Only set the first event as selected if no event is currently selected
         if (!selectedEvent) {
           setSelectedEvent(filteredEvents[0]);
         }
       }
     }
-  }, [events]);
-  
-  // Initialize selected event once events are loaded
-  useEffect(() => {
-    if (performanceEvents.length > 0 && !selectedEvent) {
-      setSelectedEvent(performanceEvents[0]);
-    }
-  }, [performanceEvents]);
+  }, [events, selectedEvent]);
   
   // Handle event selection with a more explicit function
   const handleEventSelect = (event: PerformanceEventType) => {
     console.log("Selected event:", event.title);
     setSelectedEvent(event);
+    // Update the selected date to match the event date
+    setSelectedDate(event.date);
   };
   
   const handleAddPerformance = () => {

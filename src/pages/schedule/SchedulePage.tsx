@@ -6,13 +6,15 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useAuth } from "@/contexts/AuthContext";
-import { format } from "date-fns";
+import { format, isFuture } from "date-fns";
 import { toast } from "sonner";
 import { useCalendarEvents, CalendarEvent } from "@/hooks/useCalendarEvents";
+import { useNavigate } from "react-router-dom";
 
 export default function SchedulePage() {
   const { user, userProfile } = useAuth();
   const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
   const { 
     events, 
     loading: eventsLoading, 
@@ -23,6 +25,11 @@ export default function SchedulePage() {
   useEffect(() => {
     setLoading(eventsLoading);
   }, [eventsLoading]);
+  
+  // Filter for upcoming events
+  const upcomingEvents = events
+    .filter(event => isFuture(event.date))
+    .sort((a, b) => a.date.getTime() - b.date.getTime());
   
   const getTypeColor = (type: string) => {
     switch (type) {
@@ -39,6 +46,16 @@ export default function SchedulePage() {
     }
   };
 
+  // Navigate to calendar with specific date
+  const navigateToCalendar = (date?: Date) => {
+    navigate("/calendar", { state: { selectedDate: date } });
+  };
+
+  // Handle adding new event
+  const handleAddEvent = () => {
+    navigate("/calendar", { state: { openAddForm: true } });
+  };
+
   // Update the role comparisons to use "administrator" instead of "admin"
   const isAdmin = userProfile?.role === "administrator";
   const canEdit = userProfile?.role === "administrator" || userProfile?.role === "section_leader";
@@ -52,7 +69,7 @@ export default function SchedulePage() {
         actions={
           <div className="flex items-center gap-3">
             {isAdmin && (
-              <Button>
+              <Button onClick={handleAddEvent}>
                 <Plus className="mr-2 h-4 w-4" /> Add Event
               </Button>
             )}
@@ -76,13 +93,14 @@ export default function SchedulePage() {
             </div>
           ) : (
             <div className="space-y-6">
-              {events.length === 0 ? (
+              {upcomingEvents.length === 0 ? (
                 <p className="text-center text-gray-500 dark:text-white">No upcoming events found.</p>
               ) : (
-                events.slice(0, 10).map((event) => (
+                upcomingEvents.slice(0, 10).map((event) => (
                   <div
                     key={event.id}
-                    className="rounded-lg border p-4 dark:border-gray-700"
+                    className="rounded-lg border p-4 dark:border-gray-700 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700"
+                    onClick={() => navigateToCalendar(event.date)}
                   >
                     <div className="flex flex-wrap items-start justify-between gap-2">
                       <div>
@@ -109,10 +127,33 @@ export default function SchedulePage() {
                       </Badge>
                     </div>
                     <p className="mt-4 text-sm dark:text-white">{event.description}</p>
-                    {user?.role === "administrator" && (
+                    {isAdmin && (
                       <div className="mt-4 flex justify-end gap-2">
-                        <Button variant="outline" size="sm">Edit</Button>
-                        <Button variant="outline" size="sm" className="text-destructive hover:bg-destructive/10">
+                        <Button 
+                          variant="outline" 
+                          size="sm" 
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            navigate("/calendar", { 
+                              state: { 
+                                selectedDate: event.date,
+                                editEvent: event 
+                              } 
+                            });
+                          }}
+                        >
+                          Edit
+                        </Button>
+                        <Button 
+                          variant="outline" 
+                          size="sm" 
+                          className="text-destructive hover:bg-destructive/10"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            // Logic for canceling event would go here
+                            toast.error("This functionality is not yet implemented");
+                          }}
+                        >
                           Cancel Event
                         </Button>
                       </div>

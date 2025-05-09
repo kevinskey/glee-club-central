@@ -24,7 +24,7 @@ export const EventList = React.memo(({
   
   if (!date) return null;
 
-  // Make sure we're only showing events for the selected date
+  // Make sure we're only showing events for the selected date using isSameDay
   const eventsOnSelectedDate = events.filter(event => 
     isSameDay(event.date, date)
   );
@@ -56,8 +56,8 @@ export const EventList = React.memo(({
   if (!prevProps.date && !nextProps.date) return true;
   if (!prevProps.date || !nextProps.date) return false;
   
-  // Compare date values
-  const dateEqual = prevProps.date.getTime() === nextProps.date.getTime();
+  // Compare date values using isSameDay for better comparison
+  const dateEqual = isSameDay(prevProps.date, nextProps.date);
   
   // Compare events length
   const eventsLengthEqual = prevProps.events.length === nextProps.events.length;
