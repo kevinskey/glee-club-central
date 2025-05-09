@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Routes, Route } from 'react-router-dom';
 import { ProtectedRoute } from './components/auth/ProtectedRoute';
@@ -136,34 +137,34 @@ function App() {
           </PermissionRoute>
         } />
         
-        {/* Admin routes - Allow both super admins and admins */}
+        {/* Admin routes - Allow both super admins and admins with explicit requireSuperAdmin=false */}
         <Route path="admin" element={
-          <PermissionRoute>
+          <PermissionRoute requireSuperAdmin={false}>
             <AdminDashboardPage />
           </PermissionRoute>
         } />
         <Route path="admin/members" element={
-          <PermissionRoute>
+          <PermissionRoute requireSuperAdmin={false}>
             <AdminMembersPage />
           </PermissionRoute>
         } />
         <Route path="admin/finances" element={
-          <PermissionRoute>
+          <PermissionRoute requireSuperAdmin={false}>
             <AdminFinancesPage />
           </PermissionRoute>
         } />
         <Route path="admin/wardrobe" element={
-          <PermissionRoute>
+          <PermissionRoute requireSuperAdmin={false}>
             <div>Wardrobe Management Page</div>
           </PermissionRoute>
         } />
         <Route path="admin/analytics" element={
-          <PermissionRoute>
+          <PermissionRoute requireSuperAdmin={false}>
             <AdminAnalyticsPage />
           </PermissionRoute>
         } />
         <Route path="admin/settings" element={
-          <PermissionRoute>
+          <PermissionRoute requireSuperAdmin={false}>
             <AdminSettingsPage />
           </PermissionRoute>
         } />

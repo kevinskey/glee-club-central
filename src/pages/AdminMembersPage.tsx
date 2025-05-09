@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { Navigate } from "react-router-dom";
@@ -65,8 +64,8 @@ const formatRole = (role: string): string => {
 };
 
 export default function AdminMembersPage() {
-  const { isAdmin, isLoading: authLoading, isAuthenticated } = useAuth();
-  const { hasPermission } = usePermissions();
+  const { isAdmin, isLoading: authLoading, isAuthenticated, profile } = useAuth();
+  const { hasPermission, isSuperAdmin } = usePermissions();
   const [searchQuery, setSearchQuery] = useState("");
   const [roleFilter, setRoleFilter] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
@@ -85,7 +84,12 @@ export default function AdminMembersPage() {
   
   // Fetch members on component mount
   useEffect(() => {
-    if (isAuthenticated && isAdmin()) {
+    if (isAuthenticated) {
+      console.log("AdminMembersPage - Fetching users", { 
+        isAdmin: isAdmin(), 
+        isSuperAdmin,
+        profileSuperAdmin: profile?.is_super_admin 
+      });
       fetchUsers();
     }
   }, [isAuthenticated]);
@@ -109,8 +113,18 @@ export default function AdminMembersPage() {
     }
   };
 
-  // Redirect if user is not authenticated or not an admin
-  if (!authLoading && (!isAuthenticated || !isAdmin())) {
+  // Log access state for debugging
+  console.log("AdminMembersPage - Access check:", {
+    isAuthenticated,
+    authLoading,
+    isAdmin: isAdmin(),
+    isSuperAdmin,
+    profileSuperAdmin: profile?.is_super_admin
+  });
+
+  // Only redirect if not admin AND not super admin
+  if (!authLoading && isAuthenticated && !isAdmin() && !isSuperAdmin && !profile?.is_super_admin) {
+    console.log("AdminMembersPage - Access denied, redirecting to dashboard");
     return <Navigate to="/dashboard" />;
   }
   

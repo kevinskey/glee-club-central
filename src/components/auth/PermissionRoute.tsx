@@ -45,14 +45,14 @@ export function PermissionRoute({
     return <Navigate to="/login" state={{ from: location }} replace />;
   }
   
-  // If the user is a superadmin, always allow access
-  if (profile?.is_super_admin || isSuperAdmin) {
-    console.log('Access granted: User is super admin');
+  // If the user is a superadmin or has admin role, always allow access
+  if (profile?.is_super_admin || isSuperAdmin || isAdmin()) {
+    console.log('Access granted: User is super admin or admin');
     return <>{children}</>;
   }
   
-  // Check for admin requirement
-  if (requireSuperAdmin && !isAdmin()) {
+  // Check for super admin requirement when user isn't admin
+  if (requireSuperAdmin) {
     console.log('Access denied: User is not super admin or admin');
     return <Navigate to="/dashboard" state={{ permissionDenied: true }} replace />;
   }
