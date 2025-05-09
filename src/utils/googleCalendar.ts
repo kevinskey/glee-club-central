@@ -30,7 +30,7 @@ export async function fetchGoogleCalendarEvents(
   timeMax: string = new Date(new Date().setMonth(new Date().getMonth() + 3)).toISOString(),
 ): Promise<CalendarEvent[]> {
   try {
-    if (!GOOGLE_CALENDAR_API_KEY || GOOGLE_CALENDAR_API_KEY === "") {
+    if (!GOOGLE_CALENDAR_API_KEY || GOOGLE_CALENDAR_API_KEY.length === 0) {
       console.error('Google Calendar API key is missing');
       throw new Error('Google Calendar API key is missing');
     }
