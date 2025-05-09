@@ -91,6 +91,11 @@ export default function CalendarPage() {
     }
   };
   
+  // Open add event dialog with current date selected
+  const handleOpenAddEvent = () => {
+    setIsAddEventOpen(true);
+  };
+  
   // Get badge color based on event type
   const getEventTypeColor = useCallback((type: string) => {
     switch (type) {
@@ -113,7 +118,7 @@ export default function CalendarPage() {
       <main className="flex-1 bg-gray-50 dark:bg-gray-900">
         <div className="container py-8 sm:py-10 md:py-12">
           <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
-            <CalendarPageHeader onAddEventClick={() => setIsAddEventOpen(true)} />
+            <CalendarPageHeader onAddEventClick={handleOpenAddEvent} />
           </div>
           
           <div className="flex flex-col lg:flex-row gap-8 h-full">
@@ -169,7 +174,8 @@ export default function CalendarPage() {
           </DialogHeader>
           <AddEventForm 
             onAddEvent={handleAddEvent} 
-            onCancel={() => setIsAddEventOpen(false)} 
+            onCancel={() => setIsAddEventOpen(false)}
+            initialDate={date} 
           />
         </DialogContent>
       </Dialog>

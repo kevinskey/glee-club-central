@@ -115,6 +115,7 @@ export function useCalendarEvents() {
         // Try to fetch Google Calendar events
         try {
           console.log("Attempting to fetch Google Calendar events");
+          // Always force refresh Google Calendar events when explicitly requested
           const googleEvents = await fetchGoogleCalendarEvents(undefined, undefined, 90, forceRefresh);
           
           // Mark events as coming from Google Calendar
@@ -137,6 +138,9 @@ export function useCalendarEvents() {
               combinedEvents.push(googleEvent);
             }
           });
+          
+          // Sort by date 
+          combinedEvents.sort((a, b) => a.date.getTime() - b.date.getTime());
           
           setEvents(combinedEvents);
           console.log("Combined events count:", combinedEvents.length, 

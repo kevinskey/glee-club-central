@@ -1,5 +1,5 @@
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -28,9 +28,10 @@ export type EventFormValues = z.infer<typeof formSchema>;
 interface AddEventFormProps {
   onAddEvent: (event: EventFormValues) => void;
   onCancel: () => void;
+  initialDate?: Date;
 }
 
-export function AddEventForm({ onAddEvent, onCancel }: AddEventFormProps) {
+export function AddEventForm({ onAddEvent, onCancel, initialDate }: AddEventFormProps) {
   const [selectedImage, setSelectedImage] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [isUploading, setIsUploading] = useState(false);
@@ -40,12 +41,20 @@ export function AddEventForm({ onAddEvent, onCancel }: AddEventFormProps) {
     resolver: zodResolver(formSchema),
     defaultValues: {
       title: "",
+      date: initialDate || new Date(),
       time: "",
       location: "",
       description: "",
       type: "concert",
     },
   });
+
+  // Update the form's date value when initialDate prop changes
+  useEffect(() => {
+    if (initialDate) {
+      form.setValue('date', initialDate);
+    }
+  }, [initialDate, form]);
 
   async function onSubmit(values: EventFormValues) {
     if (!user) {
