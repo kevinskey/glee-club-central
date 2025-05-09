@@ -12,7 +12,11 @@ interface NavItemProps {
 
 export function NavItem({ title, href, icon, external = false }: NavItemProps) {
   const location = useLocation();
-  const isActive = location.pathname === href || location.pathname.startsWith(`${href}/`);
+  
+  // Make sure we're only highlighting exact matches or direct children
+  const isActive = href !== "/" && 
+    (location.pathname === href || 
+     (location.pathname.startsWith(`${href}/`) && href !== "/dashboard"));
   
   const linkContent = (
     <>

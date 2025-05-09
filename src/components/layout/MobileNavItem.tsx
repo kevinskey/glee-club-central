@@ -17,7 +17,12 @@ export function MobileNavItem({
   onClick,
 }: MobileNavItemProps) {
   const { pathname } = useLocation();
-  const isActive = pathname === href;
+  
+  // More precise active state check - only highlight exact matches
+  // or direct children paths, but not for the dashboard
+  const isActive = href !== "/" && 
+    (pathname === href || 
+     (pathname.startsWith(`${href}/`) && href !== "/dashboard"));
   
   return (
     <Link

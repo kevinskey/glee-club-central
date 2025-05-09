@@ -14,7 +14,12 @@ interface NavLinkProps {
 
 export const NavLink = ({ href, children, icon, disabled = false, className }: NavLinkProps) => {
   const location = useLocation();
-  const isActive = location.pathname === href || location.pathname.startsWith(`${href}/`);
+  
+  // Refined logic to ensure only exact matches or direct children are highlighted
+  // For the dashboard, we want it highlighted only when exactly on /dashboard
+  const isActive = href !== "/" && 
+    (location.pathname === href || 
+     (location.pathname.startsWith(`${href}/`) && href !== "/dashboard"));
 
   return (
     <RouterNavLink

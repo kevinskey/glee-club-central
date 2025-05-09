@@ -9,7 +9,6 @@ import {
   ListMusic, 
   Calendar,
   Menu,
-  Star,
   Settings
 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
@@ -36,7 +35,7 @@ export function MobileNav() {
       <MobileNavItem
         href="/dashboard"
         title="Home"
-        icon={<Star className="h-5 w-5" />}
+        icon={<Home className="h-5 w-5" />}
       />
       <MobileNavItem
         href="/dashboard/sheet-music"
