@@ -4,11 +4,11 @@ import { CalendarEvent } from '@/hooks/useCalendarEvents';
 
 // This is the public Google Calendar ID for Spelman College Glee Club
 // Make sure this is the correct calendar ID for your Google Calendar
-const GOOGLE_CALENDAR_ID = "spelmangleeclub@gmail.com";
+const GOOGLE_CALENDAR_ID = "00f2c84ca319b84d9b2adafc6434d2ddd7c3aa3da4dfc458cc5d633926a2e437@group.calendar.google.com";
 
 // Your Google Calendar API key
 // This should be a valid API key from Google Cloud Console with Google Calendar API enabled
-const GOOGLE_CALENDAR_API_KEY = "AIzaSyCW-3QkDkb_r6du2Lcfn_wNwJdF2YPZusQ"; 
+const GOOGLE_CALENDAR_API_KEY = "AIzaSyCd8BS6BiOBgn89dCvGAsa5qTXT0j0S3Vc"; 
 
 export interface GoogleCalendarEvent {
   id: string;
