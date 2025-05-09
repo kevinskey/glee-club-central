@@ -101,7 +101,8 @@ function transformGoogleEvent(event: GoogleCalendarEvent): CalendarEvent {
     time: timeString,
     location: event.location || "No location specified",
     description: event.description || "",
-    type: eventType
+    type: eventType,
+    source: "google" 
   };
 }
 
@@ -122,4 +123,32 @@ export function getAddToGoogleCalendarUrl(event: CalendarEvent): string {
 // Create URL to view the Google Calendar
 export function getViewGoogleCalendarUrl(): string {
   return `https://calendar.google.com/calendar/u/0?cid=${GOOGLE_CALENDAR_ID}`;
+}
+
+// Helper function to sync events from Google Calendar to Supabase
+export async function syncGoogleEventsToSupabase(userId: string) {
+  try {
+    // First, get Google Calendar events
+    const googleEvents = await fetchGoogleCalendarEvents();
+    
+    // Prepare events for Supabase format
+    const eventsToSync = googleEvents.map(event => ({
+      title: event.title,
+      date: format(event.date, 'yyyy-MM-dd'),
+      time: event.time,
+      location: event.location,
+      description: event.description,
+      type: event.type,
+      user_id: userId,
+      // Add a source field to track the origin
+      source: "google_calendar"
+    }));
+    
+    console.log(`Prepared ${eventsToSync.length} Google Calendar events for sync to Supabase`);
+    
+    return eventsToSync;
+  } catch (error) {
+    console.error('Error syncing Google events to Supabase:', error);
+    throw error;
+  }
 }

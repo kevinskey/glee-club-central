@@ -18,27 +18,25 @@ import {
   FileImage
 } from "lucide-react";
 import { Spinner } from "@/components/ui/spinner";
+import { useCalendarEvents } from "@/hooks/useCalendarEvents";
+import { format } from "date-fns";
+import { fetchGoogleCalendarEvents } from "@/utils/googleCalendar";
+import { toast } from "sonner";
 
 const DashboardPage = () => {
   // Properly define a default for the profile to avoid TypeScript errors
   const { profile, isAuthenticated, isLoading: authLoading } = useAuth();
   const profileData = profile || { first_name: 'Member', last_name: '', role: '', status: '' };
   
-  // Sample data for dashboard components
-  const upcomingEvents = [
-    { id: 1, title: "Weekly Rehearsal", date: "Today", time: "6:00 PM" },
-    { id: 2, title: "Spring Concert", date: "May 15", time: "7:00 PM" },
-    { id: 3, title: "Sectional Practice", date: "May 10", time: "3:00 PM" }
-  ];
-  
-  const announcements = [
-    { id: 1, title: "New Sheet Music Available", message: "The sheet music for our spring concert is now available." },
-    { id: 2, title: "Rehearsal Schedule Update", message: "Please note that rehearsals will now be held on Tuesdays and Thursdays." }
-  ];
+  // Get calendar events from the hook
+  const { events, loading: eventsLoading } = useCalendarEvents();
   
   // Add loading indicator
   const [loading, setLoading] = useState(true);
   
+  // Upcoming events state
+  const [upcomingEvents, setUpcomingEvents] = useState([]);
+
   // Add debug info to the console
   useEffect(() => {
     console.log("Dashboard mounting...");
@@ -59,10 +57,34 @@ const DashboardPage = () => {
       clearTimeout(timer);
     };
   }, [profile, authLoading, isAuthenticated]);
+
+  // Process and set upcoming events when events are loaded
+  useEffect(() => {
+    if (!eventsLoading && events.length > 0) {
+      console.log("Processing calendar events for dashboard...");
+      
+      // Get today's date and filter upcoming events
+      const today = new Date();
+      const upcoming = events
+        .filter(event => event.date >= today)
+        .sort((a, b) => a.date.getTime() - b.date.getTime())
+        .slice(0, 3) // Get first 3 upcoming events
+        .map(event => ({
+          id: event.id,
+          title: event.title,
+          date: format(event.date, 'MMM d'),
+          time: event.time,
+          location: event.location
+        }));
+      
+      setUpcomingEvents(upcoming);
+      console.log("Dashboard upcoming events set:", upcoming);
+    }
+  }, [events, eventsLoading]);
   
   console.log("Current loading state:", loading);
   
-  if (loading || authLoading) {
+  if (loading || authLoading || eventsLoading) {
     console.log("Rendering loading spinner");
     return (
       <div className="container mx-auto p-4 flex justify-center items-center min-h-[60vh]">

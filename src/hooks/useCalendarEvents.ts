@@ -5,6 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { useSampleEvents } from "./useSampleEvents";
 import { useCalendarOperations } from "./useCalendarOperations";
+import { fetchGoogleCalendarEvents, GoogleCalendarEvent } from "@/utils/googleCalendar";
 
 export interface CalendarEvent {
   id: number | string;
@@ -15,6 +16,7 @@ export interface CalendarEvent {
   description: string | null;
   type: "concert" | "rehearsal" | "tour" | "special";
   image_url?: string | null;
+  source?: "local" | "google";
 }
 
 export function useCalendarEvents() {
@@ -78,9 +80,11 @@ export function useCalendarEvents() {
         }
       } else {
         setFetchError(false);
+        let supabaseEvents: CalendarEvent[] = [];
+        
         if (data) {
           console.log("Successfully fetched calendar events from Supabase:", data.length);
-          const supabaseEvents = data.map(event => ({
+          supabaseEvents = data.map(event => ({
             id: event.id,
             title: event.title,
             date: new Date(event.date),
@@ -88,13 +92,44 @@ export function useCalendarEvents() {
             location: event.location,
             description: event.description || "",
             type: event.type as "concert" | "rehearsal" | "tour" | "special",
-            image_url: event.image_url
+            image_url: event.image_url,
+            source: "local"
+          }));
+        }
+        
+        // Try to fetch Google Calendar events
+        try {
+          console.log("Attempting to fetch Google Calendar events");
+          const googleEvents = await fetchGoogleCalendarEvents(undefined, undefined, 90);
+          
+          // Mark events as coming from Google Calendar
+          const formattedGoogleEvents = googleEvents.map(event => ({
+            ...event,
+            source: "google" as const
           }));
           
-          setEvents(supabaseEvents);
-        } else if (!initialFetchDoneRef.current || userChanged) {
-          // Fall back to sample events if no data returned
-          setEvents(getSampleEvents());
+          // Merge events, avoiding duplicates by using the id as a key
+          const combinedEvents = [...supabaseEvents];
+          
+          // Only add Google events that don't have the same title and date as local events
+          formattedGoogleEvents.forEach(googleEvent => {
+            const sameEvent = supabaseEvents.find(event => 
+              event.title === googleEvent.title && 
+              event.date.toDateString() === googleEvent.date.toDateString()
+            );
+            
+            if (!sameEvent) {
+              combinedEvents.push(googleEvent);
+            }
+          });
+          
+          setEvents(combinedEvents);
+          console.log("Combined events count:", combinedEvents.length);
+          
+        } catch (googleErr) {
+          console.error("Error fetching Google Calendar events:", googleErr);
+          // If Google Calendar fetch fails, still use Supabase events
+          setEvents(supabaseEvents.length > 0 ? supabaseEvents : getSampleEvents());
         }
       }
     } catch (err) {
