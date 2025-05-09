@@ -89,27 +89,96 @@ export function MemberPermissionsDialog({
     
     setIsSaving(true);
     try {
-      // For each permission, update it in the database
+      // For each permission, update it in the database using the SQL function via direct SQL query
+      let allSuccessful = true;
+      
       for (const { permission, granted } of permissions) {
-        const { error } = await supabase.rpc(
-          'update_user_permission', 
-          { 
-            p_user_id: user.id, 
-            p_permission: permission, 
-            p_granted: granted 
-          }
-        );
-
-        if (error) {
-          console.error(`Error updating permission ${permission}:`, error);
-          toast.error(`Failed to update some permissions`);
-          return;
+        // Get the user's title first
+        const { data: profileData, error: profileError } = await supabase
+          .from('profiles')
+          .select('title')
+          .eq('id', user.id)
+          .single();
+          
+        if (profileError) {
+          console.error('Error getting user title:', profileError);
+          allSuccessful = false;
+          continue;
+        }
+        
+        const userTitle = profileData?.title;
+        if (!userTitle) {
+          console.error('User has no title assigned');
+          allSuccessful = false;
+          continue;
+        }
+        
+        // Get the role ID for this title
+        const { data: roleData, error: roleError } = await supabase
+          .from('user_roles')
+          .select('id')
+          .eq('title', userTitle)
+          .single();
+          
+        if (roleError) {
+          console.error('Error getting role ID:', roleError);
+          allSuccessful = false;
+          continue;
+        }
+        
+        const roleId = roleData?.id;
+        if (!roleId) {
+          console.error('No role found for title:', userTitle);
+          allSuccessful = false;
+          continue;
+        }
+        
+        // Check if permission exists for this role
+        const { data: existingPerm, error: checkError } = await supabase
+          .from('role_permissions')
+          .select('id')
+          .eq('role_id', roleId)
+          .eq('permission', permission)
+          .maybeSingle();
+          
+        if (checkError) {
+          console.error('Error checking existing permission:', checkError);
+          allSuccessful = false;
+          continue;
+        }
+        
+        let updateError;
+        
+        if (existingPerm) {
+          // Update existing permission
+          const { error } = await supabase
+            .from('role_permissions')
+            .update({ granted })
+            .eq('id', existingPerm.id);
+            
+          updateError = error;
+        } else {
+          // Insert new permission
+          const { error } = await supabase
+            .from('role_permissions')
+            .insert({ role_id: roleId, permission, granted });
+            
+          updateError = error;
+        }
+        
+        if (updateError) {
+          console.error(`Error updating permission ${permission}:`, updateError);
+          allSuccessful = false;
         }
       }
 
-      toast.success('Permissions updated successfully');
-      if (onSuccess) onSuccess();
-      setIsOpen(false);
+      if (allSuccessful) {
+        toast.success('Permissions updated successfully');
+        if (onSuccess) onSuccess();
+        setIsOpen(false);
+      } else {
+        toast.error('Some permissions failed to update');
+      }
     } catch (error) {
       console.error('Error saving permissions:', error);
       toast.error('Failed to save permissions');
