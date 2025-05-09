@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useContext, createContext, useCallback } from 'react';
 import {
   Session,
@@ -30,7 +31,7 @@ interface AuthContextType {
   updatePassword?: (newPassword: string) => Promise<void>;
   signInWithGoogle?: () => void;
   signInWithApple?: () => void;
-  refreshPermissions?: () => Promise<void>;
+  refreshPermissions?: () => Promise<any>; // Updated return type to be more flexible
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -124,7 +125,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, []);
 
   const refreshPermissions = useCallback(async () => {
-    if (!user) return;
+    if (!user) return null;
     
     try {
       // Fetch updated permissions
@@ -145,6 +146,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       return permissions;
     } catch (error) {
       console.error('Error refreshing permissions:', error);
+      return null;
     }
   }, [user]);
 

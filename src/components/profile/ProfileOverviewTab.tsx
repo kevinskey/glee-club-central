@@ -12,7 +12,7 @@ import { User } from "@/hooks/useUserManagement";
 
 interface ProfileOverviewTabProps {
   profile: User;
-  isEditable?: boolean;
+  isEditable?: boolean; // Added isEditable prop
 }
 
 export function ProfileOverviewTab({ profile, isEditable }: ProfileOverviewTabProps) {

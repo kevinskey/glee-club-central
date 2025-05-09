@@ -1,4 +1,3 @@
-
 export interface AuthUser {
   id: string;
   email?: string;
@@ -83,5 +82,5 @@ export interface AuthContextType {
   updatePassword?: (newPassword: string) => Promise<void>;
   signInWithGoogle?: () => void;
   signInWithApple?: () => void;
-  refreshPermissions?: () => Promise<void>;
+  refreshPermissions?: () => Promise<any>; // Updated to match implementation
 }
