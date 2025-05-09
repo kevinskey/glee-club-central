@@ -1,12 +1,18 @@
-
 import { format, parseISO } from 'date-fns';
 import { CalendarEvent } from '@/hooks/useCalendarEvents';
 
 // This is the public Google Calendar ID for Spelman College Glee Club
 const GOOGLE_CALENDAR_ID = "00f2c84ca319b84d9b2adafc6434d2dd7c3aa3da4dfc458cc5d633926a2e437@group.calendar.google.com";
 
-// Here we're adding a new API key. This is a public API key that should be replaced with a valid one
-// You'll need to create an API key in the Google Cloud Console and enable the Google Calendar API
+// Replace this with your own Google Calendar API key
+// To get an API key:
+// 1. Go to https://console.cloud.google.com/
+// 2. Create a new project or select an existing one
+// 3. Navigate to "APIs & Services" > "Library" 
+// 4. Search for and enable the "Google Calendar API"
+// 5. Go to "APIs & Services" > "Credentials"
+// 6. Click "Create credentials" and select "API key"
+// 7. Copy the generated API key and paste it below
 const GOOGLE_CALENDAR_API_KEY = "AIzaSyBNlYH01_9Hc5S1J9vuFmu2nUqBZJNAXxs"; 
 
 export interface GoogleCalendarEvent {
