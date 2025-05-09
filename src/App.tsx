@@ -28,6 +28,7 @@ import ViewSheetMusicPage from './pages/sheet-music/ViewSheetMusicPage';
 import SetlistsPage from './pages/SetlistsPage';
 import ViewSetlistPage from './pages/ViewSetlistPage';
 import PracticePage from './pages/practice/PracticePage';
+import MembersPage from './pages/MembersPage';
 
 // Admin Pages
 import AdminDashboardPage from './pages/AdminDashboardPage';
@@ -93,7 +94,7 @@ function App() {
         <Route path="merch" element={<div>Merchandise Page</div>} />
         <Route path="media-library" element={<div>Media Sources Page</div>} />
         <Route path="profile" element={<ProfilePage />} />
-        <Route path="members" element={<div>Members Page</div>} />
+        <Route path="members" element={<MembersPage />} />
         <Route path="announcements" element={
           <PermissionRoute requiredPermission="can_post_announcements">
             <div>Announcements Page</div>
