@@ -9,11 +9,15 @@ import {
   ListMusic, 
   Calendar,
   Menu,
-  Star 
+  Star,
+  Settings
 } from "lucide-react";
+import { useAuth } from "@/contexts/AuthContext";
 
 export function MobileNav() {
   const { isOpen, onOpen, onClose } = useSidebar();
+  const { isAdmin, profile } = useAuth();
+  const isSuperAdmin = !!profile?.is_super_admin;
   
   return (
     <nav className={cn(
@@ -39,6 +43,13 @@ export function MobileNav() {
         title="Calendar"
         icon={<Calendar className="h-5 w-5" />}
       />
+      {(isAdmin() || isSuperAdmin) && (
+        <MobileNavItem
+          href="/dashboard/admin"
+          title="Admin"
+          icon={<Settings className="h-5 w-5" />}
+        />
+      )}
       <MobileNavItem
         href="#sidebar"
         title="Menu"

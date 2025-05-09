@@ -17,9 +17,20 @@ export function PermissionRoute({
   requiredPermission,
   requireSuperAdmin = false
 }: PermissionRouteProps) {
-  const { isAuthenticated, isLoading, isAdmin } = useAuth();
+  const { isAuthenticated, isLoading, isAdmin, profile } = useAuth();
   const { hasPermission, isSuperAdmin } = usePermissions();
   const location = useLocation();
+  
+  console.log('PermissionRoute check:', { 
+    path: location.pathname,
+    isAuthenticated, 
+    isLoading,
+    isAdmin: isAdmin(),
+    isSuperAdmin,
+    requireSuperAdmin,
+    requiredPermission,
+    userProfile: profile
+  });
   
   if (isLoading) {
     return (
