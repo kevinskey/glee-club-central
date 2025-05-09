@@ -54,7 +54,11 @@ export default function CalendarPage() {
     setDate(newDate);
     // Always reset selected event when changing dates to avoid showing events from a different date
     setSelectedEvent(null);
-  }, []);
+    
+    // Remove this argument - this is what's causing the TS error
+    // fetchEvents(true); 
+    fetchEvents();
+  }, [fetchEvents]);
 
   // Handle adding new event
   const handleAddEvent = async (formValues: Omit<CalendarEvent, "id">) => {
@@ -98,7 +102,7 @@ export default function CalendarPage() {
       toast.success("Event deleted successfully");
       
       // Force refresh to ensure the deleted event is removed from the UI
-      await fetchEvents(true);
+      await fetchEvents();
     }
   };
   
