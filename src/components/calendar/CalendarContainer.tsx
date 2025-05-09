@@ -4,7 +4,7 @@ import { Calendar } from "@/components/ui/calendar";
 import { format, isAfter, startOfToday } from "date-fns";
 import { CalendarEvent } from "@/hooks/useCalendarEvents";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Clock, MapPin } from "lucide-react";
+import { MapPin } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
 
 interface CalendarContainerProps {
@@ -45,14 +45,14 @@ export const CalendarContainer = memo(({
   }
 
   return (
-    <div className="space-y-4 md:space-y-6">
+    <div className="space-y-4 md:space-y-6 h-full">
       {/* Calendar */}
-      <div className="border rounded-lg p-2 md:p-4 bg-white dark:bg-gray-800 shadow-sm">
+      <div className="border rounded-lg p-2 md:p-4 bg-white dark:bg-gray-800 shadow-sm h-auto">
         <Calendar
           mode="single"
           selected={date}
           onSelect={setDate}
-          className={isMobile ? "scale-[0.85] mx-auto -mx-2 transform-origin-center" : "mx-auto"}
+          className={isMobile ? "scale-[0.85] w-full mx-auto transform-origin-center" : "mx-auto w-full"}
           modifiers={{
             event: daysWithEvents
           }}
@@ -64,7 +64,10 @@ export const CalendarContainer = memo(({
           }}
           styles={{
             day: { fontWeight: 'medium' },
-            caption_label: { fontWeight: 'bold', fontSize: '1rem' }
+            caption_label: { fontWeight: 'bold', fontSize: '1rem' },
+            table: { width: '100%' },
+            month: { width: '100%' },
+            months: { width: '100%' }
           }}
           classNames={{
             day_selected: "bg-glee-purple text-white hover:bg-glee-purple hover:text-white font-bold",

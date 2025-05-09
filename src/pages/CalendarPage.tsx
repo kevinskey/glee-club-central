@@ -110,7 +110,7 @@ export default function CalendarPage() {
             <CalendarPageHeader onAddEventClick={() => setIsAddEventOpen(true)} />
           </div>
           
-          <div className="flex flex-col lg:flex-row gap-8">
+          <div className="flex flex-col lg:flex-row gap-8 h-full">
             {/* Calendar */}
             <div className="w-full lg:w-1/2">
               <CalendarContainer 
@@ -123,7 +123,7 @@ export default function CalendarPage() {
             </div>
             
             {/* Event details */}
-            <div className="w-full lg:w-1/2">
+            <div className="w-full lg:w-1/2 h-full">
               <div className="border rounded-lg p-6 h-full bg-white dark:bg-gray-800 shadow-sm">
                 {loading ? (
                   <div className="flex justify-center items-center py-10">
