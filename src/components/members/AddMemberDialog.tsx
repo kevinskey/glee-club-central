@@ -34,17 +34,21 @@ interface AddMemberDialogProps {
   onOpenChange: (open: boolean) => void;
   onMemberAdd: (data: UserFormValues) => Promise<void>;
   isSubmitting?: boolean;
+  initialValues?: UserFormValues;
+  isEditing?: boolean;
 }
 
 export const AddMemberDialog: React.FC<AddMemberDialogProps> = ({
   isOpen,
   onOpenChange,
   onMemberAdd,
-  isSubmitting = false
+  isSubmitting = false,
+  initialValues,
+  isEditing = false
 }) => {
   const form = useForm<UserFormValues>({
     resolver: zodResolver(userFormSchema),
-    defaultValues: {
+    defaultValues: initialValues || {
       first_name: "",
       last_name: "",
       email: "",
@@ -56,24 +60,28 @@ export const AddMemberDialog: React.FC<AddMemberDialogProps> = ({
     }
   });
 
-  // Reset form when dialog opens
+  // Reset form when dialog opens or initialValues change
   useEffect(() => {
     if (isOpen) {
-      form.reset({
-        first_name: "",
-        last_name: "",
-        email: "",
-        phone: "",
-        role: "singer",
-        voice_part: "soprano_1",
-        status: "pending",
-        password: ""
-      });
+      if (initialValues) {
+        form.reset(initialValues);
+      } else {
+        form.reset({
+          first_name: "",
+          last_name: "",
+          email: "",
+          phone: "",
+          role: "singer",
+          voice_part: "soprano_1",
+          status: "pending",
+          password: ""
+        });
+      }
     }
-  }, [isOpen, form]);
+  }, [isOpen, initialValues, form]);
 
   const onSubmit = async (data: UserFormValues) => {
-    console.log("AddMemberDialog - Submit with data:", data);
+    console.log(`${isEditing ? "Edit" : "Add"}MemberDialog - Submit with data:`, data);
     try {
       await onMemberAdd(data);
     } catch (error) {
@@ -91,9 +99,12 @@ export const AddMemberDialog: React.FC<AddMemberDialogProps> = ({
     <Dialog open={isOpen} onOpenChange={handleOpenChange}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle>Add New Member</DialogTitle>
+          <DialogTitle>{isEditing ? "Edit" : "Add New"} Member</DialogTitle>
           <DialogDescription>
-            Add a new member to the Glee Club with their primary information.
+            {isEditing 
+              ? "Update member information in the Glee Club."
+              : "Add a new member to the Glee Club with their primary information."
+            }
           </DialogDescription>
         </DialogHeader>
         <Form {...form}>
@@ -137,7 +148,12 @@ export const AddMemberDialog: React.FC<AddMemberDialogProps> = ({
                   <FormItem>
                     <FormLabel>Email</FormLabel>
                     <FormControl>
-                      <Input type="email" placeholder="Email Address" {...field} />
+                      <Input 
+                        type="email" 
+                        placeholder="Email Address" 
+                        {...field} 
+                        disabled={isEditing} // Email can't be changed if editing
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -219,9 +235,13 @@ export const AddMemberDialog: React.FC<AddMemberDialogProps> = ({
                 name="password"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Initial Password</FormLabel>
+                    <FormLabel>{isEditing ? "New Password" : "Initial Password"}</FormLabel>
                     <FormControl>
-                      <Input type="password" placeholder="Set initial password" {...field} />
+                      <Input 
+                        type="password" 
+                        placeholder={isEditing ? "Leave blank to keep current" : "Set initial password"} 
+                        {...field} 
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -243,6 +263,7 @@ export const AddMemberDialog: React.FC<AddMemberDialogProps> = ({
                         <SelectItem value="pending">Pending</SelectItem>
                         <SelectItem value="active">Active</SelectItem>
                         <SelectItem value="inactive">Inactive</SelectItem>
+                        <SelectItem value="alumni">Alumni</SelectItem>
                       </SelectContent>
                     </Select>
                     <FormMessage />
@@ -261,7 +282,7 @@ export const AddMemberDialog: React.FC<AddMemberDialogProps> = ({
                 Cancel
               </Button>
               <Button type="submit" disabled={isSubmitting}>
-                {isSubmitting ? "Adding..." : "Add Member"}
+                {isSubmitting ? (isEditing ? "Updating..." : "Adding...") : (isEditing ? "Update Member" : "Add Member")}
               </Button>
             </DialogFooter>
           </form>
@@ -269,4 +290,4 @@ export const AddMemberDialog: React.FC<AddMemberDialogProps> = ({
       </DialogContent>
     </Dialog>
   );
-};
+}

@@ -13,6 +13,8 @@ import { AddMemberDialog } from "@/components/members/AddMemberDialog";
 import { UserFormValues } from "@/components/members/form/userFormSchema";
 import { toast } from "sonner";
 import { usePermissions } from "@/hooks/usePermissions";
+import { DeleteMemberDialog } from "@/components/members/DeleteMemberDialog";
+import { User } from "@/hooks/useUserManagement";
 
 export default function MembersPage() {
   const { isLoading: authLoading } = useAuth();
@@ -20,7 +22,13 @@ export default function MembersPage() {
   const [roleFilter, setRoleFilter] = useState("");
   const [voicePartFilter, setVoicePartFilter] = useState("");
   const [isAddMemberDialogOpen, setIsAddMemberDialogOpen] = useState(false);
+  const [isEditMemberDialogOpen, setIsEditMemberDialogOpen] = useState(false);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [currentMember, setCurrentMember] = useState<User | null>(null);
+  const [memberToDelete, setMemberToDelete] = useState<string | null>(null);
+  const [memberToDeleteName, setMemberToDeleteName] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
   const isMobile = useMedia('(max-width: 640px)');
   const { hasPermission } = usePermissions();
   
@@ -28,17 +36,19 @@ export default function MembersPage() {
     users: members,
     isLoading,
     fetchUsers,
-    addUser
+    addUser,
+    updateUser,
+    deleteUser
   } = useUserManagement();
   
-  // Fetch members on component mount with proper dependency array
+  // Fetch members on component mount
   useEffect(() => {
     console.log("MembersPage - Fetching users");
     fetchUsers().catch(err => {
       console.error("Error fetching users:", err);
       toast.error("Failed to load members");
     });
-  }, []);  // Empty dependency array to run only once on mount
+  }, [fetchUsers]);
 
   // Handle adding a new member
   const handleAddMember = async (data: UserFormValues) => {
@@ -46,14 +56,61 @@ export default function MembersPage() {
     try {
       const success = await addUser(data);
       if (success) {
-        toast.success(`Added ${data.first_name} ${data.last_name} successfully!`);
         setIsAddMemberDialogOpen(false);
       }
     } catch (error) {
       console.error("Error adding member:", error);
-      toast.error("Failed to add member");
     } finally {
       setIsSubmitting(false);
+    }
+  };
+  
+  // Handle editing a member
+  const handleEditMember = (member: User) => {
+    setCurrentMember(member);
+    setIsEditMemberDialogOpen(true);
+  };
+  
+  // Handle updating a member
+  const handleUpdateMember = async (data: UserFormValues) => {
+    if (!currentMember) return;
+    
+    setIsSubmitting(true);
+    try {
+      const success = await updateUser(currentMember.id, data);
+      if (success) {
+        setIsEditMemberDialogOpen(false);
+        setCurrentMember(null);
+      }
+    } catch (error) {
+      console.error("Error updating member:", error);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+  
+  // Handle deleting a member
+  const handleDeleteClick = (memberId: string) => {
+    const member = members.find(m => m.id === memberId);
+    if (member) {
+      setMemberToDelete(memberId);
+      setMemberToDeleteName(`${member.first_name || ''} ${member.last_name || ''}`.trim() || 'this member');
+      setIsDeleteDialogOpen(true);
+    }
+  };
+  
+  const handleConfirmDelete = async () => {
+    if (!memberToDelete) return;
+    
+    setIsDeleting(true);
+    try {
+      await deleteUser(memberToDelete);
+      setIsDeleteDialogOpen(false);
+      setMemberToDelete(null);
+    } catch (error) {
+      console.error("Error deleting member:", error);
+    } finally {
+      setIsDeleting(false);
     }
   };
 
@@ -73,13 +130,13 @@ export default function MembersPage() {
   }, [members, searchQuery, roleFilter, voicePartFilter]);
 
   // Check if user has permission to add members
-  const canAddMembers = hasPermission('can_manage_users');
+  const canManageMembers = hasPermission('can_manage_users');
 
   console.log("MembersPage rendering", { 
     memberCount: members.length, 
     isLoading, 
     authLoading,
-    canAddMembers
+    canManageMembers
   });
 
   return (
@@ -120,7 +177,7 @@ export default function MembersPage() {
               {isMobile ? '' : 'Filter'}
             </Button>
             
-            {canAddMembers && (
+            {canManageMembers && (
               <Button 
                 variant="default" 
                 size="sm"
@@ -138,17 +195,53 @@ export default function MembersPage() {
             <div className="h-8 w-8 rounded-full border-4 border-primary border-t-transparent animate-spin"></div>
           </div>
         ) : (
-          <MembersList members={filteredMembers} />
+          <MembersList 
+            members={filteredMembers} 
+            onEditMember={canManageMembers ? handleEditMember : undefined}
+            onDeleteMember={canManageMembers ? handleDeleteClick : undefined}
+          />
         )}
       </Card>
       
       {/* Add Member Dialog */}
-      {canAddMembers && (
+      {canManageMembers && (
         <AddMemberDialog
           isOpen={isAddMemberDialogOpen}
           onOpenChange={setIsAddMemberDialogOpen}
           onMemberAdd={handleAddMember}
           isSubmitting={isSubmitting}
+        />
+      )}
+      
+      {/* Edit Member Dialog - We'll reuse AddMemberDialog with initial values */}
+      {canManageMembers && currentMember && (
+        <AddMemberDialog
+          isOpen={isEditMemberDialogOpen}
+          onOpenChange={setIsEditMemberDialogOpen}
+          onMemberAdd={handleUpdateMember}
+          isSubmitting={isSubmitting}
+          initialValues={{
+            first_name: currentMember.first_name || '',
+            last_name: currentMember.last_name || '',
+            email: currentMember.email || '',
+            phone: currentMember.phone || '',
+            role: currentMember.role || 'singer',
+            voice_part: currentMember.voice_part || 'soprano_1',
+            status: currentMember.status || 'pending',
+            password: ''
+          }}
+          isEditing={true}
+        />
+      )}
+      
+      {/* Delete Member Dialog */}
+      {canManageMembers && (
+        <DeleteMemberDialog
+          isOpen={isDeleteDialogOpen}
+          onOpenChange={setIsDeleteDialogOpen}
+          onConfirm={handleConfirmDelete}
+          memberName={memberToDeleteName}
+          isDeleting={isDeleting}
         />
       )}
     </div>

@@ -42,17 +42,18 @@ const adminSupabase = {
       
       updateUserById: async (userId: string, attributes: any) => {
         try {
-          console.log("adminSupabase - updateUserById called for:", userId);
+          console.log("adminSupabase - updateUserById called for:", userId, "with attributes:", attributes);
           
           // For email and metadata updates we can use the admin functions 
           // which should work with the authenticated user having the right permissions
           const { data, error } = await supabase.auth.updateUser({
             email: attributes.email,
+            password: attributes.password,
             data: attributes.user_metadata
           });
           
           if (error) throw error;
-          return data;
+          return { user: data.user };
         } catch (error: any) {
           console.error("Error updating user:", error);
           throw error;
@@ -72,7 +73,7 @@ const adminSupabase = {
             
           if (error) throw error;
           
-          return { success: true };
+          return { success: true, userId };
         } catch (error: any) {
           console.error("Error deleting user:", error);
           throw error;

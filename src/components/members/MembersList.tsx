@@ -12,10 +12,17 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { 
+  DropdownMenu, 
+  DropdownMenuContent, 
+  DropdownMenuItem, 
+  DropdownMenuTrigger,
+  DropdownMenuSeparator
+} from "@/components/ui/dropdown-menu";
 import { Link } from "react-router-dom";
-import { UserCheck } from "lucide-react";
+import { UserPlus, Edit, Trash2, UserCheck } from "lucide-react";
 import { getAvatarUrl } from "@/integrations/supabase/client";
+import { usePermissions } from "@/hooks/usePermissions";
 
 // Format voice part for display
 const formatVoicePart = (voicePart: string | null): string => {
@@ -35,9 +42,18 @@ const formatVoicePart = (voicePart: string | null): string => {
 
 interface MembersListProps {
   members: User[];
+  onEditMember?: (member: User) => void;
+  onDeleteMember?: (memberId: string) => void;
 }
 
-export function MembersList({ members }: MembersListProps) {
+export function MembersList({ 
+  members,
+  onEditMember,
+  onDeleteMember 
+}: MembersListProps) {
+  const { hasPermission } = usePermissions();
+  const canManageUsers = hasPermission('can_manage_users');
+  
   // Get initials from name
   const getInitials = (firstName: string | null, lastName: string | null) => {
     const first = firstName ? firstName.charAt(0).toUpperCase() : '';
@@ -117,11 +133,25 @@ export function MembersList({ members }: MembersListProps) {
                         View Attendance
                       </Link>
                     </DropdownMenuItem>
-                    <DropdownMenuItem asChild>
-                      <Link to={`/dashboard/admin/members`} className="cursor-pointer">
-                        Manage Role & Permissions
-                      </Link>
-                    </DropdownMenuItem>
+                    {canManageUsers && (
+                      <>
+                        <DropdownMenuSeparator />
+                        <DropdownMenuItem
+                          onClick={() => onEditMember && onEditMember(member)}
+                          className="cursor-pointer"
+                        >
+                          <Edit className="h-4 w-4 mr-2" />
+                          Edit Member
+                        </DropdownMenuItem>
+                        <DropdownMenuItem
+                          onClick={() => onDeleteMember && onDeleteMember(member.id)}
+                          className="cursor-pointer text-destructive focus:text-destructive"
+                        >
+                          <Trash2 className="h-4 w-4 mr-2" />
+                          Delete Member
+                        </DropdownMenuItem>
+                      </>
+                    )}
                   </DropdownMenuContent>
                 </DropdownMenu>
               </TableCell>
