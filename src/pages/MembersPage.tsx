@@ -190,6 +190,12 @@ export default function MembersPage() {
     setIsRoleDialogOpen(true);
   };
 
+  // Create a wrapper function for fetchUsers that doesn't return anything
+  const refreshMembers = async (): Promise<void> => {
+    await fetchUsers();
+    // Function does not return anything
+  };
+
   return (
     <div className="container mx-auto p-4 space-y-6">
       <PageHeader
@@ -450,7 +456,7 @@ export default function MembersPage() {
           user={currentMember}
           isOpen={isRoleDialogOpen}
           onOpenChange={setIsRoleDialogOpen}
-          onSuccess={fetchUsers}
+          onSuccess={refreshMembers}
         />
       )}
       
@@ -460,7 +466,7 @@ export default function MembersPage() {
           user={currentMember}
           isOpen={isPermissionsDialogOpen}
           setIsOpen={setIsPermissionsDialogOpen}
-          onSuccess={fetchUsers}
+          onSuccess={refreshMembers}
         />
       )}
     </div>
