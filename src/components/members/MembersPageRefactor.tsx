@@ -1,5 +1,6 @@
 
 import { toast } from "sonner";
+import { useAuth } from "@/contexts/AuthContext";
 
 /**
  * Creates a wrapper function for fetchUsers that returns void
