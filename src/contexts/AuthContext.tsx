@@ -250,6 +250,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             first_name: firstName,
             last_name: lastName,
           },
+          emailRedirectTo: `${window.location.origin}/login`,
         },
       });
 
@@ -258,24 +259,50 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         return { error, data: null };
       }
 
-      // After successful signup, update the profile table
+      console.log("Sign-up response:", data);
+      
+      // Check if profile exists already (might happen if user is re-registering)
       if (data.user?.id) {
-        console.log("User created, updating profile for:", data.user.email);
-        const { error: profileError } = await supabase
+        const { data: existingProfile } = await supabase
           .from('profiles')
-          .update({
-            first_name: firstName,
-            last_name: lastName,
-          })
-          .eq('id', data.user.id);
+          .select('id')
+          .eq('id', data.user.id)
+          .single();
+          
+        if (!existingProfile) {
+          console.log("Creating new profile for:", data.user.email);
+          // Create profile manually if trigger didn't work
+          const { error: profileError } = await supabase
+            .from('profiles')
+            .insert({
+              id: data.user.id,
+              first_name: firstName,
+              last_name: lastName,
+              role: 'singer', // Default role
+              status: 'pending', // Default status
+            });
 
-        if (profileError) {
-          console.error("Profile update error:", profileError);
-          // Optionally, sign out the user if profile update fails
-          await supabase.auth.signOut();
-          return { error: profileError, data: null };
+          if (profileError) {
+            console.error("Profile creation error:", profileError);
+            // Don't return error here, as the user is already created
+          }
+        } else {
+          console.log("User profile already exists, updating it");
+          // Update the existing profile
+          const { error: profileError } = await supabase
+            .from('profiles')
+            .update({
+              first_name: firstName,
+              last_name: lastName,
+            })
+            .eq('id', data.user.id);
+
+          if (profileError) {
+            console.error("Profile update error:", profileError);
+          }
         }
       }
+      
       console.log("Sign-up successful for:", email);
       toast.success("Signed up successfully! Please check your email to confirm your account.");
       return { error: null, data };

@@ -14,6 +14,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Music, AlertCircle } from "lucide-react";
 import { useMessaging } from "@/hooks/useMessaging";
+import { supabase, cleanupAuthState } from "@/integrations/supabase/client";
 
 const registerSchema = z.object({
   firstName: z.string().min(1, {
@@ -95,8 +96,21 @@ export default function RegisterPage() {
   const onSubmit = async (values: RegisterFormValues) => {
     setIsSubmitting(true);
     setRegisterError(null);
-
+    
     try {
+      console.log("Registration attempt for:", values.email);
+      
+      // Clean up any existing auth state first
+      cleanupAuthState();
+      
+      // Try to sign out first to clear any existing sessions
+      try {
+        await supabase.auth.signOut({ scope: 'global' });
+      } catch (err) {
+        // Continue even if this fails
+        console.log("Sign-out before registration failed, continuing anyway");
+      }
+      
       const { error, data } = await signUp(
         values.email,
         values.password,
@@ -106,7 +120,15 @@ export default function RegisterPage() {
 
       if (error) {
         console.error("Registration error:", error);
-        setRegisterError(error.message || "Failed to register account");
+        
+        // Check for duplicate email error
+        if (error.message?.includes("already registered")) {
+          setRegisterError("This email is already registered. Please use a different email or try logging in.");
+          toast.error("Email already registered");
+        } else {
+          setRegisterError(error.message || "Failed to register account");
+          toast.error("Registration failed", { description: error.message });
+        }
       } else {
         toast.success("Registration successful!", {
           description: "Please check your email for a verification link"
@@ -124,6 +146,7 @@ export default function RegisterPage() {
     } catch (error: any) {
       console.error("Unexpected error during registration:", error);
       setRegisterError(error.message || "An unexpected error occurred");
+      toast.error("Registration failed", { description: "An unexpected error occurred" });
     } finally {
       setIsSubmitting(false);
     }
