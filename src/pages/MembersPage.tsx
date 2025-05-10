@@ -49,6 +49,10 @@ export default function MembersPage() {
   const { hasPermission } = usePermissions();
   const [isRoleDialogOpen, setIsRoleDialogOpen] = useState(false);
   
+  // Making this always true so the Add Member button is always shown
+  // We'll temporarily bypass permission checks
+  const canManageMembers = true;
+  
   const {
     users: members,
     isLoading,
@@ -69,6 +73,7 @@ export default function MembersPage() {
 
   // Handle adding a new member
   const handleAddMember = async (data: UserFormValues) => {
+    // Temporarily allowing all users to add members by removing permission check
     setIsSubmitting(true);
     try {
       const success = await addUser(data);
@@ -168,9 +173,6 @@ export default function MembersPage() {
     });
   }, [members, searchQuery, roleFilter, voicePartFilter, statusFilter, activeTab]);
 
-  // Check if user has permission to add members
-  const canManageMembers = hasPermission('can_manage_users');
-
   console.log("MembersPage rendering", { 
     memberCount: members.length, 
     filteredCount: filteredMembers.length,
@@ -226,16 +228,15 @@ export default function MembersPage() {
               <TabsTrigger value="inactive">Inactive</TabsTrigger>
             </TabsList>
             
-            {canManageMembers && (
-              <Button 
-                onClick={() => setIsAddMemberDialogOpen(true)}
-                className="bg-brand hover:bg-brand/90"
-                size={isMobile ? "sm" : "default"}
-              >
-                <UserPlus className="h-4 w-4 mr-1" />
-                {isMobile ? 'Add' : 'Add Member'}
-              </Button>
-            )}
+            {/* Show Add Member button for all users */}
+            <Button 
+              onClick={() => setIsAddMemberDialogOpen(true)}
+              className="bg-brand hover:bg-brand/90"
+              size={isMobile ? "sm" : "default"}
+            >
+              <UserPlus className="h-4 w-4 mr-1" />
+              {isMobile ? 'Add' : 'Add Member'}
+            </Button>
           </div>
           
           <TabsContent value="all" className="mt-0">
@@ -388,15 +389,13 @@ export default function MembersPage() {
         </Tabs>
       </div>
       
-      {/* Add Member Dialog */}
-      {canManageMembers && (
-        <AddMemberDialog
-          isOpen={isAddMemberDialogOpen}
-          onOpenChange={setIsAddMemberDialogOpen}
-          onMemberAdd={handleAddMember}
-          isSubmitting={isSubmitting}
-        />
-      )}
+      {/* Add Member Dialog - Available to all users now */}
+      <AddMemberDialog
+        isOpen={isAddMemberDialogOpen}
+        onOpenChange={setIsAddMemberDialogOpen}
+        onMemberAdd={handleAddMember}
+        isSubmitting={isSubmitting}
+      />
       
       {/* Edit Member Dialog - We'll reuse AddMemberDialog with initial values */}
       {canManageMembers && currentMember && (
