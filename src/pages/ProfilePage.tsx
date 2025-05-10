@@ -10,6 +10,14 @@ import { Label } from "@/components/ui/label";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
+import { 
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectTrigger,
+  SelectValue 
+} from '@/components/ui/select';
 
 export default function ProfilePage() {
   const [isEditing, setIsEditing] = useState(false);
@@ -18,8 +26,19 @@ export default function ProfilePage() {
     firstName: "",
     lastName: "",
     voicePart: "",
-    email: user?.email || ""
+    email: user?.email || "",
+    role: profile?.role || ""
   });
+
+  // Available voice parts for dropdown
+  const voiceParts = [
+    { value: "soprano_1", label: "Soprano 1" },
+    { value: "soprano_2", label: "Soprano 2" },
+    { value: "alto_1", label: "Alto 1" },
+    { value: "alto_2", label: "Alto 2" },
+    { value: "tenor", label: "Tenor" },
+    { value: "bass", label: "Bass" }
+  ];
 
   // Initialize form data from profile if available
   React.useEffect(() => {
@@ -28,13 +47,18 @@ export default function ProfilePage() {
         firstName: profile.first_name || "",
         lastName: profile.last_name || "",
         voicePart: profile.voice_part || "",
-        email: user?.email || ""
+        email: user?.email || "",
+        role: profile.role || ""
       });
     }
   }, [profile, user]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
+    setFormData(prev => ({ ...prev, [name]: value }));
+  };
+
+  const handleSelectChange = (name: string, value: string) => {
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
@@ -76,6 +100,38 @@ export default function ProfilePage() {
     }
   };
 
+  // Format voice part for display
+  const formatVoicePart = (voicePart: string | null | undefined) => {
+    if (!voicePart) return "Not set";
+    
+    const voicePartMap: {[key: string]: string} = {
+      "soprano_1": "Soprano 1",
+      "soprano_2": "Soprano 2",
+      "alto_1": "Alto 1",
+      "alto_2": "Alto 2",
+      "tenor": "Tenor",
+      "bass": "Bass"
+    };
+    
+    return voicePartMap[voicePart] || voicePart;
+  };
+
+  // Format role for display
+  const formatRole = (role: string | null | undefined) => {
+    if (!role) return "Not set";
+    
+    const roleMap: {[key: string]: string} = {
+      "administrator": "Administrator",
+      "section_leader": "Section Leader",
+      "singer": "Singer",
+      "student_conductor": "Student Conductor",
+      "accompanist": "Accompanist",
+      "non_singer": "Non-Singer"
+    };
+    
+    return roleMap[role] || role;
+  };
+
   return (
     <div className="space-y-6">
       <PageHeader
@@ -111,7 +167,7 @@ export default function ProfilePage() {
               </div>
               <div>
                 <h4 className="text-sm font-medium">Voice Part</h4>
-                <p className="text-sm text-muted-foreground">{profile?.voice_part || "Not set"}</p>
+                <p className="text-sm text-muted-foreground">{formatVoicePart(profile?.voice_part)}</p>
               </div>
               <div>
                 <h4 className="text-sm font-medium">Member Since</h4>
@@ -142,7 +198,7 @@ export default function ProfilePage() {
               </div>
               <div>
                 <h4 className="text-sm font-medium">Role</h4>
-                <p className="text-sm text-muted-foreground">{profile?.role || "Not set"}</p>
+                <p className="text-sm text-muted-foreground">{formatRole(profile?.role)}</p>
               </div>
               <div>
                 <h4 className="text-sm font-medium">Class Year</h4>
@@ -191,13 +247,25 @@ export default function ProfilePage() {
                 <Label htmlFor="voicePart" className="text-right">
                   Voice Part
                 </Label>
-                <Input
-                  id="voicePart"
-                  name="voicePart"
-                  value={formData.voicePart}
-                  onChange={handleInputChange}
-                  className="col-span-3"
-                />
+                <div className="col-span-3">
+                  <Select
+                    value={formData.voicePart}
+                    onValueChange={(value) => handleSelectChange("voicePart", value)}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select voice part" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectGroup>
+                        {voiceParts.map((part) => (
+                          <SelectItem key={part.value} value={part.value}>
+                            {part.label}
+                          </SelectItem>
+                        ))}
+                      </SelectGroup>
+                    </SelectContent>
+                  </Select>
+                </div>
               </div>
               <div className="grid grid-cols-4 items-center gap-4">
                 <Label htmlFor="email" className="text-right">

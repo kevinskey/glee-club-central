@@ -12,6 +12,7 @@ import { FinancialInfoTab } from "@/components/profile/FinancialInfoTab";
 import { MediaConsentTab } from "@/components/profile/MediaConsentTab";
 import { UserRoleEditor } from "@/components/profile/UserRoleEditor";
 import { usePermissions } from "@/hooks/usePermissions";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 
 export default function ProfilePage() {
   const { profile, isLoading } = useAuth();
@@ -87,14 +88,31 @@ export default function ProfilePage() {
         
         <div className="space-y-6">
           <UserRoleEditor />
+          
           {canManageRoles && (
-            <div className="bg-muted/50 rounded-md p-4 mt-4">
-              <h3 className="font-medium text-sm mb-2">Admin Note</h3>
-              <p className="text-xs text-muted-foreground">
-                As an administrator, you can manage additional roles and permissions
-                in the Admin Members section.
-              </p>
-            </div>
+            <Card>
+              <CardHeader>
+                <CardTitle>Admin Access</CardTitle>
+                <CardDescription>
+                  Special administrative features
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <p className="text-sm mb-4">
+                  As an administrator, you have special privileges to manage user permissions, 
+                  roles and other administrative functions.
+                </p>
+                <div className="space-y-2">
+                  <h4 className="text-sm font-medium">Administrative Tools:</h4>
+                  <ul className="text-sm space-y-1 list-disc pl-4">
+                    <li>Manage user permissions</li>
+                    <li>Edit member roles</li>
+                    <li>Handle financial records</li>
+                    <li>Configure system settings</li>
+                  </ul>
+                </div>
+              </CardContent>
+            </Card>
           )}
         </div>
       </div>
