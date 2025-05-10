@@ -40,8 +40,9 @@ export function UserRoleSelector({
     }
   }, [user]);
   
-  // Ensure these role values exactly match what's allowed in the database constraint
-  const roles = [
+  // These role values must exactly match the database constraint on the profiles table
+  // Using the UserRole type from @/types/auth to ensure type safety
+  const roles: { value: UserRole; label: string; description: string }[] = [
     { value: 'administrator', label: 'Administrator', description: 'Full access to all features' },
     { value: 'section_leader', label: 'Section Leader', description: 'Can manage section members and music' },
     { value: 'singer', label: 'Singer', description: 'Regular choir member' },
@@ -62,7 +63,7 @@ export function UserRoleSelector({
       // Direct update to the profiles table
       const { data, error: updateError } = await supabase
         .from('profiles')
-        .update({ role: selectedRole })
+        .update({ role: selectedRole as UserRole })
         .eq('id', user.id);
       
       if (updateError) {
