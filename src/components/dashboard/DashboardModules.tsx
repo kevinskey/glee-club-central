@@ -52,7 +52,10 @@ export function DashboardModules() {
   const { permissions, profile } = useAuth();
   const { isSuperAdmin } = usePermissions();
   
-  const availableModules = getPermittedModules(permissions, isSuperAdmin);
+  // Add fallback for permissions to prevent undefined errors
+  const userPermissions = permissions || {};
+  
+  const availableModules = getPermittedModules(userPermissions, isSuperAdmin);
   const groupedModules = groupModulesByCategory(availableModules);
   
   return (

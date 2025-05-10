@@ -46,7 +46,7 @@ export function PermissionRoute({
   }
   
   // If the user is a superadmin or has admin role, always allow access
-  if (profile?.is_super_admin || isSuperAdmin || isAdmin()) {
+  if (isSuperAdmin || isAdmin()) {
     console.log('Access granted: User is super admin or admin');
     return <>{children}</>;
   }
