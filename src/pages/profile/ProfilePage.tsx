@@ -11,9 +11,12 @@ import { WardrobeTab } from "@/components/profile/WardrobeTab";
 import { FinancialInfoTab } from "@/components/profile/FinancialInfoTab";
 import { MediaConsentTab } from "@/components/profile/MediaConsentTab";
 import { UserRoleEditor } from "@/components/profile/UserRoleEditor";
+import { usePermissions } from "@/hooks/usePermissions";
 
 export default function ProfilePage() {
   const { profile, isLoading } = useAuth();
+  const { hasPermission } = usePermissions();
+  const canManageRoles = hasPermission('can_manage_users');
   
   if (isLoading) {
     return (
@@ -84,8 +87,15 @@ export default function ProfilePage() {
         
         <div className="space-y-6">
           <UserRoleEditor />
-          {/* This area can contain other sidebar components */}
-          {/* For example profile actions, stats, etc. */}
+          {canManageRoles && (
+            <div className="bg-muted/50 rounded-md p-4 mt-4">
+              <h3 className="font-medium text-sm mb-2">Admin Note</h3>
+              <p className="text-xs text-muted-foreground">
+                As an administrator, you can manage additional roles and permissions
+                in the Admin Members section.
+              </p>
+            </div>
+          )}
         </div>
       </div>
     </div>
