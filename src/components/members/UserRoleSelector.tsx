@@ -29,19 +29,20 @@ export function UserRoleSelector({
   onOpenChange,
   onSuccess
 }: UserRoleSelectorProps) {
-  const [selectedRole, setSelectedRole] = useState<string>('');
+  const [selectedRole, setSelectedRole] = useState<UserRole>('singer');
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   
   React.useEffect(() => {
     if (user) {
-      setSelectedRole(user.role || 'singer');
+      // Ensure we're setting a valid role value from the UserRole type
+      const roleValue = (user.role || 'singer') as UserRole;
+      setSelectedRole(roleValue);
       setError(null);
     }
   }, [user]);
   
-  // These role values must exactly match the database constraint on the profiles table
-  // Using the UserRole type from @/types/auth to ensure type safety
+  // These roles MUST exactly match the database enum values
   const roles: { value: UserRole; label: string; description: string }[] = [
     { value: 'administrator', label: 'Administrator', description: 'Full access to all features' },
     { value: 'section_leader', label: 'Section Leader', description: 'Can manage section members and music' },
@@ -60,10 +61,15 @@ export function UserRoleSelector({
     try {
       console.log("Saving role:", { userId: user.id, role: selectedRole });
       
+      // Check that the role is valid before saving
+      if (!roles.some(r => r.value === selectedRole)) {
+        throw new Error(`Invalid role value: ${selectedRole}`);
+      }
+      
       // Direct update to the profiles table
       const { data, error: updateError } = await supabase
         .from('profiles')
-        .update({ role: selectedRole as UserRole })
+        .update({ role: selectedRole })
         .eq('id', user.id);
       
       if (updateError) {
@@ -109,7 +115,7 @@ export function UserRoleSelector({
           </div>
         )}
         
-        <RadioGroup value={selectedRole} onValueChange={setSelectedRole} className="gap-4">
+        <RadioGroup value={selectedRole} onValueChange={(value) => setSelectedRole(value as UserRole)} className="gap-4">
           {roles.map((role) => (
             <div key={role.value} className="flex items-start space-x-2">
               <RadioGroupItem value={role.value} id={role.value} />
