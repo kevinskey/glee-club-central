@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -289,7 +288,7 @@ export function Header({ initialShowNewsFeed = true }: HeaderProps) {
               Login
             </Button>
             <Button 
-              variant="primary" 
+              variant="default" 
               size="sm" 
               className="mt-2 bg-glee-purple hover:bg-glee-purple/90"
               onClick={() => {
