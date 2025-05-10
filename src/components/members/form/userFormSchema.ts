@@ -9,7 +9,11 @@ export const userFormSchema = z.object({
   phone: z.string().optional(),
   role: z.string().default("singer"),
   voice_part: z.string().default("soprano_1"),
-  status: z.string().default("pending")
+  status: z.string().default("pending"),
+  class_year: z.string().optional(),
+  notes: z.string().optional(),
+  special_roles: z.string().optional(),
+  dues_paid: z.boolean().optional()
 });
 
 export type UserFormValues = z.infer<typeof userFormSchema>;

@@ -9,19 +9,22 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Checkbox } from "@/components/ui/checkbox";
 import { 
   Form, 
   FormControl, 
   FormField, 
   FormItem, 
   FormLabel, 
-  FormMessage 
+  FormMessage, 
+  FormDescription
 } from "@/components/ui/form";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { userFormSchema, UserFormValues } from "./form/userFormSchema";
 import { RoleStatusSelect } from "./form/RoleStatusSelect";
 import { Loader2 } from "lucide-react";
+import { Textarea } from "@/components/ui/textarea";
 
 interface AddMemberDialogProps {
   isOpen: boolean;
@@ -50,7 +53,11 @@ export function AddMemberDialog({
       phone: "",
       role: "singer",
       voice_part: "soprano_1",
-      status: "pending"
+      status: "pending",
+      class_year: "",
+      notes: "",
+      special_roles: "",
+      dues_paid: false
     }
   });
 
@@ -68,7 +75,11 @@ export function AddMemberDialog({
           phone: "",
           role: "singer",
           voice_part: "soprano_1",
-          status: "pending"
+          status: "pending",
+          class_year: "",
+          notes: "",
+          special_roles: "",
+          dues_paid: false
         });
       }
     }
@@ -186,23 +197,43 @@ export function AddMemberDialog({
               )}
             />
 
-            <FormField
-              control={form.control}
-              name="phone"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Phone Number</FormLabel>
-                  <FormControl>
-                    <Input 
-                      placeholder="123-456-7890" 
-                      {...field} 
-                      value={field.value || ""}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+            <div className="grid grid-cols-2 gap-4">
+              <FormField
+                control={form.control}
+                name="phone"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Phone Number</FormLabel>
+                    <FormControl>
+                      <Input 
+                        placeholder="123-456-7890" 
+                        {...field} 
+                        value={field.value || ""}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              
+              <FormField
+                control={form.control}
+                name="class_year"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Class Year</FormLabel>
+                    <FormControl>
+                      <Input 
+                        placeholder="2026" 
+                        {...field} 
+                        value={field.value || ""}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
 
             <div className="grid grid-cols-2 gap-4">
               <RoleStatusSelect
@@ -225,6 +256,66 @@ export function AddMemberDialog({
               name="status"
               label="Status"
               options={statusOptions}
+            />
+            
+            <FormField
+              control={form.control}
+              name="dues_paid"
+              render={({ field }) => (
+                <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
+                  <FormControl>
+                    <Checkbox
+                      checked={field.value}
+                      onCheckedChange={field.onChange}
+                    />
+                  </FormControl>
+                  <div className="space-y-1 leading-none">
+                    <FormLabel>
+                      Dues Paid
+                    </FormLabel>
+                    <FormDescription>
+                      Check this box if member has paid their dues
+                    </FormDescription>
+                  </div>
+                </FormItem>
+              )}
+            />
+            
+            <FormField
+              control={form.control}
+              name="special_roles"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Special Roles</FormLabel>
+                  <FormControl>
+                    <Input 
+                      placeholder="E.g., Secretary, Treasurer, etc." 
+                      {...field} 
+                      value={field.value || ""}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            
+            <FormField
+              control={form.control}
+              name="notes"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Notes</FormLabel>
+                  <FormControl>
+                    <Textarea 
+                      placeholder="Additional notes about this member" 
+                      {...field} 
+                      value={field.value || ""}
+                      className="min-h-[80px]"
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
             />
 
             <div className="flex justify-end gap-2 pt-4">

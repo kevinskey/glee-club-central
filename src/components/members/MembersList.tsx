@@ -33,7 +33,7 @@ interface MembersListProps {
   onChangeRole?: (member: User) => void;
 }
 
-// Format voice part for display
+// Format voice part for display 
 const formatVoicePart = (voicePart: string | null): string => {
   if (!voicePart) return "Not set";
   
@@ -90,14 +90,32 @@ export function MembersList({
                   <div>
                     <div className="font-medium">{member.first_name} {member.last_name}</div>
                     <div className="text-sm text-muted-foreground">{member.email}</div>
+                    {member.class_year && (
+                      <div className="text-xs text-muted-foreground">Class of {member.class_year}</div>
+                    )}
                   </div>
                 </TableCell>
                 <TableCell>{formatVoicePart(member.voice_part)}</TableCell>
-                <TableCell>{formatRole(member.role || '')}</TableCell>
                 <TableCell>
-                  <Badge variant={member.status === "active" ? "default" : "secondary"}>
-                    {(member.status || 'pending').charAt(0).toUpperCase() + (member.status || 'pending').slice(1)}
-                  </Badge>
+                  <div>
+                    <div>{formatRole(member.role || '')}</div>
+                    {member.special_roles && (
+                      <div className="text-xs text-muted-foreground">{member.special_roles}</div>
+                    )}
+                  </div>
+                </TableCell>
+                <TableCell>
+                  <div className="space-y-1">
+                    <Badge variant={member.status === "active" ? "default" : "secondary"}>
+                      {(member.status || 'pending').charAt(0).toUpperCase() + (member.status || 'pending').slice(1)}
+                    </Badge>
+                    
+                    {member.dues_paid && (
+                      <Badge variant="outline" className="bg-green-50 border-green-200 text-green-700">
+                        Dues Paid
+                      </Badge>
+                    )}
+                  </div>
                 </TableCell>
                 <TableCell className="text-right">
                   {(onEditMember || onDeleteMember || onManagePermissions || onChangeRole) && (

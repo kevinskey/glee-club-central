@@ -91,6 +91,10 @@ export const useUserManagement = () => {
           role: userData.role,
           voice_part: userData.voice_part,
           status: userData.status,
+          class_year: userData.class_year,
+          notes: userData.notes,
+          special_roles: userData.special_roles,
+          dues_paid: userData.dues_paid
         })
         .eq('id', user.id);
       
@@ -130,6 +134,10 @@ export const useUserManagement = () => {
           role: userData.role,
           voice_part: userData.voice_part,
           status: userData.status,
+          class_year: userData.class_year,
+          notes: userData.notes,
+          special_roles: userData.special_roles,
+          dues_paid: userData.dues_paid
         })
         .eq('id', userId);
       
