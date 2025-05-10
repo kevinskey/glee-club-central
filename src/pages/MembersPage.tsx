@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { PageHeader } from "@/components/ui/page-header";
@@ -342,7 +343,25 @@ export default function MembersPage() {
                   </div>
                 </div>
                 
-                {/* ... keep existing code (conditional rendering of loading, empty state, or member list) */}
+                {/* Display loading state, empty state, or member list */}
+                {isLoading ? (
+                  <div className="flex items-center justify-center h-64">
+                    <div className="h-8 w-8 rounded-full border-4 border-primary border-t-transparent animate-spin"></div>
+                  </div>
+                ) : filteredMembers.length === 0 ? (
+                  <div className="flex flex-col items-center justify-center h-64">
+                    <p className="text-muted-foreground mb-4">No members found matching your criteria.</p>
+                    <Button variant="outline" onClick={resetFilters}>Reset Filters</Button>
+                  </div>
+                ) : (
+                  <MembersList 
+                    members={filteredMembers} 
+                    onEditMember={canManageMembers ? handleEditMember : undefined}
+                    onDeleteMember={canManageMembers ? handleDeleteClick : undefined}
+                    onManagePermissions={canManageMembers ? handleManagePermissions : undefined}
+                    onChangeRole={canManageMembers ? handleChangeRole : undefined}
+                  />
+                )}
               </div>
             </Card>
           </TabsContent>
