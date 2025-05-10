@@ -1,6 +1,6 @@
 
 import React from "react";
-import { Bell, Home, Menu, User, Users, Settings, LogOut } from "lucide-react";
+import { Bell, Home, Menu, User, Users, Settings, LogOut, Upload } from "lucide-react";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { Sidebar } from "@/components/layout/Sidebar";
@@ -16,7 +16,11 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 
-export function MobileNav() {
+interface MobileNavProps {
+  isAdmin: boolean;
+}
+
+export function MobileNav({ isAdmin }: MobileNavProps) {
   const { signOut, profile } = useAuth();
   const navigate = useNavigate();
   
@@ -91,9 +95,20 @@ export function MobileNav() {
         className="fixed bottom-0 left-0 right-0 border-t bg-background sm:hidden flex justify-around py-2 z-50"
       >
         <MobileNavItem href="/" title="Home" icon={<Home />} onClick={() => navigate("/")} />
-        <MobileNavItem href="/dashboard/members" title="Members" icon={<Users />} />
-        <MobileNavItem href="/dashboard/announcements" title="Updates" icon={<Bell />} />
-        <MobileNavItem href="/dashboard/profile" title="Profile" icon={<User />} />
+        
+        {isAdmin ? (
+          <>
+            <MobileNavItem href="/dashboard/admin/users" title="Users" icon={<Users />} />
+            <MobileNavItem href="/dashboard/admin/media" title="Media" icon={<Upload />} />
+            <MobileNavItem href="/dashboard/admin/settings" title="Settings" icon={<Settings />} />
+          </>
+        ) : (
+          <>
+            <MobileNavItem href="/dashboard/sheet-music" title="Music" icon={<Music />} />
+            <MobileNavItem href="/dashboard/announcements" title="Updates" icon={<Bell />} />
+            <MobileNavItem href="/dashboard/profile" title="Profile" icon={<User />} />
+          </>
+        )}
       </div>
     </>
   );

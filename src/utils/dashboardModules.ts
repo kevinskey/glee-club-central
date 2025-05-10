@@ -1,6 +1,4 @@
 
-import { UserPermissions } from "@/types/permissions";
-
 // Define the dashboard module interface
 export interface DashboardModule {
   id: string;
@@ -9,7 +7,7 @@ export interface DashboardModule {
   icon: string;
   color: string;
   path: string;
-  permissions: string[];
+  adminOnly: boolean;
   category: string;
 }
 
@@ -22,7 +20,7 @@ export const dashboardModules: DashboardModule[] = [
     icon: "Music",
     color: "bg-purple-500",
     path: "/dashboard/sheet-music",
-    permissions: ["can_view_sheet_music"],
+    adminOnly: false,
     category: "Music"
   },
   {
@@ -32,7 +30,7 @@ export const dashboardModules: DashboardModule[] = [
     icon: "Calendar",
     color: "bg-green-500",
     path: "/dashboard/calendar",
-    permissions: ["can_view_calendar"],
+    adminOnly: false,
     category: "Events"
   },
   {
@@ -42,48 +40,18 @@ export const dashboardModules: DashboardModule[] = [
     icon: "CheckSquare",
     color: "bg-orange-500",
     path: "/dashboard/attendance",
-    permissions: ["can_view_attendance"],
+    adminOnly: false,
     category: "Performance"
   },
   {
-    id: "financial",
-    title: "Dues & Payments",
-    description: "Manage your dues and view payment history",
-    icon: "DollarSign",
-    color: "bg-amber-500",
-    path: "/dashboard/profile?tab=financial",
-    permissions: ["can_view_financial_info"],
-    category: "Administration"
-  },
-  {
-    id: "wardrobe",
-    title: "Wardrobe",
-    description: "View your assigned performance attire",
-    icon: "Shirt",
-    color: "bg-pink-500",
-    path: "/dashboard/profile?tab=wardrobe",
-    permissions: ["can_view_wardrobe"],
-    category: "Performance"
-  },
-  {
-    id: "announcements",
-    title: "Announcements",
-    description: "View important club announcements",
-    icon: "Bell",
-    color: "bg-red-500",
-    path: "/dashboard/announcements",
-    permissions: ["can_view_announcements"],
-    category: "Communication"
-  },
-  {
-    id: "members",
-    title: "Members",
-    description: "View and manage member directory",
-    icon: "Users",
+    id: "profile",
+    title: "My Profile",
+    description: "Update your profile and contact information",
+    icon: "User",
     color: "bg-blue-500",
-    path: "/dashboard/members",
-    permissions: ["can_view_members"],
-    category: "Community"
+    path: "/dashboard/profile",
+    adminOnly: false,
+    category: "Account"
   },
   {
     id: "practice",
@@ -92,81 +60,90 @@ export const dashboardModules: DashboardModule[] = [
     icon: "FileText",
     color: "bg-cyan-500",
     path: "/dashboard/practice",
-    permissions: ["can_view_practice_resources"],
+    adminOnly: false,
     category: "Music"
   },
   {
-    id: "recordings",
-    title: "Recordings",
-    description: "Submit and view recordings",
-    icon: "Upload",
+    id: "announcements",
+    title: "Announcements",
+    description: "View important club announcements",
+    icon: "Bell",
+    color: "bg-red-500",
+    path: "/dashboard/announcements",
+    adminOnly: false,
+    category: "Communication"
+  },
+  {
+    id: "contact_admin",
+    title: "Contact Admin",
+    description: "Send a message to administrators",
+    icon: "MessageSquare",
     color: "bg-indigo-500",
-    path: "/dashboard/recordings",
-    permissions: ["can_view_recordings"],
-    category: "Music"
+    path: "/dashboard/contact",
+    adminOnly: false,
+    category: "Support"
   },
+  // Admin-only modules
   {
-    id: "handbook",
-    title: "Handbook",
-    description: "Access the Glee Club handbook",
-    icon: "FileText",
-    color: "bg-emerald-500",
-    path: "/dashboard/handbook",
-    permissions: ["can_view_handbook"],
+    id: "user_management",
+    title: "User Management",
+    description: "Manage all users in the system",
+    icon: "Users",
+    color: "bg-slate-500",
+    path: "/dashboard/admin/users",
+    adminOnly: true,
     category: "Administration"
   },
   {
-    id: "admin_dashboard",
-    title: "Admin Dashboard",
-    description: "Access administrative controls",
-    icon: "Settings",
-    color: "bg-slate-500",
-    path: "/dashboard/admin",
-    permissions: ["is_admin"],
+    id: "media_manager",
+    title: "Media Manager",
+    description: "Upload and organize PDFs and media files",
+    icon: "Upload",
+    color: "bg-emerald-500",
+    path: "/dashboard/admin/media",
+    adminOnly: true,
+    category: "Administration"
+  },
+  {
+    id: "event_manager",
+    title: "Event Manager",
+    description: "Create and manage calendar events",
+    icon: "CalendarPlus",
+    color: "bg-yellow-500",
+    path: "/dashboard/admin/events",
+    adminOnly: true,
     category: "Administration"
   },
   {
     id: "analytics",
     title: "Analytics",
-    description: "View attendance and performance analytics",
+    description: "View site usage and login activity",
     icon: "BarChart",
     color: "bg-violet-500",
     path: "/dashboard/admin/analytics",
-    permissions: ["can_view_analytics"],
+    adminOnly: true,
     category: "Administration"
   },
   {
-    id: "messaging",
-    title: "Messaging",
-    description: "Send and receive messages",
-    icon: "Bell",
+    id: "settings",
+    title: "Site Settings",
+    description: "Configure system notifications and permissions",
+    icon: "Settings",
     color: "bg-rose-500",
-    path: "/dashboard/messaging",
-    permissions: ["can_use_messaging"],
-    category: "Communication"
+    path: "/dashboard/admin/settings",
+    adminOnly: true,
+    category: "Administration"
   }
 ];
 
-// Function to get modules based on user permissions
-export function getPermittedModules(
-  permissions: string[] | undefined,
-  isSuperAdmin: boolean
-): DashboardModule[] {
-  if (isSuperAdmin) {
-    return dashboardModules;
+// Function to get modules based on user role
+export function getModulesByRole(isAdmin: boolean): DashboardModule[] {
+  if (isAdmin) {
+    return dashboardModules; // Admins can see all modules
   }
-
-  if (!permissions || permissions.length === 0) {
-    // Return default modules that don't require special permissions
-    return dashboardModules.filter(module => 
-      module.permissions.includes("can_view_sheet_music") || 
-      module.permissions.includes("can_view_calendar")
-    );
-  }
-
-  return dashboardModules.filter(module => 
-    module.permissions.some(permission => permissions.includes(permission))
-  );
+  
+  // Filter out admin-only modules for general users
+  return dashboardModules.filter(module => !module.adminOnly);
 }
 
 // Function to get a module by ID

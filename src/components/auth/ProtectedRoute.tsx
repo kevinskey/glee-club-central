@@ -1,32 +1,19 @@
 
-import React, { useEffect } from 'react';
+import React from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { Spinner } from '@/components/ui/spinner';
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
-  requiredRoles?: string[];
+  adminOnly?: boolean;
 }
 
-export function ProtectedRoute({ children, requiredRoles }: ProtectedRouteProps) {
-  const { isAuthenticated, isLoading, profile } = useAuth();
+export function ProtectedRoute({ children, adminOnly = false }: ProtectedRouteProps) {
+  const { isAuthenticated, isLoading, isAdmin } = useAuth();
   const location = useLocation();
   
-  console.log("Protected Route - Auth Status:", { 
-    isAuthenticated, 
-    isLoading, 
-    currentPath: location.pathname,
-    profile: profile ? `${profile.first_name} (${profile.role})` : 'No profile'
-  });
-  
-  // Use an effect to log when the component re-renders with new auth state
-  useEffect(() => {
-    console.log("ProtectedRoute auth state updated:", { isAuthenticated, isLoading });
-  }, [isAuthenticated, isLoading]);
-  
   if (isLoading) {
-    console.log("Authentication loading, showing spinner");
     return (
       <div className="flex items-center justify-center min-h-screen">
         <Spinner size="lg" />
@@ -35,20 +22,13 @@ export function ProtectedRoute({ children, requiredRoles }: ProtectedRouteProps)
   }
   
   if (!isAuthenticated) {
-    console.log("Not authenticated, redirecting to login");
-    // Save the location the user was trying to access and redirect to login
     return <Navigate to="/login" state={{ from: location }} replace />;
   }
   
-  // Check for required roles if specified
-  if (requiredRoles?.length && profile?.role) {
-    const hasRequiredRole = requiredRoles.includes(profile.role);
-    if (!hasRequiredRole) {
-      console.log("Missing required role, redirecting to dashboard");
-      return <Navigate to="/dashboard" replace />;
-    }
+  // Check if admin access is required
+  if (adminOnly && !isAdmin()) {
+    return <Navigate to="/dashboard" state={{ accessDenied: true }} replace />;
   }
   
-  console.log("Authentication passed, rendering protected content");
   return <>{children}</>;
 }

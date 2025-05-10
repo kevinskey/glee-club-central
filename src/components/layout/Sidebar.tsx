@@ -22,7 +22,7 @@ export function Sidebar() {
       <DesktopSidebar isOpen={isOpen} isAdmin={isAdmin()} />
       
       {/* Mobile Navigation */}
-      <MobileNav />
+      <MobileNav isAdmin={isAdmin()} />
       
       {/* Overlay when sidebar is open on mobile */}
       {isOpen && (

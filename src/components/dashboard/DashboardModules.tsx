@@ -1,13 +1,12 @@
 
 import React from 'react';
-import { dashboardModules, getPermittedModules, DashboardModule } from '@/utils/dashboardModules';
+import { dashboardModules, getModulesByRole, DashboardModule } from '@/utils/dashboardModules';
 import { Link } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
-import { usePermissions } from '@/hooks/usePermissions';
 import { 
   CreditCard, DollarSign, FileText, CheckSquare, Shirt, Scissors,
   Upload, Map, Layout, Heart, Bell, Calendar, Users, Settings,
-  BarChart, Search, Music
+  BarChart, Search, Music, MessageSquare, CalendarPlus, User
 } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 
@@ -26,9 +25,12 @@ const iconMap: Record<string, React.ReactNode> = {
   BarChart: <BarChart className="h-6 w-6" />,
   Search: <Search className="h-6 w-6" />,
   Calendar: <Calendar className="h-6 w-6" />,
+  CalendarPlus: <Calendar className="h-6 w-6" />,
   Users: <Users className="h-6 w-6" />,
   Settings: <Settings className="h-6 w-6" />,
-  Music: <Music className="h-6 w-6" />
+  Music: <Music className="h-6 w-6" />,
+  MessageSquare: <MessageSquare className="h-6 w-6" />,
+  User: <User className="h-6 w-6" />
 };
 
 // Type definition for grouped modules
@@ -49,13 +51,9 @@ const groupModulesByCategory = (modules: DashboardModule[]): GroupedModules => {
 };
 
 export function DashboardModules() {
-  const { permissions, profile } = useAuth();
-  const { isSuperAdmin } = usePermissions();
+  const { isAdmin, profile } = useAuth();
   
-  // Add fallback for permissions to prevent undefined errors
-  const userPermissions = permissions || {};
-  
-  const availableModules = getPermittedModules(userPermissions, isSuperAdmin);
+  const availableModules = getModulesByRole(isAdmin());
   const groupedModules = groupModulesByCategory(availableModules);
   
   return (
@@ -63,7 +61,7 @@ export function DashboardModules() {
       {Object.keys(groupedModules).length === 0 ? (
         <div className="col-span-full p-8 text-center border rounded-lg">
           <div className="text-muted-foreground mb-2">
-            No modules available for your permission level
+            No modules available for your role
           </div>
           <p className="text-sm">
             Contact an administrator if you need access to specific features
@@ -98,10 +96,10 @@ export function DashboardModules() {
                   
                   <div className="mt-4 flex justify-between items-center">
                     <span className="text-xs text-muted-foreground">
-                      {profile?.title || 'Member'}
+                      {isAdmin() ? 'Admin Access' : 'Member Access'}
                     </span>
                     <span className="text-xs px-2 py-1 bg-muted rounded-full">
-                      Access Granted
+                      Available
                     </span>
                   </div>
                 </Link>
