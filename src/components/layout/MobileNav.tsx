@@ -1,6 +1,6 @@
 
 import React from "react";
-import { Bell, Home, Menu, User, Users } from "lucide-react";
+import { Bell, Home, Menu, User, Users, Settings, LogOut } from "lucide-react";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { Sidebar } from "@/components/layout/Sidebar";
