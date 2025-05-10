@@ -14,7 +14,11 @@ import {
   CheckSquare,
   Shirt,
   DollarSign,
-  MessageSquare
+  MessageSquare,
+  Users,
+  Upload,
+  BarChart,
+  Settings
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";

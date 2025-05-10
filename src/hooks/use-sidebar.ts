@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from "react";
+import React, { useState, useEffect, createContext, useContext } from "react";
 
 interface SidebarState {
   isOpen: boolean;
@@ -8,6 +8,30 @@ interface SidebarState {
   onToggle: () => void;
 }
 
+// Create a context for the sidebar state
+const SidebarContext = createContext<SidebarState | undefined>(undefined);
+
+// Create a provider component
+export function SidebarProvider({ children }: { children: React.ReactNode }) {
+  const sidebarState = useSidebar();
+  
+  return (
+    <SidebarContext.Provider value={sidebarState}>
+      {children}
+    </SidebarContext.Provider>
+  );
+}
+
+// Hook for components to consume the sidebar context
+export const useSidebarContext = (): SidebarState => {
+  const context = useContext(SidebarContext);
+  if (!context) {
+    throw new Error("useSidebarContext must be used within a SidebarProvider");
+  }
+  return context;
+};
+
+// Original hook implementation as a standalone hook
 export function useSidebar(): SidebarState {
   const [isOpen, setIsOpen] = useState(false);
   

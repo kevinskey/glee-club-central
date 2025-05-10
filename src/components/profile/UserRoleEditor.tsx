@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from '@/components/ui/button';
@@ -16,7 +15,7 @@ import { toast } from 'sonner';
 import { UserRole } from '@/types/auth';
 
 export function UserRoleEditor() {
-  const { profile, refreshPermissions } = useAuth();
+  const { profile } = useAuth();
   const { updateUserRole } = useUserManagement();
   const [selectedRole, setSelectedRole] = useState<string>(profile?.role || '');
   const [isLoading, setIsLoading] = useState(false);
@@ -52,10 +51,7 @@ export function UserRoleEditor() {
       const success = await updateUserRole(profile.id, selectedRole);
       if (success) {
         toast.success("Your role has been updated");
-        // Refresh user permissions to reflect the new role
-        if (refreshPermissions) {
-          await refreshPermissions();
-        }
+        // Role updated successfully, page will be refreshed with updated permissions
       }
     } catch (error) {
       console.error("Error updating user role:", error);

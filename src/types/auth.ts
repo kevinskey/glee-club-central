@@ -21,6 +21,7 @@ export interface Profile {
   avatar_url?: string | null;
   status: string;
   last_login?: string | null;
+  last_sign_in_at?: string | null;
   created_at: string;
   updated_at?: string | null;
   is_super_admin?: boolean;
@@ -43,4 +44,5 @@ export interface AuthContextType {
   signOut: () => Promise<void>;
   isAdmin: () => boolean;
   updatePassword?: (newPassword: string) => Promise<void>;
+  refreshPermissions?: () => Promise<void>;
 }

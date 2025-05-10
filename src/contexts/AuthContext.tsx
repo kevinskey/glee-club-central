@@ -25,6 +25,7 @@ interface AuthContextType {
   signOut: () => Promise<void>;
   isAdmin: () => boolean;
   updatePassword?: (newPassword: string) => Promise<void>;
+  refreshPermissions?: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -43,6 +44,26 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [permissions, setPermissions] = useState<Record<string, boolean>>({});
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
+
+  // Function to refresh permissions
+  const refreshPermissions = async () => {
+    if (!user) return;
+    
+    try {
+      const { data: permissionsData } = await supabase
+        .rpc('get_user_permissions', { p_user_id: user.id });
+      
+      if (permissionsData) {
+        const permMap: Record<string, boolean> = {};
+        permissionsData.forEach((item: any) => {
+          permMap[item.permission] = item.granted;
+        });
+        setPermissions(permMap);
+      }
+    } catch (permError) {
+      console.error("Error loading permissions:", permError);
+    }
+  };
 
   // Initialize auth state and set up listener
   useEffect(() => {
@@ -357,6 +378,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     signUp,
     isAdmin,
     updatePassword,
+    refreshPermissions,
   };
 
   return (

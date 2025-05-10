@@ -1,4 +1,3 @@
-
 import React from "react";
 import { PageHeader } from "@/components/ui/page-header";
 import { Headphones, Music, PlayCircle, Music2, BookOpen, BarChart } from "lucide-react";
@@ -78,7 +77,7 @@ const practiceData: Record<string, PracticeMedia[]> = {
 };
 
 export default function PracticePage() {
-  const { user, userProfile } = useAuth();
+  const { profile } = useAuth();
   const [activeTab, setActiveTab] = React.useState<string>("warmups");
   
   const { 
@@ -104,8 +103,8 @@ export default function PracticePage() {
   };
 
   // Update role checks to use correct roles
-  const canUpload = userProfile?.role === "administrator" || userProfile?.role === "section_leader";
-  const isAdmin = userProfile?.role === "administrator";
+  const canUpload = profile?.role === "admin";
+  const isAdmin = profile?.role === "admin";
   
   return (
     <div>

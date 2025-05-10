@@ -1,300 +1,120 @@
-
-import React, { useState } from "react";
+import React from 'react';
 import { PageHeader } from "@/components/ui/page-header";
-import { User, PencilLine } from "lucide-react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useAuth } from "@/contexts/AuthContext";
-import { toast } from "sonner";
-import { supabase } from "@/integrations/supabase/client";
-import { 
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectTrigger,
-  SelectValue 
-} from '@/components/ui/select';
+import { User } from "lucide-react";
+import { ProfileOverviewTab } from "@/components/profile/ProfileOverviewTab";
+import { ParticipationTab } from "@/components/profile/ParticipationTab";
+import { MusicAccessTab } from "@/components/profile/MusicAccessTab";
+import { WardrobeTab } from "@/components/profile/WardrobeTab";
+import { FinancialInfoTab } from "@/components/profile/FinancialInfoTab";
+import { MediaConsentTab } from "@/components/profile/MediaConsentTab";
+import { UserRoleEditor } from "@/components/profile/UserRoleEditor";
+import { usePermissions } from "@/hooks/usePermissions";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 
 export default function ProfilePage() {
-  const [isEditing, setIsEditing] = useState(false);
-  const { user, profile, refreshPermissions } = useAuth();
-  const [formData, setFormData] = useState({
-    firstName: "",
-    lastName: "",
-    voicePart: "",
-    email: user?.email || "",
-    role: profile?.role || ""
-  });
-
-  // Available voice parts for dropdown
-  const voiceParts = [
-    { value: "soprano_1", label: "Soprano 1" },
-    { value: "soprano_2", label: "Soprano 2" },
-    { value: "alto_1", label: "Alto 1" },
-    { value: "alto_2", label: "Alto 2" },
-    { value: "tenor", label: "Tenor" },
-    { value: "bass", label: "Bass" }
-  ];
-
-  // Initialize form data from profile if available
-  React.useEffect(() => {
-    if (profile && user) {
-      setFormData({
-        firstName: profile.first_name || "",
-        lastName: profile.last_name || "",
-        voicePart: profile.voice_part || "",
-        email: user.email || "",
-        role: profile.role || ""
-      });
-    }
-  }, [profile, user]);
-
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
-  };
-
-  const handleSelectChange = (name: string, value: string) => {
-    setFormData(prev => ({ ...prev, [name]: value }));
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    if (!user) {
-      toast.error("You must be logged in to update your profile.");
-      return;
-    }
-
-    try {
-      const { error } = await supabase
-        .from("profiles")
-        .update({
-          first_name: formData.firstName,
-          last_name: formData.lastName,
-          voice_part: formData.voicePart,
-          updated_at: new Date().toISOString()
-        })
-        .eq("id", user.id);
-
-      if (error) {
-        console.error("Profile update error:", error);
-        toast.error("Failed to update profile: " + error.message);
-        return;
-      }
-
-      // Refresh user profile data after successful update
-      if (refreshPermissions) {
-        await refreshPermissions();
-      }
-      
-      toast.success("Profile updated successfully!");
-      setIsEditing(false);
-    } catch (error: any) {
-      console.error("Error updating profile:", error);
-      toast.error("Failed to update profile: " + (error.message || "Unknown error"));
-    }
-  };
-
-  // Format voice part for display
-  const formatVoicePart = (voicePart: string | null | undefined) => {
-    if (!voicePart) return "Not set";
-    
-    const voicePartMap: {[key: string]: string} = {
-      "soprano_1": "Soprano 1",
-      "soprano_2": "Soprano 2",
-      "alto_1": "Alto 1",
-      "alto_2": "Alto 2",
-      "tenor": "Tenor",
-      "bass": "Bass"
-    };
-    
-    return voicePartMap[voicePart] || voicePart;
-  };
-
-  // Format role for display
-  const formatRole = (role: string | null | undefined) => {
-    if (!role) return "Not set";
-    
-    const roleMap: {[key: string]: string} = {
-      "administrator": "Administrator",
-      "section_leader": "Section Leader",
-      "singer": "Singer",
-      "student_conductor": "Student Conductor",
-      "accompanist": "Accompanist",
-      "non_singer": "Non-Singer"
-    };
-    
-    return roleMap[role] || role;
-  };
+  const { profile, isLoading } = useAuth();
+  const { hasPermission } = usePermissions();
+  const canManageRoles = hasPermission('can_manage_users');
+  
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="h-8 w-8 rounded-full border-4 border-primary border-t-transparent animate-spin"></div>
+      </div>
+    );
+  }
+  
+  if (!profile) {
+    return (
+      <div className="container mx-auto p-4">
+        <div className="text-center py-8">
+          <h2 className="text-2xl font-bold mb-2">Profile Not Found</h2>
+          <p className="text-muted-foreground">
+            We couldn't find your profile information. Please try again later.
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <div className="space-y-6">
+    <div className="container mx-auto p-4 space-y-6">
       <PageHeader
         title="My Profile"
-        description="View and edit your profile information"
+        description="View and manage your Glee Club membership information"
         icon={<User className="h-6 w-6" />}
-        actions={
-          <Button onClick={() => setIsEditing(true)} variant="outline">
-            <PencilLine className="h-4 w-4 mr-2" /> Edit Profile
-          </Button>
-        }
       />
       
-      <div className="grid gap-6 md:grid-cols-2">
-        <Card>
-          <CardHeader>
-            <CardTitle>Personal Information</CardTitle>
-            <CardDescription>
-              Your basic profile information
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <h4 className="text-sm font-medium">Name</h4>
-                <p className="text-sm text-muted-foreground">
-                  {profile?.first_name || "Not set"} {profile?.last_name || ""}
-                </p>
-              </div>
-              <div>
-                <h4 className="text-sm font-medium">Email</h4>
-                <p className="text-sm text-muted-foreground">{user?.email || "Not set"}</p>
-              </div>
-              <div>
-                <h4 className="text-sm font-medium">Voice Part</h4>
-                <p className="text-sm text-muted-foreground">{formatVoicePart(profile?.voice_part)}</p>
-              </div>
-              <div>
-                <h4 className="text-sm font-medium">Member Since</h4>
-                <p className="text-sm text-muted-foreground">
-                  {profile?.join_date ? new Date(profile.join_date).toLocaleDateString() : "Not set"}
-                </p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="md:col-span-2">
+          <Tabs defaultValue="overview" className="w-full">
+            <TabsList className="grid grid-cols-3 md:grid-cols-6 mb-4">
+              <TabsTrigger value="overview">Overview</TabsTrigger>
+              <TabsTrigger value="participation">Participation</TabsTrigger>
+              <TabsTrigger value="music">Music</TabsTrigger>
+              <TabsTrigger value="wardrobe">Wardrobe</TabsTrigger>
+              <TabsTrigger value="financial">Financial</TabsTrigger>
+              <TabsTrigger value="media">Media</TabsTrigger>
+            </TabsList>
+            
+            <TabsContent value="overview">
+              <ProfileOverviewTab profile={profile} isEditable />
+            </TabsContent>
+            
+            <TabsContent value="participation">
+              <ParticipationTab memberId={profile.id} />
+            </TabsContent>
+            
+            <TabsContent value="music">
+              <MusicAccessTab memberId={profile.id} voicePart={profile.voice_part} />
+            </TabsContent>
+            
+            <TabsContent value="wardrobe">
+              <WardrobeTab profile={profile} />
+            </TabsContent>
+            
+            <TabsContent value="financial">
+              <FinancialInfoTab memberId={profile.id} />
+            </TabsContent>
+            
+            <TabsContent value="media">
+              <MediaConsentTab profile={profile} />
+            </TabsContent>
+          </Tabs>
+        </div>
         
-        <Card>
-          <CardHeader>
-            <CardTitle>Choir Membership</CardTitle>
-            <CardDescription>
-              Your membership status and details
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <h4 className="text-sm font-medium">Status</h4>
-                <p className="text-sm text-muted-foreground">{profile?.status || "Not set"}</p>
-              </div>
-              <div>
-                <h4 className="text-sm font-medium">Dues</h4>
-                <p className="text-sm text-muted-foreground">{profile?.dues_paid ? "Paid" : "Unpaid"}</p>
-              </div>
-              <div>
-                <h4 className="text-sm font-medium">Role</h4>
-                <p className="text-sm text-muted-foreground">{formatRole(profile?.role)}</p>
-              </div>
-              <div>
-                <h4 className="text-sm font-medium">Class Year</h4>
-                <p className="text-sm text-muted-foreground">{profile?.class_year || "Not set"}</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+        <div className="space-y-6">
+          <UserRoleEditor />
+          
+          {canManageRoles && (
+            <Card>
+              <CardHeader>
+                <CardTitle>Admin Access</CardTitle>
+                <CardDescription>
+                  Special administrative features
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <p className="text-sm mb-4">
+                  As an administrator, you have special privileges to manage user permissions, 
+                  roles and other administrative functions.
+                </p>
+                <div className="space-y-2">
+                  <h4 className="text-sm font-medium">Administrative Tools:</h4>
+                  <ul className="text-sm space-y-1 list-disc pl-4">
+                    <li>Manage user permissions</li>
+                    <li>Edit member roles</li>
+                    <li>Handle financial records</li>
+                    <li>Configure system settings</li>
+                  </ul>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+        </div>
       </div>
-
-      <Dialog open={isEditing} onOpenChange={setIsEditing}>
-        <DialogContent className="sm:max-w-[425px]">
-          <DialogHeader>
-            <DialogTitle>Edit Profile</DialogTitle>
-            <DialogDescription>
-              Make changes to your profile information.
-            </DialogDescription>
-          </DialogHeader>
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div className="grid gap-4 py-4">
-              <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="firstName" className="text-right">
-                  First Name
-                </Label>
-                <Input
-                  id="firstName"
-                  name="firstName"
-                  value={formData.firstName}
-                  onChange={handleInputChange}
-                  className="col-span-3"
-                />
-              </div>
-              <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="lastName" className="text-right">
-                  Last Name
-                </Label>
-                <Input
-                  id="lastName"
-                  name="lastName"
-                  value={formData.lastName}
-                  onChange={handleInputChange}
-                  className="col-span-3"
-                />
-              </div>
-              <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="voicePart" className="text-right">
-                  Voice Part
-                </Label>
-                <div className="col-span-3">
-                  <Select
-                    value={formData.voicePart}
-                    onValueChange={(value) => handleSelectChange("voicePart", value)}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select voice part" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectGroup>
-                        {voiceParts.map((part) => (
-                          <SelectItem key={part.value} value={part.value}>
-                            {part.label}
-                          </SelectItem>
-                        ))}
-                      </SelectGroup>
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
-              <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="email" className="text-right">
-                  Email
-                </Label>
-                <Input
-                  id="email"
-                  name="email"
-                  type="email"
-                  value={formData.email}
-                  disabled
-                  className="col-span-3 bg-muted"
-                />
-                <div className="col-span-3 col-start-2">
-                  <p className="text-xs text-muted-foreground">
-                    Email can only be changed through account settings.
-                  </p>
-                </div>
-              </div>
-            </div>
-            <div className="flex justify-end space-x-2">
-              <Button variant="outline" type="button" onClick={() => setIsEditing(false)}>
-                Cancel
-              </Button>
-              <Button type="submit">Save Changes</Button>
-            </div>
-          </form>
-        </DialogContent>
-      </Dialog>
     </div>
   );
 }
