@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { PageHeader } from "@/components/ui/page-header";
-import { Users, Search, Filter, UserPlus } from "lucide-react";
+import { Users, Search, Filter, UserPlus, Settings } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -14,6 +14,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
+import { Link } from "react-router-dom";
 import { useUserManagement } from "@/hooks/useUserManagement";
 import { MembersList } from "@/components/members/MembersList";
 import { useMedia } from "@/hooks/use-mobile";
@@ -195,11 +196,25 @@ export default function MembersPage() {
 
   return (
     <div className="container mx-auto p-4 space-y-6">
-      <PageHeader
-        title="Glee Club Members"
-        description="View and manage all Spelman College Glee Club members"
-        icon={<Users className="h-6 w-6" />}
-      />
+      <div className="flex flex-col sm:flex-row justify-between items-start mb-4">
+        <PageHeader
+          title="Glee Club Members"
+          description="View and manage all Spelman College Glee Club members"
+          icon={<Users className="h-6 w-6" />}
+        />
+        
+        {hasPermission('can_manage_users') && (
+          <Link to="/dashboard/admin/members">
+            <Button 
+              variant="secondary" 
+              className="mt-4 sm:mt-0"
+            >
+              <Settings className="h-4 w-4 mr-2" />
+              Advanced Member Management
+            </Button>
+          </Link>
+        )}
+      </div>
       
       <div className="flex flex-col gap-4">
         {/* Tabs navigation for quick filtering */}
