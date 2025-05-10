@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -20,7 +21,6 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuSeparator,
-  DropdownMenuProvider,
 } from "@/components/ui/dropdown-menu";
 import {
   NavigationMenu,
@@ -31,6 +31,7 @@ import {
   NavigationMenuTrigger,
   navigationMenuTriggerStyle,
 } from "@/components/ui/navigation-menu";
+import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover";
 
 interface HeaderProps {
   initialShowNewsFeed?: boolean;
@@ -41,6 +42,7 @@ export function Header({ initialShowNewsFeed = true }: HeaderProps) {
   const isMobile = useIsMobile();
   const [showNewsFeed, setShowNewsFeed] = useState(initialShowNewsFeed);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [showDropdown, setShowDropdown] = useState(false);
 
   // Auto-hide the news feed after a shorter duration (2 seconds instead of default)
   useEffect(() => {
@@ -112,7 +114,7 @@ export function Header({ initialShowNewsFeed = true }: HeaderProps) {
               <NavigationMenuItem>
                 <NavigationMenuTrigger>Resources</NavigationMenuTrigger>
                 <NavigationMenuContent>
-                  <div className="w-[200px] p-2">
+                  <div className="w-[200px] p-2 bg-popover">
                     <NavigationMenuLink 
                       className="block p-2 hover:bg-accent rounded-md"
                       onClick={() => navigate("/administration")}
@@ -146,22 +148,20 @@ export function Header({ initialShowNewsFeed = true }: HeaderProps) {
           </TooltipProvider>
           
           {/* Member Portal button */}
-          <DropdownMenuProvider>
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button 
-                  size="sm"
-                  className="bg-glee-purple hover:bg-glee-purple/90 h-8 px-3 text-xs flex items-center gap-1"
-                >
-                  Member Portal <ChevronDown className="h-3 w-3 opacity-70" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-48 bg-popover">
-                <DropdownMenuItem onClick={() => navigate("/login")}>Login</DropdownMenuItem>
-                <DropdownMenuItem onClick={() => navigate("/dashboard")}>Dashboard</DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          </DropdownMenuProvider>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button 
+                size="sm"
+                className="bg-glee-purple hover:bg-glee-purple/90 h-8 px-3 text-xs flex items-center gap-1"
+              >
+                Member Portal <ChevronDown className="h-3 w-3 opacity-70" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-48 bg-popover">
+              <DropdownMenuItem onClick={() => navigate("/login")}>Login</DropdownMenuItem>
+              <DropdownMenuItem onClick={() => navigate("/dashboard")}>Dashboard</DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
         
         {/* Mobile menu and theme toggle */}
