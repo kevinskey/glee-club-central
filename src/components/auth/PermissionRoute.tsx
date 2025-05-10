@@ -30,7 +30,6 @@ export function PermissionRoute({
     requireSuperAdmin,
     requiredPermission,
     userProfile: profile,
-    isSuperAdminFromProfile: profile?.is_super_admin
   });
   
   if (isLoading) {

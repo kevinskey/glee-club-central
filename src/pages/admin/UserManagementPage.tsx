@@ -25,27 +25,33 @@ import { Card } from "@/components/ui/card";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { formatDistanceToNow } from "date-fns";
+import { UserRoleSelector } from "@/components/members/UserRoleSelector";
+import { User } from "@/hooks/useUserManagement";
 
-interface User {
-  id: string;
-  email: string;
-  first_name: string;
-  last_name: string;
-  role: string;
-  status: string;
-  last_login: string | null;
+interface UserManagementState {
+  users: User[];
+  isLoading: boolean;
+  searchQuery: string;
+  roleFilter: string;
+  statusFilter: string;
+  selectedUser: User | null;
+  isRoleDialogOpen: boolean;
 }
 
 export default function UserManagementPage() {
-  const [users, setUsers] = useState<User[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [searchQuery, setSearchQuery] = useState("");
-  const [roleFilter, setRoleFilter] = useState("all");
-  const [statusFilter, setStatusFilter] = useState("all");
+  const [state, setState] = useState<UserManagementState>({
+    users: [],
+    isLoading: true,
+    searchQuery: "",
+    roleFilter: "all",
+    statusFilter: "all",
+    selectedUser: null,
+    isRoleDialogOpen: false
+  });
   
   // Fetch users
   const fetchUsers = async () => {
-    setIsLoading(true);
+    setState(prev => ({ ...prev, isLoading: true }));
     try {
       const { data, error } = await supabase
         .from('profiles')
@@ -56,12 +62,12 @@ export default function UserManagementPage() {
         throw error;
       }
       
-      setUsers(data as User[]);
+      setState(prev => ({ ...prev, users: data as User[] }));
     } catch (error) {
       console.error("Error fetching users:", error);
       toast.error("Failed to load users");
     } finally {
-      setIsLoading(false);
+      setState(prev => ({ ...prev, isLoading: false }));
     }
   };
 
@@ -70,36 +76,25 @@ export default function UserManagementPage() {
   }, []);
 
   // Filter users based on search query and filters
-  const filteredUsers = users.filter(user => {
+  const filteredUsers = state.users.filter(user => {
     const matchesSearch = 
-      user.first_name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      user.last_name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      user.email?.toLowerCase().includes(searchQuery.toLowerCase());
+      (user.first_name || '').toLowerCase().includes(state.searchQuery.toLowerCase()) ||
+      (user.last_name || '').toLowerCase().includes(state.searchQuery.toLowerCase()) ||
+      (user.email || '').toLowerCase().includes(state.searchQuery.toLowerCase());
     
-    const matchesRole = roleFilter === "all" || user.role === roleFilter;
-    const matchesStatus = statusFilter === "all" || user.status === statusFilter;
+    const matchesRole = state.roleFilter === "all" || user.role === state.roleFilter;
+    const matchesStatus = state.statusFilter === "all" || user.status === state.statusFilter;
     
     return matchesSearch && matchesRole && matchesStatus;
   });
 
   // Change user role
-  const changeUserRole = async (userId: string, newRole: string) => {
-    try {
-      const { error } = await supabase
-        .from('profiles')
-        .update({ role: newRole })
-        .eq('id', userId);
-        
-      if (error) {
-        throw error;
-      }
-      
-      toast.success(`User role updated to ${newRole}`);
-      fetchUsers(); // Refresh user list
-    } catch (error) {
-      console.error("Error updating user role:", error);
-      toast.error("Failed to update user role");
-    }
+  const openRoleDialog = (user: User) => {
+    setState(prev => ({
+      ...prev,
+      selectedUser: user,
+      isRoleDialogOpen: true
+    }));
   };
 
   // Change user status
@@ -146,8 +141,8 @@ export default function UserManagementPage() {
             <Search className="h-4 w-4 text-muted-foreground" />
             <Input
               placeholder="Search users..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
+              value={state.searchQuery}
+              onChange={(e) => setState(prev => ({ ...prev, searchQuery: e.target.value }))}
               className="max-w-sm"
             />
           </div>
@@ -155,8 +150,8 @@ export default function UserManagementPage() {
           <div className="flex gap-2 items-center">
             <select
               className="border rounded p-2 text-sm"
-              value={roleFilter}
-              onChange={(e) => setRoleFilter(e.target.value)}
+              value={state.roleFilter}
+              onChange={(e) => setState(prev => ({ ...prev, roleFilter: e.target.value }))}
             >
               <option value="all">All Roles</option>
               <option value="admin">Admin</option>
@@ -165,8 +160,8 @@ export default function UserManagementPage() {
             
             <select
               className="border rounded p-2 text-sm"
-              value={statusFilter}
-              onChange={(e) => setStatusFilter(e.target.value)}
+              value={state.statusFilter}
+              onChange={(e) => setState(prev => ({ ...prev, statusFilter: e.target.value }))}
             >
               <option value="all">All Statuses</option>
               <option value="active">Active</option>
@@ -198,7 +193,7 @@ export default function UserManagementPage() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {isLoading ? (
+              {state.isLoading ? (
                 <TableRow>
                   <TableCell colSpan={6} className="h-24 text-center">
                     Loading users...
@@ -242,9 +237,9 @@ export default function UserManagementPage() {
                         <DropdownMenuContent align="end">
                           <DropdownMenuLabel>User Actions</DropdownMenuLabel>
                           <DropdownMenuSeparator />
-                          <DropdownMenuItem onClick={() => changeUserRole(user.id, user.role === 'admin' ? 'general' : 'admin')}>
+                          <DropdownMenuItem onClick={() => openRoleDialog(user)}>
                             <UserCog className="mr-2 h-4 w-4" />
-                            {user.role === 'admin' ? 'Remove Admin Role' : 'Make Admin'}
+                            Change Role
                           </DropdownMenuItem>
                           <DropdownMenuItem onClick={() => changeUserStatus(user.id, user.status === 'active' ? 'inactive' : 'active')}>
                             {user.status === 'active' ? 'Deactivate User' : 'Activate User'}
@@ -269,6 +264,13 @@ export default function UserManagementPage() {
           </Table>
         </div>
       </Card>
+      
+      <UserRoleSelector
+        user={state.selectedUser}
+        isOpen={state.isRoleDialogOpen}
+        onOpenChange={(isOpen) => setState(prev => ({ ...prev, isRoleDialogOpen: isOpen }))}
+        onSuccess={fetchUsers}
+      />
     </div>
   );
 }

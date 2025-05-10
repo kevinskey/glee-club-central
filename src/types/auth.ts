@@ -23,6 +23,12 @@ export interface Profile {
   last_login?: string | null;
   created_at: string;
   updated_at?: string | null;
+  is_super_admin?: boolean;
+  title?: string;
+  class_year?: string;
+  join_date?: string;
+  special_roles?: string;
+  dues_paid?: boolean;
 }
 
 export interface AuthContextType {
@@ -31,6 +37,7 @@ export interface AuthContextType {
   loading: boolean;
   isAuthenticated: boolean;
   isLoading: boolean;
+  permissions?: Record<string, boolean>;
   signIn: (email: string, password: string) => Promise<{ error: any }>;
   signUp: (email: string, password: string, firstName: string, lastName: string) => Promise<{ error: any, data: any }>;
   signOut: () => Promise<void>;

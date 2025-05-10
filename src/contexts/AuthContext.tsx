@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect, useContext, createContext, useCallback } from 'react';
+import React, { useState, useEffect, useContext, createContext } from 'react';
 import {
   Session,
   User as SupabaseUser,
@@ -19,6 +19,7 @@ interface AuthContextType {
   loading: boolean;
   isAuthenticated: boolean;
   isLoading: boolean;
+  permissions?: Record<string, boolean>;
   signIn: (email: string, password: string) => Promise<{ error: any }>;
   signUp: (email: string, password: string, firstName: string, lastName: string) => Promise<{ error: any, data: any }>;
   signOut: () => Promise<void>;
@@ -39,6 +40,7 @@ export const useAuth = () => {
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<AuthUser | null>(null);
   const [profile, setProfile] = useState<Profile | null>(null);
+  const [permissions, setPermissions] = useState<Record<string, boolean>>({});
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
@@ -74,6 +76,22 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
                 console.log("Profile loaded:", profileData.first_name, profileData.last_name);
                 setUser({ ...session.user, role: profileData.role || 'general' });
                 setProfile(profileData);
+
+                // Load user permissions if available
+                try {
+                  const { data: permissionsData } = await supabase
+                    .rpc('get_user_permissions', { p_user_id: session.user.id });
+                  
+                  if (permissionsData) {
+                    const permMap: Record<string, boolean> = {};
+                    permissionsData.forEach((item: any) => {
+                      permMap[item.permission] = item.granted;
+                    });
+                    setPermissions(permMap);
+                  }
+                } catch (permError) {
+                  console.error("Error loading permissions:", permError);
+                }
               } else {
                 console.warn("No profile found for user:", session.user.id);
               }
@@ -87,6 +105,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           console.log("No session, user is not authenticated");
           setUser(null);
           setProfile(null);
+          setPermissions({});
           setLoading(false);
         }
       }
@@ -118,6 +137,22 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             console.log("Profile data loaded:", profileData.first_name, profileData.role);
             setUser({ ...session.user, role: profileData.role || 'general' });
             setProfile(profileData);
+
+            // Load user permissions
+            try {
+              const { data: permissionsData } = await supabase
+                .rpc('get_user_permissions', { p_user_id: session.user.id });
+              
+              if (permissionsData) {
+                const permMap: Record<string, boolean> = {};
+                permissionsData.forEach((item: any) => {
+                  permMap[item.permission] = item.granted;
+                });
+                setPermissions(permMap);
+              }
+            } catch (permError) {
+              console.error("Error loading permissions:", permError);
+            }
           } else {
             console.warn("No profile found for user:", session.user.id);
           }
@@ -125,6 +160,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           console.log("No existing session found");
           setUser(null);
           setProfile(null);
+          setPermissions({});
         }
       } catch (error) {
         console.error("Error fetching user data:", error);
@@ -171,7 +207,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         // Update last_login time in profile
         await supabase
           .from('profiles')
-          .update({ last_login: new Date().toISOString() })
+          .update({ 
+            last_login: new Date().toISOString() 
+          })
           .eq('id', data.user.id);
         
         // Use navigate instead of forced reload for smoother experience
@@ -273,6 +311,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       // Clear state
       setUser(null);
       setProfile(null);
+      setPermissions({});
       
       // Navigate to login
       navigate('/login');
@@ -309,6 +348,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const value: AuthContextType = {
     user,
     profile,
+    permissions,
     loading,
     isLoading: loading,
     isAuthenticated: !!user,

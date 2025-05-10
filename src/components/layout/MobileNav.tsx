@@ -1,115 +1,166 @@
 
 import React from "react";
-import { Bell, Home, Menu, User, Users, Settings, LogOut, Upload } from "lucide-react";
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-import { Button } from "@/components/ui/button";
-import { Sidebar } from "@/components/layout/Sidebar";
-import { MobileNavItem } from "@/components/layout/MobileNavItem";
+import { Link, useLocation } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
-import { useNavigate } from "react-router-dom";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+import { Button } from "@/components/ui/button";
+import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import { useSidebar } from "@/hooks/use-sidebar";
+import { cn } from "@/lib/utils";
+import { 
+  LayoutDashboard, 
+  Menu, 
+  Music, 
+  Calendar, 
+  CheckSquare,
+  Bell, 
+  Upload, 
+  BarChart,
+  Settings,
+  Users,
+  MessageSquare,
+  FileText
+} from "lucide-react";
 
 interface MobileNavProps {
   isAdmin: boolean;
 }
 
 export function MobileNav({ isAdmin }: MobileNavProps) {
-  const { signOut, profile } = useAuth();
-  const navigate = useNavigate();
+  const { pathname } = useLocation();
+  const { isOpen, onOpen, onClose } = useSidebar();
+  const { isAuthenticated } = useAuth();
   
+  if (!isAuthenticated) return null;
+  
+  const mainNavItems = [
+    {
+      title: "Dashboard",
+      href: "/dashboard",
+      icon: <LayoutDashboard className="h-4 w-4" />,
+    },
+    {
+      title: "Sheet Music",
+      href: "/dashboard/sheet-music",
+      icon: <Music className="h-4 w-4" />,
+    },
+    {
+      title: "Calendar",
+      href: "/dashboard/calendar",
+      icon: <Calendar className="h-4 w-4" />,
+    },
+    {
+      title: "Attendance",
+      href: "/dashboard/attendance",
+      icon: <CheckSquare className="h-4 w-4" />,
+    },
+    {
+      title: "Announcements",
+      href: "/dashboard/announcements",
+      icon: <Bell className="h-4 w-4" />,
+    },
+    {
+      title: "Practice Resources",
+      href: "/dashboard/practice",
+      icon: <FileText className="h-4 w-4" />,
+    },
+    {
+      title: "Contact Admin",
+      href: "/dashboard/contact",
+      icon: <MessageSquare className="h-4 w-4" />,
+    }
+  ];
+  
+  const adminNavItems = [
+    {
+      title: "User Management",
+      href: "/dashboard/admin/users",
+      icon: <Users className="h-4 w-4" />,
+    },
+    {
+      title: "Media Manager",
+      href: "/dashboard/admin/media",
+      icon: <Upload className="h-4 w-4" />,
+    },
+    {
+      title: "Event Manager",
+      href: "/dashboard/admin/events",
+      icon: <Calendar className="h-4 w-4" />,
+    },
+    {
+      title: "Analytics",
+      href: "/dashboard/admin/analytics",
+      icon: <BarChart className="h-4 w-4" />,
+    },
+    {
+      title: "Site Settings",
+      href: "/dashboard/admin/settings",
+      icon: <Settings className="h-4 w-4" />,
+    },
+  ];
+
   return (
-    <>
-      <div className="flex sm:hidden items-center">
-        <Sheet>
-          <SheetTrigger asChild>
-            <Button variant="ghost" size="icon">
-              <Menu className="h-5 w-5" />
-              <span className="sr-only">Toggle Menu</span>
-            </Button>
-          </SheetTrigger>
-          <SheetContent side="left" className="px-0 pt-12">
-            <Sidebar />
-          </SheetContent>
-        </Sheet>
-        
-        {/* Add user dropdown for mobile */}
-        <div className="ml-auto">
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="icon">
-                <User className="h-5 w-5" />
-                <span className="sr-only">User Menu</span>
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-56 bg-popover">
-              <DropdownMenuLabel>
-                {profile?.first_name} {profile?.last_name}
-              </DropdownMenuLabel>
-              <DropdownMenuSeparator />
-              
-              <DropdownMenuItem 
-                onClick={() => navigate("/dashboard/profile")}
-                className="flex items-center gap-2 cursor-pointer"
-              >
-                <User className="h-4 w-4" />
-                <span>My Profile</span>
-              </DropdownMenuItem>
-              
-              <DropdownMenuItem
-                onClick={() => navigate("/update-password")}
-                className="flex items-center gap-2 cursor-pointer"
-              >
-                <Settings className="h-4 w-4" />
-                <span>Change Password</span>
-              </DropdownMenuItem>
-              
-              <DropdownMenuItem
-                onClick={() => navigate("/")}
-                className="flex items-center gap-2 cursor-pointer"
-              >
-                <Home className="h-4 w-4" />
-                <span>Home Page</span>
-              </DropdownMenuItem>
-              
-              <DropdownMenuSeparator />
-              <DropdownMenuItem 
-                onClick={() => signOut()}
-                className="flex items-center gap-2 cursor-pointer text-destructive"
-              >
-                <LogOut className="h-4 w-4" />
-                <span>Sign Out</span>
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-        </div>
-      </div>
-      
-      <div
-        className="fixed bottom-0 left-0 right-0 border-t bg-background sm:hidden flex justify-around py-2 z-50"
-      >
-        <MobileNavItem href="/" title="Home" icon={<Home />} onClick={() => navigate("/")} />
-        
-        {isAdmin ? (
-          <>
-            <MobileNavItem href="/dashboard/admin/users" title="Users" icon={<Users />} />
-            <MobileNavItem href="/dashboard/admin/media" title="Media" icon={<Upload />} />
-            <MobileNavItem href="/dashboard/admin/settings" title="Settings" icon={<Settings />} />
-          </>
-        ) : (
-          <>
-            <MobileNavItem href="/dashboard/sheet-music" title="Music" icon={<Music />} />
-            <MobileNavItem href="/dashboard/announcements" title="Updates" icon={<Bell />} />
-            <MobileNavItem href="/dashboard/profile" title="Profile" icon={<User />} />
-          </>
-        )}
-      </div>
-    </>
+    <div className="flex items-center lg:hidden">
+      <Sheet open={isOpen} onOpenChange={isOpen ? onClose : onOpen}>
+        <SheetTrigger asChild>
+          <Button 
+            variant="ghost" 
+            size="sm" 
+            className="mr-2 px-0 text-base hover:bg-transparent focus-visible:bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0"
+          >
+            <Menu className="h-5 w-5" />
+            <span className="sr-only">Toggle Menu</span>
+          </Button>
+        </SheetTrigger>
+        <SheetContent side="left" className="pr-0 sm:max-w-xs">
+          <div className="space-y-4 py-4">
+            <div className="px-3">
+              <h2 className="mb-2 px-4 text-lg font-semibold tracking-tight">
+                Main Menu
+              </h2>
+              <div className="space-y-1">
+                {mainNavItems.map((item) => (
+                  <Link
+                    key={item.href}
+                    to={item.href}
+                    onClick={onClose}
+                    className={cn(
+                      "flex items-center rounded-md px-3 py-2 text-sm font-medium",
+                      pathname === item.href ? "bg-accent text-accent-foreground" : "hover:bg-accent hover:text-accent-foreground transition-colors"
+                    )}
+                  >
+                    {item.icon}
+                    <span className="ml-3">{item.title}</span>
+                  </Link>
+                ))}
+              </div>
+            </div>
+            
+            {isAdmin && (
+              <div className="px-3">
+                <h2 className="mb-2 px-4 text-lg font-semibold tracking-tight">
+                  Admin Menu
+                </h2>
+                <div className="space-y-1">
+                  {adminNavItems.map((item) => (
+                    <Link
+                      key={item.href}
+                      to={item.href}
+                      onClick={onClose}
+                      className={cn(
+                        "flex items-center rounded-md px-3 py-2 text-sm font-medium",
+                        pathname === item.href ? "bg-accent text-accent-foreground" : "hover:bg-accent hover:text-accent-foreground transition-colors"
+                      )}
+                    >
+                      {item.icon}
+                      <span className="ml-3">{item.title}</span>
+                    </Link>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+        </SheetContent>
+      </Sheet>
+    </div>
   );
 }

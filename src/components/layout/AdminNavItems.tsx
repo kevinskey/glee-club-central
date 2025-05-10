@@ -1,6 +1,41 @@
 
 import React from "react";
-import { adminNavItems, SidebarNavItems } from "@/components/layout/SidebarNavItems";
+import { 
+  Users, 
+  Upload, 
+  Calendar, 
+  BarChart,
+  Settings 
+} from "lucide-react";
+import { SidebarNavItems } from "@/components/layout/SidebarNavItems";
+
+export const adminNavItems = [
+  {
+    title: "User Management",
+    href: "/dashboard/admin/users",
+    icon: <Users className="h-4 w-4" />,
+  },
+  {
+    title: "Media Manager",
+    href: "/dashboard/admin/media",
+    icon: <Upload className="h-4 w-4" />,
+  },
+  {
+    title: "Event Manager",
+    href: "/dashboard/admin/events",
+    icon: <Calendar className="h-4 w-4" />,
+  },
+  {
+    title: "Analytics",
+    href: "/dashboard/admin/analytics",
+    icon: <BarChart className="h-4 w-4" />,
+  },
+  {
+    title: "Site Settings",
+    href: "/dashboard/admin/settings",
+    icon: <Settings className="h-4 w-4" />,
+  },
+];
 
 export function AdminNavigation() {
   return (

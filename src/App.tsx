@@ -7,7 +7,7 @@ import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { Toaster } from "@/components/ui/toaster";
 
 // Public Pages
-import HomePage from "@/pages/HomePage";
+import LandingPage from "@/pages/LandingPage";
 import LoginPage from "@/pages/LoginPage";
 import RegisterPage from "@/pages/RegisterPage";
 import ResetPasswordPage from "@/pages/ResetPasswordPage";
@@ -18,6 +18,7 @@ import DashboardPage from "@/pages/dashboard/DashboardPage";
 
 // Admin Pages
 import UserManagementPage from "@/pages/admin/UserManagementPage";
+import AdminDashboardPage from "@/pages/AdminDashboardPage";
 
 function App() {
   return (
@@ -26,7 +27,7 @@ function App() {
         <SidebarProvider>
           <Routes>
             {/* Public routes */}
-            <Route path="/" element={<HomePage />} />
+            <Route path="/" element={<LandingPage />} />
             <Route path="/login" element={<LoginPage />} />
             <Route path="/register" element={<RegisterPage />} />
             <Route path="/reset-password" element={<ResetPasswordPage />} />
@@ -49,6 +50,15 @@ function App() {
                 element={
                   <ProtectedRoute adminOnly>
                     <UserManagementPage />
+                  </ProtectedRoute>
+                } 
+              />
+              
+              <Route 
+                path="admin/dashboard" 
+                element={
+                  <ProtectedRoute adminOnly>
+                    <AdminDashboardPage />
                   </ProtectedRoute>
                 } 
               />
