@@ -18,14 +18,14 @@ export function useCalendarOperations(refreshEvents: () => Promise<void>) {
         return null;
       }
 
-      if (!event.date) {
-        toast.error("Event date is required");
+      if (!event.start) {
+        toast.error("Event start date is required");
         return null;
       }
 
       const newEvent = {
         title: event.title,
-        date: event.date.toISOString().split('T')[0],
+        date: event.start.toISOString().split('T')[0],
         time: event.time,
         location: event.location,
         description: event.description,
@@ -53,6 +53,8 @@ export function useCalendarOperations(refreshEvents: () => Promise<void>) {
           id: data[0].id,
           title: data[0].title,
           date: new Date(data[0].date),
+          start: new Date(data[0].date),
+          end: new Date(data[0].date),
           time: data[0].time,
           location: data[0].location,
           description: data[0].description || "",
@@ -85,7 +87,7 @@ export function useCalendarOperations(refreshEvents: () => Promise<void>) {
         return false;
       }
 
-      if (!event.date) {
+      if (!event.start) {
         toast.error("Event date is required");
         return false;
       }
@@ -94,7 +96,7 @@ export function useCalendarOperations(refreshEvents: () => Promise<void>) {
         .from("calendar_events")
         .update({
           title: event.title,
-          date: event.date.toISOString().split('T')[0],
+          date: event.start.toISOString().split('T')[0],
           time: event.time,
           location: event.location,
           description: event.description,

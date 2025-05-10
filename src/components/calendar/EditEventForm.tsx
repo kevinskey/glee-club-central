@@ -1,6 +1,5 @@
 
-import React, { useState, useEffect } from "react";
-import { z } from "zod";
+import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Form } from "@/components/ui/form";
@@ -29,7 +28,7 @@ export function EditEventForm({ event, onUpdateEvent, onCancel }: EditEventFormP
     resolver: zodResolver(formSchema),
     defaultValues: {
       title: event.title,
-      date: event.date,
+      date: event.start,
       time: event.time,
       location: event.location,
       description: event.description || "",
@@ -84,7 +83,9 @@ export function EditEventForm({ event, onUpdateEvent, onCancel }: EditEventFormP
       const updated = await onUpdateEvent({
         ...event,
         title: values.title,
-        date: values.date,
+        start: values.date,
+        end: values.date,
+        date: values.date, // Keep compatibility with date field
         time: values.time,
         location: values.location,
         description: values.description || "",

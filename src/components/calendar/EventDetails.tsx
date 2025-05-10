@@ -38,7 +38,7 @@ export const EventDetails = ({
         <div className="mt-2 space-y-2">
           <div className="flex items-start md:items-center gap-2 text-sm">
             <Calendar className="h-4 w-4 mt-0.5 md:mt-0" />
-            <span>{format(selectedEvent.date, 'EEEE, MMMM d, yyyy')}</span>
+            <span>{format(selectedEvent.start, 'EEEE, MMMM d, yyyy')}</span>
           </div>
           
           <div className="flex items-start md:items-center gap-2 text-sm">

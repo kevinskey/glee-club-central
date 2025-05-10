@@ -76,6 +76,7 @@ const DashboardPage = () => {
       if (error) throw error;
       
       if (data) {
+        // Convert string dates to Date objects
         setEvents(data.map(event => ({
           ...event,
           date: new Date(event.date)
@@ -102,7 +103,7 @@ const DashboardPage = () => {
   const quickAccessLinks = [
     { icon: <User className="h-5 w-5" />, title: "My Profile", path: "/dashboard/profile", color: "bg-blue-500" },
     { icon: <Music className="h-5 w-5" />, title: "Sheet Music", path: "/dashboard/sheet-music", color: "bg-purple-500" },
-    { icon: <Calendar className="h-5 w-5" />, title: "Calendar", path: "/dashboard/calendar", color: "bg-green-500" },
+    { icon: <Calendar className="h-5 w-5" />, title: "Calendar", path: "/dashboard/schedule", color: "bg-green-500" },
     { icon: <CheckSquare className="h-5 w-5" />, title: "Attendance", path: "/dashboard/attendance", color: "bg-orange-500" },
     { icon: <Bell className="h-5 w-5" />, title: "Announcements", path: "/dashboard/announcements", color: "bg-red-500" },
     { icon: <MessageSquare className="h-5 w-5" />, title: "Contact Admin", path: "/dashboard/contact", color: "bg-indigo-500" },
@@ -198,7 +199,7 @@ const DashboardPage = () => {
             </div>
             <div className="mt-4">
               <Link 
-                to="/dashboard/calendar" 
+                to="/dashboard/schedule" 
                 className="text-sm text-primary hover:underline"
               >
                 View full calendar

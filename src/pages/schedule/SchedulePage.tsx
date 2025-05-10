@@ -22,7 +22,7 @@ export default function SchedulePage() {
   // Check if user is admin
   const isAdmin = profile?.role === "admin";
 
-  // Get days with events for the calendar
+  // Get days with events for the calendar - convert string dates to Date objects
   const daysWithEvents = events.map(event => event.date);
   
   // Helper function to get event type color

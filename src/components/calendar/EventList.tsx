@@ -24,9 +24,9 @@ export const EventList = React.memo(({
   
   if (!date) return null;
 
-  // Make sure we're only showing events for the selected date using isSameDay
+  // Filter events for the selected date using isSameDay
   const eventsOnSelectedDate = events.filter(event => 
-    isSameDay(event.date, date)
+    isSameDay(event.start, date)
   );
 
   return (

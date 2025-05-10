@@ -1,183 +1,35 @@
 
-import { format, parseISO, addDays } from 'date-fns';
-import { CalendarEvent } from '@/hooks/useCalendarEvents';
+// Utility functions for Google Calendar integration
+import { CalendarEvent } from "@/hooks/useCalendarEvents";
 
-// This is the public Google Calendar ID for Spelman College Glee Club
-// Make sure this is the correct calendar ID for your Google Calendar
-const GOOGLE_CALENDAR_ID = "00f2c84ca319b84d9b2adafc6434d2ddd7c3aa3da4dfc458cc5d633926a2e437@group.calendar.google.com";
-
-// Your Google Calendar API key
-// This should be a valid API key from Google Cloud Console with Google Calendar API enabled
-const GOOGLE_CALENDAR_API_KEY = "AIzaSyCd8BS6BiOBgn89dCvGAsa5qTXT0j0S3Vc"; 
-
-export interface GoogleCalendarEvent {
-  id: string;
-  summary: string;
-  description?: string;
-  location?: string;
-  start: {
-    dateTime?: string;
-    date?: string;
+export function getAddToGoogleCalendarUrl(event?: CalendarEvent): string {
+  // If no event provided, return Google Calendar home page
+  if (!event) return "https://calendar.google.com/";
+  
+  // Format date for Google Calendar URL
+  const formatDate = (date: Date) => {
+    return date.toISOString().replace(/-|:|\.\d+/g, '');
   };
-  end: {
-    dateTime?: string;
-    date?: string;
-  };
-}
-
-// Cache mechanism for Google Calendar events
-const eventCache = {
-  events: [] as CalendarEvent[],
-  lastFetchTime: 0,
-  cacheValidTime: 5 * 60 * 1000, // 5 minutes in milliseconds
-};
-
-// Fetch events from Google Calendar
-export async function fetchGoogleCalendarEvents(
-  timeMin: string = new Date().toISOString(),
-  timeMax: string = new Date(addDays(new Date(), 90)).toISOString(),  // Default to 90 days ahead
-  daysAhead?: number, // New parameter for days ahead
-  forceRefresh: boolean = false, // New parameter to force refresh
-): Promise<CalendarEvent[]> {
-  try {
-    // Check if cache is valid and we're not forcing a refresh
-    const now = Date.now();
-    if (!forceRefresh && 
-        eventCache.events.length > 0 && 
-        now - eventCache.lastFetchTime < eventCache.cacheValidTime) {
-      console.log("Using cached Google Calendar events:", eventCache.events.length);
-      return eventCache.events;
-    }
-
-    // Check if API key is available
-    if (!GOOGLE_CALENDAR_API_KEY || GOOGLE_CALENDAR_API_KEY.length === 0) {
-      console.error('Google Calendar API key is missing');
-      throw new Error('Google Calendar API key is missing');
-    }
-
-    // If daysAhead is specified, override the timeMax
-    if (daysAhead !== undefined && daysAhead > 0) {
-      timeMax = new Date(addDays(new Date(), daysAhead)).toISOString();
-      console.log(`Fetching Google Calendar events for the next ${daysAhead} days`);
-    }
-
-    const url = `https://www.googleapis.com/calendar/v3/calendars/${encodeURIComponent(GOOGLE_CALENDAR_ID)}/events?key=${encodeURIComponent(GOOGLE_CALENDAR_API_KEY)}&timeMin=${encodeURIComponent(timeMin)}&timeMax=${encodeURIComponent(timeMax)}&singleEvents=true&orderBy=startTime`;
-    
-    console.log("Fetching Google Calendar events...");
-    const response = await fetch(url);
-    
-    if (!response.ok) {
-      const errorData = await response.json();
-      console.error('Failed to fetch Google Calendar events:', errorData);
-      
-      // Get a more specific error message if available
-      const errorMessage = errorData.error?.message || `HTTP error ${response.status}`;
-      throw new Error(`Google Calendar API error: ${errorMessage}`);
-    }
-    
-    const data = await response.json();
-    console.log("Successfully fetched Google Calendar events:", data.items?.length || 0);
-    
-    // Transform Google Calendar events to our app's format
-    const transformedEvents = data.items?.map((event: GoogleCalendarEvent) => transformGoogleEvent(event)) || [];
-    
-    // Update cache
-    eventCache.events = transformedEvents;
-    eventCache.lastFetchTime = now;
-    
-    return transformedEvents;
-    
-  } catch (error) {
-    console.error('Error fetching Google Calendar events:', error);
-    throw error;
-  }
-}
-
-// Clear the cache to force a refresh on next fetch
-export function clearGoogleCalendarCache() {
-  eventCache.events = [];
-  eventCache.lastFetchTime = 0;
-}
-
-// Helper function to transform Google Calendar event to app format
-function transformGoogleEvent(event: GoogleCalendarEvent): CalendarEvent {
-  // Get start date and time
-  const startDateTime = event.start.dateTime || event.start.date;
-  const startDate = startDateTime ? parseISO(startDateTime) : new Date();
   
-  // Format time string
-  const hasTime = !!event.start.dateTime;
-  const timeString = hasTime 
-    ? `${format(startDate, 'h:mm a')} - ${format(parseISO(event.end.dateTime!), 'h:mm a')}`
-    : 'All day';
+  // Build Google Calendar URL
+  const startDate = formatDate(event.start);
+  const endDate = formatDate(event.end);
   
-  // Determine event type based on summary or description
-  const summary = event.summary?.toLowerCase() || '';
-  let eventType: "concert" | "rehearsal" | "tour" | "special" = "special";
+  let url = `https://calendar.google.com/calendar/render?action=TEMPLATE`;
+  url += `&text=${encodeURIComponent(event.title)}`;
+  url += `&dates=${startDate}/${endDate}`;
   
-  if (summary.includes('concert') || summary.includes('performance')) {
-    eventType = "concert";
-  } else if (summary.includes('rehearsal') || summary.includes('practice')) {
-    eventType = "rehearsal";
-  } else if (summary.includes('tour')) {
-    eventType = "tour";
+  if (event.location) {
+    url += `&location=${encodeURIComponent(event.location)}`;
   }
   
-  return {
-    id: event.id,
-    title: event.summary || "Untitled Event",
-    date: startDate,
-    time: timeString,
-    location: event.location || "No location specified",
-    description: event.description || "",
-    type: eventType,
-    source: "google" 
-  };
-}
-
-// Create URL to add an event to Google Calendar
-export function getAddToGoogleCalendarUrl(event: CalendarEvent): string {
-  const params = new URLSearchParams({
-    action: 'TEMPLATE',
-    text: event.title,
-    dates: `${format(event.date, 'yyyyMMdd')}/${format(event.date, 'yyyyMMdd')}`,
-    details: event.description || '',
-    location: event.location || '',
-    trp: 'true', // Show as busy
-  });
+  if (event.description) {
+    url += `&details=${encodeURIComponent(event.description)}`;
+  }
   
-  return `https://calendar.google.com/calendar/render?${params.toString()}`;
+  return url;
 }
 
-// Create URL to view the Google Calendar
 export function getViewGoogleCalendarUrl(): string {
-  return `https://calendar.google.com/calendar/u/0?cid=${GOOGLE_CALENDAR_ID}`;
-}
-
-// Helper function to sync events from Google Calendar to Supabase
-export async function syncGoogleEventsToSupabase(userId: string) {
-  try {
-    // Force refresh from Google Calendar
-    const googleEvents = await fetchGoogleCalendarEvents(undefined, undefined, undefined, true);
-    
-    // Prepare events for Supabase format
-    const eventsToSync = googleEvents.map(event => ({
-      title: event.title,
-      date: format(event.date, 'yyyy-MM-dd'),
-      time: event.time,
-      location: event.location,
-      description: event.description,
-      type: event.type,
-      user_id: userId,
-      // Add a source field to track the origin
-      source: "google_calendar"
-    }));
-    
-    console.log(`Prepared ${eventsToSync.length} Google Calendar events for sync to Supabase`);
-    
-    return eventsToSync;
-  } catch (error) {
-    console.error('Error syncing Google events to Supabase:', error);
-    throw error;
-  }
+  return "https://calendar.google.com/";
 }

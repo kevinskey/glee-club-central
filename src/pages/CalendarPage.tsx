@@ -13,7 +13,6 @@ import { CalendarContainer } from "@/components/calendar/CalendarContainer";
 import { EventList } from "@/components/calendar/EventList";
 import { EventDetails } from "@/components/calendar/EventDetails";
 import { CalendarPageHeader } from "@/components/calendar/CalendarPageHeader";
-import { Button } from "@/components/ui/button";
 
 export default function CalendarPage() {
   const [date, setDate] = useState<Date | undefined>(new Date());
@@ -35,9 +34,9 @@ export default function CalendarPage() {
     if (!date) return [];
     
     return events.filter(event => 
-      event.date.getDate() === date.getDate() && 
-      event.date.getMonth() === date.getMonth() && 
-      event.date.getFullYear() === date.getFullYear()
+      event.start.getDate() === date.getDate() && 
+      event.start.getMonth() === date.getMonth() && 
+      event.start.getFullYear() === date.getFullYear()
     );
   }, [date, events]);
     
@@ -55,8 +54,7 @@ export default function CalendarPage() {
     // Always reset selected event when changing dates to avoid showing events from a different date
     setSelectedEvent(null);
     
-    // Remove this argument - this is what's causing the TS error
-    // fetchEvents(true); 
+    // Fetch events when changing dates
     fetchEvents();
   }, [fetchEvents]);
 
@@ -70,9 +68,9 @@ export default function CalendarPage() {
       
       // If the new event is on the currently selected date, select it
       if (date && 
-          formValues.date.getDate() === date.getDate() && 
-          formValues.date.getMonth() === date.getMonth() && 
-          formValues.date.getFullYear() === date.getFullYear()) {
+          formValues.start.getDate() === date.getDate() && 
+          formValues.start.getMonth() === date.getMonth() && 
+          formValues.start.getFullYear() === date.getFullYear()) {
         // Set the date again to trigger a refresh of the events list
         handleDateSelect(new Date(date));
         
