@@ -14,6 +14,7 @@ import { Separator } from "@/components/ui/separator";
 import { User } from "@/hooks/useUserManagement";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { UserRole } from "@/types/auth";
 
 interface UserRoleSelectorProps {
   user: User | null;
@@ -39,7 +40,7 @@ export function UserRoleSelector({
     }
   }, [user]);
   
-  // These roles must match the exact values allowed in the profiles table constraint
+  // Ensure these role values exactly match what's allowed in the database constraint
   const roles = [
     { value: 'administrator', label: 'Administrator', description: 'Full access to all features' },
     { value: 'section_leader', label: 'Section Leader', description: 'Can manage section members and music' },
