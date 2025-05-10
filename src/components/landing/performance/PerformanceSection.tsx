@@ -4,7 +4,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
 import { Link } from "react-router-dom";
-import { PerformanceEvent } from "./PerformanceEvent";
+import { PerformanceEventDetails } from "./PerformanceEvent";
 import { CalendarPlus } from "lucide-react";
 
 interface Event {
@@ -72,7 +72,25 @@ export function PerformanceSection() {
         
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {events.slice(0, visibleEvents).map(event => (
-            <PerformanceEvent key={event.id} event={event} />
+            <Card key={event.id} className="overflow-hidden">
+              <div className="relative h-48">
+                <img 
+                  src={event.image} 
+                  alt={event.title} 
+                  className="absolute inset-0 w-full h-full object-cover"
+                />
+              </div>
+              <CardHeader>
+                <CardTitle>{event.title}</CardTitle>
+                <CardDescription>{event.date} | {event.location}</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <p className="mb-4">{event.description}</p>
+                <Link to="/calendar">
+                  <Button variant="outline" size="sm">View Details</Button>
+                </Link>
+              </CardContent>
+            </Card>
           ))}
         </div>
 
