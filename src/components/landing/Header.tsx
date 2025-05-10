@@ -21,7 +21,17 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuSeparator,
+  DropdownMenuProvider,
 } from "@/components/ui/dropdown-menu";
+import {
+  NavigationMenu,
+  NavigationMenuContent,
+  NavigationMenuItem,
+  NavigationMenuLink,
+  NavigationMenuList,
+  NavigationMenuTrigger,
+  navigationMenuTriggerStyle,
+} from "@/components/ui/navigation-menu";
 
 interface HeaderProps {
   initialShowNewsFeed?: boolean;
@@ -73,6 +83,55 @@ export function Header({ initialShowNewsFeed = true }: HeaderProps) {
         
         {/* Desktop navigation */}
         <div className="hidden md:flex items-center gap-3">
+          {/* Main navigation menu */}
+          <NavigationMenu>
+            <NavigationMenuList>
+              <NavigationMenuItem>
+                <NavigationMenuLink 
+                  className={navigationMenuTriggerStyle()}
+                  onClick={() => navigate("/")}
+                >
+                  Home
+                </NavigationMenuLink>
+              </NavigationMenuItem>
+              <NavigationMenuItem>
+                <NavigationMenuLink 
+                  className={navigationMenuTriggerStyle()}
+                  onClick={() => navigate("/about")}
+                >
+                  About Us
+                </NavigationMenuLink>
+              </NavigationMenuItem>
+              <NavigationMenuItem>
+                <NavigationMenuLink 
+                  className={navigationMenuTriggerStyle()}
+                  onClick={() => navigate("/contact")}
+                >
+                  Contact
+                </NavigationMenuLink>
+              </NavigationMenuItem>
+              <NavigationMenuItem>
+                <NavigationMenuTrigger>Resources</NavigationMenuTrigger>
+                <NavigationMenuContent>
+                  <div className="w-[200px] p-2">
+                    <NavigationMenuLink 
+                      className="block p-2 hover:bg-accent rounded-md"
+                      onClick={() => navigate("/administration")}
+                    >
+                      Administration
+                    </NavigationMenuLink>
+                    <NavigationMenuLink 
+                      className="block p-2 hover:bg-accent rounded-md"
+                      onClick={() => navigate("/fan-page")}
+                    >
+                      For Fans
+                    </NavigationMenuLink>
+                  </div>
+                </NavigationMenuContent>
+              </NavigationMenuItem>
+            </NavigationMenuList>
+          </NavigationMenu>
+          
           <ThemeToggle />
           <TooltipProvider>
             <Tooltip>
@@ -86,34 +145,24 @@ export function Header({ initialShowNewsFeed = true }: HeaderProps) {
               </TooltipContent>
             </Tooltip>
           </TooltipProvider>
-          <Button 
-            variant="outline" 
-            size="sm"
-            className="text-glee-purple border-glee-purple hover:bg-glee-purple/10 h-8 px-3 text-xs" 
-            onClick={() => navigate("/fan-page")}
-          >
-            Guest Access
-          </Button>
           
-          {/* Replace Member Portal button with dropdown */}
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button 
-                size="sm"
-                className="bg-glee-purple hover:bg-glee-purple/90 h-8 px-3 text-xs flex items-center gap-1"
-              >
-                Menu <ChevronDown className="h-3 w-3 opacity-70" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-48">
-              <DropdownMenuItem onClick={() => navigate("/")}>Home</DropdownMenuItem>
-              <DropdownMenuItem onClick={() => navigate("/login")}>Login</DropdownMenuItem>
-              <DropdownMenuItem onClick={() => navigate("/administration")}>Administration</DropdownMenuItem>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem onClick={() => navigate("/about")}>About Us</DropdownMenuItem>
-              <DropdownMenuItem onClick={() => navigate("/contact")}>Contact</DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
+          {/* Member Portal button */}
+          <DropdownMenuProvider>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button 
+                  size="sm"
+                  className="bg-glee-purple hover:bg-glee-purple/90 h-8 px-3 text-xs flex items-center gap-1"
+                >
+                  Member Portal <ChevronDown className="h-3 w-3 opacity-70" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-48 bg-popover">
+                <DropdownMenuItem onClick={() => navigate("/login")}>Login</DropdownMenuItem>
+                <DropdownMenuItem onClick={() => navigate("/dashboard")}>Dashboard</DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </DropdownMenuProvider>
         </div>
         
         {/* Mobile menu and theme toggle */}
@@ -145,7 +194,7 @@ export function Header({ initialShowNewsFeed = true }: HeaderProps) {
       {/* Mobile menu */}
       {mobileMenuOpen && (
         <div className="md:hidden bg-background border-t border-border">
-          <div className="container py-4 px-4 flex flex-col gap-4">
+          <div className="container py-4 px-4 flex flex-col gap-2">
             <div className="flex justify-center">
               <TooltipProvider>
                 <Tooltip>
@@ -160,76 +209,96 @@ export function Header({ initialShowNewsFeed = true }: HeaderProps) {
                 </Tooltip>
               </TooltipProvider>
             </div>
+            
+            {/* Mobile menu items */}
             <Button 
-              variant="outline" 
-              size="sm"
-              className="text-glee-purple border-glee-purple hover:bg-glee-purple/10 w-full h-8 text-xs" 
+              variant="ghost" 
+              size="sm" 
+              className="justify-start" 
+              onClick={() => {
+                navigate("/");
+                setMobileMenuOpen(false);
+              }}
+            >
+              Home
+            </Button>
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              className="justify-start" 
+              onClick={() => {
+                navigate("/about");
+                setMobileMenuOpen(false);
+              }}
+            >
+              About Us
+            </Button>
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              className="justify-start" 
+              onClick={() => {
+                navigate("/contact");
+                setMobileMenuOpen(false);
+              }}
+            >
+              Contact
+            </Button>
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              className="justify-start" 
+              onClick={() => {
+                navigate("/administration");
+                setMobileMenuOpen(false);
+              }}
+            >
+              Administration
+            </Button>
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              className="justify-start" 
               onClick={() => {
                 navigate("/fan-page");
                 setMobileMenuOpen(false);
               }}
             >
-              Guest Access
+              For Fans
             </Button>
-            
-            {/* Mobile menu items */}
-            <div className="flex flex-col gap-2">
-              <Button 
-                variant="ghost" 
-                size="sm" 
-                className="justify-start" 
-                onClick={() => {
-                  navigate("/");
-                  setMobileMenuOpen(false);
-                }}
-              >
-                Home
-              </Button>
-              <Button 
-                variant="ghost" 
-                size="sm" 
-                className="justify-start" 
-                onClick={() => {
-                  navigate("/login");
-                  setMobileMenuOpen(false);
-                }}
-              >
-                Login
-              </Button>
-              <Button 
-                variant="ghost" 
-                size="sm" 
-                className="justify-start" 
-                onClick={() => {
-                  navigate("/administration");
-                  setMobileMenuOpen(false);
-                }}
-              >
-                Administration
-              </Button>
-              <Button 
-                variant="ghost" 
-                size="sm" 
-                className="justify-start" 
-                onClick={() => {
-                  navigate("/about");
-                  setMobileMenuOpen(false);
-                }}
-              >
-                About Us
-              </Button>
-              <Button 
-                variant="ghost" 
-                size="sm" 
-                className="justify-start" 
-                onClick={() => {
-                  navigate("/contact");
-                  setMobileMenuOpen(false);
-                }}
-              >
-                Contact
-              </Button>
-            </div>
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              className="justify-start" 
+              onClick={() => {
+                navigate("/dashboard");
+                setMobileMenuOpen(false);
+              }}
+            >
+              Dashboard
+            </Button>
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              className="justify-start" 
+              onClick={() => {
+                navigate("/login");
+                setMobileMenuOpen(false);
+              }}
+            >
+              Login
+            </Button>
+            <Button 
+              variant="primary" 
+              size="sm" 
+              className="mt-2 bg-glee-purple hover:bg-glee-purple/90"
+              onClick={() => {
+                navigate("/dashboard");
+                setMobileMenuOpen(false);
+              }}
+            >
+              Member Portal
+            </Button>
           </div>
         </div>
       )}
