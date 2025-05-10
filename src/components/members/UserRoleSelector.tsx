@@ -39,6 +39,7 @@ export function UserRoleSelector({
     }
   }, [user]);
   
+  // These roles must match the exact values allowed in the profiles table constraint
   const roles = [
     { value: 'administrator', label: 'Administrator', description: 'Full access to all features' },
     { value: 'section_leader', label: 'Section Leader', description: 'Can manage section members and music' },
@@ -57,16 +58,20 @@ export function UserRoleSelector({
     try {
       console.log("Saving role:", { userId: user.id, role: selectedRole });
       
-      // Use the updateUserRole method from useUserManagement hook instead of direct RPC call
+      // Direct update to the profiles table
       const { data, error: updateError } = await supabase
         .from('profiles')
         .update({ role: selectedRole })
         .eq('id', user.id);
       
-      if (updateError) throw updateError;
+      if (updateError) {
+        console.error("Update error details:", updateError);
+        throw updateError;
+      }
       
       console.log("Role update successful", data);
-      toast.success(`Role updated to ${roles.find(r => r.value === selectedRole)?.label || selectedRole}`);
+      const roleLabel = roles.find(r => r.value === selectedRole)?.label || selectedRole;
+      toast.success(`Role updated to ${roleLabel}`);
       
       if (onSuccess) {
         await onSuccess();
