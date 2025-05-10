@@ -16,6 +16,7 @@ import UpdatePasswordPage from "@/pages/UpdatePasswordPage";
 
 // Dashboard Pages
 import DashboardPage from "@/pages/dashboard/DashboardPage";
+import SchedulePage from "@/pages/schedule/SchedulePage";
 
 // Admin Pages
 import UserManagementPage from "@/pages/admin/UserManagementPage";
@@ -44,6 +45,7 @@ function App() {
               }
             >
               <Route index element={<DashboardPage />} />
+              <Route path="schedule" element={<SchedulePage />} />
               
               {/* Admin-only routes */}
               <Route 
