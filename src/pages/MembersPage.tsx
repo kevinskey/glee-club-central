@@ -54,7 +54,7 @@ export default function MembersPage() {
   const canManageMembers = true;
   
   const {
-    users: members,
+    users: allMembers,
     isLoading,
     fetchUsers,
     addUser,
@@ -62,6 +62,9 @@ export default function MembersPage() {
     updateUserRole,
     deleteUser
   } = useUserManagement();
+  
+  // Filter out deleted users
+  const members = allMembers.filter(member => member.status !== 'deleted');
   
   // Fetch members on component mount
   useEffect(() => {
@@ -196,14 +199,7 @@ export default function MembersPage() {
   });
 
   // Create a wrapper function for fetchUsers that returns void
-  const refreshMembers = async () => {
-    try {
-      await fetchUsers();
-      console.log("Members refreshed successfully");
-    } catch (error) {
-      console.error("Failed to refresh members:", error);
-    }
-  };
+  const refreshMembers = createMemberRefreshFunction(fetchUsers);
 
   return (
     <div className="container mx-auto p-4 space-y-6">

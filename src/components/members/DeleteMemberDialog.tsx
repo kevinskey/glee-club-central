@@ -34,8 +34,8 @@ export function DeleteMemberDialog({
         <AlertDialogHeader>
           <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
           <AlertDialogDescription>
-            This action will remove {memberName} from the system. 
-            This action cannot be undone.
+            This action will mark {memberName} as deleted. They will no longer appear in the member list.
+            Their account data will be preserved for record-keeping purposes but they will no longer have access to the system.
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>

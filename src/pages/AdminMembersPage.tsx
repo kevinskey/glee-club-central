@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { Navigate } from "react-router-dom";
@@ -78,11 +77,14 @@ export default function AdminMembersPage() {
   const isMobile = useMedia('(max-width: 640px)');
   
   const {
-    users: members,
+    users: allMembers,
     isLoading,
     fetchUsers,
     addUser
   } = useUserManagement();
+  
+  // Filter out deleted users
+  const members = allMembers.filter(member => member.status !== 'deleted');
   
   // Fetch members on component mount
   useEffect(() => {

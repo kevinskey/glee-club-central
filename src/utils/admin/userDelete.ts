@@ -1,7 +1,7 @@
 
 import { supabase } from '@/integrations/supabase/client';
 
-// Delete a user (for development, this just updates their status)
+// Delete a user (marks status as deleted)
 export const deleteUser = async (userId: string) => {
   try {
     console.log(`Attempting to delete user with ID: ${userId}`);
@@ -28,7 +28,7 @@ export const deleteUser = async (userId: string) => {
       return { success: true, userId, alreadyDeleted: true };
     }
     
-    // For development, we'll just update the status to 'deleted'
+    // Mark user as deleted in the profiles table
     const { error, data } = await supabase
       .from('profiles')
       .update({ status: 'deleted' })
