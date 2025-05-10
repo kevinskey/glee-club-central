@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from '@/components/ui/button';
 import {
@@ -20,6 +20,13 @@ export function UserRoleEditor() {
   const { updateUserRole } = useUserManagement();
   const [selectedRole, setSelectedRole] = useState<string>(profile?.role || '');
   const [isLoading, setIsLoading] = useState(false);
+
+  // Update selected role when profile changes
+  useEffect(() => {
+    if (profile?.role) {
+      setSelectedRole(profile.role);
+    }
+  }, [profile?.role]);
 
   const roles: { value: string; label: string }[] = [
     { value: "singer", label: "Singer" },
