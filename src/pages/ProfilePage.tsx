@@ -42,12 +42,12 @@ export default function ProfilePage() {
 
   // Initialize form data from profile if available
   React.useEffect(() => {
-    if (profile) {
+    if (profile && user) {
       setFormData({
         firstName: profile.first_name || "",
         lastName: profile.last_name || "",
         voicePart: profile.voice_part || "",
-        email: user?.email || "",
+        email: user.email || "",
         role: profile.role || ""
       });
     }
@@ -274,10 +274,16 @@ export default function ProfilePage() {
                 <Input
                   id="email"
                   name="email"
+                  type="email"
                   value={formData.email}
                   disabled
-                  className="col-span-3"
+                  className="col-span-3 bg-muted"
                 />
+                <div className="col-span-3 col-start-2">
+                  <p className="text-xs text-muted-foreground">
+                    Email can only be changed through account settings.
+                  </p>
+                </div>
               </div>
             </div>
             <div className="flex justify-end space-x-2">
