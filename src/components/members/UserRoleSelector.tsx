@@ -14,6 +14,7 @@ import { Separator } from "@/components/ui/separator";
 import { User } from "@/hooks/useUserManagement";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { Alert, AlertDescription } from "@/components/ui/alert-dialog";
 
 interface UserRoleSelectorProps {
   user: User | null;
@@ -30,10 +31,12 @@ export function UserRoleSelector({
 }: UserRoleSelectorProps) {
   const [selectedRole, setSelectedRole] = useState<string>('');
   const [isSaving, setIsSaving] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   
   React.useEffect(() => {
     if (user) {
       setSelectedRole(user.role || 'singer');
+      setError(null);
     }
   }, [user]);
   
@@ -50,15 +53,20 @@ export function UserRoleSelector({
     if (!user || !selectedRole) return;
     
     setIsSaving(true);
+    setError(null);
+    
     try {
-      const { error } = await supabase
-        .rpc('handle_user_role', {
-          p_user_id: user.id,
-          p_role: selectedRole
-        });
+      console.log("Saving role:", { userId: user.id, role: selectedRole });
       
-      if (error) throw error;
+      // Use the updateUserRole method from useUserManagement hook instead of direct RPC call
+      const { data, error: updateError } = await supabase
+        .from('profiles')
+        .update({ role: selectedRole })
+        .eq('id', user.id);
       
+      if (updateError) throw updateError;
+      
+      console.log("Role update successful", data);
       toast.success(`Role updated to ${roles.find(r => r.value === selectedRole)?.label || selectedRole}`);
       
       if (onSuccess) {
@@ -68,6 +76,7 @@ export function UserRoleSelector({
       onOpenChange(false);
     } catch (error: any) {
       console.error('Error updating role:', error);
+      setError(`Failed to update role: ${error.message || 'Unknown error'}`);
       toast.error(`Failed to update role: ${error.message || 'Unknown error'}`);
     } finally {
       setIsSaving(false);
@@ -85,6 +94,14 @@ export function UserRoleSelector({
             Update role for {user.first_name} {user.last_name}
           </DialogDescription>
         </DialogHeader>
+        
+        {error && (
+          <div className="mb-4">
+            <div className="bg-destructive/15 text-destructive text-sm p-3 rounded-md">
+              {error}
+            </div>
+          </div>
+        )}
         
         <RadioGroup value={selectedRole} onValueChange={setSelectedRole} className="gap-4">
           {roles.map((role) => (

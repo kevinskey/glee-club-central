@@ -1,3 +1,4 @@
+
 import { useState, useCallback } from 'react';
 import { Profile } from '@/types/auth';
 import { supabase } from '@/integrations/supabase/client';
@@ -203,12 +204,11 @@ export const useUserManagement = () => {
     setError(null);
     
     try {
-      // Use the handle_user_role RPC function to update the user's role
+      // Update directly in the profiles table instead of using RPC
       const { error } = await supabase
-        .rpc('handle_user_role', {
-          p_user_id: userId,
-          p_role: role
-        });
+        .from('profiles')
+        .update({ role })
+        .eq('id', userId);
       
       if (error) {
         console.error("Role update error:", error);

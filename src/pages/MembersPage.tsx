@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { PageHeader } from "@/components/ui/page-header";
@@ -60,6 +59,7 @@ export default function MembersPage() {
     fetchUsers,
     addUser,
     updateUser,
+    updateUserRole,
     deleteUser
   } = useUserManagement();
   
@@ -112,6 +112,13 @@ export default function MembersPage() {
     }
   };
   
+  // Handle changing a member's role
+  const handleChangeRole = (member: User) => {
+    console.log("Opening role selector for:", member);
+    setCurrentMember(member);
+    setIsRoleDialogOpen(true);
+  };
+
   // Handle deleting a member
   const handleDeleteClick = (memberId: string) => {
     const member = members.find(m => m.id === memberId);
@@ -182,20 +189,15 @@ export default function MembersPage() {
     canManageMembers
   });
 
-  // Handle managing permissions for a member
-  const handleManagePermissions = (member: User) => {
-    setCurrentMember(member);
-    setIsPermissionsDialogOpen(true);
+  // Create a wrapper function for fetchUsers that returns void
+  const refreshMembers = async () => {
+    try {
+      await fetchUsers();
+      console.log("Members refreshed successfully");
+    } catch (error) {
+      console.error("Failed to refresh members:", error);
+    }
   };
-
-  // Handle changing a member's role
-  const handleChangeRole = (member: User) => {
-    setCurrentMember(member);
-    setIsRoleDialogOpen(true);
-  };
-
-  // Create a wrapper function for fetchUsers that returns void to satisfy Promise<void> type
-  const refreshMembers = createMemberRefreshFunction(fetchUsers);
 
   return (
     <div className="container mx-auto p-4 space-y-6">
