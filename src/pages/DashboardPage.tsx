@@ -7,7 +7,13 @@ import { Link, useLocation } from "react-router-dom";
 import { 
   Calendar, 
   Home, 
-  Bell
+  Bell,
+  FileText,
+  Music,
+  User,
+  CheckSquare,
+  Shirt,
+  DollarSign
 } from "lucide-react";
 import { Spinner } from "@/components/ui/spinner";
 import { useCalendarEvents } from "@/hooks/useCalendarEvents";
@@ -15,6 +21,8 @@ import { format } from "date-fns";
 import { DashboardModules } from "@/components/dashboard/DashboardModules";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { toast } from "sonner";
+import { Button } from "@/components/ui/button";
+import { Separator } from "@/components/ui/separator";
 
 const DashboardPage = () => {
   // Properly define a default for the profile to avoid TypeScript errors
@@ -49,6 +57,16 @@ const DashboardPage = () => {
       message: "New arrangements for the Spring concert have been uploaded. Please review before next rehearsal."
     }
   ]);
+
+  // Quick access links for members
+  const quickAccessLinks = [
+    { icon: <User className="h-5 w-5" />, title: "My Profile", path: "/dashboard/profile", color: "bg-blue-500" },
+    { icon: <Music className="h-5 w-5" />, title: "Sheet Music", path: "/dashboard/sheet-music", color: "bg-purple-500" },
+    { icon: <Calendar className="h-5 w-5" />, title: "Calendar", path: "/dashboard/calendar", color: "bg-green-500" },
+    { icon: <CheckSquare className="h-5 w-5" />, title: "Attendance", path: "/dashboard/attendance", color: "bg-orange-500" },
+    { icon: <Shirt className="h-5 w-5" />, title: "Wardrobe", path: "/dashboard/profile?tab=wardrobe", color: "bg-pink-500" },
+    { icon: <DollarSign className="h-5 w-5" />, title: "Dues", path: "/dashboard/profile?tab=financial", color: "bg-amber-500" },
+  ];
 
   // Add debug info to the console
   useEffect(() => {
@@ -117,6 +135,35 @@ const DashboardPage = () => {
         icon={<Home className="h-6 w-6" />}
       />
       
+      {/* Quick Access Section */}
+      <Card>
+        <CardHeader>
+          <div className="flex items-center justify-between">
+            <div>
+              <CardTitle>Quick Access</CardTitle>
+              <CardDescription>Frequently used Glee Club resources</CardDescription>
+            </div>
+          </div>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-3">
+            {quickAccessLinks.map((link, index) => (
+              <Link key={index} to={link.path} className="no-underline">
+                <Button 
+                  variant="outline" 
+                  className="w-full h-auto flex-col py-4 gap-2 hover:border-primary"
+                >
+                  <div className={`${link.color} text-white p-2 rounded-full`}>
+                    {link.icon}
+                  </div>
+                  <span className="text-xs font-medium">{link.title}</span>
+                </Button>
+              </Link>
+            ))}
+          </div>
+        </CardContent>
+      </Card>
+      
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         {/* Upcoming Events Card */}
         <Card className="md:col-span-2">
@@ -139,6 +186,7 @@ const DashboardPage = () => {
                       <span>{event.date}</span>
                       <span>{event.time}</span>
                     </div>
+                    {event.location && <div className="text-xs text-muted-foreground">{event.location}</div>}
                   </div>
                 ))
               ) : (
@@ -179,6 +227,79 @@ const DashboardPage = () => {
               ) : (
                 <div className="text-muted-foreground">No announcements</div>
               )}
+            </div>
+            <div className="mt-4">
+              <Link 
+                to="/dashboard/announcements" 
+                className="text-sm text-primary hover:underline"
+              >
+                View all announcements
+              </Link>
+            </div>
+          </CardContent>
+        </Card>
+        
+        {/* Member Resources */}
+        <Card className="md:col-span-3">
+          <CardHeader>
+            <div className="flex items-center justify-between">
+              <div>
+                <CardTitle>Member Resources</CardTitle>
+                <CardDescription>Important documents and resources</CardDescription>
+              </div>
+              <FileText className="h-5 w-5 text-muted-foreground" />
+            </div>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+              <Link to="/dashboard/handbook" className="no-underline">
+                <Card className="h-full hover:shadow-md transition-shadow cursor-pointer">
+                  <CardHeader className="pb-2">
+                    <CardTitle className="text-base">Glee Club Handbook</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-sm text-muted-foreground">
+                      Access the official handbook with rules and guidelines
+                    </p>
+                  </CardContent>
+                </Card>
+              </Link>
+              <Link to="/dashboard/sheet-music" className="no-underline">
+                <Card className="h-full hover:shadow-md transition-shadow cursor-pointer">
+                  <CardHeader className="pb-2">
+                    <CardTitle className="text-base">Sheet Music</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-sm text-muted-foreground">
+                      Browse and download all current repertoire
+                    </p>
+                  </CardContent>
+                </Card>
+              </Link>
+              <Link to="/dashboard/practice" className="no-underline">
+                <Card className="h-full hover:shadow-md transition-shadow cursor-pointer">
+                  <CardHeader className="pb-2">
+                    <CardTitle className="text-base">Practice Resources</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-sm text-muted-foreground">
+                      Practice tracks and sight reading exercises
+                    </p>
+                  </CardContent>
+                </Card>
+              </Link>
+              <Link to="/dashboard/recordings" className="no-underline">
+                <Card className="h-full hover:shadow-md transition-shadow cursor-pointer">
+                  <CardHeader className="pb-2">
+                    <CardTitle className="text-base">Recordings</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-sm text-muted-foreground">
+                      Access past performances and rehearsal recordings
+                    </p>
+                  </CardContent>
+                </Card>
+              </Link>
             </div>
           </CardContent>
         </Card>
