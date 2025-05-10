@@ -59,6 +59,16 @@ export function Header({ initialShowNewsFeed = true }: HeaderProps) {
     setMobileMenuOpen(!mobileMenuOpen);
   };
 
+  const navigateToMemberPortal = () => {
+    console.log("Navigating to member portal/dashboard");
+    navigate("/dashboard");
+  };
+
+  const navigateToLogin = () => {
+    console.log("Navigating to login");
+    navigate("/login");
+  };
+
   return (
     <header className="sticky top-0 z-50 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       {showNewsFeed && <NewsFeed onClose={() => setShowNewsFeed(false)} />}
@@ -158,8 +168,8 @@ export function Header({ initialShowNewsFeed = true }: HeaderProps) {
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-48 bg-popover">
-              <DropdownMenuItem onClick={() => navigate("/login")}>Login</DropdownMenuItem>
-              <DropdownMenuItem onClick={() => navigate("/dashboard")}>Dashboard</DropdownMenuItem>
+              <DropdownMenuItem onClick={navigateToLogin}>Login</DropdownMenuItem>
+              <DropdownMenuItem onClick={navigateToMemberPortal}>Dashboard</DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
         </div>

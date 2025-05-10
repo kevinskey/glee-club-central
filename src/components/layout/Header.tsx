@@ -1,6 +1,6 @@
 
 import React from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import {
   DropdownMenu,
@@ -23,6 +23,7 @@ import { useSidebar } from "@/hooks/use-sidebar";
 export function Header() {
   const { profile, signOut } = useAuth();
   const { onOpen } = useSidebar();
+  const navigate = useNavigate();
 
   return (
     <header className="bg-background sticky top-0 z-50 w-full border-b">
