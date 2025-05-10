@@ -82,13 +82,15 @@ export default function LoginPage() {
   };
 
   const onSubmit = async (values: LoginFormValues) => {
+    console.log("Login attempt with:", values.email);
     setIsSubmitting(true);
     setLoginError(null);
 
     try {
-      // Clean up any existing auth state first
+      // Clean up any existing auth state first to prevent conflicts
       cleanupAuthState();
       
+      // Attempt sign in
       const { error } = await signIn(values.email, values.password);
       
       if (error) {
@@ -98,6 +100,7 @@ export default function LoginPage() {
         if (error.message?.includes("Email not confirmed") || 
             error.message?.toLowerCase().includes("email not verified") ||
             error.message?.toLowerCase().includes("not confirmed")) {
+          
           setLoginError("Please verify your email address before logging in. Check your inbox and spam folder for a verification email.");
           toast.error("Email not verified", {
             description: "Check your inbox for a verification email",
@@ -108,14 +111,18 @@ export default function LoginPage() {
           });
         } else {
           setLoginError(error.message || "Invalid login credentials");
+          toast.error(error.message || "Login failed");
         }
       } else {
         toast.success("Login successful!");
-        navigate("/dashboard");
+        // Navigate is now handled by the auth state change in AuthContext
       }
     } catch (error: any) {
       console.error("Unexpected error during login:", error);
       setLoginError(error.message || "An unexpected error occurred");
+      toast.error("Login failed", {
+        description: error.message || "An unexpected error occurred"
+      });
     } finally {
       setIsSubmitting(false);
     }
