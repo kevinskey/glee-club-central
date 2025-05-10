@@ -1,5 +1,5 @@
 
-import { UserPermission } from "@/types/permissions";
+import { UserPermissions } from "@/types/permissions";
 
 // Define the dashboard module interface
 export interface DashboardModule {

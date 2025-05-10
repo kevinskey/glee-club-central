@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { dashboardModules, getPermittedModules } from '@/utils/dashboardModules';
+import { dashboardModules, getPermittedModules, DashboardModule } from '@/utils/dashboardModules';
 import { Link } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { usePermissions } from '@/hooks/usePermissions';
@@ -31,9 +31,14 @@ const iconMap: Record<string, React.ReactNode> = {
   Music: <Music className="h-6 w-6" />
 };
 
+// Type definition for grouped modules
+interface GroupedModules {
+  [category: string]: DashboardModule[];
+}
+
 // Group modules by category
-const groupModulesByCategory = (modules: any[]) => {
-  return modules.reduce((acc, module) => {
+const groupModulesByCategory = (modules: DashboardModule[]): GroupedModules => {
+  return modules.reduce<GroupedModules>((acc, module) => {
     const category = module.category || 'General';
     if (!acc[category]) {
       acc[category] = [];
@@ -72,7 +77,7 @@ export function DashboardModules() {
             </div>
             
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-              {modules.map((module: any) => (
+              {modules.map((module: DashboardModule) => (
                 <Link 
                   key={module.id}
                   to={module.path}
