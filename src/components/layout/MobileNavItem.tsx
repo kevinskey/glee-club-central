@@ -26,8 +26,13 @@ export function MobileNavItem({
   
   return (
     <Link
-      to={onClick ? "#" : href}
-      onClick={onClick}
+      to={href}
+      onClick={(e) => {
+        if (onClick) {
+          e.preventDefault();
+          onClick();
+        }
+      }}
       className={cn(
         "flex flex-col items-center justify-center gap-1 px-2",
         isActive ? "text-primary" : "text-muted-foreground"

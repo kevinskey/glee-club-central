@@ -11,7 +11,7 @@ import { NewsFeed } from "@/components/news/NewsFeed";
 
 export default function LandingPage() {
   return (
-    <div className="flex min-h-screen flex-col">
+    <div className="flex min-h-screen flex-col" id="home">
       <NewsFeed />
       <Header initialShowNewsFeed={false} />
       <HeroSection />

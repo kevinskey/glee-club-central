@@ -6,9 +6,11 @@ import { Button } from "@/components/ui/button";
 import { Sidebar } from "@/components/layout/Sidebar";
 import { MobileNavItem } from "@/components/layout/MobileNavItem";
 import { useAuth } from "@/contexts/AuthContext";
+import { useNavigate } from "react-router-dom";
 
 export function MobileNav() {
   const { signOut } = useAuth();
+  const navigate = useNavigate();
   
   return (
     <>
@@ -29,7 +31,7 @@ export function MobileNav() {
       <div
         className="fixed bottom-0 left-0 right-0 border-t bg-background sm:hidden flex justify-around py-2 z-50"
       >
-        <MobileNavItem href="/dashboard" title="Home" icon={<Home />} />
+        <MobileNavItem href="/" title="Home" icon={<Home />} onClick={() => navigate("/")} />
         <MobileNavItem href="/dashboard/members" title="Members" icon={<Users />} />
         <MobileNavItem href="/dashboard/announcements" title="Updates" icon={<Bell />} />
         <MobileNavItem href="/dashboard/profile" title="Profile" icon={<User />} />
