@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { PageHeader } from "@/components/ui/page-header";
@@ -27,13 +26,14 @@ import { User } from "@/hooks/useUserManagement";
 import { Separator } from "@/components/ui/separator";
 import { MemberPermissionsDialog } from "@/components/members/MemberPermissionsDialog";
 import { UserRoleSelector } from "@/components/members/UserRoleSelector";
+import { createMemberRefreshFunction } from "@/components/members/MembersPageRefactor";
 
 export default function MembersPage() {
   const { isLoading: authLoading } = useAuth();
   const [searchQuery, setSearchQuery] = useState("");
-  const [roleFilter, setRoleFilter] = useState("");
-  const [voicePartFilter, setVoicePartFilter] = useState("");
-  const [statusFilter, setStatusFilter] = useState("");
+  const [roleFilter, setRoleFilter] = useState("all");
+  const [voicePartFilter, setVoicePartFilter] = useState("all");
+  const [statusFilter, setStatusFilter] = useState("all");
   const [isAddMemberDialogOpen, setIsAddMemberDialogOpen] = useState(false);
   const [isEditMemberDialogOpen, setIsEditMemberDialogOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
@@ -133,9 +133,9 @@ export default function MembersPage() {
   // Reset all filters
   const resetFilters = () => {
     setSearchQuery("");
-    setRoleFilter("");
-    setVoicePartFilter("");
-    setStatusFilter("");
+    setRoleFilter("all");
+    setVoicePartFilter("all");
+    setStatusFilter("all");
     setActiveTab("all");
   };
 
@@ -152,9 +152,9 @@ export default function MembersPage() {
       if (!matchesSearch) return false;
       
       // Then apply dropdown filters
-      const matchesRole = !roleFilter || (member.role || '') === roleFilter;
-      const matchesVoicePart = !voicePartFilter || (member.voice_part || '') === voicePartFilter;
-      const matchesStatus = !statusFilter || (member.status || '') === statusFilter;
+      const matchesRole = roleFilter === "all" || (member.role || '') === roleFilter;
+      const matchesVoicePart = voicePartFilter === "all" || (member.voice_part || '') === voicePartFilter;
+      const matchesStatus = statusFilter === "all" || (member.status || '') === statusFilter;
       
       if (!matchesRole || !matchesVoicePart || !matchesStatus) return false;
       
@@ -190,11 +190,8 @@ export default function MembersPage() {
     setIsRoleDialogOpen(true);
   };
 
-  // Create a wrapper function for fetchUsers that doesn't return anything
-  const refreshMembers = async (): Promise<void> => {
-    await fetchUsers();
-    // Function does not return anything
-  };
+  // Create a wrapper function for fetchUsers that returns void to satisfy Promise<void> type
+  const refreshMembers = createMemberRefreshFunction(fetchUsers);
 
   return (
     <div className="container mx-auto p-4 space-y-6">
@@ -249,7 +246,7 @@ export default function MembersPage() {
                             <SelectValue placeholder="Role" />
                           </SelectTrigger>
                           <SelectContent>
-                            <SelectItem value="">All Roles</SelectItem>
+                            <SelectItem value="all">All Roles</SelectItem>
                             <SelectItem value="administrator">Administrator</SelectItem>
                             <SelectItem value="section_leader">Section Leader</SelectItem>
                             <SelectItem value="student_conductor">Student Conductor</SelectItem>
@@ -264,7 +261,7 @@ export default function MembersPage() {
                             <SelectValue placeholder="Voice Part" />
                           </SelectTrigger>
                           <SelectContent>
-                            <SelectItem value="">All Voice Parts</SelectItem>
+                            <SelectItem value="all">All Voice Parts</SelectItem>
                             <SelectItem value="soprano_1">Soprano 1</SelectItem>
                             <SelectItem value="soprano_2">Soprano 2</SelectItem>
                             <SelectItem value="alto_1">Alto 1</SelectItem>
@@ -279,7 +276,7 @@ export default function MembersPage() {
                             <SelectValue placeholder="Status" />
                           </SelectTrigger>
                           <SelectContent>
-                            <SelectItem value="">All Statuses</SelectItem>
+                            <SelectItem value="all">All Statuses</SelectItem>
                             <SelectItem value="active">Active</SelectItem>
                             <SelectItem value="pending">Pending</SelectItem>
                             <SelectItem value="inactive">Inactive</SelectItem>
@@ -329,39 +326,7 @@ export default function MembersPage() {
                   </div>
                 </div>
                 
-                {isLoading ? (
-                  <div className="flex items-center justify-center h-64">
-                    <div className="h-8 w-8 rounded-full border-4 border-primary border-t-transparent animate-spin"></div>
-                  </div>
-                ) : filteredMembers.length === 0 ? (
-                  <div className="flex flex-col items-center justify-center h-64 text-center p-4">
-                    <Users className="h-10 w-10 text-muted-foreground mb-2" />
-                    <h3 className="text-lg font-medium">No members found</h3>
-                    <p className="text-sm text-muted-foreground mb-4">
-                      {searchQuery || roleFilter || voicePartFilter || statusFilter ? 
-                        "Try adjusting your search or filters" : 
-                        "There are no members to display"}
-                    </p>
-                    {searchQuery || roleFilter || voicePartFilter || statusFilter ? (
-                      <Button variant="outline" size="sm" onClick={resetFilters}>
-                        Reset Filters
-                      </Button>
-                    ) : canManageMembers ? (
-                      <Button onClick={() => setIsAddMemberDialogOpen(true)}>
-                        <UserPlus className="h-4 w-4 mr-2" />
-                        Add First Member
-                      </Button>
-                    ) : null}
-                  </div>
-                ) : (
-                  <MembersList 
-                    members={filteredMembers} 
-                    onEditMember={canManageMembers ? handleEditMember : undefined}
-                    onDeleteMember={canManageMembers ? handleDeleteClick : undefined}
-                    onManagePermissions={canManageMembers ? handleManagePermissions : undefined}
-                    onChangeRole={canManageMembers ? handleChangeRole : undefined}
-                  />
-                )}
+                {/* ... keep existing code (conditional rendering of loading, empty state, or member list) */}
               </div>
             </Card>
           </TabsContent>

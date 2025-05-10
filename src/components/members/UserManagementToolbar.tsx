@@ -55,7 +55,7 @@ export function UserManagementToolbar({
                 <SelectValue placeholder="Role" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">All Roles</SelectItem>
+                <SelectItem value="all">All Roles</SelectItem>
                 <SelectItem value="administrator">Administrator</SelectItem>
                 <SelectItem value="section_leader">Section Leader</SelectItem>
                 <SelectItem value="singer">Singer</SelectItem>
@@ -73,7 +73,7 @@ export function UserManagementToolbar({
                 <SelectValue placeholder="Status" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">All Statuses</SelectItem>
+                <SelectItem value="all">All Statuses</SelectItem>
                 <SelectItem value="active">Active</SelectItem>
                 <SelectItem value="pending">Pending</SelectItem>
                 <SelectItem value="inactive">Inactive</SelectItem>

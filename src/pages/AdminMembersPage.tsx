@@ -33,6 +33,7 @@ import { UserFormValues } from "@/components/members/form/userFormSchema";
 import { usePermissions } from "@/hooks/usePermissions";
 import { UserManagementToolbar } from "@/components/members/UserManagementToolbar";
 import { useMedia } from "@/hooks/use-mobile";
+import { createMemberRefreshFunction } from "@/components/members/MembersPageRefactor";
 
 // Format voice part for display
 const formatVoicePart = (voicePart: string | null): string => {
@@ -68,8 +69,8 @@ export default function AdminMembersPage() {
   const { isAdmin, isLoading: authLoading, isAuthenticated, profile } = useAuth();
   const { hasPermission, isSuperAdmin } = usePermissions();
   const [searchQuery, setSearchQuery] = useState("");
-  const [roleFilter, setRoleFilter] = useState("");
-  const [statusFilter, setStatusFilter] = useState("");
+  const [roleFilter, setRoleFilter] = useState("all");
+  const [statusFilter, setStatusFilter] = useState("all");
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [isManageRoleOpen, setIsManageRoleOpen] = useState(false);
   const [isAddMemberOpen, setIsAddMemberOpen] = useState(false);
@@ -95,9 +96,12 @@ export default function AdminMembersPage() {
     }
   }, [isAuthenticated]);
 
+  // Create a wrapper function for fetchUsers that returns void
+  const refreshUsers = createMemberRefreshFunction(fetchUsers);
+
   // Handle refresh after role update
   const handleRoleUpdateSuccess = async () => {
-    await fetchUsers();
+    await refreshUsers();
     toast.success("Member list refreshed");
   };
   
@@ -144,8 +148,8 @@ export default function AdminMembersPage() {
       (member.last_name || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
       (member.email || '').toLowerCase().includes(searchQuery.toLowerCase());
     
-    const matchesRole = !roleFilter || roleFilter === "all" || (member.role || '') === roleFilter;
-    const matchesStatus = !statusFilter || statusFilter === "all" || (member.status || '') === statusFilter;
+    const matchesRole = roleFilter === "all" || (member.role || '') === roleFilter;
+    const matchesStatus = statusFilter === "all" || (member.status || '') === statusFilter;
     
     return matchesSearch && matchesRole && matchesStatus;
   });
@@ -173,7 +177,7 @@ export default function AdminMembersPage() {
           statusFilter={statusFilter}
           setStatusFilter={setStatusFilter}
           onCreateUserClick={() => setIsAddMemberOpen(true)}
-          onRefreshClick={fetchUsers}
+          onRefreshClick={refreshUsers}
           isLoading={isLoading}
           isMobile={isMobile}
           canCreate={hasPermission('can_manage_users')}
