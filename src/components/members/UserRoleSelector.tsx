@@ -14,7 +14,6 @@ import { Separator } from "@/components/ui/separator";
 import { User } from "@/hooks/useUserManagement";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { Alert, AlertDescription } from "@/components/ui/alert-dialog";
 
 interface UserRoleSelectorProps {
   user: User | null;

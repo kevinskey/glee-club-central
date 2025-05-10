@@ -119,6 +119,12 @@ export default function MembersPage() {
     setIsRoleDialogOpen(true);
   };
 
+  // Add the missing handleManagePermissions function
+  const handleManagePermissions = (member: User) => {
+    setCurrentMember(member);
+    setIsPermissionsDialogOpen(true);
+  };
+
   // Handle deleting a member
   const handleDeleteClick = (memberId: string) => {
     const member = members.find(m => m.id === memberId);
