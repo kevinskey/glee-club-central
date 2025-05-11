@@ -37,7 +37,8 @@ export function UserRoleEditor() {
   ];
 
   // Only show admin roles if user is already an admin
-  if (profile?.role === 'administrator') {
+  if (profile?.role === 'administrator' || profile?.role === 'admin') {
+    roles.unshift({ value: "admin", label: "Admin" });
     roles.unshift({ value: "administrator", label: "Administrator" });
   }
   
@@ -108,6 +109,7 @@ export function UserRoleEditor() {
               {selectedRole === 'non_singer' && "Member who supports the Glee Club in non-performance capacities."}
               {selectedRole === 'administrator' && "Full administrative access to the Glee World platform."}
               {selectedRole === 'director' && "Administrative access with artistic direction responsibilities."}
+              {selectedRole === 'admin' && "Full administrative access to all features and settings."}
             </p>
           </div>
           

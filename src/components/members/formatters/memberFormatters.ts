@@ -28,7 +28,8 @@ export const formatRole = (role: string): string => {
     singer: "Singer",
     student_conductor: "Student Conductor",
     accompanist: "Accompanist",
-    non_singer: "Non-Singer"
+    non_singer: "Non-Singer",
+    admin: "Admin"
   };
   
   return roles[role] || role;
