@@ -20,7 +20,8 @@ interface RolePermissionContextType {
   refreshPermissions: () => Promise<void>;
 }
 
-// Create context with null as initial value and use type assertion
+// Create context with null as initial value and use non-null assertion
+// This avoids deep type checking during context creation
 const RolePermissionContext = createContext<RolePermissionContextType>(null!);
 
 // Export the hook for consuming the context
@@ -48,15 +49,14 @@ export const RolePermissionProvider: React.FC<{ children: React.ReactNode }> = (
       // Get role from profile
       const roleFromProfile = profile?.role || 'student';
       
-      // Define valid roles - using type assertion here to avoid deep type instantiation
-      const validRoles: string[] = ['admin', 'student', 'section_leader', 'staff', 'guest'];
+      // Define valid roles using a simple array
+      const validRoles = ['admin', 'student', 'section_leader', 'staff', 'guest'];
       
       // Determine the role safely using string comparison
-      let role: UserRole = 'student'; // Default role
+      // Avoid complex type operations
+      let role = 'student' as UserRole; // Default role with simple type assertion
       
-      // Simple string comparison to avoid TypeScript recursion
       if (typeof roleFromProfile === 'string' && validRoles.includes(roleFromProfile)) {
-        // Using type assertion after validation
         role = roleFromProfile as UserRole;
       }
       
