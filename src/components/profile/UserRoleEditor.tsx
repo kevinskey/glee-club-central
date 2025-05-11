@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from '@/components/ui/button';
@@ -16,7 +15,7 @@ import { toast } from 'sonner';
 import { UserRole } from '@/types/auth';
 
 export function UserRoleEditor() {
-  const { profile } = useAuth();
+  const { profile, refreshPermissions } = useAuth();
   const { updateUserRole } = useUserManagement();
   const [selectedRole, setSelectedRole] = useState<string>(profile?.role || '');
   const [isLoading, setIsLoading] = useState(false);
@@ -33,6 +32,7 @@ export function UserRoleEditor() {
     { value: "section_leader", label: "Section Leader" },
     { value: "student_conductor", label: "Student Conductor" },
     { value: "accompanist", label: "Accompanist" },
+    { value: "director", label: "Director" },
     { value: "non_singer", label: "Non-Singer" }
   ];
 
@@ -43,7 +43,11 @@ export function UserRoleEditor() {
   }
   
   if (profile?.role === 'director') {
-    roles.unshift({ value: "director", label: "Director" });
+    // If user is already a director, keep it in the list
+    const directorExists = roles.some(role => role.value === 'director');
+    if (!directorExists) {
+      roles.unshift({ value: "director", label: "Director" });
+    }
   }
 
   const handleSave = async () => {
@@ -57,7 +61,10 @@ export function UserRoleEditor() {
       const success = await updateUserRole(profile.id, selectedRole);
       if (success) {
         toast.success("Your role has been updated");
-        // Role updated successfully, page will be refreshed with updated permissions
+        // Refresh permissions to update the UI
+        if (refreshPermissions) {
+          refreshPermissions();
+        }
       }
     } catch (error) {
       console.error("Error updating user role:", error);

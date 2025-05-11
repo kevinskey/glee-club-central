@@ -7,7 +7,7 @@ export const userFormSchema = z.object({
   email: z.string().email("Invalid email format"),
   password: z.string().optional(),
   phone: z.string().optional(),
-  role: z.enum(["admin", "student", "section_leader", "staff", "guest"], {
+  role: z.enum(["admin", "director", "student", "section_leader", "staff", "guest"], {
     required_error: "Please select a role",
   }),
   voice_part: z.enum(["soprano_1", "soprano_2", "alto_1", "alto_2", "tenor", "bass"], {

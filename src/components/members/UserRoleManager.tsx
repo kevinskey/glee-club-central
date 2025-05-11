@@ -90,6 +90,7 @@ export function UserRoleManager({
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="admin">Administrator</SelectItem>
+                  <SelectItem value="director">Director</SelectItem>
                   <SelectItem value="section_leader">Section Leader</SelectItem>
                   <SelectItem value="student">Student Member</SelectItem>
                   <SelectItem value="staff">Staff</SelectItem>

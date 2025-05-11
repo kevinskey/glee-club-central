@@ -53,6 +53,7 @@ export const formatRole = (role: string | null): string => {
     'guest': 'Guest',
     'administrator': 'Administrator',
     'singer': 'Singer',
+    'director': 'Director',
     'non_singer': 'Non-Singer',
     'student_conductor': 'Student Conductor',
     'accompanist': 'Accompanist'
@@ -60,4 +61,3 @@ export const formatRole = (role: string | null): string => {
   
   return roleMap[role] || role;
 };
-
