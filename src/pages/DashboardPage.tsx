@@ -1,105 +1,52 @@
 
-import React, { useState, useEffect } from "react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { PageHeader } from "@/components/ui/page-header";
-import { useAuth } from "@/contexts/AuthContext";
-import { Link } from "react-router-dom";
-import { 
-  Calendar, 
-  Home, 
-  Bell,
-} from "lucide-react";
-import { Spinner } from "@/components/ui/spinner";
-import { DashboardModules } from "@/components/dashboard/DashboardModules";
-import { DashboardAnnouncements } from "@/components/dashboard/DashboardAnnouncements";
-import { DashboardEvents } from "@/components/dashboard/DashboardEvents";
-import { DashboardQuickAccess } from "@/components/dashboard/DashboardQuickAccess";
+import React from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
-const DashboardPage = () => {
-  const { profile, isAuthenticated, isLoading: authLoading } = useAuth();
-  const [loading, setLoading] = useState(true);
-  
-  // Add debug info to the console
-  useEffect(() => {
-    console.log("Dashboard mounting...");
-    console.log("Auth loading state:", authLoading);
-    console.log("Auth state:", isAuthenticated);
-    console.log("Profile data:", profile);
-    
-    // Set a timeout to simulate data loading and then remove the loading state
-    const timer = setTimeout(() => {
-      console.log("Setting loading to false");
-      setLoading(false);
-      console.log("Dashboard loaded");
-    }, 1000);
-    
-    // Clean up the timer
-    return () => {
-      console.log("Dashboard unmounting, clearing timer");
-      clearTimeout(timer);
-    };
-  }, [profile, authLoading, isAuthenticated]);
-
-  if (loading || authLoading) {
-    return (
-      <div className="container mx-auto p-4 flex justify-center items-center min-h-[60vh]">
-        <Spinner size="lg" />
-      </div>
-    );
-  }
-  
+const DashboardPage: React.FC = () => {
   return (
-    <div className="space-y-4 md:space-y-6">
-      <PageHeader
-        title={`Welcome, ${profile?.first_name || 'Member'}`}
-        description={`Dashboard - ${profile?.title || 'Member'}`}
-        icon={<Home className="h-5 w-5 md:h-6 md:w-6" />}
-      />
+    <div className="container mx-auto px-4 py-8">
+      <h1 className="text-3xl font-bold mb-6">Dashboard</h1>
       
-      {/* Quick Access Section */}
-      <DashboardQuickAccess />
-      
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-3 md:gap-4">
-        {/* Upcoming Events Card */}
-        <Card className="md:col-span-2">
-          <CardHeader className="p-4 md:p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <CardTitle className="text-lg md:text-xl">Upcoming Events</CardTitle>
-                <CardDescription>Your scheduled events</CardDescription>
-              </div>
-              <Calendar className="h-5 w-5 text-muted-foreground" />
-            </div>
-          </CardHeader>
-          <CardContent className="p-4 md:p-6 pt-0 md:pt-0">
-            <DashboardEvents />
-          </CardContent>
-        </Card>
-        
-        {/* Announcements Card */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         <Card>
-          <CardHeader className="p-4 md:p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <CardTitle className="text-lg md:text-xl">Announcements</CardTitle>
-                <CardDescription>Latest updates</CardDescription>
-              </div>
-              <Bell className="h-5 w-5 text-muted-foreground" />
-            </div>
+          <CardHeader>
+            <CardTitle>Welcome to Glee World</CardTitle>
           </CardHeader>
-          <CardContent className="p-4 md:p-6 pt-0 md:pt-0">
-            <DashboardAnnouncements />
+          <CardContent>
+            <p className="text-muted-foreground">
+              Your central hub for Spelman College Glee Club activities and resources.
+            </p>
           </CardContent>
         </Card>
         
-        {/* Role-Based Dashboard Modules */}
-        <Card className="md:col-span-3">
-          <CardHeader className="p-4 md:p-6">
-            <CardTitle className="text-lg md:text-xl">Your Dashboard</CardTitle>
-            <CardDescription>Modules available based on your {profile?.title || 'role'}</CardDescription>
+        <Card>
+          <CardHeader>
+            <CardTitle>Quick Links</CardTitle>
           </CardHeader>
-          <CardContent className="p-4 md:p-6 pt-0 md:pt-0">
-            <DashboardModules />
+          <CardContent>
+            <ul className="space-y-2">
+              <li>
+                <a href="/dashboard/profile" className="text-primary hover:underline">
+                  My Profile
+                </a>
+              </li>
+              <li>
+                <a href="/dashboard/members" className="text-primary hover:underline">
+                  Members Directory
+                </a>
+              </li>
+            </ul>
+          </CardContent>
+        </Card>
+        
+        <Card>
+          <CardHeader>
+            <CardTitle>Recent Activity</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-muted-foreground">
+              No recent activity to display.
+            </p>
           </CardContent>
         </Card>
       </div>
