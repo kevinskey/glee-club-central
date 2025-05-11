@@ -57,14 +57,11 @@ export const RolePermissionProvider: React.FC<{ children: React.ReactNode }> = (
       // Get role from profile as string
       const roleFromProfile = profile?.role || 'student';
       
-      // Simple explicit type checking with a direct assignment
-      const validatedRole: UserRole = (
-        roleFromProfile === 'admin' || 
-        roleFromProfile === 'student' || 
-        roleFromProfile === 'section_leader' || 
-        roleFromProfile === 'staff' || 
-        roleFromProfile === 'guest'
-      ) ? roleFromProfile as UserRole : 'student';
+      // Simple validation using a preset array of valid roles
+      const validRoles: UserRole[] = ['admin', 'student', 'section_leader', 'staff', 'guest'];
+      const validatedRole = validRoles.includes(roleFromProfile as UserRole) 
+        ? (roleFromProfile as UserRole) 
+        : 'student';
       
       // Set role
       setUserRole(validatedRole);
