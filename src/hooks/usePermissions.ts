@@ -1,22 +1,17 @@
 
 import { useAuth } from '@/contexts/AuthContext';
+import { useRolePermissions } from '@/contexts/RolePermissionContext';
 import { useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 
 export function usePermissions() {
-  const { permissions, profile, isAdmin, refreshPermissions } = useAuth();
+  const { profile, isAdmin } = useAuth();
+  const { permissions, hasPermission: contextHasPermission } = useRolePermissions();
   const [isUpdating, setIsUpdating] = useState(false);
-
-  // Get permission by name
-  const hasPermission = (permissionName: string): boolean => {
-    // Super admins and admins have all permissions
-    if (profile?.is_super_admin || isAdmin()) return true;
-    
-    // Otherwise check specific permissions
-    if (!permissions) return false;
-    return permissions[permissionName] === true;
-  };
+  
+  // Get permission by name, using the context's hasPermission function
+  const hasPermission = contextHasPermission;
   
   // Check if the user is a super admin
   const isSuperAdmin = Boolean(profile?.is_super_admin);
@@ -46,9 +41,7 @@ export function usePermissions() {
       }
       
       // Refresh the permissions to reflect the changes
-      if (refreshPermissions) {
-        await refreshPermissions();
-      }
+      await useRolePermissions().refreshPermissions();
       
       toast.success("You are now a Super Admin for development");
       return true;
