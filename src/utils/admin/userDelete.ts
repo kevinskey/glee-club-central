@@ -4,8 +4,7 @@ import { toast } from 'sonner';
 
 /**
  * Delete a user from the system
- * For development purposes, this simply updates the user's status to 'deleted'
- * In production, you would want to implement proper user deletion via backend functions
+ * This marks a user as deleted rather than actually removing the record
  */
 export async function deleteUser(userId: string): Promise<boolean> {
   try {

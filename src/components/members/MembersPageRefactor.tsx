@@ -1,5 +1,5 @@
 
-import React, { useState } from "react";
+import React, { useState, useCallback } from "react";
 import { User } from "@/hooks/useUserManagement";
 import { Navigate } from "react-router-dom";
 import { PageHeader } from "@/components/ui/page-header";
@@ -44,23 +44,33 @@ export interface MembersPageProps {
 }
 
 export function MembersPageComponent({ useUserManagementHook }: MembersPageProps) {
+  // Get auth and permissions
   const { isAdmin, isLoading: authLoading, isAuthenticated, profile } = useAuth();
   const { hasPermission, isSuperAdmin } = usePermissions();
+  
+  // UI state
   const [searchQuery, setSearchQuery] = useState("");
   const [roleFilter, setRoleFilter] = useState("all");
   const [statusFilter, setStatusFilter] = useState("all");
+  
+  // Dialog state
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [isManageRoleOpen, setIsManageRoleOpen] = useState(false);
   const [isAddMemberOpen, setIsAddMemberOpen] = useState(false);
   const [isEditUserOpen, setIsEditUserOpen] = useState(false);
   const [isPermissionsOpen, setIsPermissionsOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  
+  // Loading state
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+  
+  // User to delete
   const [userToDelete, setUserToDelete] = useState<string | null>(null);
   const [userToDeleteName, setUserToDeleteName] = useState("");
   const isMobile = useMedia('(max-width: 640px)');
   
+  // Get user management data and functions
   const {
     users: allMembers,
     isLoading,
@@ -76,14 +86,14 @@ export function MembersPageComponent({ useUserManagementHook }: MembersPageProps
   // Create a wrapper function for fetchUsers that returns void
   const refreshUsers = createMemberRefreshFunction(fetchUsers);
 
-  // Handle refresh after role update
-  const handleRoleUpdateSuccess = async () => {
+  // Memoize handlers to prevent unnecessary re-renders
+  const handleRoleUpdateSuccess = useCallback(async () => {
     await refreshUsers();
     toast.success("Member list refreshed");
-  };
+  }, [refreshUsers]);
   
   // Handle adding a new member
-  const handleAddMember = async (data: UserFormValues) => {
+  const handleAddMember = useCallback(async (data: UserFormValues) => {
     setIsSubmitting(true);
     try {
       const success = await addUser(data);
@@ -95,10 +105,10 @@ export function MembersPageComponent({ useUserManagementHook }: MembersPageProps
     } finally {
       setIsSubmitting(false);
     }
-  };
+  }, [addUser, refreshUsers]);
 
   // Handle updating a user's information
-  const handleUpdateUser = async (data: UserFormValues) => {
+  const handleUpdateUser = useCallback(async (data: UserFormValues) => {
     if (!selectedUser || !updateUser) return;
     
     setIsSubmitting(true);
@@ -116,19 +126,19 @@ export function MembersPageComponent({ useUserManagementHook }: MembersPageProps
     } finally {
       setIsSubmitting(false);
     }
-  };
+  }, [selectedUser, updateUser, refreshUsers]);
   
   // Handle deleting a user
-  const handleDeleteUser = (userId: string) => {
+  const handleDeleteUser = useCallback((userId: string) => {
     const user = members.find(m => m.id === userId);
     if (user) {
       setUserToDelete(userId);
       setUserToDeleteName(`${user.first_name} ${user.last_name}`);
       setIsDeleteDialogOpen(true);
     }
-  };
+  }, [members]);
   
-  const confirmDeleteUser = async () => {
+  const confirmDeleteUser = useCallback(async () => {
     if (!userToDelete || !deleteUser) return;
     
     setIsDeleting(true);
@@ -146,20 +156,10 @@ export function MembersPageComponent({ useUserManagementHook }: MembersPageProps
       setIsDeleting(false);
       setUserToDelete(null);
     }
-  };
+  }, [userToDelete, deleteUser, userToDeleteName, refreshUsers]);
 
   // Check if user has admin privileges
   const hasAdminAccess = isAdmin?.() || isSuperAdmin || profile?.is_super_admin || hasPermission('can_manage_users');
-
-  console.log("AdminMembersPage - Access check:", {
-    isAuthenticated,
-    authLoading,
-    isAdmin: isAdmin?.(),
-    isSuperAdmin,
-    profileSuperAdmin: profile?.is_super_admin,
-    hasPermission: hasPermission('can_manage_users'),
-    hasAdminAccess
-  });
 
   // Only redirect if no admin access
   if (!authLoading && isAuthenticated && !hasAdminAccess) {
