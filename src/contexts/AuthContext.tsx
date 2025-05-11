@@ -1,3 +1,4 @@
+
 import React, { createContext, useState, useEffect, useContext, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Profile, AuthUser, AuthContextType, UserRole } from '@/types/auth';
@@ -149,7 +150,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
         // Create a complete profile object with id as user_id if needed
         const completeProfile: Profile = {
           ...profileData,
-          // Ensure user_id exists (use id if it doesn't)
+          // Ensure user_id exists
           user_id: profileData.id
         };
         setProfile(completeProfile);
@@ -397,7 +398,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
     user,
     profile,
     isAuthenticated: !!user,
-    isLoading, // Changed from 'loading' to 'isLoading' to match the interface
+    isLoading,
     permissions,
     signIn,
     signUp,

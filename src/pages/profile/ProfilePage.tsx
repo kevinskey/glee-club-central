@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { PageHeader } from "@/components/ui/page-header";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -156,7 +155,7 @@ export default function ProfilePage() {
             
             <TabsContent value="overview">
               <EditableProfileTab 
-                profile={profile as Profile} 
+                profile={profile} 
                 isEditable={isEditing} 
                 onSave={handleProfileUpdate}
               />

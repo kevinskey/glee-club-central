@@ -10,7 +10,7 @@ import ProtectedRoute from "./components/ProtectedRoute";
 const HomePage = lazy(() => import("./pages/HomePage"));
 const DashboardPage = lazy(() => import("./pages/DashboardPage"));
 const LoginPage = lazy(() => import("./pages/LoginPage"));
-const ProfilePage = lazy(() => import("./pages/ProfilePage"));
+const ProfilePage = lazy(() => import("./pages/profile/ProfilePage"));
 const AdminPage = lazy(() => import("./pages/AdminPage"));
 const AnnouncementsPage = lazy(() => import("./pages/AnnouncementsPage"));
 const CalendarPage = lazy(() => import("./pages/CalendarPage"));
@@ -20,7 +20,6 @@ const ViewSheetMusicPage = lazy(() => import("./pages/sheet-music/ViewSheetMusic
 export const router = createBrowserRouter([
   {
     path: "/",
-    // Remove the direct App import, we'll use Outlet in App.tsx instead
     element: null, // This will be handled in App.tsx
     errorElement: <NotFoundPage />,
     children: [
