@@ -128,7 +128,7 @@ export default function MediaLibraryPage() {
       // Calculate statistics
       const stats: MediaStats = {
         totalFiles: combinedFiles.length,
-        totalSize: combinedFiles.reduce((total, file) => total + (file.size || 0), 0),
+        totalSize: combinedFiles.reduce((total, file) => total + file.size, 0),
         filesByType: {}
       };
       
