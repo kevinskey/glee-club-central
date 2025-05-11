@@ -12,6 +12,7 @@ import {
   Shirt,
   Music,
   Bell,
+  Image,
 } from "lucide-react";
 
 // Import the new components
@@ -19,6 +20,8 @@ import { AnalyticsCard } from "@/components/admin/AnalyticsCard";
 import { AdminMembersList } from "@/components/admin/AdminMembersList";
 import { EventTimeline } from "@/components/admin/EventTimeline";
 import { QuickActions } from "@/components/admin/QuickActions";
+import { HeroImagesManager } from "@/components/admin/HeroImagesManager";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 // Sample data for demonstration
 const sampleMembers = [
@@ -93,6 +96,7 @@ export default function AdminDashboardPage() {
   const [activeMembers, setActiveMembers] = useState(42);
   const [duesPercentage, setDuesPercentage] = useState(87);
   const [upcomingEvents, setUpcomingEvents] = useState(3);
+  const [activeTab, setActiveTab] = useState("overview");
   
   // Redirect if user is not authenticated or not an admin
   if (!isLoading && (!isAuthenticated || !isAdmin())) {
@@ -115,96 +119,116 @@ export default function AdminDashboardPage() {
         icon={<Settings className="h-6 w-6" />}
       />
       
-      {/* Analytics Overview */}
-      <div className="grid gap-4 md:grid-cols-3">
-        <AnalyticsCard 
-          title="Active Members" 
-          value={activeMembers} 
-          change={4}
-          description={`${activeMembers} total members`}
-          icon={<Users className="h-5 w-5" />}
-        />
-        <AnalyticsCard 
-          title="Upcoming Events" 
-          value={upcomingEvents}
-          description="Next: Spring Concert (May 15)"
-          icon={<Calendar className="h-5 w-5" />}
-        />
-        <AnalyticsCard 
-          title="Dues Collection" 
-          value={`${duesPercentage}%`}
-          description={`${Math.round(activeMembers * duesPercentage/100)}/${activeMembers} members paid`}
-          icon={<CreditCard className="h-5 w-5" />}
-        />
-      </div>
-      
-      {/* Quick Actions Section */}
-      <div className="grid gap-4 md:grid-cols-2">
-        <QuickActions />
-        <EventTimeline events={sampleEvents} />
-      </div>
-      
-      {/* Members and Activity Section */}
-      <div className="grid gap-4 md:grid-cols-2">
-        <AdminMembersList members={sampleMembers} />
+      <Tabs value={activeTab} onValueChange={setActiveTab}>
+        <TabsList className="grid w-full md:w-auto grid-cols-2 md:grid-cols-3">
+          <TabsTrigger value="overview">Overview</TabsTrigger>
+          <TabsTrigger value="content">Content Management</TabsTrigger>
+          <TabsTrigger value="settings">Settings</TabsTrigger>
+        </TabsList>
         
-        {/* Recent Activity */}
-        <div className="space-y-4">
-          <h2 className="text-xl font-semibold">Recent Activity</h2>
-          <div className="space-y-4">
-            <div className="flex gap-4 items-start">
-              <div className="bg-primary/10 p-2 rounded">
-                <Users className="h-4 w-4 text-primary" />
-              </div>
-              <div>
-                <p className="font-medium">New member registered</p>
-                <p className="text-sm text-muted-foreground">Tanya Williams joined as Alto 2</p>
-                <p className="text-xs text-muted-foreground">2 hours ago</p>
-              </div>
-            </div>
-            <div className="flex gap-4 items-start">
-              <div className="bg-primary/10 p-2 rounded">
-                <Music className="h-4 w-4 text-primary" />
-              </div>
-              <div>
-                <p className="font-medium">New sheet music uploaded</p>
-                <p className="text-sm text-muted-foreground">Ave Maria - Soprano 1 & 2 parts</p>
-                <p className="text-xs text-muted-foreground">Yesterday</p>
-              </div>
-            </div>
-            <div className="flex gap-4 items-start">
-              <div className="bg-primary/10 p-2 rounded">
-                <Calendar className="h-4 w-4 text-primary" />
-              </div>
-              <div>
-                <p className="font-medium">Event updated</p>
-                <p className="text-sm text-muted-foreground">Spring Concert time changed to 7:30 PM</p>
-                <p className="text-xs text-muted-foreground">2 days ago</p>
-              </div>
-            </div>
-            <div className="flex gap-4 items-start">
-              <div className="bg-primary/10 p-2 rounded">
-                <Bell className="h-4 w-4 text-primary" />
-              </div>
-              <div>
-                <p className="font-medium">Announcement sent</p>
-                <p className="text-sm text-muted-foreground">Reminder about dues payment deadline</p>
-                <p className="text-xs text-muted-foreground">3 days ago</p>
-              </div>
-            </div>
-            <div className="flex gap-4 items-start">
-              <div className="bg-primary/10 p-2 rounded">
-                <Shirt className="h-4 w-4 text-primary" />
-              </div>
-              <div>
-                <p className="font-medium">Wardrobe update</p>
-                <p className="text-sm text-muted-foreground">Concert dresses assigned to 5 new members</p>
-                <p className="text-xs text-muted-foreground">Last week</p>
+        <TabsContent value="overview" className="space-y-6">
+          {/* Analytics Overview */}
+          <div className="grid gap-4 md:grid-cols-3">
+            <AnalyticsCard 
+              title="Active Members" 
+              value={activeMembers} 
+              change={4}
+              description={`${activeMembers} total members`}
+              icon={<Users className="h-5 w-5" />}
+            />
+            <AnalyticsCard 
+              title="Upcoming Events" 
+              value={upcomingEvents}
+              description="Next: Spring Concert (May 15)"
+              icon={<Calendar className="h-5 w-5" />}
+            />
+            <AnalyticsCard 
+              title="Dues Collection" 
+              value={`${duesPercentage}%`}
+              description={`${Math.round(activeMembers * duesPercentage/100)}/${activeMembers} members paid`}
+              icon={<CreditCard className="h-5 w-5" />}
+            />
+          </div>
+          
+          {/* Quick Actions Section */}
+          <div className="grid gap-4 md:grid-cols-2">
+            <QuickActions />
+            <EventTimeline events={sampleEvents} />
+          </div>
+          
+          {/* Members and Activity Section */}
+          <div className="grid gap-4 md:grid-cols-2">
+            <AdminMembersList members={sampleMembers} />
+            
+            {/* Recent Activity */}
+            <div className="space-y-4">
+              <h2 className="text-xl font-semibold">Recent Activity</h2>
+              <div className="space-y-4">
+                <div className="flex gap-4 items-start">
+                  <div className="bg-primary/10 p-2 rounded">
+                    <Users className="h-4 w-4 text-primary" />
+                  </div>
+                  <div>
+                    <p className="font-medium">New member registered</p>
+                    <p className="text-sm text-muted-foreground">Tanya Williams joined as Alto 2</p>
+                    <p className="text-xs text-muted-foreground">2 hours ago</p>
+                  </div>
+                </div>
+                <div className="flex gap-4 items-start">
+                  <div className="bg-primary/10 p-2 rounded">
+                    <Music className="h-4 w-4 text-primary" />
+                  </div>
+                  <div>
+                    <p className="font-medium">New sheet music uploaded</p>
+                    <p className="text-sm text-muted-foreground">Ave Maria - Soprano 1 & 2 parts</p>
+                    <p className="text-xs text-muted-foreground">Yesterday</p>
+                  </div>
+                </div>
+                <div className="flex gap-4 items-start">
+                  <div className="bg-primary/10 p-2 rounded">
+                    <Calendar className="h-4 w-4 text-primary" />
+                  </div>
+                  <div>
+                    <p className="font-medium">Event updated</p>
+                    <p className="text-sm text-muted-foreground">Spring Concert time changed to 7:30 PM</p>
+                    <p className="text-xs text-muted-foreground">2 days ago</p>
+                  </div>
+                </div>
+                <div className="flex gap-4 items-start">
+                  <div className="bg-primary/10 p-2 rounded">
+                    <Bell className="h-4 w-4 text-primary" />
+                  </div>
+                  <div>
+                    <p className="font-medium">Announcement sent</p>
+                    <p className="text-sm text-muted-foreground">Reminder about dues payment deadline</p>
+                    <p className="text-xs text-muted-foreground">3 days ago</p>
+                  </div>
+                </div>
+                <div className="flex gap-4 items-start">
+                  <div className="bg-primary/10 p-2 rounded">
+                    <Shirt className="h-4 w-4 text-primary" />
+                  </div>
+                  <div>
+                    <p className="font-medium">Wardrobe update</p>
+                    <p className="text-sm text-muted-foreground">Concert dresses assigned to 5 new members</p>
+                    <p className="text-xs text-muted-foreground">Last week</p>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
-        </div>
-      </div>
+        </TabsContent>
+        
+        <TabsContent value="content" className="space-y-6">
+          <HeroImagesManager />
+        </TabsContent>
+        
+        <TabsContent value="settings" className="space-y-6">
+          <div className="text-center text-muted-foreground py-8">
+            <p>Site settings will be added in a future update.</p>
+          </div>
+        </TabsContent>
+      </Tabs>
     </div>
   );
 }
