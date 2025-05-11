@@ -20,7 +20,7 @@ export interface AuthUser {
 
 export interface Profile {
   id: string;
-  user_id: string;
+  user_id?: string;  // Made optional to fix setProfile error
   first_name?: string;
   last_name?: string;
   email?: string;
@@ -44,12 +44,9 @@ export interface Profile {
   personal_title?: string;
 }
 
-export interface UserRole {
-  id: string;
-  name: string;
-  description?: string;
-  permissions?: string[];
-}
+// Updated to string literal type union instead of interface
+export type UserRole = 'admin' | 'director' | 'section_leader' | 'singer' | 
+                      'student_conductor' | 'accompanist' | 'non_singer' | 'general';
 
 export interface AuthContextType {
   user: AuthUser | null;
@@ -61,5 +58,7 @@ export interface AuthContextType {
   logout: () => Promise<void>;
   resetPassword: (email: string) => Promise<void>;
   signOut?: () => Promise<void>;
+  signIn?: (email: string, password: string) => Promise<any>;
+  signUp?: (email: string, password: string, firstName: string, lastName: string, role?: string) => Promise<any>;
   refreshPermissions?: (userId?: string) => Promise<void>;
 }

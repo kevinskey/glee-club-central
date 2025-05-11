@@ -31,22 +31,11 @@ export function AuthProvider({ children }: AuthProviderProps) {
     // Extract needed properties
     const { id, email, role } = userData;
     
-    // Map the role string to one of the allowed UserRole values
-    let mappedRole: UserRole = 'general'; // Default to general
-    
-    if (role === 'admin') {
-      mappedRole = 'admin';
-    } else if (role === 'director') {
-      mappedRole = 'director';
-    } else if (role === 'section_leader' || role === 'singer' || 
-               role === 'student_conductor' || role === 'accompanist' || role === 'non_singer') {
-      mappedRole = role as UserRole;
-    }
-    
+    // Return the user data with the role included
     return {
       id,
       email: email || undefined,
-      role: mappedRole,
+      role: role || 'general', // Default to general if no role specified
       ...userData, // Include other properties
     };
   };
@@ -146,7 +135,12 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
       if (profileData) {
         console.log("Profile data loaded:", profileData);
-        setProfile(profileData);
+        // Add id as user_id if it doesn't exist to satisfy the type requirements
+        const completeProfile: Profile = {
+          ...profileData,
+          user_id: profileData.user_id || profileData.id
+        };
+        setProfile(completeProfile);
         
         // Try to load permissions but don't block on failure
         try {
@@ -327,8 +321,28 @@ export function AuthProvider({ children }: AuthProviderProps) {
     }
   };
 
-  // Alias logout to signOut for backwards compatibility
+  // Alias these methods for backwards compatibility
+  const login = signIn;
   const logout = signOut;
+
+  const resetPassword = async (email: string) => {
+    try {
+      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: `${window.location.origin}/update-password`,
+      });
+
+      if (error) {
+        toast.error('Failed to send password reset email');
+        return { error };
+      }
+
+      toast.success('Password reset email sent');
+      return { error: null };
+    } catch (err) {
+      toast.error('Error sending password reset email');
+      return { error: err };
+    }
+  };
 
   const updatePassword = async (newPassword: string) => {
     try {
@@ -371,10 +385,12 @@ export function AuthProvider({ children }: AuthProviderProps) {
     signIn,
     signUp,
     signOut,
+    login,
     logout,
     isAdmin,
     updatePassword,
     refreshPermissions,
+    resetPassword
   };
 
   return (

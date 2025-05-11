@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { PageHeader } from "@/components/ui/page-header";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -18,6 +17,7 @@ import { toast } from "sonner";
 import { useUserManagement } from "@/hooks/useUserManagement";
 import { Spinner } from "@/components/ui/spinner";
 import { ProfileOverviewTab as EditableProfileTab } from "@/components/profile/ProfileOverviewTab";
+import { Profile } from "@/types/auth";
 
 export default function ProfilePage() {
   const { profile, isLoading, refreshPermissions } = useAuth();
@@ -102,6 +102,7 @@ export default function ProfilePage() {
     );
   }
 
+  // Pass profile data correctly to components
   return (
     <div className="container mx-auto p-4 space-y-6">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
@@ -151,7 +152,7 @@ export default function ProfilePage() {
             
             <TabsContent value="overview">
               <EditableProfileTab 
-                profile={profile} 
+                profile={profile as Profile} 
                 isEditable={isEditing} 
                 onSave={handleProfileUpdate}
               />
@@ -166,7 +167,7 @@ export default function ProfilePage() {
             </TabsContent>
             
             <TabsContent value="wardrobe">
-              <WardrobeTab profile={profile} />
+              <WardrobeTab profile={profile as Profile} />
             </TabsContent>
             
             <TabsContent value="financial">
@@ -174,7 +175,7 @@ export default function ProfilePage() {
             </TabsContent>
             
             <TabsContent value="media">
-              <MediaConsentTab profile={profile} />
+              <MediaConsentTab profile={profile as Profile} />
             </TabsContent>
           </Tabs>
         </div>
