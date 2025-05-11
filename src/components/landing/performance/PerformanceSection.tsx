@@ -4,7 +4,6 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
 import { Link } from "react-router-dom";
-import { PerformanceEventDetails } from "./PerformanceEvent";
 import { CalendarPlus } from "lucide-react";
 
 interface Event {
@@ -23,7 +22,7 @@ const events: Event[] = [
     date: "May 15, 2024",
     location: "Sisters Chapel, Spelman College",
     description: "Join us for an evening of music celebrating the season of spring.",
-    image: "/images/events/spring_concert.jpg"
+    image: "/lovable-uploads/a2e734d0-cb83-4b32-be93-9f3f0da03fc4.png"
   },
   {
     id: "2",
@@ -31,7 +30,7 @@ const events: Event[] = [
     date: "April 20, 2024",
     location: "Tapley Hall, Spelman College",
     description: "A special performance for Spelman alumni during Alumni Weekend.",
-    image: "/images/events/alumni_weekend.jpg"
+    image: "/lovable-uploads/e06ff100-0add-4adc-834f-50ef81098d35.png"
   },
   {
     id: "3",
@@ -39,18 +38,26 @@ const events: Event[] = [
     date: "December 5, 2024",
     location: "Sisters Chapel, Spelman College",
     description: "Celebrate the holidays with a festive concert featuring classic and contemporary holiday music.",
-    image: "/images/events/holiday_concert.jpg"
+    image: "/lovable-uploads/8aa13e63-fb9a-4c52-95cf-86b458c58f1c.png"
   }
 ];
 
 export function PerformanceSection() {
   const [visibleEvents, setVisibleEvents] = useState(2);
+  const [imageErrors, setImageErrors] = useState<Record<string, boolean>>({});
 
   // Get the authenticated user
   const { isAuthenticated, profile } = useAuth();
   
   const loadMore = () => {
     setVisibleEvents(prevVisibleEvents => prevVisibleEvents + 2);
+  };
+
+  const handleImageError = (eventId: string) => {
+    setImageErrors(prev => ({
+      ...prev,
+      [eventId]: true
+    }));
   };
 
   return (
@@ -73,12 +80,19 @@ export function PerformanceSection() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {events.slice(0, visibleEvents).map(event => (
             <Card key={event.id} className="overflow-hidden">
-              <div className="relative h-48">
-                <img 
-                  src={event.image} 
-                  alt={event.title} 
-                  className="absolute inset-0 w-full h-full object-cover"
-                />
+              <div className="relative h-48 bg-muted">
+                {!imageErrors[event.id] ? (
+                  <img 
+                    src={event.image} 
+                    alt={event.title} 
+                    className="absolute inset-0 w-full h-full object-cover"
+                    onError={() => handleImageError(event.id)}
+                  />
+                ) : (
+                  <div className="absolute inset-0 flex items-center justify-center bg-muted">
+                    <p className="text-muted-foreground text-sm">{event.title} - Image unavailable</p>
+                  </div>
+                )}
               </div>
               <CardHeader>
                 <CardTitle>{event.title}</CardTitle>
