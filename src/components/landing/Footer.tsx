@@ -1,8 +1,9 @@
 
 import React from "react";
 import { useNavigate } from "react-router-dom";
-import { Music, Instagram, Facebook, Youtube, TiktokIcon } from "lucide-react";
+import { Music, Instagram, Facebook, Youtube } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Icons } from "@/components/Icons";
 
 export function Footer() {
   const navigate = useNavigate();
@@ -68,7 +69,7 @@ export function Footer() {
             className="text-gray-600 hover:text-glee-purple transition-colors"
             aria-label="TikTok"
           >
-            <TiktokIcon className="h-5 w-5 sm:h-6 sm:w-6" />
+            <Icons.tiktok className="h-5 w-5 sm:h-6 sm:w-6" />
           </a>
           <a 
             href="https://www.youtube.com/@SpelmanCollegeGleeClub" 

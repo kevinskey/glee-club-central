@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { PageHeaderWithToggle } from "@/components/ui/page-header-with-toggle";
@@ -20,9 +21,9 @@ import {
   Globe,
   Instagram,
   Facebook,
-  TiktokIcon,
   Youtube
 } from "lucide-react";
+import { Icons } from "@/components/Icons";
 import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
 import { supabase } from "@/integrations/supabase/client";
@@ -416,7 +417,7 @@ const DashboardPage = () => {
                 className="h-auto flex-col py-4 px-3 hover:bg-orange-50 hover:text-orange-600 hover:border-orange-200 whitespace-normal text-center"
                 onClick={() => window.open("https://www.tiktok.com/@spelmanglee", "_blank")}
               >
-                <TiktokIcon className="h-6 w-6 mb-2 text-orange-500" />
+                <Icons.tiktok className="h-6 w-6 mb-2 text-orange-500" />
                 <span className="text-sm">TikTok</span>
               </Button>
               
