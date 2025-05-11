@@ -32,7 +32,8 @@ export function getMediaTypeLabel(type: MediaType): string {
 
 // Flickr API utility
 export async function fetchFlickrPhotos(userId = '129581018@N02', count = 6) {
-  const apiKey = 'f9736a5829672b0626b09be91b45c0fa';
+  // Updated API key for Flickr
+  const apiKey = '3123882337f8b49fe43efdc0b5cdd46a';
   const url = `https://www.flickr.com/services/rest/?method=flickr.people.getPublicPhotos&api_key=${apiKey}&user_id=${userId}&format=json&per_page=${count}&nojsoncallback=1`;
   
   try {
@@ -56,4 +57,3 @@ export async function fetchFlickrPhotos(userId = '129581018@N02', count = 6) {
     return [];
   }
 }
-

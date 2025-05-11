@@ -4,6 +4,7 @@ import { fetchFlickrPhotos } from '@/utils/mediaUtils';
 import { AspectRatio } from '@/components/ui/aspect-ratio';
 import { Skeleton } from '@/components/ui/skeleton';
 import { ExternalLink } from 'lucide-react';
+import { toast } from '@/components/ui/use-toast';
 
 interface FlickrGalleryProps {
   userId?: string;
@@ -21,7 +22,17 @@ export function FlickrGallery({ userId = '129581018@N02', photoCount = 6, classN
       setLoading(true);
       try {
         const flickrPhotos = await fetchFlickrPhotos(userId, photoCount);
-        setPhotos(flickrPhotos);
+        if (flickrPhotos.length > 0) {
+          setPhotos(flickrPhotos);
+        } else {
+          // If no photos are returned, use fallback static images
+          setError('Unable to load photos from Flickr. Showing static gallery images.');
+          toast({
+            title: "Flickr Connection Issue",
+            description: "We're having trouble accessing the Flickr gallery. Showing static images instead.",
+            variant: "default"
+          });
+        }
       } catch (err) {
         console.error('Error loading Flickr photos:', err);
         setError('Failed to load photos from Flickr');
@@ -33,14 +44,30 @@ export function FlickrGallery({ userId = '129581018@N02', photoCount = 6, classN
     loadPhotos();
   }, [userId, photoCount]);
   
-  if (error) {
-    return (
-      <div className="text-center py-6 text-red-500">
-        <p>{error}</p>
-        <p className="text-sm mt-2">Please check your connection and try again later.</p>
-      </div>
-    );
-  }
+  // Fallback static images if Flickr fails
+  const staticImages = [
+    {
+      id: "static-1",
+      title: "Spelman College Glee Club Performance",
+      imageUrl: "/lovable-uploads/3ad02de0-04d1-4a5e-9279-898e9c317d80.png",
+      flickrUrl: "https://www.flickr.com/photos/spelmanglee/"
+    },
+    {
+      id: "static-2",
+      title: "Glee Club Formal Portrait",
+      imageUrl: "/lovable-uploads/10bab1e7-0f4e-402f-ab65-feb4710b5eaf.png",
+      flickrUrl: "https://www.flickr.com/photos/spelmanglee/"
+    },
+    {
+      id: "static-3",
+      title: "Glee Club with Orchestra",
+      imageUrl: "/lovable-uploads/e06ff100-0add-4adc-834f-50ef81098d35.png",
+      flickrUrl: "https://www.flickr.com/photos/spelmanglee/"
+    }
+  ];
+  
+  // Use fallback images if there's an error or no photos
+  const displayPhotos = photos.length > 0 ? photos : staticImages;
   
   return (
     <div className={className}>
@@ -57,9 +84,9 @@ export function FlickrGallery({ userId = '129581018@N02', photoCount = 6, classN
               </div>
             </div>
           ))
-        ) : photos.length > 0 ? (
-          // Actual photos
-          photos.map((photo) => (
+        ) : displayPhotos.length > 0 ? (
+          // Actual photos (either from Flickr or static fallback)
+          displayPhotos.map((photo) => (
             <a 
               key={photo.id}
               href={photo.flickrUrl}
@@ -97,6 +124,12 @@ export function FlickrGallery({ userId = '129581018@N02', photoCount = 6, classN
           </div>
         )}
       </div>
+      
+      {error && (
+        <div className="text-sm text-amber-600 mb-4 text-center">
+          Note: {error}
+        </div>
+      )}
       
       <div className="text-center mt-4">
         <a 
