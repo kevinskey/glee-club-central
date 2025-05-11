@@ -29,16 +29,25 @@ export async function fetchUserPermissions(userId: string) {
       console.log("User is super admin, granting all permissions");
       
       // Fetch all available permissions to grant them
+      // Fix: Replace distinct() with a query that fetches unique permissions
       const { data: allPermissions } = await supabase
         .from('role_permissions')
-        .select('permission')
-        .distinct();
+        .select('permission');
         
       if (allPermissions) {
+        // Create a Set to ensure unique permissions
+        const uniquePermissions = new Set();
         const permissionsMap: Record<string, boolean> = {};
+        
         allPermissions.forEach((item) => {
-          permissionsMap[item.permission] = true;
+          // Only add each permission once
+          if (!uniquePermissions.has(item.permission)) {
+            uniquePermissions.add(item.permission);
+            permissionsMap[item.permission] = true;
+          }
         });
+        
+        console.log("Granted permissions for super admin:", Object.keys(permissionsMap).length);
         return permissionsMap;
       }
       
