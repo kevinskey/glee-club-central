@@ -49,56 +49,56 @@ const DashboardPage = () => {
   }
   
   return (
-    <div className="container mx-auto p-4 space-y-6">
+    <div className="space-y-4 md:space-y-6">
       <PageHeader
         title={`Welcome, ${profile?.first_name || 'Member'}`}
         description={`Dashboard - ${profile?.title || 'Member'}`}
-        icon={<Home className="h-6 w-6" />}
+        icon={<Home className="h-5 w-5 md:h-6 md:w-6" />}
       />
       
       {/* Quick Access Section */}
       <DashboardQuickAccess />
       
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-3 md:gap-4">
         {/* Upcoming Events Card */}
         <Card className="md:col-span-2">
-          <CardHeader>
+          <CardHeader className="p-4 md:p-6">
             <div className="flex items-center justify-between">
               <div>
-                <CardTitle>Upcoming Events</CardTitle>
+                <CardTitle className="text-lg md:text-xl">Upcoming Events</CardTitle>
                 <CardDescription>Your scheduled events</CardDescription>
               </div>
               <Calendar className="h-5 w-5 text-muted-foreground" />
             </div>
           </CardHeader>
-          <CardContent>
+          <CardContent className="p-4 md:p-6 pt-0 md:pt-0">
             <DashboardEvents />
           </CardContent>
         </Card>
         
         {/* Announcements Card */}
         <Card>
-          <CardHeader>
+          <CardHeader className="p-4 md:p-6">
             <div className="flex items-center justify-between">
               <div>
-                <CardTitle>Announcements</CardTitle>
+                <CardTitle className="text-lg md:text-xl">Announcements</CardTitle>
                 <CardDescription>Latest updates</CardDescription>
               </div>
               <Bell className="h-5 w-5 text-muted-foreground" />
             </div>
           </CardHeader>
-          <CardContent>
+          <CardContent className="p-4 md:p-6 pt-0 md:pt-0">
             <DashboardAnnouncements />
           </CardContent>
         </Card>
         
         {/* Role-Based Dashboard Modules */}
         <Card className="md:col-span-3">
-          <CardHeader>
-            <CardTitle>Your Dashboard</CardTitle>
+          <CardHeader className="p-4 md:p-6">
+            <CardTitle className="text-lg md:text-xl">Your Dashboard</CardTitle>
             <CardDescription>Modules available based on your {profile?.title || 'role'}</CardDescription>
           </CardHeader>
-          <CardContent>
+          <CardContent className="p-4 md:p-6 pt-0 md:pt-0">
             <DashboardModules />
           </CardContent>
         </Card>

@@ -23,21 +23,21 @@ export function DashboardAnnouncements() {
   ]);
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-3 md:space-y-4">
       {announcements && announcements.length > 0 ? (
         announcements.map(announcement => (
           <div key={announcement.id} className="pb-3 border-b last:border-0">
-            <h3 className="font-medium">{announcement.title}</h3>
-            <p className="text-sm text-muted-foreground mt-1">{announcement.message}</p>
+            <h3 className="font-medium text-sm md:text-base">{announcement.title}</h3>
+            <p className="text-xs md:text-sm text-muted-foreground mt-1 line-clamp-2 md:line-clamp-none">{announcement.message}</p>
           </div>
         ))
       ) : (
-        <div className="text-muted-foreground">No announcements</div>
+        <div className="text-muted-foreground text-xs md:text-sm">No announcements</div>
       )}
-      <div className="mt-4">
+      <div className="mt-3 md:mt-4">
         <Link 
           to="/dashboard/announcements" 
-          className="text-sm text-primary hover:underline"
+          className="text-xs md:text-sm text-primary hover:underline inline-flex items-center"
         >
           View all announcements
         </Link>

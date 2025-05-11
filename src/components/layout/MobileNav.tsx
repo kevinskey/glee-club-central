@@ -111,9 +111,9 @@ export function MobileNav({ isAdmin }: MobileNavProps) {
             <span className="sr-only">Toggle Menu</span>
           </Button>
         </SheetTrigger>
-        <SheetContent side="left" className="pr-0 sm:max-w-xs">
-          <div className="space-y-4 py-4">
-            <div className="px-3">
+        <SheetContent side="left" className="pr-0 sm:max-w-xs w-[85%] px-0">
+          <div className="space-y-4 py-2 h-full flex flex-col">
+            <div className="px-3 flex-1 overflow-auto">
               <h2 className="mb-2 px-4 text-lg font-semibold tracking-tight">
                 Main Menu
               </h2>
@@ -124,19 +124,19 @@ export function MobileNav({ isAdmin }: MobileNavProps) {
                     to={item.href}
                     onClick={onClose}
                     className={cn(
-                      "flex items-center rounded-md px-3 py-2 text-sm font-medium",
+                      "flex items-center rounded-md px-3 py-3 text-sm font-medium",
                       pathname === item.href ? "bg-accent text-accent-foreground" : "hover:bg-accent hover:text-accent-foreground transition-colors"
                     )}
                   >
-                    {item.icon}
-                    <span className="ml-3">{item.title}</span>
+                    <span className="mr-3 flex h-5 w-5 items-center justify-center">{item.icon}</span>
+                    <span>{item.title}</span>
                   </Link>
                 ))}
               </div>
             </div>
             
             {isAdmin && (
-              <div className="px-3">
+              <div className="px-3 border-t pt-4">
                 <h2 className="mb-2 px-4 text-lg font-semibold tracking-tight">
                   Admin Menu
                 </h2>
@@ -147,12 +147,12 @@ export function MobileNav({ isAdmin }: MobileNavProps) {
                       to={item.href}
                       onClick={onClose}
                       className={cn(
-                        "flex items-center rounded-md px-3 py-2 text-sm font-medium",
+                        "flex items-center rounded-md px-3 py-3 text-sm font-medium",
                         pathname === item.href ? "bg-accent text-accent-foreground" : "hover:bg-accent hover:text-accent-foreground transition-colors"
                       )}
                     >
-                      {item.icon}
-                      <span className="ml-3">{item.title}</span>
+                      <span className="mr-3 flex h-5 w-5 items-center justify-center">{item.icon}</span>
+                      <span>{item.title}</span>
                     </Link>
                   ))}
                 </div>

@@ -35,13 +35,13 @@ export function DashboardLayout() {
   }
 
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="min-h-screen flex flex-col bg-background">
       <Header />
       
-      <div className="flex-1 flex">
+      <div className="flex-1 flex flex-col md:flex-row">
         <Sidebar />
         
-        <main className="flex-1 p-4 md:p-8 md:ml-64">
+        <main className="flex-1 p-3 md:p-6 lg:p-8 md:ml-64 pb-16 md:pb-8 overflow-x-hidden">
           <Outlet />
         </main>
       </div>

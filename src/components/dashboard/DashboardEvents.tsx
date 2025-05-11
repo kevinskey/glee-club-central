@@ -36,29 +36,29 @@ export function DashboardEvents() {
   }, [events, eventsLoading]);
   
   if (eventsLoading) {
-    return <div className="text-muted-foreground">Loading events...</div>;
+    return <div className="text-xs md:text-sm text-muted-foreground">Loading events...</div>;
   }
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-3 md:space-y-4">
       {upcomingEvents && upcomingEvents.length > 0 ? (
         upcomingEvents.map(event => (
           <div key={event.id} className="border-b pb-3 last:border-0">
-            <h3 className="font-medium">{event.title}</h3>
-            <div className="flex justify-between text-sm text-muted-foreground">
+            <h3 className="font-medium text-sm md:text-base">{event.title}</h3>
+            <div className="flex justify-between text-xs md:text-sm text-muted-foreground">
               <span>{event.date}</span>
               <span>{event.time}</span>
             </div>
-            {event.location && <div className="text-xs text-muted-foreground">{event.location}</div>}
+            {event.location && <div className="text-xs text-muted-foreground truncate">{event.location}</div>}
           </div>
         ))
       ) : (
-        <div className="text-muted-foreground">No upcoming events</div>
+        <div className="text-xs md:text-sm text-muted-foreground">No upcoming events</div>
       )}
-      <div className="mt-4">
+      <div className="mt-3 md:mt-4">
         <Link 
           to="/dashboard/calendar" 
-          className="text-sm text-primary hover:underline"
+          className="text-xs md:text-sm text-primary hover:underline inline-flex items-center"
         >
           View full calendar
         </Link>
