@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { PageHeader } from "@/components/ui/page-header";
@@ -397,7 +398,7 @@ export default function MembersPage() {
                   members={filteredMembers} 
                   onEditMember={canManageMembers ? handleEditMember : undefined}
                   onDeleteMember={canManageMembers ? handleDeleteClick : undefined}
-                  onManagePermissions={canManagePermissions ? handleManagePermissions : undefined}
+                  onManagePermissions={canManageMembers ? handleManagePermissions : undefined}
                   onChangeRole={canManageMembers ? handleChangeRole : undefined}
                 />
               )}
@@ -417,7 +418,7 @@ export default function MembersPage() {
                   members={filteredMembers} 
                   onEditMember={canManageMembers ? handleEditMember : undefined}
                   onDeleteMember={canManageMembers ? handleDeleteClick : undefined}
-                  onManagePermissions={canManagePermissions ? handleManagePermissions : undefined}
+                  onManagePermissions={canManageMembers ? handleManagePermissions : undefined}
                   onChangeRole={canManageMembers ? handleChangeRole : undefined}
                 />
               )}
