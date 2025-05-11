@@ -1,28 +1,26 @@
 
 import React from "react";
 import { Button } from "@/components/ui/button";
-import { Upload } from "lucide-react";
-import { useIsMobile } from "@/hooks/use-mobile";
+import { FileUp } from "lucide-react";
 
 interface UploadMediaButtonProps {
   onClick: () => void;
   canUpload: boolean;
+  label?: string;
 }
 
-export function UploadMediaButton({ onClick, canUpload }: UploadMediaButtonProps) {
-  const isMobile = useIsMobile();
-  
+export function UploadMediaButton({ 
+  onClick, 
+  canUpload,
+  label = "Upload Media"
+}: UploadMediaButtonProps) {
   if (!canUpload) return null;
   
   return (
-    <div className="flex justify-end">
-      <Button 
-        onClick={onClick}
-        className="flex items-center gap-2"
-        size={isMobile ? "default" : "lg"}
-      >
-        <Upload className={`${isMobile ? "h-4 w-4" : "h-5 w-5"}`} /> 
-        {isMobile ? "Upload" : "Upload Media File"}
+    <div className="flex justify-between items-center">
+      <Button onClick={onClick} className="bg-brand hover:bg-brand/90">
+        <FileUp className="mr-2 h-4 w-4" />
+        {label}
       </Button>
     </div>
   );

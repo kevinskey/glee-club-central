@@ -12,11 +12,17 @@ import { MediaLoadingState } from "@/components/media/MediaLoadingState";
 import { MediaAccordionView } from "@/components/media/MediaAccordionView";
 import { UploadMediaButton } from "@/components/media/UploadMediaButton";
 
-export default function MediaLibraryPage() {
+interface MediaLibraryPageProps {
+  isAdminView?: boolean;
+}
+
+export default function MediaLibraryPage({ isAdminView = false }: MediaLibraryPageProps) {
   const { isSuperAdmin, hasPermission } = usePermissions();
   
-  // Check if user has permission to upload files
+  // Check if user has permission based on roles
   const canUploadMedia = isSuperAdmin || hasPermission('can_upload_media');
+  const canEditMedia = isAdminView || isSuperAdmin || hasPermission('can_upload_media');
+  const canDeleteMedia = isAdminView || isSuperAdmin;
   
   const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
@@ -36,12 +42,24 @@ export default function MediaLibraryPage() {
     setDateFilter,
     mediaTypes,
     categories,
-    fetchAllMedia
+    fetchAllMedia,
+    deleteMediaItem
   } = useMediaLibrary();
   
   const handleUploadComplete = () => {
     console.log("Upload complete, refreshing data");
     fetchAllMedia();
+  };
+
+  const handleDeleteMedia = async (mediaId: string) => {
+    if (!canDeleteMedia) return;
+    
+    try {
+      await deleteMediaItem(mediaId);
+      fetchAllMedia();
+    } catch (error) {
+      console.error("Error deleting media:", error);
+    }
   };
 
   if (error) {
@@ -53,6 +71,7 @@ export default function MediaLibraryPage() {
         <UploadMediaButton 
           onClick={() => fetchAllMedia()} 
           canUpload={true}
+          label="Retry Loading"
         />
       </div>
     );
@@ -60,11 +79,13 @@ export default function MediaLibraryPage() {
 
   return (
     <div className="space-y-6 md:space-y-8">
-      <PageHeader
-        title="Media Library"
-        description="Access and manage all your media files in one place"
-        icon={<FilesIcon className="h-6 w-6" />}
-      />
+      {!isAdminView && (
+        <PageHeader
+          title="Media Library"
+          description="Access and manage all your media files in one place"
+          icon={<FilesIcon className="h-6 w-6" />}
+        />
+      )}
       
       {/* Stats Row */}
       <MediaStatsDisplay stats={mediaStats} />
@@ -87,11 +108,11 @@ export default function MediaLibraryPage() {
         setDateFilter={setDateFilter}
         viewMode={viewMode}
         setViewMode={setViewMode}
-        categories={categories}
         mediaTypes={mediaTypes}
+        categories={categories}
       />
       
-      {/* Content Area - Loading, Empty or Files */}
+      {/* Loading State or Empty State */}
       <MediaLoadingState 
         isLoading={isLoading}
         isEmpty={filteredMediaFiles.length === 0}
@@ -99,34 +120,32 @@ export default function MediaLibraryPage() {
         onUploadClick={() => setIsUploadModalOpen(true)}
       />
       
+      {/* Media Files Display */}
       {!isLoading && filteredMediaFiles.length > 0 && (
         <>
-          {selectedMediaType === "all" && selectedCategory === "all" ? (
-            // When showing all types, use accordion for better organization
-            <MediaAccordionView 
-              files={filteredMediaFiles}
-              mediaTypes={mediaTypes}
-              viewMode={viewMode}
-              onDelete={fetchAllMedia}
+          {viewMode === "grid" ? (
+            <MediaFilesSection 
+              mediaFiles={filteredMediaFiles} 
+              canEdit={canEditMedia}
+              canDelete={canDeleteMedia}
+              onDelete={handleDeleteMedia}
             />
           ) : (
-            // When filtered, show all matching files
-            <MediaFilesSection
-              files={filteredMediaFiles}
-              mediaType={selectedMediaType}
-              viewMode={viewMode}
-              onDelete={fetchAllMedia}
-              title={selectedCategory !== "all" ? `${selectedCategory.replace('_', ' ')}` : undefined}
+            <MediaAccordionView 
+              mediaFiles={filteredMediaFiles} 
+              canEdit={canEditMedia}
+              canDelete={canDeleteMedia}
+              onDelete={handleDeleteMedia}
             />
           )}
         </>
       )}
-
+      
+      {/* Upload Modal */}
       <UploadMediaModal 
+        onUploadComplete={handleUploadComplete}
         open={isUploadModalOpen}
         onOpenChange={setIsUploadModalOpen}
-        onUploadComplete={handleUploadComplete}
-        defaultCategory={selectedCategory !== "all" ? selectedCategory : "general"}
       />
     </div>
   );

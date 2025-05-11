@@ -1,105 +1,122 @@
+
 import React from "react";
-import { MediaFile } from "@/types/media";
-import { MediaFileCard } from "./MediaFileCard";
-import { MediaType, getMediaType } from "@/utils/mediaUtils";
-import { formatDistanceToNow } from "date-fns";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
+import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Download } from "lucide-react";
+import { Pencil, Trash2, Eye, Download } from "lucide-react";
+import { MediaFile } from "@/types/media";
+import { Badge } from "@/components/ui/badge";
+import { formatFileSize, getFileTypeIcon } from "@/utils/file-utils";
 
 interface MediaFilesSectionProps {
-  files: MediaFile[];
-  mediaType: MediaType | "all";
-  viewMode?: "grid" | "list";
-  title?: string;
-  onDelete?: () => void;
+  mediaFiles: MediaFile[];
+  canEdit?: boolean;
+  canDelete?: boolean;
+  onDelete?: (mediaId: string) => void;
 }
 
 export function MediaFilesSection({ 
-  files, 
-  mediaType, 
-  viewMode = "grid",
-  title,
-  onDelete
+  mediaFiles, 
+  canEdit = false,
+  canDelete = false,
+  onDelete 
 }: MediaFilesSectionProps) {
-  // Filter files by media type if mediaType is specified (not "all")
-  const filteredFiles = mediaType !== "all" 
-    ? files.filter(file => getMediaType(file.file_type) === mediaType)
-    : files;
-  
-  if (filteredFiles.length === 0) {
-    return null;
-  }
-
-  // Function to format the date
-  const formatDate = (dateString: string) => {
-    try {
-      const date = new Date(dateString);
-      return formatDistanceToNow(date, { addSuffix: true });
-    } catch (error) {
-      return "Date unknown";
+  const handleDelete = (id: string) => {
+    if (onDelete && window.confirm("Are you sure you want to delete this media file?")) {
+      onDelete(id);
     }
   };
   
-  // Function to format file size
-  const formatFileSize = (bytes: number) => {
-    if (bytes < 1024) return `${bytes} B`;
-    if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
-    return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
-  };
-  
-  // Function to open a file
-  const openFile = (url: string) => {
-    window.open(url, "_blank");
-  };
-
   return (
-    <div className="mb-6 md:mb-8 px-2 sm:px-0">
-      {title && <h2 className="text-xl md:text-2xl font-bold mb-3 md:mb-4 break-words capitalize">{title}</h2>}
-      
-      {viewMode === "grid" ? (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-4">
-          {filteredFiles.map((file) => (
-            <MediaFileCard key={file.id} file={file} onDelete={onDelete} />
-          ))}
-        </div>
-      ) : (
-        <div className="rounded-md border">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead className="w-[300px]">Name</TableHead>
-                <TableHead>Category</TableHead>
-                <TableHead>Size</TableHead>
-                <TableHead>Uploaded</TableHead>
-                <TableHead className="text-right">Actions</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {filteredFiles.map((file) => (
-                <TableRow key={file.id}>
-                  <TableCell className="font-medium">{file.title}</TableCell>
-                  <TableCell>{file.category || getMediaType(file.file_type)}</TableCell>
-                  <TableCell>{formatFileSize(file.size)}</TableCell>
-                  <TableCell>{formatDate(file.created_at)}</TableCell>
-                  <TableCell className="text-right">
-                    <Button size="sm" variant="outline" onClick={() => openFile(file.file_url)}>
-                      <Download className="h-4 w-4 mr-1" /> Open
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+      {mediaFiles.map((file) => {
+        const FileTypeIcon = getFileTypeIcon(file.file_type);
+        
+        return (
+          <Card key={file.id} className="overflow-hidden transition-shadow hover:shadow-md">
+            <div className="h-36 bg-muted flex items-center justify-center">
+              {file.file_type.startsWith("image/") ? (
+                <img 
+                  src={file.file_url} 
+                  alt={file.title} 
+                  className="w-full h-full object-cover"
+                  onError={(e) => {
+                    e.currentTarget.onerror = null;
+                    e.currentTarget.src = "https://placehold.co/400x225/e2e8f0/94a3b8?text=Image+Unavailable";
+                  }}
+                />
+              ) : (
+                <FileTypeIcon className="h-12 w-12 text-muted-foreground" />
+              )}
+            </div>
+            
+            <CardContent className="pt-4">
+              <div className="flex justify-between items-start mb-1">
+                <h3 className="font-medium line-clamp-1" title={file.title}>
+                  {file.title}
+                </h3>
+                <Badge variant="outline" className="shrink-0">
+                  {file.file_type.split('/')[1]?.toUpperCase() || "FILE"}
+                </Badge>
+              </div>
+              
+              {file.description && (
+                <p className="text-sm text-muted-foreground mb-3 line-clamp-2" title={file.description}>
+                  {file.description}
+                </p>
+              )}
+              
+              <div className="flex flex-wrap justify-between items-center gap-2 mt-4">
+                <div className="text-xs text-muted-foreground">
+                  {file.size && formatFileSize(file.size)}
+                </div>
+                
+                <div className="flex space-x-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    asChild
+                  >
+                    <a href={file.file_url} target="_blank" rel="noopener noreferrer">
+                      <Eye className="h-4 w-4" />
+                    </a>
+                  </Button>
+                  
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    asChild
+                  >
+                    <a href={file.file_url} download={file.title}>
+                      <Download className="h-4 w-4" />
+                    </a>
+                  </Button>
+                  
+                  {canEdit && (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => alert('Edit functionality coming soon')}
+                    >
+                      <Pencil className="h-4 w-4" />
                     </Button>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </div>
-      )}
+                  )}
+                  
+                  {canDelete && (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="text-destructive hover:bg-destructive hover:text-destructive-foreground"
+                      onClick={() => handleDelete(file.id)}
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  )}
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        );
+      })}
     </div>
   );
 }
