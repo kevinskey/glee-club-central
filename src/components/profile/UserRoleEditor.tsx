@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from '@/components/ui/button';
@@ -12,12 +11,14 @@ import {
 } from '@/components/ui/select';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useUserManagement } from '@/hooks/useUserManagement';
+import { usePermissions } from '@/hooks/usePermissions';
 import { toast } from 'sonner';
 import { UserRole } from '@/types/auth';
 
 export function UserRoleEditor() {
   const { profile, refreshPermissions } = useAuth();
   const { updateUserRole } = useUserManagement();
+  const { isAdminRole, isSuperAdmin } = usePermissions();
   const [selectedRole, setSelectedRole] = useState<string>(profile?.role || '');
   const [isLoading, setIsLoading] = useState(false);
 
@@ -28,27 +29,25 @@ export function UserRoleEditor() {
     }
   }, [profile?.role]);
 
+  // Determine available roles based on user permissions
   const roles: { value: string; label: string }[] = [
     { value: "singer", label: "Singer" },
     { value: "section_leader", label: "Section Leader" },
     { value: "student_conductor", label: "Student Conductor" },
     { value: "accompanist", label: "Accompanist" },
-    { value: "director", label: "Director" },
     { value: "non_singer", label: "Non-Singer" }
   ];
 
-  // Only show admin roles if user is already an admin
-  if (profile?.role === 'administrator' || profile?.role === 'admin') {
+  // Only show admin roles if user is already an admin or super admin
+  if (isSuperAdmin || isAdminRole || profile?.role === 'administrator' || profile?.role === 'admin') {
     roles.unshift({ value: "admin", label: "Admin" });
     roles.unshift({ value: "administrator", label: "Administrator" });
+    roles.push({ value: "director", label: "Director" });
   }
   
   // If user is already a director, keep it in the list
-  if (profile?.role === 'director') {
-    const directorExists = roles.some(role => role.value === 'director');
-    if (!directorExists) {
-      roles.unshift({ value: "director", label: "Director" });
-    }
+  if (profile?.role === 'director' && !roles.some(role => role.value === 'director')) {
+    roles.push({ value: "director", label: "Director" });
   }
 
   const handleSave = async () => {
@@ -83,6 +82,15 @@ export function UserRoleEditor() {
   if (!profile) {
     return null;
   }
+
+  // Debug information
+  console.log("UserRoleEditor - Current state:", {
+    profileRole: profile.role,
+    selectedRole,
+    isAdminRole,
+    isSuperAdmin,
+    availableRoles: roles.map(r => r.value)
+  });
 
   return (
     <Card>

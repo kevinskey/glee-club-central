@@ -1,4 +1,3 @@
-
 import { supabase } from '@/integrations/supabase/client';
 import { UserTitle } from '@/types/permissions';
 
@@ -66,10 +65,27 @@ export async function fetchUserPermissions(userId: string) {
         // Fallback: if the user has an admin-like role, grant permissions
         if (profileData?.role === 'admin' || profileData?.role === 'administrator' || profileData?.role === 'director') {
           console.log("User is admin or has admin role, granting all permissions");
-          return {}; // Empty map but we'll treat this as "has all permissions" in the auth context
+          
+          // Return a permissions map with all permissions granted
+          return {
+            can_view_financials: true,
+            can_edit_financials: true,
+            can_upload_sheet_music: true,
+            can_view_sheet_music: true,
+            can_edit_attendance: true,
+            can_view_attendance: true,
+            can_view_wardrobe: true,
+            can_edit_wardrobe: true,
+            can_upload_media: true,
+            can_manage_tour: true,
+            can_manage_stage: true,
+            can_view_prayer_box: true,
+            can_post_announcements: true,
+            can_manage_users: true
+          };
         }
         
-        return null;
+        return {};
       }
 
       if (!data || data.length === 0) {
@@ -99,14 +115,29 @@ export async function fetchUserPermissions(userId: string) {
       // Fallback for admin users
       if (profileData?.role === 'admin' || profileData?.role === 'administrator' || profileData?.role === 'director') {
         console.log("User has admin role, granting permissions via fallback");
-        return {};  // Will be treated as "has permissions" in the context
+        return {
+          can_view_financials: true,
+          can_edit_financials: true,
+          can_upload_sheet_music: true,
+          can_view_sheet_music: true,
+          can_edit_attendance: true,
+          can_view_attendance: true,
+          can_view_wardrobe: true,
+          can_edit_wardrobe: true,
+          can_upload_media: true,
+          can_manage_tour: true,
+          can_manage_stage: true,
+          can_view_prayer_box: true,
+          can_post_announcements: true,
+          can_manage_users: true
+        };
       }
       
-      return null;
+      return {};
     }
   } catch (error) {
     console.error("Unexpected error fetching permissions:", error);
-    return null;
+    return {};
   }
 }
 

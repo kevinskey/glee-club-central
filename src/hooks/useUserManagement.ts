@@ -170,20 +170,21 @@ export const useUserManagement = () => {
   
         if (error) {
           console.error('Error updating user role:', error);
-          toast.error('Failed to update user role');
+          toast.error(`Failed to update user role: ${error.message}`);
           return false;
         }
   
         console.log('User role updated successfully');
-        toast.success('User role updated successfully');
         
-        // Refresh the user list after update
-        fetchUsers();
+        // Refresh the user list after update if fetchUsers is available
+        if (typeof fetchUsers === 'function') {
+          fetchUsers().catch(err => console.error('Error refreshing users after role update:', err));
+        }
         
         return true;
       } catch (err) {
         console.error('Unexpected error updating user role:', err);
-        toast.error('An unexpected error occurred');
+        toast.error('An unexpected error occurred while updating the role');
         return false;
       }
     }, [fetchUsers]),
