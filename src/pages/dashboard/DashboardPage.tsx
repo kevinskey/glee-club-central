@@ -297,7 +297,7 @@ const DashboardPage = () => {
               <div className="grid grid-cols-2 gap-3">
                 <Button 
                   variant="outline" 
-                  className="h-auto flex-col py-6 px-3 hover:bg-orange-50 hover:text-orange-600 hover:border-orange-200"
+                  className="h-auto flex-col py-6 px-3 hover:bg-orange-50 hover:text-orange-600 hover:border-orange-200 min-h-[90px] whitespace-normal text-center"
                   onClick={() => navigate("/dashboard/sheet-music")}
                 >
                   <Music className="h-6 w-6 mb-2 text-orange-500" />
@@ -305,7 +305,7 @@ const DashboardPage = () => {
                 </Button>
                 <Button 
                   variant="outline" 
-                  className="h-auto flex-col py-6 px-3 hover:bg-orange-50 hover:text-orange-600 hover:border-orange-200"
+                  className="h-auto flex-col py-6 px-3 hover:bg-orange-50 hover:text-orange-600 hover:border-orange-200 min-h-[90px] whitespace-normal text-center"
                   onClick={() => navigate("/dashboard/practice")}
                 >
                   <Headphones className="h-6 w-6 mb-2 text-orange-500" />
@@ -313,7 +313,7 @@ const DashboardPage = () => {
                 </Button>
                 <Button 
                   variant="outline" 
-                  className="h-auto flex-col py-6 px-3 hover:bg-orange-50 hover:text-orange-600 hover:border-orange-200"
+                  className="h-auto flex-col py-6 px-3 hover:bg-orange-50 hover:text-orange-600 hover:border-orange-200 min-h-[90px] whitespace-normal text-center"
                   onClick={() => navigate("/dashboard/attendance")}
                 >
                   <CheckSquare className="h-6 w-6 mb-2 text-orange-500" />
@@ -321,7 +321,7 @@ const DashboardPage = () => {
                 </Button>
                 <Button 
                   variant="outline" 
-                  className="h-auto flex-col py-6 px-3 hover:bg-orange-50 hover:text-orange-600 hover:border-orange-200"
+                  className="h-auto flex-col py-6 px-3 hover:bg-orange-50 hover:text-orange-600 hover:border-orange-200 min-h-[90px] whitespace-normal text-center"
                   onClick={() => navigate("/dashboard/profile")}
                 >
                   <User className="h-6 w-6 mb-2 text-orange-500" />
