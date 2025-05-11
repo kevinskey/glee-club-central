@@ -4,7 +4,7 @@ import { fetchFlickrPhotos } from '@/utils/mediaUtils';
 import { AspectRatio } from '@/components/ui/aspect-ratio';
 import { Skeleton } from '@/components/ui/skeleton';
 import { ExternalLink } from 'lucide-react';
-import { toast } from '@/components/ui/use-toast';
+import { toast } from 'sonner';
 
 interface FlickrGalleryProps {
   userId?: string;
@@ -27,10 +27,8 @@ export function FlickrGallery({ userId = '129581018@N02', photoCount = 6, classN
         } else {
           // If no photos are returned, use fallback static images
           setError('Unable to load photos from Flickr. Showing static gallery images.');
-          toast({
-            title: "Flickr Connection Issue",
-            description: "We're having trouble accessing the Flickr gallery. Showing static images instead.",
-            variant: "default"
+          toast("Flickr Connection Issue", {
+            description: "We're having trouble accessing the Flickr gallery. Showing static images instead."
           });
         }
       } catch (err) {
