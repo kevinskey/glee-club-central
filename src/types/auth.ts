@@ -18,7 +18,7 @@ export interface Profile {
   dues_paid?: boolean;
   standing?: string;
   notes?: string;
-  last_sign_in_at?: string;
+  last_sign_in_at?: string; // Added missing property
   title?: string;
   special_roles?: string;
   last_login?: string;
