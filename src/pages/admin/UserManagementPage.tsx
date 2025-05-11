@@ -1,6 +1,7 @@
+
 import React, { useState, useEffect } from "react";
 import { PageHeader } from "@/components/ui/page-header";
-import { Users, Plus, Search, Filter, UserCog } from "lucide-react";
+import { Users, Plus, Search, Filter, UserCog, Edit } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import {
@@ -19,14 +20,6 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import { supabase } from "@/integrations/supabase/client";
@@ -34,11 +27,10 @@ import { toast } from "sonner";
 import { formatDistanceToNow } from "date-fns";
 import { UserRoleSelector } from "@/components/members/UserRoleSelector";
 import { User, useUserManagement } from "@/hooks/useUserManagement";
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { userFormSchema, UserFormValues } from "@/components/members/form/userFormSchema";
-import { useForm } from "react-hook-form";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { AddMemberDialog } from "@/components/members/AddMemberDialog";
+import { UserFormValues } from "@/components/members/form/userFormSchema";
+import { DeleteMemberDialog } from "@/components/members/DeleteMemberDialog";
+import { EditUserDialog } from "@/components/members/EditUserDialog";
 
 interface UserManagementState {
   users: User[];
@@ -49,10 +41,22 @@ interface UserManagementState {
   selectedUser: User | null;
   isRoleDialogOpen: boolean;
   isAddUserDialogOpen: boolean;
+  isEditUserDialogOpen: boolean;
+  isDeleteDialogOpen: boolean;
+  isSubmitting: boolean;
+  userToDelete: string | null;
+  userToDeleteName: string;
+  isDeleting: boolean;
 }
 
 export default function UserManagementPage() {
-  const { addUser, fetchUsers } = useUserManagement();
+  const { 
+    addUser, 
+    fetchUsers, 
+    updateUser, 
+    deleteUser 
+  } = useUserManagement();
+  
   const [state, setState] = useState<UserManagementState>({
     users: [],
     isLoading: true,
@@ -61,20 +65,13 @@ export default function UserManagementPage() {
     statusFilter: "all",
     selectedUser: null,
     isRoleDialogOpen: false,
-    isAddUserDialogOpen: false
-  });
-
-  const form = useForm<UserFormValues>({
-    resolver: zodResolver(userFormSchema),
-    defaultValues: {
-      first_name: "",
-      last_name: "",
-      email: "",
-      password: "",
-      role: "singer",
-      voice_part: "soprano_1",
-      status: "active"
-    }
+    isAddUserDialogOpen: false,
+    isEditUserDialogOpen: false,
+    isDeleteDialogOpen: false,
+    isSubmitting: false,
+    userToDelete: null,
+    userToDeleteName: "",
+    isDeleting: false
   });
   
   // Fetch users
@@ -118,21 +115,59 @@ export default function UserManagementPage() {
 
   // Handler for adding a new user by admin
   const handleAddUser = async (values: UserFormValues) => {
+    setState(prev => ({ ...prev, isSubmitting: true }));
     try {
       const success = await addUser(values);
       if (success) {
         toast.success(`Added ${values.first_name} ${values.last_name}`);
-        form.reset();
-        setState(prev => ({ ...prev, isAddUserDialogOpen: false }));
+        setState(prev => ({ 
+          ...prev, 
+          isAddUserDialogOpen: false,
+          isSubmitting: false 
+        }));
         loadUsers();
       }
     } catch (error) {
       console.error("Error adding user:", error);
       toast.error("Failed to add user");
+      setState(prev => ({ ...prev, isSubmitting: false }));
     }
   };
 
-  // Change user role, status, etc.
+  // Handler for updating a user
+  const handleUpdateUser = async (data: UserFormValues) => {
+    if (!state.selectedUser) return;
+    
+    setState(prev => ({ ...prev, isSubmitting: true }));
+    try {
+      const success = await updateUser(state.selectedUser.id, data);
+      if (success) {
+        setState(prev => ({ 
+          ...prev, 
+          isEditUserDialogOpen: false,
+          selectedUser: null,
+          isSubmitting: false
+        }));
+        toast.success(`Updated ${data.first_name} ${data.last_name}`);
+        await loadUsers(); // Refresh the list after update
+      }
+    } catch (error) {
+      console.error("Error updating user:", error);
+      toast.error("Failed to update user");
+      setState(prev => ({ ...prev, isSubmitting: false }));
+    }
+  };
+
+  // Open edit dialog for a user
+  const handleEditUser = (user: User) => {
+    setState(prev => ({
+      ...prev,
+      selectedUser: user,
+      isEditUserDialogOpen: true
+    }));
+  };
+
+  // Change user role
   const openRoleDialog = (user: User) => {
     setState(prev => ({
       ...prev,
@@ -154,10 +189,46 @@ export default function UserManagementPage() {
       }
       
       toast.success(`User status updated to ${newStatus}`);
-      fetchUsers(); // Refresh user list
+      await loadUsers(); // Refresh user list
     } catch (error) {
       console.error("Error updating user status:", error);
       toast.error("Failed to update user status");
+    }
+  };
+
+  // Delete user
+  const handleDeleteClick = (userId: string) => {
+    const user = state.users.find(u => u.id === userId);
+    if (user) {
+      setState(prev => ({
+        ...prev,
+        userToDelete: userId,
+        userToDeleteName: `${user.first_name || ''} ${user.last_name || ''}`.trim() || 'this user',
+        isDeleteDialogOpen: true
+      }));
+    }
+  };
+  
+  const handleConfirmDelete = async () => {
+    if (!state.userToDelete) return;
+    
+    setState(prev => ({ ...prev, isDeleting: true }));
+    try {
+      const success = await deleteUser(state.userToDelete);
+      if (success) {
+        setState(prev => ({ 
+          ...prev, 
+          isDeleteDialogOpen: false,
+          userToDelete: null,
+          isDeleting: false
+        }));
+        toast.success(`${state.userToDeleteName} has been removed`);
+        await loadUsers(); // Refresh user list
+      }
+    } catch (error) {
+      console.error("Error deleting user:", error);
+      toast.error("Failed to delete user");
+      setState(prev => ({ ...prev, isDeleting: false }));
     }
   };
 
@@ -198,8 +269,12 @@ export default function UserManagementPage() {
               onChange={(e) => setState(prev => ({ ...prev, roleFilter: e.target.value }))}
             >
               <option value="all">All Roles</option>
-              <option value="admin">Admin</option>
-              <option value="general">General</option>
+              <option value="administrator">Administrator</option>
+              <option value="section_leader">Section Leader</option>
+              <option value="singer">Singer</option>
+              <option value="student_conductor">Student Conductor</option>
+              <option value="accompanist">Accompanist</option>
+              <option value="non_singer">Non-Singer</option>
             </select>
             
             <select
@@ -209,10 +284,12 @@ export default function UserManagementPage() {
             >
               <option value="all">All Statuses</option>
               <option value="active">Active</option>
+              <option value="pending">Pending</option>
               <option value="inactive">Inactive</option>
+              <option value="alumni">Alumni</option>
             </select>
             
-            <Button variant="outline" onClick={() => fetchUsers()}>
+            <Button variant="outline" onClick={loadUsers}>
               <Filter className="h-4 w-4 mr-2" />
               Reset
             </Button>
@@ -258,16 +335,16 @@ export default function UserManagementPage() {
                     <TableCell>{user.email}</TableCell>
                     <TableCell>
                       <Badge 
-                        variant={user.role === 'admin' ? "default" : "outline"}
+                        variant={user.role === 'administrator' ? "default" : "outline"}
                       >
-                        {user.role === 'admin' ? 'Admin' : 'General'}
+                        {user.role === 'administrator' ? 'Administrator' : user.role}
                       </Badge>
                     </TableCell>
                     <TableCell>
                       <Badge 
                         variant={user.status === 'active' ? "success" : "secondary"}
                       >
-                        {user.status === 'active' ? 'Active' : 'Inactive'}
+                        {user.status}
                       </Badge>
                     </TableCell>
                     <TableCell>{formatLastLogin(user.last_login)}</TableCell>
@@ -281,21 +358,38 @@ export default function UserManagementPage() {
                         <DropdownMenuContent align="end">
                           <DropdownMenuLabel>User Actions</DropdownMenuLabel>
                           <DropdownMenuSeparator />
+                          
+                          <DropdownMenuItem onClick={() => handleEditUser(user)}>
+                            <Edit className="mr-2 h-4 w-4" />
+                            Edit User Details
+                          </DropdownMenuItem>
+                          
                           <DropdownMenuItem onClick={() => openRoleDialog(user)}>
                             <UserCog className="mr-2 h-4 w-4" />
                             Change Role
                           </DropdownMenuItem>
-                          <DropdownMenuItem onClick={() => changeUserStatus(user.id, user.status === 'active' ? 'inactive' : 'active')}>
-                            {user.status === 'active' ? 'Deactivate User' : 'Activate User'}
-                          </DropdownMenuItem>
-                          <DropdownMenuItem>
-                            View Profile
-                          </DropdownMenuItem>
-                          <DropdownMenuItem>
-                            Edit Details
-                          </DropdownMenuItem>
+                          
                           <DropdownMenuSeparator />
-                          <DropdownMenuItem className="text-destructive">
+                          
+                          <DropdownMenuLabel>Status</DropdownMenuLabel>
+                          <DropdownMenuItem onClick={() => changeUserStatus(user.id, 'active')}>
+                            Set as Active
+                          </DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => changeUserStatus(user.id, 'pending')}>
+                            Set as Pending
+                          </DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => changeUserStatus(user.id, 'inactive')}>
+                            Set as Inactive
+                          </DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => changeUserStatus(user.id, 'alumni')}>
+                            Set as Alumni
+                          </DropdownMenuItem>
+                          
+                          <DropdownMenuSeparator />
+                          <DropdownMenuItem 
+                            className="text-destructive" 
+                            onClick={() => handleDeleteClick(user.id)}
+                          >
                             Delete User
                           </DropdownMenuItem>
                         </DropdownMenuContent>
@@ -317,178 +411,31 @@ export default function UserManagementPage() {
         onSuccess={loadUsers}
       />
 
-      {/* Add User Dialog - Comprehensive form for admin user creation */}
-      <Dialog open={state.isAddUserDialogOpen} onOpenChange={(open) => setState(prev => ({ ...prev, isAddUserDialogOpen: open }))}>
-        <DialogContent className="sm:max-w-[550px]">
-          <DialogHeader>
-            <DialogTitle>Add New User</DialogTitle>
-            <DialogDescription>
-              Create a new user with full attributes and role selection
-            </DialogDescription>
-          </DialogHeader>
-          
-          <Form {...form}>
-            <form onSubmit={form.handleSubmit(handleAddUser)} className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
-                <FormField
-                  control={form.control}
-                  name="first_name"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>First Name</FormLabel>
-                      <FormControl>
-                        <Input {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                
-                <FormField
-                  control={form.control}
-                  name="last_name"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Last Name</FormLabel>
-                      <FormControl>
-                        <Input {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
-
-              <FormField
-                control={form.control}
-                name="email"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Email</FormLabel>
-                    <FormControl>
-                      <Input type="email" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="password"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Password</FormLabel>
-                    <FormControl>
-                      <Input type="password" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <div className="grid grid-cols-2 gap-4">
-                <FormField
-                  control={form.control}
-                  name="role"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Role</FormLabel>
-                      <Select onValueChange={field.onChange} defaultValue={field.value}>
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Select role" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          <SelectItem value="singer">Singer</SelectItem>
-                          <SelectItem value="section_leader">Section Leader</SelectItem>
-                          <SelectItem value="student_conductor">Student Conductor</SelectItem>
-                          <SelectItem value="accompanist">Accompanist</SelectItem>
-                          <SelectItem value="non_singer">Non-Singer</SelectItem>
-                          <SelectItem value="administrator">Administrator</SelectItem>
-                          <SelectItem value="director">Director</SelectItem>
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="voice_part"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Voice Part</FormLabel>
-                      <Select onValueChange={field.onChange} defaultValue={field.value}>
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Select voice part" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          <SelectItem value="soprano_1">Soprano 1</SelectItem>
-                          <SelectItem value="soprano_2">Soprano 2</SelectItem>
-                          <SelectItem value="alto_1">Alto 1</SelectItem>
-                          <SelectItem value="alto_2">Alto 2</SelectItem>
-                          <SelectItem value="tenor">Tenor</SelectItem>
-                          <SelectItem value="bass">Bass</SelectItem>
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
-
-              <FormField
-                control={form.control}
-                name="status"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Status</FormLabel>
-                    <Select onValueChange={field.onChange} defaultValue={field.value}>
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select status" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        <SelectItem value="active">Active</SelectItem>
-                        <SelectItem value="pending">Pending</SelectItem>
-                        <SelectItem value="inactive">Inactive</SelectItem>
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="class_year"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Class Year</FormLabel>
-                    <FormControl>
-                      <Input {...field} value={field.value || ''} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <DialogFooter>
-                <Button type="button" variant="outline" onClick={() => setState(prev => ({ ...prev, isAddUserDialogOpen: false }))}>
-                  Cancel
-                </Button>
-                <Button type="submit">Create User</Button>
-              </DialogFooter>
-            </form>
-          </Form>
-        </DialogContent>
-      </Dialog>
+      {/* Add User Dialog */}
+      <AddMemberDialog
+        isOpen={state.isAddUserDialogOpen}
+        onOpenChange={(open) => setState(prev => ({ ...prev, isAddUserDialogOpen: open }))}
+        onMemberAdd={handleAddUser}
+        isSubmitting={state.isSubmitting}
+      />
+      
+      {/* Edit User Dialog */}
+      <EditUserDialog
+        isOpen={state.isEditUserDialogOpen}
+        onOpenChange={(open) => setState(prev => ({ ...prev, isEditUserDialogOpen: open }))}
+        onSave={handleUpdateUser}
+        isSubmitting={state.isSubmitting}
+        user={state.selectedUser}
+      />
+      
+      {/* Delete User Dialog */}
+      <DeleteMemberDialog
+        isOpen={state.isDeleteDialogOpen}
+        onOpenChange={(open) => setState(prev => ({ ...prev, isDeleteDialogOpen: open }))}
+        onConfirm={handleConfirmDelete}
+        memberName={state.userToDeleteName}
+        isDeleting={state.isDeleting}
+      />
     </div>
   );
 }
