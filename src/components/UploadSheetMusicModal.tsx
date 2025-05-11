@@ -1,4 +1,3 @@
-
 import React, { useState, useRef } from "react";
 import { FileUp, Loader2, X, Upload, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -176,14 +175,10 @@ export function UploadSheetMusicModal({
         const fileName = `${Date.now()}-${Math.random().toString(36).substring(2, 15)}.${fileExt}`;
         const filePath = fileName;
 
+        // Using the upload method without onUploadProgress option
         const { error: uploadError, data } = await supabase.storage
           .from('sheet-music')
-          .upload(filePath, file.file, {
-            onUploadProgress: (progress) => {
-              const percent = Math.round((progress.loaded / progress.total) * 100);
-              updateFileData(file.id, { uploadProgress: percent });
-            }
-          });
+          .upload(filePath, file.file);
 
         if (uploadError) throw uploadError;
 
@@ -208,7 +203,10 @@ export function UploadSheetMusicModal({
         if (dbError) throw dbError;
 
         // Update file status to success
-        updateFileData(file.id, { status: 'success' });
+        updateFileData(file.id, { 
+          status: 'success',
+          uploadProgress: 100 // Set to 100% since we can't track progress
+        });
         successCount++;
       } catch (error: any) {
         console.error("Upload error:", error);
@@ -219,7 +217,7 @@ export function UploadSheetMusicModal({
         errorCount++;
       }
       
-      // Update overall progress
+      // Update overall progress based on completed count
       setOverallProgress(Math.round(((i + 1) / files.length) * 100));
     }
 
