@@ -205,44 +205,42 @@ export default function AboutPage() {
           </div>
         </div>
 
-        {/* Leadership Section - MOVED UP BEFORE JOIN US CTA */}
-        <div className="container mx-auto px-4 py-16">
-          <div className="max-w-4xl mx-auto">
-            <div className="flex items-center gap-3 mb-6">
-              <Users className="h-8 w-8 text-glee-accent" />
-              <h2 className="font-playfair text-3xl font-bold text-gray-800 dark:text-gray-100">Director</h2>
-            </div>
-            
-            <div className="prose max-w-none dark:prose-invert mb-12">
-              <p className="text-lg mb-6 text-gray-700 dark:text-gray-300 leading-relaxed">
-                The Spelman College Glee Club is led by our esteemed director who upholds our tradition of excellence.
-              </p>
-            </div>
-
-            <div className="flex justify-center mb-12">
-              <Card className="overflow-hidden max-w-md">
-                <CardContent className="text-center py-6">
-                  <h3 className="text-xl font-bold mb-1">Dr. Kevin Phillip Johnson</h3>
-                  <p className="text-glee-purple font-medium mb-3">Director</p>
-                  <p className="text-gray-600 dark:text-gray-400">
-                    Dr. Kevin Phillip Johnson has served as the distinguished Director of the Spelman College Glee Club since 2010. 
-                    He holds a Doctor of Musical Arts degree in Choral Conducting from the University of Michigan and has previously 
-                    served on the faculties of Morgan State University and Howard University.
+        {/* Director Section */}
+        <div className="bg-gray-50 dark:bg-gray-900 py-16">
+          <div className="container mx-auto px-4">
+            <div className="max-w-4xl mx-auto">
+              <div className="flex items-center gap-3 mb-6">
+                <Users className="h-8 w-8 text-glee-accent" />
+                <h2 className="font-playfair text-3xl font-bold text-gray-800 dark:text-gray-100">Director</h2>
+              </div>
+              
+              <Card className="bg-white dark:bg-gray-800 border-none shadow-lg max-w-3xl mx-auto">
+                <CardContent className="py-8 px-6 md:px-10">
+                  <h3 className="text-2xl font-bold mb-2 text-glee-purple">Dr. Kevin Phillip Johnson</h3>
+                  <p className="text-lg font-medium mb-6 text-gray-600 dark:text-gray-400">
+                    Director, Spelman College Glee Club
                   </p>
-                  <p className="text-gray-600 dark:text-gray-400 mt-3">
-                    Under his leadership, the Glee Club has performed at prestigious venues including Carnegie Hall, the Kennedy Center, 
-                    and on international tours across Europe and Africa. Dr. Johnson is recognized for his expertise in African American 
-                    choral traditions, particularly spirituals and gospel music, and has published numerous scholarly articles and 
-                    arrangements. His innovative programming bridges classical repertoire with the rich heritage of 
-                    African American musical traditions.
-                  </p>
+                  <div className="space-y-4 text-gray-700 dark:text-gray-300">
+                    <p>
+                      Dr. Kevin Phillip Johnson is an award-winning composer, arranger, and Associate Professor of Music 
+                      at Spelman College, where he directs the renowned Spelman College Glee Club. A dynamic educator 
+                      and cultural visionary, Dr. Johnson integrates African-American musical traditions with cutting-edge 
+                      technology in both performance and pedagogy.
+                    </p>
+                    <p>
+                      His innovative work includes the Hip-Hop Mass, the Black Music Scholar Academy, and original 
+                      compositions published through Carl Fischer and Lion & Lamb Publishing. With a creative portfolio 
+                      spanning choral music, screenwriting, and product development, Dr. Johnson continues to shape 
+                      the future of music education and Black cultural expression.
+                    </p>
+                  </div>
                 </CardContent>
               </Card>
             </div>
           </div>
         </div>
 
-        {/* Join Us CTA - NOW AFTER THE LEADERSHIP SECTION */}
+        {/* Join Us CTA */}
         <div className="bg-glee-purple text-white py-16">
           <div className="container mx-auto px-4">
             <div className="max-w-4xl mx-auto text-center">
