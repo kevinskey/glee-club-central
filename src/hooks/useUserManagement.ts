@@ -71,9 +71,7 @@ export const useUserManagement = () => {
         
         // Update local state to remove the deleted user from the UI immediately
         setUsers(currentUsers => 
-          currentUsers.map(user => 
-            user.id === userId ? { ...user, status: 'deleted' } : user
-          )
+          currentUsers.filter(user => user.id !== userId)
         );
         
         return true;

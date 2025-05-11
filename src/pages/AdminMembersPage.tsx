@@ -32,16 +32,13 @@ export default function AdminMembersPage() {
   useEffect(() => {
     // Create a custom event listener for user deletion
     const handleUserDeleted = (event: CustomEvent) => {
-      console.log("User deleted event detected, refreshing user list");
+      console.log("User deleted event detected");
       // Access the deleted user ID from the event detail
       const userId = event.detail?.userId;
       if (userId) {
-        console.log(`User ${userId} was deleted, updating UI`);
+        console.log(`User ${userId} was deleted, UI will be updated`);
       }
-      userManagement.fetchUsers()
-        .catch(err => {
-          console.error("Error refreshing users after deletion:", err);
-        });
+      // No need to refresh here since useUserManagement.deleteUser now updates the local state
     };
     
     // Listen for the custom event

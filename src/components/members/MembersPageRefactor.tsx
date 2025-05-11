@@ -1,4 +1,3 @@
-
 import React, { useState, useCallback } from "react";
 import { User } from "@/hooks/useUserManagement";
 import { Navigate } from "react-router-dom";
@@ -81,7 +80,7 @@ export function MembersPageComponent({ useUserManagementHook }: MembersPageProps
     deleteUser
   } = useUserManagementHook();
   
-  // Filter out deleted users more explicitly
+  // Explicitly filter out deleted users
   const members = allMembers ? allMembers.filter(member => member.status !== 'deleted') : [];
   
   // Create a wrapper function for fetchUsers that returns void
@@ -148,8 +147,7 @@ export function MembersPageComponent({ useUserManagementHook }: MembersPageProps
       const success = await deleteUser(userToDelete);
       
       if (success) {
-        // Immediately remove the deleted user from the local state
-        // This ensures the UI updates right away without waiting for a refresh
+        // The deleteUser function now handles removing the user from the local state
         setIsDeleteDialogOpen(false);
         setUserToDelete(null);
         toast.success(`${userToDeleteName} has been deleted`);
