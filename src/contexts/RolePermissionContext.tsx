@@ -7,10 +7,10 @@ import { toast } from 'sonner';
 // Define user roles as a simple string literal union type
 export type UserRole = 'admin' | 'student' | 'section_leader' | 'staff' | 'guest';
 
-// Simple permission record type
-type PermissionRecord = Record<string, boolean>;
+// Simple permission record type using a plain index signature
+type PermissionRecord = { [key: string]: boolean };
 
-// Define the context interface clearly
+// Define the context interface
 interface RolePermissionContextType {
   userRole: UserRole | null;
   permissions: PermissionRecord;
@@ -53,14 +53,13 @@ export const RolePermissionProvider: React.FC<{ children: React.ReactNode }> = (
       // Get role from profile
       const roleFromProfile = profile?.role || 'student';
       
-      // List of valid roles as a const array
-      const validRoles = ['admin', 'student', 'section_leader', 'staff', 'guest'] as const;
+      // Valid roles
+      const validRoles: UserRole[] = ['admin', 'student', 'section_leader', 'staff', 'guest'];
       
       // Determine the role safely
       let role: UserRole = 'student'; // Default role
       
-      // Check if roleFromProfile is a valid role
-      if (validRoles.includes(roleFromProfile as any)) {
+      if (validRoles.includes(roleFromProfile as UserRole)) {
         role = roleFromProfile as UserRole;
       }
       
