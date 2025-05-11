@@ -1,7 +1,7 @@
 
 import React from "react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Check, CreditCard, Clock, Banknote, AlertTriangle, X } from "lucide-react"; // Added X import
+import { Check, CreditCard, Clock, Banknote, AlertTriangle, X } from "lucide-react"; 
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { useQuery } from "@tanstack/react-query";
@@ -26,10 +26,10 @@ export const FinancialInfoTab: React.FC<FinancialInfoTabProps> = ({ memberId }) 
     enabled: !!memberId,
   });
 
-  // Mock financial data
+  // Mock financial data with updated dues amount
   const financialData = {
-    total_dues: 200,
-    amount_paid: 150,
+    total_dues: 100,  // Updated to $100
+    amount_paid: 100,  // Updated to $100
     fundraiser_participation: [
       { id: 1, name: "Bake Sale", participated: true, amount_raised: 75 },
       { id: 2, name: "Car Wash", participated: false, amount_raised: 0 },

@@ -20,24 +20,24 @@ import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, Responsi
 
 // Sample financial data
 const samplePayments = [
-  { id: "1", memberId: "1", memberName: "Alexis Johnson", amount: 75, date: "2024-01-15", method: "Credit Card", status: "completed", description: "Fall Semester Dues" },
-  { id: "2", memberId: "2", memberName: "Jamal Williams", amount: 75, date: "2024-01-12", method: "Venmo", status: "completed", description: "Fall Semester Dues" },
-  { id: "3", memberId: "4", memberName: "Maya Rodriguez", amount: 75, date: "2024-01-10", method: "Cash", status: "completed", description: "Fall Semester Dues" },
-  { id: "4", memberId: "5", memberName: "Devon Carter", amount: 75, date: "2024-01-05", method: "Check", status: "completed", description: "Fall Semester Dues" },
-  { id: "5", memberId: "3", memberName: "Taylor Smith", amount: 75, date: "2024-02-28", method: "Credit Card", status: "pending", description: "Fall Semester Dues" },
+  { id: "1", memberId: "1", memberName: "Alexis Johnson", amount: 100, date: "2024-01-15", method: "Credit Card", status: "completed", description: "Academic Year 2025 Dues" },
+  { id: "2", memberId: "2", memberName: "Jamal Williams", amount: 100, date: "2024-01-12", method: "Venmo", status: "completed", description: "Academic Year 2025 Dues" },
+  { id: "3", memberId: "4", memberName: "Maya Rodriguez", amount: 100, date: "2024-01-10", method: "Cash", status: "completed", description: "Academic Year 2025 Dues" },
+  { id: "4", memberId: "5", memberName: "Devon Carter", amount: 100, date: "2024-01-05", method: "Check", status: "completed", description: "Academic Year 2025 Dues" },
+  { id: "5", memberId: "3", memberName: "Taylor Smith", amount: 100, date: "2024-02-28", method: "Credit Card", status: "pending", description: "Academic Year 2025 Dues" },
 ];
 
 const chartData = [
   { name: "Aug", revenue: 0, expenses: 125 },
-  { name: "Sep", revenue: 225, expenses: 250 },
-  { name: "Oct", revenue: 375, expenses: 175 },
-  { name: "Nov", revenue: 75, expenses: 350 },
-  { name: "Dec", revenue: 150, expenses: 200 },
-  { name: "Jan", revenue: 375, expenses: 125 },
-  { name: "Feb", revenue: 75, expenses: 175 },
+  { name: "Sep", revenue: 300, expenses: 250 },
+  { name: "Oct", revenue: 400, expenses: 175 },
+  { name: "Nov", revenue: 100, expenses: 350 },
+  { name: "Dec", revenue: 200, expenses: 200 },
+  { name: "Jan", revenue: 500, expenses: 125 },
+  { name: "Feb", revenue: 100, expenses: 175 },
   { name: "Mar", revenue: 0, expenses: 300 },
-  { name: "Apr", revenue: 225, expenses: 250 },
-  { name: "May", revenue: 375, expenses: 500 },
+  { name: "Apr", revenue: 300, expenses: 250 },
+  { name: "May", revenue: 500, expenses: 500 },
 ];
 
 export default function AdminFinancesPage() {
@@ -91,7 +91,7 @@ export default function AdminFinancesPage() {
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold">${totalRevenue}</div>
-                <p className="text-xs text-muted-foreground">Academic Year 2023-2024</p>
+                <p className="text-xs text-muted-foreground">Academic Year 2024-2025</p>
               </CardContent>
             </Card>
             
@@ -111,7 +111,7 @@ export default function AdminFinancesPage() {
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold">${totalExpenses}</div>
-                <p className="text-xs text-muted-foreground">Academic Year 2023-2024</p>
+                <p className="text-xs text-muted-foreground">Academic Year 2024-2025</p>
               </CardContent>
             </Card>
           </div>

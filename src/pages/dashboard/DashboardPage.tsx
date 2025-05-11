@@ -251,7 +251,7 @@ const DashboardPage = () => {
             </CardContent>
           </Card>
           
-          {/* Announcements Card - MOVED HERE */}
+          {/* Announcements Card */}
           <Card className="shadow-md border-t-4 border-t-orange-500">
             <CardHeader className="pb-2">
               <div className="flex items-center justify-between">
@@ -280,7 +280,7 @@ const DashboardPage = () => {
           </Card>
         </div>
         
-        {/* Right Column - Quick Access (removed Announcements from here) */}
+        {/* Right Column - Quick Access */}
         <div className="space-y-8">
           {/* Quick Access */}
           <Card className="shadow-md">
@@ -342,7 +342,7 @@ const DashboardPage = () => {
             <CardContent>
               <div className="flex flex-col gap-3">
                 <div className="flex justify-between items-center">
-                  <span className="text-sm font-medium">Spring 2025</span>
+                  <span className="text-sm font-medium">Academic Year 2025</span>
                   <div className="bg-green-100 text-green-700 px-2 py-0.5 rounded-full text-xs font-medium">
                     Paid
                   </div>
@@ -351,7 +351,7 @@ const DashboardPage = () => {
                   <div className="h-full bg-green-500 rounded-full" style={{ width: "100%" }}></div>
                 </div>
                 <div className="flex justify-between text-xs text-muted-foreground">
-                  <span>Amount: $150.00</span>
+                  <span>Amount: $100.00</span>
                   <span>Paid on: April 15, 2025</span>
                 </div>
                 <Button 

@@ -31,7 +31,7 @@ export function FinancialInfoTab({ memberId }: FinancialInfoTabProps) {
   });
   
   // Calculate the balance
-  const totalDue = 100; // This would come from a setting in the database
+  const totalDue = 100; // Updated to $100 for academic year
   const totalPaid = paymentRecords?.reduce((sum, payment) => {
     if (payment.status === 'completed') {
       return sum + Number(payment.amount);
