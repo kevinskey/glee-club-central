@@ -1,5 +1,5 @@
 
-import React, { useState, useCallback, useEffect } from "react";
+import React, { useState, useCallback, useEffect, useRef } from "react";
 import { Header } from "@/components/landing/Header";
 import { Footer } from "@/components/landing/Footer";
 import FullCalendar from "@fullcalendar/react";
@@ -29,6 +29,9 @@ const CalendarPage = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [calendarView, setCalendarView] = useState<'dayGridMonth' | 'timeGridWeek' | 'timeGridDay' | 'listWeek'>('dayGridMonth');
   const [currentDate, setCurrentDate] = useState(new Date());
+  
+  // Add a ref to access the FullCalendar API
+  const calendarRef = useRef<FullCalendar | null>(null);
   
   const { events, fetchEvents, addEvent, updateEvent, deleteEvent } = useCalendarStore();
   const { isAdmin, profile, isAuthenticated, isLoading: authLoading } = useAuth();
@@ -160,27 +163,28 @@ const CalendarPage = () => {
     }
   };
 
+  // Update the navigation methods to use the ref instead of querySelector
   const handlePrevClick = () => {
-    const calendarApi = document.querySelector('.fc')?.getApi();
-    if (calendarApi) {
-      calendarApi.prev();
-      setCurrentDate(calendarApi.getDate());
+    if (calendarRef.current) {
+      const api = calendarRef.current.getApi();
+      api.prev();
+      setCurrentDate(api.getDate());
     }
   };
 
   const handleNextClick = () => {
-    const calendarApi = document.querySelector('.fc')?.getApi();
-    if (calendarApi) {
-      calendarApi.next();
-      setCurrentDate(calendarApi.getDate());
+    if (calendarRef.current) {
+      const api = calendarRef.current.getApi();
+      api.next();
+      setCurrentDate(api.getDate());
     }
   };
 
   const handleTodayClick = () => {
-    const calendarApi = document.querySelector('.fc')?.getApi();
-    if (calendarApi) {
-      calendarApi.today();
-      setCurrentDate(calendarApi.getDate());
+    if (calendarRef.current) {
+      const api = calendarRef.current.getApi();
+      api.today();
+      setCurrentDate(api.getDate());
     }
   };
 
@@ -294,12 +298,7 @@ const CalendarPage = () => {
               <div className="flex-1 bg-white dark:bg-gray-800 rounded-lg shadow-sm p-4">
                 <CustomToolbar />
                 <FullCalendar
-                  ref={(ref) => {
-                    // Update current date when calendar is mounted
-                    if (ref) {
-                      setCurrentDate(ref.getApi().getDate());
-                    }
-                  }}
+                  ref={calendarRef}
                   plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin, listPlugin]}
                   initialView={calendarView}
                   headerToolbar={false} // We use our custom header
