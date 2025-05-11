@@ -1,5 +1,6 @@
 
 import { supabase } from '@/integrations/supabase/client';
+import { UserTitle } from '@/types/permissions';
 
 export async function fetchUserPermissions(userId: string) {
   try {
@@ -49,7 +50,7 @@ export async function fetchUserPermissions(userId: string) {
  * @param title The new title to set for the user
  * @returns True if successful, false otherwise
  */
-export async function updateUserTitle(userId: string, title: string): Promise<boolean> {
+export async function updateUserTitle(userId: string, title: UserTitle): Promise<boolean> {
   try {
     if (!userId) {
       console.warn('No user ID provided to updateUserTitle');
