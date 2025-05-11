@@ -1,4 +1,3 @@
-
 import React from "react";
 import { createBrowserRouter, Navigate } from "react-router-dom";
 
@@ -77,6 +76,10 @@ export const router = createBrowserRouter([
       {
         path: "admin/members",
         element: <AdminRoute><UserManagementPage /></AdminRoute>,
+      },
+      {
+        path: "members",
+        element: <AdminRoute><AdminMembersPage /></AdminRoute>,
       },
     ],
   },
