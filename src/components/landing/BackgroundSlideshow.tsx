@@ -15,14 +15,14 @@ export function BackgroundSlideshow({
   const [currentIndex, setCurrentIndex] = useState(0);
   const [nextIndex, setNextIndex] = useState(1);
   const [isTransitioning, setIsTransitioning] = useState(false);
-  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const timerRef = useRef<number | null>(null);
+  const intervalRef = useRef<number | null>(null);
 
   // Reset component when images change
   useEffect(() => {
     // Clear any existing timers
-    if (timerRef.current) clearTimeout(timerRef.current);
-    if (intervalRef.current) clearInterval(intervalRef.current);
+    if (timerRef.current) window.clearTimeout(timerRef.current);
+    if (intervalRef.current) window.clearInterval(intervalRef.current);
     
     // Reset state with the first image
     setCurrentIndex(0);
@@ -38,7 +38,7 @@ export function BackgroundSlideshow({
       setIsTransitioning(true);
       
       // After transition completes, update to next image
-      timerRef.current = setTimeout(() => {
+      timerRef.current = window.setTimeout(() => {
         const newCurrentIndex = nextIndex;
         const newNextIndex = (nextIndex + 1) % images.length;
         
@@ -51,19 +51,19 @@ export function BackgroundSlideshow({
     };
 
     // Set up interval for consistent timing between transitions
-    intervalRef.current = setInterval(handleTransition, duration);
+    intervalRef.current = window.setInterval(handleTransition, duration);
     
     return () => {
       // Clean up timers
-      if (timerRef.current) clearTimeout(timerRef.current);
-      if (intervalRef.current) clearInterval(intervalRef.current);
+      if (timerRef.current) window.clearTimeout(timerRef.current);
+      if (intervalRef.current) window.clearInterval(intervalRef.current);
     };
   }, [images, duration, transition]);
 
-  // If no images provided, don't render anything
+  // If no images provided, return an empty div instead of null
   if (!images || images.length === 0) {
     console.log("No images provided to BackgroundSlideshow");
-    return null;
+    return <div className="absolute inset-0 bg-background" />;
   }
   
   // Special case for single image (no transitions needed)

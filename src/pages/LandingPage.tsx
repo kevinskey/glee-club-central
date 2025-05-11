@@ -20,7 +20,6 @@ export default function LandingPage() {
     console.log("LandingPage component mounting");
     
     // Simple timeout to ensure all resources are loaded properly
-    // This gives the browser time to process all components
     const timer = setTimeout(() => {
       try {
         console.log("LandingPage finished loading");
