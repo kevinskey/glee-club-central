@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from '@/components/ui/button';
@@ -67,6 +68,8 @@ export function UserRoleEditor() {
         if (refreshPermissions) {
           await refreshPermissions();
         }
+      } else {
+        toast.error("Failed to update your role");
       }
     } catch (error) {
       console.error("Error updating user role:", error);

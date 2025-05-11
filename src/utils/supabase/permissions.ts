@@ -29,7 +29,6 @@ export async function fetchUserPermissions(userId: string) {
       console.log("User is super admin, granting all permissions");
       
       // Fetch all available permissions to grant them
-      // Fix: Replace distinct() with a query that fetches unique permissions
       const { data: allPermissions } = await supabase
         .from('role_permissions')
         .select('permission');
@@ -66,7 +65,7 @@ export async function fetchUserPermissions(userId: string) {
         
         // Fallback: if the user has an admin-like role, grant permissions
         if (profileData?.role === 'admin' || profileData?.role === 'administrator' || profileData?.role === 'director') {
-          console.log("User is super admin or has admin role, granting all permissions");
+          console.log("User is admin or has admin role, granting all permissions");
           return {}; // Empty map but we'll treat this as "has all permissions" in the auth context
         }
         
