@@ -11,6 +11,12 @@ import { CalendarEvent } from "@/types/calendar";
 import { useCalendarNavigation } from "@/hooks/useCalendarNavigation";
 import { Card } from "@/components/ui/card";
 
+// Import required CSS for FullCalendar
+import "@fullcalendar/core/main.css";
+import "@fullcalendar/daygrid/main.css";
+import "@fullcalendar/timegrid/main.css";
+import "@fullcalendar/list/main.css";
+
 interface CalendarMainProps {
   events: CalendarEvent[];
   calendarView: 'dayGridMonth' | 'timeGridWeek' | 'timeGridDay' | 'listWeek';
@@ -51,7 +57,7 @@ export const CalendarMain = ({
     const timer = setTimeout(() => {
       setCalendarReady(true);
       console.log("Calendar ready state set to true");
-    }, 100);
+    }, 500); // Increased timeout to ensure DOM is fully ready
     
     return () => {
       console.log("CalendarMain unmounting");
@@ -63,10 +69,23 @@ export const CalendarMain = ({
     return <EventContent eventInfo={eventInfo} view={calendarView} />;
   };
 
-  console.log("CalendarMain rendering with events:", events.length);
+  // Add a sample event if events array is empty (for testing purposes)
+  const displayEvents = events.length > 0 ? events : [
+    {
+      id: "test-event",
+      title: "Sample Test Event",
+      start: new Date().toISOString(),
+      end: new Date(Date.now() + 3600000).toISOString(),
+      type: "special" as const,
+      location: "Test Location",
+      description: "This is a test event to verify calendar rendering"
+    }
+  ];
+
+  console.log("CalendarMain rendering with events:", events.length, "View:", calendarView);
 
   return (
-    <Card className="flex-1 bg-white dark:bg-gray-800 rounded-lg shadow-sm p-4 overflow-hidden">
+    <Card className="flex-1 bg-white dark:bg-gray-800 rounded-lg shadow-sm p-4 overflow-visible">
       <CalendarToolbar 
         onPrevClick={handlePrevClick}
         onNextClick={handleNextClick}
@@ -75,14 +94,15 @@ export const CalendarMain = ({
         calendarView={calendarView}
         eventsCount={events.length}
       />
-      <div className="h-[600px] mt-4">
+
+      <div style={{ minHeight: "600px", height: "70vh", marginTop: "1rem" }} className="calendar-container">
         {calendarReady && (
           <FullCalendar
             ref={calendarRef}
             plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin, listPlugin]}
             initialView={calendarView}
             headerToolbar={false} // We use our custom header
-            events={events.map(event => ({
+            events={displayEvents.map(event => ({
               id: event.id,
               title: event.title,
               start: event.start,
