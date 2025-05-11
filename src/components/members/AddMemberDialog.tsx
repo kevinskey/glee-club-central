@@ -1,37 +1,46 @@
 
 import React from 'react';
-import { 
+import { Loader2 } from 'lucide-react';
+import { z } from 'zod';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { format } from 'date-fns';
+
+import { Button } from '@/components/ui/button';
+import {
   Dialog,
   DialogContent,
   DialogDescription,
+  DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Checkbox } from "@/components/ui/checkbox";
-import { 
-  Form, 
-  FormControl, 
-  FormField, 
-  FormItem, 
-  FormLabel, 
-  FormMessage, 
-  FormDescription
-} from "@/components/ui/form";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { userFormSchema, UserFormValues } from "./form/userFormSchema";
-import { RoleStatusSelect } from "./form/RoleStatusSelect";
-import { Loader2 } from "lucide-react";
-import { Textarea } from "@/components/ui/textarea";
+} from '@/components/ui/dialog';
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from '@/components/ui/form';
+import { Input } from '@/components/ui/input';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Textarea } from '@/components/ui/textarea';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { userFormSchema, UserFormValues } from './form/userFormSchema';
 
 interface AddMemberDialogProps {
   isOpen: boolean;
   onOpenChange: (open: boolean) => void;
-  onMemberAdd: (data: UserFormValues) => Promise<void>;
+  onMemberAdd: (data: UserFormValues) => void;
   isSubmitting: boolean;
-  initialValues?: UserFormValues;
+  initialValues?: Partial<UserFormValues>;
   isEditing?: boolean;
 }
 
@@ -45,90 +54,39 @@ export function AddMemberDialog({
 }: AddMemberDialogProps) {
   const form = useForm<UserFormValues>({
     resolver: zodResolver(userFormSchema),
-    defaultValues: initialValues || {
-      first_name: "",
-      last_name: "",
-      email: "",
-      password: "",
-      phone: "",
-      role: "singer",
-      voice_part: "soprano_1",
-      status: "pending",
-      class_year: "",
-      notes: "",
-      special_roles: "",
-      dues_paid: false
-    }
+    defaultValues: {
+      first_name: initialValues?.first_name || '',
+      last_name: initialValues?.last_name || '',
+      email: initialValues?.email || '',
+      password: '',
+      phone: initialValues?.phone || '',
+      role: initialValues?.role || 'student',
+      voice_part: initialValues?.voice_part || 'soprano_1',
+      status: initialValues?.status || 'active',
+      join_date: initialValues?.join_date || format(new Date(), 'yyyy-MM-dd'),
+      class_year: initialValues?.class_year || '',
+      notes: initialValues?.notes || '',
+      dues_paid: initialValues?.dues_paid || false,
+    },
   });
 
-  // Reset form when dialog opens/closes or when editing a different user
-  React.useEffect(() => {
-    if (isOpen) {
-      if (initialValues) {
-        form.reset(initialValues);
-      } else {
-        form.reset({
-          first_name: "",
-          last_name: "",
-          email: "",
-          password: "",
-          phone: "",
-          role: "singer",
-          voice_part: "soprano_1",
-          status: "pending",
-          class_year: "",
-          notes: "",
-          special_roles: "",
-          dues_paid: false
-        });
-      }
-    }
-  }, [isOpen, initialValues, form]);
-
-  const onSubmit = async (data: UserFormValues) => {
-    await onMemberAdd(data);
+  const onSubmit = (data: z.infer<typeof userFormSchema>) => {
+    onMemberAdd(data);
   };
-
-  const roleOptions = [
-    { label: "Singer", value: "singer" },
-    { label: "Section Leader", value: "section_leader" },
-    { label: "Administrator", value: "administrator" },
-    { label: "Student Conductor", value: "student_conductor" },
-    { label: "Accompanist", value: "accompanist" },
-    { label: "Non-Singer", value: "non_singer" }
-  ];
-
-  const voicePartOptions = [
-    { label: "Soprano 1", value: "soprano_1" },
-    { label: "Soprano 2", value: "soprano_2" },
-    { label: "Alto 1", value: "alto_1" },
-    { label: "Alto 2", value: "alto_2" },
-    { label: "Tenor", value: "tenor" },
-    { label: "Bass", value: "bass" }
-  ];
-
-  const statusOptions = [
-    { label: "Active", value: "active" },
-    { label: "Pending", value: "pending" },
-    { label: "Inactive", value: "inactive" },
-    { label: "Alumni", value: "alumni" }
-  ];
 
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-md max-h-[80vh] overflow-y-auto">
+      <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>{isEditing ? "Edit Member" : "Add New Member"}</DialogTitle>
+          <DialogTitle>{isEditing ? 'Edit Member' : 'Add New Member'}</DialogTitle>
           <DialogDescription>
-            {isEditing 
-              ? "Update member information in the database." 
-              : "Add a new member to the Glee Club."}
+            {isEditing ? 'Update member information below.' : 'Enter the details for the new member below.'}
           </DialogDescription>
         </DialogHeader>
 
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <FormField
                 control={form.control}
                 name="first_name"
@@ -136,13 +94,13 @@ export function AddMemberDialog({
                   <FormItem>
                     <FormLabel>First Name</FormLabel>
                     <FormControl>
-                      <Input placeholder="John" {...field} />
+                      <Input placeholder="Jane" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
               />
-
+              
               <FormField
                 control={form.control}
                 name="last_name"
@@ -156,48 +114,37 @@ export function AddMemberDialog({
                   </FormItem>
                 )}
               />
-            </div>
-
-            <FormField
-              control={form.control}
-              name="email"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Email</FormLabel>
-                  <FormControl>
-                    <Input 
-                      type="email" 
-                      placeholder="john.doe@example.com" 
-                      {...field} 
-                      disabled={isEditing}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
+              
+              <FormField
+                control={form.control}
+                name="email"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Email</FormLabel>
+                    <FormControl>
+                      <Input placeholder="jane.doe@example.com" {...field} readOnly={isEditing} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              
+              {!isEditing && (
+                <FormField
+                  control={form.control}
+                  name="password"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Password</FormLabel>
+                      <FormControl>
+                        <Input type="password" placeholder="••••••••" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
               )}
-            />
-
-            <FormField
-              control={form.control}
-              name="password"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>
-                    {isEditing ? "Password (leave blank to keep current)" : "Password"}
-                  </FormLabel>
-                  <FormControl>
-                    <Input 
-                      type="password" 
-                      placeholder={isEditing ? "••••••••" : "Create password"} 
-                      {...field} 
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <div className="grid grid-cols-2 gap-4">
+              
               <FormField
                 control={form.control}
                 name="phone"
@@ -205,11 +152,105 @@ export function AddMemberDialog({
                   <FormItem>
                     <FormLabel>Phone Number</FormLabel>
                     <FormControl>
-                      <Input 
-                        placeholder="123-456-7890" 
-                        {...field} 
-                        value={field.value || ""}
-                      />
+                      <Input placeholder="555-123-4567" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              
+              <FormField
+                control={form.control}
+                name="voice_part"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Voice Part</FormLabel>
+                    <Select 
+                      onValueChange={field.onChange} 
+                      defaultValue={field.value || undefined}
+                    >
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select voice part" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value="soprano_1">Soprano 1</SelectItem>
+                        <SelectItem value="soprano_2">Soprano 2</SelectItem>
+                        <SelectItem value="alto_1">Alto 1</SelectItem>
+                        <SelectItem value="alto_2">Alto 2</SelectItem>
+                        <SelectItem value="tenor">Tenor</SelectItem>
+                        <SelectItem value="bass">Bass</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="role"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Role</FormLabel>
+                    <Select 
+                      onValueChange={field.onChange} 
+                      defaultValue={field.value}
+                    >
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select role" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value="admin">Administrator</SelectItem>
+                        <SelectItem value="section_leader">Section Leader</SelectItem>
+                        <SelectItem value="student">Student Member</SelectItem>
+                        <SelectItem value="staff">Staff</SelectItem>
+                        <SelectItem value="guest">Guest/Alumni</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              
+              <FormField
+                control={form.control}
+                name="status"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Status</FormLabel>
+                    <Select 
+                      onValueChange={field.onChange} 
+                      defaultValue={field.value}
+                    >
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select status" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value="active">Active</SelectItem>
+                        <SelectItem value="pending">Pending</SelectItem>
+                        <SelectItem value="inactive">Inactive</SelectItem>
+                        <SelectItem value="alumni">Alumni</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              
+              <FormField
+                control={form.control}
+                name="join_date"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Join Date</FormLabel>
+                    <FormControl>
+                      <Input type="date" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -223,81 +264,33 @@ export function AddMemberDialog({
                   <FormItem>
                     <FormLabel>Class Year</FormLabel>
                     <FormControl>
-                      <Input 
-                        placeholder="2026" 
-                        {...field} 
-                        value={field.value || ""}
-                      />
+                      <Input placeholder="2024" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
               />
-            </div>
-
-            <div className="grid grid-cols-2 gap-4">
-              <RoleStatusSelect
-                form={form}
-                name="role"
-                label="Role"
-                options={roleOptions}
+              
+              <FormField
+                control={form.control}
+                name="dues_paid"
+                render={({ field }) => (
+                  <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
+                    <FormControl>
+                      <Checkbox
+                        checked={field.value}
+                        onCheckedChange={field.onChange}
+                      />
+                    </FormControl>
+                    <div className="space-y-1 leading-none">
+                      <FormLabel>
+                        Dues Paid
+                      </FormLabel>
+                    </div>
+                  </FormItem>
+                )}
               />
-
-              <RoleStatusSelect
-                form={form}
-                name="voice_part"
-                label="Voice Part"
-                options={voicePartOptions}
-              />
             </div>
-
-            <RoleStatusSelect
-              form={form}
-              name="status"
-              label="Status"
-              options={statusOptions}
-            />
-            
-            <FormField
-              control={form.control}
-              name="dues_paid"
-              render={({ field }) => (
-                <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
-                  <FormControl>
-                    <Checkbox
-                      checked={field.value}
-                      onCheckedChange={field.onChange}
-                    />
-                  </FormControl>
-                  <div className="space-y-1 leading-none">
-                    <FormLabel>
-                      Dues Paid
-                    </FormLabel>
-                    <FormDescription>
-                      Check this box if member has paid their dues
-                    </FormDescription>
-                  </div>
-                </FormItem>
-              )}
-            />
-            
-            <FormField
-              control={form.control}
-              name="special_roles"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Special Roles</FormLabel>
-                  <FormControl>
-                    <Input 
-                      placeholder="E.g., Secretary, Treasurer, etc." 
-                      {...field} 
-                      value={field.value || ""}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
             
             <FormField
               control={form.control}
@@ -306,11 +299,10 @@ export function AddMemberDialog({
                 <FormItem>
                   <FormLabel>Notes</FormLabel>
                   <FormControl>
-                    <Textarea 
-                      placeholder="Additional notes about this member" 
-                      {...field} 
-                      value={field.value || ""}
-                      className="min-h-[80px]"
+                    <Textarea
+                      placeholder="Any additional notes about this member..."
+                      className="resize-none"
+                      {...field}
                     />
                   </FormControl>
                   <FormMessage />
@@ -318,7 +310,7 @@ export function AddMemberDialog({
               )}
             />
 
-            <div className="flex justify-end gap-2 pt-4">
+            <DialogFooter>
               <Button
                 type="button"
                 variant="outline"
@@ -331,13 +323,13 @@ export function AddMemberDialog({
                 {isSubmitting ? (
                   <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    {isEditing ? "Updating..." : "Adding..."}
+                    {isEditing ? 'Updating...' : 'Adding...'}
                   </>
                 ) : (
-                  isEditing ? "Update Member" : "Add Member"
+                  isEditing ? 'Update Member' : 'Add Member'
                 )}
               </Button>
-            </div>
+            </DialogFooter>
           </form>
         </Form>
       </DialogContent>

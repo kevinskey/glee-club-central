@@ -1,16 +1,24 @@
 
 import React from 'react';
-import { RouterProvider } from 'react-router-dom';
-import { router } from './router';
+import { BrowserRouter } from 'react-router-dom';
 import { Toaster } from 'sonner';
-import './App.css';
+import { AuthProvider } from './contexts/AuthContext';
+import { RolePermissionProvider } from './contexts/RolePermissionContext';
+import { ThemeProvider } from './components/ThemeProvider';
+import Routes from './Routes';
 
 function App() {
   return (
-    <>
-      <RouterProvider router={router} />
-      <Toaster position="top-right" richColors />
-    </>
+    <ThemeProvider>
+      <BrowserRouter>
+        <AuthProvider>
+          <RolePermissionProvider>
+            <Routes />
+            <Toaster position="top-right" />
+          </RolePermissionProvider>
+        </AuthProvider>
+      </BrowserRouter>
+    </ThemeProvider>
   );
 }
 
