@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from '@/components/ui/button';
@@ -41,6 +40,14 @@ export function UserRoleEditor() {
   if (profile?.role === 'administrator' || profile?.role === 'admin') {
     roles.unshift({ value: "admin", label: "Admin" });
     roles.unshift({ value: "administrator", label: "Administrator" });
+  }
+  
+  // If user is already a director, keep it in the list
+  if (profile?.role === 'director') {
+    const directorExists = roles.some(role => role.value === 'director');
+    if (!directorExists) {
+      roles.unshift({ value: "director", label: "Director" });
+    }
   }
 
   const handleSave = async () => {

@@ -36,6 +36,11 @@ export const RolePermissionProvider: React.FC<{ children: React.ReactNode }> = (
     // If user is a super admin, grant all permissions
     if (profile?.is_super_admin) return true;
     
+    // If user has an admin-like role, grant all permissions
+    if (profile?.role === 'admin' || profile?.role === 'administrator' || profile?.role === 'director') {
+      return true;
+    }
+    
     // Otherwise, check if the specific permission is granted
     return permissions[permissionName] === true;
   };
@@ -84,6 +89,7 @@ export const RolePermissionProvider: React.FC<{ children: React.ReactNode }> = (
 
   const refreshPermissions = async () => {
     if (user?.id) {
+      console.log('Refreshing permissions for user:', user.id);
       await loadPermissions();
     }
   };

@@ -16,6 +16,11 @@ export function usePermissions() {
   // Check if the user is a super admin
   const isSuperAdmin = Boolean(profile?.is_super_admin);
   
+  // Check if the user has an admin-like role
+  const isAdminRole = profile?.role === 'admin' || 
+                      profile?.role === 'administrator' || 
+                      profile?.role === 'director';
+  
   // Development function to promote current user to super admin
   const promoteToSuperAdmin = async (): Promise<boolean> => {
     if (!profile?.id) {
@@ -58,6 +63,7 @@ export function usePermissions() {
   console.log('usePermissions hook:', {
     isSuperAdmin,
     isAdmin: isAdmin ? isAdmin() : false,
+    isAdminRole,
     profileSuperAdmin: profile?.is_super_admin,
     permissions
   });
@@ -65,6 +71,7 @@ export function usePermissions() {
   return {
     hasPermission,
     isSuperAdmin,
+    isAdminRole,
     promoteToSuperAdmin,
     isUpdating
   };

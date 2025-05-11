@@ -17,54 +17,87 @@ export async function fetchUserPermissions(userId: string) {
     
     console.log('Fetching permissions for user:', userId);
     
-    // Modified to use the proper response format from the RPC function
-    const { data, error } = await supabase.rpc('get_user_permissions', {
-      p_user_id: userId
-    });
-
-    if (error) {
-      console.error("Error fetching permissions:", error);
-      return null;
-    }
-
-    if (!data || data.length === 0) {
-      console.warn("No permissions returned for user:", userId);
+    // First check if user is a super admin
+    const { data: profileData } = await supabase
+      .from('profiles')
+      .select('is_super_admin, role')
+      .eq('id', userId)
+      .single();
+      
+    // If user is super admin, grant all permissions
+    if (profileData?.is_super_admin) {
+      console.log("User is super admin, granting all permissions");
+      
+      // Fetch all available permissions to grant them
+      const { data: allPermissions } = await supabase
+        .from('role_permissions')
+        .select('permission')
+        .distinct();
+        
+      if (allPermissions) {
+        const permissionsMap: Record<string, boolean> = {};
+        allPermissions.forEach((item) => {
+          permissionsMap[item.permission] = true;
+        });
+        return permissionsMap;
+      }
+      
+      // Fallback to empty permissions map
       return {};
     }
-
-    // Convert array of permission objects to a simple map
-    const permissionsMap: Record<string, boolean> = {};
     
-    // Handle various response formats to ensure compatibility
-    if (Array.isArray(data)) {
-      // Check if we have an array of objects with permission and granted properties
-      if (data.length > 0 && typeof data[0] === 'object' && 'permission' in data[0] && 'granted' in data[0]) {
-        // Correctly type the data as an array of objects with permission and granted
-        type PermissionItem = { permission: string; granted: boolean };
-        const permissionItems = data as PermissionItem[];
-        
-        // Build the permissions map
-        permissionItems.forEach((item) => {
-          permissionsMap[item.permission] = item.granted;
-        });
-        
-        console.log('Permissions loaded:', permissionItems.length);
-      } 
-      // If data is an array of permission strings (all granted)
-      else if (data.length > 0 && typeof data[0] === 'string') {
-        const permissionStrings = data as unknown as string[];
-        permissionStrings.forEach((permission) => {
-          permissionsMap[permission] = true;
-        });
-        
-        console.log('Permissions loaded (string format):', permissionStrings.length);
-      }
-    }
+    // For regular users, fetch their permissions based on role
+    try {
+      const { data, error } = await supabase.rpc('get_user_permissions', {
+        p_user_id: userId
+      });
 
-    console.log("User permissions loaded:", Object.keys(permissionsMap).length);
-    return permissionsMap;
+      if (error) {
+        console.error("Error fetching permissions:", error);
+        
+        // Fallback: if the user has an admin-like role, grant permissions
+        if (profileData?.role === 'admin' || profileData?.role === 'administrator' || profileData?.role === 'director') {
+          console.log("User is super admin or has admin role, granting all permissions");
+          return {}; // Empty map but we'll treat this as "has all permissions" in the auth context
+        }
+        
+        return null;
+      }
+
+      if (!data || data.length === 0) {
+        console.warn("No permissions returned for user:", userId);
+        return {};
+      }
+
+      // Convert array of permission objects to a simple map
+      const permissionsMap: Record<string, boolean> = {};
+      
+      if (Array.isArray(data)) {
+        data.forEach((item: any) => {
+          // Handle different response formats
+          if (item && typeof item === 'object' && 'permission' in item && 'granted' in item) {
+            permissionsMap[item.permission] = item.granted;
+          } else if (typeof item === 'string') {
+            permissionsMap[item] = true;
+          }
+        });
+      }
+
+      console.log("User permissions loaded:", Object.keys(permissionsMap).length);
+      return permissionsMap;
+    } catch (error) {
+      console.error("Error in permissions RPC:", error);
+      
+      // Fallback for admin users
+      if (profileData?.role === 'admin' || profileData?.role === 'administrator' || profileData?.role === 'director') {
+        console.log("User has admin role, granting permissions via fallback");
+        return {};  // Will be treated as "has permissions" in the context
+      }
+      
+      return null;
+    }
   } catch (error) {
-    console.error("Error fetching permissions:", error);
+    console.error("Unexpected error fetching permissions:", error);
     return null;
   }
 }
