@@ -37,6 +37,7 @@ export const ProfileOverviewTab: React.FC<ProfileOverviewTabProps> = ({
   onSave 
 }) => {
   const [formData, setFormData] = useState({
+    personal_title: profile.personal_title || '',
     first_name: profile.first_name,
     last_name: profile.last_name,
     phone: profile.phone || '',
@@ -108,6 +109,7 @@ export const ProfileOverviewTab: React.FC<ProfileOverviewTabProps> = ({
   const handleCancel = () => {
     // Reset form data to original profile values
     setFormData({
+      personal_title: profile.personal_title || '',
       first_name: profile.first_name,
       last_name: profile.last_name,
       phone: profile.phone || '',
@@ -168,6 +170,25 @@ export const ProfileOverviewTab: React.FC<ProfileOverviewTabProps> = ({
           // Editable form with all registration data
           <div className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="personal_title">Title</Label>
+                <Select
+                  value={formData.personal_title || ''}
+                  onValueChange={(value) => handleSelectChange('personal_title', value)}
+                >
+                  <SelectTrigger id="personal_title">
+                    <SelectValue placeholder="Select title" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="">None</SelectItem>
+                    <SelectItem value="Mr.">Mr.</SelectItem>
+                    <SelectItem value="Mrs.">Mrs.</SelectItem>
+                    <SelectItem value="Miss">Miss</SelectItem>
+                    <SelectItem value="Dr.">Dr.</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              
               <div className="space-y-2">
                 <Label htmlFor="first_name">First Name</Label>
                 <Input 
@@ -286,10 +307,21 @@ export const ProfileOverviewTab: React.FC<ProfileOverviewTabProps> = ({
         ) : (
           // View-only display with all registration data
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {profile.personal_title && (
+              <div className="flex items-center space-x-2">
+                <UserIcon className="h-4 w-4 opacity-70" />
+                <span className="font-semibold">Title:</span>
+                <span>{profile.personal_title}</span>
+              </div>
+            )}
+            
             <div className="flex items-center space-x-2">
               <UserIcon className="h-4 w-4 opacity-70" />
               <span className="font-semibold">Full Name:</span>
-              <span>{profile.first_name} {profile.last_name}</span>
+              <span>
+                {profile.personal_title ? `${profile.personal_title} ` : ''}
+                {profile.first_name} {profile.last_name}
+              </span>
             </div>
             
             <div className="flex items-center space-x-2">

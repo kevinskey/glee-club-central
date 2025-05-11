@@ -22,6 +22,7 @@ export interface Profile {
   notes?: string;
   last_sign_in_at?: string;
   title?: Database["public"]["Enums"]["user_title"];
+  personal_title?: string; // New field for Mr, Mrs, Miss, Dr., None
   special_roles?: string;
   last_login?: string;
 }
