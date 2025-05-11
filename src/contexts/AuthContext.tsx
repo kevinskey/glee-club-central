@@ -396,9 +396,8 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const value: AuthContextType = {
     user,
     profile,
-    loading: false, // Legacy prop kept for backwards compatibility
     isAuthenticated: !!user,
-    isLoading,
+    isLoading, // Changed from 'loading' to 'isLoading' to match the interface
     permissions,
     signIn,
     signUp,
