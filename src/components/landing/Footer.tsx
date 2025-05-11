@@ -1,7 +1,7 @@
 
 import React from "react";
 import { useNavigate } from "react-router-dom";
-import { Music, Instagram, Facebook, Twitter, Youtube } from "lucide-react";
+import { Music, Instagram, Facebook, Youtube, TiktokIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 export function Footer() {
@@ -62,13 +62,13 @@ export function Footer() {
             <Facebook className="h-5 w-5 sm:h-6 sm:w-6" />
           </a>
           <a 
-            href="https://www.twitter.com/spelmangleeclub" 
+            href="https://www.tiktok.com/@spelmanglee" 
             target="_blank" 
             rel="noopener noreferrer" 
             className="text-gray-600 hover:text-glee-purple transition-colors"
-            aria-label="Twitter"
+            aria-label="TikTok"
           >
-            <Twitter className="h-5 w-5 sm:h-6 sm:w-6" />
+            <TiktokIcon className="h-5 w-5 sm:h-6 sm:w-6" />
           </a>
           <a 
             href="https://www.youtube.com/@SpelmanCollegeGleeClub" 

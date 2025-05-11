@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { PageHeaderWithToggle } from "@/components/ui/page-header-with-toggle";
@@ -21,7 +20,7 @@ import {
   Globe,
   Instagram,
   Facebook,
-  Twitter,
+  TiktokIcon,
   Youtube
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -415,10 +414,10 @@ const DashboardPage = () => {
               <Button
                 variant="outline"
                 className="h-auto flex-col py-4 px-3 hover:bg-orange-50 hover:text-orange-600 hover:border-orange-200 whitespace-normal text-center"
-                onClick={() => window.open("https://www.twitter.com/spelmangleeclub", "_blank")}
+                onClick={() => window.open("https://www.tiktok.com/@spelmanglee", "_blank")}
               >
-                <Twitter className="h-6 w-6 mb-2 text-orange-500" />
-                <span className="text-sm">Twitter</span>
+                <TiktokIcon className="h-6 w-6 mb-2 text-orange-500" />
+                <span className="text-sm">TikTok</span>
               </Button>
               
               <Button
