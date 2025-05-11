@@ -12,6 +12,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { Spinner } from "@/components/ui/spinner";
 import { CalendarMain } from "@/components/calendar/CalendarMain";
 import { useCalendarEventHandlers } from "@/hooks/useCalendarEventHandlers";
+import { toast } from "sonner";
 
 const CalendarPage = () => {
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
@@ -28,16 +29,23 @@ const CalendarPage = () => {
   const userCanCreate = profile?.role === "admin" || profile?.role === "section_leader";
 
   useEffect(() => {
+    console.log("CalendarPage - Initializing");
     const loadEvents = async () => {
+      console.log("CalendarPage - Loading events", authLoading);
       if (!authLoading) {
         setIsLoading(true);
+        console.log("CalendarPage - Fetching events");
         await fetchEvents();
         setIsLoading(false);
+        console.log("CalendarPage - Events loaded");
       }
     };
     
     loadEvents();
   }, [authLoading, fetchEvents]);
+
+  console.log("CalendarPage - Events count:", events.length);
+  console.log("CalendarPage - Current view:", calendarView);
 
   // Use our custom hook for event handling
   const {
@@ -63,6 +71,7 @@ const CalendarPage = () => {
   const onCreateEvent = async (eventData: any) => {
     const success = await handleCreateEvent(eventData);
     if (success) {
+      toast.success("Event created successfully");
       setIsCreateModalOpen(false);
     }
   };
@@ -71,6 +80,7 @@ const CalendarPage = () => {
   const onUpdateEvent = async (eventData: any) => {
     const success = await handleUpdateEvent(eventData);
     if (success) {
+      toast.success("Event updated successfully");
       setIsViewModalOpen(false);
       setSelectedEvent(null);
     }
@@ -80,6 +90,7 @@ const CalendarPage = () => {
   const onDeleteEvent = async (eventId: string) => {
     const success = await handleDeleteEvent(eventId);
     if (success) {
+      toast.success("Event deleted successfully");
       setIsViewModalOpen(false);
       setSelectedEvent(null);
     }

@@ -72,7 +72,7 @@ export const CalendarMain = ({
             created_by: event.created_by
           }
         }))}
-        dateClick={handleDateClick}
+        dateClick={userCanCreate ? handleDateClick : undefined}
         eventClick={handleEventClick}
         editable={userCanCreate}
         eventDrop={handleEventDrop}

@@ -9,6 +9,7 @@ export const useCalendarNavigation = (
 ) => {
   const handlePrevClick = useCallback(() => {
     if (calendarRef.current) {
+      console.log("Navigation: Previous");
       const calendarApi = calendarRef.current.getApi();
       calendarApi.prev();
       setCurrentDate(calendarApi.getDate());
@@ -17,6 +18,7 @@ export const useCalendarNavigation = (
 
   const handleNextClick = useCallback(() => {
     if (calendarRef.current) {
+      console.log("Navigation: Next");
       const calendarApi = calendarRef.current.getApi();
       calendarApi.next();
       setCurrentDate(calendarApi.getDate());
@@ -25,6 +27,7 @@ export const useCalendarNavigation = (
 
   const handleTodayClick = useCallback(() => {
     if (calendarRef.current) {
+      console.log("Navigation: Today");
       const calendarApi = calendarRef.current.getApi();
       calendarApi.today();
       setCurrentDate(calendarApi.getDate());

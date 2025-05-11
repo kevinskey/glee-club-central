@@ -15,9 +15,10 @@ export const useCalendarEventHandlers = (
   setIsCreateModalOpen: (isOpen: boolean) => void
 ) => {
   const { isAdmin, profile } = useAuth();
-  const userCanCreate = isAdmin() || profile?.role === "section_leader";
+  const userCanCreate = profile?.role === "admin" || profile?.role === "section_leader";
 
   const handleDateClick = useCallback((info: any) => {
+    console.log("Date clicked:", info.date);
     if (userCanCreate) {
       setSelectedDate(info.date);
       setIsCreateModalOpen(true);
@@ -25,6 +26,7 @@ export const useCalendarEventHandlers = (
   }, [userCanCreate, setSelectedDate, setIsCreateModalOpen]);
 
   const handleEventClick = useCallback((info: any) => {
+    console.log("Event clicked:", info.event.id);
     const eventId = info.event.id;
     const event = events.find(e => e.id === eventId);
     if (event) {
@@ -34,6 +36,7 @@ export const useCalendarEventHandlers = (
   }, [events, setSelectedEvent, setIsViewModalOpen]);
 
   const handleEventDrop = useCallback(async (info: any) => {
+    console.log("Event dropped:", info.event.id);
     if (!userCanCreate) {
       toast.error("You don't have permission to move events");
       info.revert();
@@ -62,6 +65,7 @@ export const useCalendarEventHandlers = (
   }, [events, updateEvent, userCanCreate]);
 
   const handleEventResize = useCallback(async (info: any) => {
+    console.log("Event resized:", info.event.id);
     if (!userCanCreate) {
       toast.error("You don't have permission to resize events");
       info.revert();
@@ -90,6 +94,7 @@ export const useCalendarEventHandlers = (
 
   const handleCreateEvent = async (eventData: Omit<CalendarEvent, 'id' | 'created_by'>) => {
     if (!profile) return false;
+    console.log("Creating event:", eventData);
     
     try {
       const newEvent = {
@@ -107,6 +112,7 @@ export const useCalendarEventHandlers = (
   };
 
   const handleUpdateEvent = async (eventData: CalendarEvent) => {
+    console.log("Updating event:", eventData);
     try {
       await updateEvent(eventData);
       return true;
@@ -118,6 +124,7 @@ export const useCalendarEventHandlers = (
   };
 
   const handleDeleteEvent = async (eventId: string) => {
+    console.log("Deleting event:", eventId);
     try {
       await deleteEvent(eventId);
       return true;
