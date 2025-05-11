@@ -1,5 +1,6 @@
 
 import React, { useState, useEffect, useRef } from "react";
+import { Spinner } from "@/components/ui/spinner";
 
 interface BackgroundSlideshowProps {
   images: string[];
@@ -15,9 +16,34 @@ export function BackgroundSlideshow({
   const [currentIndex, setCurrentIndex] = useState(0);
   const [nextIndex, setNextIndex] = useState(1);
   const [isTransitioning, setIsTransitioning] = useState(false);
+  const [imagesLoaded, setImagesLoaded] = useState<boolean[]>([]);
   const timerRef = useRef<number | null>(null);
   const intervalRef = useRef<number | null>(null);
 
+  // Track image loading status
+  useEffect(() => {
+    if (!images || images.length === 0) return;
+    
+    // Initialize image loading status array
+    setImagesLoaded(Array(images.length).fill(false));
+    
+    // Preload images
+    images.forEach((src, index) => {
+      const img = new Image();
+      img.src = src;
+      img.onload = () => {
+        setImagesLoaded(prev => {
+          const newStatus = [...prev];
+          newStatus[index] = true;
+          return newStatus;
+        });
+      };
+      img.onerror = () => {
+        console.error(`Failed to load image: ${src}`);
+      };
+    });
+  }, [images]);
+  
   // Reset component when images change
   useEffect(() => {
     // Clear any existing timers
@@ -34,15 +60,12 @@ export function BackgroundSlideshow({
 
     // Function to handle transitions
     const handleTransition = () => {
-      console.log("Starting transition between images");
       setIsTransitioning(true);
       
       // After transition completes, update to next image
       timerRef.current = window.setTimeout(() => {
         const newCurrentIndex = nextIndex;
         const newNextIndex = (nextIndex + 1) % images.length;
-        
-        console.log(`Transition complete. Current: ${newCurrentIndex}, Next: ${newNextIndex}`);
         
         setCurrentIndex(newCurrentIndex);
         setNextIndex(newNextIndex);
@@ -60,10 +83,13 @@ export function BackgroundSlideshow({
     };
   }, [images, duration, transition]);
 
-  // If no images provided, return an empty div instead of null
+  // Show loading state if no images are available
   if (!images || images.length === 0) {
-    console.log("No images provided to BackgroundSlideshow");
-    return <div className="absolute inset-0 bg-background" />;
+    return (
+      <div className="absolute inset-0 bg-background flex items-center justify-center">
+        <Spinner size="lg" />
+      </div>
+    );
   }
   
   // Special case for single image (no transitions needed)
