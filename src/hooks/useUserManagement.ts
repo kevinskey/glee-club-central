@@ -1,8 +1,32 @@
 
 import { useState, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { User } from '@/types/auth';
+import { User as AuthUser } from '@/types/auth';
 import { toast } from 'sonner';
+import { UserFormValues } from '@/components/members/form/userFormSchema';
+
+// Export the User type so it can be imported by other components
+export interface User {
+  id: string;
+  email?: string | null;
+  first_name: string | null;
+  last_name: string | null;
+  phone?: string | null;
+  voice_part: string | null;
+  role: string;
+  avatar_url?: string | null;
+  status: string;
+  last_login?: string | null;
+  last_sign_in_at?: string | null;
+  created_at: string;
+  updated_at?: string | null;
+  is_super_admin?: boolean;
+  title?: string;
+  class_year?: string;
+  join_date?: string;
+  special_roles?: string;
+  dues_paid?: boolean;
+}
 
 export const useUserManagement = () => {
   const [users, setUsers] = useState<User[]>([]);
@@ -58,6 +82,82 @@ export const useUserManagement = () => {
       return null;
     }
   }, []);
+
+  const addUser = useCallback(async (userData: UserFormValues): Promise<boolean> => {
+    try {
+      console.log('Adding new user with data:', userData);
+      
+      // First, create the user in auth
+      let authData, authError;
+      
+      if (userData.email && userData.password) {
+        const { data, error } = await supabase.auth.signUp({
+          email: userData.email,
+          password: userData.password,
+          options: {
+            data: {
+              first_name: userData.first_name,
+              last_name: userData.last_name,
+            }
+          }
+        });
+        
+        authData = data;
+        authError = error;
+      } else {
+        console.error('Email and password are required to create a user');
+        toast.error('Email and password are required');
+        return false;
+      }
+      
+      if (authError) {
+        console.error('Error creating user in auth:', authError);
+        toast.error(authError.message || 'Failed to create user account');
+        return false;
+      }
+      
+      if (!authData.user) {
+        console.error('No user returned from auth signup');
+        toast.error('Failed to create user');
+        return false;
+      }
+      
+      // Then update the profile with additional information
+      const { error: profileError } = await supabase
+        .from('profiles')
+        .update({
+          first_name: userData.first_name,
+          last_name: userData.last_name,
+          phone: userData.phone || null,
+          role: userData.role,
+          voice_part: userData.voice_part,
+          status: userData.status,
+          class_year: userData.class_year || null,
+          notes: userData.notes || null,
+          special_roles: userData.special_roles || null,
+          dues_paid: userData.dues_paid || false,
+        })
+        .eq('id', authData.user.id);
+      
+      if (profileError) {
+        console.error('Error updating profile:', profileError);
+        toast.error('User created but profile update failed');
+        // We'll still return true since the user was created
+      }
+      
+      console.log('User added successfully');
+      toast.success(`Added ${userData.first_name} ${userData.last_name}`);
+      
+      // Refresh the users list
+      fetchUsers();
+      
+      return true;
+    } catch (err) {
+      console.error('Unexpected error adding user:', err);
+      toast.error('An unexpected error occurred');
+      return false;
+    }
+  }, [fetchUsers]);
 
   const updateUser = useCallback(async (userId: string, userData: any) => {
     try {
@@ -178,6 +278,7 @@ export const useUserManagement = () => {
     updateUser,
     updateUserRole,
     updateUserStatus,
-    deleteUser
+    deleteUser,
+    addUser
   };
 };
