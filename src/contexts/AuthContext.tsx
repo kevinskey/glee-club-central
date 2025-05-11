@@ -34,8 +34,8 @@ export function AuthProvider({ children }: AuthProviderProps) {
     // Map the role string to one of the allowed UserRole values
     let mappedRole: UserRole = 'general'; // Default to general
     
-    if (role === 'admin' || role === 'administrator') {
-      mappedRole = 'administrator';
+    if (role === 'admin') {
+      mappedRole = 'admin';
     } else if (role === 'director') {
       mappedRole = 'director';
     } else if (role === 'section_leader' || role === 'singer' || 
@@ -352,9 +352,8 @@ export function AuthProvider({ children }: AuthProviderProps) {
     if (!profile) return false;
     
     // Check for admin role in profile, or super_admin flag, or admin title
-    return profile.role === 'administrator' || 
+    return profile.role === 'admin' || 
            profile.role === 'director' || 
-           profile.role === 'admin' ||
            profile.is_super_admin === true || 
            profile.title === 'Super Admin';
   }, [profile]);
