@@ -15,7 +15,10 @@ import {
   Upload,
   BarChart,
   Settings,
-  FileText
+  FileText,
+  Headphones,
+  Shirt,
+  DollarSign
 } from "lucide-react";
 
 export function DashboardQuickAccess() {
@@ -23,21 +26,26 @@ export function DashboardQuickAccess() {
   
   // Quick access links for users
   const quickAccessLinks = [
-    { icon: <User className="h-5 w-5" />, title: "My Profile", path: "/dashboard/profile", color: "bg-blue-500" },
+    { icon: <User className="h-5 w-5" />, title: "My Profile", path: "/dashboard/profile", color: "bg-orange-500" },
     { icon: <Music className="h-5 w-5" />, title: "Sheet Music", path: "/dashboard/sheet-music", color: "bg-purple-500" },
+    { icon: <Headphones className="h-5 w-5" />, title: "Practice Tracks", path: "/dashboard/recordings", color: "bg-blue-500" },
     { icon: <Calendar className="h-5 w-5" />, title: "Calendar", path: "/dashboard/calendar", color: "bg-green-500" },
-    { icon: <CheckSquare className="h-5 w-5" />, title: "Attendance", path: "/dashboard/attendance", color: "bg-orange-500" },
+    { icon: <CheckSquare className="h-5 w-5" />, title: "Attendance", path: "/dashboard/attendance", color: "bg-amber-500" },
+    { icon: <Shirt className="h-5 w-5" />, title: "Wardrobe", path: "/dashboard/wardrobe", color: "bg-pink-500" },
+    { icon: <DollarSign className="h-5 w-5" />, title: "Dues", path: "/dashboard/dues", color: "bg-emerald-500" },
     { icon: <Bell className="h-5 w-5" />, title: "Announcements", path: "/dashboard/announcements", color: "bg-red-500" },
-    { icon: <FileText className="h-5 w-5" />, title: "Media Library", path: "/dashboard/media-library", color: "bg-emerald-500" },
   ];
   
   // Admin quick links
   const adminQuickLinks = [
     { icon: <Users className="h-5 w-5" />, title: "User Management", path: "/dashboard/admin/users", color: "bg-slate-500" },
-    { icon: <Upload className="h-5 w-5" />, title: "Media Manager", path: "/dashboard/media-library", color: "bg-emerald-500" },
+    { icon: <Music className="h-5 w-5" />, title: "Sheet Music", path: "/dashboard/sheet-music", color: "bg-purple-500" },
     { icon: <Calendar className="h-5 w-5" />, title: "Event Manager", path: "/dashboard/admin/events", color: "bg-yellow-500" },
-    { icon: <BarChart className="h-5 w-5" />, title: "Analytics", path: "/dashboard/admin/analytics", color: "bg-violet-500" },
-    { icon: <Settings className="h-5 w-5" />, title: "Site Settings", path: "/dashboard/admin/settings", color: "bg-rose-500" },
+    { icon: <MessageSquare className="h-5 w-5" />, title: "Messaging", path: "/dashboard/messaging", color: "bg-blue-500" },
+    { icon: <DollarSign className="h-5 w-5" />, title: "Finance", path: "/dashboard/admin/finances", color: "bg-emerald-500" },
+    { icon: <Bell className="h-5 w-5" />, title: "Announcements", path: "/dashboard/announcements/new", color: "bg-red-500" },
+    { icon: <Upload className="h-5 w-5" />, title: "Media Manager", path: "/dashboard/media-library", color: "bg-pink-500" },
+    { icon: <Settings className="h-5 w-5" />, title: "Settings", path: "/dashboard/admin/settings", color: "bg-gray-500" },
   ];
   
   const currentLinks = isAdmin() ? adminQuickLinks : quickAccessLinks;
@@ -55,12 +63,12 @@ export function DashboardQuickAccess() {
         </div>
       </CardHeader>
       <CardContent>
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-3">
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
           {currentLinks.map((link, index) => (
             <Link key={index} to={link.path} className="no-underline">
               <Button 
                 variant="outline" 
-                className="w-full h-auto flex-col py-4 gap-2 hover:border-primary"
+                className="w-full h-auto flex-col py-4 gap-2 hover:border-orange-300 hover:bg-orange-50"
               >
                 <div className={`${link.color} text-white p-2 rounded-full`}>
                   {link.icon}

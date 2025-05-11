@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { PageHeader } from "@/components/ui/page-header";
+import { PageHeaderWithToggle } from "@/components/ui/page-header-with-toggle";
 import { useAuth } from "@/contexts/AuthContext";
 import { Link, useNavigate } from "react-router-dom";
 import { 
@@ -15,15 +15,14 @@ import {
   Shirt,
   DollarSign,
   MessageSquare,
-  Users,
-  Upload,
-  BarChart,
-  Settings
+  Clock,
+  Calendar as CalendarIcon,
+  Headphones
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
 import { supabase } from "@/integrations/supabase/client";
-import { DashboardModules } from "@/components/dashboard/DashboardModules";
+import { DashboardQuickAccess } from "@/components/dashboard/DashboardQuickAccess";
 import { toast } from "sonner";
 
 interface Event {
@@ -38,6 +37,7 @@ interface Announcement {
   id: number;
   title: string;
   message: string;
+  date: string;
 }
 
 const DashboardPage = () => {
@@ -49,17 +49,20 @@ const DashboardPage = () => {
     {
       id: 1,
       title: "End of Semester Performance",
-      message: "Our final performance will be held on May 15th at Sisters Chapel. All members must attend dress rehearsal."
+      message: "Our final performance will be held on May 15th at Sisters Chapel. All members must attend dress rehearsal.",
+      date: "May 1, 2025"
     },
     {
       id: 2,
       title: "Dues Reminder",
-      message: "Spring semester dues are due by April 30th. Please make your payments online through the dashboard."
+      message: "Spring semester dues are due by April 30th. Please make your payments online through the dashboard.",
+      date: "April 15, 2025"
     },
     {
       id: 3,
       title: "New Sheet Music Available",
-      message: "New arrangements for the Spring concert have been uploaded. Please review before next rehearsal."
+      message: "New arrangements for the Spring concert have been uploaded. Please review before next rehearsal.",
+      date: "April 10, 2025"
     }
   ]);
   
@@ -99,24 +102,22 @@ const DashboardPage = () => {
     }
   }, [authLoading]);
   
-  // Quick access links for users
-  const quickAccessLinks = [
-    { icon: <User className="h-5 w-5" />, title: "My Profile", path: "/dashboard/profile", color: "bg-blue-500" },
-    { icon: <Music className="h-5 w-5" />, title: "Sheet Music", path: "/dashboard/sheet-music", color: "bg-purple-500" },
-    { icon: <Calendar className="h-5 w-5" />, title: "Calendar", path: "/dashboard/schedule", color: "bg-green-500" },
-    { icon: <CheckSquare className="h-5 w-5" />, title: "Attendance", path: "/dashboard/attendance", color: "bg-orange-500" },
-    { icon: <Bell className="h-5 w-5" />, title: "Announcements", path: "/dashboard/announcements", color: "bg-red-500" },
-    { icon: <MessageSquare className="h-5 w-5" />, title: "Contact Admin", path: "/dashboard/contact", color: "bg-indigo-500" },
-  ];
+  // Next upcoming event for countdown
+  const nextEvent = events && events.length > 0 ? events[0] : null;
   
-  // Admin quick links
-  const adminQuickLinks = [
-    { icon: <Users className="h-5 w-5" />, title: "User Management", path: "/dashboard/admin/users", color: "bg-slate-500" },
-    { icon: <Upload className="h-5 w-5" />, title: "Media Manager", path: "/dashboard/admin/media", color: "bg-emerald-500" },
-    { icon: <Calendar className="h-5 w-5" />, title: "Event Manager", path: "/dashboard/admin/events", color: "bg-yellow-500" },
-    { icon: <BarChart className="h-5 w-5" />, title: "Analytics", path: "/dashboard/admin/analytics", color: "bg-violet-500" },
-    { icon: <Settings className="h-5 w-5" />, title: "Site Settings", path: "/dashboard/admin/settings", color: "bg-rose-500" },
-  ];
+  // Calculate days until next event
+  const getDaysUntilNextEvent = () => {
+    if (!nextEvent) return null;
+    
+    const today = new Date();
+    const eventDate = new Date(nextEvent.date);
+    const diffTime = Math.abs(eventDate.getTime() - today.getTime());
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    
+    return diffDays;
+  };
+  
+  const daysUntilNextEvent = getDaysUntilNextEvent();
   
   if (loading || authLoading) {
     return (
@@ -126,123 +127,250 @@ const DashboardPage = () => {
     );
   }
   
-  // Display appropriate dashboard based on role
-  const isAdminUser = isAdmin();
-  
   return (
     <div className="container mx-auto p-4 space-y-6">
-      <PageHeader
-        title={`Welcome, ${profile?.first_name || 'User'}`}
-        description={`Dashboard - ${isAdminUser ? 'Administrator' : 'Member'}`}
+      <PageHeaderWithToggle
+        title={`Welcome, ${profile?.first_name || 'Member'}`}
+        description={`Spelman College Glee Club Dashboard`}
         icon={<Home className="h-6 w-6" />}
       />
       
-      {/* Quick Access Section */}
-      <Card>
-        <CardHeader>
-          <div className="flex items-center justify-between">
-            <div>
-              <CardTitle>Quick Access</CardTitle>
+      {/* Main Dashboard Content */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        {/* Left Column - Today's Agenda */}
+        <div className="md:col-span-2 space-y-6">
+          {/* Next Event Countdown */}
+          {nextEvent && (
+            <Card className="border-l-4 border-l-orange-500">
+              <CardHeader className="pb-2">
+                <CardTitle className="flex justify-between items-center">
+                  <div className="flex items-center gap-2">
+                    <Clock className="h-5 w-5 text-orange-500" />
+                    <span>Next Event Countdown</span>
+                  </div>
+                  <span className="text-xl font-bold text-orange-500">
+                    {daysUntilNextEvent} {daysUntilNextEvent === 1 ? 'day' : 'days'}
+                  </span>
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-2">
+                  <h3 className="text-lg font-semibold">{nextEvent.title}</h3>
+                  <div className="flex justify-between text-sm text-muted-foreground">
+                    <div className="flex items-center gap-2">
+                      <CalendarIcon className="h-4 w-4" />
+                      <span>{nextEvent.date.toLocaleDateString()}</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Clock className="h-4 w-4" />
+                      <span>{nextEvent.time}</span>
+                    </div>
+                  </div>
+                  {nextEvent.location && (
+                    <div className="text-sm flex items-center gap-2 mt-2">
+                      <span className="font-medium">Location:</span> 
+                      <span>{nextEvent.location}</span>
+                    </div>
+                  )}
+                </div>
+                <div className="mt-4">
+                  <Button variant="outline" onClick={() => navigate("/dashboard/calendar")} className="text-orange-500 hover:text-orange-600">
+                    View Details
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+          
+          {/* Upcoming Events */}
+          <Card>
+            <CardHeader className="pb-2">
+              <div className="flex items-center justify-between">
+                <CardTitle className="flex items-center gap-2">
+                  <Calendar className="h-5 w-5 text-orange-500" />
+                  <span>Today's Agenda</span>
+                </CardTitle>
+                <Link to="/dashboard/calendar" className="text-sm text-orange-500 hover:underline">
+                  View Calendar
+                </Link>
+              </div>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                {events.length > 0 ? (
+                  events.map(event => (
+                    <div key={event.id} className="border-b pb-3 last:border-0">
+                      <h3 className="font-medium">{event.title}</h3>
+                      <div className="flex justify-between text-sm text-muted-foreground">
+                        <span>{event.date.toLocaleDateString()}</span>
+                        <span>{event.time}</span>
+                      </div>
+                      {event.location && <div className="text-xs text-muted-foreground">{event.location}</div>}
+                    </div>
+                  ))
+                ) : (
+                  <div className="text-muted-foreground">No upcoming events</div>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+          
+          {/* Rehearsal Notes */}
+          <Card>
+            <CardHeader className="pb-2">
+              <CardTitle className="flex items-center gap-2">
+                <FileText className="h-5 w-5 text-orange-500" />
+                <span>Rehearsal Notes</span>
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-3">
+                <div className="p-3 rounded-md border bg-muted/50">
+                  <div className="flex justify-between text-sm mb-2">
+                    <span className="font-medium">Spring Concert Preparation</span>
+                    <span className="text-muted-foreground">April 28, 2025</span>
+                  </div>
+                  <p className="text-sm">
+                    Focus on dynamics in "Lift Every Voice" measures 24-36. 
+                    Sopranos, work on breath control in the sustained high notes.
+                    Everyone should memorize first verse by next rehearsal.
+                  </p>
+                </div>
+                <Link 
+                  to="/dashboard/sheet-music" 
+                  className="text-sm text-orange-500 hover:underline inline-flex"
+                >
+                  View all notes
+                </Link>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+        
+        {/* Right Column - Announcements & Quick Access */}
+        <div className="space-y-6">
+          {/* Announcements Card */}
+          <Card>
+            <CardHeader className="pb-2">
+              <div className="flex items-center justify-between">
+                <CardTitle className="flex items-center gap-2">
+                  <Bell className="h-5 w-5 text-orange-500" />
+                  <span>Announcements</span>
+                </CardTitle>
+                <Link to="/dashboard/announcements" className="text-sm text-orange-500 hover:underline">
+                  View All
+                </Link>
+              </div>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                {announcements.map(announcement => (
+                  <div key={announcement.id} className="pb-3 border-b last:border-0">
+                    <div className="flex justify-between mb-1">
+                      <h3 className="font-medium text-sm">{announcement.title}</h3>
+                      <span className="text-xs text-muted-foreground">{announcement.date}</span>
+                    </div>
+                    <p className="text-xs text-muted-foreground">{announcement.message}</p>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+          
+          {/* Quick Access */}
+          <Card>
+            <CardHeader className="pb-2">
+              <CardTitle className="flex items-center gap-2">
+                <Music className="h-5 w-5 text-orange-500" />
+                <span>Quick Access</span>
+              </CardTitle>
               <CardDescription>
-                {isAdminUser ? "Administrative Tools" : "Frequently used resources"}
+                Frequently used resources
               </CardDescription>
-            </div>
-          </div>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-3">
-            {(isAdminUser ? adminQuickLinks : quickAccessLinks).map((link, index) => (
-              <Link key={index} to={link.path} className="no-underline">
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-2 gap-3">
                 <Button 
                   variant="outline" 
-                  className="w-full h-auto flex-col py-4 gap-2 hover:border-primary"
+                  className="h-auto flex-col py-4 px-2 hover:bg-orange-50 hover:text-orange-600 hover:border-orange-200"
+                  onClick={() => navigate("/dashboard/sheet-music")}
                 >
-                  <div className={`${link.color} text-white p-2 rounded-full`}>
-                    {link.icon}
-                  </div>
-                  <span className="text-xs font-medium">{link.title}</span>
+                  <Music className="h-5 w-5 mb-2 text-orange-500" />
+                  <span className="text-xs">Sheet Music</span>
                 </Button>
-              </Link>
-            ))}
-          </div>
-        </CardContent>
-      </Card>
-      
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        {/* Upcoming Events Card */}
-        <Card className="md:col-span-2">
-          <CardHeader>
-            <div className="flex items-center justify-between">
-              <div>
-                <CardTitle>Upcoming Events</CardTitle>
-                <CardDescription>Your scheduled events</CardDescription>
+                <Button 
+                  variant="outline" 
+                  className="h-auto flex-col py-4 px-2 hover:bg-orange-50 hover:text-orange-600 hover:border-orange-200"
+                  onClick={() => navigate("/dashboard/practice")}
+                >
+                  <Headphones className="h-5 w-5 mb-2 text-orange-500" />
+                  <span className="text-xs">Practice Tracks</span>
+                </Button>
+                <Button 
+                  variant="outline" 
+                  className="h-auto flex-col py-4 px-2 hover:bg-orange-50 hover:text-orange-600 hover:border-orange-200"
+                  onClick={() => navigate("/dashboard/attendance")}
+                >
+                  <CheckSquare className="h-5 w-5 mb-2 text-orange-500" />
+                  <span className="text-xs">Attendance</span>
+                </Button>
+                <Button 
+                  variant="outline" 
+                  className="h-auto flex-col py-4 px-2 hover:bg-orange-50 hover:text-orange-600 hover:border-orange-200"
+                  onClick={() => navigate("/dashboard/profile")}
+                >
+                  <User className="h-5 w-5 mb-2 text-orange-500" />
+                  <span className="text-xs">My Profile</span>
+                </Button>
               </div>
-              <Calendar className="h-5 w-5 text-muted-foreground" />
-            </div>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              {events.length > 0 ? (
-                events.map(event => (
-                  <div key={event.id} className="border-b pb-3 last:border-0">
-                    <h3 className="font-medium">{event.title}</h3>
-                    <div className="flex justify-between text-sm text-muted-foreground">
-                      <span>{event.date.toLocaleDateString()}</span>
-                      <span>{event.time}</span>
-                    </div>
-                    {event.location && <div className="text-xs text-muted-foreground">{event.location}</div>}
+            </CardContent>
+          </Card>
+          
+          {/* Dues Status Card */}
+          <Card>
+            <CardHeader className="pb-2">
+              <CardTitle className="flex items-center gap-2">
+                <DollarSign className="h-5 w-5 text-orange-500" />
+                <span>Dues Status</span>
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="flex flex-col gap-3">
+                <div className="flex justify-between items-center">
+                  <span className="text-sm font-medium">Spring 2025</span>
+                  <div className="bg-green-100 text-green-700 px-2 py-0.5 rounded-full text-xs">
+                    Paid
                   </div>
-                ))
-              ) : (
-                <div className="text-muted-foreground">No upcoming events</div>
-              )}
-            </div>
-            <div className="mt-4">
-              <Link 
-                to="/dashboard/schedule" 
-                className="text-sm text-primary hover:underline"
-              >
-                View full calendar
-              </Link>
-            </div>
-          </CardContent>
-        </Card>
-        
-        {/* Announcements Card */}
+                </div>
+                <div className="h-2 w-full bg-gray-100 rounded-full overflow-hidden">
+                  <div className="h-full bg-green-500 rounded-full" style={{ width: "100%" }}></div>
+                </div>
+                <div className="flex justify-between text-xs text-muted-foreground">
+                  <span>Amount: $150.00</span>
+                  <span>Paid on: April 15, 2025</span>
+                </div>
+                <Button 
+                  onClick={() => navigate("/dashboard/dues")}
+                  variant="outline" 
+                  className="w-full mt-2 text-orange-500 border-orange-200 hover:bg-orange-50"
+                >
+                  View Payment History
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+      
+      {/* Bottom Row */}
+      <div className="grid grid-cols-1 gap-6">
+        {/* Available Modules */}
         <Card>
           <CardHeader>
-            <div className="flex items-center justify-between">
-              <div>
-                <CardTitle>Announcements</CardTitle>
-                <CardDescription>Latest updates</CardDescription>
-              </div>
-              <Bell className="h-5 w-5 text-muted-foreground" />
-            </div>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              {announcements.map(announcement => (
-                <div key={announcement.id} className="pb-3 border-b last:border-0">
-                  <h3 className="font-medium">{announcement.title}</h3>
-                  <p className="text-sm text-muted-foreground mt-1">{announcement.message}</p>
-                </div>
-              ))}
-            </div>
-            <div className="mt-4">
-              <Link 
-                to="/dashboard/announcements" 
-                className="text-sm text-primary hover:underline"
-              >
-                View all announcements
-              </Link>
-            </div>
-          </CardContent>
-        </Card>
-        
-        {/* Available Modules */}
-        <Card className="md:col-span-3">
-          <CardHeader>
-            <CardTitle>Available Resources</CardTitle>
+            <CardTitle className="flex items-center gap-2">
+              <MessageSquare className="h-5 w-5 text-orange-500" />
+              <span>Resources</span>
+            </CardTitle>
             <CardDescription>Features available to you</CardDescription>
           </CardHeader>
           <CardContent>
