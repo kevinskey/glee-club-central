@@ -1,34 +1,33 @@
+import React from "react";
+import { createBrowserRouter } from "react-router-dom";
 
-import { RouteObject } from "react-router-dom";
-import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
-import LoginPage from "@/pages/LoginPage";
-import RegisterPage from "@/pages/RegisterPage";
-import ResetPasswordPage from "@/pages/ResetPasswordPage";
-import { DashboardLayout } from "@/components/layout/DashboardLayout";
-import UpdatePasswordPage from "@/pages/UpdatePasswordPage";
-import CalendarPage from "@/pages/CalendarPage";
-import SheetMusicPage from "@/pages/SheetMusicPage";
-import NotFoundPage from "@/pages/NotFoundPage";
-import ProfilePage from "@/pages/ProfilePage";
-import RecordingsPage from "@/pages/RecordingsPage";
-import LandingPage from "@/pages/LandingPage";
-import FanPage from "@/pages/FanPage";
-import DashboardPage from "@/pages/DashboardPage";
-import AttendancePage from "@/pages/AttendancePage";
-import PerformanceChecklistPage from "@/pages/PerformanceChecklistPage";
+// Import pages
+import LandingPage from "./pages/LandingPage";
+import LoginPage from "./pages/LoginPage";
+import RegisterPage from "./pages/RegisterPage";
+import ProfilePage from "./pages/ProfilePage";
+import UpdatePasswordPage from "./pages/UpdatePasswordPage";
+import MembersPage from "./pages/MembersPage";
+import MemberDetailsPage from "./pages/MemberDetailsPage";
+import EventsPage from "./pages/EventsPage";
+import EventDetailsPage from "./pages/EventDetailsPage";
+import RepertoirePage from "./pages/RepertoirePage";
+import RepertoireDetailsPage from "./pages/RepertoireDetailsPage";
+import AttendancePage from "./pages/AttendancePage";
+import FinancesPage from "./pages/FinancesPage";
+import CommunicationsPage from "./pages/CommunicationsPage";
+import ResourcesPage from "./pages/ResourcesPage";
+import SettingsPage from "./pages/SettingsPage";
+import NotFoundPage from "./pages/NotFoundPage";
 
-// This file is used for reference only - actual routes are now in App.tsx
-// We keep this for future reference or if we want to switch back to RouterProvider
-const routes: RouteObject[] = [
-  // Public routes
+import { ProtectedRoute } from "./components/auth/ProtectedRoute";
+import { DashboardLayout } from "./components/layout/DashboardLayout";
+import { AdminRoute } from "./components/auth/AdminRoute";
+
+export const router = createBrowserRouter([
   {
     path: "/",
     element: <LandingPage />,
-    errorElement: <NotFoundPage />
-  },
-  {
-    path: "/fan-page",
-    element: <FanPage />,
   },
   {
     path: "/login",
@@ -39,60 +38,65 @@ const routes: RouteObject[] = [
     element: <RegisterPage />,
   },
   {
-    path: "/reset-password",
-    element: <ResetPasswordPage />,
-  },
-  {
     path: "/update-password",
-    element: <UpdatePasswordPage />,
+    element: <ProtectedRoute><UpdatePasswordPage /></ProtectedRoute>,
   },
-  
-  // Protected dashboard routes
   {
     path: "/dashboard",
     element: <ProtectedRoute><DashboardLayout /></ProtectedRoute>,
     children: [
       {
-        path: "", // Dashboard home
-        element: <DashboardPage />, // Using DashboardPage component
-      },
-      {
-        path: "calendar",
-        element: <CalendarPage />,
-      },
-      {
-        path: "sheet-music",
-        element: <SheetMusicPage />,
-      },
-      {
         path: "profile",
         element: <ProfilePage />,
       },
       {
-        path: "recordings",
-        element: <RecordingsPage />,
+        path: "members",
+        element: <AdminRoute><MembersPage /></AdminRoute>,
+      },
+      {
+        path: "members/:memberId",
+        element: <AdminRoute><MemberDetailsPage /></AdminRoute>,
+      },
+      {
+        path: "events",
+        element: <EventsPage />,
+      },
+      {
+        path: "events/:eventId",
+        element: <EventDetailsPage />,
+      },
+      {
+        path: "repertoire",
+        element: <RepertoirePage />,
+      },
+      {
+        path: "repertoire/:repertoireId",
+        element: <RepertoireDetailsPage />,
       },
       {
         path: "attendance",
         element: <AttendancePage />,
       },
       {
-        path: "performance-checklist",
-        element: <PerformanceChecklistPage />,
+        path: "finances",
+        element: <FinancesPage />,
       },
-      // The remaining routes will use the "Not Found" page until implemented
       {
-        path: "*",
-        element: <NotFoundPage />,
-      }
+        path: "communications",
+        element: <CommunicationsPage />,
+      },
+      {
+        path: "resources",
+        element: <ResourcesPage />,
+      },
+      {
+        path: "settings",
+        element: <AdminRoute><SettingsPage /></AdminRoute>,
+      },
     ],
   },
-  
-  // Catch-all for 404
   {
     path: "*",
     element: <NotFoundPage />,
-  }
-];
-
-export default routes;
+  },
+]);
