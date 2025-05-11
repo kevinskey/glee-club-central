@@ -103,19 +103,23 @@ export default function MediaLibraryPage() {
       console.log("Audio files converted:", audioMediaFiles.length);
       
       // Combine all media files, ensuring proper type casting for storageFiles
-      const typedStorageFiles = storageFiles?.map(file => ({
-        id: file.id,
-        title: file.title,
-        description: file.description,
-        file_url: file.file_url,
-        file_path: file.file_path,
-        file_type: file.file_type,
-        created_at: file.created_at,
-        uploaded_by: file.uploaded_by,
-        category: file.folder || getMediaType(file.file_type), // Use folder as category or derive from file type
-        tags: file.tags || [],
-        size: file.size || 0 // Ensure size property exists, default to 0 if not available
-      })) || [];
+      const typedStorageFiles = storageFiles?.map(file => {
+        // Extract all properties from the file object
+        const mediaFile: MediaFile = {
+          id: file.id,
+          title: file.title,
+          description: file.description,
+          file_url: file.file_url,
+          file_path: file.file_path,
+          file_type: file.file_type,
+          created_at: file.created_at,
+          uploaded_by: file.uploaded_by,
+          category: file.folder || getMediaType(file.file_type), // Use folder as category or derive from file type
+          tags: file.tags || [],
+          size: typeof file.size === 'number' ? file.size : 0 // Safely handle size property
+        };
+        return mediaFile;
+      }) || [];
       
       const combinedFiles = [
         ...typedStorageFiles,
