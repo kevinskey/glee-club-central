@@ -17,7 +17,7 @@ export function Logo() {
       <Tooltip>
         <TooltipTrigger asChild>
           <div className="flex items-center gap-2 cursor-pointer" onClick={() => navigate("/")}>
-            <Icons.logo className="h-5 w-5 text-glee-purple" />
+            <Icons.logo className="h-6 w-auto text-glee-purple" />
             <span className="font-playfair text-lg font-semibold text-glee-purple">
               Glee World
             </span>

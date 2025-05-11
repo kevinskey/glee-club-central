@@ -1,7 +1,8 @@
 
 import React from "react";
 import { Link } from "react-router-dom";
-import { Book, Info } from "lucide-react";
+import { Book } from "lucide-react";
+import { Icons } from "@/components/Icons";
 
 export function SidebarHelp() {
   return (
@@ -19,6 +20,11 @@ export function SidebarHelp() {
         >
           <Book className="h-4 w-4" />
           <span className="sr-only">View Handbook</span>
+        </Link>
+      </div>
+      <div className="mt-4 flex items-center justify-center">
+        <Link to="/" className="flex items-center gap-2">
+          <Icons.logo className="h-6 w-auto opacity-70 hover:opacity-100 transition-opacity" />
         </Link>
       </div>
     </div>

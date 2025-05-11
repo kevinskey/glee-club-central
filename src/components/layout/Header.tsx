@@ -16,10 +16,10 @@ import {
   User,
   Settings,
   LogOut,
-  Home,
 } from "lucide-react";
 import { useSidebar } from "@/components/ui/sidebar";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
+import { Icons } from "@/components/Icons";
 
 export function Header() {
   const { profile, signOut } = useAuth();
@@ -45,7 +45,7 @@ export function Header() {
             <span className="sr-only">Toggle sidebar</span>
           </Button>
           <Link to="/" className="font-bold flex items-center gap-1 sm:gap-2 hover:text-primary transition-colors">
-            <Home className="h-4 sm:h-5 w-4 sm:w-5" />
+            <Icons.logo className="h-5 sm:h-6 w-auto" />
             <span>Glee Club</span>
           </Link>
         </div>
@@ -79,7 +79,7 @@ export function Header() {
               </DropdownMenuItem>
               
               <DropdownMenuItem onClick={() => navigate("/")}>
-                <Home className="h-4 w-4 mr-2" />
+                <Icons.logo className="h-4 w-auto mr-2" />
                 <span>Home Page</span>
               </DropdownMenuItem>
               
