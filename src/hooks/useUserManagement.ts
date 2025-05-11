@@ -31,6 +31,7 @@ export const useUserManagement = () => {
   const [users, setUsers] = useState<User[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
+  const [userCount, setUserCount] = useState<number>(0);
 
   const fetchUsers = useCallback(async () => {
     setIsLoading(true);
@@ -51,19 +52,35 @@ export const useUserManagement = () => {
       
       if (data) {
         // Process the data to ensure consistent field formats
-        const processedData = data.map(user => ({
-          ...user,
-          // Ensure boolean fields are actually booleans
-          dues_paid: typeof user.dues_paid === 'boolean' ? user.dues_paid : false,
-          is_super_admin: typeof user.is_super_admin === 'boolean' ? user.is_super_admin : false,
-          // Format dates if needed
-          join_date: user.join_date || null,
-          // Ensure other required fields have defaults
-          status: user.status || 'pending',
-          role: user.role || 'singer',
-        }));
+        const processedData = data.map(user => {
+          // Create a consistent User object with all required fields
+          const processedUser: User = {
+            id: user.id,
+            email: user.email || null,
+            first_name: user.first_name || '',
+            last_name: user.last_name || '',
+            phone: user.phone || null,
+            role: user.role || 'singer',
+            voice_part: user.voice_part || null,
+            avatar_url: user.avatar_url || null,
+            status: user.status || 'pending',
+            last_login: user.last_login || null,
+            last_sign_in_at: user.last_sign_in_at || null,
+            created_at: user.created_at || new Date().toISOString(),
+            updated_at: user.updated_at || null,
+            is_super_admin: user.is_super_admin === true,
+            title: user.title || null,
+            class_year: user.class_year || null,
+            join_date: user.join_date || null,
+            notes: user.notes || null,
+            dues_paid: user.dues_paid === true
+          };
+          
+          return processedUser;
+        });
         
         setUsers(processedData);
+        setUserCount(processedData.length);
         return processedData;
       }
       
@@ -74,6 +91,25 @@ export const useUserManagement = () => {
       return [];
     } finally {
       setIsLoading(false);
+    }
+  }, []);
+
+  const getUserCount = useCallback(async () => {
+    try {
+      const { count, error } = await supabase
+        .from('profiles')
+        .select('*', { count: 'exact', head: true });
+      
+      if (error) {
+        console.error('Error getting user count:', error);
+        return 0;
+      }
+      
+      setUserCount(count || 0);
+      return count || 0;
+    } catch (err) {
+      console.error('Unexpected error getting user count:', err);
+      return 0;
     }
   }, []);
 
@@ -113,6 +149,8 @@ export const useUserManagement = () => {
     error,
     fetchUsers,
     deleteUser,
+    getUserCount,
+    userCount,
     getUserById: useCallback(async (userId: string) => {
       try {
         console.log(`Fetching user with ID: ${userId}`);

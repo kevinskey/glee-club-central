@@ -1,6 +1,6 @@
-
-import React from 'react';
-import {
+import React from "react";
+import { Button } from "@/components/ui/button";
+import { 
   Dialog,
   DialogContent,
   DialogDescription,
@@ -8,17 +8,18 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import { Loader2 } from "lucide-react";
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Checkbox } from "@/components/ui/checkbox";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { userFormSchema, UserFormValues } from "@/components/members/form/userFormSchema";
+import { Label } from "@/components/ui/label";
+import { 
+  Select, 
+  SelectContent, 
+  SelectItem, 
+  SelectTrigger, 
+  SelectValue 
+} from "@/components/ui/select";
 import { useForm } from "react-hook-form";
 import { User } from "@/hooks/useUserManagement";
-import { formatPhoneNumber } from "@/components/members/formatters/memberFormatters";
+import { formatPhoneNumber } from "@/utils/formatters"; // Fix: Import from utils/formatters instead
 
 interface EditUserDialogProps {
   isOpen: boolean;
