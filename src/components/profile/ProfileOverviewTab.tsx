@@ -176,14 +176,13 @@ export const ProfileOverviewTab: React.FC<ProfileOverviewTabProps> = ({
               <div className="space-y-2">
                 <Label htmlFor="voice_part">Voice Part</Label>
                 <Select
-                  value={formData.voice_part || ''}
+                  value={formData.voice_part || undefined}
                   onValueChange={(value) => handleSelectChange('voice_part', value)}
                 >
                   <SelectTrigger id="voice_part">
                     <SelectValue placeholder="Select voice part" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">Not set</SelectItem>
                     <SelectItem value="soprano_1">Soprano 1</SelectItem>
                     <SelectItem value="soprano_2">Soprano 2</SelectItem>
                     <SelectItem value="alto_1">Alto 1</SelectItem>
