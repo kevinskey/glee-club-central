@@ -15,6 +15,7 @@ export async function fetchUserPermissions(userId: string) {
       return null;
     }
     
+    // Modified to use the proper response format from the RPC function
     const { data, error } = await supabase.rpc('get_user_permissions', {
       p_user_id: userId
     });
@@ -29,12 +30,24 @@ export async function fetchUserPermissions(userId: string) {
       return {};
     }
 
-    // Convert array of permission objects to a simple map of permission names to boolean values
+    // Convert array of permission objects to a simple map
     const permissionsMap: Record<string, boolean> = {};
     
-    data.forEach((item: { permission: string, granted: boolean }) => {
-      permissionsMap[item.permission] = item.granted;
-    });
+    // Handle various response formats to ensure compatibility
+    if (Array.isArray(data)) {
+      // If data is an array of objects with permission and granted properties
+      if (typeof data[0] === 'object' && 'permission' in data[0] && 'granted' in data[0]) {
+        data.forEach((item: { permission: string, granted: boolean }) => {
+          permissionsMap[item.permission] = item.granted;
+        });
+      } 
+      // If data is an array of permission strings (all granted)
+      else if (typeof data[0] === 'string') {
+        data.forEach((permission: string) => {
+          permissionsMap[permission] = true;
+        });
+      }
+    }
 
     console.log("User permissions loaded:", permissionsMap);
     return permissionsMap;

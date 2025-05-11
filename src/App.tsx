@@ -10,14 +10,12 @@ import Routes from './Routes';
 function App() {
   return (
     <ThemeProvider>
-      <BrowserRouter>
-        <AuthProvider>
-          <RolePermissionProvider>
-            <Routes />
-            <Toaster position="top-right" />
-          </RolePermissionProvider>
-        </AuthProvider>
-      </BrowserRouter>
+      <AuthProvider>
+        <RolePermissionProvider>
+          <Routes />
+          <Toaster position="top-right" />
+        </RolePermissionProvider>
+      </AuthProvider>
     </ThemeProvider>
   );
 }
