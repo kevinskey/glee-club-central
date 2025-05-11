@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { PageHeader } from "@/components/ui/page-header";
 import { FilesIcon, Upload, Search, Filter, Calendar, List, Grid2X2 } from "lucide-react";
@@ -38,6 +37,7 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
+import { Badge } from "@/components/ui/badge";
 
 export default function MediaLibraryPage() {
   const { audioFiles, loading: audioLoading } = useAudioFiles();
@@ -110,9 +110,9 @@ export default function MediaLibraryPage() {
         file_type: file.file_type,
         created_at: file.created_at,
         uploaded_by: file.uploaded_by,
-        category: file.category || getMediaType(file.file_type),
+        category: file.folder || getMediaType(file.file_type), // Use folder as category or derive from file type
         tags: file.tags || [],
-        size: file.size
+        size: file.size || 0 // Default to 0 if size is not available
       })) || [];
       
       const combinedFiles = [

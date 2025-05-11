@@ -17,7 +17,7 @@ import { Download } from "lucide-react";
 
 interface MediaFilesSectionProps {
   files: MediaFile[];
-  mediaType: MediaType;
+  mediaType: MediaType | "all";
   viewMode?: "grid" | "list";
   title?: string;
   onDelete?: () => void;
