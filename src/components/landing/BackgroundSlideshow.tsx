@@ -18,10 +18,13 @@ export function BackgroundSlideshow({
 
   useEffect(() => {
     // Don't set up transitions if we don't have enough images
-    if (images.length <= 1) return;
+    if (!images || images.length <= 1) return;
 
     // Calculate the next image index
     const calculateNextIndex = (current: number) => (current + 1) % images.length;
+    
+    // Set initial nextImageIndex
+    setNextImageIndex(calculateNextIndex(currentImageIndex));
 
     // Function to handle image transition
     const handleTransition = () => {
@@ -40,14 +43,11 @@ export function BackgroundSlideshow({
     // Set up interval for consistent timing
     const intervalId = setInterval(handleTransition, duration);
     
-    // Initial setup for nextImageIndex
-    setNextImageIndex(calculateNextIndex(currentImageIndex));
-
     // Cleanup function
     return () => {
       clearInterval(intervalId);
     };
-  }, [images.length, duration, transition, currentImageIndex, nextImageIndex]);
+  }, [images, images?.length, duration, transition, currentImageIndex, nextImageIndex]);
 
   // If no images provided, don't render anything
   if (!images || images.length === 0) return null;
