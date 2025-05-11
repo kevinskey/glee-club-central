@@ -26,7 +26,7 @@ export function DashboardQuickAccess() {
   
   // Quick access links for users
   const quickAccessLinks = [
-    { icon: <User className="h-5 w-5" />, title: "My Profile", path: "/dashboard/profile", color: "bg-orange-500" },
+    { icon: <User className="h-5 w-5" />, title: "My Profile", path: "/dashboard/profile", color: "bg-glee-spelman" },
     { icon: <Music className="h-5 w-5" />, title: "Sheet Music", path: "/dashboard/sheet-music", color: "bg-purple-500" },
     { icon: <Headphones className="h-5 w-5" />, title: "Practice Tracks", path: "/dashboard/recordings", color: "bg-blue-500" },
     { icon: <Calendar className="h-5 w-5" />, title: "Calendar", path: "/dashboard/calendar", color: "bg-green-500" },
@@ -68,7 +68,7 @@ export function DashboardQuickAccess() {
             <Link key={index} to={link.path} className="no-underline">
               <Button 
                 variant="outline" 
-                className="w-full h-auto flex-col py-4 gap-2 hover:border-orange-300 hover:bg-orange-50"
+                className="w-full h-auto flex-col py-4 gap-2 hover:border-glee-spelman/20 hover:bg-glee-spelman/5"
               >
                 <div className={`${link.color} text-white p-2 rounded-full`}>
                   {link.icon}

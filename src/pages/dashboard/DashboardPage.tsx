@@ -147,7 +147,7 @@ const DashboardPage = () => {
         <div className="md:col-span-2 space-y-8">
           {/* Next Event Countdown */}
           {nextEvent && (
-            <Card className="overflow-hidden border-none shadow-md bg-gradient-to-br from-orange-500 to-orange-600 text-white">
+            <Card className="overflow-hidden border-none shadow-md bg-gradient-to-br from-glee-spelman to-glee-spelman/90 text-white">
               <CardHeader className="pb-2">
                 <CardTitle className="flex justify-between items-center">
                   <div className="flex items-center gap-2">
@@ -182,7 +182,7 @@ const DashboardPage = () => {
                     <Button 
                       variant="secondary" 
                       onClick={() => navigate("/dashboard/calendar")} 
-                      className="bg-white text-orange-600 hover:bg-white/90"
+                      className="bg-white text-glee-spelman hover:bg-white/90"
                     >
                       View Details
                     </Button>
@@ -193,14 +193,14 @@ const DashboardPage = () => {
           )}
           
           {/* Upcoming Events */}
-          <Card className="shadow-md border-t-4 border-t-orange-500">
+          <Card className="shadow-md border-t-4 border-t-glee-spelman">
             <CardHeader className="pb-2">
               <div className="flex items-center justify-between">
                 <CardTitle className="flex items-center gap-2">
-                  <Calendar className="h-5 w-5 text-orange-500" />
+                  <Calendar className="h-5 w-5 text-glee-spelman" />
                   <span>Today's Agenda</span>
                 </CardTitle>
-                <Link to="/dashboard/calendar" className="text-sm text-orange-500 hover:underline font-medium">
+                <Link to="/dashboard/calendar" className="text-sm text-glee-spelman hover:underline font-medium">
                   View Calendar
                 </Link>
               </div>
@@ -229,7 +229,7 @@ const DashboardPage = () => {
           <Card className="shadow-md">
             <CardHeader className="pb-2">
               <CardTitle className="flex items-center gap-2">
-                <FileText className="h-5 w-5 text-orange-500" />
+                <FileText className="h-5 w-5 text-glee-spelman" />
                 <span>Rehearsal Notes</span>
               </CardTitle>
             </CardHeader>
@@ -248,7 +248,7 @@ const DashboardPage = () => {
                 </div>
                 <Link 
                   to="/dashboard/sheet-music" 
-                  className="text-sm text-orange-500 hover:underline inline-flex font-medium"
+                  className="text-sm text-glee-spelman hover:underline inline-flex font-medium"
                 >
                   View all notes
                 </Link>
@@ -257,14 +257,14 @@ const DashboardPage = () => {
           </Card>
           
           {/* Announcements Card */}
-          <Card className="shadow-md border-t-4 border-t-orange-500">
+          <Card className="shadow-md border-t-4 border-t-glee-spelman">
             <CardHeader className="pb-2">
               <div className="flex items-center justify-between">
                 <CardTitle className="flex items-center gap-2">
-                  <Bell className="h-5 w-5 text-orange-500" />
+                  <Bell className="h-5 w-5 text-glee-spelman" />
                   <span>Announcements</span>
                 </CardTitle>
-                <Link to="/dashboard/announcements" className="text-sm text-orange-500 hover:underline font-medium">
+                <Link to="/dashboard/announcements" className="text-sm text-glee-spelman hover:underline font-medium">
                   View All
                 </Link>
               </div>
@@ -291,7 +291,7 @@ const DashboardPage = () => {
           <Card className="shadow-md">
             <CardHeader className="pb-2">
               <CardTitle className="flex items-center gap-2">
-                <Music className="h-5 w-5 text-orange-500" />
+                <Music className="h-5 w-5 text-glee-spelman" />
                 <span>Quick Access</span>
               </CardTitle>
               <CardDescription>
@@ -302,34 +302,34 @@ const DashboardPage = () => {
               <div className="grid grid-cols-2 gap-3">
                 <Button 
                   variant="outline" 
-                  className="h-auto flex-col py-6 px-3 hover:bg-orange-50 hover:text-orange-600 hover:border-orange-200 min-h-[90px] whitespace-normal text-center"
+                  className="h-auto flex-col py-6 px-3 hover:bg-glee-spelman/5 hover:text-glee-spelman hover:border-glee-spelman/20 min-h-[90px] whitespace-normal text-center"
                   onClick={() => navigate("/dashboard/sheet-music")}
                 >
-                  <Music className="h-6 w-6 mb-2 text-orange-500" />
+                  <Music className="h-6 w-6 mb-2 text-glee-spelman" />
                   <span className="text-sm">Sheet Music</span>
                 </Button>
                 <Button 
                   variant="outline" 
-                  className="h-auto flex-col py-6 px-3 hover:bg-orange-50 hover:text-orange-600 hover:border-orange-200 min-h-[90px] whitespace-normal text-center"
+                  className="h-auto flex-col py-6 px-3 hover:bg-glee-spelman/5 hover:text-glee-spelman hover:border-glee-spelman/20 min-h-[90px] whitespace-normal text-center"
                   onClick={() => navigate("/dashboard/practice")}
                 >
-                  <Headphones className="h-6 w-6 mb-2 text-orange-500" />
+                  <Headphones className="h-6 w-6 mb-2 text-glee-spelman" />
                   <span className="text-sm">Practice Tracks</span>
                 </Button>
                 <Button 
                   variant="outline" 
-                  className="h-auto flex-col py-6 px-3 hover:bg-orange-50 hover:text-orange-600 hover:border-orange-200 min-h-[90px] whitespace-normal text-center"
+                  className="h-auto flex-col py-6 px-3 hover:bg-glee-spelman/5 hover:text-glee-spelman hover:border-glee-spelman/20 min-h-[90px] whitespace-normal text-center"
                   onClick={() => navigate("/dashboard/attendance")}
                 >
-                  <CheckSquare className="h-6 w-6 mb-2 text-orange-500" />
+                  <CheckSquare className="h-6 w-6 mb-2 text-glee-spelman" />
                   <span className="text-sm">Attendance</span>
                 </Button>
                 <Button 
                   variant="outline" 
-                  className="h-auto flex-col py-6 px-3 hover:bg-orange-50 hover:text-orange-600 hover:border-orange-200 min-h-[90px] whitespace-normal text-center"
+                  className="h-auto flex-col py-6 px-3 hover:bg-glee-spelman/5 hover:text-glee-spelman hover:border-glee-spelman/20 min-h-[90px] whitespace-normal text-center"
                   onClick={() => navigate("/dashboard/profile")}
                 >
-                  <User className="h-6 w-6 mb-2 text-orange-500" />
+                  <User className="h-6 w-6 mb-2 text-glee-spelman" />
                   <span className="text-sm">My Profile</span>
                 </Button>
               </div>
@@ -340,7 +340,7 @@ const DashboardPage = () => {
           <Card className="shadow-md">
             <CardHeader className="pb-2">
               <CardTitle className="flex items-center gap-2">
-                <DollarSign className="h-5 w-5 text-orange-500" />
+                <DollarSign className="h-5 w-5 text-glee-spelman" />
                 <span>Dues Status</span>
               </CardTitle>
             </CardHeader>
@@ -362,7 +362,7 @@ const DashboardPage = () => {
                 <Button 
                   onClick={() => navigate("/dashboard/dues")}
                   variant="outline" 
-                  className="w-full mt-2 text-orange-500 border-orange-200 hover:bg-orange-50"
+                  className="w-full mt-2 text-glee-spelman border-glee-spelman/20 hover:bg-glee-spelman/5"
                 >
                   View Payment History
                 </Button>
@@ -378,7 +378,7 @@ const DashboardPage = () => {
         <Card className="shadow-md">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <Globe className="h-5 w-5 text-orange-500" />
+              <Globe className="h-5 w-5 text-glee-spelman" />
               <span>Resources</span>
             </CardTitle>
             <CardDescription>Spelman College Links & Social Media</CardDescription>
@@ -387,46 +387,46 @@ const DashboardPage = () => {
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
               <Button
                 variant="outline"
-                className="h-auto flex-col py-4 px-3 hover:bg-orange-50 hover:text-orange-600 hover:border-orange-200 whitespace-normal text-center"
+                className="h-auto flex-col py-4 px-3 hover:bg-glee-spelman/5 hover:text-glee-spelman hover:border-glee-spelman/20 whitespace-normal text-center"
                 onClick={() => window.open("https://www.spelman.edu", "_blank")}
               >
-                <Globe className="h-6 w-6 mb-2 text-orange-500" />
+                <Globe className="h-6 w-6 mb-2 text-glee-spelman" />
                 <span className="text-sm">Spelman College</span>
               </Button>
               
               <Button
                 variant="outline"
-                className="h-auto flex-col py-4 px-3 hover:bg-orange-50 hover:text-orange-600 hover:border-orange-200 whitespace-normal text-center"
+                className="h-auto flex-col py-4 px-3 hover:bg-glee-spelman/5 hover:text-glee-spelman hover:border-glee-spelman/20 whitespace-normal text-center"
                 onClick={() => window.open("https://www.instagram.com/spelmanglee/", "_blank")}
               >
-                <Instagram className="h-6 w-6 mb-2 text-orange-500" />
+                <Instagram className="h-6 w-6 mb-2 text-glee-spelman" />
                 <span className="text-sm">Instagram</span>
               </Button>
               
               <Button
                 variant="outline"
-                className="h-auto flex-col py-4 px-3 hover:bg-orange-50 hover:text-orange-600 hover:border-orange-200 whitespace-normal text-center"
+                className="h-auto flex-col py-4 px-3 hover:bg-glee-spelman/5 hover:text-glee-spelman hover:border-glee-spelman/20 whitespace-normal text-center"
                 onClick={() => window.open("https://www.facebook.com/SpelmanGlee/", "_blank")}
               >
-                <Facebook className="h-6 w-6 mb-2 text-orange-500" />
+                <Facebook className="h-6 w-6 mb-2 text-glee-spelman" />
                 <span className="text-sm">Facebook</span>
               </Button>
               
               <Button
                 variant="outline"
-                className="h-auto flex-col py-4 px-3 hover:bg-orange-50 hover:text-orange-600 hover:border-orange-200 whitespace-normal text-center"
+                className="h-auto flex-col py-4 px-3 hover:bg-glee-spelman/5 hover:text-glee-spelman hover:border-glee-spelman/20 whitespace-normal text-center"
                 onClick={() => window.open("https://www.tiktok.com/@spelmanglee", "_blank")}
               >
-                <Icons.tiktok className="h-6 w-6 mb-2 text-orange-500" />
+                <Icons.tiktok className="h-6 w-6 mb-2 text-glee-spelman" />
                 <span className="text-sm">TikTok</span>
               </Button>
               
               <Button
                 variant="outline"
-                className="h-auto flex-col py-4 px-3 hover:bg-orange-50 hover:text-orange-600 hover:border-orange-200 whitespace-normal text-center"
+                className="h-auto flex-col py-4 px-3 hover:bg-glee-spelman/5 hover:text-glee-spelman hover:border-glee-spelman/20 whitespace-normal text-center"
                 onClick={() => window.open("https://www.youtube.com/@SpelmanCollegeGleeClub", "_blank")}
               >
-                <Youtube className="h-6 w-6 mb-2 text-orange-500" />
+                <Youtube className="h-6 w-6 mb-2 text-glee-spelman" />
                 <span className="text-sm">YouTube</span>
               </Button>
             </div>

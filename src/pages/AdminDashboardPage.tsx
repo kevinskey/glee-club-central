@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { Navigate } from "react-router-dom";
@@ -134,7 +135,7 @@ export default function AdminDashboardPage() {
         icon={<Settings className="h-6 w-6" />}
         actions={
           <Button 
-            className="bg-orange-500 hover:bg-orange-600 text-white"
+            className="bg-glee-spelman hover:bg-glee-spelman/90 text-white"
             onClick={() => navigate("/dashboard/messaging")}
           >
             <Mail className="mr-2 h-4 w-4" /> Send Message
@@ -200,7 +201,7 @@ export default function AdminDashboardPage() {
               <CardHeader className="pb-2">
                 <div className="flex items-center justify-between">
                   <CardTitle>Tasks</CardTitle>
-                  <Button variant="ghost" size="sm" className="text-orange-500 hover:text-orange-600">
+                  <Button variant="ghost" size="sm" className="text-glee-spelman hover:text-glee-spelman/80">
                     <Plus className="h-4 w-4 mr-1" /> Add Task
                   </Button>
                 </div>
@@ -211,7 +212,7 @@ export default function AdminDashboardPage() {
                   {tasks.map(task => (
                     <div key={task.id} className="flex items-center justify-between p-2 border rounded-md hover:bg-muted/50">
                       <div className="flex items-start gap-3">
-                        <div className={`mt-1 w-2 h-2 rounded-full ${task.status === 'completed' ? 'bg-green-500' : 'bg-orange-500'}`}></div>
+                        <div className={`mt-1 w-2 h-2 rounded-full ${task.status === 'completed' ? 'bg-green-500' : 'bg-glee-spelman'}`}></div>
                         <div>
                           <p className={`text-sm font-medium ${task.status === 'completed' ? 'line-through text-muted-foreground' : ''}`}>{task.title}</p>
                           <p className="text-xs text-muted-foreground">Due: {task.due}</p>
@@ -284,8 +285,8 @@ export default function AdminDashboardPage() {
             <CardContent>
               <div className="space-y-4">
                 <div className="flex gap-4 items-start">
-                  <div className="bg-orange-100 p-2 rounded">
-                    <Users className="h-4 w-4 text-orange-500" />
+                  <div className="bg-glee-spelman/10 p-2 rounded">
+                    <Users className="h-4 w-4 text-glee-spelman" />
                   </div>
                   <div>
                     <p className="font-medium">New member registered</p>
@@ -294,8 +295,8 @@ export default function AdminDashboardPage() {
                   </div>
                 </div>
                 <div className="flex gap-4 items-start">
-                  <div className="bg-orange-100 p-2 rounded">
-                    <Music className="h-4 w-4 text-orange-500" />
+                  <div className="bg-glee-spelman/10 p-2 rounded">
+                    <Music className="h-4 w-4 text-glee-spelman" />
                   </div>
                   <div>
                     <p className="font-medium">New sheet music uploaded</p>
@@ -304,8 +305,8 @@ export default function AdminDashboardPage() {
                   </div>
                 </div>
                 <div className="flex gap-4 items-start">
-                  <div className="bg-orange-100 p-2 rounded">
-                    <Calendar className="h-4 w-4 text-orange-500" />
+                  <div className="bg-glee-spelman/10 p-2 rounded">
+                    <Calendar className="h-4 w-4 text-glee-spelman" />
                   </div>
                   <div>
                     <p className="font-medium">Event updated</p>
@@ -314,8 +315,8 @@ export default function AdminDashboardPage() {
                   </div>
                 </div>
                 <div className="flex gap-4 items-start">
-                  <div className="bg-orange-100 p-2 rounded">
-                    <Bell className="h-4 w-4 text-orange-500" />
+                  <div className="bg-glee-spelman/10 p-2 rounded">
+                    <Bell className="h-4 w-4 text-glee-spelman" />
                   </div>
                   <div>
                     <p className="font-medium">Announcement sent</p>
@@ -335,7 +336,7 @@ export default function AdminDashboardPage() {
             <Card>
               <CardHeader className="pb-2">
                 <CardTitle className="flex items-center gap-2">
-                  <Music className="h-5 w-5 text-orange-500" />
+                  <Music className="h-5 w-5 text-glee-spelman" />
                   <span>Sheet Music</span>
                 </CardTitle>
               </CardHeader>
@@ -359,7 +360,7 @@ export default function AdminDashboardPage() {
             <Card>
               <CardHeader className="pb-2">
                 <CardTitle className="flex items-center gap-2">
-                  <Headphones className="h-5 w-5 text-orange-500" />
+                  <Headphones className="h-5 w-5 text-glee-spelman" />
                   <span>Practice Audio</span>
                 </CardTitle>
               </CardHeader>
@@ -383,7 +384,7 @@ export default function AdminDashboardPage() {
             <Card>
               <CardHeader className="pb-2">
                 <CardTitle className="flex items-center gap-2">
-                  <BookOpen className="h-5 w-5 text-orange-500" />
+                  <BookOpen className="h-5 w-5 text-glee-spelman" />
                   <span>Handbook</span>
                 </CardTitle>
               </CardHeader>
@@ -435,7 +436,7 @@ export default function AdminDashboardPage() {
                     <Button variant="outline" size="sm" className="text-destructive">Delete</Button>
                   </div>
                 </div>
-                <Button>
+                <Button className="bg-glee-spelman hover:bg-glee-spelman/90 text-white">
                   <Plus className="mr-2 h-4 w-4" /> Create New Announcement
                 </Button>
               </div>
