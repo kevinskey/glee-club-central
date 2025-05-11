@@ -18,6 +18,8 @@ import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { EventType, CalendarEvent } from "@/types/calendar";
 import { Spinner } from "@/components/ui/spinner";
+import { CalendarClock, ChevronLeft, ChevronRight } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 const CalendarPage = () => {
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
@@ -26,6 +28,7 @@ const CalendarPage = () => {
   const [selectedEvent, setSelectedEvent] = useState<CalendarEvent | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [calendarView, setCalendarView] = useState<'dayGridMonth' | 'timeGridWeek' | 'timeGridDay' | 'listWeek'>('dayGridMonth');
+  const [currentDate, setCurrentDate] = useState(new Date());
   
   const { events, fetchEvents, addEvent, updateEvent, deleteEvent } = useCalendarStore();
   const { isAdmin, profile, isAuthenticated, isLoading: authLoading } = useAuth();
@@ -157,6 +160,30 @@ const CalendarPage = () => {
     }
   };
 
+  const handlePrevClick = () => {
+    const calendarApi = document.querySelector('.fc')?.getApi();
+    if (calendarApi) {
+      calendarApi.prev();
+      setCurrentDate(calendarApi.getDate());
+    }
+  };
+
+  const handleNextClick = () => {
+    const calendarApi = document.querySelector('.fc')?.getApi();
+    if (calendarApi) {
+      calendarApi.next();
+      setCurrentDate(calendarApi.getDate());
+    }
+  };
+
+  const handleTodayClick = () => {
+    const calendarApi = document.querySelector('.fc')?.getApi();
+    if (calendarApi) {
+      calendarApi.today();
+      setCurrentDate(calendarApi.getDate());
+    }
+  };
+
   const eventContent = (eventInfo: any) => {
     const typeColors: Record<EventType, string> = {
       'rehearsal': 'bg-blue-500 border-blue-600',
@@ -168,17 +195,80 @@ const CalendarPage = () => {
     const eventType = eventInfo.event.extendedProps.type as EventType || 'special';
     const location = eventInfo.event.extendedProps.location;
     
-    return (
-      <div className="w-full overflow-hidden">
-        <div className={`flex items-center py-1 px-2 rounded-sm ${typeColors[eventType]}`}>
-          <div className="flex-1 text-white truncate">
-            <div className="font-medium text-xs md:text-sm truncate">{eventInfo.event.title}</div>
-            {location && <div className="text-xs text-white/80 truncate">{location}</div>}
+    // Different rendering based on view type
+    if (calendarView === 'dayGridMonth') {
+      return (
+        <div className="w-full overflow-hidden">
+          <div className={`flex items-center py-1 px-2 rounded-sm ${typeColors[eventType]}`}>
+            <div className="flex-1 text-white truncate">
+              <div className="font-medium text-xs md:text-sm truncate">{eventInfo.event.title}</div>
+              {location && <div className="text-xs text-white/80 truncate">{location}</div>}
+            </div>
           </div>
         </div>
-      </div>
-    );
+      );
+    } else {
+      // Week/Day view with more detailed info
+      return (
+        <div className="w-full h-full overflow-hidden">
+          <div className={`flex flex-col h-full py-1 px-2 ${typeColors[eventType]}`}>
+            <div className="font-medium text-xs md:text-sm text-white">{eventInfo.event.title}</div>
+            {location && (
+              <div className="text-xs text-white/80 flex items-center gap-1 mt-1">
+                <span className="w-1.5 h-1.5 rounded-full bg-white/80"></span>
+                <span className="truncate">{location}</span>
+              </div>
+            )}
+          </div>
+        </div>
+      );
+    }
   };
+
+  // Custom toolbar
+  const CustomToolbar = () => (
+    <div className="flex items-center justify-between mb-4 p-2 bg-white dark:bg-gray-800 rounded-lg shadow-sm">
+      <div className="flex items-center gap-2">
+        <Button 
+          variant="outline" 
+          size="sm" 
+          onClick={handleTodayClick}
+          id="today-button"
+        >
+          Today
+        </Button>
+        <div className="flex items-center gap-1">
+          <Button variant="ghost" size="icon" onClick={handlePrevClick}>
+            <ChevronLeft className="h-4 w-4" />
+          </Button>
+          <Button variant="ghost" size="icon" onClick={handleNextClick}>
+            <ChevronRight className="h-4 w-4" />
+          </Button>
+        </div>
+        <h2 className="text-lg font-semibold ml-2">
+          {new Intl.DateTimeFormat('en-US', { 
+            month: 'long', 
+            year: 'numeric',
+            ...(calendarView === 'timeGridDay' && { day: 'numeric' }),
+            ...(calendarView === 'timeGridWeek' && { day: 'numeric' })
+          }).format(currentDate)}
+          {calendarView === 'timeGridWeek' && (
+            <span> - {new Intl.DateTimeFormat('en-US', { 
+              month: 'long', 
+              day: 'numeric',
+              year: currentDate.getMonth() + 7 > 12 ? 'numeric' : undefined
+            }).format(new Date(currentDate.getTime() + 6 * 24 * 60 * 60 * 1000))}</span>
+          )}
+        </h2>
+      </div>
+      <div className="flex items-center gap-2">
+        <CalendarClock className="h-4 w-4 mr-1 text-gray-400" />
+        <span className="text-sm text-gray-500 dark:text-gray-400">
+          {events.length} {events.length === 1 ? 'event' : 'events'}
+        </span>
+      </div>
+    </div>
+  );
 
   return (
     <div className="flex flex-col min-h-screen">
@@ -202,7 +292,14 @@ const CalendarPage = () => {
                 <CalendarSidebar />
               </div>
               <div className="flex-1 bg-white dark:bg-gray-800 rounded-lg shadow-sm p-4">
+                <CustomToolbar />
                 <FullCalendar
+                  ref={(ref) => {
+                    // Update current date when calendar is mounted
+                    if (ref) {
+                      setCurrentDate(ref.getApi().getDate());
+                    }
+                  }}
                   plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin, listPlugin]}
                   initialView={calendarView}
                   headerToolbar={false} // We use our custom header
@@ -230,6 +327,42 @@ const CalendarPage = () => {
                   dayMaxEvents={true}
                   slotMinTime="07:00:00"
                   slotMaxTime="22:00:00"
+                  allDaySlot={true}
+                  allDayText="All day"
+                  slotLabelFormat={{
+                    hour: '2-digit',
+                    minute: '2-digit',
+                    meridiem: 'short'
+                  }}
+                  datesSet={(dateInfo) => {
+                    setCurrentDate(dateInfo.view.currentStart);
+                  }}
+                  eventTimeFormat={{
+                    hour: '2-digit',
+                    minute: '2-digit',
+                    meridiem: 'short'
+                  }}
+                  views={{
+                    dayGridMonth: {
+                      dayMaxEventRows: 3,
+                      titleFormat: { month: 'long', year: 'numeric' }
+                    },
+                    timeGridWeek: {
+                      titleFormat: { month: 'long', year: 'numeric' },
+                      slotDuration: '00:30:00',
+                      slotLabelInterval: '01:00'
+                    },
+                    timeGridDay: {
+                      titleFormat: { month: 'long', day: 'numeric', year: 'numeric' },
+                      slotDuration: '00:30:00',
+                      slotLabelInterval: '01:00'
+                    },
+                    listWeek: {
+                      titleFormat: { month: 'long', year: 'numeric' },
+                      listDayFormat: { weekday: 'long', month: 'short', day: 'numeric' },
+                      listDaySideFormat: false
+                    }
+                  }}
                 />
               </div>
             </div>
