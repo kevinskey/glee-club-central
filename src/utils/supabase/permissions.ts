@@ -1,4 +1,3 @@
-
 import { supabase } from '@/integrations/supabase/client';
 import { UserTitle } from '@/types/permissions';
 
@@ -36,13 +35,13 @@ export async function fetchUserPermissions(userId: string) {
     // Handle various response formats to ensure compatibility
     if (Array.isArray(data)) {
       // If data is an array of objects with permission and granted properties
-      if (typeof data[0] === 'object' && 'permission' in data[0] && 'granted' in data[0]) {
+      if (data.length > 0 && typeof data[0] === 'object' && 'permission' in data[0] && 'granted' in data[0]) {
         data.forEach((item: { permission: string, granted: boolean }) => {
           permissionsMap[item.permission] = item.granted;
         });
       } 
       // If data is an array of permission strings (all granted)
-      else if (typeof data[0] === 'string') {
+      else if (data.length > 0 && typeof data[0] === 'string') {
         data.forEach((permission: string) => {
           permissionsMap[permission] = true;
         });
