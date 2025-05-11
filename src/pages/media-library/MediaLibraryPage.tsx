@@ -3,7 +3,7 @@ import React, { useState, useEffect } from "react";
 import { PageHeader } from "@/components/ui/page-header";
 import { FilesIcon, Upload, Search, Filter, Calendar } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { useToast } from "@/hooks/use-toast";
+import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { MediaFile } from "@/types/media";
 import { MediaType, getMediaType, getMediaTypeLabel } from "@/utils/mediaUtils";
@@ -14,6 +14,7 @@ import { Separator } from "@/components/ui/separator";
 import { useAuth } from "@/contexts/AuthContext";
 import { Input } from "@/components/ui/input";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { Spinner } from "@/components/ui/spinner";
 import { 
   Select, 
   SelectContent, 
@@ -23,8 +24,7 @@ import {
 } from "@/components/ui/select";
 
 export default function MediaLibraryPage() {
-  const { toast } = useToast();
-  const { audioFiles } = useAudioFiles();
+  const { audioFiles, loading: audioLoading } = useAudioFiles();
   const { user } = useAuth();
   const isMobile = useIsMobile();
   
@@ -32,6 +32,7 @@ export default function MediaLibraryPage() {
   const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
   const [allMediaFiles, setAllMediaFiles] = useState<MediaFile[]>([]);
   const [filteredMediaFiles, setFilteredMediaFiles] = useState<MediaFile[]>([]);
+  const [error, setError] = useState<Error | null>(null);
   
   // Search and filter states
   const [searchQuery, setSearchQuery] = useState("");
@@ -41,14 +42,21 @@ export default function MediaLibraryPage() {
   // Fetch all media files with RLS automatically handling permission
   const fetchAllMedia = async () => {
     setIsLoading(true);
+    setError(null);
     try {
+      console.log("Fetching media files...");
       // Fetch files from media_library table
       const { data: storageFiles, error: storageError } = await supabase
         .from('media_library')
         .select('*')
         .order('created_at', { ascending: dateFilter === "oldest" });
       
-      if (storageError) throw storageError;
+      if (storageError) {
+        console.error("Error fetching from media_library:", storageError);
+        throw storageError;
+      }
+      
+      console.log("Media files fetched:", storageFiles?.length || 0);
       
       // Convert audio files to media files format, ensuring all required fields are present
       // But only include personal recordings (my_tracks category)
@@ -64,6 +72,8 @@ export default function MediaLibraryPage() {
           created_at: audioFile.created_at,
           uploaded_by: audioFile.uploaded_by
         }));
+      
+      console.log("Audio files converted:", audioMediaFiles.length);
       
       // Combine all media files, ensuring proper type casting for storageFiles
       const typedStorageFiles = storageFiles?.map(file => ({
@@ -82,14 +92,14 @@ export default function MediaLibraryPage() {
         ...audioMediaFiles
       ];
       
+      console.log("Combined total files:", combinedFiles.length);
       setAllMediaFiles(combinedFiles);
       applyFilters(combinedFiles, searchQuery, selectedMediaType);
     } catch (error: any) {
       console.error("Error fetching media files:", error);
-      toast({
-        title: "Error loading media",
+      setError(error instanceof Error ? error : new Error("Failed to load media files"));
+      toast("Error loading media", {
         description: error.message || "Failed to load media files",
-        variant: "destructive"
       });
     } finally {
       setIsLoading(false);
@@ -119,6 +129,7 @@ export default function MediaLibraryPage() {
     }
     
     setFilteredMediaFiles(filtered);
+    console.log("Filtered files:", filtered.length);
   };
   
   // Handle search input change
@@ -129,28 +140,43 @@ export default function MediaLibraryPage() {
   };
   
   // Handle media type filter change
-  const handleMediaTypeChange = (value: MediaType | "all") => {
-    setSelectedMediaType(value);
-    applyFilters(allMediaFiles, searchQuery, value);
+  const handleMediaTypeChange = (value: string) => {
+    setSelectedMediaType(value as MediaType | "all");
+    applyFilters(allMediaFiles, searchQuery, value as MediaType | "all");
   };
   
   // Handle date filter change
-  const handleDateFilterChange = (value: "newest" | "oldest") => {
-    setDateFilter(value);
+  const handleDateFilterChange = (value: string) => {
+    setDateFilter(value as "newest" | "oldest");
     // Re-fetch with new sorting
     fetchAllMedia();
   };
   
   useEffect(() => {
+    console.log("MediaLibraryPage: Initial render, fetching data");
     fetchAllMedia();
   }, [audioFiles, dateFilter]); // Refetch when audio files or date filter change
   
   const handleUploadComplete = () => {
+    console.log("Upload complete, refreshing data");
     fetchAllMedia();
   };
 
   // Get all media types we have files for
   const mediaTypes: MediaType[] = ["pdf", "audio", "image", "video", "other"];
+
+  if (error) {
+    return (
+      <div className="flex flex-col items-center justify-center p-8 text-center">
+        <FilesIcon className="h-12 w-12 text-destructive mb-4" />
+        <h2 className="text-xl font-bold mb-2">Unable to load media library</h2>
+        <p className="text-muted-foreground mb-4">{error.message}</p>
+        <Button onClick={() => fetchAllMedia()}>
+          Try Again
+        </Button>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6 md:space-y-8">
@@ -187,7 +213,7 @@ export default function MediaLibraryPage() {
         <div className="flex flex-col sm:flex-row gap-2 w-full">
           <Select
             value={selectedMediaType}
-            onValueChange={(value) => handleMediaTypeChange(value as MediaType | "all")}
+            onValueChange={handleMediaTypeChange}
           >
             <SelectTrigger className="w-full sm:w-[140px]">
               <Filter className="h-4 w-4 mr-2" />
@@ -205,7 +231,7 @@ export default function MediaLibraryPage() {
           
           <Select
             value={dateFilter}
-            onValueChange={(value) => handleDateFilterChange(value as "newest" | "oldest")}
+            onValueChange={handleDateFilterChange}
           >
             <SelectTrigger className="w-full sm:w-[140px]">
               <Calendar className="h-4 w-4 mr-2" />
@@ -220,8 +246,9 @@ export default function MediaLibraryPage() {
       </div>
       
       {isLoading ? (
-        <div className="flex justify-center py-8">
-          <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
+        <div className="flex flex-col items-center justify-center py-16">
+          <Spinner size="lg" className="mb-4" />
+          <p className="text-muted-foreground">Loading media library...</p>
         </div>
       ) : (
         <>
