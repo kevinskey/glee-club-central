@@ -20,9 +20,10 @@ import { useAuth } from "@/contexts/AuthContext";
 interface ProfileOverviewTabProps {
   profile: Profile;
   isEditable?: boolean;
+  onSave?: (updatedProfile: any) => Promise<void>;
 }
 
-export const ProfileOverviewTab: React.FC<ProfileOverviewTabProps> = ({ profile, isEditable }) => {
+export const ProfileOverviewTab: React.FC<ProfileOverviewTabProps> = ({ profile, isEditable, onSave }) => {
   const { refreshPermissions } = useAuth();
   
   // Auto sync profile data when component mounts or profile changes
