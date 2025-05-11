@@ -1,223 +1,200 @@
 
-import React, { useState, useEffect, useRef } from "react";
-import { Button } from "@/components/ui/button";
+import { useState, useEffect, useRef } from "react";
+import { Music, Volume2 } from "lucide-react";
 import { Slider } from "@/components/ui/slider";
-import { 
-  Play, 
-  Pause, 
-  Music, 
-  Volume2
-} from "lucide-react";
-import { 
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
+import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
 
-// Define sound types with correct paths to the audio files
-const SOUNDS = {
-  click: "/sounds/click.wav",
-  woodblock: "/sounds/woodblock.wav", 
-  beep: "/sounds/beep.wav",
-};
+interface MetronomeProps {
+  isPlaying?: boolean;
+  bpm?: number;
+  timeSignature?: string;
+  showControls?: boolean;
+}
 
-export function Metronome() {
-  const [isPlaying, setIsPlaying] = useState(false);
-  const [tempo, setTempo] = useState(100);
-  const [soundType, setSoundType] = useState<keyof typeof SOUNDS>("click");
+export function Metronome({
+  isPlaying: propIsPlaying = false,
+  bpm: propBpm = 100,
+  timeSignature: propTimeSignature = "4/4",
+  showControls = false,
+}: MetronomeProps) {
+  const [isPlaying, setIsPlaying] = useState(propIsPlaying);
+  const [bpm, setBpm] = useState(propBpm);
+  const [timeSignature, setTimeSignature] = useState(propTimeSignature);
   const [volume, setVolume] = useState(0.5);
-  const [isOpen, setIsOpen] = useState(false);
+  const [soundType, setSoundType] = useState<"click" | "beep" | "woodblock">("click");
   
-  const intervalRef = useRef<number | null>(null);
-  const lastBeatTimeRef = useRef<number>(0);
+  // Audio refs
+  const clickAudioRef = useRef<HTMLAudioElement | null>(null);
+  const beepAudioRef = useRef<HTMLAudioElement | null>(null);
+  const woodblockAudioRef = useRef<HTMLAudioElement | null>(null);
+  const accentAudioRef = useRef<HTMLAudioElement | null>(null);
   
-  // Calculate interval from tempo (beats per minute)
-  const getIntervalFromTempo = (bpm: number) => {
-    return 60000 / bpm; // Convert BPM to milliseconds per beat
+  // Timer ref
+  const timerRef = useRef<number | null>(null);
+  const beatCountRef = useRef(0);
+  
+  // Beats per measure based on time signature
+  const getBeatsPerMeasure = () => {
+    return parseInt(timeSignature.split('/')[0]);
   };
   
-  // Handle play/pause
   useEffect(() => {
-    const playBeat = () => {
-      try {
-        // Create a new audio instance each time for better mobile support
-        const sound = new Audio(SOUNDS[soundType]);
-        sound.volume = volume;
-        sound.play()
-          .then(() => console.log("Metronome sound played successfully"))
-          .catch(err => console.error("Error playing metronome:", err));
-      } catch (error) {
-        console.error("Error playing metronome:", error);
+    // Create audio elements
+    clickAudioRef.current = new Audio('/sounds/metronome-click.mp3');
+    beepAudioRef.current = new Audio('/sounds/metronome-beep.mp3');
+    woodblockAudioRef.current = new Audio('/sounds/metronome-woodblock.mp3');
+    accentAudioRef.current = new Audio('/sounds/metronome-click.mp3'); // Use click for accent too
+    
+    return () => {
+      // Clean up interval when component unmounts
+      if (timerRef.current !== null) {
+        clearInterval(timerRef.current);
       }
+    };
+  }, []);
+  
+  // Update isPlaying state when prop changes
+  useEffect(() => {
+    setIsPlaying(propIsPlaying);
+  }, [propIsPlaying]);
+  
+  // Update BPM when prop changes
+  useEffect(() => {
+    setBpm(propBpm);
+  }, [propBpm]);
+
+  // Start or stop metronome based on isPlaying state
+  useEffect(() => {
+    const startMetronome = () => {
+      if (timerRef.current !== null) {
+        clearInterval(timerRef.current);
+      }
+      
+      beatCountRef.current = 0;
+      const intervalMs = (60 / bpm) * 1000;
+      
+      timerRef.current = window.setInterval(() => {
+        const beatsPerMeasure = getBeatsPerMeasure();
+        
+        // Get the appropriate audio element
+        let audio;
+        if (beatCountRef.current === 0) {
+          // First beat is the accent
+          audio = accentAudioRef.current;
+        } else {
+          switch (soundType) {
+            case "click":
+              audio = clickAudioRef.current;
+              break;
+            case "beep":
+              audio = beepAudioRef.current;
+              break;
+            case "woodblock":
+              audio = woodblockAudioRef.current;
+              break;
+            default:
+              audio = clickAudioRef.current;
+          }
+        }
+        
+        if (audio) {
+          audio.currentTime = 0;
+          audio.volume = volume;
+          audio.play().catch(error => console.error("Error playing metronome sound:", error));
+        }
+        
+        // Update beat counter
+        beatCountRef.current = (beatCountRef.current + 1) % beatsPerMeasure;
+      }, intervalMs);
     };
     
     if (isPlaying) {
-      // Use requestAnimationFrame for more accurate timing
-      const animationCallback = (timestamp: number) => {
-        if (!lastBeatTimeRef.current) {
-          lastBeatTimeRef.current = timestamp;
-        }
-        
-        const interval = getIntervalFromTempo(tempo);
-        
-        if (timestamp - lastBeatTimeRef.current >= interval) {
-          playBeat();
-          // Adjust for drift
-          lastBeatTimeRef.current = timestamp - ((timestamp - lastBeatTimeRef.current) % interval);
-        }
-        
-        intervalRef.current = requestAnimationFrame(animationCallback);
-      };
-      
-      intervalRef.current = requestAnimationFrame(animationCallback);
-    } else {
-      if (intervalRef.current) {
-        cancelAnimationFrame(intervalRef.current);
-        intervalRef.current = null;
-        lastBeatTimeRef.current = 0;
-      }
+      startMetronome();
+    } else if (timerRef.current !== null) {
+      clearInterval(timerRef.current);
+      timerRef.current = null;
     }
     
     return () => {
-      if (intervalRef.current) {
-        cancelAnimationFrame(intervalRef.current);
-        intervalRef.current = null;
+      if (timerRef.current !== null) {
+        clearInterval(timerRef.current);
       }
     };
-  }, [isPlaying, tempo, volume, soundType]);
+  }, [isPlaying, bpm, timeSignature, soundType, volume]);
   
-  // Toggle play/pause
-  const togglePlay = () => {
-    setIsPlaying(!isPlaying);
-  };
-  
-  // Close the popover when clicking outside on mobile
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (isOpen && event.target instanceof Element) {
-        const popoverContent = document.querySelector('[data-radix-popper-content-wrapper]');
-        if (popoverContent && !popoverContent.contains(event.target)) {
-          setIsOpen(false);
-        }
-      }
-    };
-    
-    document.addEventListener('mousedown', handleClickOutside);
-    
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-    };
-  }, [isOpen]);
+  if (!showControls) {
+    return null; // Don't render UI if controls are hidden
+  }
 
   return (
-    <TooltipProvider>
-      <Tooltip>
-        <TooltipTrigger asChild>
-          <div className="flex items-center">
-            <Popover open={isOpen} onOpenChange={setIsOpen}>
-              <PopoverTrigger asChild>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="relative h-8 w-8 rounded-full transition-colors hover:bg-accent/10"
-                >
-                  <Music className="h-4 w-4 text-glee-purple" />
-                  <span className="sr-only">Open metronome</span>
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent className="w-64 p-4" align="end">
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <h4 className="text-sm font-medium">Metronome</h4>
-                    <Button
-                      size="sm"
-                      variant="ghost"
-                      className={`h-8 w-8 rounded-full p-0 ${
-                        isPlaying ? "text-glee-purple" : "text-muted-foreground"
-                      }`}
-                      onClick={togglePlay}
-                    >
-                      {isPlaying ? (
-                        <Pause className="h-4 w-4" />
-                      ) : (
-                        <Play className="h-4 w-4" />
-                      )}
-                      <span className="sr-only">
-                        {isPlaying ? "Pause" : "Play"} metronome
-                      </span>
-                    </Button>
-                  </div>
-                  
-                  <div className="space-y-2">
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm">Tempo</span>
-                      <span className="text-sm font-medium">{tempo} BPM</span>
-                    </div>
-                    <Slider
-                      value={[tempo]}
-                      min={40}
-                      max={240}
-                      step={1}
-                      onValueChange={(value) => setTempo(value[0])}
-                      className="[&_.absolute]:bg-glee-purple"
-                    />
-                  </div>
-                  
-                  <div className="space-y-2">
-                    <label className="text-sm">Sound Type</label>
-                    <Select
-                      value={soundType}
-                      onValueChange={(value: keyof typeof SOUNDS) => setSoundType(value)}
-                    >
-                      <SelectTrigger className="h-8 text-sm">
-                        <SelectValue placeholder="Select sound" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="click">Click</SelectItem>
-                        <SelectItem value="woodblock">Woodblock</SelectItem>
-                        <SelectItem value="beep">Beep</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  
-                  <div className="space-y-2">
-                    <div className="flex items-center justify-between">
-                      <span className="flex items-center text-sm">
-                        <Volume2 className="mr-1 h-3 w-3" /> Volume
-                      </span>
-                      <span className="text-sm font-medium">{Math.round(volume * 100)}%</span>
-                    </div>
-                    <Slider
-                      value={[volume * 100]}
-                      min={0}
-                      max={100}
-                      step={1}
-                      onValueChange={(value) => setVolume(value[0] / 100)}
-                      className="[&_.absolute]:bg-glee-purple"
-                    />
-                  </div>
-                </div>
-              </PopoverContent>
-            </Popover>
+    <Card className="p-4 w-full">
+      <div className="flex flex-col space-y-4">
+        <div className="flex justify-between items-center">
+          <h3 className="text-lg font-semibold flex items-center">
+            <Music className="h-4 w-4 mr-2" /> Metronome
+          </h3>
+          
+          <Button
+            size="sm"
+            variant={isPlaying ? "destructive" : "default"}
+            onClick={() => setIsPlaying(!isPlaying)}
+          >
+            {isPlaying ? "Stop" : "Start"}
+          </Button>
+        </div>
+        
+        <div className="space-y-4">
+          <div className="space-y-2">
+            <label className="text-sm font-medium">Tempo: {bpm} BPM</label>
+            <Slider
+              value={[bpm]}
+              min={40}
+              max={208}
+              step={1}
+              onValueChange={(value) => setBpm(value[0])}
+              disabled={isPlaying}
+            />
           </div>
-        </TooltipTrigger>
-        <TooltipContent>
-          <p>Metronome</p>
-        </TooltipContent>
-      </Tooltip>
-    </TooltipProvider>
+          
+          <div className="space-y-2">
+            <label className="text-sm font-medium">Time Signature</label>
+            <ToggleGroup type="single" value={timeSignature} onValueChange={(value) => {
+              if (value) setTimeSignature(value);
+            }} disabled={isPlaying}>
+              <ToggleGroupItem value="2/4" aria-label="2/4 time">2/4</ToggleGroupItem>
+              <ToggleGroupItem value="3/4" aria-label="3/4 time">3/4</ToggleGroupItem>
+              <ToggleGroupItem value="4/4" aria-label="4/4 time">4/4</ToggleGroupItem>
+              <ToggleGroupItem value="6/8" aria-label="6/8 time">6/8</ToggleGroupItem>
+            </ToggleGroup>
+          </div>
+          
+          <div className="space-y-2">
+            <label className="text-sm font-medium flex items-center">
+              <Volume2 className="h-4 w-4 mr-2" /> Volume
+            </label>
+            <Slider
+              value={[volume * 100]}
+              min={0}
+              max={100}
+              step={1}
+              onValueChange={(value) => setVolume(value[0] / 100)}
+            />
+          </div>
+          
+          <div className="space-y-2">
+            <label className="text-sm font-medium">Sound</label>
+            <ToggleGroup type="single" value={soundType} onValueChange={(value: "click" | "beep" | "woodblock") => {
+              if (value) setSoundType(value);
+            }}>
+              <ToggleGroupItem value="click" aria-label="Click sound">Click</ToggleGroupItem>
+              <ToggleGroupItem value="beep" aria-label="Beep sound">Beep</ToggleGroupItem>
+              <ToggleGroupItem value="woodblock" aria-label="Woodblock sound">Woodblock</ToggleGroupItem>
+            </ToggleGroup>
+          </div>
+        </div>
+      </div>
+    </Card>
   );
 }

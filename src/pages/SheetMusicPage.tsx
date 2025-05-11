@@ -1,13 +1,12 @@
 
-import React from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { PageHeader } from "@/components/ui/page-header";
-import { FileText, Search, Plus, Upload, FolderOpen, ListMusic, Check, TableIcon, ArrowUpDown } from "lucide-react";
+import { FileText, Search, Plus, Upload, FolderOpen, ListMusic, Check, TableIcon, ArrowUpDown, Music } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Link, useSearchParams } from "react-router-dom";
-import { useState, useEffect } from "react";
+import { Link, useSearchParams, useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { UploadSheetMusicModal } from "@/components/UploadSheetMusicModal";
@@ -15,6 +14,9 @@ import { SetlistDrawer } from "@/components/setlist/SetlistDrawer";
 import { useAuth } from "@/contexts/AuthContext";
 import { Checkbox } from "@/components/ui/checkbox";
 import { MultipleDownloadBar } from "@/components/sheet-music/MultipleDownloadBar";
+import { getMediaType } from "@/utils/mediaUtils";
+import { useMediaLibrary } from "@/hooks/useMediaLibrary";
+import { Toggle } from "@/components/ui/toggle";
 import {
   Table,
   TableBody,
@@ -33,6 +35,19 @@ interface SheetMusic {
   voicing?: string;
 }
 
+interface MediaSheetMusic {
+  id: string;
+  title: string;
+  composer?: string;
+  file_url: string;
+  created_at: string;
+  voicing?: string;
+  file_type: string;
+  description?: string;
+  category?: string;
+  tags?: string[];
+}
+
 type SortColumn = 'title' | 'composer' | 'voicing' | 'created_at';
 type SortDirection = 'asc' | 'desc';
 
@@ -40,15 +55,30 @@ export default function SheetMusicPage() {
   const { toast } = useToast();
   const { user } = useAuth();
   const [loading, setLoading] = useState(true);
-  const [musicFiles, setMusicFiles] = useState<SheetMusic[]>([]);
-  const [filteredFiles, setFilteredFiles] = useState<SheetMusic[]>([]);
+  const [musicFiles, setMusicFiles] = useState<MediaSheetMusic[]>([]);
+  const [filteredFiles, setFilteredFiles] = useState<MediaSheetMusic[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
   const [isSetlistDrawerOpen, setIsSetlistDrawerOpen] = useState(false);
-  const [selectedFiles, setSelectedFiles] = useState<SheetMusic[]>([]);
+  const [selectedFiles, setSelectedFiles] = useState<MediaSheetMusic[]>([]);
   const [isSelectionMode, setIsSelectionMode] = useState(false);
   const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
   const defaultView = searchParams.get("view") === "list" ? "list" : "grid";
+  const [useMediaLibrarySource, setUseMediaLibrarySource] = useState(true);
+  
+  // Media library integration
+  const {
+    isLoading: mediaLoading,
+    error: mediaError,
+    filteredMediaFiles,
+    searchQuery: mediaSearchQuery,
+    setSearchQuery: setMediaSearchQuery,
+    selectedMediaType,
+    setSelectedMediaType,
+    setDateFilter,
+    fetchAllMedia,
+  } = useMediaLibrary();
   
   // Sorting states
   const [sortColumn, setSortColumn] = useState<SortColumn>('title');
@@ -58,22 +88,48 @@ export default function SheetMusicPage() {
   const fetchSheetMusic = async () => {
     setLoading(true);
     try {
-      const { data, error } = await supabase
-        .from('sheet_music')
-        .select('*')
-        .order('created_at', { ascending: false });
-
-      if (error) throw error;
-
-      if (data) {
-        // Format dates for display
-        const formattedData = data.map((item: SheetMusic) => ({
-          ...item,
-          created_at: new Date(item.created_at).toLocaleDateString()
-        }));
+      if (useMediaLibrarySource) {
+        // Set media library to only show PDF files
+        setSelectedMediaType("pdf");
         
-        setMusicFiles(formattedData);
-        setFilteredFiles(formattedData);
+        // Map media library files to sheet music format
+        const pdfFiles = filteredMediaFiles
+          .filter(file => file.file_type === "application/pdf" || getMediaType(file.file_type) === "pdf")
+          .map(file => ({
+            id: file.id,
+            title: file.title,
+            composer: file.description || "Unknown",
+            file_url: file.file_url,
+            created_at: new Date(file.created_at).toLocaleDateString(),
+            voicing: file.category || "N/A",
+            file_type: file.file_type,
+            description: file.description,
+            category: file.category,
+            tags: file.tags,
+          }));
+          
+        setMusicFiles(pdfFiles);
+        setFilteredFiles(pdfFiles);
+      } else {
+        // Fallback to original sheet_music table
+        const { data, error } = await supabase
+          .from('sheet_music')
+          .select('*')
+          .order('created_at', { ascending: false });
+
+        if (error) throw error;
+
+        if (data) {
+          // Format dates for display
+          const formattedData = data.map((item: SheetMusic) => ({
+            ...item,
+            created_at: new Date(item.created_at).toLocaleDateString(),
+            file_type: "application/pdf"
+          })) as MediaSheetMusic[];
+          
+          setMusicFiles(formattedData);
+          setFilteredFiles(formattedData);
+        }
       }
     } catch (error: any) {
       console.error("Error fetching sheet music:", error);
@@ -89,8 +145,22 @@ export default function SheetMusicPage() {
 
   // Load data on initial render
   useEffect(() => {
-    fetchSheetMusic();
+    fetchAllMedia();
   }, []);
+
+  // Update music files when media library is loaded or data source changes
+  useEffect(() => {
+    if (!mediaLoading && filteredMediaFiles.length > 0 && useMediaLibrarySource) {
+      fetchSheetMusic();
+    }
+  }, [mediaLoading, filteredMediaFiles, useMediaLibrarySource]);
+  
+  // Fallback to sheet_music table if media library fails or is empty
+  useEffect(() => {
+    if (!useMediaLibrarySource) {
+      fetchSheetMusic();
+    }
+  }, [useMediaLibrarySource]);
 
   // Filter music files based on search
   useEffect(() => {
@@ -100,8 +170,9 @@ export default function SheetMusicPage() {
         musicFiles.filter(
           file => 
             file.title.toLowerCase().includes(query) || 
-            file.composer.toLowerCase().includes(query) ||
-            (file.voicing && file.voicing.toLowerCase().includes(query))
+            (file.composer && file.composer.toLowerCase().includes(query)) ||
+            (file.voicing && file.voicing.toLowerCase().includes(query)) ||
+            (file.tags && file.tags.some(tag => tag.toLowerCase().includes(query)))
         )
       );
     } else {
@@ -140,7 +211,7 @@ export default function SheetMusicPage() {
   };
 
   // Toggle file selection
-  const toggleFileSelection = (file: SheetMusic) => {
+  const toggleFileSelection = (file: MediaSheetMusic) => {
     setSelectedFiles(prevSelected => {
       // Check if the file is already selected by comparing IDs
       const isSelected = prevSelected.some(item => item.id === file.id);
@@ -164,6 +235,25 @@ export default function SheetMusicPage() {
   // Check if a file is selected
   const isFileSelected = (fileId: string) => {
     return selectedFiles.some(file => file.id === fileId);
+  };
+  
+  // Open sheet music viewer with enhanced features
+  const openSheetMusic = (file: MediaSheetMusic) => {
+    navigate(`/dashboard/sheet-music/${file.id}`, { 
+      state: { 
+        file,
+        fromMediaLibrary: useMediaLibrarySource 
+      }
+    });
+  };
+
+  // Toggle data source
+  const toggleDataSource = () => {
+    setUseMediaLibrarySource(!useMediaLibrarySource);
+    toast({
+      title: `Using ${!useMediaLibrarySource ? "Media Library" : "Sheet Music Table"}`,
+      description: `Switched to ${!useMediaLibrarySource ? "Media Library" : "Sheet Music Table"} as data source`,
+    });
   };
 
   return (
@@ -193,7 +283,7 @@ export default function SheetMusicPage() {
         }
       />
 
-      {/* Search bar and view toggle */}
+      {/* Data source toggle and search bar */}
       <div className="flex flex-col md:flex-row gap-4">
         <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
@@ -204,7 +294,18 @@ export default function SheetMusicPage() {
             className="pl-10"
           />
         </div>
-        <div className="flex gap-2">
+        <div className="flex gap-2 flex-wrap">
+          <Toggle
+            pressed={useMediaLibrarySource}
+            onPressedChange={toggleDataSource}
+            variant="outline"
+            aria-label="Toggle data source"
+            className="h-10"
+          >
+            <Music className="h-4 w-4 mr-2" /> 
+            {useMediaLibrarySource ? "Using Media Library" : "Using Sheet Music DB"}
+          </Toggle>
+          
           <Button 
             variant="outline" 
             className="flex-shrink-0"
@@ -216,7 +317,7 @@ export default function SheetMusicPage() {
           <Button 
             variant="outline"
             asChild
-            className="flex-shrink-0 bg-red-600 hover:bg-red-700 text-white"
+            className="flex-shrink-0"
           >
             <Link to="/dashboard/sheet-music?view=list">
               <TableIcon className="h-4 w-4 mr-2" /> Table View
@@ -246,7 +347,7 @@ export default function SheetMusicPage() {
           </TabsList>
         </div>
         
-        {loading ? (
+        {loading || mediaLoading ? (
           <div className="grid gap-6 md:grid-cols-3 lg:grid-cols-4">
             {[1, 2, 3, 4, 5, 6].map((i) => (
               <div key={i} className="aspect-[3/4] rounded-md bg-muted animate-pulse" />
@@ -303,7 +404,10 @@ export default function SheetMusicPage() {
                         </CardContent>
                       </div>
                     ) : (
-                      <Link to={`/dashboard/sheet-music/${file.id}`}>
+                      <div 
+                        className="cursor-pointer"
+                        onClick={() => openSheetMusic(file)}
+                      >
                         <div className="aspect-[3/4] bg-muted flex items-center justify-center">
                           <FileText className="h-16 w-16 text-muted-foreground" />
                         </div>
@@ -317,8 +421,22 @@ export default function SheetMusicPage() {
                               </span>
                             </p>
                           )}
+                          {file.tags && file.tags.length > 0 && (
+                            <div className="flex flex-wrap gap-1 mt-1">
+                              {file.tags.slice(0, 2).map((tag, idx) => (
+                                <span key={idx} className="inline-flex items-center rounded-md bg-gray-50 px-1.5 py-0.5 text-[10px] font-medium text-gray-600 ring-1 ring-inset ring-gray-500/10">
+                                  {tag}
+                                </span>
+                              ))}
+                              {file.tags.length > 2 && (
+                                <span className="inline-flex items-center rounded-md bg-gray-50 px-1.5 py-0.5 text-[10px] font-medium text-gray-600 ring-1 ring-inset ring-gray-500/10">
+                                  +{file.tags.length - 2}
+                                </span>
+                              )}
+                            </div>
+                          )}
                         </CardContent>
-                      </Link>
+                      </div>
                     )}
                   </Card>
                 ))}
@@ -372,7 +490,7 @@ export default function SheetMusicPage() {
                         onClick={() => handleSort('voicing')}
                       >
                         <div className="flex items-center">
-                          Voicing
+                          Category/Voicing
                           <ArrowUpDown className="ml-2 h-4 w-4" />
                           {sortColumn === 'voicing' && (
                             <span className="ml-1 text-xs">{sortDirection === 'asc' ? '↑' : '↓'}</span>
@@ -433,9 +551,9 @@ export default function SheetMusicPage() {
                             <Button 
                               variant="outline" 
                               size="sm" 
-                              asChild
+                              onClick={() => openSheetMusic(file)}
                             >
-                              <Link to={`/dashboard/sheet-music/${file.id}`}>View</Link>
+                              View
                             </Button>
                           )}
                         </TableCell>

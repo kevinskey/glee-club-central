@@ -1,11 +1,10 @@
 
-import React, { useState } from "react";
-import { Button } from "@/components/ui/button";
+import React from "react";
+import { PDFAnnotationCanvas, Annotation } from "@/components/PDFAnnotationCanvas";
+import { PDFAnnotationToolbar } from "@/components/PDFAnnotationToolbar";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { PDFAnnotationToolbar, AnnotationTool } from "../PDFAnnotationToolbar";
-import { PDFAnnotationCanvas, Annotation } from "../PDFAnnotationCanvas";
-import { useIsMobile } from "@/hooks/use-mobile";
+import { User } from "@supabase/supabase-js";
 
 interface PDFAnnotationManagerProps {
   showAnnotations: boolean;
@@ -13,7 +12,7 @@ interface PDFAnnotationManagerProps {
   canvasWidth: number;
   canvasHeight: number;
   zoom: number;
-  user: any;
+  user: User | null;
   sheetMusicId?: string;
   annotations: Annotation[];
   setAnnotations: (annotations: Annotation[]) => void;
@@ -28,101 +27,120 @@ export const PDFAnnotationManager = ({
   user,
   sheetMusicId,
   annotations,
-  setAnnotations,
+  setAnnotations
 }: PDFAnnotationManagerProps) => {
+  const [activeTool, setActiveTool] = React.useState<"pen" | "eraser" | "square" | null>(null);
+  const [penColor, setPenColor] = React.useState("#FF0000");
+  const [penSize, setPenSize] = React.useState(3);
   const { toast } = useToast();
-  const [activeTool, setActiveTool] = useState<AnnotationTool>(null);
-  const [penColor, setPenColor] = useState("#FF0000"); // Default to red
-  const [penSize, setPenSize] = useState(3);
-  const [isSaving, setIsSaving] = useState(false);
-  const isMobile = useIsMobile();
 
-  if (!showAnnotations) return null;
+  const handleToolChange = (tool: "pen" | "eraser" | "square" | null) => {
+    setActiveTool(tool);
+  };
 
-  const handleAnnotationsChange = (newAnnotations: Annotation[]) => {
+  const handleAnnotationChange = (newAnnotations: Annotation[]) => {
     setAnnotations(newAnnotations);
   };
 
-  const handleClearAnnotations = () => {
-    if (window.confirm("Are you sure you want to clear all annotations?")) {
-      setAnnotations([]);
-    }
-  };
-
-  const saveAnnotations = async () => {
+  const handleSave = async () => {
     if (!user || !sheetMusicId) {
       toast({
         title: "Cannot save annotations",
-        description: "You must be logged in to save annotations.",
+        description: "You must be logged in to save annotations",
         variant: "destructive",
       });
       return;
     }
 
-    setIsSaving(true);
-
     try {
-      // Convert annotations to a JSON-compatible format
-      const annotationsForDB = JSON.parse(JSON.stringify(annotations));
-      
-      const { data, error } = await supabase
+      // Check if there's an existing entry
+      const { data, error: fetchError } = await supabase
         .from('pdf_annotations')
-        .upsert(
-          {
-            sheet_music_id: sheetMusicId,
-            user_id: user.id,
-            annotations: annotationsForDB,
-            updated_at: new Date().toISOString(),
-          },
-          { onConflict: 'sheet_music_id,user_id' }
-        );
+        .select('*')
+        .eq('sheet_music_id', sheetMusicId)
+        .eq('user_id', user.id)
+        .maybeSingle();
 
-      if (error) throw error;
+      if (fetchError) throw fetchError;
+
+      if (data) {
+        // Update existing entry
+        const { error: updateError } = await supabase
+          .from('pdf_annotations')
+          .update({
+            annotations: annotations,
+            updated_at: new Date()
+          })
+          .eq('id', data.id);
+
+        if (updateError) throw updateError;
+      } else {
+        // Insert new entry
+        const { error: insertError } = await supabase
+          .from('pdf_annotations')
+          .insert([
+            {
+              sheet_music_id: sheetMusicId,
+              user_id: user.id,
+              annotations: annotations
+            }
+          ]);
+
+        if (insertError) throw insertError;
+      }
 
       toast({
         title: "Annotations saved",
-        description: "Your annotations have been saved successfully.",
+        description: "Your annotations have been saved successfully"
       });
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error saving annotations:", error);
       toast({
         title: "Error saving annotations",
-        description: "There was an error saving your annotations. Please try again.",
+        description: error.message || "An unexpected error occurred",
         variant: "destructive",
       });
-    } finally {
-      setIsSaving(false);
     }
   };
 
+  const handleClear = () => {
+    if (window.confirm("Are you sure you want to clear all annotations?")) {
+      setAnnotations([]);
+      toast({
+        title: "Annotations cleared",
+        description: "All annotations have been cleared. Save to persist changes."
+      });
+    }
+  };
+
+  if (!showAnnotations) return null;
+
   return (
-    <div className="annotation-manager-container w-full">
+    <>
       <PDFAnnotationToolbar
         isOpen={showAnnotations}
         activeTool={activeTool}
-        onToolChange={setActiveTool}
-        onSave={saveAnnotations}
-        onClear={handleClearAnnotations}
+        onToolChange={handleToolChange}
+        onSave={handleSave}
+        onClear={handleClear}
         penColor={penColor}
         onPenColorChange={setPenColor}
         penSize={penSize}
         onPenSizeChange={setPenSize}
-        isMobile={isMobile}
+        isMobile={false}
       />
       
-      {showAnnotations && (
-        <PDFAnnotationCanvas
-          containerRef={containerRef}
-          activeTool={activeTool}
-          canvasWidth={canvasWidth}
-          canvasHeight={canvasHeight}
-          penColor={penColor}
-          penSize={penSize}
-          scale={zoom / 100}
-          annotations={annotations}
-          onChange={handleAnnotationsChange}
-        />
-      )}
-    </div>
+      <PDFAnnotationCanvas
+        containerRef={containerRef}
+        activeTool={activeTool}
+        canvasWidth={canvasWidth}
+        canvasHeight={canvasHeight}
+        penColor={penColor}
+        penSize={penSize}
+        scale={zoom / 100}
+        annotations={annotations}
+        onChange={handleAnnotationChange}
+      />
+    </>
   );
 };
