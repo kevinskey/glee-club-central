@@ -14,6 +14,7 @@ interface RolePermissionContextType {
   refreshPermissions: () => Promise<void>;
 }
 
+// Create context with default values
 const RolePermissionContext = createContext<RolePermissionContextType>({
   userRole: null,
   permissions: {},
