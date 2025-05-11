@@ -3,11 +3,12 @@ import React, { createContext, useContext, useState, useEffect } from 'react';
 import { useAuth } from './AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import { PermissionName } from '@/types/permissions';
 
 // Define user roles as a simple string literal union type
 export type UserRole = 'admin' | 'student' | 'section_leader' | 'staff' | 'guest';
 
-// Use a simple interface instead of recursive types
+// Use a simple interface for permissions object
 interface PermissionsObject {
   [key: string]: boolean;
 }
