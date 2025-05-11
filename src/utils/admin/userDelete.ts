@@ -24,9 +24,12 @@ export async function deleteUser(userId: string): Promise<boolean> {
     
     // If we reach here, deletion was successful
     console.log("User marked as deleted successfully");
+    toast.success("User was deleted successfully");
+    
     return true;
   } catch (error) {
     console.error("Unexpected error during user deletion:", error);
+    toast.error("An unexpected error occurred");
     return false;
   }
 }

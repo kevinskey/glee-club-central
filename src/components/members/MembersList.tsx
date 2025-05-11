@@ -64,10 +64,9 @@ export function MembersList({
     }
   };
 
-  // Log members to confirm none are deleted
-  console.log(`MembersList rendering ${members.length} members`);
-  console.log(`Members with deleted status: ${members.filter(m => m.status === 'deleted').length}`);
-
+  // Filter out deleted members first before rendering
+  const activeMembers = members.filter(member => member.status !== 'deleted');
+  
   return (
     <div className="border rounded-md mt-4 overflow-hidden">
       <Table>
@@ -82,15 +81,14 @@ export function MembersList({
           </TableRow>
         </TableHeader>
         <TableBody>
-          {members.length === 0 ? (
+          {activeMembers.length === 0 ? (
             <TableRow>
               <TableCell colSpan={canEdit ? 6 : 5} className="h-24 text-center">
                 No members found.
               </TableCell>
             </TableRow>
           ) : (
-            // Double check filtering out deleted members
-            members.filter(member => member.status !== 'deleted').map((member) => (
+            activeMembers.map((member) => (
               <TableRow key={member.id}>
                 <TableCell className="font-medium">
                   {member.first_name} {member.last_name}

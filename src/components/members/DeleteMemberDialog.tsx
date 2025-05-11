@@ -10,7 +10,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { Loader2 } from "lucide-react";
+import { Loader2, UserX } from "lucide-react";
 
 interface DeleteMemberDialogProps {
   isOpen: boolean;
@@ -31,7 +31,10 @@ export function DeleteMemberDialog({
     <AlertDialog open={isOpen} onOpenChange={onOpenChange}>
       <AlertDialogContent>
         <AlertDialogHeader>
-          <AlertDialogTitle>Delete Member</AlertDialogTitle>
+          <AlertDialogTitle className="flex items-center gap-2">
+            <UserX className="h-5 w-5 text-destructive" />
+            Delete Member
+          </AlertDialogTitle>
           <AlertDialogDescription>
             Are you sure you want to delete {memberName}? This action cannot be undone.
           </AlertDialogDescription>

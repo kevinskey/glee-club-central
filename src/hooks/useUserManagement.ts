@@ -1,4 +1,3 @@
-
 import { useState, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
@@ -77,6 +76,9 @@ export const useUserManagement = () => {
           )
         );
         
+        // Dispatch a custom event to notify other components about the deletion
+        window.dispatchEvent(new CustomEvent("user:deleted", { detail: { userId } }));
+        
         // Refresh the user list after deletion to ensure consistency with database
         await fetchUsers();
         
@@ -96,6 +98,7 @@ export const useUserManagement = () => {
     isLoading,
     error,
     fetchUsers,
+    deleteUser,
     getUserById: useCallback(async (userId: string) => {
       try {
         console.log(`Fetching user with ID: ${userId}`);
@@ -195,7 +198,6 @@ export const useUserManagement = () => {
         return false;
       }
     }, [fetchUsers]),
-    deleteUser,
     addUser: useCallback(async (userData: UserFormValues): Promise<boolean> => {
       try {
         console.log('Adding new user with data:', userData);

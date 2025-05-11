@@ -28,6 +28,26 @@ export default function AdminMembersPage() {
     }
   }, [isAuthenticated, userManagement, isLoaded]);
 
+  // Add listener for deletion events
+  useEffect(() => {
+    // Create a custom event listener for user deletion
+    const handleUserDeleted = () => {
+      console.log("User deleted event detected, refreshing user list");
+      userManagement.fetchUsers()
+        .catch(err => {
+          console.error("Error refreshing users after deletion:", err);
+        });
+    };
+    
+    // Listen for the custom event
+    window.addEventListener("user:deleted", handleUserDeleted);
+    
+    // Cleanup
+    return () => {
+      window.removeEventListener("user:deleted", handleUserDeleted);
+    };
+  }, [userManagement]);
+
   // Use conditional rendering instead of early returns
   return <MembersPageComponent useUserManagementHook={() => userManagement} />;
 }
