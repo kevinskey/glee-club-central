@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { Navigate } from "react-router-dom";
-import { PageHeaderWithToggle } from "@/components/ui/page-header-with-toggle";
+import { PageHeader } from "@/components/ui/page-header";
 import {
   BarChart3,
   Calendar,
@@ -145,7 +145,8 @@ export default function AdminDashboardPage() {
 
   return (
     <div className="container mx-auto p-4 space-y-6">
-      <PageHeaderWithToggle
+      {/* Replace PageHeaderWithToggle with PageHeader to remove theme toggle */}
+      <PageHeader
         title="Administrator Dashboard"
         description="Manage all aspects of the Glee Club"
         icon={<Settings className="h-6 w-6" />}

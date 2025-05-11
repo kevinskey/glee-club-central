@@ -18,6 +18,7 @@ import { DuesStatusCard } from "@/components/dashboard/DuesStatusCard";
 import { DeveloperTools } from "@/components/dashboard/DeveloperTools";
 import { ResourcesSection } from "@/components/dashboard/ResourcesSection";
 import { AdminDashboardAccess } from "@/components/dashboard/AdminDashboardAccess";
+import { PageHeader } from "@/components/ui/page-header";
 
 export interface Event {
   id: string;
@@ -89,7 +90,8 @@ const DashboardPageContent = () => {
     
     return (
       <div className="container mx-auto p-4 space-y-8">
-        <PageHeaderWithToggle
+        {/* Replace PageHeaderWithToggle with PageHeader to remove the theme toggle */}
+        <PageHeader
           title={`Welcome, ${profile?.first_name || 'Member'}`}
           description="Your Spelman College Glee Club dashboard"
           icon={<Home className="h-6 w-6" />}

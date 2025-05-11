@@ -4,7 +4,6 @@ import { useNavigate } from "react-router-dom";
 import { ArrowLeft, CalendarIcon, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { Metronome } from "@/components/ui/metronome";
 import { Icons } from "@/components/Icons";
 import {
@@ -60,7 +59,7 @@ export const CalendarPageHeader = ({ onAddEventClick }: CalendarPageHeaderProps)
         </h1>
         
         <div className="flex items-center gap-2 sm:gap-3 mt-3 sm:mt-0">
-          <ThemeToggle />
+          {/* Theme toggle removed */}
           <TooltipProvider>
             <Tooltip>
               <TooltipTrigger asChild>
