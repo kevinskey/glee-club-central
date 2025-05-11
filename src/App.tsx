@@ -3,6 +3,7 @@ import React from 'react';
 import { Routes, Route, Navigate } from "react-router-dom";
 import { SidebarProvider } from "@/hooks/use-sidebar";
 import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
+import { PermissionRoute } from "@/components/auth/PermissionRoute";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { Toaster } from "@/components/ui/toaster";
 
@@ -16,13 +17,14 @@ import UpdatePasswordPage from "@/pages/UpdatePasswordPage";
 import ContactPage from "@/pages/ContactPage";
 
 // Dashboard Pages
-import DashboardPage from "@/pages/dashboard/DashboardPage";
+import DashboardPage from "@/pages/DashboardPage";
 import SchedulePage from "@/pages/schedule/SchedulePage";
 import ProfilePage from "@/pages/profile/ProfilePage";
 
 // Admin Pages
 import UserManagementPage from "@/pages/admin/UserManagementPage";
 import AdminDashboardPage from "@/pages/AdminDashboardPage";
+import AdminMembersPage from "@/pages/AdminMembersPage";
 
 function App() {
   return (
@@ -54,18 +56,27 @@ function App() {
           <Route 
             path="admin/users" 
             element={
-              <ProtectedRoute adminOnly>
+              <PermissionRoute requiredPermission="can_manage_users">
                 <UserManagementPage />
-              </ProtectedRoute>
+              </PermissionRoute>
+            } 
+          />
+          
+          <Route 
+            path="admin/members" 
+            element={
+              <PermissionRoute requiredPermission="can_manage_users">
+                <AdminMembersPage />
+              </PermissionRoute>
             } 
           />
           
           <Route 
             path="admin/dashboard" 
             element={
-              <ProtectedRoute adminOnly>
+              <PermissionRoute requireSuperAdmin>
                 <AdminDashboardPage />
-              </ProtectedRoute>
+              </PermissionRoute>
             } 
           />
           
