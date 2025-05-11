@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from '@/components/ui/button';
@@ -35,9 +36,13 @@ export function UserRoleEditor() {
     { value: "non_singer", label: "Non-Singer" }
   ];
 
-  // Only show admin role if user is already an admin
+  // Only show admin roles if user is already an admin
   if (profile?.role === 'administrator') {
     roles.unshift({ value: "administrator", label: "Administrator" });
+  }
+  
+  if (profile?.role === 'director') {
+    roles.unshift({ value: "director", label: "Director" });
   }
 
   const handleSave = async () => {
@@ -102,6 +107,7 @@ export function UserRoleEditor() {
               {selectedRole === 'accompanist' && "Member who provides musical accompaniment for the Glee Club."}
               {selectedRole === 'non_singer' && "Member who supports the Glee Club in non-performance capacities."}
               {selectedRole === 'administrator' && "Full administrative access to the Glee World platform."}
+              {selectedRole === 'director' && "Administrative access with artistic direction responsibilities."}
             </p>
           </div>
           

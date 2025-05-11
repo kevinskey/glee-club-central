@@ -1,4 +1,3 @@
-
 import { Database } from "@/integrations/supabase/types";
 
 export interface Profile {
@@ -15,19 +14,18 @@ export interface Profile {
   voice_part?: string;
   robe_number?: number;
   is_super_admin?: boolean;
-  created_at: string; // Changed from optional to required to match User interface
+  created_at: string;
   updated_at?: string;
   dues_paid?: boolean;
   standing?: string;
   notes?: string;
-  last_sign_in_at?: string; // Added missing property
-  // Update the title type to match the expected enum values from Supabase
+  last_sign_in_at?: string;
   title?: Database["public"]["Enums"]["user_title"];
   special_roles?: string;
   last_login?: string;
 }
 
-export type UserRole = 'admin' | 'general';
+export type UserRole = 'admin' | 'director' | 'general';
 export type MemberStatus = 'active' | 'inactive';
 export type VoicePart = 'soprano_1' | 'soprano_2' | 'alto_1' | 'alto_2' | 'tenor' | 'bass' | null;
 
@@ -49,7 +47,7 @@ export interface AuthContextType {
 export interface AuthUser {
   id: string;
   email?: string;
-  role: 'admin' | 'general';
+  role: 'admin' | 'director' | 'general';
   [key: string]: any; 
 }
 
