@@ -28,6 +28,8 @@ import AdminDashboardPage from "@/pages/AdminDashboardPage";
 import AdminMembersPage from "@/pages/AdminMembersPage";
 
 function App() {
+  console.log("App component rendering");
+  
   return (
     <SidebarProvider>
       <Routes>
@@ -81,8 +83,6 @@ function App() {
               </PermissionRoute>
             } 
           />
-          
-          {/* Add other routes as needed */}
         </Route>
         
         {/* Fallback route */}

@@ -9,25 +9,37 @@ import { CTASection } from "@/components/landing/CTASection";
 import { Footer } from "@/components/landing/Footer";
 import { NewsFeed } from "@/components/news/NewsFeed";
 import { Spinner } from "@/components/ui/spinner";
+import { useToast } from "@/components/ui/use-toast";
 
 export default function LandingPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
+  const { toast } = useToast();
 
   useEffect(() => {
+    // Add console log for debugging
+    console.log("LandingPage component mounting");
+    
     // Simulate checking resources are loaded
     const timer = setTimeout(() => {
       try {
+        console.log("LandingPage finished loading");
         setIsLoading(false);
       } catch (err) {
         console.error("Error loading landing page:", err);
         setError(err instanceof Error ? err : new Error("Failed to load page"));
         setIsLoading(false);
+        
+        toast({
+          variant: "destructive",
+          title: "Error loading page",
+          description: "Please refresh the page or try again later.",
+        });
       }
     }, 500);
 
     return () => clearTimeout(timer);
-  }, []);
+  }, [toast]);
 
   if (isLoading) {
     return (

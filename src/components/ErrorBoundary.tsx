@@ -19,12 +19,14 @@ class ErrorBoundary extends Component<Props, State> {
   };
 
   public static getDerivedStateFromError(error: Error): State {
+    console.error("ErrorBoundary caught an error:", error);
     // Update state so the next render will show the fallback UI.
     return { hasError: true, error };
   }
 
   public componentDidCatch(error: Error, errorInfo: ErrorInfo) {
-    console.error("Uncaught error:", error, errorInfo);
+    console.error("Uncaught error:", error);
+    console.error("Component stack:", errorInfo.componentStack);
   }
 
   public resetError = () => {
@@ -44,7 +46,7 @@ class ErrorBoundary extends Component<Props, State> {
             <h1 className="text-3xl font-bold text-glee-purple">Something went wrong</h1>
             <div className="p-4 bg-destructive/10 text-destructive rounded-md">
               <p className="font-mono text-sm overflow-auto max-h-40 text-left">
-                {this.state.error?.toString()}
+                {this.state.error?.toString() || "Unknown error occurred"}
               </p>
             </div>
             <div className="space-y-4">
