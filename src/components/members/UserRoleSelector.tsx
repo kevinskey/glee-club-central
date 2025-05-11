@@ -43,7 +43,6 @@ export const UserRoleSelector = memo(({
   // Define available roles
   const roles: { value: string; label: string; description: string }[] = [
     { value: 'admin', label: 'Admin', description: 'Full access to all features' },
-    { value: 'administrator', label: 'Administrator', description: 'Full access to all features' },
     { value: 'director', label: 'Director', description: 'Administrative access with artistic oversight' },
     { value: 'general', label: 'General User', description: 'Regular member access' }
   ];

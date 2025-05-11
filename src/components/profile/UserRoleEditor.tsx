@@ -39,9 +39,8 @@ export function UserRoleEditor() {
   ];
 
   // Only show admin roles if user is already an admin or super admin
-  if (isSuperAdmin || isAdminRole || profile?.role === 'administrator' || profile?.role === 'admin') {
+  if (isSuperAdmin || isAdminRole || profile?.role === 'admin') {
     roles.unshift({ value: "admin", label: "Admin" });
-    roles.unshift({ value: "administrator", label: "Administrator" });
     roles.push({ value: "director", label: "Director" });
   }
   
@@ -127,9 +126,8 @@ export function UserRoleEditor() {
               {selectedRole === 'student_conductor' && "Member who assists in conducting during rehearsals and performances."}
               {selectedRole === 'accompanist' && "Member who provides musical accompaniment for the Glee Club."}
               {selectedRole === 'non_singer' && "Member who supports the Glee Club in non-performance capacities."}
-              {selectedRole === 'administrator' && "Full administrative access to the Glee World platform."}
-              {selectedRole === 'director' && "Administrative access with artistic direction responsibilities."}
               {selectedRole === 'admin' && "Full administrative access to all features and settings."}
+              {selectedRole === 'director' && "Administrative access with artistic direction responsibilities."}
             </p>
           </div>
           

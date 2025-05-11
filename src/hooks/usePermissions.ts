@@ -18,7 +18,6 @@ export function usePermissions() {
   
   // Check if the user has an admin-like role
   const isAdminRole = profile?.role === 'admin' || 
-                      profile?.role === 'administrator' || 
                       profile?.role === 'director';
   
   // Development function to promote current user to super admin

@@ -89,7 +89,7 @@ export function UserRoleManager({
                   <SelectValue placeholder="Select a role" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="admin">Administrator</SelectItem>
+                  <SelectItem value="admin">Admin</SelectItem>
                   <SelectItem value="director">Director</SelectItem>
                   <SelectItem value="section_leader">Section Leader</SelectItem>
                   <SelectItem value="student">Student Member</SelectItem>

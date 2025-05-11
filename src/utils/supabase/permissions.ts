@@ -1,3 +1,4 @@
+
 import { supabase } from '@/integrations/supabase/client';
 import { UserTitle } from '@/types/permissions';
 
@@ -63,7 +64,7 @@ export async function fetchUserPermissions(userId: string) {
         console.error("Error fetching permissions:", error);
         
         // Fallback: if the user has an admin-like role, grant permissions
-        if (profileData?.role === 'admin' || profileData?.role === 'administrator' || profileData?.role === 'director') {
+        if (profileData?.role === 'admin' || profileData?.role === 'director') {
           console.log("User is admin or has admin role, granting all permissions");
           
           // Return a permissions map with all permissions granted
@@ -113,7 +114,7 @@ export async function fetchUserPermissions(userId: string) {
       console.error("Error in permissions RPC:", error);
       
       // Fallback for admin users
-      if (profileData?.role === 'admin' || profileData?.role === 'administrator' || profileData?.role === 'director') {
+      if (profileData?.role === 'admin' || profileData?.role === 'director') {
         console.log("User has admin role, granting permissions via fallback");
         return {
           can_view_financials: true,

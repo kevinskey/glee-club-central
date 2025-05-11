@@ -26,7 +26,7 @@ export interface Profile {
   last_login?: string;
 }
 
-export type UserRole = 'admin' | 'administrator' | 'director' | 'general' | 'section_leader' | 'singer' | 'student_conductor' | 'accompanist' | 'non_singer';
+export type UserRole = 'admin' | 'director' | 'general' | 'section_leader' | 'singer' | 'student_conductor' | 'accompanist' | 'non_singer';
 export type MemberStatus = 'active' | 'inactive';
 export type VoicePart = 'soprano_1' | 'soprano_2' | 'alto_1' | 'alto_2' | 'tenor' | 'bass' | null;
 
