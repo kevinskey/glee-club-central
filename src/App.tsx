@@ -9,6 +9,7 @@ import { Toaster } from "@/components/ui/toaster";
 // Public Pages
 import LandingPage from "@/pages/LandingPage";
 import AboutPage from "@/pages/AboutPage";
+import PressKitPage from "@/pages/PressKitPage";
 import LoginPage from "@/pages/LoginPage";
 import RegisterPage from "@/pages/RegisterPage";
 import ResetPasswordPage from "@/pages/ResetPasswordPage";
@@ -29,6 +30,7 @@ function App() {
         {/* Public routes */}
         <Route path="/" element={<LandingPage />} />
         <Route path="/about" element={<AboutPage />} />
+        <Route path="/press-kit" element={<PressKitPage />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />
         <Route path="/reset-password" element={<ResetPasswordPage />} />
