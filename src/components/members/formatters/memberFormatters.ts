@@ -34,3 +34,27 @@ export const formatRole = (role: string): string => {
   
   return roles[role] || role;
 };
+
+/**
+ * Format phone number for display with the pattern (XXX) XXX-XXXX
+ */
+export const formatPhoneNumber = (phoneNumber: string): string => {
+  // Strip all non-digits
+  const cleaned = phoneNumber.replace(/\D/g, '');
+  
+  // Check if the input is valid
+  if (cleaned.length < 10) {
+    return phoneNumber; // Return original if not enough digits
+  }
+  
+  // Get the matches
+  const match = cleaned.match(/^(\d{3})(\d{3})(\d{4})$/);
+  
+  if (match) {
+    // Format as (XXX) XXX-XXXX
+    return `(${match[1]}) ${match[2]}-${match[3]}`;
+  }
+  
+  // Return original if not matched
+  return phoneNumber;
+};
