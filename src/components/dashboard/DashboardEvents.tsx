@@ -58,7 +58,7 @@ export function DashboardEvents() {
       <div className="mt-3 md:mt-4">
         <Link 
           to="/dashboard/calendar" 
-          className="text-xs md:text-sm text-primary hover:underline inline-flex items-center"
+          className="text-xs md:text-sm text-glee-spelman hover:underline inline-flex items-center"
         >
           View full calendar
         </Link>

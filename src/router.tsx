@@ -12,6 +12,8 @@ import DashboardPage from "./pages/dashboard/DashboardPage";
 import ProfilePage from "./pages/profile/ProfilePage";
 import AdminDashboardPage from "./pages/AdminDashboardPage";
 import AdminMembersPage from "./pages/AdminMembersPage";
+import SchedulePage from "./pages/schedule/SchedulePage";
+import FanPage from "./pages/FanPage";
 
 // Import layout components
 import { ProtectedRoute } from "./components/auth/ProtectedRoute";
@@ -36,6 +38,14 @@ export const router = createBrowserRouter([
     element: <ProtectedRoute><UpdatePasswordPage /></ProtectedRoute>,
   },
   {
+    path: "/calendar",
+    element: <SchedulePage />,
+  },
+  {
+    path: "/fan",
+    element: <FanPage />,
+  },
+  {
     path: "/dashboard",
     element: <ProtectedRoute><DashboardLayout /></ProtectedRoute>,
     children: [
@@ -47,6 +57,10 @@ export const router = createBrowserRouter([
       {
         path: "profile",
         element: <ProfilePage />,
+      },
+      {
+        path: "calendar",
+        element: <SchedulePage />,
       },
       {
         path: "admin",
