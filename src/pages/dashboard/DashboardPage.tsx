@@ -443,26 +443,24 @@ const DashboardPage = () => {
         </Card>
       </div>
       
-      {/* Admin registration link - only show if not already admin */}
-      {!isAdmin() && (
-        <Card className="border-glee-spelman/20 shadow-sm">
-          <CardHeader>
-            <CardTitle className="text-lg">Administrator Registration</CardTitle>
-            <CardDescription>
-              Are you a Glee Club administrator? Register with admin privileges
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <Button 
-              variant="outline" 
-              className="border-glee-spelman text-glee-spelman hover:bg-glee-spelman/5"
-              onClick={handleRegisterAsAdmin}
-            >
-              Register as Admin
-            </Button>
-          </CardContent>
-        </Card>
-      )}
+      {/* Admin registration link - now shown to ALL users regardless of admin status */}
+      <Card className="border-glee-spelman/20 shadow-sm">
+        <CardHeader>
+          <CardTitle className="text-lg">Administrator Registration</CardTitle>
+          <CardDescription>
+            Are you a Glee Club administrator? Register with admin privileges
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <Button 
+            variant="outline" 
+            className="border-glee-spelman text-glee-spelman hover:bg-glee-spelman/5"
+            onClick={handleRegisterAsAdmin}
+          >
+            Register as Admin
+          </Button>
+        </CardContent>
+      </Card>
     </div>
   );
 };
