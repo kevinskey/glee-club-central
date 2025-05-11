@@ -1,6 +1,6 @@
 
 import { create } from 'zustand';
-import { CalendarEvent } from '@/types/calendar';
+import { CalendarEvent, EventType } from '@/types/calendar'; // Import EventType alongside CalendarEvent
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 
