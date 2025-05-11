@@ -138,7 +138,7 @@ export default function LoginPage() {
       {/* Semi-transparent overlay */}
       <div className="absolute inset-0 bg-black/60"></div>
       
-      <Card className="w-full max-w-md relative z-10 bg-white/80 dark:bg-black/80 backdrop-blur-sm">
+      <Card className="w-full max-w-md relative z-10 bg-white dark:bg-black backdrop-blur-sm">
         <CardHeader className="text-center">
           <div className="flex justify-center mb-4">
             <Music className="h-12 w-12 text-glee-purple" />
