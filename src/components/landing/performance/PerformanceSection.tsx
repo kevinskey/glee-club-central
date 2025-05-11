@@ -66,7 +66,6 @@ export function PerformanceSection() {
         <div className="flex flex-col md:flex-row items-start md:items-center justify-between mb-8">
           <div>
             <h2 className="text-3xl font-bold tracking-tight">Upcoming Performances</h2>
-            <p className="text-muted-foreground mt-2">See where the Spelman College Glee Club will be performing</p>
           </div>
           
           {isAuthenticated && profile?.role === 'admin' && (
