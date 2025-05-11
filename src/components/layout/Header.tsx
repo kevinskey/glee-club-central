@@ -1,4 +1,3 @@
-
 import React from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
@@ -51,10 +50,8 @@ export function Header() {
         </div>
 
         <nav className="flex items-center gap-2 sm:gap-4">
-          {/* Theme Toggle - Added here */}
           <ThemeToggle />
           
-          {/* User Dropdown Menu */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" size="icon">
