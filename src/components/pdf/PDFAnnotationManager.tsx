@@ -5,6 +5,7 @@ import { PDFAnnotationToolbar } from "@/components/PDFAnnotationToolbar";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { User } from "@supabase/supabase-js";
+import { AuthUser } from "@/types/auth";
 
 interface PDFAnnotationManagerProps {
   showAnnotations: boolean;
@@ -12,7 +13,7 @@ interface PDFAnnotationManagerProps {
   canvasWidth: number;
   canvasHeight: number;
   zoom: number;
-  user: User | null;
+  user: AuthUser | null;
   sheetMusicId?: string;
   annotations: Annotation[];
   setAnnotations: (annotations: Annotation[]) => void;
@@ -63,13 +64,16 @@ export const PDFAnnotationManager = ({
 
       if (fetchError) throw fetchError;
 
+      // Convert annotations to a serializable format
+      const serializedAnnotations = JSON.parse(JSON.stringify(annotations));
+
       if (data) {
         // Update existing entry
         const { error: updateError } = await supabase
           .from('pdf_annotations')
           .update({
-            annotations: annotations,
-            updated_at: new Date()
+            annotations: serializedAnnotations,
+            updated_at: new Date().toISOString()
           })
           .eq('id', data.id);
 
@@ -78,13 +82,11 @@ export const PDFAnnotationManager = ({
         // Insert new entry
         const { error: insertError } = await supabase
           .from('pdf_annotations')
-          .insert([
-            {
-              sheet_music_id: sheetMusicId,
-              user_id: user.id,
-              annotations: annotations
-            }
-          ]);
+          .insert({
+            sheet_music_id: sheetMusicId,
+            user_id: user.id,
+            annotations: serializedAnnotations
+          });
 
         if (insertError) throw insertError;
       }

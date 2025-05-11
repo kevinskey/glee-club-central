@@ -1,15 +1,11 @@
 
 import React from "react";
 import { Button } from "@/components/ui/button";
-import { ZoomIn, ZoomOut, Download, ArrowLeft, ArrowRight, Pen, ListMusic } from "lucide-react";
-import { useIsMobile } from "@/hooks/use-mobile";
-import {
-  Menubar,
-  MenubarContent,
-  MenubarItem,
-  MenubarMenu,
-  MenubarTrigger,
-} from "@/components/ui/menubar";
+import { 
+  ChevronLeft, ChevronRight, ZoomIn, ZoomOut, Download, 
+  Pencil, ListMusic, Maximize, Minimize 
+} from "lucide-react";
+import { AuthUser } from "@/types/auth";
 
 interface PDFControlsProps {
   currentPage: number;
@@ -19,16 +15,16 @@ interface PDFControlsProps {
   onZoomIn: () => void;
   onZoomOut: () => void;
   onDownload: () => void;
+  hasAnnotationSupport?: boolean;
   showAnnotations: boolean;
   toggleAnnotations: () => void;
   isSetlistOpen: boolean;
   toggleSetlist: () => void;
   url: string;
-  hasAnnotationSupport: boolean;
-  user: any;
+  user: AuthUser | null;
 }
 
-export const PDFControls = ({
+export const PDFControls: React.FC<PDFControlsProps> = ({
   currentPage,
   totalPages,
   onPrevPage,
@@ -36,106 +32,95 @@ export const PDFControls = ({
   onZoomIn,
   onZoomOut,
   onDownload,
+  hasAnnotationSupport = false,
   showAnnotations,
   toggleAnnotations,
   isSetlistOpen,
   toggleSetlist,
   url,
-  hasAnnotationSupport,
-  user,
-}: PDFControlsProps) => {
-  const isMobile = useIsMobile();
-
+  user
+}) => {
   return (
-    <div className="sticky top-0 z-10 flex justify-between items-center p-3 border-b bg-background">
-      <div className="flex items-center gap-2">
-        {!isMobile && (
-          <>
-            <Button 
-              variant="outline" 
-              size="sm" 
-              onClick={onPrevPage} 
-              disabled={currentPage <= 1}
-              className="flex items-center h-7 w-7 p-0"
-            >
-              <ArrowLeft className="h-3 w-3" />
-            </Button>
-            <span className="text-xs">{currentPage}</span>
-            <Button 
-              variant="outline" 
-              size="sm" 
-              onClick={onNextPage} 
-              disabled={currentPage >= totalPages}
-              className="flex items-center h-7 w-7 p-0"
-            >
-              <ArrowRight className="h-3 w-3" />
-            </Button>
-          </>
-        )}
+    <div className="flex items-center justify-between p-2 border-b bg-card/60">
+      <div className="flex items-center space-x-2">
+        <Button
+          variant="outline"
+          size="icon"
+          onClick={onPrevPage}
+          disabled={currentPage <= 1}
+          title="Previous page"
+        >
+          <ChevronLeft className="h-4 w-4" />
+        </Button>
         
-        <Menubar className="border-none bg-transparent p-0">
-          <MenubarMenu>
-            <MenubarTrigger className="h-7 px-2 text-xs">Options</MenubarTrigger>
-            <MenubarContent>
-              <MenubarItem onClick={onZoomIn} className="flex items-center gap-2 text-xs">
-                <ZoomIn className="h-3 w-3" /> Zoom In
-              </MenubarItem>
-              <MenubarItem onClick={onZoomOut} className="flex items-center gap-2 text-xs">
-                <ZoomOut className="h-3 w-3" /> Zoom Out
-              </MenubarItem>
-              <MenubarItem 
-                onClick={() => window.open(url, "_blank")}
-                className="flex items-center gap-2 text-xs"
-              >
-                <Download className="h-3 w-3" /> Download
-              </MenubarItem>
-              {user && hasAnnotationSupport && (
-                <MenubarItem 
-                  onClick={toggleAnnotations}
-                  className="flex items-center gap-2 text-xs"
-                >
-                  <Pen className="h-3 w-3" /> 
-                  {showAnnotations ? "Hide Annotations" : "Show Annotations"}
-                </MenubarItem>
-              )}
-              {user && (
-                <MenubarItem 
-                  onClick={toggleSetlist}
-                  className="flex items-center gap-2 text-xs"
-                >
-                  <ListMusic className="h-3 w-3" /> 
-                  {isSetlistOpen ? "Hide Setlist" : "Show Setlist"}
-                </MenubarItem>
-              )}
-            </MenubarContent>
-          </MenubarMenu>
-        </Menubar>
+        <div className="text-sm">
+          Page {currentPage} of {totalPages}
+        </div>
         
-        {/* Show annotation toggle button outside menu on larger screens */}
-        {!isMobile && user && hasAnnotationSupport && (
+        <Button
+          variant="outline"
+          size="icon"
+          onClick={onNextPage}
+          disabled={currentPage >= totalPages}
+          title="Next page"
+        >
+          <ChevronRight className="h-4 w-4" />
+        </Button>
+      </div>
+
+      <div className="flex items-center space-x-2">
+        <Button
+          variant="outline"
+          size="icon"
+          onClick={onZoomOut}
+          title="Zoom out"
+        >
+          <ZoomOut className="h-4 w-4" />
+        </Button>
+        
+        <Button
+          variant="outline"
+          size="icon"
+          onClick={onZoomIn}
+          title="Zoom in"
+        >
+          <ZoomIn className="h-4 w-4" />
+        </Button>
+        
+        {hasAnnotationSupport && user && (
           <Button
             variant={showAnnotations ? "default" : "outline"}
             size="sm"
             onClick={toggleAnnotations}
-            className="flex items-center gap-1 h-7 px-2 text-xs"
+            title="Toggle annotations"
+            className={showAnnotations ? "bg-glee-purple hover:bg-glee-purple/90" : ""}
           >
-            <Pen className="h-3 w-3" />
-            {showAnnotations ? "Hide" : "Annotate"}
+            <Pencil className="h-4 w-4 mr-2" />
+            {showAnnotations ? "Hide Markup" : "Add Markup"}
           </Button>
         )}
-
-        {/* Show setlist toggle button outside menu on larger screens */}
-        {!isMobile && user && (
+        
+        {user && (
           <Button
             variant={isSetlistOpen ? "default" : "outline"}
             size="sm"
             onClick={toggleSetlist}
-            className="flex items-center gap-1 h-7 px-2 text-xs"
+            title="Add to setlist"
           >
-            <ListMusic className="h-3 w-3" />
-            Setlist
+            <ListMusic className="h-4 w-4 mr-2" />
+            {isSetlistOpen ? "Close Setlist" : "Add to Setlist"}
           </Button>
         )}
+        
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={onDownload}
+          title="Download PDF"
+        >
+          <Download className="h-4 w-4 mr-2" />
+          Download
+        </Button>
       </div>
     </div>
   );

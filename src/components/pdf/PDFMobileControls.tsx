@@ -1,135 +1,142 @@
 
 import React from "react";
 import { Button } from "@/components/ui/button";
-import { ZoomIn, ZoomOut, Download, ArrowLeft, ArrowRight, Pen, ListMusic, Maximize2 } from "lucide-react";
+import { 
+  ChevronLeft, ChevronRight, ZoomIn, ZoomOut, Download, 
+  Pencil, ListMusic, Maximize, Minimize, Menu 
+} from "lucide-react";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { AuthUser } from "@/types/auth";
 
 interface PDFMobileControlsProps {
-  user: any;
-  hasAnnotationSupport: boolean;
-  showAnnotations: boolean;
-  toggleAnnotations: () => void;
-  isSetlistOpen: boolean;
-  toggleSetlist: () => void;
   currentPage: number;
   totalPages: number;
   onPrevPage: () => void;
   onNextPage: () => void;
-  onZoomOut: () => void;
   onZoomIn: () => void;
+  onZoomOut: () => void;
+  hasAnnotationSupport?: boolean;
+  showAnnotations: boolean;
+  toggleAnnotations: () => void;
+  isSetlistOpen: boolean;
+  toggleSetlist: () => void;
   onFullscreen: () => void;
   isFullscreen: boolean;
   url: string;
+  user: AuthUser | null;
 }
 
-export const PDFMobileControls = ({
-  user,
-  hasAnnotationSupport,
-  showAnnotations,
-  toggleAnnotations,
-  isSetlistOpen,
-  toggleSetlist,
+export const PDFMobileControls: React.FC<PDFMobileControlsProps> = ({
   currentPage,
   totalPages,
   onPrevPage,
   onNextPage,
-  onZoomOut,
   onZoomIn,
+  onZoomOut,
+  hasAnnotationSupport = false,
+  showAnnotations,
+  toggleAnnotations,
+  isSetlistOpen,
+  toggleSetlist,
   onFullscreen,
   isFullscreen,
   url,
-}: PDFMobileControlsProps) => {
+  user
+}) => {
   return (
-    <div className="flex flex-col gap-1 w-full max-w-full bg-background/95 shadow-sm z-30">
-      {/* Mobile top controls - ForScore style */}
-      <div className="flex justify-between items-center p-1 border-b w-full">
-        {/* Page navigation controls */}
-        <div className="flex items-center gap-1">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={onPrevPage}
-            disabled={currentPage <= 1}
-            className="h-7 w-7 p-0 rounded-full flex-shrink-0"
-          >
-            <ArrowLeft className="h-3 w-3" />
-          </Button>
-          <span className="text-xs font-medium px-1 whitespace-nowrap">
-            {currentPage} / {totalPages}
-          </span>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={onNextPage}
-            disabled={currentPage >= totalPages}
-            className="h-7 w-7 p-0 rounded-full flex-shrink-0"
-          >
-            <ArrowRight className="h-3 w-3" />
-          </Button>
+    <div className="flex items-center justify-between p-2 border-b bg-card/60">
+      <div className="flex items-center space-x-1">
+        <Button
+          variant="outline"
+          size="icon"
+          onClick={onPrevPage}
+          disabled={currentPage <= 1}
+          className="h-8 w-8"
+        >
+          <ChevronLeft className="h-4 w-4" />
+        </Button>
+        
+        <div className="text-sm">
+          {currentPage}/{totalPages}
         </div>
         
-        {/* Tools controls */}
-        {user && (
-          <div className="flex items-center gap-1 overflow-x-auto hide-scrollbar">
-            {hasAnnotationSupport && (
-              <Button
-                variant={showAnnotations ? "default" : "outline"}
-                size="sm"
-                onClick={toggleAnnotations}
-                className={`h-7 px-2 ${showAnnotations ? "bg-glee-purple hover:bg-glee-purple/90 text-white" : ""} flex-shrink-0`}
-              >
-                <Pen className="h-3 w-3 mr-1" />
-                <span className="text-xs">Notes</span>
-              </Button>
-            )}
-            <Button
-              variant={isSetlistOpen ? "default" : "outline"}
-              size="sm"
-              onClick={toggleSetlist}
-              className={`h-7 px-2 ${isSetlistOpen ? "bg-glee-purple hover:bg-glee-purple/90 text-white" : ""} flex-shrink-0`}
-            >
-              <ListMusic className="h-3 w-3 mr-1" />
-              <span className="text-xs">Setlist</span>
+        <Button
+          variant="outline"
+          size="icon"
+          onClick={onNextPage}
+          disabled={currentPage >= totalPages}
+          className="h-8 w-8"
+        >
+          <ChevronRight className="h-4 w-4" />
+        </Button>
+      </div>
+
+      <div className="flex items-center space-x-1">
+        <Button
+          variant="outline"
+          size="icon"
+          onClick={onZoomOut}
+          className="h-8 w-8"
+        >
+          <ZoomOut className="h-4 w-4" />
+        </Button>
+        
+        <Button
+          variant="outline"
+          size="icon"
+          onClick={onZoomIn}
+          className="h-8 w-8"
+        >
+          <ZoomIn className="h-4 w-4" />
+        </Button>
+        
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="outline" size="icon" className="h-8 w-8">
+              <Menu className="h-4 w-4" />
             </Button>
-          </div>
-        )}
-        
-        {/* Zoom controls */}
-        <div className="flex items-center gap-1">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={onZoomOut}
-            className="h-7 w-7 p-0 rounded-full flex-shrink-0"
-          >
-            <ZoomOut className="h-3 w-3" />
-          </Button>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={onZoomIn}
-            className="h-7 w-7 p-0 rounded-full flex-shrink-0"
-          >
-            <ZoomIn className="h-3 w-3" />
-          </Button>
-          <Button 
-            variant="outline"
-            size="sm"
-            onClick={onFullscreen}
-            className="h-7 w-7 p-0 rounded-full flex-shrink-0"
-            aria-label={isFullscreen ? "Exit fullscreen" : "Enter fullscreen"}
-          >
-            <Maximize2 className="h-3 w-3" />
-          </Button>
-          <Button 
-            variant="default"
-            size="sm"
-            onClick={() => window.open(url, "_blank")}
-            className="h-7 w-7 p-0 rounded-full bg-glee-purple hover:bg-glee-purple/90 flex-shrink-0"
-          >
-            <Download className="h-3 w-3" />
-          </Button>
-        </div>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            {hasAnnotationSupport && user && (
+              <DropdownMenuItem onClick={toggleAnnotations}>
+                <Pencil className="h-4 w-4 mr-2" />
+                {showAnnotations ? "Hide Markup" : "Add Markup"}
+              </DropdownMenuItem>
+            )}
+            
+            {user && (
+              <DropdownMenuItem onClick={toggleSetlist}>
+                <ListMusic className="h-4 w-4 mr-2" />
+                {isSetlistOpen ? "Close Setlist" : "Add to Setlist"}
+              </DropdownMenuItem>
+            )}
+            
+            <DropdownMenuItem onClick={onFullscreen}>
+              {isFullscreen ? (
+                <>
+                  <Minimize className="h-4 w-4 mr-2" />
+                  Exit Fullscreen
+                </>
+              ) : (
+                <>
+                  <Maximize className="h-4 w-4 mr-2" />
+                  Fullscreen
+                </>
+              )}
+            </DropdownMenuItem>
+            
+            <DropdownMenuItem onClick={() => window.open(url, "_blank")}>
+              <Download className="h-4 w-4 mr-2" />
+              Download
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
       </div>
     </div>
   );
-}
+};

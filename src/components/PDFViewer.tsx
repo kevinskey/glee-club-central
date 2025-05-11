@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useRef } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -10,12 +11,13 @@ import { PDFMobileControls } from "./pdf/PDFMobileControls";
 import { PDFDocument } from "./pdf/PDFDocument";
 import { PDFAnnotationManager } from "./pdf/PDFAnnotationManager";
 import { Button } from "@/components/ui/button";
+import { AuthUser } from "@/types/auth";
 
 interface PDFViewerProps {
   url: string;
   title: string;
   sheetMusicId?: string;
-  fullHeight?: boolean; // Add the fullHeight prop to the interface
+  fullHeight?: boolean;
 }
 
 export const PDFViewer = ({ url, title, sheetMusicId, fullHeight }: PDFViewerProps) => {
@@ -118,7 +120,7 @@ export const PDFViewer = ({ url, title, sheetMusicId, fullHeight }: PDFViewerPro
 
       if (data && data.annotations) {
         // Ensure annotations is properly typed
-        const savedAnnotations = data.annotations as unknown as Annotation[];
+        const savedAnnotations = data.annotations as Annotation[];
         setAnnotations(savedAnnotations);
       }
     } catch (error) {
