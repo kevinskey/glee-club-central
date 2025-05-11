@@ -225,11 +225,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         console.log("Sign-in successful for:", data.user.email);
         toast.success("Signed in successfully!");
         
-        // Update last_login time in profile
+        // Update last_login time in profile using a proper update object
+        // that only includes fields that exist in the profiles table
         await supabase
           .from('profiles')
           .update({ 
-            last_login: new Date().toISOString() 
+            last_sign_in_at: new Date().toISOString() 
           })
           .eq('id', data.user.id);
         
