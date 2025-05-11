@@ -13,8 +13,8 @@ export function Footer() {
       <div className="container px-4 sm:px-6 md:px-8">
         <div className="flex flex-col md:flex-row justify-between items-center">
           <div className="flex items-center mb-5 sm:mb-6 md:mb-0">
-            <Music className="h-4 w-4 sm:h-5 sm:w-5 md:h-6 md:w-6 text-glee-purple mr-2" />
-            <span className="font-playfair text-base sm:text-lg md:text-xl font-semibold text-glee-purple">
+            <Music className="h-4 w-4 sm:h-5 sm:w-5 md:h-6 md:w-6 text-glee-spelman mr-2" />
+            <span className="font-playfair text-base sm:text-lg md:text-xl font-semibold text-glee-spelman">
               Glee World
             </span>
           </div>
@@ -26,14 +26,14 @@ export function Footer() {
             <div className="flex gap-3 mt-3 sm:mt-0">
               <Button 
                 variant="ghost" 
-                className="text-glee-purple hover:text-white hover:bg-glee-spelman"
+                className="text-glee-spelman hover:text-white hover:bg-glee-spelman"
                 onClick={() => navigate("/fan-page")}
               >
                 Guest Access
               </Button>
               <Button 
                 variant="ghost" 
-                className="text-glee-purple hover:text-white hover:bg-glee-spelman"
+                className="text-glee-spelman hover:text-white hover:bg-glee-spelman"
                 onClick={() => navigate("/login")}
               >
                 Member Portal
@@ -48,7 +48,7 @@ export function Footer() {
             href="https://www.instagram.com/spelmanglee/" 
             target="_blank" 
             rel="noopener noreferrer" 
-            className="text-gray-600 hover:text-glee-purple transition-colors"
+            className="text-gray-600 hover:text-glee-spelman transition-colors"
             aria-label="Instagram"
           >
             <Instagram className="h-5 w-5 sm:h-6 sm:w-6" />
@@ -57,7 +57,7 @@ export function Footer() {
             href="https://www.facebook.com/SpelmanGlee/" 
             target="_blank" 
             rel="noopener noreferrer" 
-            className="text-gray-600 hover:text-glee-purple transition-colors"
+            className="text-gray-600 hover:text-glee-spelman transition-colors"
             aria-label="Facebook"
           >
             <Facebook className="h-5 w-5 sm:h-6 sm:w-6" />
@@ -66,7 +66,7 @@ export function Footer() {
             href="https://www.tiktok.com/@spelmanglee" 
             target="_blank" 
             rel="noopener noreferrer" 
-            className="text-gray-600 hover:text-glee-purple transition-colors"
+            className="text-gray-600 hover:text-glee-spelman transition-colors"
             aria-label="TikTok"
           >
             <Icons.tiktok className="h-5 w-5 sm:h-6 sm:w-6" />
@@ -75,7 +75,7 @@ export function Footer() {
             href="https://www.youtube.com/@SpelmanCollegeGleeClub" 
             target="_blank" 
             rel="noopener noreferrer" 
-            className="text-gray-600 hover:text-glee-purple transition-colors"
+            className="text-gray-600 hover:text-glee-spelman transition-colors"
             aria-label="YouTube"
           >
             <Youtube className="h-5 w-5 sm:h-6 sm:w-6" />

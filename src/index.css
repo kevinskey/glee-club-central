@@ -1,3 +1,4 @@
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -26,8 +27,8 @@
     --secondary: 210 40% 96%;
     --secondary-foreground: 0 0% 0%;
 
-    --accent: 24 100% 50%; /* #FF7F00 */
-    --accent-foreground: 0 0% 0%;
+    --accent: 217 85% 28%; /* #0B3C84 - Changed from orange to Spelman Blue */
+    --accent-foreground: 0 0% 100%; /* Changed text color to white for better contrast */
 
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 0 0% 98%;
@@ -60,7 +61,7 @@
     --secondary: 0 0% 15%;
     --secondary-foreground: 0 0% 100%;
 
-    --accent: 24 100% 50%; /* #FF7F00 - same accent color for consistency */
+    --accent: 217 85% 28%; /* #0B3C84 - Changed from orange to Spelman Blue */
     --accent-foreground: 0 0% 100%;
 
     --destructive: 0 62.8% 30.6%;

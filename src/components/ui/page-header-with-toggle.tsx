@@ -23,7 +23,7 @@ export function PageHeaderWithToggle({
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
           {icon && (
-            <div className="text-orange-500 flex items-center justify-center h-10 w-10 rounded-full bg-orange-100 dark:bg-orange-900/20">
+            <div className="text-glee-spelman flex items-center justify-center h-10 w-10 rounded-full bg-blue-100 dark:bg-blue-900/20">
               {icon}
             </div>
           )}
