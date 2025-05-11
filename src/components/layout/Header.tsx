@@ -19,6 +19,7 @@ import {
   Home,
 } from "lucide-react";
 import { useSidebar } from "@/components/ui/sidebar";
+import { ThemeToggle } from "@/components/ui/theme-toggle";
 
 export function Header() {
   const { profile, signOut } = useAuth();
@@ -50,6 +51,9 @@ export function Header() {
         </div>
 
         <nav className="flex items-center gap-2 sm:gap-4">
+          {/* Theme Toggle - Added here */}
+          <ThemeToggle />
+          
           {/* User Dropdown Menu */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>

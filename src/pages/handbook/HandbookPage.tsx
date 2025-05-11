@@ -1,6 +1,6 @@
 
 import React, { useState } from "react";
-import { PageHeader } from "@/components/ui/page-header";
+import { PageHeaderWithToggle } from "@/components/ui/page-header-with-toggle";
 import { BookOpen, Download } from "lucide-react";
 import { PDFViewer } from "@/components/PDFViewer";
 import { Button } from "@/components/ui/button";
@@ -44,7 +44,7 @@ export default function HandbookPage() {
 
   return (
     <div className="space-y-6">
-      <PageHeader
+      <PageHeaderWithToggle
         title="Glee Club Handbook"
         description="Official guidelines, policies, and information for members"
         icon={<BookOpen className="h-6 w-6" />}
