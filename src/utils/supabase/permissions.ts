@@ -9,25 +9,80 @@ export async function fetchUserPermissions(userId: string): Promise<UserPermissi
       return null;
     }
 
-    const { data, error } = await supabase
-      .rpc('get_user_permissions', { p_user_id: userId });
+    // First check if the user is a super admin in the profiles table
+    const { data: profileData, error: profileError } = await supabase
+      .from('profiles')
+      .select('is_super_admin, role')
+      .eq('id', userId)
+      .single();
 
-    if (error) {
-      console.error('Error fetching user permissions:', error);
-      toast.error('Failed to load user permissions');
+    if (profileError) {
+      console.error('Error fetching profile data:', profileError);
       return null;
     }
 
-    // Transform the data to a permissions object
-    const permissions: UserPermissions = {};
-    
-    if (data) {
-      data.forEach((item: { permission: PermissionName; granted: boolean }) => {
-        permissions[item.permission] = item.granted;
+    // If the user is a super admin or has admin role, grant all permissions
+    if (profileData?.is_super_admin || 
+        profileData?.role === 'admin' || 
+        profileData?.role === 'administrator') {
+      
+      // Return all permissions as granted
+      const fullPermissions: UserPermissions = {};
+      const permissionNames: PermissionName[] = [
+        'can_view_financials', 'can_edit_financials', 'can_upload_sheet_music',
+        'can_view_sheet_music', 'can_edit_attendance', 'can_view_attendance',
+        'can_view_wardrobe', 'can_edit_wardrobe', 'can_upload_media',
+        'can_manage_tour', 'can_manage_stage', 'can_view_prayer_box',
+        'can_post_announcements', 'can_manage_users', 'can_manage_archives',
+        'can_post_social', 'can_view_travel_logistics', 'can_manage_spiritual_events',
+        'can_grade_submissions', 'can_upload_documents', 'can_view_events',
+        'can_submit_absence_form'
+      ];
+      
+      permissionNames.forEach(permission => {
+        fullPermissions[permission] = true;
       });
+      
+      console.log('User is super admin or has admin role, granting all permissions');
+      return fullPermissions;
     }
 
-    return permissions;
+    // If not a super admin, try to fetch specific permissions
+    try {
+      const { data, error } = await supabase
+        .rpc('get_user_permissions', { p_user_id: userId });
+
+      if (error) {
+        console.error('Error fetching user permissions:', error);
+        
+        // Fallback: If the RPC fails, check if the user has specific roles that should have permissions
+        if (profileData?.role) {
+          const basicPermissions: UserPermissions = {};
+          if (['section_leader', 'director', 'president'].includes(profileData.role)) {
+            basicPermissions['can_view_attendance'] = true;
+            basicPermissions['can_view_sheet_music'] = true;
+          }
+          
+          return basicPermissions;
+        }
+        
+        return {};
+      }
+
+      // Transform the data to a permissions object
+      const permissions: UserPermissions = {};
+      
+      if (data) {
+        data.forEach((item: { permission: PermissionName; granted: boolean }) => {
+          permissions[item.permission] = item.granted;
+        });
+      }
+
+      return permissions;
+    } catch (error) {
+      console.error('Error in RPC call:', error);
+      return {};
+    }
   } catch (error) {
     console.error('Error in fetchUserPermissions:', error);
     return null;
@@ -43,18 +98,40 @@ export async function hasPermission(
       return false;
     }
 
-    const { data, error } = await supabase
-      .rpc('has_permission', { 
-        p_user_id: userId,
-        p_permission: permission
-      });
-
-    if (error) {
-      console.error('Error checking permission:', error);
-      return false;
+    // First check if user is super admin
+    const { data: profileData, error: profileError } = await supabase
+      .from('profiles')
+      .select('is_super_admin, role')
+      .eq('id', userId)
+      .single();
+      
+    if (profileError) {
+      console.error('Error checking super admin status:', profileError);
+    } else if (profileData?.is_super_admin || 
+              profileData?.role === 'admin' || 
+              profileData?.role === 'administrator') {
+      console.log('User is super admin or admin, has all permissions');
+      return true;
     }
 
-    return !!data;
+    // If not super admin, check specific permission
+    try {
+      const { data, error } = await supabase
+        .rpc('has_permission', { 
+          p_user_id: userId,
+          p_permission: permission
+        });
+
+      if (error) {
+        console.error('Error checking permission:', error);
+        return false;
+      }
+
+      return !!data;
+    } catch (error) {
+      console.error('Error in RPC call:', error);
+      return false;
+    }
   } catch (error) {
     console.error('Error in hasPermission:', error);
     return false;

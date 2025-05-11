@@ -11,7 +11,7 @@ interface AdminRouteProps {
 }
 
 export const AdminRoute: React.FC<AdminRouteProps> = ({ children }) => {
-  const { isAdmin, isLoading, isAuthenticated } = useAuth();
+  const { isAdmin, isLoading, isAuthenticated, profile } = useAuth();
   const { hasPermission, isSuperAdmin } = usePermissions();
   
   // Show loading state while checking admin status

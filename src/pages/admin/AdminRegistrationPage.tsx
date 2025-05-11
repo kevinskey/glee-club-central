@@ -146,18 +146,21 @@ export default function AdminRegistrationPage() {
           toast.error("Registration failed", { description: error.message });
         }
       } else {
-        // Set the user as admin in the database
+        // Set the user as admin in the database - IMPORTANT: Updated to include role and is_super_admin
         try {
           const { error: roleError } = await supabase
             .from('profiles')
             .update({ 
               role: 'admin',
-              is_super_admin: true
+              is_super_admin: true,
+              title: 'Super Admin' // Set the user title to Super Admin
             })
             .eq('id', data?.user?.id);
 
           if (roleError) {
             console.error("Failed to set admin role:", roleError);
+          } else {
+            console.log("Successfully set user as admin with super admin privileges");
           }
         } catch (roleErr) {
           console.error("Error setting admin role:", roleErr);

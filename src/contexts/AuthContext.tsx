@@ -1,3 +1,4 @@
+
 import React, { createContext, useState, useEffect, useContext, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Profile, AuthUser, AuthContextType, UserRole } from '@/types/auth';
@@ -280,7 +281,13 @@ export function AuthProvider({ children }: AuthProviderProps) {
   // Check if the user has an admin role
   const isAdmin = useCallback(() => {
     if (!profile) return false;
-    return profile.role === 'administrator' || profile.role === 'director' || profile.role === 'admin';
+    
+    // Check for admin role in profile, or super_admin flag, or admin title
+    return profile.role === 'administrator' || 
+           profile.role === 'director' || 
+           profile.role === 'admin' ||
+           profile.is_super_admin === true || 
+           profile.title === 'Super Admin';
   }, [profile]);
 
   const value = {
