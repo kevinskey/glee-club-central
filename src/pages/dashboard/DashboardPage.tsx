@@ -73,66 +73,68 @@ const DashboardPageContent = () => {
   // Next upcoming event for countdown
   const nextEvent = events && events.length > 0 ? events[0] : null;
   
-  // Flag for conditional rendering instead of early return
-  const showSpinner = loading || authLoading;
-  
   const handleRegisterAsAdmin = () => {
     navigate("/dashboard/admin");
   };
   
-  if (showSpinner) {
+  // Use conditional rendering instead of early returns
+  const renderContent = () => {
+    if (loading || authLoading) {
+      return (
+        <div className="container mx-auto p-4 flex justify-center items-center min-h-[60vh]">
+          <Spinner size="lg" />
+        </div>
+      );
+    }
+    
     return (
-      <div className="container mx-auto p-4 flex justify-center items-center min-h-[60vh]">
-        <Spinner size="lg" />
-      </div>
-    );
-  }
-  
-  return (
-    <div className="container mx-auto p-4 space-y-8">
-      <PageHeaderWithToggle
-        title={`Welcome, ${profile?.first_name || 'Member'}`}
-        description="Your Spelman College Glee Club dashboard"
-        icon={<Home className="h-6 w-6" />}
-      />
-      
-      {/* Main Dashboard Content */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-        {/* Left Column - Today's Agenda */}
-        <div className="md:col-span-2 space-y-8">
-          {/* Next Event Countdown */}
-          {nextEvent && <NextEventCountdown event={nextEvent} />}
+      <div className="container mx-auto p-4 space-y-8">
+        <PageHeaderWithToggle
+          title={`Welcome, ${profile?.first_name || 'Member'}`}
+          description="Your Spelman College Glee Club dashboard"
+          icon={<Home className="h-6 w-6" />}
+        />
+        
+        {/* Main Dashboard Content */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          {/* Left Column - Today's Agenda */}
+          <div className="md:col-span-2 space-y-8">
+            {/* Next Event Countdown */}
+            {nextEvent && <NextEventCountdown event={nextEvent} />}
+            
+            {/* Upcoming Events */}
+            <DashboardEvents events={events} />
+            
+            {/* Rehearsal Notes */}
+            <RehearsalNotes />
+            
+            {/* Announcements Card */}
+            <DashboardAnnouncements />
+          </div>
           
-          {/* Upcoming Events */}
-          <DashboardEvents events={events} />
-          
-          {/* Rehearsal Notes */}
-          <RehearsalNotes />
-          
-          {/* Announcements Card */}
-          <DashboardAnnouncements />
+          {/* Right Column - Quick Access */}
+          <div className="space-y-8">
+            {/* Quick Access */}
+            <QuickAccess />
+            
+            {/* Dues Status Card */}
+            <DuesStatusCard />
+            
+            {/* Development Tools */}
+            <DeveloperTools />
+          </div>
         </div>
         
-        {/* Right Column - Quick Access */}
-        <div className="space-y-8">
-          {/* Quick Access */}
-          <QuickAccess />
-          
-          {/* Dues Status Card */}
-          <DuesStatusCard />
-          
-          {/* Development Tools */}
-          <DeveloperTools />
-        </div>
+        {/* Bottom Row */}
+        <ResourcesSection />
+        
+        {/* Admin Dashboard Access */}
+        <AdminDashboardAccess onAccess={handleRegisterAsAdmin} />
       </div>
-      
-      {/* Bottom Row */}
-      <ResourcesSection />
-      
-      {/* Admin Dashboard Access */}
-      <AdminDashboardAccess onAccess={handleRegisterAsAdmin} />
-    </div>
-  );
+    );
+  };
+  
+  return renderContent();
 };
 
 // Wrap the component with ErrorBoundary for better error handling
