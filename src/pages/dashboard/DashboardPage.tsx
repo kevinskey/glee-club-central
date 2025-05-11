@@ -406,7 +406,7 @@ const DashboardPage = () => {
               <Button
                 variant="outline"
                 className="h-auto flex-col py-4 px-3 hover:bg-orange-50 hover:text-orange-600 hover:border-orange-200 whitespace-normal text-center"
-                onClick={() => window.open("https://www.facebook.com/spelmangleeclubofficial", "_blank")}
+                onClick={() => window.open("https://www.facebook.com/SpelmanGlee/", "_blank")}
               >
                 <Facebook className="h-6 w-6 mb-2 text-orange-500" />
                 <span className="text-sm">Facebook</span>
@@ -424,7 +424,7 @@ const DashboardPage = () => {
               <Button
                 variant="outline"
                 className="h-auto flex-col py-4 px-3 hover:bg-orange-50 hover:text-orange-600 hover:border-orange-200 whitespace-normal text-center"
-                onClick={() => window.open("https://www.youtube.com/spelmangleeclubofficial", "_blank")}
+                onClick={() => window.open("https://www.youtube.com/@SpelmanCollegeGleeClub", "_blank")}
               >
                 <Youtube className="h-6 w-6 mb-2 text-orange-500" />
                 <span className="text-sm">YouTube</span>

@@ -53,7 +53,7 @@ export function Footer() {
             <Instagram className="h-5 w-5 sm:h-6 sm:w-6" />
           </a>
           <a 
-            href="https://www.facebook.com/spelmangleeclubofficial" 
+            href="https://www.facebook.com/SpelmanGlee/" 
             target="_blank" 
             rel="noopener noreferrer" 
             className="text-gray-600 hover:text-glee-purple transition-colors"
@@ -71,7 +71,7 @@ export function Footer() {
             <Twitter className="h-5 w-5 sm:h-6 sm:w-6" />
           </a>
           <a 
-            href="https://www.youtube.com/spelmangleeclubofficial" 
+            href="https://www.youtube.com/@SpelmanCollegeGleeClub" 
             target="_blank" 
             rel="noopener noreferrer" 
             className="text-gray-600 hover:text-glee-purple transition-colors"
