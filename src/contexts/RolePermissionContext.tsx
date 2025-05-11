@@ -5,7 +5,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { PermissionName } from '@/types/permissions';
 
-// Define user roles as a simple string literal union type
+// Define user roles as a simple string literal type
 export type UserRole = 'admin' | 'student' | 'section_leader' | 'staff' | 'guest';
 
 // Simple permissions object with string keys and boolean values
@@ -20,9 +20,14 @@ interface RolePermissionContextType {
   refreshPermissions: () => Promise<void>;
 }
 
-// Create context with null as initial value and use non-null assertion
-// This avoids deep type checking during context creation
-const RolePermissionContext = createContext<RolePermissionContextType>(null!);
+// Create context with default value to avoid type checking issues
+const RolePermissionContext = createContext<RolePermissionContextType>({
+  userRole: null,
+  permissions: {},
+  isLoading: true,
+  hasPermission: () => false,
+  refreshPermissions: async () => {}
+});
 
 // Export the hook for consuming the context
 export const useRolePermissions = () => useContext(RolePermissionContext);
@@ -52,12 +57,15 @@ export const RolePermissionProvider: React.FC<{ children: React.ReactNode }> = (
       // Define valid roles using a simple array
       const validRoles = ['admin', 'student', 'section_leader', 'staff', 'guest'];
       
-      // Determine the role safely using string comparison
-      // Avoid complex type operations
-      let role = 'student' as UserRole; // Default role with simple type assertion
+      // Simple role assignment with manual validation
+      let role: UserRole;
       
-      if (typeof roleFromProfile === 'string' && validRoles.includes(roleFromProfile)) {
+      if (validRoles.includes(roleFromProfile as string)) {
+        // Only set as UserRole if it's in our validRoles array
         role = roleFromProfile as UserRole;
+      } else {
+        // Default fallback
+        role = 'student';
       }
       
       // Set role directly
