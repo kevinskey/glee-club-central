@@ -22,6 +22,8 @@ export async function deleteUser(userId: string): Promise<boolean> {
       return false;
     }
     
+    // If we reach here, deletion was successful
+    console.log("User marked as deleted successfully");
     return true;
   } catch (error) {
     console.error("Unexpected error during user deletion:", error);

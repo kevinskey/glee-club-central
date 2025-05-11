@@ -147,7 +147,8 @@ export function MembersPageComponent({ useUserManagementHook }: MembersPageProps
       if (success) {
         setIsDeleteDialogOpen(false);
         toast.success(`${userToDeleteName} has been deleted`);
-        await refreshUsers();
+        // Force refresh the user list after deletion
+        await fetchUsers();
       }
     } catch (error) {
       console.error("Error deleting user:", error);
@@ -156,7 +157,7 @@ export function MembersPageComponent({ useUserManagementHook }: MembersPageProps
       setIsDeleting(false);
       setUserToDelete(null);
     }
-  }, [userToDelete, deleteUser, userToDeleteName, refreshUsers]);
+  }, [userToDelete, deleteUser, userToDeleteName, fetchUsers]);
 
   // Check if user has admin privileges
   const hasAdminAccess = isAdmin?.() || isSuperAdmin || profile?.is_super_admin || hasPermission('can_manage_users');
@@ -187,6 +188,9 @@ export function MembersPageComponent({ useUserManagementHook }: MembersPageProps
     
     return matchesSearch && matchesRole && matchesStatus;
   });
+
+  // Log the filteredMembers length to verify filtering
+  console.log(`Filtered members: ${filteredMembers.length} out of ${allMembers.length} total (${members.length} non-deleted)`);
 
   return (
     <div className="container mx-auto p-4 space-y-6">

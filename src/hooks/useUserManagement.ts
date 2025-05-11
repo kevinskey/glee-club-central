@@ -1,8 +1,8 @@
 import { useState, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { User as AuthUser, Profile } from '@/types/auth';
 import { toast } from 'sonner';
 import { UserFormValues } from '@/components/members/form/userFormSchema';
+import { deleteUser as deleteUserUtil } from '@/utils/admin/userDelete';
 
 // Export the User type so it can be imported by other components
 export interface User {
@@ -242,26 +242,27 @@ export const useUserManagement = () => {
     try {
       console.log(`Deleting user ${userId}`);
       
-      // First, delete from profiles table
-      const { error: profileError } = await supabase
-        .from('profiles')
-        .delete()
-        .eq('id', userId);
-
-      if (profileError) {
-        console.error('Error deleting user profile:', profileError);
+      // Use the utility function to mark the user as deleted
+      const success = await deleteUserUtil(userId);
+      
+      if (success) {
+        console.log('User marked as deleted successfully');
+        
+        // Update local state to remove the deleted user from the UI
+        // This ensures the UI updates immediately even if fetchUsers hasn't completed yet
+        setUsers(currentUsers => 
+          currentUsers.map(user => 
+            user.id === userId ? { ...user, status: 'deleted' } : user
+          )
+        );
+        
+        // Refresh the user list after deletion
+        await fetchUsers();
+        
+        return true;
+      } else {
         return false;
       }
-      
-      // Optionally, if you have admin access to delete auth users:
-      // This would require a Supabase edge function with service role key
-
-      console.log('User deleted successfully');
-      
-      // Refresh the user list after deletion
-      fetchUsers();
-      
-      return true;
     } catch (err) {
       console.error('Unexpected error deleting user:', err);
       return false;
@@ -273,11 +274,180 @@ export const useUserManagement = () => {
     isLoading,
     error,
     fetchUsers,
-    getUserById,
-    updateUser,
-    updateUserRole,
-    updateUserStatus,
+    getUserById: useCallback(async (userId: string) => {
+      try {
+        console.log(`Fetching user with ID: ${userId}`);
+        const { data, error } = await supabase
+          .rpc('get_user_by_id', { p_user_id: userId });
+  
+        if (error) {
+          console.error('Error fetching user by ID:', error);
+          return null;
+        }
+  
+        if (!data || data.length === 0) {
+          console.log('No user found with that ID');
+          return null;
+        }
+  
+        return data[0];
+      } catch (err) {
+        console.error('Unexpected error getting user by ID:', err);
+        return null;
+      }
+    }, []),
+    updateUser: useCallback(async (userId: string, userData: any) => {
+      try {
+        console.log(`Updating user ${userId} with data:`, userData);
+        const { data, error } = await supabase
+          .from('profiles')
+          .update(userData)
+          .eq('id', userId);
+  
+        if (error) {
+          console.error('Error updating user:', error);
+          return false;
+        }
+  
+        console.log('User updated successfully');
+        
+        // Optionally refresh the user list after update
+        fetchUsers();
+        
+        return true;
+      } catch (err) {
+        console.error('Unexpected error updating user:', err);
+        return false;
+      }
+    }, [fetchUsers]),
+    updateUserRole: useCallback(async (userId: string, role: string) => {
+      try {
+        console.log(`Updating user ${userId} role to ${role}`);
+        const { error } = await supabase
+          .rpc('handle_user_role', { 
+            p_user_id: userId, 
+            p_role: role 
+          });
+  
+        if (error) {
+          console.error('Error updating user role:', error);
+          toast.error('Failed to update user role');
+          return false;
+        }
+  
+        console.log('User role updated successfully');
+        toast.success('User role updated successfully');
+        
+        // Refresh the user list after update
+        fetchUsers();
+        
+        return true;
+      } catch (err) {
+        console.error('Unexpected error updating user role:', err);
+        toast.error('An unexpected error occurred');
+        return false;
+      }
+    }, [fetchUsers]),
+    updateUserStatus: useCallback(async (userId: string, status: string) => {
+      try {
+        console.log(`Updating user ${userId} status to ${status}`);
+        const { error } = await supabase
+          .rpc('update_user_status', { 
+            p_user_id: userId, 
+            p_status: status 
+          });
+  
+        if (error) {
+          console.error('Error updating user status:', error);
+          return false;
+        }
+  
+        console.log('User status updated successfully');
+        
+        // Refresh the user list after update
+        fetchUsers();
+        
+        return true;
+      } catch (err) {
+        console.error('Unexpected error updating user status:', err);
+        return false;
+      }
+    }, [fetchUsers]),
     deleteUser,
-    addUser
+    addUser: useCallback(async (userData: UserFormValues): Promise<boolean> => {
+      try {
+        console.log('Adding new user with data:', userData);
+        
+        // First, create the user in auth
+        let authData, authError;
+        
+        if (userData.email && userData.password) {
+          const { data, error } = await supabase.auth.signUp({
+            email: userData.email,
+            password: userData.password,
+            options: {
+              data: {
+                first_name: userData.first_name,
+                last_name: userData.last_name,
+              }
+            }
+          });
+          
+          authData = data;
+          authError = error;
+        } else {
+          console.error('Email and password are required to create a user');
+          toast.error('Email and password are required');
+          return false;
+        }
+        
+        if (authError) {
+          console.error('Error creating user in auth:', authError);
+          toast.error(authError.message || 'Failed to create user account');
+          return false;
+        }
+        
+        if (!authData.user) {
+          console.error('No user returned from auth signup');
+          toast.error('Failed to create user');
+          return false;
+        }
+        
+        // Then update the profile with additional information
+        const { error: profileError } = await supabase
+          .from('profiles')
+          .update({
+            first_name: userData.first_name,
+            last_name: userData.last_name,
+            phone: userData.phone || null,
+            role: userData.role,
+            voice_part: userData.voice_part,
+            status: userData.status,
+            class_year: userData.class_year || null,
+            notes: userData.notes || null,
+            special_roles: userData.special_roles || null,
+            dues_paid: userData.dues_paid || false,
+          })
+          .eq('id', authData.user.id);
+        
+        if (profileError) {
+          console.error('Error updating profile:', profileError);
+          toast.error('User created but profile update failed');
+          // We'll still return true since the user was created
+        }
+        
+        console.log('User added successfully');
+        toast.success(`Added ${userData.first_name} ${userData.last_name}`);
+        
+        // Refresh the users list
+        fetchUsers();
+        
+        return true;
+      } catch (err) {
+        console.error('Unexpected error adding user:', err);
+        toast.error('An unexpected error occurred');
+        return false;
+      }
+    }, [fetchUsers])
   };
 };
