@@ -18,9 +18,9 @@ export const useCalendarStore = create<CalendarStore>((set, get) => ({
   fetchEvents: async () => {
     try {
       const { data, error } = await supabase
-        .from('calendar_events')  // Changed from 'events' to 'calendar_events'
+        .from('calendar_events')
         .select('*')
-        .order('start', { ascending: true });
+        .order('date', { ascending: true });
       
       if (error) {
         console.error('Error fetching events:', error);
@@ -28,16 +28,16 @@ export const useCalendarStore = create<CalendarStore>((set, get) => ({
         return;
       }
       
-      // Transform the data to match our CalendarEvent type
+      // Transform the data from DB schema to our CalendarEvent type
       const events: CalendarEvent[] = data.map(event => ({
         id: event.id,
         title: event.title,
-        type: event.type,
-        start: event.start,
-        end: event.end,
-        location: event.location,
-        description: event.description,
-        created_by: event.created_by
+        type: event.type as EventType,
+        start: new Date(`${event.date}T${event.time || '00:00:00'}`).toISOString(),
+        end: new Date(`${event.date}T${event.time || '00:00:00'}`).toISOString(), // Default end to same as start
+        location: event.location || '',
+        description: event.description || '',
+        created_by: event.user_id
       }));
       
       set({ events });
@@ -49,9 +49,20 @@ export const useCalendarStore = create<CalendarStore>((set, get) => ({
   
   addEvent: async (event) => {
     try {
+      // Transform our CalendarEvent type to match DB schema
+      const dbEvent = {
+        title: event.title,
+        type: event.type,
+        date: new Date(event.start).toISOString().split('T')[0], // Extract YYYY-MM-DD
+        time: new Date(event.start).toISOString().split('T')[1].substring(0, 8), // Extract HH:MM:SS
+        location: event.location || '',
+        description: event.description || '',
+        user_id: event.created_by
+      };
+      
       const { data, error } = await supabase
-        .from('calendar_events')  // Changed from 'events' to 'calendar_events'
-        .insert([event])
+        .from('calendar_events')
+        .insert([dbEvent])
         .select('*')
         .single();
       
@@ -61,16 +72,16 @@ export const useCalendarStore = create<CalendarStore>((set, get) => ({
         return false;
       }
       
-      // Add the new event to the store
+      // Add the new event to the store, transforming back to our CalendarEvent type
       const newEvent: CalendarEvent = {
         id: data.id,
         title: data.title,
-        type: data.type,
-        start: data.start,
-        end: data.end,
-        location: data.location,
-        description: data.description,
-        created_by: data.created_by
+        type: data.type as EventType,
+        start: new Date(`${data.date}T${data.time || '00:00:00'}`).toISOString(),
+        end: new Date(`${data.date}T${data.time || '00:00:00'}`).toISOString(),
+        location: data.location || '',
+        description: data.description || '',
+        created_by: data.user_id
       };
       
       set(state => ({
@@ -87,16 +98,19 @@ export const useCalendarStore = create<CalendarStore>((set, get) => ({
   
   updateEvent: async (event) => {
     try {
+      // Transform our CalendarEvent type to match DB schema
+      const dbEvent = {
+        title: event.title,
+        type: event.type,
+        date: new Date(event.start).toISOString().split('T')[0],
+        time: new Date(event.start).toISOString().split('T')[1].substring(0, 8),
+        location: event.location || '',
+        description: event.description || '',
+      };
+      
       const { error } = await supabase
-        .from('calendar_events')  // Changed from 'events' to 'calendar_events'
-        .update({
-          title: event.title,
-          type: event.type,
-          start: event.start,
-          end: event.end,
-          location: event.location,
-          description: event.description
-        })
+        .from('calendar_events')
+        .update(dbEvent)
         .eq('id', event.id);
       
       if (error) {
@@ -123,7 +137,7 @@ export const useCalendarStore = create<CalendarStore>((set, get) => ({
   deleteEvent: async (id) => {
     try {
       const { error } = await supabase
-        .from('calendar_events')  // Changed from 'events' to 'calendar_events'
+        .from('calendar_events')
         .delete()
         .eq('id', id);
       

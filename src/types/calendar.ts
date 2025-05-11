@@ -1,4 +1,3 @@
-
 export type EventType = "rehearsal" | "concert" | "sectional" | "special";
 
 export interface CalendarEvent {
