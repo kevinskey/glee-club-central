@@ -31,6 +31,7 @@ import { DashboardQuickAccess } from "@/components/dashboard/DashboardQuickAcces
 import { DashboardModules } from "@/components/dashboard/DashboardModules";
 import { toast } from "sonner";
 import { usePermissions } from "@/hooks/usePermissions";
+import { ErrorBoundary } from "@/components/ErrorBoundary";
 
 interface Event {
   id: string;
@@ -47,14 +48,13 @@ interface Announcement {
   date: string;
 }
 
-const DashboardPage = () => {
+const DashboardPageContent = () => {
+  // ⚠️ Fix: Move ALL hooks to the top of the component
   const { profile, isLoading: authLoading, isAdmin } = useAuth();
   const { promoteToSuperAdmin, isUpdating, isSuperAdmin } = usePermissions();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const [events, setEvents] = useState<Event[]>([]);
-  
-  // Define announcements state
   const [announcements, setAnnouncements] = useState<Announcement[]>([
     {
       id: 1,
@@ -127,20 +127,21 @@ const DashboardPage = () => {
     return diffDays;
   };
   
-  const daysUntilNextEvent = getDaysUntilNextEvent();
+  // ⚠️ Fix: Use flags instead of early returns
+  const showSpinner = loading || authLoading;
   
-  if (loading || authLoading) {
+  const handleRegisterAsAdmin = () => {
+    // Navigate to admin dashboard instead of register/admin
+    navigate("/dashboard/admin");
+  };
+  
+  if (showSpinner) {
     return (
       <div className="container mx-auto p-4 flex justify-center items-center min-h-[60vh]">
         <Spinner size="lg" />
       </div>
     );
   }
-  
-  const handleRegisterAsAdmin = () => {
-    // Navigate to admin dashboard instead of register/admin
-    navigate("/dashboard/admin");
-  };
   
   return (
     <div className="container mx-auto p-4 space-y-8">
@@ -492,6 +493,15 @@ const DashboardPage = () => {
         </CardContent>
       </Card>
     </div>
+  );
+};
+
+// Wrap the component with ErrorBoundary for better error handling
+const DashboardPage = () => {
+  return (
+    <ErrorBoundary>
+      <DashboardPageContent />
+    </ErrorBoundary>
   );
 };
 
