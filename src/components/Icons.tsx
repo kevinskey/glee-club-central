@@ -5,8 +5,8 @@ import { Globe } from "lucide-react";
 
 export type IconProps = React.HTMLAttributes<SVGElement>;
 
-// Define a separate type for image-based icons
-export type ImageIconProps = Omit<React.ImgHTMLAttributes<HTMLImageElement>, keyof React.SVGAttributes<SVGElement>>;
+// Define a separate type for image-based icons that includes className
+export type ImageIconProps = React.ImgHTMLAttributes<HTMLImageElement>;
 
 export const Icons = {
   logo: (props: ImageIconProps) => (
