@@ -135,7 +135,8 @@ const DashboardPage = () => {
   }
   
   const handleRegisterAsAdmin = () => {
-    navigate("/register/admin");
+    // Navigate to admin dashboard instead of register/admin
+    navigate("/dashboard/admin");
   };
   
   return (
@@ -446,9 +447,9 @@ const DashboardPage = () => {
       {/* Admin registration link - now shown to ALL users regardless of admin status */}
       <Card className="border-glee-spelman/20 shadow-sm">
         <CardHeader>
-          <CardTitle className="text-lg">Administrator Registration</CardTitle>
+          <CardTitle className="text-lg">Administrator Dashboard</CardTitle>
           <CardDescription>
-            Are you a Glee Club administrator? Register with admin privileges
+            Access the administrator dashboard to manage Glee Club resources
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -457,7 +458,7 @@ const DashboardPage = () => {
             className="border-glee-spelman text-glee-spelman hover:bg-glee-spelman/5"
             onClick={handleRegisterAsAdmin}
           >
-            Register as Admin
+            Go to Admin Dashboard
           </Button>
         </CardContent>
       </Card>
