@@ -7,13 +7,15 @@ import { toast } from 'sonner';
 // Define user roles as a simple string literal union type
 export type UserRole = 'admin' | 'student' | 'section_leader' | 'staff' | 'guest';
 
-// Define permissions as a plain object type to avoid recursion issues
-type PermissionRecord = {[key: string]: boolean};
+// Use a simple interface instead of recursive types
+interface PermissionsObject {
+  [key: string]: boolean;
+}
 
 // Define the context interface
 interface RolePermissionContextType {
   userRole: UserRole | null;
-  permissions: PermissionRecord;
+  permissions: PermissionsObject;
   isLoading: boolean;
   hasPermission: (permissionName: string) => boolean;
   refreshPermissions: () => Promise<void>;
@@ -35,7 +37,7 @@ export const useRolePermissions = () => useContext(RolePermissionContext);
 export const RolePermissionProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { user, profile } = useAuth();
   const [userRole, setUserRole] = useState<UserRole | null>(null);
-  const [permissions, setPermissions] = useState<{[key: string]: boolean}>({});
+  const [permissions, setPermissions] = useState<PermissionsObject>({});
   const [isLoading, setIsLoading] = useState(true);
 
   // Function to fetch permissions from Supabase
@@ -79,7 +81,7 @@ export const RolePermissionProvider: React.FC<{ children: React.ReactNode }> = (
       }
 
       // Create permissions object directly
-      const permissionsMap: {[key: string]: boolean} = {};
+      const permissionsMap: PermissionsObject = {};
       if (data) {
         data.forEach((item) => {
           permissionsMap[item.permission] = item.granted;
