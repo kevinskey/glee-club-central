@@ -6,7 +6,7 @@ export function HeroContent() {
   const isMobile = useIsMobile();
   
   return (
-    <div className="text-white space-y-2 sm:space-y-3 md:space-y-4 lg:space-y-5 md:pr-6 max-w-xs sm:max-w-sm md:max-w-lg lg:max-w-2xl text-left">
+    <div className="text-white space-y-2 sm:space-y-3 md:space-y-4 lg:space-y-5 md:pr-6 max-w-xs sm:max-w-sm md:max-w-lg lg:max-w-2xl text-left pl-4 sm:pl-6 md:pl-8 lg:pl-10">
       <h1 className="font-playfair tracking-tight">
         <span className="block text-lg sm:text-xl md:text-2xl lg:text-[2.5rem] xl:text-[3.2rem] font-bold mb-1 sm:mb-2 md:mb-3">
           Spelman College
