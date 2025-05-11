@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { PageHeader } from "@/components/ui/page-header";
@@ -28,6 +29,7 @@ import { Separator } from "@/components/ui/separator";
 import { MemberPermissionsDialog } from "@/components/members/MemberPermissionsDialog";
 import { UserRoleSelector } from "@/components/members/UserRoleSelector";
 import { createMemberRefreshFunction } from "@/components/members/MembersPageRefactor";
+import { deleteUser as deleteUserUtil } from "@/utils/admin/userDelete";
 
 export default function MembersPage() {
   const { isLoading: authLoading } = useAuth();
@@ -107,9 +109,12 @@ export default function MembersPage() {
       if (success) {
         setIsEditMemberDialogOpen(false);
         setCurrentMember(null);
+        toast.success(`Updated ${data.first_name} ${data.last_name}`);
+        await fetchUsers(); // Refresh the list after update
       }
     } catch (error) {
       console.error("Error updating member:", error);
+      toast.error("Failed to update member");
     } finally {
       setIsSubmitting(false);
     }
@@ -143,11 +148,16 @@ export default function MembersPage() {
     
     setIsDeleting(true);
     try {
-      await deleteUser(memberToDelete);
+      // Using the utility function for deletion
+      await deleteUserUtil(memberToDelete);
       setIsDeleteDialogOpen(false);
       setMemberToDelete(null);
+      toast.success(`${memberToDeleteName} has been removed from the member list`);
+      // Refresh the list after deletion
+      await fetchUsers();
     } catch (error) {
       console.error("Error deleting member:", error);
+      toast.error("Failed to delete member");
     } finally {
       setIsDeleting(false);
     }
