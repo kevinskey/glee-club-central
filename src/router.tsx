@@ -6,11 +6,12 @@ import { createBrowserRouter } from "react-router-dom";
 import LandingPage from "./pages/LandingPage";
 import LoginPage from "./pages/LoginPage";
 import RegisterPage from "./pages/RegisterPage";
-import ProfilePage from "./pages/ProfilePage";
 import UpdatePasswordPage from "./pages/UpdatePasswordPage";
 import MembersPage from "./pages/MembersPage";
 import NotFoundPage from "./pages/NotFoundPage";
-import DashboardPage from "./pages/DashboardPage";
+import DashboardPage from "./pages/dashboard/DashboardPage";
+import ProfilePage from "./pages/profile/ProfilePage";
+import AdminDashboardPage from "./pages/AdminDashboardPage";
 
 // Import layout components
 import { ProtectedRoute } from "./components/auth/ProtectedRoute";
@@ -49,6 +50,10 @@ export const router = createBrowserRouter([
       {
         path: "members",
         element: <AdminRoute><MembersPage /></AdminRoute>,
+      },
+      {
+        path: "admin",
+        element: <AdminRoute><AdminDashboardPage /></AdminRoute>,
       },
     ],
   },
