@@ -14,6 +14,7 @@ import AdminDashboardPage from "./pages/AdminDashboardPage";
 import AdminMembersPage from "./pages/AdminMembersPage";
 import SchedulePage from "./pages/schedule/SchedulePage";
 import FanPage from "./pages/FanPage";
+import CalendarPage from "./pages/calendar/CalendarPage";
 
 // Import layout components
 import { ProtectedRoute } from "./components/auth/ProtectedRoute";
@@ -39,7 +40,7 @@ export const router = createBrowserRouter([
   },
   {
     path: "/calendar",
-    element: <SchedulePage />,
+    element: <CalendarPage />,
   },
   {
     path: "/fan",
