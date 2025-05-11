@@ -8,6 +8,11 @@ import {
   Calendar, 
   Music,
   User as UserIcon,
+  School,
+  CalendarClock,
+  CircleDot,
+  FileText,
+  BadgeDollarSign,
   Save,
   X
 } from "lucide-react";
@@ -17,6 +22,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
+import { Switch } from "@/components/ui/switch";
 
 interface ProfileOverviewTabProps {
   profile: Profile;
@@ -34,7 +40,13 @@ export const ProfileOverviewTab: React.FC<ProfileOverviewTabProps> = ({
     last_name: profile.last_name,
     phone: profile.phone || '',
     voice_part: profile.voice_part, 
-    class_year: profile.class_year || ''
+    class_year: profile.class_year || '',
+    email: profile.email || '',
+    status: profile.status,
+    role: profile.role,
+    join_date: profile.join_date || '',
+    notes: profile.notes || '',
+    dues_paid: profile.dues_paid || false
   });
   const [isSaving, setIsSaving] = useState(false);
 
@@ -65,6 +77,10 @@ export const ProfileOverviewTab: React.FC<ProfileOverviewTabProps> = ({
   const handleSelectChange = (name: string, value: string) => {
     setFormData(prev => ({ ...prev, [name]: value }));
   };
+  
+  const handleSwitchChange = (name: string, checked: boolean) => {
+    setFormData(prev => ({ ...prev, [name]: checked }));
+  };
 
   const handleSave = async () => {
     if (!onSave) return;
@@ -87,7 +103,13 @@ export const ProfileOverviewTab: React.FC<ProfileOverviewTabProps> = ({
       last_name: profile.last_name,
       phone: profile.phone || '',
       voice_part: profile.voice_part,
-      class_year: profile.class_year || ''
+      class_year: profile.class_year || '',
+      email: profile.email || '',
+      status: profile.status,
+      role: profile.role,
+      join_date: profile.join_date || '',
+      notes: profile.notes || '',
+      dues_paid: profile.dues_paid || false
     });
     
     // If there's a parent component handling edit mode, let it know
@@ -135,7 +157,7 @@ export const ProfileOverviewTab: React.FC<ProfileOverviewTabProps> = ({
       </CardHeader>
       <CardContent className="space-y-4">
         {isEditable ? (
-          // Editable form
+          // Editable form with all registration data
           <div className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
@@ -159,13 +181,12 @@ export const ProfileOverviewTab: React.FC<ProfileOverviewTabProps> = ({
               </div>
               
               <div className="space-y-2">
-                <Label htmlFor="email">Email Address (Read Only)</Label>
+                <Label htmlFor="email">Email Address</Label>
                 <Input 
                   id="email"
-                  value={profile.email || ''}
-                  readOnly
-                  disabled
-                  className="bg-muted"
+                  name="email"
+                  value={formData.email}
+                  onChange={handleInputChange}
                 />
               </div>
               
@@ -208,24 +229,54 @@ export const ProfileOverviewTab: React.FC<ProfileOverviewTabProps> = ({
                   onChange={handleInputChange}
                 />
               </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="join_date">Join Date</Label>
+                <Input 
+                  id="join_date"
+                  name="join_date"
+                  type="date"
+                  value={formData.join_date?.toString().slice(0, 10) || ''}
+                  onChange={handleInputChange}
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="notes">Notes</Label>
+                <Input 
+                  id="notes"
+                  name="notes"
+                  value={formData.notes}
+                  onChange={handleInputChange}
+                />
+              </div>
+
+              <div className="flex items-center space-x-2">
+                <Label htmlFor="dues_paid">Dues Paid</Label>
+                <Switch 
+                  id="dues_paid"
+                  checked={formData.dues_paid}
+                  onCheckedChange={(checked) => handleSwitchChange('dues_paid', checked)}
+                />
+              </div>
             </div>
-            
+
             <div className="space-y-2">
-              <Label>Member Status</Label>
+              <Label>Member Status (Read-only)</Label>
               <div className="p-2 bg-muted rounded">
-                {profile.status || "Not set"} (Cannot be edited here)
+                {formData.status || "Not set"}
               </div>
             </div>
             
             <div className="space-y-2">
-              <Label>Join Date</Label>
+              <Label>Member Role (Read-only)</Label>
               <div className="p-2 bg-muted rounded">
-                {formatDate(profile.join_date)} (Cannot be edited here)
+                {formData.role || "Not set"}
               </div>
             </div>
           </div>
         ) : (
-          // View-only display
+          // View-only display with all registration data
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="flex items-center space-x-2">
               <UserIcon className="h-4 w-4 opacity-70" />
@@ -252,7 +303,7 @@ export const ProfileOverviewTab: React.FC<ProfileOverviewTabProps> = ({
             </div>
             
             <div className="flex items-center space-x-2">
-              <User className="h-4 w-4 opacity-70" />
+              <School className="h-4 w-4 opacity-70" />
               <span className="font-semibold">Class Year:</span>
               <span>{profile.class_year || "Not set"}</span>
             </div>
@@ -264,9 +315,67 @@ export const ProfileOverviewTab: React.FC<ProfileOverviewTabProps> = ({
             </div>
             
             <div className="flex items-center space-x-2">
-              <User className="h-4 w-4 opacity-70" />
+              <CircleDot className="h-4 w-4 opacity-70" />
               <span className="font-semibold">Status:</span>
               <span>{profile.status}</span>
+            </div>
+
+            <div className="flex items-center space-x-2">
+              <User className="h-4 w-4 opacity-70" />
+              <span className="font-semibold">Role:</span>
+              <span>{profile.role}</span>
+            </div>
+            
+            {profile.title && (
+              <div className="flex items-center space-x-2">
+                <User className="h-4 w-4 opacity-70" />
+                <span className="font-semibold">Title:</span>
+                <span>{profile.title}</span>
+              </div>
+            )}
+            
+            {profile.special_roles && (
+              <div className="flex items-center space-x-2">
+                <User className="h-4 w-4 opacity-70" />
+                <span className="font-semibold">Special Roles:</span>
+                <span>{profile.special_roles}</span>
+              </div>
+            )}
+            
+            <div className="flex items-center space-x-2">
+              <CalendarClock className="h-4 w-4 opacity-70" />
+              <span className="font-semibold">Created At:</span>
+              <span>{formatDate(profile.created_at)}</span>
+            </div>
+            
+            {profile.updated_at && (
+              <div className="flex items-center space-x-2">
+                <CalendarClock className="h-4 w-4 opacity-70" />
+                <span className="font-semibold">Last Updated:</span>
+                <span>{formatDate(profile.updated_at)}</span>
+              </div>
+            )}
+            
+            {profile.last_sign_in_at && (
+              <div className="flex items-center space-x-2">
+                <CalendarClock className="h-4 w-4 opacity-70" />
+                <span className="font-semibold">Last Sign In:</span>
+                <span>{formatDate(profile.last_sign_in_at)}</span>
+              </div>
+            )}
+            
+            {profile.notes && (
+              <div className="flex items-center space-x-2">
+                <FileText className="h-4 w-4 opacity-70" />
+                <span className="font-semibold">Notes:</span>
+                <span>{profile.notes}</span>
+              </div>
+            )}
+            
+            <div className="flex items-center space-x-2">
+              <BadgeDollarSign className="h-4 w-4 opacity-70" />
+              <span className="font-semibold">Dues Paid:</span>
+              <span>{profile.dues_paid ? "Yes" : "No"}</span>
             </div>
           </div>
         )}
