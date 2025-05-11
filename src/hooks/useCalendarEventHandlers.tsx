@@ -1,5 +1,5 @@
 
-import { useCallback } from "react";
+import { useCallback, useEffect } from "react";
 import { CalendarEvent } from "@/types/calendar";
 import { toast } from "sonner";
 import { useAuth } from "@/contexts/AuthContext";
@@ -17,6 +17,10 @@ export const useCalendarEventHandlers = (
   const { isAdmin, profile } = useAuth();
   const userCanCreate = profile?.role === "admin" || profile?.role === "section_leader";
 
+  useEffect(() => {
+    console.log("useCalendarEventHandlers initialized with events:", events.length);
+  }, [events]);
+
   const handleDateClick = useCallback((info: any) => {
     console.log("Date clicked:", info.date);
     if (userCanCreate) {
@@ -32,6 +36,8 @@ export const useCalendarEventHandlers = (
     if (event) {
       setSelectedEvent(event);
       setIsViewModalOpen(true);
+    } else {
+      console.warn("Could not find clicked event in events array");
     }
   }, [events, setSelectedEvent, setIsViewModalOpen]);
 
@@ -93,7 +99,11 @@ export const useCalendarEventHandlers = (
   }, [events, updateEvent, userCanCreate]);
 
   const handleCreateEvent = async (eventData: Omit<CalendarEvent, 'id' | 'created_by'>) => {
-    if (!profile) return false;
+    if (!profile) {
+      toast.error("You must be logged in to create events");
+      return false;
+    }
+    
     console.log("Creating event:", eventData);
     
     try {

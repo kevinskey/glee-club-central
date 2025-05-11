@@ -1,5 +1,5 @@
 
-import React, { useRef } from "react";
+import React, { useRef, useEffect } from "react";
 import FullCalendar from "@fullcalendar/react";
 import dayGridPlugin from "@fullcalendar/daygrid";
 import timeGridPlugin from "@fullcalendar/timegrid";
@@ -41,6 +41,15 @@ export const CalendarMain = ({
     handleTodayClick 
   } = useCalendarNavigation(calendarRef, setCurrentDate);
   
+  useEffect(() => {
+    console.log("CalendarMain mounted, view:", calendarView);
+    console.log("Events received:", events.length);
+    
+    return () => {
+      console.log("CalendarMain unmounting");
+    };
+  }, [calendarView, events]);
+  
   const eventContent = (eventInfo: any) => {
     return <EventContent eventInfo={eventInfo} view={calendarView} />;
   };
@@ -55,72 +64,75 @@ export const CalendarMain = ({
         calendarView={calendarView}
         eventsCount={events.length}
       />
-      <FullCalendar
-        ref={calendarRef}
-        plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin, listPlugin]}
-        initialView={calendarView}
-        headerToolbar={false} // We use our custom header
-        events={events.map(event => ({
-          id: event.id,
-          title: event.title,
-          start: event.start,
-          end: event.end,
-          extendedProps: {
-            type: event.type,
-            location: event.location,
-            description: event.description,
-            created_by: event.created_by
-          }
-        }))}
-        dateClick={userCanCreate ? handleDateClick : undefined}
-        eventClick={handleEventClick}
-        editable={userCanCreate}
-        eventDrop={handleEventDrop}
-        eventResize={handleEventResize}
-        eventContent={eventContent}
-        height="auto"
-        firstDay={0} // Start week on Sunday
-        nowIndicator={true}
-        dayMaxEvents={true}
-        slotMinTime="07:00:00"
-        slotMaxTime="22:00:00"
-        allDaySlot={true}
-        allDayText="All day"
-        slotLabelFormat={{
-          hour: '2-digit',
-          minute: '2-digit',
-          meridiem: 'short'
-        }}
-        datesSet={(dateInfo) => {
-          setCurrentDate(dateInfo.view.currentStart);
-        }}
-        eventTimeFormat={{
-          hour: '2-digit',
-          minute: '2-digit',
-          meridiem: 'short'
-        }}
-        views={{
-          dayGridMonth: {
-            dayMaxEventRows: 3,
-            titleFormat: { month: 'long', year: 'numeric' }
-          },
-          timeGridWeek: {
-            titleFormat: { month: 'long', year: 'numeric' },
-            slotDuration: '00:30:00',
-            slotLabelInterval: '01:00'
-          },
-          timeGridDay: {
-            titleFormat: { month: 'long', day: 'numeric', year: 'numeric' },
-            slotDuration: '00:30:00',
-            slotLabelInterval: '01:00'
-          },
-          listWeek: {
-            titleFormat: { month: 'long', year: 'numeric' },
-            listDayFormat: { weekday: 'long', month: 'short', day: 'numeric' },
-            listDaySideFormat: false
-          }
-        }}
-      />
+      <div className="h-[600px] overflow-auto">
+        <FullCalendar
+          ref={calendarRef}
+          plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin, listPlugin]}
+          initialView={calendarView}
+          headerToolbar={false} // We use our custom header
+          events={events.map(event => ({
+            id: event.id,
+            title: event.title,
+            start: event.start,
+            end: event.end,
+            extendedProps: {
+              type: event.type,
+              location: event.location || "",
+              description: event.description || "",
+              created_by: event.created_by
+            }
+          }))}
+          dateClick={userCanCreate ? handleDateClick : undefined}
+          eventClick={handleEventClick}
+          editable={userCanCreate}
+          eventDrop={handleEventDrop}
+          eventResize={handleEventResize}
+          eventContent={eventContent}
+          height="auto"
+          firstDay={0} // Start week on Sunday
+          nowIndicator={true}
+          dayMaxEvents={true}
+          slotMinTime="07:00:00"
+          slotMaxTime="22:00:00"
+          allDaySlot={true}
+          allDayText="All day"
+          slotLabelFormat={{
+            hour: '2-digit',
+            minute: '2-digit',
+            meridiem: 'short'
+          }}
+          datesSet={(dateInfo) => {
+            console.log("Calendar datesSet:", dateInfo.view.title);
+            setCurrentDate(dateInfo.view.currentStart);
+          }}
+          eventTimeFormat={{
+            hour: '2-digit',
+            minute: '2-digit',
+            meridiem: 'short'
+          }}
+          views={{
+            dayGridMonth: {
+              dayMaxEventRows: 3,
+              titleFormat: { month: 'long', year: 'numeric' }
+            },
+            timeGridWeek: {
+              titleFormat: { month: 'long', year: 'numeric' },
+              slotDuration: '00:30:00',
+              slotLabelInterval: '01:00'
+            },
+            timeGridDay: {
+              titleFormat: { month: 'long', day: 'numeric', year: 'numeric' },
+              slotDuration: '00:30:00',
+              slotLabelInterval: '01:00'
+            },
+            listWeek: {
+              titleFormat: { month: 'long', year: 'numeric' },
+              listDayFormat: { weekday: 'long', month: 'short', day: 'numeric' },
+              listDaySideFormat: false
+            }
+          }}
+        />
+      </div>
     </div>
   );
 };

@@ -1,5 +1,5 @@
 
-import React from "react";
+import React, { useEffect } from "react";
 import { EventType } from "@/types/calendar";
 
 interface EventContentProps {
@@ -8,6 +8,10 @@ interface EventContentProps {
 }
 
 export const EventContent = ({ eventInfo, view }: EventContentProps) => {
+  useEffect(() => {
+    console.log("EventContent rendering for event:", eventInfo.event.title);
+  }, [eventInfo.event.title]);
+  
   const typeColors: Record<EventType, string> = {
     'rehearsal': 'bg-blue-500 border-blue-600',
     'concert': 'bg-orange-500 border-orange-600',
@@ -16,7 +20,7 @@ export const EventContent = ({ eventInfo, view }: EventContentProps) => {
   };
 
   const eventType = (eventInfo.event.extendedProps?.type as EventType) || 'special';
-  const location = eventInfo.event.extendedProps?.location;
+  const location = eventInfo.event.extendedProps?.location || '';
   
   // Different rendering based on view type
   if (view === 'dayGridMonth') {
