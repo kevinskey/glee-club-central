@@ -8,7 +8,6 @@ import RegisterPage from "./pages/RegisterPage";
 import ProfilePage from "./pages/ProfilePage";
 import UpdatePasswordPage from "./pages/UpdatePasswordPage";
 import MembersPage from "./pages/MembersPage";
-import MemberDetailsPage from "./pages/MemberDetailsPage";
 import EventsPage from "./pages/EventsPage";
 import EventDetailsPage from "./pages/EventDetailsPage";
 import RepertoirePage from "./pages/RepertoirePage";
@@ -52,10 +51,6 @@ export const router = createBrowserRouter([
       {
         path: "members",
         element: <AdminRoute><MembersPage /></AdminRoute>,
-      },
-      {
-        path: "members/:memberId",
-        element: <AdminRoute><MemberDetailsPage /></AdminRoute>,
       },
       {
         path: "events",
