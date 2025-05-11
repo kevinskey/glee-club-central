@@ -10,23 +10,33 @@ export default function AdminMembersPage() {
   // All hooks at the top
   const { isAuthenticated } = useAuth();
   const userManagement = useUserManagement();
-  const [isLoaded, setIsLoaded] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   
-  // Fetch members on component mount
+  // Fetch members only once on component mount
   useEffect(() => {
+    let mounted = true;
+    
     if (isAuthenticated) {
       console.log("AdminMembersPage - Fetching users on mount");
       userManagement.fetchUsers()
         .then(() => {
-          console.log("AdminMembersPage - Users fetched successfully");
-          setIsLoaded(true);
+          if (mounted) {
+            console.log("AdminMembersPage - Users fetched successfully");
+            setIsLoading(false);
+          }
         })
         .catch(err => {
-          console.error("Error fetching users:", err);
-          toast.error("Failed to load member data");
-          setIsLoaded(true);
+          if (mounted) {
+            console.error("Error fetching users:", err);
+            toast.error("Failed to load member data");
+            setIsLoading(false);
+          }
         });
     }
+    
+    return () => {
+      mounted = false;
+    };
   }, [isAuthenticated, userManagement]);
 
   // Add listeners for user events
@@ -65,8 +75,8 @@ export default function AdminMembersPage() {
     };
   }, [userManagement]);
 
-  // Use conditional rendering instead of early returns
-  if (!isLoaded) {
+  // Show loading state only during initial load
+  if (isLoading) {
     return (
       <div className="flex items-center justify-center min-h-[60vh]">
         <Spinner size="lg" />
@@ -74,5 +84,6 @@ export default function AdminMembersPage() {
     );
   }
 
+  // Once loaded, always render the component with the current data
   return <MembersPageComponent useUserManagementHook={() => userManagement} />;
 }

@@ -1,5 +1,5 @@
 
-import React from "react";
+import React, { memo } from "react";
 import { 
   Table, 
   TableBody, 
@@ -41,7 +41,8 @@ interface MembersListProps {
   canEdit?: boolean;
 }
 
-export function MembersList({ 
+// Use memo to prevent unnecessary re-renders
+export const MembersList = memo(({ 
   members = [], // Provide default empty array to prevent null/undefined errors
   onChangeRole,
   onEditUser,
@@ -53,7 +54,7 @@ export function MembersList({
   onStatusUpdate,
   onStatusUpdateSuccess,
   canEdit = true
-}: MembersListProps) {
+}: MembersListProps) => {
   // Format last login time
   const formatLastLogin = (lastLogin: string | null) => {
     if (!lastLogin) return "Never";
@@ -159,4 +160,8 @@ export function MembersList({
       </Table>
     </div>
   );
-}
+});
+
+// Add display name for better debugging
+MembersList.displayName = "MembersList";
+

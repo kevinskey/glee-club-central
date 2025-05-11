@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect, memo } from 'react';
 import {
   Dialog,
   DialogContent,
@@ -22,23 +22,23 @@ interface UserRoleSelectorProps {
   onSuccess?: () => Promise<void>;
 }
 
-export function UserRoleSelector({
+export const UserRoleSelector = memo(({
   user,
   isOpen,
   onOpenChange,
   onSuccess
-}: UserRoleSelectorProps) {
+}: UserRoleSelectorProps) => {
   const [selectedRole, setSelectedRole] = useState<string>('general');
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   
-  React.useEffect(() => {
+  useEffect(() => {
     if (user) {
       // Set the role value
       setSelectedRole(user.role || 'general');
       setError(null);
     }
-  }, [user]);
+  }, [user, isOpen]); // Also reset when dialog opens
   
   // Define available roles
   const roles: { value: string; label: string; description: string }[] = [
@@ -145,4 +145,8 @@ export function UserRoleSelector({
       </DialogContent>
     </Dialog>
   );
-}
+});
+
+// Add display name for better debugging
+UserRoleSelector.displayName = "UserRoleSelector";
+
