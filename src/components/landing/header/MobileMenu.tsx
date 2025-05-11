@@ -24,7 +24,7 @@ export function MobileMenu({ onClose }: MobileMenuProps) {
   
   return (
     <div className="md:hidden bg-background border-t border-border">
-      <div className="container py-3 px-3 sm:px-4 flex flex-col gap-2">
+      <div className="container py-3 px-2 flex flex-col gap-2">
         <div className="flex justify-center mb-1 sm:mb-2">
           <TooltipProvider>
             <Tooltip>

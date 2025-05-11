@@ -114,7 +114,7 @@ export function MobileNav({ isAdmin }: MobileNavProps) {
         <SheetContent side="left" className="pr-0 sm:max-w-xs w-[90%] sm:w-[85%] px-0">
           <div className="space-y-3 sm:space-y-4 py-1 sm:py-2 h-full flex flex-col">
             <div className="px-2 sm:px-3 flex-1 overflow-auto">
-              <h2 className="mb-1 sm:mb-2 px-3 sm:px-4 text-base sm:text-lg font-semibold tracking-tight">
+              <h2 className="mb-1 sm:mb-2 px-2 text-base sm:text-lg font-semibold tracking-tight">
                 Main Menu
               </h2>
               <div className="space-y-1">
@@ -124,7 +124,7 @@ export function MobileNav({ isAdmin }: MobileNavProps) {
                     to={item.href}
                     onClick={() => setOpen(false)}
                     className={cn(
-                      "flex items-center rounded-md px-2 sm:px-3 py-2 text-sm font-medium",
+                      "flex items-center rounded-md px-2 py-2 text-sm font-medium",
                       pathname === item.href ? "bg-accent text-accent-foreground" : "hover:bg-accent hover:text-accent-foreground transition-colors"
                     )}
                   >
@@ -137,7 +137,7 @@ export function MobileNav({ isAdmin }: MobileNavProps) {
             
             {isAdmin && (
               <div className="px-2 sm:px-3 border-t pt-3 sm:pt-4">
-                <h2 className="mb-1 sm:mb-2 px-3 sm:px-4 text-base sm:text-lg font-semibold tracking-tight">
+                <h2 className="mb-1 sm:mb-2 px-2 text-base sm:text-lg font-semibold tracking-tight">
                   Admin Menu
                 </h2>
                 <div className="space-y-1">
@@ -147,7 +147,7 @@ export function MobileNav({ isAdmin }: MobileNavProps) {
                       to={item.href}
                       onClick={() => setOpen(false)}
                       className={cn(
-                        "flex items-center rounded-md px-2 sm:px-3 py-2 text-sm font-medium",
+                        "flex items-center rounded-md px-2 py-2 text-sm font-medium",
                         pathname === item.href ? "bg-accent text-accent-foreground" : "hover:bg-accent hover:text-accent-foreground transition-colors"
                       )}
                     >

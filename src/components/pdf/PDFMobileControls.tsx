@@ -41,7 +41,7 @@ export const PDFMobileControls = ({
   return (
     <div className="flex flex-col gap-1 w-full max-w-full bg-background/95 shadow-sm z-30">
       {/* Mobile top controls - ForScore style */}
-      <div className="flex justify-between items-center p-2 border-b w-full">
+      <div className="flex justify-between items-center p-1 border-b w-full">
         {/* Page navigation controls */}
         <div className="flex items-center gap-1">
           <Button
@@ -132,4 +132,4 @@ export const PDFMobileControls = ({
       </div>
     </div>
   );
-};
+}

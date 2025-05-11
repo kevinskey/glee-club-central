@@ -12,7 +12,7 @@ export function FeaturesSection() {
   
   return (
     <section className="py-12 md:py-20 bg-white dark:bg-glee-dark">
-      <div className="container px-4 md:px-8">
+      <div className="container px-2 md:px-8">
         <div className="text-center mb-10 md:mb-16">
           <h2 className="text-2xl md:text-3xl lg:text-4xl font-playfair font-bold mb-4">
             Our Digital Member Hub

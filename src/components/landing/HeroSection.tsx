@@ -29,7 +29,7 @@ export function HeroSection() {
         />
       </div>
       
-      <div className="container relative z-10 mx-auto px-3 sm:px-4 md:px-6 lg:px-8 h-full flex items-center pt-2 sm:pt-3 md:pt-4 lg:pt-6">
+      <div className="container relative z-10 mx-auto px-2 h-full flex items-center pt-2 sm:pt-3 md:pt-4 lg:pt-6">
         <HeroContent />
       </div>
 
