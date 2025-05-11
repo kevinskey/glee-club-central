@@ -17,6 +17,7 @@ export function BackgroundSlideshow({
   const [isTransitioning, setIsTransitioning] = useState(false);
 
   useEffect(() => {
+    // Don't set up transitions if we don't have enough images
     if (images.length <= 1) return;
 
     // Calculate the next image index
@@ -33,7 +34,7 @@ export function BackgroundSlideshow({
         setIsTransitioning(false);
       }, transition);
       
-      return transitionTimer;
+      return () => clearTimeout(transitionTimer);
     };
 
     // Set up interval for consistent timing
@@ -48,38 +49,43 @@ export function BackgroundSlideshow({
     };
   }, [images.length, duration, transition, currentImageIndex, nextImageIndex]);
 
-  if (images.length === 0) return null;
+  // If no images provided, don't render anything
+  if (!images || images.length === 0) return null;
   
+  // Special case for single image (no transitions needed)
   if (images.length === 1) {
     return (
       <div 
         className="absolute inset-0 bg-center"
         style={{ 
           backgroundImage: `url('${images[0]}')`,
-          backgroundSize: 'cover', // Ensuring image covers the container
+          backgroundSize: 'cover',
           backgroundRepeat: 'no-repeat'
         }}
       />
     );
   }
 
+  // For multiple images, set up the transition between current and next
   return (
     <div className="absolute inset-0 overflow-hidden">
+      {/* Current Image */}
       <div
         className="absolute inset-0 bg-center transition-opacity"
         style={{
           backgroundImage: `url('${images[currentImageIndex]}')`,
-          backgroundSize: 'cover', // Ensuring image covers the container
+          backgroundSize: 'cover',
           backgroundRepeat: 'no-repeat',
           opacity: isTransitioning ? 0 : 1,
           transitionDuration: `${transition}ms`,
         }}
       />
+      {/* Next Image */}
       <div
         className="absolute inset-0 bg-center transition-opacity"
         style={{
           backgroundImage: `url('${images[nextImageIndex]}')`,
-          backgroundSize: 'cover', // Ensuring image covers the container
+          backgroundSize: 'cover',
           backgroundRepeat: 'no-repeat',
           opacity: isTransitioning ? 1 : 0,
           transitionDuration: `${transition}ms`,

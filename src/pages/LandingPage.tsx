@@ -17,7 +17,6 @@ export default function LandingPage() {
   const { toast } = useToast();
 
   useEffect(() => {
-    // Add console log for debugging
     console.log("LandingPage component mounting");
     
     // Simulate checking resources are loaded
