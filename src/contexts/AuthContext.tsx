@@ -226,12 +226,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         toast.success("Signed in successfully!");
         
         // Update last_login time in profile using a proper update object
-        // that only includes fields that exist in the profiles table
+        // with a type declaration to help TypeScript understand it's valid
+        const updateData: Partial<Profile> = {
+          last_sign_in_at: new Date().toISOString()
+        };
+        
         await supabase
           .from('profiles')
-          .update({ 
-            last_sign_in_at: new Date().toISOString() 
-          })
+          .update(updateData)
           .eq('id', data.user.id);
         
         // Use navigate instead of forced reload for smoother experience
