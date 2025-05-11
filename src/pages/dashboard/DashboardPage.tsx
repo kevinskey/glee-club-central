@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { PageHeaderWithToggle } from "@/components/ui/page-header-with-toggle";
@@ -23,6 +22,7 @@ import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
 import { supabase } from "@/integrations/supabase/client";
 import { DashboardQuickAccess } from "@/components/dashboard/DashboardQuickAccess";
+import { DashboardModules } from "@/components/dashboard/DashboardModules";
 import { toast } from "sonner";
 
 interface Event {
