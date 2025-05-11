@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { PageHeaderWithToggle } from "@/components/ui/page-header-with-toggle";
@@ -31,7 +32,7 @@ import { DashboardQuickAccess } from "@/components/dashboard/DashboardQuickAcces
 import { DashboardModules } from "@/components/dashboard/DashboardModules";
 import { toast } from "sonner";
 import { usePermissions } from "@/hooks/usePermissions";
-import { ErrorBoundary } from "@/components/ErrorBoundary";
+import ErrorBoundary from "@/components/ErrorBoundary";
 
 interface Event {
   id: string;
@@ -129,6 +130,9 @@ const DashboardPageContent = () => {
   
   // ⚠️ Fix: Use flags instead of early returns
   const showSpinner = loading || authLoading;
+  
+  // Calculate days until next event and store the result
+  const daysUntilNextEvent = getDaysUntilNextEvent();
   
   const handleRegisterAsAdmin = () => {
     // Navigate to admin dashboard instead of register/admin
