@@ -7,7 +7,7 @@ import { toast } from 'sonner';
 // Define user roles as a simple string literal union type
 export type UserRole = 'admin' | 'student' | 'section_leader' | 'staff' | 'guest';
 
-// Simple permission record type using a plain index signature
+// Use a simple type definition for permissions to avoid recursive types
 type PermissionRecord = { [key: string]: boolean };
 
 // Define the context interface
@@ -53,16 +53,17 @@ export const RolePermissionProvider: React.FC<{ children: React.ReactNode }> = (
       // Get role from profile
       const roleFromProfile = profile?.role || 'student';
       
-      // Define valid roles array
+      // Define valid roles array - use string[] instead of UserRole[] to avoid type issues
       const validRoles = ['admin', 'student', 'section_leader', 'staff', 'guest'];
       
-      // Determine the role safely
+      // Determine the role safely using string comparison
       let role = 'student'; // Default role
       
       if (validRoles.includes(roleFromProfile)) {
         role = roleFromProfile;
       }
       
+      // Cast to UserRole only when setting state
       setUserRole(role as UserRole);
 
       // Fetch permissions based on role
@@ -77,7 +78,7 @@ export const RolePermissionProvider: React.FC<{ children: React.ReactNode }> = (
         return;
       }
 
-      // Convert to permissions object
+      // Convert to permissions object - use simple object creation to avoid complex types
       const permissionsMap: PermissionRecord = {};
       if (data) {
         data.forEach((item) => {
