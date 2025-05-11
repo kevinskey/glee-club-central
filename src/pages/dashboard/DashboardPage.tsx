@@ -50,26 +50,6 @@ const DashboardPage = () => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const [events, setEvents] = useState<Event[]>([]);
-  const [announcements, setAnnouncements] = useState<Announcement[]>([
-    {
-      id: 1,
-      title: "End of Semester Performance",
-      message: "Our final performance will be held on May 15th at Sisters Chapel. All members must attend dress rehearsal.",
-      date: "May 1, 2025"
-    },
-    {
-      id: 2,
-      title: "Dues Reminder",
-      message: "Spring semester dues are due by April 30th. Please make your payments online through the dashboard.",
-      date: "April 15, 2025"
-    },
-    {
-      id: 3,
-      title: "New Sheet Music Available",
-      message: "New arrangements for the Spring concert have been uploaded. Please review before next rehearsal.",
-      date: "April 10, 2025"
-    }
-  ]);
   
   // Fetch events from the database
   const fetchEvents = async () => {
@@ -432,6 +412,25 @@ const DashboardPage = () => {
           </CardContent>
         </Card>
       </div>
+      
+      {/* Admin registration link - only show if not already admin */}
+      {!isAdmin() && (
+        <Card className="border-glee-spelman/20 shadow-sm">
+          <CardHeader>
+            <CardTitle className="text-lg">Administrator Registration</CardTitle>
+            <CardDescription>
+              Are you a Glee Club administrator? Register with admin privileges
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Link to="/register/admin">
+              <Button variant="outline" className="border-glee-spelman text-glee-spelman hover:bg-glee-spelman/5">
+                Register as Admin
+              </Button>
+            </Link>
+          </CardContent>
+        </Card>
+      )}
     </div>
   );
 };

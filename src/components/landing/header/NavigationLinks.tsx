@@ -1,78 +1,80 @@
 
 import React from "react";
-import { useNavigate } from "react-router-dom";
-import {
-  NavigationMenu,
-  NavigationMenuContent,
-  NavigationMenuItem,
-  NavigationMenuLink,
-  NavigationMenuList,
-  NavigationMenuTrigger,
-  navigationMenuTriggerStyle,
-} from "@/components/ui/navigation-menu";
 import { cn } from "@/lib/utils";
+import { Link } from "react-router-dom";
+import { useAuth } from "@/contexts/AuthContext";
 
-export function NavigationLinks() {
-  const navigate = useNavigate();
-  
-  const navLinkStyle = cn(
-    navigationMenuTriggerStyle(),
-    "hover:text-white hover:bg-glee-spelman"
-  );
+interface NavigationLinksProps {
+  className?: string;
+  onLinkClick?: () => void;
+}
+
+export function NavigationLinks({ className, onLinkClick }: NavigationLinksProps) {
+  const { isAuthenticated, isAdmin } = useAuth();
+
+  const handleLinkClick = () => {
+    if (onLinkClick) {
+      onLinkClick();
+    }
+  };
   
   return (
-    <NavigationMenu>
-      <NavigationMenuList>
-        <NavigationMenuItem>
-          <NavigationMenuLink 
-            className={navLinkStyle}
-            onClick={() => navigate("/")}
-          >
-            Home
-          </NavigationMenuLink>
-        </NavigationMenuItem>
-        <NavigationMenuItem>
-          <NavigationMenuLink 
-            className={navLinkStyle}
-            onClick={() => navigate("/press-kit")}
-          >
-            Press Kit
-          </NavigationMenuLink>
-        </NavigationMenuItem>
-        <NavigationMenuItem>
-          <NavigationMenuLink 
-            className={navLinkStyle}
-            onClick={() => navigate("/contact")}
-          >
-            Contact
-          </NavigationMenuLink>
-        </NavigationMenuItem>
-        <NavigationMenuItem>
-          <NavigationMenuTrigger className="hover:text-white hover:bg-glee-spelman">Resources</NavigationMenuTrigger>
-          <NavigationMenuContent>
-            <div className="w-[220px] p-2 bg-popover">
-              <NavigationMenuLink 
-                className="block p-2 hover:bg-glee-spelman hover:text-white rounded-md"
-                onClick={() => navigate("/administration")}
-              >
-                Administration
-              </NavigationMenuLink>
-              <NavigationMenuLink 
-                className="block p-2 hover:bg-glee-spelman hover:text-white rounded-md"
-                onClick={() => navigate("/fan-page")}
-              >
-                For Fans
-              </NavigationMenuLink>
-              <NavigationMenuLink 
-                className="block p-2 hover:bg-glee-spelman hover:text-white rounded-md"
-                onClick={() => window.open("https://www.spelman.edu", "_blank")}
-              >
-                Spelman College
-              </NavigationMenuLink>
-            </div>
-          </NavigationMenuContent>
-        </NavigationMenuItem>
-      </NavigationMenuList>
-    </NavigationMenu>
+    <nav className={cn("flex gap-6", className)}>
+      <Link
+        to="/about"
+        className="text-md font-medium text-muted-foreground transition-colors hover:text-foreground"
+        onClick={handleLinkClick}
+      >
+        About Us
+      </Link>
+      <Link
+        to="/events"
+        className="text-md font-medium text-muted-foreground transition-colors hover:text-foreground"
+        onClick={handleLinkClick}
+      >
+        Events
+      </Link>
+      <Link
+        to="/media"
+        className="text-md font-medium text-muted-foreground transition-colors hover:text-foreground"
+        onClick={handleLinkClick}
+      >
+        Media
+      </Link>
+      <Link
+        to="/support"
+        className="text-md font-medium text-muted-foreground transition-colors hover:text-foreground"
+        onClick={handleLinkClick}
+      >
+        Support Us
+      </Link>
+      {isAuthenticated && (
+        <Link
+          to="/dashboard"
+          className="text-md font-medium text-muted-foreground transition-colors hover:text-foreground"
+          onClick={handleLinkClick}
+        >
+          Dashboard
+        </Link>
+      )}
+      {isAuthenticated && isAdmin && isAdmin() && (
+        <Link
+          to="/dashboard/admin"
+          className="text-md font-medium text-glee-spelman transition-colors hover:text-glee-spelman/80"
+          onClick={handleLinkClick}
+        >
+          Admin Panel
+        </Link>
+      )}
+      {!isAuthenticated && (
+        <Link
+          to="/register/admin"
+          className="text-md font-medium text-muted-foreground transition-colors hover:text-foreground"
+          onClick={handleLinkClick}
+        >
+          Admin Registration
+        </Link>
+      )}
+    </nav>
   );
 }

@@ -10,11 +10,12 @@ import UpdatePasswordPage from "./pages/UpdatePasswordPage";
 import NotFoundPage from "./pages/NotFoundPage";
 import DashboardPage from "./pages/dashboard/DashboardPage";
 import ProfilePage from "./pages/profile/ProfilePage";
-import AdminDashboardPage from "./pages/AdminDashboardPage";
+import AdminDashboardPage from "./pages/admin/AdminDashboardPage";
 import AdminMembersPage from "./pages/AdminMembersPage";
 import SchedulePage from "./pages/schedule/SchedulePage";
 import FanPage from "./pages/FanPage";
 import CalendarPage from "./pages/calendar/CalendarPage";
+import AdminRegistrationPage from "./pages/admin/AdminRegistrationPage";
 
 // Import layout components
 import { ProtectedRoute } from "./components/auth/ProtectedRoute";
@@ -33,6 +34,10 @@ export const router = createBrowserRouter([
   {
     path: "/register",
     element: <RegisterPage />,
+  },
+  {
+    path: "/register/admin",
+    element: <AdminRegistrationPage />,
   },
   {
     path: "/update-password",
