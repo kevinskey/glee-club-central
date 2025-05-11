@@ -64,7 +64,7 @@ export function MembersList({
     }
   };
 
-  // Filter out deleted members first before rendering
+  // Filter out deleted members before rendering
   const activeMembers = members.filter(member => member.status !== 'deleted');
   
   return (

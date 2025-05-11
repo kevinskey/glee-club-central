@@ -12,12 +12,13 @@ export default function AdminMembersPage() {
   const userManagement = useUserManagement();
   const [isLoaded, setIsLoaded] = useState(false);
   
-  // Fetch members only once on component mount
+  // Fetch members on component mount
   useEffect(() => {
-    if (isAuthenticated && !isLoaded) {
-      console.log("AdminMembersPage - Fetching users");
+    if (isAuthenticated) {
+      console.log("AdminMembersPage - Fetching users on mount");
       userManagement.fetchUsers()
         .then(() => {
+          console.log("AdminMembersPage - Users fetched successfully");
           setIsLoaded(true);
         })
         .catch(err => {
@@ -26,23 +27,23 @@ export default function AdminMembersPage() {
           setIsLoaded(true);
         });
     }
-  }, [isAuthenticated, userManagement, isLoaded]);
+  }, [isAuthenticated, userManagement]);
 
   // Add listeners for user events
   useEffect(() => {
     // Handle user deletion events
     const handleUserDeleted = (event: CustomEvent) => {
-      console.log("User deleted event detected");
+      console.log("User deleted event detected in AdminMembersPage");
       const userId = event.detail?.userId;
       if (userId) {
-        console.log(`User ${userId} was deleted, UI will be updated`);
+        console.log(`User ${userId} was deleted, UI will be updated automatically`);
+        // No need to refresh here since useUserManagement.deleteUser now updates the local state
       }
-      // No need to refresh here since useUserManagement.deleteUser now updates the local state
     };
     
     // Handle user added events
     const handleUserAdded = (event: CustomEvent) => {
-      console.log("User added event detected");
+      console.log("User added event detected in AdminMembersPage");
       const userId = event.detail?.userId;
       if (userId) {
         console.log(`User ${userId} was added, refreshing user list`);
@@ -65,5 +66,13 @@ export default function AdminMembersPage() {
   }, [userManagement]);
 
   // Use conditional rendering instead of early returns
+  if (!isLoaded) {
+    return (
+      <div className="flex items-center justify-center min-h-[60vh]">
+        <Spinner size="lg" />
+      </div>
+    );
+  }
+
   return <MembersPageComponent useUserManagementHook={() => userManagement} />;
 }

@@ -1,3 +1,4 @@
+
 import { useState, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
@@ -47,9 +48,14 @@ export const useUserManagement = () => {
         return [];
       }
 
-      console.log(`Fetched ${data.length} users`);
-      setUsers(data);
-      return data;
+      console.log(`Fetched ${data?.length || 0} users`);
+      
+      if (data) {
+        setUsers(data);
+        return data;
+      }
+      
+      return [];
     } catch (err) {
       console.error('Unexpected error fetching users:', err);
       setError('An unexpected error occurred while fetching users');
@@ -71,7 +77,11 @@ export const useUserManagement = () => {
         
         // Update local state to remove the deleted user from the UI immediately
         setUsers(currentUsers => 
-          currentUsers.filter(user => user.id !== userId)
+          currentUsers.map(user => 
+            user.id === userId 
+              ? { ...user, status: 'deleted' }
+              : user
+          )
         );
         
         return true;
@@ -83,7 +93,7 @@ export const useUserManagement = () => {
       return false;
     }
   }, []);
-
+  
   // Return only required functions to avoid bloating the hook response
   return {
     users,
