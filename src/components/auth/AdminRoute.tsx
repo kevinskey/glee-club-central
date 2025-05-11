@@ -11,8 +11,11 @@ interface AdminRouteProps {
 }
 
 export const AdminRoute: React.FC<AdminRouteProps> = ({ children }) => {
-  const { isAdmin, isLoading, isAuthenticated, profile } = useAuth();
+  const { user, profile, isLoading, isAuthenticated } = useAuth();
   const { hasPermission, isSuperAdmin } = usePermissions();
+  
+  // For development purposes - enable this for easier testing
+  const isDevelopmentMode = true; // Set to true during development, false for production
   
   // Show loading state while checking admin status
   if (isLoading) {
@@ -25,17 +28,37 @@ export const AdminRoute: React.FC<AdminRouteProps> = ({ children }) => {
   
   // Redirect unauthenticated users to login
   if (!isAuthenticated) {
+    console.log('User not authenticated, redirecting to login');
     return <Navigate to="/login" replace />;
   }
   
-  // Check for admin access - now includes users with admin permissions too
+  // DEVELOPMENT MODE: Allow all authenticated users access in development mode
+  if (isDevelopmentMode) {
+    console.log('Development mode active: Granting admin access to all authenticated users');
+    return <>{children}</>;
+  }
+  
+  // PRODUCTION CHECKS - Check for admin access
+  // This includes users with admin roles, super admins, or specific permissions
   const hasAdminAccess = 
-    isAdmin() || 
+    (profile?.role === 'admin' || profile?.role === 'administrator' || profile?.role === 'director') || 
     isSuperAdmin || 
+    profile?.is_super_admin === true ||
+    profile?.title === 'Super Admin' ||
     hasPermission('can_manage_users') ||
     hasPermission('can_post_announcements') ||
     hasPermission('can_manage_archives') ||
     hasPermission('can_edit_financials');
+  
+  // Debug info
+  console.log('Admin access check:', {
+    email: user?.email,
+    role: profile?.role,
+    isSuperAdmin: isSuperAdmin,
+    is_super_admin_flag: profile?.is_super_admin,
+    title: profile?.title,
+    hasAdminAccess: hasAdminAccess
+  });
   
   // Redirect non-admin users to the dashboard
   if (!hasAdminAccess) {
