@@ -5,24 +5,14 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useAuth } from "@/contexts/AuthContext";
 import { User, Edit, Save } from "lucide-react";
 import { ProfileOverviewTab } from "@/components/profile/ProfileOverviewTab";
-import { ParticipationTab } from "@/components/profile/ParticipationTab";
-import { MusicAccessTab } from "@/components/profile/MusicAccessTab";
-import { WardrobeTab } from "@/components/profile/WardrobeTab";
-import { FinancialInfoTab } from "@/components/profile/FinancialInfoTab";
-import { MediaConsentTab } from "@/components/profile/MediaConsentTab";
-import { UserRoleEditor } from "@/components/profile/UserRoleEditor";
-import { usePermissions } from "@/hooks/usePermissions";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { useUserManagement } from "@/hooks/useUserManagement";
-import { Profile } from "@/types/auth";
 
 export default function ProfilePage() {
   const { profile, isLoading } = useAuth();
-  const { hasPermission } = usePermissions();
   const { updateUser } = useUserManagement();
-  const canManageRoles = hasPermission('can_manage_users');
   const [isEditing, setIsEditing] = useState(false);
   
   const toggleEditMode = () => {
@@ -97,74 +87,35 @@ export default function ProfilePage() {
       
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <div className="md:col-span-2">
-          <Tabs defaultValue="overview" className="w-full">
-            <TabsList className="grid grid-cols-3 md:grid-cols-6 mb-4">
-              <TabsTrigger value="overview">Overview</TabsTrigger>
-              <TabsTrigger value="participation">Participation</TabsTrigger>
-              <TabsTrigger value="music">Music</TabsTrigger>
-              <TabsTrigger value="wardrobe">Wardrobe</TabsTrigger>
-              <TabsTrigger value="financial">Financial</TabsTrigger>
-              <TabsTrigger value="media">Media</TabsTrigger>
-            </TabsList>
-            
-            <TabsContent value="overview">
-              <ProfileOverviewTab 
-                profile={profile} 
-                isEditable={isEditing} 
-                onSave={handleProfileUpdate}
-              />
-            </TabsContent>
-            
-            <TabsContent value="participation">
-              <ParticipationTab memberId={profile.id} />
-            </TabsContent>
-            
-            <TabsContent value="music">
-              <MusicAccessTab memberId={profile.id} voicePart={profile.voice_part} />
-            </TabsContent>
-            
-            <TabsContent value="wardrobe">
-              <WardrobeTab profile={profile} />
-            </TabsContent>
-            
-            <TabsContent value="financial">
-              <FinancialInfoTab memberId={profile.id} />
-            </TabsContent>
-            
-            <TabsContent value="media">
-              <MediaConsentTab profile={profile} />
-            </TabsContent>
-          </Tabs>
+          <ProfileOverviewTab 
+            profile={profile} 
+            isEditable={isEditing} 
+            onSave={handleProfileUpdate}
+          />
         </div>
         
         <div className="space-y-6">
-          <UserRoleEditor />
-          
-          {canManageRoles && (
-            <Card>
-              <CardHeader>
-                <CardTitle>Admin Access</CardTitle>
-                <CardDescription>
-                  Special administrative features
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <p className="text-sm mb-4">
-                  As an administrator, you have special privileges to manage user permissions, 
-                  roles and other administrative functions.
-                </p>
-                <div className="space-y-2">
-                  <h4 className="text-sm font-medium">Administrative Tools:</h4>
-                  <ul className="text-sm space-y-1 list-disc pl-4">
-                    <li>Manage user permissions</li>
-                    <li>Edit member roles</li>
-                    <li>Handle financial records</li>
-                    <li>Configure system settings</li>
-                  </ul>
+          <Card>
+            <CardHeader>
+              <CardTitle>Member Information</CardTitle>
+              <CardDescription>
+                Your membership details
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <p className="text-sm mb-4">
+                As a member of the Spelman College Glee Club, you have access to resources, 
+                sheet music, and other materials.
+              </p>
+              <div className="space-y-2">
+                <h4 className="text-sm font-medium">Membership Status:</h4>
+                <div className="flex items-center gap-2">
+                  <span className={`w-2 h-2 rounded-full ${profile.status === "active" ? "bg-green-500" : "bg-yellow-500"}`}></span>
+                  <span className="capitalize">{profile.status || "Pending"}</span>
                 </div>
-              </CardContent>
-            </Card>
-          )}
+              </div>
+            </CardContent>
+          </Card>
         </div>
       </div>
     </div>
