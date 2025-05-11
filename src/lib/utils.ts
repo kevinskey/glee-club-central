@@ -6,18 +6,22 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
-export function formatDate(dateString: string | null | undefined): string {
-  if (!dateString) return "N/A";
-  
-  try {
-    const date = new Date(dateString);
-    return new Intl.DateTimeFormat('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric'
-    }).format(date);
-  } catch (e) {
-    console.error("Error formatting date:", e);
-    return "Invalid Date";
+export function formatDate(date: Date | string): string {
+  if (typeof date === "string") {
+    date = new Date(date);
   }
+  return date.toLocaleDateString("en-US", {
+    year: "numeric",
+    month: "short",
+    day: "numeric",
+  });
+}
+
+export function truncateText(text: string, maxLength: number): string {
+  if (text.length <= maxLength) return text;
+  return text.slice(0, maxLength) + "...";
+}
+
+export function openPDFInViewer(id: string, navigate: any): void {
+  navigate(`/dashboard/sheet-music/${id}`);
 }

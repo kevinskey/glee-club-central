@@ -3,6 +3,7 @@ import React, { useState } from "react";
 import { PDFDocument } from "./PDFDocument";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { FileText } from "lucide-react";
+import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 
 interface PDFPreviewProps {
   url: string;
@@ -23,6 +24,7 @@ export const PDFPreview = ({
 }: PDFPreviewProps) => {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
   
   const handleLoad = () => {
     setIsLoading(false);
@@ -34,8 +36,33 @@ export const PDFPreview = ({
   };
   
   return (
-    <div className={className}>
-      {children}
-    </div>
+    <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+      <DialogTrigger asChild>
+        <div className={`cursor-pointer ${className}`}>
+          {children}
+        </div>
+      </DialogTrigger>
+      <DialogContent className="max-w-4xl w-[90vw] h-[90vh] p-1">
+        <div className="w-full h-full flex items-center justify-center">
+          {url ? (
+            <PDFDocument
+              url={url}
+              currentPage={1}
+              zoom={100}
+              isLoading={isLoading}
+              onLoad={handleLoad}
+              onError={handleError}
+              error={error}
+              title={title}
+            />
+          ) : (
+            <div className="flex flex-col items-center justify-center text-muted-foreground">
+              <FileText className="h-16 w-16 mb-2" />
+              <p>No PDF preview available</p>
+            </div>
+          )}
+        </div>
+      </DialogContent>
+    </Dialog>
   );
 };
