@@ -146,10 +146,11 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
       if (profileData) {
         console.log("Profile data loaded:", profileData);
-        // Add id as user_id if it doesn't exist to satisfy the type requirements
+        // Create a complete profile object with id as user_id if needed
         const completeProfile: Profile = {
           ...profileData,
-          user_id: profileData.user_id || profileData.id
+          // Ensure user_id exists (use id if it doesn't)
+          user_id: profileData.id
         };
         setProfile(completeProfile);
         

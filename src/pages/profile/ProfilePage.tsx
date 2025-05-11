@@ -19,6 +19,7 @@ import { useUserManagement } from "@/hooks/useUserManagement";
 import { Spinner } from "@/components/ui/spinner";
 import { ProfileOverviewTab as EditableProfileTab } from "@/components/profile/ProfileOverviewTab";
 import { Profile } from "@/types/auth";
+import { User as UserType } from "@/hooks/useUserManagement";
 
 export default function ProfilePage() {
   const { profile, isLoading, refreshPermissions } = useAuth();
@@ -103,7 +104,9 @@ export default function ProfilePage() {
     );
   }
 
-  // Pass profile data correctly to components
+  // Cast the profile to UserType where needed for components that expect it
+  const profileAsUser = profile as unknown as UserType;
+
   return (
     <div className="container mx-auto p-4 space-y-6">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
@@ -168,7 +171,7 @@ export default function ProfilePage() {
             </TabsContent>
             
             <TabsContent value="wardrobe">
-              <WardrobeTab profile={profile as Profile} />
+              <WardrobeTab profile={profileAsUser} />
             </TabsContent>
             
             <TabsContent value="financial">
@@ -176,7 +179,7 @@ export default function ProfilePage() {
             </TabsContent>
             
             <TabsContent value="media">
-              <MediaConsentTab profile={profile as Profile} />
+              <MediaConsentTab profile={profileAsUser} />
             </TabsContent>
           </Tabs>
         </div>

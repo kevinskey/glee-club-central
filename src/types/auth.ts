@@ -13,7 +13,7 @@ export interface AuthUser {
     provider?: string;
     [key: string]: any;
   };
-  role?: string;
+  role?: UserRole;
   aud?: string;
   created_at?: string;
 }
@@ -54,6 +54,7 @@ export interface AuthContextType {
   profile: Profile | null;
   isAuthenticated: boolean;
   isLoading: boolean;
+  permissions?: Record<string, boolean>;
   isAdmin: () => boolean;
   login: (email: string, password: string) => Promise<{ error: any } | void>;
   logout: () => Promise<void>;
@@ -62,4 +63,5 @@ export interface AuthContextType {
   signIn?: (email: string, password: string) => Promise<any>;
   signUp?: (email: string, password: string, firstName: string, lastName: string, role?: string) => Promise<any>;
   refreshPermissions?: (userId?: string) => Promise<void>;
+  updatePassword?: (newPassword: string) => Promise<void>;
 }
