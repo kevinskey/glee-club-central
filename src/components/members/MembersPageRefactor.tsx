@@ -100,12 +100,12 @@ export function MembersPageComponent({ useUserManagementHook }: MembersPageProps
       if (success) {
         setIsAddMemberOpen(false);
         toast.success(`Added ${data.first_name} ${data.last_name} successfully`);
-        await refreshUsers();
+        // No need to call refreshUsers here since we're adding the user to local state in addUser function
       }
     } finally {
       setIsSubmitting(false);
     }
-  }, [addUser, refreshUsers]);
+  }, [addUser]);
 
   // Handle updating a user's information
   const handleUpdateUser = useCallback(async (data: UserFormValues) => {

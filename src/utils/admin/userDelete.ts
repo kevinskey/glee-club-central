@@ -1,40 +1,39 @@
 
 import { supabase } from '@/integrations/supabase/client';
-import { toast } from 'sonner';
 
 /**
- * Delete a user from the system
- * This marks a user as deleted rather than actually removing the record
+ * Marks a user as deleted in the database
+ * @param userId The ID of the user to delete
+ * @returns boolean indicating success or failure
  */
 export async function deleteUser(userId: string): Promise<boolean> {
   try {
-    console.log("Deleting user with ID:", userId);
+    console.log(`Marking user ${userId} as deleted`);
     
-    // Update the user's status to 'deleted' rather than actually deleting
+    // Update the user's status to 'deleted' in the profiles table
     const { error } = await supabase
-      .from('profiles')
-      .update({ status: 'deleted' })
-      .eq('id', userId);
-      
+      .rpc('update_user_status', { 
+        p_user_id: userId, 
+        p_status: 'deleted' 
+      });
+    
     if (error) {
-      console.error("Error deleting user:", error);
-      toast.error("Failed to delete user");
+      console.error('Error marking user as deleted:', error);
       return false;
     }
     
-    // If we reach here, deletion was successful
-    console.log("User marked as deleted successfully");
-    toast.success("User was deleted successfully");
+    console.log(`User ${userId} successfully marked as deleted`);
     
-    // Dispatch a custom event to notify other components of the change
-    window.dispatchEvent(new CustomEvent("user:deleted", { 
+    // Dispatch a custom event that the user was deleted
+    // This allows components to update their UI without a full page refresh
+    const event = new CustomEvent('user:deleted', {
       detail: { userId }
-    }));
+    });
+    window.dispatchEvent(event);
     
     return true;
-  } catch (error) {
-    console.error("Unexpected error during user deletion:", error);
-    toast.error("An unexpected error occurred");
+  } catch (err) {
+    console.error('Unexpected error in deleteUser utility:', err);
     return false;
   }
 }

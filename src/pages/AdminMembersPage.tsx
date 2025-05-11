@@ -28,12 +28,11 @@ export default function AdminMembersPage() {
     }
   }, [isAuthenticated, userManagement, isLoaded]);
 
-  // Add listener for deletion events
+  // Add listeners for user events
   useEffect(() => {
-    // Create a custom event listener for user deletion
+    // Handle user deletion events
     const handleUserDeleted = (event: CustomEvent) => {
       console.log("User deleted event detected");
-      // Access the deleted user ID from the event detail
       const userId = event.detail?.userId;
       if (userId) {
         console.log(`User ${userId} was deleted, UI will be updated`);
@@ -41,12 +40,27 @@ export default function AdminMembersPage() {
       // No need to refresh here since useUserManagement.deleteUser now updates the local state
     };
     
-    // Listen for the custom event
+    // Handle user added events
+    const handleUserAdded = (event: CustomEvent) => {
+      console.log("User added event detected");
+      const userId = event.detail?.userId;
+      if (userId) {
+        console.log(`User ${userId} was added, refreshing user list`);
+        userManagement.fetchUsers()
+          .catch(err => {
+            console.error("Error refreshing users after addition:", err);
+          });
+      }
+    };
+    
+    // Listen for the custom events
     window.addEventListener("user:deleted", handleUserDeleted as EventListener);
+    window.addEventListener("user:added", handleUserAdded as EventListener);
     
     // Cleanup
     return () => {
       window.removeEventListener("user:deleted", handleUserDeleted as EventListener);
+      window.removeEventListener("user:added", handleUserAdded as EventListener);
     };
   }, [userManagement]);
 

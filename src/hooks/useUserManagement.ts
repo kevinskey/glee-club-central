@@ -252,11 +252,32 @@ export const useUserManagement = () => {
           // We'll still return true since the user was created
         }
         
-        console.log('User added successfully');
+        console.log('User added successfully with ID:', authData.user.id);
         toast.success(`Added ${userData.first_name} ${userData.last_name}`);
         
-        // Refresh the users list
-        fetchUsers();
+        // Dispatch event for user added
+        const userAddedEvent = new CustomEvent('user:added', {
+          detail: { userId: authData.user.id }
+        });
+        window.dispatchEvent(userAddedEvent);
+        
+        // Add the user to local state immediately
+        const newUser: User = {
+          id: authData.user.id,
+          email: userData.email,
+          first_name: userData.first_name,
+          last_name: userData.last_name,
+          phone: userData.phone || null,
+          role: userData.role,
+          voice_part: userData.voice_part,
+          status: userData.status,
+          created_at: new Date().toISOString(),
+          class_year: userData.class_year,
+          special_roles: userData.special_roles,
+          dues_paid: userData.dues_paid
+        };
+        
+        setUsers(currentUsers => [...currentUsers, newUser]);
         
         return true;
       } catch (err) {
@@ -264,6 +285,6 @@ export const useUserManagement = () => {
         toast.error('An unexpected error occurred');
         return false;
       }
-    }, [fetchUsers])
+    }, [])
   };
 };
