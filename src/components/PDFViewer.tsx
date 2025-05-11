@@ -122,19 +122,23 @@ export const PDFViewer = ({ url, title, sheetMusicId, fullHeight }: PDFViewerPro
         // Parse the stored annotations and ensure they match our type
         try {
           // Need to cast the Json type to Annotation[] after converting
-          const parsedAnnotations = data.annotations as unknown;
-          // Verify the structure matches our Annotation[] type
+          const parsedAnnotations = data.annotations as any;
+          
+          // Verify the structure matches our Annotation[] type and provide defaults for missing properties
           const convertedAnnotations = (Array.isArray(parsedAnnotations) ? 
             parsedAnnotations.map((ann: any) => ({
               id: ann.id || String(Date.now()),
-              type: ann.type,
-              points: ann.points || [],
-              color: ann.color || '#FF0000',
-              size: ann.size || 3,
-              x: ann.x,
-              y: ann.y,
-              width: ann.width,
-              height: ann.height
+              type: ann.type as "pen" | "eraser" | "square" | null,
+              points: Array.isArray(ann.points) ? ann.points.map((p: any) => ({
+                x: typeof p.x === 'number' ? p.x : 0,
+                y: typeof p.y === 'number' ? p.y : 0
+              })) : [],
+              color: typeof ann.color === 'string' ? ann.color : '#FF0000',
+              size: typeof ann.size === 'number' ? ann.size : 3,
+              x: typeof ann.x === 'number' ? ann.x : undefined,
+              y: typeof ann.y === 'number' ? ann.y : undefined,
+              width: typeof ann.width === 'number' ? ann.width : undefined,
+              height: typeof ann.height === 'number' ? ann.height : undefined
             })) : []) as Annotation[];
             
           setAnnotations(convertedAnnotations);

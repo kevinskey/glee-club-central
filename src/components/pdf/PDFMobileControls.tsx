@@ -1,4 +1,3 @@
-
 import React from "react";
 import { Button } from "@/components/ui/button";
 import { 
@@ -116,7 +115,7 @@ export const PDFMobileControls: React.FC<PDFMobileControlsProps> = ({
               </DropdownMenuItem>
             )}
             
-            <DropdownMenuItem onClick={onFullscreen}>
+<DropdownMenuItem onClick={onFullscreen}>
               {isFullscreen ? (
                 <>
                   <Minimize className="h-4 w-4 mr-2" />

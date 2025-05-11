@@ -63,9 +63,21 @@ export const PDFAnnotationManager = ({
 
       if (fetchError) throw fetchError;
 
-      // Convert annotations to a serializable format - first to regular objects to strip methods
-      // and then use JSON.parse(JSON.stringify()) to ensure it's compatible with supabase's JSON type
-      const serializedAnnotations = JSON.parse(JSON.stringify(annotations));
+      // Convert annotations to a serializable format suitable for Supabase's JSON type
+      // Remove any circular references and ensure it's a plain object
+      const cleanAnnotations = annotations.map(ann => ({
+        id: ann.id,
+        type: ann.type,
+        points: ann.points ? ann.points.map(p => ({ x: p.x, y: p.y })) : [],
+        color: ann.color,
+        size: ann.size,
+        x: ann.x,
+        y: ann.y,
+        width: ann.width,
+        height: ann.height
+      }));
+      
+      const serializedAnnotations = JSON.parse(JSON.stringify(cleanAnnotations));
 
       if (data) {
         // Update existing entry
