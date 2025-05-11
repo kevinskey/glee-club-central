@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
@@ -134,8 +133,12 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-background px-4 py-12">
-      <Card className="w-full max-w-md">
+    <div className="flex min-h-screen items-center justify-center bg-background bg-cover bg-center px-4"
+         style={{ backgroundImage: "url('/lovable-uploads/b57ced8e-7ed7-405b-8302-41ab726303af.png')" }}>
+      {/* Semi-transparent overlay */}
+      <div className="absolute inset-0 bg-black/60"></div>
+      
+      <Card className="w-full max-w-md relative z-10 bg-white/80 dark:bg-black/80 backdrop-blur-sm">
         <CardHeader className="text-center">
           <div className="flex justify-center mb-4">
             <Music className="h-12 w-12 text-glee-purple" />
