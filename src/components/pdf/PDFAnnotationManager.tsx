@@ -4,7 +4,6 @@ import { PDFAnnotationCanvas, Annotation } from "@/components/PDFAnnotationCanva
 import { PDFAnnotationToolbar } from "@/components/PDFAnnotationToolbar";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { User } from "@supabase/supabase-js";
 import { AuthUser } from "@/types/auth";
 
 interface PDFAnnotationManagerProps {
@@ -64,7 +63,8 @@ export const PDFAnnotationManager = ({
 
       if (fetchError) throw fetchError;
 
-      // Convert annotations to a serializable format
+      // Convert annotations to a serializable format - first to regular objects to strip methods
+      // and then use JSON.parse(JSON.stringify()) to ensure it's compatible with supabase's JSON type
       const serializedAnnotations = JSON.parse(JSON.stringify(annotations));
 
       if (data) {

@@ -119,9 +119,31 @@ export const PDFViewer = ({ url, title, sheetMusicId, fullHeight }: PDFViewerPro
       }
 
       if (data && data.annotations) {
-        // Ensure annotations is properly typed
-        const savedAnnotations = data.annotations as Annotation[];
-        setAnnotations(savedAnnotations);
+        // Parse the stored annotations and ensure they match our type
+        try {
+          // Need to cast the Json type to Annotation[] after converting
+          const parsedAnnotations = data.annotations as unknown;
+          // Verify the structure matches our Annotation[] type
+          const convertedAnnotations = (Array.isArray(parsedAnnotations) ? 
+            parsedAnnotations.map((ann: any) => ({
+              id: ann.id || String(Date.now()),
+              type: ann.type,
+              points: ann.points || [],
+              color: ann.color || '#FF0000',
+              size: ann.size || 3,
+              x: ann.x,
+              y: ann.y,
+              width: ann.width,
+              height: ann.height
+            })) : []) as Annotation[];
+            
+          setAnnotations(convertedAnnotations);
+          console.log("Loaded annotations:", convertedAnnotations);
+        } catch (parseError) {
+          console.error("Error parsing annotations:", parseError);
+          // If parsing fails, initialize with empty annotations
+          setAnnotations([]);
+        }
       }
     } catch (error) {
       console.error("Error loading annotations:", error);
