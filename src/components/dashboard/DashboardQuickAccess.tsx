@@ -14,7 +14,8 @@ import {
   Users,
   Upload,
   BarChart,
-  Settings
+  Settings,
+  FileText
 } from "lucide-react";
 
 export function DashboardQuickAccess() {
@@ -27,13 +28,13 @@ export function DashboardQuickAccess() {
     { icon: <Calendar className="h-5 w-5" />, title: "Calendar", path: "/dashboard/calendar", color: "bg-green-500" },
     { icon: <CheckSquare className="h-5 w-5" />, title: "Attendance", path: "/dashboard/attendance", color: "bg-orange-500" },
     { icon: <Bell className="h-5 w-5" />, title: "Announcements", path: "/dashboard/announcements", color: "bg-red-500" },
-    { icon: <MessageSquare className="h-5 w-5" />, title: "Contact Admin", path: "/dashboard/contact", color: "bg-indigo-500" },
+    { icon: <FileText className="h-5 w-5" />, title: "Media Library", path: "/dashboard/media-library", color: "bg-emerald-500" },
   ];
   
   // Admin quick links
   const adminQuickLinks = [
     { icon: <Users className="h-5 w-5" />, title: "User Management", path: "/dashboard/admin/users", color: "bg-slate-500" },
-    { icon: <Upload className="h-5 w-5" />, title: "Media Manager", path: "/dashboard/admin/media", color: "bg-emerald-500" },
+    { icon: <Upload className="h-5 w-5" />, title: "Media Manager", path: "/dashboard/media-library", color: "bg-emerald-500" },
     { icon: <Calendar className="h-5 w-5" />, title: "Event Manager", path: "/dashboard/admin/events", color: "bg-yellow-500" },
     { icon: <BarChart className="h-5 w-5" />, title: "Analytics", path: "/dashboard/admin/analytics", color: "bg-violet-500" },
     { icon: <Settings className="h-5 w-5" />, title: "Site Settings", path: "/dashboard/admin/settings", color: "bg-rose-500" },

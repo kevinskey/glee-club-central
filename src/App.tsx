@@ -20,6 +20,7 @@ import ContactPage from "@/pages/ContactPage";
 import DashboardPage from "@/pages/DashboardPage";
 import SchedulePage from "@/pages/schedule/SchedulePage";
 import ProfilePage from "@/pages/profile/ProfilePage";
+import MediaLibraryPage from "@/pages/media-library/MediaLibraryPage";
 
 // Admin Pages
 import UserManagementPage from "@/pages/admin/UserManagementPage";
@@ -51,6 +52,7 @@ function App() {
           <Route index element={<DashboardPage />} />
           <Route path="schedule" element={<SchedulePage />} />
           <Route path="profile" element={<ProfilePage />} />
+          <Route path="media-library" element={<MediaLibraryPage />} />
           
           {/* Admin-only routes */}
           <Route 
