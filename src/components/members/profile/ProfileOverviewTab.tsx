@@ -1,3 +1,4 @@
+
 import React from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { 
@@ -6,9 +7,15 @@ import {
   Phone, 
   Calendar, 
   Music,
-  User as UserIcon 
+  User as UserIcon,
+  School,
+  CalendarClock,
+  CircleDot,
+  FileText,
+  BadgeDollarSign
 } from "lucide-react";
 import { Profile } from "@/types/auth";
+import { useAuth } from "@/contexts/AuthContext";
 
 interface ProfileOverviewTabProps {
   profile: Profile;
@@ -16,6 +23,16 @@ interface ProfileOverviewTabProps {
 }
 
 export const ProfileOverviewTab: React.FC<ProfileOverviewTabProps> = ({ profile, isEditable }) => {
+  const { refreshPermissions } = useAuth();
+  
+  // Auto sync profile data when component mounts or profile changes
+  React.useEffect(() => {
+    if (refreshPermissions) {
+      // This will refresh the user's profile data from the database
+      refreshPermissions();
+    }
+  }, [refreshPermissions]);
+
   const formatDate = (dateString: string | null | undefined) => {
     if (!dateString) return "Not set";
     return new Date(dateString).toLocaleDateString();
@@ -27,10 +44,8 @@ export const ProfileOverviewTab: React.FC<ProfileOverviewTabProps> = ({ profile,
       case "soprano_2": return "Soprano 2";
       case "alto_1": return "Alto 1";
       case "alto_2": return "Alto 2";
-      case "tenor_1": return "Tenor 1";
-      case "tenor_2": return "Tenor 2";
-      case "bass_1": return "Bass 1";
-      case "bass_2": return "Bass 2";
+      case "tenor": return "Tenor";
+      case "bass": return "Bass";
       default: return voicePart;
     }
   };
@@ -67,7 +82,7 @@ export const ProfileOverviewTab: React.FC<ProfileOverviewTabProps> = ({ profile,
           </div>
           
           <div className="flex items-center space-x-2">
-            <User className="h-4 w-4 opacity-70" />
+            <School className="h-4 w-4 opacity-70" />
             <span className="font-semibold">Class Year:</span>
             <span>{profile.class_year || "Not set"}</span>
           </div>
@@ -79,9 +94,67 @@ export const ProfileOverviewTab: React.FC<ProfileOverviewTabProps> = ({ profile,
           </div>
           
           <div className="flex items-center space-x-2">
-            <User className="h-4 w-4 opacity-70" />
+            <CircleDot className="h-4 w-4 opacity-70" />
             <span className="font-semibold">Status:</span>
             <span>{profile.status}</span>
+          </div>
+          
+          <div className="flex items-center space-x-2">
+            <User className="h-4 w-4 opacity-70" />
+            <span className="font-semibold">Role:</span>
+            <span>{profile.role}</span>
+          </div>
+          
+          {profile.title && (
+            <div className="flex items-center space-x-2">
+              <User className="h-4 w-4 opacity-70" />
+              <span className="font-semibold">Title:</span>
+              <span>{profile.title}</span>
+            </div>
+          )}
+          
+          {profile.special_roles && (
+            <div className="flex items-center space-x-2">
+              <User className="h-4 w-4 opacity-70" />
+              <span className="font-semibold">Special Roles:</span>
+              <span>{profile.special_roles}</span>
+            </div>
+          )}
+          
+          <div className="flex items-center space-x-2">
+            <CalendarClock className="h-4 w-4 opacity-70" />
+            <span className="font-semibold">Created At:</span>
+            <span>{formatDate(profile.created_at)}</span>
+          </div>
+          
+          {profile.updated_at && (
+            <div className="flex items-center space-x-2">
+              <CalendarClock className="h-4 w-4 opacity-70" />
+              <span className="font-semibold">Last Updated:</span>
+              <span>{formatDate(profile.updated_at)}</span>
+            </div>
+          )}
+          
+          {profile.last_sign_in_at && (
+            <div className="flex items-center space-x-2">
+              <CalendarClock className="h-4 w-4 opacity-70" />
+              <span className="font-semibold">Last Sign In:</span>
+              <span>{formatDate(profile.last_sign_in_at)}</span>
+            </div>
+          )}
+          
+          {profile.notes && (
+            <div className="flex items-center space-x-2">
+              <FileText className="h-4 w-4 opacity-70" />
+              <span className="font-semibold">Notes:</span>
+              <span>{profile.notes}</span>
+            </div>
+          )}
+          
+          <div className="flex items-center space-x-2">
+            <BadgeDollarSign className="h-4 w-4 opacity-70" />
+            <span className="font-semibold">Dues Paid:</span>
+            <span>{profile.dues_paid ? "Yes" : "No"}</span>
           </div>
         </div>
       </CardContent>

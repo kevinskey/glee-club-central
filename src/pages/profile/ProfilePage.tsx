@@ -1,10 +1,9 @@
-
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { PageHeader } from "@/components/ui/page-header";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useAuth } from "@/contexts/AuthContext";
 import { User, Edit, Save } from "lucide-react";
-import { ProfileOverviewTab } from "@/components/profile/ProfileOverviewTab";
+import { ProfileOverviewTab } from "@/components/members/profile/ProfileOverviewTab";
 import { ParticipationTab } from "@/components/profile/ParticipationTab";
 import { MusicAccessTab } from "@/components/profile/MusicAccessTab";
 import { WardrobeTab } from "@/components/profile/WardrobeTab";
@@ -26,6 +25,21 @@ export default function ProfilePage() {
   const canManageRoles = hasPermission('can_manage_users');
   const [isEditing, setIsEditing] = useState(false);
   const [activeTab, setActiveTab] = useState("overview");
+  
+  // Auto sync profile data at regular intervals
+  useEffect(() => {
+    if (!refreshPermissions) return;
+    
+    // Refresh immediately on mount
+    refreshPermissions();
+    
+    // Set up periodic refresh
+    const interval = setInterval(() => {
+      refreshPermissions();
+    }, 60000); // Refresh every minute
+    
+    return () => clearInterval(interval);
+  }, [refreshPermissions]);
   
   const toggleEditMode = () => {
     setIsEditing(!isEditing);
