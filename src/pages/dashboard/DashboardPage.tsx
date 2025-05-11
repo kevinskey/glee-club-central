@@ -250,11 +250,8 @@ const DashboardPage = () => {
               </div>
             </CardContent>
           </Card>
-        </div>
-        
-        {/* Right Column - Announcements & Quick Access */}
-        <div className="space-y-8">
-          {/* Announcements Card */}
+          
+          {/* Announcements Card - MOVED HERE */}
           <Card className="shadow-md border-t-4 border-t-orange-500">
             <CardHeader className="pb-2">
               <div className="flex items-center justify-between">
@@ -281,7 +278,10 @@ const DashboardPage = () => {
               </div>
             </CardContent>
           </Card>
-          
+        </div>
+        
+        {/* Right Column - Quick Access (removed Announcements from here) */}
+        <div className="space-y-8">
           {/* Quick Access */}
           <Card className="shadow-md">
             <CardHeader className="pb-2">
