@@ -134,6 +134,10 @@ const DashboardPage = () => {
     );
   }
   
+  const handleRegisterAsAdmin = () => {
+    navigate("/register/admin");
+  };
+  
   return (
     <div className="container mx-auto p-4 space-y-8">
       <PageHeaderWithToggle
@@ -449,11 +453,13 @@ const DashboardPage = () => {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <Link to="/register/admin">
-              <Button variant="outline" className="border-glee-spelman text-glee-spelman hover:bg-glee-spelman/5">
-                Register as Admin
-              </Button>
-            </Link>
+            <Button 
+              variant="outline" 
+              className="border-glee-spelman text-glee-spelman hover:bg-glee-spelman/5"
+              onClick={handleRegisterAsAdmin}
+            >
+              Register as Admin
+            </Button>
           </CardContent>
         </Card>
       )}
