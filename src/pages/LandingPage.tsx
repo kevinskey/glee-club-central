@@ -19,25 +19,25 @@ export default function LandingPage() {
   useEffect(() => {
     console.log("LandingPage component mounting");
     
-    // Simulate checking resources are loaded
-    const timer = setTimeout(() => {
-      try {
+    try {
+      // Load essential components with a slight delay to ensure DOM is ready
+      const timer = setTimeout(() => {
         console.log("LandingPage finished loading");
         setIsLoading(false);
-      } catch (err) {
-        console.error("Error loading landing page:", err);
-        setError(err instanceof Error ? err : new Error("Failed to load page"));
-        setIsLoading(false);
-        
-        toast({
-          variant: "destructive",
-          title: "Error loading page",
-          description: "Please refresh the page or try again later.",
-        });
-      }
-    }, 500);
-
-    return () => clearTimeout(timer);
+      }, 800);
+      
+      return () => clearTimeout(timer);
+    } catch (err) {
+      console.error("Error loading landing page:", err);
+      setError(err instanceof Error ? err : new Error("Failed to load page"));
+      setIsLoading(false);
+      
+      toast({
+        variant: "destructive",
+        title: "Error loading page",
+        description: "Please refresh the page or try again later.",
+      });
+    }
   }, [toast]);
 
   if (isLoading) {
@@ -67,11 +67,13 @@ export default function LandingPage() {
     <div className="flex min-h-screen flex-col" id="home">
       <NewsFeed />
       <Header initialShowNewsFeed={false} />
-      <HeroSection />
-      <PerformanceSection />
-      <FeaturesSection />
-      <TestimonialSection />
-      <CTASection />
+      <main>
+        <HeroSection />
+        <PerformanceSection />
+        <FeaturesSection />
+        <TestimonialSection />
+        <CTASection />
+      </main>
       <Footer />
     </div>
   );
