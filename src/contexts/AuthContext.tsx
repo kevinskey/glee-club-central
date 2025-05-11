@@ -1,4 +1,3 @@
-
 import React, { createContext, useState, useEffect, useContext, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Profile, AuthUser, AuthContextType, UserRole } from '@/types/auth';
@@ -148,7 +147,42 @@ export function AuthProvider({ children }: AuthProviderProps) {
       if (profileData) {
         console.log("Profile data loaded:", profileData);
         setProfile(profileData);
-        await refreshPermissions(userId);
+        
+        // Try to load permissions but don't block on failure
+        try {
+          await refreshPermissions(userId);
+        } catch (err) {
+          console.error("Failed to load permissions but continuing:", err);
+          // If the user is an admin or super admin, grant all permissions regardless
+          if (profileData.is_super_admin || profileData.role === 'admin' || 
+              profileData.role === 'administrator' || profileData.role === 'director') {
+            console.log("User is super admin or has admin role, granting all permissions");
+            setPermissions({
+              can_view_financials: true,
+              can_edit_financials: true,
+              can_upload_sheet_music: true,
+              can_view_sheet_music: true,
+              can_edit_attendance: true,
+              can_view_attendance: true,
+              can_view_wardrobe: true,
+              can_edit_wardrobe: true,
+              can_upload_media: true,
+              can_manage_tour: true,
+              can_manage_stage: true,
+              can_view_prayer_box: true,
+              can_post_announcements: true,
+              can_manage_users: true,
+              can_manage_archives: true,
+              can_post_social: true,
+              can_view_travel_logistics: true,
+              can_manage_spiritual_events: true,
+              can_grade_submissions: true,
+              can_upload_documents: true,
+              can_view_events: true,
+              can_submit_absence_form: true
+            });
+          }
+        }
       } else {
         console.log("No profile found for user:", userId);
         setProfile(null);
@@ -171,6 +205,41 @@ export function AuthProvider({ children }: AuthProviderProps) {
     try {
       console.log("Refreshing permissions for user:", id);
       const userPermissions = await fetchUserPermissions(id);
+      
+      // If user is super admin or has admin role but permissions failed to load,
+      // manually set admin permissions
+      if (!userPermissions && profile) {
+        if (profile.is_super_admin || profile.role === 'admin' || 
+            profile.role === 'administrator' || profile.role === 'director') {
+          console.log("User is super admin or has admin role, granting all permissions");
+          setPermissions({
+            can_view_financials: true,
+            can_edit_financials: true,
+            can_upload_sheet_music: true,
+            can_view_sheet_music: true,
+            can_edit_attendance: true,
+            can_view_attendance: true,
+            can_view_wardrobe: true,
+            can_edit_wardrobe: true,
+            can_upload_media: true,
+            can_manage_tour: true,
+            can_manage_stage: true,
+            can_view_prayer_box: true,
+            can_post_announcements: true,
+            can_manage_users: true,
+            can_manage_archives: true,
+            can_post_social: true,
+            can_view_travel_logistics: true,
+            can_manage_spiritual_events: true,
+            can_grade_submissions: true,
+            can_upload_documents: true,
+            can_view_events: true,
+            can_submit_absence_form: true
+          });
+          return;
+        }
+      }
+      
       if (userPermissions) {
         console.log("User permissions loaded:", userPermissions);
         setPermissions(userPermissions);
@@ -180,7 +249,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
       }
     } catch (error) {
       console.error("Error refreshing permissions:", error);
-      toast.error('Failed to refresh permissions');
+      // Don't toast here as it might disrupt login flow
     }
   };
 

@@ -3,6 +3,8 @@ import React from 'react';
 import { Navigate, Route, Routes } from 'react-router-dom';
 import { PermissionGuard } from './components/auth/PermissionGuard';
 import { Spinner } from './components/ui/spinner';
+import LoginPage from './pages/LoginPage';
+import { useAuth } from './contexts/AuthContext';
 
 // Simple placeholder component for missing pages
 const PlaceholderPage = ({ title }: { title: string }) => (
@@ -14,7 +16,6 @@ const PlaceholderPage = ({ title }: { title: string }) => (
 
 // Use these components for now
 const Dashboard = () => <PlaceholderPage title="Dashboard" />;
-const Login = () => <PlaceholderPage title="Login" />;
 const Register = () => <PlaceholderPage title="Register" />;
 const NotFound = () => <PlaceholderPage title="404 - Not Found" />;
 const UserProfilePage = () => <PlaceholderPage title="User Profile" />;
@@ -29,10 +30,12 @@ const MainLayout = ({ children }: { children: React.ReactNode }) => (
 );
 
 const AppRoutes = () => {
+  const { isAuthenticated } = useAuth();
+
   return (
     <Routes>
       {/* Public routes */}
-      <Route path="/login" element={<Login />} />
+      <Route path="/login" element={<LoginPage />} />
       <Route path="/register" element={<Register />} />
       
       {/* Protected routes with MainLayout */}
@@ -80,8 +83,10 @@ const AppRoutes = () => {
         </PermissionGuard>
       } />
       
-      {/* Redirect root to dashboard */}
-      <Route path="/" element={<Navigate to="/dashboard" replace />} />
+      {/* Redirect root to dashboard if authenticated, otherwise to login */}
+      <Route path="/" element={
+        isAuthenticated ? <Navigate to="/dashboard" replace /> : <Navigate to="/login" replace />
+      } />
       
       {/* 404 page */}
       <Route path="*" element={<NotFound />} />

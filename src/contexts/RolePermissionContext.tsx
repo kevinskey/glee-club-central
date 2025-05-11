@@ -1,130 +1,107 @@
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { useAuth } from './AuthContext';
 import { supabase } from '@/integrations/supabase/client';
-import { toast } from 'sonner';
-import { PermissionName } from '@/types/permissions';
+import { useAuth } from './AuthContext';
 
-// Define user roles as a simple string literal type
-export type UserRole = 'admin' | 'student' | 'section_leader' | 'staff' | 'guest';
+// Define explicit permission types to avoid deep recursion issues
+type PermissionName = 
+  | 'can_view_financials' 
+  | 'can_edit_financials'
+  | 'can_upload_sheet_music'
+  | 'can_view_sheet_music'
+  | 'can_edit_attendance'
+  | 'can_view_attendance'
+  | 'can_view_wardrobe'
+  | 'can_edit_wardrobe'
+  | 'can_upload_media'
+  | 'can_manage_tour'
+  | 'can_manage_stage'
+  | 'can_view_prayer_box'
+  | 'can_post_announcements'
+  | 'can_manage_users'
+  | 'can_manage_archives'
+  | 'can_post_social'
+  | 'can_view_travel_logistics'
+  | 'can_manage_spiritual_events'
+  | 'can_grade_submissions'
+  | 'can_upload_documents'
+  | 'can_view_events'
+  | 'can_submit_absence_form'
+  | string; // Allow other string values for extensibility
 
-// Simple permissions object with string keys and boolean values
-type PermissionsObject = Record<string, boolean>;
+// Define allowed user roles
+const validRoles = [
+  'member',
+  'admin', 
+  'administrator', 
+  'director', 
+  'section_leader', 
+  'singer', 
+  'student_conductor', 
+  'accompanist', 
+  'non_singer'
+];
 
-// Define the context interface
 interface RolePermissionContextType {
-  userRole: UserRole | null;
-  permissions: PermissionsObject;
+  userRole: string | null;
+  hasPermission: (permission: PermissionName) => boolean;
   isLoading: boolean;
-  hasPermission: (permissionName: string) => boolean;
-  refreshPermissions: () => Promise<void>;
 }
 
 // Create context with default values
-const defaultContextValue: RolePermissionContextType = {
+const defaultContext: RolePermissionContextType = {
   userRole: null,
-  permissions: {},
-  isLoading: true,
   hasPermission: () => false,
-  refreshPermissions: async () => {}
+  isLoading: true
 };
 
-// Create context with the default value
-const RolePermissionContext = createContext<RolePermissionContextType>(defaultContextValue);
+const RolePermissionContext = createContext<RolePermissionContextType>(defaultContext);
 
-// Export the hook for consuming the context
 export const useRolePermissions = () => useContext(RolePermissionContext);
 
-// Provider component implementation
-export const RolePermissionProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const { user, profile } = useAuth();
-  const [userRole, setUserRole] = useState<UserRole | null>(null);
-  const [permissions, setPermissions] = useState<Record<string, boolean>>({});
+interface RolePermissionProviderProps {
+  children: React.ReactNode;
+}
+
+export const RolePermissionProvider: React.FC<RolePermissionProviderProps> = ({ children }) => {
+  const { profile, isLoading: authLoading, permissions } = useAuth();
+  const [userRole, setUserRole] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  // Function to fetch permissions from Supabase
-  const fetchPermissions = async () => {
-    if (!user) {
-      setUserRole(null);
-      setPermissions({});
-      setIsLoading(false);
-      return;
-    }
-
-    try {
-      setIsLoading(true);
-
-      // Get role from profile as string
-      const roleFromProfile = profile?.role || 'student';
-      
-      // Define valid roles array
-      const validRoles: UserRole[] = ['admin', 'student', 'section_leader', 'staff', 'guest'];
-      
-      // Validate role using includes method
-      const validatedRole = validRoles.includes(roleFromProfile as UserRole) 
-        ? (roleFromProfile as UserRole) 
-        : 'student';
-      
-      // Set role
-      setUserRole(validatedRole);
-
-      // Fetch permissions based on role
-      const { data, error } = await supabase
-        .from('role_permissions')
-        .select('permission, granted')
-        .eq('role_id', validatedRole);
-
-      if (error) {
-        console.error('Error fetching permissions:', error);
-        toast.error('Failed to load user permissions');
-        setIsLoading(false);
-        return;
-      }
-
-      // Create permissions object
-      const permissionsMap: Record<string, boolean> = {};
-      if (data && Array.isArray(data)) {
-        data.forEach((item) => {
-          permissionsMap[item.permission] = item.granted;
-        });
-      }
-
-      setPermissions(permissionsMap);
-      setIsLoading(false);
-    } catch (err) {
-      console.error('Unexpected error loading permissions:', err);
-      setIsLoading(false);
-    }
-  };
-
-  // Effect to fetch permissions when user or profile changes
+  // Update userRole when the profile changes
   useEffect(() => {
-    fetchPermissions();
-  }, [user, profile]);
+    if (!authLoading && profile) {
+      // Get the user's role from the profile
+      const role = profile.role || 'member';
+
+      // Validate role against known values
+      setUserRole(validRoles.includes(role) ? role : 'member');
+      setIsLoading(false);
+    } else if (!authLoading) {
+      // No profile, not loading
+      setUserRole(null);
+      setIsLoading(false);
+    }
+  }, [profile, authLoading]);
 
   // Function to check if a user has a specific permission
-  const hasPermission = (permissionName: string): boolean => {
+  const hasPermission = (permission: PermissionName): boolean => {
     // Super admins have all permissions
-    if (profile?.is_super_admin) return true;
-    
-    // Admin role has all permissions
-    if (userRole === 'admin') return true;
-    
+    if (profile?.is_super_admin) {
+      return true;
+    }
+
+    // Admin roles have all permissions
+    if (userRole === 'admin' || userRole === 'administrator' || userRole === 'director') {
+      return true;
+    }
+
     // Check specific permission
-    return permissions[permissionName] === true;
+    return permissions ? !!permissions[permission] : false;
   };
 
-  // Return context provider with values
   return (
-    <RolePermissionContext.Provider
-      value={{
-        userRole,
-        permissions,
-        isLoading,
-        hasPermission,
-        refreshPermissions: fetchPermissions
-      }}
-    >
+    <RolePermissionContext.Provider value={{ userRole, hasPermission, isLoading }}>
       {children}
     </RolePermissionContext.Provider>
   );
