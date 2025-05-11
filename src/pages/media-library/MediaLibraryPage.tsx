@@ -116,7 +116,7 @@ export default function MediaLibraryPage() {
           uploaded_by: file.uploaded_by,
           category: file.folder || getMediaType(file.file_type), // Use folder as category or derive from file type
           tags: file.tags || [],
-          size: typeof file.size === 'number' ? file.size : 0 // Safely handle size property
+          size: 0 // Default to 0 since size might not exist in some records
         };
         return mediaFile;
       }) || [];
@@ -132,7 +132,7 @@ export default function MediaLibraryPage() {
       // Calculate statistics
       const stats: MediaStats = {
         totalFiles: combinedFiles.length,
-        totalSize: combinedFiles.reduce((total, file) => total + file.size, 0),
+        totalSize: combinedFiles.reduce((total, file) => total + (file.size || 0), 0),
         filesByType: {}
       };
       
