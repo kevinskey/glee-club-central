@@ -1,6 +1,6 @@
 
 import React from "react";
-import { Search, Filter, Calendar } from "lucide-react";
+import { Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { 
   Select, 
@@ -9,17 +9,11 @@ import {
   SelectTrigger, 
   SelectValue 
 } from "@/components/ui/select";
-import { MediaType, getMediaTypeLabel } from "@/utils/mediaUtils";
-import {
-  ToggleGroup,
-  ToggleGroupItem
-} from "@/components/ui/toggle-group";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
-import { Grid2X2, List } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { MediaType } from "@/utils/mediaUtils";
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
+import { useIsMobile } from "@/hooks/use-mobile";
+import { Grid, List } from "lucide-react";
 
 interface MediaFilterBarProps {
   searchQuery: string;
@@ -50,103 +44,76 @@ export function MediaFilterBar({
   categories,
   mediaTypes
 }: MediaFilterBarProps) {
+  const isMobile = useIsMobile();
   
-  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setSearchQuery(e.target.value);
-  };
-
   return (
-    <div className="flex flex-col gap-4">
-      <div className="relative w-full">
-        <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-        <Input
-          placeholder="Search media files..."
-          value={searchQuery}
-          onChange={handleSearchChange}
-          className="pl-10"
-        />
-      </div>
-      
-      <div className="grid grid-cols-1 md:grid-cols-12 gap-2">
-        <div className="md:col-span-3">
-          <Select
-            value={selectedMediaType}
-            onValueChange={(value) => setSelectedMediaType(value as MediaType | "all")}
-          >
-            <SelectTrigger className="w-full">
-              <Filter className="h-4 w-4 mr-2" />
-              <SelectValue placeholder="Filter by type" />
+    <div className="space-y-3">
+      <div className="flex flex-col md:flex-row gap-4">
+        {/* Search Box */}
+        <div className="relative flex-1">
+          <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+          <Input
+            placeholder="Search media files..."
+            className="pl-8"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+          />
+        </div>
+        
+        <div className="grid grid-cols-2 md:flex gap-2">
+          {/* Media Type Filter */}
+          <Select value={selectedMediaType} onValueChange={(value) => setSelectedMediaType(value as MediaType | "all")}>
+            <SelectTrigger className="w-[130px]">
+              <SelectValue placeholder="Media type" />
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">All Types</SelectItem>
               {mediaTypes.map((type) => (
                 <SelectItem key={type} value={type}>
-                  {getMediaTypeLabel(type)}
+                  {type === "pdf" ? "Documents" : 
+                   type === "audio" ? "Audio" :
+                   type === "image" ? "Images" :
+                   type === "video" ? "Videos" : "Other"}
                 </SelectItem>
               ))}
             </SelectContent>
           </Select>
-        </div>
-        
-        <div className="md:col-span-3">
-          <Select
-            value={selectedCategory}
-            onValueChange={setSelectedCategory}
-          >
-            <SelectTrigger className="w-full">
-              <Filter className="h-4 w-4 mr-2" />
-              <SelectValue placeholder="Filter by category" />
+          
+          {/* Category Filter */}
+          <Select value={selectedCategory} onValueChange={setSelectedCategory}>
+            <SelectTrigger className="w-[130px]">
+              <SelectValue placeholder="Category" />
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">All Categories</SelectItem>
               {categories.map((category) => (
-                <SelectItem key={category} value={category}>
-                  {category.replace('_', ' ')}
-                </SelectItem>
+                <SelectItem key={category} value={category}>{category}</SelectItem>
               ))}
             </SelectContent>
           </Select>
-        </div>
-        
-        <div className="md:col-span-3">
-          <Select
-            value={dateFilter}
-            onValueChange={(value) => setDateFilter(value as "newest" | "oldest")}
-          >
-            <SelectTrigger className="w-full">
-              <Calendar className="h-4 w-4 mr-2" />
-              <SelectValue placeholder="Sort by date" />
+          
+          {/* Date Filter */}
+          <Select value={dateFilter} onValueChange={(value) => setDateFilter(value as "newest" | "oldest")}>
+            <SelectTrigger className="w-[90px]">
+              <SelectValue placeholder="Sort" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="newest">Newest First</SelectItem>
-              <SelectItem value="oldest">Oldest First</SelectItem>
+              <SelectItem value="newest">Newest</SelectItem>
+              <SelectItem value="oldest">Oldest</SelectItem>
             </SelectContent>
           </Select>
-        </div>
-        
-        <div className="md:col-span-3 flex justify-end">
-          <ToggleGroup type="single" value={viewMode} onValueChange={(value) => value && setViewMode(value as "grid" | "list")}>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <ToggleGroupItem value="grid" aria-label="Grid view">
-                  <Grid2X2 className="h-4 w-4" />
-                </ToggleGroupItem>
-              </TooltipTrigger>
-              <TooltipContent>
-                <p>Grid view</p>
-              </TooltipContent>
-            </Tooltip>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <ToggleGroupItem value="list" aria-label="List view">
-                  <List className="h-4 w-4" />
-                </ToggleGroupItem>
-              </TooltipTrigger>
-              <TooltipContent>
-                <p>List view</p>
-              </TooltipContent>
-            </Tooltip>
-          </ToggleGroup>
+          
+          {/* View Mode Toggle */}
+          <div className="md:ml-2">
+            <ToggleGroup type="single" value={viewMode} onValueChange={(value) => value && setViewMode(value as "grid" | "list")}>
+              <ToggleGroupItem value="grid" aria-label="Grid view">
+                <Grid className="h-4 w-4" />
+              </ToggleGroupItem>
+              <ToggleGroupItem value="list" aria-label="List view">
+                <List className="h-4 w-4" />
+              </ToggleGroupItem>
+            </ToggleGroup>
+          </div>
         </div>
       </div>
     </div>

@@ -5,7 +5,8 @@ import {
   Upload, 
   Calendar, 
   BarChart,
-  Settings 
+  Settings,
+  Files
 } from "lucide-react";
 import { NavLink } from 'react-router-dom';
 
@@ -18,6 +19,11 @@ export const adminNavItems = [
   {
     title: "Media Manager",
     href: "/dashboard/admin/media",
+    icon: <Files className="h-4 w-4" />,
+  },
+  {
+    title: "Media Manager (Legacy)",
+    href: "/dashboard/admin/media-legacy",
     icon: <Upload className="h-4 w-4" />,
   },
   {

@@ -16,6 +16,7 @@ import UserManagementPage from "./pages/admin/UserManagementPage";
 import FanPage from "./pages/FanPage";
 import CalendarPage from "./pages/CalendarPage";
 import AdminRegistrationPage from "./pages/admin/AdminRegistrationPage";
+import MediaManagerPage from "./pages/admin/MediaManagerPage";
 
 // Import layout components
 import { ProtectedRoute } from "./components/auth/ProtectedRoute";
@@ -76,6 +77,10 @@ export const router = createBrowserRouter([
       {
         path: "admin/members",
         element: <AdminRoute><UserManagementPage /></AdminRoute>,
+      },
+      {
+        path: "admin/media",
+        element: <AdminRoute><MediaManagerPage /></AdminRoute>,
       },
       {
         path: "members",
