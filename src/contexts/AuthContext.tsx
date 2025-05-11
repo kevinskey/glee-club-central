@@ -22,7 +22,7 @@ interface AuthProviderProps {
 export function AuthProvider({ children }: AuthProviderProps) {
   const [user, setUser] = useState<AuthUser | null>(null);
   const [profile, setProfile] = useState<Profile | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [session, setSession] = useState<any>(null);  // Add session state
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [permissions, setPermissions] = useState<Record<string, boolean> | undefined>(undefined);
@@ -52,65 +52,74 @@ export function AuthProvider({ children }: AuthProviderProps) {
     };
   };
 
+  // Initialize authentication state
   useEffect(() => {
-    const session = async () => {
-      const { data: { session } } = await supabase.auth.getSession()
-
-      if (session?.user) {
-        const authUser = mapRoleToAuthUser(session.user);
-        setUser(authUser);
-      } else {
-        setUser(null);
+    const initializeAuth = async () => {
+      try {
+        setIsLoading(true);
+        
+        // Get current session first
+        const { data: sessionData } = await supabase.auth.getSession();
+        console.log("Initial session:", sessionData.session);
+        
+        // Set auth state based on session
+        if (sessionData.session) {
+          setSession(sessionData.session);
+          setIsAuthenticated(true);
+          
+          const authUser = mapRoleToAuthUser(sessionData.session.user);
+          setUser(authUser);
+          
+          // Fetch profile data for authenticated user
+          await fetchProfile(sessionData.session.user.id);
+        } else {
+          // No active session
+          setSession(null);
+          setUser(null);
+          setProfile(null);
+          setIsAuthenticated(false);
+          setPermissions(undefined);
+          setIsLoading(false);
+        }
+      } catch (error) {
+        console.error("Error initializing auth:", error);
+        setIsLoading(false);
       }
-      setLoading(false);
-    }
-
-    session()
-
-    supabase.auth.onAuthStateChange(async (event, session) => {
-      if (event === 'SIGNED_IN') {
-        console.log('User signed in:', session?.user);
-        if (session?.user) {
+    };
+    
+    initializeAuth();
+    
+    // Set up auth state change listener
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      async (event, session) => {
+        console.log("Auth state change:", event, session?.user?.id);
+        
+        if (event === 'SIGNED_IN' && session) {
+          setSession(session);
+          setIsAuthenticated(true);
+          
           const authUser = mapRoleToAuthUser(session.user);
           setUser(authUser);
-        } else {
+          
+          // Use setTimeout to prevent potential deadlocks
+          setTimeout(() => {
+            fetchProfile(session.user.id);
+          }, 0);
+        } 
+        else if (event === 'SIGNED_OUT' || event === 'USER_DELETED') {
+          setSession(null);
           setUser(null);
-        }
-        setIsAuthenticated(true);
-        await fetchProfile(session?.user?.id);
-      } else if (event === 'SIGNED_OUT') {
-        console.log('User signed out');
-        setUser(null);
-        setProfile(null);
-        setIsAuthenticated(false);
-        setPermissions(undefined);
-        // We'll handle navigation in components using this context
-      } else if (event === 'INITIAL_SESSION') {
-        console.log('Initial session:', session?.user);
-        if (session?.user) {
-          const authUser = mapRoleToAuthUser(session.user);
-          setUser(authUser);
-        } else {
-          setUser(null);
-        }
-        setIsAuthenticated(!!session?.user);
-        if (session?.user) {
-          await fetchProfile(session.user.id);
-        }
-      } else if (event === 'PASSWORD_RECOVERY') {
-        console.log('PASSWORD_RECOVERY session:', session?.user);
-        if (session?.user) {
-          const authUser = mapRoleToAuthUser(session.user);
-          setUser(authUser);
-        } else {
-          setUser(null);
-        }
-        setIsAuthenticated(!!session?.user);
-        if (session?.user) {
-          await fetchProfile(session.user.id);
+          setProfile(null);
+          setIsAuthenticated(false);
+          setPermissions(undefined);
+          setIsLoading(false);
         }
       }
-    })
+    );
+    
+    return () => {
+      subscription.unsubscribe();
+    };
   }, []);
 
   const fetchProfile = async (userId: string | undefined) => {
@@ -131,6 +140,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
       if (profileError) {
         console.error("Error fetching profile:", profileError);
         toast.error('Failed to load profile');
+        setIsLoading(false);
         return;
       }
 
@@ -222,7 +232,6 @@ export function AuthProvider({ children }: AuthProviderProps) {
     }
   };
 
-  // Modified to avoid direct navigate usage
   const signOut = async () => {
     try {
       console.log("Signing out user");
@@ -234,8 +243,13 @@ export function AuthProvider({ children }: AuthProviderProps) {
         return;
       }
 
+      setSession(null);
+      setUser(null);
+      setProfile(null);
+      setIsAuthenticated(false);
+      setPermissions(undefined);
+      
       toast.success('Signed out successfully');
-      // Navigation will be handled by components using this context
     } catch (err) {
       console.error("Error during sign-out:", err);
       toast.error('Error during sign-out');
@@ -271,7 +285,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const value = {
     user,
     profile,
-    loading,
+    loading: false, // Legacy prop kept for backwards compatibility
     isAuthenticated,
     isLoading,
     permissions,
@@ -285,7 +299,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
   return (
     <AuthContext.Provider value={value}>
-      {!loading && children}
+      {children}
     </AuthContext.Provider>
   );
 }

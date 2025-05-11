@@ -1,6 +1,6 @@
 
-import React, { useEffect } from "react";
-import { Outlet, useNavigate } from "react-router-dom";
+import React from "react";
+import { Outlet, Navigate } from "react-router-dom";
 import { Header } from "@/components/layout/Header";
 import { Sidebar } from "@/components/layout/Sidebar";
 import { useAuth } from "@/contexts/AuthContext";
@@ -8,19 +8,9 @@ import { Spinner } from "@/components/ui/spinner";
 
 export function DashboardLayout() {
   const { isAuthenticated, isLoading } = useAuth();
-  const navigate = useNavigate();
   
-  useEffect(() => {
-    console.log("DashboardLayout - Auth check:", { isAuthenticated, isLoading });
-    
-    // Redirect if not authenticated and not loading
-    if (!isLoading && !isAuthenticated) {
-      console.log("DashboardLayout - User not authenticated, redirecting to login");
-      navigate('/login');
-    }
-  }, [isAuthenticated, isLoading, navigate]);
+  console.log("DashboardLayout - Auth check:", { isAuthenticated, isLoading });
   
-  // Show loading spinner while auth state is being determined
   if (isLoading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
@@ -29,9 +19,9 @@ export function DashboardLayout() {
     );
   }
   
-  // Only render the layout if authenticated
   if (!isAuthenticated) {
-    return null; // Will be redirected by the useEffect
+    console.log("DashboardLayout - User not authenticated, redirecting to login");
+    return <Navigate to="/login" />;
   }
 
   return (

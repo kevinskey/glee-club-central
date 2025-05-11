@@ -16,7 +16,9 @@ export function ProtectedRoute({ children, adminOnly = false }: ProtectedRoutePr
   console.log('ProtectedRoute check:', {
     path: location.pathname,
     isAuthenticated,
-    isLoading
+    isLoading,
+    adminOnly,
+    isAdmin: isAdmin ? isAdmin() : false
   });
   
   if (isLoading) {
