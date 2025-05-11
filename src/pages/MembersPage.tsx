@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { PageHeader } from "@/components/ui/page-header";
@@ -85,9 +84,12 @@ export default function MembersPage() {
       const success = await addUser(data);
       if (success) {
         setIsAddMemberDialogOpen(false);
+        toast.success(`Added ${data.first_name} ${data.last_name}`);
+        await fetchUsers();
       }
     } catch (error) {
       console.error("Error adding member:", error);
+      toast.error("Failed to add member");
     } finally {
       setIsSubmitting(false);
     }
@@ -95,6 +97,7 @@ export default function MembersPage() {
   
   // Handle editing a member
   const handleEditMember = (member: User) => {
+    console.log("Opening edit dialog for member:", member);
     setCurrentMember(member);
     setIsEditMemberDialogOpen(true);
   };
@@ -135,6 +138,7 @@ export default function MembersPage() {
 
   // Handle deleting a member
   const handleDeleteClick = (memberId: string) => {
+    console.log("Requesting delete for member ID:", memberId);
     const member = members.find(m => m.id === memberId);
     if (member) {
       setMemberToDelete(memberId);
@@ -393,7 +397,7 @@ export default function MembersPage() {
                   members={filteredMembers} 
                   onEditMember={canManageMembers ? handleEditMember : undefined}
                   onDeleteMember={canManageMembers ? handleDeleteClick : undefined}
-                  onManagePermissions={canManageMembers ? handleManagePermissions : undefined}
+                  onManagePermissions={canManagePermissions ? handleManagePermissions : undefined}
                   onChangeRole={canManageMembers ? handleChangeRole : undefined}
                 />
               )}
@@ -413,7 +417,7 @@ export default function MembersPage() {
                   members={filteredMembers} 
                   onEditMember={canManageMembers ? handleEditMember : undefined}
                   onDeleteMember={canManageMembers ? handleDeleteClick : undefined}
-                  onManagePermissions={canManageMembers ? handleManagePermissions : undefined}
+                  onManagePermissions={canManagePermissions ? handleManagePermissions : undefined}
                   onChangeRole={canManageMembers ? handleChangeRole : undefined}
                 />
               )}
@@ -452,25 +456,21 @@ export default function MembersPage() {
       )}
       
       {/* Delete Member Dialog */}
-      {canManageMembers && (
-        <DeleteMemberDialog
-          isOpen={isDeleteDialogOpen}
-          onOpenChange={setIsDeleteDialogOpen}
-          onConfirm={handleConfirmDelete}
-          memberName={memberToDeleteName}
-          isDeleting={isDeleting}
-        />
-      )}
+      <DeleteMemberDialog
+        isOpen={isDeleteDialogOpen}
+        onOpenChange={setIsDeleteDialogOpen}
+        onConfirm={handleConfirmDelete}
+        memberName={memberToDeleteName}
+        isDeleting={isDeleting}
+      />
       
       {/* Role Selector Dialog */}
-      {canManageMembers && (
-        <UserRoleSelector
-          user={currentMember}
-          isOpen={isRoleDialogOpen}
-          onOpenChange={setIsRoleDialogOpen}
-          onSuccess={refreshMembers}
-        />
-      )}
+      <UserRoleSelector
+        user={currentMember}
+        isOpen={isRoleDialogOpen}
+        onOpenChange={setIsRoleDialogOpen}
+        onSuccess={refreshMembers}
+      />
       
       {/* Permissions Dialog */}
       {canManageMembers && (
