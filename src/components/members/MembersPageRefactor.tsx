@@ -14,6 +14,9 @@ import { UserTitleManagement } from "@/components/admin/UserTitleManagement";
 import { AddMemberDialog } from "@/components/members/AddMemberDialog";
 import { UserFormValues } from "@/components/members/form/userFormSchema";
 import { toast } from "sonner";
+import { EditUserDialog } from "@/components/members/EditUserDialog";
+import { DeleteMemberDialog } from "@/components/members/DeleteMemberDialog";
+import { MemberPermissionsDialog } from "@/components/members/MemberPermissionsDialog";
 
 // Helper function to create a member refresh function that returns void
 export const createMemberRefreshFunction = (
@@ -35,6 +38,8 @@ export interface MembersPageProps {
     isLoading: boolean;
     fetchUsers: () => Promise<any>;
     addUser: (data: UserFormValues) => Promise<boolean>;
+    updateUser?: (userId: string, data: any) => Promise<boolean>;
+    deleteUser?: (userId: string) => Promise<boolean>;
   };
 }
 
@@ -47,14 +52,22 @@ export function MembersPageComponent({ useUserManagementHook }: MembersPageProps
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [isManageRoleOpen, setIsManageRoleOpen] = useState(false);
   const [isAddMemberOpen, setIsAddMemberOpen] = useState(false);
+  const [isEditUserOpen, setIsEditUserOpen] = useState(false);
+  const [isPermissionsOpen, setIsPermissionsOpen] = useState(false);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [userToDelete, setUserToDelete] = useState<string | null>(null);
+  const [userToDeleteName, setUserToDeleteName] = useState("");
   const isMobile = useMedia('(max-width: 640px)');
   
   const {
     users: allMembers,
     isLoading,
     fetchUsers,
-    addUser
+    addUser,
+    updateUser,
+    deleteUser
   } = useUserManagementHook();
   
   // Filter out deleted users
@@ -81,6 +94,57 @@ export function MembersPageComponent({ useUserManagementHook }: MembersPageProps
       }
     } finally {
       setIsSubmitting(false);
+    }
+  };
+
+  // Handle updating a user's information
+  const handleUpdateUser = async (data: UserFormValues) => {
+    if (!selectedUser || !updateUser) return;
+    
+    setIsSubmitting(true);
+    try {
+      const success = await updateUser(selectedUser.id, data);
+      if (success) {
+        setIsEditUserOpen(false);
+        setSelectedUser(null);
+        toast.success(`Updated ${data.first_name} ${data.last_name} successfully`);
+        await refreshUsers();
+      }
+    } catch (error) {
+      console.error("Error updating user:", error);
+      toast.error("Failed to update user");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+  
+  // Handle deleting a user
+  const handleDeleteUser = (userId: string) => {
+    const user = members.find(m => m.id === userId);
+    if (user) {
+      setUserToDelete(userId);
+      setUserToDeleteName(`${user.first_name} ${user.last_name}`);
+      setIsDeleteDialogOpen(true);
+    }
+  };
+  
+  const confirmDeleteUser = async () => {
+    if (!userToDelete || !deleteUser) return;
+    
+    setIsDeleting(true);
+    try {
+      const success = await deleteUser(userToDelete);
+      if (success) {
+        setIsDeleteDialogOpen(false);
+        toast.success(`${userToDeleteName} has been deleted`);
+        await refreshUsers();
+      }
+    } catch (error) {
+      console.error("Error deleting user:", error);
+      toast.error("Failed to delete user");
+    } finally {
+      setIsDeleting(false);
+      setUserToDelete(null);
     }
   };
 
@@ -124,12 +188,6 @@ export function MembersPageComponent({ useUserManagementHook }: MembersPageProps
     return matchesSearch && matchesRole && matchesStatus;
   });
 
-  // Open role management dialog
-  const openRoleManagement = (user: User) => {
-    setSelectedUser(user);
-    setIsManageRoleOpen(true);
-  };
-
   return (
     <div className="container mx-auto p-4 space-y-6">
       <PageHeader
@@ -155,7 +213,20 @@ export function MembersPageComponent({ useUserManagementHook }: MembersPageProps
         
         <MembersList 
           members={filteredMembers}
-          onChangeRole={openRoleManagement}
+          onChangeRole={(user) => {
+            setSelectedUser(user);
+            setIsManageRoleOpen(true);
+          }}
+          onEditUser={(user) => {
+            setSelectedUser(user);
+            setIsEditUserOpen(true);
+          }}
+          onDeleteUser={handleDeleteUser}
+          onManagePermissions={(user) => {
+            setSelectedUser(user);
+            setIsPermissionsOpen(true);
+          }}
+          canEdit={hasAdminAccess}
         />
       </Card>
       
@@ -173,6 +244,34 @@ export function MembersPageComponent({ useUserManagementHook }: MembersPageProps
         onOpenChange={setIsAddMemberOpen}
         onMemberAdd={handleAddMember}
         isSubmitting={isSubmitting}
+      />
+      
+      {/* Edit User Dialog */}
+      {updateUser && (
+        <EditUserDialog
+          isOpen={isEditUserOpen}
+          onOpenChange={setIsEditUserOpen}
+          onSave={handleUpdateUser}
+          isSubmitting={isSubmitting}
+          user={selectedUser}
+        />
+      )}
+      
+      {/* Delete User Dialog */}
+      <DeleteMemberDialog
+        isOpen={isDeleteDialogOpen}
+        onOpenChange={setIsDeleteDialogOpen}
+        onConfirm={confirmDeleteUser}
+        memberName={userToDeleteName}
+        isDeleting={isDeleting}
+      />
+      
+      {/* Permissions Dialog */}
+      <MemberPermissionsDialog
+        user={selectedUser}
+        isOpen={isPermissionsOpen}
+        setIsOpen={setIsPermissionsOpen}
+        onSuccess={refreshUsers}
       />
     </div>
   );

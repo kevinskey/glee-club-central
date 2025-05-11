@@ -10,7 +10,6 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { Button } from "@/components/ui/button";
 import { Loader2 } from "lucide-react";
 
 interface DeleteMemberDialogProps {
@@ -32,18 +31,20 @@ export function DeleteMemberDialog({
     <AlertDialog open={isOpen} onOpenChange={onOpenChange}>
       <AlertDialogContent>
         <AlertDialogHeader>
-          <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+          <AlertDialogTitle>Delete Member</AlertDialogTitle>
           <AlertDialogDescription>
-            This action will mark {memberName} as deleted. They will no longer appear in the member list.
-            Their account data will be preserved for record-keeping purposes but they will no longer have access to the system.
+            Are you sure you want to delete {memberName}? This action cannot be undone.
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
           <AlertDialogCancel disabled={isDeleting}>Cancel</AlertDialogCancel>
-          <Button
-            variant="destructive"
-            onClick={onConfirm}
+          <AlertDialogAction
+            onClick={(e) => {
+              e.preventDefault();
+              onConfirm();
+            }}
             disabled={isDeleting}
+            className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
           >
             {isDeleting ? (
               <>
@@ -51,9 +52,9 @@ export function DeleteMemberDialog({
                 Deleting...
               </>
             ) : (
-              "Delete Member"
+              'Delete'
             )}
-          </Button>
+          </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>
     </AlertDialog>

@@ -1,54 +1,31 @@
 
 import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
 
-// Delete a user (marks status as deleted)
-export const deleteUser = async (userId: string) => {
+/**
+ * Delete a user from the system
+ * For development purposes, this simply updates the user's status to 'deleted'
+ * In production, you would want to implement proper user deletion via backend functions
+ */
+export async function deleteUser(userId: string): Promise<boolean> {
   try {
-    console.log(`Attempting to delete user with ID: ${userId}`);
+    console.log("Deleting user with ID:", userId);
     
-    if (!userId) {
-      console.error('Invalid user ID provided');
-      throw new Error('Invalid user ID');
-    }
-    
-    // First, check if the user exists
-    const { data: checkUser, error: checkError } = await supabase
-      .from('profiles')
-      .select('id, status')
-      .eq('id', userId)
-      .single();
-      
-    if (checkError || !checkUser) {
-      console.error('Error checking user existence:', checkError || 'User not found');
-      throw new Error('User not found or could not be accessed');
-    }
-    
-    if (checkUser.status === 'deleted') {
-      console.log(`User ${userId} is already marked as deleted`);
-      return { success: true, userId, alreadyDeleted: true };
-    }
-    
-    // Mark user as deleted in the profiles table
-    const { error, data } = await supabase
+    // Update the user's status to 'deleted' rather than actually deleting
+    const { error } = await supabase
       .from('profiles')
       .update({ status: 'deleted' })
-      .eq('id', userId)
-      .select('id');
+      .eq('id', userId);
       
     if (error) {
-      console.error('Error in deleteUser:', error);
-      throw error;
+      console.error("Error deleting user:", error);
+      toast.error("Failed to delete user");
+      return false;
     }
     
-    if (!data || data.length === 0) {
-      console.error('User not found or failed to update');
-      throw new Error('User not found or failed to delete');
-    }
-    
-    console.log(`Successfully marked user ${userId} as deleted`);
-    return { success: true, userId };
-  } catch (error: any) {
-    console.error('Error deleting user:', error);
-    throw new Error(error.message || 'Failed to delete user');
+    return true;
+  } catch (error) {
+    console.error("Unexpected error during user deletion:", error);
+    return false;
   }
-};
+}

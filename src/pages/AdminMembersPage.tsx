@@ -19,7 +19,7 @@ export default function AdminMembersPage() {
           toast.error("Failed to load member data");
         });
     }
-  }, [isAuthenticated, userManagement.fetchUsers]);
+  }, [isAuthenticated, userManagement]);
 
   return <MembersPageComponent useUserManagementHook={() => userManagement} />;
 }
