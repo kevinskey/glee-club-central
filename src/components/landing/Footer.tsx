@@ -1,7 +1,7 @@
 
 import React from "react";
 import { useNavigate } from "react-router-dom";
-import { Music } from "lucide-react";
+import { Music, Instagram, Facebook, Twitter, Youtube } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 export function Footer() {
@@ -39,6 +39,46 @@ export function Footer() {
               </Button>
             </div>
           </div>
+        </div>
+        
+        {/* Add social media links */}
+        <div className="mt-6 sm:mt-8 flex justify-center gap-4">
+          <a 
+            href="https://www.instagram.com/spelmanglee/" 
+            target="_blank" 
+            rel="noopener noreferrer" 
+            className="text-gray-600 hover:text-glee-purple transition-colors"
+            aria-label="Instagram"
+          >
+            <Instagram className="h-5 w-5 sm:h-6 sm:w-6" />
+          </a>
+          <a 
+            href="https://www.facebook.com/spelmangleeclubofficial" 
+            target="_blank" 
+            rel="noopener noreferrer" 
+            className="text-gray-600 hover:text-glee-purple transition-colors"
+            aria-label="Facebook"
+          >
+            <Facebook className="h-5 w-5 sm:h-6 sm:w-6" />
+          </a>
+          <a 
+            href="https://www.twitter.com/spelmangleeclub" 
+            target="_blank" 
+            rel="noopener noreferrer" 
+            className="text-gray-600 hover:text-glee-purple transition-colors"
+            aria-label="Twitter"
+          >
+            <Twitter className="h-5 w-5 sm:h-6 sm:w-6" />
+          </a>
+          <a 
+            href="https://www.youtube.com/spelmangleeclubofficial" 
+            target="_blank" 
+            rel="noopener noreferrer" 
+            className="text-gray-600 hover:text-glee-purple transition-colors"
+            aria-label="YouTube"
+          >
+            <Youtube className="h-5 w-5 sm:h-6 sm:w-6" />
+          </a>
         </div>
         
         <div className="mt-5 sm:mt-6 md:mt-8 pt-5 sm:pt-6 md:pt-8 border-t border-gray-200 dark:border-gray-200 text-center text-gray-500 dark:text-gray-500 text-xs sm:text-sm">
