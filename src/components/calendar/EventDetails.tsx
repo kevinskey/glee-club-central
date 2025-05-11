@@ -6,7 +6,7 @@ import { format } from "date-fns";
 import { CalendarEvent } from "@/hooks/useCalendarEvents";
 import { AlertDialog, AlertDialogTrigger, AlertDialogContent, AlertDialogTitle, AlertDialogDescription, AlertDialogCancel, AlertDialogAction } from "@/components/ui/alert-dialog";
 
-interface EventDetailsProps {
+export interface EventDetailsProps {
   event: CalendarEvent;
   onEdit: () => void;
   onDelete: () => void;

@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { CalendarContainer } from "@/components/calendar/CalendarContainer";
 import { EventList } from "@/components/calendar/EventList";
 import { useAuth } from "@/contexts/AuthContext";
-import { useCalendarEvents, EventType } from "@/hooks/useCalendarEvents";
+import { useCalendarEvents, EventType, CalendarEvent } from "@/hooks/useCalendarEvents";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { AddEventForm } from "@/components/calendar/AddEventForm";
 import { EditEventForm } from "@/components/calendar/EditEventForm";
@@ -19,7 +19,7 @@ export default function SchedulePage() {
   
   // Initialize state for calendar
   const [date, setDate] = useState<Date | undefined>(new Date());
-  const [selectedEvent, setSelectedEvent] = useState<any>(null);
+  const [selectedEvent, setSelectedEvent] = useState<CalendarEvent | null>(null);
   const [isAddEventOpen, setIsAddEventOpen] = useState(false);
   const [isEditEventOpen, setIsEditEventOpen] = useState(false);
   const [isViewEventOpen, setIsViewEventOpen] = useState(false);
@@ -50,7 +50,7 @@ export default function SchedulePage() {
   };
   
   // Handle event selection
-  const handleEventSelect = (event: any) => {
+  const handleEventSelect = (event: CalendarEvent) => {
     setSelectedEvent(event);
     setIsViewEventOpen(true);
   };
@@ -77,7 +77,7 @@ export default function SchedulePage() {
   };
 
   // Handle edit event form submission
-  const handleUpdateEvent = async (event: any) => {
+  const handleUpdateEvent = async (event: CalendarEvent): Promise<boolean> => {
     try {
       const success = await updateEvent(event);
       if (success) {
@@ -85,9 +85,11 @@ export default function SchedulePage() {
         setIsViewEventOpen(false);
         setSelectedEvent(null);
       }
+      return success;
     } catch (error) {
       console.error("Error updating event:", error);
       toast.error("Failed to update event");
+      return false;
     }
   };
 
@@ -133,7 +135,6 @@ export default function SchedulePage() {
               daysWithEvents={daysWithEvents}
               loading={loading}
               events={events}
-              onSelectEvent={handleEventSelect}
             />
           ) : (
             <EventList 
