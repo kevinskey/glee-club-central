@@ -1,3 +1,4 @@
+
 import { Database } from "@/integrations/supabase/types";
 
 export interface Profile {
@@ -8,7 +9,7 @@ export interface Profile {
   avatar_url?: string;
   phone?: string;
   email?: string;
-  role?: string;
+  role: string;  // Changed from optional to required
   status?: string;
   join_date?: string;
   class_year?: string;
