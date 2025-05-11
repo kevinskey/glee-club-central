@@ -34,14 +34,6 @@ export function NavigationLinks() {
         <NavigationMenuItem>
           <NavigationMenuLink 
             className={navLinkStyle}
-            onClick={() => navigate("/about")}
-          >
-            About Us
-          </NavigationMenuLink>
-        </NavigationMenuItem>
-        <NavigationMenuItem>
-          <NavigationMenuLink 
-            className={navLinkStyle}
             onClick={() => navigate("/press-kit")}
           >
             Press Kit
