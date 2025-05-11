@@ -1,5 +1,5 @@
+
 import React, { createContext, useState, useEffect, useContext, useCallback } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { Profile, AuthUser, AuthContextType, UserRole } from '@/types/auth';
 import { fetchUserPermissions } from '@/utils/supabase/permissions';
@@ -26,7 +26,6 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [permissions, setPermissions] = useState<Record<string, boolean> | undefined>(undefined);
-  const navigate = useNavigate();
 
   // Helper function to convert any role string to a valid UserRole
   const mapRoleToAuthUser = (userData: any): AuthUser => {
@@ -85,7 +84,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
         setProfile(null);
         setIsAuthenticated(false);
         setPermissions(undefined);
-        navigate('/login');
+        // We'll handle navigation in components using this context
       } else if (event === 'INITIAL_SESSION') {
         console.log('Initial session:', session?.user);
         if (session?.user) {
@@ -112,7 +111,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
         }
       }
     })
-  }, [navigate]);
+  }, []);
 
   const fetchProfile = async (userId: string | undefined) => {
     if (!userId) {
@@ -223,6 +222,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
     }
   };
 
+  // Modified to avoid direct navigate usage
   const signOut = async () => {
     try {
       console.log("Signing out user");
@@ -235,7 +235,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
       }
 
       toast.success('Signed out successfully');
-      navigate('/login');
+      // Navigation will be handled by components using this context
     } catch (err) {
       console.error("Error during sign-out:", err);
       toast.error('Error during sign-out');

@@ -24,6 +24,11 @@ export function Header() {
   const { profile, signOut } = useAuth();
   const { onOpen } = useSidebar();
   const navigate = useNavigate();
+  
+  const handleSignOut = async () => {
+    await signOut();
+    navigate("/login");
+  };
 
   return (
     <header className="bg-background sticky top-0 z-50 w-full border-b">
@@ -76,7 +81,7 @@ export function Header() {
               
               <DropdownMenuSeparator />
               <DropdownMenuItem 
-                onClick={() => signOut()}
+                onClick={handleSignOut}
                 className="flex items-center gap-2 cursor-pointer text-destructive"
               >
                 <LogOut className="h-4 w-4" />
