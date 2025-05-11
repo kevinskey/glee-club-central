@@ -1,3 +1,4 @@
+
 import { supabase } from '@/integrations/supabase/client';
 import { UserTitle } from '@/types/permissions';
 
@@ -36,13 +37,16 @@ export async function fetchUserPermissions(userId: string) {
     if (Array.isArray(data)) {
       // If data is an array of objects with permission and granted properties
       if (data.length > 0 && typeof data[0] === 'object' && 'permission' in data[0] && 'granted' in data[0]) {
-        data.forEach((item: { permission: string, granted: boolean }) => {
-          permissionsMap[item.permission] = item.granted;
+        data.forEach((item) => {
+          // Explicit casting to ensure TypeScript knows the structure
+          const permItem = item as { permission: string, granted: boolean };
+          permissionsMap[permItem.permission] = permItem.granted;
         });
       } 
       // If data is an array of permission strings (all granted)
       else if (data.length > 0 && typeof data[0] === 'string') {
-        data.forEach((permission: string) => {
+        // Use type assertion to tell TypeScript that in this case, data is an array of strings
+        (data as string[]).forEach((permission) => {
           permissionsMap[permission] = true;
         });
       }
