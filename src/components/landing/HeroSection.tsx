@@ -11,7 +11,11 @@ export function HeroSection() {
     "/lovable-uploads/e06ff100-0add-4adc-834f-50ef81098d35.png",
     "/lovable-uploads/8aa13e63-fb9a-4c52-95cf-86b458c58f1c.png",
     "/lovable-uploads/10bab1e7-0f4e-402f-ab65-feb4710b5eaf.png",
-    "/lovable-uploads/642b93d7-fc15-4c2c-a7df-fe81aadb2f3b.png"
+    "/lovable-uploads/642b93d7-fc15-4c2c-a7df-fe81aadb2f3b.png",
+    // Add new images here
+    "https://images.unsplash.com/photo-1649972904349-6e44c42644a7?auto=format&fit=crop&w=1920&q=80",
+    "https://images.unsplash.com/photo-1488590528505-98d2b5aba04b?auto=format&fit=crop&w=1920&q=80",
+    "https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?auto=format&fit=crop&w=1920&q=80"
   ];
   
   return (
