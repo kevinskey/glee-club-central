@@ -7,7 +7,7 @@ import {
   BarChart,
   Settings 
 } from "lucide-react";
-import { SidebarNavItems } from "@/components/layout/SidebarNavItems";
+import { NavLink } from 'react-router-dom';
 
 export const adminNavItems = [
   {
@@ -43,7 +43,24 @@ export function AdminNavigation() {
       <h2 className="mb-2 px-2 text-lg font-semibold tracking-tight">
         Admin Menu
       </h2>
-      <SidebarNavItems items={adminNavItems} />
+      <nav className="space-y-1">
+        {adminNavItems.map((item) => (
+          <NavLink
+            key={item.href}
+            to={item.href}
+            className={({ isActive }) =>
+              `flex items-center px-3 py-2 rounded-md text-sm font-medium transition-colors ${
+                isActive
+                  ? 'bg-accent text-accent-foreground'
+                  : 'hover:bg-accent hover:text-accent-foreground'
+              }`
+            }
+          >
+            {item.icon}
+            <span className="ml-2">{item.title}</span>
+          </NavLink>
+        ))}
+      </nav>
     </div>
   );
 }
