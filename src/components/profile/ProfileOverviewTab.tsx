@@ -23,6 +23,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
 import { Switch } from "@/components/ui/switch";
+import { formatPhoneNumber } from "@/utils/formatters";
 
 interface ProfileOverviewTabProps {
   profile: Profile;
@@ -72,6 +73,12 @@ export const ProfileOverviewTab: React.FC<ProfileOverviewTabProps> = ({
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
+  };
+  
+  const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { value } = e.target;
+    const formattedValue = formatPhoneNumber(value);
+    setFormData(prev => ({ ...prev, phone: formattedValue }));
   };
 
   const handleSelectChange = (name: string, value: string) => {
@@ -197,7 +204,7 @@ export const ProfileOverviewTab: React.FC<ProfileOverviewTabProps> = ({
                   id="phone"
                   name="phone"
                   value={formData.phone}
-                  onChange={handleInputChange}
+                  onChange={handlePhoneChange}
                 />
               </div>
               
@@ -294,7 +301,7 @@ export const ProfileOverviewTab: React.FC<ProfileOverviewTabProps> = ({
             <div className="flex items-center space-x-2">
               <Phone className="h-4 w-4 opacity-70" />
               <span className="font-semibold">Phone:</span>
-              <span>{profile.phone || "Not set"}</span>
+              <span>{formatPhoneNumber(profile.phone) || "Not set"}</span>
             </div>
             
             <div className="flex items-center space-x-2">
