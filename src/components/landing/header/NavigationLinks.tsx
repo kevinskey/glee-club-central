@@ -10,16 +10,22 @@ import {
   NavigationMenuTrigger,
   navigationMenuTriggerStyle,
 } from "@/components/ui/navigation-menu";
+import { cn } from "@/lib/utils";
 
 export function NavigationLinks() {
   const navigate = useNavigate();
+  
+  const navLinkStyle = cn(
+    navigationMenuTriggerStyle(),
+    "hover:text-white hover:bg-glee-spelman"
+  );
   
   return (
     <NavigationMenu>
       <NavigationMenuList>
         <NavigationMenuItem>
           <NavigationMenuLink 
-            className={navigationMenuTriggerStyle()}
+            className={navLinkStyle}
             onClick={() => navigate("/")}
           >
             Home
@@ -27,7 +33,7 @@ export function NavigationLinks() {
         </NavigationMenuItem>
         <NavigationMenuItem>
           <NavigationMenuLink 
-            className={navigationMenuTriggerStyle()}
+            className={navLinkStyle}
             onClick={() => navigate("/about")}
           >
             About Us
@@ -35,24 +41,24 @@ export function NavigationLinks() {
         </NavigationMenuItem>
         <NavigationMenuItem>
           <NavigationMenuLink 
-            className={navigationMenuTriggerStyle()}
+            className={navLinkStyle}
             onClick={() => navigate("/contact")}
           >
             Contact
           </NavigationMenuLink>
         </NavigationMenuItem>
         <NavigationMenuItem>
-          <NavigationMenuTrigger>Resources</NavigationMenuTrigger>
+          <NavigationMenuTrigger className="hover:text-white hover:bg-glee-spelman">Resources</NavigationMenuTrigger>
           <NavigationMenuContent>
             <div className="w-[200px] p-2 bg-popover">
               <NavigationMenuLink 
-                className="block p-2 hover:bg-accent rounded-md"
+                className="block p-2 hover:bg-glee-spelman hover:text-white rounded-md"
                 onClick={() => navigate("/administration")}
               >
                 Administration
               </NavigationMenuLink>
               <NavigationMenuLink 
-                className="block p-2 hover:bg-accent rounded-md"
+                className="block p-2 hover:bg-glee-spelman hover:text-white rounded-md"
                 onClick={() => navigate("/fan-page")}
               >
                 For Fans

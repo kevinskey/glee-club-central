@@ -1,4 +1,3 @@
-
 import type { Config } from "tailwindcss";
 
 export default {
@@ -70,6 +69,7 @@ export default {
 					light: '#F5FAFF',   // Very light blue background
 					dark: '#212529',    // Black for accents
 					accent: '#FF7F00',  // Orange accent color as requested
+					spelman: '#0B3C84', // Spelman Blue - Added this new color
 				}
 			},
 			fontFamily: {

@@ -28,14 +28,24 @@ export function MemberPortalDropdown() {
       <DropdownMenuTrigger asChild>
         <Button 
           size="sm"
-          className="bg-glee-purple hover:bg-glee-purple/90 h-8 px-3 text-xs flex items-center gap-1"
+          className="bg-glee-purple hover:bg-glee-spelman h-8 px-3 text-xs flex items-center gap-1"
         >
           Member Portal <ChevronDown className="h-3 w-3 opacity-70" />
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-48 bg-popover">
-        <DropdownMenuItem onClick={navigateToLogin}>Login</DropdownMenuItem>
-        <DropdownMenuItem onClick={navigateToMemberPortal}>Dashboard</DropdownMenuItem>
+        <DropdownMenuItem 
+          onClick={navigateToLogin}
+          className="hover:bg-glee-spelman hover:text-white"
+        >
+          Login
+        </DropdownMenuItem>
+        <DropdownMenuItem 
+          onClick={navigateToMemberPortal}
+          className="hover:bg-glee-spelman hover:text-white"
+        >
+          Dashboard
+        </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
   );

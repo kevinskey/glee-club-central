@@ -19,20 +19,20 @@ export function Footer() {
           </div>
           
           <div className="flex flex-col sm:flex-row items-center gap-3 sm:gap-4 md:gap-6 lg:gap-8">
-            <a href="/about" className="text-sm sm:text-base text-gray-600 dark:text-gray-600 hover:text-glee-purple transition-colors">About</a>
-            <a href="#" className="text-sm sm:text-base text-gray-600 dark:text-gray-600 hover:text-glee-purple transition-colors">Performances</a>
-            <a href="#" className="text-sm sm:text-base text-gray-600 dark:text-gray-600 hover:text-glee-purple transition-colors">Contact</a>
+            <a href="/about" className="text-sm sm:text-base text-gray-600 dark:text-gray-600 hover:text-glee-spelman transition-colors">About</a>
+            <a href="#" className="text-sm sm:text-base text-gray-600 dark:text-gray-600 hover:text-glee-spelman transition-colors">Performances</a>
+            <a href="#" className="text-sm sm:text-base text-gray-600 dark:text-gray-600 hover:text-glee-spelman transition-colors">Contact</a>
             <div className="flex gap-3 mt-3 sm:mt-0">
               <Button 
                 variant="ghost" 
-                className="text-glee-purple hover:text-glee-purple/80"
+                className="text-glee-purple hover:text-white hover:bg-glee-spelman"
                 onClick={() => navigate("/fan-page")}
               >
                 Guest Access
               </Button>
               <Button 
                 variant="ghost" 
-                className="text-glee-purple hover:text-glee-purple/80"
+                className="text-glee-purple hover:text-white hover:bg-glee-spelman"
                 onClick={() => navigate("/login")}
               >
                 Member Portal

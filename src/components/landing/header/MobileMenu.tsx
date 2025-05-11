@@ -44,7 +44,7 @@ export function MobileMenu({ onClose }: MobileMenuProps) {
         <Button 
           variant="ghost" 
           size="sm" 
-          className="justify-start" 
+          className="justify-start hover:bg-glee-spelman hover:text-white" 
           onClick={() => handleNavigation("/")}
         >
           Home
@@ -52,7 +52,7 @@ export function MobileMenu({ onClose }: MobileMenuProps) {
         <Button 
           variant="ghost" 
           size="sm" 
-          className="justify-start" 
+          className="justify-start hover:bg-glee-spelman hover:text-white" 
           onClick={() => handleNavigation("/about")}
         >
           About Us
@@ -60,7 +60,7 @@ export function MobileMenu({ onClose }: MobileMenuProps) {
         <Button 
           variant="ghost" 
           size="sm" 
-          className="justify-start" 
+          className="justify-start hover:bg-glee-spelman hover:text-white" 
           onClick={() => handleNavigation("/contact")}
         >
           Contact
@@ -68,7 +68,7 @@ export function MobileMenu({ onClose }: MobileMenuProps) {
         <Button 
           variant="ghost" 
           size="sm" 
-          className="justify-start" 
+          className="justify-start hover:bg-glee-spelman hover:text-white" 
           onClick={() => handleNavigation("/administration")}
         >
           Administration
@@ -76,7 +76,7 @@ export function MobileMenu({ onClose }: MobileMenuProps) {
         <Button 
           variant="ghost" 
           size="sm" 
-          className="justify-start" 
+          className="justify-start hover:bg-glee-spelman hover:text-white" 
           onClick={() => handleNavigation("/fan-page")}
         >
           For Fans
@@ -84,7 +84,7 @@ export function MobileMenu({ onClose }: MobileMenuProps) {
         <Button 
           variant="ghost" 
           size="sm" 
-          className="justify-start" 
+          className="justify-start hover:bg-glee-spelman hover:text-white" 
           onClick={() => handleNavigation("/dashboard")}
         >
           Dashboard
@@ -92,7 +92,7 @@ export function MobileMenu({ onClose }: MobileMenuProps) {
         <Button 
           variant="ghost" 
           size="sm" 
-          className="justify-start" 
+          className="justify-start hover:bg-glee-spelman hover:text-white" 
           onClick={() => handleNavigation("/login")}
         >
           Login
@@ -100,7 +100,7 @@ export function MobileMenu({ onClose }: MobileMenuProps) {
         <Button 
           variant="default" 
           size="sm" 
-          className="mt-2 bg-glee-purple hover:bg-glee-purple/90"
+          className="mt-2 bg-glee-purple hover:bg-glee-spelman"
           onClick={() => handleNavigation("/dashboard")}
         >
           Member Portal
