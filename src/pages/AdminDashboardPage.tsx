@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { Navigate } from "react-router-dom";
@@ -145,7 +144,11 @@ export default function AdminDashboardPage() {
       
       {/* Admin Quick Actions Bar */}
       <div className="flex flex-wrap gap-2">
-        <Button variant="outline" className="flex items-center gap-1">
+        <Button 
+          variant="outline" 
+          className="flex items-center gap-1"
+          onClick={() => navigate("/dashboard/admin/members")}
+        >
           <Plus className="h-4 w-4" /> Member
         </Button>
         <Button variant="outline" className="flex items-center gap-1">
@@ -232,7 +235,7 @@ export default function AdminDashboardPage() {
             <div className="md:col-span-3 bg-muted/30 rounded-lg p-4 border">
               <h3 className="font-semibold text-sm mb-3 px-3">Administrative Tools</h3>
               <div className="space-y-1">
-                <Button variant="ghost" className="w-full justify-start text-sm" onClick={() => navigate("/dashboard/admin/users")}>
+                <Button variant="ghost" className="w-full justify-start text-sm" onClick={() => navigate("/dashboard/admin/members")}>
                   <Users className="h-4 w-4 mr-2" /> Member Management
                 </Button>
                 <Button variant="ghost" className="w-full justify-start text-sm" onClick={() => navigate("/dashboard/admin/events")}>

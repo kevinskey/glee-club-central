@@ -7,11 +7,11 @@ import LandingPage from "./pages/LandingPage";
 import LoginPage from "./pages/LoginPage";
 import RegisterPage from "./pages/RegisterPage";
 import UpdatePasswordPage from "./pages/UpdatePasswordPage";
-import MembersPage from "./pages/MembersPage";
 import NotFoundPage from "./pages/NotFoundPage";
 import DashboardPage from "./pages/dashboard/DashboardPage";
 import ProfilePage from "./pages/profile/ProfilePage";
 import AdminDashboardPage from "./pages/AdminDashboardPage";
+import AdminMembersPage from "./pages/AdminMembersPage";
 
 // Import layout components
 import { ProtectedRoute } from "./components/auth/ProtectedRoute";
@@ -49,12 +49,12 @@ export const router = createBrowserRouter([
         element: <ProfilePage />,
       },
       {
-        path: "members",
-        element: <AdminRoute><MembersPage /></AdminRoute>,
-      },
-      {
         path: "admin",
         element: <AdminRoute><AdminDashboardPage /></AdminRoute>,
+      },
+      {
+        path: "admin/members",
+        element: <AdminRoute><AdminMembersPage /></AdminRoute>,
       },
     ],
   },

@@ -38,7 +38,7 @@ export function DashboardQuickAccess() {
   
   // Admin quick links
   const adminQuickLinks = [
-    { icon: <Users className="h-5 w-5" />, title: "User Management", path: "/dashboard/admin/users", color: "bg-slate-500" },
+    { icon: <Users className="h-5 w-5" />, title: "Member Management", path: "/dashboard/admin/members", color: "bg-slate-500" },
     { icon: <Music className="h-5 w-5" />, title: "Sheet Music", path: "/dashboard/sheet-music", color: "bg-purple-500" },
     { icon: <Calendar className="h-5 w-5" />, title: "Event Manager", path: "/dashboard/admin/events", color: "bg-yellow-500" },
     { icon: <MessageSquare className="h-5 w-5" />, title: "Messaging", path: "/dashboard/messaging", color: "bg-blue-500" },
