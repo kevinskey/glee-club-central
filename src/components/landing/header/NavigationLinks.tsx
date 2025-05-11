@@ -50,7 +50,7 @@ export function NavigationLinks() {
         <NavigationMenuItem>
           <NavigationMenuTrigger className="hover:text-white hover:bg-glee-spelman">Resources</NavigationMenuTrigger>
           <NavigationMenuContent>
-            <div className="w-[200px] p-2 bg-popover">
+            <div className="w-[220px] p-2 bg-popover">
               <NavigationMenuLink 
                 className="block p-2 hover:bg-glee-spelman hover:text-white rounded-md"
                 onClick={() => navigate("/administration")}
@@ -62,6 +62,12 @@ export function NavigationLinks() {
                 onClick={() => navigate("/fan-page")}
               >
                 For Fans
+              </NavigationMenuLink>
+              <NavigationMenuLink 
+                className="block p-2 hover:bg-glee-spelman hover:text-white rounded-md"
+                onClick={() => window.open("https://www.spelman.edu", "_blank")}
+              >
+                Spelman College
               </NavigationMenuLink>
             </div>
           </NavigationMenuContent>

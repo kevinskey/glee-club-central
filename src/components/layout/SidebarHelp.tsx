@@ -1,7 +1,7 @@
 
 import React from "react";
 import { Link } from "react-router-dom";
-import { Book } from "lucide-react";
+import { Book, Info } from "lucide-react";
 
 export function SidebarHelp() {
   return (
@@ -11,7 +11,7 @@ export function SidebarHelp() {
       >
         <div>
           <p className="text-xs font-semibold">Need Help?</p>
-          <p className="text-xs text-muted-foreground">View the handbook</p>
+          <p className="text-xs text-muted-foreground">View the Glee Club handbook</p>
         </div>
         <Link 
           to="/dashboard/handbook"

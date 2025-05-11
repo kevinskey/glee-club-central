@@ -17,7 +17,12 @@ import {
   MessageSquare,
   Clock,
   Calendar as CalendarIcon,
-  Headphones
+  Headphones,
+  Globe,
+  Instagram,
+  Facebook,
+  Twitter,
+  Youtube
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
@@ -369,17 +374,62 @@ const DashboardPage = () => {
       
       {/* Bottom Row */}
       <div className="grid grid-cols-1 gap-6">
-        {/* Available Modules */}
+        {/* External Resources */}
         <Card className="shadow-md">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <MessageSquare className="h-5 w-5 text-orange-500" />
+              <Globe className="h-5 w-5 text-orange-500" />
               <span>Resources</span>
             </CardTitle>
-            <CardDescription>Features available to you</CardDescription>
+            <CardDescription>Spelman College Links & Social Media</CardDescription>
           </CardHeader>
           <CardContent>
-            <DashboardModules />
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+              <Button
+                variant="outline"
+                className="h-auto flex-col py-4 px-3 hover:bg-orange-50 hover:text-orange-600 hover:border-orange-200 whitespace-normal text-center"
+                onClick={() => window.open("https://www.spelman.edu", "_blank")}
+              >
+                <Globe className="h-6 w-6 mb-2 text-orange-500" />
+                <span className="text-sm">Spelman College</span>
+              </Button>
+              
+              <Button
+                variant="outline"
+                className="h-auto flex-col py-4 px-3 hover:bg-orange-50 hover:text-orange-600 hover:border-orange-200 whitespace-normal text-center"
+                onClick={() => window.open("https://www.instagram.com/spelmangleeclubofficial", "_blank")}
+              >
+                <Instagram className="h-6 w-6 mb-2 text-orange-500" />
+                <span className="text-sm">Instagram</span>
+              </Button>
+              
+              <Button
+                variant="outline"
+                className="h-auto flex-col py-4 px-3 hover:bg-orange-50 hover:text-orange-600 hover:border-orange-200 whitespace-normal text-center"
+                onClick={() => window.open("https://www.facebook.com/spelmangleeclubofficial", "_blank")}
+              >
+                <Facebook className="h-6 w-6 mb-2 text-orange-500" />
+                <span className="text-sm">Facebook</span>
+              </Button>
+              
+              <Button
+                variant="outline"
+                className="h-auto flex-col py-4 px-3 hover:bg-orange-50 hover:text-orange-600 hover:border-orange-200 whitespace-normal text-center"
+                onClick={() => window.open("https://www.twitter.com/spelmangleeclub", "_blank")}
+              >
+                <Twitter className="h-6 w-6 mb-2 text-orange-500" />
+                <span className="text-sm">Twitter</span>
+              </Button>
+              
+              <Button
+                variant="outline"
+                className="h-auto flex-col py-4 px-3 hover:bg-orange-50 hover:text-orange-600 hover:border-orange-200 whitespace-normal text-center"
+                onClick={() => window.open("https://www.youtube.com/spelmangleeclubofficial", "_blank")}
+              >
+                <Youtube className="h-6 w-6 mb-2 text-orange-500" />
+                <span className="text-sm">YouTube</span>
+              </Button>
+            </div>
           </CardContent>
         </Card>
       </div>
