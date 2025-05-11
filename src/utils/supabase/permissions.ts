@@ -49,13 +49,16 @@ export async function fetchUserPermissions(userId: string): Promise<UserPermissi
 
     // If not a super admin, try to fetch specific permissions
     try {
+      // Check if the function exists before calling it
       const { data, error } = await supabase
-        .rpc('get_user_permissions', { p_user_id: userId });
+        .from('role_permissions')
+        .select('permission, granted')
+        .eq('role_id', profileData?.role || 'student');
 
       if (error) {
         console.error('Error fetching user permissions:', error);
         
-        // Fallback: If the RPC fails, check if the user has specific roles that should have permissions
+        // Fallback: If the query fails, check if the user has specific roles that should have permissions
         if (profileData?.role) {
           const basicPermissions: UserPermissions = {};
           if (['section_leader', 'director', 'president'].includes(profileData.role)) {
@@ -72,7 +75,7 @@ export async function fetchUserPermissions(userId: string): Promise<UserPermissi
       // Transform the data to a permissions object
       const permissions: UserPermissions = {};
       
-      if (data) {
+      if (data && Array.isArray(data)) {
         data.forEach((item: { permission: PermissionName; granted: boolean }) => {
           permissions[item.permission] = item.granted;
         });
@@ -80,7 +83,7 @@ export async function fetchUserPermissions(userId: string): Promise<UserPermissi
 
       return permissions;
     } catch (error) {
-      console.error('Error in RPC call:', error);
+      console.error('Error in permissions query:', error);
       return {};
     }
   } catch (error) {
@@ -114,22 +117,23 @@ export async function hasPermission(
       return true;
     }
 
-    // If not super admin, check specific permission
+    // If not super admin, check specific permission from role_permissions table
     try {
       const { data, error } = await supabase
-        .rpc('has_permission', { 
-          p_user_id: userId,
-          p_permission: permission
-        });
+        .from('role_permissions')
+        .select('granted')
+        .eq('role_id', profileData?.role || '')
+        .eq('permission', permission)
+        .maybeSingle();
 
       if (error) {
         console.error('Error checking permission:', error);
         return false;
       }
 
-      return !!data;
+      return data?.granted ?? false;
     } catch (error) {
-      console.error('Error in RPC call:', error);
+      console.error('Error in permission check query:', error);
       return false;
     }
   } catch (error) {

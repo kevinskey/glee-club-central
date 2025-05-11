@@ -29,18 +29,18 @@ export default function VideosPage() {
   return (
     <div className="container px-4 py-6 mx-auto">
       <PageHeader
-        heading="Glee Club Videos"
+        title="Glee Club Videos"
         description="Watch our performances and rehearsals"
       />
       <Separator className="my-6" />
       
       <VideoFilters 
-        currentCategory={filterCategory} 
+        selectedCategory={filterCategory} 
         onCategoryChange={handleCategoryChange} 
       />
       
       <div className="mt-6">
-        <VideoGrid videos={filteredVideos} isLoading={isLoading} error={error} />
+        <VideoGrid videos={filteredVideos} loading={isLoading} error={error} />
       </div>
     </div>
   );

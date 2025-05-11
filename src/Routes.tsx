@@ -19,6 +19,7 @@ const Register = () => <PlaceholderPage title="Register" />;
 const NotFound = () => <PlaceholderPage title="404 - Not Found" />;
 const UserProfilePage = () => <PlaceholderPage title="User Profile" />;
 const UserManagementPage = React.lazy(() => import('./pages/admin/UserManagementPage'));
+const VideosPage = React.lazy(() => import('./pages/videos/VideosPage'));
 
 // Layout component
 const MainLayout = ({ children }: { children: React.ReactNode }) => (
@@ -49,6 +50,19 @@ const AppRoutes = () => {
             <UserProfilePage />
           </MainLayout>
         </PermissionGuard>
+      } />
+      
+      {/* Videos Page */}
+      <Route path="/videos" element={
+        <React.Suspense fallback={
+          <div className="flex items-center justify-center min-h-[60vh]">
+            <Spinner size="lg" />
+          </div>
+        }>
+          <MainLayout>
+            <VideosPage />
+          </MainLayout>
+        </React.Suspense>
       } />
       
       {/* Admin routes */}

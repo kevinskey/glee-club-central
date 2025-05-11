@@ -57,8 +57,10 @@ export const RolePermissionProvider: React.FC<{ children: React.ReactNode }> = (
       // Get role from profile as string
       const roleFromProfile = profile?.role || 'student';
       
-      // Simple validation using a preset array of valid roles
+      // Define valid roles array
       const validRoles: UserRole[] = ['admin', 'student', 'section_leader', 'staff', 'guest'];
+      
+      // Validate role using includes method
       const validatedRole = validRoles.includes(roleFromProfile as UserRole) 
         ? (roleFromProfile as UserRole) 
         : 'student';
@@ -75,21 +77,22 @@ export const RolePermissionProvider: React.FC<{ children: React.ReactNode }> = (
       if (error) {
         console.error('Error fetching permissions:', error);
         toast.error('Failed to load user permissions');
+        setIsLoading(false);
         return;
       }
 
       // Create permissions object
       const permissionsMap: Record<string, boolean> = {};
-      if (data) {
+      if (data && Array.isArray(data)) {
         data.forEach((item) => {
           permissionsMap[item.permission] = item.granted;
         });
       }
 
       setPermissions(permissionsMap);
+      setIsLoading(false);
     } catch (err) {
       console.error('Unexpected error loading permissions:', err);
-    } finally {
       setIsLoading(false);
     }
   };
