@@ -1,7 +1,8 @@
+
 import React, { createContext, useState, useEffect, useContext, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
-import { Profile, AuthUser, AuthContextType } from '@/types/auth';
+import { Profile, AuthUser, AuthContextType, UserRole } from '@/types/auth';
 import { fetchUserPermissions } from '@/utils/supabase/permissions';
 import { toast } from 'sonner';
 
@@ -28,12 +29,42 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const [permissions, setPermissions] = useState<Record<string, boolean> | undefined>(undefined);
   const navigate = useNavigate();
 
+  // Helper function to convert any role string to a valid UserRole
+  const mapRoleToAuthUser = (userData: any): AuthUser => {
+    // Extract needed properties
+    const { id, email, role } = userData;
+    
+    // Map the role string to one of the allowed UserRole values
+    let mappedRole: UserRole = 'general'; // Default to general
+    
+    if (role === 'admin' || role === 'administrator') {
+      mappedRole = 'administrator';
+    } else if (role === 'director') {
+      mappedRole = 'director';
+    } else if (role === 'section_leader' || role === 'singer' || 
+               role === 'student_conductor' || role === 'accompanist' || role === 'non_singer') {
+      mappedRole = role as UserRole;
+    }
+    
+    return {
+      id,
+      email: email || undefined,
+      role: mappedRole,
+      ...userData, // Include other properties
+    };
+  };
+
   useEffect(() => {
     const session = async () => {
       const { data: { session } } = await supabase.auth.getSession()
 
-      setUser(session?.user ?? null)
-      setLoading(false)
+      if (session?.user) {
+        const authUser = mapRoleToAuthUser(session.user);
+        setUser(authUser);
+      } else {
+        setUser(null);
+      }
+      setLoading(false);
     }
 
     session()
@@ -41,7 +72,12 @@ export function AuthProvider({ children }: AuthProviderProps) {
     supabase.auth.onAuthStateChange(async (event, session) => {
       if (event === 'SIGNED_IN') {
         console.log('User signed in:', session?.user);
-        setUser(session?.user ?? null);
+        if (session?.user) {
+          const authUser = mapRoleToAuthUser(session.user);
+          setUser(authUser);
+        } else {
+          setUser(null);
+        }
         setIsAuthenticated(true);
         await fetchProfile(session?.user?.id);
       } else if (event === 'SIGNED_OUT') {
@@ -53,14 +89,24 @@ export function AuthProvider({ children }: AuthProviderProps) {
         navigate('/login');
       } else if (event === 'INITIAL_SESSION') {
         console.log('Initial session:', session?.user);
-        setUser(session?.user ?? null);
+        if (session?.user) {
+          const authUser = mapRoleToAuthUser(session.user);
+          setUser(authUser);
+        } else {
+          setUser(null);
+        }
         setIsAuthenticated(!!session?.user);
         if (session?.user) {
           await fetchProfile(session.user.id);
         }
       } else if (event === 'PASSWORD_RECOVERY') {
         console.log('PASSWORD_RECOVERY session:', session?.user);
-        setUser(session?.user ?? null);
+        if (session?.user) {
+          const authUser = mapRoleToAuthUser(session.user);
+          setUser(authUser);
+        } else {
+          setUser(null);
+        }
         setIsAuthenticated(!!session?.user);
         if (session?.user) {
           await fetchProfile(session.user.id);

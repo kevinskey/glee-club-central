@@ -1,3 +1,4 @@
+
 // Common types used across supabase query modules
 
 export interface AttendanceRecord {
@@ -37,4 +38,4 @@ export interface UserPermissions {
   [permission: string]: boolean;
 }
 
-export type UserRole = 'administrator' | 'director' | 'section_leader' | 'singer' | 'student_conductor' | 'accompanist' | 'non_singer';
+export type UserRole = 'administrator' | 'director' | 'section_leader' | 'singer' | 'student_conductor' | 'accompanist' | 'non_singer' | 'admin' | 'general';

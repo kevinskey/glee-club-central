@@ -1,3 +1,4 @@
+
 import { Database } from "@/integrations/supabase/types";
 
 export interface Profile {
@@ -25,7 +26,7 @@ export interface Profile {
   last_login?: string;
 }
 
-export type UserRole = 'admin' | 'director' | 'general';
+export type UserRole = 'admin' | 'director' | 'general' | 'administrator' | 'section_leader' | 'singer' | 'student_conductor' | 'accompanist' | 'non_singer';
 export type MemberStatus = 'active' | 'inactive';
 export type VoicePart = 'soprano_1' | 'soprano_2' | 'alto_1' | 'alto_2' | 'tenor' | 'bass' | null;
 
@@ -47,7 +48,7 @@ export interface AuthContextType {
 export interface AuthUser {
   id: string;
   email?: string;
-  role: 'admin' | 'director' | 'general';
+  role: UserRole;
   [key: string]: any; 
 }
 
