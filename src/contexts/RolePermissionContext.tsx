@@ -70,7 +70,7 @@ export const RolePermissionProvider: React.FC<{ children: React.ReactNode }> = (
       const { data, error } = await supabase
         .from('role_permissions')
         .select('permission, granted')
-        .eq('role', validatedRole);
+        .eq('role_id', validatedRole);
 
       if (error) {
         console.error('Error fetching permissions:', error);

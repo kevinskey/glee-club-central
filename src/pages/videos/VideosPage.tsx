@@ -1,91 +1,47 @@
 
-import React, { useState, useEffect } from "react";
-import { PageHeader } from "@/components/ui/page-header";
-import { VideoPlayer } from "@/components/videos/VideoPlayer";
-import { VideoGrid } from "@/components/videos/VideoGrid";
-import { VideoListSkeleton } from "@/components/videos/VideoListSkeleton";
-import { useVideoData } from "@/hooks/useVideoData";
-import { VideoFilters } from "@/components/videos/VideoFilters";
-import { Music2, Video } from "lucide-react";
+import React, { useEffect, useState } from 'react';
+import { VideoGrid } from '@/components/videos/VideoGrid';
+import { VideoFilters } from '@/components/videos/VideoFilters';
+import { useVideoData } from '@/hooks/useVideoData';
+import { PageHeader } from '@/components/ui/page-header';
+import { Separator } from '@/components/ui/separator';
+import { Video } from '@/types/video';
 
 export default function VideosPage() {
-  const { videos, featuredVideo, isLoading, error } = useVideoData();
-  const [selectedVideo, setSelectedVideo] = useState<string | null>(null);
-  const [filterCategory, setFilterCategory] = useState<string | null>(null);
-
-  // Set the featured video as the default selected video when data is loaded
+  const { videos, isLoading, error } = useVideoData();
+  const [filteredVideos, setFilteredVideos] = useState<Video[]>([]);
+  const [filterCategory, setFilterCategory] = useState<string>('all');
+  
   useEffect(() => {
-    if (featuredVideo && !selectedVideo) {
-      setSelectedVideo(featuredVideo.id);
-      console.log("Setting featured video as selected:", featuredVideo.id);
+    if (videos) {
+      if (filterCategory === 'all') {
+        setFilteredVideos(videos);
+      } else {
+        setFilteredVideos(videos.filter(video => video.category === filterCategory));
+      }
     }
-  }, [featuredVideo, selectedVideo]);
+  }, [videos, filterCategory]);
 
-  // For debugging - log when a video is selected
-  useEffect(() => {
-    if (selectedVideo) {
-      console.log("Selected video changed to:", selectedVideo);
-    }
-  }, [selectedVideo]);
-
-  // Filter videos based on selected category
-  const filteredVideos = filterCategory
-    ? videos.filter(video => video.category === filterCategory)
-    : videos;
-
-  const currentVideo = selectedVideo
-    ? videos.find(video => video.id === selectedVideo) || featuredVideo
-    : featuredVideo;
-    
-  // Add debugging logs
-  console.log("Current video:", currentVideo);
-  console.log("Videos available:", videos.length);
-  console.log("Filtered videos:", filteredVideos.length);
-
-  // Get unique categories for filter
-  const categories = [...new Set(videos.map(video => video.category))];
+  const handleCategoryChange = (category: string) => {
+    setFilterCategory(category);
+  };
 
   return (
-    <div className="space-y-6">
+    <div className="container px-4 py-6 mx-auto">
       <PageHeader
-        title="Glee Club Videos"
-        description="Watch performances and recordings from the Spelman College Glee Club"
-        icon={<Video className="h-6 w-6" />}
+        heading="Glee Club Videos"
+        description="Watch our performances and rehearsals"
       />
-
-      {isLoading ? (
-        <VideoListSkeleton />
-      ) : error ? (
-        <div className="rounded-lg border border-red-200 bg-red-50 p-4 text-red-800">
-          <p>Error loading videos. Please try again later.</p>
-        </div>
-      ) : (
-        <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
-          <div className="lg:col-span-2">
-            {currentVideo && (
-              <VideoPlayer 
-                videoId={currentVideo.id} 
-                title={currentVideo.title} 
-                description={currentVideo.description} 
-              />
-            )}
-          </div>
-          
-          <div className="space-y-4 lg:col-span-1">
-            <VideoFilters 
-              categories={categories} 
-              selectedCategory={filterCategory}
-              onSelectCategory={setFilterCategory}
-            />
-            
-            <VideoGrid 
-              videos={filteredVideos}
-              selectedVideoId={selectedVideo}
-              onSelectVideo={setSelectedVideo}
-            />
-          </div>
-        </div>
-      )}
+      <Separator className="my-6" />
+      
+      <VideoFilters 
+        currentCategory={filterCategory} 
+        onCategoryChange={handleCategoryChange} 
+      />
+      
+      <div className="mt-6">
+        <VideoGrid videos={filteredVideos} isLoading={isLoading} error={error} />
+      </div>
     </div>
   );
 }
