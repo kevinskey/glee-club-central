@@ -4,13 +4,16 @@ import { useAuth } from './AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 
-// Define user roles as a simple string union type
+// Define user roles as a simple string literal union type
 export type UserRole = 'admin' | 'student' | 'section_leader' | 'staff' | 'guest';
+
+// Simple permission record type
+type PermissionRecord = Record<string, boolean>;
 
 // Define the context interface clearly
 interface RolePermissionContextType {
   userRole: UserRole | null;
-  permissions: Record<string, boolean>;
+  permissions: PermissionRecord;
   isLoading: boolean;
   hasPermission: (permissionName: string) => boolean;
   refreshPermissions: () => Promise<void>;
@@ -32,7 +35,7 @@ export const useRolePermissions = () => useContext(RolePermissionContext);
 export const RolePermissionProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { user, profile } = useAuth();
   const [userRole, setUserRole] = useState<UserRole | null>(null);
-  const [permissions, setPermissions] = useState<Record<string, boolean>>({});
+  const [permissions, setPermissions] = useState<PermissionRecord>({});
   const [isLoading, setIsLoading] = useState(true);
 
   // Function to fetch permissions from Supabase
@@ -47,18 +50,18 @@ export const RolePermissionProvider: React.FC<{ children: React.ReactNode }> = (
     try {
       setIsLoading(true);
 
-      // Get role from profile and ensure it's a valid UserRole
+      // Get role from profile
       const roleFromProfile = profile?.role || 'student';
       
-      // List of valid roles
-      const validRoles = ['admin', 'student', 'section_leader', 'staff', 'guest'];
+      // List of valid roles as a const array
+      const validRoles = ['admin', 'student', 'section_leader', 'staff', 'guest'] as const;
       
       // Determine the role safely
-      let role: UserRole;
-      if (validRoles.includes(roleFromProfile)) {
+      let role: UserRole = 'student'; // Default role
+      
+      // Check if roleFromProfile is a valid role
+      if (validRoles.includes(roleFromProfile as any)) {
         role = roleFromProfile as UserRole;
-      } else {
-        role = 'student';
       }
       
       setUserRole(role);
@@ -76,7 +79,7 @@ export const RolePermissionProvider: React.FC<{ children: React.ReactNode }> = (
       }
 
       // Convert to permissions object
-      const permissionsMap: Record<string, boolean> = {};
+      const permissionsMap: PermissionRecord = {};
       if (data) {
         data.forEach((item) => {
           permissionsMap[item.permission] = item.granted;
