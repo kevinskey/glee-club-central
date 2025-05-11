@@ -41,6 +41,12 @@ export async function fetchUserPermissions(userId: string) {
         type PermissionItem = { permission: string; granted: boolean };
         const permissionItems = data as PermissionItem[];
         
+        // Extract permission names from granted permissions
+        const permissionNames: string[] = permissionItems
+          .filter(p => p.granted)
+          .map(p => p.permission);
+          
+        // Build the permissions map
         permissionItems.forEach((item) => {
           permissionsMap[item.permission] = item.granted;
         });
