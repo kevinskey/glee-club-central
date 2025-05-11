@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { Header } from "@/components/landing/Header";
 import { Footer } from "@/components/landing/Footer";
 import { CalendarHeader } from "@/components/calendar/CalendarHeader";
@@ -33,22 +33,28 @@ const CalendarPage = () => {
 
   useEffect(() => {
     console.log("CalendarPage - Initializing");
+    
     const loadEvents = async () => {
-      console.log("CalendarPage - Loading events", authLoading);
+      console.log("CalendarPage - Loading events. Auth loading:", authLoading);
       if (!authLoading) {
-        setIsLoading(true);
-        console.log("CalendarPage - Fetching events");
-        await fetchEvents();
-        setIsLoading(false);
-        console.log("CalendarPage - Events loaded");
+        try {
+          setIsLoading(true);
+          console.log("CalendarPage - Fetching events");
+          await fetchEvents();
+          console.log("CalendarPage - Events loaded successfully");
+        } catch (error) {
+          console.error("Error loading events:", error);
+          toast.error("Failed to load calendar events");
+        } finally {
+          setIsLoading(false);
+        }
       }
     };
     
     loadEvents();
   }, [authLoading, fetchEvents]);
 
-  console.log("CalendarPage - Events count:", events.length);
-  console.log("CalendarPage - Current view:", calendarView);
+  console.log("CalendarPage - Render state:", { isLoading, eventsCount: events.length, view: calendarView });
 
   // Use our custom hook for event handling
   const {

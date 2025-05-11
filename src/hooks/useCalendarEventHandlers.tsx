@@ -19,7 +19,10 @@ export const useCalendarEventHandlers = (
 
   useEffect(() => {
     console.log("useCalendarEventHandlers initialized with events:", events.length);
-  }, [events]);
+    return () => {
+      console.log("useCalendarEventHandlers cleanup");
+    };
+  }, [events.length]);
 
   const handleDateClick = useCallback((info: any) => {
     console.log("Date clicked:", info.date);
@@ -30,14 +33,19 @@ export const useCalendarEventHandlers = (
   }, [userCanCreate, setSelectedDate, setIsCreateModalOpen]);
 
   const handleEventClick = useCallback((info: any) => {
-    console.log("Event clicked:", info.event.id);
-    const eventId = info.event.id;
-    const event = events.find(e => e.id === eventId);
-    if (event) {
-      setSelectedEvent(event);
-      setIsViewModalOpen(true);
-    } else {
-      console.warn("Could not find clicked event in events array");
+    try {
+      console.log("Event clicked:", info.event.id);
+      const eventId = info.event.id;
+      const event = events.find(e => e.id === eventId);
+      if (event) {
+        console.log("Found clicked event:", event);
+        setSelectedEvent(event);
+        setIsViewModalOpen(true);
+      } else {
+        console.warn("Could not find clicked event in events array");
+      }
+    } catch (error) {
+      console.error("Error handling event click:", error);
     }
   }, [events, setSelectedEvent, setIsViewModalOpen]);
 
@@ -112,8 +120,7 @@ export const useCalendarEventHandlers = (
         created_by: profile.id
       };
       
-      await addEvent(newEvent);
-      return true;
+      return await addEvent(newEvent);
     } catch (error) {
       console.error("Error creating event:", error);
       toast.error("Failed to create event");
@@ -124,8 +131,7 @@ export const useCalendarEventHandlers = (
   const handleUpdateEvent = async (eventData: CalendarEvent) => {
     console.log("Updating event:", eventData);
     try {
-      await updateEvent(eventData);
-      return true;
+      return await updateEvent(eventData);
     } catch (error) {
       console.error("Error updating event:", error);
       toast.error("Failed to update event");
@@ -136,8 +142,7 @@ export const useCalendarEventHandlers = (
   const handleDeleteEvent = async (eventId: string) => {
     console.log("Deleting event:", eventId);
     try {
-      await deleteEvent(eventId);
-      return true;
+      return await deleteEvent(eventId);
     } catch (error) {
       console.error("Error deleting event:", error);
       toast.error("Failed to delete event");

@@ -9,8 +9,17 @@ interface EventContentProps {
 
 export const EventContent = ({ eventInfo, view }: EventContentProps) => {
   useEffect(() => {
+    if (!eventInfo?.event?.title) {
+      console.warn("EventContent received invalid event info", eventInfo);
+      return;
+    }
     console.log("EventContent rendering for event:", eventInfo.event.title);
-  }, [eventInfo.event.title]);
+  }, [eventInfo?.event?.title]);
+  
+  if (!eventInfo?.event) {
+    console.error("EventContent: No event data available");
+    return null;
+  }
   
   const typeColors: Record<EventType, string> = {
     'rehearsal': 'bg-blue-500 border-blue-600',
