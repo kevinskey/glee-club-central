@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { PageHeader } from "@/components/ui/page-header";
@@ -29,6 +30,8 @@ import {
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { AdvancedSearch, SearchResultItem, SearchFilter } from "@/components/ui/advanced-search";
+import { useMediaLibrary } from "@/hooks/useMediaLibrary";
+import { getMediaType } from "@/utils/mediaUtils";
 
 interface SheetMusic {
   id: string;
@@ -74,6 +77,19 @@ export default function SheetMusicPage() {
   // State for composers list (for search filters)
   const [composers, setComposers] = useState<string[]>([]);
 
+  // Media library integration
+  const {
+    isLoading: mediaLoading,
+    error: mediaError,
+    filteredMediaFiles,
+    mediaFiles: allMediaFiles,
+    searchQuery: mediaSearchQuery,
+    setSearchQuery: setMediaSearchQuery,
+    selectedMediaType,
+    setSelectedMediaType,
+    fetchAllMedia,
+  } = useMediaLibrary();
+
   // Advanced search filters
   const searchFilters: SearchFilter[] = [
     {
@@ -87,35 +103,41 @@ export default function SheetMusicPage() {
     }
   ];
 
-  // Fetch sheet music data
+  // Fetch sheet music data from media library
   const fetchSheetMusic = async () => {
     setLoading(true);
     try {
-      const { data, error } = await supabase
-        .from('sheet_music')
-        .select('*')
-        .order('created_at', { ascending: false });
-
-      if (error) throw error;
-
-      if (data) {
-        // Format dates for display
-        const formattedData = data.map((item: SheetMusic) => ({
-          ...item,
-          created_at: new Date(item.created_at).toLocaleDateString()
-        }));
-        
-        setMusicFiles(formattedData);
-        setFilteredFiles(formattedData);
-        
-        // Extract unique composers for filters
-        const uniqueComposers = Array.from(
-          new Set(formattedData.map(file => file.composer))
-        );
-        setComposers(uniqueComposers);
+      // Set media library to only show PDF files
+      setSelectedMediaType("pdf");
+      
+      // Wait for media library to load
+      if (mediaLoading) {
+        return; // Will try again when mediaLoading changes
       }
+      
+      // Map PDF files from media library to sheet music format
+      const pdfFiles = filteredMediaFiles
+        .filter(file => file.file_type === "application/pdf" || getMediaType(file.file_type) === "pdf")
+        .map(file => ({
+          id: file.id,
+          title: file.title,
+          composer: file.description || "Unknown",
+          file_url: file.file_url,
+          created_at: new Date(file.created_at).toLocaleDateString(),
+        }));
+      
+      setMusicFiles(pdfFiles);
+      setFilteredFiles(pdfFiles);
+      
+      // Extract unique composers for filters
+      const uniqueComposers = Array.from(
+        new Set(pdfFiles.map(file => file.composer))
+      );
+      setComposers(uniqueComposers);
+      
+      console.log(`Found ${pdfFiles.length} PDF files in the media library`);
     } catch (error: any) {
-      console.error("Error fetching sheet music:", error);
+      console.error("Error processing sheet music:", error);
       toast({
         title: "Error loading sheet music",
         description: error.message || "An unexpected error occurred",
@@ -152,11 +174,20 @@ export default function SheetMusicPage() {
     }
   };
 
-  // Load data on initial render
+  // Initial data fetch
   useEffect(() => {
-    fetchSheetMusic();
+    // First fetch all media
+    fetchAllMedia();
+    // Then fetch setlists separately
     fetchSetlists();
   }, []);
+  
+  // Update music files when media library is loaded
+  useEffect(() => {
+    if (!mediaLoading) {
+      fetchSheetMusic();
+    }
+  }, [mediaLoading, filteredMediaFiles]);
 
   // Update selected setlist when ID changes
   useEffect(() => {
@@ -176,6 +207,16 @@ export default function SheetMusicPage() {
     if (selectedSetlist && selectedSetlist.sheet_music_ids?.length > 0) {
       result = result.filter(file => 
         selectedSetlist.sheet_music_ids.includes(file.id)
+      );
+    }
+    
+    // Apply search query filter
+    if (searchQuery) {
+      const query = searchQuery.toLowerCase();
+      result = result.filter(
+        file => 
+          file.title.toLowerCase().includes(query) || 
+          file.composer.toLowerCase().includes(query)
       );
     }
     
@@ -200,7 +241,7 @@ export default function SheetMusicPage() {
     }
     
     setFilteredFiles(result);
-  }, [musicFiles, sortOrder, selectedSetlist]);
+  }, [musicFiles, sortOrder, selectedSetlist, searchQuery]);
 
   // Handle search results
   const handleSearchResults = (results: SheetMusicSearchItem[]) => {
@@ -241,6 +282,16 @@ export default function SheetMusicPage() {
   // View sheet music
   const viewSheetMusic = (id: string) => {
     navigate(`/dashboard/sheet-music/${id}`);
+  };
+
+  // Handle upload complete
+  const handleUploadComplete = () => {
+    // Refetch media files to include newly uploaded files
+    fetchAllMedia();
+    toast({
+      title: "Upload complete",
+      description: "Your sheet music has been uploaded successfully",
+    });
   };
 
   return (
@@ -384,7 +435,7 @@ export default function SheetMusicPage() {
           </TabsList>
         </div>
         
-        {loading ? (
+        {loading || mediaLoading ? (
           <div className="grid gap-6 md:grid-cols-3 lg:grid-cols-4">
             {[1, 2, 3, 4, 5, 6].map((i) => (
               <div key={i} className="aspect-[3/4] rounded-md bg-muted animate-pulse" />
@@ -527,7 +578,7 @@ export default function SheetMusicPage() {
       <UploadSheetMusicModal 
         open={isUploadModalOpen}
         onOpenChange={setIsUploadModalOpen}
-        onUploadComplete={fetchSheetMusic}
+        onUploadComplete={handleUploadComplete}
       />
       
       <SetlistDrawer

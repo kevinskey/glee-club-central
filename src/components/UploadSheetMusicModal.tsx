@@ -213,34 +213,37 @@ export function UploadSheetMusicModal({
         // Update file status to uploading
         updateFileData(file.id, { status: 'uploading' });
         
-        // 1. Upload file to Supabase Storage
+        // Generate a unique file name
         const fileExt = file.file.name.split('.').pop();
         const fileName = `${Date.now()}-${Math.random().toString(36).substring(2, 15)}.${fileExt}`;
         const filePath = fileName;
 
-        // Using the upload method without onUploadProgress option
+        // Upload file to Supabase Storage (media-library bucket)
         const { error: uploadError, data } = await supabase.storage
-          .from('sheet-music')
+          .from('media-library')
           .upload(filePath, file.file);
 
         if (uploadError) throw uploadError;
 
-        // 2. Get public URL
+        // Get public URL
         const { data: publicURL } = supabase.storage
-          .from('sheet-music')
+          .from('media-library')
           .getPublicUrl(filePath);
 
         if (!publicURL) throw new Error("Failed to get public URL");
 
-        // 3. Insert record in database
+        // Insert record in media_library table
         const { error: dbError } = await supabase
-          .from('sheet_music')
+          .from('media_library')
           .insert({
             title: file.title,
-            composer: file.composer,
+            description: file.composer,
             file_path: filePath,
             file_url: publicURL.publicUrl,
-            uploaded_by: profile?.id
+            file_type: "application/pdf",
+            folder: "sheet-music", // Categorize as sheet music
+            uploaded_by: profile?.id,
+            tags: ["sheet-music", "pdf"]
           });
 
         if (dbError) throw dbError;
@@ -248,7 +251,7 @@ export function UploadSheetMusicModal({
         // Update file status to success
         updateFileData(file.id, { 
           status: 'success',
-          uploadProgress: 100 // Set to 100% since we can't track progress
+          uploadProgress: 100
         });
         successCount++;
       } catch (error: any) {
