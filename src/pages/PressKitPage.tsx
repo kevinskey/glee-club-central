@@ -1,4 +1,3 @@
-
 import React from "react";
 import { Header } from "@/components/landing/Header";
 import { Footer } from "@/components/landing/Footer";
@@ -152,7 +151,7 @@ export default function PressKitPage() {
 
               {/* Our Curated Press Photos */}
               <h3 className="text-xl font-semibold mb-4 text-glee-purple">Official Press Images</h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-12">
                 <div className="rounded-xl overflow-hidden shadow-md hover:shadow-lg transition-shadow">
                   <AspectRatio ratio={4/3}>
                     <img 
@@ -163,18 +162,6 @@ export default function PressKitPage() {
                   </AspectRatio>
                   <div className="p-3 bg-white dark:bg-gray-800">
                     <p className="text-sm text-gray-600 dark:text-gray-400">Spelman College Glee Club in Performance, 2023</p>
-                  </div>
-                </div>
-                <div className="rounded-xl overflow-hidden shadow-md hover:shadow-lg transition-shadow">
-                  <AspectRatio ratio={4/3}>
-                    <img 
-                      src="/lovable-uploads/10bab1e7-0f4e-402f-ab65-feb4710b5eaf.png" 
-                      alt="Spelman College Glee Club formal portrait" 
-                      className="object-cover w-full h-full"
-                    />
-                  </AspectRatio>
-                  <div className="p-3 bg-white dark:bg-gray-800">
-                    <p className="text-sm text-gray-600 dark:text-gray-400">Glee Club Formal Portrait, 2022</p>
                   </div>
                 </div>
                 <div className="rounded-xl overflow-hidden shadow-md hover:shadow-lg transition-shadow">

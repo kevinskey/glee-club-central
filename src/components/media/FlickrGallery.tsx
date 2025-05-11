@@ -51,12 +51,6 @@ export function FlickrGallery({ userId = '129581018@N02', photoCount = 6, classN
       flickrUrl: "https://www.flickr.com/photos/spelmanglee/"
     },
     {
-      id: "static-2",
-      title: "Glee Club Formal Portrait",
-      imageUrl: "/lovable-uploads/10bab1e7-0f4e-402f-ab65-feb4710b5eaf.png",
-      flickrUrl: "https://www.flickr.com/photos/spelmanglee/"
-    },
-    {
       id: "static-3",
       title: "Glee Club with Orchestra",
       imageUrl: "/lovable-uploads/e06ff100-0add-4adc-834f-50ef81098d35.png",
