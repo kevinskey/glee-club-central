@@ -57,20 +57,14 @@ export const RolePermissionProvider: React.FC<{ children: React.ReactNode }> = (
       // Get role from profile as string
       const roleFromProfile = profile?.role || 'student';
       
-      // Directly cast to UserRole with a fallback
-      // This avoids complex type checking that can lead to deep instantiation
-      let validatedRole: UserRole;
-      
-      // Simple explicit check without complex conditional logic
-      if (roleFromProfile === 'admin' || 
-          roleFromProfile === 'student' || 
-          roleFromProfile === 'section_leader' || 
-          roleFromProfile === 'staff' || 
-          roleFromProfile === 'guest') {
-        validatedRole = roleFromProfile as UserRole;
-      } else {
-        validatedRole = 'student';
-      }
+      // Simple explicit type checking with a direct assignment
+      const validatedRole: UserRole = (
+        roleFromProfile === 'admin' || 
+        roleFromProfile === 'student' || 
+        roleFromProfile === 'section_leader' || 
+        roleFromProfile === 'staff' || 
+        roleFromProfile === 'guest'
+      ) ? roleFromProfile as UserRole : 'student';
       
       // Set role
       setUserRole(validatedRole);
