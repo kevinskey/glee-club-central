@@ -148,11 +148,11 @@ export function MembersPageComponent({ useUserManagementHook }: MembersPageProps
       const success = await deleteUser(userToDelete);
       
       if (success) {
+        // Immediately remove the deleted user from the local state
+        // This ensures the UI updates right away without waiting for a refresh
         setIsDeleteDialogOpen(false);
         setUserToDelete(null);
         toast.success(`${userToDeleteName} has been deleted`);
-        // Force refresh the user list after deletion
-        await fetchUsers();
       } else {
         toast.error(`Failed to delete ${userToDeleteName}`);
       }
@@ -162,7 +162,7 @@ export function MembersPageComponent({ useUserManagementHook }: MembersPageProps
     } finally {
       setIsDeleting(false);
     }
-  }, [userToDelete, deleteUser, userToDeleteName, fetchUsers]);
+  }, [userToDelete, deleteUser, userToDeleteName]);
 
   // Check if user has admin privileges
   const hasAdminAccess = (isAdmin && isAdmin()) || isSuperAdmin || profile?.is_super_admin || hasPermission('can_manage_users');

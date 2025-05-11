@@ -31,8 +31,13 @@ export default function AdminMembersPage() {
   // Add listener for deletion events
   useEffect(() => {
     // Create a custom event listener for user deletion
-    const handleUserDeleted = () => {
+    const handleUserDeleted = (event: CustomEvent) => {
       console.log("User deleted event detected, refreshing user list");
+      // Access the deleted user ID from the event detail
+      const userId = event.detail?.userId;
+      if (userId) {
+        console.log(`User ${userId} was deleted, updating UI`);
+      }
       userManagement.fetchUsers()
         .catch(err => {
           console.error("Error refreshing users after deletion:", err);
@@ -40,11 +45,11 @@ export default function AdminMembersPage() {
     };
     
     // Listen for the custom event
-    window.addEventListener("user:deleted", handleUserDeleted);
+    window.addEventListener("user:deleted", handleUserDeleted as EventListener);
     
     // Cleanup
     return () => {
-      window.removeEventListener("user:deleted", handleUserDeleted);
+      window.removeEventListener("user:deleted", handleUserDeleted as EventListener);
     };
   }, [userManagement]);
 

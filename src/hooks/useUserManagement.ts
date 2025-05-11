@@ -76,12 +76,6 @@ export const useUserManagement = () => {
           )
         );
         
-        // Dispatch a custom event to notify other components about the deletion
-        window.dispatchEvent(new CustomEvent("user:deleted", { detail: { userId } }));
-        
-        // Refresh the user list after deletion to ensure consistency with database
-        await fetchUsers();
-        
         return true;
       } else {
         return false;
@@ -90,7 +84,7 @@ export const useUserManagement = () => {
       console.error('Unexpected error deleting user:', err);
       return false;
     }
-  }, [fetchUsers]);
+  }, []);
 
   // Return only required functions to avoid bloating the hook response
   return {
