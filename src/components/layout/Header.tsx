@@ -59,25 +59,19 @@ export function Header() {
               </DropdownMenuLabel>
               <DropdownMenuSeparator />
               
-              <DropdownMenuItem asChild>
-                <Link to="/dashboard/profile" className="flex items-center gap-2 cursor-pointer">
-                  <User className="h-4 w-4" />
-                  <span>My Profile</span>
-                </Link>
+              <DropdownMenuItem onClick={() => navigate("/dashboard/profile")}>
+                <User className="h-4 w-4 mr-2" />
+                <span>My Profile</span>
               </DropdownMenuItem>
               
-              <DropdownMenuItem asChild>
-                <Link to="/update-password" className="flex items-center gap-2 cursor-pointer">
-                  <Settings className="h-4 w-4" />
-                  <span>Change Password</span>
-                </Link>
+              <DropdownMenuItem onClick={() => navigate("/update-password")}>
+                <Settings className="h-4 w-4 mr-2" />
+                <span>Change Password</span>
               </DropdownMenuItem>
               
-              <DropdownMenuItem asChild>
-                <Link to="/" className="flex items-center gap-2 cursor-pointer">
-                  <Home className="h-4 w-4" />
-                  <span>Home Page</span>
-                </Link>
+              <DropdownMenuItem onClick={() => navigate("/")}>
+                <Home className="h-4 w-4 mr-2" />
+                <span>Home Page</span>
               </DropdownMenuItem>
               
               <DropdownMenuSeparator />

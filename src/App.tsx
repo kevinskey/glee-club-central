@@ -13,10 +13,12 @@ import LoginPage from "@/pages/LoginPage";
 import RegisterPage from "@/pages/RegisterPage";
 import ResetPasswordPage from "@/pages/ResetPasswordPage";
 import UpdatePasswordPage from "@/pages/UpdatePasswordPage";
+import ContactPage from "@/pages/ContactPage";
 
 // Dashboard Pages
 import DashboardPage from "@/pages/dashboard/DashboardPage";
 import SchedulePage from "@/pages/schedule/SchedulePage";
+import ProfilePage from "@/pages/profile/ProfilePage";
 
 // Admin Pages
 import UserManagementPage from "@/pages/admin/UserManagementPage";
@@ -29,6 +31,7 @@ function App() {
         {/* Public routes */}
         <Route path="/" element={<LandingPage />} />
         <Route path="/press-kit" element={<PressKitPage />} />
+        <Route path="/contact" element={<ContactPage />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />
         <Route path="/reset-password" element={<ResetPasswordPage />} />
@@ -45,6 +48,7 @@ function App() {
         >
           <Route index element={<DashboardPage />} />
           <Route path="schedule" element={<SchedulePage />} />
+          <Route path="profile" element={<ProfilePage />} />
           
           {/* Admin-only routes */}
           <Route 
