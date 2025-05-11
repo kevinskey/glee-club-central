@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { 
@@ -30,7 +31,7 @@ export const ProfileOverviewTab: React.FC<ProfileOverviewTabProps> = ({
 }) => {
   const [formData, setFormData] = useState({
     first_name: profile.first_name, // Now required, so we don't need to use || ''
-    last_name: profile.last_name || '',
+    last_name: profile.last_name, // Now required, so no need for || ''
     phone: profile.phone || '',
     voice_part: profile.voice_part || '',
     class_year: profile.class_year || ''
@@ -83,8 +84,8 @@ export const ProfileOverviewTab: React.FC<ProfileOverviewTabProps> = ({
   const handleCancel = () => {
     // Reset form data to original profile values
     setFormData({
-      first_name: profile.first_name || '',
-      last_name: profile.last_name || '',
+      first_name: profile.first_name,
+      last_name: profile.last_name,
       phone: profile.phone || '',
       voice_part: profile.voice_part || '',
       class_year: profile.class_year || ''

@@ -1,7 +1,6 @@
-
 import { useState, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { User as AuthUser } from '@/types/auth';
+import { User as AuthUser, Profile } from '@/types/auth';
 import { toast } from 'sonner';
 import { UserFormValues } from '@/components/members/form/userFormSchema';
 
@@ -9,8 +8,8 @@ import { UserFormValues } from '@/components/members/form/userFormSchema';
 export interface User {
   id: string;
   email?: string | null;
-  first_name: string | null;
-  last_name: string | null;
+  first_name: string;
+  last_name: string;
   phone?: string | null;
   voice_part: string | null;
   role: string;
