@@ -7,14 +7,12 @@ import { FeaturesSection } from "@/components/landing/FeaturesSection";
 import { TestimonialSection } from "@/components/landing/TestimonialSection";
 import { CTASection } from "@/components/landing/CTASection";
 import { Footer } from "@/components/landing/Footer";
-import { NewsFeed } from "@/components/news/NewsFeed";
 import { Spinner } from "@/components/ui/spinner";
-import { useToast } from "@/components/ui/use-toast";
+import { toast } from "sonner";
 
 export default function LandingPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
-  const { toast } = useToast();
 
   useEffect(() => {
     console.log("LandingPage component mounting");
@@ -28,16 +26,12 @@ export default function LandingPage() {
         console.error("Error loading landing page:", err);
         setError(err instanceof Error ? err : new Error("Failed to load page"));
         
-        toast({
-          variant: "destructive",
-          title: "Error loading page",
-          description: "Please refresh the page or try again later.",
-        });
+        toast.error("Error loading page. Please refresh or try again later.");
       }
     }, 1000);
     
     return () => clearTimeout(timer);
-  }, [toast]);
+  }, []);
 
   if (isLoading) {
     return (
@@ -64,7 +58,6 @@ export default function LandingPage() {
 
   return (
     <div className="flex min-h-screen flex-col" id="home">
-      <NewsFeed />
       <Header initialShowNewsFeed={false} />
       <main>
         <HeroSection />

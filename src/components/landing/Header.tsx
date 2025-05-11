@@ -2,7 +2,6 @@
 import React, { useState, useEffect } from "react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Metronome } from "@/components/ui/metronome";
-import { NewsFeed } from "@/components/news/NewsFeed";
 import { Logo } from "@/components/landing/header/Logo";
 import { NavigationLinks } from "@/components/landing/header/NavigationLinks";
 import { MemberPortalDropdown } from "@/components/landing/header/MemberPortalDropdown";
@@ -16,15 +15,24 @@ interface HeaderProps {
 
 export function Header({ initialShowNewsFeed = true }: HeaderProps) {
   const isMobile = useIsMobile();
-  const [showNewsFeed, setShowNewsFeed] = useState(initialShowNewsFeed);
+  const [showNewsFeed, setShowNewsFeed] = useState(false); // Start hidden to avoid flicker
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
-  // Auto-hide the news feed after a shorter duration (2 seconds instead of default)
+  // Set the news feed state after component mounts with a slight delay
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setShowNewsFeed(initialShowNewsFeed);
+    }, 200);
+    
+    return () => clearTimeout(timer);
+  }, [initialShowNewsFeed]);
+
+  // Auto-hide the news feed after a shorter duration
   useEffect(() => {
     if (showNewsFeed) {
       const timer = setTimeout(() => {
         setShowNewsFeed(false);
-      }, 2000); // 2 seconds
+      }, 2000);
       
       return () => clearTimeout(timer);
     }
@@ -36,7 +44,6 @@ export function Header({ initialShowNewsFeed = true }: HeaderProps) {
 
   return (
     <header className="sticky top-0 z-50 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-      {showNewsFeed && <NewsFeed onClose={() => setShowNewsFeed(false)} />}
       <div className="container px-4 md:px-8 flex h-16 items-center justify-between">
         <div className="flex items-center gap-2">
           <Logo />
