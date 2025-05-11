@@ -33,6 +33,11 @@ interface MembersListProps {
   onEditUser?: (user: User) => void;
   onDeleteUser?: (userId: string) => void;
   onManagePermissions?: (user: User) => void;
+  // Add new props with equivalent names to what's being used in MembersPage.tsx
+  onEditMember?: (user: User) => void;
+  onDeleteMember?: (memberId: string) => void;
+  onStatusUpdate?: (userId: string, status: string) => Promise<boolean>;
+  onStatusUpdateSuccess?: () => Promise<void>;
   canEdit?: boolean;
 }
 
@@ -42,6 +47,11 @@ export function MembersList({
   onEditUser,
   onDeleteUser,
   onManagePermissions,
+  // Add the new props to the destructured parameters
+  onEditMember,
+  onDeleteMember,
+  onStatusUpdate,
+  onStatusUpdateSuccess,
   canEdit = true
 }: MembersListProps) {
   // Format last login time
@@ -100,8 +110,12 @@ export function MembersList({
                         </Button>
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end">
-                        {onEditUser && (
-                          <DropdownMenuItem onClick={() => onEditUser(member)}>
+                        {/* Use onEditMember if provided, otherwise fall back to onEditUser */}
+                        {(onEditMember || onEditUser) && (
+                          <DropdownMenuItem onClick={() => {
+                            if (onEditMember) onEditMember(member);
+                            else if (onEditUser) onEditUser(member);
+                          }}>
                             <Pencil className="mr-2 h-4 w-4" />
                             Edit User
                           </DropdownMenuItem>
@@ -118,10 +132,14 @@ export function MembersList({
                             Permissions
                           </DropdownMenuItem>
                         )}
-                        {onDeleteUser && (
+                        {/* Use onDeleteMember if provided, otherwise fall back to onDeleteUser */}
+                        {(onDeleteMember || onDeleteUser) && (
                           <DropdownMenuItem 
                             className="text-destructive" 
-                            onClick={() => onDeleteUser(member.id)}
+                            onClick={() => {
+                              if (onDeleteMember) onDeleteMember(member.id);
+                              else if (onDeleteUser) onDeleteUser(member.id);
+                            }}
                           >
                             <Trash2 className="mr-2 h-4 w-4" />
                             Delete User
