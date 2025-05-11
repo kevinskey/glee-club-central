@@ -48,13 +48,15 @@ export const RolePermissionProvider: React.FC<{ children: React.ReactNode }> = (
       // Get role from profile
       const roleFromProfile = profile?.role || 'student';
       
-      // Define valid roles as simple string array
-      const validRoles: UserRole[] = ['admin', 'student', 'section_leader', 'staff', 'guest'];
+      // Define valid roles - using type assertion here to avoid deep type instantiation
+      const validRoles: string[] = ['admin', 'student', 'section_leader', 'staff', 'guest'];
       
       // Determine the role safely using string comparison
       let role: UserRole = 'student'; // Default role
       
-      if (validRoles.includes(roleFromProfile as UserRole)) {
+      // Simple string comparison to avoid TypeScript recursion
+      if (typeof roleFromProfile === 'string' && validRoles.includes(roleFromProfile)) {
+        // Using type assertion after validation
         role = roleFromProfile as UserRole;
       }
       
