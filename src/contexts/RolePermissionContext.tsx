@@ -20,14 +20,17 @@ interface RolePermissionContextType {
   refreshPermissions: () => Promise<void>;
 }
 
-// Create context with default value to avoid type checking issues
-const RolePermissionContext = createContext<RolePermissionContextType>({
+// Create context with default values
+const defaultContextValue: RolePermissionContextType = {
   userRole: null,
   permissions: {},
   isLoading: true,
   hasPermission: () => false,
   refreshPermissions: async () => {}
-});
+};
+
+// Create context with the default value
+const RolePermissionContext = createContext<RolePermissionContextType>(defaultContextValue);
 
 // Export the hook for consuming the context
 export const useRolePermissions = () => useContext(RolePermissionContext);
@@ -54,28 +57,24 @@ export const RolePermissionProvider: React.FC<{ children: React.ReactNode }> = (
       // Get role from profile
       const roleFromProfile = profile?.role || 'student';
       
-      // Define valid roles using a simple array
+      // Define valid roles
       const validRoles = ['admin', 'student', 'section_leader', 'staff', 'guest'];
       
-      // Simple role assignment with manual validation
-      let role: UserRole;
+      // Assign role with validation
+      let userRoleValue: UserRole = 'student';
       
       if (validRoles.includes(roleFromProfile as string)) {
-        // Only set as UserRole if it's in our validRoles array
-        role = roleFromProfile as UserRole;
-      } else {
-        // Default fallback
-        role = 'student';
+        userRoleValue = roleFromProfile as UserRole;
       }
       
-      // Set role directly
-      setUserRole(role);
+      // Set role
+      setUserRole(userRoleValue);
 
       // Fetch permissions based on role
       const { data, error } = await supabase
         .from('role_permissions')
         .select('permission, granted')
-        .eq('role', role);
+        .eq('role', userRoleValue);
 
       if (error) {
         console.error('Error fetching permissions:', error);
@@ -83,7 +82,7 @@ export const RolePermissionProvider: React.FC<{ children: React.ReactNode }> = (
         return;
       }
 
-      // Create permissions object directly
+      // Create permissions object
       const permissionsMap: PermissionsObject = {};
       if (data) {
         data.forEach((item) => {
