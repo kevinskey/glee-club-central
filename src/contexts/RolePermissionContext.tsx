@@ -57,12 +57,16 @@ export const RolePermissionProvider: React.FC<{ children: React.ReactNode }> = (
       // Get role from profile as string
       const roleFromProfile = profile?.role || 'student';
       
-      // Define valid roles 
-      const validRoles: readonly string[] = ['admin', 'student', 'section_leader', 'staff', 'guest'];
-      
-      // Simple role validation to avoid complex type assertions
+      // Directly cast to UserRole with a fallback
+      // This avoids complex type checking that can lead to deep instantiation
       let validatedRole: UserRole;
-      if (validRoles.includes(roleFromProfile)) {
+      
+      // Simple explicit check without complex conditional logic
+      if (roleFromProfile === 'admin' || 
+          roleFromProfile === 'student' || 
+          roleFromProfile === 'section_leader' || 
+          roleFromProfile === 'staff' || 
+          roleFromProfile === 'guest') {
         validatedRole = roleFromProfile as UserRole;
       } else {
         validatedRole = 'student';
