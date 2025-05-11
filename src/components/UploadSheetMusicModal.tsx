@@ -1,4 +1,5 @@
-import React, { useState, useRef } from "react";
+
+import React, { useState, useRef, useCallback } from "react";
 import { FileUp, Loader2, X, Upload, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -46,54 +47,66 @@ export function UploadSheetMusicModal({
   const [commonComposer, setCommonComposer] = useState("");
   const [files, setFiles] = useState<FileWithMeta[]>([]);
   const [overallProgress, setOverallProgress] = useState(0);
+  const [isDragging, setIsDragging] = useState(false);
   const { toast } = useToast();
   const { profile } = useAuth();
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const dropZoneRef = useRef<HTMLDivElement>(null);
   
   // Determine if we're in controlled or uncontrolled mode
   const isControlled = controlledOpen !== undefined && setControlledOpen !== undefined;
   const open = isControlled ? controlledOpen : internalOpen;
   const setOpen = isControlled ? setControlledOpen : setInternalOpen;
 
+  const validateFile = (file: File) => {
+    // Validate file type
+    if (file.type !== "application/pdf") {
+      toast({
+        title: "Invalid file type",
+        description: `${file.name} is not a PDF file`,
+        variant: "destructive",
+      });
+      return false;
+    }
+    
+    // Validate file size (max 10MB)
+    if (file.size > 10 * 1024 * 1024) {
+      toast({
+        title: "File too large",
+        description: `${file.name} is larger than 10MB`,
+        variant: "destructive",
+      });
+      return false;
+    }
+    
+    return true;
+  };
+
+  const addFiles = (filesToAdd: File[]) => {
+    const newFiles: FileWithMeta[] = [];
+    
+    Array.from(filesToAdd).forEach(file => {
+      if (!validateFile(file)) return;
+      
+      // Extract title from filename (remove extension)
+      const title = file.name.replace(/\.[^/.]+$/, "");
+      
+      newFiles.push({
+        file,
+        id: Math.random().toString(36).substring(2),
+        title: title,
+        composer: commonComposer,
+        uploadProgress: 0,
+        status: 'pending'
+      });
+    });
+    
+    setFiles(prev => [...prev, ...newFiles]);
+  };
+
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
-      const newFiles: FileWithMeta[] = [];
-      
-      Array.from(e.target.files).forEach(file => {
-        // Validate file type
-        if (file.type !== "application/pdf") {
-          toast({
-            title: "Invalid file type",
-            description: `${file.name} is not a PDF file`,
-            variant: "destructive",
-          });
-          return;
-        }
-        
-        // Validate file size (max 10MB)
-        if (file.size > 10 * 1024 * 1024) {
-          toast({
-            title: "File too large",
-            description: `${file.name} is larger than 10MB`,
-            variant: "destructive",
-          });
-          return;
-        }
-        
-        // Extract title from filename (remove extension)
-        const title = file.name.replace(/\.[^/.]+$/, "");
-        
-        newFiles.push({
-          file,
-          id: Math.random().toString(36).substring(2),
-          title: title,
-          composer: commonComposer,
-          uploadProgress: 0,
-          status: 'pending'
-        });
-      });
-      
-      setFiles(prev => [...prev, ...newFiles]);
+      addFiles(Array.from(e.target.files));
     }
     
     // Clear input value to allow selecting the same files again
@@ -101,6 +114,36 @@ export function UploadSheetMusicModal({
       fileInputRef.current.value = '';
     }
   };
+
+  // Handle drag events
+  const handleDragIn = useCallback((e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (e.dataTransfer.items && e.dataTransfer.items.length > 0) {
+      setIsDragging(true);
+    }
+  }, []);
+
+  const handleDragOut = useCallback((e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(false);
+  }, []);
+
+  const handleDragOver = useCallback((e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+  }, []);
+
+  const handleDrop = useCallback((e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(false);
+    
+    if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+      addFiles(Array.from(e.dataTransfer.files));
+    }
+  }, []);
 
   const updateFileData = (id: string, data: Partial<FileWithMeta>) => {
     setFiles(prev => 
@@ -322,11 +365,18 @@ export function UploadSheetMusicModal({
             
             {/* Drag and drop area */}
             <div 
-              className="border-2 border-dashed rounded-md p-6 text-center cursor-pointer hover:bg-muted/50 transition-colors"
+              ref={dropZoneRef}
+              onDragEnter={handleDragIn}
+              onDragLeave={handleDragOut}
+              onDragOver={handleDragOver}
+              onDrop={handleDrop}
+              className={`border-2 ${isDragging ? 'border-primary bg-primary/10' : 'border-dashed'} rounded-md p-6 text-center cursor-pointer hover:bg-muted/50 transition-colors`}
               onClick={() => fileInputRef.current?.click()}
             >
               <Upload className="h-8 w-8 mx-auto mb-2 text-muted-foreground" />
-              <p className="text-sm font-medium">Click or drag files here</p>
+              <p className="text-sm font-medium">
+                {isDragging ? "Drop files here" : "Click or drag files here"}
+              </p>
               <p className="text-xs text-muted-foreground mt-1">PDF files up to 10MB</p>
             </div>
           </div>
