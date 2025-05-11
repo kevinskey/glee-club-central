@@ -10,6 +10,7 @@ interface ProtectedRouteProps {
 }
 
 export function ProtectedRoute({ children, adminOnly = false }: ProtectedRouteProps) {
+  // All hooks at the top
   const { isAuthenticated, isLoading, isAdmin } = useAuth();
   const location = useLocation();
   
@@ -21,6 +22,7 @@ export function ProtectedRoute({ children, adminOnly = false }: ProtectedRoutePr
     isAdmin: isAdmin ? isAdmin() : false
   });
   
+  // Using conditional rendering instead of early returns
   if (isLoading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
@@ -35,7 +37,7 @@ export function ProtectedRoute({ children, adminOnly = false }: ProtectedRoutePr
   }
   
   // Check if admin access is required
-  if (adminOnly && !isAdmin()) {
+  if (adminOnly && isAdmin && !isAdmin()) {
     console.log('Admin only route, user is not admin, redirecting to dashboard');
     return <Navigate to="/dashboard" state={{ accessDenied: true }} replace />;
   }

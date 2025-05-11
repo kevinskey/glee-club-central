@@ -17,6 +17,7 @@ import { toast } from "sonner";
 import { EditUserDialog } from "@/components/members/EditUserDialog";
 import { DeleteMemberDialog } from "@/components/members/DeleteMemberDialog";
 import { MemberPermissionsDialog } from "@/components/members/MemberPermissionsDialog";
+import { Spinner } from "@/components/ui/spinner";
 
 // Helper function to create a member refresh function that returns void
 export const createMemberRefreshFunction = (
@@ -44,9 +45,10 @@ export interface MembersPageProps {
 }
 
 export function MembersPageComponent({ useUserManagementHook }: MembersPageProps) {
-  // Get auth and permissions
+  // All hooks at the top
   const { isAdmin, isLoading: authLoading, isAuthenticated, profile } = useAuth();
   const { hasPermission, isSuperAdmin } = usePermissions();
+  const isMobile = useMedia('(max-width: 640px)');
   
   // UI state
   const [searchQuery, setSearchQuery] = useState("");
@@ -68,7 +70,6 @@ export function MembersPageComponent({ useUserManagementHook }: MembersPageProps
   // User to delete
   const [userToDelete, setUserToDelete] = useState<string | null>(null);
   const [userToDeleteName, setUserToDeleteName] = useState("");
-  const isMobile = useMedia('(max-width: 640px)');
   
   // Get user management data and functions
   const {
@@ -81,7 +82,7 @@ export function MembersPageComponent({ useUserManagementHook }: MembersPageProps
   } = useUserManagementHook();
   
   // Filter out deleted users more explicitly
-  const members = allMembers.filter(member => member.status !== 'deleted');
+  const members = allMembers ? allMembers.filter(member => member.status !== 'deleted') : [];
   
   // Create a wrapper function for fetchUsers that returns void
   const refreshUsers = createMemberRefreshFunction(fetchUsers);
@@ -160,47 +161,28 @@ export function MembersPageComponent({ useUserManagementHook }: MembersPageProps
   }, [userToDelete, deleteUser, userToDeleteName, fetchUsers]);
 
   // Check if user has admin privileges
-  const hasAdminAccess = isAdmin?.() || isSuperAdmin || profile?.is_super_admin || hasPermission('can_manage_users');
+  const hasAdminAccess = (isAdmin && isAdmin()) || isSuperAdmin || profile?.is_super_admin || hasPermission('can_manage_users');
 
-  // Only redirect if no admin access
-  if (!authLoading && isAuthenticated && !hasAdminAccess) {
-    console.log("AdminMembersPage - Access denied, redirecting to dashboard");
-    return <Navigate to="/dashboard" />;
-  }
-  
-  if (authLoading || isLoading) {
+  // Use conditional rendering instead of early returns for auth checks
+  if (authLoading) {
     return (
       <div className="flex items-center justify-center min-h-[60vh]">
-        <div className="h-8 w-8 rounded-full border-4 border-primary border-t-transparent animate-spin"></div>
+        <Spinner size="lg" />
       </div>
     );
   }
-
-  // Filter members based on search query and filters - ensuring deleted users are filtered out
-  const filteredMembers = members.filter(member => {
-    // Explicitly check again for deleted status as a safeguard
-    if (member.status === 'deleted') return false;
-    
-    const matchesSearch = 
-      (member.first_name || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
-      (member.last_name || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
-      (member.email || '').toLowerCase().includes(searchQuery.toLowerCase());
-    
-    const matchesRole = roleFilter === "all" || (member.role || '') === roleFilter;
-    const matchesStatus = statusFilter === "all" || (member.status || '') === statusFilter;
-    
-    return matchesSearch && matchesRole && matchesStatus;
-  });
-
-  // Log the filteredMembers length to verify filtering
-  console.log(`Filtered members: ${filteredMembers.length} out of ${allMembers.length} total (${members.length} non-deleted)`);
-
-  // Define the handler for editing a user
-  const handleEditUser = useCallback((user: User) => {
-    setSelectedUser(user);
-    setIsEditUserOpen(true);
-  }, []);
-
+  
+  if (!isAuthenticated) {
+    console.log("AdminMembersPage - Access denied, redirecting to login");
+    return <Navigate to="/login" />;
+  }
+  
+  if (!hasAdminAccess) {
+    console.log("AdminMembersPage - Not admin, redirecting to dashboard");
+    return <Navigate to="/dashboard" />;
+  }
+  
+  // Render the content
   return (
     <div className="container mx-auto p-4 space-y-6">
       <PageHeader
@@ -224,25 +206,31 @@ export function MembersPageComponent({ useUserManagementHook }: MembersPageProps
           canCreate={hasAdminAccess}
         />
         
-        <MembersList 
-          members={filteredMembers}
-          onChangeRole={(user) => {
-            setSelectedUser(user);
-            setIsManageRoleOpen(true);
-          }}
-          onEditUser={handleEditUser}
-          onDeleteUser={handleDeleteUser}
-          onManagePermissions={(user) => {
-            setSelectedUser(user);
-            setIsPermissionsOpen(true);
-          }}
-          canEdit={hasAdminAccess}
-          // Explicitly pass through props to match with what MembersPage.tsx expects
-          onEditMember={handleEditUser}
-          onDeleteMember={handleDeleteUser}
-          onStatusUpdate={undefined}
-          onStatusUpdateSuccess={refreshUsers}
-        />
+        {isLoading ? (
+          <div className="flex items-center justify-center h-40">
+            <Spinner size="lg" />
+          </div>
+        ) : (
+          <MembersList 
+            members={members} 
+            onEditUser={handleUpdateUser}
+            onDeleteUser={handleDeleteUser}
+            onManagePermissions={(user) => {
+              setSelectedUser(user);
+              setIsPermissionsOpen(true);
+            }}
+            onChangeRole={(user) => {
+              setSelectedUser(user);
+              setIsManageRoleOpen(true);
+            }}
+            canEdit={hasAdminAccess}
+            // Explicitly pass through props to match with what MembersPage.tsx expects
+            onEditMember={handleUpdateUser}
+            onDeleteMember={handleDeleteUser}
+            onStatusUpdate={undefined}
+            onStatusUpdateSuccess={refreshUsers}
+          />
+        )}
       </Card>
       
       {/* Role Management Dialog */}

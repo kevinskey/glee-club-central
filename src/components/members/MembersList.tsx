@@ -42,7 +42,7 @@ interface MembersListProps {
 }
 
 export function MembersList({ 
-  members, 
+  members = [], // Provide default empty array to prevent null/undefined errors
   onChangeRole,
   onEditUser,
   onDeleteUser,

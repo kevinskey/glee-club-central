@@ -4,8 +4,10 @@ import { MembersPageComponent } from "@/components/members/MembersPageRefactor";
 import { useAuth } from "@/contexts/AuthContext";
 import { useUserManagement } from "@/hooks/useUserManagement";
 import { toast } from "sonner";
+import { Spinner } from "@/components/ui/spinner";
 
 export default function AdminMembersPage() {
+  // All hooks at the top
   const { isAuthenticated } = useAuth();
   const userManagement = useUserManagement();
   const [isLoaded, setIsLoaded] = useState(false);
@@ -26,5 +28,6 @@ export default function AdminMembersPage() {
     }
   }, [isAuthenticated, userManagement, isLoaded]);
 
+  // Use conditional rendering instead of early returns
   return <MembersPageComponent useUserManagementHook={() => userManagement} />;
 }
