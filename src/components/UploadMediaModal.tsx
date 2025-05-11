@@ -13,20 +13,27 @@ import {
 import { MediaUploadForm } from "@/components/media/MediaUploadForm";
 import { useMediaUpload } from "@/hooks/useMediaUpload";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { usePermissions } from "@/hooks/usePermissions";
 
 interface UploadMediaModalProps {
   onUploadComplete: () => void;
   open?: boolean;
   onOpenChange?: (open: boolean) => void;
+  defaultCategory?: string;
 }
 
 export function UploadMediaModal({ 
   onUploadComplete,
   open: controlledOpen,
-  onOpenChange: setControlledOpen
+  onOpenChange: setControlledOpen,
+  defaultCategory = "general"
 }: UploadMediaModalProps) {
   const [internalOpen, setInternalOpen] = useState(false);
   const isMobile = useIsMobile();
+  const { hasPermission, isSuperAdmin } = usePermissions();
+  
+  // Check if user has permission to upload files
+  const canUpload = isSuperAdmin || hasPermission('can_upload_media');
   
   // Determine if we're in controlled or uncontrolled mode
   const isControlled = controlledOpen !== undefined && setControlledOpen !== undefined;
@@ -38,18 +45,26 @@ export function UploadMediaModal({
     setTitle,
     description,
     setDescription,
+    category,
+    setCategory,
+    tags,
+    setTags,
     files,
     setFiles,
     uploading,
     uploadProgress,
     handleUpload,
     resetForm
-  } = useMediaUpload(onUploadComplete);
+  } = useMediaUpload(onUploadComplete, defaultCategory);
 
   const handleClose = () => {
     setOpen(false);
     resetForm();
   };
+
+  if (!canUpload) {
+    return null;
+  }
 
   return (
     <Dialog open={open} onOpenChange={(isOpen) => {
@@ -76,6 +91,10 @@ export function UploadMediaModal({
           setTitle={setTitle}
           description={description}
           setDescription={setDescription}
+          category={category}
+          setCategory={setCategory}
+          tags={tags}
+          setTags={setTags}
           files={files}
           setFiles={setFiles}
           uploading={uploading}

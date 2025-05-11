@@ -1,11 +1,11 @@
 
 import React, { useState, useEffect } from "react";
 import { PageHeader } from "@/components/ui/page-header";
-import { FilesIcon, Upload, Search, Filter, Calendar } from "lucide-react";
+import { FilesIcon, Upload, Search, Filter, Calendar, List, Grid2X2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
-import { MediaFile } from "@/types/media";
+import { MediaFile, MediaStats } from "@/types/media";
 import { MediaType, getMediaType, getMediaTypeLabel } from "@/utils/mediaUtils";
 import { MediaFilesSection } from "@/components/media/MediaFilesSection";
 import { useAudioFiles } from "@/hooks/useAudioFiles";
@@ -15,6 +15,15 @@ import { useAuth } from "@/contexts/AuthContext";
 import { Input } from "@/components/ui/input";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Spinner } from "@/components/ui/spinner";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import {
+  ToggleGroup,
+  ToggleGroupItem
+} from "@/components/ui/toggle-group";
 import { 
   Select, 
   SelectContent, 
@@ -22,21 +31,35 @@ import {
   SelectTrigger, 
   SelectValue 
 } from "@/components/ui/select";
+import { usePermissions } from "@/hooks/usePermissions";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
 
 export default function MediaLibraryPage() {
   const { audioFiles, loading: audioLoading } = useAudioFiles();
   const { user } = useAuth();
+  const { hasPermission, isSuperAdmin } = usePermissions();
   const isMobile = useIsMobile();
+  
+  // Check if user has permission to upload files
+  const canUploadMedia = isSuperAdmin || hasPermission('can_upload_media');
   
   const [isLoading, setIsLoading] = useState(true);
   const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
   const [allMediaFiles, setAllMediaFiles] = useState<MediaFile[]>([]);
   const [filteredMediaFiles, setFilteredMediaFiles] = useState<MediaFile[]>([]);
   const [error, setError] = useState<Error | null>(null);
+  const [mediaStats, setMediaStats] = useState<MediaStats | null>(null);
+  const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
   
   // Search and filter states
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedMediaType, setSelectedMediaType] = useState<MediaType | "all">("all");
+  const [selectedCategory, setSelectedCategory] = useState<string | "all">("all");
   const [dateFilter, setDateFilter] = useState<"newest" | "oldest">("newest");
   
   // Fetch all media files with RLS automatically handling permission
@@ -70,7 +93,9 @@ export default function MediaLibraryPage() {
           file_path: audioFile.file_path,
           file_type: 'audio/mpeg', // Default audio type
           created_at: audioFile.created_at,
-          uploaded_by: audioFile.uploaded_by
+          uploaded_by: audioFile.uploaded_by,
+          category: 'audio',
+          tags: []
         }));
       
       console.log("Audio files converted:", audioMediaFiles.length);
@@ -84,7 +109,10 @@ export default function MediaLibraryPage() {
         file_path: file.file_path,
         file_type: file.file_type,
         created_at: file.created_at,
-        uploaded_by: file.uploaded_by
+        uploaded_by: file.uploaded_by,
+        category: file.category || getMediaType(file.file_type),
+        tags: file.tags || [],
+        size: file.size
       })) || [];
       
       const combinedFiles = [
@@ -94,7 +122,27 @@ export default function MediaLibraryPage() {
       
       console.log("Combined total files:", combinedFiles.length);
       setAllMediaFiles(combinedFiles);
-      applyFilters(combinedFiles, searchQuery, selectedMediaType);
+      
+      // Calculate statistics
+      const stats: MediaStats = {
+        totalFiles: combinedFiles.length,
+        totalSize: combinedFiles.reduce((total, file) => total + (file.size || 0), 0),
+        filesByType: {}
+      };
+      
+      // Count files by type
+      combinedFiles.forEach(file => {
+        const type = getMediaType(file.file_type);
+        if (!stats.filesByType[type]) {
+          stats.filesByType[type] = 0;
+        }
+        stats.filesByType[type]++;
+      });
+      
+      setMediaStats(stats);
+      
+      // Apply filters to the combined files
+      applyFilters(combinedFiles, searchQuery, selectedMediaType, selectedCategory);
     } catch (error: any) {
       console.error("Error fetching media files:", error);
       setError(error instanceof Error ? error : new Error("Failed to load media files"));
@@ -110,7 +158,8 @@ export default function MediaLibraryPage() {
   const applyFilters = (
     files: MediaFile[], 
     query: string, 
-    mediaTypeFilter: MediaType | "all"
+    mediaTypeFilter: MediaType | "all",
+    categoryFilter: string | "all"
   ) => {
     let filtered = [...files];
     
@@ -119,13 +168,19 @@ export default function MediaLibraryPage() {
       const lowerQuery = query.toLowerCase();
       filtered = filtered.filter(file => 
         file.title.toLowerCase().includes(lowerQuery) || 
-        (file.description && file.description.toLowerCase().includes(lowerQuery))
+        (file.description && file.description.toLowerCase().includes(lowerQuery)) ||
+        (file.tags && file.tags.some(tag => tag.toLowerCase().includes(lowerQuery)))
       );
     }
     
     // Apply media type filter
     if (mediaTypeFilter !== "all") {
       filtered = filtered.filter(file => getMediaType(file.file_type) === mediaTypeFilter);
+    }
+    
+    // Apply category filter
+    if (categoryFilter !== "all") {
+      filtered = filtered.filter(file => file.category === categoryFilter);
     }
     
     setFilteredMediaFiles(filtered);
@@ -136,13 +191,19 @@ export default function MediaLibraryPage() {
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const query = e.target.value;
     setSearchQuery(query);
-    applyFilters(allMediaFiles, query, selectedMediaType);
+    applyFilters(allMediaFiles, query, selectedMediaType, selectedCategory);
   };
   
   // Handle media type filter change
   const handleMediaTypeChange = (value: string) => {
     setSelectedMediaType(value as MediaType | "all");
-    applyFilters(allMediaFiles, searchQuery, value as MediaType | "all");
+    applyFilters(allMediaFiles, searchQuery, value as MediaType | "all", selectedCategory);
+  };
+  
+  // Handle category filter change
+  const handleCategoryChange = (value: string) => {
+    setSelectedCategory(value);
+    applyFilters(allMediaFiles, searchQuery, selectedMediaType, value);
   };
   
   // Handle date filter change
@@ -164,6 +225,17 @@ export default function MediaLibraryPage() {
 
   // Get all media types we have files for
   const mediaTypes: MediaType[] = ["pdf", "audio", "image", "video", "other"];
+  
+  // Get unique categories from files
+  const categories = Array.from(
+    new Set(allMediaFiles.map(file => file.category).filter(Boolean))
+  );
+
+  const formatFileSize = (bytes: number) => {
+    if (bytes < 1024) return `${bytes} B`;
+    if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+    return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+  };
 
   if (error) {
     return (
@@ -181,22 +253,48 @@ export default function MediaLibraryPage() {
   return (
     <div className="space-y-6 md:space-y-8">
       <PageHeader
-        title="Media Sources"
-        description="Access all your media files in one place"
+        title="Media Library"
+        description="Access and manage all your media files in one place"
         icon={<FilesIcon className="h-6 w-6" />}
       />
       
+      {/* Stats Row */}
+      {mediaStats && (
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <div className="bg-card rounded-lg p-4 border">
+            <h3 className="text-sm font-medium text-muted-foreground">Total Files</h3>
+            <p className="text-2xl font-bold">{mediaStats.totalFiles}</p>
+          </div>
+          <div className="bg-card rounded-lg p-4 border">
+            <h3 className="text-sm font-medium text-muted-foreground">Total Size</h3>
+            <p className="text-2xl font-bold">{formatFileSize(mediaStats.totalSize)}</p>
+          </div>
+          <div className="bg-card rounded-lg p-4 border col-span-2">
+            <h3 className="text-sm font-medium text-muted-foreground mb-2">Files by Type</h3>
+            <div className="flex flex-wrap gap-2">
+              {Object.entries(mediaStats.filesByType).map(([type, count]) => (
+                <Badge key={type} variant="secondary" className="text-xs">
+                  {getMediaTypeLabel(type as MediaType)}: {count}
+                </Badge>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+      
       {/* Upload Button - Prominently displayed at the top */}
-      <div className="flex justify-end">
-        <Button 
-          onClick={() => setIsUploadModalOpen(true)}
-          className="flex items-center gap-2"
-          size={isMobile ? "default" : "lg"}
-        >
-          <Upload className={`${isMobile ? "h-4 w-4" : "h-5 w-5"}`} /> 
-          {isMobile ? "Upload" : "Upload Media File"}
-        </Button>
-      </div>
+      {canUploadMedia && (
+        <div className="flex justify-end">
+          <Button 
+            onClick={() => setIsUploadModalOpen(true)}
+            className="flex items-center gap-2"
+            size={isMobile ? "default" : "lg"}
+          >
+            <Upload className={`${isMobile ? "h-4 w-4" : "h-5 w-5"}`} /> 
+            {isMobile ? "Upload" : "Upload Media File"}
+          </Button>
+        </div>
+      )}
       
       {/* Search and Filter Bar - Responsive layout */}
       <div className="flex flex-col gap-4">
@@ -210,38 +308,87 @@ export default function MediaLibraryPage() {
           />
         </div>
         
-        <div className="flex flex-col sm:flex-row gap-2 w-full">
-          <Select
-            value={selectedMediaType}
-            onValueChange={handleMediaTypeChange}
-          >
-            <SelectTrigger className="w-full sm:w-[140px]">
-              <Filter className="h-4 w-4 mr-2" />
-              <SelectValue placeholder="Filter by type" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All Types</SelectItem>
-              {mediaTypes.map((type) => (
-                <SelectItem key={type} value={type}>
-                  {getMediaTypeLabel(type)}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+        <div className="grid grid-cols-1 md:grid-cols-12 gap-2">
+          <div className="md:col-span-3">
+            <Select
+              value={selectedMediaType}
+              onValueChange={handleMediaTypeChange}
+            >
+              <SelectTrigger className="w-full">
+                <Filter className="h-4 w-4 mr-2" />
+                <SelectValue placeholder="Filter by type" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Types</SelectItem>
+                {mediaTypes.map((type) => (
+                  <SelectItem key={type} value={type}>
+                    {getMediaTypeLabel(type)}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
           
-          <Select
-            value={dateFilter}
-            onValueChange={handleDateFilterChange}
-          >
-            <SelectTrigger className="w-full sm:w-[140px]">
-              <Calendar className="h-4 w-4 mr-2" />
-              <SelectValue placeholder="Sort by date" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="newest">Newest First</SelectItem>
-              <SelectItem value="oldest">Oldest First</SelectItem>
-            </SelectContent>
-          </Select>
+          <div className="md:col-span-3">
+            <Select
+              value={selectedCategory}
+              onValueChange={handleCategoryChange}
+            >
+              <SelectTrigger className="w-full">
+                <Filter className="h-4 w-4 mr-2" />
+                <SelectValue placeholder="Filter by category" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Categories</SelectItem>
+                {categories.map((category) => (
+                  <SelectItem key={category} value={category}>
+                    {category.replace('_', ' ')}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          
+          <div className="md:col-span-3">
+            <Select
+              value={dateFilter}
+              onValueChange={handleDateFilterChange}
+            >
+              <SelectTrigger className="w-full">
+                <Calendar className="h-4 w-4 mr-2" />
+                <SelectValue placeholder="Sort by date" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="newest">Newest First</SelectItem>
+                <SelectItem value="oldest">Oldest First</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          
+          <div className="md:col-span-3 flex justify-end">
+            <ToggleGroup type="single" value={viewMode} onValueChange={(value) => value && setViewMode(value as "grid" | "list")}>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <ToggleGroupItem value="grid" aria-label="Grid view">
+                    <Grid2X2 className="h-4 w-4" />
+                  </ToggleGroupItem>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>Grid view</p>
+                </TooltipContent>
+              </Tooltip>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <ToggleGroupItem value="list" aria-label="List view">
+                    <List className="h-4 w-4" />
+                  </ToggleGroupItem>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>List view</p>
+                </TooltipContent>
+              </Tooltip>
+            </ToggleGroup>
+          </div>
         </div>
       </div>
       
@@ -255,43 +402,54 @@ export default function MediaLibraryPage() {
           {filteredMediaFiles.length === 0 ? (
             <div className="text-center py-10 text-muted-foreground">
               <p>No media files found matching your criteria.</p>
-              <Button 
-                onClick={() => setIsUploadModalOpen(true)}
-                variant="outline" 
-                className="mt-4"
-              >
-                <Upload className="mr-2 h-4 w-4" />
-                Upload Your First Media File
-              </Button>
+              {canUploadMedia && (
+                <Button 
+                  onClick={() => setIsUploadModalOpen(true)}
+                  variant="outline" 
+                  className="mt-4"
+                >
+                  <Upload className="mr-2 h-4 w-4" />
+                  Upload Your First Media File
+                </Button>
+              )}
             </div>
           ) : (
             <>
-              {selectedMediaType === "all" ? (
-                // When showing all types, group by media type
-                mediaTypes.map((mediaType) => {
-                  const filesOfType = filteredMediaFiles.filter(
-                    file => getMediaType(file.file_type) === mediaType
-                  );
-                  
-                  if (filesOfType.length === 0) return null;
-                  
-                  return (
-                    <React.Fragment key={mediaType}>
-                      <MediaFilesSection
-                        files={filesOfType}
-                        mediaType={mediaType}
-                        title={getMediaTypeLabel(mediaType)}
-                      />
-                      <Separator className="my-6 md:my-8" />
-                    </React.Fragment>
-                  );
-                })
+              {selectedMediaType === "all" && selectedCategory === "all" ? (
+                // When showing all types, use accordion for better organization
+                <Accordion type="single" collapsible className="w-full" defaultValue="sheet_music">
+                  {mediaTypes.map((mediaType) => {
+                    const filesOfType = filteredMediaFiles.filter(
+                      file => getMediaType(file.file_type) === mediaType
+                    );
+                    
+                    if (filesOfType.length === 0) return null;
+                    
+                    return (
+                      <AccordionItem key={mediaType} value={mediaType}>
+                        <AccordionTrigger className="text-lg">
+                          {getMediaTypeLabel(mediaType)} ({filesOfType.length})
+                        </AccordionTrigger>
+                        <AccordionContent>
+                          <MediaFilesSection
+                            files={filesOfType}
+                            mediaType={mediaType}
+                            viewMode={viewMode}
+                            onDelete={fetchAllMedia}
+                          />
+                        </AccordionContent>
+                      </AccordionItem>
+                    );
+                  })}
+                </Accordion>
               ) : (
-                // When filtered to a specific type, show all files of that type
+                // When filtered, show all matching files
                 <MediaFilesSection
                   files={filteredMediaFiles}
-                  mediaType={selectedMediaType}
-                  title={getMediaTypeLabel(selectedMediaType)}
+                  mediaType={selectedMediaType as MediaType}
+                  viewMode={viewMode}
+                  onDelete={fetchAllMedia}
+                  title={selectedCategory !== "all" ? `${selectedCategory.replace('_', ' ')}` : undefined}
                 />
               )}
             </>
@@ -303,6 +461,7 @@ export default function MediaLibraryPage() {
         open={isUploadModalOpen}
         onOpenChange={setIsUploadModalOpen}
         onUploadComplete={handleUploadComplete}
+        defaultCategory={selectedCategory !== "all" ? selectedCategory : "general"}
       />
     </div>
   );

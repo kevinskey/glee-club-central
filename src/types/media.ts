@@ -8,4 +8,16 @@ export interface MediaFile {
   file_type: string;
   created_at: string;
   uploaded_by: string;
+  category?: string;
+  tags?: string[];
+  folder?: string;
+  size?: number;
+}
+
+export type MediaCategory = 'sheet_music' | 'audio' | 'video' | 'other';
+
+export interface MediaStats {
+  totalFiles: number;
+  totalSize: number;
+  filesByType: Record<string, number>;
 }

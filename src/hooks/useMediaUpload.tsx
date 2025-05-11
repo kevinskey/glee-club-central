@@ -4,10 +4,12 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
 
-export function useMediaUpload(onComplete: () => void) {
+export function useMediaUpload(onComplete: () => void, defaultCategory: string = "general") {
   const [uploading, setUploading] = useState(false);
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
+  const [category, setCategory] = useState(defaultCategory);
+  const [tags, setTags] = useState<string[]>([]);
   const [files, setFiles] = useState<File[]>([]);
   const [uploadProgress, setUploadProgress] = useState(0);
   const { profile, user } = useAuth();
@@ -15,6 +17,8 @@ export function useMediaUpload(onComplete: () => void) {
   const resetForm = () => {
     setTitle("");
     setDescription("");
+    setCategory(defaultCategory);
+    setTags([]);
     setFiles([]);
     setUploadProgress(0);
   };
@@ -26,6 +30,16 @@ export function useMediaUpload(onComplete: () => void) {
       });
       return false;
     }
+    
+    // Check file size limit (25MB)
+    const oversizedFiles = files.filter(file => file.size > 25 * 1024 * 1024);
+    if (oversizedFiles.length > 0) {
+      toast("File size limit exceeded", {
+        description: "Files must be under 25MB. Please remove any oversized files.",
+      });
+      return false;
+    }
+    
     return true;
   };
 
@@ -51,7 +65,7 @@ export function useMediaUpload(onComplete: () => void) {
         // Generate a unique filename
         const fileExt = file.name.split('.').pop();
         const fileName = `${Date.now()}-${Math.random().toString(36).substring(2, 15)}.${fileExt}`;
-        const filePath = fileName;
+        const filePath = `${category}/${fileName}`;
 
         // Upload file to Supabase Storage
         const { error: uploadError } = await supabase.storage
@@ -81,7 +95,11 @@ export function useMediaUpload(onComplete: () => void) {
             file_path: filePath,
             file_url: publicURL.publicUrl,
             file_type: file.type,
-            uploaded_by: user.id  // This should be a valid UUID from the auth context
+            uploaded_by: user.id,
+            category: category,
+            tags: tags,
+            folder: category, // Use category as folder for organization
+            size: file.size // Store file size for statistics
           });
 
         if (dbError) {
@@ -118,6 +136,10 @@ export function useMediaUpload(onComplete: () => void) {
     setTitle,
     description,
     setDescription,
+    category,
+    setCategory,
+    tags,
+    setTags,
     files,
     setFiles,
     uploading,

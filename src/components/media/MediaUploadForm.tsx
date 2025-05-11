@@ -1,18 +1,30 @@
 
 import React from "react";
-import { Loader2 } from "lucide-react";
+import { Loader2, X, Tag, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { toast } from "sonner";
+import { 
+  Select, 
+  SelectContent, 
+  SelectItem, 
+  SelectTrigger, 
+  SelectValue 
+} from "@/components/ui/select";
+import { Badge } from "@/components/ui/badge";
 
 interface MediaUploadFormProps {
   title: string;
   setTitle: (title: string) => void;
   description: string;
   setDescription: (description: string) => void;
+  category: string;
+  setCategory: (category: string) => void;
+  tags: string[];
+  setTags: (tags: string[]) => void;
   files: File[];
   setFiles: (files: File[]) => void;
   uploading: boolean;
@@ -26,6 +38,10 @@ export function MediaUploadForm({
   setTitle,
   description,
   setDescription,
+  category,
+  setCategory,
+  tags,
+  setTags,
   files,
   setFiles,
   uploading,
@@ -34,6 +50,7 @@ export function MediaUploadForm({
   onCancel
 }: MediaUploadFormProps) {
   const isMobile = useIsMobile();
+  const [tagInput, setTagInput] = React.useState("");
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
@@ -50,6 +67,38 @@ export function MediaUploadForm({
       }
       
       setFiles(selectedFiles);
+      
+      // Auto-detect category based on file type
+      if (selectedFiles.length === 1) {
+        const file = selectedFiles[0];
+        if (file.type.startsWith('audio/')) {
+          setCategory('audio');
+        } else if (file.type.startsWith('video/')) {
+          setCategory('video');
+        } else if (file.type === 'application/pdf') {
+          setCategory('sheet_music');
+        } else {
+          setCategory('other');
+        }
+      }
+    }
+  };
+
+  const addTag = () => {
+    if (tagInput && !tags.includes(tagInput)) {
+      setTags([...tags, tagInput]);
+      setTagInput("");
+    }
+  };
+
+  const removeTag = (tagToRemove: string) => {
+    setTags(tags.filter(tag => tag !== tagToRemove));
+  };
+
+  const handleTagKeyPress = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      addTag();
     }
   };
 
@@ -71,6 +120,22 @@ export function MediaUploadForm({
             </p>
           )}
         </div>
+        
+        <div className="grid gap-2">
+          <Label htmlFor="category">Category</Label>
+          <Select value={category} onValueChange={setCategory}>
+            <SelectTrigger>
+              <SelectValue placeholder="Select a category" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="sheet_music">Sheet Music</SelectItem>
+              <SelectItem value="audio">Audio</SelectItem>
+              <SelectItem value="video">Video</SelectItem>
+              <SelectItem value="other">Other</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+        
         <div className="grid gap-2">
           <Label htmlFor="description">Description (Optional)</Label>
           <Textarea
@@ -81,10 +146,49 @@ export function MediaUploadForm({
             rows={isMobile ? 2 : 3}
           />
         </div>
+        
+        <div className="grid gap-2">
+          <Label htmlFor="tags">Tags</Label>
+          <div className="flex gap-2">
+            <Input
+              id="tags"
+              placeholder="Add tags and press Enter"
+              value={tagInput}
+              onChange={(e) => setTagInput(e.target.value)}
+              onKeyPress={handleTagKeyPress}
+              className="flex-1"
+            />
+            <Button type="button" size="icon" onClick={addTag}>
+              <Plus size={16} />
+            </Button>
+          </div>
+          
+          {tags.length > 0 && (
+            <div className="flex flex-wrap gap-1 mt-2">
+              {tags.map((tag, index) => (
+                <Badge key={index} variant="secondary" className="flex items-center gap-1">
+                  <Tag size={12} />
+                  {tag}
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    className="h-4 w-4 p-0 ml-1"
+                    onClick={() => removeTag(tag)}
+                  >
+                    <X size={12} />
+                  </Button>
+                </Badge>
+              ))}
+            </div>
+          )}
+        </div>
+        
         <FileInput 
           files={files} 
           handleFileChange={handleFileChange} 
         />
+        
         {uploading && uploadProgress > 0 && (
           <UploadProgressBar progress={uploadProgress} />
         )}
@@ -111,14 +215,19 @@ function FileInput({ files, handleFileChange }: FileInputProps) {
   return (
     <div className="grid gap-2">
       <Label htmlFor="files">Files</Label>
-      <Input
-        id="files"
-        type="file"
-        onChange={handleFileChange}
-        required
-        className="text-sm"
-        multiple
-      />
+      <div className="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-4">
+        <Input
+          id="files"
+          type="file"
+          onChange={handleFileChange}
+          required
+          className="text-sm"
+          multiple
+        />
+        <p className="text-xs text-muted-foreground mt-2">
+          Drag and drop files here or click to select files. Maximum 25MB per file.
+        </p>
+      </div>
       {files.length > 0 && (
         <div className="text-xs text-muted-foreground mt-1">
           <p>{files.length} file(s) selected:</p>
