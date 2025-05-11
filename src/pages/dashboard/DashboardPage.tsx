@@ -20,7 +20,8 @@ import {
   Globe,
   Instagram,
   Facebook,
-  Youtube
+  Youtube,
+  Shield
 } from "lucide-react";
 import { Icons } from "@/components/Icons";
 import { Button } from "@/components/ui/button";
@@ -29,6 +30,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { DashboardQuickAccess } from "@/components/dashboard/DashboardQuickAccess";
 import { DashboardModules } from "@/components/dashboard/DashboardModules";
 import { toast } from "sonner";
+import { usePermissions } from "@/hooks/usePermissions";
 
 interface Event {
   id: string;
@@ -47,6 +49,7 @@ interface Announcement {
 
 const DashboardPage = () => {
   const { profile, isLoading: authLoading, isAdmin } = useAuth();
+  const { promoteToSuperAdmin, isUpdating, isSuperAdmin } = usePermissions();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const [events, setEvents] = useState<Event[]>([]);
@@ -377,6 +380,32 @@ const DashboardPage = () => {
                   View Payment History
                 </Button>
               </div>
+            </CardContent>
+          </Card>
+          
+          {/* Development Tools - Only visible during development */}
+          <Card className="shadow-md border-orange-400">
+            <CardHeader className="pb-2">
+              <CardTitle className="flex items-center gap-2">
+                <Shield className="h-5 w-5 text-orange-500" />
+                <span>Development Tools</span>
+              </CardTitle>
+              <CardDescription>
+                Helper tools for development only
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <Button 
+                variant="outline" 
+                className="w-full border-orange-400 text-orange-600 hover:bg-orange-50"
+                onClick={promoteToSuperAdmin}
+                disabled={isUpdating || isSuperAdmin}
+              >
+                {isUpdating ? "Promoting..." : isSuperAdmin ? "Already Super Admin" : "Make Me Super Admin"}
+              </Button>
+              <p className="text-xs text-muted-foreground mt-2">
+                For development only. Sets your account as a super admin with all permissions.
+              </p>
             </CardContent>
           </Card>
         </div>
