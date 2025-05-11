@@ -1,4 +1,3 @@
-
 import React from "react";
 import { Header } from "@/components/landing/Header";
 import { Footer } from "@/components/landing/Footer";
@@ -250,8 +249,8 @@ export default function AboutPage() {
               </p>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-12">
-              <Card className="overflow-hidden">
+            <div className="flex justify-center mb-12">
+              <Card className="overflow-hidden max-w-md">
                 <div className="p-1">
                   <AspectRatio ratio={1/1} className="overflow-hidden rounded-md bg-gray-100 dark:bg-gray-800">
                     <img 
@@ -267,26 +266,6 @@ export default function AboutPage() {
                   <p className="text-gray-600 dark:text-gray-400 text-sm">
                     Leading the Glee Club with distinction since 2010, Dr. Johnson holds a Doctor of Musical 
                     Arts degree and has conducted performances worldwide.
-                  </p>
-                </CardContent>
-              </Card>
-
-              <Card className="overflow-hidden">
-                <div className="p-1">
-                  <AspectRatio ratio={1/1} className="overflow-hidden rounded-md bg-gray-100 dark:bg-gray-800">
-                    <img 
-                      src="/lovable-uploads/9a044e72-80dc-40a6-b716-2d5c2d35b878.png" 
-                      alt="Dr. Maya Williams" 
-                      className="object-cover w-full h-full"
-                    />
-                  </AspectRatio>
-                </div>
-                <CardContent className="text-center py-6">
-                  <h3 className="text-xl font-bold mb-1">Dr. Maya Williams</h3>
-                  <p className="text-glee-purple font-medium mb-3">Assistant Director</p>
-                  <p className="text-gray-600 dark:text-gray-400 text-sm">
-                    Dr. Williams specializes in vocal pedagogy and arranging traditional spirituals 
-                    for modern choral performance. Spelman Class of 2005.
                   </p>
                 </CardContent>
               </Card>
