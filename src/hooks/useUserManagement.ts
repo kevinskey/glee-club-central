@@ -64,16 +64,15 @@ export const useUserManagement = () => {
             voice_part: user.voice_part || null,
             avatar_url: user.avatar_url || null,
             status: user.status || 'pending',
-            last_login: user.last_login || null,
             last_sign_in_at: user.last_sign_in_at || null,
             created_at: user.created_at || new Date().toISOString(),
-            updated_at: user.updated_at || null,
-            is_super_admin: user.is_super_admin === true,
-            title: user.title || null,
-            class_year: user.class_year || null,
+            updated_at: null, // These fields may not exist in the DB function response
+            is_super_admin: false, // Default value if not provided
+            title: user.role_display_name || null, // Use the display name field instead
+            class_year: null, // Default value if not provided
             join_date: user.join_date || null,
-            notes: user.notes || null,
-            dues_paid: user.dues_paid === true
+            notes: null, // Default value if not provided
+            dues_paid: false // Default value if not provided
           };
           
           return processedUser;

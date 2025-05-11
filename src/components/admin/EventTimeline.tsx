@@ -11,11 +11,11 @@ interface Event {
   description?: string;
 }
 
-interface EventTimelineProps {
+export interface EventTimelineProps {
   events: Event[];
 }
 
-export function EventTimeline({ events }: EventTimelineProps) {
+export function EventTimeline({ events = [] }: EventTimelineProps) {
   const getEventIcon = (type: string) => {
     switch (type) {
       case 'performance':

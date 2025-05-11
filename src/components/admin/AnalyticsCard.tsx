@@ -1,64 +1,75 @@
 
 import React from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { ArrowUp, ArrowDown, Minus } from "lucide-react";
+import { Bar, BarChart, ResponsiveContainer } from "recharts";
+import { LucideIcon } from "lucide-react";
+import { Spinner } from "@/components/ui/spinner";
 
 interface AnalyticsCardProps {
   title: string;
-  value: string | number;
-  change?: number;
+  value: number | string;
   description?: string;
   icon?: React.ReactNode;
+  chart?: boolean;
+  change?: number;
+  isLoading?: boolean;
 }
 
-export function AnalyticsCard({
-  title,
-  value,
+export function AnalyticsCard({ 
+  title, 
+  value, 
+  description, 
+  icon, 
+  chart, 
   change,
-  description,
-  icon,
+  isLoading = false
 }: AnalyticsCardProps) {
-  const getChangeDisplay = () => {
-    if (change === undefined) return null;
-    
-    if (change > 0) {
-      return (
-        <div className="flex items-center text-emerald-500">
-          <ArrowUp className="h-4 w-4 mr-1" />
-          <span>{change}%</span>
-        </div>
-      );
-    } else if (change < 0) {
-      return (
-        <div className="flex items-center text-rose-500">
-          <ArrowDown className="h-4 w-4 mr-1" />
-          <span>{Math.abs(change)}%</span>
-        </div>
-      );
-    } else {
-      return (
-        <div className="flex items-center text-muted-foreground">
-          <Minus className="h-4 w-4 mr-1" />
-          <span>0%</span>
-        </div>
-      );
-    }
-  };
-
+  const chartData = [
+    { name: "Jan", total: Math.floor(Math.random() * 5000) },
+    { name: "Feb", total: Math.floor(Math.random() * 5000) },
+    { name: "Mar", total: Math.floor(Math.random() * 5000) },
+    { name: "Apr", total: Math.floor(Math.random() * 5000) },
+    { name: "May", total: Math.floor(Math.random() * 5000) },
+    { name: "Jun", total: Math.floor(Math.random() * 5000) },
+  ];
+  
   return (
     <Card>
-      <CardHeader className="flex flex-row items-center justify-between pb-2">
-        <CardTitle className="text-sm font-medium">{title}</CardTitle>
-        {icon && <div className="h-5 w-5 text-muted-foreground">{icon}</div>}
+      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+        <CardTitle className="text-sm font-medium">
+          {title}
+        </CardTitle>
+        {icon && <div>{icon}</div>}
       </CardHeader>
       <CardContent>
-        <div className="text-2xl font-bold">{value}</div>
-        <div className="flex items-center justify-between mt-1">
-          {description && (
-            <p className="text-xs text-muted-foreground">{description}</p>
-          )}
-          {getChangeDisplay()}
-        </div>
+        {isLoading ? (
+          <div className="flex items-center justify-center h-10">
+            <Spinner size="sm" />
+          </div>
+        ) : (
+          <div className="space-y-1">
+            <div className="text-2xl font-bold">{value}</div>
+            {description && (
+              <p className="text-xs text-muted-foreground">
+                {description}
+                {change !== undefined && (
+                  <span className={`ml-1 ${change >= 0 ? 'text-emerald-500' : 'text-rose-500'}`}>
+                    {change >= 0 ? '+' : ''}{change}%
+                  </span>
+                )}
+              </p>
+            )}
+            {chart && (
+              <div className="h-[80px] mt-4">
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart data={chartData}>
+                    <Bar dataKey="total" className="fill-primary" radius={[4, 4, 0, 0]} />
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
+            )}
+          </div>
+        )}
       </CardContent>
     </Card>
   );

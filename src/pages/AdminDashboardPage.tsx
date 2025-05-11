@@ -29,50 +29,66 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useNavigate } from "react-router-dom";
+import { User } from "@/hooks/useUserManagement";
 
 // Sample data for demonstration
 const sampleMembers = [
   {
     id: "1",
-    name: "Tanya Williams",
+    first_name: "Tanya",
+    last_name: "Williams",
     role: "Singer",
-    voicePart: "Alto 2",
-    duesPaid: true,
-    avatarUrl: ""
+    voice_part: "alto_2",
+    dues_paid: true,
+    avatar_url: "",
+    status: "active",
+    created_at: new Date().toISOString()
   },
   {
     id: "2",
-    name: "James Johnson",
+    first_name: "James",
+    last_name: "Johnson",
     role: "Singer",
-    voicePart: "Tenor",
-    duesPaid: false,
-    avatarUrl: ""
+    voice_part: "tenor",
+    dues_paid: false,
+    avatar_url: "",
+    status: "active",
+    created_at: new Date().toISOString()
   },
   {
     id: "3",
-    name: "Sophia Martinez",
+    first_name: "Sophia",
+    last_name: "Martinez",
     role: "Section Leader",
-    voicePart: "Soprano 1",
-    duesPaid: true,
-    avatarUrl: ""
+    voice_part: "soprano_1",
+    dues_paid: true,
+    avatar_url: "",
+    status: "active",
+    created_at: new Date().toISOString()
   },
   {
     id: "4",
-    name: "Marcus Brown",
+    first_name: "Marcus",
+    last_name: "Brown",
     role: "Student Conductor",
-    voicePart: "Bass",
-    duesPaid: true,
-    avatarUrl: ""
+    voice_part: "bass",
+    dues_paid: true,
+    avatar_url: "",
+    status: "active",
+    created_at: new Date().toISOString()
   },
   {
     id: "5",
-    name: "Olivia Garcia",
+    first_name: "Olivia",
+    last_name: "Garcia",
     role: "Singer",
-    voicePart: "Soprano 2",
-    duesPaid: false,
-    avatarUrl: ""
+    voice_part: "soprano_2",
+    dues_paid: false,
+    avatar_url: "",
+    status: "active",
+    created_at: new Date().toISOString()
   }
-];
+] as User[];
 
 const sampleEvents = [
   {

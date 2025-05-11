@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { useNavigate } from "react-router-dom";
-import { User } from "@/services/userManagement";
+import { User } from "@/hooks/useUserManagement";
 import { formatVoicePart } from "@/components/members/formatters/memberFormatters";
 
 interface AdminMembersListProps {

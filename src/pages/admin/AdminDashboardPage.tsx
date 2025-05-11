@@ -10,6 +10,32 @@ import { AnalyticsCard } from "@/components/admin/AnalyticsCard";
 import { UserCountCard } from "@/components/admin/UserCountCard";
 import { useUserManagement } from "@/hooks/useUserManagement";
 import { Spinner } from "@/components/ui/spinner";
+import { Users, UserCheck, Wallet } from "lucide-react";
+
+// Sample events for the timeline
+const sampleEvents = [
+  {
+    id: "1",
+    date: "May 15, 2025",
+    title: "Spring Concert",
+    type: "performance" as const,
+    description: "Annual spring performance at Sisters Chapel"
+  },
+  {
+    id: "2",
+    date: "May 10, 2025",
+    title: "Final Rehearsal",
+    type: "rehearsal" as const,
+    description: "Pre-concert dress rehearsal"
+  },
+  {
+    id: "3",
+    date: "June 5, 2025",
+    title: "Alumni Event",
+    type: "other" as const,
+    description: "Special performance for alumni weekend"
+  }
+];
 
 export default function AdminDashboardPage() {
   const { users, isLoading, fetchUsers } = useUserManagement();
@@ -38,7 +64,7 @@ export default function AdminDashboardPage() {
               title="Active Members"
               value={users.filter(u => u.status === 'active').length.toString()}
               description="Currently active members"
-              icon="users"
+              icon={<Users className="h-4 w-4" />}
               isLoading={isLoading}
             />
             <AnalyticsCard 
@@ -50,14 +76,14 @@ export default function AdminDashboardPage() {
                 return new Date(u.last_sign_in_at) >= lastWeek;
               }).length.toString()}
               description="Users logged in this week"
-              icon="userCheck"
+              icon={<UserCheck className="h-4 w-4" />}
               isLoading={isLoading}
             />
             <AnalyticsCard 
               title="Dues Paid"
               value={users.filter(u => u.dues_paid).length.toString()}
               description="Members with dues paid"
-              icon="wallet"
+              icon={<Wallet className="h-4 w-4" />}
               isLoading={isLoading}
             />
           </div>
@@ -71,7 +97,7 @@ export default function AdminDashboardPage() {
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <EventTimeline />
+                <EventTimeline events={sampleEvents} />
               </CardContent>
             </Card>
             
