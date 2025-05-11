@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { useAuth } from './AuthContext';
 import { fetchUserPermissions } from '@/utils/supabase/permissions';
@@ -8,13 +7,17 @@ interface PermissionsState {
   error: string | null;
   permissions: Record<string, boolean> | null;
   refreshPermissions: () => Promise<void>;
+  userRole: string | null;
+  hasPermission: (permissionName: string) => boolean;
 }
 
 const RolePermissionContext = createContext<PermissionsState>({
   isLoading: true,
   error: null,
   permissions: null,
-  refreshPermissions: async () => {}
+  refreshPermissions: async () => {},
+  userRole: null,
+  hasPermission: () => false,
 });
 
 export const useRolePermissions = () => useContext(RolePermissionContext);
@@ -24,6 +27,18 @@ export const RolePermissionProvider: React.FC<{ children: React.ReactNode }> = (
   const [error, setError] = useState<string | null>(null);
   const [permissions, setPermissions] = useState<Record<string, boolean> | null>(null);
   const { user, profile } = useAuth();
+
+  // Function to check if user has a specific permission
+  const hasPermission = (permissionName: string): boolean => {
+    // If user has no permissions loaded or if permissions is null, deny access
+    if (!permissions) return false;
+    
+    // If user is a super admin, grant all permissions
+    if (profile?.is_super_admin) return true;
+    
+    // Otherwise, check if the specific permission is granted
+    return permissions[permissionName] === true;
+  };
 
   const loadPermissions = async () => {
     setIsLoading(true);
@@ -73,9 +88,19 @@ export const RolePermissionProvider: React.FC<{ children: React.ReactNode }> = (
     }
   };
 
+  // Get the user's role from their profile
+  const userRole = profile?.role || null;
+
   return (
     <RolePermissionContext.Provider
-      value={{ isLoading, error, permissions, refreshPermissions }}
+      value={{ 
+        isLoading, 
+        error, 
+        permissions, 
+        refreshPermissions,
+        userRole,
+        hasPermission 
+      }}
     >
       {children}
     </RolePermissionContext.Provider>
