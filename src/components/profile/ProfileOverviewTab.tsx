@@ -30,10 +30,10 @@ export const ProfileOverviewTab: React.FC<ProfileOverviewTabProps> = ({
   onSave 
 }) => {
   const [formData, setFormData] = useState({
-    first_name: profile.first_name, // Now required, so we don't need to use || ''
-    last_name: profile.last_name, // Now required, so no need for || ''
+    first_name: profile.first_name,
+    last_name: profile.last_name,
     phone: profile.phone || '',
-    voice_part: profile.voice_part || '',
+    voice_part: profile.voice_part, // Now required, so no need for || ''
     class_year: profile.class_year || ''
   });
   const [isSaving, setIsSaving] = useState(false);
@@ -87,7 +87,7 @@ export const ProfileOverviewTab: React.FC<ProfileOverviewTabProps> = ({
       first_name: profile.first_name,
       last_name: profile.last_name,
       phone: profile.phone || '',
-      voice_part: profile.voice_part || '',
+      voice_part: profile.voice_part,
       class_year: profile.class_year || ''
     });
   };

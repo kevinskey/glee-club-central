@@ -1,10 +1,10 @@
-
 import { Database } from "@/integrations/supabase/types";
 
 export interface Profile {
-  id: string;  // Already required
-  first_name: string;  // Already required
-  last_name: string;  // Changed from optional to required
+  id: string;  // Required
+  first_name: string;  // Required
+  last_name: string;  // Required
+  voice_part: string;  // Changed from optional to required
   avatar_url?: string;
   phone?: string;
   email?: string;
@@ -12,7 +12,6 @@ export interface Profile {
   status?: string;
   join_date?: string;
   class_year?: string;
-  voice_part?: string;
   robe_number?: number;
   is_super_admin?: boolean;
   created_at: string;

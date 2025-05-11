@@ -1,4 +1,3 @@
-
 import React from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { 
@@ -22,9 +21,7 @@ export const ProfileOverviewTab: React.FC<ProfileOverviewTabProps> = ({ profile,
     return new Date(dateString).toLocaleDateString();
   };
 
-  const formatVoicePart = (voicePart: string | null | undefined) => {
-    if (!voicePart) return "Not set";
-    
+  const formatVoicePart = (voicePart: string) => {
     switch (voicePart) {
       case "soprano_1": return "Soprano 1";
       case "soprano_2": return "Soprano 2";
