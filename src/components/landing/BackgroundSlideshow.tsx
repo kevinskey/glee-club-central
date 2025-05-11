@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 
 interface BackgroundSlideshowProps {
   images: string[];
@@ -12,83 +12,96 @@ export function BackgroundSlideshow({
   duration = 10000, // 10 seconds between transitions
   transition = 2000, // 2 seconds for the transition effect
 }: BackgroundSlideshowProps) {
-  const [currentImageIndex, setCurrentImageIndex] = useState(0);
-  const [nextImageIndex, setNextImageIndex] = useState(1);
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const [nextIndex, setNextIndex] = useState(1);
   const [isTransitioning, setIsTransitioning] = useState(false);
+  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
+  // Reset component when images change
   useEffect(() => {
+    // Clear any existing timers
+    if (timerRef.current) clearTimeout(timerRef.current);
+    if (intervalRef.current) clearInterval(intervalRef.current);
+    
+    // Reset state with the first image
+    setCurrentIndex(0);
+    setNextIndex(images && images.length > 1 ? 1 : 0);
+    setIsTransitioning(false);
+    
     // Don't set up transitions if we don't have enough images
     if (!images || images.length <= 1) return;
 
-    // Calculate the next image index
-    const calculateNextIndex = (current: number) => (current + 1) % images.length;
-    
-    // Function to handle image transition
+    // Function to handle transitions
     const handleTransition = () => {
+      console.log("Starting transition between images");
       setIsTransitioning(true);
       
-      // After transition completes, update the current image
-      const transitionTimer = setTimeout(() => {
-        setCurrentImageIndex(prevIndex => {
-          const newIndex = calculateNextIndex(prevIndex);
-          setNextImageIndex(calculateNextIndex(newIndex));
-          return newIndex;
-        });
+      // After transition completes, update to next image
+      timerRef.current = setTimeout(() => {
+        const newCurrentIndex = nextIndex;
+        const newNextIndex = (nextIndex + 1) % images.length;
+        
+        console.log(`Transition complete. Current: ${newCurrentIndex}, Next: ${newNextIndex}`);
+        
+        setCurrentIndex(newCurrentIndex);
+        setNextIndex(newNextIndex);
         setIsTransitioning(false);
       }, transition);
-      
-      return () => clearTimeout(transitionTimer);
     };
 
-    // Set up interval for consistent timing
-    const intervalId = setInterval(handleTransition, duration);
+    // Set up interval for consistent timing between transitions
+    intervalRef.current = setInterval(handleTransition, duration);
     
-    // Cleanup function
     return () => {
-      clearInterval(intervalId);
+      // Clean up timers
+      if (timerRef.current) clearTimeout(timerRef.current);
+      if (intervalRef.current) clearInterval(intervalRef.current);
     };
   }, [images, duration, transition]);
 
   // If no images provided, don't render anything
-  if (!images || images.length === 0) return null;
+  if (!images || images.length === 0) {
+    console.log("No images provided to BackgroundSlideshow");
+    return null;
+  }
   
   // Special case for single image (no transitions needed)
   if (images.length === 1) {
     return (
       <div 
-        className="absolute inset-0 bg-center"
+        className="absolute inset-0 bg-cover bg-center bg-no-repeat"
         style={{ 
           backgroundImage: `url('${images[0]}')`,
-          backgroundSize: 'cover',
-          backgroundRepeat: 'no-repeat'
         }}
       />
     );
   }
 
-  // For multiple images, set up the transition between current and next
+  // For multiple images, set up the transition between images
   return (
     <div className="absolute inset-0 overflow-hidden">
       {/* Current Image */}
       <div
-        className="absolute inset-0 bg-center transition-opacity"
+        className="absolute inset-0 bg-cover bg-center bg-no-repeat transition-opacity"
         style={{
-          backgroundImage: `url('${images[currentImageIndex]}')`,
-          backgroundSize: 'cover',
-          backgroundRepeat: 'no-repeat',
+          backgroundImage: `url('${images[currentIndex]}')`,
           opacity: isTransitioning ? 0 : 1,
+          transitionProperty: 'opacity',
           transitionDuration: `${transition}ms`,
+          transitionTimingFunction: 'ease',
         }}
       />
+      
       {/* Next Image */}
       <div
-        className="absolute inset-0 bg-center transition-opacity"
+        className="absolute inset-0 bg-cover bg-center bg-no-repeat transition-opacity"
         style={{
-          backgroundImage: `url('${images[nextImageIndex]}')`,
-          backgroundSize: 'cover',
-          backgroundRepeat: 'no-repeat',
+          backgroundImage: `url('${images[nextIndex]}')`,
           opacity: isTransitioning ? 1 : 0,
+          transitionProperty: 'opacity',
           transitionDuration: `${transition}ms`,
+          transitionTimingFunction: 'ease',
         }}
       />
     </div>

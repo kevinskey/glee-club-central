@@ -19,25 +19,25 @@ export default function LandingPage() {
   useEffect(() => {
     console.log("LandingPage component mounting");
     
-    try {
-      // Load essential components with a slight delay to ensure DOM is ready
-      const timer = setTimeout(() => {
+    // Simple timeout to ensure all resources are loaded properly
+    // This gives the browser time to process all components
+    const timer = setTimeout(() => {
+      try {
         console.log("LandingPage finished loading");
         setIsLoading(false);
-      }, 800);
-      
-      return () => clearTimeout(timer);
-    } catch (err) {
-      console.error("Error loading landing page:", err);
-      setError(err instanceof Error ? err : new Error("Failed to load page"));
-      setIsLoading(false);
-      
-      toast({
-        variant: "destructive",
-        title: "Error loading page",
-        description: "Please refresh the page or try again later.",
-      });
-    }
+      } catch (err) {
+        console.error("Error loading landing page:", err);
+        setError(err instanceof Error ? err : new Error("Failed to load page"));
+        
+        toast({
+          variant: "destructive",
+          title: "Error loading page",
+          description: "Please refresh the page or try again later.",
+        });
+      }
+    }, 1000);
+    
+    return () => clearTimeout(timer);
   }, [toast]);
 
   if (isLoading) {
