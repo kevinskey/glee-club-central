@@ -327,6 +327,9 @@ export function AuthProvider({ children }: AuthProviderProps) {
     }
   };
 
+  // Alias logout to signOut for backwards compatibility
+  const logout = signOut;
+
   const updatePassword = async (newPassword: string) => {
     try {
       console.log("Updating password");
@@ -366,8 +369,9 @@ export function AuthProvider({ children }: AuthProviderProps) {
     isLoading,
     permissions,
     signIn,
-    signUp, // Include the updated signUp function
+    signUp,
     signOut,
+    logout,
     isAdmin,
     updatePassword,
     refreshPermissions,

@@ -21,13 +21,27 @@ export interface AuthUser {
 export interface Profile {
   id: string;
   user_id: string;
-  full_name?: string;
+  first_name?: string;
+  last_name?: string;
+  email?: string;
+  phone?: string;
   avatar_url?: string;
   voice_part?: string;
   section?: string;
   class_year?: string;
   bio?: string;
+  status?: string;
+  role?: string;
+  title?: string;
+  special_roles?: string;
+  join_date?: string;
+  created_at?: string;
   updated_at?: string;
+  last_sign_in_at?: string;
+  notes?: string;
+  dues_paid?: boolean;
+  is_super_admin?: boolean;
+  personal_title?: string;
 }
 
 export interface UserRole {
@@ -46,4 +60,6 @@ export interface AuthContextType {
   login: (email: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
   resetPassword: (email: string) => Promise<void>;
+  signOut?: () => Promise<void>;
+  refreshPermissions?: (userId?: string) => Promise<void>;
 }

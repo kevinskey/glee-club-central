@@ -16,8 +16,9 @@ const RootLayout = () => {
   );
 };
 
-// Update the router to use RootLayout as the root element
-router.routes[0].element = <RootLayout />;
+// Update the router configuration correctly
+const routeConfiguration = router.routes[0] as any;
+routeConfiguration.element = <RootLayout />;
 
 function App() {
   return (
