@@ -1,3 +1,4 @@
+
 import React, { useState, useCallback } from "react";
 import { User } from "@/hooks/useUserManagement";
 import { Navigate } from "react-router-dom";
@@ -54,7 +55,7 @@ export function MembersPageComponent({ useUserManagementHook }: MembersPageProps
   const [roleFilter, setRoleFilter] = useState("all");
   const [statusFilter, setStatusFilter] = useState("all");
   
-  // Dialog state
+  // Dialog state - ensure they are properly initialized
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [isManageRoleOpen, setIsManageRoleOpen] = useState(false);
   const [isAddMemberOpen, setIsAddMemberOpen] = useState(false);
@@ -80,6 +81,14 @@ export function MembersPageComponent({ useUserManagementHook }: MembersPageProps
     deleteUser
   } = useUserManagementHook();
   
+  console.log("MembersPageComponent - Dialog state:", { 
+    isAddMemberOpen, 
+    isEditUserOpen, 
+    isManageRoleOpen,
+    isPermissionsOpen,
+    isDeleteDialogOpen 
+  });
+  
   // Explicitly filter out deleted users
   const members = allMembers ? allMembers.filter(member => member.status !== 'deleted') : [];
   
@@ -96,12 +105,18 @@ export function MembersPageComponent({ useUserManagementHook }: MembersPageProps
   const handleAddMember = useCallback(async (data: UserFormValues) => {
     setIsSubmitting(true);
     try {
+      console.log("Adding member with data:", data);
       const success = await addUser(data);
       if (success) {
         setIsAddMemberOpen(false);
         toast.success(`Added ${data.first_name} ${data.last_name} successfully`);
         // No need to call refreshUsers here since we're adding the user to local state in addUser function
+      } else {
+        toast.error("Failed to add member");
       }
+    } catch (error) {
+      console.error("Error adding member:", error);
+      toast.error("Failed to add member");
     } finally {
       setIsSubmitting(false);
     }
@@ -175,12 +190,12 @@ export function MembersPageComponent({ useUserManagementHook }: MembersPageProps
   }
   
   if (!isAuthenticated) {
-    console.log("AdminMembersPage - Access denied, redirecting to login");
+    console.log("MembersPageComponent - Access denied, redirecting to login");
     return <Navigate to="/login" />;
   }
   
   if (!hasAdminAccess) {
-    console.log("AdminMembersPage - Not admin, redirecting to dashboard");
+    console.log("MembersPageComponent - Not admin, redirecting to dashboard");
     return <Navigate to="/dashboard" />;
   }
   
@@ -201,7 +216,10 @@ export function MembersPageComponent({ useUserManagementHook }: MembersPageProps
           setRoleFilter={setRoleFilter}
           statusFilter={statusFilter}
           setStatusFilter={setStatusFilter}
-          onCreateUserClick={() => setIsAddMemberOpen(true)}
+          onCreateUserClick={() => {
+            console.log("Opening add member dialog");
+            setIsAddMemberOpen(true);
+          }}
           onRefreshClick={refreshUsers}
           isLoading={isLoading}
           isMobile={isMobile}
@@ -248,15 +266,17 @@ export function MembersPageComponent({ useUserManagementHook }: MembersPageProps
       />
       
       {/* Add Member Dialog */}
-      <AddMemberDialog
-        isOpen={isAddMemberOpen}
-        onOpenChange={setIsAddMemberOpen}
-        onMemberAdd={handleAddMember}
-        isSubmitting={isSubmitting}
-      />
+      {isAddMemberOpen && (
+        <AddMemberDialog
+          isOpen={isAddMemberOpen}
+          onOpenChange={setIsAddMemberOpen}
+          onMemberAdd={handleAddMember}
+          isSubmitting={isSubmitting}
+        />
+      )}
       
       {/* Edit User Dialog */}
-      {updateUser && (
+      {updateUser && isEditUserOpen && selectedUser && (
         <EditUserDialog
           isOpen={isEditUserOpen}
           onOpenChange={setIsEditUserOpen}

@@ -32,6 +32,11 @@ export function UserManagementToolbar({
   isMobile,
   canCreate
 }: UserManagementToolbarProps) {
+  const handleCreateUserClick = () => {
+    console.log("Create user button clicked!");
+    onCreateUserClick();
+  };
+
   return (
     <div className="mb-4 flex flex-col space-y-3 sm:space-y-0 sm:flex-row justify-between">
       <div className="flex flex-1 items-center space-x-2">
@@ -101,7 +106,7 @@ export function UserManagementToolbar({
         </Button>
         
         {canCreate && (
-          <Button onClick={onCreateUserClick}>
+          <Button onClick={handleCreateUserClick} data-testid="add-member-button">
             <UserPlus className="h-4 w-4 mr-2" />
             Add Member
           </Button>
