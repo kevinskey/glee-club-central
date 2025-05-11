@@ -10,7 +10,7 @@ export interface Profile {
   phone?: string;
   email?: string;
   role: string;  // Changed from optional to required
-  status?: string;
+  status: string;  // Changed from optional to required
   join_date?: string;
   class_year?: string;
   robe_number?: number;
