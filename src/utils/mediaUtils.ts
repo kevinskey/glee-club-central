@@ -29,3 +29,31 @@ export function getMediaTypeLabel(type: MediaType): string {
       return "Other Files";
   }
 }
+
+// Flickr API utility
+export async function fetchFlickrPhotos(userId = '129581018@N02', count = 6) {
+  const apiKey = 'f9736a5829672b0626b09be91b45c0fa';
+  const url = `https://www.flickr.com/services/rest/?method=flickr.people.getPublicPhotos&api_key=${apiKey}&user_id=${userId}&format=json&per_page=${count}&nojsoncallback=1`;
+  
+  try {
+    const response = await fetch(url);
+    const data = await response.json();
+    
+    if (data.stat !== 'ok') {
+      console.error('Error fetching Flickr photos:', data);
+      return [];
+    }
+    
+    return data.photos.photo.map((photo: any) => ({
+      id: photo.id,
+      title: photo.title,
+      imageUrl: `https://live.staticflickr.com/${photo.server}/${photo.id}_${photo.secret}_c.jpg`, // c is for medium 800px
+      thumbnailUrl: `https://live.staticflickr.com/${photo.server}/${photo.id}_${photo.secret}_q.jpg`, // q is for square 150px
+      flickrUrl: `https://www.flickr.com/photos/${userId}/${photo.id}/`
+    }));
+  } catch (error) {
+    console.error('Error fetching Flickr photos:', error);
+    return [];
+  }
+}
+

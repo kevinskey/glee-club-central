@@ -7,6 +7,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { DownloadCloud, FileText, Image, Music, Users } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { FlickrGallery } from "@/components/media/FlickrGallery";
 
 export default function PressKitPage() {
   const navigate = useNavigate();
@@ -144,12 +145,14 @@ export default function PressKitPage() {
               </div>
               
               <p className="text-lg mb-8 text-gray-700 dark:text-gray-300">
-                High-resolution photographs of the Spelman College Glee Club for media use. Click on any image to download the high-resolution version.
+                High-resolution photographs of the Spelman College Glee Club for media use. Click on any image to view or download the high-resolution version.
                 All photographs are credited to Spelman College unless otherwise noted. For permission to use these images, please 
                 <a href="/contact" className="text-glee-purple hover:text-glee-accent mx-1">contact us</a>.
               </p>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+              {/* Our Curated Press Photos */}
+              <h3 className="text-xl font-semibold mb-4 text-glee-purple">Official Press Images</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
                 <div className="rounded-xl overflow-hidden shadow-md hover:shadow-lg transition-shadow">
                   <AspectRatio ratio={4/3}>
                     <img 
@@ -187,8 +190,12 @@ export default function PressKitPage() {
                   </div>
                 </div>
               </div>
+              
+              {/* Flickr Gallery Section */}
+              <h3 className="text-xl font-semibold mb-4 text-glee-purple">From Our Flickr Gallery</h3>
+              <FlickrGallery photoCount={6} />
 
-              <div className="text-center">
+              <div className="text-center mt-8">
                 <Button className="bg-glee-purple hover:bg-glee-spelman">
                   <DownloadCloud className="mr-2 h-4 w-4" /> Download All Press Photos (ZIP)
                 </Button>
