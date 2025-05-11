@@ -64,6 +64,10 @@ export function MembersList({
     }
   };
 
+  // Log members to confirm none are deleted
+  console.log(`MembersList rendering ${members.length} members`);
+  console.log(`Members with deleted status: ${members.filter(m => m.status === 'deleted').length}`);
+
   return (
     <div className="border rounded-md mt-4 overflow-hidden">
       <Table>
@@ -85,7 +89,8 @@ export function MembersList({
               </TableCell>
             </TableRow>
           ) : (
-            members.map((member) => (
+            // Double check filtering out deleted members
+            members.filter(member => member.status !== 'deleted').map((member) => (
               <TableRow key={member.id}>
                 <TableCell className="font-medium">
                   {member.first_name} {member.last_name}

@@ -80,7 +80,7 @@ export function MembersPageComponent({ useUserManagementHook }: MembersPageProps
     deleteUser
   } = useUserManagementHook();
   
-  // Filter out deleted users
+  // Filter out deleted users more explicitly
   const members = allMembers.filter(member => member.status !== 'deleted');
   
   // Create a wrapper function for fetchUsers that returns void
@@ -176,8 +176,11 @@ export function MembersPageComponent({ useUserManagementHook }: MembersPageProps
     );
   }
 
-  // Filter members based on search query and filters
+  // Filter members based on search query and filters - ensuring deleted users are filtered out
   const filteredMembers = members.filter(member => {
+    // Explicitly check again for deleted status as a safeguard
+    if (member.status === 'deleted') return false;
+    
     const matchesSearch = 
       (member.first_name || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
       (member.last_name || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -231,6 +234,14 @@ export function MembersPageComponent({ useUserManagementHook }: MembersPageProps
             setIsPermissionsOpen(true);
           }}
           canEdit={hasAdminAccess}
+          // Explicitly pass through props to match with what MembersPage.tsx expects
+          onEditMember={onEditUser ? (user) => {
+            setSelectedUser(user);
+            setIsEditUserOpen(true);
+          } : undefined}
+          onDeleteMember={handleDeleteUser}
+          onStatusUpdate={undefined}
+          onStatusUpdateSuccess={refreshUsers}
         />
       </Card>
       
