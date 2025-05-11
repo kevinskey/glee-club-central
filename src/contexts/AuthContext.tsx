@@ -1,4 +1,3 @@
-
 import React, { createContext, useState, useEffect, useContext, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Profile, AuthUser, AuthContextType, UserRole } from '@/types/auth';
@@ -204,32 +203,33 @@ export function AuthProvider({ children }: AuthProviderProps) {
     }
   };
 
-  const signUp = async (email: string, password: string, firstName: string, lastName: string) => {
+  const signUp = async (email: string, password: string, firstName: string, lastName: string, role: string = 'member') => {
     try {
-      console.log("Signing up user:", email);
+      console.log("SignUp attempt with role:", role);
+      
+      // Use Supabase's signUp method with metadata that includes the user's role
       const { data, error } = await supabase.auth.signUp({
-        email: email,
-        password: password,
+        email,
+        password,
         options: {
           data: {
             first_name: firstName,
             last_name: lastName,
-          }
-        }
+            role: role // Ensure this is included in the metadata
+          },
+        },
       });
 
       if (error) {
-        console.error("Sign-up error:", error);
-        toast.error('Sign-up failed');
+        console.error("SignUp error:", error);
         return { error, data: null };
       }
 
-      toast.success('Sign-up successful');
+      console.log("SignUp successful, user:", data.user);
       return { error: null, data };
-    } catch (err) {
-      console.error("Error during sign-up:", err);
-      toast.error('Error during sign-up');
-      return { error: err, data: null };
+    } catch (e: any) {
+      console.error("Unexpected error in signUp:", e);
+      return { error: e, data: null };
     }
   };
 
@@ -287,11 +287,11 @@ export function AuthProvider({ children }: AuthProviderProps) {
     user,
     profile,
     loading: false, // Legacy prop kept for backwards compatibility
-    isAuthenticated,
+    isAuthenticated: !!user,
     isLoading,
     permissions,
     signIn,
-    signUp,
+    signUp, // Include the updated signUp function
     signOut,
     isAdmin,
     updatePassword,

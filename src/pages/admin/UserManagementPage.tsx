@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { PageHeader } from "@/components/ui/page-header";
 import { Users, Plus, Search, Filter, UserCog } from "lucide-react";
@@ -20,13 +19,26 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { formatDistanceToNow } from "date-fns";
 import { UserRoleSelector } from "@/components/members/UserRoleSelector";
-import { User } from "@/hooks/useUserManagement";
+import { User, useUserManagement } from "@/hooks/useUserManagement";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { userFormSchema, UserFormValues } from "@/components/members/form/userFormSchema";
+import { useForm } from "react-hook-form";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 interface UserManagementState {
   users: User[];
@@ -36,9 +48,11 @@ interface UserManagementState {
   statusFilter: string;
   selectedUser: User | null;
   isRoleDialogOpen: boolean;
+  isAddUserDialogOpen: boolean;
 }
 
 export default function UserManagementPage() {
+  const { addUser, fetchUsers } = useUserManagement();
   const [state, setState] = useState<UserManagementState>({
     users: [],
     isLoading: true,
@@ -46,11 +60,25 @@ export default function UserManagementPage() {
     roleFilter: "all",
     statusFilter: "all",
     selectedUser: null,
-    isRoleDialogOpen: false
+    isRoleDialogOpen: false,
+    isAddUserDialogOpen: false
+  });
+
+  const form = useForm<UserFormValues>({
+    resolver: zodResolver(userFormSchema),
+    defaultValues: {
+      first_name: "",
+      last_name: "",
+      email: "",
+      password: "",
+      role: "singer",
+      voice_part: "soprano_1",
+      status: "active"
+    }
   });
   
   // Fetch users
-  const fetchUsers = async () => {
+  const loadUsers = async () => {
     setState(prev => ({ ...prev, isLoading: true }));
     try {
       const { data, error } = await supabase
@@ -72,7 +100,7 @@ export default function UserManagementPage() {
   };
 
   useEffect(() => {
-    fetchUsers();
+    loadUsers();
   }, []);
 
   // Filter users based on search query and filters
@@ -88,7 +116,23 @@ export default function UserManagementPage() {
     return matchesSearch && matchesRole && matchesStatus;
   });
 
-  // Change user role
+  // Handler for adding a new user by admin
+  const handleAddUser = async (values: UserFormValues) => {
+    try {
+      const success = await addUser(values);
+      if (success) {
+        toast.success(`Added ${values.first_name} ${values.last_name}`);
+        form.reset();
+        setState(prev => ({ ...prev, isAddUserDialogOpen: false }));
+        loadUsers();
+      }
+    } catch (error) {
+      console.error("Error adding user:", error);
+      toast.error("Failed to add user");
+    }
+  };
+
+  // Change user role, status, etc.
   const openRoleDialog = (user: User) => {
     setState(prev => ({
       ...prev,
@@ -173,7 +217,7 @@ export default function UserManagementPage() {
               Reset
             </Button>
             
-            <Button>
+            <Button onClick={() => setState(prev => ({ ...prev, isAddUserDialogOpen: true }))}>
               <Plus className="h-4 w-4 mr-2" />
               Add User
             </Button>
@@ -265,12 +309,186 @@ export default function UserManagementPage() {
         </div>
       </Card>
       
+      {/* User Role Dialog */}
       <UserRoleSelector
         user={state.selectedUser}
         isOpen={state.isRoleDialogOpen}
         onOpenChange={(isOpen) => setState(prev => ({ ...prev, isRoleDialogOpen: isOpen }))}
-        onSuccess={fetchUsers}
+        onSuccess={loadUsers}
       />
+
+      {/* Add User Dialog - Comprehensive form for admin user creation */}
+      <Dialog open={state.isAddUserDialogOpen} onOpenChange={(open) => setState(prev => ({ ...prev, isAddUserDialogOpen: open }))}>
+        <DialogContent className="sm:max-w-[550px]">
+          <DialogHeader>
+            <DialogTitle>Add New User</DialogTitle>
+            <DialogDescription>
+              Create a new user with full attributes and role selection
+            </DialogDescription>
+          </DialogHeader>
+          
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(handleAddUser)} className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <FormField
+                  control={form.control}
+                  name="first_name"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>First Name</FormLabel>
+                      <FormControl>
+                        <Input {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                
+                <FormField
+                  control={form.control}
+                  name="last_name"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Last Name</FormLabel>
+                      <FormControl>
+                        <Input {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+
+              <FormField
+                control={form.control}
+                name="email"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Email</FormLabel>
+                    <FormControl>
+                      <Input type="email" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="password"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Password</FormLabel>
+                    <FormControl>
+                      <Input type="password" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <div className="grid grid-cols-2 gap-4">
+                <FormField
+                  control={form.control}
+                  name="role"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Role</FormLabel>
+                      <Select onValueChange={field.onChange} defaultValue={field.value}>
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select role" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          <SelectItem value="singer">Singer</SelectItem>
+                          <SelectItem value="section_leader">Section Leader</SelectItem>
+                          <SelectItem value="student_conductor">Student Conductor</SelectItem>
+                          <SelectItem value="accompanist">Accompanist</SelectItem>
+                          <SelectItem value="non_singer">Non-Singer</SelectItem>
+                          <SelectItem value="administrator">Administrator</SelectItem>
+                          <SelectItem value="director">Director</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="voice_part"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Voice Part</FormLabel>
+                      <Select onValueChange={field.onChange} defaultValue={field.value}>
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select voice part" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          <SelectItem value="soprano_1">Soprano 1</SelectItem>
+                          <SelectItem value="soprano_2">Soprano 2</SelectItem>
+                          <SelectItem value="alto_1">Alto 1</SelectItem>
+                          <SelectItem value="alto_2">Alto 2</SelectItem>
+                          <SelectItem value="tenor">Tenor</SelectItem>
+                          <SelectItem value="bass">Bass</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+
+              <FormField
+                control={form.control}
+                name="status"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Status</FormLabel>
+                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select status" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value="active">Active</SelectItem>
+                        <SelectItem value="pending">Pending</SelectItem>
+                        <SelectItem value="inactive">Inactive</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="class_year"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Class Year</FormLabel>
+                    <FormControl>
+                      <Input {...field} value={field.value || ''} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <DialogFooter>
+                <Button type="button" variant="outline" onClick={() => setState(prev => ({ ...prev, isAddUserDialogOpen: false }))}>
+                  Cancel
+                </Button>
+                <Button type="submit">Create User</Button>
+              </DialogFooter>
+            </form>
+          </Form>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

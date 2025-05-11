@@ -111,11 +111,13 @@ export default function RegisterPage() {
         console.log("Sign-out before registration failed, continuing anyway");
       }
       
+      // Pass the 'member' role as part of the user's metadata
       const { error, data } = await signUp(
         values.email,
         values.password,
         values.firstName,
-        values.lastName
+        values.lastName,
+        'member' // Explicitly set role as 'member' for self-registrations
       );
 
       if (error) {
