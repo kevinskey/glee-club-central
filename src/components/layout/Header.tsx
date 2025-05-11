@@ -18,11 +18,11 @@ import {
   LogOut,
   Home,
 } from "lucide-react";
-import { useSidebar } from "@/hooks/use-sidebar";
+import { useSidebar } from "@/components/ui/sidebar";
 
 export function Header() {
   const { profile, signOut } = useAuth();
-  const { onOpen } = useSidebar();
+  const { toggleSidebar } = useSidebar();
   const navigate = useNavigate();
   
   const handleSignOut = async () => {
@@ -38,7 +38,7 @@ export function Header() {
             variant="ghost" 
             size="icon" 
             className="md:hidden" 
-            onClick={onOpen}
+            onClick={toggleSidebar}
           >
             <Menu className="h-5 w-5" />
             <span className="sr-only">Toggle sidebar</span>

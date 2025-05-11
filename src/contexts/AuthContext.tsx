@@ -106,7 +106,8 @@ export function AuthProvider({ children }: AuthProviderProps) {
             fetchProfile(session.user.id);
           }, 0);
         } 
-        else if (event === 'SIGNED_OUT' || event === 'USER_DELETED') {
+        // Fixed comparison - checking if event is either SIGNED_OUT or USER_DELETED
+        else if (['SIGNED_OUT', 'USER_DELETED'].includes(event)) {
           setSession(null);
           setUser(null);
           setProfile(null);

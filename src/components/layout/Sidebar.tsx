@@ -1,7 +1,7 @@
 
-import React, { useEffect } from "react";
+import React from "react";
 import { useLocation } from "react-router-dom";
-import { useSidebar } from "@/hooks/use-sidebar";
+import { useSidebar } from "@/components/ui/sidebar";
 import { useAuth } from "@/contexts/AuthContext";
 import { DesktopSidebar } from "@/components/layout/DesktopSidebar";
 import { MobileNav } from "@/components/layout/MobileNav";
@@ -9,26 +9,26 @@ import { MobileNav } from "@/components/layout/MobileNav";
 export function Sidebar() {
   const { isAdmin } = useAuth();
   const { pathname } = useLocation();
-  const { isOpen, onClose } = useSidebar();
-
+  const { open, setOpen } = useSidebar();
+  
   // Close sidebar on route change for mobile
-  useEffect(() => {
-    onClose();
-  }, [pathname, onClose]);
+  React.useEffect(() => {
+    setOpen(false);
+  }, [pathname, setOpen]);
 
   return (
     <>
       {/* Desktop Sidebar */}
-      <DesktopSidebar isOpen={isOpen} isAdmin={isAdmin()} />
+      <DesktopSidebar isOpen={open} isAdmin={isAdmin()} />
       
       {/* Mobile Navigation */}
       <MobileNav isAdmin={isAdmin()} />
       
       {/* Overlay when sidebar is open on mobile */}
-      {isOpen && (
+      {open && (
         <div 
           className="fixed inset-0 z-20 bg-background/80 backdrop-blur-sm lg:hidden"
-          onClick={onClose}
+          onClick={() => setOpen(false)}
         />
       )}
     </>

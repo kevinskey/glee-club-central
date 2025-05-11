@@ -4,7 +4,7 @@ import { Link, useLocation } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-import { useSidebar } from "@/hooks/use-sidebar";
+import { useSidebar } from "@/components/ui/sidebar";
 import { cn } from "@/lib/utils";
 import { 
   LayoutDashboard, 
@@ -27,7 +27,7 @@ interface MobileNavProps {
 
 export function MobileNav({ isAdmin }: MobileNavProps) {
   const { pathname } = useLocation();
-  const { isOpen, onOpen, onClose } = useSidebar();
+  const { open, setOpen } = useSidebar();
   const { isAuthenticated } = useAuth();
   
   if (!isAuthenticated) return null;
@@ -100,7 +100,7 @@ export function MobileNav({ isAdmin }: MobileNavProps) {
 
   return (
     <div className="flex items-center lg:hidden">
-      <Sheet open={isOpen} onOpenChange={isOpen ? onClose : onOpen}>
+      <Sheet open={open} onOpenChange={setOpen}>
         <SheetTrigger asChild>
           <Button 
             variant="ghost" 
@@ -122,7 +122,7 @@ export function MobileNav({ isAdmin }: MobileNavProps) {
                   <Link
                     key={item.href}
                     to={item.href}
-                    onClick={onClose}
+                    onClick={() => setOpen(false)}
                     className={cn(
                       "flex items-center rounded-md px-3 py-3 text-sm font-medium",
                       pathname === item.href ? "bg-accent text-accent-foreground" : "hover:bg-accent hover:text-accent-foreground transition-colors"
@@ -145,7 +145,7 @@ export function MobileNav({ isAdmin }: MobileNavProps) {
                     <Link
                       key={item.href}
                       to={item.href}
-                      onClick={onClose}
+                      onClick={() => setOpen(false)}
                       className={cn(
                         "flex items-center rounded-md px-3 py-3 text-sm font-medium",
                         pathname === item.href ? "bg-accent text-accent-foreground" : "hover:bg-accent hover:text-accent-foreground transition-colors"

@@ -5,6 +5,7 @@ import { Header } from "@/components/layout/Header";
 import { Sidebar } from "@/components/layout/Sidebar";
 import { useAuth } from "@/contexts/AuthContext";
 import { Spinner } from "@/components/ui/spinner";
+import { SidebarProvider } from "@/components/ui/sidebar";
 
 export function DashboardLayout() {
   const { isAuthenticated, isLoading } = useAuth();
@@ -25,16 +26,18 @@ export function DashboardLayout() {
   }
 
   return (
-    <div className="min-h-screen flex flex-col bg-background">
-      <Header />
-      
-      <div className="flex-1 flex flex-col md:flex-row">
-        <Sidebar />
+    <SidebarProvider>
+      <div className="min-h-screen flex flex-col bg-background w-full">
+        <Header />
         
-        <main className="flex-1 p-3 md:p-6 lg:p-8 md:ml-64 pb-16 md:pb-8 overflow-x-hidden">
-          <Outlet />
-        </main>
+        <div className="flex-1 flex flex-col md:flex-row">
+          <Sidebar />
+          
+          <main className="flex-1 p-3 md:p-6 lg:p-8 md:ml-64 pb-16 md:pb-8 overflow-x-hidden">
+            <Outlet />
+          </main>
+        </div>
       </div>
-    </div>
+    </SidebarProvider>
   );
 }
