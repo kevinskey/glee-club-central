@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useRef } from "react";
 import { PageHeader } from "@/components/ui/page-header";
 import { FileText, Search, Plus, Upload, FolderOpen, ListMusic, Check, TableIcon, ArrowUpDown, Music } from "lucide-react";
@@ -17,6 +16,8 @@ import { MultipleDownloadBar } from "@/components/sheet-music/MultipleDownloadBa
 import { getMediaType } from "@/utils/mediaUtils";
 import { useMediaLibrary } from "@/hooks/useMediaLibrary";
 import { Toggle } from "@/components/ui/toggle";
+import { PDFThumbnail } from "@/components/pdf/PDFThumbnail";
+import { PDFPreview } from "@/components/pdf/PDFPreview";
 import {
   Table,
   TableBody,
@@ -147,7 +148,7 @@ export default function SheetMusicPage() {
   useEffect(() => {
     fetchAllMedia();
   }, []);
-
+  
   // Update music files when media library is loaded or data source changes
   useEffect(() => {
     if (!mediaLoading && filteredMediaFiles.length > 0 && useMediaLibrarySource) {
