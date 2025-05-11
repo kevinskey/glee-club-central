@@ -9,25 +9,25 @@ export const useCalendarNavigation = (
 ) => {
   const handlePrevClick = useCallback(() => {
     if (calendarRef.current) {
-      const api = calendarRef.current.getApi();
-      api.prev();
-      setCurrentDate(api.getDate());
+      const calendarApi = calendarRef.current.getApi();
+      calendarApi.prev();
+      setCurrentDate(calendarApi.getDate());
     }
   }, [calendarRef, setCurrentDate]);
 
   const handleNextClick = useCallback(() => {
     if (calendarRef.current) {
-      const api = calendarRef.current.getApi();
-      api.next();
-      setCurrentDate(api.getDate());
+      const calendarApi = calendarRef.current.getApi();
+      calendarApi.next();
+      setCurrentDate(calendarApi.getDate());
     }
   }, [calendarRef, setCurrentDate]);
 
   const handleTodayClick = useCallback(() => {
     if (calendarRef.current) {
-      const api = calendarRef.current.getApi();
-      api.today();
-      setCurrentDate(api.getDate());
+      const calendarApi = calendarRef.current.getApi();
+      calendarApi.today();
+      setCurrentDate(calendarApi.getDate());
     }
   }, [calendarRef, setCurrentDate]);
 

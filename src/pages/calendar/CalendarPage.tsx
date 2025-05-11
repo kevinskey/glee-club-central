@@ -25,7 +25,7 @@ const CalendarPage = () => {
   const { events, fetchEvents, addEvent, updateEvent, deleteEvent } = useCalendarStore();
   const { isAdmin, profile, isLoading: authLoading } = useAuth();
 
-  const userCanCreate = isAdmin() || profile?.role === "section_leader";
+  const userCanCreate = profile?.role === "admin" || profile?.role === "section_leader";
 
   useEffect(() => {
     const loadEvents = async () => {

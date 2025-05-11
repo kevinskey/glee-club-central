@@ -33,7 +33,7 @@ export const CalendarMain = ({
   handleEventDrop,
   handleEventResize
 }: CalendarMainProps) => {
-  const calendarRef = useRef<FullCalendar | null>(null);
+  const calendarRef = useRef<FullCalendar>(null);
   
   const { 
     handlePrevClick, 

@@ -15,8 +15,8 @@ export const EventContent = ({ eventInfo, view }: EventContentProps) => {
     'special': 'bg-purple-500 border-purple-600'
   };
 
-  const eventType = eventInfo.event.extendedProps.type as EventType || 'special';
-  const location = eventInfo.event.extendedProps.location;
+  const eventType = (eventInfo.event.extendedProps?.type as EventType) || 'special';
+  const location = eventInfo.event.extendedProps?.location;
   
   // Different rendering based on view type
   if (view === 'dayGridMonth') {
