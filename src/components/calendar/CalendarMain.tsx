@@ -11,11 +11,8 @@ import { CalendarEvent } from "@/types/calendar";
 import { useCalendarNavigation } from "@/hooks/useCalendarNavigation";
 import { Card } from "@/components/ui/card";
 
-// Import required CSS for FullCalendar
-import "@fullcalendar/core/main.css";
-import "@fullcalendar/daygrid/main.css";
-import "@fullcalendar/timegrid/main.css";
-import "@fullcalendar/list/main.css";
+// Note: Modern FullCalendar versions don't require explicit CSS imports
+// CSS is now included in the package and automatically handled
 
 interface CalendarMainProps {
   events: CalendarEvent[];
