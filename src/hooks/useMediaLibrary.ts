@@ -3,6 +3,7 @@ import { useState, useEffect } from "react";
 import { MediaFile, MediaStats } from "@/types/media";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/components/ui/use-toast";
+import { MediaType } from "@/utils/mediaUtils";
 
 export function useMediaLibrary() {
   const [isLoading, setIsLoading] = useState(true);
@@ -14,13 +15,13 @@ export function useMediaLibrary() {
   
   // Filter states
   const [searchQuery, setSearchQuery] = useState("");
-  const [selectedMediaType, setSelectedMediaType] = useState<string | null>(null);
-  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
-  const [dateFilter, setDateFilter] = useState<string | null>(null);
+  const [selectedMediaType, setSelectedMediaType] = useState<MediaType | "all">("all");
+  const [selectedCategory, setSelectedCategory] = useState<string | "all">("all");
+  const [dateFilter, setDateFilter] = useState<"newest" | "oldest">("newest");
   
   // Derived values
-  const mediaTypes = Array.from(new Set(mediaFiles.map(file => file.file_type)));
-  const categories = Array.from(new Set(mediaFiles.map(file => file.category || "general")));
+  const [mediaTypes, setMediaTypes] = useState<MediaType[]>([]);
+  const [categories, setCategories] = useState<string[]>([]);
   
   // Fetch all media
   const fetchAllMedia = async () => {
@@ -75,6 +76,22 @@ export function useMediaLibrary() {
       });
       
       setMediaStats(stats);
+      
+      // Extract available media types and categories from data
+      const types = Array.from(new Set(
+        mappedData.map(file => {
+          if (file.file_type.startsWith('audio/')) return 'audio';
+          if (file.file_type.startsWith('image/')) return 'image';
+          if (file.file_type.startsWith('video/')) return 'video';
+          if (file.file_type === 'application/pdf') return 'pdf';
+          return 'other';
+        })
+      )) as MediaType[];
+      
+      setMediaTypes(types);
+      
+      const cats = Array.from(new Set(mappedData.map(file => file.category || "general")));
+      setCategories(cats);
       
     } catch (err: any) {
       console.error('Error fetching media:', err);
@@ -142,24 +159,33 @@ export function useMediaLibrary() {
     }
     
     // Apply media type filter
-    if (selectedMediaType) {
-      filtered = filtered.filter(file => file.file_type === selectedMediaType);
+    if (selectedMediaType !== "all") {
+      filtered = filtered.filter(file => {
+        if (selectedMediaType === 'audio') return file.file_type.startsWith('audio/');
+        if (selectedMediaType === 'image') return file.file_type.startsWith('image/');
+        if (selectedMediaType === 'video') return file.file_type.startsWith('video/');
+        if (selectedMediaType === 'pdf') return file.file_type === 'application/pdf';
+        return !file.file_type.startsWith('audio/') && 
+               !file.file_type.startsWith('image/') && 
+               !file.file_type.startsWith('video/') && 
+               file.file_type !== 'application/pdf';
+      });
     }
     
     // Apply category filter
-    if (selectedCategory) {
+    if (selectedCategory !== "all") {
       filtered = filtered.filter(file => file.category === selectedCategory);
     }
     
-    // Apply date filter
-    if (dateFilter) {
-      // Parse date string to a Date object
-      const filterDate = new Date(dateFilter);
-      filtered = filtered.filter(file => {
-        const fileDate = new Date(file.created_at);
-        return fileDate.toDateString() === filterDate.toDateString();
-      });
-    }
+    // Apply date sort
+    filtered.sort((a, b) => {
+      const dateA = new Date(a.created_at).getTime();
+      const dateB = new Date(b.created_at).getTime();
+      
+      return dateFilter === "newest" 
+        ? dateB - dateA  // newest first
+        : dateA - dateB; // oldest first
+    });
     
     setFilteredMediaFiles(filtered);
     

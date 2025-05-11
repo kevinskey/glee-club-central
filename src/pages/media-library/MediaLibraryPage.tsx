@@ -11,6 +11,7 @@ import { MediaFilterBar } from "@/components/media/MediaFilterBar";
 import { MediaLoadingState } from "@/components/media/MediaLoadingState";
 import { MediaAccordionView } from "@/components/media/MediaAccordionView";
 import { UploadMediaButton } from "@/components/media/UploadMediaButton";
+import { MediaType } from "@/utils/mediaUtils";
 
 interface MediaLibraryPageProps {
   isAdminView?: boolean;
@@ -21,8 +22,8 @@ export default function MediaLibraryPage({ isAdminView = false }: MediaLibraryPa
   
   // Check if user has permission based on roles
   const canUploadMedia = isSuperAdmin || hasPermission('can_upload_media');
-  const canEditMedia = isAdminView || isSuperAdmin || hasPermission('can_upload_media');
-  const canDeleteMedia = isAdminView || isSuperAdmin;
+  const canEditMedia = isAdminView || isSuperAdmin || hasPermission('can_edit_media');
+  const canDeleteMedia = isAdminView || isSuperAdmin || hasPermission('can_delete_media');
   
   const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
@@ -100,15 +101,15 @@ export default function MediaLibraryPage({ isAdminView = false }: MediaLibraryPa
       <MediaFilterBar 
         searchQuery={searchQuery}
         setSearchQuery={setSearchQuery}
-        selectedMediaType={selectedMediaType}
+        selectedMediaType={selectedMediaType as MediaType | "all"}
         setSelectedMediaType={setSelectedMediaType}
         selectedCategory={selectedCategory}
         setSelectedCategory={setSelectedCategory}
-        dateFilter={dateFilter}
+        dateFilter={dateFilter as "newest" | "oldest"}
         setDateFilter={setDateFilter}
         viewMode={viewMode}
         setViewMode={setViewMode}
-        mediaTypes={mediaTypes}
+        mediaTypes={mediaTypes as MediaType[]}
         categories={categories}
       />
       
