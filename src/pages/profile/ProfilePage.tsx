@@ -17,6 +17,7 @@ import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { useUserManagement } from "@/hooks/useUserManagement";
 import { Spinner } from "@/components/ui/spinner";
+import { Profile } from "@/types/auth";
 
 export default function ProfilePage() {
   const { profile, isLoading, refreshPermissions } = useAuth();

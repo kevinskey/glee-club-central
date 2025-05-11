@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { 
@@ -30,7 +29,7 @@ export const ProfileOverviewTab: React.FC<ProfileOverviewTabProps> = ({
   onSave 
 }) => {
   const [formData, setFormData] = useState({
-    first_name: profile.first_name || '',
+    first_name: profile.first_name, // Now required, so we don't need to use || ''
     last_name: profile.last_name || '',
     phone: profile.phone || '',
     voice_part: profile.voice_part || '',

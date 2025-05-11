@@ -2,8 +2,8 @@
 import { Database } from "@/integrations/supabase/types";
 
 export interface Profile {
-  id: string;  // Changed from optional to required
-  first_name?: string;
+  id: string;  // Already required
+  first_name: string;  // Changed from optional to required
   last_name?: string;
   avatar_url?: string;
   phone?: string;

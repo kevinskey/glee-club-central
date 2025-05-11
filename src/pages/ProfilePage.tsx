@@ -16,6 +16,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { useUserManagement } from "@/hooks/useUserManagement";
+import { Profile } from "@/types/auth";
 
 export default function ProfilePage() {
   const { profile, isLoading } = useAuth();
