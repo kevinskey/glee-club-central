@@ -1,18 +1,30 @@
 
 import React from 'react';
-import { BrowserRouter } from 'react-router-dom';
+import { RouterProvider, Outlet } from 'react-router-dom';
 import { Toaster } from 'sonner';
 import { AuthProvider } from './contexts/AuthContext';
 import { RolePermissionProvider } from './contexts/RolePermissionContext';
 import { ThemeProvider } from './providers/ThemeProvider';
-import Routes from './Routes';
+import { router } from './router';
+
+// Root layout component that will wrap all routes
+const RootLayout = () => {
+  return (
+    <div className="app">
+      <Outlet />
+    </div>
+  );
+};
+
+// Update the router to use RootLayout as the root element
+router.routes[0].element = <RootLayout />;
 
 function App() {
   return (
     <ThemeProvider>
       <AuthProvider>
         <RolePermissionProvider>
-          <Routes />
+          <RouterProvider router={router} />
           <Toaster position="top-right" />
         </RolePermissionProvider>
       </AuthProvider>

@@ -1,9 +1,8 @@
 
 import { createBrowserRouter, Navigate } from "react-router-dom";
 import { lazy } from "react";
-import App from "./App";
 import NotFoundPage from "./pages/NotFoundPage";
-import DashboardLayout from "./layouts/DashboardLayout";
+import DashboardLayout from "./components/layout/DashboardLayout";
 import HomeLayout from "./layouts/HomeLayout";
 import ProtectedRoute from "./components/ProtectedRoute";
 
@@ -21,7 +20,8 @@ const ViewSheetMusicPage = lazy(() => import("./pages/sheet-music/ViewSheetMusic
 export const router = createBrowserRouter([
   {
     path: "/",
-    element: <App />,
+    // Remove the direct App import, we'll use Outlet in App.tsx instead
+    element: null, // This will be handled in App.tsx
     errorElement: <NotFoundPage />,
     children: [
       {

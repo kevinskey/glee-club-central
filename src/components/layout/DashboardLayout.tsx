@@ -7,7 +7,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { Spinner } from "@/components/ui/spinner";
 import { SidebarProvider } from "@/components/ui/sidebar";
 
-export function DashboardLayout() {
+export default function DashboardLayout() {
   const { isAuthenticated, isLoading } = useAuth();
   
   console.log("DashboardLayout - Auth check:", { isAuthenticated, isLoading });
