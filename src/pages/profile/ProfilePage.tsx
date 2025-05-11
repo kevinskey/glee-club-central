@@ -17,6 +17,7 @@ import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { useUserManagement } from "@/hooks/useUserManagement";
 import { Spinner } from "@/components/ui/spinner";
+import { ProfileOverviewTab as EditableProfileTab } from "@/components/profile/ProfileOverviewTab";
 
 export default function ProfilePage() {
   const { profile, isLoading, refreshPermissions } = useAuth();
@@ -142,7 +143,7 @@ export default function ProfilePage() {
             </TabsList>
             
             <TabsContent value="overview">
-              <ProfileOverviewTab 
+              <EditableProfileTab 
                 profile={profile} 
                 isEditable={isEditing} 
                 onSave={handleProfileUpdate}

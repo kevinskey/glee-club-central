@@ -33,7 +33,7 @@ export const ProfileOverviewTab: React.FC<ProfileOverviewTabProps> = ({
     first_name: profile.first_name,
     last_name: profile.last_name,
     phone: profile.phone || '',
-    voice_part: profile.voice_part, // Now required, so no need for || ''
+    voice_part: profile.voice_part, 
     class_year: profile.class_year || ''
   });
   const [isSaving, setIsSaving] = useState(false);
@@ -72,7 +72,6 @@ export const ProfileOverviewTab: React.FC<ProfileOverviewTabProps> = ({
     setIsSaving(true);
     try {
       await onSave(formData);
-      toast.success("Profile updated successfully");
     } catch (error) {
       console.error("Error updating profile:", error);
       toast.error("Failed to update profile");
@@ -90,6 +89,13 @@ export const ProfileOverviewTab: React.FC<ProfileOverviewTabProps> = ({
       voice_part: profile.voice_part,
       class_year: profile.class_year || ''
     });
+    
+    // If there's a parent component handling edit mode, let it know
+    if (onSave) {
+      // This will trigger the parent's toggleEditMode function
+      // We're just passing empty object as we're canceling, not saving
+      onSave({}).catch(err => console.error(err));
+    }
   };
   
   return (
