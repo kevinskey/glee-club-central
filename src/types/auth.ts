@@ -13,7 +13,7 @@ export interface Profile {
   voice_part?: string;
   robe_number?: number;
   is_super_admin?: boolean;
-  created_at?: string;
+  created_at: string; // Changed from optional to required to match User interface
   updated_at?: string;
   dues_paid?: boolean;
   standing?: string;
