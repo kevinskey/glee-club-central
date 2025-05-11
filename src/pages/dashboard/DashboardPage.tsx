@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { PageHeaderWithToggle } from "@/components/ui/page-header-with-toggle";
@@ -128,35 +129,35 @@ const DashboardPage = () => {
   }
   
   return (
-    <div className="container mx-auto p-4 space-y-6">
+    <div className="container mx-auto p-4 space-y-8">
       <PageHeaderWithToggle
         title={`Welcome, ${profile?.first_name || 'Member'}`}
-        description={`Spelman College Glee Club Dashboard`}
+        description="Your Spelman College Glee Club dashboard"
         icon={<Home className="h-6 w-6" />}
       />
       
       {/* Main Dashboard Content */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
         {/* Left Column - Today's Agenda */}
-        <div className="md:col-span-2 space-y-6">
+        <div className="md:col-span-2 space-y-8">
           {/* Next Event Countdown */}
           {nextEvent && (
-            <Card className="border-l-4 border-l-orange-500">
+            <Card className="overflow-hidden border-none shadow-md bg-gradient-to-br from-orange-500 to-orange-600 text-white">
               <CardHeader className="pb-2">
                 <CardTitle className="flex justify-between items-center">
                   <div className="flex items-center gap-2">
-                    <Clock className="h-5 w-5 text-orange-500" />
-                    <span>Next Event Countdown</span>
+                    <Clock className="h-5 w-5" />
+                    <span>Next Performance Countdown</span>
                   </div>
-                  <span className="text-xl font-bold text-orange-500">
+                  <span className="text-2xl font-bold">
                     {daysUntilNextEvent} {daysUntilNextEvent === 1 ? 'day' : 'days'}
                   </span>
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="space-y-2">
-                  <h3 className="text-lg font-semibold">{nextEvent.title}</h3>
-                  <div className="flex justify-between text-sm text-muted-foreground">
+                <div className="space-y-3">
+                  <h3 className="text-xl font-semibold">{nextEvent.title}</h3>
+                  <div className="flex justify-between text-sm text-white/90">
                     <div className="flex items-center gap-2">
                       <CalendarIcon className="h-4 w-4" />
                       <span>{nextEvent.date.toLocaleDateString()}</span>
@@ -172,25 +173,29 @@ const DashboardPage = () => {
                       <span>{nextEvent.location}</span>
                     </div>
                   )}
-                </div>
-                <div className="mt-4">
-                  <Button variant="outline" onClick={() => navigate("/dashboard/calendar")} className="text-orange-500 hover:text-orange-600">
-                    View Details
-                  </Button>
+                  <div className="mt-4">
+                    <Button 
+                      variant="secondary" 
+                      onClick={() => navigate("/dashboard/calendar")} 
+                      className="bg-white text-orange-600 hover:bg-white/90"
+                    >
+                      View Details
+                    </Button>
+                  </div>
                 </div>
               </CardContent>
             </Card>
           )}
           
           {/* Upcoming Events */}
-          <Card>
+          <Card className="shadow-md border-t-4 border-t-orange-500">
             <CardHeader className="pb-2">
               <div className="flex items-center justify-between">
                 <CardTitle className="flex items-center gap-2">
                   <Calendar className="h-5 w-5 text-orange-500" />
                   <span>Today's Agenda</span>
                 </CardTitle>
-                <Link to="/dashboard/calendar" className="text-sm text-orange-500 hover:underline">
+                <Link to="/dashboard/calendar" className="text-sm text-orange-500 hover:underline font-medium">
                   View Calendar
                 </Link>
               </div>
@@ -216,7 +221,7 @@ const DashboardPage = () => {
           </Card>
           
           {/* Rehearsal Notes */}
-          <Card>
+          <Card className="shadow-md">
             <CardHeader className="pb-2">
               <CardTitle className="flex items-center gap-2">
                 <FileText className="h-5 w-5 text-orange-500" />
@@ -225,7 +230,7 @@ const DashboardPage = () => {
             </CardHeader>
             <CardContent>
               <div className="space-y-3">
-                <div className="p-3 rounded-md border bg-muted/50">
+                <div className="p-4 rounded-md border bg-muted/30">
                   <div className="flex justify-between text-sm mb-2">
                     <span className="font-medium">Spring Concert Preparation</span>
                     <span className="text-muted-foreground">April 28, 2025</span>
@@ -238,7 +243,7 @@ const DashboardPage = () => {
                 </div>
                 <Link 
                   to="/dashboard/sheet-music" 
-                  className="text-sm text-orange-500 hover:underline inline-flex"
+                  className="text-sm text-orange-500 hover:underline inline-flex font-medium"
                 >
                   View all notes
                 </Link>
@@ -248,16 +253,16 @@ const DashboardPage = () => {
         </div>
         
         {/* Right Column - Announcements & Quick Access */}
-        <div className="space-y-6">
+        <div className="space-y-8">
           {/* Announcements Card */}
-          <Card>
+          <Card className="shadow-md border-t-4 border-t-orange-500">
             <CardHeader className="pb-2">
               <div className="flex items-center justify-between">
                 <CardTitle className="flex items-center gap-2">
                   <Bell className="h-5 w-5 text-orange-500" />
                   <span>Announcements</span>
                 </CardTitle>
-                <Link to="/dashboard/announcements" className="text-sm text-orange-500 hover:underline">
+                <Link to="/dashboard/announcements" className="text-sm text-orange-500 hover:underline font-medium">
                   View All
                 </Link>
               </div>
@@ -278,7 +283,7 @@ const DashboardPage = () => {
           </Card>
           
           {/* Quick Access */}
-          <Card>
+          <Card className="shadow-md">
             <CardHeader className="pb-2">
               <CardTitle className="flex items-center gap-2">
                 <Music className="h-5 w-5 text-orange-500" />
@@ -292,42 +297,42 @@ const DashboardPage = () => {
               <div className="grid grid-cols-2 gap-3">
                 <Button 
                   variant="outline" 
-                  className="h-auto flex-col py-4 px-2 hover:bg-orange-50 hover:text-orange-600 hover:border-orange-200"
+                  className="h-auto flex-col py-6 px-3 hover:bg-orange-50 hover:text-orange-600 hover:border-orange-200"
                   onClick={() => navigate("/dashboard/sheet-music")}
                 >
-                  <Music className="h-5 w-5 mb-2 text-orange-500" />
-                  <span className="text-xs">Sheet Music</span>
+                  <Music className="h-6 w-6 mb-2 text-orange-500" />
+                  <span className="text-sm">Sheet Music</span>
                 </Button>
                 <Button 
                   variant="outline" 
-                  className="h-auto flex-col py-4 px-2 hover:bg-orange-50 hover:text-orange-600 hover:border-orange-200"
+                  className="h-auto flex-col py-6 px-3 hover:bg-orange-50 hover:text-orange-600 hover:border-orange-200"
                   onClick={() => navigate("/dashboard/practice")}
                 >
-                  <Headphones className="h-5 w-5 mb-2 text-orange-500" />
-                  <span className="text-xs">Practice Tracks</span>
+                  <Headphones className="h-6 w-6 mb-2 text-orange-500" />
+                  <span className="text-sm">Practice Tracks</span>
                 </Button>
                 <Button 
                   variant="outline" 
-                  className="h-auto flex-col py-4 px-2 hover:bg-orange-50 hover:text-orange-600 hover:border-orange-200"
+                  className="h-auto flex-col py-6 px-3 hover:bg-orange-50 hover:text-orange-600 hover:border-orange-200"
                   onClick={() => navigate("/dashboard/attendance")}
                 >
-                  <CheckSquare className="h-5 w-5 mb-2 text-orange-500" />
-                  <span className="text-xs">Attendance</span>
+                  <CheckSquare className="h-6 w-6 mb-2 text-orange-500" />
+                  <span className="text-sm">Attendance</span>
                 </Button>
                 <Button 
                   variant="outline" 
-                  className="h-auto flex-col py-4 px-2 hover:bg-orange-50 hover:text-orange-600 hover:border-orange-200"
+                  className="h-auto flex-col py-6 px-3 hover:bg-orange-50 hover:text-orange-600 hover:border-orange-200"
                   onClick={() => navigate("/dashboard/profile")}
                 >
-                  <User className="h-5 w-5 mb-2 text-orange-500" />
-                  <span className="text-xs">My Profile</span>
+                  <User className="h-6 w-6 mb-2 text-orange-500" />
+                  <span className="text-sm">My Profile</span>
                 </Button>
               </div>
             </CardContent>
           </Card>
           
           {/* Dues Status Card */}
-          <Card>
+          <Card className="shadow-md">
             <CardHeader className="pb-2">
               <CardTitle className="flex items-center gap-2">
                 <DollarSign className="h-5 w-5 text-orange-500" />
@@ -338,7 +343,7 @@ const DashboardPage = () => {
               <div className="flex flex-col gap-3">
                 <div className="flex justify-between items-center">
                   <span className="text-sm font-medium">Spring 2025</span>
-                  <div className="bg-green-100 text-green-700 px-2 py-0.5 rounded-full text-xs">
+                  <div className="bg-green-100 text-green-700 px-2 py-0.5 rounded-full text-xs font-medium">
                     Paid
                   </div>
                 </div>
@@ -365,7 +370,7 @@ const DashboardPage = () => {
       {/* Bottom Row */}
       <div className="grid grid-cols-1 gap-6">
         {/* Available Modules */}
-        <Card>
+        <Card className="shadow-md">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <MessageSquare className="h-5 w-5 text-orange-500" />

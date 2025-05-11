@@ -19,19 +19,27 @@ export function PageHeaderWithToggle({
   actions 
 }: PageHeaderWithToggleProps) {
   return (
-    <div className={cn("mb-6 space-y-2", className)}>
+    <div className={cn("mb-8 space-y-4", className)}>
       <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          {icon && <div className="text-orange-500 flex items-center">{icon}</div>}
-          <h1 className="text-2xl font-bold tracking-tight text-foreground flex items-center min-h-[2.25rem]">{title}</h1>
+        <div className="flex items-center gap-3">
+          {icon && (
+            <div className="text-orange-500 flex items-center justify-center h-10 w-10 rounded-full bg-orange-100 dark:bg-orange-900/20">
+              {icon}
+            </div>
+          )}
+          <h1 className="text-3xl font-bold tracking-tight text-foreground flex items-center min-h-[2.25rem]">
+            {title}
+          </h1>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-3">
           <ThemeToggle />
           {actions && <div>{actions}</div>}
         </div>
       </div>
       {description && (
-        <p className="text-base text-muted-foreground">{description}</p>
+        <p className="text-lg text-muted-foreground max-w-3xl">
+          {description}
+        </p>
       )}
     </div>
   );
