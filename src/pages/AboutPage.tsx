@@ -1,3 +1,4 @@
+
 import React from "react";
 import { Header } from "@/components/landing/Header";
 import { Footer } from "@/components/landing/Footer";
@@ -204,7 +205,44 @@ export default function AboutPage() {
           </div>
         </div>
 
-        {/* Join Us CTA */}
+        {/* Leadership Section - MOVED UP BEFORE JOIN US CTA */}
+        <div className="container mx-auto px-4 py-16">
+          <div className="max-w-4xl mx-auto">
+            <div className="flex items-center gap-3 mb-6">
+              <Users className="h-8 w-8 text-glee-accent" />
+              <h2 className="font-playfair text-3xl font-bold text-gray-800 dark:text-gray-100">Director</h2>
+            </div>
+            
+            <div className="prose max-w-none dark:prose-invert mb-12">
+              <p className="text-lg mb-6 text-gray-700 dark:text-gray-300 leading-relaxed">
+                The Spelman College Glee Club is led by our esteemed director who upholds our tradition of excellence.
+              </p>
+            </div>
+
+            <div className="flex justify-center mb-12">
+              <Card className="overflow-hidden max-w-md">
+                <CardContent className="text-center py-6">
+                  <h3 className="text-xl font-bold mb-1">Dr. Kevin Phillip Johnson</h3>
+                  <p className="text-glee-purple font-medium mb-3">Director</p>
+                  <p className="text-gray-600 dark:text-gray-400">
+                    Dr. Kevin Phillip Johnson has served as the distinguished Director of the Spelman College Glee Club since 2010. 
+                    He holds a Doctor of Musical Arts degree in Choral Conducting from the University of Michigan and has previously 
+                    served on the faculties of Morgan State University and Howard University.
+                  </p>
+                  <p className="text-gray-600 dark:text-gray-400 mt-3">
+                    Under his leadership, the Glee Club has performed at prestigious venues including Carnegie Hall, the Kennedy Center, 
+                    and on international tours across Europe and Africa. Dr. Johnson is recognized for his expertise in African American 
+                    choral traditions, particularly spirituals and gospel music, and has published numerous scholarly articles and 
+                    arrangements. His innovative programming bridges classical repertoire with the rich heritage of 
+                    African American musical traditions.
+                  </p>
+                </CardContent>
+              </Card>
+            </div>
+          </div>
+        </div>
+
+        {/* Join Us CTA - NOW AFTER THE LEADERSHIP SECTION */}
         <div className="bg-glee-purple text-white py-16">
           <div className="container mx-auto px-4">
             <div className="max-w-4xl mx-auto text-center">
@@ -230,45 +268,6 @@ export default function AboutPage() {
                   View Performances
                 </Button>
               </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Leadership Section */}
-        <div className="container mx-auto px-4 py-16">
-          <div className="max-w-4xl mx-auto">
-            <div className="flex items-center gap-3 mb-6">
-              <Users className="h-8 w-8 text-glee-accent" />
-              <h2 className="font-playfair text-3xl font-bold text-gray-800 dark:text-gray-100">Leadership</h2>
-            </div>
-            
-            <div className="prose max-w-none dark:prose-invert mb-12">
-              <p className="text-lg mb-6 text-gray-700 dark:text-gray-300 leading-relaxed">
-                The Spelman College Glee Club is led by a dedicated team of faculty directors and student officers 
-                who work together to uphold our tradition of excellence.
-              </p>
-            </div>
-
-            <div className="flex justify-center mb-12">
-              <Card className="overflow-hidden max-w-md">
-                <div className="p-1">
-                  <AspectRatio ratio={1/1} className="overflow-hidden rounded-md bg-gray-100 dark:bg-gray-800">
-                    <img 
-                      src="/lovable-uploads/642b93d7-fc15-4c2c-a7df-fe81aadb2f3b.png" 
-                      alt="Dr. Kevin Phillip Johnson" 
-                      className="object-cover w-full h-full"
-                    />
-                  </AspectRatio>
-                </div>
-                <CardContent className="text-center py-6">
-                  <h3 className="text-xl font-bold mb-1">Dr. Kevin Phillip Johnson</h3>
-                  <p className="text-glee-purple font-medium mb-3">Director</p>
-                  <p className="text-gray-600 dark:text-gray-400 text-sm">
-                    Leading the Glee Club with distinction since 2010, Dr. Johnson holds a Doctor of Musical 
-                    Arts degree and has conducted performances worldwide.
-                  </p>
-                </CardContent>
-              </Card>
             </div>
           </div>
         </div>
