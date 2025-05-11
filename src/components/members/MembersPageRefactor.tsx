@@ -144,19 +144,23 @@ export function MembersPageComponent({ useUserManagementHook }: MembersPageProps
     
     setIsDeleting(true);
     try {
+      // Call the deleteUser function from the hook
       const success = await deleteUser(userToDelete);
+      
       if (success) {
         setIsDeleteDialogOpen(false);
+        setUserToDelete(null);
         toast.success(`${userToDeleteName} has been deleted`);
         // Force refresh the user list after deletion
         await fetchUsers();
+      } else {
+        toast.error(`Failed to delete ${userToDeleteName}`);
       }
     } catch (error) {
       console.error("Error deleting user:", error);
       toast.error("Failed to delete user");
     } finally {
       setIsDeleting(false);
-      setUserToDelete(null);
     }
   }, [userToDelete, deleteUser, userToDeleteName, fetchUsers]);
 
@@ -213,7 +217,10 @@ export function MembersPageComponent({ useUserManagementHook }: MembersPageProps
         ) : (
           <MembersList 
             members={members} 
-            onEditUser={handleUpdateUser}
+            onEditUser={(user) => {
+              setSelectedUser(user);
+              setIsEditUserOpen(true);
+            }}
             onDeleteUser={handleDeleteUser}
             onManagePermissions={(user) => {
               setSelectedUser(user);
@@ -224,11 +231,12 @@ export function MembersPageComponent({ useUserManagementHook }: MembersPageProps
               setIsManageRoleOpen(true);
             }}
             canEdit={hasAdminAccess}
-            // Explicitly pass through props to match with what MembersPage.tsx expects
-            onEditMember={handleUpdateUser}
+            // Pass both onEditMember and onDeleteMember to maintain compatibility
+            onEditMember={(user) => {
+              setSelectedUser(user);
+              setIsEditUserOpen(true);
+            }}
             onDeleteMember={handleDeleteUser}
-            onStatusUpdate={undefined}
-            onStatusUpdateSuccess={refreshUsers}
           />
         )}
       </Card>

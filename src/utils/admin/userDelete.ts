@@ -26,6 +26,11 @@ export async function deleteUser(userId: string): Promise<boolean> {
     console.log("User marked as deleted successfully");
     toast.success("User was deleted successfully");
     
+    // Dispatch a custom event to notify other components of the change
+    window.dispatchEvent(new CustomEvent("user:deleted", { 
+      detail: { userId }
+    }));
+    
     return true;
   } catch (error) {
     console.error("Unexpected error during user deletion:", error);
