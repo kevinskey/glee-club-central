@@ -1,3 +1,4 @@
+
 import React from "react";
 import { createBrowserRouter, Navigate } from "react-router-dom";
 
@@ -12,9 +13,8 @@ import ProfilePage from "./pages/profile/ProfilePage";
 import AdminDashboardPage from "./pages/admin/AdminDashboardPage";
 import AdminMembersPage from "./pages/AdminMembersPage";
 import UserManagementPage from "./pages/admin/UserManagementPage";
-import SchedulePage from "./pages/schedule/SchedulePage";
 import FanPage from "./pages/FanPage";
-import CalendarPage from "./pages/calendar/CalendarPage";
+import CalendarPage from "./pages/CalendarPage";
 import AdminRegistrationPage from "./pages/admin/AdminRegistrationPage";
 
 // Import layout components
@@ -67,7 +67,7 @@ export const router = createBrowserRouter([
       },
       {
         path: "calendar",
-        element: <SchedulePage />,
+        element: <Navigate to="/calendar" replace />,
       },
       {
         path: "admin",
