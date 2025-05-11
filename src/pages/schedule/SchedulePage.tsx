@@ -7,6 +7,11 @@ import { CalendarContainer } from "@/components/calendar/CalendarContainer";
 import { EventList } from "@/components/calendar/EventList";
 import { useAuth } from "@/contexts/AuthContext";
 import { useCalendarEvents, EventType } from "@/hooks/useCalendarEvents";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { AddEventForm } from "@/components/calendar/AddEventForm";
+import { EditEventForm } from "@/components/calendar/EditEventForm";
+import { EventDetails } from "@/components/calendar/EventDetails";
+import { toast } from "sonner";
 
 export default function SchedulePage() {
   const [view, setView] = useState<"calendar" | "list">("calendar");
@@ -14,16 +19,19 @@ export default function SchedulePage() {
   
   // Initialize state for calendar
   const [date, setDate] = useState<Date | undefined>(new Date());
-  const [selectedEvent, setSelectedEvent] = useState(null);
+  const [selectedEvent, setSelectedEvent] = useState<any>(null);
+  const [isAddEventOpen, setIsAddEventOpen] = useState(false);
+  const [isEditEventOpen, setIsEditEventOpen] = useState(false);
+  const [isViewEventOpen, setIsViewEventOpen] = useState(false);
   
   // Get calendar events using the hook
-  const { events, loading } = useCalendarEvents();
+  const { events, loading, addEvent, updateEvent, deleteEvent } = useCalendarEvents();
   
   // Check if user is admin
   const isAdmin = profile?.role === "admin";
 
-  // Get days with events for the calendar - these are already Date objects from our updated hook
-  const daysWithEvents = events.map(event => event.date);
+  // Get days with events for the calendar
+  const daysWithEvents = events.map(event => event.start);
   
   // Helper function to get event type color
   const getEventTypeColor = (type: string) => {
@@ -44,6 +52,59 @@ export default function SchedulePage() {
   // Handle event selection
   const handleEventSelect = (event: any) => {
     setSelectedEvent(event);
+    setIsViewEventOpen(true);
+  };
+
+  // Handle add event form submission
+  const handleAddEvent = async (formValues: any) => {
+    try {
+      const eventData = {
+        ...formValues,
+        start: formValues.date, // Ensure start is set
+        end: formValues.date,   // Ensure end is set
+        type: formValues.type as EventType
+      };
+      
+      const result = await addEvent(eventData);
+      if (result) {
+        setIsAddEventOpen(false);
+        toast.success("Event added successfully");
+      }
+    } catch (error) {
+      console.error("Error adding event:", error);
+      toast.error("Failed to add event");
+    }
+  };
+
+  // Handle edit event form submission
+  const handleUpdateEvent = async (event: any) => {
+    try {
+      const success = await updateEvent(event);
+      if (success) {
+        setIsEditEventOpen(false);
+        setIsViewEventOpen(false);
+        setSelectedEvent(null);
+      }
+    } catch (error) {
+      console.error("Error updating event:", error);
+      toast.error("Failed to update event");
+    }
+  };
+
+  // Handle event deletion
+  const handleDeleteEvent = async () => {
+    if (!selectedEvent) return;
+    
+    try {
+      const success = await deleteEvent(selectedEvent.id);
+      if (success) {
+        setIsViewEventOpen(false);
+        setSelectedEvent(null);
+      }
+    } catch (error) {
+      console.error("Error deleting event:", error);
+      toast.error("Failed to delete event");
+    }
   };
   
   return (
@@ -56,7 +117,7 @@ export default function SchedulePage() {
         />
         
         {isAdmin && (
-          <Button>
+          <Button onClick={() => setIsAddEventOpen(true)}>
             <Plus className="mr-2 h-4 w-4" />
             Add Event
           </Button>
@@ -72,6 +133,7 @@ export default function SchedulePage() {
               daysWithEvents={daysWithEvents}
               loading={loading}
               events={events}
+              onSelectEvent={handleEventSelect}
             />
           ) : (
             <EventList 
@@ -84,6 +146,55 @@ export default function SchedulePage() {
           )}
         </div>
       </div>
+
+      {/* Add Event Dialog */}
+      <Dialog open={isAddEventOpen} onOpenChange={setIsAddEventOpen}>
+        <DialogContent className="sm:max-w-[550px]">
+          <DialogHeader>
+            <DialogTitle>Add New Event</DialogTitle>
+          </DialogHeader>
+          <AddEventForm 
+            onAddEvent={handleAddEvent}
+            onCancel={() => setIsAddEventOpen(false)}
+            initialDate={date}
+          />
+        </DialogContent>
+      </Dialog>
+
+      {/* View/Edit Event Dialog */}
+      {selectedEvent && (
+        <>
+          <Dialog open={isViewEventOpen} onOpenChange={setIsViewEventOpen}>
+            <DialogContent className="sm:max-w-[550px]">
+              <DialogHeader>
+                <DialogTitle>Event Details</DialogTitle>
+              </DialogHeader>
+              <EventDetails 
+                event={selectedEvent} 
+                onEdit={() => {
+                  setIsViewEventOpen(false);
+                  setIsEditEventOpen(true);
+                }}
+                onDelete={handleDeleteEvent}
+                isAdmin={isAdmin}
+              />
+            </DialogContent>
+          </Dialog>
+
+          <Dialog open={isEditEventOpen} onOpenChange={setIsEditEventOpen}>
+            <DialogContent className="sm:max-w-[550px]">
+              <DialogHeader>
+                <DialogTitle>Edit Event</DialogTitle>
+              </DialogHeader>
+              <EditEventForm 
+                event={selectedEvent} 
+                onUpdateEvent={handleUpdateEvent}
+                onCancel={() => setIsEditEventOpen(false)}
+              />
+            </DialogContent>
+          </Dialog>
+        </>
+      )}
     </div>
   );
 }

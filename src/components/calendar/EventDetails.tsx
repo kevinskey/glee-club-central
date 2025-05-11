@@ -1,102 +1,90 @@
 
 import React from "react";
-import { CalendarEvent } from "@/hooks/useCalendarEvents";
 import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
-import { Calendar, Clock, MapPin, ExternalLink } from "lucide-react";
+import { Edit2, Trash2 } from "lucide-react";
 import { format } from "date-fns";
-import { useIsMobile } from "@/hooks/use-mobile";
-import { getAddToGoogleCalendarUrl, getViewGoogleCalendarUrl } from "@/utils/googleCalendar";
+import { CalendarEvent } from "@/hooks/useCalendarEvents";
+import { AlertDialog, AlertDialogTrigger, AlertDialogContent, AlertDialogTitle, AlertDialogDescription, AlertDialogCancel, AlertDialogAction } from "@/components/ui/alert-dialog";
 
 interface EventDetailsProps {
-  selectedEvent: CalendarEvent;
-  onEditEvent?: () => void;
-  onDeleteEvent?: () => void;
+  event: CalendarEvent;
+  onEdit: () => void;
+  onDelete: () => void;
+  isAdmin: boolean;
 }
 
-export const EventDetails = ({
-  selectedEvent,
-  onEditEvent,
-  onDeleteEvent,
-}: EventDetailsProps) => {
-  const isMobile = useIsMobile();
-  const isGoogleEvent = selectedEvent.source === "google";
-
-  // Helper function to render button or link label based on device
-  const renderButtonLabel = (text: string, icon: React.ReactNode) => (
-    <div className="flex items-center space-x-1">
-      {icon}
-      {!isMobile && <span>{text}</span>}
-    </div>
-  );
-
+export function EventDetails({ event, onEdit, onDelete, isAdmin }: EventDetailsProps) {
   return (
-    <Card className="p-4 mt-4 bg-white dark:bg-gray-800">
-      <div className="mb-4">
-        <h2 className="text-lg md:text-xl font-semibold">{selectedEvent.title}</h2>
-        
-        <div className="mt-2 space-y-2">
-          <div className="flex items-start md:items-center gap-2 text-sm">
-            <Calendar className="h-4 w-4 mt-0.5 md:mt-0" />
-            <span>{format(selectedEvent.start, 'EEEE, MMMM d, yyyy')}</span>
-          </div>
-          
-          <div className="flex items-start md:items-center gap-2 text-sm">
-            <Clock className="h-4 w-4 mt-0.5 md:mt-0" />
-            <span>{selectedEvent.time}</span>
-          </div>
-          
-          <div className="flex items-start md:items-center gap-2 text-sm">
-            <MapPin className="h-4 w-4 mt-0.5 md:mt-0" />
-            <span>{selectedEvent.location}</span>
-          </div>
+    <div className="space-y-4">
+      <div>
+        <h3 className="text-lg font-medium">{event.title}</h3>
+        <div className="mt-1 text-sm text-muted-foreground">
+          {format(new Date(event.start), "EEEE, MMMM d, yyyy")}
+          {event.time && <span> at {event.time}</span>}
         </div>
       </div>
       
-      {selectedEvent.description && (
-        <div className="mb-4">
-          <h3 className="font-medium mb-1">Description</h3>
-          <p className="text-sm text-muted-foreground">{selectedEvent.description}</p>
+      <div>
+        <h4 className="text-sm font-medium">Location</h4>
+        <p className="text-sm">{event.location}</p>
+      </div>
+      
+      {event.description && (
+        <div>
+          <h4 className="text-sm font-medium">Description</h4>
+          <p className="text-sm whitespace-pre-wrap">{event.description}</p>
         </div>
       )}
       
-      <div className="flex flex-wrap justify-end gap-2 mt-4">
-        {isGoogleEvent ? (
-          // Google Calendar event actions
-          <>
-            <Button
-              variant="outline"
-              size={isMobile ? "sm" : "default"}
-              onClick={() => window.open(getViewGoogleCalendarUrl(), "_blank")}
-            >
-              {renderButtonLabel("View in Google Calendar", <ExternalLink className="h-4 w-4" />)}
-            </Button>
-          </>
-        ) : (
-          // Local event actions
-          <>
-            {onEditEvent && (
-              <Button
-                variant="outline"
-                size={isMobile ? "sm" : "default"}
-                onClick={onEditEvent}
+      {event.image_url && (
+        <div>
+          <h4 className="text-sm font-medium">Event Image</h4>
+          <div className="mt-1 rounded-lg overflow-hidden">
+            <img 
+              src={event.image_url} 
+              alt={event.title} 
+              className="w-full h-auto object-cover"
+            />
+          </div>
+        </div>
+      )}
+      
+      {isAdmin && (
+        <div className="flex justify-end gap-2 pt-4">
+          <Button 
+            variant="outline" 
+            size="sm" 
+            onClick={onEdit}
+            className="flex items-center gap-1"
+          >
+            <Edit2 className="h-4 w-4" />
+            Edit
+          </Button>
+          
+          <AlertDialog>
+            <AlertDialogTrigger asChild>
+              <Button 
+                variant="destructive" 
+                size="sm"
+                className="flex items-center gap-1"
               >
-                {renderButtonLabel("Edit", <span className="h-4 w-4">✏️</span>)}
+                <Trash2 className="h-4 w-4" />
+                Delete
               </Button>
-            )}
-            
-            {onDeleteEvent && (
-              <Button
-                variant="destructive"
-                size={isMobile ? "sm" : "default"}
-                onClick={onDeleteEvent}
-              >
-                {renderButtonLabel("Delete", <span className="h-4 w-4">🗑️</span>)}
-              </Button>
-            )}
-          </>
-        )}
-      </div>
-    </Card>
+            </AlertDialogTrigger>
+            <AlertDialogContent>
+              <AlertDialogTitle>Delete Event</AlertDialogTitle>
+              <AlertDialogDescription>
+                Are you sure you want to delete this event? This action cannot be undone.
+              </AlertDialogDescription>
+              <div className="flex justify-end gap-2 mt-4">
+                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                <AlertDialogAction onClick={onDelete}>Delete</AlertDialogAction>
+              </div>
+            </AlertDialogContent>
+          </AlertDialog>
+        </div>
+      )}
+    </div>
   );
-};
+}
