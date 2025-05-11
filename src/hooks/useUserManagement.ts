@@ -50,8 +50,21 @@ export const useUserManagement = () => {
       console.log(`Fetched ${data?.length || 0} users`);
       
       if (data) {
-        setUsers(data);
-        return data;
+        // Process the data to ensure consistent field formats
+        const processedData = data.map(user => ({
+          ...user,
+          // Ensure boolean fields are actually booleans
+          dues_paid: typeof user.dues_paid === 'boolean' ? user.dues_paid : false,
+          is_super_admin: typeof user.is_super_admin === 'boolean' ? user.is_super_admin : false,
+          // Format dates if needed
+          join_date: user.join_date || null,
+          // Ensure other required fields have defaults
+          status: user.status || 'pending',
+          role: user.role || 'singer',
+        }));
+        
+        setUsers(processedData);
+        return processedData;
       }
       
       return [];

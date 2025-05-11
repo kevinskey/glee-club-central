@@ -44,6 +44,7 @@ export default function UserManagementPage() {
 
   // Load users on component mount
   useEffect(() => {
+    console.log("UserManagementPage - Fetching users on mount");
     fetchUsers();
   }, []);
   
