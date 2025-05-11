@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useContext, createContext } from 'react';
 import {
   Session,
@@ -225,15 +224,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         console.log("Sign-in successful for:", data.user.email);
         toast.success("Signed in successfully!");
         
-        // Update last_login time in profile using a proper update object
-        // with a type declaration to help TypeScript understand it's valid
-        const updateData: Partial<Profile> = {
-          last_sign_in_at: new Date().toISOString()
-        };
-        
+        // Update last_login time in profile
+        // Only update the last_sign_in_at field specifically
         await supabase
           .from('profiles')
-          .update(updateData)
+          .update({
+            last_sign_in_at: new Date().toISOString()
+          })
           .eq('id', data.user.id);
         
         // Use navigate instead of forced reload for smoother experience

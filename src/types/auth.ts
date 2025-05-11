@@ -1,4 +1,6 @@
 
+import { Database } from "@/integrations/supabase/types";
+
 export interface Profile {
   id?: string;
   first_name?: string;
@@ -19,7 +21,8 @@ export interface Profile {
   standing?: string;
   notes?: string;
   last_sign_in_at?: string; // Added missing property
-  title?: string;
+  // Update the title type to match the expected enum values from Supabase
+  title?: Database["public"]["Enums"]["user_title"];
   special_roles?: string;
   last_login?: string;
 }
