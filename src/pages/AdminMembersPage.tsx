@@ -5,10 +5,13 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useUserManagement } from "@/hooks/useUserManagement";
 import { toast } from "sonner";
 import { Spinner } from "@/components/ui/spinner";
+import { Navigate } from "react-router-dom";
+import { usePermissions } from "@/hooks/usePermissions";
 
 export default function AdminMembersPage() {
   // All hooks at the top
   const { isAuthenticated } = useAuth();
+  const { hasPermission } = usePermissions();
   const userManagement = useUserManagement();
   const [isLoading, setIsLoading] = useState(true);
   
@@ -75,6 +78,18 @@ export default function AdminMembersPage() {
       window.removeEventListener("user:added", handleUserAdded as EventListener);
     };
   }, [userManagement]);
+
+  // Verify permissions
+  const hasAccess = hasPermission('can_manage_users');
+
+  if (!isAuthenticated) {
+    return <Navigate to="/login" replace />;
+  }
+  
+  if (!hasAccess && !isLoading) {
+    toast.error("You don't have permission to access this page");
+    return <Navigate to="/dashboard" replace />;
+  }
 
   // Show loading state only during initial load
   if (isLoading) {

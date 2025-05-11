@@ -12,6 +12,7 @@ import DashboardPage from "./pages/dashboard/DashboardPage";
 import ProfilePage from "./pages/profile/ProfilePage";
 import AdminDashboardPage from "./pages/admin/AdminDashboardPage";
 import AdminMembersPage from "./pages/AdminMembersPage";
+import UserManagementPage from "./pages/admin/UserManagementPage";
 import SchedulePage from "./pages/schedule/SchedulePage";
 import FanPage from "./pages/FanPage";
 import CalendarPage from "./pages/calendar/CalendarPage";
@@ -21,6 +22,7 @@ import AdminRegistrationPage from "./pages/admin/AdminRegistrationPage";
 import { ProtectedRoute } from "./components/auth/ProtectedRoute";
 import { DashboardLayout } from "./components/layout/DashboardLayout";
 import { AdminRoute } from "./components/auth/AdminRoute";
+import { PermissionGuard } from "./components/auth/PermissionGuard";
 
 export const router = createBrowserRouter([
   {
@@ -74,7 +76,7 @@ export const router = createBrowserRouter([
       },
       {
         path: "admin/members",
-        element: <AdminRoute><AdminMembersPage /></AdminRoute>,
+        element: <AdminRoute><UserManagementPage /></AdminRoute>,
       },
     ],
   },
