@@ -4,8 +4,10 @@ import { useAuth } from './AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 
+// Define user roles as a simple string union type
 export type UserRole = 'admin' | 'student' | 'section_leader' | 'staff' | 'guest';
 
+// Define the context interface clearly
 interface RolePermissionContextType {
   userRole: UserRole | null;
   permissions: Record<string, boolean>;
@@ -23,14 +25,17 @@ const RolePermissionContext = createContext<RolePermissionContextType>({
   refreshPermissions: async () => {}
 });
 
+// Export the hook for consuming the context
 export const useRolePermissions = () => useContext(RolePermissionContext);
 
+// Provider component implementation
 export const RolePermissionProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { user, profile } = useAuth();
   const [userRole, setUserRole] = useState<UserRole | null>(null);
   const [permissions, setPermissions] = useState<Record<string, boolean>>({});
   const [isLoading, setIsLoading] = useState(true);
 
+  // Function to fetch permissions from Supabase
   const fetchPermissions = async () => {
     if (!user) {
       setUserRole(null);
@@ -45,13 +50,16 @@ export const RolePermissionProvider: React.FC<{ children: React.ReactNode }> = (
       // Get role from profile and ensure it's a valid UserRole
       const roleFromProfile = profile?.role || 'student';
       
-      // Valid roles that match our UserRole type
-      const validRoles: UserRole[] = ['admin', 'student', 'section_leader', 'staff', 'guest'];
+      // List of valid roles
+      const validRoles = ['admin', 'student', 'section_leader', 'staff', 'guest'];
       
-      // Cast the role to UserRole type after validation
-      const role = validRoles.includes(roleFromProfile as UserRole) 
-        ? (roleFromProfile as UserRole) 
-        : 'student';
+      // Determine the role safely
+      let role: UserRole;
+      if (validRoles.includes(roleFromProfile)) {
+        role = roleFromProfile as UserRole;
+      } else {
+        role = 'student';
+      }
       
       setUserRole(role);
 
@@ -83,10 +91,12 @@ export const RolePermissionProvider: React.FC<{ children: React.ReactNode }> = (
     }
   };
 
+  // Effect to fetch permissions when user or profile changes
   useEffect(() => {
     fetchPermissions();
   }, [user, profile]);
 
+  // Function to check if a user has a specific permission
   const hasPermission = (permissionName: string): boolean => {
     // Super admins have all permissions
     if (profile?.is_super_admin) return true;
@@ -98,6 +108,7 @@ export const RolePermissionProvider: React.FC<{ children: React.ReactNode }> = (
     return permissions[permissionName] === true;
   };
 
+  // Return context provider with values
   return (
     <RolePermissionContext.Provider
       value={{
