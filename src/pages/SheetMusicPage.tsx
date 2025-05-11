@@ -1,6 +1,7 @@
+
 import React, { useState, useEffect, useRef } from "react";
 import { PageHeader } from "@/components/ui/page-header";
-import { FileText, Search, Plus, Upload, FolderOpen, ListMusic, Check, TableIcon, ArrowUpDown, Music } from "lucide-react";
+import { FileText, Search, Plus, Upload, FolderOpen, ListMusic, Check, TableIcon, ArrowUpDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
@@ -15,7 +16,6 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { MultipleDownloadBar } from "@/components/sheet-music/MultipleDownloadBar";
 import { getMediaType } from "@/utils/mediaUtils";
 import { useMediaLibrary } from "@/hooks/useMediaLibrary";
-import { Toggle } from "@/components/ui/toggle";
 import { PDFThumbnail } from "@/components/pdf/PDFThumbnail";
 import { PDFPreview } from "@/components/pdf/PDFPreview";
 import {
@@ -66,7 +66,6 @@ export default function SheetMusicPage() {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const defaultView = searchParams.get("view") === "list" ? "list" : "grid";
-  const [useMediaLibrarySource, setUseMediaLibrarySource] = useState(true);
   
   // Media library integration
   const {
@@ -89,49 +88,27 @@ export default function SheetMusicPage() {
   const fetchSheetMusic = async () => {
     setLoading(true);
     try {
-      if (useMediaLibrarySource) {
-        // Set media library to only show PDF files
-        setSelectedMediaType("pdf");
+      // Set media library to only show PDF files
+      setSelectedMediaType("pdf");
+      
+      // Map media library files to sheet music format
+      const pdfFiles = filteredMediaFiles
+        .filter(file => file.file_type === "application/pdf" || getMediaType(file.file_type) === "pdf")
+        .map(file => ({
+          id: file.id,
+          title: file.title,
+          composer: file.description || "Unknown",
+          file_url: file.file_url,
+          created_at: new Date(file.created_at).toLocaleDateString(),
+          voicing: file.category || "N/A",
+          file_type: file.file_type,
+          description: file.description,
+          category: file.category,
+          tags: file.tags,
+        }));
         
-        // Map media library files to sheet music format
-        const pdfFiles = filteredMediaFiles
-          .filter(file => file.file_type === "application/pdf" || getMediaType(file.file_type) === "pdf")
-          .map(file => ({
-            id: file.id,
-            title: file.title,
-            composer: file.description || "Unknown",
-            file_url: file.file_url,
-            created_at: new Date(file.created_at).toLocaleDateString(),
-            voicing: file.category || "N/A",
-            file_type: file.file_type,
-            description: file.description,
-            category: file.category,
-            tags: file.tags,
-          }));
-          
-        setMusicFiles(pdfFiles);
-        setFilteredFiles(pdfFiles);
-      } else {
-        // Fallback to original sheet_music table
-        const { data, error } = await supabase
-          .from('sheet_music')
-          .select('*')
-          .order('created_at', { ascending: false });
-
-        if (error) throw error;
-
-        if (data) {
-          // Format dates for display
-          const formattedData = data.map((item: SheetMusic) => ({
-            ...item,
-            created_at: new Date(item.created_at).toLocaleDateString(),
-            file_type: "application/pdf"
-          })) as MediaSheetMusic[];
-          
-          setMusicFiles(formattedData);
-          setFilteredFiles(formattedData);
-        }
-      }
+      setMusicFiles(pdfFiles);
+      setFilteredFiles(pdfFiles);
     } catch (error: any) {
       console.error("Error fetching sheet music:", error);
       toast({
@@ -149,19 +126,12 @@ export default function SheetMusicPage() {
     fetchAllMedia();
   }, []);
   
-  // Update music files when media library is loaded or data source changes
+  // Update music files when media library is loaded
   useEffect(() => {
-    if (!mediaLoading && filteredMediaFiles.length > 0 && useMediaLibrarySource) {
+    if (!mediaLoading && filteredMediaFiles.length > 0) {
       fetchSheetMusic();
     }
-  }, [mediaLoading, filteredMediaFiles, useMediaLibrarySource]);
-  
-  // Fallback to sheet_music table if media library fails or is empty
-  useEffect(() => {
-    if (!useMediaLibrarySource) {
-      fetchSheetMusic();
-    }
-  }, [useMediaLibrarySource]);
+  }, [mediaLoading, filteredMediaFiles]);
 
   // Filter music files based on search
   useEffect(() => {
@@ -243,17 +213,8 @@ export default function SheetMusicPage() {
     navigate(`/dashboard/sheet-music/${file.id}`, { 
       state: { 
         file,
-        fromMediaLibrary: useMediaLibrarySource 
+        fromMediaLibrary: true 
       }
-    });
-  };
-
-  // Toggle data source
-  const toggleDataSource = () => {
-    setUseMediaLibrarySource(!useMediaLibrarySource);
-    toast({
-      title: `Using ${!useMediaLibrarySource ? "Media Library" : "Sheet Music Table"}`,
-      description: `Switched to ${!useMediaLibrarySource ? "Media Library" : "Sheet Music Table"} as data source`,
     });
   };
 
@@ -284,7 +245,7 @@ export default function SheetMusicPage() {
         }
       />
 
-      {/* Data source toggle and search bar */}
+      {/* Search bar */}
       <div className="flex flex-col md:flex-row gap-4">
         <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
@@ -296,17 +257,6 @@ export default function SheetMusicPage() {
           />
         </div>
         <div className="flex gap-2 flex-wrap">
-          <Toggle
-            pressed={useMediaLibrarySource}
-            onPressedChange={toggleDataSource}
-            variant="outline"
-            aria-label="Toggle data source"
-            className="h-10"
-          >
-            <Music className="h-4 w-4 mr-2" /> 
-            {useMediaLibrarySource ? "Using Media Library" : "Using Sheet Music DB"}
-          </Toggle>
-          
           <Button 
             variant="outline" 
             className="flex-shrink-0"
