@@ -18,7 +18,7 @@ export const useCalendarStore = create<CalendarStore>((set, get) => ({
   fetchEvents: async () => {
     try {
       const { data, error } = await supabase
-        .from('events')
+        .from('calendar_events')  // Changed from 'events' to 'calendar_events'
         .select('*')
         .order('start', { ascending: true });
       
@@ -50,7 +50,7 @@ export const useCalendarStore = create<CalendarStore>((set, get) => ({
   addEvent: async (event) => {
     try {
       const { data, error } = await supabase
-        .from('events')
+        .from('calendar_events')  // Changed from 'events' to 'calendar_events'
         .insert([event])
         .select('*')
         .single();
@@ -88,7 +88,7 @@ export const useCalendarStore = create<CalendarStore>((set, get) => ({
   updateEvent: async (event) => {
     try {
       const { error } = await supabase
-        .from('events')
+        .from('calendar_events')  // Changed from 'events' to 'calendar_events'
         .update({
           title: event.title,
           type: event.type,
@@ -123,7 +123,7 @@ export const useCalendarStore = create<CalendarStore>((set, get) => ({
   deleteEvent: async (id) => {
     try {
       const { error } = await supabase
-        .from('events')
+        .from('calendar_events')  // Changed from 'events' to 'calendar_events'
         .delete()
         .eq('id', id);
       
