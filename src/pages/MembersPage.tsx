@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { PageHeader } from "@/components/ui/page-header";
@@ -30,6 +29,10 @@ import { MemberPermissionsDialog } from "@/components/members/MemberPermissionsD
 import { UserRoleSelector } from "@/components/members/UserRoleSelector";
 import { createMemberRefreshFunction } from "@/components/members/MembersPageRefactor";
 import { deleteUser as deleteUserUtil } from "@/utils/admin/userDelete";
+
+type UserRoleType = "admin" | "student" | "section_leader" | "staff" | "guest";
+type VoicePartType = "soprano_1" | "soprano_2" | "alto_1" | "alto_2" | "tenor" | "bass";
+type StatusType = "active" | "pending" | "inactive" | "alumni";
 
 export default function MembersPage() {
   const { isLoading: authLoading } = useAuth();
@@ -461,9 +464,12 @@ export default function MembersPage() {
             last_name: currentMember.last_name || '',
             email: currentMember.email || '',
             phone: currentMember.phone || '',
-            role: currentMember.role || 'singer',
-            voice_part: currentMember.voice_part || 'soprano_1',
-            status: currentMember.status || 'pending',
+            role: (currentMember.role as UserRoleType) || 'student',
+            voice_part: (currentMember.voice_part as VoicePartType) || null,
+            status: (currentMember.status as StatusType) || 'active',
+            class_year: currentMember.class_year || '',
+            notes: currentMember.notes || '',
+            dues_paid: currentMember.dues_paid || false,
             password: ''
           }}
           isEditing={true}

@@ -1,60 +1,18 @@
 
 /**
- * Format voice part for display
+ * Formats a phone number in a standardized way (xxx) xxx-xxxx
+ * @param input Phone number input string
+ * @returns Formatted phone number string
  */
-export const formatVoicePart = (voicePart: string | null): string => {
-  if (!voicePart) return "N/A";
+export const formatPhoneNumber = (input: string): string => {
+  // Strip all non-numeric characters
+  const digits = input.replace(/\D/g, '');
   
-  const parts: {[key: string]: string} = {
-    soprano_1: "Soprano 1",
-    soprano_2: "Soprano 2",
-    alto_1: "Alto 1",
-    alto_2: "Alto 2",
-    tenor: "Tenor",
-    bass: "Bass"
-  };
-  
-  return parts[voicePart] || voicePart;
-};
-
-/**
- * Format role for display
- */
-export const formatRole = (role: string): string => {
-  const roles: {[key: string]: string} = {
-    administrator: "Administrator",
-    director: "Director",
-    section_leader: "Section Leader",
-    singer: "Singer",
-    student_conductor: "Student Conductor",
-    accompanist: "Accompanist",
-    non_singer: "Non-Singer",
-    admin: "Admin"
-  };
-  
-  return roles[role] || role;
-};
-
-/**
- * Format phone number for display with the pattern (XXX) XXX-XXXX
- */
-export const formatPhoneNumber = (phoneNumber: string): string => {
-  // Strip all non-digits
-  const cleaned = phoneNumber.replace(/\D/g, '');
-  
-  // Check if the input is valid
-  if (cleaned.length < 10) {
-    return phoneNumber; // Return original if not enough digits
+  // Format as (xxx) xxx-xxxx if 10 digits
+  if (digits.length === 10) {
+    return `(${digits.slice(0, 3)}) ${digits.slice(3, 6)}-${digits.slice(6)}`;
   }
   
-  // Get the matches
-  const match = cleaned.match(/^(\d{3})(\d{3})(\d{4})$/);
-  
-  if (match) {
-    // Format as (XXX) XXX-XXXX
-    return `(${match[1]}) ${match[2]}-${match[3]}`;
-  }
-  
-  // Return original if not matched
-  return phoneNumber;
+  // Return cleaned digits if not 10 digits
+  return digits;
 };

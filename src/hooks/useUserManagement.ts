@@ -24,7 +24,7 @@ export interface User {
   title?: string;
   class_year?: string;
   join_date?: string;
-  special_roles?: string;
+  notes?: string;
   dues_paid?: boolean;
 }
 
@@ -123,12 +123,24 @@ export const useUserManagement = () => {
         return null;
       }
     }, []),
-    updateUser: useCallback(async (userId: string, userData: any) => {
+    updateUser: useCallback(async (userId: string, userData: UserFormValues) => {
       try {
         console.log(`Updating user ${userId} with data:`, userData);
         const { data, error } = await supabase
           .from('profiles')
-          .update(userData)
+          .update({
+            first_name: userData.first_name,
+            last_name: userData.last_name,
+            email: userData.email,
+            phone: userData.phone,
+            role: userData.role,
+            voice_part: userData.voice_part,
+            status: userData.status,
+            class_year: userData.class_year,
+            notes: userData.notes,
+            dues_paid: userData.dues_paid,
+            join_date: userData.join_date
+          })
           .eq('id', userId);
   
         if (error) {
@@ -251,7 +263,6 @@ export const useUserManagement = () => {
             status: userData.status,
             class_year: userData.class_year || null,
             notes: userData.notes || null,
-            special_roles: userData.special_roles || null,
             dues_paid: userData.dues_paid || false,
           })
           .eq('id', authData.user.id);
@@ -283,7 +294,7 @@ export const useUserManagement = () => {
           status: userData.status,
           created_at: new Date().toISOString(),
           class_year: userData.class_year,
-          special_roles: userData.special_roles,
+          notes: userData.notes,
           dues_paid: userData.dues_paid
         };
         

@@ -1,22 +1,31 @@
 
 import React from 'react';
 import { Navigate, Route, Routes } from 'react-router-dom';
-import MainLayout from './layouts/MainLayout';
-import Dashboard from './pages/Dashboard';
-import Login from './pages/Login';
-import Register from './pages/Register';
-import NotFound from './pages/NotFound';
 import { PermissionGuard } from './components/auth/PermissionGuard';
-import UserManagementPage from './pages/admin/UserManagementPage';
-import UserProfilePage from './pages/UserProfilePage';
-import { Suspense } from 'react';
 import { Spinner } from './components/ui/spinner';
 
-// Lazy load additional pages
-const SheetMusicPage = React.lazy(() => import('./pages/SheetMusicPage'));
-const CalendarPage = React.lazy(() => import('./pages/CalendarPage'));
-const AnnouncementsPage = React.lazy(() => import('./pages/AnnouncementsPage'));
-const FinancesPage = React.lazy(() => import('./pages/FinancesPage'));
+// Simple placeholder component for missing pages
+const PlaceholderPage = ({ title }: { title: string }) => (
+  <div className="flex flex-col items-center justify-center min-h-[60vh]">
+    <h1 className="text-2xl font-bold mb-4">{title}</h1>
+    <p>This page is under development.</p>
+  </div>
+);
+
+// Use these components for now
+const Dashboard = () => <PlaceholderPage title="Dashboard" />;
+const Login = () => <PlaceholderPage title="Login" />;
+const Register = () => <PlaceholderPage title="Register" />;
+const NotFound = () => <PlaceholderPage title="404 - Not Found" />;
+const UserProfilePage = () => <PlaceholderPage title="User Profile" />;
+const UserManagementPage = React.lazy(() => import('./pages/admin/UserManagementPage'));
+
+// Layout component
+const MainLayout = ({ children }: { children: React.ReactNode }) => (
+  <div className="min-h-screen bg-background">
+    <div className="container mx-auto py-4">{children}</div>
+  </div>
+);
 
 const AppRoutes = () => {
   return (
@@ -28,51 +37,34 @@ const AppRoutes = () => {
       {/* Protected routes with MainLayout */}
       <Route path="/dashboard" element={
         <PermissionGuard>
-          <MainLayout />
+          <MainLayout>
+            <Dashboard />
+          </MainLayout>
         </PermissionGuard>
-      }>
-        <Route index element={<Dashboard />} />
-        <Route path="profile" element={<UserProfilePage />} />
-        
-        <Route path="sheet-music" element={
-          <Suspense fallback={<div className="flex items-center justify-center min-h-[60vh]"><Spinner size="lg" /></div>}>
-            <PermissionGuard requiredPermission="view_sheet_music">
-              <SheetMusicPage />
-            </PermissionGuard>
-          </Suspense>
-        } />
-        
-        <Route path="calendar" element={
-          <Suspense fallback={<div className="flex items-center justify-center min-h-[60vh]"><Spinner size="lg" /></div>}>
-            <PermissionGuard requiredPermission="view_calendar">
-              <CalendarPage />
-            </PermissionGuard>
-          </Suspense>
-        } />
-        
-        <Route path="announcements" element={
-          <Suspense fallback={<div className="flex items-center justify-center min-h-[60vh]"><Spinner size="lg" /></div>}>
-            <PermissionGuard requiredPermission="view_announcements">
-              <AnnouncementsPage />
-            </PermissionGuard>
-          </Suspense>
-        } />
-        
-        <Route path="finances" element={
-          <Suspense fallback={<div className="flex items-center justify-center min-h-[60vh]"><Spinner size="lg" /></div>}>
-            <PermissionGuard requiredPermission="view_financials">
-              <FinancesPage />
-            </PermissionGuard>
-          </Suspense>
-        } />
-        
-        {/* Admin routes */}
-        <Route path="admin/members" element={
-          <PermissionGuard requiredPermission="manage_users">
-            <UserManagementPage />
-          </PermissionGuard>
-        } />
-      </Route>
+      } />
+      
+      <Route path="/dashboard/profile" element={
+        <PermissionGuard>
+          <MainLayout>
+            <UserProfilePage />
+          </MainLayout>
+        </PermissionGuard>
+      } />
+      
+      {/* Admin routes */}
+      <Route path="/dashboard/admin/members" element={
+        <PermissionGuard requiredPermission="manage_users">
+          <MainLayout>
+            <React.Suspense fallback={
+              <div className="flex items-center justify-center min-h-[60vh]">
+                <Spinner size="lg" />
+              </div>
+            }>
+              <UserManagementPage />
+            </React.Suspense>
+          </MainLayout>
+        </PermissionGuard>
+      } />
       
       {/* Redirect root to dashboard */}
       <Route path="/" element={<Navigate to="/dashboard" replace />} />

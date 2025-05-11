@@ -6,11 +6,6 @@ import { toast } from 'sonner';
 
 export type UserRole = 'admin' | 'student' | 'section_leader' | 'staff' | 'guest';
 
-export interface Permission {
-  name: string;
-  granted: boolean;
-}
-
 interface RolePermissionContextType {
   userRole: UserRole | null;
   permissions: Record<string, boolean>;

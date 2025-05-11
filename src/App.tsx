@@ -4,7 +4,7 @@ import { BrowserRouter } from 'react-router-dom';
 import { Toaster } from 'sonner';
 import { AuthProvider } from './contexts/AuthContext';
 import { RolePermissionProvider } from './contexts/RolePermissionContext';
-import { ThemeProvider } from './components/ThemeProvider';
+import { ThemeProvider } from './providers/ThemeProvider';
 import Routes from './Routes';
 
 function App() {

@@ -42,11 +42,11 @@ export function EditUserDialog({
       last_name: user?.last_name || '',
       email: user?.email || '',
       phone: user?.phone || '',
-      role: user?.role || 'singer',
-      voice_part: user?.voice_part || 'soprano_1',
-      status: user?.status || 'active',
+      role: (user?.role as "admin" | "student" | "section_leader" | "staff" | "guest") || 'student',
+      voice_part: (user?.voice_part as "soprano_1" | "soprano_2" | "alto_1" | "alto_2" | "tenor" | "bass" | null) || null,
+      status: (user?.status as "active" | "pending" | "inactive" | "alumni") || 'active',
       class_year: user?.class_year || '',
-      special_roles: user?.special_roles || '',
+      notes: user?.notes || '',
       dues_paid: user?.dues_paid || false
     }
   });
@@ -59,11 +59,11 @@ export function EditUserDialog({
         last_name: user.last_name || '',
         email: user.email || '',
         phone: user.phone || '',
-        role: user.role || 'singer',
-        voice_part: user.voice_part || 'soprano_1',
-        status: user.status || 'active',
+        role: (user.role as "admin" | "student" | "section_leader" | "staff" | "guest") || 'student',
+        voice_part: (user.voice_part as "soprano_1" | "soprano_2" | "alto_1" | "alto_2" | "tenor" | "bass" | null) || null,
+        status: (user.status as "active" | "pending" | "inactive" | "alumni") || 'active',
         class_year: user.class_year || '',
-        special_roles: user.special_roles || '',
+        notes: user.notes || '',
         dues_paid: user.dues_paid || false
       });
     }
@@ -165,13 +165,11 @@ export function EditUserDialog({
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        <SelectItem value="singer">Singer</SelectItem>
+                        <SelectItem value="admin">Admin</SelectItem>
+                        <SelectItem value="student">Student Member</SelectItem>
                         <SelectItem value="section_leader">Section Leader</SelectItem>
-                        <SelectItem value="student_conductor">Student Conductor</SelectItem>
-                        <SelectItem value="accompanist">Accompanist</SelectItem>
-                        <SelectItem value="non_singer">Non-Singer</SelectItem>
-                        <SelectItem value="administrator">Administrator</SelectItem>
-                        <SelectItem value="director">Director</SelectItem>
+                        <SelectItem value="staff">Staff</SelectItem>
+                        <SelectItem value="guest">Guest/Alumni</SelectItem>
                       </SelectContent>
                     </Select>
                     <FormMessage />
@@ -185,7 +183,7 @@ export function EditUserDialog({
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Voice Part</FormLabel>
-                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                    <Select onValueChange={field.onChange} defaultValue={field.value || undefined}>
                       <FormControl>
                         <SelectTrigger>
                           <SelectValue placeholder="Select voice part" />
@@ -248,10 +246,10 @@ export function EditUserDialog({
 
             <FormField
               control={form.control}
-              name="special_roles"
+              name="notes"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Special Roles (optional)</FormLabel>
+                  <FormLabel>Notes (optional)</FormLabel>
                   <FormControl>
                     <Input {...field} value={field.value || ''} />
                   </FormControl>
