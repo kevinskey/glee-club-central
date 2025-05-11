@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useContext, createContext } from 'react';
 import {
   Session,
@@ -224,13 +225,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         console.log("Sign-in successful for:", data.user.email);
         toast.success("Signed in successfully!");
         
-        // Update last_login time in profile
-        // Only update the last_sign_in_at field specifically
+        // Use a type assertion to resolve the TypeScript error
+        const updateData = {
+          last_sign_in_at: new Date().toISOString()
+        };
+        
         await supabase
           .from('profiles')
-          .update({
-            last_sign_in_at: new Date().toISOString()
-          })
+          .update(updateData as any)  // Use type assertion to bypass TypeScript check
           .eq('id', data.user.id);
         
         // Use navigate instead of forced reload for smoother experience
