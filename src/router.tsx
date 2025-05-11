@@ -10,7 +10,7 @@ import ProfilePage from "./pages/ProfilePage";
 import UpdatePasswordPage from "./pages/UpdatePasswordPage";
 import MembersPage from "./pages/MembersPage";
 import NotFoundPage from "./pages/NotFoundPage";
-import DashboardPage from "./pages/DashboardPage"; // We'll keep this one
+import DashboardPage from "./pages/DashboardPage";
 
 // Import layout components
 import { ProtectedRoute } from "./components/auth/ProtectedRoute";
