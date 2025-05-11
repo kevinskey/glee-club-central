@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { User } from '@/hooks/useUserManagement';
 import { 
   Dialog, 
@@ -23,6 +23,7 @@ import { UserTitle } from '@/types/permissions';
 import { updateUserTitle, toggleSuperAdmin } from '@/utils/supabase/permissions';
 import { Switch } from '@/components/ui/switch';
 import { toast } from 'sonner';
+import { supabase } from '@/integrations/supabase/client';
 
 interface UserTitleManagementProps {
   user: User | null;
@@ -44,6 +45,14 @@ export function UserTitleManagement({
     user?.is_super_admin || false
   );
   const [isLoading, setIsLoading] = useState(false);
+  
+  // Update form state when user changes
+  useEffect(() => {
+    if (user) {
+      setSelectedTitle(user.title as UserTitle || 'General Member');
+      setIsSuperAdmin(user.is_super_admin || false);
+    }
+  }, [user]);
 
   const titles: UserTitle[] = [
     'Super Admin',
@@ -70,18 +79,26 @@ export function UserTitleManagement({
 
     setIsLoading(true);
     try {
-      // Update title
+      // Update title using RPC function
       const titleUpdated = await updateUserTitle(user.id, selectedTitle);
       
-      // Update super admin status
-      const adminUpdated = await toggleSuperAdmin(user.id, isSuperAdmin);
+      // Update admin status directly
+      const { error } = await supabase
+        .from('profiles')
+        .update({ 
+          is_super_admin: isSuperAdmin,
+          title: selectedTitle
+        })
+        .eq('id', user.id);
       
-      if (titleUpdated && adminUpdated) {
-        toast.success("User role updated successfully");
-        if (onSuccess) onSuccess();
-        setIsOpen(false);
+      if (error) {
+        throw error;
       }
-    } catch (error) {
+      
+      toast.success("User role updated successfully");
+      if (onSuccess) onSuccess();
+      setIsOpen(false);
+    } catch (error: any) {
       console.error("Error updating user role:", error);
       toast.error("Failed to update user role");
     } finally {

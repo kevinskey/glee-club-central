@@ -63,6 +63,8 @@ export async function hasPermission(
 
 export async function updateUserTitle(userId: string, title: UserTitle): Promise<boolean> {
   try {
+    console.log(`Updating user ${userId} title to ${title}`);
+    
     const { error } = await supabase
       .from('profiles')
       .update({ title })
@@ -74,7 +76,7 @@ export async function updateUserTitle(userId: string, title: UserTitle): Promise
       return false;
     }
 
-    toast.success('User title updated successfully');
+    console.log('User title updated successfully');
     return true;
   } catch (error) {
     console.error('Error in updateUserTitle:', error);
@@ -84,6 +86,8 @@ export async function updateUserTitle(userId: string, title: UserTitle): Promise
 
 export async function toggleSuperAdmin(userId: string, isSuperAdmin: boolean): Promise<boolean> {
   try {
+    console.log(`Setting user ${userId} super admin status to ${isSuperAdmin}`);
+    
     const { error } = await supabase
       .from('profiles')
       .update({ is_super_admin: isSuperAdmin })
@@ -95,7 +99,7 @@ export async function toggleSuperAdmin(userId: string, isSuperAdmin: boolean): P
       return false;
     }
 
-    toast.success(`User ${isSuperAdmin ? 'promoted to' : 'removed from'} Super Admin`);
+    console.log(`User ${isSuperAdmin ? 'promoted to' : 'removed from'} Super Admin`);
     return true;
   } catch (error) {
     console.error('Error in toggleSuperAdmin:', error);

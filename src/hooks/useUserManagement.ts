@@ -118,39 +118,49 @@ export const useUserManagement = () => {
     }
   };
 
-  const updateUser = async (userId: string, userData: Partial<UserFormValues>): Promise<boolean> => {
+  const updateUser = async (userId: string, userData: Partial<UserFormValues | Profile>): Promise<boolean> => {
     console.log("useUserManagement - updateUser called for:", userId);
     setIsLoading(true);
     setError(null);
     
     try {
-      // Update the profile with provided data
-      const { error: profileError } = await supabase
-        .from('profiles')
-        .update({
-          first_name: userData.first_name,
-          last_name: userData.last_name,
-          phone: userData.phone,
-          role: userData.role,
-          voice_part: userData.voice_part,
-          status: userData.status,
-          class_year: userData.class_year,
-          notes: userData.notes,
-          special_roles: userData.special_roles,
-          dues_paid: userData.dues_paid
-        })
-        .eq('id', userId);
+      // Extract fields to update in the profile
+      const profileFields: any = {};
       
-      if (profileError) {
-        console.error("Profile update error:", profileError);
-        throw profileError;
+      // Map all allowed profile fields
+      const allowedFields = [
+        'first_name', 'last_name', 'phone', 'role', 
+        'voice_part', 'status', 'class_year', 'notes', 
+        'special_roles', 'dues_paid', 'title', 'is_super_admin'
+      ];
+      
+      allowedFields.forEach(field => {
+        if (field in userData) {
+          profileFields[field] = (userData as any)[field];
+        }
+      });
+      
+      // Only proceed with update if we have fields to update
+      if (Object.keys(profileFields).length > 0) {
+        console.log("Updating profile with fields:", profileFields);
+        
+        // Update the profile with provided data
+        const { error: profileError } = await supabase
+          .from('profiles')
+          .update(profileFields)
+          .eq('id', userId);
+        
+        if (profileError) {
+          console.error("Profile update error:", profileError);
+          throw profileError;
+        }
       }
 
-      // If email needs updating, use admin API
-      if (userData.email) {
+      // Handle email update if provided
+      if ('email' in userData && userData.email) {
         try {
           const response = await adminSupabase.auth.admin.updateUserById(userId, {
-            email: userData.email
+            email: userData.email as string
           });
           
           // Check if response has error
@@ -164,8 +174,8 @@ export const useUserManagement = () => {
         }
       }
 
-      // If password provided, update it
-      if (userData.password && userData.password.trim() !== '') {
+      // Handle password update if provided
+      if ('password' in userData && userData.password && typeof userData.password === 'string' && userData.password.trim() !== '') {
         try {
           const response = await adminSupabase.auth.admin.updateUserById(userId, {
             password: userData.password

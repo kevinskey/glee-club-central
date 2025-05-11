@@ -25,7 +25,7 @@ export function PermissionRoute({
     path: location.pathname,
     isAuthenticated, 
     isLoading,
-    isAdmin: isAdmin(),
+    isAdmin: isAdmin ? isAdmin() : false,
     isSuperAdmin,
     requireSuperAdmin,
     requiredPermission,
@@ -45,7 +45,7 @@ export function PermissionRoute({
   }
   
   // If the user is a superadmin or has admin role, always allow access
-  if (isSuperAdmin || isAdmin()) {
+  if (isSuperAdmin || (isAdmin && isAdmin())) {
     console.log('Access granted: User is super admin or admin');
     return <>{children}</>;
   }

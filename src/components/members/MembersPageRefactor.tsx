@@ -76,23 +76,29 @@ export function MembersPageComponent({ useUserManagementHook }: MembersPageProps
       const success = await addUser(data);
       if (success) {
         setIsAddMemberOpen(false);
+        toast.success(`Added ${data.first_name} ${data.last_name} successfully`);
+        await refreshUsers();
       }
     } finally {
       setIsSubmitting(false);
     }
   };
 
-  // Log access state for debugging
+  // Check if user has admin privileges
+  const hasAdminAccess = isAdmin?.() || isSuperAdmin || profile?.is_super_admin || hasPermission('can_manage_users');
+
   console.log("AdminMembersPage - Access check:", {
     isAuthenticated,
     authLoading,
-    isAdmin: isAdmin(),
+    isAdmin: isAdmin?.(),
     isSuperAdmin,
-    profileSuperAdmin: profile?.is_super_admin
+    profileSuperAdmin: profile?.is_super_admin,
+    hasPermission: hasPermission('can_manage_users'),
+    hasAdminAccess
   });
 
-  // Only redirect if not admin AND not super admin
-  if (!authLoading && isAuthenticated && !isAdmin() && !isSuperAdmin && !profile?.is_super_admin) {
+  // Only redirect if no admin access
+  if (!authLoading && isAuthenticated && !hasAdminAccess) {
     console.log("AdminMembersPage - Access denied, redirecting to dashboard");
     return <Navigate to="/dashboard" />;
   }
@@ -144,7 +150,7 @@ export function MembersPageComponent({ useUserManagementHook }: MembersPageProps
           onRefreshClick={refreshUsers}
           isLoading={isLoading}
           isMobile={isMobile}
-          canCreate={hasPermission('can_manage_users')}
+          canCreate={hasAdminAccess}
         />
         
         <MembersList 
