@@ -8,10 +8,8 @@ import { PermissionName } from '@/types/permissions';
 // Define user roles as a simple string literal union type
 export type UserRole = 'admin' | 'student' | 'section_leader' | 'staff' | 'guest';
 
-// Use a simple interface for permissions object
-interface PermissionsObject {
-  [key: string]: boolean;
-}
+// Simple permissions object with string keys and boolean values
+type PermissionsObject = Record<string, boolean>;
 
 // Define the context interface
 interface RolePermissionContextType {
@@ -22,14 +20,8 @@ interface RolePermissionContextType {
   refreshPermissions: () => Promise<void>;
 }
 
-// Create context with default values
-const RolePermissionContext = createContext<RolePermissionContextType>({
-  userRole: null,
-  permissions: {},
-  isLoading: true,
-  hasPermission: () => false,
-  refreshPermissions: async () => {}
-});
+// Create context with null as initial value and use type assertion
+const RolePermissionContext = createContext<RolePermissionContextType>(null!);
 
 // Export the hook for consuming the context
 export const useRolePermissions = () => useContext(RolePermissionContext);
@@ -57,17 +49,17 @@ export const RolePermissionProvider: React.FC<{ children: React.ReactNode }> = (
       const roleFromProfile = profile?.role || 'student';
       
       // Define valid roles as simple string array
-      const validRoles = ['admin', 'student', 'section_leader', 'staff', 'guest'];
+      const validRoles: UserRole[] = ['admin', 'student', 'section_leader', 'staff', 'guest'];
       
       // Determine the role safely using string comparison
-      let role = 'student'; // Default role
+      let role: UserRole = 'student'; // Default role
       
-      if (validRoles.includes(roleFromProfile)) {
-        role = roleFromProfile;
+      if (validRoles.includes(roleFromProfile as UserRole)) {
+        role = roleFromProfile as UserRole;
       }
       
       // Set role directly
-      setUserRole(role as UserRole);
+      setUserRole(role);
 
       // Fetch permissions based on role
       const { data, error } = await supabase
