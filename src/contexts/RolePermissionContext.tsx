@@ -54,16 +54,19 @@ export const RolePermissionProvider: React.FC<{ children: React.ReactNode }> = (
     try {
       setIsLoading(true);
 
-      // Get role from profile
+      // Get role from profile as string
       const roleFromProfile = profile?.role || 'student';
       
-      // Define valid roles as array of string literals
-      const validRoles = ['admin', 'student', 'section_leader', 'staff', 'guest'];
+      // Define valid roles 
+      const validRoles: readonly string[] = ['admin', 'student', 'section_leader', 'staff', 'guest'];
       
-      // Assign role with validation - use type assertion directly
-      const validatedRole = validRoles.includes(roleFromProfile) 
-        ? roleFromProfile as UserRole 
-        : 'student' as UserRole;
+      // Simple role validation to avoid complex type assertions
+      let validatedRole: UserRole;
+      if (validRoles.includes(roleFromProfile)) {
+        validatedRole = roleFromProfile as UserRole;
+      } else {
+        validatedRole = 'student';
+      }
       
       // Set role
       setUserRole(validatedRole);
