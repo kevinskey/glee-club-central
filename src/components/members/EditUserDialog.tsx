@@ -1,3 +1,4 @@
+
 import React from "react";
 import { Button } from "@/components/ui/button";
 import { 
@@ -19,7 +20,20 @@ import {
 } from "@/components/ui/select";
 import { useForm } from "react-hook-form";
 import { User } from "@/hooks/useUserManagement";
-import { formatPhoneNumber } from "@/utils/formatters"; // Fix: Import from utils/formatters instead
+import { formatPhoneNumber } from "@/utils/formatters";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { UserFormValues, userFormSchema } from "@/components/members/form/userFormSchema";
+import { 
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage
+} from "@/components/ui/form";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Loader2 } from "lucide-react";
+import { Spinner } from "@/components/ui/spinner";
 
 interface EditUserDialogProps {
   isOpen: boolean;
