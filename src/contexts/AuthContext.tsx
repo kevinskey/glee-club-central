@@ -1,4 +1,3 @@
-
 import React, { createContext, useState, useEffect, useContext, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
@@ -244,24 +243,24 @@ export function AuthProvider({ children }: AuthProviderProps) {
   };
 
   const updatePassword = async (newPassword: string) => {
-        try {
-            console.log("Updating password");
-            const { data, error } = await supabase.auth.updateUser({
-                password: newPassword,
-            });
+    try {
+      console.log("Updating password");
+      const { data, error } = await supabase.auth.updateUser({
+        password: newPassword,
+      });
 
-            if (error) {
-                console.error("Update password error:", error);
-                toast.error('Failed to update password');
-                return;
-            }
+      if (error) {
+        console.error("Update password error:", error);
+        toast.error('Failed to update password');
+        return;
+      }
 
-            toast.success('Password updated successfully');
-        } catch (err) {
-            console.error("Error during password update:", err);
-            toast.error('Error during password update');
-        }
-    };
+      toast.success('Password updated successfully');
+    } catch (err) {
+      console.error("Error during password update:", err);
+      toast.error('Error during password update');
+    }
+  };
 
   // Check if the user has an admin role
   const isAdmin = useCallback(() => {
