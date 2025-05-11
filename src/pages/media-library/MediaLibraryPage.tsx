@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { PageHeader } from "@/components/ui/page-header";
 import { FilesIcon, Upload, Search, Filter, Calendar, List, Grid2X2 } from "lucide-react";
@@ -95,7 +96,8 @@ export default function MediaLibraryPage() {
           created_at: audioFile.created_at,
           uploaded_by: audioFile.uploaded_by,
           category: 'audio',
-          tags: []
+          tags: [],
+          size: 0 // Default size for audio files since we don't have this info
         }));
       
       console.log("Audio files converted:", audioMediaFiles.length);

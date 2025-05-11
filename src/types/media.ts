@@ -11,7 +11,7 @@ export interface MediaFile {
   category?: string;
   tags?: string[];
   folder?: string;
-  size?: number;
+  size: number; // file size in bytes
 }
 
 export type MediaCategory = 'sheet_music' | 'audio' | 'video' | 'other';
