@@ -10,6 +10,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { EventFormFields } from "./EventFormFields";
 import { EventImageUpload } from "./EventImageUpload";
+import { EventType } from "@/hooks/useCalendarEvents";
 
 export const formSchema = z.object({
   title: z.string().min(2, { message: "Title must be at least 2 characters" }),
@@ -26,7 +27,7 @@ export const formSchema = z.object({
 export type EventFormValues = z.infer<typeof formSchema>;
 
 interface AddEventFormProps {
-  onAddEvent: (event: EventFormValues) => void;
+  onAddEvent: (event: EventFormValues & { start: Date, end: Date }) => void;
   onCancel: () => void;
   initialDate?: Date;
 }
@@ -45,7 +46,7 @@ export function AddEventForm({ onAddEvent, onCancel, initialDate }: AddEventForm
       time: "",
       location: "",
       description: "",
-      type: "concert",
+      type: "concert" as EventType,
     },
   });
 
@@ -98,11 +99,16 @@ export function AddEventForm({ onAddEvent, onCancel, initialDate }: AddEventForm
         }
       }
       
-      // Add the image URL to the event data
-      onAddEvent({
-        ...values, 
-        image_url: imageUrl
-      });
+      // Add the image URL and required start/end dates to the event data
+      const enhancedValues = {
+        ...values,
+        image_url: imageUrl,
+        start: values.date,  // Set start date from form date
+        end: values.date     // Set end date (same as start for simplicity)
+      };
+      
+      // Pass the enhanced values to the onAddEvent handler
+      onAddEvent(enhancedValues);
       
       // Reset form and state
       form.reset();

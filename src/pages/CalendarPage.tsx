@@ -1,10 +1,9 @@
-
 import React, { useState, useCallback, useMemo } from "react";
 import { Header } from "@/components/landing/Header";
 import { Footer } from "@/components/landing/Footer";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { useCalendarEvents, CalendarEvent } from "@/hooks/useCalendarEvents";
-import { AddEventForm } from "@/components/calendar/AddEventForm";
+import { useCalendarEvents, CalendarEvent, EventType } from "@/hooks/useCalendarEvents";
+import { AddEventForm, EventFormValues } from "@/components/calendar/AddEventForm";
 import { EditEventForm } from "@/components/calendar/EditEventForm";
 import { toast } from "sonner";
 
@@ -40,7 +39,7 @@ export default function CalendarPage() {
     );
   }, [date, events]);
     
-  // Get days with events for highlighting in the calendar
+  // Get days with events for highlighting in the calendar - ensure they are Date objects
   const daysWithEvents = useMemo(() => events.map(event => event.date), [events]);
   
   // Handle event selection
@@ -58,9 +57,23 @@ export default function CalendarPage() {
     fetchEvents();
   }, [fetchEvents]);
 
-  // Handle adding new event
-  const handleAddEvent = async (formValues: Omit<CalendarEvent, "id">) => {
-    const newEvent = await addEvent(formValues);
+  // Handle adding new event - ensuring event has all required fields
+  const handleAddEvent = async (formValues: EventFormValues & { start: Date, end: Date }) => {
+    // Make sure we have all required fields from formValues
+    // and conform to the requirements for CalendarEvent
+    const eventData: Omit<CalendarEvent, "id"> = {
+      title: formValues.title,
+      description: formValues.description || "",
+      date: formValues.date,
+      start: formValues.start,
+      end: formValues.end,
+      time: formValues.time,
+      location: formValues.location,
+      type: formValues.type as EventType, // Ensure correct type casting
+      image_url: formValues.image_url || undefined
+    };
+    
+    const newEvent = await addEvent(eventData);
     
     if (newEvent) {
       setIsAddEventOpen(false);
@@ -68,9 +81,9 @@ export default function CalendarPage() {
       
       // If the new event is on the currently selected date, select it
       if (date && 
-          formValues.start.getDate() === date.getDate() && 
-          formValues.start.getMonth() === date.getMonth() && 
-          formValues.start.getFullYear() === date.getFullYear()) {
+          formValues.date.getDate() === date.getDate() && 
+          formValues.date.getMonth() === date.getMonth() && 
+          formValues.date.getFullYear() === date.getFullYear()) {
         // Set the date again to trigger a refresh of the events list
         handleDateSelect(new Date(date));
         

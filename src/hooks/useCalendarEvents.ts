@@ -4,6 +4,9 @@ import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
+// Define acceptable event types to enforce type safety
+export type EventType = "concert" | "rehearsal" | "tour" | "special";
+
 // Export CalendarEvent type to be used across components
 export interface CalendarEvent {
   id: string;
@@ -14,7 +17,7 @@ export interface CalendarEvent {
   end: Date;           // New standardized field
   time?: string;       // Keep for backward compatibility
   location: string;
-  type: string;
+  type: EventType;
   image_url?: string;
   allDay?: boolean;
   source?: string;     // Used to identify events from external sources like Google Calendar
@@ -46,7 +49,7 @@ export function useCalendarEvents() {
           return;
         }
 
-        // Transform database events to CalendarEvent type
+        // Transform database events to CalendarEvent type with explicit typing
         const transformedEvents: CalendarEvent[] = dbEvents.map(event => ({
           id: event.id,
           title: event.title,
@@ -56,7 +59,8 @@ export function useCalendarEvents() {
           time: event.time,
           location: event.location,
           description: event.description || "",
-          type: event.type,
+          // Ensure type is cast to one of the allowed values
+          type: validateEventType(event.type),
           image_url: event.image_url,
           allDay: !event.time  // If no time specified, treat as all-day event
         }));
@@ -76,6 +80,14 @@ export function useCalendarEvents() {
     }
   }, [isAuthenticated, user]);
 
+  // Helper function to validate and cast event types
+  const validateEventType = (type: string): EventType => {
+    const validTypes: EventType[] = ["concert", "rehearsal", "tour", "special"];
+    return validTypes.includes(type as EventType) 
+      ? (type as EventType) 
+      : "special"; // Default to special if invalid
+  };
+
   // Add a new event
   const addEvent = async (event: Omit<CalendarEvent, "id">): Promise<CalendarEvent | null> => {
     try {
@@ -84,6 +96,9 @@ export function useCalendarEvents() {
         return null;
       }
 
+      // Ensure event type is valid before saving
+      const validatedType = validateEventType(event.type);
+
       // Prepare event data for database
       const newEvent = {
         title: event.title,
@@ -91,7 +106,7 @@ export function useCalendarEvents() {
         time: event.time,
         location: event.location,
         description: event.description,
-        type: event.type,
+        type: validatedType,
         image_url: event.image_url,
         user_id: user.id
       };
@@ -119,7 +134,7 @@ export function useCalendarEvents() {
           time: data[0].time,
           location: data[0].location,
           description: data[0].description || "",
-          type: data[0].type,
+          type: validateEventType(data[0].type),
           image_url: data[0].image_url
         };
         
@@ -150,6 +165,9 @@ export function useCalendarEvents() {
         return false;
       }
 
+      // Ensure event type is valid before updating
+      const validatedType = validateEventType(event.type);
+
       // Update in database
       const { error } = await supabase
         .from("calendar_events")
@@ -159,7 +177,7 @@ export function useCalendarEvents() {
           time: event.time,
           location: event.location,
           description: event.description,
-          type: event.type,
+          type: validatedType,
           image_url: event.image_url,
           updated_at: new Date().toISOString()
         })

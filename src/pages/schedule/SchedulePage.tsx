@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { CalendarContainer } from "@/components/calendar/CalendarContainer";
 import { EventList } from "@/components/calendar/EventList";
 import { useAuth } from "@/contexts/AuthContext";
-import { useCalendarEvents } from "@/hooks/useCalendarEvents";
+import { useCalendarEvents, EventType } from "@/hooks/useCalendarEvents";
 
 export default function SchedulePage() {
   const [view, setView] = useState<"calendar" | "list">("calendar");
@@ -22,7 +22,7 @@ export default function SchedulePage() {
   // Check if user is admin
   const isAdmin = profile?.role === "admin";
 
-  // Get days with events for the calendar - convert string dates to Date objects
+  // Get days with events for the calendar - these are already Date objects from our updated hook
   const daysWithEvents = events.map(event => event.date);
   
   // Helper function to get event type color

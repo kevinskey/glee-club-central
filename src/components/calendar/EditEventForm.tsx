@@ -9,7 +9,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { EventFormFields } from "./EventFormFields";
 import { EventImageUpload } from "./EventImageUpload";
-import { CalendarEvent } from "@/hooks/useCalendarEvents";
+import { CalendarEvent, EventType } from "@/hooks/useCalendarEvents";
 import { formSchema, EventFormValues } from "./AddEventForm";
 
 interface EditEventFormProps {
@@ -29,10 +29,10 @@ export function EditEventForm({ event, onUpdateEvent, onCancel }: EditEventFormP
     defaultValues: {
       title: event.title,
       date: event.start,
-      time: event.time,
+      time: event.time || "",
       location: event.location,
       description: event.description || "",
-      type: event.type,
+      type: event.type as EventType, // Ensure proper type casting
       image_url: event.image_url || null,
     },
   });
@@ -89,7 +89,7 @@ export function EditEventForm({ event, onUpdateEvent, onCancel }: EditEventFormP
         time: values.time,
         location: values.location,
         description: values.description || "",
-        type: values.type,
+        type: values.type as EventType, // Ensure proper type casting
         image_url: imageUrl
       });
       
