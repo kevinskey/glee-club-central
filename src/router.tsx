@@ -10,14 +10,12 @@ import ProfilePage from "./pages/ProfilePage";
 import UpdatePasswordPage from "./pages/UpdatePasswordPage";
 import MembersPage from "./pages/MembersPage";
 import NotFoundPage from "./pages/NotFoundPage";
+import DashboardPage from "./pages/DashboardPage"; // We'll keep this one
 
 // Import layout components
 import { ProtectedRoute } from "./components/auth/ProtectedRoute";
 import { DashboardLayout } from "./components/layout/DashboardLayout";
 import { AdminRoute } from "./components/auth/AdminRoute";
-
-// Create basic placeholder pages to prevent build errors
-import DashboardPage from "./pages/DashboardPage";
 
 export const router = createBrowserRouter([
   {
