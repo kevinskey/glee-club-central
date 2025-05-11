@@ -25,6 +25,7 @@ export default function AdminMembersPage() {
         .then((result) => {
           if (mounted) {
             console.log("AdminMembersPage - Users fetched successfully", result?.length || 0, "users");
+            console.log("Users data sample:", result?.slice(0, 2));
             setIsLoading(false);
           }
         })
@@ -101,6 +102,6 @@ export default function AdminMembersPage() {
   }
 
   // Once loaded, always render the component with the current data
-  console.log("AdminMembersPage - Rendering with user data");
+  console.log("AdminMembersPage - Rendering with user data", userManagement.users?.length || 0, "users available");
   return <MembersPageComponent useUserManagementHook={() => userManagement} />;
 }

@@ -1,4 +1,3 @@
-
 import React, { useState, useCallback } from "react";
 import { User } from "@/hooks/useUserManagement";
 import { Navigate } from "react-router-dom";
@@ -18,6 +17,8 @@ import { EditUserDialog } from "@/components/members/EditUserDialog";
 import { DeleteMemberDialog } from "@/components/members/DeleteMemberDialog";
 import { MemberPermissionsDialog } from "@/components/members/MemberPermissionsDialog";
 import { Spinner } from "@/components/ui/spinner";
+import { Button } from "@/components/ui/button";
+import { UserPlus } from "lucide-react";
 
 // Helper function to create a member refresh function that returns void
 export const createMemberRefreshFunction = (
@@ -81,16 +82,12 @@ export function MembersPageComponent({ useUserManagementHook }: MembersPageProps
     deleteUser
   } = useUserManagementHook();
   
-  console.log("MembersPageComponent - Dialog state:", { 
-    isAddMemberOpen, 
-    isEditUserOpen, 
-    isManageRoleOpen,
-    isPermissionsOpen,
-    isDeleteDialogOpen 
-  });
+  console.log("MembersPageComponent - Initializing with", allMembers?.length || 0, "members");
+  console.log("MembersPageComponent - Members sample:", allMembers?.slice(0, 2));
   
   // Explicitly filter out deleted users
   const members = allMembers ? allMembers.filter(member => member.status !== 'deleted') : [];
+  console.log("MembersPageComponent - Active members:", members.length);
   
   // Create a wrapper function for fetchUsers that returns void
   const refreshUsers = createMemberRefreshFunction(fetchUsers);
@@ -101,7 +98,7 @@ export function MembersPageComponent({ useUserManagementHook }: MembersPageProps
     toast.success("Member list refreshed");
   }, [refreshUsers]);
   
-  // Handle adding a new member
+  // Handler functions
   const handleAddMember = useCallback(async (data: UserFormValues) => {
     setIsSubmitting(true);
     try {
@@ -220,7 +217,12 @@ export function MembersPageComponent({ useUserManagementHook }: MembersPageProps
             console.log("Opening add member dialog");
             setIsAddMemberOpen(true);
           }}
-          onRefreshClick={refreshUsers}
+          onRefreshClick={() => {
+            console.log("Refreshing user list");
+            fetchUsers().then(() => {
+              console.log("User list refreshed, now have", allMembers?.length || 0, "users");
+            });
+          }}
           isLoading={isLoading}
           isMobile={isMobile}
           canCreate={hasAdminAccess}
@@ -229,6 +231,18 @@ export function MembersPageComponent({ useUserManagementHook }: MembersPageProps
         {isLoading ? (
           <div className="flex items-center justify-center h-40">
             <Spinner size="lg" />
+          </div>
+        ) : members.length === 0 ? (
+          <div className="text-center p-8">
+            <p className="text-muted-foreground mb-2">No members found</p>
+            <Button 
+              variant="outline" 
+              onClick={() => setIsAddMemberOpen(true)}
+              className="mt-2"
+            >
+              <UserPlus className="mr-2 h-4 w-4" />
+              Add your first member
+            </Button>
           </div>
         ) : (
           <MembersList 

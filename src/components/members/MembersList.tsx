@@ -1,4 +1,3 @@
-
 import React, { memo } from "react";
 import { 
   Table, 
@@ -42,7 +41,7 @@ interface MembersListProps {
 }
 
 // Use memo to prevent unnecessary re-renders
-export const MembersList = memo(({ 
+export const MembersList = memo(function MembersList({ 
   members = [], // Provide default empty array to prevent null/undefined errors
   onChangeRole,
   onEditUser,
@@ -54,7 +53,10 @@ export const MembersList = memo(({
   onStatusUpdate,
   onStatusUpdateSuccess,
   canEdit = true
-}: MembersListProps) => {
+}: MembersListProps) {
+  // For debugging
+  console.log("MembersList rendering with", members.length, "members");
+  
   // Format last login time
   const formatLastLogin = (lastLogin: string | null) => {
     if (!lastLogin) return "Never";
@@ -67,6 +69,7 @@ export const MembersList = memo(({
 
   // Filter out deleted members before rendering
   const activeMembers = members.filter(member => member.status !== 'deleted');
+  console.log("MembersList active members:", activeMembers.length);
   
   return (
     <div className="border rounded-md mt-4 overflow-hidden">
@@ -164,4 +167,3 @@ export const MembersList = memo(({
 
 // Add display name for better debugging
 MembersList.displayName = "MembersList";
-

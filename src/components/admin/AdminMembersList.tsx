@@ -15,6 +15,8 @@ interface AdminMembersListProps {
 export function AdminMembersList({ members, isLoading = false }: AdminMembersListProps) {
   const navigate = useNavigate();
   
+  console.log("AdminMembersList rendering with", members?.length || 0, "members");
+  
   if (isLoading) {
     return (
       <Card>
@@ -41,7 +43,7 @@ export function AdminMembersList({ members, isLoading = false }: AdminMembersLis
     );
   }
   
-  if (members.length === 0) {
+  if (!members || members.length === 0) {
     return (
       <Card>
         <CardHeader>
@@ -56,6 +58,7 @@ export function AdminMembersList({ members, isLoading = false }: AdminMembersLis
   
   // Only show active members in the dashboard preview
   const activeMembers = members.filter(member => member.status === 'active');
+  console.log("AdminMembersList active members:", activeMembers.length);
   const recentMembers = activeMembers.slice(0, 5);
   
   return (
