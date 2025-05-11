@@ -1,8 +1,9 @@
+
 import * as React from "react";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { useMedia } from "@/hooks/use-mobile";
 import { cn } from "@/lib/utils";
-import { SidebarContext } from "./useSidebar";
+import { SidebarContext, SidebarContextType } from "./useSidebar";
 
 const SIDEBAR_COOKIE_NAME = "sidebar:state";
 const SIDEBAR_COOKIE_MAX_AGE = 60 * 60 * 24 * 7;
@@ -80,7 +81,7 @@ export const SidebarProvider = React.forwardRef<
     // This makes it easier to style the sidebar with Tailwind classes.
     const state = open ? "expanded" : "collapsed";
 
-    const contextValue = React.useMemo<SidebarContext>(
+    const contextValue: SidebarContextType = React.useMemo(
       () => ({
         state,
         open,

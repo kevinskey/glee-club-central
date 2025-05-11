@@ -2,7 +2,7 @@
 import * as React from "react";
 import { useMedia } from "@/hooks/use-mobile";
 
-type SidebarContext = {
+export type SidebarContextType = {
   state: "expanded" | "collapsed"
   open: boolean
   setOpen: (open: boolean) => void
@@ -12,7 +12,7 @@ type SidebarContext = {
   toggleSidebar: () => void
 }
 
-export const SidebarContext = React.createContext<SidebarContext | null>(null);
+export const SidebarContext = React.createContext<SidebarContextType | null>(null);
 
 export function useSidebar() {
   const context = React.useContext(SidebarContext);
