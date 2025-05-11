@@ -195,6 +195,12 @@ export function MembersPageComponent({ useUserManagementHook }: MembersPageProps
   // Log the filteredMembers length to verify filtering
   console.log(`Filtered members: ${filteredMembers.length} out of ${allMembers.length} total (${members.length} non-deleted)`);
 
+  // Define the handler for editing a user
+  const handleEditUser = useCallback((user: User) => {
+    setSelectedUser(user);
+    setIsEditUserOpen(true);
+  }, []);
+
   return (
     <div className="container mx-auto p-4 space-y-6">
       <PageHeader
@@ -224,10 +230,7 @@ export function MembersPageComponent({ useUserManagementHook }: MembersPageProps
             setSelectedUser(user);
             setIsManageRoleOpen(true);
           }}
-          onEditUser={(user) => {
-            setSelectedUser(user);
-            setIsEditUserOpen(true);
-          }}
+          onEditUser={handleEditUser}
           onDeleteUser={handleDeleteUser}
           onManagePermissions={(user) => {
             setSelectedUser(user);
@@ -235,10 +238,7 @@ export function MembersPageComponent({ useUserManagementHook }: MembersPageProps
           }}
           canEdit={hasAdminAccess}
           // Explicitly pass through props to match with what MembersPage.tsx expects
-          onEditMember={onEditUser ? (user) => {
-            setSelectedUser(user);
-            setIsEditUserOpen(true);
-          } : undefined}
+          onEditMember={handleEditUser}
           onDeleteMember={handleDeleteUser}
           onStatusUpdate={undefined}
           onStatusUpdateSuccess={refreshUsers}
