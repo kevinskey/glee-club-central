@@ -1,8 +1,8 @@
 
-import React, { useState } from "react";
+import React from "react";
 import { PageHeader } from "@/components/ui/page-header";
 import { FilesIcon } from "lucide-react";
-import { MediaLibraryPage } from "@/pages/media-library/MediaLibraryPage";
+import MediaLibraryPage from "@/pages/media-library/MediaLibraryPage";
 
 export default function MediaManagerPage() {
   return (
