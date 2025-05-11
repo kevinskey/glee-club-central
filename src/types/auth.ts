@@ -46,7 +46,8 @@ export interface Profile {
 
 // Updated to string literal type union instead of interface
 export type UserRole = 'admin' | 'director' | 'section_leader' | 'singer' | 
-                      'student_conductor' | 'accompanist' | 'non_singer' | 'general';
+                      'student_conductor' | 'accompanist' | 'non_singer' | 'general' |
+                      'administrator' | 'member';
 
 export interface AuthContextType {
   user: AuthUser | null;
@@ -54,9 +55,9 @@ export interface AuthContextType {
   isAuthenticated: boolean;
   isLoading: boolean;
   isAdmin: () => boolean;
-  login: (email: string, password: string) => Promise<void>;
+  login: (email: string, password: string) => Promise<{ error: any } | void>;
   logout: () => Promise<void>;
-  resetPassword: (email: string) => Promise<void>;
+  resetPassword: (email: string) => Promise<{ error: any } | void>;
   signOut?: () => Promise<void>;
   signIn?: (email: string, password: string) => Promise<any>;
   signUp?: (email: string, password: string, firstName: string, lastName: string, role?: string) => Promise<any>;

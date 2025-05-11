@@ -31,11 +31,22 @@ export function AuthProvider({ children }: AuthProviderProps) {
     // Extract needed properties
     const { id, email, role } = userData;
     
+    let mappedRole: UserRole = 'general'; // Default role
+    
+    // Map string role to UserRole type
+    if (role === 'admin' || role === 'director' || 
+        role === 'section_leader' || role === 'singer' || 
+        role === 'student_conductor' || role === 'accompanist' || 
+        role === 'non_singer' || role === 'administrator' || 
+        role === 'member') {
+      mappedRole = role as UserRole;
+    }
+    
     // Return the user data with the role included
     return {
       id,
       email: email || undefined,
-      role: role || 'general', // Default to general if no role specified
+      role: mappedRole,
       ...userData, // Include other properties
     };
   };
@@ -321,9 +332,15 @@ export function AuthProvider({ children }: AuthProviderProps) {
     }
   };
 
-  // Alias these methods for backwards compatibility
-  const login = signIn;
-  const logout = signOut;
+  // Alias these methods for backwards compatibility with updated return types
+  const login = async (email: string, password: string) => {
+    const result = await signIn(email, password);
+    return result;
+  };
+
+  const logout = async () => {
+    await signOut();
+  };
 
   const resetPassword = async (email: string) => {
     try {
@@ -375,7 +392,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
            profile.title === 'Super Admin';
   }, [profile]);
 
-  const value = {
+  const value: AuthContextType = {
     user,
     profile,
     loading: false, // Legacy prop kept for backwards compatibility
