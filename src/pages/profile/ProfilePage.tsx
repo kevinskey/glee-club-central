@@ -1,9 +1,9 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { PageHeader } from "@/components/ui/page-header";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useAuth } from "@/contexts/AuthContext";
-import { User } from "lucide-react";
+import { User, Edit, Save } from "lucide-react";
 import { ProfileOverviewTab } from "@/components/profile/ProfileOverviewTab";
 import { ParticipationTab } from "@/components/profile/ParticipationTab";
 import { MusicAccessTab } from "@/components/profile/MusicAccessTab";
@@ -13,16 +13,55 @@ import { MediaConsentTab } from "@/components/profile/MediaConsentTab";
 import { UserRoleEditor } from "@/components/profile/UserRoleEditor";
 import { usePermissions } from "@/hooks/usePermissions";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { toast } from "sonner";
+import { useUserManagement } from "@/hooks/useUserManagement";
+import { Spinner } from "@/components/ui/spinner";
 
 export default function ProfilePage() {
-  const { profile, isLoading } = useAuth();
+  const { profile, isLoading, refreshPermissions } = useAuth();
   const { hasPermission } = usePermissions();
+  const { updateUser } = useUserManagement();
   const canManageRoles = hasPermission('can_manage_users');
+  const [isEditing, setIsEditing] = useState(false);
+  const [activeTab, setActiveTab] = useState("overview");
+  
+  const toggleEditMode = () => {
+    setIsEditing(!isEditing);
+  };
+  
+  const handleProfileUpdate = async (updatedProfile: any) => {
+    if (!profile?.id) return;
+    
+    try {
+      const success = await updateUser(profile.id, updatedProfile);
+      if (success) {
+        toast.success("Profile updated successfully");
+        setIsEditing(false);
+        // Refresh the user's profile and permissions
+        if (refreshPermissions) {
+          refreshPermissions();
+        }
+      } else {
+        toast.error("Failed to update profile");
+      }
+    } catch (error) {
+      console.error("Error updating profile:", error);
+      toast.error("An error occurred while updating your profile");
+    }
+  };
+
+  const handleTabChange = (tab: string) => {
+    setActiveTab(tab);
+    if (isEditing && tab !== "overview") {
+      setIsEditing(false);
+    }
+  };
   
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <div className="h-8 w-8 rounded-full border-4 border-primary border-t-transparent animate-spin"></div>
+        <Spinner size="lg" />
       </div>
     );
   }
@@ -42,15 +81,42 @@ export default function ProfilePage() {
 
   return (
     <div className="container mx-auto p-4 space-y-6">
-      <PageHeader
-        title="My Profile"
-        description="View and manage your Glee Club membership information"
-        icon={<User className="h-6 w-6" />}
-      />
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+        <PageHeader
+          title="My Profile"
+          description="View and manage your Glee Club membership information"
+          icon={<User className="h-6 w-6" />}
+        />
+        {activeTab === "overview" && (
+          <Button 
+            variant="outline" 
+            size="sm" 
+            onClick={toggleEditMode}
+            className="flex items-center gap-1"
+          >
+            {isEditing ? (
+              <>
+                <Save className="h-4 w-4" />
+                <span>Exit Edit Mode</span>
+              </>
+            ) : (
+              <>
+                <Edit className="h-4 w-4" />
+                <span>Edit Profile</span>
+              </>
+            )}
+          </Button>
+        )}
+      </div>
       
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <div className="md:col-span-2">
-          <Tabs defaultValue="overview" className="w-full">
+          <Tabs 
+            defaultValue="overview" 
+            value={activeTab} 
+            onValueChange={handleTabChange}
+            className="w-full"
+          >
             <TabsList className="grid grid-cols-3 md:grid-cols-6 mb-4">
               <TabsTrigger value="overview">Overview</TabsTrigger>
               <TabsTrigger value="participation">Participation</TabsTrigger>
@@ -61,7 +127,11 @@ export default function ProfilePage() {
             </TabsList>
             
             <TabsContent value="overview">
-              <ProfileOverviewTab profile={profile} isEditable />
+              <ProfileOverviewTab 
+                profile={profile} 
+                isEditable={isEditing} 
+                onSave={handleProfileUpdate}
+              />
             </TabsContent>
             
             <TabsContent value="participation">

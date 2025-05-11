@@ -1,9 +1,9 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
-import { Link } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
@@ -26,6 +26,8 @@ export default function ResetPasswordPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [resetError, setResetError] = useState<string | null>(null);
   const [resetSent, setResetSent] = useState(false);
+  const location = useLocation();
+  const navigate = useNavigate();
   
   // Initialize the form with useForm hook
   const form = useForm<ResetFormValues>({
@@ -34,6 +36,13 @@ export default function ResetPasswordPage() {
       email: "",
     },
   });
+
+  // Check for message passed via location state
+  useEffect(() => {
+    if (location.state?.message) {
+      toast.info(location.state.message);
+    }
+  }, [location.state]);
 
   const onSubmit = async (values: ResetFormValues) => {
     setIsSubmitting(true);

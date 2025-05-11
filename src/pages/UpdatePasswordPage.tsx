@@ -33,6 +33,7 @@ export default function UpdatePasswordPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [updateError, setUpdateError] = useState<string | null>(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isChecking, setIsChecking] = useState(true);
   
   // Initialize the form with useForm hook
   const form = useForm<PasswordFormValues>({
@@ -46,8 +47,14 @@ export default function UpdatePasswordPage() {
   // Check if the user is already authenticated with a recovery token
   useEffect(() => {
     const checkAuth = async () => {
-      const { data } = await supabase.auth.getSession();
-      setIsAuthenticated(!!data.session);
+      try {
+        const { data } = await supabase.auth.getSession();
+        setIsAuthenticated(!!data.session);
+      } catch (error) {
+        console.error("Error checking auth session:", error);
+      } finally {
+        setIsChecking(false);
+      }
     };
     
     checkAuth();
@@ -76,6 +83,17 @@ export default function UpdatePasswordPage() {
       setIsSubmitting(false);
     }
   };
+
+  if (isChecking) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-background px-4 py-12">
+        <div className="text-center">
+          <div className="h-8 w-8 rounded-full border-4 border-primary border-t-transparent animate-spin mx-auto mb-4"></div>
+          <p className="text-muted-foreground">Verifying your session...</p>
+        </div>
+      </div>
+    );
+  }
 
   if (!isAuthenticated) {
     return (
