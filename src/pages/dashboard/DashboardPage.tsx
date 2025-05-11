@@ -51,6 +51,28 @@ const DashboardPage = () => {
   const [loading, setLoading] = useState(true);
   const [events, setEvents] = useState<Event[]>([]);
   
+  // Define announcements state
+  const [announcements, setAnnouncements] = useState<Announcement[]>([
+    {
+      id: 1,
+      title: "End of Semester Performance",
+      message: "Our final performance will be held on May 15th at Sisters Chapel. All members must attend dress rehearsal.",
+      date: "May 1, 2025"
+    },
+    {
+      id: 2,
+      title: "Dues Reminder",
+      message: "Spring semester dues are due by April 30th. Please make your payments online through the dashboard.",
+      date: "April 15, 2025"
+    },
+    {
+      id: 3,
+      title: "New Sheet Music Available",
+      message: "New arrangements for the Spring concert have been uploaded. Please review before next rehearsal.",
+      date: "April 10, 2025"
+    }
+  ]);
+  
   // Fetch events from the database
   const fetchEvents = async () => {
     try {
@@ -250,15 +272,19 @@ const DashboardPage = () => {
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
-                {announcements.map(announcement => (
-                  <div key={announcement.id} className="pb-3 border-b last:border-0">
-                    <div className="flex justify-between mb-1">
-                      <h3 className="font-medium text-sm">{announcement.title}</h3>
-                      <span className="text-xs text-muted-foreground">{announcement.date}</span>
+                {announcements && announcements.length > 0 ? (
+                  announcements.map(announcement => (
+                    <div key={announcement.id} className="pb-3 border-b last:border-0">
+                      <div className="flex justify-between mb-1">
+                        <h3 className="font-medium text-sm">{announcement.title}</h3>
+                        <span className="text-xs text-muted-foreground">{announcement.date}</span>
+                      </div>
+                      <p className="text-xs text-muted-foreground">{announcement.message}</p>
                     </div>
-                    <p className="text-xs text-muted-foreground">{announcement.message}</p>
-                  </div>
-                ))}
+                  ))
+                ) : (
+                  <div className="text-muted-foreground">No announcements</div>
+                )}
               </div>
             </CardContent>
           </Card>
