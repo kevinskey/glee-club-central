@@ -49,6 +49,7 @@ export function BackgroundSlideshow({
   }, [images.length, duration, transition, currentImageIndex, nextImageIndex]);
 
   if (images.length === 0) return null;
+  
   if (images.length === 1) {
     return (
       <div 
