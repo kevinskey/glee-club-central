@@ -1,4 +1,3 @@
-
 import React from "react";
 import { MediaFile } from "@/types/media";
 import { MediaFileCard } from "./MediaFileCard";
@@ -50,9 +49,7 @@ export function MediaFilesSection({
   };
   
   // Function to format file size
-  const formatFileSize = (bytes?: number) => {
-    if (!bytes) return "Unknown size";
-    
+  const formatFileSize = (bytes: number) => {
     if (bytes < 1024) return `${bytes} B`;
     if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
     return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;

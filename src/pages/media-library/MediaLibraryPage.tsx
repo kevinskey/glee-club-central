@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { PageHeader } from "@/components/ui/page-header";
 import { FilesIcon, Upload, Search, Filter, Calendar, List, Grid2X2 } from "lucide-react";
@@ -113,7 +114,7 @@ export default function MediaLibraryPage() {
         uploaded_by: file.uploaded_by,
         category: file.folder || getMediaType(file.file_type), // Use folder as category or derive from file type
         tags: file.tags || [],
-        size: file.size || 0 // Default to 0 if size is not available
+        size: file.size || 0 // Ensure size property exists, default to 0 if not available
       })) || [];
       
       const combinedFiles = [

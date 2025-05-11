@@ -1,4 +1,3 @@
-
 import React from "react";
 import { FileText, FileAudio, FileImage, FileVideo, File, Download, Trash2, Tag } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -87,9 +86,7 @@ export function MediaFileCard({ file, onDelete }: MediaFileCardProps) {
   };
 
   // Function to format file size
-  const formatFileSize = (bytes?: number) => {
-    if (!bytes) return null;
-    
+  const formatFileSize = (bytes: number) => {
     if (bytes < 1024) return `${bytes} B`;
     if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
     return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
@@ -130,11 +127,9 @@ export function MediaFileCard({ file, onDelete }: MediaFileCardProps) {
           </div>
         )}
         
-        {file.size && (
-          <p className="text-xs text-muted-foreground mb-3">
-            Size: {formatFileSize(file.size)}
-          </p>
-        )}
+        <p className="text-xs text-muted-foreground mb-3">
+          Size: {formatFileSize(file.size)}
+        </p>
       </div>
       
       <div className="flex gap-2">

@@ -86,6 +86,9 @@ export function useMediaUpload(onComplete: () => void, defaultCategory: string =
           ? `${title} ${i + 1}` 
           : title;
 
+        // Get file size from the File object
+        const fileSize = file.size;
+
         // Insert record in database with the correct user ID
         const { error: dbError } = await supabase
           .from('media_library')
@@ -99,7 +102,7 @@ export function useMediaUpload(onComplete: () => void, defaultCategory: string =
             category: category,
             tags: tags,
             folder: category, // Use category as folder for organization
-            size: file.size // Store file size for statistics
+            size: fileSize // Store file size for statistics
           });
 
         if (dbError) {
