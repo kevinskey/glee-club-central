@@ -2,11 +2,11 @@
 import React from "react";
 import { 
   Users, 
+  Files,
   Upload, 
   Calendar, 
   BarChart,
-  Settings,
-  Files
+  Settings
 } from "lucide-react";
 import { NavLink } from 'react-router-dom';
 
