@@ -41,8 +41,16 @@ export const RolePermissionProvider: React.FC<{ children: React.ReactNode }> = (
     try {
       setIsLoading(true);
 
-      // Get role from profile
-      const role = profile?.role as UserRole || 'student';
+      // Get role from profile and ensure it's a valid UserRole
+      const roleFromProfile = profile?.role || 'student';
+      
+      // Cast the role to UserRole type after validation
+      const role = (
+        ['admin', 'student', 'section_leader', 'staff', 'guest'].includes(roleFromProfile) 
+          ? roleFromProfile 
+          : 'student'
+      ) as UserRole;
+      
       setUserRole(role);
 
       // Fetch permissions based on role

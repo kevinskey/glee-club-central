@@ -16,3 +16,48 @@ export const formatPhoneNumber = (input: string): string => {
   // Return cleaned digits if not 10 digits
   return digits;
 };
+
+/**
+ * Formats a voice part for display
+ * @param voicePart Voice part identifier string
+ * @returns Formatted voice part string
+ */
+export const formatVoicePart = (voicePart: string | null): string => {
+  if (!voicePart) return 'Not Assigned';
+  
+  const voicePartMap: Record<string, string> = {
+    'soprano_1': 'Soprano 1',
+    'soprano_2': 'Soprano 2',
+    'alto_1': 'Alto 1',
+    'alto_2': 'Alto 2',
+    'tenor': 'Tenor',
+    'bass': 'Bass'
+  };
+  
+  return voicePartMap[voicePart] || voicePart;
+};
+
+/**
+ * Formats a role for display
+ * @param role Role identifier string
+ * @returns Formatted role string
+ */
+export const formatRole = (role: string | null): string => {
+  if (!role) return 'Not Assigned';
+  
+  const roleMap: Record<string, string> = {
+    'admin': 'Admin',
+    'student': 'Student',
+    'section_leader': 'Section Leader',
+    'staff': 'Staff',
+    'guest': 'Guest',
+    'administrator': 'Administrator',
+    'singer': 'Singer',
+    'non_singer': 'Non-Singer',
+    'student_conductor': 'Student Conductor',
+    'accompanist': 'Accompanist'
+  };
+  
+  return roleMap[role] || role;
+};
+
