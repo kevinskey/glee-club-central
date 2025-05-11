@@ -62,6 +62,7 @@ export default function MembersPage() {
     addUser,
     updateUser,
     updateUserRole,
+    updateUserStatus,
     deleteUser
   } = useUserManagement();
   
@@ -131,10 +132,17 @@ export default function MembersPage() {
     setIsRoleDialogOpen(true);
   };
 
-  // Add the missing handleManagePermissions function
+  // Handle managing permissions
   const handleManagePermissions = (member: User) => {
     setCurrentMember(member);
     setIsPermissionsDialogOpen(true);
+  };
+
+  // Handle status update success (added for UI refresh)
+  const handleStatusUpdateSuccess = async () => {
+    console.log("Status updated, refreshing member list");
+    await fetchUsers();
+    toast.success("Member status updated successfully");
   };
 
   // Handle deleting a member
@@ -379,6 +387,8 @@ export default function MembersPage() {
                     onDeleteMember={canManageMembers ? handleDeleteClick : undefined}
                     onManagePermissions={canManageMembers ? handleManagePermissions : undefined}
                     onChangeRole={canManageMembers ? handleChangeRole : undefined}
+                    onStatusUpdate={updateUserStatus}
+                    onStatusUpdateSuccess={handleStatusUpdateSuccess}
                   />
                 )}
               </div>
@@ -400,6 +410,8 @@ export default function MembersPage() {
                   onDeleteMember={canManageMembers ? handleDeleteClick : undefined}
                   onManagePermissions={canManageMembers ? handleManagePermissions : undefined}
                   onChangeRole={canManageMembers ? handleChangeRole : undefined}
+                  onStatusUpdate={updateUserStatus}
+                  onStatusUpdateSuccess={handleStatusUpdateSuccess}
                 />
               )}
             </Card>
@@ -420,6 +432,8 @@ export default function MembersPage() {
                   onDeleteMember={canManageMembers ? handleDeleteClick : undefined}
                   onManagePermissions={canManageMembers ? handleManagePermissions : undefined}
                   onChangeRole={canManageMembers ? handleChangeRole : undefined}
+                  onStatusUpdate={updateUserStatus}
+                  onStatusUpdateSuccess={handleStatusUpdateSuccess}
                 />
               )}
             </Card>

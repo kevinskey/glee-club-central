@@ -22,8 +22,10 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
+  DropdownMenuRadioGroup,
+  DropdownMenuRadioItem,
 } from "@/components/ui/dropdown-menu";
-import { Edit, Trash2, Shield, UserCog } from "lucide-react";
+import { Edit, Trash2, Shield, UserCog, UserCheck } from "lucide-react";
 
 interface MembersListProps {
   members: User[];
@@ -31,6 +33,8 @@ interface MembersListProps {
   onDeleteMember?: (memberId: string) => void;
   onManagePermissions?: (member: User) => void;
   onChangeRole?: (member: User) => void;
+  onStatusUpdate?: (userId: string, status: string) => Promise<boolean>;
+  onStatusUpdateSuccess?: () => Promise<void>;
 }
 
 // Format voice part for display 
@@ -68,8 +72,27 @@ export function MembersList({
   onEditMember, 
   onDeleteMember,
   onManagePermissions,
-  onChangeRole
+  onChangeRole,
+  onStatusUpdate,
+  onStatusUpdateSuccess
 }: MembersListProps) {
+  // New function to handle status updates
+  const handleStatusUpdate = async (member: User, newStatus: string) => {
+    if (!onStatusUpdate || !onStatusUpdateSuccess) return;
+    
+    try {
+      console.log(`Updating status for ${member.first_name} ${member.last_name} to ${newStatus}`);
+      const success = await onStatusUpdate(member.id, newStatus);
+      
+      if (success) {
+        console.log("Status update successful, triggering refresh");
+        await onStatusUpdateSuccess();
+      }
+    } catch (error) {
+      console.error("Error updating member status:", error);
+    }
+  };
+
   return (
     <Card>
       <CardContent className="p-0">
@@ -106,9 +129,57 @@ export function MembersList({
                 </TableCell>
                 <TableCell>
                   <div className="space-y-1">
-                    <Badge variant={member.status === "active" ? "default" : "secondary"}>
-                      {(member.status || 'pending').charAt(0).toUpperCase() + (member.status || 'pending').slice(1)}
-                    </Badge>
+                    {onStatusUpdate ? (
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Badge 
+                            variant={member.status === "active" ? "default" : "secondary"}
+                            className="cursor-pointer hover:opacity-80"
+                          >
+                            {(member.status || 'pending').charAt(0).toUpperCase() + (member.status || 'pending').slice(1)}
+                          </Badge>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="start">
+                          <DropdownMenuLabel>Change Status</DropdownMenuLabel>
+                          <DropdownMenuSeparator />
+                          <DropdownMenuRadioGroup value={member.status || ''}>
+                            <DropdownMenuRadioItem 
+                              value="active" 
+                              onClick={() => handleStatusUpdate(member, 'active')}
+                              className={member.status === 'active' ? 'bg-primary/10' : ''}
+                            >
+                              <UserCheck className="mr-2 h-4 w-4" />
+                              Active
+                            </DropdownMenuRadioItem>
+                            <DropdownMenuRadioItem 
+                              value="pending" 
+                              onClick={() => handleStatusUpdate(member, 'pending')}
+                              className={member.status === 'pending' ? 'bg-primary/10' : ''}
+                            >
+                              Pending
+                            </DropdownMenuRadioItem>
+                            <DropdownMenuRadioItem 
+                              value="inactive" 
+                              onClick={() => handleStatusUpdate(member, 'inactive')}
+                              className={member.status === 'inactive' ? 'bg-primary/10' : ''}
+                            >
+                              Inactive
+                            </DropdownMenuRadioItem>
+                            <DropdownMenuRadioItem 
+                              value="alumni" 
+                              onClick={() => handleStatusUpdate(member, 'alumni')}
+                              className={member.status === 'alumni' ? 'bg-primary/10' : ''}
+                            >
+                              Alumni
+                            </DropdownMenuRadioItem>
+                          </DropdownMenuRadioGroup>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    ) : (
+                      <Badge variant={member.status === "active" ? "default" : "secondary"}>
+                        {(member.status || 'pending').charAt(0).toUpperCase() + (member.status || 'pending').slice(1)}
+                      </Badge>
+                    )}
                     
                     {member.dues_paid && (
                       <Badge variant="outline" className="bg-green-50 border-green-200 text-green-700">
