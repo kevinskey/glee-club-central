@@ -53,17 +53,17 @@ export const RolePermissionProvider: React.FC<{ children: React.ReactNode }> = (
       // Get role from profile
       const roleFromProfile = profile?.role || 'student';
       
-      // Valid roles
-      const validRoles: UserRole[] = ['admin', 'student', 'section_leader', 'staff', 'guest'];
+      // Define valid roles array
+      const validRoles = ['admin', 'student', 'section_leader', 'staff', 'guest'];
       
       // Determine the role safely
-      let role: UserRole = 'student'; // Default role
+      let role = 'student'; // Default role
       
-      if (validRoles.includes(roleFromProfile as UserRole)) {
-        role = roleFromProfile as UserRole;
+      if (validRoles.includes(roleFromProfile)) {
+        role = roleFromProfile;
       }
       
-      setUserRole(role);
+      setUserRole(role as UserRole);
 
       // Fetch permissions based on role
       const { data, error } = await supabase
