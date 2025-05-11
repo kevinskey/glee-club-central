@@ -49,7 +49,14 @@ export default function ProfilePage() {
   const handleProfileUpdate = async (updatedProfile: any) => {
     if (!profile?.id) return;
     
+    // If updatedProfile is null, it means the user cancelled the edit
+    if (updatedProfile === null) {
+      setIsEditing(false);
+      return;
+    }
+    
     try {
+      console.log("Updating profile with data:", updatedProfile);
       const success = await updateUser(profile.id, updatedProfile);
       if (success) {
         toast.success("Profile updated successfully");

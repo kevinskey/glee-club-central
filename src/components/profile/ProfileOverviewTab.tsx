@@ -87,7 +87,9 @@ export const ProfileOverviewTab: React.FC<ProfileOverviewTabProps> = ({
     
     setIsSaving(true);
     try {
+      console.log("Saving profile data:", formData);
       await onSave(formData);
+      toast.success("Profile updated successfully");
     } catch (error) {
       console.error("Error updating profile:", error);
       toast.error("Failed to update profile");
@@ -114,9 +116,8 @@ export const ProfileOverviewTab: React.FC<ProfileOverviewTabProps> = ({
     
     // If there's a parent component handling edit mode, let it know
     if (onSave) {
-      // This will trigger the parent's toggleEditMode function
-      // We're just passing empty object as we're canceling, not saving
-      onSave({}).catch(err => console.error(err));
+      toast.info("Cancelled profile updates");
+      onSave(null).catch(err => console.error(err));
     }
   };
   

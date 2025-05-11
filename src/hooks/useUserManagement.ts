@@ -122,42 +122,50 @@ export const useUserManagement = () => {
         return null;
       }
     }, []),
-    updateUser: useCallback(async (userId: string, userData: UserFormValues) => {
+    updateUser: useCallback(async (userId: string, userData: Partial<User>) => {
       try {
         console.log(`Updating user ${userId} with data:`, userData);
-        const { data, error } = await supabase
+        
+        if (!userData) {
+          console.log("No data provided for update, skipping");
+          return true;
+        }
+        
+        // Filter out undefined values to avoid issues with the database
+        const filteredData: Record<string, any> = {};
+        Object.entries(userData).forEach(([key, value]) => {
+          // Only include properties that are defined
+          if (value !== undefined) {
+            // For date fields that come as strings, ensure proper format
+            if (key === 'join_date' && value) {
+              filteredData[key] = value;
+            } else {
+              filteredData[key] = value;
+            }
+          }
+        });
+        
+        console.log("Filtered data for update:", filteredData);
+        
+        const { error } = await supabase
           .from('profiles')
-          .update({
-            first_name: userData.first_name,
-            last_name: userData.last_name,
-            email: userData.email,
-            phone: userData.phone,
-            role: userData.role,
-            voice_part: userData.voice_part,
-            status: userData.status,
-            class_year: userData.class_year,
-            notes: userData.notes,
-            dues_paid: userData.dues_paid,
-            join_date: userData.join_date
-          })
+          .update(filteredData)
           .eq('id', userId);
   
         if (error) {
           console.error('Error updating user:', error);
+          toast.error(`Failed to update user: ${error.message}`);
           return false;
         }
   
         console.log('User updated successfully');
-        
-        // Refresh the user list after update
-        fetchUsers();
-        
         return true;
       } catch (err) {
         console.error('Unexpected error updating user:', err);
+        toast.error('An unexpected error occurred while updating the user');
         return false;
       }
-    }, [fetchUsers]),
+    }, []),
     updateUserRole: useCallback(async (userId: string, role: string) => {
       try {
         console.log(`Updating user ${userId} role to ${role}`);
