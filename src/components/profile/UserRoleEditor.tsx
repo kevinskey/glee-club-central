@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from '@/components/ui/button';
@@ -41,14 +42,6 @@ export function UserRoleEditor() {
     roles.unshift({ value: "admin", label: "Admin" });
     roles.unshift({ value: "administrator", label: "Administrator" });
   }
-  
-  if (profile?.role === 'director') {
-    // If user is already a director, keep it in the list
-    const directorExists = roles.some(role => role.value === 'director');
-    if (!directorExists) {
-      roles.unshift({ value: "director", label: "Director" });
-    }
-  }
 
   const handleSave = async () => {
     if (!profile?.id || !selectedRole) {
@@ -58,12 +51,14 @@ export function UserRoleEditor() {
 
     setIsLoading(true);
     try {
+      console.log("Updating role to:", selectedRole);
       const success = await updateUserRole(profile.id, selectedRole);
+      
       if (success) {
         toast.success("Your role has been updated");
         // Refresh permissions to update the UI
         if (refreshPermissions) {
-          refreshPermissions();
+          await refreshPermissions();
         }
       }
     } catch (error) {

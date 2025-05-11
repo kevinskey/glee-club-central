@@ -162,11 +162,12 @@ export const useUserManagement = () => {
     updateUserRole: useCallback(async (userId: string, role: string) => {
       try {
         console.log(`Updating user ${userId} role to ${role}`);
+        
+        // Direct update to the profiles table for more reliability
         const { error } = await supabase
-          .rpc('handle_user_role', { 
-            p_user_id: userId, 
-            p_role: role 
-          });
+          .from('profiles')
+          .update({ role })
+          .eq('id', userId);
   
         if (error) {
           console.error('Error updating user role:', error);

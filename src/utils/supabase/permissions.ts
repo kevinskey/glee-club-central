@@ -15,6 +15,8 @@ export async function fetchUserPermissions(userId: string) {
       return null;
     }
     
+    console.log('Fetching permissions for user:', userId);
+    
     // Modified to use the proper response format from the RPC function
     const { data, error } = await supabase.rpc('get_user_permissions', {
       p_user_id: userId
@@ -41,27 +43,25 @@ export async function fetchUserPermissions(userId: string) {
         type PermissionItem = { permission: string; granted: boolean };
         const permissionItems = data as PermissionItem[];
         
-        // Extract permission names from granted permissions
-        const permissionNames: string[] = permissionItems
-          .filter(p => p.granted)
-          .map(p => p.permission);
-          
         // Build the permissions map
         permissionItems.forEach((item) => {
           permissionsMap[item.permission] = item.granted;
         });
+        
+        console.log('Permissions loaded:', permissionItems.length);
       } 
       // If data is an array of permission strings (all granted)
       else if (data.length > 0 && typeof data[0] === 'string') {
-        // For arrays of strings, we need a different approach
         const permissionStrings = data as unknown as string[];
         permissionStrings.forEach((permission) => {
           permissionsMap[permission] = true;
         });
+        
+        console.log('Permissions loaded (string format):', permissionStrings.length);
       }
     }
 
-    console.log("User permissions loaded:", permissionsMap);
+    console.log("User permissions loaded:", Object.keys(permissionsMap).length);
     return permissionsMap;
   } catch (error) {
     console.error("Error fetching permissions:", error);
