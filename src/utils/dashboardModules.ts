@@ -1,4 +1,3 @@
-
 // Define the dashboard module interface
 export interface DashboardModule {
   id: string;
@@ -90,7 +89,7 @@ export const dashboardModules: DashboardModule[] = [
     description: "Manage all users in the system",
     icon: "Users",
     color: "bg-slate-500",
-    path: "/dashboard/admin/users",
+    path: "/dashboard/admin/members",
     adminOnly: true,
     category: "Administration"
   },

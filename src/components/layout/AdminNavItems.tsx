@@ -12,7 +12,7 @@ import { SidebarNavItems } from "@/components/layout/SidebarNavItems";
 export const adminNavItems = [
   {
     title: "User Management",
-    href: "/dashboard/admin/users",
+    href: "/dashboard/admin/members",
     icon: <Users className="h-4 w-4" />,
   },
   {

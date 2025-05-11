@@ -265,7 +265,7 @@ export default function AdminDashboardPage() {
                 <CardHeader>
                   <div className="flex items-center justify-between">
                     <CardTitle>Member Overview</CardTitle>
-                    <Button variant="outline" onClick={() => navigate("/dashboard/admin/users")}>View All</Button>
+                    <Button variant="outline" onClick={() => navigate("/dashboard/admin/members")}>View All</Button>
                   </div>
                 </CardHeader>
                 <CardContent>
