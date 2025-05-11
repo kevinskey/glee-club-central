@@ -24,7 +24,7 @@ export const CalendarPageHeader = ({ onAddEventClick }: CalendarPageHeaderProps)
 
   return (
     <>
-      <div className="flex flex-col sm:flex-row items-center justify-between mb-6">
+      <div className="flex flex-col sm:flex-row items-center justify-between mb-4 sm:mb-6">
         <TooltipProvider>
           <Tooltip>
             <TooltipTrigger asChild>
@@ -32,7 +32,7 @@ export const CalendarPageHeader = ({ onAddEventClick }: CalendarPageHeaderProps)
                 variant="ghost"
                 size="sm"
                 onClick={() => navigate(-1)}
-                className="mb-4 sm:mb-0 self-start h-8 px-2"
+                className="mb-3 sm:mb-0 self-start h-7 sm:h-8 px-2"
               >
                 <ArrowLeft className="mr-1 h-3 w-3" />
                 Back
@@ -44,11 +44,11 @@ export const CalendarPageHeader = ({ onAddEventClick }: CalendarPageHeaderProps)
           </Tooltip>
         </TooltipProvider>
         
-        <h1 className="text-2xl sm:text-3xl md:text-4xl font-playfair font-bold flex items-center gap-2 min-h-[2.5rem] sm:min-h-[2.75rem] md:min-h-[3rem]">
+        <h1 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-playfair font-bold flex items-center gap-2 min-h-[2rem] sm:min-h-[2.5rem] md:min-h-[2.75rem]">
           <TooltipProvider>
             <Tooltip>
               <TooltipTrigger asChild>
-                <CalendarIcon className="h-6 w-6 sm:h-7 sm:w-7 md:h-8 md:w-8 text-glee-purple" />
+                <CalendarIcon className="h-5 w-5 sm:h-6 sm:w-6 md:h-7 md:w-7 text-glee-purple" />
               </TooltipTrigger>
               <TooltipContent>
                 <p>Calendar</p>
@@ -59,14 +59,14 @@ export const CalendarPageHeader = ({ onAddEventClick }: CalendarPageHeaderProps)
           <Metronome />
         </h1>
         
-        <div className="flex items-center gap-3 mt-4 sm:mt-0">
+        <div className="flex items-center gap-2 sm:gap-3 mt-3 sm:mt-0">
           <ThemeToggle />
           <TooltipProvider>
             <Tooltip>
               <TooltipTrigger asChild>
                 <Button
                   onClick={onAddEventClick}
-                  className="bg-glee-purple hover:bg-glee-purple/90 text-white hidden sm:flex h-8 px-3 text-xs"
+                  className="bg-glee-purple hover:bg-glee-purple/90 text-white hidden sm:flex h-7 sm:h-8 px-2 sm:px-3 text-xs"
                 >
                   <Plus className="mr-1 h-3 w-3" />
                   Add Event
@@ -81,7 +81,7 @@ export const CalendarPageHeader = ({ onAddEventClick }: CalendarPageHeaderProps)
       </div>
 
       {/* Mobile Add Event Button */}
-      <div className="flex justify-end sm:hidden mb-4">
+      <div className="flex justify-end sm:hidden mb-3 sm:mb-4">
         <TooltipProvider>
           <Tooltip>
             <TooltipTrigger asChild>

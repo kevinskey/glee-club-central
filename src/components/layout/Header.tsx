@@ -32,8 +32,8 @@ export function Header() {
 
   return (
     <header className="bg-background sticky top-0 z-50 w-full border-b">
-      <div className="container flex h-16 items-center justify-between">
-        <div className="flex items-center gap-2">
+      <div className="container flex h-14 sm:h-16 items-center justify-between px-3 sm:px-4">
+        <div className="flex items-center gap-1 sm:gap-2">
           <Button 
             variant="ghost" 
             size="icon" 
@@ -43,18 +43,18 @@ export function Header() {
             <Menu className="h-5 w-5" />
             <span className="sr-only">Toggle sidebar</span>
           </Button>
-          <Link to="/" className="font-bold flex items-center gap-2 hover:text-primary transition-colors">
-            <Home className="h-5 w-5" />
+          <Link to="/" className="font-bold flex items-center gap-1 sm:gap-2 hover:text-primary transition-colors">
+            <Home className="h-4 sm:h-5 w-4 sm:w-5" />
             <span>Glee Club</span>
           </Link>
         </div>
 
-        <nav className="flex items-center gap-4">
+        <nav className="flex items-center gap-2 sm:gap-4">
           {/* User Dropdown Menu */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" size="icon">
-                <User className="h-5 w-5" />
+                <User className="h-4 sm:h-5 w-4 sm:w-5" />
                 <span className="sr-only">User Menu</span>
               </Button>
             </DropdownMenuTrigger>

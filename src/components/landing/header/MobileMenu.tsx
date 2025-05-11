@@ -24,8 +24,8 @@ export function MobileMenu({ onClose }: MobileMenuProps) {
   
   return (
     <div className="md:hidden bg-background border-t border-border">
-      <div className="container py-4 px-4 flex flex-col gap-3">
-        <div className="flex justify-center mb-2">
+      <div className="container py-3 px-3 sm:px-4 flex flex-col gap-2">
+        <div className="flex justify-center mb-1 sm:mb-2">
           <TooltipProvider>
             <Tooltip>
               <TooltipTrigger asChild>
@@ -44,7 +44,7 @@ export function MobileMenu({ onClose }: MobileMenuProps) {
         <Button 
           variant="ghost" 
           size="sm" 
-          className="justify-start py-3 hover:bg-glee-spelman hover:text-white" 
+          className="justify-start py-2 hover:bg-glee-spelman hover:text-white" 
           onClick={() => handleNavigation("/")}
         >
           Home
@@ -52,7 +52,7 @@ export function MobileMenu({ onClose }: MobileMenuProps) {
         <Button 
           variant="ghost" 
           size="sm" 
-          className="justify-start py-3 hover:bg-glee-spelman hover:text-white" 
+          className="justify-start py-2 hover:bg-glee-spelman hover:text-white" 
           onClick={() => handleNavigation("/about")}
         >
           About Us
@@ -60,7 +60,7 @@ export function MobileMenu({ onClose }: MobileMenuProps) {
         <Button 
           variant="ghost" 
           size="sm" 
-          className="justify-start py-3 hover:bg-glee-spelman hover:text-white" 
+          className="justify-start py-2 hover:bg-glee-spelman hover:text-white" 
           onClick={() => handleNavigation("/contact")}
         >
           Contact
@@ -68,7 +68,7 @@ export function MobileMenu({ onClose }: MobileMenuProps) {
         <Button 
           variant="ghost" 
           size="sm" 
-          className="justify-start py-3 hover:bg-glee-spelman hover:text-white" 
+          className="justify-start py-2 hover:bg-glee-spelman hover:text-white" 
           onClick={() => handleNavigation("/administration")}
         >
           Administration
@@ -76,7 +76,7 @@ export function MobileMenu({ onClose }: MobileMenuProps) {
         <Button 
           variant="ghost" 
           size="sm" 
-          className="justify-start py-3 hover:bg-glee-spelman hover:text-white" 
+          className="justify-start py-2 hover:bg-glee-spelman hover:text-white" 
           onClick={() => handleNavigation("/fan-page")}
         >
           For Fans
@@ -84,7 +84,7 @@ export function MobileMenu({ onClose }: MobileMenuProps) {
         <Button 
           variant="ghost" 
           size="sm" 
-          className="justify-start py-3 hover:bg-glee-spelman hover:text-white" 
+          className="justify-start py-2 hover:bg-glee-spelman hover:text-white" 
           onClick={() => handleNavigation("/dashboard")}
         >
           Dashboard
@@ -92,7 +92,7 @@ export function MobileMenu({ onClose }: MobileMenuProps) {
         <Button 
           variant="ghost" 
           size="sm" 
-          className="justify-start py-3 hover:bg-glee-spelman hover:text-white" 
+          className="justify-start py-2 hover:bg-glee-spelman hover:text-white" 
           onClick={() => handleNavigation("/login")}
         >
           Login
@@ -100,7 +100,7 @@ export function MobileMenu({ onClose }: MobileMenuProps) {
         <Button 
           variant="default" 
           size="sm" 
-          className="mt-2 py-3 bg-glee-purple hover:bg-glee-spelman"
+          className="mt-1 sm:mt-2 py-2 bg-glee-purple hover:bg-glee-spelman"
           onClick={() => handleNavigation("/dashboard")}
         >
           Member Portal

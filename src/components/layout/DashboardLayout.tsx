@@ -33,7 +33,7 @@ export function DashboardLayout() {
         <div className="flex-1 flex flex-col md:flex-row">
           <Sidebar />
           
-          <main className="flex-1 p-3 md:p-6 lg:p-8 md:ml-64 pb-16 md:pb-8 overflow-x-hidden">
+          <main className="flex-1 p-2 sm:p-3 md:p-5 lg:p-6 md:ml-64 pb-12 md:pb-6 overflow-x-hidden">
             <Outlet />
           </main>
         </div>

@@ -105,16 +105,16 @@ export function MobileNav({ isAdmin }: MobileNavProps) {
           <Button 
             variant="ghost" 
             size="sm" 
-            className="mr-2 px-0 text-base hover:bg-transparent focus-visible:bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0"
+            className="mr-1 sm:mr-2 px-0 text-base hover:bg-transparent focus-visible:bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0"
           >
-            <Menu className="h-5 w-5" />
+            <Menu className="h-4 sm:h-5 w-4 sm:w-5" />
             <span className="sr-only">Toggle Menu</span>
           </Button>
         </SheetTrigger>
-        <SheetContent side="left" className="pr-0 sm:max-w-xs w-[85%] px-0">
-          <div className="space-y-4 py-2 h-full flex flex-col">
-            <div className="px-3 flex-1 overflow-auto">
-              <h2 className="mb-2 px-4 text-lg font-semibold tracking-tight">
+        <SheetContent side="left" className="pr-0 sm:max-w-xs w-[90%] sm:w-[85%] px-0">
+          <div className="space-y-3 sm:space-y-4 py-1 sm:py-2 h-full flex flex-col">
+            <div className="px-2 sm:px-3 flex-1 overflow-auto">
+              <h2 className="mb-1 sm:mb-2 px-3 sm:px-4 text-base sm:text-lg font-semibold tracking-tight">
                 Main Menu
               </h2>
               <div className="space-y-1">
@@ -124,11 +124,11 @@ export function MobileNav({ isAdmin }: MobileNavProps) {
                     to={item.href}
                     onClick={() => setOpen(false)}
                     className={cn(
-                      "flex items-center rounded-md px-3 py-3 text-sm font-medium",
+                      "flex items-center rounded-md px-2 sm:px-3 py-2 text-sm font-medium",
                       pathname === item.href ? "bg-accent text-accent-foreground" : "hover:bg-accent hover:text-accent-foreground transition-colors"
                     )}
                   >
-                    <span className="mr-3 flex h-5 w-5 items-center justify-center">{item.icon}</span>
+                    <span className="mr-2 sm:mr-3 flex h-5 w-5 items-center justify-center">{item.icon}</span>
                     <span>{item.title}</span>
                   </Link>
                 ))}
@@ -136,8 +136,8 @@ export function MobileNav({ isAdmin }: MobileNavProps) {
             </div>
             
             {isAdmin && (
-              <div className="px-3 border-t pt-4">
-                <h2 className="mb-2 px-4 text-lg font-semibold tracking-tight">
+              <div className="px-2 sm:px-3 border-t pt-3 sm:pt-4">
+                <h2 className="mb-1 sm:mb-2 px-3 sm:px-4 text-base sm:text-lg font-semibold tracking-tight">
                   Admin Menu
                 </h2>
                 <div className="space-y-1">
@@ -147,11 +147,11 @@ export function MobileNav({ isAdmin }: MobileNavProps) {
                       to={item.href}
                       onClick={() => setOpen(false)}
                       className={cn(
-                        "flex items-center rounded-md px-3 py-3 text-sm font-medium",
+                        "flex items-center rounded-md px-2 sm:px-3 py-2 text-sm font-medium",
                         pathname === item.href ? "bg-accent text-accent-foreground" : "hover:bg-accent hover:text-accent-foreground transition-colors"
                       )}
                     >
-                      <span className="mr-3 flex h-5 w-5 items-center justify-center">{item.icon}</span>
+                      <span className="mr-2 sm:mr-3 flex h-5 w-5 items-center justify-center">{item.icon}</span>
                       <span>{item.title}</span>
                     </Link>
                   ))}
