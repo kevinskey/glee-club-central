@@ -39,7 +39,7 @@ export const useRolePermissions = () => useContext(RolePermissionContext);
 export const RolePermissionProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { user, profile } = useAuth();
   const [userRole, setUserRole] = useState<UserRole | null>(null);
-  const [permissions, setPermissions] = useState<PermissionsObject>({});
+  const [permissions, setPermissions] = useState<Record<string, boolean>>({});
   const [isLoading, setIsLoading] = useState(true);
 
   // Function to fetch permissions from Supabase
@@ -57,15 +57,13 @@ export const RolePermissionProvider: React.FC<{ children: React.ReactNode }> = (
       // Get role from profile
       const roleFromProfile = profile?.role || 'student';
       
-      // Define valid roles
-      const validRoles: string[] = ['admin', 'student', 'section_leader', 'staff', 'guest'];
+      // Define valid roles as array of string literals
+      const validRoles = ['admin', 'student', 'section_leader', 'staff', 'guest'];
       
-      // Assign role with validation
-      let validatedRole: UserRole = 'student';
-      
-      if (validRoles.includes(roleFromProfile as string)) {
-        validatedRole = roleFromProfile as UserRole;
-      }
+      // Assign role with validation - use type assertion directly
+      const validatedRole = validRoles.includes(roleFromProfile) 
+        ? roleFromProfile as UserRole 
+        : 'student' as UserRole;
       
       // Set role
       setUserRole(validatedRole);
@@ -83,7 +81,7 @@ export const RolePermissionProvider: React.FC<{ children: React.ReactNode }> = (
       }
 
       // Create permissions object
-      const permissionsMap: PermissionsObject = {};
+      const permissionsMap: Record<string, boolean> = {};
       if (data) {
         data.forEach((item) => {
           permissionsMap[item.permission] = item.granted;
