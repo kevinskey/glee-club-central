@@ -19,9 +19,9 @@ export default function AdminMembersPage() {
     if (isAuthenticated) {
       console.log("AdminMembersPage - Fetching users on mount");
       userManagement.fetchUsers()
-        .then(() => {
+        .then((result) => {
           if (mounted) {
-            console.log("AdminMembersPage - Users fetched successfully");
+            console.log("AdminMembersPage - Users fetched successfully", result?.length || 0, "users");
             setIsLoading(false);
           }
         })
@@ -32,6 +32,8 @@ export default function AdminMembersPage() {
             setIsLoading(false);
           }
         });
+    } else {
+      console.log("AdminMembersPage - Not authenticated yet, waiting...");
     }
     
     return () => {
@@ -47,7 +49,6 @@ export default function AdminMembersPage() {
       const userId = event.detail?.userId;
       if (userId) {
         console.log(`User ${userId} was deleted, UI will be updated automatically`);
-        // No need to refresh here since useUserManagement.deleteUser now updates the local state
       }
     };
     
@@ -85,5 +86,6 @@ export default function AdminMembersPage() {
   }
 
   // Once loaded, always render the component with the current data
+  console.log("AdminMembersPage - Rendering with user data");
   return <MembersPageComponent useUserManagementHook={() => userManagement} />;
 }

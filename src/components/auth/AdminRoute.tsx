@@ -17,6 +17,17 @@ export const AdminRoute: React.FC<AdminRouteProps> = ({ children }) => {
   // For development purposes - enable this for easier testing
   const isDevelopmentMode = true; // Set to true during development, false for production
   
+  // Debug info (add console logging for troubleshooting)
+  console.log('AdminRoute check:', {
+    isLoading,
+    isAuthenticated,
+    email: user?.email,
+    role: profile?.role,
+    isSuperAdmin: isSuperAdmin,
+    is_super_admin_flag: profile?.is_super_admin,
+    title: profile?.title
+  });
+  
   // Show loading state while checking admin status
   if (isLoading) {
     return (
@@ -49,16 +60,6 @@ export const AdminRoute: React.FC<AdminRouteProps> = ({ children }) => {
     hasPermission('can_post_announcements') ||
     hasPermission('can_manage_archives') ||
     hasPermission('can_edit_financials');
-  
-  // Debug info
-  console.log('Admin access check:', {
-    email: user?.email,
-    role: profile?.role,
-    isSuperAdmin: isSuperAdmin,
-    is_super_admin_flag: profile?.is_super_admin,
-    title: profile?.title,
-    hasAdminAccess: hasAdminAccess
-  });
   
   // Redirect non-admin users to the dashboard
   if (!hasAdminAccess) {
