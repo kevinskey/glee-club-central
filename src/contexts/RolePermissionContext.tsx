@@ -58,23 +58,23 @@ export const RolePermissionProvider: React.FC<{ children: React.ReactNode }> = (
       const roleFromProfile = profile?.role || 'student';
       
       // Define valid roles
-      const validRoles = ['admin', 'student', 'section_leader', 'staff', 'guest'];
+      const validRoles: string[] = ['admin', 'student', 'section_leader', 'staff', 'guest'];
       
       // Assign role with validation
-      let userRoleValue: UserRole = 'student';
+      let validatedRole: UserRole = 'student';
       
       if (validRoles.includes(roleFromProfile as string)) {
-        userRoleValue = roleFromProfile as UserRole;
+        validatedRole = roleFromProfile as UserRole;
       }
       
       // Set role
-      setUserRole(userRoleValue);
+      setUserRole(validatedRole);
 
       // Fetch permissions based on role
       const { data, error } = await supabase
         .from('role_permissions')
         .select('permission, granted')
-        .eq('role', userRoleValue);
+        .eq('role', validatedRole);
 
       if (error) {
         console.error('Error fetching permissions:', error);
