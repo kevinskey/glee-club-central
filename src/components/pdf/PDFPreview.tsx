@@ -1,7 +1,6 @@
 
 import React, { useState } from "react";
 import { PDFDocument } from "./PDFDocument";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import { FileText } from "lucide-react";
 import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 
