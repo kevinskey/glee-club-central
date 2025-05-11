@@ -20,7 +20,7 @@ export function HeroSection() {
   ];
   
   return (
-    <section className="relative bg-glee-dark py-4 sm:py-6 md:py-10 lg:py-16 xl:py-24 min-h-[300px] sm:min-h-[385px] md:min-h-[500px] lg:min-h-[600px] xl:min-h-[700px] w-full overflow-hidden flex items-center justify-center">
+    <section className="relative bg-glee-dark py-4 sm:py-6 md:py-10 lg:py-16 xl:py-24 min-h-[300px] sm:min-h-[385px] md:min-h-[500px] lg:min-h-[600px] xl:min-h-[700px] w-full overflow-hidden flex items-center justify-start">
       <div className="absolute inset-0 opacity-50 bg-blend-overlay bg-black">
         <BackgroundSlideshow 
           images={backgroundImages} 
@@ -29,7 +29,7 @@ export function HeroSection() {
         />
       </div>
       
-      <div className="relative z-10 mx-auto px-2 md:container h-full flex items-center justify-center w-full">
+      <div className="relative z-10 mx-auto px-6 md:container h-full flex items-center justify-start w-full">
         <HeroContent />
       </div>
 
