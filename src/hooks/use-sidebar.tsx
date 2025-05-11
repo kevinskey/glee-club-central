@@ -13,26 +13,6 @@ const SidebarContext = createContext<SidebarState | undefined>(undefined);
 
 // Create a provider component
 export function SidebarProvider({ children }: { children: React.ReactNode }) {
-  const sidebarState = useSidebar();
-  
-  return (
-    <SidebarContext.Provider value={sidebarState}>
-      {children}
-    </SidebarContext.Provider>
-  );
-}
-
-// Hook for components to consume the sidebar context
-export const useSidebarContext = (): SidebarState => {
-  const context = useContext(SidebarContext);
-  if (!context) {
-    throw new Error("useSidebarContext must be used within a SidebarProvider");
-  }
-  return context;
-};
-
-// Original hook implementation as a standalone hook
-export function useSidebar(): SidebarState {
   const [isOpen, setIsOpen] = useState(false);
   
   // Close sidebar when ESC key is pressed
@@ -51,12 +31,32 @@ export function useSidebar(): SidebarState {
   const onClose = () => setIsOpen(false);
   const onToggle = () => setIsOpen(prev => !prev);
   
-  return {
+  const value = {
     isOpen,
     onOpen,
     onClose,
-    onToggle
+    onToggle,
   };
+  
+  return (
+    <SidebarContext.Provider value={value}>
+      {children}
+    </SidebarContext.Provider>
+  );
+}
+
+// Hook for components to consume the sidebar context
+export const useSidebarContext = (): SidebarState => {
+  const context = useContext(SidebarContext);
+  if (!context) {
+    throw new Error("useSidebarContext must be used within a SidebarProvider");
+  }
+  return context;
+};
+
+// Original hook implementation as a standalone hook (now just returns the context)
+export function useSidebar(): SidebarState {
+  return useSidebarContext();
 }
 
 // Add this for backward compatibility if needed
