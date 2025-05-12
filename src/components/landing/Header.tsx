@@ -8,7 +8,16 @@ import { MemberPortalDropdown } from "@/components/landing/header/MemberPortalDr
 import { HeaderUtils } from "@/components/landing/header/HeaderUtils";
 import { MobileMenuToggle } from "@/components/landing/header/MobileMenuToggle";
 import { MobileMenu } from "@/components/landing/header/MobileMenu";
-import { GlobalMetronome } from "@/components/ui/global-metronome";
+import { EnhancedMetronome } from "@/components/ui/enhanced-metronome";
+import { Button } from "@/components/ui/button";
+import { Music } from "lucide-react";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 
 interface HeaderProps {
   initialShowNewsFeed?: boolean;
@@ -18,6 +27,7 @@ export function Header({ initialShowNewsFeed = true }: HeaderProps) {
   const isMobile = useIsMobile();
   const [showNewsFeed, setShowNewsFeed] = useState(false); // Start hidden to avoid flicker
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [metronomeOpen, setMetronomeOpen] = useState(false);
 
   // Set the news feed state after component mounts with a slight delay
   useEffect(() => {
@@ -49,7 +59,22 @@ export function Header({ initialShowNewsFeed = true }: HeaderProps) {
         <div className="container px-2 flex h-14 sm:h-16 items-center justify-between">
           <div className="flex items-center gap-1 sm:gap-2">
             <Logo />
-            <Metronome />
+            
+            {/* Metronome Dialog in Header */}
+            <Dialog open={metronomeOpen} onOpenChange={setMetronomeOpen}>
+              <DialogTrigger asChild>
+                <Button variant="ghost" size="icon" className="h-8 w-8">
+                  <Music className="h-4 w-4" />
+                  <span className="sr-only">Open metronome</span>
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="sm:max-w-md">
+                <DialogHeader>
+                  <DialogTitle>Metronome</DialogTitle>
+                </DialogHeader>
+                <EnhancedMetronome showControls={true} size="md" />
+              </DialogContent>
+            </Dialog>
           </div>
           
           {/* Desktop navigation */}
@@ -72,9 +97,6 @@ export function Header({ initialShowNewsFeed = true }: HeaderProps) {
         {/* Mobile menu */}
         {mobileMenuOpen && <MobileMenu onClose={() => setMobileMenuOpen(false)} />}
       </header>
-      
-      {/* Global Metronome - positioned outside header container */}
-      <GlobalMetronome />
     </>
   );
 }
