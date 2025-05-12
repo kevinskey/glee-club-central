@@ -1,3 +1,4 @@
+
 import React, { memo } from "react";
 import { 
   Table, 
@@ -32,9 +33,9 @@ interface MembersListProps {
   onEditUser?: (user: User) => void;
   onDeleteUser?: (userId: string) => void;
   onManagePermissions?: (user: User) => void;
-  // Add new props with equivalent names to what's being used in MembersPage.tsx
+  // Fix type definitions to match what MembersPage is using
   onEditMember?: (user: User) => void;
-  onDeleteMember?: (memberId: string) => void;
+  onDeleteMember?: (userId: string | User) => void;
   onStatusUpdate?: (userId: string, status: string) => Promise<boolean>;
   onStatusUpdateSuccess?: () => Promise<void>;
   canEdit?: boolean;
@@ -144,7 +145,7 @@ export const MembersList = memo(function MembersList({
                           <DropdownMenuItem 
                             className="text-destructive" 
                             onClick={() => {
-                              if (onDeleteMember) onDeleteMember(member.id);
+                              if (onDeleteMember) onDeleteMember(member);
                               else if (onDeleteUser) onDeleteUser(member.id);
                             }}
                           >
