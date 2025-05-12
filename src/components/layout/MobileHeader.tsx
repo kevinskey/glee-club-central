@@ -9,14 +9,14 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, Dialog
 import { EnhancedMetronome } from "@/components/ui/enhanced-metronome";
 import { Clock, Menu, X } from "lucide-react";
 import { MobileMenu } from "@/components/landing/header/MobileMenu";
-import { useSidebar } from "@/components/ui/sidebar";
+import { SidebarProvider, useSidebar } from "@/components/ui/sidebar";
 
 export function MobileHeader() {
   const { isAuthenticated } = useAuth();
   const navigate = useNavigate();
   const isMobile = useIsMobile();
   const location = useLocation();
-  const { toggleSidebar } = useSidebar();
+  const { toggleSidebar, setOpenMobile } = useSidebar();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [metronomeOpen, setMetronomeOpen] = useState(false);
   const audioContextRef = useRef<AudioContext | null>(null);
@@ -47,9 +47,13 @@ export function MobileHeader() {
   };
 
   const handleSidebarToggle = () => {
+    console.log("Toggling sidebar or mobile menu. isDashboardPath:", isDashboardPath);
+    
     if (isDashboardPath) {
-      toggleSidebar();
+      // For dashboard pages, use the sidebar's setOpenMobile function
+      setOpenMobile(prev => !prev);
     } else {
+      // For public pages, toggle our local mobile menu state
       toggleMobileMenu();
     }
   };
@@ -71,7 +75,7 @@ export function MobileHeader() {
               ) : (
                 <Menu className="h-5 w-5 text-foreground" />
               )}
-              <span className="sr-only">{mobileMenuOpen ? "Close menu" : "Toggle sidebar"}</span>
+              <span className="sr-only">{mobileMenuOpen ? "Close menu" : "Toggle menu"}</span>
             </Button>
             
             <Link to={isAuthenticated ? "/dashboard" : "/"} className="font-bold flex items-center hover:text-primary transition-colors">
