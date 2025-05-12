@@ -66,8 +66,32 @@ export function PerformanceSection() {
   };
 
   return (
-    <section id="performances" className="py-0 bg-gradient-to-b from-glee-dark to-background min-h-[400px] flex items-center">
-      <div className="container mx-auto px-0 md:px-4 w-full">
+    <section id="performances" className="py-0 relative overflow-hidden min-h-[400px] flex items-center">
+      {/* Stage Curtain Background */}
+      <div className="absolute inset-0 z-0">
+        <div className="absolute inset-0 bg-glee-spelman z-0">
+          {/* Curtain texture effect */}
+          <div className="h-full w-full opacity-40" 
+               style={{
+                 backgroundImage: 'repeating-linear-gradient(0deg, rgba(0,0,0,0.2), rgba(0,0,0,0.2) 1px, transparent 1px, transparent 20px), repeating-linear-gradient(90deg, rgba(0,0,0,0.1), rgba(0,0,0,0.1) 1px, transparent 1px, transparent 20px)',
+                 backgroundSize: '20px 20px'
+               }}>
+          </div>
+          {/* Curtain fold effect */}
+          <div className="absolute inset-0 opacity-70"
+               style={{
+                 backgroundImage: 'repeating-linear-gradient(90deg, rgba(0,0,0,0.3), rgba(0,0,0,0.1) 5%, rgba(0,0,0,0.3) 10%)',
+                 backgroundSize: '100px 100%'
+               }}>
+          </div>
+          {/* Top shadow for curtain effect */}
+          <div className="absolute top-0 left-0 right-0 h-24 bg-gradient-to-b from-black/40 to-transparent"></div>
+          {/* Bottom shadow for stage effect */}
+          <div className="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-black/70 to-transparent"></div>
+        </div>
+      </div>
+      
+      <div className="container mx-auto px-0 md:px-4 w-full relative z-10">
         <div className="relative">
           <div className="absolute left-0 top-0 z-10 px-4 md:px-6 py-4 flex items-center justify-between w-full">
             <h2 className="text-2xl font-bold tracking-tight text-white">Upcoming Performances</h2>
