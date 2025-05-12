@@ -24,26 +24,26 @@ export function MobileMenu({ onClose }: MobileMenuProps) {
   };
   
   return (
-    <div className="md:hidden fixed top-16 left-0 right-0 z-50 bg-background border-t border-border">
+    <div className="md:hidden fixed top-16 left-0 right-0 z-50 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-t border-border">
       <div className="container py-4 px-4 flex flex-col gap-2 max-h-[70vh] overflow-y-auto">
         {/* Mobile menu items */}
         <Button 
           variant="ghost" 
-          className="justify-start py-3 hover:bg-glee-spelman hover:text-white" 
+          className="justify-start py-3 hover:bg-accent hover:text-accent-foreground" 
           onClick={() => handleNavigation("/")}
         >
           Home
         </Button>
         <Button 
           variant="ghost" 
-          className="justify-start py-3 hover:bg-glee-spelman hover:text-white" 
+          className="justify-start py-3 hover:bg-accent hover:text-accent-foreground" 
           onClick={() => handleNavigation("/about")}
         >
           About
         </Button>
         <Button 
           variant="ghost" 
-          className="justify-start py-3 hover:bg-glee-spelman hover:text-white" 
+          className="justify-start py-3 hover:bg-accent hover:text-accent-foreground" 
           onClick={() => handleNavigation("/press-kit")}
         >
           Press Kit
@@ -52,7 +52,7 @@ export function MobileMenu({ onClose }: MobileMenuProps) {
           <>
             <Button 
               variant="ghost" 
-              className="justify-start py-3 hover:bg-glee-spelman hover:text-white" 
+              className="justify-start py-3 hover:bg-accent hover:text-accent-foreground" 
               onClick={() => handleNavigation("/dashboard")}
             >
               Dashboard
@@ -62,14 +62,14 @@ export function MobileMenu({ onClose }: MobileMenuProps) {
           <>
             <Button 
               variant="ghost" 
-              className="justify-start py-3 hover:bg-glee-spelman hover:text-white" 
+              className="justify-start py-3 hover:bg-accent hover:text-accent-foreground" 
               onClick={() => handleNavigation("/login")}
             >
               Login
             </Button>
             <Button 
               variant="ghost" 
-              className="justify-start py-3 hover:bg-glee-spelman hover:text-white" 
+              className="justify-start py-3 hover:bg-accent hover:text-accent-foreground" 
               onClick={() => handleNavigation("/register")}
             >
               Register
@@ -78,7 +78,7 @@ export function MobileMenu({ onClose }: MobileMenuProps) {
         )}
         <Button 
           variant="ghost" 
-          className="justify-start py-3 hover:bg-glee-spelman hover:text-white" 
+          className="justify-start py-3 hover:bg-accent hover:text-accent-foreground" 
           onClick={() => handleNavigation("/contact")}
         >
           Contact
