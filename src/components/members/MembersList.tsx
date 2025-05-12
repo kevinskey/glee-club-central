@@ -1,5 +1,5 @@
 
-import React, { memo } from "react";
+import React, { memo, useCallback } from "react";
 import { 
   Table, 
   TableBody, 
@@ -58,15 +58,33 @@ export const MembersList = memo(function MembersList({
   // For debugging
   console.log("MembersList rendering with", members.length, "members");
   
-  // Format last login time
-  const formatLastLogin = (lastLogin: string | null) => {
+  // Format last login time - memoize to prevent recreation on render
+  const formatLastLogin = useCallback((lastLogin: string | null) => {
     if (!lastLogin) return "Never";
     try {
       return formatDistanceToNow(new Date(lastLogin), { addSuffix: true });
     } catch (e) {
       return "Invalid date";
     }
-  };
+  }, []);
+
+  // Handle user deletion with proper type handling
+  const handleDelete = useCallback((member: User) => {
+    if (onDeleteMember) {
+      onDeleteMember(member);
+    } else if (onDeleteUser) {
+      onDeleteUser(member.id);
+    }
+  }, [onDeleteMember, onDeleteUser]);
+
+  // Handle user editing with proper type handling
+  const handleEdit = useCallback((member: User) => {
+    if (onEditMember) {
+      onEditMember(member);
+    } else if (onEditUser) {
+      onEditUser(member);
+    }
+  }, [onEditMember, onEditUser]);
 
   // Filter out deleted members before rendering
   const activeMembers = members.filter(member => member.status !== 'deleted');
@@ -118,12 +136,8 @@ export const MembersList = memo(function MembersList({
                         </Button>
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end">
-                        {/* Use onEditMember if provided, otherwise fall back to onEditUser */}
                         {(onEditMember || onEditUser) && (
-                          <DropdownMenuItem onClick={() => {
-                            if (onEditMember) onEditMember(member);
-                            else if (onEditUser) onEditUser(member);
-                          }}>
+                          <DropdownMenuItem onClick={() => handleEdit(member)}>
                             <Pencil className="mr-2 h-4 w-4" />
                             Edit User
                           </DropdownMenuItem>
@@ -144,10 +158,7 @@ export const MembersList = memo(function MembersList({
                         {(onDeleteMember || onDeleteUser) && (
                           <DropdownMenuItem 
                             className="text-destructive" 
-                            onClick={() => {
-                              if (onDeleteMember) onDeleteMember(member);
-                              else if (onDeleteUser) onDeleteUser(member.id);
-                            }}
+                            onClick={() => handleDelete(member)}
                           >
                             <Trash2 className="mr-2 h-4 w-4" />
                             Delete User

@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Music, Minimize2, Maximize2, X } from "lucide-react";
 import { EnhancedMetronome } from "@/components/ui/enhanced-metronome";
 import { Button } from "@/components/ui/button";
@@ -11,27 +11,47 @@ export function GlobalMetronome() {
   const [isExpanded, setIsExpanded] = useState(false);
   const [isActive, setIsActive] = useState(false);
   const [isVisible, setIsVisible] = useState(true);
+  const audioContextRef = useRef<AudioContext | null>(null);
 
-  // Clean up audio context when component is hidden
+  // Clean up audio context when component is hidden or deactivated
   useEffect(() => {
+    // Only clean up when needed
     if (!isVisible || !isActive) {
-      // Any cleanup needed when metronome is hidden or deactivated
       return () => {
-        // Cleanup function
+        // Close any existing audio context to free browser resources
+        if (audioContextRef.current && audioContextRef.current.state !== 'closed') {
+          audioContextRef.current.close().catch(console.error);
+          audioContextRef.current = null;
+        }
       };
     }
   }, [isVisible, isActive]);
 
+  // Handle visibility toggle
+  const toggleVisibility = () => {
+    // If hiding and active, deactivate first to ensure proper cleanup
+    if (isVisible && isActive) {
+      setIsActive(false);
+    }
+    setIsVisible(!isVisible);
+  };
+
   if (!isVisible) {
     return (
-      <Button
-        variant="outline"
-        size="icon"
-        className="fixed top-20 left-4 z-50 bg-background/80 backdrop-blur"
-        onClick={() => setIsVisible(true)}
+      <motion.div
+        initial={{ opacity: 0, scale: 0.8 }}
+        animate={{ opacity: 1, scale: 1 }}
+        className="fixed top-20 left-4 z-50"
       >
-        <Music className="h-4 w-4" />
-      </Button>
+        <Button
+          variant="outline"
+          size="icon"
+          className="bg-background/80 backdrop-blur"
+          onClick={toggleVisibility}
+        >
+          <Music className="h-4 w-4" />
+        </Button>
+      </motion.div>
     );
   }
 
@@ -42,6 +62,7 @@ export function GlobalMetronome() {
         initial={{ opacity: 0, scale: 0.8 }}
         animate={{ opacity: 1, scale: 1 }}
         exit={{ opacity: 0, scale: 0.8 }}
+        transition={{ duration: 0.2 }}
       >
         <Card className={`shadow-md transition-all duration-300 ${isExpanded ? 'w-80' : 'w-auto'} bg-background/80 backdrop-blur`}>
           <div className="flex items-center justify-between p-2">
@@ -73,7 +94,7 @@ export function GlobalMetronome() {
                 variant="ghost"
                 size="sm"
                 className="h-8 w-8 p-0"
-                onClick={() => setIsVisible(false)}
+                onClick={toggleVisibility}
               >
                 <X className="h-3.5 w-3.5" />
               </Button>
@@ -82,7 +103,11 @@ export function GlobalMetronome() {
           
           {isActive && isExpanded && (
             <div className="px-2 pb-2">
-              <EnhancedMetronome showControls={true} size="sm" />
+              <EnhancedMetronome 
+                showControls={true} 
+                size="sm" 
+                audioContextRef={audioContextRef}
+              />
             </div>
           )}
         </Card>

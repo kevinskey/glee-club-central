@@ -1,5 +1,5 @@
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import { MembersPageComponent } from "@/components/members/MembersPageRefactor";
 import { useAuth } from "@/contexts/AuthContext";
 import { useUserManagement } from "@/hooks/useUserManagement";
@@ -46,6 +46,9 @@ export default function AdminMembersPage() {
     };
   }, [isAuthenticated, userManagement]);
 
+  // Create memoized userManagementHook prop to prevent unnecessary rerenders
+  const memoizedUserManagementHook = useCallback(() => userManagement, [userManagement]);
+
   // Verify permissions
   const hasAccess = hasPermission('can_manage_users');
 
@@ -68,5 +71,5 @@ export default function AdminMembersPage() {
   }
 
   // Once loaded, render the component with the current data
-  return <MembersPageComponent useUserManagementHook={() => userManagement} />;
+  return <MembersPageComponent useUserManagementHook={memoizedUserManagementHook} />;
 }
