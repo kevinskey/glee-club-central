@@ -32,7 +32,6 @@ export const GoogleCalendarToggle = ({
 
   const checkConnection = async () => {
     if (!isAuthenticated || !user) {
-      console.log("Not checking Google Calendar connection - user not authenticated");
       setIsChecking(false);
       setIsConnected(false);
       return;
@@ -42,7 +41,6 @@ export const GoogleCalendarToggle = ({
     try {
       const connected = await checkGoogleCalendarConnection();
       setIsConnected(connected);
-      console.info("Google Calendar connection status:", connected);
       
       // Auto-enable Google Calendar if connected
       if (connected && !useGoogleCalendar) {
@@ -59,10 +57,8 @@ export const GoogleCalendarToggle = ({
   useEffect(() => {
     // Only check connection when we have an authenticated user
     if (isAuthenticated && user) {
-      console.log("Authenticated user, checking Google Calendar connection");
       checkConnection();
     } else {
-      console.log("No authenticated user, skipping Google Calendar connection check");
       setIsConnected(false);
       setIsChecking(false);
     }
@@ -76,9 +72,7 @@ export const GoogleCalendarToggle = ({
 
     setIsConnecting(true);
     try {
-      console.log("Making request to get Google auth URL");
       const authUrl = await startGoogleOAuth();
-      console.log("Response from startGoogleOAuth:", authUrl ? "URL received" : "No URL");
       
       if (!authUrl) {
         toast.error("Failed to start Google authentication");

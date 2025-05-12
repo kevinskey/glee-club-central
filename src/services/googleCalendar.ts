@@ -1,4 +1,3 @@
-
 import { CalendarEvent, EventType } from "@/hooks/useCalendarEvents";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -30,13 +29,18 @@ interface GoogleCalendarEvent {
  * Check if user is authenticated
  */
 const checkAuthStatus = async (): Promise<boolean> => {
-  // Check if user is logged in
-  const { data: { session } } = await supabase.auth.getSession();
-  if (!session?.user) {
-    console.warn("No authenticated user found for Google Calendar operations");
+  try {
+    // Check if user is logged in
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session?.user) {
+      console.warn("No authenticated user found for Google Calendar operations");
+      return false;
+    }
+    return true;
+  } catch (error) {
+    console.error("Error checking authentication status:", error);
     return false;
   }
-  return true;
 }
 
 /**
@@ -84,7 +88,7 @@ export const startGoogleOAuth = async (): Promise<string | null> => {
     
     // Get the auth URL from our edge function
     const { data, error } = await supabase.functions.invoke('google-calendar-auth', {
-      body: { action: 'getAuthUrl' },
+      body: JSON.stringify({ action: 'getAuthUrl' }),
       headers: {
         'Content-Type': 'application/json'
       }
@@ -124,7 +128,7 @@ export const handleOAuthCallback = async (code: string): Promise<boolean> => {
     
     // Send the auth code to our edge function
     const { data, error } = await supabase.functions.invoke('google-calendar-auth', {
-      body: { action: 'handleCallback', code },
+      body: JSON.stringify({ action: 'handleCallback', code }),
       headers: {
         'Content-Type': 'application/json'
       }
