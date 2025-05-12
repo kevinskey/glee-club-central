@@ -1,4 +1,3 @@
-
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
@@ -106,61 +105,72 @@ serve(async (req) => {
   }
   
   try {
-    // Get the request body
+    // We need to handle the request body carefully
+    let requestText;
     let requestData;
+    
     try {
-      // We need to handle the request body carefully
-      const requestText = await req.text();
+      requestText = await req.text();
       console.log("Request body text:", requestText);
       
-      // Handle empty request body by providing a helpful error
-      if (!requestText || !requestText.trim()) {
+      if (!requestText || requestText.trim() === '') {
         console.error("Request body is empty");
-        return new Response(JSON.stringify({ 
-          error: "Request body is empty", 
-          message: "Please provide a valid request body with action parameter" 
-        }), {
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-          status: 400,
-        });
+        return new Response(
+          JSON.stringify({
+            error: "Request body is empty",
+            message: "Please provide a valid JSON request body with action parameter"
+          }), 
+          {
+            status: 400,
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+          }
+        );
       }
       
-      // Parse the JSON body
       try {
         requestData = JSON.parse(requestText);
         console.log("Parsed request data:", JSON.stringify(requestData));
       } catch (e) {
-        console.error("Error parsing request JSON:", e);
-        return new Response(JSON.stringify({ 
-          error: "Invalid JSON in request body",
-          message: "The request body must be properly formatted JSON"
-        }), {
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-          status: 400,
-        });
+        console.error("Error parsing JSON request:", e);
+        return new Response(
+          JSON.stringify({
+            error: "Invalid JSON in request body",
+            message: "The request body must be properly formatted JSON"
+          }),
+          {
+            status: 400,
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+          }
+        );
       }
     } catch (e) {
       console.error("Error reading request body:", e);
-      return new Response(JSON.stringify({ 
-        error: "Failed to read request body",
-        message: "Could not read the request body" 
-      }), {
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        status: 400,
-      });
+      return new Response(
+        JSON.stringify({
+          error: "Failed to read request body",
+          message: "Could not read the request body"
+        }),
+        {
+          status: 400,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        }
+      );
     }
     
     const { action, code } = requestData || {};
     
     if (!action) {
       console.error("No action provided in request");
-      return new Response(JSON.stringify({ 
-        error: "Missing action parameter", 
-        message: "Please provide an action parameter in your request" 
-      }), {
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        status: 400,
-      });
+      return new Response(
+        JSON.stringify({
+          error: "Missing action parameter",
+          message: "Please provide an action parameter in your request"
+        }),
+        {
+          status: 400,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        }
+      );
     }
     
     // Special case: getting the auth URL doesn't require authentication
@@ -169,16 +179,22 @@ serve(async (req) => {
       try {
         const authUrl = getAuthorizationUrl();
         console.log("Auth URL generated:", authUrl);
-        return new Response(JSON.stringify({ authUrl }), {
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-          status: 200,
-        });
+        return new Response(
+          JSON.stringify({ authUrl }),
+          {
+            status: 200,
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+          }
+        );
       } catch (error) {
         console.error("Error generating auth URL:", error);
-        return new Response(JSON.stringify({ error: error.message }), {
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-          status: 500,
-        });
+        return new Response(
+          JSON.stringify({ error: error.message }),
+          {
+            status: 500,
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+          }
+        );
       }
     }
     
@@ -186,13 +202,16 @@ serve(async (req) => {
     const authHeader = req.headers.get('Authorization');
     if (!authHeader) {
       console.error("Missing Authorization header");
-      return new Response(JSON.stringify({ 
-        error: "Missing Authorization header",
-        message: "Please provide an Authorization header with a valid JWT token"
-      }), {
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        status: 401,
-      });
+      return new Response(
+        JSON.stringify({
+          error: "Missing Authorization header",
+          message: "Please provide an Authorization header with a valid JWT token"
+        }),
+        {
+          status: 401,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        }
+      );
     }
     
     // Get user ID from JWT

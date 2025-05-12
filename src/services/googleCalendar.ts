@@ -1,3 +1,4 @@
+
 import { CalendarEvent, EventType } from "@/hooks/useCalendarEvents";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -94,6 +95,8 @@ export const startGoogleOAuth = async (): Promise<string | null> => {
       }
     });
     
+    console.log("Response from edge function:", data, error);
+    
     if (error) {
       console.error("Error getting Google OAuth URL:", error);
       toast.error("Error starting Google authentication");
@@ -101,14 +104,14 @@ export const startGoogleOAuth = async (): Promise<string | null> => {
     }
     
     if (!data?.authUrl) {
-      console.error("No auth URL returned from function");
+      console.error("No auth URL returned from function:", data);
       toast.error("Error starting Google authentication: No URL returned");
       return null;
     }
     
     console.log("Received OAuth URL:", data.authUrl);
     return data.authUrl;
-  } catch (error) {
+  } catch (error: any) {
     console.error("Error in startGoogleOAuth:", error);
     toast.error(`Error starting Google authentication: ${error.message || 'Unknown error'}`);
     return null;
