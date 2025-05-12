@@ -28,11 +28,13 @@ export const GoogleCalendarToggle = ({
   const [isChecking, setIsChecking] = useState<boolean>(true);
   const [isConnecting, setIsConnecting] = useState<boolean>(false);
   const { isSuperAdmin } = usePermissions();
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, user } = useAuth();
 
   const checkConnection = async () => {
-    if (!isAuthenticated) {
+    if (!isAuthenticated || !user) {
+      console.log("Not checking Google Calendar connection - user not authenticated");
       setIsChecking(false);
+      setIsConnected(false);
       return;
     }
     
@@ -55,23 +57,25 @@ export const GoogleCalendarToggle = ({
   };
 
   useEffect(() => {
-    if (isAuthenticated) {
+    // Only check connection when we have an authenticated user
+    if (isAuthenticated && user) {
+      console.log("Authenticated user, checking Google Calendar connection");
       checkConnection();
     } else {
+      console.log("No authenticated user, skipping Google Calendar connection check");
       setIsConnected(false);
       setIsChecking(false);
     }
-  }, [isAuthenticated]);
+  }, [isAuthenticated, user]);
 
   const handleConnect = async () => {
-    if (!isAuthenticated) {
+    if (!isAuthenticated || !user) {
       toast.error("You must be logged in to connect Google Calendar");
       return;
     }
 
     setIsConnecting(true);
     try {
-      // Add debugging to track request flow
       console.log("Making request to get Google auth URL");
       const authUrl = await startGoogleOAuth();
       console.log("Response from startGoogleOAuth:", authUrl ? "URL received" : "No URL");
@@ -129,6 +133,11 @@ export const GoogleCalendarToggle = ({
   };
 
   const handleDisconnect = async () => {
+    if (!isAuthenticated || !user) {
+      toast.error("You must be logged in to disconnect Google Calendar");
+      return;
+    }
+    
     try {
       const success = await disconnectGoogleCalendar();
       if (success) {
@@ -163,7 +172,9 @@ export const GoogleCalendarToggle = ({
           </div>
         </div>
         
-        {isChecking ? (
+        {!isAuthenticated || !user ? (
+          <div className="text-xs text-amber-500">Please log in to use Google Calendar integration</div>
+        ) : isChecking ? (
           <div className="text-xs text-gray-500">Checking connection...</div>
         ) : (
           <>

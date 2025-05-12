@@ -1,3 +1,4 @@
+
 import { CalendarEvent, EventType } from "@/hooks/useCalendarEvents";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -26,21 +27,34 @@ interface GoogleCalendarEvent {
 }
 
 /**
+ * Check if user is authenticated
+ */
+const checkAuthStatus = async (): Promise<boolean> => {
+  // Check if user is logged in
+  const { data: { session } } = await supabase.auth.getSession();
+  if (!session?.user) {
+    console.warn("No authenticated user found for Google Calendar operations");
+    return false;
+  }
+  return true;
+}
+
+/**
  * Get user's Google Calendar token from Supabase
  */
 export const getGoogleCalendarToken = async (): Promise<string | null> => {
   try {
-    // Check if user is logged in
-    const { data: { session } } = await supabase.auth.getSession();
-    
-    if (!session) {
-      console.error("No session found. User must be logged in to access Google Calendar.");
+    // First check if user is authenticated
+    if (!await checkAuthStatus()) {
       return null;
     }
     
     // Get Google Calendar token from user's metadata
     const { data: userTokenData, error } = await supabase.functions.invoke('get-google-token', {
-      body: { userId: session.user.id }
+      body: { userId: supabase.auth.getUser() },
+      headers: {
+        'Content-Type': 'application/json'
+      }
     });
     
     if (error || !userTokenData?.token) {
@@ -60,10 +74,15 @@ export const getGoogleCalendarToken = async (): Promise<string | null> => {
  */
 export const startGoogleOAuth = async (): Promise<string | null> => {
   try {
+    // First check if user is authenticated
+    if (!await checkAuthStatus()) {
+      toast.error("Please log in to connect Google Calendar");
+      return null;
+    }
+    
     console.log("Starting Google OAuth flow...");
     
     // Get the auth URL from our edge function
-    // Fix: Ensure we're always sending a valid JSON body
     const { data, error } = await supabase.functions.invoke('google-calendar-auth', {
       body: { action: 'getAuthUrl' },
       headers: {
@@ -97,7 +116,13 @@ export const startGoogleOAuth = async (): Promise<string | null> => {
  */
 export const handleOAuthCallback = async (code: string): Promise<boolean> => {
   try {
-    // Fix: Ensure we're sending a properly formatted JSON body
+    // First check if user is authenticated
+    if (!await checkAuthStatus()) {
+      toast.error("Please log in to connect Google Calendar");
+      return false;
+    }
+    
+    // Send the auth code to our edge function
     const { data, error } = await supabase.functions.invoke('google-calendar-auth', {
       body: { action: 'handleCallback', code },
       headers: {
@@ -122,11 +147,8 @@ export const handleOAuthCallback = async (code: string): Promise<boolean> => {
  */
 export const checkGoogleCalendarConnection = async (): Promise<boolean> => {
   try {
-    // Check if user is logged in first
-    const { data: { session } } = await supabase.auth.getSession();
-    
-    if (!session) {
-      console.error("No session found. User must be logged in to check Google Calendar connection.");
+    // First check if user is authenticated
+    if (!await checkAuthStatus()) {
       return false;
     }
     
@@ -145,6 +167,12 @@ export const fetchGoogleCalendarEvents = async (
   daysAhead: number = 90
 ): Promise<CalendarEvent[]> => {
   try {
+    // First check if user is authenticated
+    if (!await checkAuthStatus()) {
+      console.log("No authenticated user found. Using simulated events.");
+      return simulateCalendarEvents(daysAhead);
+    }
+    
     // Get OAuth token
     const token = await getGoogleCalendarToken();
     
@@ -208,7 +236,11 @@ export const fetchGoogleCalendarEvents = async (
  */
 export const refreshGoogleToken = async (): Promise<boolean> => {
   try {
-    // Fix: Ensure we're sending a valid JSON body
+    // First check if user is authenticated
+    if (!await checkAuthStatus()) {
+      return false;
+    }
+    
     const { data, error } = await supabase.functions.invoke('google-calendar-auth', {
       body: { action: 'refreshToken' },
       headers: {
@@ -238,7 +270,12 @@ export const refreshGoogleToken = async (): Promise<boolean> => {
  */
 export const disconnectGoogleCalendar = async (): Promise<boolean> => {
   try {
-    // Fix: Ensure we're sending a valid JSON body
+    // First check if user is authenticated
+    if (!await checkAuthStatus()) {
+      toast.error("Please log in to disconnect Google Calendar");
+      return false;
+    }
+    
     const { data, error } = await supabase.functions.invoke('google-calendar-auth', {
       body: { action: 'disconnect' },
       headers: {

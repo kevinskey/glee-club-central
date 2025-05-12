@@ -106,45 +106,62 @@ serve(async (req) => {
   }
   
   try {
-    // Create Supabase client
-    const supabaseUrl = Deno.env.get("SUPABASE_URL") as string;
-    const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") as string;
-    const supabaseAdmin = createClient(supabaseUrl, supabaseKey);
-    
-    // Parse the request body
+    // Get the request body
     let requestData;
     try {
+      // We need to handle the request body carefully
       const requestText = await req.text();
       console.log("Request body text:", requestText);
       
-      // Fix: Handle empty request body by providing default
-      if (!requestText.trim()) {
-        // Return a more helpful error instead of proceeding with undefined data
-        return new Response(JSON.stringify({ error: "Request body is empty", message: "Please provide a valid request body with action parameter" }), {
+      // Handle empty request body by providing a helpful error
+      if (!requestText || !requestText.trim()) {
+        console.error("Request body is empty");
+        return new Response(JSON.stringify({ 
+          error: "Request body is empty", 
+          message: "Please provide a valid request body with action parameter" 
+        }), {
           headers: { ...corsHeaders, 'Content-Type': 'application/json' },
           status: 400,
         });
       }
       
+      // Parse the JSON body
       try {
         requestData = JSON.parse(requestText);
         console.log("Parsed request data:", JSON.stringify(requestData));
       } catch (e) {
         console.error("Error parsing request JSON:", e);
-        return new Response(JSON.stringify({ error: "Invalid JSON in request body" }), {
+        return new Response(JSON.stringify({ 
+          error: "Invalid JSON in request body",
+          message: "The request body must be properly formatted JSON"
+        }), {
           headers: { ...corsHeaders, 'Content-Type': 'application/json' },
           status: 400,
         });
       }
     } catch (e) {
       console.error("Error reading request body:", e);
-      return new Response(JSON.stringify({ error: "Failed to read request body" }), {
+      return new Response(JSON.stringify({ 
+        error: "Failed to read request body",
+        message: "Could not read the request body" 
+      }), {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         status: 400,
       });
     }
     
     const { action, code } = requestData || {};
+    
+    if (!action) {
+      console.error("No action provided in request");
+      return new Response(JSON.stringify({ 
+        error: "Missing action parameter", 
+        message: "Please provide an action parameter in your request" 
+      }), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        status: 400,
+      });
+    }
     
     // Special case: getting the auth URL doesn't require authentication
     if (action === 'getAuthUrl') {
@@ -169,26 +186,46 @@ serve(async (req) => {
     const authHeader = req.headers.get('Authorization');
     if (!authHeader) {
       console.error("Missing Authorization header");
-      throw new Error('Missing Authorization header');
+      return new Response(JSON.stringify({ 
+        error: "Missing Authorization header",
+        message: "Please provide an Authorization header with a valid JWT token"
+      }), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        status: 401,
+      });
     }
     
     // Get user ID from JWT
     let userId;
     
     try {
+      // Create Supabase client
+      const supabaseUrl = Deno.env.get("SUPABASE_URL") as string;
+      const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") as string;
+      const supabaseAdmin = createClient(supabaseUrl, supabaseKey);
+      
       const jwt = authHeader.replace('Bearer ', '');
       const { data: { user }, error } = await supabaseAdmin.auth.getUser(jwt);
       
       if (error || !user) {
         console.error("JWT verification error:", error);
-        throw new Error('Invalid JWT token');
+        return new Response(JSON.stringify({ 
+          error: "Invalid JWT token",
+          message: "The provided authorization token is invalid or expired"
+        }), {
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          status: 401,
+        });
       }
       
       userId = user.id;
       console.log("Authenticated user ID:", userId);
     } catch (error) {
       console.error('JWT verification error:', error);
-      return new Response(JSON.stringify({ error: 'Invalid authorization' }), {
+      return new Response(JSON.stringify({ 
+        error: "Invalid authorization",
+        message: "Could not verify the provided authorization token"
+      }), {
         status: 401,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
@@ -199,7 +236,13 @@ serve(async (req) => {
       case 'handleCallback': {
         console.log("Handling OAuth callback");
         if (!code) {
-          throw new Error('Authorization code is required');
+          return new Response(JSON.stringify({ 
+            error: "Authorization code is required",
+            message: "Please provide the authorization code from the OAuth flow"
+          }), {
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+            status: 400,
+          });
         }
         
         // Exchange code for tokens
@@ -209,6 +252,11 @@ serve(async (req) => {
           refresh_token: "REDACTED",
           expires_in: tokens.expires_in
         }));
+        
+        // Create Supabase client for database operations
+        const supabaseUrl = Deno.env.get("SUPABASE_URL") as string;
+        const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") as string;
+        const supabaseAdmin = createClient(supabaseUrl, supabaseKey);
         
         // Store tokens in the database
         const { error } = await supabaseAdmin
@@ -224,7 +272,13 @@ serve(async (req) => {
         
         if (error) {
           console.error("Error storing tokens:", error);
-          throw new Error(`Failed to store tokens: ${error.message}`);
+          return new Response(JSON.stringify({ 
+            error: "Failed to store tokens",
+            message: error.message
+          }), {
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+            status: 500,
+          });
         }
         
         console.log("Tokens stored successfully");
@@ -236,6 +290,11 @@ serve(async (req) => {
       
       case 'refreshToken': {
         console.log("Refreshing access token");
+        // Create Supabase client for database operations
+        const supabaseUrl = Deno.env.get("SUPABASE_URL") as string;
+        const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") as string;
+        const supabaseAdmin = createClient(supabaseUrl, supabaseKey);
+        
         // Get refresh token for user
         const { data: tokenData, error: tokenError } = await supabaseAdmin
           .from('user_google_tokens')
@@ -245,7 +304,13 @@ serve(async (req) => {
         
         if (tokenError || !tokenData?.refresh_token) {
           console.error("Error getting refresh token:", tokenError);
-          throw new Error('No refresh token found for user');
+          return new Response(JSON.stringify({ 
+            error: "No refresh token found",
+            message: "No refresh token found for this user"
+          }), {
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+            status: 404,
+          });
         }
         
         // Refresh the access token
@@ -264,7 +329,13 @@ serve(async (req) => {
         
         if (error) {
           console.error("Error updating tokens:", error);
-          throw new Error(`Failed to update tokens: ${error.message}`);
+          return new Response(JSON.stringify({ 
+            error: "Failed to update tokens",
+            message: error.message 
+          }), {
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+            status: 500,
+          });
         }
         
         return new Response(JSON.stringify({ success: true }), {
@@ -275,6 +346,11 @@ serve(async (req) => {
       
       case 'disconnect': {
         console.log("Disconnecting Google Calendar");
+        // Create Supabase client for database operations
+        const supabaseUrl = Deno.env.get("SUPABASE_URL") as string;
+        const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") as string;
+        const supabaseAdmin = createClient(supabaseUrl, supabaseKey);
+        
         // Delete tokens from database
         const { error } = await supabaseAdmin
           .from('user_google_tokens')
@@ -283,7 +359,13 @@ serve(async (req) => {
         
         if (error) {
           console.error("Error disconnecting:", error);
-          throw new Error(`Failed to disconnect: ${error.message}`);
+          return new Response(JSON.stringify({ 
+            error: "Failed to disconnect",
+            message: error.message 
+          }), {
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+            status: 500,
+          });
         }
         
         return new Response(JSON.stringify({ success: true }), {
@@ -294,13 +376,22 @@ serve(async (req) => {
       
       default:
         console.error("Unknown action:", action);
-        throw new Error(`Unknown action: ${action}`);
+        return new Response(JSON.stringify({ 
+          error: "Unknown action", 
+          message: `Action "${action}" is not supported` 
+        }), {
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          status: 400,
+        });
     }
   } catch (error) {
     console.error('Error handling request:', error);
-    return new Response(JSON.stringify({ error: error.message }), {
+    return new Response(JSON.stringify({ 
+      error: "Internal server error", 
+      message: error.message 
+    }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      status: 400,
+      status: 500,
     });
   }
 });
