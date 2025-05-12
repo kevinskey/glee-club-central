@@ -8,6 +8,7 @@ import { MemberPortalDropdown } from "@/components/landing/header/MemberPortalDr
 import { HeaderUtils } from "@/components/landing/header/HeaderUtils";
 import { MobileMenuToggle } from "@/components/landing/header/MobileMenuToggle";
 import { MobileMenu } from "@/components/landing/header/MobileMenu";
+import { GlobalMetronome } from "@/components/ui/global-metronome";
 
 interface HeaderProps {
   initialShowNewsFeed?: boolean;
@@ -43,32 +44,37 @@ export function Header({ initialShowNewsFeed = true }: HeaderProps) {
   };
 
   return (
-    <header className="sticky top-0 z-50 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-      <div className="container px-2 flex h-14 sm:h-16 items-center justify-between">
-        <div className="flex items-center gap-1 sm:gap-2">
-          <Logo />
-          <Metronome />
+    <>
+      <header className="sticky top-0 z-50 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+        <div className="container px-2 flex h-14 sm:h-16 items-center justify-between">
+          <div className="flex items-center gap-1 sm:gap-2">
+            <Logo />
+            <Metronome />
+          </div>
+          
+          {/* Desktop navigation */}
+          <div className="hidden md:flex items-center gap-2 sm:gap-3">
+            <NavigationLinks />
+            <HeaderUtils />
+            <MemberPortalDropdown />
+          </div>
+          
+          {/* Mobile menu toggle */}
+          <div className="md:hidden flex items-center gap-1 sm:gap-2">
+            <HeaderUtils />
+            <MobileMenuToggle 
+              isOpen={mobileMenuOpen} 
+              onToggle={toggleMobileMenu} 
+            />
+          </div>
         </div>
         
-        {/* Desktop navigation */}
-        <div className="hidden md:flex items-center gap-2 sm:gap-3">
-          <NavigationLinks />
-          <HeaderUtils />
-          <MemberPortalDropdown />
-        </div>
-        
-        {/* Mobile menu toggle */}
-        <div className="md:hidden flex items-center gap-1 sm:gap-2">
-          <HeaderUtils />
-          <MobileMenuToggle 
-            isOpen={mobileMenuOpen} 
-            onToggle={toggleMobileMenu} 
-          />
-        </div>
-      </div>
+        {/* Mobile menu */}
+        {mobileMenuOpen && <MobileMenu onClose={() => setMobileMenuOpen(false)} />}
+      </header>
       
-      {/* Mobile menu */}
-      {mobileMenuOpen && <MobileMenu onClose={() => setMobileMenuOpen(false)} />}
-    </header>
+      {/* Global Metronome */}
+      <GlobalMetronome />
+    </>
   );
 }
