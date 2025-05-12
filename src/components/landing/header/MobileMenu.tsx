@@ -1,7 +1,6 @@
 
 import React from "react";
 import { Button } from "@/components/ui/button";
-import { Clock } from "@/components/ui/clock";
 import { useNavigate } from "react-router-dom";
 import {
   Tooltip,
@@ -27,21 +26,6 @@ export function MobileMenu({ onClose }: MobileMenuProps) {
   return (
     <div className="md:hidden fixed top-16 left-0 right-0 z-50 bg-background border-t border-border">
       <div className="container py-4 px-4 flex flex-col gap-2 max-h-[70vh] overflow-y-auto">
-        <div className="flex justify-center mb-2">
-          <TooltipProvider>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <div>
-                  <Clock />
-                </div>
-              </TooltipTrigger>
-              <TooltipContent>
-                <p>Current time</p>
-              </TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
-        </div>
-        
         {/* Mobile menu items */}
         <Button 
           variant="ghost" 

@@ -29,12 +29,14 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { EnhancedMetronome } from "@/components/ui/enhanced-metronome";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 export function Header() {
   const { profile, signOut } = useAuth();
   const { toggleSidebar } = useSidebar();
   const navigate = useNavigate();
   const [metronomeOpen, setMetronomeOpen] = useState(false);
+  const isMobile = useIsMobile();
   
   const handleSignOut = async () => {
     if (signOut) {

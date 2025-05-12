@@ -55,11 +55,10 @@ export const CalendarPageHeader = ({ onAddEventClick }: CalendarPageHeaderProps)
             </Tooltip>
           </TooltipProvider>
           <span>Performance <span className="text-glee-purple">Calendar</span></span>
-          <Metronome />
+          {!isMobile && <Metronome />}
         </h1>
         
         <div className="flex items-center gap-2 sm:gap-3 mt-3 sm:mt-0">
-          {/* Theme toggle removed */}
           <TooltipProvider>
             <Tooltip>
               <TooltipTrigger asChild>
