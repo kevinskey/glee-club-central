@@ -1,6 +1,8 @@
+
 import { CalendarEvent, EventType } from "@/hooks/useCalendarEvents";
 
-const API_KEY = 'AIzaSyBNlYH01_9Hc5S1J9vuFmu2nUqBZJNAXxs'; // Demo key for placeholder - would be replaced with a real key
+// Demo key for placeholder - would be replaced with a real key from Supabase secrets in production
+const API_KEY = 'AIzaSyBNlYH01_9Hc5S1J9vuFmu2nUqBZJNAXxs'; 
 const CALENDAR_ID = 'primary'; // Default to user's primary calendar
 
 interface GoogleCalendarEvent {
@@ -41,10 +43,20 @@ export const fetchGoogleCalendarEvents = async (
     url.searchParams.append('singleEvents', 'true');
     url.searchParams.append('orderBy', 'startTime');
     
+    console.log('Fetching Google Calendar events from:', url.toString());
     const response = await fetch(url.toString());
     
     if (!response.ok) {
-      throw new Error(`Google Calendar API error: ${response.statusText}`);
+      // Enhanced error handling with more details
+      let errorDetails = '';
+      try {
+        const errorData = await response.json();
+        errorDetails = JSON.stringify(errorData);
+      } catch {
+        errorDetails = response.statusText;
+      }
+      
+      throw new Error(`Google Calendar API error (${response.status}): ${errorDetails}`);
     }
     
     const data = await response.json();
