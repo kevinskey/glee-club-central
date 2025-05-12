@@ -17,8 +17,7 @@ import {
   User,
   Settings,
   LogOut,
-  Clock,
-  ChevronDown
+  Clock
 } from "lucide-react";
 import { useSidebar } from "@/components/ui/sidebar";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
@@ -64,84 +63,42 @@ export function Header() {
   return (
     <header className="bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 sticky top-0 z-50 w-full border-b hidden md:block">
       <div className="container flex h-16 items-center justify-between px-4">
-        <div className="flex items-center gap-2">
-          {/* Left Nav Dropdown Button */}
-          <DropdownMenuProvider>
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button 
-                  variant="ghost" 
-                  size="icon" 
-                  className="md:flex-shrink-0" 
-                >
-                  <Menu className="h-5 w-5 text-foreground" />
-                  <span className="sr-only">Navigation menu</span>
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="start" className="w-56 bg-popover">
-                <DropdownMenuLabel>Navigation</DropdownMenuLabel>
-                <DropdownMenuSeparator />
-                
-                <DropdownMenuItem onClick={toggleSidebar}>
-                  Toggle Sidebar
-                </DropdownMenuItem>
-                
-                <DropdownMenuItem onClick={() => navigate("/")}>
-                  Home Page
-                </DropdownMenuItem>
-                
-                <DropdownMenuItem onClick={() => navigate("/about")}>
-                  About
-                </DropdownMenuItem>
-                
-                <DropdownMenuSeparator />
-                
-                <DropdownMenuItem onClick={() => navigate("/dashboard")}>
-                  Dashboard
-                </DropdownMenuItem>
-                
-                <DropdownMenuItem onClick={() => navigate("/dashboard/profile")}>
-                  My Profile
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          </DropdownMenuProvider>
+        {/* Left side: Logo, title, metronome */}
+        <div className="flex items-center gap-4">
+          <Link to="/" className="font-bold flex items-center gap-2 hover:text-primary transition-colors">
+            <Icons.logo className="h-6 w-auto" />
+            <span className="text-base text-foreground">Glee World</span>
+          </Link>
           
-          <div className="flex items-center">
-            <Link to="/" className="font-bold flex items-center gap-2 hover:text-primary transition-colors">
-              <Icons.logo className="h-6 w-auto" />
-              <span className="text-base text-foreground">Glee World</span>
-            </Link>
-            
-            {/* Metronome Icon */}
-            <Dialog open={metronomeOpen} onOpenChange={setMetronomeOpen}>
-              <DialogTrigger asChild>
-                <Button variant="ghost" size="icon" className="h-8 w-8 ml-1" onClick={handleOpenMetronome}>
-                  <Clock className="h-4 w-4 text-foreground" />
-                  <span className="sr-only">Open metronome</span>
-                </Button>
-              </DialogTrigger>
-              <DialogContent className="sm:max-w-md">
-                <DialogHeader>
-                  <DialogTitle>Metronome</DialogTitle>
-                  <DialogDescription>
-                    Use the metronome to practice at different tempos and time signatures.
-                  </DialogDescription>
-                </DialogHeader>
-                <EnhancedMetronome showControls={true} size="md" audioContextRef={audioContextRef} />
-              </DialogContent>
-            </Dialog>
-          </div>
+          {/* Metronome Icon */}
+          <Dialog open={metronomeOpen} onOpenChange={setMetronomeOpen}>
+            <DialogTrigger asChild>
+              <Button variant="ghost" size="icon" className="h-9 w-9" onClick={handleOpenMetronome}>
+                <Clock className="h-5 w-5 text-foreground" />
+                <span className="sr-only">Open metronome</span>
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="sm:max-w-md">
+              <DialogHeader>
+                <DialogTitle>Metronome</DialogTitle>
+                <DialogDescription>
+                  Use the metronome to practice at different tempos and time signatures.
+                </DialogDescription>
+              </DialogHeader>
+              <EnhancedMetronome showControls={true} size="md" audioContextRef={audioContextRef} />
+            </DialogContent>
+          </Dialog>
         </div>
 
-        <nav className="flex items-center gap-2 sm:gap-4">
+        {/* Right side: Theme toggle and user dropdown */}
+        <div className="flex items-center gap-3">
           <ThemeToggle />
           
           <DropdownMenuProvider>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" size="icon">
-                  <User className="h-5 w-5 text-foreground" />
+                  <Menu className="h-5 w-5 text-foreground" />
                   <span className="sr-only">User Menu</span>
                 </Button>
               </DropdownMenuTrigger>
@@ -166,6 +123,11 @@ export function Header() {
                   <span>Home Page</span>
                 </DropdownMenuItem>
                 
+                <DropdownMenuItem onClick={toggleSidebar}>
+                  <Menu className="h-4 w-4 mr-2" />
+                  <span>Toggle Sidebar</span>
+                </DropdownMenuItem>
+                
                 <DropdownMenuSeparator />
                 <DropdownMenuItem 
                   onClick={handleSignOut}
@@ -177,7 +139,7 @@ export function Header() {
               </DropdownMenuContent>
             </DropdownMenu>
           </DropdownMenuProvider>
-        </nav>
+        </div>
       </div>
     </header>
   );

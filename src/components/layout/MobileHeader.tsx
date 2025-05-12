@@ -7,7 +7,7 @@ import { useIsMobile } from "@/hooks/use-mobile";
 import { useAuth } from "@/contexts/AuthContext";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription } from "@/components/ui/dialog";
 import { EnhancedMetronome } from "@/components/ui/enhanced-metronome";
-import { Clock, Menu, X, ChevronDown } from "lucide-react";
+import { Clock, Menu, X } from "lucide-react";
 import { MobileMenu } from "@/components/landing/header/MobileMenu";
 import { useSidebar } from "@/components/ui/sidebar";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
@@ -79,9 +79,40 @@ export function MobileHeader() {
     <>
       <header className="md:hidden sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
         <div className="container px-4 flex h-14 items-center justify-between">
-          {/* Left side: Menu toggle and logo */}
+          {/* Left side: Logo and metronome */}
+          <div className="flex items-center gap-3">
+            <Link to="/" className="font-bold flex items-center hover:text-primary transition-colors">
+              <Icons.logo className="h-6 w-auto" />
+              <span className="text-base ml-2 text-foreground">Glee World</span>
+            </Link>
+            
+            <Dialog open={metronomeOpen} onOpenChange={setMetronomeOpen}>
+              <DialogTrigger asChild>
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  className="flex items-center gap-1 px-2 h-8"
+                  onClick={handleOpenMetronome}
+                >
+                  <Clock className="h-4 w-4 text-foreground" />
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="sm:max-w-md">
+                <DialogHeader>
+                  <DialogTitle>Metronome</DialogTitle>
+                  <DialogDescription>
+                    Use the metronome to practice at different tempos and time signatures.
+                  </DialogDescription>
+                </DialogHeader>
+                <EnhancedMetronome showControls={true} size="md" audioContextRef={audioContextRef} />
+              </DialogContent>
+            </Dialog>
+          </div>
+          
+          {/* Right side: Theme toggle and dropdown menu */}
           <div className="flex items-center gap-2">
-            {/* Left Nav Dropdown Button */}
+            <ThemeToggle />
+            
             <DropdownMenuProvider>
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
@@ -94,7 +125,7 @@ export function MobileHeader() {
                     <span className="sr-only">Navigation menu</span>
                   </Button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent align="start" className="w-56 bg-popover">
+                <DropdownMenuContent align="end" className="w-56 bg-popover">
                   <DropdownMenuLabel>Navigation</DropdownMenuLabel>
                   <DropdownMenuSeparator />
                   
@@ -119,9 +150,18 @@ export function MobileHeader() {
                   )}
                   
                   {isAuthenticated ? (
-                    <DropdownMenuItem onClick={() => navigate("/dashboard")}>
-                      Dashboard
-                    </DropdownMenuItem>
+                    <>
+                      <DropdownMenuItem onClick={() => navigate("/dashboard")}>
+                        Dashboard
+                      </DropdownMenuItem>
+                      <DropdownMenuItem onClick={() => navigate("/dashboard/profile")}>
+                        Profile
+                      </DropdownMenuItem>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuItem onClick={handleSignOut}>
+                        Sign Out
+                      </DropdownMenuItem>
+                    </>
                   ) : (
                     <DropdownMenuItem onClick={() => navigate("/login")}>
                       Member Login
@@ -136,68 +176,6 @@ export function MobileHeader() {
                 </DropdownMenuContent>
               </DropdownMenu>
             </DropdownMenuProvider>
-            
-            <Link to="/" className="font-bold flex items-center hover:text-primary transition-colors">
-              <Icons.logo className="h-6 w-auto" />
-              <span className="text-base ml-2 text-foreground">Glee World</span>
-            </Link>
-          </div>
-          
-          {/* Right side: Theme toggle, Metronome and User dropdown */}
-          <div className="flex items-center gap-2">
-            <ThemeToggle />
-            
-            <Dialog open={metronomeOpen} onOpenChange={setMetronomeOpen}>
-              <DialogTrigger asChild>
-                <Button 
-                  variant="ghost" 
-                  size="sm" 
-                  className="flex items-center gap-1 px-2 h-8"
-                  onClick={handleOpenMetronome}
-                >
-                  <Clock className="h-4 w-4 text-foreground" />
-                </Button>
-              </DialogTrigger>
-              <DialogContent className="sm:max-w-md">
-                <DialogHeader>
-                  <DialogTitle>Metronome</DialogTitle>
-                  <DialogDescription>
-                    Use the metronome to practice at different tempos and time signatures.
-                  </DialogDescription>
-                </DialogHeader>
-                <EnhancedMetronome showControls={true} size="md" audioContextRef={audioContextRef} />
-              </DialogContent>
-            </Dialog>
-            
-            {isAuthenticated && (
-              <DropdownMenuProvider>
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button 
-                      variant="outline" 
-                      size="sm" 
-                      className="h-8 px-2 text-xs"
-                    >
-                      Menu
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end" className="w-48 bg-popover">
-                    <DropdownMenuLabel>Options</DropdownMenuLabel>
-                    <DropdownMenuSeparator />
-                    <DropdownMenuItem onClick={() => navigate("/dashboard")}>
-                      Dashboard
-                    </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => navigate("/dashboard/profile")}>
-                      Profile
-                    </DropdownMenuItem>
-                    <DropdownMenuSeparator />
-                    <DropdownMenuItem onClick={handleSignOut}>
-                      Sign Out
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              </DropdownMenuProvider>
-            )}
           </div>
         </div>
       </header>

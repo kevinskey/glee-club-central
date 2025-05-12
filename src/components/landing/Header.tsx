@@ -2,10 +2,8 @@
 import React, { useState, useEffect } from "react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Logo } from "@/components/landing/header/Logo";
-import { NavigationLinks } from "@/components/landing/header/NavigationLinks";
 import { MemberPortalDropdown } from "@/components/landing/header/MemberPortalDropdown";
-import { HeaderUtils } from "@/components/landing/header/HeaderUtils";
-import { Clock, Menu, ChevronDown } from "lucide-react";
+import { Clock, Menu } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription } from "@/components/ui/dialog";
 import { EnhancedMetronome } from "@/components/ui/enhanced-metronome";
@@ -76,8 +74,39 @@ export function Header({ initialShowNewsFeed = true }: HeaderProps) {
   return (
     <header className="sticky top-0 z-50 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container px-2 flex h-16 items-center justify-between">
-        <div className="flex items-center gap-2">
-          {/* Left Nav Dropdown Button */}
+        {/* Left side: Logo, Title, Metronome */}
+        <div className="flex items-center gap-4">
+          <Logo />
+          
+          {/* Metronome Icon */}
+          <Dialog open={metronomeOpen} onOpenChange={setMetronomeOpen}>
+            <DialogTrigger asChild>
+              <Button 
+                variant="ghost" 
+                size="icon" 
+                className="h-10 w-10" 
+                onClick={handleOpenMetronome}
+              >
+                <Clock className="h-6 w-6 text-foreground" />
+                <span className="sr-only">Open metronome</span>
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="sm:max-w-md">
+              <DialogHeader>
+                <DialogTitle>Metronome</DialogTitle>
+                <DialogDescription>
+                  Use the metronome to practice at different tempos and time signatures.
+                </DialogDescription>
+              </DialogHeader>
+              <EnhancedMetronome showControls={true} size="md" audioContextRef={audioContextRef} />
+            </DialogContent>
+          </Dialog>
+        </div>
+        
+        {/* Right side: Theme toggle and navigation dropdown */}
+        <div className="flex items-center gap-3">
+          <ThemeToggle />
+          
           <DropdownMenuProvider>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
@@ -90,7 +119,7 @@ export function Header({ initialShowNewsFeed = true }: HeaderProps) {
                   <span className="sr-only">Navigation menu</span>
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="start" className="w-56 bg-popover">
+              <DropdownMenuContent align="end" className="w-56 bg-popover">
                 <DropdownMenuLabel>Navigation</DropdownMenuLabel>
                 <DropdownMenuSeparator />
                 
@@ -126,43 +155,6 @@ export function Header({ initialShowNewsFeed = true }: HeaderProps) {
               </DropdownMenuContent>
             </DropdownMenu>
           </DropdownMenuProvider>
-          
-          <Logo />
-          
-          {/* Metronome Icon (on left) */}
-          <Dialog open={metronomeOpen} onOpenChange={setMetronomeOpen}>
-            <DialogTrigger asChild>
-              <Button 
-                variant="ghost" 
-                size="icon" 
-                className="h-10 w-10" 
-                onClick={handleOpenMetronome}
-              >
-                <Clock className="h-8 w-8 text-foreground" />
-                <span className="sr-only">Open metronome</span>
-              </Button>
-            </DialogTrigger>
-            <DialogContent className="sm:max-w-md">
-              <DialogHeader>
-                <DialogTitle>Metronome</DialogTitle>
-                <DialogDescription>
-                  Use the metronome to practice at different tempos and time signatures.
-                </DialogDescription>
-              </DialogHeader>
-              <EnhancedMetronome showControls={true} size="md" audioContextRef={audioContextRef} />
-            </DialogContent>
-          </Dialog>
-        </div>
-        
-        {/* Center the navigation links */}
-        <div className="hidden md:flex">
-          <NavigationLinks className="flex" />
-        </div>
-        
-        {/* Right side: Theme toggle and member portal */}
-        <div className="flex items-center gap-3">
-          <ThemeToggle />
-          <MemberPortalDropdown />
         </div>
       </div>
     </header>
