@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useYouTubeData } from '@/hooks/useYouTubeData';
 import { Header } from "@/components/landing/Header";
@@ -6,7 +5,6 @@ import { Footer } from "@/components/landing/Footer";
 import { PageHeader } from '@/components/ui/page-header';
 import { Card } from '@/components/ui/card';
 import { AspectRatio } from '@/components/ui/aspect-ratio';
-import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Spinner } from '@/components/ui/spinner';
 import { YouTubeVideo } from '@/types/youtube';
@@ -160,7 +158,7 @@ export default function YoutubeVideosPage() {
             )}
           </div>
           <div className="p-4">
-            <Button variant="outline" onClick={() => setSelectedVideo(null)} className="ml-auto">Close</Button>
+            <button onClick={() => setSelectedVideo(null)} className="ml-auto">Close</button>
           </div>
         </DialogContent>
       </Dialog>

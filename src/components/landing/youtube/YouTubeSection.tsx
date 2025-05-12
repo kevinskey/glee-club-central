@@ -1,7 +1,6 @@
 
 import React, { useState } from 'react';
 import { useYouTubeData } from '@/hooks/useYouTubeData';
-import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { AspectRatio } from '@/components/ui/aspect-ratio';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -221,7 +220,7 @@ export function YouTubeSection() {
             )}
           </div>
           <div className="p-4 flex justify-end">
-            <Button variant="outline" onClick={handleCloseDialog}>Close</Button>
+            <button onClick={handleCloseDialog}>Close</button>
           </div>
         </DialogContent>
       </Dialog>
