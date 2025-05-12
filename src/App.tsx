@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Outlet } from 'react-router-dom';
+import { BrowserRouter } from 'react-router-dom';
 import { Toaster } from 'sonner';
 import { AuthProvider } from './contexts/AuthContext';
 import { RolePermissionProvider } from './contexts/RolePermissionContext';
@@ -12,8 +12,10 @@ function App() {
     <ThemeProvider>
       <AuthProvider>
         <RolePermissionProvider>
-          <AppRoutes />
-          <Toaster position="top-right" />
+          <BrowserRouter>
+            <AppRoutes />
+            <Toaster position="top-right" />
+          </BrowserRouter>
         </RolePermissionProvider>
       </AuthProvider>
     </ThemeProvider>
