@@ -39,6 +39,7 @@ import RecordingsPage from "./pages/RecordingsPage";
 import SubmitRecordingPage from "./pages/recordings/SubmitRecordingPage";
 import SocialPage from "./pages/SocialPage";
 import PrivacyPolicyPage from "./pages/PrivacyPolicyPage";
+import TermsOfServicePage from "./pages/TermsOfServicePage";
 
 export const router = createBrowserRouter([
   {
@@ -80,6 +81,10 @@ export const router = createBrowserRouter([
       {
         path: "/privacy",
         element: <PrivacyPolicyPage />,
+      },
+      {
+        path: "/terms",
+        element: <TermsOfServicePage />,
       },
       {
         path: "/recordings",

@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Logo } from "@/components/landing/header/Logo";
@@ -134,6 +135,10 @@ export function Header({ initialShowNewsFeed = true }: HeaderProps) {
                   Privacy Policy
                 </DropdownMenuItem>
                 
+                <DropdownMenuItem onClick={() => navigate("/terms")}>
+                  Terms of Service
+                </DropdownMenuItem>
+                
                 <DropdownMenuItem onClick={() => navigate("/press-kit")}>
                   Press Kit
                 </DropdownMenuItem>
@@ -162,4 +167,4 @@ export function Header({ initialShowNewsFeed = true }: HeaderProps) {
       </div>
     </header>
   );
-};
+}

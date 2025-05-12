@@ -59,6 +59,16 @@ export function NavigationLinks({ className, onLinkClick }: NavigationLinksProps
           </Link>
         </NavigationMenuItem>
         
+        <NavigationMenuItem>
+          <Link
+            to="/terms"
+            className="text-lg font-medium text-muted-foreground transition-colors hover:text-foreground"
+            onClick={handleLinkClick}
+          >
+            Terms
+          </Link>
+        </NavigationMenuItem>
+        
         {!isAuthenticated && (
           <NavigationMenuItem>
             <Link
