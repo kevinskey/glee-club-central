@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useRef } from "react";
 import { useParams, useNavigate, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -12,6 +11,7 @@ import { useIsMobile } from "@/hooks/use-mobile";
 import { Metronome } from "@/components/ui/metronome";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Label } from "@/components/ui/label";
+import { toast } from "sonner";
 
 interface SheetMusic {
   id: string;
@@ -166,6 +166,17 @@ export default function ViewSheetMusicPage() {
     setShowDetails(false);
   };
 
+  // Toggle metronome with safety
+  const toggleMetronome = () => {
+    // If turning on, inform user about sound
+    if (!isMetronomeActive) {
+      toast.info("Starting metronome - ensure your volume is on", {
+        duration: 2000,
+      });
+    }
+    setIsMetronomeActive(!isMetronomeActive);
+  };
+
   return (
     <div className={`space-y-4 ${isFullscreenMode ? 'fixed inset-0 z-50 bg-background p-0' : ''}`}>
       {!isFullscreenMode && (
@@ -292,7 +303,7 @@ export default function ViewSheetMusicPage() {
                       <Button
                         variant={isMetronomeActive ? "destructive" : "outline"}
                         size="sm"
-                        onClick={() => setIsMetronomeActive(!isMetronomeActive)}
+                        onClick={toggleMetronome}
                         className="w-full"
                       >
                         <Music className="h-4 w-4 mr-2" />
@@ -300,7 +311,7 @@ export default function ViewSheetMusicPage() {
                       </Button>
                       
                       {/* Hidden metronome component that plays when active */}
-                      {isMetronomeActive && <Metronome bpm={bpm} isPlaying={isMetronomeActive} />}
+                      <Metronome bpm={bpm} isPlaying={isMetronomeActive} />
                     </div>
                   </TabsContent>
                   

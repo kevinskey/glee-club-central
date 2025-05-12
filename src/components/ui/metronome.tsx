@@ -1,9 +1,11 @@
+
 import { useState, useEffect, useRef } from "react";
 import { Music, Volume2 } from "lucide-react";
 import { Slider } from "@/components/ui/slider";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { toast } from "sonner";
 
 interface MetronomeProps {
   isPlaying?: boolean;
@@ -23,14 +25,10 @@ export function Metronome({
   const [timeSignature, setTimeSignature] = useState(propTimeSignature);
   const [volume, setVolume] = useState(0.5);
   const [soundType, setSoundType] = useState<"click" | "beep" | "woodblock">("click");
+  const [audioLoaded, setAudioLoaded] = useState(false);
   
-  // Audio context references
   const audioContextRef = useRef<AudioContext | null>(null);
-  const clickBufferRef = useRef<AudioBuffer | null>(null);
-  const beepBufferRef = useRef<AudioBuffer | null>(null);
-  const woodblockBufferRef = useRef<AudioBuffer | null>(null);
-  
-  // Timer ref
+  const audioBuffersRef = useRef<{[key: string]: AudioBuffer}>({});
   const timerRef = useRef<number | null>(null);
   const beatCountRef = useRef(0);
   
@@ -38,57 +36,92 @@ export function Metronome({
   const getBeatsPerMeasure = () => {
     return parseInt(timeSignature.split('/')[0]);
   };
-  
-  // Initialize the Web Audio API
-  useEffect(() => {
-    if (typeof window !== 'undefined') {
-      try {
-        // Create audio context
-        const AudioContext = window.AudioContext || (window as any).webkitAudioContext;
-        if (!audioContextRef.current) {
-          audioContextRef.current = new AudioContext();
-        }
+
+  // Initialize audio context with safety checks for different browsers
+  const initAudioContext = () => {
+    if (typeof window === 'undefined') return null;
+    
+    try {
+      window.AudioContext = window.AudioContext || (window as any).webkitAudioContext;
+      if (!audioContextRef.current) {
+        audioContextRef.current = new AudioContext();
         
-        // Load sound buffers from the base64 encoded files in public folder
-        const loadSounds = async () => {
+        // iOS Safari requires user interaction to start audio context
+        if (audioContextRef.current.state === 'suspended') {
+          console.log('Audio context is suspended. Attempting to resume on user interaction.');
+        }
+      }
+      return audioContextRef.current;
+    } catch (error) {
+      console.error("Failed to create audio context:", error);
+      toast.error("Audio system initialization failed. Please try a different browser.");
+      return null;
+    }
+  };
+
+  // Load sound buffers once on component mount
+  useEffect(() => {
+    let isMounted = true;
+    const audioContext = initAudioContext();
+    
+    if (!audioContext) return;
+
+    const loadSoundsFromBase64 = async () => {
+      try {
+        // Fallback to static path loading if base64 fails
+        const loadSoundFile = async (path: string) => {
           try {
-            // Get the audio data directly from the data URIs in the public folder
-            const clickResponse = await fetch('/sounds/metronome-click.mp3');
-            const clickArrayBuffer = await clickResponse.arrayBuffer();
-            clickBufferRef.current = await audioContextRef.current!.decodeAudioData(clickArrayBuffer);
+            // First try with fetch to handle both relative and data URLs
+            const response = await fetch(path);
+            if (!response.ok) throw new Error(`Failed to fetch ${path}`);
             
-            const beepResponse = await fetch('/sounds/metronome-beep.mp3');
-            const beepArrayBuffer = await beepResponse.arrayBuffer();
-            beepBufferRef.current = await audioContextRef.current!.decodeAudioData(beepArrayBuffer);
+            const arrayBuffer = await response.arrayBuffer();
+            if (!arrayBuffer) throw new Error(`Invalid audio data from ${path}`);
             
-            const woodblockResponse = await fetch('/sounds/metronome-woodblock.mp3');
-            const woodblockArrayBuffer = await woodblockResponse.arrayBuffer();
-            woodblockBufferRef.current = await audioContextRef.current!.decodeAudioData(woodblockArrayBuffer);
-            
-            console.log("All metronome sounds loaded successfully");
+            return await audioContext.decodeAudioData(arrayBuffer);
           } catch (error) {
-            console.error("Failed to load metronome sounds:", error);
+            console.error(`Failed to load sound from ${path}:`, error);
+            toast.error("Failed to load audio files. Please refresh the page.");
+            throw error;
           }
         };
+
+        // Load all sound files
+        const [clickBuffer, beepBuffer, woodblockBuffer] = await Promise.all([
+          loadSoundFile('/sounds/metronome-click.mp3'),
+          loadSoundFile('/sounds/metronome-beep.mp3'),
+          loadSoundFile('/sounds/metronome-woodblock.mp3')
+        ]);
         
-        loadSounds();
+        if (!isMounted) return;
+
+        audioBuffersRef.current = {
+          click: clickBuffer,
+          beep: beepBuffer,
+          woodblock: woodblockBuffer
+        };
+        
+        setAudioLoaded(true);
+        console.log("✅ All metronome sounds loaded successfully");
       } catch (error) {
-        console.error("Web Audio API not supported:", error);
+        console.error("Failed to load metronome sounds:", error);
+        if (isMounted) {
+          toast.error("Failed to load audio files. Please refresh the page.");
+        }
       }
-    }
+    };
     
+    loadSoundsFromBase64();
+    
+    // Cleanup function
     return () => {
-      // Clean up interval when component unmounts
+      isMounted = false;
       if (timerRef.current !== null) {
         clearInterval(timerRef.current);
       }
-      // Close audio context
-      if (audioContextRef.current && audioContextRef.current.state !== 'closed') {
-        audioContextRef.current.close();
-      }
     };
   }, []);
-  
+
   // Update isPlaying state when prop changes
   useEffect(() => {
     setIsPlaying(propIsPlaying);
@@ -99,29 +132,43 @@ export function Metronome({
     setBpm(propBpm);
   }, [propBpm]);
 
-  // Play a sound using Web Audio API
-  const playSound = (buffer: AudioBuffer | null, isAccent: boolean = false) => {
-    if (!audioContextRef.current || !buffer) return;
+  // Play a sound with Web Audio API
+  const playSound = (soundName: string, isAccent: boolean = false) => {
+    const audioContext = audioContextRef.current;
+    if (!audioContext || audioContext.state !== 'running') {
+      // Try to resume the context if it's suspended (mobile browser policy)
+      if (audioContext && audioContext.state === 'suspended') {
+        audioContext.resume().then(() => {
+          // Retry playing after resuming
+          setTimeout(() => playSound(soundName, isAccent), 10);
+        }).catch(err => {
+          console.error("Failed to resume audio context:", err);
+        });
+        return;
+      }
+      return;
+    }
+    
+    const buffer = audioBuffersRef.current[soundName || 'click'];
+    if (!buffer) {
+      console.error(`Sound buffer not found for: ${soundName}`);
+      return;
+    }
     
     try {
-      // Resume audio context if it's suspended (needed for Safari/Chrome)
-      if (audioContextRef.current.state === 'suspended') {
-        audioContextRef.current.resume();
-      }
-      
-      // Create source from buffer
-      const source = audioContextRef.current.createBufferSource();
+      // Create a new source for each sound (required for Web Audio API)
+      const source = audioContext.createBufferSource();
       source.buffer = buffer;
       
-      // Create gain node for volume control
-      const gainNode = audioContextRef.current.createGain();
-      gainNode.gain.value = isAccent ? volume * 1.3 : volume; // Slightly louder for accent
+      // Create gain node for volume
+      const gainNode = audioContext.createGain();
+      gainNode.gain.value = isAccent ? Math.min(volume * 1.5, 1.0) : volume;
       
-      // Connect nodes
+      // Connect the nodes
       source.connect(gainNode);
-      gainNode.connect(audioContextRef.current.destination);
+      gainNode.connect(audioContext.destination);
       
-      // Play the sound
+      // Start the sound
       source.start(0);
     } catch (error) {
       console.error("Error playing sound:", error);
@@ -130,7 +177,14 @@ export function Metronome({
 
   // Start or stop metronome based on isPlaying state
   useEffect(() => {
+    const audioContext = audioContextRef.current;
+    
     const startMetronome = () => {
+      if (!audioLoaded || !audioContext) {
+        console.log("Audio not ready yet, waiting...");
+        return;
+      }
+      
       if (timerRef.current !== null) {
         clearInterval(timerRef.current);
       }
@@ -138,39 +192,25 @@ export function Metronome({
       beatCountRef.current = 0;
       const intervalMs = (60 / bpm) * 1000;
       
-      // Resume audio context if needed (especially important for iOS/Safari)
-      if (audioContextRef.current && audioContextRef.current.state === 'suspended') {
-        audioContextRef.current.resume();
+      // Resume audio context if needed (browser autoplay policy)
+      if (audioContext.state === 'suspended') {
+        audioContext.resume().catch(err => {
+          console.error("Failed to resume audio context:", err);
+        });
       }
+      
+      console.log("Starting metronome at", bpm, "BPM");
       
       timerRef.current = window.setInterval(() => {
         const beatsPerMeasure = getBeatsPerMeasure();
         
-        // Get the appropriate sound buffer
-        let buffer;
+        // First beat is accented
         const isFirstBeat = beatCountRef.current === 0;
         
         if (isFirstBeat) {
-          // First beat is always the click (accent) sound
-          buffer = clickBufferRef.current;
-          playSound(buffer, true); // Play as accent
+          playSound('click', true);
         } else {
-          // Other beats use the selected sound type
-          switch (soundType) {
-            case "click":
-              buffer = clickBufferRef.current;
-              break;
-            case "beep":
-              buffer = beepBufferRef.current;
-              break;
-            case "woodblock":
-              buffer = woodblockBufferRef.current;
-              break;
-            default:
-              buffer = clickBufferRef.current;
-          }
-          
-          playSound(buffer);
+          playSound(soundType, false);
         }
         
         // Update beat counter
@@ -190,11 +230,43 @@ export function Metronome({
         clearInterval(timerRef.current);
       }
     };
-  }, [isPlaying, bpm, timeSignature, soundType, volume]);
+  }, [isPlaying, bpm, timeSignature, soundType, volume, audioLoaded]);
+  
+  // Cleanup audio context on unmount
+  useEffect(() => {
+    return () => {
+      if (audioContextRef.current && audioContextRef.current.state !== 'closed') {
+        audioContextRef.current.close().catch(console.error);
+      }
+    };
+  }, []);
   
   if (!showControls) {
     return null; // Don't render UI if controls are hidden
   }
+
+  // Handle toggle click with user interaction for mobile
+  const handleToggleClick = () => {
+    // Initialize or resume audio context on user interaction
+    const audioContext = audioContextRef.current || initAudioContext();
+    
+    if (audioContext && audioContext.state === 'suspended') {
+      audioContext.resume().catch(err => {
+        console.error("Failed to resume audio context:", err);
+      });
+    }
+    
+    // Play a silent sound to unlock audio on iOS
+    if (!isPlaying && audioContext) {
+      const silentBuffer = audioContext.createBuffer(1, 1, 22050);
+      const source = audioContext.createBufferSource();
+      source.buffer = silentBuffer;
+      source.connect(audioContext.destination);
+      source.start(0);
+    }
+    
+    setIsPlaying(!isPlaying);
+  };
 
   return (
     <Card className="p-4 w-full">
@@ -207,15 +279,10 @@ export function Metronome({
           <Button
             size="sm"
             variant={isPlaying ? "destructive" : "default"}
-            onClick={() => {
-              // Resume audio context when user interacts (needed for autoplay policies)
-              if (audioContextRef.current && audioContextRef.current.state === 'suspended') {
-                audioContextRef.current.resume();
-              }
-              setIsPlaying(!isPlaying);
-            }}
+            onClick={handleToggleClick}
+            disabled={!audioLoaded}
           >
-            {isPlaying ? "Stop" : "Start"}
+            {!audioLoaded ? "Loading..." : isPlaying ? "Stop" : "Start"}
           </Button>
         </div>
         
