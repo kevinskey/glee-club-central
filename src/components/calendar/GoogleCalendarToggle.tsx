@@ -1,8 +1,13 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Switch } from "@/components/ui/switch";
-import { ExternalLink, Calendar, Globe, Key, CalendarClock, AlertCircle } from "lucide-react";
+import { ExternalLink, Calendar, Globe, Key, CalendarClock, AlertCircle, Check, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { getViewGoogleCalendarUrl } from "@/services/googleCalendar";
+import { 
+  checkGoogleCalendarConnection, 
+  disconnectGoogleCalendar, 
+  getViewGoogleCalendarUrl,
+  startGoogleOAuth
+} from "@/services/googleCalendar";
 import { toast } from "sonner";
 import { Badge } from '@/components/ui/badge';
 import { 
@@ -14,7 +19,6 @@ import {
   DialogTrigger,
   DialogFooter
 } from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { 
   Select,
@@ -26,6 +30,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
+import { useQueryClient } from '@tanstack/react-query';
 
 interface GoogleCalendarToggleProps {
   useGoogleCalendar: boolean;
@@ -44,21 +49,36 @@ export const GoogleCalendarToggle = ({
   daysAhead = 90,
   onDaysAheadChange
 }: GoogleCalendarToggleProps) => {
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isDateRangeOpen, setIsDateRangeOpen] = useState(false);
-  const [apiKey, setApiKey] = useState("AIzaSyBjWOPNeIScJJtvWGs19IfnD_zGnNyY9hU");
-  
-  const handleToggle = () => {
+  const [isConnectDialogOpen, setIsConnectDialogOpen] = useState(false);
+  const [isConnected, setIsConnected] = useState<boolean | null>(null);
+  const [isConnecting, setIsConnecting] = useState(false);
+  const queryClient = useQueryClient();
+
+  // Check if user has connected their Google Calendar
+  useEffect(() => {
+    const checkConnection = async () => {
+      const connected = await checkGoogleCalendarConnection();
+      setIsConnected(connected);
+    };
+    
+    checkConnection();
+  }, []);
+
+  const handleToggle = async () => {
+    // If turning on Google Calendar but not connected yet
+    if (!useGoogleCalendar && !isConnected) {
+      setIsConnectDialogOpen(true);
+      return;
+    }
+    
+    // Otherwise just toggle the setting
     toggleGoogleCalendar();
     toast.info(
       useGoogleCalendar 
         ? "Switching to local calendar" 
         : "Switching to Google Calendar"
     );
-  };
-
-  const handleKeyConfigClick = () => {
-    setIsDialogOpen(true);
   };
 
   const handleDaysChange = (value: string) => {
@@ -69,20 +89,82 @@ export const GoogleCalendarToggle = ({
     }
   };
 
-  const handleSaveKey = () => {
-    // In a real app, we would save this key securely
-    toast.success("API Key saved successfully!");
-    setIsDialogOpen(false);
-    
-    // Note: In a production app, we would store this in Supabase secrets
-    // and reload the calendar data
-    toast.info("Using your Google Calendar API key", {
-      duration: 5000,
-    });
+  const handleConnect = async () => {
+    try {
+      setIsConnecting(true);
+      const authUrl = await startGoogleOAuth();
+      
+      if (!authUrl) {
+        toast.error("Failed to start Google Calendar authentication");
+        return;
+      }
+      
+      // Open the auth URL in a new window/tab
+      window.open(authUrl, "_blank");
+      
+      toast.info(
+        "Please complete Google authentication in the new browser tab. Return here when finished.",
+        { duration: 8000 }
+      );
+      
+      // We'll check the connection status periodically
+      const checkInterval = setInterval(async () => {
+        const connected = await checkGoogleCalendarConnection();
+        if (connected) {
+          setIsConnected(true);
+          clearInterval(checkInterval);
+          setIsConnecting(false);
+          setIsConnectDialogOpen(false);
+          
+          // Turn on Google Calendar integration
+          if (!useGoogleCalendar) {
+            toggleGoogleCalendar();
+          }
+          
+          // Invalidate queries to refresh data
+          queryClient.invalidateQueries({ queryKey: ['calendar'] });
+          
+          toast.success("Successfully connected to Google Calendar!");
+        }
+      }, 5000); // Check every 5 seconds
+      
+      // Stop checking after 2 minutes (user might have abandoned the flow)
+      setTimeout(() => {
+        clearInterval(checkInterval);
+        if (!isConnected) {
+          setIsConnecting(false);
+          toast.error("Connection timeout. Please try again.");
+        }
+      }, 120000);
+      
+    } catch (error) {
+      console.error("Error connecting to Google Calendar:", error);
+      toast.error("Failed to connect to Google Calendar");
+      setIsConnecting(false);
+    }
   };
 
-  // Display a different message when in demo mode
-  const isDemoMode = false; // Set to false since we're using a real API key now
+  const handleDisconnect = async () => {
+    try {
+      const success = await disconnectGoogleCalendar();
+      
+      if (success) {
+        setIsConnected(false);
+        
+        // If currently using Google Calendar, switch back to local
+        if (useGoogleCalendar) {
+          toggleGoogleCalendar();
+        }
+        
+        toast.success("Disconnected from Google Calendar");
+      } else {
+        toast.error("Failed to disconnect from Google Calendar");
+      }
+    } catch (error) {
+      console.error("Error disconnecting from Google Calendar:", error);
+      toast.error("Failed to disconnect from Google Calendar");
+    }
+  };
 
   if (compact) {
     return (
@@ -110,9 +192,9 @@ export const GoogleCalendarToggle = ({
           </TooltipTrigger>
           <TooltipContent side="bottom">
             {useGoogleCalendar ? 
-              (isDemoMode ? 
-                "Using Google Calendar Demo Mode (click to switch to local)" : 
-                "Using Google Calendar (click to switch to local)"
+              (isConnected ? 
+                "Using Google Calendar (click to switch to local)" : 
+                "Connect Google Calendar"
               ) : 
               "Using local calendar (click to switch to Google)"
             }
@@ -163,20 +245,21 @@ export const GoogleCalendarToggle = ({
           </Dialog>
         )}
 
-        {isDemoMode && useGoogleCalendar && (
+        {isConnected && (
           <Tooltip>
             <TooltipTrigger asChild>
-              <Badge variant="outline" className="text-xs px-1 py-0 bg-amber-100 text-amber-800 border-amber-300">
-                Demo
+              <Badge variant="outline" className="text-xs px-1 py-0 bg-green-100 text-green-800 border-green-300">
+                <Check className="h-3 w-3 mr-1" />
+                Connected
               </Badge>
             </TooltipTrigger>
             <TooltipContent side="bottom">
-              Using simulated calendar data for demo purposes
+              Your Google Calendar is connected
             </TooltipContent>
           </Tooltip>
         )}
 
-        {googleCalendarError && useGoogleCalendar && !isDemoMode && (
+        {googleCalendarError && useGoogleCalendar && (
           <>
             <Tooltip>
               <TooltipTrigger asChild>
@@ -189,56 +272,64 @@ export const GoogleCalendarToggle = ({
                 Failed to connect to Google Calendar API
               </TooltipContent>
             </Tooltip>
-            
-            <Button variant="ghost" size="sm" className="h-6 w-6 p-0" onClick={handleKeyConfigClick}>
-              <Key className="h-3 w-3" />
-            </Button>
           </>
         )}
         
-        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+        <Dialog open={isConnectDialogOpen} onOpenChange={setIsConnectDialogOpen}>
           <DialogContent>
             <DialogHeader>
-              <DialogTitle>Configure Google Calendar API</DialogTitle>
+              <DialogTitle>Connect Google Calendar</DialogTitle>
               <DialogDescription>
-                Enter your Google Calendar API key to connect to your calendar.
+                Connect your Google Calendar to view your events directly in the Glee World app.
               </DialogDescription>
             </DialogHeader>
             <div className="space-y-4 py-4">
-              <div className="space-y-2">
-                <Label htmlFor="api-key">Google Calendar API Key</Label>
-                <Input
-                  id="api-key"
-                  placeholder="Enter your Google Calendar API key"
-                  value={apiKey}
-                  onChange={(e) => setApiKey(e.target.value)}
-                />
-              </div>
               <div className="text-sm text-muted-foreground">
-                <p>You can get your API key from the Google Cloud Console.</p>
-                <p>Make sure the Google Calendar API is enabled for your project.</p>
+                <p>Connecting your Google Calendar allows you to:</p>
+                <ul className="list-disc list-inside space-y-1 mt-1 ml-2">
+                  <li>View your Google Calendar events in Glee World</li>
+                  <li>Manage both Glee Club events and personal events in one place</li>
+                  <li>Keep track of all your commitments in a single calendar</li>
+                </ul>
                 
                 <div className="mt-4">
-                  <p className="font-semibold">Required API Setup:</p>
-                  <ol className="list-decimal list-inside space-y-1 mt-1 ml-2">
-                    <li>Create a project in the Google Cloud Console</li>
-                    <li>Enable the Google Calendar API</li>
-                    <li>Create API credentials (API Key)</li>
-                    <li>Ensure the API key has access to Google Calendar API</li>
-                  </ol>
+                  <p className="font-semibold">This will:</p>
+                  <ul className="list-disc list-inside space-y-1 mt-1 ml-2">
+                    <li>Only request read-only access to your calendar</li>
+                    <li>Never modify or create events in your Google Calendar</li>
+                    <li>You can disconnect at any time</li>
+                  </ul>
                 </div>
                 
-                {isDemoMode && (
-                  <div className="mt-4 p-2 bg-blue-50 text-blue-800 rounded border border-blue-200">
-                    <p className="font-medium">Demo Mode Active</p>
-                    <p>Currently using simulated data for demonstration purposes.</p>
+                {isConnected === false && (
+                  <div className="mt-4 p-2 bg-amber-50 text-amber-800 rounded border border-amber-200">
+                    <p className="font-medium">Not Connected</p>
+                    <p>Please click Connect to begin the authentication process.</p>
+                  </div>
+                )}
+                
+                {isConnected === true && (
+                  <div className="mt-4 p-2 bg-green-50 text-green-800 rounded border border-green-200">
+                    <p className="font-medium">Already Connected</p>
+                    <p>Your Google Calendar is already connected.</p>
                   </div>
                 )}
               </div>
             </div>
             <DialogFooter>
-              <Button variant="outline" onClick={() => setIsDialogOpen(false)}>Cancel</Button>
-              <Button onClick={handleSaveKey}>Save</Button>
+              {isConnected ? (
+                <>
+                  <Button variant="outline" onClick={() => setIsConnectDialogOpen(false)}>Cancel</Button>
+                  <Button variant="destructive" onClick={handleDisconnect}>Disconnect</Button>
+                </>
+              ) : (
+                <>
+                  <Button variant="outline" onClick={() => setIsConnectDialogOpen(false)}>Cancel</Button>
+                  <Button onClick={handleConnect} disabled={isConnecting}>
+                    {isConnecting ? "Connecting..." : "Connect"}
+                  </Button>
+                </>
+              )}
             </DialogFooter>
           </DialogContent>
         </Dialog>
@@ -265,6 +356,22 @@ export const GoogleCalendarToggle = ({
             className="data-[state=checked]:bg-glee-purple"
           />
         </div>
+        
+        {isConnected && (
+          <Badge variant={isConnected ? "outline" : "secondary"} className="flex items-center gap-1">
+            {isConnected ? (
+              <>
+                <Check className="h-4 w-4 text-green-600" />
+                <span>Connected</span>
+              </>
+            ) : (
+              <>
+                <X className="h-4 w-4 text-red-600" />
+                <span>Disconnected</span>
+              </>
+            )}
+          </Badge>
+        )}
         
         {useGoogleCalendar && (
           <div className="flex items-center gap-2">
@@ -320,56 +427,69 @@ export const GoogleCalendarToggle = ({
             </Dialog>
           </div>
         )}
-        
-        {googleCalendarError && useGoogleCalendar && (
-          <Button variant="ghost" size="sm" className="h-8 w-8 p-0" onClick={handleKeyConfigClick}>
-            <Key className="h-4 w-4" />
-          </Button>
-        )}
       </div>
       
       {googleCalendarError && useGoogleCalendar && (
         <div className="text-red-600 text-xs bg-red-50 p-2 rounded border border-red-100">
-          {googleCalendarError}. Click the key icon to update your API key.
+          {googleCalendarError}
         </div>
       )}
       
-      <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+      <Dialog open={isConnectDialogOpen} onOpenChange={setIsConnectDialogOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Configure Google Calendar API</DialogTitle>
+            <DialogTitle>Connect Google Calendar</DialogTitle>
             <DialogDescription>
-              Enter your Google Calendar API key to connect to your calendar.
+              Connect your Google Calendar to view your events directly in the Glee World app.
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4 py-4">
-            <div className="space-y-2">
-              <Label htmlFor="api-key">Google Calendar API Key</Label>
-              <Input
-                id="api-key"
-                placeholder="Enter your Google Calendar API key"
-                value={apiKey}
-                onChange={(e) => setApiKey(e.target.value)}
-              />
-            </div>
             <div className="text-sm text-muted-foreground">
-              <p>You can get your API key from the Google Cloud Console.</p>
-              <p>Make sure the Google Calendar API is enabled for your project.</p>
+              <p>Connecting your Google Calendar allows you to:</p>
+              <ul className="list-disc list-inside space-y-1 mt-1 ml-2">
+                <li>View your Google Calendar events in Glee World</li>
+                <li>Manage both Glee Club events and personal events in one place</li>
+                <li>Keep track of all your commitments in a single calendar</li>
+              </ul>
               
               <div className="mt-4">
-                <p className="font-semibold">Required API Setup:</p>
-                <ol className="list-decimal list-inside space-y-1 mt-1 ml-2">
-                  <li>Create a project in the Google Cloud Console</li>
-                  <li>Enable the Google Calendar API</li>
-                  <li>Create API credentials (API Key)</li>
-                  <li>Ensure the API key has access to Google Calendar API</li>
-                </ol>
+                <p className="font-semibold">This will:</p>
+                <ul className="list-disc list-inside space-y-1 mt-1 ml-2">
+                  <li>Only request read-only access to your calendar</li>
+                  <li>Never modify or create events in your Google Calendar</li>
+                  <li>You can disconnect at any time</li>
+                </ul>
               </div>
+              
+              {isConnected === false && (
+                <div className="mt-4 p-2 bg-amber-50 text-amber-800 rounded border border-amber-200">
+                  <p className="font-medium">Not Connected</p>
+                  <p>Please click Connect to begin the authentication process.</p>
+                </div>
+              )}
+              
+              {isConnected === true && (
+                <div className="mt-4 p-2 bg-green-50 text-green-800 rounded border border-green-200">
+                  <p className="font-medium">Already Connected</p>
+                  <p>Your Google Calendar is already connected.</p>
+                </div>
+              )}
             </div>
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setIsDialogOpen(false)}>Cancel</Button>
-            <Button onClick={handleSaveKey}>Save</Button>
+            {isConnected ? (
+              <>
+                <Button variant="outline" onClick={() => setIsConnectDialogOpen(false)}>Cancel</Button>
+                <Button variant="destructive" onClick={handleDisconnect}>Disconnect</Button>
+              </>
+            ) : (
+              <>
+                <Button variant="outline" onClick={() => setIsConnectDialogOpen(false)}>Cancel</Button>
+                <Button onClick={handleConnect} disabled={isConnecting}>
+                  {isConnecting ? "Connecting..." : "Connect"}
+                </Button>
+              </>
+            )}
           </DialogFooter>
         </DialogContent>
       </Dialog>

@@ -1,9 +1,10 @@
 
 import { CalendarEvent, EventType } from "@/hooks/useCalendarEvents";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 
-// User-provided Google Calendar API key
-const API_KEY = 'AIzaSyBjWOPNeIScJJtvWGs19IfnD_zGnNyY9hU'; 
-const CALENDAR_ID = 'primary'; // Default to user's primary calendar
+// Constants for Google Calendar API
+const GOOGLE_API_BASE_URL = 'https://www.googleapis.com/calendar/v3';
 
 interface GoogleCalendarEvent {
   id: string;
@@ -24,74 +25,195 @@ interface GoogleCalendarEvent {
 }
 
 /**
- * Fetches events from Google Calendar API
+ * Get user's Google Calendar token from Supabase
+ */
+export const getGoogleCalendarToken = async (): Promise<string | null> => {
+  try {
+    // Check if user is logged in
+    const { data: { session } } = await supabase.auth.getSession();
+    
+    if (!session) {
+      console.error("No session found. User must be logged in to access Google Calendar.");
+      return null;
+    }
+    
+    // Get Google Calendar token from user's metadata
+    const { data: userTokenData, error } = await supabase.functions.invoke('get-google-token', {
+      body: { userId: session.user.id }
+    });
+    
+    if (error || !userTokenData?.token) {
+      console.error("Error getting Google token:", error || "No token found");
+      return null;
+    }
+    
+    return userTokenData.token;
+  } catch (error) {
+    console.error("Error in getGoogleCalendarToken:", error);
+    return null;
+  }
+};
+
+/**
+ * Start Google OAuth Flow
+ */
+export const startGoogleOAuth = async (): Promise<string | null> => {
+  try {
+    // Get the auth URL from our edge function
+    const { data, error } = await supabase.functions.invoke('google-calendar-auth', {
+      body: { action: 'getAuthUrl' }
+    });
+    
+    if (error || !data?.authUrl) {
+      console.error("Error getting Google OAuth URL:", error || "No URL returned");
+      return null;
+    }
+    
+    return data.authUrl;
+  } catch (error) {
+    console.error("Error in startGoogleOAuth:", error);
+    return null;
+  }
+};
+
+/**
+ * Handle OAuth callback
+ */
+export const handleOAuthCallback = async (code: string): Promise<boolean> => {
+  try {
+    const { data, error } = await supabase.functions.invoke('google-calendar-auth', {
+      body: { action: 'handleCallback', code }
+    });
+    
+    if (error || !data?.success) {
+      console.error("Error handling OAuth callback:", error || "Failed to complete OAuth flow");
+      return false;
+    }
+    
+    return true;
+  } catch (error) {
+    console.error("Error in handleOAuthCallback:", error);
+    return false;
+  }
+};
+
+/**
+ * Check if user has connected Google Calendar
+ */
+export const checkGoogleCalendarConnection = async (): Promise<boolean> => {
+  const token = await getGoogleCalendarToken();
+  return !!token;
+};
+
+/**
+ * Fetches events from Google Calendar API using OAuth token
  */
 export const fetchGoogleCalendarEvents = async (
   daysAhead: number = 90
 ): Promise<CalendarEvent[]> => {
   try {
+    // Get OAuth token
+    const token = await getGoogleCalendarToken();
+    
+    if (!token) {
+      console.log("No Google Calendar token found. Using simulated events.");
+      return simulateCalendarEvents(daysAhead);
+    }
+    
     // Calculate time range
     const timeMin = new Date().toISOString();
     const timeMax = new Date();
     timeMax.setDate(timeMax.getDate() + daysAhead);
     
-    // Build Google Calendar API URL with query parameters
-    const url = new URL(`https://www.googleapis.com/calendar/v3/calendars/${encodeURIComponent(CALENDAR_ID)}/events`);
-    url.searchParams.append('key', API_KEY);
-    url.searchParams.append('timeMin', timeMin);
-    url.searchParams.append('timeMax', timeMax.toISOString());
-    url.searchParams.append('singleEvents', 'true');
-    url.searchParams.append('orderBy', 'startTime');
-    
-    console.log('Fetching Google Calendar events from:', url.toString());
-    
-    try {
-      // Attempt actual API call with the provided key
-      const response = await fetch(url.toString());
-      
-      if (!response.ok) {
-        // Enhanced error handling with more details
-        let errorDetails = '';
-        try {
-          const errorData = await response.json();
-          errorDetails = JSON.stringify(errorData);
-          console.error("Google Calendar API error details:", errorData);
-        } catch {
-          errorDetails = response.statusText;
+    // Fetch events from Google Calendar API
+    const response = await fetch(
+      `${GOOGLE_API_BASE_URL}/calendars/primary/events?timeMin=${encodeURIComponent(timeMin)}&timeMax=${encodeURIComponent(timeMax.toISOString())}&singleEvents=true&orderBy=startTime`,
+      {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
         }
-        
-        console.error(`Google Calendar API error (${response.status}): ${errorDetails}`);
-        
-        // If API call fails, fall back to simulated data
-        console.log("Falling back to simulated data due to API error");
-        return simulateCalendarEvents(daysAhead);
+      }
+    );
+    
+    if (!response.ok) {
+      console.error(`Google Calendar API error (${response.status}): ${response.statusText}`);
+      
+      if (response.status === 401) {
+        // Token expired, try to refresh
+        const refreshed = await refreshGoogleToken();
+        if (refreshed) {
+          // Try again with new token
+          return fetchGoogleCalendarEvents(daysAhead);
+        }
       }
       
-      const data = await response.json();
-      
-      if (!data.items || !Array.isArray(data.items)) {
-        console.error("Invalid response format from Google Calendar API:", data);
-        return simulateCalendarEvents(daysAhead);
-      }
-      
-      console.log(`Successfully fetched ${data.items.length} events from Google Calendar`);
-      
-      // Transform Google Calendar events to our app's format
-      return data.items.map((event: GoogleCalendarEvent) => transformGoogleEvent(event));
-    } catch (error) {
-      console.error("Error making Google Calendar API call:", error);
-      // Fall back to simulated data if actual API call fails
+      // Fallback to simulated data
       return simulateCalendarEvents(daysAhead);
     }
+    
+    const data = await response.json();
+    
+    if (!data.items || !Array.isArray(data.items)) {
+      console.error("Invalid response format from Google Calendar API:", data);
+      return simulateCalendarEvents(daysAhead);
+    }
+    
+    console.log(`Successfully fetched ${data.items.length} events from Google Calendar`);
+    
+    // Transform Google Calendar events to our app's format
+    return data.items.map((event: GoogleCalendarEvent) => transformGoogleEvent(event));
+    
   } catch (error) {
     console.error('Error in fetchGoogleCalendarEvents:', error);
-    throw error;
+    return simulateCalendarEvents(daysAhead);
+  }
+};
+
+/**
+ * Refresh Google token if expired
+ */
+export const refreshGoogleToken = async (): Promise<boolean> => {
+  try {
+    const { data, error } = await supabase.functions.invoke('google-calendar-auth', {
+      body: { action: 'refreshToken' }
+    });
+    
+    if (error || !data?.success) {
+      console.error("Error refreshing Google token:", error || "Failed to refresh token");
+      return false;
+    }
+    
+    return true;
+  } catch (error) {
+    console.error("Error in refreshGoogleToken:", error);
+    return false;
+  }
+};
+
+/**
+ * Disconnect Google Calendar
+ */
+export const disconnectGoogleCalendar = async (): Promise<boolean> => {
+  try {
+    const { data, error } = await supabase.functions.invoke('google-calendar-auth', {
+      body: { action: 'disconnect' }
+    });
+    
+    if (error || !data?.success) {
+      console.error("Error disconnecting Google Calendar:", error || "Failed to disconnect");
+      return false;
+    }
+    
+    return true;
+  } catch (error) {
+    console.error("Error in disconnectGoogleCalendar:", error);
+    return false;
   }
 };
 
 /**
  * Simulates Google Calendar events for testing purposes
- * Remove this in production
  */
 const simulateCalendarEvents = (daysAhead: number): CalendarEvent[] => {
   const events: CalendarEvent[] = [];
