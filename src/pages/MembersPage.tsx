@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { PageHeader } from "@/components/ui/page-header";
@@ -83,14 +84,11 @@ export default function MemberDirectoryPage() {
   };
 
   // Handle deleting a member
-  const handleDeleteClick = (memberId: string) => {
-    console.log("Requesting delete for member ID:", memberId);
-    const member = members.find(m => m.id === memberId);
-    if (member) {
-      setMemberToDelete(memberId);
-      setMemberToDeleteName(`${member.first_name || ''} ${member.last_name || ''}`.trim() || 'this member');
-      setIsDeleteDialogOpen(true);
-    }
+  const handleDeleteClick = (member: User) => {
+    console.log("Requesting delete for member ID:", member.id);
+    setMemberToDelete(member.id);
+    setMemberToDeleteName(`${member.first_name || ''} ${member.last_name || ''}`.trim() || 'this member');
+    setIsDeleteDialogOpen(true);
   };
   
   const handleConfirmDelete = async () => {
@@ -258,8 +256,8 @@ export default function MemberDirectoryPage() {
                 ) : (
                   <MembersList 
                     members={filteredMembers} 
-                    onEditMember={canManageMembers ? handleDeleteClick : undefined}
-                    onDeleteMember={canManageMembers ? handleDeleteClick : undefined}
+                    onEditMember={handleDeleteClick}
+                    onDeleteMember={handleDeleteClick}
                   />
                 )}
               </div>
@@ -277,8 +275,8 @@ export default function MemberDirectoryPage() {
               ) : (
                 <MembersList 
                   members={filteredMembers} 
-                  onEditMember={canManageMembers ? handleDeleteClick : undefined}
-                  onDeleteMember={canManageMembers ? handleDeleteClick : undefined}
+                  onEditMember={handleDeleteClick}
+                  onDeleteMember={handleDeleteClick}
                 />
               )}
             </Card>
@@ -295,8 +293,8 @@ export default function MemberDirectoryPage() {
               ) : (
                 <MembersList 
                   members={filteredMembers} 
-                  onEditMember={canManageMembers ? handleDeleteClick : undefined}
-                  onDeleteMember={canManageMembers ? handleDeleteClick : undefined}
+                  onEditMember={handleDeleteClick}
+                  onDeleteMember={handleDeleteClick}
                 />
               )}
             </Card>
