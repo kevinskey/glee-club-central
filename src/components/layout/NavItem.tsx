@@ -11,12 +11,8 @@ interface NavItemProps {
 }
 
 export function NavItem({ title, href, icon, external = false }: NavItemProps) {
-  const location = useLocation();
-  
-  // Make sure we're only highlighting exact matches or direct children
-  const isActive = href !== "/" && 
-    (location.pathname === href || 
-     (location.pathname.startsWith(`${href}/`) && href !== "/dashboard"));
+  // Removing active state highlighting by setting isActive to false always
+  const isActive = false;
   
   const linkContent = (
     <>

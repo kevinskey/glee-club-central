@@ -69,13 +69,7 @@ export function SidebarNavItems({ items }: SidebarNavItemsProps = {}) {
           <NavLink
             key={item.href}
             to={item.href}
-            className={({ isActive }) =>
-              `flex items-center px-3 py-2 rounded-md text-sm font-medium transition-colors ${
-                isActive
-                  ? 'bg-accent text-accent-foreground'
-                  : 'hover:bg-accent hover:text-accent-foreground'
-              }`
-            }
+            className="flex items-center px-3 py-2 rounded-md text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground"
           >
             {item.icon}
             <span className="ml-2">{item.title}</span>
@@ -92,13 +86,7 @@ export function SidebarNavItems({ items }: SidebarNavItemsProps = {}) {
       <NavLink
         to="/dashboard"
         end
-        className={({ isActive }) =>
-          `flex items-center px-3 py-2 rounded-md text-sm font-medium transition-colors ${
-            isActive
-              ? 'bg-accent text-accent-foreground'
-              : 'hover:bg-accent hover:text-accent-foreground'
-          }`
-        }
+        className="flex items-center px-3 py-2 rounded-md text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground"
       >
         <Home className="h-4 w-4 mr-2" />
         <span>Dashboard</span>
@@ -106,13 +94,7 @@ export function SidebarNavItems({ items }: SidebarNavItemsProps = {}) {
 
       <NavLink
         to="/dashboard/calendar"
-        className={({ isActive }) =>
-          `flex items-center px-3 py-2 rounded-md text-sm font-medium transition-colors ${
-            isActive
-              ? 'bg-accent text-accent-foreground'
-              : 'hover:bg-accent hover:text-accent-foreground'
-          }`
-        }
+        className="flex items-center px-3 py-2 rounded-md text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground"
       >
         <Calendar className="h-4 w-4 mr-2" />
         <span>Calendar</span>

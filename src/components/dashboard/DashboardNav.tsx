@@ -26,10 +26,11 @@ export function DashboardNav({
   const { pathname } = useLocation();
   const { hasPermission } = useRolePermissions();
   
+  // All buttons will use 'ghost' variant to remove highlights
   return (
     <nav className={cn('flex flex-col gap-2', className)} {...props}>
       <Button
-        variant={pathname === '/dashboard' ? 'default' : 'ghost'}
+        variant="ghost"
         className={cn('justify-start', isCollapsed && 'justify-center')}
         asChild
       >
@@ -41,7 +42,7 @@ export function DashboardNav({
 
       {hasPermission('view_sheet_music') && (
         <Button
-          variant={pathname.includes('/dashboard/sheet-music') ? 'default' : 'ghost'}
+          variant="ghost"
           className={cn('justify-start', isCollapsed && 'justify-center')}
           asChild
         >
@@ -54,7 +55,7 @@ export function DashboardNav({
 
       {hasPermission('view_calendar') && (
         <Button
-          variant={pathname.includes('/dashboard/calendar') ? 'default' : 'ghost'}
+          variant="ghost"
           className={cn('justify-start', isCollapsed && 'justify-center')}
           asChild
         >
@@ -67,7 +68,7 @@ export function DashboardNav({
 
       {hasPermission('view_announcements') && (
         <Button
-          variant={pathname.includes('/dashboard/announcements') ? 'default' : 'ghost'}
+          variant="ghost"
           className={cn('justify-start', isCollapsed && 'justify-center')}
           asChild
         >
@@ -80,7 +81,7 @@ export function DashboardNav({
 
       {hasPermission('view_financials') && (
         <Button
-          variant={pathname.includes('/dashboard/finances') ? 'default' : 'ghost'}
+          variant="ghost"
           className={cn('justify-start', isCollapsed && 'justify-center')}
           asChild
         >
@@ -93,7 +94,7 @@ export function DashboardNav({
 
       {hasPermission('manage_users') && (
         <Button
-          variant={pathname.includes('/dashboard/admin/members') ? 'default' : 'ghost'}
+          variant="ghost"
           className={cn('justify-start', isCollapsed && 'justify-center')}
           asChild
         >
@@ -106,7 +107,7 @@ export function DashboardNav({
 
       {hasPermission('manage_users') && (
         <Button
-          variant={pathname.includes('/dashboard/settings') ? 'default' : 'ghost'}
+          variant="ghost"
           className={cn('justify-start', isCollapsed && 'justify-center')}
           asChild
         >
