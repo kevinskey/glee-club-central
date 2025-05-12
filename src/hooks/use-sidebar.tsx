@@ -1,5 +1,6 @@
 
 import React, { useState, useEffect, createContext, useContext } from "react";
+import { useMedia } from "@/hooks/use-mobile";
 
 interface SidebarState {
   isOpen: boolean;
@@ -14,6 +15,7 @@ const SidebarContext = createContext<SidebarState | undefined>(undefined);
 // Create a provider component
 export function SidebarProvider({ children }: { children: React.ReactNode }) {
   const [isOpen, setIsOpen] = useState(false);
+  const isMobile = useMedia("(max-width: 768px)");
   
   // Close sidebar when ESC key is pressed
   useEffect(() => {
@@ -27,9 +29,16 @@ export function SidebarProvider({ children }: { children: React.ReactNode }) {
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, []);
   
-  const onOpen = () => setIsOpen(true);
+  // Close sidebar when screen size changes to mobile
+  useEffect(() => {
+    if (isMobile) {
+      setIsOpen(false);
+    }
+  }, [isMobile]);
+  
+  const onOpen = () => !isMobile && setIsOpen(true);
   const onClose = () => setIsOpen(false);
-  const onToggle = () => setIsOpen(prev => !prev);
+  const onToggle = () => !isMobile && setIsOpen(prev => !prev);
   
   const value = {
     isOpen,

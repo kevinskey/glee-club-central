@@ -22,14 +22,16 @@ export function Sidebar() {
 
   return (
     <>
-      {/* Desktop Sidebar */}
-      <DesktopSidebar isOpen={true} isAdmin={isAdmin()} />
+      {/* Desktop Sidebar - Hidden on Mobile */}
+      <div className="hidden md:block">
+        <DesktopSidebar isOpen={true} isAdmin={isAdmin()} />
+      </div>
       
       {/* Mobile Navigation */}
       <MobileNav isAdmin={isAdmin()} />
       
-      {/* Overlay when sidebar is open on mobile */}
-      {openMobile && (
+      {/* Overlay when sidebar is open on mobile - Hidden */}
+      {openMobile && !isMobile && (
         <div 
           className="fixed inset-0 z-20 bg-background/80 backdrop-blur-sm lg:hidden"
           onClick={() => setOpenMobile(false)}
