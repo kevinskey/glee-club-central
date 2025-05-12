@@ -1,3 +1,4 @@
+
 import {
   createBrowserRouter,
 } from "react-router-dom";
@@ -37,6 +38,7 @@ import ProfilePage from "./pages/profile/ProfilePage";
 import RecordingsPage from "./pages/RecordingsPage";
 import SubmitRecordingPage from "./pages/recordings/SubmitRecordingPage";
 import SocialPage from "./pages/SocialPage";
+import PrivacyPolicyPage from "./pages/PrivacyPolicyPage";
 
 export const router = createBrowserRouter([
   {
@@ -74,6 +76,10 @@ export const router = createBrowserRouter([
       {
         path: "/social",
         element: <SocialPage />,
+      },
+      {
+        path: "/privacy",
+        element: <PrivacyPolicyPage />,
       },
       {
         path: "/recordings",

@@ -1,4 +1,3 @@
-
 import React, { useState, useRef } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { Icons } from "@/components/Icons";
@@ -135,6 +134,10 @@ export function MobileHeader() {
                   
                   <DropdownMenuItem onClick={() => navigate("/about")}>
                     About
+                  </DropdownMenuItem>
+                  
+                  <DropdownMenuItem onClick={() => navigate("/privacy")}>
+                    Privacy Policy
                   </DropdownMenuItem>
                   
                   <DropdownMenuItem onClick={() => navigate("/press-kit")}>

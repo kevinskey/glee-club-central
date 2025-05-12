@@ -7,7 +7,6 @@ import {
   NavigationMenu,
   NavigationMenuContent,
   NavigationMenuItem,
-  NavigationMenuLink,
   NavigationMenuList,
   NavigationMenuTrigger,
   navigationMenuTriggerStyle,
@@ -47,6 +46,16 @@ export function NavigationLinks({ className, onLinkClick }: NavigationLinksProps
             onClick={handleLinkClick}
           >
             About
+          </Link>
+        </NavigationMenuItem>
+        
+        <NavigationMenuItem>
+          <Link
+            to="/privacy"
+            className="text-lg font-medium text-muted-foreground transition-colors hover:text-foreground"
+            onClick={handleLinkClick}
+          >
+            Privacy
           </Link>
         </NavigationMenuItem>
         

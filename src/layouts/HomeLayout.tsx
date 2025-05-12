@@ -13,10 +13,10 @@ const HomeLayout: React.FC = () => {
   const location = useLocation();
   
   // Only show header on specific routes
-  const shouldShowHeader = ["/", "/about", "/contact", "/press-kit"].includes(location.pathname);
+  const shouldShowHeader = ["/", "/about", "/contact", "/press-kit", "/privacy"].includes(location.pathname);
   
   // Routes where we want to show the bottom navigation
-  const showMobileBottomNav = ["/", "/about", "/videos", "/contact", "/press-kit", "/social", "/recordings", "/recordings/submit"].includes(location.pathname);
+  const showMobileBottomNav = ["/", "/about", "/videos", "/contact", "/press-kit", "/privacy", "/social", "/recordings", "/recordings/submit"].includes(location.pathname);
   
   return (
     <>

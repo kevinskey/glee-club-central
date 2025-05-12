@@ -21,8 +21,9 @@ export function Footer() {
           
           <div className="flex flex-col sm:flex-row items-center gap-3 sm:gap-4 md:gap-6 lg:gap-8">
             <a href="/press-kit" className="text-sm sm:text-base text-gray-600 dark:text-gray-600 hover:text-glee-spelman transition-colors">Press Kit</a>
-            <a href="#" className="text-sm sm:text-base text-gray-600 dark:text-gray-600 hover:text-glee-spelman transition-colors">Performances</a>
-            <a href="#" className="text-sm sm:text-base text-gray-600 dark:text-gray-600 hover:text-glee-spelman transition-colors">Contact</a>
+            <a href="/privacy" className="text-sm sm:text-base text-gray-600 dark:text-gray-600 hover:text-glee-spelman transition-colors">Privacy Policy</a>
+            <a href="/about" className="text-sm sm:text-base text-gray-600 dark:text-gray-600 hover:text-glee-spelman transition-colors">About</a>
+            <a href="/contact" className="text-sm sm:text-base text-gray-600 dark:text-gray-600 hover:text-glee-spelman transition-colors">Contact</a>
             <div className="flex gap-3 mt-3 sm:mt-0">
               <Button 
                 variant="ghost" 

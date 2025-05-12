@@ -130,6 +130,10 @@ export function Header({ initialShowNewsFeed = true }: HeaderProps) {
                   About
                 </DropdownMenuItem>
                 
+                <DropdownMenuItem onClick={() => navigate("/privacy")}>
+                  Privacy Policy
+                </DropdownMenuItem>
+                
                 <DropdownMenuItem onClick={() => navigate("/press-kit")}>
                   Press Kit
                 </DropdownMenuItem>
