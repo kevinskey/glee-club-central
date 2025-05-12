@@ -138,7 +138,7 @@ export function YouTubeSection() {
 
         {/* Horizontal Scrolling Video Cards */}
         <h3 className="text-xl font-semibold text-blue-100 mb-4">More Videos</h3>
-        <ScrollArea className="w-full whitespace-nowrap pb-4" type="scroll" direction="horizontal">
+        <ScrollArea className="w-full whitespace-nowrap pb-4" type="scroll">
           <div className="flex gap-4">
             {isLoading ? (
               <>
