@@ -6,7 +6,6 @@ import { Sidebar } from "@/components/layout/Sidebar";
 import { useAuth } from "@/contexts/AuthContext";
 import { Spinner } from "@/components/ui/spinner";
 import { SidebarProvider } from "@/components/ui/sidebar";
-import { GlobalMetronome } from "@/components/ui/global-metronome";
 
 const DashboardLayout: React.FC = () => {
   const { isAuthenticated, isLoading } = useAuth();
@@ -46,8 +45,6 @@ const DashboardLayout: React.FC = () => {
             <Outlet />
           </main>
         </div>
-        
-        <GlobalMetronome />
       </div>
     </SidebarProvider>
   );
