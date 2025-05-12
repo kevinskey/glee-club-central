@@ -18,11 +18,14 @@ const CalendarPage = lazy(() => import("./pages/CalendarPage"));
 const SheetMusicPage = lazy(() => import("./pages/sheet-music/SheetMusicPage"));
 const ViewSheetMusicPage = lazy(() => import("./pages/sheet-music/ViewSheetMusicPage"));
 
+// Create an error element wrapper that provides children to ErrorBoundary
+const ErrorWrapper = () => <ErrorBoundary><NotFoundPage /></ErrorBoundary>;
+
 export const router = createBrowserRouter([
   {
     path: "/",
     element: null, // This will be handled in App.tsx
-    errorElement: <ErrorBoundary />,
+    errorElement: <ErrorWrapper />,
     children: [
       {
         path: "/",
