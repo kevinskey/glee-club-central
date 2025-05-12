@@ -10,7 +10,7 @@ interface NavigationLinksProps {
 }
 
 export function NavigationLinks({ className, onLinkClick }: NavigationLinksProps) {
-  const { isAuthenticated, isAdmin } = useAuth();
+  const { isAuthenticated } = useAuth();
 
   const handleLinkClick = () => {
     if (onLinkClick) {
@@ -27,34 +27,6 @@ export function NavigationLinks({ className, onLinkClick }: NavigationLinksProps
       >
         About Us
       </Link>
-      <Link
-        to="/events"
-        className="text-md font-medium text-muted-foreground transition-colors hover:text-foreground"
-        onClick={handleLinkClick}
-      >
-        Events
-      </Link>
-      <Link
-        to="/videos"
-        className="text-md font-medium text-muted-foreground transition-colors hover:text-foreground"
-        onClick={handleLinkClick}
-      >
-        Videos
-      </Link>
-      <Link
-        to="/media"
-        className="text-md font-medium text-muted-foreground transition-colors hover:text-foreground"
-        onClick={handleLinkClick}
-      >
-        Media
-      </Link>
-      <Link
-        to="/support"
-        className="text-md font-medium text-muted-foreground transition-colors hover:text-foreground"
-        onClick={handleLinkClick}
-      >
-        Support Us
-      </Link>
       {isAuthenticated && (
         <Link
           to="/dashboard"
@@ -62,15 +34,6 @@ export function NavigationLinks({ className, onLinkClick }: NavigationLinksProps
           onClick={handleLinkClick}
         >
           Dashboard
-        </Link>
-      )}
-      {isAuthenticated && isAdmin && isAdmin() && (
-        <Link
-          to="/dashboard/admin"
-          className="text-md font-medium text-glee-spelman transition-colors hover:text-glee-spelman/80"
-          onClick={handleLinkClick}
-        >
-          Admin Panel
         </Link>
       )}
       {!isAuthenticated && (

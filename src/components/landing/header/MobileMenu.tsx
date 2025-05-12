@@ -9,6 +9,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { useAuth } from "@/contexts/AuthContext";
 
 interface MobileMenuProps {
   onClose: () => void;
@@ -16,6 +17,7 @@ interface MobileMenuProps {
 
 export function MobileMenu({ onClose }: MobileMenuProps) {
   const navigate = useNavigate();
+  const { isAuthenticated } = useAuth();
   
   const handleNavigation = (path: string) => {
     navigate(path);
@@ -57,54 +59,36 @@ export function MobileMenu({ onClose }: MobileMenuProps) {
         >
           About Us
         </Button>
-        <Button 
-          variant="ghost" 
-          size="sm" 
-          className="justify-start py-2 hover:bg-glee-spelman hover:text-white" 
-          onClick={() => handleNavigation("/contact")}
-        >
-          Contact
-        </Button>
-        <Button 
-          variant="ghost" 
-          size="sm" 
-          className="justify-start py-2 hover:bg-glee-spelman hover:text-white" 
-          onClick={() => handleNavigation("/administration")}
-        >
-          Administration
-        </Button>
-        <Button 
-          variant="ghost" 
-          size="sm" 
-          className="justify-start py-2 hover:bg-glee-spelman hover:text-white" 
-          onClick={() => handleNavigation("/fan-page")}
-        >
-          For Fans
-        </Button>
-        <Button 
-          variant="ghost" 
-          size="sm" 
-          className="justify-start py-2 hover:bg-glee-spelman hover:text-white" 
-          onClick={() => handleNavigation("/dashboard")}
-        >
-          Dashboard
-        </Button>
-        <Button 
-          variant="ghost" 
-          size="sm" 
-          className="justify-start py-2 hover:bg-glee-spelman hover:text-white" 
-          onClick={() => handleNavigation("/login")}
-        >
-          Login
-        </Button>
-        <Button 
-          variant="default" 
-          size="sm" 
-          className="mt-1 sm:mt-2 py-2 bg-glee-purple hover:bg-glee-spelman"
-          onClick={() => handleNavigation("/dashboard")}
-        >
-          Member Portal
-        </Button>
+        {isAuthenticated && (
+          <Button 
+            variant="ghost" 
+            size="sm" 
+            className="justify-start py-2 hover:bg-glee-spelman hover:text-white" 
+            onClick={() => handleNavigation("/dashboard")}
+          >
+            Dashboard
+          </Button>
+        )}
+        {!isAuthenticated && (
+          <>
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              className="justify-start py-2 hover:bg-glee-spelman hover:text-white" 
+              onClick={() => handleNavigation("/login")}
+            >
+              Login
+            </Button>
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              className="justify-start py-2 hover:bg-glee-spelman hover:text-white" 
+              onClick={() => handleNavigation("/register/admin")}
+            >
+              Admin Registration
+            </Button>
+          </>
+        )}
       </div>
     </div>
   );
