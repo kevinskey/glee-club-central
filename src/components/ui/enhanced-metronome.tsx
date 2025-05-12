@@ -59,7 +59,7 @@ export function EnhancedMetronome({
     setVisualSubBeat(subBeat);
   }, []);
 
-  const { audioLoaded, audioError, resumeAudioContext } = useMetronomeEngine({
+  const { audioLoaded, audioError, resumeAudioSystem } = useMetronomeEngine({
     bpm,
     isPlaying,
     volume,
@@ -116,7 +116,7 @@ export function EnhancedMetronome({
   const handleToggleClick = () => {
     // Initialize audio on first click
     if (!audioInitialized) {
-      const success = resumeAudioContext();
+      const success = resumeAudioSystem();
       if (success) {
         setAudioInitialized(true);
         toast.success("Audio system initialized");
@@ -126,7 +126,7 @@ export function EnhancedMetronome({
       }
     } else {
       // Just resume audio context if already initialized
-      resumeAudioContext();
+      resumeAudioSystem();
     }
     
     setIsPlaying(!isPlaying);
