@@ -1,4 +1,5 @@
-import React, { useState, useCallback, useMemo } from "react";
+
+import React, { useState, useCallback, useMemo, useEffect } from "react";
 import { Footer } from "@/components/landing/Footer";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { useCalendarEvents, CalendarEvent, EventType } from "@/hooks/useCalendarEvents";
@@ -6,6 +7,7 @@ import { AddEventForm, EventFormValues } from "@/components/calendar/AddEventFor
 import { EditEventForm } from "@/components/calendar/EditEventForm";
 import { toast } from "sonner";
 import { usePermissions } from "@/hooks/usePermissions";
+import { useLocation, useSearchParams } from "react-router-dom";
 
 // Components
 import { CalendarContainer } from "@/components/calendar/CalendarContainer";
@@ -19,6 +21,8 @@ export default function CalendarPage() {
   const [selectedEvent, setSelectedEvent] = useState<CalendarEvent | null>(null);
   const [isAddEventOpen, setIsAddEventOpen] = useState(false);
   const [isEditEventOpen, setIsEditEventOpen] = useState(false);
+  const [searchParams] = useSearchParams();
+  const eventId = searchParams.get('event');
   
   const { 
     events, 
@@ -47,6 +51,22 @@ export default function CalendarPage() {
       event.start.getFullYear() === date.getFullYear()
     );
   }, [date, events]);
+  
+  // Handle URL event parameter
+  useEffect(() => {
+    if (eventId && events.length > 0 && !loading) {
+      // Find the event by ID
+      const event = events.find(e => e.id === eventId);
+      if (event) {
+        // Set the selected date to the event's date
+        setDate(new Date(event.start));
+        // Select the event
+        setSelectedEvent(event);
+      } else {
+        toast.error("Event not found");
+      }
+    }
+  }, [eventId, events, loading]);
     
   // Get days with events for highlighting in the calendar - ensure they are Date objects
   const daysWithEvents = useMemo(() => events.map(event => event.date), [events]);
@@ -244,4 +264,20 @@ export default function CalendarPage() {
       )}
     </div>
   );
+}
+
+// Needed to prevent TypeScript error - not included in original
+function getEventTypeColor(type: string) {
+  switch (type) {
+    case "concert":
+      return "bg-glee-purple hover:bg-glee-purple/90";
+    case "rehearsal":
+      return "bg-blue-500 hover:bg-blue-500/90";
+    case "tour":
+      return "bg-green-500 hover:bg-green-500/90";
+    case "special":
+      return "bg-amber-500 hover:bg-amber-500/90";
+    default:
+      return "bg-gray-500 hover:bg-gray-500/90";
+  }
 }
