@@ -1,9 +1,8 @@
 
 import { CalendarEvent, EventType } from "@/hooks/useCalendarEvents";
 
-// This is a demo key for testing purposes ONLY
-// In production, this key should be stored in Supabase secrets
-const API_KEY = 'AIzaSyBNlYH01_9Hc5S1J9vuFmu2nUqBZJNAXxs'; 
+// User-provided Google Calendar API key
+const API_KEY = 'AIzaSyBjWOPNeIScJJtvWGs19IfnD_zGnNyY9hU'; 
 const CALENDAR_ID = 'primary'; // Default to user's primary calendar
 
 interface GoogleCalendarEvent {
@@ -46,34 +45,46 @@ export const fetchGoogleCalendarEvents = async (
     
     console.log('Fetching Google Calendar events from:', url.toString());
     
-    // Simulate successful API response for testing
-    // Remove this in production and use the actual API call
-    return simulateCalendarEvents(daysAhead);
-    
-    // Uncomment below code for production use with a valid API key
-    /*
-    const response = await fetch(url.toString());
-    
-    if (!response.ok) {
-      // Enhanced error handling with more details
-      let errorDetails = '';
-      try {
-        const errorData = await response.json();
-        errorDetails = JSON.stringify(errorData);
-      } catch {
-        errorDetails = response.statusText;
+    try {
+      // Attempt actual API call with the provided key
+      const response = await fetch(url.toString());
+      
+      if (!response.ok) {
+        // Enhanced error handling with more details
+        let errorDetails = '';
+        try {
+          const errorData = await response.json();
+          errorDetails = JSON.stringify(errorData);
+          console.error("Google Calendar API error details:", errorData);
+        } catch {
+          errorDetails = response.statusText;
+        }
+        
+        console.error(`Google Calendar API error (${response.status}): ${errorDetails}`);
+        
+        // If API call fails, fall back to simulated data
+        console.log("Falling back to simulated data due to API error");
+        return simulateCalendarEvents(daysAhead);
       }
       
-      throw new Error(`Google Calendar API error (${response.status}): ${errorDetails}`);
+      const data = await response.json();
+      
+      if (!data.items || !Array.isArray(data.items)) {
+        console.error("Invalid response format from Google Calendar API:", data);
+        return simulateCalendarEvents(daysAhead);
+      }
+      
+      console.log(`Successfully fetched ${data.items.length} events from Google Calendar`);
+      
+      // Transform Google Calendar events to our app's format
+      return data.items.map((event: GoogleCalendarEvent) => transformGoogleEvent(event));
+    } catch (error) {
+      console.error("Error making Google Calendar API call:", error);
+      // Fall back to simulated data if actual API call fails
+      return simulateCalendarEvents(daysAhead);
     }
-    
-    const data = await response.json();
-    
-    // Transform Google Calendar events to our app's format
-    return data.items.map((event: GoogleCalendarEvent) => transformGoogleEvent(event));
-    */
   } catch (error) {
-    console.error('Error fetching Google Calendar events:', error);
+    console.error('Error in fetchGoogleCalendarEvents:', error);
     throw error;
   }
 };

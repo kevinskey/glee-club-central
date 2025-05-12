@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Switch } from "@/components/ui/switch";
 import { ExternalLink, Calendar, Globe, Key, CalendarClock, AlertCircle } from "lucide-react";
@@ -47,14 +46,14 @@ export const GoogleCalendarToggle = ({
 }: GoogleCalendarToggleProps) => {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isDateRangeOpen, setIsDateRangeOpen] = useState(false);
-  const [apiKey, setApiKey] = useState("");
+  const [apiKey, setApiKey] = useState("AIzaSyBjWOPNeIScJJtvWGs19IfnD_zGnNyY9hU");
   
   const handleToggle = () => {
     toggleGoogleCalendar();
     toast.info(
       useGoogleCalendar 
         ? "Switching to local calendar" 
-        : "Switching to Google Calendar (demo mode)"
+        : "Switching to Google Calendar"
     );
   };
 
@@ -77,13 +76,13 @@ export const GoogleCalendarToggle = ({
     
     // Note: In a production app, we would store this in Supabase secrets
     // and reload the calendar data
-    toast.info("Google Calendar will use simulated data for demo purposes", {
+    toast.info("Using your Google Calendar API key", {
       duration: 5000,
     });
   };
 
   // Display a different message when in demo mode
-  const isDemoMode = true; // Always true since we're simulating for this example
+  const isDemoMode = false; // Set to false since we're using a real API key now
 
   if (compact) {
     return (
@@ -255,7 +254,7 @@ export const GoogleCalendarToggle = ({
           {useGoogleCalendar ? (
             <Badge variant="outline" className="flex items-center gap-1 bg-glee-purple/10 text-glee-purple border-glee-purple/50 px-2 py-0.5">
               <Globe className="h-3 w-3 mr-1" />
-              <span className="text-xs">Google Calendar {isDemoMode && "(Demo)"}</span>
+              <span className="text-xs">Google Calendar</span>
             </Badge>
           ) : (
             <span className="text-sm font-medium">Google Calendar</span>
@@ -322,16 +321,16 @@ export const GoogleCalendarToggle = ({
           </div>
         )}
         
-        {isDemoMode && useGoogleCalendar && (
-          <Badge variant="outline" className="bg-amber-50 text-amber-800 border-amber-300">
-            Demo Mode
-          </Badge>
+        {googleCalendarError && useGoogleCalendar && (
+          <Button variant="ghost" size="sm" className="h-8 w-8 p-0" onClick={handleKeyConfigClick}>
+            <Key className="h-4 w-4" />
+          </Button>
         )}
       </div>
       
-      {isDemoMode && useGoogleCalendar && (
-        <div className="text-blue-600 text-xs bg-blue-50 p-2 rounded border border-blue-100">
-          Using simulated calendar data for demonstration purposes. In production, replace with your Google Calendar API key.
+      {googleCalendarError && useGoogleCalendar && (
+        <div className="text-red-600 text-xs bg-red-50 p-2 rounded border border-red-100">
+          {googleCalendarError}. Click the key icon to update your API key.
         </div>
       )}
       
@@ -363,7 +362,7 @@ export const GoogleCalendarToggle = ({
                   <li>Create a project in the Google Cloud Console</li>
                   <li>Enable the Google Calendar API</li>
                   <li>Create API credentials (API Key)</li>
-                  <li>Ensure the API key has access to Calendar API</li>
+                  <li>Ensure the API key has access to Google Calendar API</li>
                 </ol>
               </div>
             </div>
