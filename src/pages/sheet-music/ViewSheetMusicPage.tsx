@@ -171,7 +171,7 @@ export default function ViewSheetMusicPage() {
     // If turning on, inform user about sound
     if (!isMetronomeActive) {
       toast("Starting metronome - ensure your volume is on", {
-        duration: 2000,
+        duration: 2000
       });
     }
     setIsMetronomeActive(!isMetronomeActive);
