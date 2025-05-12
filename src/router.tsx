@@ -5,6 +5,7 @@ import NotFoundPage from "./pages/NotFoundPage";
 import DashboardLayout from "./components/layout/DashboardLayout";
 import HomeLayout from "./layouts/HomeLayout";
 import ProtectedRoute from "./components/ProtectedRoute";
+import ErrorBoundary from "./components/ErrorBoundary";
 
 // Lazy load pages for better performance
 const HomePage = lazy(() => import("./pages/HomePage"));
@@ -14,14 +15,14 @@ const ProfilePage = lazy(() => import("./pages/profile/ProfilePage"));
 const AdminPage = lazy(() => import("./pages/AdminPage"));
 const AnnouncementsPage = lazy(() => import("./pages/AnnouncementsPage"));
 const CalendarPage = lazy(() => import("./pages/CalendarPage"));
-const SheetMusicPage = lazy(() => import("./pages/SheetMusicPage"));
+const SheetMusicPage = lazy(() => import("./pages/sheet-music/SheetMusicPage"));
 const ViewSheetMusicPage = lazy(() => import("./pages/sheet-music/ViewSheetMusicPage"));
 
 export const router = createBrowserRouter([
   {
     path: "/",
     element: null, // This will be handled in App.tsx
-    errorElement: <NotFoundPage />,
+    errorElement: <ErrorBoundary />,
     children: [
       {
         path: "/",

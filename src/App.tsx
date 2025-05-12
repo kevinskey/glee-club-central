@@ -1,31 +1,18 @@
 
 import React from 'react';
-import { RouterProvider, Outlet } from 'react-router-dom';
+import { Outlet } from 'react-router-dom';
 import { Toaster } from 'sonner';
 import { AuthProvider } from './contexts/AuthContext';
 import { RolePermissionProvider } from './contexts/RolePermissionContext';
 import { ThemeProvider } from './providers/ThemeProvider';
-import { router } from './router';
-
-// Root layout component that will wrap all routes
-const RootLayout = () => {
-  return (
-    <div className="app">
-      <Outlet />
-    </div>
-  );
-};
-
-// Update the router configuration correctly
-const routeConfiguration = router.routes[0] as any;
-routeConfiguration.element = <RootLayout />;
+import AppRoutes from './Routes';
 
 function App() {
   return (
     <ThemeProvider>
       <AuthProvider>
         <RolePermissionProvider>
-          <RouterProvider router={router} />
+          <AppRoutes />
           <Toaster position="top-right" />
         </RolePermissionProvider>
       </AuthProvider>
