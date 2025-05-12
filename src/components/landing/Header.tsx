@@ -73,7 +73,7 @@ export function Header({ initialShowNewsFeed = true }: HeaderProps) {
         {mobileMenuOpen && <MobileMenu onClose={() => setMobileMenuOpen(false)} />}
       </header>
       
-      {/* Global Metronome */}
+      {/* Global Metronome - positioned outside header container */}
       <GlobalMetronome />
     </>
   );
