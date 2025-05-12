@@ -1,5 +1,4 @@
-
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, MutableRefObject } from "react";
 import { Music, Volume2, AlertCircle } from "lucide-react";
 import { Slider } from "@/components/ui/slider";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
@@ -20,6 +19,7 @@ interface MetronomeProps {
   showControls?: boolean;
   size?: 'sm' | 'md' | 'lg';
   className?: string;
+  audioContextRef?: MutableRefObject<AudioContext | null>; // Added this prop
 }
 
 export function EnhancedMetronome({
@@ -29,6 +29,7 @@ export function EnhancedMetronome({
   showControls = false,
   size = 'md',
   className,
+  audioContextRef, // Accept the prop
 }: MetronomeProps) {
   // Metronome state
   const [isPlaying, setIsPlaying] = useState(propIsPlaying);
