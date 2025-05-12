@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { Header } from "@/components/landing/Header";
 import { HeroSection } from "@/components/landing/HeroSection";
@@ -62,8 +61,8 @@ export default function LandingPage() {
       <Header initialShowNewsFeed={false} />
       <main>
         <HeroSection />
-        <PerformanceSection />
         <YouTubeSection />
+        <PerformanceSection />
         <FeaturesSection />
         <TestimonialSection />
         <CTASection />
