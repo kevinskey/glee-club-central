@@ -8,23 +8,28 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 export function HeaderUtils() {
+  const isMobile = useIsMobile();
+  
   return (
     <>
       <ThemeToggle />
-      <TooltipProvider>
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <div>
-              <Clock />
-            </div>
-          </TooltipTrigger>
-          <TooltipContent>
-            <p>Current time</p>
-          </TooltipContent>
-        </Tooltip>
-      </TooltipProvider>
+      {!isMobile && (
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <div>
+                <Clock />
+              </div>
+            </TooltipTrigger>
+            <TooltipContent>
+              <p>Current time</p>
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
+      )}
     </>
   );
 }

@@ -63,21 +63,23 @@ export function Header() {
             <span>Glee Club</span>
           </Link>
 
-          {/* Metronome Dialog in Header */}
-          <Dialog open={metronomeOpen} onOpenChange={setMetronomeOpen}>
-            <DialogTrigger asChild>
-              <Button variant="ghost" size="icon" className="h-8 w-8">
-                <Music className="h-4 w-4" />
-                <span className="sr-only">Open metronome</span>
-              </Button>
-            </DialogTrigger>
-            <DialogContent className="sm:max-w-md">
-              <DialogHeader>
-                <DialogTitle>Metronome</DialogTitle>
-              </DialogHeader>
-              <EnhancedMetronome showControls={true} size="md" />
-            </DialogContent>
-          </Dialog>
+          {/* Metronome Dialog in Header - hidden on mobile */}
+          {!isMobile && (
+            <Dialog open={metronomeOpen} onOpenChange={setMetronomeOpen}>
+              <DialogTrigger asChild>
+                <Button variant="ghost" size="icon" className="h-8 w-8">
+                  <Music className="h-4 w-4" />
+                  <span className="sr-only">Open metronome</span>
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="sm:max-w-md">
+                <DialogHeader>
+                  <DialogTitle>Metronome</DialogTitle>
+                </DialogHeader>
+                <EnhancedMetronome showControls={true} size="md" />
+              </DialogContent>
+            </Dialog>
+          )}
         </div>
 
         <nav className="flex items-center gap-2 sm:gap-4">

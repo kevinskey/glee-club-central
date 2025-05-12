@@ -61,24 +61,26 @@ export function Header({ initialShowNewsFeed = true }: HeaderProps) {
           <div className="flex items-center gap-1 sm:gap-2">
             <Logo />
             
-            {/* Metronome Dialog in Header */}
-            <Dialog open={metronomeOpen} onOpenChange={setMetronomeOpen}>
-              <DialogTrigger asChild>
-                <Button variant="ghost" size="icon" className="h-8 w-8">
-                  <Music className="h-4 w-4" />
-                  <span className="sr-only">Open metronome</span>
-                </Button>
-              </DialogTrigger>
-              <DialogContent className="sm:max-w-md">
-                <DialogHeader>
-                  <DialogTitle>Metronome</DialogTitle>
-                  <DialogDescription>
-                    Adjust tempo and rhythm settings as needed for your practice.
-                  </DialogDescription>
-                </DialogHeader>
-                <EnhancedMetronome showControls={true} size="md" />
-              </DialogContent>
-            </Dialog>
+            {/* Metronome Dialog in Header - hidden on mobile */}
+            {!isMobile && (
+              <Dialog open={metronomeOpen} onOpenChange={setMetronomeOpen}>
+                <DialogTrigger asChild>
+                  <Button variant="ghost" size="icon" className="h-8 w-8">
+                    <Music className="h-4 w-4" />
+                    <span className="sr-only">Open metronome</span>
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className="sm:max-w-md">
+                  <DialogHeader>
+                    <DialogTitle>Metronome</DialogTitle>
+                    <DialogDescription>
+                      Adjust tempo and rhythm settings as needed for your practice.
+                    </DialogDescription>
+                  </DialogHeader>
+                  <EnhancedMetronome showControls={true} size="md" />
+                </DialogContent>
+              </Dialog>
+            )}
           </div>
           
           {/* Desktop navigation */}
