@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from "react";
-import { PageHeaderWithToggle } from "@/components/ui/page-header-with-toggle";
+import { PageHeader } from "@/components/ui/page-header";
 import { useAuth } from "@/contexts/AuthContext";
 import { Link, useNavigate } from "react-router-dom";
 import { Home } from "lucide-react";
@@ -18,7 +18,7 @@ import { DuesStatusCard } from "@/components/dashboard/DuesStatusCard";
 import { DeveloperTools } from "@/components/dashboard/DeveloperTools";
 import { ResourcesSection } from "@/components/dashboard/ResourcesSection";
 import { AdminDashboardAccess } from "@/components/dashboard/AdminDashboardAccess";
-import { PageHeader } from "@/components/ui/page-header";
+import { GlobalMetronome } from "@/components/ui/global-metronome";
 
 export interface Event {
   id: string;
@@ -90,7 +90,6 @@ const DashboardPageContent = () => {
     
     return (
       <div className="container mx-auto p-4 space-y-8">
-        {/* Replace PageHeaderWithToggle with PageHeader to remove the theme toggle */}
         <PageHeader
           title={`Welcome, ${profile?.first_name || 'Member'}`}
           description="Your Spelman College Glee Club dashboard"
@@ -144,6 +143,7 @@ const DashboardPage = () => {
   return (
     <ErrorBoundary>
       <DashboardPageContent />
+      <GlobalMetronome />
     </ErrorBoundary>
   );
 };

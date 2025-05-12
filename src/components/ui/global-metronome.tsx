@@ -13,19 +13,14 @@ export function GlobalMetronome() {
   const [isVisible, setIsVisible] = useState(true);
   const audioContextRef = useRef<AudioContext | null>(null);
 
-  // Clean up audio context when component is hidden or deactivated
+  // Clean up audio context when component is unmounted or hidden
   useEffect(() => {
-    // Only clean up when needed
-    if (!isVisible || !isActive) {
-      return () => {
-        // Close any existing audio context to free browser resources
-        if (audioContextRef.current && audioContextRef.current.state !== 'closed') {
-          audioContextRef.current.close().catch(console.error);
-          audioContextRef.current = null;
-        }
-      };
-    }
-  }, [isVisible, isActive]);
+    return () => {
+      if (audioContextRef.current && audioContextRef.current.state !== 'closed') {
+        audioContextRef.current.close().catch(console.error);
+      }
+    };
+  }, []);
 
   // Handle visibility toggle
   const toggleVisibility = () => {

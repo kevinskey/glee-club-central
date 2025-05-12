@@ -6,6 +6,7 @@ import { Sidebar } from "@/components/layout/Sidebar";
 import { useAuth } from "@/contexts/AuthContext";
 import { Spinner } from "@/components/ui/spinner";
 import { SidebarProvider } from "@/components/ui/sidebar";
+import { GlobalMetronome } from "@/components/ui/global-metronome";
 
 export default function DashboardLayout() {
   const { isAuthenticated, isLoading } = useAuth();
@@ -37,6 +38,8 @@ export default function DashboardLayout() {
             <Outlet />
           </main>
         </div>
+        
+        <GlobalMetronome />
       </div>
     </SidebarProvider>
   );

@@ -1,65 +1,81 @@
 
-import React from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import React from "react";
+import { Link } from "react-router-dom";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { useNavigate } from "react-router-dom";
-import { 
-  Music, 
-  Headphones,
+import {
+  Music,
+  Calendar,
   CheckSquare,
-  User 
+  Bell,
+  Book,
+  User,
+  FileText
 } from "lucide-react";
 
-export const QuickAccess: React.FC = () => {
-  const navigate = useNavigate();
-  
+export function QuickAccess() {
+  const links = [
+    {
+      icon: <User className="h-4 w-4" />,
+      label: "Profile",
+      href: "/dashboard/profile"
+    },
+    {
+      icon: <Music className="h-4 w-4" />,
+      label: "Sheet Music",
+      href: "/dashboard/sheet-music"
+    },
+    {
+      icon: <Calendar className="h-4 w-4" />,
+      label: "Calendar",
+      href: "/dashboard/calendar"
+    },
+    {
+      icon: <CheckSquare className="h-4 w-4" />,
+      label: "Attendance",
+      href: "/dashboard/attendance"
+    },
+    {
+      icon: <Bell className="h-4 w-4" />,
+      label: "Announcements",
+      href: "/dashboard/announcements"
+    },
+    {
+      icon: <Book className="h-4 w-4" />,
+      label: "Practice",
+      href: "/dashboard/practice"
+    },
+    {
+      icon: <FileText className="h-4 w-4" />,
+      label: "Resources",
+      href: "/dashboard/resources"
+    }
+  ];
+
   return (
-    <Card className="shadow-md">
-      <CardHeader className="pb-2">
-        <CardTitle className="flex items-center gap-2">
-          <Music className="h-5 w-5 text-accent" />
-          <span>Quick Access</span>
-        </CardTitle>
-        <CardDescription>
-          Frequently used resources
-        </CardDescription>
+    <Card>
+      <CardHeader>
+        <CardTitle>Quick Access</CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="grid grid-cols-2 gap-3">
-          <Button 
-            variant="outline" 
-            className="h-auto flex-col py-6 px-3 hover:bg-accent/5 hover:text-accent hover:border-accent/20 min-h-[90px] whitespace-normal text-center"
-            onClick={() => navigate("/dashboard/sheet-music")}
-          >
-            <Music className="h-6 w-6 mb-2 text-accent" />
-            <span className="text-sm">Sheet Music</span>
-          </Button>
-          <Button 
-            variant="outline" 
-            className="h-auto flex-col py-6 px-3 hover:bg-accent/5 hover:text-accent hover:border-accent/20 min-h-[90px] whitespace-normal text-center"
-            onClick={() => navigate("/dashboard/practice")}
-          >
-            <Headphones className="h-6 w-6 mb-2 text-accent" />
-            <span className="text-sm">Practice Tracks</span>
-          </Button>
-          <Button 
-            variant="outline" 
-            className="h-auto flex-col py-6 px-3 hover:bg-accent/5 hover:text-accent hover:border-accent/20 min-h-[90px] whitespace-normal text-center"
-            onClick={() => navigate("/dashboard/attendance")}
-          >
-            <CheckSquare className="h-6 w-6 mb-2 text-accent" />
-            <span className="text-sm">Attendance</span>
-          </Button>
-          <Button 
-            variant="outline" 
-            className="h-auto flex-col py-6 px-3 hover:bg-accent/5 hover:text-accent hover:border-accent/20 min-h-[90px] whitespace-normal text-center"
-            onClick={() => navigate("/dashboard/profile")}
-          >
-            <User className="h-6 w-6 mb-2 text-accent" />
-            <span className="text-sm">My Profile</span>
-          </Button>
+        <div className="grid grid-cols-2 gap-2">
+          {links.map((link, index) => (
+            <Link 
+              key={index} 
+              to={link.href}
+              className="no-underline"
+            >
+              <Button 
+                variant="outline" 
+                className="w-full justify-start flex gap-2 hover:bg-muted"
+              >
+                {link.icon}
+                <span>{link.label}</span>
+              </Button>
+            </Link>
+          ))}
         </div>
       </CardContent>
     </Card>
   );
-};
+}
