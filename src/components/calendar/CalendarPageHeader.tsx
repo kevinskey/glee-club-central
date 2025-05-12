@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Metronome } from "@/components/ui/metronome";
 import { BackButton } from "@/components/ui/back-button";
+import { usePermissions } from "@/hooks/usePermissions";
 import {
   Tooltip,
   TooltipContent,
@@ -18,6 +19,7 @@ interface CalendarPageHeaderProps {
 
 export const CalendarPageHeader = ({ onAddEventClick }: CalendarPageHeaderProps) => {
   const isMobile = useIsMobile();
+  const { isSuperAdmin } = usePermissions();
 
   return (
     <>
@@ -39,13 +41,37 @@ export const CalendarPageHeader = ({ onAddEventClick }: CalendarPageHeaderProps)
           {!isMobile && <Metronome />}
         </h1>
         
-        <div className="flex items-center gap-2 sm:gap-3 mt-3 sm:mt-0">
+        {isSuperAdmin && (
+          <div className="flex items-center gap-2 sm:gap-3 mt-3 sm:mt-0">
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    onClick={onAddEventClick}
+                    className="bg-glee-purple hover:bg-glee-purple/90 text-white hidden sm:flex h-7 sm:h-8 px-2 sm:px-3 text-xs"
+                  >
+                    <Plus className="mr-1 h-3 w-3" />
+                    Add Event
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>Create new calendar event</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+          </div>
+        )}
+      </div>
+
+      {/* Mobile Add Event Button - Only for super admins */}
+      {isSuperAdmin && (
+        <div className="flex justify-end sm:hidden mb-3 sm:mb-4">
           <TooltipProvider>
             <Tooltip>
               <TooltipTrigger asChild>
                 <Button
                   onClick={onAddEventClick}
-                  className="bg-glee-purple hover:bg-glee-purple/90 text-white hidden sm:flex h-7 sm:h-8 px-2 sm:px-3 text-xs"
+                  className="bg-glee-purple hover:bg-glee-purple/90 w-full sm:w-auto text-white h-8 text-xs"
                 >
                   <Plus className="mr-1 h-3 w-3" />
                   Add Event
@@ -57,27 +83,7 @@ export const CalendarPageHeader = ({ onAddEventClick }: CalendarPageHeaderProps)
             </Tooltip>
           </TooltipProvider>
         </div>
-      </div>
-
-      {/* Mobile Add Event Button */}
-      <div className="flex justify-end sm:hidden mb-3 sm:mb-4">
-        <TooltipProvider>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button
-                onClick={onAddEventClick}
-                className="bg-glee-purple hover:bg-glee-purple/90 w-full sm:w-auto text-white h-8 text-xs"
-              >
-                <Plus className="mr-1 h-3 w-3" />
-                Add Event
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent>
-              <p>Create new calendar event</p>
-            </TooltipContent>
-          </Tooltip>
-        </TooltipProvider>
-      </div>
+      )}
     </>
   );
 };

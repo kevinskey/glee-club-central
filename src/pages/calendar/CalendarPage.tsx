@@ -13,6 +13,7 @@ import { useCalendarEventHandlers } from "@/hooks/useCalendarEventHandlers";
 import { toast } from "sonner";
 import { CalendarPageHeader } from "@/components/calendar/CalendarPageHeader";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { usePermissions } from "@/hooks/usePermissions";
 
 const CalendarPage = () => {
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
@@ -26,11 +27,13 @@ const CalendarPage = () => {
   
   const { events, fetchEvents, addEvent, updateEvent, deleteEvent } = useCalendarStore();
   const { isAdmin, profile, isLoading: authLoading } = useAuth();
+  const { isSuperAdmin } = usePermissions();
 
   console.log("CalendarPage rendering with view:", calendarView);
   console.log("Current events count:", events.length);
 
-  const userCanCreate = profile?.role === "admin" || profile?.role === "section_leader";
+  // Only super admins can create events
+  const userCanCreate = isSuperAdmin;
 
   useEffect(() => {
     console.log("CalendarPage - Initializing");

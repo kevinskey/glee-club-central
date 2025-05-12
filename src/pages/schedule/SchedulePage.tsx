@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { PageHeader } from "@/components/ui/page-header";
 import { Calendar, Plus } from "lucide-react";
@@ -12,10 +11,12 @@ import { AddEventForm } from "@/components/calendar/AddEventForm";
 import { EditEventForm } from "@/components/calendar/EditEventForm";
 import { EventDetails } from "@/components/calendar/EventDetails";
 import { toast } from "sonner";
+import { usePermissions } from '@/hooks/usePermissions';
 
 export default function SchedulePage() {
   const [view, setView] = useState<"calendar" | "list">("calendar");
   const { isAuthenticated, profile } = useAuth();
+  const { isSuperAdmin } = usePermissions();
   
   // Initialize state for calendar
   const [date, setDate] = useState<Date | undefined>(new Date());
@@ -27,8 +28,8 @@ export default function SchedulePage() {
   // Get calendar events using the hook
   const { events, loading, addEvent, updateEvent, deleteEvent } = useCalendarEvents();
   
-  // Check if user is admin
-  const isAdmin = profile?.role === "admin";
+  // Check if user is admin - now check for super admin
+  const isAdmin = isSuperAdmin;
 
   // Get days with events for the calendar
   const daysWithEvents = events.map(event => event.start);

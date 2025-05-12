@@ -1,4 +1,3 @@
-
 import React, { useState, useCallback, useMemo } from "react";
 import { Footer } from "@/components/landing/Footer";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -6,6 +5,7 @@ import { useCalendarEvents, CalendarEvent, EventType } from "@/hooks/useCalendar
 import { AddEventForm, EventFormValues } from "@/components/calendar/AddEventForm";
 import { EditEventForm } from "@/components/calendar/EditEventForm";
 import { toast } from "sonner";
+import { usePermissions } from "@/hooks/usePermissions";
 
 // Components
 import { CalendarContainer } from "@/components/calendar/CalendarContainer";
@@ -33,6 +33,9 @@ export default function CalendarPage() {
     daysAhead,
     setDaysAhead
   } = useCalendarEvents();
+  
+  // Use the permissions hook to check for super admin status
+  const { isSuperAdmin } = usePermissions();
   
   // Filter events for the selected date - memoized
   const eventsOnSelectedDate = useMemo(() => {
@@ -125,7 +128,9 @@ export default function CalendarPage() {
   
   // Open add event dialog with current date selected
   const handleOpenAddEvent = () => {
-    setIsAddEventOpen(true);
+    if (isSuperAdmin) {
+      setIsAddEventOpen(true);
+    }
   };
   
   // Get badge color based on event type
@@ -151,6 +156,8 @@ export default function CalendarPage() {
         <div className="container py-8 sm:py-10 md:py-12">
           <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
             <CalendarPageHeader onAddEventClick={handleOpenAddEvent} />
+            
+            {/* Only show Google Calendar toggle for super admins */}
             <GoogleCalendarToggle 
               useGoogleCalendar={useGoogleCalendar}
               toggleGoogleCalendar={toggleGoogleCalendar} 

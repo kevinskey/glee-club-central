@@ -8,6 +8,7 @@ import {
   LayoutList,
   Clock
 } from "lucide-react";
+import { usePermissions } from "@/hooks/usePermissions";
 
 type CalendarView = 'dayGridMonth' | 'timeGridWeek' | 'timeGridDay' | 'listWeek';
 
@@ -19,12 +20,17 @@ interface CalendarHeaderProps {
 }
 
 export function CalendarHeader({ view, onViewChange, onAddEvent, userCanCreate }: CalendarHeaderProps) {
+  const { isSuperAdmin } = usePermissions();
+  
   const viewOptions = [
     { id: 'dayGridMonth', label: 'Month', icon: <LayoutGrid className="h-4 w-4" /> },
     { id: 'timeGridWeek', label: 'Week', icon: <Calendar className="h-4 w-4" /> },
     { id: 'timeGridDay', label: 'Day', icon: <Clock className="h-4 w-4" /> },
     { id: 'listWeek', label: 'Agenda', icon: <LayoutList className="h-4 w-4" /> },
   ] as const;
+
+  // Only allow super admins to see the Add Event button
+  const canAddEvent = isSuperAdmin && userCanCreate;
 
   return (
     <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-4">
@@ -58,7 +64,7 @@ export function CalendarHeader({ view, onViewChange, onAddEvent, userCanCreate }
           ))}
         </div>
         
-        {userCanCreate && (
+        {canAddEvent && (
           <Button 
             onClick={onAddEvent}
             className="w-full sm:w-auto"
