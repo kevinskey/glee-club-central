@@ -1,16 +1,27 @@
-
 import React, { useState } from "react";
+import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Form } from "@/components/ui/form";
 import { Button } from "@/components/ui/button";
-import { toast } from "sonner";
-import { useAuth } from "@/contexts/AuthContext";
-import { supabase } from "@/integrations/supabase/client";
+import { CalendarEvent, EventType } from "@/hooks/useCalendarEvents";
 import { EventFormFields } from "./EventFormFields";
 import { EventImageUpload } from "./EventImageUpload";
-import { CalendarEvent, EventType } from "@/hooks/useCalendarEvents";
-import { formSchema, EventFormValues } from "./AddEventForm";
+import { MobileFitCheck } from "./MobileFitCheck";
+import { checkEventMobileFit } from "@/utils/mobileUtils";
+import { toast } from "sonner";
+
+export const formSchema = z.object({
+  title: z.string().min(2, { message: "Title must be at least 2 characters" }),
+  date: z.date({ required_error: "Please select a date" }),
+  time: z.string().min(1, { message: "Please select a time" }),
+  location: z.string().min(1, { message: "Please enter a location" }),
+  description: z.string().optional(),
+  type: z.enum(["concert", "rehearsal", "tour", "special"], {
+    required_error: "Please select an event type",
+  }),
+  image_url: z.string().optional().nullable(),
+});
 
 interface EditEventFormProps {
   event: CalendarEvent;
@@ -18,119 +29,127 @@ interface EditEventFormProps {
   onCancel: () => void;
 }
 
-export function EditEventForm({ event, onUpdateEvent, onCancel }: EditEventFormProps) {
+export function EditEventForm({
+  event,
+  onUpdateEvent,
+  onCancel,
+}: EditEventFormProps) {
   const [selectedImage, setSelectedImage] = useState<File | null>(null);
-  const [imagePreview, setImagePreview] = useState<string | null>(event.image_url || null);
-  const [isUploading, setIsUploading] = useState(false);
-  const { user } = useAuth();
+  const [imagePreview, setImagePreview] = useState<string | null>(
+    event.image_url || null
+  );
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [mobileFitIssues, setMobileFitIssues] = useState<{ fits: boolean; issues: string[]; suggestions: string[] } | null>(null);
 
-  const form = useForm<EventFormValues>({
+  // Create form with default values from the event
+  const form = useForm({
     resolver: zodResolver(formSchema),
     defaultValues: {
       title: event.title,
-      date: event.start,
+      date: new Date(event.date),
       time: event.time || "",
       location: event.location,
       description: event.description || "",
-      type: event.type as EventType, // Ensure proper type casting
+      type: event.type,
       image_url: event.image_url || null,
     },
   });
 
-  async function onSubmit(values: EventFormValues) {
-    if (!user) {
-      toast.error("You must be logged in to update events");
-      return;
+  // Watch form fields to check mobile fit
+  const title = form.watch('title');
+  const location = form.watch('location');
+  const description = form.watch('description');
+
+  const onSubmit = async (values: any) => {
+    // Check mobile fit before saving
+    const mobileFitCheck = checkEventMobileFit(values.title, values.location, values.description);
+    
+    // If there are mobile fit issues, show a warning but allow continuing
+    if (!mobileFitCheck.fits) {
+      setMobileFitIssues(mobileFitCheck);
+      
+      // Show toast with warning but continue with saving
+      toast.warning("Event may not display optimally on mobile devices", {
+        description: "You can continue saving or go back and make adjustments.",
+        action: {
+          label: "View Details",
+          onClick: () => setMobileFitIssues(mobileFitCheck)
+        }
+      });
     }
     
-    setIsUploading(true);
-    
+    setIsSubmitting(true);
+
     try {
-      // Handle image upload if there's a selected image
-      let imageUrl = values.image_url;
-      
-      if (selectedImage) {
-        try {
-          // Create a unique filename with timestamp and original name
-          const fileExt = selectedImage.name.split('.').pop();
-          const fileName = `${Date.now()}-${Math.random().toString(36).substring(2, 15)}.${fileExt}`;
-          
-          // Upload the file to Supabase storage
-          const { data: uploadData, error: uploadError } = await supabase.storage
-            .from('event-images')
-            .upload(fileName, selectedImage);
-            
-          if (uploadError) {
-            console.error('Image upload error:', uploadError);
-            toast.error('Failed to upload image: ' + uploadError.message);
-            return;
-          }
-          
-          // Get the public URL for the uploaded image
-          const { data: { publicUrl } } = supabase.storage
-            .from('event-images')
-            .getPublicUrl(fileName);
-            
-          imageUrl = publicUrl;
-        } catch (err) {
-          console.error('Error uploading image:', err);
-          toast.error('Failed to upload image');
-          return;
-        }
-      }
-      
-      // Update the event with the form values and image URL
-      const updated = await onUpdateEvent({
-        ...event,
+      const updatedEvent: CalendarEvent = {
+        id: event.id,
         title: values.title,
+        date: values.date,
         start: values.date,
         end: values.date,
-        date: values.date, // Keep compatibility with date field
         time: values.time,
         location: values.location,
-        description: values.description || "",
-        type: values.type as EventType, // Ensure proper type casting
-        image_url: imageUrl
-      });
-      
-      if (updated) {
+        description: values.description,
+        type: values.type,
+        image_url: values.image_url,
+      };
+
+      const success = await onUpdateEvent(updatedEvent);
+      if (success) {
         toast.success("Event updated successfully");
         onCancel();
       }
     } catch (error) {
-      console.error("Error submitting form:", error);
-      toast.error("An error occurred while updating the event");
+      console.error("Error updating event:", error);
+      toast.error("Failed to update event");
     } finally {
-      setIsUploading(false);
+      setIsSubmitting(false);
     }
-  }
+  };
 
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
         <EventFormFields form={form} />
 
-        <EventImageUpload 
+        <EventImageUpload
           form={form}
-          isUploading={isUploading}
+          isUploading={isSubmitting}
           selectedImage={selectedImage}
           setSelectedImage={setSelectedImage}
           imagePreview={imagePreview}
           setImagePreview={setImagePreview}
         />
 
+        {mobileFitIssues && !mobileFitIssues.fits && (
+          <MobileFitCheck 
+            title={title}
+            location={location}
+            description={description}
+          />
+        )}
+
         <div className="flex justify-end gap-2">
-          <Button type="button" variant="outline" onClick={onCancel} className="bg-white dark:bg-gray-700" disabled={isUploading}>
+          <Button
+            type="button"
+            variant="outline"
+            onClick={onCancel}
+            disabled={isSubmitting}
+          >
             Cancel
           </Button>
-          <Button type="submit" className="bg-glee-purple hover:bg-glee-purple/90" disabled={isUploading}>
-            {isUploading ? (
+          <Button
+            type="submit"
+            className="bg-glee-purple hover:bg-glee-purple/90"
+            disabled={isSubmitting}
+          >
+            {isSubmitting ? (
               <>
-                <span className="mr-2">Updating...</span>
-                <div className="h-4 w-4 rounded-full border-2 border-white border-t-transparent animate-spin"></div>
+                <span className="mr-2">Saving...</span>
+                <span className="animate-spin">⏳</span>
               </>
             ) : (
-              'Update Event'
+              "Save Changes"
             )}
           </Button>
         </div>

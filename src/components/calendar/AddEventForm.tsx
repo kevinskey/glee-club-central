@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
@@ -11,6 +10,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { EventFormFields } from "./EventFormFields";
 import { EventImageUpload } from "./EventImageUpload";
 import { EventType } from "@/hooks/useCalendarEvents";
+import { MobileFitCheck } from "./MobileFitCheck";
+import { checkEventMobileFit } from "@/utils/mobileUtils";
 
 export const formSchema = z.object({
   title: z.string().min(2, { message: "Title must be at least 2 characters" }),
@@ -36,6 +37,7 @@ export function AddEventForm({ onAddEvent, onCancel, initialDate }: AddEventForm
   const [selectedImage, setSelectedImage] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [isUploading, setIsUploading] = useState(false);
+  const [mobileFitIssues, setMobileFitIssues] = useState<{ fits: boolean; issues: string[]; suggestions: string[] } | null>(null);
   const { user } = useAuth();
 
   const form = useForm<EventFormValues>({
@@ -57,10 +59,32 @@ export function AddEventForm({ onAddEvent, onCancel, initialDate }: AddEventForm
     }
   }, [initialDate, form]);
 
+  // Watch form fields to check mobile fit
+  const title = form.watch('title');
+  const location = form.watch('location');
+  const description = form.watch('description');
+
   async function onSubmit(values: EventFormValues) {
     if (!user) {
       toast.error("You must be logged in to save events");
       return;
+    }
+    
+    // Check mobile fit before saving
+    const mobileFitCheck = checkEventMobileFit(values.title, values.location, values.description);
+    
+    // If there are mobile fit issues, show a warning but allow continuing
+    if (!mobileFitCheck.fits) {
+      setMobileFitIssues(mobileFitCheck);
+      
+      // Show toast with warning but continue with saving
+      toast.warning("Event may not display optimally on mobile devices", {
+        description: "You can continue saving or go back and make adjustments.",
+        action: {
+          label: "View Details",
+          onClick: () => setMobileFitIssues(mobileFitCheck)
+        }
+      });
     }
     
     setIsUploading(true);
@@ -114,6 +138,7 @@ export function AddEventForm({ onAddEvent, onCancel, initialDate }: AddEventForm
       form.reset();
       setSelectedImage(null);
       setImagePreview(null);
+      setMobileFitIssues(null);
     } catch (error) {
       console.error("Error submitting form:", error);
       toast.error("An error occurred while saving the event");
@@ -135,6 +160,14 @@ export function AddEventForm({ onAddEvent, onCancel, initialDate }: AddEventForm
           imagePreview={imagePreview}
           setImagePreview={setImagePreview}
         />
+
+        {mobileFitIssues && !mobileFitIssues.fits && (
+          <MobileFitCheck 
+            title={title}
+            location={location}
+            description={description}
+          />
+        )}
 
         <div className="flex justify-end gap-2">
           <Button type="button" variant="outline" onClick={onCancel} className="bg-white dark:bg-gray-700" disabled={isUploading}>
