@@ -2,11 +2,13 @@
 import React, { useState } from "react";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { FileIcon, Pencil, Trash2 } from "lucide-react";
+import { FileIcon, Pencil, Trash2, Music, ArrowRight } from "lucide-react";
 import { PDFThumbnail } from "@/components/pdf/PDFThumbnail";
+import { PDFPreview } from "@/components/pdf/PDFPreview";
 import { MediaFile } from "@/types/media";
 import { getMediaType } from "@/utils/mediaUtils";
 import { formatDistanceToNow } from "date-fns";
+import { useNavigate } from "react-router-dom";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -36,6 +38,7 @@ export const MediaFileCard = ({
   canDelete = false
 }: MediaFileCardProps) => {
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const navigate = useNavigate();
   
   // Determine the media type based on file_type
   const mediaType = getMediaType(file.file_type);
@@ -63,12 +66,18 @@ export const MediaFileCard = ({
     }
   };
 
+  // Open in Sheet Music Library
+  const openInSheetMusic = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    navigate(`/dashboard/sheet-music?media_id=${file.id}`);
+  };
+
   return (
     <>
       <Card className="h-full flex flex-col overflow-hidden hover:shadow-md transition-shadow">
         {/* Card Preview/Thumbnail */}
         <div 
-          className="aspect-video bg-muted cursor-pointer overflow-hidden" 
+          className="aspect-video bg-muted cursor-pointer overflow-hidden relative" 
           onClick={handleClick}
         >
           {mediaType === 'image' ? (
@@ -78,10 +87,22 @@ export const MediaFileCard = ({
               className="w-full h-full object-cover"
             />
           ) : mediaType === 'pdf' ? (
-            <PDFThumbnail url={file.file_url} title={file.title || ''} />
+            <PDFPreview 
+              url={file.file_url} 
+              title={file.title || ''} 
+              mediaSourceId={file.id}
+              category={file.category || 'media-library'}
+              isMediaLibraryFile={true}
+            >
+              <PDFThumbnail url={file.file_url} title={file.title || ''} />
+            </PDFPreview>
           ) : (
             <div className="flex items-center justify-center h-full">
-              <FileIcon className="h-16 w-16 text-muted-foreground" />
+              {mediaType === 'audio' ? (
+                <Music className="h-16 w-16 text-muted-foreground" />
+              ) : (
+                <FileIcon className="h-16 w-16 text-muted-foreground" />
+              )}
             </div>
           )}
         </div>
@@ -106,7 +127,7 @@ export const MediaFileCard = ({
         </CardContent>
         
         {/* Card Footer */}
-        <CardFooter className="p-3 pt-0 flex justify-between gap-2">
+        <CardFooter className="p-3 pt-0 flex justify-between gap-2 flex-wrap">
           <Button 
             variant="outline" 
             size="sm" 
@@ -117,6 +138,18 @@ export const MediaFileCard = ({
           </Button>
           
           <div className="flex gap-1">
+            {mediaType === 'pdf' && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={openInSheetMusic}
+                className="flex-nowrap whitespace-nowrap"
+              >
+                <ArrowRight className="h-4 w-4 mr-1" />
+                <span className="hidden sm:inline">Music Library</span>
+              </Button>
+            )}
+            
             {canEdit && onEdit && (
               <Button
                 variant="outline"

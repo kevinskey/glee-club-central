@@ -1,6 +1,5 @@
-
 import React, { useState, useEffect } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { PageHeader } from "@/components/ui/page-header";
 import { FileText, Plus, Upload, FolderOpen, ListMusic, X, TableIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -13,6 +12,7 @@ import { SetlistDrawer } from "@/components/setlist/SetlistDrawer";
 import { useAuth } from "@/contexts/AuthContext";
 import { PDFThumbnail } from "@/components/pdf/PDFThumbnail";
 import { PDFPreview } from "@/components/pdf/PDFPreview";
+import { Spinner } from "@/components/ui/spinner";
 import {
   Select,
   SelectContent,
@@ -39,6 +39,8 @@ interface SheetMusic {
   composer: string;
   file_url: string;
   created_at: string;
+  mediaSourceId: string;
+  category: string;
 }
 
 interface SheetMusicSearchItem extends SearchResultItem {
@@ -60,6 +62,9 @@ export default function SheetMusicPage() {
   const { toast } = useToast();
   const { user } = useAuth();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const mediaId = searchParams.get('media_id');
+  
   const [loading, setLoading] = useState(true);
   const [musicFiles, setMusicFiles] = useState<SheetMusic[]>([]);
   const [filteredFiles, setFilteredFiles] = useState<SheetMusic[]>([]);
@@ -68,6 +73,7 @@ export default function SheetMusicPage() {
   const [isSetlistDrawerOpen, setIsSetlistDrawerOpen] = useState(false);
   const [selectedFiles, setSelectedFiles] = useState<SheetMusic[]>([]);
   const [sortOrder, setSortOrder] = useState<SortOption>("newest");
+  const [highlightedMediaId, setHighlightedMediaId] = useState<string | null>(null);
   
   // State for setlist filtering
   const [availableSetlists, setAvailableSetlists] = useState<Setlist[]>([]);
@@ -137,6 +143,8 @@ export default function SheetMusicPage() {
           composer: file.description || "Unknown Composer",
           file_url: file.file_url,
           created_at: new Date(file.created_at).toLocaleDateString(),
+          mediaSourceId: file.id,
+          category: file.category || "sheet-music"
         }));
       
       console.log(`Found ${pdfFiles.length} PDF files in the media library`);
@@ -150,12 +158,27 @@ export default function SheetMusicPage() {
       );
       setComposers(uniqueComposers);
       
+      // Handle media_id parameter if present
+      if (mediaId) {
+        setHighlightedMediaId(mediaId);
+        
+        // Find the matching file
+        const matchingFile = pdfFiles.find(file => file.mediaSourceId === mediaId);
+        if (matchingFile) {
+          // Scroll to the matching file after render
+          setTimeout(() => {
+            const element = document.getElementById(`sheet-music-${mediaId}`);
+            if (element) {
+              element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+          }, 500);
+        }
+      }
+      
     } catch (error: any) {
       console.error("Error processing sheet music:", error);
       toast({
-        title: "Error loading sheet music",
-        description: error.message || "An unexpected error occurred",
-        variant: "destructive",
+        description: error.message || "An unexpected error occurred"
       });
     } finally {
       setLoading(false);
@@ -451,10 +474,9 @@ export default function SheetMusicPage() {
         </div>
         
         {loading || mediaLoading ? (
-          <div className="grid gap-6 md:grid-cols-3 lg:grid-cols-4">
-            {[1, 2, 3, 4, 5, 6].map((i) => (
-              <div key={i} className="aspect-[3/4] rounded-md bg-muted animate-pulse" />
-            ))}
+          <div className="flex flex-col items-center justify-center p-12">
+            <Spinner size="lg" />
+            <p className="mt-4 text-muted-foreground">Loading sheet music...</p>
           </div>
         ) : filteredFiles.length === 0 ? (
           <div className="flex flex-col items-center justify-center rounded-lg border border-dashed p-8 text-center">
@@ -500,24 +522,34 @@ export default function SheetMusicPage() {
             <TabsContent value="grid">
               <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
                 {filteredFiles.map((file) => (
-                  <PDFPreview 
-                    key={file.id}
-                    url={file.file_url} 
-                    title={file.title}
-                    previewWidth={400}
-                    previewHeight={500}
+                  <div 
+                    key={file.id} 
+                    id={`sheet-music-${file.mediaSourceId}`} 
+                    className={`transition-all duration-300 ${
+                      highlightedMediaId === file.mediaSourceId ? 
+                      'ring-4 ring-glee-purple scale-105 shadow-lg' : ''
+                    }`}
                   >
-                    <Card 
-                      className="overflow-hidden hover:shadow-md transition-shadow cursor-pointer"
-                      onClick={() => viewSheetMusic(file.id)}
+                    <PDFPreview 
+                      url={file.file_url} 
+                      title={file.title}
+                      mediaSourceId={file.mediaSourceId}
+                      category={file.category}
+                      previewWidth={400}
+                      previewHeight={500}
                     >
-                      <PDFThumbnail url={file.file_url} title={file.title} />
-                      <CardContent className="p-3">
-                        <h3 className="font-medium text-sm truncate">{file.title}</h3>
-                        <p className="text-xs text-muted-foreground truncate">{file.composer}</p>
-                      </CardContent>
-                    </Card>
-                  </PDFPreview>
+                      <Card 
+                        className="overflow-hidden hover:shadow-md transition-shadow cursor-pointer"
+                        onClick={() => viewSheetMusic(file.id)}
+                      >
+                        <PDFThumbnail url={file.file_url} title={file.title} />
+                        <CardContent className="p-3">
+                          <h3 className="font-medium text-sm truncate">{file.title}</h3>
+                          <p className="text-xs text-muted-foreground truncate">{file.composer}</p>
+                        </CardContent>
+                      </Card>
+                    </PDFPreview>
+                  </div>
                 ))}
 
                 {/* Add new sheet music card */}
@@ -540,6 +572,7 @@ export default function SheetMusicPage() {
                       <TableHead className="w-12"></TableHead>
                       <TableHead>Title</TableHead>
                       <TableHead>Composer</TableHead>
+                      <TableHead>Category</TableHead>
                       <TableHead>Date Added</TableHead>
                       <TableHead className="text-right">Actions</TableHead>
                     </TableRow>
@@ -548,12 +581,18 @@ export default function SheetMusicPage() {
                     {filteredFiles.map((file) => (
                       <TableRow 
                         key={file.id} 
-                        className="hover:bg-muted/50"
+                        id={`sheet-music-${file.mediaSourceId}`}
+                        className={`hover:bg-muted/50 ${
+                          highlightedMediaId === file.mediaSourceId ? 
+                          'bg-glee-purple/10' : ''
+                        }`}
                       >
                         <TableCell className="p-0 w-12 h-12">
                           <PDFPreview 
                             url={file.file_url} 
                             title={file.title}
+                            mediaSourceId={file.mediaSourceId}
+                            category={file.category}
                             previewWidth={400}
                             previewHeight={500}
                           >
@@ -566,6 +605,11 @@ export default function SheetMusicPage() {
                         </TableCell>
                         <TableCell className="font-medium">{file.title}</TableCell>
                         <TableCell>{file.composer}</TableCell>
+                        <TableCell>
+                          {file.category && (
+                            <Badge variant="outline">{file.category}</Badge>
+                          )}
+                        </TableCell>
                         <TableCell>{file.created_at}</TableCell>
                         <TableCell className="text-right">
                           <Button 

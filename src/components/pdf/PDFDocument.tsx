@@ -1,9 +1,9 @@
-
 import React, { useRef, useEffect, useState } from "react";
-import { Loader2, FileText, Download } from "lucide-react";
+import { Loader2, FileText, Download, Link } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Toggle } from "@/components/ui/toggle";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { Badge } from "@/components/ui/badge";
 
 interface PDFDocumentProps {
   url: string;
@@ -14,6 +14,8 @@ interface PDFDocumentProps {
   onError: () => void;
   error: string | null;
   title: string;
+  mediaSourceId?: string;
+  category?: string;
   children?: React.ReactNode;
 }
 
@@ -26,6 +28,8 @@ export const PDFDocument = ({
   onError,
   error,
   title,
+  mediaSourceId,
+  category,
   children,
 }: PDFDocumentProps) => {
   const iframeRef = useRef<HTMLIFrameElement>(null);
@@ -144,6 +148,13 @@ export const PDFDocument = ({
     setViewMode(prev => prev === 'page' ? 'scroll' : 'page');
   };
 
+  // View in Media Library
+  const goToMediaLibrary = () => {
+    if (mediaSourceId) {
+      window.open(`/dashboard/admin/media?id=${mediaSourceId}`, "_blank");
+    }
+  };
+
   if (!url) {
     return (
       <div className="flex h-full items-center justify-center p-8 text-center">
@@ -171,6 +182,20 @@ export const PDFDocument = ({
 
   return (
     <div className="relative w-full h-full flex flex-col justify-center overflow-hidden">
+      {/* Source Badge */}
+      {mediaSourceId && category && (
+        <div className="absolute top-12 left-2 z-40">
+          <Badge 
+            variant="outline" 
+            className="bg-background/90 cursor-pointer hover:bg-background"
+            onClick={goToMediaLibrary}
+          >
+            <Link className="h-3 w-3 mr-1" />
+            From {category}
+          </Badge>
+        </div>
+      )}
+      
       {/* View Mode Toggle */}
       <div className="absolute top-2 left-2 z-40 bg-background/80 rounded-md shadow-sm">
         <div className="flex items-center gap-2 p-1">

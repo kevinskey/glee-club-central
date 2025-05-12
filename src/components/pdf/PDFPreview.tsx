@@ -1,8 +1,10 @@
 
 import React, { useState } from "react";
 import { PDFDocument } from "./PDFDocument";
-import { FileText } from "lucide-react";
+import { FileText, Link } from "lucide-react";
 import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
+import { Badge } from "@/components/ui/badge";
+import { useNavigate } from "react-router-dom";
 
 interface PDFPreviewProps {
   url: string;
@@ -11,6 +13,9 @@ interface PDFPreviewProps {
   className?: string;
   previewWidth?: number;
   previewHeight?: number;
+  mediaSourceId?: string;
+  category?: string;
+  isMediaLibraryFile?: boolean;
 }
 
 export const PDFPreview = ({
@@ -19,11 +24,15 @@ export const PDFPreview = ({
   children,
   className = "",
   previewWidth = 320,
-  previewHeight = 450
+  previewHeight = 450,
+  mediaSourceId,
+  category,
+  isMediaLibraryFile = false
 }: PDFPreviewProps) => {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const navigate = useNavigate();
   
   const handleLoad = () => {
     setIsLoading(false);
@@ -32,6 +41,13 @@ export const PDFPreview = ({
   const handleError = () => {
     setIsLoading(false);
     setError("Failed to load PDF preview");
+  };
+  
+  const goToMediaLibrary = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (mediaSourceId) {
+      navigate(`/dashboard/admin/media?id=${mediaSourceId}`);
+    }
   };
   
   return (
@@ -53,6 +69,8 @@ export const PDFPreview = ({
               onError={handleError}
               error={error}
               title={title}
+              mediaSourceId={mediaSourceId}
+              category={category}
             />
           ) : (
             <div className="flex flex-col items-center justify-center text-muted-foreground">
