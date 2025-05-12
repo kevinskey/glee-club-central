@@ -13,11 +13,6 @@ import {
 export function MemberPortalDropdown() {
   const navigate = useNavigate();
   
-  const navigateToMemberPortal = () => {
-    console.log("Navigating to member portal/dashboard");
-    navigate("/dashboard");
-  };
-
   const navigateToLogin = () => {
     console.log("Navigating to login");
     navigate("/login");
@@ -39,12 +34,6 @@ export function MemberPortalDropdown() {
           className="hover:bg-glee-spelman hover:text-white"
         >
           Login
-        </DropdownMenuItem>
-        <DropdownMenuItem 
-          onClick={navigateToMemberPortal}
-          className="hover:bg-glee-spelman hover:text-white"
-        >
-          Dashboard
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>

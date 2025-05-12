@@ -27,15 +27,6 @@ export function NavigationLinks({ className, onLinkClick }: NavigationLinksProps
       >
         About Us
       </Link>
-      {isAuthenticated && (
-        <Link
-          to="/dashboard"
-          className="text-md font-medium text-muted-foreground transition-colors hover:text-foreground"
-          onClick={handleLinkClick}
-        >
-          Dashboard
-        </Link>
-      )}
       {!isAuthenticated && (
         <Link
           to="/register/admin"

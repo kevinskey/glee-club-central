@@ -59,16 +59,6 @@ export function MobileMenu({ onClose }: MobileMenuProps) {
         >
           About Us
         </Button>
-        {isAuthenticated && (
-          <Button 
-            variant="ghost" 
-            size="sm" 
-            className="justify-start py-2 hover:bg-glee-spelman hover:text-white" 
-            onClick={() => handleNavigation("/dashboard")}
-          >
-            Dashboard
-          </Button>
-        )}
         {!isAuthenticated && (
           <>
             <Button 
