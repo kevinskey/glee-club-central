@@ -55,9 +55,9 @@ export function MobileMenu({ onClose }: MobileMenuProps) {
           variant="ghost" 
           size="sm" 
           className="justify-start py-2 hover:bg-glee-spelman hover:text-white" 
-          onClick={() => handleNavigation("/about")}
+          onClick={() => handleNavigation("/press-kit")}
         >
-          About Us
+          Press Kit
         </Button>
         {!isAuthenticated && (
           <>

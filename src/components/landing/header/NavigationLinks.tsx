@@ -21,11 +21,11 @@ export function NavigationLinks({ className, onLinkClick }: NavigationLinksProps
   return (
     <nav className={cn("flex gap-6", className)}>
       <Link
-        to="/about"
+        to="/press-kit"
         className="text-md font-medium text-muted-foreground transition-colors hover:text-foreground"
         onClick={handleLinkClick}
       >
-        About Us
+        Press Kit
       </Link>
       {!isAuthenticated && (
         <Link
