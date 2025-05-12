@@ -55,36 +55,36 @@ export const EventFormFields = ({ form }: EventFormFieldsProps) => {
   const description = formMethods.watch('description') || '';
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-3">
       <FormField
         control={form.control}
         name="title"
         render={({ field }) => (
           <FormItem>
-            <FormLabel>Event Title</FormLabel>
+            <FormLabel className="text-sm">Event Title</FormLabel>
             <FormControl>
-              <Input placeholder="Enter event title" {...field} />
+              <Input placeholder="Enter event title" {...field} className="h-9" />
             </FormControl>
-            <FormMessage />
+            <FormMessage className="text-xs" />
           </FormItem>
         )}
       />
 
-      <div className="flex flex-col sm:flex-row gap-4">
+      <div className="flex flex-col sm:flex-row gap-3">
         <div className="flex-1">
           <FormField
             control={form.control}
             name="date"
             render={({ field }) => (
               <FormItem className="flex flex-col">
-                <FormLabel>Date</FormLabel>
+                <FormLabel className="text-sm">Date</FormLabel>
                 <Popover>
                   <PopoverTrigger asChild>
                     <FormControl>
                       <Button
                         variant={"outline"}
                         className={cn(
-                          "w-full pl-3 text-left font-normal",
+                          "w-full h-9 pl-3 text-left font-normal text-sm",
                           !field.value && "text-muted-foreground"
                         )}
                       >
@@ -109,7 +109,7 @@ export const EventFormFields = ({ form }: EventFormFieldsProps) => {
                     />
                   </PopoverContent>
                 </Popover>
-                <FormMessage />
+                <FormMessage className="text-xs" />
               </FormItem>
             )}
           />
@@ -121,11 +121,11 @@ export const EventFormFields = ({ form }: EventFormFieldsProps) => {
             name="time"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Time</FormLabel>
+                <FormLabel className="text-sm">Time</FormLabel>
                 <FormControl>
-                  <Input type="time" {...field} />
+                  <Input type="time" {...field} className="h-9 text-sm" />
                 </FormControl>
-                <FormMessage />
+                <FormMessage className="text-xs" />
               </FormItem>
             )}
           />
@@ -137,11 +137,11 @@ export const EventFormFields = ({ form }: EventFormFieldsProps) => {
         name="location"
         render={({ field }) => (
           <FormItem>
-            <FormLabel>Location</FormLabel>
+            <FormLabel className="text-sm">Location</FormLabel>
             <FormControl>
-              <Input placeholder="Event location" {...field} />
+              <Input placeholder="Event location" {...field} className="h-9 text-sm" />
             </FormControl>
-            <FormMessage />
+            <FormMessage className="text-xs" />
           </FormItem>
         )}
       />
@@ -151,10 +151,10 @@ export const EventFormFields = ({ form }: EventFormFieldsProps) => {
         name="type"
         render={({ field }) => (
           <FormItem>
-            <FormLabel>Event Type</FormLabel>
+            <FormLabel className="text-sm">Event Type</FormLabel>
             <Select onValueChange={field.onChange} defaultValue={field.value}>
               <FormControl>
-                <SelectTrigger>
+                <SelectTrigger className="h-9 text-sm">
                   <SelectValue placeholder="Select event type" />
                 </SelectTrigger>
               </FormControl>
@@ -165,7 +165,7 @@ export const EventFormFields = ({ form }: EventFormFieldsProps) => {
                 <SelectItem value="special">Special Event</SelectItem>
               </SelectContent>
             </Select>
-            <FormMessage />
+            <FormMessage className="text-xs" />
           </FormItem>
         )}
       />
@@ -175,15 +175,15 @@ export const EventFormFields = ({ form }: EventFormFieldsProps) => {
         name="description"
         render={({ field }) => (
           <FormItem>
-            <FormLabel>Description</FormLabel>
+            <FormLabel className="text-sm">Description</FormLabel>
             <FormControl>
               <Textarea
                 placeholder="Event description"
-                className="min-h-[120px]"
+                className="min-h-[80px] text-sm resize-none"
                 {...field}
               />
             </FormControl>
-            <FormMessage />
+            <FormMessage className="text-xs" />
           </FormItem>
         )}
       />
@@ -193,7 +193,7 @@ export const EventFormFields = ({ form }: EventFormFieldsProps) => {
           type="button"
           variant="outline"
           size="sm"
-          className="mt-2 text-xs"
+          className="mt-1 text-xs"
           onClick={() => setShowMobileFit(!showMobileFit)}
         >
           <Smartphone className="mr-1 h-3 w-3" />

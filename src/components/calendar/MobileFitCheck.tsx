@@ -1,77 +1,63 @@
 
 import React from 'react';
-import { AlertCircle, CheckCircle, Info } from 'lucide-react';
+import { AlertCircle } from 'lucide-react';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { checkEventMobileFit } from '@/utils/mobileUtils';
 
 interface MobileFitCheckProps {
   title: string;
   location: string;
-  description?: string;
+  description: string;
   showPreview?: boolean;
 }
 
 export function MobileFitCheck({ title, location, description, showPreview = false }: MobileFitCheckProps) {
-  const { fits, issues, suggestions } = checkEventMobileFit(title, location, description);
+  const result = checkEventMobileFit(title, location, description);
   
-  if (fits && !showPreview) return null;
+  if (result.fits) {
+    return (
+      <div className="mt-2 p-2 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-900 rounded-md">
+        <p className="text-xs text-green-700 dark:text-green-400">
+          ✓ Content will display well on mobile devices
+        </p>
+      </div>
+    );
+  }
   
   return (
-    <div className="mt-4 rounded-md border p-4 bg-gray-50 dark:bg-gray-800">
-      <div className="flex items-center mb-2">
-        <div className="mr-2">
-          {fits ? (
-            <CheckCircle className="h-5 w-5 text-green-500" />
-          ) : (
-            <AlertCircle className="h-5 w-5 text-amber-500" />
-          )}
-        </div>
-        <h4 className="font-medium text-sm">
-          {fits ? "Mobile-friendly content ✓" : "Mobile display issues detected"}
-        </h4>
-      </div>
-      
-      {!fits && (
-        <div className="space-y-2 ml-7">
-          <ul className="text-xs space-y-1 text-gray-600 dark:text-gray-300">
-            {issues.map((issue, index) => (
-              <li key={`issue-${index}`} className="flex items-start">
-                <span className="mr-1">•</span>
-                {issue}
-              </li>
-            ))}
-          </ul>
-          
-          <div className="text-xs text-gray-600 dark:text-gray-300">
-            <p className="font-medium">Suggestions:</p>
-            <ul className="space-y-1 ml-1">
-              {suggestions.map((suggestion, index) => (
-                <li key={`suggestion-${index}`} className="flex items-start">
-                  <span className="mr-1">-</span>
-                  {suggestion}
-                </li>
+    <div className="mt-2">
+      <Alert variant="destructive" className="p-3">
+        <AlertCircle className="h-4 w-4" />
+        <AlertTitle className="text-xs font-medium">Mobile display issues detected</AlertTitle>
+        <AlertDescription className="text-xs mt-1">
+          {result.issues.length > 0 && (
+            <ul className="list-disc pl-4 space-y-1">
+              {result.issues.map((issue, i) => (
+                <li key={i}>{issue}</li>
               ))}
             </ul>
-          </div>
-        </div>
-      )}
-      
-      {showPreview && fits && (
-        <div className="text-xs text-gray-600 dark:text-gray-300 ml-7">
-          <p>Your event content will display well on mobile devices.</p>
-        </div>
-      )}
+          )}
+          
+          {result.suggestions.length > 0 && (
+            <div className="mt-2">
+              <p className="font-medium">Suggestions:</p>
+              <ul className="list-disc pl-4 space-y-1">
+                {result.suggestions.map((suggestion, i) => (
+                  <li key={i}>{suggestion}</li>
+                ))}
+              </ul>
+            </div>
+          )}
+        </AlertDescription>
+      </Alert>
       
       {showPreview && (
-        <div className="mt-3 border rounded-lg p-2 mx-auto max-w-[320px] bg-white dark:bg-gray-900">
-          <div className="text-xs text-gray-500 mb-1">Mobile preview:</div>
-          <div className="mockup-phone border-2">
-            <div className="phone-content p-2 overflow-hidden">
-              <div className="text-sm font-medium truncate">{title}</div>
-              <div className="text-xs text-gray-500 truncate">{location}</div>
-              {description && (
-                <div className="text-xs mt-1 line-clamp-2">{description}</div>
-              )}
-            </div>
+        <div className="mt-3">
+          <p className="text-xs font-semibold mb-1">Mobile Preview:</p>
+          <div className="border border-gray-200 dark:border-gray-700 rounded-md p-2 bg-white dark:bg-gray-800 mx-auto" style={{ width: '260px', maxWidth: '100%' }}>
+            <div className="text-sm font-semibold truncate">{title || 'Event Title'}</div>
+            <div className="text-xs text-gray-500 dark:text-gray-400 truncate">{location || 'Location'}</div>
+            <div className="text-xs mt-1 line-clamp-2">{description || 'Event description'}</div>
           </div>
         </div>
       )}

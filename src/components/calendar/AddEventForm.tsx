@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
@@ -148,7 +149,7 @@ export function AddEventForm({ onAddEvent, onCancel, initialDate }: AddEventForm
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 px-1">
         <EventFormFields form={form} />
 
         <EventImageUpload 
@@ -169,14 +170,14 @@ export function AddEventForm({ onAddEvent, onCancel, initialDate }: AddEventForm
         )}
 
         <div className="flex justify-end gap-2">
-          <Button type="button" variant="outline" onClick={onCancel} className="bg-white dark:bg-gray-700" disabled={isUploading}>
+          <Button type="button" variant="outline" onClick={onCancel} className="bg-white dark:bg-gray-700 text-sm px-3 py-1 h-8" disabled={isUploading}>
             Cancel
           </Button>
-          <Button type="submit" className="bg-glee-purple hover:bg-glee-purple/90" disabled={isUploading}>
+          <Button type="submit" className="bg-glee-purple hover:bg-glee-purple/90 text-sm px-3 py-1 h-8" disabled={isUploading}>
             {isUploading ? (
               <>
                 <span className="mr-2">Uploading...</span>
-                <div className="h-4 w-4 rounded-full border-2 border-white border-t-transparent animate-spin"></div>
+                <div className="h-3 w-3 rounded-full border-2 border-white border-t-transparent animate-spin"></div>
               </>
             ) : (
               'Save Event'
