@@ -29,7 +29,7 @@ export function ThemeToggle() {
             className="rounded-full transition-colors hover:bg-accent/10 h-8 w-8"
             aria-label={ariaLabel}
           >
-            <Icon className="h-4 w-4 text-glee-spelman" />
+            <Icon className="h-5 w-5 text-foreground" />
             <span className="sr-only">{ariaLabel}</span>
           </Button>
         </TooltipTrigger>

@@ -47,7 +47,7 @@ export function Header() {
 
   return (
     <header className="bg-background sticky top-0 z-50 w-full border-b">
-      <div className="container flex h-14 sm:h-16 items-center justify-between px-2">
+      <div className="container flex h-16 items-center justify-between px-2">
         <div className="flex items-center gap-1 sm:gap-2">
           <Button 
             variant="ghost" 
@@ -55,12 +55,12 @@ export function Header() {
             className="md:hidden" 
             onClick={toggleSidebar}
           >
-            <Menu className="h-5 w-5" />
+            <Menu className="h-6 w-6 text-foreground" />
             <span className="sr-only">Toggle sidebar</span>
           </Button>
           <Link to="/" className="font-bold flex items-center gap-1 sm:gap-2 hover:text-primary transition-colors">
-            <Icons.logo className="h-5 sm:h-6 w-auto" />
-            <span>Glee Club</span>
+            <Icons.logo className={`${isMobile ? "h-8" : "h-6"} w-auto`} />
+            <span className={`${isMobile ? "text-xl" : ""} text-foreground`}>Glee Club</span>
           </Link>
 
           {/* Metronome Dialog in Header - hidden on mobile */}
@@ -68,7 +68,7 @@ export function Header() {
             <Dialog open={metronomeOpen} onOpenChange={setMetronomeOpen}>
               <DialogTrigger asChild>
                 <Button variant="ghost" size="icon" className="h-8 w-8">
-                  <Music className="h-4 w-4" />
+                  <Music className="h-4 w-4 text-foreground" />
                   <span className="sr-only">Open metronome</span>
                 </Button>
               </DialogTrigger>
@@ -88,7 +88,7 @@ export function Header() {
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" size="icon">
-                <User className="h-4 sm:h-5 w-4 sm:w-5" />
+                <User className="h-5 w-5 text-foreground" />
                 <span className="sr-only">User Menu</span>
               </Button>
             </DropdownMenuTrigger>

@@ -8,17 +8,19 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 export function Logo() {
   const navigate = useNavigate();
+  const isMobile = useIsMobile();
   
   return (
     <TooltipProvider>
       <Tooltip>
         <TooltipTrigger asChild>
           <div className="flex items-center gap-2 cursor-pointer" onClick={() => navigate("/")}>
-            <Icons.logo className="h-6 w-auto text-glee-purple" />
-            <span className="font-playfair text-lg font-semibold text-glee-purple">
+            <Icons.logo className={`${isMobile ? "h-8" : "h-6"} w-auto`} />
+            <span className={`font-playfair ${isMobile ? "text-xl" : "text-lg"} font-semibold text-foreground`}>
               Glee World
             </span>
           </div>

@@ -20,13 +20,13 @@ export function MobileMenuToggle({ isOpen, onToggle }: MobileMenuToggleProps) {
         <TooltipTrigger asChild>
           <button 
             onClick={onToggle}
-            className="p-2 text-glee-purple"
+            className="p-2 text-foreground"
             aria-label={isOpen ? "Close menu" : "Open menu"}
           >
             {isOpen ? (
-              <X className="h-5 w-5" />
+              <X className="h-6 w-6" />
             ) : (
-              <Menu className="h-5 w-5" />
+              <Menu className="h-6 w-6" />
             )}
           </button>
         </TooltipTrigger>

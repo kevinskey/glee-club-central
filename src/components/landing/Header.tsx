@@ -57,7 +57,7 @@ export function Header({ initialShowNewsFeed = true }: HeaderProps) {
   return (
     <>
       <header className="sticky top-0 z-50 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-        <div className="container px-2 flex h-14 sm:h-16 items-center justify-between">
+        <div className="container px-2 flex h-16 items-center justify-between">
           <div className="flex items-center gap-1 sm:gap-2">
             <Logo />
             
@@ -66,7 +66,7 @@ export function Header({ initialShowNewsFeed = true }: HeaderProps) {
               <Dialog open={metronomeOpen} onOpenChange={setMetronomeOpen}>
                 <DialogTrigger asChild>
                   <Button variant="ghost" size="icon" className="h-8 w-8">
-                    <Music className="h-4 w-4" />
+                    <Music className="h-4 w-4 text-foreground" />
                     <span className="sr-only">Open metronome</span>
                   </Button>
                 </DialogTrigger>
