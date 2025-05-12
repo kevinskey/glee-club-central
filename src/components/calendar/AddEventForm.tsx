@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
@@ -7,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
-import { EventFormFields } from "./EventFormFields";
+import { EventFormFields, EventFormValues } from "./EventFormFields";
 import { EventImageUpload } from "./EventImageUpload";
 import { EventType } from "@/hooks/useCalendarEvents";
 import { MobileFitCheck } from "./MobileFitCheck";
@@ -19,13 +20,11 @@ export const formSchema = z.object({
   time: z.string().min(1, { message: "Please select a time" }),
   location: z.string().min(1, { message: "Please enter a location" }),
   description: z.string().optional(),
-  type: z.enum(["concert", "rehearsal", "tour", "special"], {
+  type: z.enum(["concert", "rehearsal", "sectional", "special"], {
     required_error: "Please select an event type",
   }),
   image_url: z.string().optional().nullable(),
 });
-
-export type EventFormValues = z.infer<typeof formSchema>;
 
 interface AddEventFormProps {
   onAddEvent: (event: EventFormValues & { start: Date, end: Date }) => void;
@@ -49,6 +48,7 @@ export function AddEventForm({ onAddEvent, onCancel, initialDate }: AddEventForm
       location: "",
       description: "",
       type: "concert" as EventType,
+      image_url: null,
     },
   });
 
