@@ -66,7 +66,7 @@ export function Header({ initialShowNewsFeed = true }: HeaderProps) {
         <div className="flex items-center gap-2">
           <Logo />
           
-          {/* Metronome Icon (moved to left) */}
+          {/* Metronome Icon (on left) */}
           <Dialog open={metronomeOpen} onOpenChange={setMetronomeOpen}>
             <DialogTrigger asChild>
               <Button 
@@ -91,9 +91,9 @@ export function Header({ initialShowNewsFeed = true }: HeaderProps) {
           </Dialog>
         </div>
         
-        {/* Desktop navigation - moved to right side and increased size */}
+        {/* Right side navigation with increased size */}
         <div className="flex items-center gap-4">
-          <NavigationLinks className="text-lg" />
+          <NavigationLinks className="hidden md:flex text-lg" />
           <HeaderUtils />
           <MemberPortalDropdown />
         </div>
