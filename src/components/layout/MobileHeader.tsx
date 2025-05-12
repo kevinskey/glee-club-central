@@ -51,7 +51,9 @@ export function MobileHeader() {
     
     if (isDashboardPath) {
       // For dashboard pages, use the sidebar's setOpenMobile function
-      setOpenMobile(prev => !prev);
+      // Fix: Pass a direct boolean value instead of a function
+      const currentMobileState = useSidebar().openMobile;
+      setOpenMobile(!currentMobileState);
     } else {
       // For public pages, toggle our local mobile menu state
       toggleMobileMenu();
