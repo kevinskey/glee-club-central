@@ -21,11 +21,6 @@ export function YouTubeSection() {
   const [selectedVideo, setSelectedVideo] = useState<string | null>(null);
   const isMobile = useIsMobile();
   
-  // Don't render on mobile devices
-  if (isMobile) {
-    return null;
-  }
-  
   const handleVideoClick = (videoId: string) => {
     setSelectedVideo(videoId);
   };

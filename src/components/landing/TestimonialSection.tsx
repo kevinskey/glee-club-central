@@ -6,11 +6,6 @@ import { useIsMobile } from "@/hooks/use-mobile";
 export function TestimonialSection() {
   const isMobile = useIsMobile();
   
-  // Don't render on mobile devices
-  if (isMobile) {
-    return null;
-  }
-  
   return (
     <section className="py-8 sm:py-12 md:py-16 lg:py-20 bg-glee-purple/5 dark:bg-glee-light">
       <div className="container px-4 md:px-6 lg:px-8">
