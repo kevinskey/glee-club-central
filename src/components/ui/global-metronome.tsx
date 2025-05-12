@@ -48,6 +48,7 @@ export function GlobalMetronome() {
           size="icon"
           className="bg-background/80 backdrop-blur"
           onClick={toggleVisibility}
+          aria-label="Show metronome"
         >
           <Music className="h-4 w-4" />
         </Button>
@@ -95,6 +96,7 @@ export function GlobalMetronome() {
                 size="sm"
                 className="h-8 w-8 p-0"
                 onClick={toggleVisibility}
+                aria-label="Hide metronome"
               >
                 <X className="h-3.5 w-3.5" />
               </Button>

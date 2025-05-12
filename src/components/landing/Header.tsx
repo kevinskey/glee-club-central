@@ -17,6 +17,7 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
+  DialogDescription,
 } from "@/components/ui/dialog";
 
 interface HeaderProps {
@@ -71,6 +72,9 @@ export function Header({ initialShowNewsFeed = true }: HeaderProps) {
               <DialogContent className="sm:max-w-md">
                 <DialogHeader>
                   <DialogTitle>Metronome</DialogTitle>
+                  <DialogDescription>
+                    Adjust tempo and rhythm settings as needed for your practice.
+                  </DialogDescription>
                 </DialogHeader>
                 <EnhancedMetronome showControls={true} size="md" />
               </DialogContent>
