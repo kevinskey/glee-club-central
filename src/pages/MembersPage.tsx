@@ -83,12 +83,27 @@ export default function MemberDirectoryPage() {
     }
   };
 
-  // Handle deleting a member
-  const handleDeleteClick = (member: User) => {
-    console.log("Requesting delete for member ID:", member.id);
-    setMemberToDelete(member.id);
-    setMemberToDeleteName(`${member.first_name || ''} ${member.last_name || ''}`.trim() || 'this member');
-    setIsDeleteDialogOpen(true);
+  // Modified to work with both User objects and string IDs
+  const handleDeleteClick = (memberIdOrObject: string | User) => {
+    console.log("Requesting delete for member:", memberIdOrObject);
+    let memberId: string;
+    let member: User | undefined;
+    
+    // Check if we received a string ID or User object
+    if (typeof memberIdOrObject === 'string') {
+      memberId = memberIdOrObject;
+      member = members.find(m => m.id === memberId);
+    } else {
+      // It's a User object
+      memberId = memberIdOrObject.id;
+      member = memberIdOrObject;
+    }
+    
+    if (member) {
+      setMemberToDelete(memberId);
+      setMemberToDeleteName(`${member.first_name || ''} ${member.last_name || ''}`.trim() || 'this member');
+      setIsDeleteDialogOpen(true);
+    }
   };
   
   const handleConfirmDelete = async () => {
