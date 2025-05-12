@@ -14,10 +14,17 @@ import {
   DialogTitle,
   DialogDescription
 } from '@/components/ui/dialog';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 export function YouTubeSection() {
   const { videos, isLoading, error } = useYouTubeData();
   const [selectedVideo, setSelectedVideo] = useState<string | null>(null);
+  const isMobile = useIsMobile();
+  
+  // Don't render on mobile devices
+  if (isMobile) {
+    return null;
+  }
   
   const handleVideoClick = (videoId: string) => {
     setSelectedVideo(videoId);

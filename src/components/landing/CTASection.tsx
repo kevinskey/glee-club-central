@@ -8,6 +8,11 @@ export function CTASection() {
   const navigate = useNavigate();
   const isMobile = useIsMobile();
   
+  // Don't render on mobile devices
+  if (isMobile) {
+    return null;
+  }
+  
   return (
     <section className="relative py-8 sm:py-10 md:py-14 w-full bg-glee-dark text-white overflow-hidden">
       <div className="absolute inset-0 opacity-20">

@@ -10,6 +10,11 @@ export function FeaturesSection() {
   const navigate = useNavigate();
   const isMobile = useIsMobile();
   
+  // Don't render on mobile devices
+  if (isMobile) {
+    return null;
+  }
+  
   return (
     <section className="py-12 md:py-20 bg-white dark:bg-glee-dark">
       <div className="container px-2 md:px-8">
