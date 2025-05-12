@@ -14,13 +14,17 @@ const HomeLayout: React.FC = () => {
     <>
       <Toaster />
       <SidebarProvider>
-        {/* Show mobile header on mobile devices and standard header on larger screens */}
-        {isMobile ? (
-          <MobileHeader />
-        ) : (
-          <Header initialShowNewsFeed={false} />
-        )}
-        <Outlet />
+        <div className="min-h-screen flex flex-col bg-background w-full">
+          {/* Show mobile header on mobile devices and standard header on larger screens */}
+          {isMobile ? (
+            <MobileHeader />
+          ) : (
+            <Header initialShowNewsFeed={false} />
+          )}
+          <div className="flex-1">
+            <Outlet />
+          </div>
+        </div>
       </SidebarProvider>
     </>
   );

@@ -16,7 +16,7 @@ export function MobileHeader() {
   const navigate = useNavigate();
   const isMobile = useIsMobile();
   const location = useLocation();
-  const { toggleSidebar, setOpenMobile, openMobile } = useSidebar();
+  const { setOpenMobile, openMobile } = useSidebar();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [metronomeOpen, setMetronomeOpen] = useState(false);
   const audioContextRef = useRef<AudioContext | null>(null);
