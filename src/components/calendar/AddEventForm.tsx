@@ -101,16 +101,24 @@ export function AddEventForm({ onAddEvent, onCancel, initialDate }: AddEventForm
           const fileExt = selectedImage.name.split('.').pop();
           const fileName = `${Date.now()}-${Math.random().toString(36).substring(2, 15)}.${fileExt}`;
           
+          console.log("Uploading image to Supabase:", fileName);
+          
           // Upload the file to Supabase storage
           const { data: uploadData, error: uploadError } = await supabase.storage
             .from('event-images')
-            .upload(fileName, selectedImage);
+            .upload(fileName, selectedImage, {
+              cacheControl: '3600',
+              upsert: false
+            });
             
           if (uploadError) {
             console.error('Image upload error:', uploadError);
             toast.error('Failed to upload image: ' + uploadError.message);
+            setIsUploading(false);
             return;
           }
+          
+          console.log("Image uploaded successfully:", uploadData);
           
           // Get the public URL for the uploaded image
           const { data: { publicUrl } } = supabase.storage
@@ -118,9 +126,12 @@ export function AddEventForm({ onAddEvent, onCancel, initialDate }: AddEventForm
             .getPublicUrl(fileName);
             
           imageUrl = publicUrl;
+          console.log("Image public URL:", imageUrl);
+          
         } catch (err) {
           console.error('Error uploading image:', err);
           toast.error('Failed to upload image');
+          setIsUploading(false);
           return;
         }
       }
@@ -151,7 +162,7 @@ export function AddEventForm({ onAddEvent, onCancel, initialDate }: AddEventForm
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-3 px-1 max-h-[65vh] overflow-y-auto pb-2">
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-3 px-1 max-h-[70vh] overflow-y-auto pb-16">
         <EventFormFields form={form} />
 
         <EventImageUpload 
@@ -171,7 +182,7 @@ export function AddEventForm({ onAddEvent, onCancel, initialDate }: AddEventForm
           />
         )}
 
-        <div className="flex justify-end gap-2 sticky bottom-0 pt-2 bg-white dark:bg-gray-800">
+        <div className="flex justify-end gap-2 sticky bottom-0 pt-2 bg-white dark:bg-gray-800 border-t border-gray-100 dark:border-gray-700">
           <Button type="button" variant="outline" onClick={onCancel} className="bg-white dark:bg-gray-700 text-sm px-3 py-1 h-8" disabled={isUploading}>
             Cancel
           </Button>

@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { FormControl, FormField, FormItem, FormLabel } from "@/components/ui/form";
 import { ImageIcon, Upload, X } from "lucide-react";
 import { EventFormValues } from "./EventFormFields";
+import { toast } from "sonner";
 
 interface EventImageUploadProps {
   form: UseFormReturn<EventFormValues>;
@@ -30,11 +31,18 @@ export function EventImageUpload({
     if (file) {
       // Check file size (limit to 5MB)
       if (file.size > 5 * 1024 * 1024) {
-        alert("File size exceeds 5MB limit.");
+        toast.error("File size exceeds 5MB limit.");
+        return;
+      }
+
+      // Check file type
+      if (!file.type.match('image/(jpeg|jpg|png|gif)')) {
+        toast.error("Only JPEG, PNG and GIF images are allowed.");
         return;
       }
 
       setSelectedImage(file);
+      form.setValue("image_url", null);
 
       // Create a preview URL
       const reader = new FileReader();
@@ -62,8 +70,8 @@ export function EventImageUpload({
           <FormControl>
             <div className="space-y-1">
               {!imagePreview && !field.value ? (
-                <div className="flex flex-col items-center justify-center border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-2 text-center">
-                  <ImageIcon className="h-6 w-6 mb-1 text-gray-400" />
+                <div className="flex flex-col items-center justify-center border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-1 text-center">
+                  <ImageIcon className="h-5 w-5 mb-1 text-gray-400" />
                   <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">
                     PNG, JPG or GIF (max. 5MB)
                   </p>
@@ -92,13 +100,13 @@ export function EventImageUpload({
                   <img
                     src={imagePreview || field.value || ""}
                     alt="Event image preview"
-                    className="w-full h-24 object-cover rounded-lg"
+                    className="w-full h-20 object-cover rounded-lg"
                   />
                   <Button
                     type="button"
                     size="icon"
                     variant="destructive"
-                    className="absolute top-2 right-2 h-6 w-6"
+                    className="absolute top-1 right-1 h-5 w-5"
                     onClick={handleRemoveImage}
                     disabled={isUploading}
                   >

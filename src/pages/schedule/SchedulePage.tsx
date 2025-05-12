@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { PageHeader } from "@/components/ui/page-header";
 import { Calendar, Plus } from "lucide-react";
@@ -12,11 +13,13 @@ import { EditEventForm } from "@/components/calendar/EditEventForm";
 import { EventDetails } from "@/components/calendar/EventDetails";
 import { toast } from "sonner";
 import { usePermissions } from '@/hooks/usePermissions';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 export default function SchedulePage() {
   const [view, setView] = useState<"calendar" | "list">("calendar");
   const { isAuthenticated, profile } = useAuth();
   const { isSuperAdmin } = usePermissions();
+  const isMobile = useIsMobile();
   
   // Initialize state for calendar
   const [date, setDate] = useState<Date | undefined>(new Date());
@@ -41,7 +44,7 @@ export default function SchedulePage() {
         return "bg-glee-purple hover:bg-glee-purple/90";
       case "rehearsal":
         return "bg-blue-500 hover:bg-blue-500/90";
-      case "tour":
+      case "sectional":
         return "bg-green-500 hover:bg-green-500/90";
       case "special":
         return "bg-amber-500 hover:bg-amber-500/90";
@@ -149,25 +152,27 @@ export default function SchedulePage() {
         </div>
       </div>
 
-      {/* Add Event Dialog - Limited to 90% viewport width */}
+      {/* Add Event Dialog with improved mobile handling */}
       <Dialog open={isAddEventOpen} onOpenChange={setIsAddEventOpen}>
-        <DialogContent className="w-[90vw] max-w-[550px]">
+        <DialogContent className={`${isMobile ? 'w-[95vw] max-h-[85vh]' : 'w-[90vw]'} max-w-[550px]`}>
           <DialogHeader>
             <DialogTitle>Add New Event</DialogTitle>
           </DialogHeader>
-          <AddEventForm 
-            onAddEvent={handleAddEvent}
-            onCancel={() => setIsAddEventOpen(false)}
-            initialDate={date}
-          />
+          <div className="overflow-hidden">
+            <AddEventForm 
+              onAddEvent={handleAddEvent}
+              onCancel={() => setIsAddEventOpen(false)}
+              initialDate={date}
+            />
+          </div>
         </DialogContent>
       </Dialog>
 
-      {/* View/Edit Event Dialog - Also limited to 90% viewport width */}
+      {/* View/Edit Event Dialog - Also with improved mobile handling */}
       {selectedEvent && (
         <>
           <Dialog open={isViewEventOpen} onOpenChange={setIsViewEventOpen}>
-            <DialogContent className="w-[90vw] max-w-[550px]">
+            <DialogContent className={`${isMobile ? 'w-[95vw] max-h-[85vh]' : 'w-[90vw]'} max-w-[550px]`}>
               <DialogHeader>
                 <DialogTitle>Event Details</DialogTitle>
               </DialogHeader>
@@ -184,15 +189,17 @@ export default function SchedulePage() {
           </Dialog>
 
           <Dialog open={isEditEventOpen} onOpenChange={setIsEditEventOpen}>
-            <DialogContent className="w-[90vw] max-w-[550px]">
+            <DialogContent className={`${isMobile ? 'w-[95vw] max-h-[85vh]' : 'w-[90vw]'} max-w-[550px]`}>
               <DialogHeader>
                 <DialogTitle>Edit Event</DialogTitle>
               </DialogHeader>
-              <EditEventForm 
-                event={selectedEvent} 
-                onUpdateEvent={handleUpdateEvent}
-                onCancel={() => setIsEditEventOpen(false)}
-              />
+              <div className="overflow-hidden">
+                <EditEventForm 
+                  event={selectedEvent} 
+                  onUpdateEvent={handleUpdateEvent}
+                  onCancel={() => setIsEditEventOpen(false)}
+                />
+              </div>
             </DialogContent>
           </Dialog>
         </>
