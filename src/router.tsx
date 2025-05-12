@@ -1,3 +1,4 @@
+
 import {
   createBrowserRouter,
 } from "react-router-dom";
@@ -17,7 +18,7 @@ import AnalyticsPage from "./pages/admin/AnalyticsPage";
 import SiteSettingsPage from "./pages/admin/SiteSettingsPage";
 import LoginPage from "./pages/LoginPage";
 import RequireAuth from "./components/auth/RequireAuth";
-import MembersPage from "./pages/MembersPage";
+import MemberDirectoryPage from "./pages/MembersPage";
 import AdminMembersPage from "./pages/AdminMembersPage";
 import SheetMusicPage from "./pages/SheetMusicPage";
 import SheetMusicViewerPage from "./pages/sheet-music/SheetMusicPage";
@@ -82,21 +83,25 @@ export const router = createBrowserRouter([
         path: "/dashboard/contact",
         element: <ContactAdminPage />,
       },
-	  {
+      {
         path: "/dashboard/sheet-music",
         element: <SheetMusicPage />,
       },
-	  {
+      {
         path: "/dashboard/sheet-music/:id",
         element: <ViewSheetMusicPage />,
       },
-    {
+      {
         path: "/dashboard/setlists",
         element: <SetlistsPage />,
       },
-    {
+      {
         path: "/dashboard/sheet-music/choral-titles",
         element: <ChoralTitlesPage />,
+      },
+      {
+        path: "/dashboard/members",
+        element: <MemberDirectoryPage />,
       },
     ],
   },

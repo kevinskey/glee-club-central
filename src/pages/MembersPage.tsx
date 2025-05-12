@@ -1,18 +1,11 @@
 import React, { useState, useEffect } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { PageHeader } from "@/components/ui/page-header";
-import { Users, Search, Filter, UserPlus, Settings } from "lucide-react";
+import { Users, Search, UserPlus, Settings } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { 
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { Link } from "react-router-dom";
 import { useUserManagement } from "@/hooks/useUserManagement";
@@ -25,26 +18,20 @@ import { usePermissions } from "@/hooks/usePermissions";
 import { DeleteMemberDialog } from "@/components/members/DeleteMemberDialog";
 import { User } from "@/hooks/useUserManagement";
 import { Separator } from "@/components/ui/separator";
-import { MemberPermissionsDialog } from "@/components/members/MemberPermissionsDialog";
-import { UserRoleSelector } from "@/components/members/UserRoleSelector";
 import { createMemberRefreshFunction } from "@/components/members/MembersPageRefactor";
-import { deleteUser as deleteUserUtil } from "@/utils/admin/userDelete";
 
-type UserRoleType = "admin" | "student" | "section_leader" | "staff" | "guest";
-type VoicePartType = "soprano_1" | "soprano_2" | "alto_1" | "alto_2" | "tenor" | "bass";
-type StatusType = "active" | "pending" | "inactive" | "alumni";
-
-export default function MembersPage() {
+/**
+ * Member Directory Page
+ * This is the general member directory available to all authenticated users
+ * with simplified management capabilities compared to the admin version
+ */
+export default function MemberDirectoryPage() {
   const { isLoading: authLoading } = useAuth();
   const [searchQuery, setSearchQuery] = useState("");
   const [roleFilter, setRoleFilter] = useState("all");
-  const [voicePartFilter, setVoicePartFilter] = useState("all");
   const [statusFilter, setStatusFilter] = useState("all");
   const [isAddMemberDialogOpen, setIsAddMemberDialogOpen] = useState(false);
-  const [isEditMemberDialogOpen, setIsEditMemberDialogOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
-  const [isPermissionsDialogOpen, setIsPermissionsDialogOpen] = useState(false);
-  const [currentMember, setCurrentMember] = useState<User | null>(null);
   const [memberToDelete, setMemberToDelete] = useState<string | null>(null);
   const [memberToDeleteName, setMemberToDeleteName] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -52,7 +39,6 @@ export default function MembersPage() {
   const [activeTab, setActiveTab] = useState("all");
   const isMobile = useMedia('(max-width: 640px)');
   const { hasPermission } = usePermissions();
-  const [isRoleDialogOpen, setIsRoleDialogOpen] = useState(false);
   
   // Making this always true so the Add Member button is always shown
   // We'll temporarily bypass permission checks
@@ -63,9 +49,6 @@ export default function MembersPage() {
     isLoading,
     fetchUsers,
     addUser,
-    updateUser,
-    updateUserRole,
-    updateUserStatus,
     deleteUser
   } = useUserManagement();
   
@@ -74,7 +57,7 @@ export default function MembersPage() {
   
   // Fetch members on component mount
   useEffect(() => {
-    console.log("MembersPage - Fetching users");
+    console.log("MemberDirectoryPage - Fetching users");
     fetchUsers().catch(err => {
       console.error("Error fetching users:", err);
       toast.error("Failed to load members");
@@ -83,7 +66,6 @@ export default function MembersPage() {
 
   // Handle adding a new member
   const handleAddMember = async (data: UserFormValues) => {
-    // Temporarily allowing all users to add members by removing permission check
     setIsSubmitting(true);
     try {
       const success = await addUser(data);
@@ -98,54 +80,6 @@ export default function MembersPage() {
     } finally {
       setIsSubmitting(false);
     }
-  };
-  
-  // Handle editing a member
-  const handleEditMember = (member: User) => {
-    console.log("Opening edit dialog for member:", member);
-    setCurrentMember(member);
-    setIsEditMemberDialogOpen(true);
-  };
-  
-  // Handle updating a member
-  const handleUpdateMember = async (data: UserFormValues) => {
-    if (!currentMember) return;
-    
-    setIsSubmitting(true);
-    try {
-      const success = await updateUser(currentMember.id, data);
-      if (success) {
-        setIsEditMemberDialogOpen(false);
-        setCurrentMember(null);
-        toast.success(`Updated ${data.first_name} ${data.last_name}`);
-        await fetchUsers(); // Refresh the list after update
-      }
-    } catch (error) {
-      console.error("Error updating member:", error);
-      toast.error("Failed to update member");
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
-  
-  // Handle changing a member's role
-  const handleChangeRole = (member: User) => {
-    console.log("Opening role selector for:", member);
-    setCurrentMember(member);
-    setIsRoleDialogOpen(true);
-  };
-
-  // Handle managing permissions
-  const handleManagePermissions = (member: User) => {
-    setCurrentMember(member);
-    setIsPermissionsDialogOpen(true);
-  };
-
-  // Handle status update success (added for UI refresh)
-  const handleStatusUpdateSuccess = async () => {
-    console.log("Status updated, refreshing member list");
-    await fetchUsers();
-    toast.success("Member status updated successfully");
   };
 
   // Handle deleting a member
@@ -164,13 +98,14 @@ export default function MembersPage() {
     
     setIsDeleting(true);
     try {
-      // Using the utility function for deletion
-      await deleteUserUtil(memberToDelete);
-      setIsDeleteDialogOpen(false);
-      setMemberToDelete(null);
-      toast.success(`${memberToDeleteName} has been removed from the member list`);
-      // Refresh the list after deletion
-      await fetchUsers();
+      if (deleteUser) {
+        await deleteUser(memberToDelete);
+        setIsDeleteDialogOpen(false);
+        setMemberToDelete(null);
+        toast.success(`${memberToDeleteName} has been removed from the member list`);
+        // Refresh the list after deletion
+        await fetchUsers();
+      }
     } catch (error) {
       console.error("Error deleting member:", error);
       toast.error("Failed to delete member");
@@ -183,7 +118,6 @@ export default function MembersPage() {
   const resetFilters = () => {
     setSearchQuery("");
     setRoleFilter("all");
-    setVoicePartFilter("all");
     setStatusFilter("all");
     setActiveTab("all");
   };
@@ -202,10 +136,9 @@ export default function MembersPage() {
       
       // Then apply dropdown filters
       const matchesRole = roleFilter === "all" || (member.role || '') === roleFilter;
-      const matchesVoicePart = voicePartFilter === "all" || (member.voice_part || '') === voicePartFilter;
       const matchesStatus = statusFilter === "all" || (member.status || '') === statusFilter;
       
-      if (!matchesRole || !matchesVoicePart || !matchesStatus) return false;
+      if (!matchesRole || !matchesStatus) return false;
       
       // Then apply tab filter
       if (activeTab === "all") return true;
@@ -214,15 +147,7 @@ export default function MembersPage() {
       
       return false;
     });
-  }, [members, searchQuery, roleFilter, voicePartFilter, statusFilter, activeTab]);
-
-  console.log("MembersPage rendering", { 
-    memberCount: members.length, 
-    filteredCount: filteredMembers.length,
-    isLoading, 
-    authLoading,
-    canManageMembers
-  });
+  }, [members, searchQuery, roleFilter, statusFilter, activeTab]);
 
   // Create a wrapper function for fetchUsers that returns void
   const refreshMembers = createMemberRefreshFunction(fetchUsers);
@@ -232,7 +157,7 @@ export default function MembersPage() {
       <div className="flex flex-col sm:flex-row justify-between items-start mb-4">
         <PageHeader
           title="Glee Club Members"
-          description="View and manage all Spelman College Glee Club members"
+          description="View and connect with Spelman College Glee Club members"
           icon={<Users className="h-6 w-6" />}
         />
         
@@ -285,62 +210,9 @@ export default function MembersPage() {
                         onChange={(e) => setSearchQuery(e.target.value)}
                       />
                     </div>
-                    
-                    {!isMobile && (
-                      <>
-                        <Select value={roleFilter} onValueChange={setRoleFilter}>
-                          <SelectTrigger className="w-[140px]">
-                            <SelectValue placeholder="Role" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="all">All Roles</SelectItem>
-                            <SelectItem value="administrator">Administrator</SelectItem>
-                            <SelectItem value="section_leader">Section Leader</SelectItem>
-                            <SelectItem value="student_conductor">Student Conductor</SelectItem>
-                            <SelectItem value="accompanist">Accompanist</SelectItem>
-                            <SelectItem value="singer">Singer</SelectItem>
-                            <SelectItem value="non_singer">Non-Singer</SelectItem>
-                          </SelectContent>
-                        </Select>
-                        
-                        <Select value={voicePartFilter} onValueChange={setVoicePartFilter}>
-                          <SelectTrigger className="w-[140px]">
-                            <SelectValue placeholder="Voice Part" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="all">All Voice Parts</SelectItem>
-                            <SelectItem value="soprano_1">Soprano 1</SelectItem>
-                            <SelectItem value="soprano_2">Soprano 2</SelectItem>
-                            <SelectItem value="alto_1">Alto 1</SelectItem>
-                            <SelectItem value="alto_2">Alto 2</SelectItem>
-                            <SelectItem value="tenor">Tenor</SelectItem>
-                            <SelectItem value="bass">Bass</SelectItem>
-                          </SelectContent>
-                        </Select>
-                        
-                        <Select value={statusFilter} onValueChange={setStatusFilter}>
-                          <SelectTrigger className="w-[140px]">
-                            <SelectValue placeholder="Status" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="all">All Statuses</SelectItem>
-                            <SelectItem value="active">Active</SelectItem>
-                            <SelectItem value="pending">Pending</SelectItem>
-                            <SelectItem value="inactive">Inactive</SelectItem>
-                            <SelectItem value="alumni">Alumni</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </>
-                    )}
                   </div>
                   
                   <div className="flex gap-2 w-full sm:w-auto justify-end">
-                    {isMobile && (
-                      <Button variant="outline" size="sm">
-                        <Filter className="h-4 w-4 mr-1" />
-                        Filters
-                      </Button>
-                    )}
                     <Button
                       variant="outline"
                       size="sm"
@@ -386,12 +258,8 @@ export default function MembersPage() {
                 ) : (
                   <MembersList 
                     members={filteredMembers} 
-                    onEditMember={canManageMembers ? handleEditMember : undefined}
+                    onEditMember={canManageMembers ? handleDeleteClick : undefined}
                     onDeleteMember={canManageMembers ? handleDeleteClick : undefined}
-                    onManagePermissions={canManageMembers ? handleManagePermissions : undefined}
-                    onChangeRole={canManageMembers ? handleChangeRole : undefined}
-                    onStatusUpdate={updateUserStatus}
-                    onStatusUpdateSuccess={handleStatusUpdateSuccess}
                   />
                 )}
               </div>
@@ -409,12 +277,8 @@ export default function MembersPage() {
               ) : (
                 <MembersList 
                   members={filteredMembers} 
-                  onEditMember={canManageMembers ? handleEditMember : undefined}
+                  onEditMember={canManageMembers ? handleDeleteClick : undefined}
                   onDeleteMember={canManageMembers ? handleDeleteClick : undefined}
-                  onManagePermissions={canManageMembers ? handleManagePermissions : undefined}
-                  onChangeRole={canManageMembers ? handleChangeRole : undefined}
-                  onStatusUpdate={updateUserStatus}
-                  onStatusUpdateSuccess={handleStatusUpdateSuccess}
                 />
               )}
             </Card>
@@ -431,12 +295,8 @@ export default function MembersPage() {
               ) : (
                 <MembersList 
                   members={filteredMembers} 
-                  onEditMember={canManageMembers ? handleEditMember : undefined}
+                  onEditMember={canManageMembers ? handleDeleteClick : undefined}
                   onDeleteMember={canManageMembers ? handleDeleteClick : undefined}
-                  onManagePermissions={canManageMembers ? handleManagePermissions : undefined}
-                  onChangeRole={canManageMembers ? handleChangeRole : undefined}
-                  onStatusUpdate={updateUserStatus}
-                  onStatusUpdateSuccess={handleStatusUpdateSuccess}
                 />
               )}
             </Card>
@@ -452,30 +312,6 @@ export default function MembersPage() {
         isSubmitting={isSubmitting}
       />
       
-      {/* Edit Member Dialog - We'll reuse AddMemberDialog with initial values */}
-      {canManageMembers && currentMember && (
-        <AddMemberDialog
-          isOpen={isEditMemberDialogOpen}
-          onOpenChange={setIsEditMemberDialogOpen}
-          onMemberAdd={handleUpdateMember}
-          isSubmitting={isSubmitting}
-          initialValues={{
-            first_name: currentMember.first_name || '',
-            last_name: currentMember.last_name || '',
-            email: currentMember.email || '',
-            phone: currentMember.phone || '',
-            role: (currentMember.role as UserRoleType) || 'student',
-            voice_part: (currentMember.voice_part as VoicePartType) || null,
-            status: (currentMember.status as StatusType) || 'active',
-            class_year: currentMember.class_year || '',
-            notes: currentMember.notes || '',
-            dues_paid: currentMember.dues_paid || false,
-            password: ''
-          }}
-          isEditing={true}
-        />
-      )}
-      
       {/* Delete Member Dialog */}
       <DeleteMemberDialog
         isOpen={isDeleteDialogOpen}
@@ -484,24 +320,6 @@ export default function MembersPage() {
         memberName={memberToDeleteName}
         isDeleting={isDeleting}
       />
-      
-      {/* Role Selector Dialog */}
-      <UserRoleSelector
-        user={currentMember}
-        isOpen={isRoleDialogOpen}
-        onOpenChange={setIsRoleDialogOpen}
-        onSuccess={refreshMembers}
-      />
-      
-      {/* Permissions Dialog */}
-      {canManageMembers && (
-        <MemberPermissionsDialog
-          user={currentMember}
-          isOpen={isPermissionsDialogOpen}
-          setIsOpen={setIsPermissionsDialogOpen}
-          onSuccess={refreshMembers}
-        />
-      )}
     </div>
   );
 }
