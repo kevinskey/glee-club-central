@@ -13,9 +13,13 @@ export function GlobalMetronome() {
   const [isVisible, setIsVisible] = useState(true);
   const audioContextRef = useRef<AudioContext | null>(null);
 
-  // Clean up audio context when component is unmounted or hidden
+  // Clean up audio context when component unmounts or is hidden
   useEffect(() => {
     return () => {
+      if (isActive) {
+        setIsActive(false);
+      }
+      
       if (audioContextRef.current && audioContextRef.current.state !== 'closed') {
         audioContextRef.current.close().catch(console.error);
       }
@@ -30,13 +34,18 @@ export function GlobalMetronome() {
     }
     setIsVisible(!isVisible);
   };
+  
+  // Properly handle metronome activation
+  const toggleActive = () => {
+    setIsActive(!isActive);
+  };
 
   if (!isVisible) {
     return (
       <motion.div
         initial={{ opacity: 0, scale: 0.8 }}
         animate={{ opacity: 1, scale: 1 }}
-        className="fixed top-20 left-4 z-50"
+        className="fixed top-20 left-4 z-40"
       >
         <Button
           variant="outline"
@@ -54,7 +63,7 @@ export function GlobalMetronome() {
   return (
     <AnimatePresence>
       <motion.div 
-        className="fixed top-20 left-4 z-50"
+        className="fixed top-20 left-4 z-40"
         initial={{ opacity: 0, scale: 0.8 }}
         animate={{ opacity: 1, scale: 1 }}
         exit={{ opacity: 0, scale: 0.8 }}
@@ -66,7 +75,7 @@ export function GlobalMetronome() {
               variant="ghost"
               size="sm"
               className="gap-1 text-xs"
-              onClick={() => setIsActive(!isActive)}
+              onClick={toggleActive}
             >
               <Music className="h-3.5 w-3.5" /> 
               <span className={isExpanded ? '' : 'sr-only'}>Global Metronome</span>

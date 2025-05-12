@@ -1,6 +1,6 @@
 
-import React from "react";
-import { Outlet, Navigate } from "react-router-dom";
+import React, { useEffect } from "react";
+import { Outlet, Navigate, useLocation } from "react-router-dom";
 import { Header } from "@/components/layout/Header";
 import { Sidebar } from "@/components/layout/Sidebar";
 import { useAuth } from "@/contexts/AuthContext";
@@ -10,6 +10,12 @@ import { GlobalMetronome } from "@/components/ui/global-metronome";
 
 export default function DashboardLayout() {
   const { isAuthenticated, isLoading } = useAuth();
+  const location = useLocation();
+  
+  // Log current route for troubleshooting
+  useEffect(() => {
+    console.log("DashboardLayout - Current route:", location.pathname);
+  }, [location.pathname]);
   
   console.log("DashboardLayout - Auth check:", { isAuthenticated, isLoading });
   
@@ -23,7 +29,9 @@ export default function DashboardLayout() {
   
   if (!isAuthenticated) {
     console.log("DashboardLayout - User not authenticated, redirecting to login");
-    return <Navigate to="/login" />;
+    // Store the intended destination for post-login redirect
+    const returnTo = encodeURIComponent(location.pathname + location.search);
+    return <Navigate to={`/login?returnTo=${returnTo}`} />;
   }
 
   return (
