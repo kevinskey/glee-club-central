@@ -9,7 +9,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription } from "@/components/ui/dialog";
 import { EnhancedMetronome } from "@/components/ui/enhanced-metronome";
 import { Button } from "@/components/ui/button";
 import { Music } from "lucide-react";
@@ -49,6 +49,9 @@ export function Logo() {
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
             <DialogTitle>Metronome</DialogTitle>
+            <DialogDescription>
+              Use the metronome to practice at different tempos and time signatures.
+            </DialogDescription>
           </DialogHeader>
           <EnhancedMetronome showControls={true} size="md" />
         </DialogContent>

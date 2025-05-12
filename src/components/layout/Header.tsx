@@ -16,14 +16,14 @@ import {
   User,
   Settings,
   LogOut,
+  Music
 } from "lucide-react";
 import { useSidebar } from "@/components/ui/sidebar";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { Icons } from "@/components/Icons";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription } from "@/components/ui/dialog";
 import { EnhancedMetronome } from "@/components/ui/enhanced-metronome";
-import { Music } from "lucide-react";
 
 export function Header() {
   const { profile, signOut } = useAuth();
@@ -70,6 +70,9 @@ export function Header() {
               <DialogContent className="sm:max-w-md">
                 <DialogHeader>
                   <DialogTitle>Metronome</DialogTitle>
+                  <DialogDescription>
+                    Use the metronome to practice at different tempos and time signatures.
+                  </DialogDescription>
                 </DialogHeader>
                 <EnhancedMetronome showControls={true} size="md" />
               </DialogContent>

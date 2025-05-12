@@ -1,23 +1,12 @@
 
 import React, { useState, useEffect } from "react";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { Metronome } from "@/components/ui/metronome";
 import { Logo } from "@/components/landing/header/Logo";
 import { NavigationLinks } from "@/components/landing/header/NavigationLinks";
 import { MemberPortalDropdown } from "@/components/landing/header/MemberPortalDropdown";
 import { HeaderUtils } from "@/components/landing/header/HeaderUtils";
 import { MobileMenuToggle } from "@/components/landing/header/MobileMenuToggle";
 import { MobileMenu } from "@/components/landing/header/MobileMenu";
-import { Button } from "@/components/ui/button";
-import { Music } from "lucide-react";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-  DialogDescription,
-} from "@/components/ui/dialog";
 
 interface HeaderProps {
   initialShowNewsFeed?: boolean;
