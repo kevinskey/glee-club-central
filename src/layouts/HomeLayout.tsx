@@ -1,23 +1,25 @@
 
-import React from 'react';
-import { Outlet, useLocation } from 'react-router-dom';
-import { Toaster } from 'sonner';
+import React from "react";
+import { Outlet } from "react-router-dom";
+import { Toaster } from "sonner";
+import { useIsMobile } from "@/hooks/use-mobile";
+import { MobileHeader } from "@/components/layout/MobileHeader";
+import { Header } from "@/components/landing/Header";
 
 const HomeLayout: React.FC = () => {
-  const location = useLocation();
-  
-  // Log current route for troubleshooting
-  React.useEffect(() => {
-    console.log("HomeLayout - Current route:", location.pathname);
-  }, [location.pathname]);
+  const isMobile = useIsMobile();
   
   return (
-    <div className="min-h-screen bg-background flex flex-col">
-      <div className="flex-1">
-        <Outlet />
-      </div>
-      <Toaster position="top-right" richColors />
-    </div>
+    <>
+      <Toaster />
+      {/* Show mobile header on mobile devices and standard header on larger screens */}
+      {isMobile ? (
+        <MobileHeader />
+      ) : (
+        <Header initialShowNewsFeed={false} />
+      )}
+      <Outlet />
+    </>
   );
 };
 

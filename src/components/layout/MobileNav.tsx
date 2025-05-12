@@ -1,8 +1,6 @@
-
 import React from "react";
 import { Link, useLocation } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
-import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { 
   LayoutDashboard, 
@@ -21,7 +19,10 @@ export function MobileNav({ isAdmin }: MobileNavProps) {
   
   if (!isAuthenticated) return null;
   
-  // Simplified mobile navigation with just the essential items
+  // Only show in dashboard paths
+  if (!pathname.startsWith('/dashboard')) return null;
+  
+  // Bottom navigation tabs (remains unchanged)
   return (
     <div className="fixed bottom-0 left-0 right-0 z-40 bg-background border-t md:hidden">
       <div className="flex items-center justify-between px-4 py-2">

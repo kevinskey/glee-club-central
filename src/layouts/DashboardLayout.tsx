@@ -7,6 +7,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { Spinner } from "@/components/ui/spinner";
 import { SidebarProvider } from "@/components/ui/sidebar";
 import { useMedia } from "@/hooks/use-mobile";
+import { MobileHeader } from "@/components/layout/MobileHeader";
 
 const DashboardLayout: React.FC = () => {
   const { isAuthenticated, isLoading } = useAuth();
@@ -38,7 +39,12 @@ const DashboardLayout: React.FC = () => {
   return (
     <SidebarProvider>
       <div className="min-h-screen flex flex-col bg-background w-full">
-        <Header />
+        {/* Show mobile header on mobile devices and standard header on larger screens */}
+        {isMobile ? (
+          <MobileHeader />
+        ) : (
+          <Header />
+        )}
         
         <div className="flex-1 flex flex-col md:flex-row">
           <Sidebar />

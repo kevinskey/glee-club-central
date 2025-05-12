@@ -41,6 +41,7 @@ export function Header({ initialShowNewsFeed = true }: HeaderProps) {
     setMobileMenuOpen(!mobileMenuOpen);
   };
 
+  // This component will now only be rendered on desktop
   return (
     <>
       <header className="sticky top-0 z-50 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
@@ -50,25 +51,13 @@ export function Header({ initialShowNewsFeed = true }: HeaderProps) {
           </div>
           
           {/* Desktop navigation */}
-          <div className="hidden md:flex items-center gap-2 sm:gap-3">
+          <div className="flex items-center gap-2 sm:gap-3">
             <NavigationLinks />
             <HeaderUtils />
             <MemberPortalDropdown />
           </div>
-          
-          {/* Mobile menu toggle */}
-          <div className="md:hidden flex items-center gap-1 sm:gap-2">
-            <HeaderUtils />
-            <MobileMenuToggle 
-              isOpen={mobileMenuOpen} 
-              onToggle={toggleMobileMenu} 
-            />
-          </div>
         </div>
-        
-        {/* Mobile menu */}
-        {mobileMenuOpen && <MobileMenu onClose={() => setMobileMenuOpen(false)} />}
       </header>
     </>
   );
-}
+};

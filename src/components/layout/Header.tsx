@@ -59,8 +59,9 @@ export function Header() {
     setMetronomeOpen(true);
   };
 
+  // This component will now only be shown on desktop screens
   return (
-    <header className="bg-background sticky top-0 z-50 w-full border-b">
+    <header className="bg-background sticky top-0 z-50 w-full border-b hidden md:block">
       <div className="container flex h-16 items-center justify-between px-2">
         <div className="flex items-center gap-1 sm:gap-2">
           <Button 
