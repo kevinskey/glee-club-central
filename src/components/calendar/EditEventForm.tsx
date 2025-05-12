@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
@@ -5,7 +6,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Form } from "@/components/ui/form";
 import { Button } from "@/components/ui/button";
 import { CalendarEvent, EventType } from "@/hooks/useCalendarEvents";
-import { EventFormFields } from "./EventFormFields";
+import { EventFormFields, EventFormValues } from "./EventFormFields";
 import { EventImageUpload } from "./EventImageUpload";
 import { MobileFitCheck } from "./MobileFitCheck";
 import { checkEventMobileFit } from "@/utils/mobileUtils";
@@ -42,7 +43,7 @@ export function EditEventForm({
   const [mobileFitIssues, setMobileFitIssues] = useState<{ fits: boolean; issues: string[]; suggestions: string[] } | null>(null);
 
   // Create form with default values from the event
-  const form = useForm({
+  const form = useForm<EventFormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       title: event.title,
@@ -60,7 +61,7 @@ export function EditEventForm({
   const location = form.watch('location');
   const description = form.watch('description');
 
-  const onSubmit = async (values: any) => {
+  const onSubmit = async (values: EventFormValues) => {
     // Check mobile fit before saving
     const mobileFitCheck = checkEventMobileFit(values.title, values.location, values.description);
     

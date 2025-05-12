@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { UseFormReturn } from "react-hook-form";
 import { toast } from "sonner";
-import { EventFormValues } from "./AddEventForm";
+import { EventFormValues } from "./EventFormFields";
 
 interface EventImageUploadProps {
   form: UseFormReturn<EventFormValues>;

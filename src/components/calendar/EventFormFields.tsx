@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from "react";
-import { useFormContext } from "react-hook-form";
+import { useFormContext, UseFormReturn } from "react-hook-form";
 import { 
   FormControl, 
   FormField, 
@@ -28,8 +28,24 @@ import { CalendarIcon, Smartphone } from "lucide-react";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
 import { MobileFitCheck } from "./MobileFitCheck";
+import { EventType } from "@/hooks/useCalendarEvents";
 
-export const EventFormFields = ({ form }) => {
+// Define a proper type for the form values to match both AddEventForm and EditEventForm
+export interface EventFormValues {
+  title: string;
+  date: Date;
+  time: string;
+  location: string;
+  description: string;
+  type: EventType;
+  image_url: string | null;
+}
+
+interface EventFormFieldsProps {
+  form: UseFormReturn<EventFormValues>;
+}
+
+export const EventFormFields = ({ form }: EventFormFieldsProps) => {
   const [showMobileFit, setShowMobileFit] = useState(false);
   const formMethods = useFormContext();
   
