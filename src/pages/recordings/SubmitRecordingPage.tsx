@@ -1,214 +1,37 @@
 
-import React, { useState, useEffect } from "react";
+import React from "react";
 import { PageHeader } from "@/components/ui/page-header";
-import { Upload, FileAudio, Mic, Share2 } from "lucide-react";
+import { Mic } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { useToast } from "@/hooks/use-toast";
-import { useAuth } from "@/contexts/AuthContext";
-import { MyRecordingsTable } from "@/components/recordings/MyRecordingsTable";
-import { UploadRecordingModal } from "@/components/recordings/UploadRecordingModal";
-import { ShareRecordingDialog } from "@/components/recordings/ShareRecordingDialog";
-import { supabase } from "@/integrations/supabase/client";
-import { AudioFile, AudioPageCategory } from "@/types/audio";
-import { RecordingSection } from "@/components/audio/RecordingSection";
-import { initializeAudioSystem, audioLogger } from "@/utils/audioUtils";
+import { useNavigate } from "react-router-dom";
 
 export default function SubmitRecordingPage() {
-  const { toast } = useToast();
-  const { user } = useAuth();
-  const [isLoading, setIsLoading] = useState(true);
-  const [myRecordings, setMyRecordings] = useState<AudioFile[]>([]);
-  const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
-  const [selectedRecording, setSelectedRecording] = useState<AudioFile | null>(null);
-  const [isShareDialogOpen, setIsShareDialogOpen] = useState(false);
-  const [activeTab, setActiveTab] = useState("record");
+  const navigate = useNavigate();
   
-  // Initialize audio system when the page loads
-  useEffect(() => {
-    const setupAudio = async () => {
-      try {
-        await initializeAudioSystem();
-        audioLogger.log("Recording page: Audio system initialized");
-      } catch (error) {
-        audioLogger.error("Recording page: Failed to initialize audio system", error);
-      }
-    };
-    
-    setupAudio();
-  }, []);
-  
-  const fetchMyRecordings = async () => {
-    if (!user) return;
-    
-    setIsLoading(true);
-    try {
-      const { data, error } = await supabase
-        .from('audio_files')
-        .select('*')
-        .eq('uploaded_by', user.id)
-        .eq('category', 'my_tracks')
-        .order('created_at', { ascending: false });
-      
-      if (error) throw error;
-      
-      if (data) {
-        // Format dates for display
-        const formattedData = data.map((item: any) => ({
-          ...item,
-          created_at: new Date(item.created_at).toLocaleDateString(),
-          category: item.category || "my_tracks"
-        }));
-        
-        setMyRecordings(formattedData);
-      }
-    } catch (error: any) {
-      console.error("Error fetching recordings:", error);
-      toast({
-        title: "Error loading recordings",
-        description: error.message || "Failed to load your recordings",
-        variant: "destructive",
-      });
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  // Handle deleting a recording
-  const handleDeleteRecording = async (recordingId: string) => {
-    try {
-      // First get the file path to delete from storage
-      const { data: fileData } = await supabase
-        .from('audio_files')
-        .select('file_path')
-        .eq('id', recordingId)
-        .single();
-      
-      if (fileData?.file_path) {
-        // Delete from storage
-        const { error: storageError } = await supabase.storage
-          .from('audio')
-          .remove([fileData.file_path]);
-        
-        if (storageError) {
-          console.error("Error deleting file from storage:", storageError);
-        }
-      }
-      
-      // Delete from database
-      const { error: dbError } = await supabase
-        .from('audio_files')
-        .delete()
-        .eq('id', recordingId);
-        
-      if (dbError) throw dbError;
-      
-      // Update UI
-      setMyRecordings((prev) => prev.filter(recording => recording.id !== recordingId));
-      
-      toast({
-        title: "Recording deleted",
-        description: "Your recording has been successfully deleted.",
-      });
-    } catch (error: any) {
-      console.error("Error deleting recording:", error);
-      toast({
-        title: "Error deleting recording",
-        description: error.message || "An unexpected error occurred",
-        variant: "destructive",
-      });
-    }
-  };
-
-  const handleShareRecording = (recording: AudioFile) => {
-    setSelectedRecording(recording);
-    setIsShareDialogOpen(true);
-  };
-
-  const handleRecordingSaved = (category?: Exclude<AudioPageCategory, "all">) => {
-    fetchMyRecordings();
-    setActiveTab("my-recordings");
-    toast({
-      title: "Recording saved",
-      description: "Your recording has been successfully saved.",
-    });
-  };
-
-  const handleUploadComplete = () => {
-    fetchMyRecordings();
-    setActiveTab("my-recordings");
-  };
-
-  useEffect(() => {
-    if (user) {
-      fetchMyRecordings();
-    }
-  }, [user]);
-
   return (
-    <div className="space-y-8">
+    <div className="space-y-6">
       <PageHeader
-        title="Submit Recordings"
-        description="Record or upload your vocal recordings"
-        icon={<FileAudio className="h-6 w-6" />}
+        title="Submit Recording"
+        description="Record your vocals and share with the Glee Club community"
+        icon={<Mic className="h-6 w-6" />}
         actions={
-          <div className="flex gap-2">
-            <Button 
-              onClick={() => setIsUploadModalOpen(true)}
-              variant="outline"
-              className="gap-2"
-            >
-              <Upload className="h-4 w-4" /> Upload
-            </Button>
-            <Button 
-              onClick={() => setActiveTab("record")}
-              className="gap-2"
-            >
-              <Mic className="h-4 w-4" /> Record
-            </Button>
-          </div>
+          <Button onClick={() => navigate("/dashboard")}>
+            Go to Dashboard
+          </Button>
         }
       />
       
-      <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-        <TabsList className="grid grid-cols-2 w-full max-w-md mx-auto">
-          <TabsTrigger value="record" className="gap-2">
-            <Mic className="h-4 w-4" /> Record Audio
-          </TabsTrigger>
-          <TabsTrigger value="my-recordings" className="gap-2">
-            <FileAudio className="h-4 w-4" /> My Recordings
-          </TabsTrigger>
-        </TabsList>
-        
-        <TabsContent value="record" className="space-y-4">
-          <RecordingSection onRecordingSaved={handleRecordingSaved} />
-        </TabsContent>
-        
-        <TabsContent value="my-recordings" className="space-y-4">
-          <MyRecordingsTable 
-            recordings={myRecordings}
-            isLoading={isLoading}
-            onDelete={handleDeleteRecording}
-            onShare={handleShareRecording}
-          />
-        </TabsContent>
-      </Tabs>
-
-      {/* Upload Modal */}
-      <UploadRecordingModal
-        open={isUploadModalOpen}
-        onOpenChange={setIsUploadModalOpen}
-        onUploadComplete={handleUploadComplete}
-      />
-
-      {/* Share Dialog */}
-      {selectedRecording && (
-        <ShareRecordingDialog
-          open={isShareDialogOpen}
-          onOpenChange={setIsShareDialogOpen}
-          recording={selectedRecording}
-        />
-      )}
+      <div className="container px-4">
+        <div className="flex flex-col items-center justify-center p-8 border border-dashed rounded-lg">
+          <Mic className="h-12 w-12 text-muted-foreground mb-4" />
+          <h3 className="text-lg font-medium mb-2">Record Your Voice</h3>
+          <p className="text-center text-muted-foreground mb-6">
+            Use this page to record your voice and share it with the Glee Club community.
+            You can record performances, practice sessions, or vocal warm-ups.
+          </p>
+          <Button>Start Recording</Button>
+        </div>
+      </div>
     </div>
   );
 }

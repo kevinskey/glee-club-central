@@ -1,4 +1,3 @@
-
 import {
   createBrowserRouter,
 } from "react-router-dom";
@@ -35,6 +34,9 @@ import AdminDashboardPage from "./pages/AdminDashboardPage";
 import AdminFinancesPage from "./pages/AdminFinancesPage";
 import AdminSettingsPage from "./pages/AdminSettingsPage";
 import ProfilePage from "./pages/profile/ProfilePage";
+import RecordingsPage from "./pages/RecordingsPage";
+import SubmitRecordingPage from "./pages/recordings/SubmitRecordingPage";
+import SocialPage from "./pages/SocialPage";
 
 export const router = createBrowserRouter([
   {
@@ -68,6 +70,18 @@ export const router = createBrowserRouter([
       {
         path: "/contact",
         element: <ContactPage />,
+      },
+      {
+        path: "/social",
+        element: <SocialPage />,
+      },
+      {
+        path: "/recordings",
+        element: <RecordingsPage />,
+      },
+      {
+        path: "/recordings/submit",
+        element: <SubmitRecordingPage />,
       },
     ],
   },

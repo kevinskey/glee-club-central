@@ -6,6 +6,7 @@ import { useIsMobile } from "@/hooks/use-mobile";
 import { MobileHeader } from "@/components/layout/MobileHeader";
 import { Header } from "@/components/landing/Header";
 import { SidebarProvider } from "@/components/ui/sidebar";
+import { MobileBottomNav } from "@/components/layout/MobileBottomNav";
 
 const HomeLayout: React.FC = () => {
   const isMobile = useIsMobile();
@@ -13,6 +14,9 @@ const HomeLayout: React.FC = () => {
   
   // Only show header on specific routes
   const shouldShowHeader = ["/", "/about", "/contact", "/press-kit"].includes(location.pathname);
+  
+  // Routes where we want to show the bottom navigation
+  const showMobileBottomNav = ["/", "/about", "/videos", "/contact", "/press-kit"].includes(location.pathname);
   
   return (
     <>
@@ -29,9 +33,12 @@ const HomeLayout: React.FC = () => {
               )}
             </>
           )}
-          <div className="flex-1">
+          <div className="flex-1 pb-16"> {/* Add padding bottom to avoid content being hidden by the nav */}
             <Outlet />
           </div>
+          
+          {/* Mobile bottom navigation */}
+          {isMobile && showMobileBottomNav && <MobileBottomNav />}
         </div>
       </SidebarProvider>
     </>
