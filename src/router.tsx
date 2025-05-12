@@ -1,87 +1,120 @@
-
-import { createBrowserRouter, Navigate } from "react-router-dom";
-import { lazy } from "react";
-import NotFoundPage from "./pages/NotFoundPage";
-import DashboardLayout from "./components/layout/DashboardLayout";
+import {
+  createBrowserRouter,
+} from "react-router-dom";
 import HomeLayout from "./layouts/HomeLayout";
-import ProtectedRoute from "./components/ProtectedRoute";
-import ErrorBoundary from "./components/ErrorBoundary";
-
-// Lazy load pages for better performance
-const HomePage = lazy(() => import("./pages/HomePage"));
-const DashboardPage = lazy(() => import("./pages/DashboardPage"));
-const LoginPage = lazy(() => import("./pages/LoginPage"));
-const ProfilePage = lazy(() => import("./pages/profile/ProfilePage"));
-const AdminPage = lazy(() => import("./pages/AdminPage"));
-const AnnouncementsPage = lazy(() => import("./pages/AnnouncementsPage"));
-const CalendarPage = lazy(() => import("./pages/CalendarPage"));
-const SheetMusicPage = lazy(() => import("./pages/sheet-music/SheetMusicPage"));
-const ViewSheetMusicPage = lazy(() => import("./pages/sheet-music/ViewSheetMusicPage"));
-
-// Create an error element wrapper that provides children to ErrorBoundary
-const ErrorWrapper = () => <ErrorBoundary><NotFoundPage /></ErrorBoundary>;
+import HomePage from "./pages/HomePage";
+import DashboardLayout from "./layouts/DashboardLayout";
+import DashboardPage from "./pages/DashboardPage";
+import CalendarPage from "./pages/CalendarPage";
+import AttendancePage from "./pages/AttendancePage";
+import AnnouncementsPage from "./pages/AnnouncementsPage";
+import PracticeResourcesPage from "./pages/PracticeResourcesPage";
+import ContactAdminPage from "./pages/ContactAdminPage";
+import AdminLayout from "./layouts/AdminLayout";
+import UserManagementPage from "./pages/admin/UserManagementPage";
+import EventManagerPage from "./pages/admin/EventManagerPage";
+import AnalyticsPage from "./pages/admin/AnalyticsPage";
+import SiteSettingsPage from "./pages/admin/SiteSettingsPage";
+import LoginPage from "./pages/LoginPage";
+import RequireAuth from "./components/auth/RequireAuth";
+import MembersPage from "./pages/admin/MembersPage";
+import SheetMusicPage from "./pages/SheetMusicPage";
+import SheetMusicViewerPage from "./pages/sheet-music/SheetMusicPage";
+import SetlistsPage from "./pages/SetlistsPage";
+import ChoralTitlesPage from "./pages/sheet-music/ChoralTitlesPage";
 
 export const router = createBrowserRouter([
   {
     path: "/",
-    element: null, // This will be handled in App.tsx
-    errorElement: <ErrorWrapper />,
+    element: <HomeLayout />,
     children: [
       {
         path: "/",
-        element: <HomeLayout />,
-        children: [
-          {
-            index: true,
-            element: <HomePage />,
-          },
-          {
-            path: "login",
-            element: <LoginPage />,
-          },
-        ],
+        element: <HomePage />,
       },
       {
+        path: "/login",
+        element: <LoginPage />,
+      },
+    ],
+  },
+  {
+    path: "/dashboard",
+    element: (
+      <RequireAuth>
+        <DashboardLayout />
+      </RequireAuth>
+    ),
+    children: [
+      {
         path: "/dashboard",
-        element: (
-          <ProtectedRoute>
-            <DashboardLayout />
-          </ProtectedRoute>
-        ),
-        children: [
-          {
-            index: true,
-            element: <DashboardPage />,
-          },
-          {
-            path: "profile",
-            element: <ProfilePage />,
-          },
-          {
-            path: "admin",
-            element: (
-              <ProtectedRoute adminOnly>
-                <AdminPage />
-              </ProtectedRoute>
-            ),
-          },
-          {
-            path: "announcements",
-            element: <AnnouncementsPage />,
-          },
-          {
-            path: "calendar",
-            element: <CalendarPage />,
-          },
-          {
-            path: "sheet-music",
-            element: <SheetMusicPage />,
-          },
-          {
-            path: "sheet-music/:id",
-            element: <ViewSheetMusicPage />,
-          },
-        ],
+        element: <DashboardPage />,
+      },
+      {
+        path: "/dashboard/calendar",
+        element: <CalendarPage />,
+      },
+      {
+        path: "/dashboard/attendance",
+        element: <AttendancePage />,
+      },
+      {
+        path: "/dashboard/announcements",
+        element: <AnnouncementsPage />,
+      },
+      {
+        path: "/dashboard/practice",
+        element: <PracticeResourcesPage />,
+      },
+      {
+        path: "/dashboard/contact",
+        element: <ContactAdminPage />,
+      },
+	  {
+        path: "/dashboard/sheet-music",
+        element: <SheetMusicPage />,
+      },
+	  {
+        path: "/dashboard/sheet-music/:id",
+        element: <SheetMusicViewerPage />,
+      },
+    {
+        path: "/dashboard/setlists",
+        element: <SetlistsPage />,
+      },
+    {
+        path: "/dashboard/sheet-music/choral-titles",
+        element: <ChoralTitlesPage />,
+      },
+    ],
+  },
+  {
+    path: "/dashboard/admin",
+    element: (
+      <RequireAuth requiredRole="admin">
+        <AdminLayout />
+      </RequireAuth>
+    ),
+    children: [
+      {
+        path: "/dashboard/admin/members",
+        element: <MembersPage />,
+      },
+      {
+        path: "/dashboard/admin/users",
+        element: <UserManagementPage />,
+      },
+      {
+        path: "/dashboard/admin/events",
+        element: <EventManagerPage />,
+      },
+      {
+        path: "/dashboard/admin/analytics",
+        element: <AnalyticsPage />,
+      },
+      {
+        path: "/dashboard/admin/settings",
+        element: <SiteSettingsPage />,
       },
     ],
   },

@@ -1,4 +1,3 @@
-
 import React from "react";
 import { Link, useLocation } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
@@ -13,7 +12,6 @@ import {
   Calendar, 
   CheckSquare,
   Bell, 
-  Upload, 
   BarChart,
   Settings,
   Users,
@@ -77,11 +75,6 @@ export function MobileNav({ isAdmin }: MobileNavProps) {
       icon: <Users className="h-4 w-4" />,
     },
     {
-      title: "Media Manager",
-      href: "/dashboard/admin/media",
-      icon: <Upload className="h-4 w-4" />,
-    },
-    {
       title: "Event Manager",
       href: "/dashboard/admin/events",
       icon: <Calendar className="h-4 w-4" />,
@@ -98,6 +91,7 @@ export function MobileNav({ isAdmin }: MobileNavProps) {
     },
   ];
 
+  
   return (
     <div className="flex items-center lg:hidden">
       <Sheet open={open} onOpenChange={setOpen}>

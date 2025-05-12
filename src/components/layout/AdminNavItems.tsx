@@ -2,8 +2,6 @@
 import React from "react";
 import { 
   Users, 
-  Files,
-  Upload, 
   Calendar, 
   BarChart,
   Settings
@@ -15,16 +13,6 @@ export const adminNavItems = [
     title: "User Management",
     href: "/dashboard/admin/members",
     icon: <Users className="h-4 w-4" />,
-  },
-  {
-    title: "Media Manager",
-    href: "/dashboard/admin/media",
-    icon: <Files className="h-4 w-4" />,
-  },
-  {
-    title: "Media Manager (Legacy)",
-    href: "/dashboard/admin/media-legacy",
-    icon: <Upload className="h-4 w-4" />,
   },
   {
     title: "Event Manager",
