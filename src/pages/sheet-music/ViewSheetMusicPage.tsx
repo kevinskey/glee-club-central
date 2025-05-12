@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useRef } from "react";
 import { useParams, useNavigate, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -171,10 +170,8 @@ export default function ViewSheetMusicPage() {
   const toggleMetronome = () => {
     // If turning on, inform user about sound
     if (!isMetronomeActive) {
-      // Fix: Using toast correctly with Sonner API - only one argument that includes message and options
-      toast("Starting metronome - ensure your volume is on", {
-        duration: 2000
-      });
+      // Using Sonner toast with proper syntax - single argument
+      toast("Starting metronome - ensure your volume is on");
     }
     setIsMetronomeActive(!isMetronomeActive);
   };
