@@ -20,15 +20,22 @@ export default function AdminMembersPage() {
     let mounted = true;
     
     if (isAuthenticated) {
+      console.log("[DEBUG] AdminMembersPage - Starting to fetch users");
       userManagement.fetchUsers()
         .then((result) => {
           if (mounted) {
+            console.log("[DEBUG] AdminMembersPage - Users fetched successfully:", result?.length || 0, "users");
+            if (result?.length === 0) {
+              console.log("[DEBUG] No users returned from database");
+            } else {
+              console.log("[DEBUG] First user sample:", result?.[0]);
+            }
             setIsLoading(false);
           }
         })
         .catch(err => {
           if (mounted) {
-            console.error("Error fetching users:", err);
+            console.error("[DEBUG] Error fetching users:", err);
             toast.error("Failed to load member data");
             setIsLoading(false);
           }
@@ -92,6 +99,10 @@ export default function AdminMembersPage() {
       </div>
     );
   }
+
+  console.log("[DEBUG] AdminMembersPage - Rendering with users data:", 
+    userManagement.users?.length, "total users", 
+    userManagement.users?.filter(u => u.status !== 'deleted')?.length, "non-deleted users");
 
   // Once loaded, render the component with the current data
   return <MembersPageComponent useUserManagementHook={() => userManagement} />;

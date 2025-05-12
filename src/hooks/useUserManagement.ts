@@ -38,17 +38,17 @@ export const useUserManagement = () => {
     setError(null);
     
     try {
-      console.log('Fetching users from database');
+      console.log('[DEBUG] Fetching users from database with RPC call "get_all_users"');
       const { data, error } = await supabase
         .rpc('get_all_users');
 
       if (error) {
-        console.error('Error fetching users:', error);
+        console.error('[DEBUG] Error fetching users with RPC:', error);
         setError(error.message);
         return [];
       }
 
-      console.log(`Fetched ${data?.length || 0} users`);
+      console.log(`[DEBUG] Fetched ${data?.length || 0} users from database`);
       
       if (data) {
         // Process the data to ensure consistent field formats
@@ -78,14 +78,22 @@ export const useUserManagement = () => {
           return processedUser;
         });
         
+        console.log('[DEBUG] Processed data from DB:', processedData.length, 'users');
+        if (processedData.length > 0) {
+          console.log('[DEBUG] First user after processing:', processedData[0]);
+        } else {
+          console.log('[DEBUG] No users found after processing');
+        }
+        
         setUsers(processedData);
         setUserCount(processedData.length);
         return processedData;
       }
       
+      console.log('[DEBUG] No data returned from database');
       return [];
     } catch (err) {
-      console.error('Unexpected error fetching users:', err);
+      console.error('[DEBUG] Unexpected error fetching users:', err);
       setError('An unexpected error occurred while fetching users');
       return [];
     } finally {

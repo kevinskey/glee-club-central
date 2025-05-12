@@ -82,12 +82,16 @@ export function MembersPageComponent({ useUserManagementHook }: MembersPageProps
     deleteUser
   } = useUserManagementHook();
   
-  console.log("MembersPageComponent - Initializing with", allMembers?.length || 0, "members");
-  console.log("MembersPageComponent - Members sample:", allMembers?.slice(0, 2));
+  console.log("[DEBUG] MembersPageComponent - Initializing with", allMembers?.length || 0, "members");
+  if (allMembers?.length === 0) {
+    console.log("[DEBUG] No members available to display");
+  } else if (allMembers?.length > 0) {
+    console.log("[DEBUG] Members sample:", allMembers?.slice(0, 2));
+  }
   
   // Explicitly filter out deleted users
   const members = allMembers ? allMembers.filter(member => member.status !== 'deleted') : [];
-  console.log("MembersPageComponent - Active members:", members.length);
+  console.log("[DEBUG] MembersPageComponent - After filtering deleted members:", members.length);
   
   // Create a wrapper function for fetchUsers that returns void
   const refreshUsers = createMemberRefreshFunction(fetchUsers);
