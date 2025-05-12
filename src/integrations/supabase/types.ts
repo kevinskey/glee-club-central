@@ -86,11 +86,14 @@ export type Database = {
       }
       calendar_events: {
         Row: {
+          allday: boolean | null
           created_at: string
           date: string
           description: string | null
+          google_event_id: string | null
           id: string
           image_url: string | null
+          last_synced_at: string | null
           location: string
           time: string
           title: string
@@ -99,11 +102,14 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          allday?: boolean | null
           created_at?: string
           date: string
           description?: string | null
+          google_event_id?: string | null
           id?: string
           image_url?: string | null
+          last_synced_at?: string | null
           location: string
           time: string
           title: string
@@ -112,11 +118,14 @@ export type Database = {
           user_id: string
         }
         Update: {
+          allday?: boolean | null
           created_at?: string
           date?: string
           description?: string | null
+          google_event_id?: string | null
           id?: string
           image_url?: string | null
+          last_synced_at?: string | null
           location?: string
           time?: string
           title?: string
