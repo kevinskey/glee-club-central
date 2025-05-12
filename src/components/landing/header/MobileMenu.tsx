@@ -25,9 +25,9 @@ export function MobileMenu({ onClose }: MobileMenuProps) {
   };
   
   return (
-    <div className="md:hidden bg-background border-t border-border">
-      <div className="container py-3 px-2 flex flex-col gap-2 max-h-[70vh] overflow-y-auto">
-        <div className="flex justify-center mb-1 sm:mb-2">
+    <div className="md:hidden fixed top-16 left-0 right-0 z-50 bg-background border-t border-border">
+      <div className="container py-4 px-4 flex flex-col gap-2 max-h-[70vh] overflow-y-auto">
+        <div className="flex justify-center mb-2">
           <TooltipProvider>
             <Tooltip>
               <TooltipTrigger asChild>
@@ -45,40 +45,60 @@ export function MobileMenu({ onClose }: MobileMenuProps) {
         {/* Mobile menu items */}
         <Button 
           variant="ghost" 
-          size="sm" 
-          className="justify-start py-2 hover:bg-glee-spelman hover:text-white" 
+          className="justify-start py-3 hover:bg-glee-spelman hover:text-white" 
           onClick={() => handleNavigation("/")}
         >
           Home
         </Button>
         <Button 
           variant="ghost" 
-          size="sm" 
-          className="justify-start py-2 hover:bg-glee-spelman hover:text-white" 
+          className="justify-start py-3 hover:bg-glee-spelman hover:text-white" 
+          onClick={() => handleNavigation("/about")}
+        >
+          About
+        </Button>
+        <Button 
+          variant="ghost" 
+          className="justify-start py-3 hover:bg-glee-spelman hover:text-white" 
           onClick={() => handleNavigation("/press-kit")}
         >
           Press Kit
         </Button>
-        {!isAuthenticated && (
+        {isAuthenticated ? (
           <>
             <Button 
               variant="ghost" 
-              size="sm" 
-              className="justify-start py-2 hover:bg-glee-spelman hover:text-white" 
+              className="justify-start py-3 hover:bg-glee-spelman hover:text-white" 
+              onClick={() => handleNavigation("/dashboard")}
+            >
+              Dashboard
+            </Button>
+          </>
+        ) : (
+          <>
+            <Button 
+              variant="ghost" 
+              className="justify-start py-3 hover:bg-glee-spelman hover:text-white" 
               onClick={() => handleNavigation("/login")}
             >
               Login
             </Button>
             <Button 
               variant="ghost" 
-              size="sm" 
-              className="justify-start py-2 hover:bg-glee-spelman hover:text-white" 
-              onClick={() => handleNavigation("/register/admin")}
+              className="justify-start py-3 hover:bg-glee-spelman hover:text-white" 
+              onClick={() => handleNavigation("/register")}
             >
-              Admin Registration
+              Register
             </Button>
           </>
         )}
+        <Button 
+          variant="ghost" 
+          className="justify-start py-3 hover:bg-glee-spelman hover:text-white" 
+          onClick={() => handleNavigation("/contact")}
+        >
+          Contact
+        </Button>
       </div>
     </div>
   );

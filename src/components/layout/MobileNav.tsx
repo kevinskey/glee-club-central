@@ -1,3 +1,4 @@
+
 import React from "react";
 import { Link, useLocation } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
@@ -16,7 +17,8 @@ import {
   Settings,
   Users,
   MessageSquare,
-  FileText
+  FileText,
+  Archive
 } from "lucide-react";
 
 interface MobileNavProps {
@@ -25,7 +27,7 @@ interface MobileNavProps {
 
 export function MobileNav({ isAdmin }: MobileNavProps) {
   const { pathname } = useLocation();
-  const { open, setOpen } = useSidebar();
+  const { openMobile, setOpenMobile } = useSidebar();
   const { isAuthenticated } = useAuth();
   
   if (!isAuthenticated) return null;
@@ -34,82 +36,91 @@ export function MobileNav({ isAdmin }: MobileNavProps) {
     {
       title: "Dashboard",
       href: "/dashboard",
-      icon: <LayoutDashboard className="h-4 w-4" />,
+      icon: <LayoutDashboard className="h-5 w-5" />,
     },
     {
       title: "Sheet Music",
       href: "/dashboard/sheet-music",
-      icon: <Music className="h-4 w-4" />,
+      icon: <Music className="h-5 w-5" />,
     },
     {
       title: "Calendar",
       href: "/dashboard/calendar",
-      icon: <Calendar className="h-4 w-4" />,
+      icon: <Calendar className="h-5 w-5" />,
     },
     {
       title: "Attendance",
       href: "/dashboard/attendance",
-      icon: <CheckSquare className="h-4 w-4" />,
+      icon: <CheckSquare className="h-5 w-5" />,
     },
     {
       title: "Announcements",
       href: "/dashboard/announcements",
-      icon: <Bell className="h-4 w-4" />,
+      icon: <Bell className="h-5 w-5" />,
     },
     {
       title: "Practice Resources",
       href: "/dashboard/practice",
-      icon: <FileText className="h-4 w-4" />,
+      icon: <FileText className="h-5 w-5" />,
+    },
+    {
+      title: "Media Library",
+      href: "/dashboard/archives",
+      icon: <Archive className="h-5 w-5" />,
     },
     {
       title: "Contact Admin",
       href: "/dashboard/contact",
-      icon: <MessageSquare className="h-4 w-4" />,
+      icon: <MessageSquare className="h-5 w-5" />,
     }
   ];
   
   const adminNavItems = [
     {
+      title: "Admin Dashboard",
+      href: "/dashboard/admin",
+      icon: <LayoutDashboard className="h-5 w-5" />,
+    },
+    {
       title: "User Management",
       href: "/dashboard/admin/users",
-      icon: <Users className="h-4 w-4" />,
+      icon: <Users className="h-5 w-5" />,
     },
     {
       title: "Event Manager",
       href: "/dashboard/admin/events",
-      icon: <Calendar className="h-4 w-4" />,
+      icon: <Calendar className="h-5 w-5" />,
     },
     {
       title: "Analytics",
       href: "/dashboard/admin/analytics",
-      icon: <BarChart className="h-4 w-4" />,
+      icon: <BarChart className="h-5 w-5" />,
     },
     {
       title: "Site Settings",
       href: "/dashboard/admin/settings",
-      icon: <Settings className="h-4 w-4" />,
+      icon: <Settings className="h-5 w-5" />,
     },
   ];
 
-  
   return (
     <div className="flex items-center lg:hidden">
-      <Sheet open={open} onOpenChange={setOpen}>
+      <Sheet open={openMobile} onOpenChange={setOpenMobile}>
         <SheetTrigger asChild>
           <Button 
             variant="ghost" 
             size="sm" 
-            className="mr-1 sm:mr-2 px-0 text-base hover:bg-transparent focus-visible:bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0"
+            className="mr-2 px-0 text-base hover:bg-transparent focus-visible:bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0"
             aria-label="Toggle Menu"
           >
-            <Menu className="h-4 sm:h-5 w-4 sm:w-5" />
+            <Menu className="h-5 w-5" />
             <span className="sr-only">Toggle Menu</span>
           </Button>
         </SheetTrigger>
-        <SheetContent side="left" className="pr-0 sm:max-w-xs w-[90%] sm:w-[85%] px-0">
-          <div className="space-y-3 sm:space-y-4 py-1 sm:py-2 h-full flex flex-col">
-            <div className="px-2 sm:px-3 flex-1 overflow-auto">
-              <h2 className="mb-1 sm:mb-2 px-2 text-base sm:text-lg font-semibold tracking-tight">
+        <SheetContent side="left" className="pr-0 sm:max-w-xs w-[300px] px-1">
+          <div className="space-y-4 py-3 h-full flex flex-col overflow-hidden">
+            <div className="px-3 flex-1 overflow-auto">
+              <h2 className="mb-2 px-2 text-lg font-semibold tracking-tight">
                 Main Menu
               </h2>
               <div className="space-y-1">
@@ -117,13 +128,13 @@ export function MobileNav({ isAdmin }: MobileNavProps) {
                   <Link
                     key={item.href}
                     to={item.href}
-                    onClick={() => setOpen(false)}
+                    onClick={() => setOpenMobile(false)}
                     className={cn(
-                      "flex items-center rounded-md px-2 py-2 text-sm font-medium",
-                      pathname === item.href ? "bg-accent text-accent-foreground" : "hover:bg-accent hover:text-accent-foreground transition-colors"
+                      "flex items-center rounded-md px-3 py-2 text-sm font-medium",
+                      pathname === item.href ? "bg-accent text-accent-foreground" : "hover:bg-accent/50 hover:text-accent-foreground transition-colors"
                     )}
                   >
-                    <span className="mr-2 sm:mr-3 flex h-5 w-5 items-center justify-center">{item.icon}</span>
+                    <span className="mr-3 flex h-5 w-5 items-center justify-center">{item.icon}</span>
                     <span>{item.title}</span>
                   </Link>
                 ))}
@@ -131,22 +142,22 @@ export function MobileNav({ isAdmin }: MobileNavProps) {
             </div>
             
             {isAdmin && (
-              <div className="px-2 sm:px-3 border-t pt-3 sm:pt-4">
-                <h2 className="mb-1 sm:mb-2 px-2 text-base sm:text-lg font-semibold tracking-tight">
+              <div className="px-3 border-t pt-4">
+                <h2 className="mb-2 px-2 text-lg font-semibold tracking-tight">
                   Admin Menu
                 </h2>
-                <div className="space-y-1">
+                <div className="space-y-1 mb-4">
                   {adminNavItems.map((item) => (
                     <Link
                       key={item.href}
                       to={item.href}
-                      onClick={() => setOpen(false)}
+                      onClick={() => setOpenMobile(false)}
                       className={cn(
-                        "flex items-center rounded-md px-2 py-2 text-sm font-medium",
-                        pathname === item.href ? "bg-accent text-accent-foreground" : "hover:bg-accent hover:text-accent-foreground transition-colors"
+                        "flex items-center rounded-md px-3 py-2 text-sm font-medium",
+                        pathname === item.href ? "bg-accent text-accent-foreground" : "hover:bg-accent/50 hover:text-accent-foreground transition-colors"
                       )}
                     >
-                      <span className="mr-2 sm:mr-3 flex h-5 w-5 items-center justify-center">{item.icon}</span>
+                      <span className="mr-3 flex h-5 w-5 items-center justify-center">{item.icon}</span>
                       <span>{item.title}</span>
                     </Link>
                   ))}

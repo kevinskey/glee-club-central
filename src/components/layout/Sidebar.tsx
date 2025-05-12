@@ -9,26 +9,26 @@ import { MobileNav } from "@/components/layout/MobileNav";
 export function Sidebar() {
   const { isAdmin } = useAuth();
   const { pathname } = useLocation();
-  const { open, setOpen } = useSidebar();
+  const { openMobile, setOpenMobile } = useSidebar();
   
   // Close sidebar on route change for mobile
   React.useEffect(() => {
-    setOpen(false);
-  }, [pathname, setOpen]);
+    setOpenMobile(false);
+  }, [pathname, setOpenMobile]);
 
   return (
     <>
       {/* Desktop Sidebar */}
-      <DesktopSidebar isOpen={open} isAdmin={isAdmin()} />
+      <DesktopSidebar isOpen={true} isAdmin={isAdmin()} />
       
       {/* Mobile Navigation */}
       <MobileNav isAdmin={isAdmin()} />
       
       {/* Overlay when sidebar is open on mobile */}
-      {open && (
+      {openMobile && (
         <div 
           className="fixed inset-0 z-20 bg-background/80 backdrop-blur-sm lg:hidden"
-          onClick={() => setOpen(false)}
+          onClick={() => setOpenMobile(false)}
         />
       )}
     </>
