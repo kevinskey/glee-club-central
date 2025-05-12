@@ -46,7 +46,7 @@ const DashboardPageContent = () => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const [events, setEvents] = useState<Event[]>([]);
-  const { isAdmin } = usePermissions();
+  const { isAdminRole, isSuperAdmin } = usePermissions();
   
   // Get current time of day for greeting
   const getTimeOfDay = () => {
@@ -284,7 +284,7 @@ const DashboardPageContent = () => {
             </Card>
             
             {/* Admin Dashboard Access (only if admin) */}
-            {isAdmin && (
+            {(isAdminRole || isSuperAdmin) && (
               <AdminDashboardAccess onAccess={handleRegisterAsAdmin} />
             )}
           </div>
