@@ -83,8 +83,9 @@ export function YouTubeSection() {
       <div className="container mx-auto px-4 relative z-10">
         <div className="flex justify-between items-center mb-8">
           <div>
-            <h2 className="text-3xl font-bold text-blue-100">Featured Videos</h2>
-            <p className="text-blue-200/80 mt-2">Watch performances from the Spelman College Glee Club</p>
+            <h2 className="text-3xl md:text-4xl font-bold text-transparent bg-gradient-to-r from-blue-100 to-blue-200 bg-clip-text drop-shadow-[0_2px_2px_rgba(0,0,0,0.3)]">
+              Featured Videos
+            </h2>
           </div>
           <div className="flex items-center gap-4">
             <Link 
@@ -108,10 +109,10 @@ export function YouTubeSection() {
           </div>
         </div>
 
-        {/* Video Selection Dropdown */}
+        {/* Video Selection Dropdown - Improved for mobile */}
         <div className="mb-6">
           <Select onValueChange={handleSelectVideo} defaultValue={videos[0]?.id}>
-            <SelectTrigger className="bg-black/30 border-blue-800/50 text-blue-100 w-full max-w-md">
+            <SelectTrigger className="bg-black/30 border-blue-800/50 text-blue-100 w-full max-w-full md:max-w-md">
               <SelectValue placeholder="Select a video to watch" />
             </SelectTrigger>
             <SelectContent className="bg-glee-spelman border-blue-900 text-blue-100">
@@ -126,7 +127,7 @@ export function YouTubeSection() {
 
         {/* Featured Video Player */}
         {featuredVideoId && (
-          <div className="mb-8 bg-black/30 p-4 rounded-lg">
+          <div className="mb-8 bg-black/30 p-2 md:p-4 rounded-lg">
             <VideoPlayer 
               videoId={featuredVideoId} 
               title={videos.find(v => v.id === featuredVideoId)?.title || ""}
@@ -135,19 +136,23 @@ export function YouTubeSection() {
           </div>
         )}
 
-        {/* Horizontal Scrolling Video Cards */}
-        <h3 className="text-xl font-semibold text-blue-100 mb-4">More Videos</h3>
+        {/* Mobile/Desktop headers with consistent styling */}
+        <h3 className="text-xl font-semibold text-transparent bg-gradient-to-r from-blue-100 to-blue-200 bg-clip-text mb-4">
+          More Videos
+        </h3>
+        
+        {/* Horizontal Scrolling Video Cards - Improved for mobile */}
         <ScrollArea className="w-full whitespace-nowrap pb-4" type="scroll">
-          <div className="flex gap-4">
+          <div className="flex gap-3 md:gap-4">
             {isLoading ? (
               <>
                 {[1, 2, 3, 4].map((i) => (
-                  <div key={i} className="min-w-[250px] max-w-[250px] flex-none">
+                  <div key={i} className="min-w-[200px] max-w-[200px] md:min-w-[250px] md:max-w-[250px] flex-none">
                     <Card className="overflow-hidden bg-black/20 border-blue-900/30 h-full">
                       <AspectRatio ratio={16 / 9}>
                         <Skeleton className="h-full w-full bg-black/40" />
                       </AspectRatio>
-                      <div className="p-4">
+                      <div className="p-3 md:p-4">
                         <Skeleton className="h-5 w-3/4 mb-2 bg-black/40" />
                         <Skeleton className="h-4 w-full bg-black/30" />
                       </div>
@@ -158,7 +163,7 @@ export function YouTubeSection() {
             ) : (
               <>
                 {videos.map((video) => (
-                  <div key={video.id} className="min-w-[250px] max-w-[250px] flex-none">
+                  <div key={video.id} className="min-w-[200px] max-w-[200px] md:min-w-[250px] md:max-w-[250px] flex-none">
                     <Card 
                       className="overflow-hidden hover:shadow-lg transition-all cursor-pointer group bg-black/20 border-blue-900/30 h-full"
                       onClick={() => handleVideoClick(video.id)}
@@ -175,9 +180,9 @@ export function YouTubeSection() {
                           <PlayCircle className="text-blue-200 w-12 h-12" />
                         </div>
                       </div>
-                      <div className="p-4">
-                        <h3 className="font-medium truncate mb-1 text-blue-100 group-hover:text-blue-200">{video.title}</h3>
-                        <p className="text-sm text-blue-200/70 truncate">{new Date(video.publishedAt).toLocaleDateString()}</p>
+                      <div className="p-3 md:p-4">
+                        <h3 className="font-medium truncate mb-1 text-blue-100 group-hover:text-blue-200 text-sm md:text-base">{video.title}</h3>
+                        <p className="text-xs md:text-sm text-blue-200/70 truncate">{new Date(video.publishedAt).toLocaleDateString()}</p>
                       </div>
                     </Card>
                   </div>
@@ -190,9 +195,9 @@ export function YouTubeSection() {
         <div className="mt-8 text-center">
           <Link 
             to="/videos" 
-            className="inline-flex items-center px-6 py-3 rounded-full bg-blue-800/40 hover:bg-blue-800/60 text-blue-100 transition-colors border border-blue-700/50"
+            className="inline-flex items-center px-4 py-2 md:px-6 md:py-3 rounded-full bg-blue-800/40 hover:bg-blue-800/60 text-blue-100 transition-colors border border-blue-700/50"
           >
-            <span>Browse our complete video collection</span>
+            <span>Browse our video collection</span>
             <Youtube size={18} className="ml-2" />
           </Link>
         </div>
