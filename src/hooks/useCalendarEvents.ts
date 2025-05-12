@@ -3,6 +3,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { fetchGoogleCalendarEvents } from "@/services/googleCalendar";
 
 // Define acceptable event types to enforce type safety
 export type EventType = "concert" | "rehearsal" | "tour" | "special";
@@ -26,7 +27,15 @@ export interface CalendarEvent {
 export function useCalendarEvents() {
   const [events, setEvents] = useState<CalendarEvent[]>([]);
   const [loading, setLoading] = useState(true);
+  const [useGoogleCalendar, setUseGoogleCalendar] = useState(false);
+  const [googleCalendarError, setGoogleCalendarError] = useState<string | null>(null);
+  const [daysAhead, setDaysAhead] = useState(90); // Default to 90 days ahead
   const { isAuthenticated, user } = useAuth();
+  
+  // Toggle between Google Calendar and local calendar
+  const toggleGoogleCalendar = useCallback(() => {
+    setUseGoogleCalendar(prev => !prev);
+  }, []);
   
   // Fetch events from the database
   const fetchEvents = useCallback(async () => {
@@ -34,7 +43,10 @@ export function useCalendarEvents() {
     console.info('Fetching calendar events updates');
 
     try {
+      let calendarEvents: CalendarEvent[] = [];
+      
       if (isAuthenticated && user) {
+        // Always fetch local events from Supabase
         console.info(`Attempting to fetch calendar events from Supabase for user: ${user.id}`);
         
         // Fetch from Supabase
@@ -50,7 +62,7 @@ export function useCalendarEvents() {
         }
 
         // Transform database events to CalendarEvent type with explicit typing
-        const transformedEvents: CalendarEvent[] = dbEvents.map(event => ({
+        calendarEvents = dbEvents.map(event => ({
           id: event.id,
           title: event.title,
           date: new Date(event.date),      // Convert string to Date
@@ -62,23 +74,43 @@ export function useCalendarEvents() {
           // Ensure type is cast to one of the allowed values
           type: validateEventType(event.type),
           image_url: event.image_url,
-          allDay: !event.time  // If no time specified, treat as all-day event
+          allDay: !event.time,  // If no time specified, treat as all-day event
+          source: "local"
         }));
 
-        console.info(`Successfully fetched ${transformedEvents.length} calendar events from Supabase`);
+        console.info(`Successfully fetched ${calendarEvents.length} calendar events from Supabase`);
         
-        // In a real app, you'd also fetch Google Calendar events here
-        console.info('Using mock events for now');
-        
-        setEvents(transformedEvents);
+        // If Google Calendar is enabled, fetch Google events
+        if (useGoogleCalendar) {
+          try {
+            console.info(`Fetching Google Calendar events for the next ${daysAhead} days`);
+            setGoogleCalendarError(null);
+            
+            const googleEvents = await fetchGoogleCalendarEvents(daysAhead);
+            console.info(`Successfully fetched ${googleEvents.length} events from Google Calendar`);
+            
+            // Combine with local events
+            calendarEvents = [...calendarEvents, ...googleEvents];
+            
+            // Sort events by start date
+            calendarEvents.sort((a, b) => a.start.getTime() - b.start.getTime());
+            
+          } catch (googleError) {
+            console.error('Error fetching Google Calendar events:', googleError);
+            setGoogleCalendarError(String(googleError));
+            toast.error('Failed to load Google Calendar events');
+          }
+        }
       }
+      
+      setEvents(calendarEvents);
     } catch (error) {
       console.error('Error in fetchEvents:', error);
       toast.error('Failed to load calendar events');
     } finally {
       setLoading(false);
     }
-  }, [isAuthenticated, user]);
+  }, [isAuthenticated, user, useGoogleCalendar, daysAhead]);
 
   // Helper function to validate and cast event types
   const validateEventType = (type: string): EventType => {
@@ -249,7 +281,7 @@ export function useCalendarEvents() {
       console.info('Clearing events polling interval');
       clearInterval(intervalId);
     };
-  }, [isAuthenticated, fetchEvents]);
+  }, [isAuthenticated, fetchEvents, useGoogleCalendar, daysAhead]);
 
   return { 
     events, 
@@ -257,6 +289,11 @@ export function useCalendarEvents() {
     fetchEvents,
     addEvent,
     updateEvent,
-    deleteEvent
+    deleteEvent,
+    useGoogleCalendar,
+    toggleGoogleCalendar,
+    googleCalendarError,
+    daysAhead,
+    setDaysAhead
   };
 }

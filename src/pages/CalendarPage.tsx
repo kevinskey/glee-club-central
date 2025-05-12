@@ -1,4 +1,3 @@
-
 import React, { useState, useCallback, useMemo } from "react";
 import { Header } from "@/components/landing/Header";
 import { Footer } from "@/components/landing/Footer";
@@ -13,6 +12,7 @@ import { CalendarContainer } from "@/components/calendar/CalendarContainer";
 import { EventList } from "@/components/calendar/EventList";
 import { EventDetails } from "@/components/calendar/EventDetails";
 import { CalendarPageHeader } from "@/components/calendar/CalendarPageHeader";
+import { GoogleCalendarToggle } from "@/components/calendar/GoogleCalendarToggle";
 
 export default function CalendarPage() {
   const [date, setDate] = useState<Date | undefined>(new Date());
@@ -26,7 +26,12 @@ export default function CalendarPage() {
     addEvent, 
     updateEvent, 
     deleteEvent,
-    fetchEvents
+    fetchEvents,
+    useGoogleCalendar,
+    toggleGoogleCalendar,
+    googleCalendarError,
+    daysAhead,
+    setDaysAhead
   } = useCalendarEvents();
   
   // Filter events for the selected date - memoized
@@ -146,6 +151,13 @@ export default function CalendarPage() {
         <div className="container py-8 sm:py-10 md:py-12">
           <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
             <CalendarPageHeader onAddEventClick={handleOpenAddEvent} />
+            <GoogleCalendarToggle 
+              useGoogleCalendar={useGoogleCalendar}
+              toggleGoogleCalendar={toggleGoogleCalendar} 
+              googleCalendarError={googleCalendarError}
+              daysAhead={daysAhead}
+              onDaysAheadChange={setDaysAhead}
+            />
           </div>
           
           <div className="flex flex-col lg:flex-row gap-8 h-full">
@@ -182,7 +194,7 @@ export default function CalendarPage() {
                         event={selectedEvent} 
                         onDelete={handleDeleteEvent}
                         onEdit={handleEditEvent}
-                        isAdmin={true} 
+                        isAdmin={!selectedEvent.source || selectedEvent.source === 'local'} 
                       />
                     )}
                   </>
