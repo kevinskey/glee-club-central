@@ -4,7 +4,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
 import { Link } from "react-router-dom";
-import { CalendarPlus, ArrowRight } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import { fetchUpcomingPerformances } from "@/utils/supabase/calendar";
 import { toast } from "sonner";
 import { 
@@ -96,21 +96,12 @@ export function PerformanceSection() {
           <div className="absolute left-0 top-0 z-10 px-4 md:px-6 py-4 flex items-center justify-between w-full">
             <h2 className="text-2xl font-bold tracking-tight text-white">Upcoming Performances</h2>
             
-            {isAuthenticated && profile?.role === 'admin' ? (
-              <Link to="/calendar">
-                <Button size="sm" variant="outline" className="bg-white/20 backdrop-blur-sm text-white border-white/40 hover:bg-white/30">
-                  <CalendarPlus className="mr-2 h-4 w-4" />
-                  Add Event
-                </Button>
-              </Link>
-            ) : (
-              <Link to="/calendar">
-                <Button size="sm" variant="outline" className="bg-white/20 backdrop-blur-sm text-white border-white/40 hover:bg-white/30">
-                  View All
-                  <ArrowRight className="ml-2 h-4 w-4" />
-                </Button>
-              </Link>
-            )}
+            <Link to="/calendar">
+              <Button size="sm" variant="outline" className="bg-white/20 backdrop-blur-sm text-white border-white/40 hover:bg-white/30">
+                View All
+                <ArrowRight className="ml-2 h-4 w-4" />
+              </Button>
+            </Link>
           </div>
           
           {loading ? (
