@@ -1,21 +1,19 @@
 
 import React from 'react';
-import { BrowserRouter } from 'react-router-dom';
+import { RouterProvider } from 'react-router-dom';
 import { Toaster } from 'sonner';
 import { AuthProvider } from './contexts/AuthContext';
 import { RolePermissionProvider } from './contexts/RolePermissionContext';
 import { ThemeProvider } from './providers/ThemeProvider';
-import AppRoutes from './Routes';
+import { router } from './router';
 
 function App() {
   return (
     <ThemeProvider>
       <AuthProvider>
         <RolePermissionProvider>
-          <BrowserRouter>
-            <AppRoutes />
-            <Toaster position="top-right" />
-          </BrowserRouter>
+          <RouterProvider router={router} />
+          <Toaster position="top-right" />
         </RolePermissionProvider>
       </AuthProvider>
     </ThemeProvider>

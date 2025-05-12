@@ -27,6 +27,14 @@ import SetlistsPage from "./pages/SetlistsPage";
 import ChoralTitlesPage from "./pages/sheet-music/ChoralTitlesPage";
 import YoutubeVideosPage from "./pages/YoutubeVideosPage";
 import PressKitPage from "./pages/PressKitPage";
+import RegisterPage from "./pages/RegisterPage";
+import AboutPage from "./pages/AboutPage";
+import ContactPage from "./pages/ContactPage";
+import MediaLibraryPage from "./pages/media-library/MediaLibraryPage";
+import AdminDashboardPage from "./pages/AdminDashboardPage";
+import AdminFinancesPage from "./pages/AdminFinancesPage";
+import AdminSettingsPage from "./pages/AdminSettingsPage";
+import ProfilePage from "./pages/profile/ProfilePage";
 
 export const router = createBrowserRouter([
   {
@@ -42,12 +50,24 @@ export const router = createBrowserRouter([
         element: <LoginPage />,
       },
       {
+        path: "/register",
+        element: <RegisterPage />,
+      },
+      {
         path: "/videos",
         element: <YoutubeVideosPage />,
       },
       {
         path: "/press-kit",
         element: <PressKitPage />,
+      },
+      {
+        path: "/about",
+        element: <AboutPage />,
+      },
+      {
+        path: "/contact",
+        element: <ContactPage />,
       },
     ],
   },
@@ -103,6 +123,18 @@ export const router = createBrowserRouter([
         path: "/dashboard/members",
         element: <MemberDirectoryPage />,
       },
+      {
+        path: "/dashboard/profile",
+        element: <ProfilePage />,
+      },
+      {
+        path: "/dashboard/archives",
+        element: <MediaLibraryPage />,
+      },
+      {
+        path: "/dashboard/music",
+        element: <SheetMusicPage />,
+      },
     ],
   },
   {
@@ -113,6 +145,10 @@ export const router = createBrowserRouter([
       </RequireAuth>
     ),
     children: [
+      {
+        path: "/dashboard/admin",
+        element: <AdminDashboardPage />,
+      },
       {
         path: "/dashboard/admin/members",
         element: <AdminMembersPage />,
@@ -132,6 +168,22 @@ export const router = createBrowserRouter([
       {
         path: "/dashboard/admin/settings",
         element: <SiteSettingsPage />,
+      },
+      {
+        path: "/dashboard/admin/dashboard",
+        element: <AdminDashboardPage />,
+      },
+      {
+        path: "/dashboard/admin/media",
+        element: <MediaLibraryPage />,
+      },
+      {
+        path: "/dashboard/admin/financial",
+        element: <AdminFinancesPage />,
+      },
+      {
+        path: "/dashboard/admin/settings",
+        element: <AdminSettingsPage />,
       },
     ],
   },
