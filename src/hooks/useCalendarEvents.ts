@@ -83,8 +83,8 @@ export function useCalendarEvents() {
           created_by: event.user_id,
           image_url: event.image_url,
           source: 'local',
-          // Handle allDay property with a fallback to false if undefined
-          allDay: event.allDay !== undefined ? event.allDay : false,
+          // Using allday from database with fallback to false
+          allDay: event.allday !== undefined ? event.allday : false,
         };
       });
       
@@ -129,7 +129,7 @@ export function useCalendarEvents() {
           type: eventData.type,
           user_id: user.id,
           image_url: eventData.image_url,
-          allDay: eventData.allDay || false // Add allDay to the database insert with default
+          allday: eventData.allDay || false // Use allday (lowercase) for database insert
         })
         .select()
         .single();
@@ -154,7 +154,7 @@ export function useCalendarEvents() {
         created_by: data.user_id,
         image_url: data.image_url,
         source: 'local',
-        allDay: data.allDay !== undefined ? data.allDay : false,
+        allDay: data.allday !== undefined ? data.allday : false, // Use allday from database with proper conversion
       };
       
       // Add to local events array
@@ -192,7 +192,7 @@ export function useCalendarEvents() {
           description: eventData.description,
           type: eventData.type,
           image_url: eventData.image_url,
-          allDay: eventData.allDay || false // Add allDay to the update with default
+          allday: eventData.allDay || false // Use allday (lowercase) for database update
         })
         .eq("id", eventData.id);
       
