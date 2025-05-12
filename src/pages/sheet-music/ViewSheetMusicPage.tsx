@@ -26,7 +26,7 @@ interface SheetMusic {
 
 export default function ViewSheetMusicPage() {
   const { id: sheetMusicId } = useParams();
-  const { toast } = useToast();
+  const { toast: toastLegacy } = useToast(); // Rename to avoid conflict with sonner
   const navigate = useNavigate();
   const location = useLocation();
   const [sheetMusic, setSheetMusic] = useState<SheetMusic | null>(null);
@@ -57,7 +57,7 @@ export default function ViewSheetMusicPage() {
     }
     
     if (!sheetMusicId) {
-      toast({
+      toastLegacy({
         title: "Missing sheet music ID",
         description: "Please select a sheet music to view",
         variant: "destructive",
@@ -104,7 +104,7 @@ export default function ViewSheetMusicPage() {
           setSheetMusic(data as SheetMusic);
         } else {
           // Handle case where sheet music is not found
-          toast({
+          toastLegacy({
             title: "Sheet music not found",
             description: "The requested sheet music could not be found",
             variant: "destructive",
@@ -113,7 +113,7 @@ export default function ViewSheetMusicPage() {
         }
       } catch (error: any) {
         console.error("Error fetching sheet music:", error);
-        toast({
+        toastLegacy({
           title: "Error loading sheet music",
           description: error.message || "An unexpected error occurred",
           variant: "destructive",
@@ -125,7 +125,7 @@ export default function ViewSheetMusicPage() {
     };
 
     fetchSheetMusic();
-  }, [sheetMusicId, toast, navigate, fileFromLocation, fromMediaLibrary]);
+  }, [sheetMusicId, toastLegacy, navigate, fileFromLocation, fromMediaLibrary]);
   
   // Check if already bookmarked (from localStorage)
   useEffect(() => {
@@ -144,15 +144,13 @@ export default function ViewSheetMusicPage() {
     
     if (isBookmarked) {
       newBookmarkedIds = bookmarkedIds.filter((id: string) => id !== sheetMusicId);
-      toast({
-        title: "Bookmark removed",
-        description: "Sheet music removed from bookmarks",
+      toast.message("Bookmark removed", {
+        description: "Sheet music removed from bookmarks"
       });
     } else {
       newBookmarkedIds = [...bookmarkedIds, sheetMusicId];
-      toast({
-        title: "Bookmarked",
-        description: "Sheet music added to bookmarks",
+      toast.message("Bookmarked", {
+        description: "Sheet music added to bookmarks"  
       });
     }
     
@@ -170,8 +168,8 @@ export default function ViewSheetMusicPage() {
   const toggleMetronome = () => {
     // If turning on, inform user about sound
     if (!isMetronomeActive) {
-      // Fixed: Using the proper Sonner toast syntax
-      toast("Starting metronome - ensure your volume is on");
+      // Using the proper Sonner toast syntax
+      toast.message("Starting metronome - ensure your volume is on");
     }
     setIsMetronomeActive(!isMetronomeActive);
   };
