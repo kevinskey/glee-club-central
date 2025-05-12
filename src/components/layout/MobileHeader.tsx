@@ -94,7 +94,7 @@ export function MobileHeader() {
               <span className="sr-only">{mobileMenuOpen ? "Close menu" : "Toggle menu"}</span>
             </Button>
             
-            <Link to={isAuthenticated ? "/dashboard" : "/"} className="font-bold flex items-center hover:text-primary transition-colors">
+            <Link to="/" className="font-bold flex items-center hover:text-primary transition-colors">
               <Icons.logo className="h-6 w-auto" />
               <span className="text-base ml-2 text-foreground">Glee World</span>
             </Link>
