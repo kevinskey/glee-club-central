@@ -32,7 +32,7 @@ export function NavigationLinks({ className, onLinkClick }: NavigationLinksProps
         <NavigationMenuItem>
           <Link
             to="/press-kit"
-            className="text-lg font-medium text-muted-foreground transition-colors hover:text-foreground"
+            className="text-base md:text-lg font-inter font-medium text-muted-foreground transition-colors hover:text-foreground"
             onClick={handleLinkClick}
           >
             Press Kit
@@ -42,7 +42,7 @@ export function NavigationLinks({ className, onLinkClick }: NavigationLinksProps
         <NavigationMenuItem>
           <Link
             to="/about"
-            className="text-lg font-medium text-muted-foreground transition-colors hover:text-foreground"
+            className="text-base md:text-lg font-inter font-medium text-muted-foreground transition-colors hover:text-foreground"
             onClick={handleLinkClick}
           >
             About
@@ -52,7 +52,7 @@ export function NavigationLinks({ className, onLinkClick }: NavigationLinksProps
         <NavigationMenuItem>
           <Link
             to="/privacy"
-            className="text-lg font-medium text-muted-foreground transition-colors hover:text-foreground"
+            className="text-base md:text-lg font-inter font-medium text-muted-foreground transition-colors hover:text-foreground"
             onClick={handleLinkClick}
           >
             Privacy
@@ -62,7 +62,7 @@ export function NavigationLinks({ className, onLinkClick }: NavigationLinksProps
         <NavigationMenuItem>
           <Link
             to="/terms"
-            className="text-lg font-medium text-muted-foreground transition-colors hover:text-foreground"
+            className="text-base md:text-lg font-inter font-medium text-muted-foreground transition-colors hover:text-foreground"
             onClick={handleLinkClick}
           >
             Terms
@@ -73,7 +73,7 @@ export function NavigationLinks({ className, onLinkClick }: NavigationLinksProps
           <NavigationMenuItem>
             <Link
               to="/register/admin"
-              className="text-lg font-medium text-muted-foreground transition-colors hover:text-foreground"
+              className="text-base md:text-lg font-inter font-medium text-muted-foreground transition-colors hover:text-foreground"
               onClick={handleLinkClick}
             >
               Admin Registration

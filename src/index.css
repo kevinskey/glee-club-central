@@ -78,18 +78,109 @@
     transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
     transition-duration: 300ms;
   }
+  
+  html {
+    font-size: 16px;
+    @apply scroll-smooth;
+  }
+  
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground font-inter;
+  }
+  
+  /* Typography system - Base elements */
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-playfair font-bold tracking-tight;
+    line-height: 1.2;
+  }
+  
+  h1 {
+    @apply text-3xl md:text-4xl lg:text-5xl mb-6;
+  }
+  
+  h2 {
+    @apply text-2xl md:text-3xl lg:text-4xl mb-5;
+  }
+  
+  h3 {
+    @apply text-xl md:text-2xl lg:text-3xl mb-4;
+  }
+  
+  h4 {
+    @apply text-lg md:text-xl mb-3;
+  }
+  
+  h5 {
+    @apply text-base md:text-lg font-semibold mb-3;
+  }
+  
+  h6 {
+    @apply text-sm md:text-base font-semibold mb-2;
+  }
+  
+  p {
+    @apply leading-relaxed mb-4;
+    line-height: 1.8;
+  }
+  
+  a {
+    @apply text-glee-spelman hover:text-glee-spelman/80 transition-colors duration-200;
+  }
+  
+  small {
+    @apply text-sm text-muted-foreground;
+  }
+  
+  /* Utility text classes */
+  .text-balance {
+    text-wrap: balance;
+  }
+  
+  .text-pretty {
+    text-wrap: pretty;
+  }
+  
+  /* Custom typography classes */
+  .heading-xl {
+    @apply font-playfair text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-bold tracking-tight;
+  }
+  
+  .heading-large {
+    @apply font-playfair text-3xl md:text-4xl lg:text-5xl font-bold tracking-tight;
+  }
+  
+  .heading-medium {
+    @apply font-playfair text-2xl md:text-3xl font-bold tracking-tight;
+  }
+  
+  .heading-small {
+    @apply font-playfair text-xl md:text-2xl font-semibold;
+  }
+  
+  .body-large {
+    @apply text-lg leading-relaxed;
+  }
+  
+  .body-medium {
+    @apply text-base leading-relaxed;
+  }
+  
+  .body-small {
+    @apply text-sm leading-relaxed;
+  }
+  
+  .caption {
+    @apply text-xs text-muted-foreground;
+  }
+  
+  .quote {
+    @apply font-playfair italic text-lg md:text-xl leading-relaxed border-l-4 border-glee-spelman pl-4 py-2;
   }
   
   /* Add consistent text spacing */
   p {
     @apply leading-extra-relaxed;
     line-height: 2.2; /* Increased from previous 2.0 to double spacing */
-  }
-  
-  h1, h2, h3, h4, h5, h6 {
-    @apply leading-tight tracking-normal;
   }
   
   /* Adjust line heights based on text size */

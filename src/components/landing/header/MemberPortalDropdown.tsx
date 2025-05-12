@@ -37,22 +37,22 @@ export function MemberPortalDropdown() {
           <Button 
             size="sm"
             variant="outline"
-            className="h-8 px-3 text-xs flex items-center gap-1"
+            className="h-8 px-3 text-xs flex items-center gap-1 font-inter"
           >
             Member Portal
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end" className="w-48 bg-popover">
-          <DropdownMenuLabel>Member Options</DropdownMenuLabel>
+          <DropdownMenuLabel className="font-inter text-sm">Member Options</DropdownMenuLabel>
           <DropdownMenuSeparator />
-          <DropdownMenuItem onClick={() => navigate("/dashboard")}>
+          <DropdownMenuItem onClick={() => navigate("/dashboard")} className="font-inter text-sm">
             Dashboard
           </DropdownMenuItem>
-          <DropdownMenuItem onClick={() => navigate("/dashboard/profile")}>
+          <DropdownMenuItem onClick={() => navigate("/dashboard/profile")} className="font-inter text-sm">
             Profile
           </DropdownMenuItem>
           <DropdownMenuSeparator />
-          <DropdownMenuItem onClick={handleSignOut}>
+          <DropdownMenuItem onClick={handleSignOut} className="font-inter text-sm">
             Sign Out
           </DropdownMenuItem>
         </DropdownMenuContent>
@@ -61,7 +61,8 @@ export function MemberPortalDropdown() {
   ) : (
     <Button 
       size="sm"
-      className="bg-glee-purple hover:bg-glee-spelman h-8 px-3 text-xs flex items-center gap-1"
+      variant="spelman"
+      className="h-8 px-3 text-xs flex items-center gap-1 font-inter"
       onClick={navigateToLogin}
     >
       <LogIn className="h-3.5 w-3.5 mr-1" /> Login

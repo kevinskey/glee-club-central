@@ -20,22 +20,22 @@ export function CTASection() {
       </div>
       <div className="px-2 sm:px-4 md:container relative z-10">
         <div className="max-w-xs sm:max-w-sm md:max-w-lg lg:max-w-2xl xl:max-w-3xl mx-auto text-center">
-          <h2 className="text-xl sm:text-2xl md:text-3xl font-playfair font-bold mb-2 sm:mb-3 md:mb-4">Join Our Digital Choir Community</h2>
-          <p className="text-sm sm:text-base md:text-lg mb-4 sm:mb-5 md:mb-6 opacity-90">
+          <h2 className="font-playfair text-xl sm:text-2xl md:text-3xl font-bold mb-2 sm:mb-3 md:mb-4 tracking-tight">Join Our Digital Choir Community</h2>
+          <p className="font-inter text-sm sm:text-base md:text-lg mb-6 sm:mb-7 md:mb-8 opacity-90 text-pretty leading-relaxed">
             Access sheet music, submit recordings, check schedules, and connect with fellow members.
           </p>
           <div className="flex flex-col sm:flex-row justify-center gap-3">
             <Button 
               size={isMobile ? "default" : "lg"} 
               variant="outline"
-              className="bg-white/10 text-white border-white hover:bg-white/20 w-full sm:w-auto"
+              className="bg-white/10 text-white border-white hover:bg-white/20 w-full sm:w-auto font-inter"
               onClick={() => navigate("/fan-page")}
             >
               Guest Access
             </Button>
             <Button 
               size={isMobile ? "default" : "lg"} 
-              className="bg-white text-glee-dark hover:bg-white/90 w-full sm:w-auto"
+              className="bg-white text-glee-dark hover:bg-white/90 w-full sm:w-auto font-inter"
               onClick={() => navigate("/login")}
             >
               Member Portal

@@ -20,6 +20,8 @@ const badgeVariants = cva(
           "border-transparent bg-glee-purple text-white hover:bg-glee-purple/90",
         success:
           "border-transparent bg-green-600 text-white hover:bg-green-700",
+        spelman: 
+          "border-transparent bg-glee-spelman text-white hover:bg-glee-spelman/90 font-medium",
       },
     },
     defaultVariants: {

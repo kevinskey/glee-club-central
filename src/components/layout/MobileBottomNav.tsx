@@ -13,28 +13,28 @@ export function MobileBottomNav() {
           className="flex flex-col items-center justify-center px-3 py-2"
         >
           <LogIn className="h-5 w-5" />
-          <span className="text-xs mt-1">Login</span>
+          <span className="text-xs mt-1 font-inter font-medium">Login</span>
         </Link>
         <Link 
           to="/recordings/submit" 
           className="flex flex-col items-center justify-center px-3 py-2"
         >
           <Mic className="h-5 w-5" />
-          <span className="text-xs mt-1">Record</span>
+          <span className="text-xs mt-1 font-inter font-medium">Record</span>
         </Link>
         <Link 
           to="/social" 
           className="flex flex-col items-center justify-center px-3 py-2"
         >
           <Share2 className="h-5 w-5" />
-          <span className="text-xs mt-1">Social</span>
+          <span className="text-xs mt-1 font-inter font-medium">Social</span>
         </Link>
         <Link 
           to="/contact" 
           className="flex flex-col items-center justify-center px-3 py-2"
         >
           <MessageSquare className="h-5 w-5" />
-          <span className="text-xs mt-1">Contact</span>
+          <span className="text-xs mt-1 font-inter font-medium">Contact</span>
         </Link>
       </div>
     </div>

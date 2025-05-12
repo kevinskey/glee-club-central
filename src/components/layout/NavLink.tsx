@@ -22,7 +22,7 @@ export const NavLink = ({ href, children, icon, disabled = false, className }: N
     <RouterNavLink
       to={disabled ? "#" : href}
       className={cn(
-        "flex items-center space-x-2 rounded-md px-3 py-2 text-sm font-medium transition-all",
+        "flex items-center space-x-2 rounded-md px-3 py-2 text-sm font-medium transition-all font-inter",
         isActive
           ? "bg-accent/10 text-accent"
           : "text-muted-foreground hover:bg-accent/10 hover:text-accent",

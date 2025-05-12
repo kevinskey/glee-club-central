@@ -10,20 +10,22 @@ const buttonVariants = cva(
   {
     variants: {
       variant: {
-        default: "bg-primary text-primary-foreground hover:bg-glee-spelman",
+        default: "bg-primary text-primary-foreground font-medium hover:bg-glee-spelman",
         destructive:
-          "bg-destructive text-destructive-foreground hover:bg-destructive/90",
+          "bg-destructive text-destructive-foreground font-medium hover:bg-destructive/90",
         outline:
-          "border border-input bg-background hover:bg-glee-spelman hover:text-white",
+          "border border-input bg-background font-medium hover:bg-glee-spelman hover:text-white",
         secondary:
-          "bg-secondary text-secondary-foreground hover:bg-glee-spelman hover:text-white",
-        ghost: "hover:bg-glee-spelman hover:text-white",
-        link: "text-primary underline-offset-4 hover:underline",
+          "bg-secondary text-secondary-foreground font-medium hover:bg-glee-spelman hover:text-white",
+        ghost: "hover:bg-glee-spelman font-medium hover:text-white",
+        link: "text-primary font-medium underline-offset-4 hover:underline",
+        spelman: "bg-glee-spelman text-white font-medium hover:bg-glee-spelman/90",
       },
       size: {
         default: "h-10 px-4 py-2",
-        sm: "h-9 rounded-md px-3",
-        lg: "h-11 rounded-md px-8",
+        sm: "h-8 rounded-md px-3 text-xs",
+        lg: "h-12 rounded-md px-8 text-base",
+        xl: "h-14 rounded-md px-10 text-lg",
         icon: "h-10 w-10",
       },
     },

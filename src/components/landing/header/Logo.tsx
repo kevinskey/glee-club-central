@@ -21,13 +21,13 @@ export function Logo() {
           <TooltipTrigger asChild>
             <div className="flex items-center gap-2 cursor-pointer" onClick={() => navigate("/")}>
               <Icons.logo className={`${isMobile ? "h-8" : "h-6"} w-auto`} />
-              <span className={`font-playfair ${isMobile ? "text-xl" : "text-lg"} font-semibold text-foreground`}>
+              <span className={`font-playfair ${isMobile ? "text-xl" : "text-lg"} font-semibold text-foreground tracking-tight`}>
                 Glee World
               </span>
             </div>
           </TooltipTrigger>
           <TooltipContent>
-            <p>Go to homepage</p>
+            <p className="font-inter text-sm">Go to homepage</p>
           </TooltipContent>
         </Tooltip>
       </TooltipProvider>

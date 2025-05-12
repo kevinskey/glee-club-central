@@ -29,21 +29,21 @@ export function MobileMenu({ onClose }: MobileMenuProps) {
         {/* Mobile menu items */}
         <Button 
           variant="ghost" 
-          className="justify-start py-3 hover:bg-accent hover:text-accent-foreground" 
+          className="justify-start py-3 hover:bg-accent hover:text-accent-foreground font-inter text-base" 
           onClick={() => handleNavigation("/")}
         >
           Home
         </Button>
         <Button 
           variant="ghost" 
-          className="justify-start py-3 hover:bg-accent hover:text-accent-foreground" 
+          className="justify-start py-3 hover:bg-accent hover:text-accent-foreground font-inter text-base" 
           onClick={() => handleNavigation("/about")}
         >
           About
         </Button>
         <Button 
           variant="ghost" 
-          className="justify-start py-3 hover:bg-accent hover:text-accent-foreground" 
+          className="justify-start py-3 hover:bg-accent hover:text-accent-foreground font-inter text-base" 
           onClick={() => handleNavigation("/press-kit")}
         >
           Press Kit
@@ -52,7 +52,7 @@ export function MobileMenu({ onClose }: MobileMenuProps) {
           <>
             <Button 
               variant="ghost" 
-              className="justify-start py-3 hover:bg-accent hover:text-accent-foreground" 
+              className="justify-start py-3 hover:bg-accent hover:text-accent-foreground font-inter text-base" 
               onClick={() => handleNavigation("/dashboard")}
             >
               Dashboard
@@ -62,14 +62,14 @@ export function MobileMenu({ onClose }: MobileMenuProps) {
           <>
             <Button 
               variant="ghost" 
-              className="justify-start py-3 hover:bg-accent hover:text-accent-foreground" 
+              className="justify-start py-3 hover:bg-accent hover:text-accent-foreground font-inter text-base" 
               onClick={() => handleNavigation("/login")}
             >
               Login
             </Button>
             <Button 
               variant="ghost" 
-              className="justify-start py-3 hover:bg-accent hover:text-accent-foreground" 
+              className="justify-start py-3 hover:bg-accent hover:text-accent-foreground font-inter text-base" 
               onClick={() => handleNavigation("/register")}
             >
               Register
@@ -78,7 +78,7 @@ export function MobileMenu({ onClose }: MobileMenuProps) {
         )}
         <Button 
           variant="ghost" 
-          className="justify-start py-3 hover:bg-accent hover:text-accent-foreground" 
+          className="justify-start py-3 hover:bg-accent hover:text-accent-foreground font-inter text-base" 
           onClick={() => handleNavigation("/contact")}
         >
           Contact

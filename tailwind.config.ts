@@ -19,6 +19,10 @@ export default {
 			}
 		},
 		extend: {
+			fontFamily: {
+				playfair: ['Playfair Display', 'serif'],
+				inter: ['Inter', 'sans-serif'],
+			},
 			colors: {
 				border: 'hsl(var(--border))',
 				input: 'hsl(var(--input))',
@@ -73,10 +77,6 @@ export default {
 					spelman: '#0B3C84', // Spelman Blue - preserved for specific uses
 				}
 			},
-			fontFamily: {
-				playfair: ['Playfair Display', 'serif'],
-				inter: ['Inter', 'sans-serif'],
-			},
 			borderRadius: {
 				lg: 'var(--radius)',
 				md: 'calc(var(--radius) - 2px)',
@@ -103,7 +103,17 @@ export default {
 			animation: {
 				'accordion-down': 'accordion-down 0.2s ease-out',
 				'accordion-up': 'accordion-up 0.2s ease-out'
-			}
+			},
+			letterSpacing: {
+				tightest: '-.075em',
+				tighter: '-.05em',
+				tight: '-.025em',
+				normal: '0',
+				wide: '.025em',
+				wider: '.05em',
+				widest: '.1em',
+				spaced: '.2em',
+			},
 		}
 	},
 	plugins: [require("tailwindcss-animate")],
