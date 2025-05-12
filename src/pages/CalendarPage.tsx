@@ -1,5 +1,5 @@
+
 import React, { useState, useCallback, useMemo } from "react";
-import { Header } from "@/components/landing/Header";
 import { Footer } from "@/components/landing/Footer";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { useCalendarEvents, CalendarEvent, EventType } from "@/hooks/useCalendarEvents";
@@ -146,7 +146,7 @@ export default function CalendarPage() {
   
   return (
     <div className="flex min-h-screen flex-col">
-      <Header />
+      {/* Removed the duplicate Header component here */}
       <main className="flex-1 bg-gray-50 dark:bg-gray-900">
         <div className="container py-8 sm:py-10 md:py-12">
           <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">

@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useRef } from "react";
 import { Footer } from "@/components/landing/Footer";
 import { CalendarHeader } from "@/components/calendar/CalendarHeader";
@@ -109,7 +108,7 @@ const CalendarPage = () => {
 
   return (
     <div className="flex flex-col min-h-screen">
-      {/* Remove the Header component on mobile */}
+      {/* Removed the Header component completely */}
       <main className="flex-1 bg-gray-50 dark:bg-gray-900">
         <div className="container mx-auto p-4">
           {/* Use CalendarPageHeader on mobile, CalendarHeader on desktop */}
