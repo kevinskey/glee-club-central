@@ -63,5 +63,5 @@ export interface AuthContextType {
   signIn?: (email: string, password: string) => Promise<any>;
   signUp?: (email: string, password: string, firstName: string, lastName: string, role?: string) => Promise<any>;
   refreshPermissions?: (userId?: string) => Promise<void>;
-  updatePassword?: (newPassword: string) => Promise<void>;
+  updatePassword?: (newPassword: string) => Promise<{ error: any } | null>; // Updated return type
 }
