@@ -1,7 +1,6 @@
 
 import React from "react";
 import { HeroSection } from "@/components/landing/HeroSection";
-import { FeaturesSection } from "@/components/landing/FeaturesSection";
 import { TestimonialSection } from "@/components/landing/TestimonialSection";
 import { CTASection } from "@/components/landing/CTASection";
 import { Footer } from "@/components/landing/Footer";
@@ -13,7 +12,6 @@ const LandingPage: React.FC = () => {
     <div className="min-h-screen">
       <main>
         <HeroSection />
-        <FeaturesSection />
         <PerformanceSection />
         <YouTubeSection />
         <TestimonialSection />
