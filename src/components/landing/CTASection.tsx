@@ -28,14 +28,14 @@ export function CTASection() {
             <Button 
               size={isMobile ? "default" : "lg"} 
               variant="outline"
-              className="bg-white/10 text-white border-white hover:bg-white/20"
+              className="bg-white/10 text-white border-white hover:bg-white/20 w-full sm:w-auto"
               onClick={() => navigate("/fan-page")}
             >
               Guest Access
             </Button>
             <Button 
               size={isMobile ? "default" : "lg"} 
-              className="bg-white text-glee-dark hover:bg-white/90"
+              className="bg-white text-glee-dark hover:bg-white/90 w-full sm:w-auto"
               onClick={() => navigate("/login")}
             >
               Member Portal
