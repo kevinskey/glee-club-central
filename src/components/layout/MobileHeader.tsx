@@ -10,9 +10,18 @@ import { EnhancedMetronome } from "@/components/ui/enhanced-metronome";
 import { Clock, Menu, X } from "lucide-react";
 import { MobileMenu } from "@/components/landing/header/MobileMenu";
 import { useSidebar } from "@/components/ui/sidebar";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+  DropdownMenuSeparator,
+  DropdownMenuLabel,
+  DropdownMenuProvider
+} from "@/components/ui/dropdown-menu";
 
 export function MobileHeader() {
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, signOut } = useAuth();
   const navigate = useNavigate();
   const isMobile = useIsMobile();
   const location = useLocation();
@@ -57,6 +66,13 @@ export function MobileHeader() {
       toggleMobileMenu();
     }
   };
+  
+  const handleSignOut = async () => {
+    if (signOut) {
+      await signOut();
+      navigate("/login");
+    }
+  };
 
   return (
     <>
@@ -84,8 +100,8 @@ export function MobileHeader() {
             </Link>
           </div>
           
-          {/* Right side: Metronome */}
-          <div className="flex items-center">
+          {/* Right side: Metronome and User dropdown */}
+          <div className="flex items-center gap-2">
             <Dialog open={metronomeOpen} onOpenChange={setMetronomeOpen}>
               <DialogTrigger asChild>
                 <Button 
@@ -95,7 +111,6 @@ export function MobileHeader() {
                   onClick={handleOpenMetronome}
                 >
                   <Clock className="h-4 w-4 text-foreground" />
-                  <span className="text-xs hidden sm:inline">Metronome</span>
                 </Button>
               </DialogTrigger>
               <DialogContent className="sm:max-w-md">
@@ -108,6 +123,36 @@ export function MobileHeader() {
                 <EnhancedMetronome showControls={true} size="md" audioContextRef={audioContextRef} />
               </DialogContent>
             </Dialog>
+            
+            {isAuthenticated && (
+              <DropdownMenuProvider>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      className="h-8 px-2 text-xs"
+                    >
+                      Menu
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="w-48 bg-popover">
+                    <DropdownMenuLabel>Options</DropdownMenuLabel>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem onClick={() => navigate("/dashboard")}>
+                      Dashboard
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => navigate("/dashboard/profile")}>
+                      Profile
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem onClick={handleSignOut}>
+                      Sign Out
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </DropdownMenuProvider>
+            )}
           </div>
         </div>
       </header>

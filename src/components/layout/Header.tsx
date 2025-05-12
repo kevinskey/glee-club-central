@@ -9,6 +9,7 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
+  DropdownMenuProvider
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
 import {
@@ -103,44 +104,46 @@ export function Header() {
         <nav className="flex items-center gap-2 sm:gap-4">
           <ThemeToggle />
           
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="icon">
-                <User className="h-5 w-5 text-foreground" />
-                <span className="sr-only">User Menu</span>
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-56 bg-popover">
-              <DropdownMenuLabel>
-                {profile?.first_name} {profile?.last_name}
-              </DropdownMenuLabel>
-              <DropdownMenuSeparator />
-              
-              <DropdownMenuItem onClick={() => navigate("/dashboard/profile")}>
-                <User className="h-4 w-4 mr-2" />
-                <span>My Profile</span>
-              </DropdownMenuItem>
-              
-              <DropdownMenuItem onClick={() => navigate("/update-password")}>
-                <Settings className="h-4 w-4 mr-2" />
-                <span>Change Password</span>
-              </DropdownMenuItem>
-              
-              <DropdownMenuItem onClick={() => navigate("/")}>
-                <Icons.logo className="h-4 w-auto mr-2" />
-                <span>Home Page</span>
-              </DropdownMenuItem>
-              
-              <DropdownMenuSeparator />
-              <DropdownMenuItem 
-                onClick={handleSignOut}
-                className="flex items-center gap-2 cursor-pointer text-destructive"
-              >
-                <LogOut className="h-4 w-4" />
-                <span>Sign Out</span>
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
+          <DropdownMenuProvider>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="icon">
+                  <User className="h-5 w-5 text-foreground" />
+                  <span className="sr-only">User Menu</span>
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-56 bg-popover">
+                <DropdownMenuLabel>
+                  {profile?.first_name} {profile?.last_name}
+                </DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                
+                <DropdownMenuItem onClick={() => navigate("/dashboard/profile")}>
+                  <User className="h-4 w-4 mr-2" />
+                  <span>My Profile</span>
+                </DropdownMenuItem>
+                
+                <DropdownMenuItem onClick={() => navigate("/update-password")}>
+                  <Settings className="h-4 w-4 mr-2" />
+                  <span>Change Password</span>
+                </DropdownMenuItem>
+                
+                <DropdownMenuItem onClick={() => navigate("/")}>
+                  <Icons.logo className="h-4 w-auto mr-2" />
+                  <span>Home Page</span>
+                </DropdownMenuItem>
+                
+                <DropdownMenuSeparator />
+                <DropdownMenuItem 
+                  onClick={handleSignOut}
+                  className="flex items-center gap-2 cursor-pointer text-destructive"
+                >
+                  <LogOut className="h-4 w-4" />
+                  <span>Sign Out</span>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </DropdownMenuProvider>
         </nav>
       </div>
     </header>

@@ -3,6 +3,15 @@ import React from "react";
 import { cn } from "@/lib/utils";
 import { Link } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
+import {
+  NavigationMenu,
+  NavigationMenuContent,
+  NavigationMenuItem,
+  NavigationMenuLink,
+  NavigationMenuList,
+  NavigationMenuTrigger,
+  navigationMenuTriggerStyle,
+} from "@/components/ui/navigation-menu";
 
 interface NavigationLinksProps {
   className?: string;
@@ -19,23 +28,40 @@ export function NavigationLinks({ className, onLinkClick }: NavigationLinksProps
   };
   
   return (
-    <nav className={cn("flex gap-6", className)}>
-      <Link
-        to="/press-kit"
-        className="text-lg font-medium text-muted-foreground transition-colors hover:text-foreground"
-        onClick={handleLinkClick}
-      >
-        Press Kit
-      </Link>
-      {!isAuthenticated && (
-        <Link
-          to="/register/admin"
-          className="text-lg font-medium text-muted-foreground transition-colors hover:text-foreground"
-          onClick={handleLinkClick}
-        >
-          Admin Registration
-        </Link>
-      )}
-    </nav>
+    <NavigationMenu className={cn("", className)}>
+      <NavigationMenuList className="gap-4">
+        <NavigationMenuItem>
+          <Link
+            to="/press-kit"
+            className="text-lg font-medium text-muted-foreground transition-colors hover:text-foreground"
+            onClick={handleLinkClick}
+          >
+            Press Kit
+          </Link>
+        </NavigationMenuItem>
+        
+        <NavigationMenuItem>
+          <Link
+            to="/about"
+            className="text-lg font-medium text-muted-foreground transition-colors hover:text-foreground"
+            onClick={handleLinkClick}
+          >
+            About
+          </Link>
+        </NavigationMenuItem>
+        
+        {!isAuthenticated && (
+          <NavigationMenuItem>
+            <Link
+              to="/register/admin"
+              className="text-lg font-medium text-muted-foreground transition-colors hover:text-foreground"
+              onClick={handleLinkClick}
+            >
+              Admin Registration
+            </Link>
+          </NavigationMenuItem>
+        )}
+      </NavigationMenuList>
+    </NavigationMenu>
   );
 }

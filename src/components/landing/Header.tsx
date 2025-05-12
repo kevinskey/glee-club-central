@@ -93,7 +93,7 @@ export function Header({ initialShowNewsFeed = true }: HeaderProps) {
         
         {/* Right side navigation with increased size */}
         <div className="flex items-center gap-4">
-          <NavigationLinks className="hidden md:flex text-lg" />
+          <NavigationLinks className="hidden md:flex" />
           <HeaderUtils />
           <MemberPortalDropdown />
         </div>
