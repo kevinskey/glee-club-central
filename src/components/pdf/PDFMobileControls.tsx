@@ -1,3 +1,4 @@
+
 import React from "react";
 import { Button } from "@/components/ui/button";
 import { 
@@ -11,6 +12,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { AuthUser } from "@/types/auth";
+import { toast } from "sonner";
 
 interface PDFMobileControlsProps {
   currentPage: number;
@@ -115,7 +117,7 @@ export const PDFMobileControls: React.FC<PDFMobileControlsProps> = ({
               </DropdownMenuItem>
             )}
             
-<DropdownMenuItem onClick={onFullscreen}>
+            <DropdownMenuItem onClick={onFullscreen}>
               {isFullscreen ? (
                 <>
                   <Minimize className="h-4 w-4 mr-2" />

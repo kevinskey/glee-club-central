@@ -12,6 +12,7 @@ import { PDFDocument } from "./pdf/PDFDocument";
 import { PDFAnnotationManager } from "./pdf/PDFAnnotationManager";
 import { Button } from "@/components/ui/button";
 import { AuthUser } from "@/types/auth";
+import { toast } from "sonner";
 
 interface PDFViewerProps {
   url: string;
@@ -33,7 +34,7 @@ export const PDFViewer = ({ url, title, sheetMusicId, fullHeight }: PDFViewerPro
   const [isSetlistOpen, setIsSetlistOpen] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
   
-  const { toast } = useToast();
+  const { toast: toastLegacy } = useToast();
   const isMobile = useIsMobile();
   const { user } = useAuth();
   
@@ -72,10 +73,8 @@ export const PDFViewer = ({ url, title, sheetMusicId, fullHeight }: PDFViewerPro
       // Enter fullscreen
       if (viewerRef.current?.requestFullscreen) {
         viewerRef.current.requestFullscreen().catch(err => {
-          toast({
-            title: "Fullscreen error",
-            description: `Error attempting to enable fullscreen: ${err.message}`,
-            variant: "destructive",
+          toast.error("Error attempting to enable fullscreen", {
+            description: err.message
           });
         });
       }
@@ -178,10 +177,8 @@ export const PDFViewer = ({ url, title, sheetMusicId, fullHeight }: PDFViewerPro
   const handleError = () => {
     setIsLoading(false);
     setError("Failed to load PDF. Please try again later or download it directly.");
-    toast({
-      title: "Error loading PDF",
-      description: "The PDF could not be loaded. Please try downloading it instead.",
-      variant: "destructive",
+    toast.error("The PDF could not be loaded", {
+      description: "Please try downloading it instead."
     });
   };
 

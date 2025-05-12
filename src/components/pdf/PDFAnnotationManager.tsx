@@ -5,6 +5,7 @@ import { PDFAnnotationToolbar } from "@/components/PDFAnnotationToolbar";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { AuthUser } from "@/types/auth";
+import { toast } from "sonner";
 
 interface PDFAnnotationManagerProps {
   showAnnotations: boolean;
@@ -32,7 +33,7 @@ export const PDFAnnotationManager = ({
   const [activeTool, setActiveTool] = React.useState<"pen" | "eraser" | "square" | null>(null);
   const [penColor, setPenColor] = React.useState("#FF0000");
   const [penSize, setPenSize] = React.useState(3);
-  const { toast } = useToast();
+  const { toast: toastLegacy } = useToast();
 
   const handleToolChange = (tool: "pen" | "eraser" | "square" | null) => {
     setActiveTool(tool);
@@ -44,10 +45,8 @@ export const PDFAnnotationManager = ({
 
   const handleSave = async () => {
     if (!user || !sheetMusicId) {
-      toast({
-        title: "Cannot save annotations",
-        description: "You must be logged in to save annotations",
-        variant: "destructive",
+      toast.error("Cannot save annotations", {
+        description: "You must be logged in to save annotations"
       });
       return;
     }
@@ -103,16 +102,13 @@ export const PDFAnnotationManager = ({
         if (insertError) throw insertError;
       }
 
-      toast({
-        title: "Annotations saved",
+      toast.success("Annotations saved", {
         description: "Your annotations have been saved successfully"
       });
     } catch (error: any) {
       console.error("Error saving annotations:", error);
-      toast({
-        title: "Error saving annotations",
-        description: error.message || "An unexpected error occurred",
-        variant: "destructive",
+      toast.error("Error saving annotations", {
+        description: error.message || "An unexpected error occurred"
       });
     }
   };
@@ -120,8 +116,7 @@ export const PDFAnnotationManager = ({
   const handleClear = () => {
     if (window.confirm("Are you sure you want to clear all annotations?")) {
       setAnnotations([]);
-      toast({
-        title: "Annotations cleared",
+      toast.message("Annotations cleared", {
         description: "All annotations have been cleared. Save to persist changes."
       });
     }

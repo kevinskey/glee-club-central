@@ -1,3 +1,4 @@
+
 import { useState, useEffect, useRef } from "react";
 import { useParams, useNavigate, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -322,8 +323,7 @@ export default function ViewSheetMusicPage() {
                           className="w-12 h-12 flex flex-col items-center justify-center p-0"
                           onClick={() => {
                             // Play note sound (would normally use Tone.js or similar)
-                            toast({
-                              title: `Playing ${note}`,
+                            toast.message(`Playing ${note}`, {
                               description: "Pitch reference tone"
                             });
                           }}
