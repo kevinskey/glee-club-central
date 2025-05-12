@@ -28,7 +28,7 @@ export function YouTubeSection() {
 
   if (error) {
     return (
-      <section className="py-16 bg-white">
+      <section className="py-8 bg-white">
         <div className="container mx-auto px-4">
           <div className="text-center">
             <p className="text-red-500">Failed to load YouTube videos. Please try again later.</p>
@@ -39,7 +39,7 @@ export function YouTubeSection() {
   }
 
   return (
-    <section id="youtube" className="py-16 bg-white">
+    <section id="youtube" className="py-10 bg-white">
       <div className="container mx-auto px-4">
         <div className="flex justify-between items-center mb-8">
           <div>

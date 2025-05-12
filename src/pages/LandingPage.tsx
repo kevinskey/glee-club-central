@@ -61,8 +61,8 @@ export default function LandingPage() {
       <Header initialShowNewsFeed={false} />
       <main>
         <HeroSection />
-        <YouTubeSection />
         <PerformanceSection />
+        <YouTubeSection />
         <FeaturesSection />
         <TestimonialSection />
         <CTASection />
