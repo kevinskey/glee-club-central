@@ -14,15 +14,17 @@ const DashboardLayout: React.FC = () => {
   const location = useLocation();
   const isMobile = useMedia("(max-width: 768px)");
   
-  // Only show header on the main dashboard route
-  const shouldShowHeader = location.pathname === "/dashboard";
+  // Show header on main dashboard routes and certain other important sections
+  const shouldShowHeader = [
+    "/dashboard", 
+    "/dashboard/profile",
+    "/dashboard/calendar",
+    "/dashboard/sheet-music"
+  ].includes(location.pathname);
   
-  // Log current route for troubleshooting
   useEffect(() => {
     console.log("DashboardLayout - Current route:", location.pathname);
   }, [location.pathname]);
-  
-  console.log("DashboardLayout - Auth check:", { isAuthenticated, isLoading });
   
   if (isLoading) {
     return (
@@ -34,7 +36,6 @@ const DashboardLayout: React.FC = () => {
   
   if (!isAuthenticated) {
     console.log("DashboardLayout - User not authenticated, redirecting to login");
-    // Store the intended destination for post-login redirect
     const returnTo = encodeURIComponent(location.pathname + location.search);
     return <Navigate to={`/login?returnTo=${returnTo}`} />;
   }

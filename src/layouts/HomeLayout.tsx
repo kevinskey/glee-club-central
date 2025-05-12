@@ -11,15 +11,15 @@ const HomeLayout: React.FC = () => {
   const isMobile = useIsMobile();
   const location = useLocation();
   
-  // Only show header on the main route
-  const shouldShowHeader = location.pathname === "/";
+  // Only show header on specific routes
+  const shouldShowHeader = ["/", "/about", "/contact", "/press-kit"].includes(location.pathname);
   
   return (
     <>
       <Toaster />
       <SidebarProvider>
         <div className="min-h-screen flex flex-col bg-background w-full">
-          {/* Only show headers on main route */}
+          {/* Only show headers on main public routes */}
           {shouldShowHeader && (
             <>
               {isMobile ? (

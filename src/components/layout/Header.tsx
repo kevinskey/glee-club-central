@@ -59,25 +59,24 @@ export function Header() {
     setMetronomeOpen(true);
   };
 
-  // This component will now only be shown on desktop screens
   return (
     <header className="bg-background sticky top-0 z-50 w-full border-b hidden md:block">
-      <div className="container flex h-16 items-center justify-between px-2">
-        <div className="flex items-center gap-1 sm:gap-2">
+      <div className="container flex h-16 items-center justify-between px-4">
+        <div className="flex items-center gap-2">
           <Button 
             variant="ghost" 
             size="icon" 
-            className="md:hidden" 
+            className="md:flex-shrink-0" 
             onClick={toggleSidebar}
           >
-            <Menu className="h-6 w-6 text-foreground" />
+            <Menu className="h-5 w-5 text-foreground" />
             <span className="sr-only">Toggle sidebar</span>
           </Button>
           
           <div className="flex items-center">
-            <Link to="/" className="font-bold flex items-center gap-1 sm:gap-2 hover:text-primary transition-colors">
-              <Icons.logo className={`${isMobile ? "h-8" : "h-6"} w-auto`} />
-              <span className={`${isMobile ? "text-xl" : ""} text-foreground`}>Glee Club</span>
+            <Link to="/" className="font-bold flex items-center gap-2 hover:text-primary transition-colors">
+              <Icons.logo className="h-6 w-auto" />
+              <span className="text-base text-foreground">Glee World</span>
             </Link>
             
             {/* Metronome Icon */}
