@@ -2,6 +2,7 @@
 import React from "react";
 import { cn } from "@/lib/utils";
 import { Globe } from "lucide-react";
+import { useTheme } from "@/providers/ThemeProvider";
 
 export type IconProps = React.HTMLAttributes<SVGElement>;
 
@@ -9,14 +10,23 @@ export type IconProps = React.HTMLAttributes<SVGElement>;
 export type ImageIconProps = React.ImgHTMLAttributes<HTMLImageElement>;
 
 export const Icons = {
-  logo: (props: ImageIconProps) => (
-    <img 
-      src="/lovable-uploads/cb5429e5-ef5e-4b87-8109-1e1216828e19.png" 
-      alt="Spelman College Glee Club Logo" 
-      className={cn("h-6 w-auto dark:invert", props.className)} 
-      {...props} 
-    />
-  ),
+  logo: (props: ImageIconProps) => {
+    const { theme } = useTheme();
+    
+    // Use different logo based on theme
+    const logoSrc = theme === "dark" 
+      ? "/lovable-uploads/312fd1a4-7f46-4000-8711-320383aa565a.png" 
+      : "/lovable-uploads/8fa96710-a03a-4033-9ee0-032306d74daa.png";
+    
+    return (
+      <img 
+        src={logoSrc}
+        alt="Spelman College Glee Club Logo" 
+        className={cn("h-6 w-auto", props.className)} 
+        {...props} 
+      />
+    );
+  },
   globe: (props: IconProps) => (
     <Globe className={cn("h-6 w-6 text-black dark:text-white", props.className)} {...props} />
   ),
