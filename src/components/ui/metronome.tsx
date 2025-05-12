@@ -24,11 +24,11 @@ export function Metronome({
   const [volume, setVolume] = useState(0.5);
   const [soundType, setSoundType] = useState<"click" | "beep" | "woodblock">("click");
   
-  // Audio refs
-  const clickAudioRef = useRef<HTMLAudioElement | null>(null);
-  const beepAudioRef = useRef<HTMLAudioElement | null>(null);
-  const woodblockAudioRef = useRef<HTMLAudioElement | null>(null);
-  const accentAudioRef = useRef<HTMLAudioElement | null>(null);
+  // Audio context references
+  const audioContextRef = useRef<AudioContext | null>(null);
+  const clickBufferRef = useRef<AudioBuffer | null>(null);
+  const beepBufferRef = useRef<AudioBuffer | null>(null);
+  const woodblockBufferRef = useRef<AudioBuffer | null>(null);
   
   // Timer ref
   const timerRef = useRef<number | null>(null);
@@ -39,53 +39,52 @@ export function Metronome({
     return parseInt(timeSignature.split('/')[0]);
   };
   
+  // Initialize the Web Audio API
   useEffect(() => {
-    // Create audio elements - Fix the paths to the audio files
     if (typeof window !== 'undefined') {
-      clickAudioRef.current = new Audio();
-      clickAudioRef.current.src = '/sounds/metronome-click.mp3';
-      clickAudioRef.current.preload = 'auto';
-      
-      beepAudioRef.current = new Audio();
-      beepAudioRef.current.src = '/sounds/metronome-beep.mp3';
-      beepAudioRef.current.preload = 'auto';
-      
-      woodblockAudioRef.current = new Audio();
-      woodblockAudioRef.current.src = '/sounds/metronome-woodblock.mp3';
-      woodblockAudioRef.current.preload = 'auto';
-      
-      accentAudioRef.current = new Audio();
-      accentAudioRef.current.src = '/sounds/metronome-click.mp3';
-      accentAudioRef.current.preload = 'auto';
-      
-      // Load the audio files
-      const preloadAudio = async () => {
-        try {
-          clickAudioRef.current?.load();
-          beepAudioRef.current?.load();
-          woodblockAudioRef.current?.load();
-          accentAudioRef.current?.load();
-          
-          // Test play and immediately pause to ensure browser loads the audio
-          if (clickAudioRef.current) {
-            clickAudioRef.current.volume = 0;
-            await clickAudioRef.current.play();
-            clickAudioRef.current.pause();
-            clickAudioRef.current.currentTime = 0;
-            clickAudioRef.current.volume = volume;
-          }
-        } catch (error) {
-          console.error("Error preloading audio:", error);
+      try {
+        // Create audio context
+        const AudioContext = window.AudioContext || (window as any).webkitAudioContext;
+        if (!audioContextRef.current) {
+          audioContextRef.current = new AudioContext();
         }
-      };
-      
-      preloadAudio();
+        
+        // Load sound buffers from the base64 encoded files in public folder
+        const loadSounds = async () => {
+          try {
+            // Get the audio data directly from the data URIs in the public folder
+            const clickResponse = await fetch('/sounds/metronome-click.mp3');
+            const clickArrayBuffer = await clickResponse.arrayBuffer();
+            clickBufferRef.current = await audioContextRef.current!.decodeAudioData(clickArrayBuffer);
+            
+            const beepResponse = await fetch('/sounds/metronome-beep.mp3');
+            const beepArrayBuffer = await beepResponse.arrayBuffer();
+            beepBufferRef.current = await audioContextRef.current!.decodeAudioData(beepArrayBuffer);
+            
+            const woodblockResponse = await fetch('/sounds/metronome-woodblock.mp3');
+            const woodblockArrayBuffer = await woodblockResponse.arrayBuffer();
+            woodblockBufferRef.current = await audioContextRef.current!.decodeAudioData(woodblockArrayBuffer);
+            
+            console.log("All metronome sounds loaded successfully");
+          } catch (error) {
+            console.error("Failed to load metronome sounds:", error);
+          }
+        };
+        
+        loadSounds();
+      } catch (error) {
+        console.error("Web Audio API not supported:", error);
+      }
     }
     
     return () => {
       // Clean up interval when component unmounts
       if (timerRef.current !== null) {
         clearInterval(timerRef.current);
+      }
+      // Close audio context
+      if (audioContextRef.current && audioContextRef.current.state !== 'closed') {
+        audioContextRef.current.close();
       }
     };
   }, []);
@@ -100,6 +99,35 @@ export function Metronome({
     setBpm(propBpm);
   }, [propBpm]);
 
+  // Play a sound using Web Audio API
+  const playSound = (buffer: AudioBuffer | null, isAccent: boolean = false) => {
+    if (!audioContextRef.current || !buffer) return;
+    
+    try {
+      // Resume audio context if it's suspended (needed for Safari/Chrome)
+      if (audioContextRef.current.state === 'suspended') {
+        audioContextRef.current.resume();
+      }
+      
+      // Create source from buffer
+      const source = audioContextRef.current.createBufferSource();
+      source.buffer = buffer;
+      
+      // Create gain node for volume control
+      const gainNode = audioContextRef.current.createGain();
+      gainNode.gain.value = isAccent ? volume * 1.3 : volume; // Slightly louder for accent
+      
+      // Connect nodes
+      source.connect(gainNode);
+      gainNode.connect(audioContextRef.current.destination);
+      
+      // Play the sound
+      source.start(0);
+    } catch (error) {
+      console.error("Error playing sound:", error);
+    }
+  };
+
   // Start or stop metronome based on isPlaying state
   useEffect(() => {
     const startMetronome = () => {
@@ -110,37 +138,39 @@ export function Metronome({
       beatCountRef.current = 0;
       const intervalMs = (60 / bpm) * 1000;
       
+      // Resume audio context if needed (especially important for iOS/Safari)
+      if (audioContextRef.current && audioContextRef.current.state === 'suspended') {
+        audioContextRef.current.resume();
+      }
+      
       timerRef.current = window.setInterval(() => {
         const beatsPerMeasure = getBeatsPerMeasure();
         
-        // Get the appropriate audio element
-        let audio;
-        if (beatCountRef.current === 0) {
-          // First beat is the accent
-          audio = accentAudioRef.current;
+        // Get the appropriate sound buffer
+        let buffer;
+        const isFirstBeat = beatCountRef.current === 0;
+        
+        if (isFirstBeat) {
+          // First beat is always the click (accent) sound
+          buffer = clickBufferRef.current;
+          playSound(buffer, true); // Play as accent
         } else {
+          // Other beats use the selected sound type
           switch (soundType) {
             case "click":
-              audio = clickAudioRef.current;
+              buffer = clickBufferRef.current;
               break;
             case "beep":
-              audio = beepAudioRef.current;
+              buffer = beepBufferRef.current;
               break;
             case "woodblock":
-              audio = woodblockAudioRef.current;
+              buffer = woodblockBufferRef.current;
               break;
             default:
-              audio = clickAudioRef.current;
+              buffer = clickBufferRef.current;
           }
-        }
-        
-        if (audio) {
-          // Create a new instance of the audio for each beat to allow overlapping sounds
-          const audioInstance = new Audio(audio.src);
-          audioInstance.volume = volume;
-          audioInstance.play().catch(error => {
-            console.error("Error playing metronome sound:", error);
-          });
+          
+          playSound(buffer);
         }
         
         // Update beat counter
@@ -177,7 +207,13 @@ export function Metronome({
           <Button
             size="sm"
             variant={isPlaying ? "destructive" : "default"}
-            onClick={() => setIsPlaying(!isPlaying)}
+            onClick={() => {
+              // Resume audio context when user interacts (needed for autoplay policies)
+              if (audioContextRef.current && audioContextRef.current.state === 'suspended') {
+                audioContextRef.current.resume();
+              }
+              setIsPlaying(!isPlaying);
+            }}
           >
             {isPlaying ? "Stop" : "Start"}
           </Button>
