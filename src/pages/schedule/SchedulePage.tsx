@@ -149,9 +149,9 @@ export default function SchedulePage() {
         </div>
       </div>
 
-      {/* Add Event Dialog */}
+      {/* Add Event Dialog - Limited to 90% viewport width */}
       <Dialog open={isAddEventOpen} onOpenChange={setIsAddEventOpen}>
-        <DialogContent className="sm:max-w-[550px]">
+        <DialogContent className="w-[90vw] max-w-[550px]">
           <DialogHeader>
             <DialogTitle>Add New Event</DialogTitle>
           </DialogHeader>
@@ -163,11 +163,11 @@ export default function SchedulePage() {
         </DialogContent>
       </Dialog>
 
-      {/* View/Edit Event Dialog */}
+      {/* View/Edit Event Dialog - Also limited to 90% viewport width */}
       {selectedEvent && (
         <>
           <Dialog open={isViewEventOpen} onOpenChange={setIsViewEventOpen}>
-            <DialogContent className="sm:max-w-[550px]">
+            <DialogContent className="w-[90vw] max-w-[550px]">
               <DialogHeader>
                 <DialogTitle>Event Details</DialogTitle>
               </DialogHeader>
@@ -184,7 +184,7 @@ export default function SchedulePage() {
           </Dialog>
 
           <Dialog open={isEditEventOpen} onOpenChange={setIsEditEventOpen}>
-            <DialogContent className="sm:max-w-[550px]">
+            <DialogContent className="w-[90vw] max-w-[550px]">
               <DialogHeader>
                 <DialogTitle>Edit Event</DialogTitle>
               </DialogHeader>

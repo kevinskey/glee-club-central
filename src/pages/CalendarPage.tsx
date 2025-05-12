@@ -233,9 +233,9 @@ export default function CalendarPage() {
       </main>
       <Footer />
 
-      {/* Add Event Dialog */}
+      {/* Add Event Dialog - Modified to limit width to 90% of viewport */}
       <Dialog open={isAddEventOpen} onOpenChange={setIsAddEventOpen}>
-        <DialogContent className="sm:max-w-[600px] bg-white dark:bg-gray-800">
+        <DialogContent className="w-[90vw] max-w-[600px] bg-white dark:bg-gray-800">
           <DialogHeader>
             <DialogTitle>Add New Event</DialogTitle>
           </DialogHeader>
@@ -247,10 +247,10 @@ export default function CalendarPage() {
         </DialogContent>
       </Dialog>
 
-      {/* Edit Event Dialog */}
+      {/* Edit Event Dialog - Also modified for consistency */}
       {selectedEvent && (
         <Dialog open={isEditEventOpen} onOpenChange={setIsEditEventOpen}>
-          <DialogContent className="sm:max-w-[600px] bg-white dark:bg-gray-800">
+          <DialogContent className="w-[90vw] max-w-[600px] bg-white dark:bg-gray-800">
             <DialogHeader>
               <DialogTitle>Edit Event</DialogTitle>
             </DialogHeader>
