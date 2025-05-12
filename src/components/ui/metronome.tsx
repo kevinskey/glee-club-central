@@ -66,31 +66,29 @@ export function Metronome({
     
     if (!audioContext) return;
 
-    const loadSoundsFromBase64 = async () => {
+    const loadSounds = async () => {
       try {
-        // Fallback to static path loading if base64 fails
-        const loadSoundFile = async (path: string) => {
+        // Use the WAV files directly from the public directory
+        const loadSoundFile = async (filename: string) => {
           try {
-            // First try with fetch to handle both relative and data URLs
-            const response = await fetch(path);
-            if (!response.ok) throw new Error(`Failed to fetch ${path}`);
+            const response = await fetch(`/sounds/${filename}`);
+            if (!response.ok) throw new Error(`Failed to fetch ${filename}`);
             
             const arrayBuffer = await response.arrayBuffer();
-            if (!arrayBuffer) throw new Error(`Invalid audio data from ${path}`);
+            if (!arrayBuffer) throw new Error(`Invalid audio data from ${filename}`);
             
             return await audioContext.decodeAudioData(arrayBuffer);
           } catch (error) {
-            console.error(`Failed to load sound from ${path}:`, error);
-            toast.error("Failed to load audio files. Please refresh the page.");
+            console.error(`Failed to load sound from ${filename}:`, error);
             throw error;
           }
         };
 
-        // Load all sound files
+        // Load all sound files - using the .wav files that are already in the project
         const [clickBuffer, beepBuffer, woodblockBuffer] = await Promise.all([
-          loadSoundFile('/sounds/metronome-click.mp3'),
-          loadSoundFile('/sounds/metronome-beep.mp3'),
-          loadSoundFile('/sounds/metronome-woodblock.mp3')
+          loadSoundFile('click.wav'),
+          loadSoundFile('beep.wav'),
+          loadSoundFile('woodblock.wav')
         ]);
         
         if (!isMounted) return;
@@ -111,7 +109,7 @@ export function Metronome({
       }
     };
     
-    loadSoundsFromBase64();
+    loadSounds();
     
     // Cleanup function
     return () => {
