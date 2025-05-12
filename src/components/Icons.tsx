@@ -13,7 +13,7 @@ export const Icons = {
     <img 
       src="/lovable-uploads/cb5429e5-ef5e-4b87-8109-1e1216828e19.png" 
       alt="Spelman College Glee Club Logo" 
-      className={cn("h-6 w-auto", props.className)} 
+      className={cn("h-6 w-auto dark:invert", props.className)} 
       {...props} 
     />
   ),
