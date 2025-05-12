@@ -41,7 +41,7 @@ export const PDFPreview = ({
           {children}
         </div>
       </DialogTrigger>
-      <DialogContent className="max-w-4xl w-[90vw] h-[90vh] p-1">
+      <DialogContent className="max-w-4xl w-[95vw] sm:w-[90vw] h-[90vh] p-1">
         <div className="w-full h-full flex items-center justify-center">
           {url ? (
             <PDFDocument

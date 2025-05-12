@@ -150,18 +150,18 @@ export const MediaFileCard = ({
       
       {/* Delete confirmation dialog */}
       <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
-        <AlertDialogContent>
+        <AlertDialogContent className="sm:max-w-md">
           <AlertDialogHeader>
             <AlertDialogTitle>Are you sure you want to delete this file?</AlertDialogTitle>
             <AlertDialogDescription>
               This action cannot be undone. This will permanently delete the file.
             </AlertDialogDescription>
           </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
+          <AlertDialogFooter className="flex flex-col sm:flex-row gap-2">
+            <AlertDialogCancel className="mt-0 sm:mt-0 w-full sm:w-auto">Cancel</AlertDialogCancel>
             <AlertDialogAction 
               onClick={handleDelete}
-              className="bg-destructive hover:bg-destructive/90"
+              className="bg-destructive hover:bg-destructive/90 w-full sm:w-auto"
             >
               Delete
             </AlertDialogAction>

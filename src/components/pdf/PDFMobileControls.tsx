@@ -87,6 +87,7 @@ export const PDFMobileControls: React.FC<PDFMobileControlsProps> = ({
             onClick={onPrevPage}
             disabled={currentPage <= 1}
             className="h-8 w-8"
+            title="Previous Page"
           >
             <ChevronLeft className="h-4 w-4" />
           </Button>
@@ -101,6 +102,7 @@ export const PDFMobileControls: React.FC<PDFMobileControlsProps> = ({
             onClick={onNextPage}
             disabled={currentPage >= totalPages}
             className="h-8 w-8"
+            title="Next Page"
           >
             <ChevronRight className="h-4 w-4" />
           </Button>
@@ -112,6 +114,7 @@ export const PDFMobileControls: React.FC<PDFMobileControlsProps> = ({
             size="icon"
             onClick={onZoomOut}
             className="h-8 w-8"
+            title="Zoom Out"
           >
             <ZoomOut className="h-4 w-4" />
           </Button>
@@ -121,17 +124,18 @@ export const PDFMobileControls: React.FC<PDFMobileControlsProps> = ({
             size="icon"
             onClick={onZoomIn}
             className="h-8 w-8"
+            title="Zoom In"
           >
             <ZoomIn className="h-4 w-4" />
           </Button>
           
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="outline" size="icon" className="h-8 w-8">
+              <Button variant="outline" size="icon" className="h-8 w-8" title="Menu">
                 <Menu className="h-4 w-4" />
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
+            <DropdownMenuContent align="end" className="w-56">
               {hasAnnotationSupport && user && (
                 <DropdownMenuItem onClick={toggleAnnotations}>
                   <Pencil className="h-4 w-4 mr-2" />
@@ -184,18 +188,18 @@ export const PDFMobileControls: React.FC<PDFMobileControlsProps> = ({
       
       {/* Delete confirmation dialog */}
       <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
-        <AlertDialogContent>
+        <AlertDialogContent className="sm:max-w-md">
           <AlertDialogHeader>
             <AlertDialogTitle>Are you sure you want to delete this PDF?</AlertDialogTitle>
             <AlertDialogDescription>
               This action cannot be undone. This will permanently delete the PDF file.
             </AlertDialogDescription>
           </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
+          <AlertDialogFooter className="flex flex-col sm:flex-row gap-2">
+            <AlertDialogCancel className="mt-0 sm:mt-0 w-full sm:w-auto">Cancel</AlertDialogCancel>
             <AlertDialogAction 
               onClick={handleDelete}
-              className="bg-destructive hover:bg-destructive/90"
+              className="bg-destructive hover:bg-destructive/90 w-full sm:w-auto"
             >
               Delete
             </AlertDialogAction>

@@ -5,7 +5,7 @@ import { Outlet } from 'react-router-dom';
 const HomeLayout = () => {
   return (
     <div className="min-h-screen bg-background">
-      <main>
+      <main className="pb-safe">
         <Outlet />
       </main>
     </div>

@@ -106,6 +106,7 @@ export function MobileNav({ isAdmin }: MobileNavProps) {
             variant="ghost" 
             size="sm" 
             className="mr-1 sm:mr-2 px-0 text-base hover:bg-transparent focus-visible:bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0"
+            aria-label="Toggle Menu"
           >
             <Menu className="h-4 sm:h-5 w-4 sm:w-5" />
             <span className="sr-only">Toggle Menu</span>
