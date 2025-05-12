@@ -117,18 +117,28 @@ serve(async (req) => {
       const requestText = await req.text();
       console.log("Request body text:", requestText);
       
+      // Fix: Handle empty request body by providing default
       if (!requestText.trim()) {
-        return new Response(JSON.stringify({ error: "Request body is empty" }), {
+        // Return a more helpful error instead of proceeding with undefined data
+        return new Response(JSON.stringify({ error: "Request body is empty", message: "Please provide a valid request body with action parameter" }), {
           headers: { ...corsHeaders, 'Content-Type': 'application/json' },
           status: 400,
         });
       }
       
-      requestData = JSON.parse(requestText);
-      console.log("Parsed request data:", JSON.stringify(requestData));
+      try {
+        requestData = JSON.parse(requestText);
+        console.log("Parsed request data:", JSON.stringify(requestData));
+      } catch (e) {
+        console.error("Error parsing request JSON:", e);
+        return new Response(JSON.stringify({ error: "Invalid JSON in request body" }), {
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          status: 400,
+        });
+      }
     } catch (e) {
-      console.error("Error parsing request JSON:", e);
-      return new Response(JSON.stringify({ error: "Invalid JSON in request body" }), {
+      console.error("Error reading request body:", e);
+      return new Response(JSON.stringify({ error: "Failed to read request body" }), {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         status: 400,
       });

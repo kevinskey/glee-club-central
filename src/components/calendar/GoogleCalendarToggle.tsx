@@ -71,7 +71,11 @@ export const GoogleCalendarToggle = ({
 
     setIsConnecting(true);
     try {
+      // Add debugging to track request flow
+      console.log("Making request to get Google auth URL");
       const authUrl = await startGoogleOAuth();
+      console.log("Response from startGoogleOAuth:", authUrl ? "URL received" : "No URL");
+      
       if (!authUrl) {
         toast.error("Failed to start Google authentication");
         return;

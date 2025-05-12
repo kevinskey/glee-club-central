@@ -63,8 +63,12 @@ export const startGoogleOAuth = async (): Promise<string | null> => {
     console.log("Starting Google OAuth flow...");
     
     // Get the auth URL from our edge function
+    // Fix: Ensure we're always sending a valid JSON body
     const { data, error } = await supabase.functions.invoke('google-calendar-auth', {
-      body: { action: 'getAuthUrl' }
+      body: { action: 'getAuthUrl' },
+      headers: {
+        'Content-Type': 'application/json'
+      }
     });
     
     if (error) {
@@ -93,8 +97,12 @@ export const startGoogleOAuth = async (): Promise<string | null> => {
  */
 export const handleOAuthCallback = async (code: string): Promise<boolean> => {
   try {
+    // Fix: Ensure we're sending a properly formatted JSON body
     const { data, error } = await supabase.functions.invoke('google-calendar-auth', {
-      body: { action: 'handleCallback', code }
+      body: { action: 'handleCallback', code },
+      headers: {
+        'Content-Type': 'application/json'
+      }
     });
     
     if (error || !data?.success) {
@@ -200,6 +208,7 @@ export const fetchGoogleCalendarEvents = async (
  */
 export const refreshGoogleToken = async (): Promise<boolean> => {
   try {
+    // Fix: Ensure we're sending a valid JSON body
     const { data, error } = await supabase.functions.invoke('google-calendar-auth', {
       body: { action: 'refreshToken' },
       headers: {
@@ -229,8 +238,12 @@ export const refreshGoogleToken = async (): Promise<boolean> => {
  */
 export const disconnectGoogleCalendar = async (): Promise<boolean> => {
   try {
+    // Fix: Ensure we're sending a valid JSON body
     const { data, error } = await supabase.functions.invoke('google-calendar-auth', {
-      body: { action: 'disconnect' }
+      body: { action: 'disconnect' },
+      headers: {
+        'Content-Type': 'application/json'
+      }
     });
     
     if (error || !data?.success) {
