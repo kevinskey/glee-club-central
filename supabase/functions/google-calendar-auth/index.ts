@@ -1,10 +1,9 @@
-
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 // Constants for Google OAuth
-const GOOGLE_OAUTH_CLIENT_ID = Deno.env.get("GOOGLE_OAUTH_CLIENT_ID") || "9zx7bAIxfErcwdDg9Xn2cwup";
-const GOOGLE_OAUTH_CLIENT_SECRET = Deno.env.get("GOOGLE_OAUTH_CLIENT_SECRET") || "";
+const GOOGLE_OAUTH_CLIENT_ID = Deno.env.get("GOOGLE_OAUTH_CLIENT_ID") || "774938147540-oqr6eqvuo3ef7gg5q9u4t3jh798n1jnr.apps.googleusercontent.com";
+const GOOGLE_OAUTH_CLIENT_SECRET = Deno.env.get("GOOGLE_OAUTH_CLIENT_SECRET") || "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";
 const REDIRECT_URI = Deno.env.get("GOOGLE_OAUTH_REDIRECT_URI") || "https://dzzptovqfqausipsgabw.supabase.co/functions/v1/google-calendar-auth";
 const APP_URL = Deno.env.get("APP_URL") || "https://glee-club-central.lovable.app"; 
 
@@ -16,10 +15,6 @@ const corsHeaders = {
 
 // Create an OAuth2 client
 const createOAuth2Client = () => {
-  if (!GOOGLE_OAUTH_CLIENT_ID) {
-    throw new Error("Google OAuth client ID not configured");
-  }
-  
   return {
     clientId: GOOGLE_OAUTH_CLIENT_ID,
     clientSecret: GOOGLE_OAUTH_CLIENT_SECRET,

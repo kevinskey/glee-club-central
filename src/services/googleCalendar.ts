@@ -5,6 +5,8 @@ import { toast } from "sonner";
 
 // Constants for Google Calendar API
 const GOOGLE_API_BASE_URL = 'https://www.googleapis.com/calendar/v3';
+const GOOGLE_OAUTH_CLIENT_ID = '774938147540-oqr6eqvuo3ef7gg5q9u4t3jh798n1jnr.apps.googleusercontent.com';
+const REDIRECT_URI = 'https://dzzptovqfqausipsgabw.supabase.co/functions/v1/google-calendar-auth';
 
 interface GoogleCalendarEvent {
   id: string;
