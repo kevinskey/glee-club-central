@@ -20,12 +20,9 @@ export default function AdminMembersPage() {
     let mounted = true;
     
     if (isAuthenticated) {
-      console.log("AdminMembersPage - Fetching users on mount");
       userManagement.fetchUsers()
         .then((result) => {
           if (mounted) {
-            console.log("AdminMembersPage - Users fetched successfully", result?.length || 0, "users");
-            console.log("Users data sample:", result?.slice(0, 2));
             setIsLoading(false);
           }
         })
@@ -36,8 +33,6 @@ export default function AdminMembersPage() {
             setIsLoading(false);
           }
         });
-    } else {
-      console.log("AdminMembersPage - Not authenticated yet, waiting...");
     }
     
     return () => {
@@ -49,7 +44,6 @@ export default function AdminMembersPage() {
   useEffect(() => {
     // Handle user deletion events
     const handleUserDeleted = (event: CustomEvent) => {
-      console.log("User deleted event detected in AdminMembersPage");
       const userId = event.detail?.userId;
       if (userId) {
         console.log(`User ${userId} was deleted, UI will be updated automatically`);
@@ -58,10 +52,8 @@ export default function AdminMembersPage() {
     
     // Handle user added events
     const handleUserAdded = (event: CustomEvent) => {
-      console.log("User added event detected in AdminMembersPage");
       const userId = event.detail?.userId;
       if (userId) {
-        console.log(`User ${userId} was added, refreshing user list`);
         userManagement.fetchUsers()
           .catch(err => {
             console.error("Error refreshing users after addition:", err);
@@ -101,7 +93,6 @@ export default function AdminMembersPage() {
     );
   }
 
-  // Once loaded, always render the component with the current data
-  console.log("AdminMembersPage - Rendering with user data", userManagement.users?.length || 0, "users available");
+  // Once loaded, render the component with the current data
   return <MembersPageComponent useUserManagementHook={() => userManagement} />;
 }

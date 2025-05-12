@@ -24,7 +24,7 @@ export function MemberManagementLink() {
       }
     >
       <Users className="h-4 w-4 mr-2" />
-      <span>Registered Users</span>
+      <span>Member Management</span>
     </NavLink>
   );
 }

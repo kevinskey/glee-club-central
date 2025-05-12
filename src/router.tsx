@@ -18,7 +18,8 @@ import AnalyticsPage from "./pages/admin/AnalyticsPage";
 import SiteSettingsPage from "./pages/admin/SiteSettingsPage";
 import LoginPage from "./pages/LoginPage";
 import RequireAuth from "./components/auth/RequireAuth";
-import MembersPage from "./pages/admin/MembersPage";
+import MembersPage from "./pages/MembersPage";
+import AdminMembersPage from "./pages/AdminMembersPage";
 import SheetMusicPage from "./pages/SheetMusicPage";
 import SheetMusicViewerPage from "./pages/sheet-music/SheetMusicPage";
 import ViewSheetMusicPage from "./pages/sheet-music/ViewSheetMusicPage";
@@ -105,7 +106,7 @@ export const router = createBrowserRouter([
     children: [
       {
         path: "/dashboard/admin/members",
-        element: <MembersPage />,
+        element: <AdminMembersPage />,
       },
       {
         path: "/dashboard/admin/users",
