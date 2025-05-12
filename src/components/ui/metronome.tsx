@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useRef } from "react";
 import { Music, Volume2 } from "lucide-react";
 import { Slider } from "@/components/ui/slider";
@@ -41,11 +40,47 @@ export function Metronome({
   };
   
   useEffect(() => {
-    // Create audio elements
-    clickAudioRef.current = new Audio('/sounds/metronome-click.mp3');
-    beepAudioRef.current = new Audio('/sounds/metronome-beep.mp3');
-    woodblockAudioRef.current = new Audio('/sounds/metronome-woodblock.mp3');
-    accentAudioRef.current = new Audio('/sounds/metronome-click.mp3'); // Use click for accent too
+    // Create audio elements - Fix the paths to the audio files
+    if (typeof window !== 'undefined') {
+      clickAudioRef.current = new Audio();
+      clickAudioRef.current.src = '/sounds/metronome-click.mp3';
+      clickAudioRef.current.preload = 'auto';
+      
+      beepAudioRef.current = new Audio();
+      beepAudioRef.current.src = '/sounds/metronome-beep.mp3';
+      beepAudioRef.current.preload = 'auto';
+      
+      woodblockAudioRef.current = new Audio();
+      woodblockAudioRef.current.src = '/sounds/metronome-woodblock.mp3';
+      woodblockAudioRef.current.preload = 'auto';
+      
+      accentAudioRef.current = new Audio();
+      accentAudioRef.current.src = '/sounds/metronome-click.mp3';
+      accentAudioRef.current.preload = 'auto';
+      
+      // Load the audio files
+      const preloadAudio = async () => {
+        try {
+          clickAudioRef.current?.load();
+          beepAudioRef.current?.load();
+          woodblockAudioRef.current?.load();
+          accentAudioRef.current?.load();
+          
+          // Test play and immediately pause to ensure browser loads the audio
+          if (clickAudioRef.current) {
+            clickAudioRef.current.volume = 0;
+            await clickAudioRef.current.play();
+            clickAudioRef.current.pause();
+            clickAudioRef.current.currentTime = 0;
+            clickAudioRef.current.volume = volume;
+          }
+        } catch (error) {
+          console.error("Error preloading audio:", error);
+        }
+      };
+      
+      preloadAudio();
+    }
     
     return () => {
       // Clean up interval when component unmounts
@@ -100,9 +135,12 @@ export function Metronome({
         }
         
         if (audio) {
-          audio.currentTime = 0;
-          audio.volume = volume;
-          audio.play().catch(error => console.error("Error playing metronome sound:", error));
+          // Create a new instance of the audio for each beat to allow overlapping sounds
+          const audioInstance = new Audio(audio.src);
+          audioInstance.volume = volume;
+          audioInstance.play().catch(error => {
+            console.error("Error playing metronome sound:", error);
+          });
         }
         
         // Update beat counter
