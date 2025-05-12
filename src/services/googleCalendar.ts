@@ -1,4 +1,3 @@
-
 import { CalendarEvent, EventType } from "@/hooks/useCalendarEvents";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -56,7 +55,7 @@ export const getGoogleCalendarToken = async (): Promise<string | null> => {
     
     // Get Google Calendar token from user's metadata
     const { data: userTokenData, error } = await supabase.functions.invoke('get-google-token', {
-      body: { userId: supabase.auth.getUser() },
+      body: { userId: (await supabase.auth.getUser()).data.user?.id },
       headers: {
         'Content-Type': 'application/json'
       }

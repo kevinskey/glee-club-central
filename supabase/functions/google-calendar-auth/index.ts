@@ -1,3 +1,4 @@
+
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
@@ -39,12 +40,15 @@ const getAuthorizationUrl = () => {
   url.searchParams.append('access_type', 'offline');
   url.searchParams.append('prompt', 'consent');
   
+  console.log("Generated OAuth URL:", url.toString());
   return url.toString();
 };
 
 // Exchange authorization code for tokens
 const exchangeCodeForTokens = async (code: string) => {
   const oauth2Client = createOAuth2Client();
+  
+  console.log("Exchanging code for tokens");
   
   const tokenResponse = await fetch('https://oauth2.googleapis.com/token', {
     method: 'POST',
@@ -66,12 +70,16 @@ const exchangeCodeForTokens = async (code: string) => {
     throw new Error(`Failed to exchange code for tokens: ${errorText}`);
   }
   
-  return tokenResponse.json();
+  const tokenData = await tokenResponse.json();
+  console.log("Token exchange successful");
+  return tokenData;
 };
 
 // Refresh access token using refresh token
 const refreshAccessToken = async (refreshToken: string) => {
   const oauth2Client = createOAuth2Client();
+  
+  console.log("Refreshing access token");
   
   const tokenResponse = await fetch('https://oauth2.googleapis.com/token', {
     method: 'POST',
@@ -91,7 +99,9 @@ const refreshAccessToken = async (refreshToken: string) => {
     throw new Error(`Failed to refresh token: ${errorText}`);
   }
   
-  return tokenResponse.json();
+  const tokenData = await tokenResponse.json();
+  console.log("Token refresh successful");
+  return tokenData;
 };
 
 // Main handler
@@ -105,21 +115,40 @@ serve(async (req) => {
   }
   
   try {
-    // We need to handle the request body carefully
-    let requestText;
-    let requestData;
+    // Handle request with robust error checking
+    let requestText = "";
+    let requestData = null;
     
     try {
-      requestText = await req.text();
-      console.log("Request body text:", requestText);
+      // Check if request body is empty
+      const contentType = req.headers.get('content-type');
+      console.log("Request content-type:", contentType);
       
-      if (!requestText || requestText.trim() === '') {
-        console.error("Request body is empty");
+      // First try to read the text from the request
+      try {
+        requestText = await req.text();
+        console.log("Request body text length:", requestText.length);
+        
+        if (!requestText || requestText.trim() === '') {
+          console.error("Request body is empty");
+          return new Response(
+            JSON.stringify({
+              error: "Request body is empty",
+              message: "Please provide a valid JSON request body with action parameter"
+            }), 
+            {
+              status: 400,
+              headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+            }
+          );
+        }
+      } catch (e) {
+        console.error("Error reading request body as text:", e);
         return new Response(
           JSON.stringify({
-            error: "Request body is empty",
-            message: "Please provide a valid JSON request body with action parameter"
-          }), 
+            error: "Failed to read request body",
+            message: "Could not read the request body as text"
+          }),
           {
             status: 400,
             headers: { ...corsHeaders, 'Content-Type': 'application/json' }
@@ -127,15 +156,16 @@ serve(async (req) => {
         );
       }
       
+      // Now try to parse the text as JSON
       try {
         requestData = JSON.parse(requestText);
-        console.log("Parsed request data:", JSON.stringify(requestData));
+        console.log("Parsed request data action:", requestData?.action);
       } catch (e) {
         console.error("Error parsing JSON request:", e);
         return new Response(
           JSON.stringify({
             error: "Invalid JSON in request body",
-            message: "The request body must be properly formatted JSON"
+            message: "The request body is not valid JSON: " + e.message
           }),
           {
             status: 400,
@@ -144,11 +174,11 @@ serve(async (req) => {
         );
       }
     } catch (e) {
-      console.error("Error reading request body:", e);
+      console.error("General error processing request body:", e);
       return new Response(
         JSON.stringify({
-          error: "Failed to read request body",
-          message: "Could not read the request body"
+          error: "Failed to process request body",
+          message: "Could not process the request body: " + e.message
         }),
         {
           status: 400,
@@ -178,7 +208,7 @@ serve(async (req) => {
       console.log("Getting auth URL");
       try {
         const authUrl = getAuthorizationUrl();
-        console.log("Auth URL generated:", authUrl);
+        console.log("Auth URL generated successfully");
         return new Response(
           JSON.stringify({ authUrl }),
           {
@@ -205,7 +235,7 @@ serve(async (req) => {
       return new Response(
         JSON.stringify({
           error: "Missing Authorization header",
-          message: "Please provide an Authorization header with a valid JWT token"
+          message: "Please log in to access this functionality"
         }),
         {
           status: 401,
@@ -230,7 +260,7 @@ serve(async (req) => {
         console.error("JWT verification error:", error);
         return new Response(JSON.stringify({ 
           error: "Invalid JWT token",
-          message: "The provided authorization token is invalid or expired"
+          message: "Your session has expired or is invalid. Please log in again."
         }), {
           headers: { ...corsHeaders, 'Content-Type': 'application/json' },
           status: 401,
@@ -242,8 +272,8 @@ serve(async (req) => {
     } catch (error) {
       console.error('JWT verification error:', error);
       return new Response(JSON.stringify({ 
-        error: "Invalid authorization",
-        message: "Could not verify the provided authorization token"
+        error: "Invalid authentication",
+        message: "Authentication failed. Please log in again."
       }), {
         status: 401,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
@@ -266,11 +296,7 @@ serve(async (req) => {
         
         // Exchange code for tokens
         const tokens = await exchangeCodeForTokens(code);
-        console.log("Tokens received:", JSON.stringify({
-          access_token: "REDACTED",
-          refresh_token: "REDACTED",
-          expires_in: tokens.expires_in
-        }));
+        console.log("Tokens received successfully");
         
         // Create Supabase client for database operations
         const supabaseUrl = Deno.env.get("SUPABASE_URL") as string;
@@ -325,7 +351,7 @@ serve(async (req) => {
           console.error("Error getting refresh token:", tokenError);
           return new Response(JSON.stringify({ 
             error: "No refresh token found",
-            message: "No refresh token found for this user"
+            message: "No refresh token found for this user. Please reconnect your Google Calendar."
           }), {
             headers: { ...corsHeaders, 'Content-Type': 'application/json' },
             status: 404,

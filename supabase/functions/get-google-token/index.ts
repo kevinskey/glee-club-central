@@ -21,11 +21,49 @@ serve(async (req) => {
   
   try {
     // Get the request body
-    const { userId } = await req.json();
+    let requestData;
     
-    if (!userId) {
-      throw new Error('User ID is required');
+    try {
+      const requestText = await req.text();
+      if (!requestText || requestText.trim() === '') {
+        throw new Error('Empty request body');
+      }
+      
+      try {
+        requestData = JSON.parse(requestText);
+      } catch (e) {
+        throw new Error(`Invalid JSON in request body: ${e.message}`);
+      }
+    } catch (e) {
+      console.error("Error processing request:", e);
+      return new Response(
+        JSON.stringify({
+          error: e.message || 'Failed to process request body'
+        }),
+        {
+          status: 400,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        }
+      );
     }
+    
+    const { userId } = requestData || {};
+    
+    // Check for valid userId
+    if (!userId || !userId.user || !userId.user.id) {
+      console.error("Invalid or missing user ID:", userId);
+      return new Response(
+        JSON.stringify({
+          error: 'User ID is required'
+        }),
+        { 
+          status: 400, 
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        }
+      );
+    }
+    
+    const actualUserId = userId.user.id;
     
     // Create Supabase admin client
     const supabaseAdmin = createClient(
@@ -37,11 +75,20 @@ serve(async (req) => {
     const { data: tokenData, error: tokenError } = await supabaseAdmin
       .from('user_google_tokens')
       .select('access_token, expires_at, refresh_token')
-      .eq('user_id', userId)
+      .eq('user_id', actualUserId)
       .single();
     
     if (tokenError) {
-      throw new Error(`No Google Calendar token found for user: ${tokenError.message}`);
+      console.error("No token found for user:", tokenError);
+      return new Response(
+        JSON.stringify({
+          error: `No Google Calendar token found for user: ${tokenError.message}`
+        }),
+        { 
+          status: 404, 
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        }
+      );
     }
     
     // Check if token has expired
@@ -50,6 +97,8 @@ serve(async (req) => {
     
     // If token has expired, refresh it
     if (expiresAt <= now) {
+      console.log("Token expired, refreshing...");
+      
       // Token has expired, refresh it
       if (!tokenData.refresh_token) {
         throw new Error('No refresh token available');
@@ -70,7 +119,8 @@ serve(async (req) => {
       });
       
       if (!tokenResponse.ok) {
-        throw new Error('Failed to refresh Google Calendar token');
+        const errorText = await tokenResponse.text();
+        throw new Error(`Failed to refresh Google Calendar token: ${errorText}`);
       }
       
       const tokens = await tokenResponse.json();
@@ -81,31 +131,41 @@ serve(async (req) => {
         .update({
           access_token: tokens.access_token,
           expires_at: new Date(Date.now() + tokens.expires_in * 1000).toISOString(),
+          updated_at: new Date().toISOString()
         })
-        .eq('user_id', userId);
+        .eq('user_id', actualUserId);
       
       if (error) {
         throw new Error(`Failed to update token in database: ${error.message}`);
       }
       
       // Return the new token
-      return new Response(JSON.stringify({ token: tokens.access_token }), {
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        status: 200,
-      });
+      return new Response(
+        JSON.stringify({ token: tokens.access_token }), 
+        {
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          status: 200,
+        }
+      );
     }
     
     // Return the current token
-    return new Response(JSON.stringify({ token: tokenData.access_token }), {
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      status: 200,
-    });
+    return new Response(
+      JSON.stringify({ token: tokenData.access_token }), 
+      {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        status: 200,
+      }
+    );
     
   } catch (error) {
     console.error('Error getting Google token:', error);
-    return new Response(JSON.stringify({ error: error.message }), {
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      status: 400,
-    });
+    return new Response(
+      JSON.stringify({ error: error.message }), 
+      {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        status: 500,
+      }
+    );
   }
 });

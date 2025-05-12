@@ -4,7 +4,11 @@ import { CalendarRange } from "lucide-react";
 import { Label } from "@/components/ui/label";
 import { Slider } from "@/components/ui/slider";
 import { Button } from "@/components/ui/button";
-import { disconnectGoogleCalendar, startGoogleOAuth, checkGoogleCalendarConnection } from "@/utils/googleCalendar";
+import { 
+  disconnectGoogleCalendar, 
+  startGoogleOAuth, 
+  checkGoogleCalendarConnection 
+} from "@/services/googleCalendar";
 import { useAuth } from "@/contexts/AuthContext";
 import { usePermissions } from "@/hooks/usePermissions";
 import { toast } from "sonner";
@@ -72,6 +76,7 @@ export const GoogleCalendarToggle = ({
 
     setIsConnecting(true);
     try {
+      console.log("Starting Google auth process...");
       const authUrl = await startGoogleOAuth();
       
       if (!authUrl) {
@@ -79,6 +84,8 @@ export const GoogleCalendarToggle = ({
         return;
       }
 
+      console.log("Got auth URL:", authUrl);
+      
       // Open the OAuth URL in a popup window
       const width = 600;
       const height = 700;
@@ -95,12 +102,15 @@ export const GoogleCalendarToggle = ({
         toast.error("Popup was blocked. Please allow popups for this site.");
         return;
       }
+
+      console.log("Opened popup window for authentication");
       
       // Check for connection every 2 seconds
       const interval = setInterval(async () => {
         try {
           if (popup.closed) {
             clearInterval(interval);
+            console.log("Popup closed, checking connection");
             await checkConnection();
             if (isConnected) {
               toast.success("Google Calendar connected successfully!");
