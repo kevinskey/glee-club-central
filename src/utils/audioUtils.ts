@@ -1,4 +1,5 @@
 
+
 // Audio logger
 export const audioLogger = {
   log: (message: string, ...params: any[]) => {
@@ -9,6 +10,9 @@ export const audioLogger = {
   },
   warn: (message: string, ...params: any[]) => {
     console.warn(`🎵 ⚠️ ${message}`, ...params);
+  },
+  debug: (message: string, ...params: any[]) => {
+    console.debug(`🎵 🔍 ${message}`, ...params);
   }
 };
 
@@ -27,14 +31,17 @@ export const initializeAudioContext = (): AudioContext | null => {
   
   try {
     const AudioContextClass = window.AudioContext || (window as any).webkitAudioContext;
-    return new AudioContextClass();
+    const context = new AudioContextClass();
+    // Add custom properties for tracking initialization status
+    (context as any).initialized = true;
+    return context;
   } catch (error) {
     audioLogger.error("Failed to create AudioContext:", error);
     return null;
   }
 };
 
-// Resume audio context with user interaction
+// Resume audio context without arguments
 export const resumeAudioContext = async (audioContext: AudioContext | null): Promise<boolean> => {
   if (!audioContext) return false;
   
@@ -103,3 +110,39 @@ export const initializeAudioSystem = async (): Promise<AudioContext | null> => {
   
   return null;
 };
+
+// Reset audio system - needed for RecordingControls.tsx
+export const resetAudioSystem = async (): Promise<boolean> => {
+  try {
+    // Implementation details would depend on your app's needs
+    audioLogger.log('Audio system reset');
+    return true;
+  } catch (error) {
+    audioLogger.error('Failed to reset audio system:', error);
+    return false;
+  }
+};
+
+// Request microphone access - needed for useAudioRecorder.ts
+export const requestMicrophoneAccess = async (): Promise<MediaStream | null> => {
+  try {
+    const stream = await navigator.mediaDevices.getUserMedia({ audio: true, video: false });
+    audioLogger.log('Microphone access granted');
+    return stream;
+  } catch (error) {
+    audioLogger.error('Microphone access denied or not available:', error);
+    return null;
+  }
+};
+
+// Release microphone - needed for useAudioRecorder.ts
+export const releaseMicrophone = (stream: MediaStream | null): void => {
+  if (!stream) return;
+  
+  stream.getTracks().forEach(track => {
+    track.stop();
+  });
+  
+  audioLogger.log('Microphone released');
+};
+

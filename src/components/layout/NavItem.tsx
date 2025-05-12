@@ -29,8 +29,8 @@ export function NavItem({ title, href, icon, external = false }: NavItemProps) {
     <a
       href={href}
       className={cn(
-        "flex items-center px-3 py-2 text-sm rounded-md hover:bg-accent hover:text-accent-foreground",
-        isActive && "bg-accent text-accent-foreground"
+        "flex items-center px-3 py-2 text-sm rounded-md hover:bg-accent/10 hover:text-accent",
+        isActive && "bg-accent/10 text-accent"
       )}
     >
       {linkContent}
@@ -39,8 +39,8 @@ export function NavItem({ title, href, icon, external = false }: NavItemProps) {
     <Link
       to={href}
       className={cn(
-        "flex items-center px-3 py-2 text-sm rounded-md hover:bg-accent hover:text-accent-foreground",
-        isActive && "bg-accent text-accent-foreground"
+        "flex items-center px-3 py-2 text-sm rounded-md hover:bg-accent/10 hover:text-accent",
+        isActive && "bg-accent/10 text-accent"
       )}
     >
       {linkContent}

@@ -9,8 +9,8 @@
     --background: 0 0% 100%; /* #FFFFFF */
     --foreground: 0 0% 0%; /* #000000 */
 
-    --muted: 210 40% 96%;
-    --muted-foreground: 210 38% 40%;
+    --muted: 0 0% 96%;
+    --muted-foreground: 0 0% 50%;
 
     --popover: 0 0% 100%;
     --popover-foreground: 0 0% 0%;
@@ -18,17 +18,17 @@
     --card: 0 0% 100%;
     --card-foreground: 0 0% 0%;
 
-    --border: 210 40% 90%;
-    --input: 210 40% 90%;
+    --border: 0 0% 90%;
+    --input: 0 0% 90%;
 
-    --primary: 204 59% 56%;
+    --primary: 0 0% 20%; /* Changed to dark gray from blue */
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 210 40% 96%;
+    --secondary: 0 0% 96%;
     --secondary-foreground: 0 0% 0%;
 
-    --accent: 217 85% 28%; /* #0B3C84 - Changed from orange to Spelman Blue */
-    --accent-foreground: 0 0% 100%; /* Changed text color to white for better contrast */
+    --accent: 0 0% 20%; /* Changed to dark gray from Spelman Blue */
+    --accent-foreground: 0 0% 100%; 
 
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 0 0% 98%;
@@ -55,13 +55,13 @@
     --border: 0 0% 20%;
     --input: 0 0% 20%;
 
-    --primary: 204 59% 56%;
-    --primary-foreground: 0 0% 100%;
+    --primary: 0 0% 80%; /* Changed to light gray from blue */
+    --primary-foreground: 0 0% 10%;
 
     --secondary: 0 0% 15%;
     --secondary-foreground: 0 0% 100%;
 
-    --accent: 217 85% 28%; /* #0B3C84 - Changed from orange to Spelman Blue */
+    --accent: 0 0% 20%; /* Changed to dark gray from Spelman Blue */
     --accent-foreground: 0 0% 100%;
 
     --destructive: 0 62.8% 30.6%;

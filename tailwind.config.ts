@@ -69,8 +69,8 @@ export default {
 					gold: '#FFFFFF',    // White
 					light: '#F5FAFF',   // Very light blue background
 					dark: '#212529',    // Black for accents
-					accent: '#0B3C84',  // Changed from orange to Spelman Blue
-					spelman: '#0B3C84', // Spelman Blue - preserved
+					accent: '#333333',  // Changed from blue to dark gray
+					spelman: '#0B3C84', // Spelman Blue - preserved for specific uses
 				}
 			},
 			fontFamily: {

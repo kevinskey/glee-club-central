@@ -35,7 +35,7 @@ export function MobileNavItem({
       }}
       className={cn(
         "flex flex-col items-center justify-center gap-1 px-2",
-        isActive ? "text-primary" : "text-muted-foreground"
+        isActive ? "text-accent" : "text-muted-foreground"
       )}
     >
       {icon && <span className="h-5 w-5">{icon}</span>}
