@@ -1,3 +1,4 @@
+
 import {
   createBrowserRouter,
 } from "react-router-dom";
@@ -20,6 +21,7 @@ import RequireAuth from "./components/auth/RequireAuth";
 import MembersPage from "./pages/admin/MembersPage";
 import SheetMusicPage from "./pages/SheetMusicPage";
 import SheetMusicViewerPage from "./pages/sheet-music/SheetMusicPage";
+import ViewSheetMusicPage from "./pages/sheet-music/ViewSheetMusicPage";
 import SetlistsPage from "./pages/SetlistsPage";
 import ChoralTitlesPage from "./pages/sheet-music/ChoralTitlesPage";
 import YoutubeVideosPage from "./pages/YoutubeVideosPage";
@@ -81,7 +83,7 @@ export const router = createBrowserRouter([
       },
 	  {
         path: "/dashboard/sheet-music/:id",
-        element: <SheetMusicViewerPage />,
+        element: <ViewSheetMusicPage />,
       },
     {
         path: "/dashboard/setlists",
