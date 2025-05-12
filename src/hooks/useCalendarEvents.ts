@@ -1,11 +1,10 @@
-
 import { useState, useEffect, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
 
 // Define the event type enum
-export type EventType = "concert" | "rehearsal" | "sectional" | "special";
+export type EventType = "concert" | "rehearsal" | "sectional" | "special" | "tour";
 
 // Define the CalendarEvent interface
 export interface CalendarEvent {
@@ -21,6 +20,7 @@ export interface CalendarEvent {
   created_by?: string;
   image_url?: string;
   source?: 'local' | 'google'; // Source of the event
+  allDay?: boolean; // Added allDay property
 }
 
 export function useCalendarEvents() {
@@ -82,6 +82,7 @@ export function useCalendarEvents() {
           created_by: event.user_id,
           image_url: event.image_url,
           source: 'local',
+          allDay: event.allDay,
         };
       });
       
@@ -150,6 +151,7 @@ export function useCalendarEvents() {
         created_by: data.user_id,
         image_url: data.image_url,
         source: 'local',
+        allDay: eventData.allDay,
       };
       
       // Add to local events array
@@ -210,7 +212,8 @@ export function useCalendarEvents() {
                 start: new Date(formattedDate + 'T' + eventData.time),
                 end: new Date(new Date(formattedDate + 'T' + eventData.time).getTime() + 3600000),
                 type: eventData.type,
-                image_url: eventData.image_url
+                image_url: eventData.image_url,
+                allDay: eventData.allDay
               }
             : event
         )
@@ -311,6 +314,6 @@ export function useCalendarEvents() {
     googleCalendarError,
     daysAhead,
     setDaysAhead,
-    resetCalendar // Added the reset function
+    resetCalendar
   };
 }

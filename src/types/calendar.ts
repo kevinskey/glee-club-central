@@ -1,4 +1,5 @@
-export type EventType = "rehearsal" | "concert" | "sectional" | "special";
+
+export type EventType = "rehearsal" | "concert" | "sectional" | "special" | "tour";
 
 export interface CalendarEvent {
   id: string;
@@ -9,4 +10,5 @@ export interface CalendarEvent {
   location?: string;
   description?: string;
   created_by: string; // user ID
+  allDay?: boolean;   // Added allDay property
 }

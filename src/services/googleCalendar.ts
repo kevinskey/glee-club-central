@@ -315,7 +315,7 @@ const simulateCalendarEvents = (daysAhead: number): CalendarEvent[] => {
   const today = new Date();
   
   // Generate some example events
-  const eventTypes: EventType[] = ['rehearsal', 'concert', 'tour', 'special'];
+  const eventTypes: EventType[] = ['rehearsal', 'concert', 'tour', 'special', 'sectional'];
   const locations = [
     'Sisters Chapel', 
     'Cosby Auditorium', 
@@ -409,6 +409,8 @@ const transformGoogleEvent = (event: GoogleCalendarEvent): CalendarEvent => {
     eventType = "concert";
   } else if (event.summary?.toLowerCase().includes('tour')) {
     eventType = "tour";
+  } else if (event.summary?.toLowerCase().includes('sectional')) {
+    eventType = "sectional";
   }
 
   return {
