@@ -25,7 +25,8 @@ export const EventContent = ({ eventInfo, view }: EventContentProps) => {
     'rehearsal': 'bg-blue-500 border-blue-600',
     'concert': 'bg-orange-500 border-orange-600',
     'sectional': 'bg-green-500 border-green-600',
-    'special': 'bg-purple-500 border-purple-600'
+    'special': 'bg-purple-500 border-purple-600',
+    'tour': 'bg-teal-500 border-teal-600' // Added missing 'tour' type
   };
 
   const eventType = (eventInfo.event.extendedProps?.type as EventType) || 'special';

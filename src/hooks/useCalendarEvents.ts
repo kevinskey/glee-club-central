@@ -1,3 +1,4 @@
+
 import { useState, useEffect, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
@@ -82,7 +83,8 @@ export function useCalendarEvents() {
           created_by: event.user_id,
           image_url: event.image_url,
           source: 'local',
-          allDay: event.allDay,
+          // Handle allDay property with a fallback to false if undefined
+          allDay: Boolean(event.allDay),
         };
       });
       
@@ -126,7 +128,8 @@ export function useCalendarEvents() {
           description: eventData.description,
           type: eventData.type,
           user_id: user.id,
-          image_url: eventData.image_url
+          image_url: eventData.image_url,
+          allDay: eventData.allDay // Add allDay to the database insert
         })
         .select()
         .single();
@@ -151,7 +154,7 @@ export function useCalendarEvents() {
         created_by: data.user_id,
         image_url: data.image_url,
         source: 'local',
-        allDay: eventData.allDay,
+        allDay: data.allDay,
       };
       
       // Add to local events array
@@ -188,7 +191,8 @@ export function useCalendarEvents() {
           location: eventData.location,
           description: eventData.description,
           type: eventData.type,
-          image_url: eventData.image_url
+          image_url: eventData.image_url,
+          allDay: eventData.allDay // Add allDay to the update
         })
         .eq("id", eventData.id);
       
