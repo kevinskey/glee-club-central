@@ -8,6 +8,7 @@ export interface MediaFile {
   file_type: string;
   uploaded_by: string;
   category?: string;
+  folder?: string;  // Added this property
   tags?: string[];
   created_at: string;
   size?: number;
