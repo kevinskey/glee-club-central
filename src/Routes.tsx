@@ -3,7 +3,7 @@ import React from "react";
 import { useRoutes } from "react-router-dom";
 import HomeLayout from "@/layouts/HomeLayout";
 import DashboardLayout from "@/layouts/DashboardLayout";
-import HomePage from "@/pages/HomePage";
+import LandingPage from "@/pages/LandingPage";
 import RegisterPage from "@/pages/RegisterPage";
 import LoginPage from "@/pages/LoginPage";
 import DashboardPage from "@/pages/DashboardPage";
@@ -31,7 +31,7 @@ export default function AppRoutes() {
       path: "/",
       element: <HomeLayout />,
       children: [
-        { path: "/", element: <HomePage /> },
+        { path: "/", element: <LandingPage /> },
         { path: "register", element: <RegisterPage /> },
         { path: "login", element: <LoginPage /> },
         {
