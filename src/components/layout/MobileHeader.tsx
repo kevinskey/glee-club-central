@@ -9,14 +9,14 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, Dialog
 import { EnhancedMetronome } from "@/components/ui/enhanced-metronome";
 import { Clock, Menu, X } from "lucide-react";
 import { MobileMenu } from "@/components/landing/header/MobileMenu";
-import { SidebarProvider, useSidebar } from "@/components/ui/sidebar";
+import { useSidebar } from "@/components/ui/sidebar";
 
 export function MobileHeader() {
   const { isAuthenticated } = useAuth();
   const navigate = useNavigate();
   const isMobile = useIsMobile();
   const location = useLocation();
-  const { toggleSidebar, setOpenMobile } = useSidebar();
+  const { toggleSidebar, setOpenMobile, openMobile } = useSidebar();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [metronomeOpen, setMetronomeOpen] = useState(false);
   const audioContextRef = useRef<AudioContext | null>(null);
@@ -51,9 +51,7 @@ export function MobileHeader() {
     
     if (isDashboardPath) {
       // For dashboard pages, use the sidebar's setOpenMobile function
-      // Fix: Pass a direct boolean value instead of a function
-      const currentMobileState = useSidebar().openMobile;
-      setOpenMobile(!currentMobileState);
+      setOpenMobile(!openMobile);
     } else {
       // For public pages, toggle our local mobile menu state
       toggleMobileMenu();
