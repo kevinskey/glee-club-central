@@ -114,17 +114,32 @@ export default function SheetMusicPage() {
       if (mediaLoading) {
         return; // Will try again when mediaLoading changes
       }
+
+      console.log("Media files loaded:", filteredMediaFiles.length);
       
-      // Map PDF files from media library to sheet music format
-      const pdfFiles = filteredMediaFiles
-        .filter(file => file.file_type === "application/pdf" || getMediaType(file.file_type) === "pdf")
+      // Map PDF files from media library to sheet music format - enhanced PDF detection
+      const pdfFiles = allMediaFiles
+        .filter(file => {
+          // Improved PDF detection logic
+          return (
+            file.file_type === "application/pdf" || 
+            file.file_type.includes("pdf") ||
+            getMediaType(file.file_type) === "pdf" ||
+            (file.file_path && file.file_path.toLowerCase().endsWith('.pdf')) ||
+            (file.tags && file.tags.includes("pdf")) ||
+            (file.folder && file.folder.toLowerCase() === "sheet-music") ||
+            (file.category && file.category.toLowerCase() === "sheet-music")
+          );
+        })
         .map(file => ({
           id: file.id,
-          title: file.title,
-          composer: file.description || "Unknown",
+          title: file.title || "Untitled PDF",
+          composer: file.description || "Unknown Composer",
           file_url: file.file_url,
           created_at: new Date(file.created_at).toLocaleDateString(),
         }));
+      
+      console.log(`Found ${pdfFiles.length} PDF files in the media library`);
       
       setMusicFiles(pdfFiles);
       setFilteredFiles(pdfFiles);
@@ -135,7 +150,6 @@ export default function SheetMusicPage() {
       );
       setComposers(uniqueComposers);
       
-      console.log(`Found ${pdfFiles.length} PDF files in the media library`);
     } catch (error: any) {
       console.error("Error processing sheet music:", error);
       toast({
@@ -176,7 +190,7 @@ export default function SheetMusicPage() {
 
   // Initial data fetch
   useEffect(() => {
-    // First fetch all media
+    // Force refresh of all media
     fetchAllMedia();
     // Then fetch setlists separately
     fetchSetlists();
@@ -187,7 +201,7 @@ export default function SheetMusicPage() {
     if (!mediaLoading) {
       fetchSheetMusic();
     }
-  }, [mediaLoading, filteredMediaFiles]);
+  }, [mediaLoading, allMediaFiles]);
 
   // Update selected setlist when ID changes
   useEffect(() => {
@@ -286,7 +300,8 @@ export default function SheetMusicPage() {
 
   // Handle upload complete
   const handleUploadComplete = () => {
-    // Refetch media files to include newly uploaded files
+    console.log("Upload complete, refreshing data from media library");
+    // Refetch all media files without filtering to get the latest uploads
     fetchAllMedia();
     toast({
       title: "Upload complete",

@@ -29,7 +29,9 @@ export function useMediaLibrary() {
     setError(null);
     
     try {
-      // Fetch media files from Supabase
+      console.log("Fetching all media files without filtering...");
+      
+      // Fetch media files from Supabase - use no filter to get everything
       const { data, error } = await supabase
         .from('media_library')
         .select('*')
@@ -37,11 +39,13 @@ export function useMediaLibrary() {
         
       if (error) throw error;
       
+      console.log(`Retrieved ${data?.length || 0} media files from database`);
+      
       // Map data to MediaFile type
       const mappedData = data.map((item: any) => ({
         id: item.id,
-        title: item.title,
-        description: item.description,
+        title: item.title || 'Untitled',
+        description: item.description || '',
         file_url: item.file_url,
         file_path: item.file_path,
         file_type: item.file_type,
@@ -53,7 +57,9 @@ export function useMediaLibrary() {
       }));
       
       setMediaFiles(mappedData);
-      setFilteredMediaFiles(mappedData);
+      
+      // Apply initial filters based on current filter settings
+      applyFilters(mappedData);
       
       // Calculate stats
       const stats: MediaStats = {
@@ -83,7 +89,9 @@ export function useMediaLibrary() {
           if (file.file_type.startsWith('audio/')) return 'audio';
           if (file.file_type.startsWith('image/')) return 'image';
           if (file.file_type.startsWith('video/')) return 'video';
-          if (file.file_type === 'application/pdf') return 'pdf';
+          if (file.file_type === 'application/pdf' || 
+              file.file_type.includes('pdf') || 
+              file.file_path.endsWith('.pdf')) return 'pdf';
           return 'other';
         })
       )) as MediaType[];
@@ -99,6 +107,59 @@ export function useMediaLibrary() {
     } finally {
       setIsLoading(false);
     }
+  };
+  
+  // Helper function to apply filters
+  const applyFilters = (files: MediaFile[]) => {
+    let filtered = [...files];
+    
+    // Apply search filter
+    if (searchQuery) {
+      const query = searchQuery.toLowerCase();
+      filtered = filtered.filter(file => 
+        file.title?.toLowerCase().includes(query) || 
+        (file.description && file.description.toLowerCase().includes(query)) ||
+        (file.tags && file.tags.some(tag => tag.toLowerCase().includes(query)))
+      );
+    }
+    
+    // Apply media type filter
+    if (selectedMediaType !== "all") {
+      filtered = filtered.filter(file => {
+        if (selectedMediaType === 'audio') return file.file_type.startsWith('audio/');
+        if (selectedMediaType === 'image') return file.file_type.startsWith('image/');
+        if (selectedMediaType === 'video') return file.file_type.startsWith('video/');
+        if (selectedMediaType === 'pdf') {
+          return file.file_type === 'application/pdf' || 
+                 file.file_type.includes('pdf') ||
+                 (file.file_path && file.file_path.toLowerCase().endsWith('.pdf')) ||
+                 (file.category === 'sheet-music') ||
+                 (file.tags && file.tags.includes('pdf'));
+        }
+        return !file.file_type.startsWith('audio/') && 
+               !file.file_type.startsWith('image/') && 
+               !file.file_type.startsWith('video/') && 
+               !file.file_type.includes('pdf') && 
+               file.file_type !== 'application/pdf';
+      });
+    }
+    
+    // Apply category filter
+    if (selectedCategory !== "all") {
+      filtered = filtered.filter(file => file.category === selectedCategory);
+    }
+    
+    // Apply date sort
+    filtered.sort((a, b) => {
+      const dateA = new Date(a.created_at).getTime();
+      const dateB = new Date(b.created_at).getTime();
+      
+      return dateFilter === "newest" 
+        ? dateB - dateA  // newest first
+        : dateA - dateB; // oldest first
+    });
+    
+    setFilteredMediaFiles(filtered);
   };
   
   // Delete media item
@@ -145,50 +206,7 @@ export function useMediaLibrary() {
   // Apply filters whenever filter criteria change
   useEffect(() => {
     if (mediaFiles.length === 0) return;
-    
-    let filtered = [...mediaFiles];
-    
-    // Apply search filter
-    if (searchQuery) {
-      const query = searchQuery.toLowerCase();
-      filtered = filtered.filter(file => 
-        file.title.toLowerCase().includes(query) || 
-        (file.description && file.description.toLowerCase().includes(query)) ||
-        (file.tags && file.tags.some(tag => tag.toLowerCase().includes(query)))
-      );
-    }
-    
-    // Apply media type filter
-    if (selectedMediaType !== "all") {
-      filtered = filtered.filter(file => {
-        if (selectedMediaType === 'audio') return file.file_type.startsWith('audio/');
-        if (selectedMediaType === 'image') return file.file_type.startsWith('image/');
-        if (selectedMediaType === 'video') return file.file_type.startsWith('video/');
-        if (selectedMediaType === 'pdf') return file.file_type === 'application/pdf';
-        return !file.file_type.startsWith('audio/') && 
-               !file.file_type.startsWith('image/') && 
-               !file.file_type.startsWith('video/') && 
-               file.file_type !== 'application/pdf';
-      });
-    }
-    
-    // Apply category filter
-    if (selectedCategory !== "all") {
-      filtered = filtered.filter(file => file.category === selectedCategory);
-    }
-    
-    // Apply date sort
-    filtered.sort((a, b) => {
-      const dateA = new Date(a.created_at).getTime();
-      const dateB = new Date(b.created_at).getTime();
-      
-      return dateFilter === "newest" 
-        ? dateB - dateA  // newest first
-        : dateA - dateB; // oldest first
-    });
-    
-    setFilteredMediaFiles(filtered);
-    
+    applyFilters(mediaFiles);
   }, [searchQuery, selectedMediaType, selectedCategory, dateFilter, mediaFiles]);
   
   // Initial fetch

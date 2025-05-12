@@ -60,7 +60,7 @@ export function UploadSheetMusicModal({
 
   const validateFile = (file: File) => {
     // Validate file type
-    if (file.type !== "application/pdf") {
+    if (file.type !== "application/pdf" && !file.name.toLowerCase().endsWith('.pdf')) {
       toast({
         title: "Invalid file type",
         description: `${file.name} is not a PDF file`,
@@ -232,7 +232,7 @@ export function UploadSheetMusicModal({
 
         if (!publicURL) throw new Error("Failed to get public URL");
 
-        // Insert record in media_library table
+        // Insert record in media_library table with improved categorization
         const { error: dbError } = await supabase
           .from('media_library')
           .insert({
@@ -241,12 +241,15 @@ export function UploadSheetMusicModal({
             file_path: filePath,
             file_url: publicURL.publicUrl,
             file_type: "application/pdf",
-            folder: "sheet-music", // Categorize as sheet music
+            folder: "sheet-music", // Explicitly categorize as sheet music
             uploaded_by: profile?.id,
-            tags: ["sheet-music", "pdf"]
+            tags: ["sheet-music", "pdf", "music", file.composer.toLowerCase().replace(/\s+/g, '-')], // Add more detailed tags
+            is_public: true // Make sheet music publicly accessible
           });
 
         if (dbError) throw dbError;
+
+        console.log("Successfully uploaded sheet music to media library:", file.title);
 
         // Update file status to success
         updateFileData(file.id, { 

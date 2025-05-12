@@ -8,7 +8,11 @@ export function getMediaType(fileType: string): MediaType {
     return "video";
   } else if (fileType.startsWith('image/') || fileType.includes('image')) {
     return "image";
-  } else if (fileType === 'application/pdf' || fileType.includes('pdf')) {
+  } else if (
+    fileType === 'application/pdf' || 
+    fileType.includes('pdf') || 
+    fileType.endsWith('.pdf')
+  ) {
     return "pdf";
   } else {
     return "other";
