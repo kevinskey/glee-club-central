@@ -15,10 +15,20 @@ import {
   DialogDescription
 } from '@/components/ui/dialog';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { 
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { VideoPlayer } from '@/components/videos/VideoPlayer';
+import { ScrollArea } from '@/components/ui/scroll-area';
 
 export function YouTubeSection() {
   const { videos, isLoading, error } = useYouTubeData();
   const [selectedVideo, setSelectedVideo] = useState<string | null>(null);
+  const [featuredVideoId, setFeaturedVideoId] = useState<string | null>(null);
   const isMobile = useIsMobile();
   
   const handleVideoClick = (videoId: string) => {
@@ -27,6 +37,10 @@ export function YouTubeSection() {
 
   const handleCloseDialog = () => {
     setSelectedVideo(null);
+  };
+  
+  const handleSelectVideo = (videoId: string) => {
+    setFeaturedVideoId(videoId);
   };
 
   if (error) {
@@ -95,48 +109,84 @@ export function YouTubeSection() {
           </div>
         </div>
 
-        {isLoading ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {[1, 2, 3, 4].map((i) => (
-              <Card key={i} className="overflow-hidden bg-black/20 border-blue-900/30">
-                <AspectRatio ratio={16 / 9}>
-                  <Skeleton className="h-full w-full bg-black/40" />
-                </AspectRatio>
-                <div className="p-4">
-                  <Skeleton className="h-5 w-3/4 mb-2 bg-black/40" />
-                  <Skeleton className="h-4 w-full bg-black/30" />
-                </div>
-              </Card>
-            ))}
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {videos.map((video) => (
-              <Card 
-                key={video.id} 
-                className="overflow-hidden hover:shadow-lg transition-all cursor-pointer group bg-black/20 border-blue-900/30"
-                onClick={() => handleVideoClick(video.id)}
-              >
-                <div className="relative">
-                  <AspectRatio ratio={16 / 9}>
-                    <img
-                      src={video.thumbnailUrl}
-                      alt={video.title}
-                      className="object-cover w-full h-full"
-                    />
-                  </AspectRatio>
-                  <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                    <PlayCircle className="text-blue-200 w-12 h-12" />
-                  </div>
-                </div>
-                <div className="p-4">
-                  <h3 className="font-medium line-clamp-2 mb-1 text-blue-100 group-hover:text-blue-200">{video.title}</h3>
-                  <p className="text-sm text-blue-200/70">{new Date(video.publishedAt).toLocaleDateString()}</p>
-                </div>
-              </Card>
-            ))}
+        {/* Video Selection Dropdown */}
+        <div className="mb-6">
+          <Select onValueChange={handleSelectVideo} defaultValue={videos[0]?.id}>
+            <SelectTrigger className="bg-black/30 border-blue-800/50 text-blue-100 w-full max-w-md">
+              <SelectValue placeholder="Select a video to watch" />
+            </SelectTrigger>
+            <SelectContent className="bg-glee-spelman border-blue-900 text-blue-100">
+              {videos.map((video) => (
+                <SelectItem key={video.id} value={video.id} className="text-blue-100 focus:bg-blue-800/40 focus:text-white cursor-pointer">
+                  {video.title}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+
+        {/* Featured Video Player */}
+        {featuredVideoId && (
+          <div className="mb-8 bg-black/30 p-4 rounded-lg">
+            <VideoPlayer 
+              videoId={featuredVideoId} 
+              title={videos.find(v => v.id === featuredVideoId)?.title || ""}
+              description={videos.find(v => v.id === featuredVideoId)?.description || ""}
+            />
           </div>
         )}
+
+        {/* Horizontal Scrolling Video Cards */}
+        <h3 className="text-xl font-semibold text-blue-100 mb-4">More Videos</h3>
+        <ScrollArea className="w-full whitespace-nowrap pb-4" type="scroll" direction="horizontal">
+          <div className="flex gap-4">
+            {isLoading ? (
+              <>
+                {[1, 2, 3, 4].map((i) => (
+                  <div key={i} className="min-w-[250px] max-w-[250px] flex-none">
+                    <Card className="overflow-hidden bg-black/20 border-blue-900/30 h-full">
+                      <AspectRatio ratio={16 / 9}>
+                        <Skeleton className="h-full w-full bg-black/40" />
+                      </AspectRatio>
+                      <div className="p-4">
+                        <Skeleton className="h-5 w-3/4 mb-2 bg-black/40" />
+                        <Skeleton className="h-4 w-full bg-black/30" />
+                      </div>
+                    </Card>
+                  </div>
+                ))}
+              </>
+            ) : (
+              <>
+                {videos.map((video) => (
+                  <div key={video.id} className="min-w-[250px] max-w-[250px] flex-none">
+                    <Card 
+                      className="overflow-hidden hover:shadow-lg transition-all cursor-pointer group bg-black/20 border-blue-900/30 h-full"
+                      onClick={() => handleVideoClick(video.id)}
+                    >
+                      <div className="relative">
+                        <AspectRatio ratio={16 / 9}>
+                          <img
+                            src={video.thumbnailUrl}
+                            alt={video.title}
+                            className="object-cover w-full h-full"
+                          />
+                        </AspectRatio>
+                        <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                          <PlayCircle className="text-blue-200 w-12 h-12" />
+                        </div>
+                      </div>
+                      <div className="p-4">
+                        <h3 className="font-medium truncate mb-1 text-blue-100 group-hover:text-blue-200">{video.title}</h3>
+                        <p className="text-sm text-blue-200/70 truncate">{new Date(video.publishedAt).toLocaleDateString()}</p>
+                      </div>
+                    </Card>
+                  </div>
+                ))}
+              </>
+            )}
+          </div>
+        </ScrollArea>
         
         <div className="mt-8 text-center">
           <Link 

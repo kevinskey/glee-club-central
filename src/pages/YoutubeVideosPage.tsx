@@ -12,11 +12,21 @@ import { Spinner } from '@/components/ui/spinner';
 import { YouTubeVideo } from '@/types/youtube';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { ExternalLink, Youtube } from 'lucide-react';
+import { VideoPlayer } from '@/components/videos/VideoPlayer';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { 
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 export default function YoutubeVideosPage() {
   const { videos, isLoading, error } = useYouTubeData();
   const [selectedVideo, setSelectedVideo] = useState<string | null>(null);
   const [videoFilter, setVideoFilter] = useState<string>("all");
+  const [featuredVideoId, setFeaturedVideoId] = useState<string | null>(null);
   
   // Simple filter function based on video title or description
   const filteredVideos = videos.filter(video => {
@@ -33,6 +43,10 @@ export default function YoutubeVideosPage() {
     
     return terms.some(term => content.includes(term));
   });
+  
+  const handleSelectVideo = (videoId: string) => {
+    setFeaturedVideoId(videoId);
+  };
   
   return (
     <div className="min-h-screen flex flex-col">
@@ -54,6 +68,33 @@ export default function YoutubeVideosPage() {
           </TabsList>
         </Tabs>
         
+        {/* Video Selection Dropdown */}
+        <div className="mb-6">
+          <Select onValueChange={handleSelectVideo}>
+            <SelectTrigger className="w-full max-w-md">
+              <SelectValue placeholder="Select a video to watch" />
+            </SelectTrigger>
+            <SelectContent>
+              {filteredVideos.map((video) => (
+                <SelectItem key={video.id} value={video.id}>
+                  {video.title}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+        
+        {/* Featured Video Player */}
+        {featuredVideoId && (
+          <div className="mb-8">
+            <VideoPlayer 
+              videoId={featuredVideoId} 
+              title={videos.find(v => v.id === featuredVideoId)?.title || ""} 
+              description={videos.find(v => v.id === featuredVideoId)?.description}
+            />
+          </div>
+        )}
+        
         {isLoading ? (
           <div className="flex justify-center my-12">
             <Spinner size="lg" />
@@ -64,7 +105,21 @@ export default function YoutubeVideosPage() {
           </div>
         ) : (
           <>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <h3 className="text-xl font-bold mb-4">Browse All Videos</h3>
+            
+            {/* Horizontal scrolling on mobile */}
+            <ScrollArea className="w-full pb-4 md:hidden" type="scroll" direction="horizontal">
+              <div className="flex gap-4">
+                {filteredVideos.map((video) => (
+                  <div key={video.id} className="min-w-[250px] max-w-[250px] flex-none">
+                    <VideoCard video={video} onClick={() => setSelectedVideo(video.id)} />
+                  </div>
+                ))}
+              </div>
+            </ScrollArea>
+            
+            {/* Grid view on desktop */}
+            <div className="hidden md:grid md:grid-cols-2 lg:grid-cols-3 gap-6">
               {filteredVideos.map((video) => (
                 <VideoCard key={video.id} video={video} onClick={() => setSelectedVideo(video.id)} />
               ))}
