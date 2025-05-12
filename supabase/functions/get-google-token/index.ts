@@ -24,21 +24,12 @@ serve(async (req) => {
     let requestData;
     
     try {
-      const requestText = await req.text();
-      if (!requestText || requestText.trim() === '') {
-        throw new Error('Empty request body');
-      }
-      
-      try {
-        requestData = JSON.parse(requestText);
-      } catch (e) {
-        throw new Error(`Invalid JSON in request body: ${e.message}`);
-      }
+      requestData = await req.json();
     } catch (e) {
-      console.error("Error processing request:", e);
+      console.error("Error parsing request body as JSON:", e);
       return new Response(
         JSON.stringify({
-          error: e.message || 'Failed to process request body'
+          error: 'Invalid JSON in request body'
         }),
         {
           status: 400,
@@ -50,8 +41,8 @@ serve(async (req) => {
     const { userId } = requestData || {};
     
     // Check for valid userId
-    if (!userId || !userId.user || !userId.user.id) {
-      console.error("Invalid or missing user ID:", userId);
+    if (!userId) {
+      console.error("Missing user ID in request");
       return new Response(
         JSON.stringify({
           error: 'User ID is required'
@@ -63,8 +54,6 @@ serve(async (req) => {
       );
     }
     
-    const actualUserId = userId.user.id;
-    
     // Create Supabase admin client
     const supabaseAdmin = createClient(
       Deno.env.get('SUPABASE_URL') as string,
@@ -75,7 +64,7 @@ serve(async (req) => {
     const { data: tokenData, error: tokenError } = await supabaseAdmin
       .from('user_google_tokens')
       .select('access_token, expires_at, refresh_token')
-      .eq('user_id', actualUserId)
+      .eq('user_id', userId)
       .single();
     
     if (tokenError) {
@@ -133,7 +122,7 @@ serve(async (req) => {
           expires_at: new Date(Date.now() + tokens.expires_in * 1000).toISOString(),
           updated_at: new Date().toISOString()
         })
-        .eq('user_id', actualUserId);
+        .eq('user_id', userId);
       
       if (error) {
         throw new Error(`Failed to update token in database: ${error.message}`);

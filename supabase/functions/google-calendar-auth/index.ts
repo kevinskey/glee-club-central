@@ -1,4 +1,3 @@
-
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
@@ -115,76 +114,25 @@ serve(async (req) => {
   }
   
   try {
-    // Handle request with robust error checking
-    let requestText = "";
-    let requestData = null;
-    
+    // Parse the request body
+    let requestData;
     try {
-      // Check if request body is empty
-      const contentType = req.headers.get('content-type');
-      console.log("Request content-type:", contentType);
-      
-      // First try to read the text from the request
-      try {
-        requestText = await req.text();
-        console.log("Request body text length:", requestText.length);
-        
-        if (!requestText || requestText.trim() === '') {
-          console.error("Request body is empty");
-          return new Response(
-            JSON.stringify({
-              error: "Request body is empty",
-              message: "Please provide a valid JSON request body with action parameter"
-            }), 
-            {
-              status: 400,
-              headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-            }
-          );
-        }
-      } catch (e) {
-        console.error("Error reading request body as text:", e);
-        return new Response(
-          JSON.stringify({
-            error: "Failed to read request body",
-            message: "Could not read the request body as text"
-          }),
-          {
-            status: 400,
-            headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-          }
-        );
-      }
-      
-      // Now try to parse the text as JSON
-      try {
-        requestData = JSON.parse(requestText);
-        console.log("Parsed request data action:", requestData?.action);
-      } catch (e) {
-        console.error("Error parsing JSON request:", e);
-        return new Response(
-          JSON.stringify({
-            error: "Invalid JSON in request body",
-            message: "The request body is not valid JSON: " + e.message
-          }),
-          {
-            status: 400,
-            headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-          }
-        );
-      }
+      requestData = await req.json();
     } catch (e) {
-      console.error("General error processing request body:", e);
-      return new Response(
-        JSON.stringify({
-          error: "Failed to process request body",
-          message: "Could not process the request body: " + e.message
-        }),
-        {
-          status: 400,
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-        }
-      );
+      // Try to parse as text if JSON parsing fails
+      try {
+        const text = await req.text();
+        requestData = text ? JSON.parse(text) : {};
+      } catch (textError) {
+        console.error("Failed to parse request body:", textError);
+        return new Response(
+          JSON.stringify({ error: "Invalid request format" }),
+          {
+            status: 400,
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+          }
+        );
+      }
     }
     
     const { action, code } = requestData || {};
@@ -192,10 +140,7 @@ serve(async (req) => {
     if (!action) {
       console.error("No action provided in request");
       return new Response(
-        JSON.stringify({
-          error: "Missing action parameter",
-          message: "Please provide an action parameter in your request"
-        }),
+        JSON.stringify({ error: "Missing action parameter" }),
         {
           status: 400,
           headers: { ...corsHeaders, 'Content-Type': 'application/json' }

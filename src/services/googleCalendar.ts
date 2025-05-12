@@ -53,15 +53,15 @@ export const getGoogleCalendarToken = async (): Promise<string | null> => {
       return null;
     }
     
-    const userData = await supabase.auth.getUser();
-    if (!userData?.data?.user) {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) {
       console.error("No user found");
       return null;
     }
     
     // Get Google Calendar token through edge function
     const { data: userTokenData, error } = await supabase.functions.invoke('get-google-token', {
-      body: { userId: userData },
+      body: { userId: user.id },
       headers: {
         'Content-Type': 'application/json'
       }
@@ -94,7 +94,7 @@ export const startGoogleOAuth = async (): Promise<string | null> => {
     
     // Get the auth URL from our edge function
     const { data, error } = await supabase.functions.invoke('google-calendar-auth', {
-      body: JSON.stringify({ action: 'getAuthUrl' }),
+      body: { action: 'getAuthUrl' },
       headers: {
         'Content-Type': 'application/json'
       }
@@ -289,7 +289,7 @@ export const disconnectGoogleCalendar = async (): Promise<boolean> => {
     }
     
     const { data, error } = await supabase.functions.invoke('google-calendar-auth', {
-      body: JSON.stringify({ action: 'disconnect' }),
+      body: { action: 'disconnect' },
       headers: {
         'Content-Type': 'application/json'
       }
