@@ -1,298 +1,316 @@
-import { useState, useEffect, useCallback } from 'react';
-import { useAuth } from "@/contexts/AuthContext";
+
+import { useState, useEffect, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
-import { fetchGoogleCalendarEvents } from "@/services/googleCalendar";
 
-// Define acceptable event types to enforce type safety
-export type EventType = "concert" | "rehearsal" | "tour" | "special";
+// Define the event type enum
+export type EventType = "concert" | "rehearsal" | "sectional" | "special";
 
-// Export CalendarEvent type to be used across components
+// Define the CalendarEvent interface
 export interface CalendarEvent {
   id: string;
   title: string;
-  description?: string;
-  date: Date;          // For backward compatibility
-  start: Date;         // New standardized field
-  end: Date;           // New standardized field
-  time?: string;       // Keep for backward compatibility
+  description: string;
   location: string;
+  date: Date;
+  time: string;
+  start: Date;
+  end: Date;
   type: EventType;
+  created_by?: string;
   image_url?: string;
-  allDay?: boolean;
-  source?: string;     // Used to identify events from external sources like Google Calendar
+  source?: 'local' | 'google'; // Source of the event
 }
 
 export function useCalendarEvents() {
   const [events, setEvents] = useState<CalendarEvent[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [useGoogleCalendar, setUseGoogleCalendar] = useState(false);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [useGoogleCalendar, setUseGoogleCalendar] = useState<boolean>(false);
   const [googleCalendarError, setGoogleCalendarError] = useState<string | null>(null);
-  const [daysAhead, setDaysAhead] = useState(90); // Default to 90 days ahead
-  const { isAuthenticated, user } = useAuth();
-  
-  // Toggle between Google Calendar and local calendar
-  const toggleGoogleCalendar = useCallback(() => {
-    setUseGoogleCalendar(prev => !prev);
-  }, []);
-  
-  // Fetch events from the database
+  const [daysAhead, setDaysAhead] = useState<number>(30);
+  const { user } = useAuth();
+
+  // Fetch events from Supabase database
   const fetchEvents = useCallback(async () => {
+    if (!user) {
+      setEvents([]);
+      setLoading(false);
+      return;
+    }
+
     setLoading(true);
-    console.info('Fetching calendar events updates');
-
+    
     try {
-      let calendarEvents: CalendarEvent[] = [];
+      console.log("Fetching events from Supabase");
       
-      if (isAuthenticated && user) {
-        // Always fetch local events from Supabase
-        console.info(`Attempting to fetch calendar events from Supabase for user: ${user.id}`);
-        
-        // Fetch from Supabase
-        const { data: dbEvents, error } = await supabase
-          .from("calendar_events")
-          .select("*")
-          .order("date", { ascending: true });
-          
-        if (error) {
-          console.error('Error fetching events from database:', error);
-          toast.error('Failed to load calendar events');
-          return;
-        }
-
-        // Transform database events to CalendarEvent type with explicit typing
-        calendarEvents = dbEvents.map(event => ({
-          id: event.id,
-          title: event.title,
-          date: new Date(event.date),      // Convert string to Date
-          start: new Date(event.date),     // Set start date
-          end: new Date(event.date),       // Set end date to same day by default
-          time: event.time,
-          location: event.location,
-          description: event.description || "",
-          // Ensure type is cast to one of the allowed values
-          type: validateEventType(event.type),
-          image_url: event.image_url,
-          allDay: !event.time,  // If no time specified, treat as all-day event
-          source: "local"
-        }));
-
-        console.info(`Successfully fetched ${calendarEvents.length} calendar events from Supabase`);
-        
-        // If Google Calendar is enabled, fetch Google events
-        if (useGoogleCalendar) {
-          try {
-            console.info(`Fetching Google Calendar events for the next ${daysAhead} days`);
-            setGoogleCalendarError(null);
-            
-            const googleEvents = await fetchGoogleCalendarEvents(daysAhead);
-            console.info(`Successfully fetched ${googleEvents.length} events from Google Calendar`);
-            
-            // Combine with local events
-            calendarEvents = [...calendarEvents, ...googleEvents];
-            
-            // Sort events by start date
-            calendarEvents.sort((a, b) => a.start.getTime() - b.start.getTime());
-            
-          } catch (googleError) {
-            console.error('Error fetching Google Calendar events:', googleError);
-            setGoogleCalendarError(String(googleError));
-            toast.error('Failed to load Google Calendar events');
-          }
-        }
+      // Get events from the database
+      const { data: dbEvents, error } = await supabase
+        .from("calendar_events")
+        .select("*");
+      
+      if (error) {
+        console.error("Error fetching events:", error);
+        toast.error("Failed to load calendar events");
+        setLoading(false);
+        return;
       }
       
-      setEvents(calendarEvents);
+      console.log(`Retrieved ${dbEvents.length} events from Supabase`);
+      
+      // Map the database events to CalendarEvent objects
+      const mappedEvents: CalendarEvent[] = dbEvents.map(event => {
+        const date = new Date(event.date);
+        const [hour, minute] = event.time.split(':').map(Number);
+        
+        date.setHours(hour, minute, 0, 0);
+        
+        // Set end time to 1 hour after start by default
+        const endDate = new Date(date);
+        endDate.setHours(endDate.getHours() + 1);
+        
+        return {
+          id: event.id,
+          title: event.title,
+          description: event.description || "",
+          location: event.location,
+          date: new Date(event.date), // Keep original date without time
+          time: event.time,
+          start: date, // Date with time
+          end: endDate,
+          type: event.type as EventType,
+          created_by: event.user_id,
+          image_url: event.image_url,
+          source: 'local',
+        };
+      });
+      
+      setEvents(mappedEvents);
     } catch (error) {
-      console.error('Error in fetchEvents:', error);
-      toast.error('Failed to load calendar events');
+      console.error("Error in fetchEvents:", error);
+      toast.error("An error occurred while loading calendar events");
     } finally {
       setLoading(false);
     }
-  }, [isAuthenticated, user, useGoogleCalendar, daysAhead]);
+  }, [user]);
 
-  // Helper function to validate and cast event types
-  const validateEventType = (type: string): EventType => {
-    const validTypes: EventType[] = ["concert", "rehearsal", "tour", "special"];
-    return validTypes.includes(type as EventType) 
-      ? (type as EventType) 
-      : "special"; // Default to special if invalid
-  };
+  // Initial fetch of events
+  useEffect(() => {
+    if (user) {
+      fetchEvents();
+    }
+  }, [user, fetchEvents]);
 
   // Add a new event
-  const addEvent = async (event: Omit<CalendarEvent, "id">): Promise<CalendarEvent | null> => {
+  const addEvent = async (eventData: Omit<CalendarEvent, "id">): Promise<CalendarEvent | null> => {
+    if (!user) {
+      toast.error("You must be logged in to add events");
+      return null;
+    }
+    
     try {
-      if (!user) {
-        toast.error("You must be logged in to save events");
-        return null;
-      }
-
-      // Ensure event type is valid before saving
-      const validatedType = validateEventType(event.type);
-
-      // Prepare event data for database
-      const newEvent = {
-        title: event.title,
-        date: event.start.toISOString().split('T')[0],  // Convert Date to YYYY-MM-DD
-        time: event.time,
-        location: event.location,
-        description: event.description,
-        type: validatedType,
-        image_url: event.image_url,
-        user_id: user.id
-      };
-
-      // Insert into database
+      console.log("Adding event:", eventData);
+      
+      // Format the date as ISO string for database
+      const formattedDate = eventData.date.toISOString().split('T')[0];
+      
+      // Insert event into the database
       const { data, error } = await supabase
         .from("calendar_events")
-        .insert([newEvent])
-        .select();
-
+        .insert({
+          title: eventData.title,
+          date: formattedDate,
+          time: eventData.time,
+          location: eventData.location,
+          description: eventData.description,
+          type: eventData.type,
+          user_id: user.id,
+          image_url: eventData.image_url
+        })
+        .select()
+        .single();
+      
       if (error) {
         console.error("Error adding event:", error);
-        toast.error("Failed to save event");
+        toast.error("Failed to add event");
         return null;
       }
-
-      // Create CalendarEvent object from response
-      if (data && data[0]) {
-        const newCalendarEvent: CalendarEvent = {
-          id: data[0].id,
-          title: data[0].title,
-          date: new Date(data[0].date),
-          start: new Date(data[0].date),
-          end: new Date(data[0].date),
-          time: data[0].time,
-          location: data[0].location,
-          description: data[0].description || "",
-          type: validateEventType(data[0].type),
-          image_url: data[0].image_url
-        };
-        
-        // Refresh events list
-        await fetchEvents();
-        
-        return newCalendarEvent;
-      }
-      return null;
-    } catch (err) {
-      console.error("Error in addEvent:", err);
-      toast.error("Failed to save event");
+      
+      // Create a CalendarEvent from the inserted data
+      const newEvent: CalendarEvent = {
+        id: data.id,
+        title: data.title,
+        description: data.description || "",
+        location: data.location,
+        date: new Date(data.date),
+        time: data.time,
+        start: new Date(data.date + 'T' + data.time),
+        end: new Date(new Date(data.date + 'T' + data.time).getTime() + 3600000), // Add 1 hour
+        type: data.type as EventType,
+        created_by: data.user_id,
+        image_url: data.image_url,
+        source: 'local',
+      };
+      
+      // Add to local events array
+      setEvents(prevEvents => [...prevEvents, newEvent]);
+      
+      return newEvent;
+    } catch (error) {
+      console.error("Error in addEvent:", error);
+      toast.error("An error occurred while adding the event");
       return null;
     }
   };
 
   // Update an existing event
-  const updateEvent = async (event: CalendarEvent): Promise<boolean> => {
+  const updateEvent = async (eventData: CalendarEvent): Promise<boolean> => {
+    if (!user) {
+      toast.error("You must be logged in to update events");
+      return false;
+    }
+    
     try {
-      // Check if this is a Google Calendar event
-      if (event.source === "google") {
-        toast.info("Google Calendar events can only be edited in Google Calendar");
-        return false;
-      }
+      console.log("Updating event:", eventData);
       
-      if (!user) {
-        toast.error("You must be logged in to update events");
-        return false;
-      }
-
-      // Ensure event type is valid before updating
-      const validatedType = validateEventType(event.type);
-
-      // Update in database
+      // Format the date as ISO string for database
+      const formattedDate = eventData.date.toISOString().split('T')[0];
+      
+      // Update event in the database
       const { error } = await supabase
         .from("calendar_events")
         .update({
-          title: event.title,
-          date: event.start.toISOString().split('T')[0],
-          time: event.time,
-          location: event.location,
-          description: event.description,
-          type: validatedType,
-          image_url: event.image_url,
-          updated_at: new Date().toISOString()
+          title: eventData.title,
+          date: formattedDate,
+          time: eventData.time,
+          location: eventData.location,
+          description: eventData.description,
+          type: eventData.type,
+          image_url: eventData.image_url
         })
-        .eq("id", event.id);
-
+        .eq("id", eventData.id);
+      
       if (error) {
         console.error("Error updating event:", error);
         toast.error("Failed to update event");
         return false;
       }
-
-      // Refresh events list
-      await fetchEvents();
+      
+      // Update local events array
+      setEvents(prevEvents => 
+        prevEvents.map(event => 
+          event.id === eventData.id 
+            ? {
+                ...event,
+                title: eventData.title,
+                description: eventData.description,
+                location: eventData.location,
+                date: new Date(formattedDate),
+                time: eventData.time,
+                start: new Date(formattedDate + 'T' + eventData.time),
+                end: new Date(new Date(formattedDate + 'T' + eventData.time).getTime() + 3600000),
+                type: eventData.type,
+                image_url: eventData.image_url
+              }
+            : event
+        )
+      );
+      
+      toast.success("Event updated successfully");
       return true;
-    } catch (err) {
-      console.error("Error in updateEvent:", err);
-      toast.error("Failed to update event");
+    } catch (error) {
+      console.error("Error in updateEvent:", error);
+      toast.error("An error occurred while updating the event");
       return false;
     }
   };
 
   // Delete an event
   const deleteEvent = async (eventId: string): Promise<boolean> => {
+    if (!user) {
+      toast.error("You must be logged in to delete events");
+      return false;
+    }
+    
     try {
-      // Check if this is a Google Calendar event
-      if (eventId.includes('_')) {
-        toast.info("Google Calendar events can only be deleted in Google Calendar");
-        return false;
-      }
+      console.log("Deleting event:", eventId);
       
-      if (!user) {
-        toast.error("You must be logged in to delete events");
-        return false;
-      }
-
-      // Delete from database
+      // Delete event from the database
       const { error } = await supabase
         .from("calendar_events")
         .delete()
         .eq("id", eventId);
-
+      
       if (error) {
         console.error("Error deleting event:", error);
         toast.error("Failed to delete event");
         return false;
       }
-
-      // Refresh events list
-      await fetchEvents();
+      
+      // Remove from local events array
+      setEvents(prevEvents => prevEvents.filter(event => event.id !== eventId));
+      
+      toast.success("Event deleted successfully");
       return true;
-    } catch (err) {
-      console.error("Error in deleteEvent:", err);
-      toast.error("Failed to delete event");
+    } catch (error) {
+      console.error("Error in deleteEvent:", error);
+      toast.error("An error occurred while deleting the event");
       return false;
     }
   };
 
-  // Initial fetch of events
-  useEffect(() => {
-    if (isAuthenticated) {
-      fetchEvents();
-    }
-    
-    // Set up polling for new events
-    console.info('Setting up events polling with interval: 60000ms');
-    const intervalId = setInterval(fetchEvents, 60000);
-    
-    return () => {
-      console.info('Clearing events polling interval');
-      clearInterval(intervalId);
-    };
-  }, [isAuthenticated, fetchEvents, useGoogleCalendar, daysAhead]);
+  // Toggle Google Calendar integration
+  const toggleGoogleCalendar = () => {
+    setUseGoogleCalendar(!useGoogleCalendar);
+  };
 
-  return { 
-    events, 
+  // New function to reset all calendar events
+  const resetCalendar = async (): Promise<boolean> => {
+    try {
+      setLoading(true);
+      console.log("Resetting calendar...");
+      
+      // If you want to delete all events from database
+      if (user && window.confirm("Are you sure you want to delete all calendar events? This action cannot be undone.")) {
+        const { error } = await supabase
+          .from("calendar_events")
+          .delete()
+          .neq("id", "dummy"); // This condition will match all records
+          
+        if (error) {
+          console.error("Error resetting calendar:", error);
+          toast.error("Failed to reset calendar");
+          return false;
+        }
+        
+        // Clear local events array
+        setEvents([]);
+        toast.success("Calendar has been reset successfully");
+        return true;
+      }
+      
+      return false;
+    } catch (error) {
+      console.error("Error in resetCalendar:", error);
+      toast.error("An error occurred while resetting the calendar");
+      return false;
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return {
+    events,
     loading,
-    fetchEvents,
     addEvent,
     updateEvent,
     deleteEvent,
+    fetchEvents,
     useGoogleCalendar,
     toggleGoogleCalendar,
     googleCalendarError,
     daysAhead,
-    setDaysAhead
+    setDaysAhead,
+    resetCalendar // Added the reset function
   };
 }

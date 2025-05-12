@@ -1,7 +1,7 @@
 
 import React, { useState } from "react";
 import { PageHeader } from "@/components/ui/page-header";
-import { Calendar, Plus } from "lucide-react";
+import { Calendar, Plus, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { CalendarContainer } from "@/components/calendar/CalendarContainer";
 import { EventList } from "@/components/calendar/EventList";
@@ -14,6 +14,16 @@ import { EventDetails } from "@/components/calendar/EventDetails";
 import { toast } from "sonner";
 import { usePermissions } from '@/hooks/usePermissions';
 import { useIsMobile } from '@/hooks/use-mobile';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 export default function SchedulePage() {
   const [view, setView] = useState<"calendar" | "list">("calendar");
@@ -27,9 +37,17 @@ export default function SchedulePage() {
   const [isAddEventOpen, setIsAddEventOpen] = useState(false);
   const [isEditEventOpen, setIsEditEventOpen] = useState(false);
   const [isViewEventOpen, setIsViewEventOpen] = useState(false);
+  const [isResetConfirmOpen, setIsResetConfirmOpen] = useState(false);
   
   // Get calendar events using the hook
-  const { events, loading, addEvent, updateEvent, deleteEvent } = useCalendarEvents();
+  const { 
+    events, 
+    loading, 
+    addEvent, 
+    updateEvent, 
+    deleteEvent, 
+    resetCalendar 
+  } = useCalendarEvents();
   
   // Check if user is admin - now check for super admin
   const isAdmin = isSuperAdmin;
@@ -113,6 +131,14 @@ export default function SchedulePage() {
     }
   };
   
+  // Handle calendar reset
+  const handleResetCalendar = async () => {
+    const success = await resetCalendar();
+    if (success) {
+      setIsResetConfirmOpen(false);
+    }
+  };
+  
   return (
     <div className="container mx-auto p-4 space-y-6">
       <div className="flex items-center justify-between">
@@ -122,12 +148,24 @@ export default function SchedulePage() {
           icon={<Calendar className="h-6 w-6" />}
         />
         
-        {isAdmin && (
-          <Button onClick={() => setIsAddEventOpen(true)}>
-            <Plus className="mr-2 h-4 w-4" />
-            Add Event
-          </Button>
-        )}
+        <div className="flex gap-2">
+          {isAdmin && (
+            <>
+              <Button onClick={() => setIsAddEventOpen(true)}>
+                <Plus className="mr-2 h-4 w-4" />
+                Add Event
+              </Button>
+              <Button 
+                variant="outline" 
+                onClick={() => setIsResetConfirmOpen(true)}
+                className="text-red-500 border-red-200 hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-900/20"
+              >
+                <RefreshCw className="mr-2 h-4 w-4" />
+                Reset
+              </Button>
+            </>
+          )}
+        </div>
       </div>
       
       <div className="flex flex-col-reverse md:flex-row gap-6">
@@ -204,6 +242,27 @@ export default function SchedulePage() {
           </Dialog>
         </>
       )}
+      
+      {/* Reset Confirmation Dialog */}
+      <AlertDialog open={isResetConfirmOpen} onOpenChange={setIsResetConfirmOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Reset Calendar</AlertDialogTitle>
+            <AlertDialogDescription>
+              This will permanently delete all calendar events. This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction 
+              onClick={handleResetCalendar} 
+              className="bg-red-500 hover:bg-red-600"
+            >
+              Reset Calendar
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
