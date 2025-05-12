@@ -13,6 +13,7 @@ import { EventImageUpload } from "./EventImageUpload";
 import { EventType } from "@/hooks/useCalendarEvents";
 import { MobileFitCheck } from "./MobileFitCheck";
 import { checkEventMobileFit } from "@/utils/mobileUtils";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 export const formSchema = z.object({
   title: z.string().min(2, { message: "Title must be at least 2 characters" }),
@@ -38,6 +39,7 @@ export function AddEventForm({ onAddEvent, onCancel, initialDate }: AddEventForm
   const [isUploading, setIsUploading] = useState(false);
   const [mobileFitIssues, setMobileFitIssues] = useState<{ fits: boolean; issues: string[]; suggestions: string[] } | null>(null);
   const { user } = useAuth();
+  const isMobile = useIsMobile();
 
   const form = useForm<EventFormValues>({
     resolver: zodResolver(formSchema),
@@ -149,7 +151,7 @@ export function AddEventForm({ onAddEvent, onCancel, initialDate }: AddEventForm
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 px-1">
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-3 px-1 max-h-[65vh] overflow-y-auto pb-2">
         <EventFormFields form={form} />
 
         <EventImageUpload 
@@ -169,7 +171,7 @@ export function AddEventForm({ onAddEvent, onCancel, initialDate }: AddEventForm
           />
         )}
 
-        <div className="flex justify-end gap-2">
+        <div className="flex justify-end gap-2 sticky bottom-0 pt-2 bg-white dark:bg-gray-800">
           <Button type="button" variant="outline" onClick={onCancel} className="bg-white dark:bg-gray-700 text-sm px-3 py-1 h-8" disabled={isUploading}>
             Cancel
           </Button>

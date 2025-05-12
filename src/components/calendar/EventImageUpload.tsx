@@ -57,14 +57,14 @@ export function EventImageUpload({
       control={form.control}
       name="image_url"
       render={({ field }) => (
-        <FormItem>
-          <FormLabel className="text-sm">Event Image (Optional)</FormLabel>
+        <FormItem className="mt-1">
+          <FormLabel className="text-xs">Event Image (Optional)</FormLabel>
           <FormControl>
-            <div className="space-y-2">
+            <div className="space-y-1">
               {!imagePreview && !field.value ? (
-                <div className="flex flex-col items-center justify-center border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-3 text-center">
-                  <ImageIcon className="h-8 w-8 mb-1 text-gray-400" />
-                  <p className="text-xs text-gray-500 dark:text-gray-400 mb-2">
+                <div className="flex flex-col items-center justify-center border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-2 text-center">
+                  <ImageIcon className="h-6 w-6 mb-1 text-gray-400" />
+                  <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">
                     PNG, JPG or GIF (max. 5MB)
                   </p>
                   <div className="flex justify-center">
@@ -92,7 +92,7 @@ export function EventImageUpload({
                   <img
                     src={imagePreview || field.value || ""}
                     alt="Event image preview"
-                    className="w-full h-32 object-cover rounded-lg"
+                    className="w-full h-24 object-cover rounded-lg"
                   />
                   <Button
                     type="button"
