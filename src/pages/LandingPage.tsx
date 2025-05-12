@@ -3,6 +3,7 @@ import React, { useState, useEffect } from "react";
 import { Header } from "@/components/landing/Header";
 import { HeroSection } from "@/components/landing/HeroSection";
 import { PerformanceSection } from "@/components/landing/performance/PerformanceSection";
+import { YouTubeSection } from "@/components/landing/youtube/YouTubeSection";
 import { FeaturesSection } from "@/components/landing/FeaturesSection";
 import { TestimonialSection } from "@/components/landing/TestimonialSection";
 import { CTASection } from "@/components/landing/CTASection";
@@ -62,6 +63,7 @@ export default function LandingPage() {
       <main>
         <HeroSection />
         <PerformanceSection />
+        <YouTubeSection />
         <FeaturesSection />
         <TestimonialSection />
         <CTASection />
