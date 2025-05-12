@@ -1,3 +1,4 @@
+
 import { CalendarEvent, EventType } from "@/hooks/useCalendarEvents";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -100,8 +101,21 @@ export const handleOAuthCallback = async (code: string): Promise<boolean> => {
  * Check if user has connected Google Calendar
  */
 export const checkGoogleCalendarConnection = async (): Promise<boolean> => {
-  const token = await getGoogleCalendarToken();
-  return !!token;
+  try {
+    // Check if user is logged in first
+    const { data: { session } } = await supabase.auth.getSession();
+    
+    if (!session) {
+      console.error("No session found. User must be logged in to check Google Calendar connection.");
+      return false;
+    }
+    
+    const token = await getGoogleCalendarToken();
+    return !!token;
+  } catch (error) {
+    console.error("Error checking Google Calendar connection:", error);
+    return false;
+  }
 };
 
 /**

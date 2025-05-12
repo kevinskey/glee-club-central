@@ -25,7 +25,7 @@ port = 54326
 
 [functions]
 [functions.google-calendar-auth]
-verify_jwt = true
+verify_jwt = false
 
 [functions.get-google-token]
 verify_jwt = true

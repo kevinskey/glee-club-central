@@ -14,13 +14,6 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
-// Handle CORS preflight requests
-const handleCors = (req: Request) => {
-  if (req.method === "OPTIONS") {
-    return new Response("ok", { headers: corsHeaders });
-  }
-};
-
 // Create an OAuth2 client
 const createOAuth2Client = () => {
   if (!GOOGLE_OAUTH_CLIENT_ID || !GOOGLE_OAUTH_CLIENT_SECRET) {
@@ -107,46 +100,59 @@ const refreshAccessToken = async (refreshToken: string) => {
 
 // Main handler
 serve(async (req) => {
-  // Handle CORS
-  const corsResponse = handleCors(req);
-  if (corsResponse) return corsResponse;
+  // Handle CORS preflight requests
+  if (req.method === "OPTIONS") {
+    return new Response("ok", { headers: corsHeaders });
+  }
   
   try {
-    // Get the client's JWT token from the request
+    // Create Supabase client
+    const supabaseUrl = Deno.env.get("SUPABASE_URL") as string;
+    const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") as string;
+    const supabaseAdmin = createClient(supabaseUrl, supabaseKey);
+    
+    // For the getAuthUrl action, we don't need authentication
+    // Extract the action from the request regardless of authentication
+    const requestData = await req.json();
+    const { action, code } = requestData;
+    
+    // Special case: getting the auth URL doesn't require authentication
+    if (action === 'getAuthUrl') {
+      const authUrl = getAuthorizationUrl();
+      return new Response(JSON.stringify({ authUrl }), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        status: 200,
+      });
+    }
+    
+    // For all other actions, verify authentication
     const authHeader = req.headers.get('Authorization');
     if (!authHeader) {
       throw new Error('Missing Authorization header');
     }
     
-    // Create Supabase client
-    const supabaseUrl = Deno.env.get("SUPABASE_URL") as string;
-    const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") as string;
-    
-    // Create Supabase client
-    const supabaseAdmin = createClient(supabaseUrl, supabaseKey);
-    
-    // Get the request body
-    const requestData = await req.json();
-    const { action, code } = requestData;
-    
     // Get user ID from JWT
     const jwt = authHeader.replace('Bearer ', '');
-    const { sub: userId } = await verifyJWT(jwt);
+    let userId;
     
-    if (!userId) {
-      throw new Error('Invalid JWT token');
+    try {
+      const { data: { user }, error } = await supabaseAdmin.auth.getUser(jwt);
+      
+      if (error || !user) {
+        throw new Error('Invalid JWT token');
+      }
+      
+      userId = user.id;
+    } catch (error) {
+      console.error('JWT verification error:', error);
+      return new Response(JSON.stringify({ error: 'Invalid authorization' }), {
+        status: 401,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
     }
     
     // Handle different actions
     switch (action) {
-      case 'getAuthUrl': {
-        const authUrl = getAuthorizationUrl();
-        return new Response(JSON.stringify({ authUrl }), {
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-          status: 200,
-        });
-      }
-      
       case 'handleCallback': {
         if (!code) {
           throw new Error('Authorization code is required');
@@ -164,6 +170,7 @@ serve(async (req) => {
             refresh_token: tokens.refresh_token,
             expires_at: new Date(Date.now() + tokens.expires_in * 1000).toISOString(),
             created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString()
           });
         
         if (error) {
@@ -197,6 +204,7 @@ serve(async (req) => {
           .update({
             access_token: tokens.access_token,
             expires_at: new Date(Date.now() + tokens.expires_in * 1000).toISOString(),
+            updated_at: new Date().toISOString()
           })
           .eq('user_id', userId);
         
@@ -238,20 +246,3 @@ serve(async (req) => {
     });
   }
 });
-
-// Helper function to verify JWT
-async function verifyJWT(token: string) {
-  const response = await fetch(`${Deno.env.get("SUPABASE_URL")}/auth/v1/user`, {
-    headers: {
-      "Authorization": `Bearer ${token}`,
-      "apikey": Deno.env.get("SUPABASE_ANON_KEY") as string,
-    },
-  });
-  
-  if (!response.ok) {
-    throw Error("Invalid JWT");
-  }
-  
-  const user = await response.json();
-  return { sub: user.id };
-}
