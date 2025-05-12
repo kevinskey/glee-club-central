@@ -24,9 +24,9 @@ export function MobileMenuToggle({ isOpen, onToggle }: MobileMenuToggleProps) {
             aria-label={isOpen ? "Close menu" : "Open menu"}
           >
             {isOpen ? (
-              <X className="h-6 w-6" />
+              <X className="h-7 w-7" />
             ) : (
-              <Menu className="h-6 w-6" />
+              <Menu className="h-7 w-7" />
             )}
           </button>
         </TooltipTrigger>

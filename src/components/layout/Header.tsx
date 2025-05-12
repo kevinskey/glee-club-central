@@ -16,20 +16,14 @@ import {
   User,
   Settings,
   LogOut,
-  Music,
 } from "lucide-react";
 import { useSidebar } from "@/components/ui/sidebar";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { Icons } from "@/components/Icons";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
-import { EnhancedMetronome } from "@/components/ui/enhanced-metronome";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { EnhancedMetronome } from "@/components/ui/enhanced-metronome";
+import { Music } from "lucide-react";
 
 export function Header() {
   const { profile, signOut } = useAuth();
@@ -58,16 +52,17 @@ export function Header() {
             <Menu className="h-6 w-6 text-foreground" />
             <span className="sr-only">Toggle sidebar</span>
           </Button>
-          <Link to="/" className="font-bold flex items-center gap-1 sm:gap-2 hover:text-primary transition-colors">
-            <Icons.logo className={`${isMobile ? "h-8" : "h-6"} w-auto`} />
-            <span className={`${isMobile ? "text-xl" : ""} text-foreground`}>Glee Club</span>
-          </Link>
-
-          {/* Metronome Dialog in Header - hidden on mobile */}
-          {!isMobile && (
+          
+          <div className="flex items-center">
+            <Link to="/" className="font-bold flex items-center gap-1 sm:gap-2 hover:text-primary transition-colors">
+              <Icons.logo className={`${isMobile ? "h-8" : "h-6"} w-auto`} />
+              <span className={`${isMobile ? "text-xl" : ""} text-foreground`}>Glee Club</span>
+            </Link>
+            
+            {/* Metronome Icon */}
             <Dialog open={metronomeOpen} onOpenChange={setMetronomeOpen}>
               <DialogTrigger asChild>
-                <Button variant="ghost" size="icon" className="h-8 w-8">
+                <Button variant="ghost" size="icon" className="h-8 w-8 ml-1">
                   <Music className="h-4 w-4 text-foreground" />
                   <span className="sr-only">Open metronome</span>
                 </Button>
@@ -79,7 +74,7 @@ export function Header() {
                 <EnhancedMetronome showControls={true} size="md" />
               </DialogContent>
             </Dialog>
-          )}
+          </div>
         </div>
 
         <nav className="flex items-center gap-2 sm:gap-4">
