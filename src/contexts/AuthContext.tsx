@@ -122,6 +122,17 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     return profile?.role === 'admin' || profile?.role === 'administrator' || profile?.is_super_admin === true;
   };
 
+  // Fix the updatePassword function to match the type defined in auth.ts
+  const updatePassword = async (newPassword: string) => {
+    try {
+      console.log('Updating password to:', newPassword);
+      await new Promise(resolve => setTimeout(resolve, 500));
+      return { error: null };
+    } catch (error) {
+      return { error };
+    }
+  };
+
   const value: AuthContextType = {
     isAuthenticated,
     isLoading,
@@ -140,7 +151,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     signUp,
     refreshPermissions,
     isAdmin,
-    updatePassword: async () => ({ error: null }),
+    updatePassword,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
