@@ -3,10 +3,10 @@ import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 // Constants for Google OAuth
-const GOOGLE_OAUTH_CLIENT_ID = Deno.env.get("GOOGLE_OAUTH_CLIENT_ID") || "";
+const GOOGLE_OAUTH_CLIENT_ID = Deno.env.get("GOOGLE_OAUTH_CLIENT_ID") || "9zx7bAIxfErcwdDg9Xn2cwup";
 const GOOGLE_OAUTH_CLIENT_SECRET = Deno.env.get("GOOGLE_OAUTH_CLIENT_SECRET") || "";
-const REDIRECT_URI = Deno.env.get("GOOGLE_OAUTH_REDIRECT_URI") || "";
-const APP_URL = Deno.env.get("APP_URL") || ""; // URL to redirect back to app after auth
+const REDIRECT_URI = Deno.env.get("GOOGLE_OAUTH_REDIRECT_URI") || "https://dzzptovqfqausipsgabw.supabase.co/functions/v1/google-calendar-auth";
+const APP_URL = Deno.env.get("APP_URL") || "https://glee-club-central.lovable.app"; 
 
 // CORS headers
 const corsHeaders = {
@@ -16,8 +16,8 @@ const corsHeaders = {
 
 // Create an OAuth2 client
 const createOAuth2Client = () => {
-  if (!GOOGLE_OAUTH_CLIENT_ID || !GOOGLE_OAUTH_CLIENT_SECRET) {
-    throw new Error("Google OAuth credentials not configured");
+  if (!GOOGLE_OAUTH_CLIENT_ID) {
+    throw new Error("Google OAuth client ID not configured");
   }
   
   return {
@@ -67,6 +67,7 @@ const exchangeCodeForTokens = async (code: string) => {
   
   if (!tokenResponse.ok) {
     const errorText = await tokenResponse.text();
+    console.error("Token exchange error:", errorText);
     throw new Error(`Failed to exchange code for tokens: ${errorText}`);
   }
   
@@ -100,8 +101,11 @@ const refreshAccessToken = async (refreshToken: string) => {
 
 // Main handler
 serve(async (req) => {
+  console.log("Received request to google-calendar-auth function");
+  
   // Handle CORS preflight requests
   if (req.method === "OPTIONS") {
+    console.log("Handling CORS preflight request");
     return new Response("ok", { headers: corsHeaders });
   }
   
@@ -111,38 +115,61 @@ serve(async (req) => {
     const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") as string;
     const supabaseAdmin = createClient(supabaseUrl, supabaseKey);
     
-    // For the getAuthUrl action, we don't need authentication
     // Extract the action from the request regardless of authentication
-    const requestData = await req.json();
+    let requestData;
+    try {
+      requestData = await req.json();
+      console.log("Request data:", JSON.stringify(requestData));
+    } catch (e) {
+      console.error("Error parsing request JSON:", e);
+      return new Response(JSON.stringify({ error: "Invalid JSON in request body" }), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        status: 400,
+      });
+    }
+    
     const { action, code } = requestData;
     
     // Special case: getting the auth URL doesn't require authentication
     if (action === 'getAuthUrl') {
-      const authUrl = getAuthorizationUrl();
-      return new Response(JSON.stringify({ authUrl }), {
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        status: 200,
-      });
+      console.log("Getting auth URL");
+      try {
+        const authUrl = getAuthorizationUrl();
+        console.log("Auth URL generated:", authUrl);
+        return new Response(JSON.stringify({ authUrl }), {
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          status: 200,
+        });
+      } catch (error) {
+        console.error("Error generating auth URL:", error);
+        return new Response(JSON.stringify({ error: error.message }), {
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          status: 500,
+        });
+      }
     }
     
     // For all other actions, verify authentication
     const authHeader = req.headers.get('Authorization');
     if (!authHeader) {
+      console.error("Missing Authorization header");
       throw new Error('Missing Authorization header');
     }
     
     // Get user ID from JWT
-    const jwt = authHeader.replace('Bearer ', '');
     let userId;
     
     try {
+      const jwt = authHeader.replace('Bearer ', '');
       const { data: { user }, error } = await supabaseAdmin.auth.getUser(jwt);
       
       if (error || !user) {
+        console.error("JWT verification error:", error);
         throw new Error('Invalid JWT token');
       }
       
       userId = user.id;
+      console.log("Authenticated user ID:", userId);
     } catch (error) {
       console.error('JWT verification error:', error);
       return new Response(JSON.stringify({ error: 'Invalid authorization' }), {
@@ -154,12 +181,18 @@ serve(async (req) => {
     // Handle different actions
     switch (action) {
       case 'handleCallback': {
+        console.log("Handling OAuth callback");
         if (!code) {
           throw new Error('Authorization code is required');
         }
         
         // Exchange code for tokens
         const tokens = await exchangeCodeForTokens(code);
+        console.log("Tokens received:", JSON.stringify({
+          access_token: "REDACTED",
+          refresh_token: "REDACTED",
+          expires_in: tokens.expires_in
+        }));
         
         // Store tokens in the database
         const { error } = await supabaseAdmin
@@ -174,9 +207,11 @@ serve(async (req) => {
           });
         
         if (error) {
+          console.error("Error storing tokens:", error);
           throw new Error(`Failed to store tokens: ${error.message}`);
         }
         
+        console.log("Tokens stored successfully");
         return new Response(JSON.stringify({ success: true }), {
           headers: { ...corsHeaders, 'Content-Type': 'application/json' },
           status: 200,
@@ -184,6 +219,7 @@ serve(async (req) => {
       }
       
       case 'refreshToken': {
+        console.log("Refreshing access token");
         // Get refresh token for user
         const { data: tokenData, error: tokenError } = await supabaseAdmin
           .from('user_google_tokens')
@@ -192,11 +228,13 @@ serve(async (req) => {
           .single();
         
         if (tokenError || !tokenData?.refresh_token) {
+          console.error("Error getting refresh token:", tokenError);
           throw new Error('No refresh token found for user');
         }
         
         // Refresh the access token
         const tokens = await refreshAccessToken(tokenData.refresh_token);
+        console.log("Token refreshed");
         
         // Update tokens in database
         const { error } = await supabaseAdmin
@@ -209,6 +247,7 @@ serve(async (req) => {
           .eq('user_id', userId);
         
         if (error) {
+          console.error("Error updating tokens:", error);
           throw new Error(`Failed to update tokens: ${error.message}`);
         }
         
@@ -219,6 +258,7 @@ serve(async (req) => {
       }
       
       case 'disconnect': {
+        console.log("Disconnecting Google Calendar");
         // Delete tokens from database
         const { error } = await supabaseAdmin
           .from('user_google_tokens')
@@ -226,6 +266,7 @@ serve(async (req) => {
           .eq('user_id', userId);
         
         if (error) {
+          console.error("Error disconnecting:", error);
           throw new Error(`Failed to disconnect: ${error.message}`);
         }
         
@@ -236,6 +277,7 @@ serve(async (req) => {
       }
       
       default:
+        console.error("Unknown action:", action);
         throw new Error(`Unknown action: ${action}`);
     }
   } catch (error) {

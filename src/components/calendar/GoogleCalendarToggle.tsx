@@ -59,6 +59,7 @@ export const GoogleCalendarToggle = ({
   useEffect(() => {
     const checkConnection = async () => {
       const connected = await checkGoogleCalendarConnection();
+      console.log("Google Calendar connection status:", connected);
       setIsConnected(connected);
     };
     
@@ -92,13 +93,18 @@ export const GoogleCalendarToggle = ({
   const handleConnect = async () => {
     try {
       setIsConnecting(true);
+      console.log("Initiating Google Calendar OAuth flow...");
+      
       const authUrl = await startGoogleOAuth();
       
       if (!authUrl) {
+        console.error("Failed to get Google OAuth URL");
         toast.error("Failed to start Google Calendar authentication");
+        setIsConnecting(false);
         return;
       }
       
+      console.log("Opening OAuth URL:", authUrl);
       // Open the auth URL in a new window/tab
       window.open(authUrl, "_blank");
       
@@ -110,6 +116,8 @@ export const GoogleCalendarToggle = ({
       // We'll check the connection status periodically
       const checkInterval = setInterval(async () => {
         const connected = await checkGoogleCalendarConnection();
+        console.log("Connection check result:", connected);
+        
         if (connected) {
           setIsConnected(true);
           clearInterval(checkInterval);
@@ -139,7 +147,7 @@ export const GoogleCalendarToggle = ({
       
     } catch (error) {
       console.error("Error connecting to Google Calendar:", error);
-      toast.error("Failed to connect to Google Calendar");
+      toast.error(`Failed to connect to Google Calendar: ${error.message || 'Unknown error'}`);
       setIsConnecting(false);
     }
   };

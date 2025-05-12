@@ -1,4 +1,3 @@
-
 import { CalendarEvent, EventType } from "@/hooks/useCalendarEvents";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -59,19 +58,30 @@ export const getGoogleCalendarToken = async (): Promise<string | null> => {
  */
 export const startGoogleOAuth = async (): Promise<string | null> => {
   try {
+    console.log("Starting Google OAuth flow...");
+    
     // Get the auth URL from our edge function
     const { data, error } = await supabase.functions.invoke('google-calendar-auth', {
       body: { action: 'getAuthUrl' }
     });
     
-    if (error || !data?.authUrl) {
-      console.error("Error getting Google OAuth URL:", error || "No URL returned");
+    if (error) {
+      console.error("Error getting Google OAuth URL:", error);
+      toast.error("Error starting Google authentication");
       return null;
     }
     
+    if (!data?.authUrl) {
+      console.error("No auth URL returned from function");
+      toast.error("Error starting Google authentication: No URL returned");
+      return null;
+    }
+    
+    console.log("Received OAuth URL:", data.authUrl);
     return data.authUrl;
   } catch (error) {
     console.error("Error in startGoogleOAuth:", error);
+    toast.error(`Error starting Google authentication: ${error.message || 'Unknown error'}`);
     return null;
   }
 };
@@ -192,8 +202,13 @@ export const refreshGoogleToken = async (): Promise<boolean> => {
       body: { action: 'refreshToken' }
     });
     
-    if (error || !data?.success) {
-      console.error("Error refreshing Google token:", error || "Failed to refresh token");
+    if (error) {
+      console.error("Error refreshing Google token:", error);
+      return false;
+    }
+    
+    if (!data?.success) {
+      console.error("Failed to refresh token");
       return false;
     }
     
