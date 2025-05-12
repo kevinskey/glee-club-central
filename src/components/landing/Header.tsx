@@ -5,6 +5,10 @@ import { Logo } from "@/components/landing/header/Logo";
 import { NavigationLinks } from "@/components/landing/header/NavigationLinks";
 import { MemberPortalDropdown } from "@/components/landing/header/MemberPortalDropdown";
 import { HeaderUtils } from "@/components/landing/header/HeaderUtils";
+import { Clock } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription } from "@/components/ui/dialog";
+import { EnhancedMetronome } from "@/components/ui/enhanced-metronome";
 
 interface HeaderProps {
   initialShowNewsFeed?: boolean;
@@ -13,6 +17,8 @@ interface HeaderProps {
 export function Header({ initialShowNewsFeed = true }: HeaderProps) {
   const isMobile = useIsMobile();
   const [showNewsFeed, setShowNewsFeed] = useState(false); // Start hidden to avoid flicker
+  const [metronomeOpen, setMetronomeOpen] = useState(false);
+  const audioContextRef = React.useRef<AudioContext | null>(null);
   
   // Set the news feed state after component mounts with a slight delay
   useEffect(() => {
@@ -34,17 +40,60 @@ export function Header({ initialShowNewsFeed = true }: HeaderProps) {
     }
   }, [showNewsFeed]);
 
+  // Initialize audio context on first interaction
+  const handleOpenMetronome = () => {
+    // Create AudioContext on first click if it doesn't exist
+    if (!audioContextRef.current) {
+      try {
+        audioContextRef.current = new AudioContext();
+      } catch (e) {
+        console.error("Failed to create AudioContext:", e);
+      }
+    }
+    
+    // Resume audio context if needed (for mobile browsers)
+    if (audioContextRef.current && audioContextRef.current.state === 'suspended') {
+      audioContextRef.current.resume().catch(console.error);
+    }
+    
+    setMetronomeOpen(true);
+  };
+
   // This component will now only be rendered on desktop
   return (
     <header className="sticky top-0 z-50 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container px-2 flex h-16 items-center justify-between">
-        <div className="flex items-center gap-1 sm:gap-2">
+        <div className="flex items-center gap-2">
           <Logo />
+          
+          {/* Metronome Icon (moved to left) */}
+          <Dialog open={metronomeOpen} onOpenChange={setMetronomeOpen}>
+            <DialogTrigger asChild>
+              <Button 
+                variant="ghost" 
+                size="icon" 
+                className="h-10 w-10" 
+                onClick={handleOpenMetronome}
+              >
+                <Clock className="h-8 w-8 text-foreground" />
+                <span className="sr-only">Open metronome</span>
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="sm:max-w-md">
+              <DialogHeader>
+                <DialogTitle>Metronome</DialogTitle>
+                <DialogDescription>
+                  Use the metronome to practice at different tempos and time signatures.
+                </DialogDescription>
+              </DialogHeader>
+              <EnhancedMetronome showControls={true} size="md" audioContextRef={audioContextRef} />
+            </DialogContent>
+          </Dialog>
         </div>
         
-        {/* Desktop navigation */}
-        <div className="flex items-center gap-2 sm:gap-3">
-          <NavigationLinks />
+        {/* Desktop navigation - moved to right side and increased size */}
+        <div className="flex items-center gap-4">
+          <NavigationLinks className="text-lg" />
           <HeaderUtils />
           <MemberPortalDropdown />
         </div>

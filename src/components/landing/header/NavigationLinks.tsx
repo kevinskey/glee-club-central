@@ -22,7 +22,7 @@ export function NavigationLinks({ className, onLinkClick }: NavigationLinksProps
     <nav className={cn("flex gap-6", className)}>
       <Link
         to="/press-kit"
-        className="text-md font-medium text-muted-foreground transition-colors hover:text-foreground"
+        className="text-lg font-medium text-muted-foreground transition-colors hover:text-foreground"
         onClick={handleLinkClick}
       >
         Press Kit
@@ -30,7 +30,7 @@ export function NavigationLinks({ className, onLinkClick }: NavigationLinksProps
       {!isAuthenticated && (
         <Link
           to="/register/admin"
-          className="text-md font-medium text-muted-foreground transition-colors hover:text-foreground"
+          className="text-lg font-medium text-muted-foreground transition-colors hover:text-foreground"
           onClick={handleLinkClick}
         >
           Admin Registration
