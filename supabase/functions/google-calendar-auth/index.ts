@@ -1,3 +1,4 @@
+
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
@@ -110,11 +111,21 @@ serve(async (req) => {
     const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") as string;
     const supabaseAdmin = createClient(supabaseUrl, supabaseKey);
     
-    // Extract the action from the request regardless of authentication
+    // Parse the request body
     let requestData;
     try {
-      requestData = await req.json();
-      console.log("Request data:", JSON.stringify(requestData));
+      const requestText = await req.text();
+      console.log("Request body text:", requestText);
+      
+      if (!requestText.trim()) {
+        return new Response(JSON.stringify({ error: "Request body is empty" }), {
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          status: 400,
+        });
+      }
+      
+      requestData = JSON.parse(requestText);
+      console.log("Parsed request data:", JSON.stringify(requestData));
     } catch (e) {
       console.error("Error parsing request JSON:", e);
       return new Response(JSON.stringify({ error: "Invalid JSON in request body" }), {
@@ -123,7 +134,7 @@ serve(async (req) => {
       });
     }
     
-    const { action, code } = requestData;
+    const { action, code } = requestData || {};
     
     // Special case: getting the auth URL doesn't require authentication
     if (action === 'getAuthUrl') {

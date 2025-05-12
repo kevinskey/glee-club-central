@@ -1,4 +1,3 @@
-
 import { CalendarEvent, EventType } from "@/hooks/useCalendarEvents";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -65,10 +64,7 @@ export const startGoogleOAuth = async (): Promise<string | null> => {
     
     // Get the auth URL from our edge function
     const { data, error } = await supabase.functions.invoke('google-calendar-auth', {
-      body: { action: 'getAuthUrl' },
-      headers: {
-        'Content-Type': 'application/json'
-      }
+      body: { action: 'getAuthUrl' }
     });
     
     if (error) {
@@ -98,10 +94,7 @@ export const startGoogleOAuth = async (): Promise<string | null> => {
 export const handleOAuthCallback = async (code: string): Promise<boolean> => {
   try {
     const { data, error } = await supabase.functions.invoke('google-calendar-auth', {
-      body: { action: 'handleCallback', code },
-      headers: {
-        'Content-Type': 'application/json'
-      }
+      body: { action: 'handleCallback', code }
     });
     
     if (error || !data?.success) {
@@ -237,10 +230,7 @@ export const refreshGoogleToken = async (): Promise<boolean> => {
 export const disconnectGoogleCalendar = async (): Promise<boolean> => {
   try {
     const { data, error } = await supabase.functions.invoke('google-calendar-auth', {
-      body: { action: 'disconnect' },
-      headers: {
-        'Content-Type': 'application/json'
-      }
+      body: { action: 'disconnect' }
     });
     
     if (error || !data?.success) {

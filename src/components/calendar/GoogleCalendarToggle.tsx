@@ -1,7 +1,6 @@
 
 import React, { useState, useEffect } from "react";
 import { CalendarRange } from "lucide-react";
-import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Slider } from "@/components/ui/slider";
 import { Button } from "@/components/ui/button";
@@ -42,6 +41,11 @@ export const GoogleCalendarToggle = ({
       const connected = await checkGoogleCalendarConnection();
       setIsConnected(connected);
       console.info("Google Calendar connection status:", connected);
+      
+      // Auto-enable Google Calendar if connected
+      if (connected && !useGoogleCalendar) {
+        toggleGoogleCalendar();
+      }
     } catch (error) {
       console.error("Error checking Google Calendar connection:", error);
       setIsConnected(false);
@@ -149,16 +153,10 @@ export const GoogleCalendarToggle = ({
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <CalendarRange className="h-4 w-4 text-gray-500" />
-            <Label htmlFor="google-calendar-toggle" className="text-sm font-medium">
-              Google Calendar
+            <Label className="text-sm font-medium">
+              Google Calendar Integration
             </Label>
           </div>
-          <Switch
-            id="google-calendar-toggle"
-            checked={useGoogleCalendar}
-            onCheckedChange={toggleGoogleCalendar}
-            disabled={!isConnected || isChecking}
-          />
         </div>
         
         {isChecking ? (
@@ -202,7 +200,7 @@ export const GoogleCalendarToggle = ({
         )}
       </div>
       
-      {useGoogleCalendar && (
+      {isConnected && (
         <div className="space-y-1">
           <div className="flex justify-between mb-1">
             <Label htmlFor="days-ahead-slider" className="text-xs">
