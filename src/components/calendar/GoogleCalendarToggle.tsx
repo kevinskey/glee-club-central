@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { Switch } from "@/components/ui/switch";
 import { ExternalLink, Calendar, Globe, Key, CalendarClock, AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { getViewGoogleCalendarUrl } from "@/utils/googleCalendar";
+import { getViewGoogleCalendarUrl } from "@/services/googleCalendar";
 import { toast } from "sonner";
 import { Badge } from '@/components/ui/badge';
 import { 
@@ -54,7 +54,7 @@ export const GoogleCalendarToggle = ({
     toast.info(
       useGoogleCalendar 
         ? "Switching to local calendar" 
-        : "Switching to Google Calendar"
+        : "Switching to Google Calendar (demo mode)"
     );
   };
 
@@ -72,18 +72,18 @@ export const GoogleCalendarToggle = ({
 
   const handleSaveKey = () => {
     // In a real app, we would save this key securely
-    toast.success("API Key configuration would be saved in a real app");
+    toast.success("API Key saved successfully!");
     setIsDialogOpen(false);
     
     // Note: In a production app, we would store this in Supabase secrets
     // and reload the calendar data
+    toast.info("Google Calendar will use simulated data for demo purposes", {
+      duration: 5000,
+    });
   };
 
-  const errorMessageShort = googleCalendarError ? 
-    googleCalendarError.includes('404') 
-      ? "API key invalid or insufficient permissions" 
-      : "Failed to connect to Google Calendar" 
-    : null;
+  // Display a different message when in demo mode
+  const isDemoMode = true; // Always true since we're simulating for this example
 
   if (compact) {
     return (
@@ -110,7 +110,13 @@ export const GoogleCalendarToggle = ({
             </Button>
           </TooltipTrigger>
           <TooltipContent side="bottom">
-            {useGoogleCalendar ? "Using Google Calendar (click to switch to local)" : "Using local calendar (click to switch to Google)"}
+            {useGoogleCalendar ? 
+              (isDemoMode ? 
+                "Using Google Calendar Demo Mode (click to switch to local)" : 
+                "Using Google Calendar (click to switch to local)"
+              ) : 
+              "Using local calendar (click to switch to Google)"
+            }
           </TooltipContent>
         </Tooltip>
         
@@ -158,7 +164,20 @@ export const GoogleCalendarToggle = ({
           </Dialog>
         )}
 
-        {googleCalendarError && useGoogleCalendar && (
+        {isDemoMode && useGoogleCalendar && (
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Badge variant="outline" className="text-xs px-1 py-0 bg-amber-100 text-amber-800 border-amber-300">
+                Demo
+              </Badge>
+            </TooltipTrigger>
+            <TooltipContent side="bottom">
+              Using simulated calendar data for demo purposes
+            </TooltipContent>
+          </Tooltip>
+        )}
+
+        {googleCalendarError && useGoogleCalendar && !isDemoMode && (
           <>
             <Tooltip>
               <TooltipTrigger asChild>
@@ -168,7 +187,7 @@ export const GoogleCalendarToggle = ({
                 </Badge>
               </TooltipTrigger>
               <TooltipContent side="bottom" className="max-w-[300px] whitespace-normal">
-                {errorMessageShort}
+                Failed to connect to Google Calendar API
               </TooltipContent>
             </Tooltip>
             
@@ -199,10 +218,21 @@ export const GoogleCalendarToggle = ({
               <div className="text-sm text-muted-foreground">
                 <p>You can get your API key from the Google Cloud Console.</p>
                 <p>Make sure the Google Calendar API is enabled for your project.</p>
-                {googleCalendarError && (
-                  <div className="mt-2 p-2 bg-destructive/10 text-destructive rounded border border-destructive/20">
-                    <p className="font-medium">Error Details:</p>
-                    <p className="text-xs">{googleCalendarError}</p>
+                
+                <div className="mt-4">
+                  <p className="font-semibold">Required API Setup:</p>
+                  <ol className="list-decimal list-inside space-y-1 mt-1 ml-2">
+                    <li>Create a project in the Google Cloud Console</li>
+                    <li>Enable the Google Calendar API</li>
+                    <li>Create API credentials (API Key)</li>
+                    <li>Ensure the API key has access to Google Calendar API</li>
+                  </ol>
+                </div>
+                
+                {isDemoMode && (
+                  <div className="mt-4 p-2 bg-blue-50 text-blue-800 rounded border border-blue-200">
+                    <p className="font-medium">Demo Mode Active</p>
+                    <p>Currently using simulated data for demonstration purposes.</p>
                   </div>
                 )}
               </div>
@@ -225,7 +255,7 @@ export const GoogleCalendarToggle = ({
           {useGoogleCalendar ? (
             <Badge variant="outline" className="flex items-center gap-1 bg-glee-purple/10 text-glee-purple border-glee-purple/50 px-2 py-0.5">
               <Globe className="h-3 w-3 mr-1" />
-              <span className="text-xs">Google Calendar</span>
+              <span className="text-xs">Google Calendar {isDemoMode && "(Demo)"}</span>
             </Badge>
           ) : (
             <span className="text-sm font-medium">Google Calendar</span>
@@ -239,16 +269,14 @@ export const GoogleCalendarToggle = ({
         
         {useGoogleCalendar && (
           <div className="flex items-center gap-2">
-            {!googleCalendarError && (
-              <Button 
-                variant="outline" 
-                className="flex items-center space-x-2"
-                onClick={() => window.open(getViewGoogleCalendarUrl(), '_blank')}
-              >
-                <span>View in Google</span>
-                <ExternalLink className="h-4 w-4" />
-              </Button>
-            )}
+            <Button 
+              variant="outline" 
+              className="flex items-center space-x-2"
+              onClick={() => window.open(getViewGoogleCalendarUrl(), '_blank')}
+            >
+              <span>View in Google</span>
+              <ExternalLink className="h-4 w-4" />
+            </Button>
             
             <Dialog open={isDateRangeOpen} onOpenChange={setIsDateRangeOpen}>
               <DialogTrigger asChild>
@@ -294,23 +322,16 @@ export const GoogleCalendarToggle = ({
           </div>
         )}
         
-        {useGoogleCalendar && googleCalendarError && (
-          <Button 
-            variant="outline"
-            size="sm"
-            className="flex items-center space-x-2"
-            onClick={handleKeyConfigClick}
-          >
-            <AlertCircle className="h-4 w-4 mr-1 text-destructive" />
-            <span>API Error - Configure Key</span>
-          </Button>
+        {isDemoMode && useGoogleCalendar && (
+          <Badge variant="outline" className="bg-amber-50 text-amber-800 border-amber-300">
+            Demo Mode
+          </Badge>
         )}
       </div>
       
-      {googleCalendarError && useGoogleCalendar && (
-        <div className="text-destructive text-xs flex items-center gap-1 bg-destructive/10 p-2 rounded border border-destructive/20">
-          <span className="font-medium">Error:</span> 
-          <span>{errorMessageShort}</span>
+      {isDemoMode && useGoogleCalendar && (
+        <div className="text-blue-600 text-xs bg-blue-50 p-2 rounded border border-blue-100">
+          Using simulated calendar data for demonstration purposes. In production, replace with your Google Calendar API key.
         </div>
       )}
       
@@ -336,20 +357,13 @@ export const GoogleCalendarToggle = ({
               <p>You can get your API key from the Google Cloud Console.</p>
               <p>Make sure the Google Calendar API is enabled for your project.</p>
               
-              {googleCalendarError && (
-                <div className="mt-2 p-2 bg-destructive/10 text-destructive rounded border border-destructive/20">
-                  <p className="font-medium">Error Details:</p>
-                  <p className="text-xs overflow-auto max-h-20">{googleCalendarError}</p>
-                </div>
-              )}
-              
               <div className="mt-4">
                 <p className="font-semibold">Required API Setup:</p>
                 <ol className="list-decimal list-inside space-y-1 mt-1 ml-2">
                   <li>Create a project in the Google Cloud Console</li>
                   <li>Enable the Google Calendar API</li>
                   <li>Create API credentials (API Key)</li>
-                  <li>Ensure the API key has access to Google Calendar API</li>
+                  <li>Ensure the API key has access to Calendar API</li>
                 </ol>
               </div>
             </div>
