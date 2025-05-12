@@ -13,15 +13,25 @@ import { PDFAnnotationManager } from "./pdf/PDFAnnotationManager";
 import { Button } from "@/components/ui/button";
 import { AuthUser } from "@/types/auth";
 import { toast } from "sonner";
+import { useNavigate } from "react-router-dom";
 
 interface PDFViewerProps {
   url: string;
   title: string;
   sheetMusicId?: string;
   fullHeight?: boolean;
+  canDelete?: boolean;
+  onDelete?: () => void;
 }
 
-export const PDFViewer = ({ url, title, sheetMusicId, fullHeight }: PDFViewerProps) => {
+export const PDFViewer = ({ 
+  url, 
+  title, 
+  sheetMusicId, 
+  fullHeight,
+  canDelete = false,
+  onDelete 
+}: PDFViewerProps) => {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [zoom, setZoom] = useState(100); // Zoom level in percentage
@@ -37,6 +47,7 @@ export const PDFViewer = ({ url, title, sheetMusicId, fullHeight }: PDFViewerPro
   const { toast: toastLegacy } = useToast();
   const isMobile = useIsMobile();
   const { user } = useAuth();
+  const navigate = useNavigate();
   
   const containerRef = useRef<HTMLDivElement>(null);
   const viewerRef = useRef<HTMLDivElement>(null);
@@ -213,6 +224,99 @@ export const PDFViewer = ({ url, title, sheetMusicId, fullHeight }: PDFViewerPro
   const toggleSetlist = () => {
     setIsSetlistOpen(!isSetlistOpen);
   };
+
+  // Handle delete
+  const handleDelete = () => {
+    if (onDelete) {
+      onDelete();
+    } else if (canDelete && sheetMusicId) {
+      deleteSheetMusic();
+    }
+  };
+
+  // Delete sheet music
+  const deleteSheetMusic = async () => {
+    if (!sheetMusicId) return;
+    
+    try {
+      // Find the file in media_library
+      const { data: mediaData, error: mediaError } = await supabase
+        .from('media_library')
+        .select('file_path, id')
+        .eq('id', sheetMusicId)
+        .maybeSingle();
+      
+      if (mediaError) throw mediaError;
+      
+      if (!mediaData) {
+        toast.error("File not found", {
+          description: "Could not locate the file in the database"
+        });
+        return;
+      }
+      
+      // Delete annotations first (foreign key relationship)
+      const { error: annotationsError } = await supabase
+        .from('pdf_annotations')
+        .delete()
+        .eq('sheet_music_id', sheetMusicId);
+      
+      if (annotationsError) {
+        console.error("Error deleting annotations:", annotationsError);
+        // Continue with deletion even if annotations deletion fails
+      }
+      
+      // Delete from setlists (update the arrays)
+      const { data: setlists, error: setlistsError } = await supabase
+        .from('setlists')
+        .select('id, sheet_music_ids');
+        
+      if (!setlistsError && setlists) {
+        for (const setlist of setlists) {
+          if (setlist.sheet_music_ids?.includes(sheetMusicId)) {
+            const updatedIds = setlist.sheet_music_ids.filter(id => id !== sheetMusicId);
+            await supabase
+              .from('setlists')
+              .update({ sheet_music_ids: updatedIds })
+              .eq('id', setlist.id);
+          }
+        }
+      }
+      
+      // Delete from storage
+      if (mediaData.file_path) {
+        const { error: storageError } = await supabase.storage
+          .from('media-library')
+          .remove([mediaData.file_path]);
+          
+        if (storageError) {
+          console.error("Error deleting file from storage:", storageError);
+          // Continue with database deletion even if storage deletion fails
+        }
+      }
+      
+      // Delete from database
+      const { error: dbError } = await supabase
+        .from('media_library')
+        .delete()
+        .eq('id', sheetMusicId);
+        
+      if (dbError) throw dbError;
+      
+      toast.success("Sheet music deleted", {
+        description: "The file has been successfully removed"
+      });
+      
+      // Navigate back
+      navigate('/dashboard/sheet-music');
+      
+    } catch (error: any) {
+      console.error("Error deleting sheet music:", error);
+      toast.error("Failed to delete", {
+        description: error.message || "An unexpected error occurred"
+      });
+    }
+  };
   
   return (
     <div 
@@ -238,6 +342,8 @@ export const PDFViewer = ({ url, title, sheetMusicId, fullHeight }: PDFViewerPro
             onFullscreen={toggleFullscreen}
             isFullscreen={isFullscreen}
             url={url}
+            canDelete={canDelete}
+            onDelete={handleDelete}
           />
           
           {/* Annotation toolbar at the top for mobile in ForScore style */}
@@ -275,6 +381,8 @@ export const PDFViewer = ({ url, title, sheetMusicId, fullHeight }: PDFViewerPro
             url={url}
             hasAnnotationSupport={!!sheetMusicId}
             user={user}
+            canDelete={canDelete}
+            onDelete={handleDelete}
           />
           
           {/* Desktop Annotation Manager */}

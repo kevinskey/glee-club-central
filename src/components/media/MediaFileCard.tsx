@@ -1,166 +1,173 @@
-import React from "react";
-import { FileText, FileAudio, FileImage, FileVideo, File, Download, Trash2, Tag } from "lucide-react";
+
+import React, { useState } from "react";
+import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { FileIcon, Pencil, Trash2 } from "lucide-react";
+import { PDFThumbnail } from "@/components/pdf/PDFThumbnail";
 import { MediaFile } from "@/types/media";
 import { getMediaType } from "@/utils/mediaUtils";
 import { formatDistanceToNow } from "date-fns";
-import { Badge } from "@/components/ui/badge";
-import { usePermissions } from "@/hooks/usePermissions";
-import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
-import { supabase } from "@/integrations/supabase/client";
-import { toast } from "sonner";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 interface MediaFileCardProps {
   file: MediaFile;
-  onDelete?: () => void;
+  onEdit?: () => void;
+  onDelete?: (id: string) => void;
+  onClick?: () => void;
+  canEdit?: boolean;
+  canDelete?: boolean;
 }
 
-export function MediaFileCard({ file, onDelete }: MediaFileCardProps) {
-  const { hasPermission, isSuperAdmin } = usePermissions();
-  const canDeleteFiles = isSuperAdmin || hasPermission('can_upload_media');
+export const MediaFileCard = ({
+  file,
+  onEdit,
+  onDelete,
+  onClick,
+  canEdit = false,
+  canDelete = false
+}: MediaFileCardProps) => {
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   
-  // Function to get the appropriate icon based on media type
-  const getFileIcon = () => {
-    const mediaType = getMediaType(file.file_type);
-    
-    switch (mediaType) {
-      case "pdf":
-        return <FileText className="h-8 w-8 md:h-10 md:w-10 text-red-500" />;
-      case "audio":
-        return <FileAudio className="h-8 w-8 md:h-10 md:w-10 text-blue-500" />;
-      case "image":
-        return <FileImage className="h-8 w-8 md:h-10 md:w-10 text-green-500" />;
-      case "video":
-        return <FileVideo className="h-8 w-8 md:h-10 md:w-10 text-purple-500" />;
-      default:
-        return <File className="h-8 w-8 md:h-10 md:w-10 text-gray-500" />;
+  // Determine the media type based on file_type
+  const mediaType = getMediaType(file.file_type);
+  
+  // Get the formatted date
+  const formattedDate = file.created_at 
+    ? formatDistanceToNow(new Date(file.created_at), { addSuffix: true }) 
+    : '';
+  
+  // Handle file click, with different behavior based on file type
+  const handleClick = () => {
+    if (onClick) {
+      onClick();
+    } else {
+      // Default behavior: open the file in a new tab
+      window.open(file.file_url, "_blank");
     }
   };
-
-  // Function to handle opening the file
-  const handleOpenFile = () => {
-    window.open(file.file_url, "_blank");
-  };
-
-  // Function to delete a file
-  const handleDeleteFile = async () => {
-    if (!canDeleteFiles) return;
-    
-    try {
-      // Delete from storage
-      const { error: storageError } = await supabase.storage
-        .from('media-library')
-        .remove([file.file_path]);
-        
-      if (storageError) throw storageError;
-      
-      // Delete from database
-      const { error: dbError } = await supabase
-        .from('media_library')
-        .delete()
-        .eq('id', file.id);
-        
-      if (dbError) throw dbError;
-      
-      toast.success('File deleted successfully');
-      
-      // Refresh the list if callback is provided
-      if (onDelete) onDelete();
-      
-    } catch (error: any) {
-      console.error("Error deleting file:", error);
-      toast.error('Failed to delete file', {
-        description: error.message || 'An unexpected error occurred'
-      });
+  
+  // Handle delete confirmation
+  const handleDelete = () => {
+    setIsDeleteDialogOpen(false);
+    if (onDelete) {
+      onDelete(file.id);
     }
-  };
-
-  // Function to format the date
-  const formatDate = (dateString: string) => {
-    try {
-      const date = new Date(dateString);
-      return formatDistanceToNow(date, { addSuffix: true });
-    } catch (error) {
-      return "Date unknown";
-    }
-  };
-
-  // Function to format file size
-  const formatFileSize = (bytes: number) => {
-    if (bytes < 1024) return `${bytes} B`;
-    if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
-    return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
   };
 
   return (
-    <div className="flex flex-col rounded-lg border p-3 md:p-4 hover:shadow-md transition-shadow h-full">
-      <div className="flex items-center gap-3 mb-3">
-        {getFileIcon()}
-        <div className="flex-1">
-          <h3 className="text-base md:text-lg font-medium line-clamp-1 break-words">{file.title}</h3>
-          <p className="text-xs text-muted-foreground">
-            Added {formatDate(file.created_at)}
-          </p>
+    <>
+      <Card className="h-full flex flex-col overflow-hidden hover:shadow-md transition-shadow">
+        {/* Card Preview/Thumbnail */}
+        <div 
+          className="aspect-video bg-muted cursor-pointer overflow-hidden" 
+          onClick={handleClick}
+        >
+          {mediaType === 'image' ? (
+            <img 
+              src={file.file_url} 
+              alt={file.title || 'Media file'} 
+              className="w-full h-full object-cover"
+            />
+          ) : mediaType === 'pdf' ? (
+            <PDFThumbnail url={file.file_url} title={file.title || ''} />
+          ) : (
+            <div className="flex items-center justify-center h-full">
+              <FileIcon className="h-16 w-16 text-muted-foreground" />
+            </div>
+          )}
         </div>
-      </div>
-      
-      <div className="flex-1">
-        {file.description && (
-          <p className="text-xs md:text-sm text-muted-foreground mb-3 line-clamp-2 break-words">
-            {file.description}
-          </p>
-        )}
         
-        {file.tags && file.tags.length > 0 && (
-          <div className="flex flex-wrap gap-1 mb-3">
-            {file.tags.slice(0, 3).map((tag, index) => (
-              <Badge key={index} variant="outline" className="text-xs flex items-center gap-1">
-                <Tag size={10} />
-                {tag}
-              </Badge>
-            ))}
-            {file.tags.length > 3 && (
-              <Badge variant="outline" className="text-xs">
-                +{file.tags.length - 3} more
-              </Badge>
+        {/* Card Content */}
+        <CardContent className="p-3 flex-1">
+          <h3 className="font-medium text-sm truncate">{file.title}</h3>
+          
+          <div className="flex items-center gap-2 mt-1">
+            <span className="text-xs text-muted-foreground">
+              {formattedDate}
+            </span>
+          </div>
+          
+          {file.category && (
+            <div className="mt-2">
+              <span className="inline-flex items-center rounded-md bg-blue-50 px-1.5 py-0.5 text-xs font-medium text-blue-700 ring-1 ring-inset ring-blue-700/10">
+                {file.category}
+              </span>
+            </div>
+          )}
+        </CardContent>
+        
+        {/* Card Footer */}
+        <CardFooter className="p-3 pt-0 flex justify-between gap-2">
+          <Button 
+            variant="outline" 
+            size="sm" 
+            className="flex-grow"
+            onClick={handleClick}
+          >
+            View
+          </Button>
+          
+          <div className="flex gap-1">
+            {canEdit && onEdit && (
+              <Button
+                variant="outline"
+                size="icon"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onEdit();
+                }}
+                className="h-8 w-8"
+              >
+                <Pencil className="h-4 w-4" />
+              </Button>
+            )}
+            
+            {canDelete && onDelete && (
+              <Button
+                variant="outline"
+                size="icon"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setIsDeleteDialogOpen(true);
+                }}
+                className="h-8 w-8 text-destructive hover:text-destructive"
+              >
+                <Trash2 className="h-4 w-4" />
+              </Button>
             )}
           </div>
-        )}
-        
-        <p className="text-xs text-muted-foreground mb-3">
-          Size: {formatFileSize(file.size)}
-        </p>
-      </div>
+        </CardFooter>
+      </Card>
       
-      <div className="flex gap-2">
-        <Button 
-          variant="default" 
-          onClick={handleOpenFile}
-          className="flex-1 text-xs md:text-sm"
-          size="sm"
-        >
-          <Download className="h-3 w-3 mr-1" />
-          Open
-        </Button>
-        
-        {canDeleteFiles && (
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button 
-                variant="outline" 
-                onClick={handleDeleteFile}
-                size="sm"
-                className="px-2"
-              >
-                <Trash2 className="h-4 w-4 text-destructive" />
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent>
-              <p>Delete file</p>
-            </TooltipContent>
-          </Tooltip>
-        )}
-      </div>
-    </div>
+      {/* Delete confirmation dialog */}
+      <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Are you sure you want to delete this file?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This action cannot be undone. This will permanently delete the file.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction 
+              onClick={handleDelete}
+              className="bg-destructive hover:bg-destructive/90"
+            >
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </>
   );
-}
+};
