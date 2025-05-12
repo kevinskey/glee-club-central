@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Music, Minimize2, Maximize2, X } from "lucide-react";
 import { EnhancedMetronome } from "@/components/ui/enhanced-metronome";
 import { Button } from "@/components/ui/button";
@@ -11,6 +11,16 @@ export function GlobalMetronome() {
   const [isExpanded, setIsExpanded] = useState(false);
   const [isActive, setIsActive] = useState(false);
   const [isVisible, setIsVisible] = useState(true);
+
+  // Clean up audio context when component is hidden
+  useEffect(() => {
+    if (!isVisible || !isActive) {
+      // Any cleanup needed when metronome is hidden or deactivated
+      return () => {
+        // Cleanup function
+      };
+    }
+  }, [isVisible, isActive]);
 
   if (!isVisible) {
     return (

@@ -140,7 +140,7 @@ export const MembersList = memo(function MembersList({
                             Permissions
                           </DropdownMenuItem>
                         )}
-                        {/* Use onDeleteMember if provided, otherwise fall back to onDeleteUser */}
+                        {/* Handle both onDeleteMember and onDeleteUser */}
                         {(onDeleteMember || onDeleteUser) && (
                           <DropdownMenuItem 
                             className="text-destructive" 

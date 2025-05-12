@@ -1,5 +1,5 @@
 
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { MembersPageComponent } from "@/components/members/MembersPageRefactor";
 import { useAuth } from "@/contexts/AuthContext";
 import { useUserManagement } from "@/hooks/useUserManagement";
@@ -17,7 +17,7 @@ export default function AdminMembersPage() {
   const { isAuthenticated } = useAuth();
   const { hasPermission } = usePermissions();
   const userManagement = useUserManagement();
-  const [isLoading, setIsLoading] = React.useState(true);
+  const [isLoading, setIsLoading] = useState(true);
   
   // Fetch members only once on component mount
   useEffect(() => {
