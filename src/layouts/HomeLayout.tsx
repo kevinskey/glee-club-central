@@ -16,7 +16,7 @@ const HomeLayout: React.FC = () => {
   const shouldShowHeader = ["/", "/about", "/contact", "/press-kit"].includes(location.pathname);
   
   // Routes where we want to show the bottom navigation
-  const showMobileBottomNav = ["/", "/about", "/videos", "/contact", "/press-kit"].includes(location.pathname);
+  const showMobileBottomNav = ["/", "/about", "/videos", "/contact", "/press-kit", "/social", "/recordings", "/recordings/submit"].includes(location.pathname);
   
   return (
     <>
@@ -33,7 +33,7 @@ const HomeLayout: React.FC = () => {
               )}
             </>
           )}
-          <div className="flex-1 pb-16"> {/* Add padding bottom to avoid content being hidden by the nav */}
+          <div className={`flex-1 ${isMobile && showMobileBottomNav ? "pb-20" : "pb-6"}`}>
             <Outlet />
           </div>
           
