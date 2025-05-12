@@ -170,7 +170,7 @@ export default function ViewSheetMusicPage() {
   const toggleMetronome = () => {
     // If turning on, inform user about sound
     if (!isMetronomeActive) {
-      // Using Sonner toast with proper syntax - single argument
+      // Fixed: Using the proper Sonner toast syntax
       toast("Starting metronome - ensure your volume is on");
     }
     setIsMetronomeActive(!isMetronomeActive);
