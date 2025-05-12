@@ -3,6 +3,7 @@ import React, { useState } from "react";
 import { FileText, Link } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { PDFCore } from "@/components/ui/pdf-viewer/PDFCore";
+import { toast } from "sonner";
 
 interface PDFDocumentProps {
   url: string;
@@ -40,6 +41,19 @@ export const PDFDocument = ({
     }
   };
 
+  // Show a console log to help debug PDF loading issues
+  React.useEffect(() => {
+    console.log("PDFDocument rendering with URL:", url);
+    
+    // Check if URL is valid
+    if (!url || url.trim() === "") {
+      console.error("Invalid PDF URL provided:", url);
+      toast.error("Invalid PDF URL", {
+        description: "The PDF document cannot be loaded due to an invalid URL"
+      });
+    }
+  }, [url]);
+
   return (
     <div className="relative w-full h-full flex flex-col justify-center overflow-hidden">
       {/* Source Badge */}
@@ -53,6 +67,13 @@ export const PDFDocument = ({
             <Link className="h-3 w-3 mr-1" />
             From {category}
           </Badge>
+        </div>
+      )}
+      
+      {/* Debug info */}
+      {process.env.NODE_ENV === 'development' && (
+        <div className="absolute top-2 right-2 z-40 bg-background/80 text-xs px-2 py-1 rounded">
+          URL: {url ? url.substring(0, 30) + '...' : 'undefined'}
         </div>
       )}
       

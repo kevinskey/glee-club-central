@@ -1,7 +1,8 @@
 
 import React, { useState, useEffect } from "react";
-import { Loader2, FileText } from "lucide-react";
+import { Loader2, FileText, ExternalLink } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { toast } from "sonner";
 
 interface PDFCoreProps {
   url: string;
@@ -44,6 +45,8 @@ export const PDFCore: React.FC<PDFCoreProps> = ({
     setIsLoading(true);
     setError(null);
     
+    console.log("PDFCore: Loading PDF with URL:", sanitizedUrl);
+    
     // Auto-switch to fallback for iOS devices which often have PDF display issues
     if (isIOS && !fallbackMode) {
       console.log("iOS device detected, using fallback mode");
@@ -52,13 +55,16 @@ export const PDFCore: React.FC<PDFCoreProps> = ({
     
     // If no URL is provided, show error
     if (!sanitizedUrl) {
+      console.error("No PDF URL provided");
       setError("No PDF URL provided");
       setIsLoading(false);
+      onError();
     }
-  }, [url, isIOS]);
+  }, [url, isIOS, onError, fallbackMode]);
 
   // Handle iframe load
   const handleIframeLoad = () => {
+    console.log("PDF iframe loaded successfully");
     setPdfAttempted(true);
     setIsLoading(false);
     onLoad();
@@ -66,10 +72,14 @@ export const PDFCore: React.FC<PDFCoreProps> = ({
 
   // Handle iframe error
   const handleIframeError = () => {
-    console.log("PDF iframe failed to load, switching to fallback mode");
+    console.error("PDF iframe failed to load, switching to fallback mode");
     setFallbackMode(true);
     setIsLoading(false);
     onError();
+    
+    toast.error("PDF display issue", {
+      description: "Using alternative viewer to display the PDF"
+    });
   };
 
   // Build appropriate PDF URL with parameters
@@ -81,35 +91,8 @@ export const PDFCore: React.FC<PDFCoreProps> = ({
       return `https://docs.google.com/viewer?url=${encodeURIComponent(sanitizedUrl)}&embedded=true`;
     }
     
-    // Check if the URL already contains hash or query parameters
-    const hasHash = sanitizedUrl.includes('#');
-    const hasQuery = sanitizedUrl.includes('?');
-    
-    // Base URL construction
-    let viewerUrl = sanitizedUrl;
-    
-    // Add hash if needed
-    if (!hasHash && !hasQuery) {
-      viewerUrl += '#';
-    }
-    
-    // Determine correct separator for additional parameters
-    const separator = viewerUrl.endsWith('#') || viewerUrl.endsWith('&') || viewerUrl.endsWith('?') 
-      ? '' 
-      : (hasQuery || (hasHash && viewerUrl.includes('='))) ? '&' : '#';
-    
-    // Add view parameters based on selected mode
-    if (!viewerUrl.includes('view=')) {
-      const viewParam = viewMode === 'scroll' ? 'FitH' : 'SinglePage';
-      viewerUrl += separator + `toolbar=0&navpanes=1&view=${viewParam}&scrollbar=${viewMode === 'scroll' ? '1' : '0'}`;
-    }
-    
-    // Add page parameter if needed
-    if (currentPage > 1 && !viewerUrl.includes('page=')) {
-      viewerUrl += '&page=' + currentPage;
-    }
-    
-    return viewerUrl;
+    // Direct URL for PDF viewing - browser's native PDF viewer will handle it
+    return sanitizedUrl;
   };
 
   // Error display
@@ -120,12 +103,24 @@ export const PDFCore: React.FC<PDFCoreProps> = ({
           <FileText className="h-16 w-16 mx-auto text-muted-foreground mb-4" />
           <p className="mb-4 text-muted-foreground">{error}</p>
           {sanitizedUrl && (
-            <Button 
-              onClick={() => window.open(sanitizedUrl, "_blank")}
-              className="px-4 py-2 border rounded-md hover:bg-muted"
-            >
-              Download PDF Instead
-            </Button>
+            <div className="flex flex-col gap-2 items-center">
+              <Button 
+                onClick={() => window.open(sanitizedUrl, "_blank")}
+                className="px-4 py-2 border rounded-md hover:bg-muted"
+              >
+                <ExternalLink className="mr-2 h-4 w-4" /> Open PDF in New Tab
+              </Button>
+              <Button 
+                variant="outline"
+                onClick={() => {
+                  setFallbackMode(!fallbackMode);
+                  setError(null);
+                  setIsLoading(true);
+                }}
+              >
+                Try Alternative Viewer
+              </Button>
+            </div>
           )}
         </div>
       </div>
