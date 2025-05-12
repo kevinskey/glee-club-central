@@ -1,5 +1,5 @@
 
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import {
@@ -16,7 +16,7 @@ import {
   User,
   Settings,
   LogOut,
-  Music
+  Clock
 } from "lucide-react";
 import { useSidebar } from "@/components/ui/sidebar";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
@@ -31,12 +31,32 @@ export function Header() {
   const navigate = useNavigate();
   const [metronomeOpen, setMetronomeOpen] = useState(false);
   const isMobile = useIsMobile();
+  const audioContextRef = useRef<AudioContext | null>(null);
   
   const handleSignOut = async () => {
     if (signOut) {
       await signOut();
       navigate("/login");
     }
+  };
+
+  // Initialize audio context on first interaction
+  const handleOpenMetronome = () => {
+    // Create AudioContext on first click if it doesn't exist
+    if (!audioContextRef.current) {
+      try {
+        audioContextRef.current = new AudioContext();
+      } catch (e) {
+        console.error("Failed to create AudioContext:", e);
+      }
+    }
+    
+    // Resume audio context if needed (for mobile browsers)
+    if (audioContextRef.current && audioContextRef.current.state === 'suspended') {
+      audioContextRef.current.resume().catch(console.error);
+    }
+    
+    setMetronomeOpen(true);
   };
 
   return (
@@ -62,8 +82,8 @@ export function Header() {
             {/* Metronome Icon */}
             <Dialog open={metronomeOpen} onOpenChange={setMetronomeOpen}>
               <DialogTrigger asChild>
-                <Button variant="ghost" size="icon" className="h-8 w-8 ml-1">
-                  <Music className="h-4 w-4 text-foreground" />
+                <Button variant="ghost" size="icon" className="h-8 w-8 ml-1" onClick={handleOpenMetronome}>
+                  <Clock className="h-4 w-4 text-foreground" />
                   <span className="sr-only">Open metronome</span>
                 </Button>
               </DialogTrigger>
@@ -74,7 +94,7 @@ export function Header() {
                     Use the metronome to practice at different tempos and time signatures.
                   </DialogDescription>
                 </DialogHeader>
-                <EnhancedMetronome showControls={true} size="md" />
+                <EnhancedMetronome showControls={true} size="md" audioContextRef={audioContextRef} />
               </DialogContent>
             </Dialog>
           </div>

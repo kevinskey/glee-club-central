@@ -12,13 +12,33 @@ import { useIsMobile } from "@/hooks/use-mobile";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription } from "@/components/ui/dialog";
 import { EnhancedMetronome } from "@/components/ui/enhanced-metronome";
 import { Button } from "@/components/ui/button";
-import { Music } from "lucide-react";
-import { useState } from "react";
+import { Clock } from "lucide-react";
+import { useState, useRef } from "react";
 
 export function Logo() {
   const navigate = useNavigate();
   const isMobile = useIsMobile();
   const [metronomeOpen, setMetronomeOpen] = useState(false);
+  const audioContextRef = useRef<AudioContext | null>(null);
+  
+  // Initialize audio context on first interaction
+  const handleOpenMetronome = () => {
+    // Create AudioContext on first click if it doesn't exist
+    if (!audioContextRef.current) {
+      try {
+        audioContextRef.current = new AudioContext();
+      } catch (e) {
+        console.error("Failed to create AudioContext:", e);
+      }
+    }
+    
+    // Resume audio context if needed (for mobile browsers)
+    if (audioContextRef.current && audioContextRef.current.state === 'suspended') {
+      audioContextRef.current.resume().catch(console.error);
+    }
+    
+    setMetronomeOpen(true);
+  };
   
   return (
     <div className="flex items-center gap-2">
@@ -41,8 +61,8 @@ export function Logo() {
       {/* Metronome Dialog */}
       <Dialog open={metronomeOpen} onOpenChange={setMetronomeOpen}>
         <DialogTrigger asChild>
-          <Button variant="ghost" size="icon" className="h-8 w-8 ml-1 -mr-1">
-            <Music className="h-4 w-4 text-foreground" />
+          <Button variant="ghost" size="icon" className="h-8 w-8 ml-1 -mr-1" onClick={handleOpenMetronome}>
+            <Clock className="h-4 w-4 text-foreground" />
             <span className="sr-only">Open metronome</span>
           </Button>
         </DialogTrigger>
@@ -53,7 +73,7 @@ export function Logo() {
               Use the metronome to practice at different tempos and time signatures.
             </DialogDescription>
           </DialogHeader>
-          <EnhancedMetronome showControls={true} size="md" />
+          <EnhancedMetronome showControls={true} size="md" audioContextRef={audioContextRef} />
         </DialogContent>
       </Dialog>
     </div>
