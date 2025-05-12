@@ -1,6 +1,6 @@
 
 import { useState, useEffect, useCallback } from "react";
-import { Music, Volume2 } from "lucide-react";
+import { Music, Volume2, AlertCircle } from "lucide-react";
 import { Slider } from "@/components/ui/slider";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { Button } from "@/components/ui/button";
@@ -11,6 +11,7 @@ import { Switch } from "@/components/ui/switch";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
 interface MetronomeProps {
   isPlaying?: boolean;
@@ -40,6 +41,7 @@ export function EnhancedMetronome({
   const [customBpm, setCustomBpm] = useState(propBpm.toString());
   const [visualBeat, setVisualBeat] = useState(0);
   const [visualSubBeat, setVisualSubBeat] = useState(0);
+  const [audioInitialized, setAudioInitialized] = useState(false);
 
   // Update bpm from props
   useEffect(() => {
@@ -57,7 +59,7 @@ export function EnhancedMetronome({
     setVisualSubBeat(subBeat);
   }, []);
 
-  const { audioLoaded, resumeAudioContext } = useMetronomeEngine({
+  const { audioLoaded, audioError, resumeAudioContext } = useMetronomeEngine({
     bpm,
     isPlaying,
     volume,
@@ -112,8 +114,21 @@ export function EnhancedMetronome({
 
   // Handle toggle click with user interaction for mobile
   const handleToggleClick = () => {
-    // Ensure audio context is resumed on user interaction
-    resumeAudioContext();
+    // Initialize audio on first click
+    if (!audioInitialized) {
+      const success = resumeAudioContext();
+      if (success) {
+        setAudioInitialized(true);
+        toast.success("Audio system initialized");
+      } else {
+        toast.error("Could not initialize audio. Please check your browser permissions.");
+        return;
+      }
+    } else {
+      // Just resume audio context if already initialized
+      resumeAudioContext();
+    }
+    
     setIsPlaying(!isPlaying);
   };
 
@@ -162,6 +177,13 @@ export function EnhancedMetronome({
             {!audioLoaded ? "Loading..." : isPlaying ? "Stop" : "Start"}
           </Button>
         </div>
+        
+        {audioError && (
+          <Alert variant="destructive" className="py-2">
+            <AlertCircle className="h-4 w-4" />
+            <AlertDescription className="text-xs">{audioError}</AlertDescription>
+          </Alert>
+        )}
         
         {/* Beat visualization */}
         <div className="flex justify-center items-center gap-2 py-2">

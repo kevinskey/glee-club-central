@@ -1,6 +1,7 @@
 
 import { useRef, useState, useCallback, useEffect } from 'react';
-import { audioLogger } from '@/utils/audioUtils';
+import { audioLogger, resumeAudioContext, initializeAudioContext, unlockAudioOnMobile } from '@/utils/audioUtils';
+import { toast } from 'sonner';
 
 export type TimeSignature = "2/4" | "3/4" | "4/4" | "6/8";
 export type Subdivision = "quarter" | "eighth" | "triplet" | "sixteenth";
@@ -32,6 +33,7 @@ export function useMetronomeEngine({
   const beatCountRef = useRef(0);
   const subBeatCountRef = useRef(0);
   const [audioLoaded, setAudioLoaded] = useState(false);
+  const [audioError, setAudioError] = useState<string | null>(null);
 
   // Get beats per measure based on time signature
   const getBeatsPerMeasure = useCallback(() => {
@@ -54,14 +56,21 @@ export function useMetronomeEngine({
     if (typeof window === 'undefined') return null;
     
     try {
-      window.AudioContext = window.AudioContext || (window as any).webkitAudioContext;
       if (!audioContextRef.current) {
+        window.AudioContext = window.AudioContext || (window as any).webkitAudioContext;
         audioContextRef.current = new AudioContext();
         audioLogger.log('MetronomeEngine: Audio context created');
+        
+        if (audioContextRef.current.state === 'suspended') {
+          audioLogger.warn('MetronomeEngine: Audio context is suspended. Will resume on user interaction.');
+        }
       }
       return audioContextRef.current;
     } catch (error) {
+      const errorMessage = "Unable to initialize audio system. Your browser may not support Web Audio API.";
       audioLogger.error("MetronomeEngine: Failed to create audio context:", error);
+      setAudioError(errorMessage);
+      toast.error(errorMessage);
       return null;
     }
   }, []);
@@ -131,10 +140,16 @@ export function useMetronomeEngine({
         
         if (isMounted) {
           setAudioLoaded(true);
+          setAudioError(null);
           audioLogger.log("✅ MetronomeEngine: Sound buffers generated successfully");
         }
       } catch (error) {
+        const errorMessage = "Failed to generate metronome sounds. Please refresh the page.";
         audioLogger.error("MetronomeEngine: Failed to generate sounds:", error);
+        if (isMounted) {
+          setAudioError(errorMessage);
+          toast.error(errorMessage);
+        }
       }
     };
     
@@ -148,17 +163,31 @@ export function useMetronomeEngine({
   // Play sound
   const playSound = useCallback((soundName: "click" | "accentedClick" | "subdivisionClick") => {
     const audioContext = audioContextRef.current;
-    if (!audioContext || audioContext.state !== 'running') {
-      if (audioContext && audioContext.state === 'suspended') {
-        audioContext.resume().catch(err => {
-          audioLogger.error("MetronomeEngine: Failed to resume audio context:", err);
-        });
-      }
+    if (!audioContext) {
       return;
     }
     
+    // Check if audio context is suspended and try to resume it
+    if (audioContext.state === 'suspended') {
+      resumeAudioContext(audioContext)
+        .then(success => {
+          if (success) {
+            // Try playing again after resume
+            setTimeout(() => playSound(soundName), 10);
+          } else {
+            audioLogger.error("MetronomeEngine: Could not resume audio context");
+          }
+        })
+        .catch(error => {
+          audioLogger.error("MetronomeEngine: Error resuming audio context:", error);
+        });
+      return;
+    }
+    
+    // Get the sound buffer
     const buffer = audioBuffersRef.current[soundName];
     if (!buffer) {
+      audioLogger.error(`MetronomeEngine: Sound buffer not found for: ${soundName}`);
       return;
     }
     
@@ -196,9 +225,11 @@ export function useMetronomeEngine({
       const subdivisionsPerBeat = getSubdivisionsPerBeat();
       const intervalMs = (60 / bpm / subdivisionsPerBeat) * 1000;
       
+      // Resume audio context if needed
       if (audioContext && audioContext.state === 'suspended') {
-        audioContext.resume().catch(err => {
+        resumeAudioContext(audioContext).catch(err => {
           audioLogger.error("MetronomeEngine: Failed to resume audio context:", err);
+          toast.error("Could not start audio playback. Please try clicking the start button again.");
         });
       }
       
@@ -267,13 +298,21 @@ export function useMetronomeEngine({
     };
   }, []);
 
+  // Initialize or resume audio context
   const resumeAudioContext = useCallback(() => {
     const audioContext = audioContextRef.current || initAudioContext();
     
     if (audioContext && audioContext.state === 'suspended') {
-      audioContext.resume().catch(err => {
-        audioLogger.error("MetronomeEngine: Failed to resume audio context:", err);
-      });
+      audioContext.resume()
+        .then(() => {
+          audioLogger.log("MetronomeEngine: Audio context resumed successfully");
+          // Unlock audio on mobile devices
+          unlockAudioOnMobile(audioContext);
+        })
+        .catch(err => {
+          audioLogger.error("MetronomeEngine: Failed to resume audio context:", err);
+          toast.error("Could not enable audio. Please check your browser permissions.");
+        });
     }
     
     return !!audioContext;
@@ -281,6 +320,7 @@ export function useMetronomeEngine({
 
   return {
     audioLoaded,
+    audioError,
     resumeAudioContext
   };
 }
