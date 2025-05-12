@@ -119,9 +119,9 @@ export function MobileHeader() {
                   <Button 
                     variant="ghost" 
                     size="icon" 
-                    className="flex-shrink-0 h-8 w-8"
+                    className="flex-shrink-0 h-10 w-10"
                   >
-                    <Menu className="h-5 w-5 text-foreground" />
+                    <Menu className="h-6 w-6 text-foreground" />
                     <span className="sr-only">Navigation menu</span>
                   </Button>
                 </DropdownMenuTrigger>

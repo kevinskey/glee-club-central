@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Logo } from "@/components/landing/header/Logo";
@@ -113,9 +112,9 @@ export function Header({ initialShowNewsFeed = true }: HeaderProps) {
                 <Button 
                   variant="ghost" 
                   size="icon" 
-                  className="h-10 w-10"
+                  className="h-11 w-11"
                 >
-                  <Menu className="h-5 w-5 text-foreground" />
+                  <Menu className="h-7 w-7 text-foreground" />
                   <span className="sr-only">Navigation menu</span>
                 </Button>
               </DropdownMenuTrigger>

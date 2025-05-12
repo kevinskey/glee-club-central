@@ -97,8 +97,8 @@ export function Header() {
           <DropdownMenuProvider>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="icon">
-                  <Menu className="h-5 w-5 text-foreground" />
+                <Button variant="ghost" size="icon" className="h-11 w-11">
+                  <Menu className="h-7 w-7 text-foreground" />
                   <span className="sr-only">User Menu</span>
                 </Button>
               </DropdownMenuTrigger>
