@@ -1,42 +1,32 @@
 
 /**
- * Formats a phone number in a standardized way (xxx) xxx-xxxx
- * @param input Phone number input string
+ * Formats a phone number string to (123) 456-7890 format
+ * @param phoneNumberString Phone number as string
  * @returns Formatted phone number string
  */
-export const formatPhoneNumber = (input?: string | null): string => {
-  if (!input) return "";
+export const formatPhoneNumber = (phoneNumberString?: string | null): string => {
+  if (!phoneNumberString) return "";
   
   // Strip all non-numeric characters
-  const digits = input.replace(/\D/g, '');
+  const cleaned = phoneNumberString.replace(/\D/g, "");
   
-  // Format as (xxx) xxx-xxxx if 10 digits
-  if (digits.length === 10) {
-    return `(${digits.slice(0, 3)}) ${digits.slice(3, 6)}-${digits.slice(6)}`;
+  // Format based on length
+  if (cleaned.length === 10) {
+    return `(${cleaned.substring(0, 3)}) ${cleaned.substring(3, 6)}-${cleaned.substring(6, 10)}`;
+  } else if (cleaned.length > 10) {
+    return `(${cleaned.substring(0, 3)}) ${cleaned.substring(3, 6)}-${cleaned.substring(6, 10)} x${cleaned.substring(10)}`;
   }
   
-  // Return cleaned digits if not 10 digits
-  return digits;
+  // If the number doesn't match standard format, return the original
+  return phoneNumberString;
 };
 
 /**
- * Formats a date to a more readable format
- * @param date Date string or Date object
- * @param options Intl.DateTimeFormatOptions for customizing format
+ * Formats a date string to localized date format
+ * @param dateString Date as string
  * @returns Formatted date string
  */
-export const formatDate = (date?: string | Date | null, options?: Intl.DateTimeFormatOptions): string => {
-  if (!date) return "Not set";
-  
-  try {
-    const dateObject = typeof date === 'string' ? new Date(date) : date;
-    return new Intl.DateTimeFormat('en-US', options || {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric'
-    }).format(dateObject);
-  } catch (e) {
-    console.error("Error formatting date:", e);
-    return "Invalid date";
-  }
+export const formatDate = (dateString?: string | null): string => {
+  if (!dateString) return "Not set";
+  return new Date(dateString).toLocaleDateString();
 };

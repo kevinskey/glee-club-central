@@ -1,27 +1,51 @@
 
-// This file is kept for backward compatibility
-// In the future, please import directly from the appropriate module in src/utils/supabase/
-// For example: import { fetchSections } from '@/utils/supabase/sections'
+import { supabase } from '@/integrations/supabase/client';
 
-export * from './supabase/index';
-
-// Add missing exports
-export const fetchAllUsers = async () => {
-  // Placeholder function - not actually used anymore
-  return [];
+/**
+ * Fetches payment records for a member
+ * @param memberId UUID of the member
+ * @returns Array of payment records
+ */
+export const fetchPaymentRecords = async (memberId: string) => {
+  try {
+    const { data, error } = await supabase
+      .from('payment_records')
+      .select('*')
+      .eq('member_id', memberId)
+      .order('payment_date', { ascending: false });
+      
+    if (error) throw error;
+    return data || [];
+  } catch (error) {
+    console.error('Error fetching payment records:', error);
+    return [];
+  }
 };
 
-export const fetchUserById = async (userId: string) => {
-  // Placeholder function - not actually used anymore
-  return null;
-};
-
-export const updateUserRole = async (userId: string, role: string) => {
-  // Placeholder function - not actually used anymore
-  return true;
-};
-
-export const updateUserStatus = async (userId: string, status: string) => {
-  // Placeholder function - not actually used anymore
-  return true;
+/**
+ * Fetches user permissions from the database
+ * @param userId UUID of the user
+ * @returns Object with permission names as keys and boolean values
+ */
+export const fetchUserPermissions = async (userId: string) => {
+  try {
+    // Call the stored procedure to get user permissions
+    const { data, error } = await supabase
+      .rpc('get_user_permissions', { p_user_id: userId });
+    
+    if (error) throw error;
+    
+    // Convert array of permission objects to a map
+    const permissionsMap: Record<string, boolean> = {};
+    if (Array.isArray(data)) {
+      data.forEach((item: { permission: string, granted: boolean }) => {
+        permissionsMap[item.permission] = item.granted;
+      });
+    }
+    
+    return permissionsMap;
+  } catch (error) {
+    console.error('Error fetching user permissions:', error);
+    return {};
+  }
 };
