@@ -4,7 +4,8 @@ import { useLocation, Link } from "react-router-dom";
 import { useEffect } from "react";
 import { PageHeader } from "@/components/ui/page-header";
 import { Button } from "@/components/ui/button";
-import { Home, ArrowLeft } from "lucide-react";
+import { Home } from "lucide-react";
+import { BackButton } from "@/components/ui/back-button";
 
 const NotFoundPage = () => {
   const location = useLocation();
@@ -35,12 +36,11 @@ const NotFoundPage = () => {
                 Back to Home
               </Link>
             </Button>
-            <Button asChild>
-              <Link to="/dashboard" className="flex items-center bg-glee-purple hover:bg-glee-purple/90">
-                <ArrowLeft className="mr-2 h-4 w-4" />
-                Go to Dashboard
-              </Link>
-            </Button>
+            <BackButton 
+              label="Go Back"
+              fallbackPath="/dashboard"
+              className="justify-center m-0"
+            />
           </div>
         </div>
       </div>

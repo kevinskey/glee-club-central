@@ -1,11 +1,10 @@
 
 import React from "react";
-import { useNavigate } from "react-router-dom";
-import { ArrowLeft, CalendarIcon, Plus } from "lucide-react";
+import { CalendarIcon, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Metronome } from "@/components/ui/metronome";
-import { Icons } from "@/components/Icons";
+import { BackButton } from "@/components/ui/back-button";
 import {
   Tooltip,
   TooltipContent,
@@ -18,30 +17,12 @@ interface CalendarPageHeaderProps {
 }
 
 export const CalendarPageHeader = ({ onAddEventClick }: CalendarPageHeaderProps) => {
-  const navigate = useNavigate();
   const isMobile = useIsMobile();
 
   return (
     <>
       <div className="flex flex-col sm:flex-row items-center justify-between mb-4 sm:mb-6">
-        <TooltipProvider>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => navigate(-1)}
-                className="mb-3 sm:mb-0 self-start h-7 sm:h-8 px-2"
-              >
-                <ArrowLeft className="mr-1 h-3 w-3" />
-                Back
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent>
-              <p>Go back</p>
-            </TooltipContent>
-          </Tooltip>
-        </TooltipProvider>
+        <BackButton fallbackPath="/dashboard" />
         
         <h1 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-playfair font-bold flex items-center gap-2 min-h-[2rem] sm:min-h-[2.5rem] md:min-h-[2.75rem]">
           <TooltipProvider>
