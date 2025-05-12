@@ -1,10 +1,10 @@
+
 import { CalendarEvent, EventType } from "@/hooks/useCalendarEvents";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
 // Constants for Google Calendar API
 const GOOGLE_API_BASE_URL = 'https://www.googleapis.com/calendar/v3';
-const GOOGLE_OAUTH_CLIENT_ID = '774938147540-oqr6eqvuo3ef7gg5q9u4t3jh798n1jnr.apps.googleusercontent.com';
 const REDIRECT_URI = 'https://dzzptovqfqausipsgabw.supabase.co/functions/v1/google-calendar-auth';
 
 interface GoogleCalendarEvent {
@@ -53,9 +53,15 @@ export const getGoogleCalendarToken = async (): Promise<string | null> => {
       return null;
     }
     
-    // Get Google Calendar token from user's metadata
+    const userData = await supabase.auth.getUser();
+    if (!userData?.data?.user) {
+      console.error("No user found");
+      return null;
+    }
+    
+    // Get Google Calendar token through edge function
     const { data: userTokenData, error } = await supabase.functions.invoke('get-google-token', {
-      body: { userId: (await supabase.auth.getUser()).data.user?.id },
+      body: { userId: userData },
       headers: {
         'Content-Type': 'application/json'
       }
@@ -248,7 +254,7 @@ export const refreshGoogleToken = async (): Promise<boolean> => {
     }
     
     const { data, error } = await supabase.functions.invoke('google-calendar-auth', {
-      body: { action: 'refreshToken' },
+      body: JSON.stringify({ action: 'refreshToken' }),
       headers: {
         'Content-Type': 'application/json'
       }
@@ -283,7 +289,7 @@ export const disconnectGoogleCalendar = async (): Promise<boolean> => {
     }
     
     const { data, error } = await supabase.functions.invoke('google-calendar-auth', {
-      body: { action: 'disconnect' },
+      body: JSON.stringify({ action: 'disconnect' }),
       headers: {
         'Content-Type': 'application/json'
       }
