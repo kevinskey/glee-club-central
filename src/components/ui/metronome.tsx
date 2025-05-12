@@ -6,6 +6,7 @@ import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { toast } from "sonner";
+import { audioLogger, initializeAudioSystem } from "@/utils/audioUtils";
 
 interface MetronomeProps {
   isPlaying?: boolean;
@@ -45,15 +46,16 @@ export function Metronome({
       window.AudioContext = window.AudioContext || (window as any).webkitAudioContext;
       if (!audioContextRef.current) {
         audioContextRef.current = new AudioContext();
+        audioLogger.log('Metronome: Audio context created');
         
         // iOS Safari requires user interaction to start audio context
         if (audioContextRef.current.state === 'suspended') {
-          console.log('Audio context is suspended. Attempting to resume on user interaction.');
+          audioLogger.log('Metronome: Audio context is suspended. Will resume on user interaction.');
         }
       }
       return audioContextRef.current;
     } catch (error) {
-      console.error("Failed to create audio context:", error);
+      audioLogger.error("Metronome: Failed to create audio context:", error);
       toast.error("Audio system initialization failed. Please try a different browser.");
       return null;
     }
@@ -68,28 +70,78 @@ export function Metronome({
 
     const loadSounds = async () => {
       try {
-        // Use the WAV files directly from the public directory
-        const loadSoundFile = async (filename: string) => {
-          try {
-            const response = await fetch(`/sounds/${filename}`);
-            if (!response.ok) throw new Error(`Failed to fetch ${filename}`);
-            
-            const arrayBuffer = await response.arrayBuffer();
-            if (!arrayBuffer) throw new Error(`Invalid audio data from ${filename}`);
-            
-            return await audioContext.decodeAudioData(arrayBuffer);
-          } catch (error) {
-            console.error(`Failed to load sound from ${filename}:`, error);
-            throw error;
+        audioLogger.log('Metronome: Loading audio files...');
+        
+        // Create static sine wave buffers for sounds to avoid file loading issues
+        const createBeepBuffer = () => {
+          const sampleRate = audioContext.sampleRate;
+          const duration = 0.1; // 100ms
+          const bufferSize = sampleRate * duration;
+          const buffer = audioContext.createBuffer(1, bufferSize, sampleRate);
+          const data = buffer.getChannelData(0);
+          
+          // Create a sine wave
+          for (let i = 0; i < bufferSize; i++) {
+            // Frequency 880Hz for beep
+            data[i] = Math.sin(2 * Math.PI * 880 * i / sampleRate) * 
+                      // Add envelope for smoother sound
+                      (i < 0.01 * sampleRate ? i / (0.01 * sampleRate) : 
+                       i > (duration - 0.01) * sampleRate ? (bufferSize - i) / (0.01 * sampleRate) : 1);
           }
+          
+          return buffer;
         };
-
-        // Load all sound files - using the .wav files that are already in the project
-        const [clickBuffer, beepBuffer, woodblockBuffer] = await Promise.all([
-          loadSoundFile('click.wav'),
-          loadSoundFile('beep.wav'),
-          loadSoundFile('woodblock.wav')
-        ]);
+        
+        // Create click sound
+        const createClickBuffer = () => {
+          const sampleRate = audioContext.sampleRate;
+          const duration = 0.05; // 50ms
+          const bufferSize = sampleRate * duration;
+          const buffer = audioContext.createBuffer(1, bufferSize, sampleRate);
+          const data = buffer.getChannelData(0);
+          
+          // Create a short sharp burst
+          for (let i = 0; i < bufferSize; i++) {
+            // Quick decay
+            data[i] = (1 - i / bufferSize) * 
+                      (Math.random() * 0.3 - 0.15 + // Add noise
+                      (i < 0.01 * sampleRate ? 0.8 : 0.2)); // Initial spike
+          }
+          
+          return buffer;
+        };
+        
+        // Create woodblock sound
+        const createWoodblockBuffer = () => {
+          const sampleRate = audioContext.sampleRate;
+          const duration = 0.15;
+          const bufferSize = sampleRate * duration;
+          const buffer = audioContext.createBuffer(1, bufferSize, sampleRate);
+          const data = buffer.getChannelData(0);
+          
+          // Frequencies for a woodblock-like sound
+          const frequencies = [1200, 800];
+          
+          for (let i = 0; i < bufferSize; i++) {
+            const t = i / sampleRate;
+            let sample = 0;
+            
+            // Mix frequencies
+            for (const freq of frequencies) {
+              sample += Math.sin(2 * Math.PI * freq * t) * Math.exp(-15 * t);
+            }
+            
+            // Add envelope
+            data[i] = sample * 0.5;
+          }
+          
+          return buffer;
+        };
+        
+        // Generate all our sounds programmatically
+        const clickBuffer = createClickBuffer();
+        const beepBuffer = createBeepBuffer();
+        const woodblockBuffer = createWoodblockBuffer();
         
         if (!isMounted) return;
 
@@ -100,11 +152,11 @@ export function Metronome({
         };
         
         setAudioLoaded(true);
-        console.log("✅ All metronome sounds loaded successfully");
+        audioLogger.log("✅ Metronome: All sounds generated successfully");
       } catch (error) {
-        console.error("Failed to load metronome sounds:", error);
+        audioLogger.error("Metronome: Failed to generate sounds:", error);
         if (isMounted) {
-          toast.error("Failed to load audio files. Please refresh the page.");
+          toast.error("Failed to initialize metronome. Please refresh the page.");
         }
       }
     };
@@ -140,7 +192,7 @@ export function Metronome({
           // Retry playing after resuming
           setTimeout(() => playSound(soundName, isAccent), 10);
         }).catch(err => {
-          console.error("Failed to resume audio context:", err);
+          audioLogger.error("Metronome: Failed to resume audio context:", err);
         });
         return;
       }
@@ -149,7 +201,7 @@ export function Metronome({
     
     const buffer = audioBuffersRef.current[soundName || 'click'];
     if (!buffer) {
-      console.error(`Sound buffer not found for: ${soundName}`);
+      audioLogger.error(`Metronome: Sound buffer not found for: ${soundName}`);
       return;
     }
     
@@ -169,7 +221,7 @@ export function Metronome({
       // Start the sound
       source.start(0);
     } catch (error) {
-      console.error("Error playing sound:", error);
+      audioLogger.error("Metronome: Error playing sound:", error);
     }
   };
 
@@ -179,7 +231,7 @@ export function Metronome({
     
     const startMetronome = () => {
       if (!audioLoaded || !audioContext) {
-        console.log("Audio not ready yet, waiting...");
+        audioLogger.log("Metronome: Audio not ready yet, waiting...");
         return;
       }
       
@@ -193,11 +245,11 @@ export function Metronome({
       // Resume audio context if needed (browser autoplay policy)
       if (audioContext.state === 'suspended') {
         audioContext.resume().catch(err => {
-          console.error("Failed to resume audio context:", err);
+          audioLogger.error("Metronome: Failed to resume audio context:", err);
         });
       }
       
-      console.log("Starting metronome at", bpm, "BPM");
+      audioLogger.log(`Metronome: Starting at ${bpm} BPM`);
       
       timerRef.current = window.setInterval(() => {
         const beatsPerMeasure = getBeatsPerMeasure();
@@ -206,7 +258,7 @@ export function Metronome({
         const isFirstBeat = beatCountRef.current === 0;
         
         if (isFirstBeat) {
-          playSound('click', true);
+          playSound(soundType, true);
         } else {
           playSound(soundType, false);
         }
@@ -250,7 +302,7 @@ export function Metronome({
     
     if (audioContext && audioContext.state === 'suspended') {
       audioContext.resume().catch(err => {
-        console.error("Failed to resume audio context:", err);
+        audioLogger.error("Metronome: Failed to resume audio context:", err);
       });
     }
     

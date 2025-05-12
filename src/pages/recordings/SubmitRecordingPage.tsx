@@ -12,6 +12,7 @@ import { ShareRecordingDialog } from "@/components/recordings/ShareRecordingDial
 import { supabase } from "@/integrations/supabase/client";
 import { AudioFile, AudioPageCategory } from "@/types/audio";
 import { RecordingSection } from "@/components/audio/RecordingSection";
+import { initializeAudioSystem, audioLogger } from "@/utils/audioUtils";
 
 export default function SubmitRecordingPage() {
   const { toast } = useToast();
@@ -22,6 +23,20 @@ export default function SubmitRecordingPage() {
   const [selectedRecording, setSelectedRecording] = useState<AudioFile | null>(null);
   const [isShareDialogOpen, setIsShareDialogOpen] = useState(false);
   const [activeTab, setActiveTab] = useState("record");
+  
+  // Initialize audio system when the page loads
+  useEffect(() => {
+    const setupAudio = async () => {
+      try {
+        await initializeAudioSystem();
+        audioLogger.log("Recording page: Audio system initialized");
+      } catch (error) {
+        audioLogger.error("Recording page: Failed to initialize audio system", error);
+      }
+    };
+    
+    setupAudio();
+  }, []);
   
   const fetchMyRecordings = async () => {
     if (!user) return;

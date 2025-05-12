@@ -1,6 +1,6 @@
 
-import React, { useState } from 'react';
-import { Mic, MicOff, Download, Share2, Play, Pause } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Mic, MicOff, Download, Share2, Play, Pause, VolumeX, Volume2 } from 'lucide-react';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { Button } from '@/components/ui/button';
@@ -11,18 +11,25 @@ import { RecordingControls } from './RecordingControls';
 import { AudioSaveControls } from './AudioSaveControls';
 import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/popover';
 import { SocialShareButtons } from '../recordings/SocialShareButtons';
+import { toast } from 'sonner';
+import { audioLogger } from '@/utils/audioUtils';
 
 interface RecordingSectionProps {
   onRecordingSaved: (category?: Exclude<AudioPageCategory, "all">) => void;
 }
 
 export function RecordingSection({ onRecordingSaved }: RecordingSectionProps) {
+  const [audioSystemReady, setAudioSystemReady] = useState(false);
+  const [showTestControls, setShowTestControls] = useState(false);
+  
   const {
     isRecording,
     microphoneActive,
     recordingTime,
     audioURL,
     isPlaying,
+    permissionState,
+    isInitialized,
     setIsPlaying,
     audioRef,
     initializeMicrophone,
@@ -30,7 +37,8 @@ export function RecordingSection({ onRecordingSaved }: RecordingSectionProps) {
     stopRecording,
     releaseMicrophone,
     togglePlayback,
-    formatTime
+    formatTime,
+    testAudioOutput
   } = useAudioRecorder();
 
   const {
@@ -50,6 +58,13 @@ export function RecordingSection({ onRecordingSaved }: RecordingSectionProps) {
     }
   });
 
+  // Check audio system status on load
+  useEffect(() => {
+    setAudioSystemReady(isInitialized);
+    audioLogger.debug('Recording section - Audio system initialized:', isInitialized);
+    audioLogger.debug('Recording section - Permission state:', permissionState);
+  }, [isInitialized, permissionState]);
+
   // Download recording
   const handleDownloadRecording = () => {
     if (audioURL) {
@@ -59,6 +74,8 @@ export function RecordingSection({ onRecordingSaved }: RecordingSectionProps) {
       document.body.appendChild(downloadLink);
       downloadLink.click();
       document.body.removeChild(downloadLink);
+      
+      toast.success("Recording downloaded");
     }
   };
 
@@ -74,24 +91,94 @@ export function RecordingSection({ onRecordingSaved }: RecordingSectionProps) {
   const discardRecording = () => {
     if (audioURL) {
       URL.revokeObjectURL(audioURL);
+      toast.success("Recording discarded");
       onRecordingSaved();
+    }
+    
+    // Release microphone if needed
+    if (microphoneActive) {
+      releaseMicrophone();
     }
   };
 
   return (
     <Card className="border-2 border-primary/20">
       <CardHeader className="bg-primary/5">
-        <CardTitle className="flex items-center gap-2">
-          {microphoneActive ? (
-            <Mic className="h-5 w-5 text-green-500" />
-          ) : (
-            <MicOff className="h-5 w-5 text-gray-500" />
-          )} 
-          Record New Audio
+        <CardTitle className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            {microphoneActive ? (
+              <Mic className="h-5 w-5 text-green-500" />
+            ) : (
+              <MicOff className="h-5 w-5 text-gray-500" />
+            )} 
+            Record New Audio
+          </div>
+          
+          <Button 
+            variant="ghost" 
+            size="sm" 
+            onClick={() => setShowTestControls(!showTestControls)}
+          >
+            {showTestControls ? "Hide Test Controls" : "Show Test Controls"}
+          </Button>
         </CardTitle>
       </CardHeader>
       <CardContent className="p-6">
         <div className="space-y-6">
+          {/* System status indicator */}
+          {showTestControls && (
+            <div className="bg-secondary/20 p-3 rounded-md mb-4 space-y-2">
+              <h4 className="text-sm font-medium">Audio System Status</h4>
+              <div className="grid grid-cols-2 gap-2 text-xs">
+                <div>
+                  <span className="font-medium">System Initialized:</span>{" "}
+                  <span className={isInitialized ? "text-green-500" : "text-red-500"}>
+                    {isInitialized ? "Yes" : "No"}
+                  </span>
+                </div>
+                <div>
+                  <span className="font-medium">Mic Permission:</span>{" "}
+                  <span className={permissionState === "granted" ? "text-green-500" : 
+                                  permissionState === "denied" ? "text-red-500" : "text-yellow-500"}>
+                    {permissionState}
+                  </span>
+                </div>
+              </div>
+              
+              <div className="flex gap-2 mt-2">
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                  onClick={testAudioOutput}
+                >
+                  <Volume2 className="h-3 w-3 mr-1" /> Test Audio Output
+                </Button>
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                  onClick={() => {
+                    if (microphoneActive) {
+                      releaseMicrophone();
+                      toast.success("Microphone released");
+                    } else {
+                      initializeMicrophone();
+                    }
+                  }}
+                >
+                  {microphoneActive ? (
+                    <>
+                      <VolumeX className="h-3 w-3 mr-1" /> Release Microphone
+                    </>
+                  ) : (
+                    <>
+                      <Mic className="h-3 w-3 mr-1" /> Initialize Microphone
+                    </>
+                  )}
+                </Button>
+              </div>
+            </div>
+          )}
+          
           {/* Recording controls */}
           <RecordingControls 
             microphoneActive={microphoneActive}
@@ -124,13 +211,19 @@ export function RecordingSection({ onRecordingSaved }: RecordingSectionProps) {
                         )}
                       </Button>
                       <span className="text-sm font-medium">
-                        {recordingName}
+                        {recordingName || "New Recording"}
                       </span>
                     </div>
-                    <audio ref={audioRef} className="hidden" />
+                    <audio 
+                      ref={audioRef} 
+                      className="hidden" 
+                      onEnded={() => setIsPlaying(false)}
+                      onError={(e) => {
+                        audioLogger.error('Audio player error:', e);
+                        toast.error("Error playing the audio");
+                      }}
+                    />
                   </div>
-
-                  {/* Audio waveform visualization could be added here in the future */}
                 </div>
 
                 {/* Audio save controls */}
