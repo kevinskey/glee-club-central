@@ -1,5 +1,4 @@
 
-
 // Audio logger
 export const audioLogger = {
   log: (message: string, ...params: any[]) => {
@@ -32,8 +31,6 @@ export const initializeAudioContext = (): AudioContext | null => {
   try {
     const AudioContextClass = window.AudioContext || (window as any).webkitAudioContext;
     const context = new AudioContextClass();
-    // Add custom properties for tracking initialization status
-    (context as any).initialized = true;
     return context;
   } catch (error) {
     audioLogger.error("Failed to create AudioContext:", error);
@@ -41,9 +38,12 @@ export const initializeAudioContext = (): AudioContext | null => {
   }
 };
 
-// Resume audio context without arguments
-export const resumeAudioContext = async (audioContext: AudioContext | null): Promise<boolean> => {
-  if (!audioContext) return false;
+// Resume audio context - can be called with or without an audio context
+export const resumeAudioContext = async (audioContext?: AudioContext | null): Promise<boolean> => {
+  if (!audioContext) {
+    audioLogger.warn('Attempted to resume undefined audio context');
+    return false;
+  }
   
   if (audioContext.state === 'suspended') {
     try {
@@ -97,18 +97,42 @@ export const loadAudioFile = async (
 };
 
 // Initialize audio system (to be called on user interaction)
-export const initializeAudioSystem = async (): Promise<AudioContext | null> => {
+export const initializeAudioSystem = async (): Promise<{
+  audioContext: AudioContext | null;
+  initialized: boolean;
+  microphonePermission: 'granted' | 'denied' | 'prompt' | 'unsupported';
+}> => {
   const audioContext = initializeAudioContext();
+  let microphonePermission: 'granted' | 'denied' | 'prompt' | 'unsupported' = 'prompt';
+  
+  // Check microphone permissions if available
+  if (navigator.mediaDevices && navigator.permissions) {
+    try {
+      const permissionStatus = await navigator.permissions.query({ name: 'microphone' as PermissionName });
+      microphonePermission = permissionStatus.state as 'granted' | 'denied' | 'prompt';
+    } catch (error) {
+      audioLogger.warn('Could not query microphone permission:', error);
+    }
+  } else {
+    microphonePermission = 'unsupported';
+  }
   
   if (audioContext) {
-    const success = await resumeAudioContext(audioContext);
-    if (success) {
-      unlockAudioOnMobile(audioContext);
-      return audioContext;
+    if (audioContext.state === 'suspended') {
+      try {
+        await audioContext.resume();
+        unlockAudioOnMobile(audioContext);
+      } catch (error) {
+        audioLogger.error('Failed to initialize audio system:', error);
+      }
     }
   }
   
-  return null;
+  return {
+    audioContext,
+    initialized: !!audioContext,
+    microphonePermission
+  };
 };
 
 // Reset audio system - needed for RecordingControls.tsx
@@ -124,9 +148,12 @@ export const resetAudioSystem = async (): Promise<boolean> => {
 };
 
 // Request microphone access - needed for useAudioRecorder.ts
-export const requestMicrophoneAccess = async (): Promise<MediaStream | null> => {
+export const requestMicrophoneAccess = async (constraints?: MediaStreamConstraints): Promise<MediaStream | null> => {
   try {
-    const stream = await navigator.mediaDevices.getUserMedia({ audio: true, video: false });
+    const defaultConstraints = { audio: true, video: false };
+    const streamConstraints = constraints || defaultConstraints;
+    
+    const stream = await navigator.mediaDevices.getUserMedia(streamConstraints);
     audioLogger.log('Microphone access granted');
     return stream;
   } catch (error) {
@@ -136,7 +163,7 @@ export const requestMicrophoneAccess = async (): Promise<MediaStream | null> => 
 };
 
 // Release microphone - needed for useAudioRecorder.ts
-export const releaseMicrophone = (stream: MediaStream | null): void => {
+export const releaseMicrophone = (stream?: MediaStream | null): void => {
   if (!stream) return;
   
   stream.getTracks().forEach(track => {
@@ -145,4 +172,3 @@ export const releaseMicrophone = (stream: MediaStream | null): void => {
   
   audioLogger.log('Microphone released');
 };
-

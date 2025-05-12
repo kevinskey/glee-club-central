@@ -227,10 +227,17 @@ export function useMetronomeEngine({
       
       // Resume audio context if needed
       if (audioContext && audioContext.state === 'suspended') {
-        resumeAudioContext(audioContext).catch(err => {
-          audioLogger.error("MetronomeEngine: Failed to resume audio context:", err);
-          toast.error("Could not start audio playback. Please try clicking the start button again.");
-        });
+        resumeAudioContext(audioContext)
+          .then(success => {
+            if (!success) {
+              audioLogger.error("MetronomeEngine: Failed to resume audio context");
+              toast.error("Could not start audio playback. Please try clicking the start button again.");
+            }
+          })
+          .catch(err => {
+            audioLogger.error("MetronomeEngine: Failed to resume audio context:", err);
+            toast.error("Could not start audio playback. Please try clicking the start button again.");
+          });
       }
       
       audioLogger.log(`MetronomeEngine: Starting at ${bpm} BPM, ${subdivisionsPerBeat} subdivisions`);
@@ -299,15 +306,20 @@ export function useMetronomeEngine({
   }, []);
 
   // Initialize or resume audio context
-  const resumeAudioContext = useCallback(() => {
+  const resumeAudioSystem = useCallback(() => {
     const audioContext = audioContextRef.current || initAudioContext();
     
     if (audioContext && audioContext.state === 'suspended') {
-      audioContext.resume()
-        .then(() => {
-          audioLogger.log("MetronomeEngine: Audio context resumed successfully");
-          // Unlock audio on mobile devices
-          unlockAudioOnMobile(audioContext);
+      resumeAudioContext(audioContext)
+        .then(success => {
+          if (success) {
+            audioLogger.log("MetronomeEngine: Audio context resumed successfully");
+            // Unlock audio on mobile devices
+            unlockAudioOnMobile(audioContext);
+          } else {
+            audioLogger.error("MetronomeEngine: Failed to resume audio context");
+            toast.error("Could not enable audio. Please check your browser permissions.");
+          }
         })
         .catch(err => {
           audioLogger.error("MetronomeEngine: Failed to resume audio context:", err);
@@ -321,6 +333,6 @@ export function useMetronomeEngine({
   return {
     audioLoaded,
     audioError,
-    resumeAudioContext
+    resumeAudioSystem
   };
 }

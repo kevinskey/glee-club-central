@@ -81,6 +81,7 @@ export function RecordingSection({ onRecordingSaved }: RecordingSectionProps) {
 
   // Handle save recording
   const handleSaveRecording = async () => {
+    if (!audioURL) return;
     const savedCategory = await saveRecording(audioURL);
     if (savedCategory) {
       onRecordingSaved(savedCategory);

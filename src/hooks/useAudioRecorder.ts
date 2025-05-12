@@ -46,7 +46,7 @@ export function useAudioRecorder() {
         clearInterval(timerRef.current);
       }
       
-      releaseMicrophone();
+      releaseMicrophone(streamRef.current);
       
       if (audioURL) {
         URL.revokeObjectURL(audioURL);
@@ -60,14 +60,16 @@ export function useAudioRecorder() {
       // Log audio devices before requesting access
       audioLogger.debug('Audio devices before mic access:');
 
-      // Request microphone access
-      const stream = await requestMicrophoneAccess({
+      // Request microphone access with constraints
+      const constraints = {
         audio: {
           echoCancellation: true,
           noiseSuppression: true,
           autoGainControl: true
         }
-      });
+      };
+      
+      const stream = await requestMicrophoneAccess(constraints);
       
       if (!stream) {
         return null;
