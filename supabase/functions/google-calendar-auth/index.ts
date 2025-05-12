@@ -1,5 +1,6 @@
 
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 // Constants for Google OAuth
 const GOOGLE_OAUTH_CLIENT_ID = Deno.env.get("GOOGLE_OAUTH_CLIENT_ID") || "";
@@ -254,6 +255,3 @@ async function verifyJWT(token: string) {
   const user = await response.json();
   return { sub: user.id };
 }
-
-// Supabase client for admin operations
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
