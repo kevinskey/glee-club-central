@@ -1,3 +1,4 @@
+
 import * as React from "react";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { useMedia } from "@/hooks/use-mobile";
@@ -54,10 +55,24 @@ export const SidebarProvider = React.forwardRef<
 
     // Helper to toggle the sidebar
     const toggleSidebar = React.useCallback(() => {
-      return isMobile
-        ? setOpenMobile((open) => !open)
-        : setOpen((open) => !open);
-    }, [isMobile, setOpen, setOpenMobile]);
+      if (isMobile) {
+        setOpenMobile((prevState) => !prevState);
+      } else {
+        setOpen((prevState) => !prevState);
+      }
+    }, [isMobile, setOpen]);
+
+    // Close mobile sidebar on escape key
+    React.useEffect(() => {
+      const handleEscKey = (event: KeyboardEvent) => {
+        if (event.key === "Escape" && openMobile) {
+          setOpenMobile(false);
+        }
+      };
+
+      window.addEventListener("keydown", handleEscKey);
+      return () => window.removeEventListener("keydown", handleEscKey);
+    }, [openMobile]);
 
     // Keyboard shortcut to toggle sidebar
     React.useEffect(() => {
@@ -99,6 +114,7 @@ export const SidebarProvider = React.forwardRef<
               {
                 "--sidebar-width": SIDEBAR_WIDTH,
                 "--sidebar-width-icon": SIDEBAR_WIDTH_ICON,
+                "--sidebar-width-mobile": SIDEBAR_WIDTH_MOBILE,
                 ...style,
               } as React.CSSProperties
             }

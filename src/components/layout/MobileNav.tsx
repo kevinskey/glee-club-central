@@ -18,7 +18,9 @@ import {
   Users,
   MessageSquare,
   FileText,
-  Archive
+  Archive,
+  User,
+  Home
 } from "lucide-react";
 
 interface MobileNavProps {
@@ -33,6 +35,12 @@ export function MobileNav({ isAdmin }: MobileNavProps) {
   if (!isAuthenticated) return null;
   
   const mainNavItems = [
+    {
+      title: "Home",
+      href: "/",
+      icon: <Home className="h-5 w-5" />,
+      external: true,
+    },
     {
       title: "Dashboard",
       href: "/dashboard",
@@ -57,6 +65,11 @@ export function MobileNav({ isAdmin }: MobileNavProps) {
       title: "Announcements",
       href: "/dashboard/announcements",
       icon: <Bell className="h-5 w-5" />,
+    },
+    {
+      title: "Profile",
+      href: "/dashboard/profile",
+      icon: <User className="h-5 w-5" />,
     },
     {
       title: "Practice Resources",
@@ -104,69 +117,122 @@ export function MobileNav({ isAdmin }: MobileNavProps) {
   ];
 
   return (
-    <div className="flex items-center lg:hidden">
-      <Sheet open={openMobile} onOpenChange={setOpenMobile}>
-        <SheetTrigger asChild>
-          <Button 
-            variant="ghost" 
-            size="sm" 
-            className="mr-2 px-0 text-base hover:bg-transparent focus-visible:bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0"
-            aria-label="Toggle Menu"
-          >
-            <Menu className="h-5 w-5" />
-            <span className="sr-only">Toggle Menu</span>
-          </Button>
-        </SheetTrigger>
-        <SheetContent side="left" className="pr-0 sm:max-w-xs w-[300px] px-1">
-          <div className="space-y-4 py-3 h-full flex flex-col overflow-hidden">
-            <div className="px-3 flex-1 overflow-auto">
-              <h2 className="mb-2 px-2 text-lg font-semibold tracking-tight">
-                Main Menu
-              </h2>
-              <div className="space-y-1">
-                {mainNavItems.map((item) => (
-                  <Link
-                    key={item.href}
-                    to={item.href}
-                    onClick={() => setOpenMobile(false)}
-                    className={cn(
-                      "flex items-center rounded-md px-3 py-2 text-sm font-medium",
-                      pathname === item.href ? "bg-accent text-accent-foreground" : "hover:bg-accent/50 hover:text-accent-foreground transition-colors"
-                    )}
-                  >
-                    <span className="mr-3 flex h-5 w-5 items-center justify-center">{item.icon}</span>
-                    <span>{item.title}</span>
-                  </Link>
-                ))}
-              </div>
-            </div>
-            
-            {isAdmin && (
-              <div className="px-3 border-t pt-4">
-                <h2 className="mb-2 px-2 text-lg font-semibold tracking-tight">
-                  Admin Menu
+    <div className="fixed bottom-0 left-0 right-0 z-40 bg-background border-t md:hidden">
+      <div className="flex items-center justify-between px-4 py-2">
+        <Sheet open={openMobile} onOpenChange={setOpenMobile}>
+          <SheetTrigger asChild>
+            <Button 
+              variant="ghost" 
+              size="icon" 
+              className="h-10 w-10"
+              aria-label="Toggle Menu"
+            >
+              <Menu className="h-5 w-5" />
+              <span className="sr-only">Toggle Menu</span>
+            </Button>
+          </SheetTrigger>
+          <SheetContent side="left" className="w-[280px] px-2 py-6 overflow-y-auto">
+            <div className="space-y-6">
+              <div>
+                <h2 className="px-4 text-lg font-semibold tracking-tight mb-3">
+                  Main Menu
                 </h2>
-                <div className="space-y-1 mb-4">
-                  {adminNavItems.map((item) => (
+                <div className="space-y-1 px-2">
+                  {mainNavItems.map((item) => (
                     <Link
                       key={item.href}
                       to={item.href}
                       onClick={() => setOpenMobile(false)}
                       className={cn(
-                        "flex items-center rounded-md px-3 py-2 text-sm font-medium",
-                        pathname === item.href ? "bg-accent text-accent-foreground" : "hover:bg-accent/50 hover:text-accent-foreground transition-colors"
+                        "flex items-center gap-3 rounded-md px-3 py-3 text-sm font-medium transition-colors",
+                        pathname === item.href 
+                          ? "bg-accent text-accent-foreground" 
+                          : "hover:bg-accent/50 hover:text-accent-foreground"
                       )}
                     >
-                      <span className="mr-3 flex h-5 w-5 items-center justify-center">{item.icon}</span>
-                      <span>{item.title}</span>
+                      {item.icon}
+                      {item.title}
                     </Link>
                   ))}
                 </div>
               </div>
+              
+              {isAdmin && (
+                <div>
+                  <h2 className="px-4 text-lg font-semibold tracking-tight mb-3">
+                    Admin Menu
+                  </h2>
+                  <div className="space-y-1 px-2">
+                    {adminNavItems.map((item) => (
+                      <Link
+                        key={item.href}
+                        to={item.href}
+                        onClick={() => setOpenMobile(false)}
+                        className={cn(
+                          "flex items-center gap-3 rounded-md px-3 py-3 text-sm font-medium transition-colors",
+                          pathname === item.href 
+                            ? "bg-accent text-accent-foreground" 
+                            : "hover:bg-accent/50 hover:text-accent-foreground"
+                        )}
+                      >
+                        {item.icon}
+                        {item.title}
+                      </Link>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          </SheetContent>
+        </Sheet>
+        
+        <div className="flex items-center gap-3">
+          <Link 
+            to="/dashboard" 
+            className={cn(
+              "flex flex-col items-center justify-center px-3 py-1",
+              pathname === "/dashboard" ? "text-glee-spelman" : "text-muted-foreground"
             )}
-          </div>
-        </SheetContent>
-      </Sheet>
+            onClick={() => setOpenMobile(false)}
+          >
+            <LayoutDashboard className="h-5 w-5" />
+            <span className="text-xs mt-1">Dashboard</span>
+          </Link>
+          <Link 
+            to="/dashboard/sheet-music" 
+            className={cn(
+              "flex flex-col items-center justify-center px-3 py-1",
+              pathname === "/dashboard/sheet-music" ? "text-glee-spelman" : "text-muted-foreground"
+            )}
+            onClick={() => setOpenMobile(false)}
+          >
+            <Music className="h-5 w-5" />
+            <span className="text-xs mt-1">Music</span>
+          </Link>
+          <Link 
+            to="/dashboard/calendar" 
+            className={cn(
+              "flex flex-col items-center justify-center px-3 py-1",
+              pathname === "/dashboard/calendar" ? "text-glee-spelman" : "text-muted-foreground"
+            )}
+            onClick={() => setOpenMobile(false)}
+          >
+            <Calendar className="h-5 w-5" />
+            <span className="text-xs mt-1">Calendar</span>
+          </Link>
+          <Link 
+            to="/dashboard/profile" 
+            className={cn(
+              "flex flex-col items-center justify-center px-3 py-1",
+              pathname === "/dashboard/profile" ? "text-glee-spelman" : "text-muted-foreground"
+            )}
+            onClick={() => setOpenMobile(false)}
+          >
+            <User className="h-5 w-5" />
+            <span className="text-xs mt-1">Profile</span>
+          </Link>
+        </div>
+      </div>
     </div>
   );
 }

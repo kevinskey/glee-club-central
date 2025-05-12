@@ -6,10 +6,12 @@ import { Sidebar } from "@/components/layout/Sidebar";
 import { useAuth } from "@/contexts/AuthContext";
 import { Spinner } from "@/components/ui/spinner";
 import { SidebarProvider } from "@/components/ui/sidebar";
+import { useMedia } from "@/hooks/use-mobile";
 
 const DashboardLayout: React.FC = () => {
   const { isAuthenticated, isLoading } = useAuth();
   const location = useLocation();
+  const isMobile = useMedia("(max-width: 768px)");
   
   // Log current route for troubleshooting
   useEffect(() => {
@@ -41,7 +43,7 @@ const DashboardLayout: React.FC = () => {
         <div className="flex-1 flex flex-col md:flex-row">
           <Sidebar />
           
-          <main className="flex-1 p-2 sm:p-3 md:p-5 lg:p-6 md:ml-64 pb-12 md:pb-6 overflow-x-hidden">
+          <main className="flex-1 p-3 sm:p-4 md:p-5 lg:p-6 md:ml-64 pb-20 md:pb-6 overflow-x-hidden">
             <Outlet />
           </main>
         </div>

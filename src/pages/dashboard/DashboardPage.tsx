@@ -3,7 +3,20 @@ import React, { useState, useEffect } from "react";
 import { PageHeader } from "@/components/ui/page-header";
 import { useAuth } from "@/contexts/AuthContext";
 import { Link, useNavigate } from "react-router-dom";
-import { Home } from "lucide-react";
+import { 
+  Home, 
+  Calendar, 
+  Music, 
+  Bell, 
+  Headphones, 
+  FileText, 
+  User,
+  ChevronRight,
+  Clock,
+  CalendarDays,
+  ArrowRight,
+  Mic
+} from "lucide-react";
 import { Spinner } from "@/components/ui/spinner";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -15,10 +28,9 @@ import { RehearsalNotes } from "@/components/dashboard/RehearsalNotes";
 import { DashboardAnnouncements } from "@/components/dashboard/DashboardAnnouncements";
 import { QuickAccess } from "@/components/dashboard/QuickAccess";
 import { DuesStatusCard } from "@/components/dashboard/DuesStatusCard";
-import { DeveloperTools } from "@/components/dashboard/DeveloperTools";
-import { ResourcesSection } from "@/components/dashboard/ResourcesSection";
 import { AdminDashboardAccess } from "@/components/dashboard/AdminDashboardAccess";
-import { GlobalMetronome } from "@/components/ui/global-metronome";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 
 export interface Event {
   id: string;
@@ -34,6 +46,16 @@ const DashboardPageContent = () => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const [events, setEvents] = useState<Event[]>([]);
+  const { isAdmin } = usePermissions();
+  
+  // Get current time of day for greeting
+  const getTimeOfDay = () => {
+    const hour = new Date().getHours();
+    
+    if (hour < 12) return "Good morning";
+    if (hour < 18) return "Good afternoon";
+    return "Good evening";
+  };
   
   // Fetch events from the database
   const fetchEvents = async () => {
@@ -78,59 +100,195 @@ const DashboardPageContent = () => {
     navigate("/dashboard/admin");
   };
   
+  // Quick access tiles
+  const quickAccessTiles = [
+    {
+      title: "Sheet Music",
+      icon: <Music className="h-5 w-5 text-white" />,
+      href: "/dashboard/sheet-music",
+      color: "bg-gradient-to-br from-purple-500 to-purple-700"
+    },
+    {
+      title: "Calendar",
+      icon: <Calendar className="h-5 w-5 text-white" />,
+      href: "/dashboard/calendar",
+      color: "bg-gradient-to-br from-blue-500 to-blue-700"
+    },
+    {
+      title: "Practice Resources",
+      icon: <Headphones className="h-5 w-5 text-white" />,
+      href: "/dashboard/practice",
+      color: "bg-gradient-to-br from-green-500 to-green-700"
+    },
+    {
+      title: "My Recordings",
+      icon: <Mic className="h-5 w-5 text-white" />,
+      href: "/dashboard/recordings",
+      color: "bg-gradient-to-br from-red-500 to-red-700"
+    },
+    {
+      title: "My Profile",
+      icon: <User className="h-5 w-5 text-white" />,
+      href: "/dashboard/profile",
+      color: "bg-gradient-to-br from-amber-500 to-amber-700"
+    },
+    {
+      title: "Announcements",
+      icon: <Bell className="h-5 w-5 text-white" />,
+      href: "/dashboard/announcements",
+      color: "bg-gradient-to-br from-pink-500 to-pink-700"
+    },
+  ];
+  
   // Use conditional rendering instead of early returns
   const renderContent = () => {
     if (loading || authLoading) {
       return (
-        <div className="container mx-auto p-4 flex justify-center items-center min-h-[60vh]">
+        <div className="container mx-auto px-4 flex justify-center items-center min-h-[60vh]">
           <Spinner size="lg" />
         </div>
       );
     }
     
     return (
-      <div className="container mx-auto p-4 space-y-8">
-        <PageHeader
-          title={`Welcome, ${profile?.first_name || 'Member'}`}
-          description="Your Spelman College Glee Club dashboard"
-          icon={<Home className="h-6 w-6" />}
-        />
+      <div className="max-w-screen-2xl mx-auto px-4 space-y-6">
+        {/* Welcome Banner with User Info */}
+        <div className="bg-gradient-to-r from-glee-spelman to-glee-spelman/80 rounded-xl shadow-lg p-6 md:p-8 text-white">
+          <div className="flex flex-col md:flex-row md:items-center md:justify-between">
+            <div className="space-y-2">
+              <h1 className="text-2xl md:text-3xl font-bold">{getTimeOfDay()}, {profile?.first_name || 'Member'}</h1>
+              <p className="text-white/80">Welcome to your Spelman College Glee Club dashboard</p>
+            </div>
+            <div className="mt-4 md:mt-0">
+              <Button 
+                size="lg"
+                variant="secondary" 
+                className="bg-white hover:bg-white/90 text-glee-spelman"
+                onClick={() => navigate("/dashboard/profile")}
+              >
+                View Profile <ChevronRight className="ml-2 h-4 w-4" />
+              </Button>
+            </div>
+          </div>
+        </div>
         
-        {/* Main Dashboard Content */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          {/* Left Column - Today's Agenda */}
-          <div className="md:col-span-2 space-y-8">
-            {/* Next Event Countdown */}
-            {nextEvent && <NextEventCountdown event={nextEvent} />}
-            
+        {/* Quick Access Grid */}
+        <div>
+          <h2 className="text-xl font-semibold mb-4">Quick Access</h2>
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+            {quickAccessTiles.map((tile, index) => (
+              <Link key={index} to={tile.href} className="no-underline">
+                <div className={`${tile.color} rounded-xl p-4 h-full shadow-md hover:shadow-lg transition-all text-white flex flex-col justify-between min-h-[120px]`}>
+                  <div className="p-2 bg-white/20 rounded-lg w-fit">
+                    {tile.icon}
+                  </div>
+                  <div className="mt-auto">
+                    <h3 className="font-medium">{tile.title}</h3>
+                  </div>
+                </div>
+              </Link>
+            ))}
+          </div>
+        </div>
+        
+        {/* Next Event Countdown */}
+        {nextEvent && (
+          <div>
+            <h2 className="text-xl font-semibold mb-4">Next Performance</h2>
+            <NextEventCountdown event={nextEvent} />
+          </div>
+        )}
+        
+        {/* Dashboard Content in 2 columns */}
+        <div className="grid grid-cols-1 md:grid-cols-12 gap-6">
+          {/* Column 1 - Main Content */}
+          <div className="md:col-span-8 space-y-6">
             {/* Upcoming Events */}
-            <DashboardEvents events={events} />
+            <Card className="shadow-md">
+              <CardHeader className="pb-2 flex flex-row items-center justify-between">
+                <div className="flex items-center space-x-2">
+                  <CalendarDays className="h-5 w-5 text-glee-spelman" />
+                  <CardTitle>Upcoming Events</CardTitle>
+                </div>
+                <Link to="/dashboard/calendar" className="text-sm text-glee-spelman hover:underline">
+                  View Calendar
+                </Link>
+              </CardHeader>
+              <CardContent>
+                {events.length > 0 ? (
+                  <div className="space-y-3">
+                    {events.map((event, index) => (
+                      <div key={index} className="flex items-start border-b last:border-0 pb-3 last:pb-0">
+                        <div className="bg-muted text-center p-2 rounded-md min-w-[60px]">
+                          <div className="text-xs font-medium text-muted-foreground">{event.date.toLocaleDateString(undefined, { month: 'short' })}</div>
+                          <div className="text-lg font-bold">{event.date.getDate()}</div>
+                        </div>
+                        <div className="ml-4">
+                          <h4 className="font-medium">{event.title}</h4>
+                          <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                            <Clock className="h-3 w-3" /> {event.time}
+                            {event.location && <span>• {event.location}</span>}
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-muted-foreground">No upcoming events scheduled.</p>
+                )}
+              </CardContent>
+            </Card>
             
             {/* Rehearsal Notes */}
             <RehearsalNotes />
             
-            {/* Announcements Card */}
+            {/* Announcements */}
             <DashboardAnnouncements />
           </div>
           
-          {/* Right Column - Quick Access */}
-          <div className="space-y-8">
-            {/* Quick Access */}
-            <QuickAccess />
-            
+          {/* Column 2 - Side Content */}
+          <div className="md:col-span-4 space-y-6">
             {/* Dues Status Card */}
             <DuesStatusCard />
             
-            {/* Development Tools */}
-            <DeveloperTools />
+            {/* Latest Resources */}
+            <Card className="shadow-md">
+              <CardHeader className="pb-2">
+                <CardTitle className="flex items-center gap-2">
+                  <FileText className="h-5 w-5 text-glee-spelman" />
+                  <span>Latest Resources</span>
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  <div className="space-y-2">
+                    <h4 className="font-medium text-sm">New Sheet Music</h4>
+                    <div className="p-3 border rounded-lg bg-muted/30">
+                      <p className="text-sm font-medium">Lift Every Voice and Sing</p>
+                      <p className="text-xs text-muted-foreground">Added: May 5, 2025</p>
+                    </div>
+                    <div className="p-3 border rounded-lg bg-muted/30">
+                      <p className="text-sm font-medium">Ave Maria</p>
+                      <p className="text-xs text-muted-foreground">Added: May 3, 2025</p>
+                    </div>
+                  </div>
+                  
+                  <Link 
+                    to="/dashboard/sheet-music" 
+                    className="flex items-center justify-center text-sm text-glee-spelman hover:underline"
+                  >
+                    View all resources <ArrowRight className="ml-1 h-3 w-3" />
+                  </Link>
+                </div>
+              </CardContent>
+            </Card>
+            
+            {/* Admin Dashboard Access (only if admin) */}
+            {isAdmin && (
+              <AdminDashboardAccess onAccess={handleRegisterAsAdmin} />
+            )}
           </div>
         </div>
-        
-        {/* Bottom Row */}
-        <ResourcesSection />
-        
-        {/* Admin Dashboard Access */}
-        <AdminDashboardAccess onAccess={handleRegisterAsAdmin} />
       </div>
     );
   };
@@ -143,7 +301,6 @@ const DashboardPage = () => {
   return (
     <ErrorBoundary>
       <DashboardPageContent />
-      <GlobalMetronome />
     </ErrorBoundary>
   );
 };

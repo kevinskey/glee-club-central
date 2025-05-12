@@ -4,6 +4,9 @@ import { Sheet, SheetContent } from "@/components/ui/sheet";
 import { cn } from "@/lib/utils";
 import { useSidebar } from "./useSidebar";
 
+// Constants for sidebar widths
+const SIDEBAR_WIDTH_MOBILE = "18rem";
+
 export const Sidebar = React.forwardRef<
   HTMLDivElement,
   React.ComponentProps<"div"> & {
@@ -46,10 +49,10 @@ export const Sidebar = React.forwardRef<
           <SheetContent
             data-sidebar="sidebar"
             data-mobile="true"
-            className="w-[--sidebar-width] bg-sidebar p-0 text-sidebar-foreground [&>button]:hidden"
+            className="w-[--sidebar-width-mobile] bg-sidebar p-0 text-sidebar-foreground [&>button]:hidden"
             style={
               {
-                "--sidebar-width": SIDEBAR_WIDTH_MOBILE,
+                "--sidebar-width-mobile": SIDEBAR_WIDTH_MOBILE,
               } as React.CSSProperties
             }
             side={side}
@@ -106,6 +109,3 @@ export const Sidebar = React.forwardRef<
   }
 );
 Sidebar.displayName = "Sidebar";
-
-// Add missing constants
-const SIDEBAR_WIDTH_MOBILE = "18rem";
