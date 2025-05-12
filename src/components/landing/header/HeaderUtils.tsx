@@ -15,7 +15,6 @@ export function HeaderUtils() {
   
   return (
     <>
-      <ThemeToggle />
       {!isMobile && (
         <TooltipProvider>
           <Tooltip>

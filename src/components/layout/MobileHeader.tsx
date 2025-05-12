@@ -1,3 +1,4 @@
+
 import React, { useState, useRef } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { Icons } from "@/components/Icons";
@@ -9,6 +10,7 @@ import { EnhancedMetronome } from "@/components/ui/enhanced-metronome";
 import { Clock, Menu, X } from "lucide-react";
 import { MobileMenu } from "@/components/landing/header/MobileMenu";
 import { useSidebar } from "@/components/ui/sidebar";
+import { ThemeToggle } from "@/components/ui/theme-toggle";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -99,8 +101,10 @@ export function MobileHeader() {
             </Link>
           </div>
           
-          {/* Right side: Metronome and User dropdown */}
+          {/* Right side: Theme toggle, Metronome and User dropdown */}
           <div className="flex items-center gap-2">
+            <ThemeToggle />
+            
             <Dialog open={metronomeOpen} onOpenChange={setMetronomeOpen}>
               <DialogTrigger asChild>
                 <Button 
