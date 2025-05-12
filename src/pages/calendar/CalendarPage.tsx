@@ -1,6 +1,5 @@
 
 import React, { useState, useEffect, useRef } from "react";
-import { Header } from "@/components/landing/Header";
 import { Footer } from "@/components/landing/Footer";
 import { CalendarHeader } from "@/components/calendar/CalendarHeader";
 import { CalendarSidebar } from "@/components/calendar/CalendarSidebar";
@@ -13,6 +12,8 @@ import { Spinner } from "@/components/ui/spinner";
 import { CalendarMain } from "@/components/calendar/CalendarMain";
 import { useCalendarEventHandlers } from "@/hooks/useCalendarEventHandlers";
 import { toast } from "sonner";
+import { CalendarPageHeader } from "@/components/calendar/CalendarPageHeader";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 const CalendarPage = () => {
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
@@ -22,6 +23,7 @@ const CalendarPage = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [calendarView, setCalendarView] = useState<'dayGridMonth' | 'timeGridWeek' | 'timeGridDay' | 'listWeek'>('dayGridMonth');
   const [currentDate, setCurrentDate] = useState(new Date());
+  const isMobile = useIsMobile();
   
   const { events, fetchEvents, addEvent, updateEvent, deleteEvent } = useCalendarStore();
   const { isAdmin, profile, isLoading: authLoading } = useAuth();
@@ -107,15 +109,20 @@ const CalendarPage = () => {
 
   return (
     <div className="flex flex-col min-h-screen">
-      <Header />
+      {/* Remove the Header component on mobile */}
       <main className="flex-1 bg-gray-50 dark:bg-gray-900">
         <div className="container mx-auto p-4">
-          <CalendarHeader 
-            onAddEvent={() => userCanCreate && setIsCreateModalOpen(true)} 
-            view={calendarView}
-            onViewChange={setCalendarView}
-            userCanCreate={userCanCreate}
-          />
+          {/* Use CalendarPageHeader on mobile, CalendarHeader on desktop */}
+          {isMobile ? (
+            <CalendarPageHeader onAddEventClick={() => userCanCreate && setIsCreateModalOpen(true)} />
+          ) : (
+            <CalendarHeader 
+              onAddEvent={() => userCanCreate && setIsCreateModalOpen(true)} 
+              view={calendarView}
+              onViewChange={setCalendarView}
+              userCanCreate={userCanCreate}
+            />
+          )}
           
           {isLoading ? (
             <div className="flex justify-center items-center h-96">
