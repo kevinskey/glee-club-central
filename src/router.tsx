@@ -1,4 +1,3 @@
-
 import {
   createBrowserRouter,
 } from "react-router-dom";
@@ -23,6 +22,7 @@ import SheetMusicPage from "./pages/SheetMusicPage";
 import SheetMusicViewerPage from "./pages/sheet-music/SheetMusicPage";
 import SetlistsPage from "./pages/SetlistsPage";
 import ChoralTitlesPage from "./pages/sheet-music/ChoralTitlesPage";
+import YoutubeVideosPage from "./pages/YoutubeVideosPage";
 
 export const router = createBrowserRouter([
   {
@@ -36,6 +36,10 @@ export const router = createBrowserRouter([
       {
         path: "/login",
         element: <LoginPage />,
+      },
+      {
+        path: "/videos",
+        element: <YoutubeVideosPage />,
       },
     ],
   },

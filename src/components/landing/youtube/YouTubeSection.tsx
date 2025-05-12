@@ -5,7 +5,8 @@ import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { AspectRatio } from '@/components/ui/aspect-ratio';
 import { Skeleton } from '@/components/ui/skeleton';
-import { PlayCircle, ExternalLink } from 'lucide-react';
+import { PlayCircle, ExternalLink, Youtube } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import { 
   Dialog, 
   DialogContent, 
@@ -41,7 +42,7 @@ export function YouTubeSection() {
   return (
     <section 
       id="youtube" 
-      className="py-16 relative bg-red-950 text-white"
+      className="py-10 relative bg-red-950 text-white"
       style={{
         backgroundImage: `
           linear-gradient(rgba(0, 0, 0, 0.2), rgba(0, 0, 0, 0.4)),
@@ -70,15 +71,26 @@ export function YouTubeSection() {
             <h2 className="text-3xl font-bold text-amber-100">Featured Videos</h2>
             <p className="text-amber-200/80 mt-2">Watch performances from the Spelman College Glee Club</p>
           </div>
-          <a 
-            href="https://www.youtube.com/@SpelmanCollegeGleeClub" 
-            target="_blank" 
-            rel="noopener noreferrer"
-            className="flex items-center text-amber-200 hover:text-amber-100"
-          >
-            <span className="mr-1">Visit our channel</span>
-            <ExternalLink size={16} />
-          </a>
+          <div className="flex items-center gap-4">
+            <Link 
+              to="/videos" 
+              className="flex items-center gap-1 text-amber-200 hover:text-amber-100 md:mr-4"
+            >
+              <span className="hidden md:inline">View all videos</span>
+              <span className="inline md:hidden">All videos</span>
+              <Youtube size={16} className="ml-1" />
+            </Link>
+            <a 
+              href="https://www.youtube.com/@SpelmanCollegeGleeClub" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="flex items-center text-amber-200 hover:text-amber-100"
+            >
+              <span className="hidden md:inline">Visit our channel</span>
+              <span className="inline md:hidden">Channel</span>
+              <ExternalLink size={16} className="ml-1" />
+            </a>
+          </div>
         </div>
 
         {isLoading ? (
@@ -123,6 +135,16 @@ export function YouTubeSection() {
             ))}
           </div>
         )}
+        
+        <div className="mt-8 text-center">
+          <Link 
+            to="/videos" 
+            className="inline-flex items-center px-6 py-3 rounded-full bg-amber-800/40 hover:bg-amber-800/60 text-amber-100 transition-colors border border-amber-700/50"
+          >
+            <span>Browse our complete video collection</span>
+            <Youtube size={18} className="ml-2" />
+          </Link>
+        </div>
       </div>
 
       <Dialog open={selectedVideo !== null} onOpenChange={handleCloseDialog}>

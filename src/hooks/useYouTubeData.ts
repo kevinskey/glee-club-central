@@ -2,7 +2,7 @@
 import { useState, useEffect } from 'react';
 import { YouTubeVideo } from '@/types/youtube';
 
-// Sample YouTube data - in a real implementation, this would fetch from YouTube API
+// Enhanced sample YouTube data - in a real implementation, this would fetch from YouTube API
 const sampleYouTubeVideos: YouTubeVideo[] = [
   {
     id: "hYbHCl8gW-U",
@@ -35,6 +35,38 @@ const sampleYouTubeVideos: YouTubeVideo[] = [
     thumbnailUrl: "https://i3.ytimg.com/vi/wQFVgRBDykY/maxresdefault.jpg",
     publishedAt: "2023-08-22",
     videoUrl: "https://www.youtube.com/watch?v=wQFVgRBDykY"
+  },
+  {
+    id: "XmvKMxxWBOw",
+    title: "Spelman College Glee Club - Behind the Scenes Rehearsal",
+    description: "Go behind the scenes with the Spelman College Glee Club as they prepare for their upcoming tour.",
+    thumbnailUrl: "https://i3.ytimg.com/vi/XmvKMxxWBOw/maxresdefault.jpg",
+    publishedAt: "2023-07-15",
+    videoUrl: "https://www.youtube.com/watch?v=XmvKMxxWBOw"
+  },
+  {
+    id: "KqZG5hHgArQ",
+    title: "Spelman College Glee Club - Hallelujah Chorus",
+    description: "Performance from the Spring Concert featuring the full ensemble.",
+    thumbnailUrl: "https://i3.ytimg.com/vi/KqZG5hHgArQ/maxresdefault.jpg",
+    publishedAt: "2023-05-18",
+    videoUrl: "https://www.youtube.com/watch?v=KqZG5hHgArQ"
+  },
+  {
+    id: "YM3g8Hz1J4Y",
+    title: "Spelman College Glee Club - Tour Vlog: New York City",
+    description: "Join us on our East Coast tour as we perform at venues in New York City and connect with alumni.",
+    thumbnailUrl: "https://i3.ytimg.com/vi/YM3g8Hz1J4Y/maxresdefault.jpg",
+    publishedAt: "2023-04-05",
+    videoUrl: "https://www.youtube.com/watch?v=YM3g8Hz1J4Y"
+  },
+  {
+    id: "dRLRQUcoCO4",
+    title: "Spelman College Glee Club - Alto Section Warm-up Techniques",
+    description: "Our vocal coach demonstrates warm-up techniques specifically for the alto section.",
+    thumbnailUrl: "https://i3.ytimg.com/vi/dRLRQUcoCO4/maxresdefault.jpg",
+    publishedAt: "2023-03-12",
+    videoUrl: "https://www.youtube.com/watch?v=dRLRQUcoCO4"
   }
 ];
 

@@ -35,6 +35,13 @@ export function NavigationLinks({ className, onLinkClick }: NavigationLinksProps
         Events
       </Link>
       <Link
+        to="/videos"
+        className="text-md font-medium text-muted-foreground transition-colors hover:text-foreground"
+        onClick={handleLinkClick}
+      >
+        Videos
+      </Link>
+      <Link
         to="/media"
         className="text-md font-medium text-muted-foreground transition-colors hover:text-foreground"
         onClick={handleLinkClick}
