@@ -14,7 +14,7 @@ export default function AdminLayout() {
   const isMobile = useIsMobile();
   
   // Only show header on main admin routes
-  const shouldShowHeader = ["/admin", "/admin/dashboard"].includes(location.pathname);
+  const shouldShowHeader = ["/admin", "/admin/dashboard", "/dashboard/admin", "/dashboard/admin/dashboard"].includes(location.pathname);
   
   if (isLoading) {
     return (

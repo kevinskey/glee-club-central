@@ -14,7 +14,7 @@ const DashboardLayout: React.FC = () => {
   const location = useLocation();
   const isMobile = useMedia("(max-width: 768px)");
   
-  // Show header on main dashboard routes and certain other important sections
+  // Show header only on main dashboard routes
   const shouldShowHeader = [
     "/dashboard", 
     "/dashboard/profile",
@@ -43,7 +43,6 @@ const DashboardLayout: React.FC = () => {
   return (
     <SidebarProvider>
       <div className="min-h-screen flex flex-col bg-background w-full">
-        {/* Only show headers on main dashboard route */}
         {shouldShowHeader && (
           <>
             {isMobile ? (
