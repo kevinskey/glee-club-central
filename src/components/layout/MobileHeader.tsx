@@ -7,7 +7,7 @@ import { useIsMobile } from "@/hooks/use-mobile";
 import { useAuth } from "@/contexts/AuthContext";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription } from "@/components/ui/dialog";
 import { EnhancedMetronome } from "@/components/ui/enhanced-metronome";
-import { Clock, Menu, X } from "lucide-react";
+import { Clock, Menu, X, ChevronDown } from "lucide-react";
 import { MobileMenu } from "@/components/landing/header/MobileMenu";
 import { useSidebar } from "@/components/ui/sidebar";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
@@ -81,19 +81,61 @@ export function MobileHeader() {
         <div className="container px-4 flex h-14 items-center justify-between">
           {/* Left side: Menu toggle and logo */}
           <div className="flex items-center gap-2">
-            <Button 
-              variant="ghost" 
-              size="icon" 
-              onClick={handleSidebarToggle}
-              className="flex-shrink-0 h-8 w-8"
-            >
-              {mobileMenuOpen && !isDashboardPath ? (
-                <X className="h-5 w-5 text-foreground" />
-              ) : (
-                <Menu className="h-5 w-5 text-foreground" />
-              )}
-              <span className="sr-only">{mobileMenuOpen ? "Close menu" : "Toggle menu"}</span>
-            </Button>
+            {/* Left Nav Dropdown Button */}
+            <DropdownMenuProvider>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button 
+                    variant="ghost" 
+                    size="icon" 
+                    className="flex-shrink-0 h-8 w-8"
+                  >
+                    <Menu className="h-5 w-5 text-foreground" />
+                    <span className="sr-only">Navigation menu</span>
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="start" className="w-56 bg-popover">
+                  <DropdownMenuLabel>Navigation</DropdownMenuLabel>
+                  <DropdownMenuSeparator />
+                  
+                  <DropdownMenuItem onClick={() => navigate("/")}>
+                    Home
+                  </DropdownMenuItem>
+                  
+                  <DropdownMenuItem onClick={() => navigate("/about")}>
+                    About
+                  </DropdownMenuItem>
+                  
+                  <DropdownMenuItem onClick={() => navigate("/press-kit")}>
+                    Press Kit
+                  </DropdownMenuItem>
+                  
+                  <DropdownMenuSeparator />
+                  
+                  {isDashboardPath && (
+                    <DropdownMenuItem onClick={() => setOpenMobile(!openMobile)}>
+                      Toggle Sidebar
+                    </DropdownMenuItem>
+                  )}
+                  
+                  {isAuthenticated ? (
+                    <DropdownMenuItem onClick={() => navigate("/dashboard")}>
+                      Dashboard
+                    </DropdownMenuItem>
+                  ) : (
+                    <DropdownMenuItem onClick={() => navigate("/login")}>
+                      Member Login
+                    </DropdownMenuItem>
+                  )}
+                  
+                  {!isAuthenticated && (
+                    <DropdownMenuItem onClick={() => navigate("/register/admin")}>
+                      Admin Registration
+                    </DropdownMenuItem>
+                  )}
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </DropdownMenuProvider>
             
             <Link to="/" className="font-bold flex items-center hover:text-primary transition-colors">
               <Icons.logo className="h-6 w-auto" />

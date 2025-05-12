@@ -17,7 +17,8 @@ import {
   User,
   Settings,
   LogOut,
-  Clock
+  Clock,
+  ChevronDown
 } from "lucide-react";
 import { useSidebar } from "@/components/ui/sidebar";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
@@ -28,7 +29,7 @@ import { EnhancedMetronome } from "@/components/ui/enhanced-metronome";
 
 export function Header() {
   const { profile, signOut } = useAuth();
-  const { toggleSidebar } = useSidebar();
+  const { toggleSidebar, open } = useSidebar();
   const navigate = useNavigate();
   const [metronomeOpen, setMetronomeOpen] = useState(false);
   const isMobile = useIsMobile();
@@ -64,15 +65,47 @@ export function Header() {
     <header className="bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 sticky top-0 z-50 w-full border-b hidden md:block">
       <div className="container flex h-16 items-center justify-between px-4">
         <div className="flex items-center gap-2">
-          <Button 
-            variant="ghost" 
-            size="icon" 
-            className="md:flex-shrink-0" 
-            onClick={toggleSidebar}
-          >
-            <Menu className="h-5 w-5 text-foreground" />
-            <span className="sr-only">Toggle sidebar</span>
-          </Button>
+          {/* Left Nav Dropdown Button */}
+          <DropdownMenuProvider>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button 
+                  variant="ghost" 
+                  size="icon" 
+                  className="md:flex-shrink-0" 
+                >
+                  <Menu className="h-5 w-5 text-foreground" />
+                  <span className="sr-only">Navigation menu</span>
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="start" className="w-56 bg-popover">
+                <DropdownMenuLabel>Navigation</DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                
+                <DropdownMenuItem onClick={toggleSidebar}>
+                  Toggle Sidebar
+                </DropdownMenuItem>
+                
+                <DropdownMenuItem onClick={() => navigate("/")}>
+                  Home Page
+                </DropdownMenuItem>
+                
+                <DropdownMenuItem onClick={() => navigate("/about")}>
+                  About
+                </DropdownMenuItem>
+                
+                <DropdownMenuSeparator />
+                
+                <DropdownMenuItem onClick={() => navigate("/dashboard")}>
+                  Dashboard
+                </DropdownMenuItem>
+                
+                <DropdownMenuItem onClick={() => navigate("/dashboard/profile")}>
+                  My Profile
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </DropdownMenuProvider>
           
           <div className="flex items-center">
             <Link to="/" className="font-bold flex items-center gap-2 hover:text-primary transition-colors">

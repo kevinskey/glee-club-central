@@ -5,11 +5,22 @@ import { Logo } from "@/components/landing/header/Logo";
 import { NavigationLinks } from "@/components/landing/header/NavigationLinks";
 import { MemberPortalDropdown } from "@/components/landing/header/MemberPortalDropdown";
 import { HeaderUtils } from "@/components/landing/header/HeaderUtils";
-import { Clock } from "lucide-react";
+import { Clock, Menu, ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription } from "@/components/ui/dialog";
 import { EnhancedMetronome } from "@/components/ui/enhanced-metronome";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+  DropdownMenuSeparator,
+  DropdownMenuLabel,
+  DropdownMenuProvider
+} from "@/components/ui/dropdown-menu";
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "@/contexts/AuthContext";
 
 interface HeaderProps {
   initialShowNewsFeed?: boolean;
@@ -20,6 +31,8 @@ export function Header({ initialShowNewsFeed = true }: HeaderProps) {
   const [showNewsFeed, setShowNewsFeed] = useState(false); // Start hidden to avoid flicker
   const [metronomeOpen, setMetronomeOpen] = useState(false);
   const audioContextRef = React.useRef<AudioContext | null>(null);
+  const navigate = useNavigate();
+  const { isAuthenticated } = useAuth();
   
   // Set the news feed state after component mounts with a slight delay
   useEffect(() => {
@@ -64,6 +77,56 @@ export function Header({ initialShowNewsFeed = true }: HeaderProps) {
     <header className="sticky top-0 z-50 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container px-2 flex h-16 items-center justify-between">
         <div className="flex items-center gap-2">
+          {/* Left Nav Dropdown Button */}
+          <DropdownMenuProvider>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button 
+                  variant="ghost" 
+                  size="icon" 
+                  className="h-10 w-10"
+                >
+                  <Menu className="h-5 w-5 text-foreground" />
+                  <span className="sr-only">Navigation menu</span>
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="start" className="w-56 bg-popover">
+                <DropdownMenuLabel>Navigation</DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                
+                <DropdownMenuItem onClick={() => navigate("/")}>
+                  Home
+                </DropdownMenuItem>
+                
+                <DropdownMenuItem onClick={() => navigate("/about")}>
+                  About
+                </DropdownMenuItem>
+                
+                <DropdownMenuItem onClick={() => navigate("/press-kit")}>
+                  Press Kit
+                </DropdownMenuItem>
+                
+                <DropdownMenuSeparator />
+                
+                {isAuthenticated ? (
+                  <DropdownMenuItem onClick={() => navigate("/dashboard")}>
+                    Dashboard
+                  </DropdownMenuItem>
+                ) : (
+                  <DropdownMenuItem onClick={() => navigate("/login")}>
+                    Member Login
+                  </DropdownMenuItem>
+                )}
+                
+                {!isAuthenticated && (
+                  <DropdownMenuItem onClick={() => navigate("/register/admin")}>
+                    Admin Registration
+                  </DropdownMenuItem>
+                )}
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </DropdownMenuProvider>
+          
           <Logo />
           
           {/* Metronome Icon (on left) */}
