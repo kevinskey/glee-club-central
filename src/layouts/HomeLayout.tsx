@@ -3,7 +3,7 @@ import React from 'react';
 import { Outlet, useLocation } from 'react-router-dom';
 import { Toaster } from 'sonner';
 
-const HomeLayout = () => {
+const HomeLayout: React.FC = () => {
   const location = useLocation();
   
   // Log current route for troubleshooting

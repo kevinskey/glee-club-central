@@ -49,3 +49,35 @@ export const fetchUserPermissions = async (userId: string) => {
     return {};
   }
 };
+
+/**
+ * Fetches attendance records for a member
+ * @param memberId UUID of the member
+ * @returns Array of attendance records with event details
+ */
+export const fetchAttendanceRecords = async (memberId: string) => {
+  try {
+    const { data, error } = await supabase
+      .from('attendance_records')
+      .select(`
+        id,
+        status,
+        notes,
+        created_at,
+        calendar_events (
+          id,
+          title,
+          date,
+          type
+        )
+      `)
+      .eq('member_id', memberId)
+      .order('created_at', { ascending: false });
+      
+    if (error) throw error;
+    return data || [];
+  } catch (error) {
+    console.error('Error fetching attendance records:', error);
+    return [];
+  }
+};

@@ -8,7 +8,7 @@ import { Spinner } from "@/components/ui/spinner";
 import { SidebarProvider } from "@/components/ui/sidebar";
 import { GlobalMetronome } from "@/components/ui/global-metronome";
 
-export default function DashboardLayout() {
+const DashboardLayout: React.FC = () => {
   const { isAuthenticated, isLoading } = useAuth();
   const location = useLocation();
   
@@ -51,4 +51,6 @@ export default function DashboardLayout() {
       </div>
     </SidebarProvider>
   );
-}
+};
+
+export default DashboardLayout;

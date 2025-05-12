@@ -1,27 +1,29 @@
+
 import React from "react";
 import { useRoutes } from "react-router-dom";
-import { HomeLayout } from "@/layouts/HomeLayout";
-import { DashboardLayout } from "@/layouts/DashboardLayout";
+import HomeLayout from "@/layouts/HomeLayout";
+import DashboardLayout from "@/layouts/DashboardLayout";
 import HomePage from "@/pages/HomePage";
 import RegisterPage from "@/pages/RegisterPage";
 import LoginPage from "@/pages/LoginPage";
-import DashboardPage from "@/pages/Dashboard/DashboardPage";
-import AdminDashboard from "@/pages/admin/AdminDashboard";
-import MediaLibrary from "@/pages/admin/MediaLibrary";
-import UserManagement from "@/pages/admin/UserManagement";
-import EventCalendar from "@/pages/admin/EventCalendar";
-import FinancialRecords from "@/pages/admin/FinancialRecords";
-import SettingsPage from "@/pages/admin/SettingsPage";
+import DashboardPage from "@/pages/DashboardPage";
+import AdminPage from "@/pages/AdminPage";
 import { Spinner } from "@/components/ui/spinner";
 
 const ProfilePage = React.lazy(() => import("@/pages/profile/ProfilePage"));
-const AnnouncementsPage = React.lazy(() => import("@/pages/dashboard/AnnouncementsPage"));
-const ArchivesPage = React.lazy(() => import("@/pages/dashboard/ArchivesPage"));
-const MusicPage = React.lazy(() => import("@/pages/dashboard/MusicPage"));
-const MembersPage = React.lazy(() => import("@/pages/dashboard/MembersPage"));
-const AttendancePage = React.lazy(() => import("@/pages/dashboard/AttendancePage"));
+const AnnouncementsPage = React.lazy(() => import("@/pages/AnnouncementsPage"));
+const MusicPage = React.lazy(() => import("@/pages/SheetMusicPage"));
+const MembersPage = React.lazy(() => import("@/pages/MembersPage"));
+const AttendancePage = React.lazy(() => import("@/pages/AttendancePage"));
+const ArchivesPage = React.lazy(() => import("@/pages/MediaLibraryPage"));
 const AboutPage = React.lazy(() => import("@/pages/AboutPage"));
 const ContactPage = React.lazy(() => import("@/pages/ContactPage"));
+const AdminDashboardPage = React.lazy(() => import("@/pages/AdminDashboardPage"));
+const MediaLibraryPage = React.lazy(() => import("@/pages/media-library/MediaLibraryPage"));
+const UserManagementPage = React.lazy(() => import("@/pages/admin/UserManagementPage"));
+const EventCalendarPage = React.lazy(() => import("@/pages/calendar/CalendarPage"));
+const AdminFinancesPage = React.lazy(() => import("@/pages/AdminFinancesPage"));
+const AdminSettingsPage = React.lazy(() => import("@/pages/AdminSettingsPage"));
 
 export default function AppRoutes() {
   let element = useRoutes([
@@ -109,12 +111,55 @@ export default function AppRoutes() {
       path: "/dashboard/admin",
       element: <DashboardLayout />,
       children: [
-        { path: "", element: <AdminDashboard /> },
-        { path: "media", element: <MediaLibrary /> },
-        { path: "users", element: <UserManagement /> },
-        { path: "events", element: <EventCalendar /> },
-        { path: "financial", element: <FinancialRecords /> },
-        { path: "settings", element: <SettingsPage /> },
+        { path: "", element: <AdminPage /> },
+        { 
+          path: "dashboard", 
+          element: (
+            <React.Suspense fallback={<Spinner />}>
+              <AdminDashboardPage />
+            </React.Suspense>
+          )
+        },
+        { 
+          path: "media", 
+          element: (
+            <React.Suspense fallback={<Spinner />}>
+              <MediaLibraryPage />
+            </React.Suspense>
+          )
+        },
+        { 
+          path: "users", 
+          element: (
+            <React.Suspense fallback={<Spinner />}>
+              <UserManagementPage />
+            </React.Suspense>
+          )
+        },
+        { 
+          path: "events", 
+          element: (
+            <React.Suspense fallback={<Spinner />}>
+              <EventCalendarPage />
+            </React.Suspense>
+          )
+        },
+        { 
+          path: "financial", 
+          element: (
+            <React.Suspense fallback={<Spinner />}>
+              <AdminFinancesPage />
+            </React.Suspense>
+          )
+        },
+        { 
+          path: "settings", 
+          element: (
+            <React.Suspense fallback={<Spinner />}>
+              <AdminSettingsPage />
+            </React.Suspense>
+          )
+        },
       ],
     },
   ]);
