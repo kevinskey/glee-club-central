@@ -15,6 +15,7 @@ import {
   CarouselPrevious
 } from "@/components/ui/carousel";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 export interface PerformanceEvent {
   id: string;
@@ -30,6 +31,7 @@ export function PerformanceSection() {
   const [imageErrors, setImageErrors] = useState<Record<string, boolean>>({});
   const [events, setEvents] = useState<PerformanceEvent[]>([]);
   const [loading, setLoading] = useState(true);
+  const isMobile = useIsMobile();
 
   // Get the authenticated user
   const { isAuthenticated, profile } = useAuth();
@@ -40,7 +42,11 @@ export function PerformanceSection() {
       try {
         setLoading(true);
         const performances = await fetchUpcomingPerformances(10);
-        setEvents(performances);
+        // Sort events chronologically by date
+        const sortedEvents = [...performances].sort((a, b) => {
+          return new Date(a.date).getTime() - new Date(b.date).getTime();
+        });
+        setEvents(sortedEvents);
       } catch (err) {
         console.error("Error in fetchUpcomingPerformances:", err);
         toast.error("Failed to load upcoming performances");
@@ -98,6 +104,7 @@ export function PerformanceSection() {
               opts={{
                 align: "start",
                 loop: true,
+                direction: "ltr",
               }}
             >
               <CarouselContent className="-ml-2 md:-ml-4">
