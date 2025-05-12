@@ -1,11 +1,12 @@
 
 import React from "react";
-import { Outlet, Navigate } from "react-router-dom";
+import { Outlet, Navigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { Spinner } from "@/components/ui/spinner";
 
 export default function AdminLayout() {
   const { isAdmin, isLoading, isAuthenticated } = useAuth();
+  const location = useLocation();
   
   if (isLoading) {
     return (

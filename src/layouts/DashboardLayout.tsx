@@ -14,6 +14,9 @@ const DashboardLayout: React.FC = () => {
   const location = useLocation();
   const isMobile = useMedia("(max-width: 768px)");
   
+  // Only show header on the main dashboard route
+  const shouldShowHeader = location.pathname === "/dashboard";
+  
   // Log current route for troubleshooting
   useEffect(() => {
     console.log("DashboardLayout - Current route:", location.pathname);
@@ -39,11 +42,15 @@ const DashboardLayout: React.FC = () => {
   return (
     <SidebarProvider>
       <div className="min-h-screen flex flex-col bg-background w-full">
-        {/* Show mobile header on mobile devices and standard header on larger screens */}
-        {isMobile ? (
-          <MobileHeader />
-        ) : (
-          <Header />
+        {/* Only show headers on main dashboard route */}
+        {shouldShowHeader && (
+          <>
+            {isMobile ? (
+              <MobileHeader />
+            ) : (
+              <Header />
+            )}
+          </>
         )}
         
         <div className="flex-1 flex flex-col md:flex-row">
