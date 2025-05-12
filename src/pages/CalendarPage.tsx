@@ -1,13 +1,13 @@
-
 import React, { useState, useCallback, useMemo, useEffect } from "react";
 import { Footer } from "@/components/landing/Footer";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { useCalendarEvents, CalendarEvent, EventType } from "@/hooks/useCalendarEvents";
-import { AddEventForm, EventFormValues } from "@/components/calendar/AddEventForm";
+import { AddEventForm } from "@/components/calendar/AddEventForm";
 import { EditEventForm } from "@/components/calendar/EditEventForm";
 import { toast } from "sonner";
 import { usePermissions } from "@/hooks/usePermissions";
 import { useLocation, useSearchParams } from "react-router-dom";
+import { EventFormValues } from "@/components/calendar/EventFormFields";
 
 // Components
 import { CalendarContainer } from "@/components/calendar/CalendarContainer";
