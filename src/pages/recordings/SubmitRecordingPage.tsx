@@ -5,6 +5,7 @@ import { Mic } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { BackButton } from "@/components/ui/back-button";
 
 export default function SubmitRecordingPage() {
   const navigate = useNavigate();
@@ -17,9 +18,10 @@ export default function SubmitRecordingPage() {
         description="Record your vocals and share with the Glee Club community"
         icon={<Mic className="h-6 w-6" />}
         actions={
-          <Button onClick={() => navigate(-1)} size={isMobile ? "sm" : "default"}>
-            Back
-          </Button>
+          <BackButton 
+            fallbackPath="/recordings" 
+            size={isMobile ? "sm" : "default"} 
+          />
         }
       />
       

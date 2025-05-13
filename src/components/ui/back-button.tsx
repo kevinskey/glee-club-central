@@ -1,6 +1,6 @@
 
 import React from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -22,14 +22,18 @@ export const BackButton = ({
   fallbackPath = "/dashboard"
 }: BackButtonProps) => {
   const navigate = useNavigate();
+  const location = useLocation();
 
   const handleGoBack = () => {
-    // Check window.history length to determine if we can go back
-    if (window.history.length > 2) {
-      navigate(-1); // Go back to previous page in history
+    // Check if we came from another page in the app
+    if (window.history.state && window.history.state.idx > 0) {
+      // If we have history, go back
+      navigate(-1);
     } else {
-      // If there's no history, navigate to the fallback path
-      navigate(fallbackPath);
+      // If there's no history or we've just loaded the app, navigate to the fallback
+      const isDashboardPath = location.pathname.includes('/dashboard');
+      const actualFallback = isDashboardPath ? fallbackPath : '/';
+      navigate(actualFallback);
     }
   };
 
