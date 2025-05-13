@@ -1,171 +1,29 @@
 
-@tailwind utilities;
+/* Add text shadow utility for hero text */
+.text-shadow-lg {
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+}
 
-@layer utilities {
-  /* Utility text classes */
-  .text-balance {
-    text-wrap: balance;
-  }
-  
-  .text-pretty {
-    text-wrap: pretty;
-  }
-  
-  /* Add consistent text spacing */
-  p {
-    @apply leading-extra-relaxed;
-    line-height: 2.2;
-  }
-  
-  /* Adjust line heights based on text size */
-  .text-xs, .text-sm {
-    @apply leading-relaxed;
-  }
-  
-  .text-base, .text-lg {
-    @apply leading-extra-relaxed;
-  }
-  
-  .text-xl, .text-2xl, .text-3xl {
-    @apply leading-relaxed;
-  }
-  
-  .text-4xl, .text-5xl, .text-6xl {
-    @apply leading-tight;
-  }
+/* Add gradient animation for the Glee Club text */
+.animate-gradient {
+  background-size: 200% 200%;
+  background-image: linear-gradient(45deg, #ffffff 0%, #f5f5f5 25%, #ffffff 50%, #e8e8e8 75%, #ffffff 100%);
+  animation: gradient 8s ease infinite;
+}
 
-  /* Animation utilities */
-  .animate-marquee {
-    animation: marquee 60s linear infinite;
+@keyframes gradient {
+  0% {
+    background-position: 0% 50%;
   }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
 
-  @keyframes marquee {
-    0% {
-      transform: translateX(0);
-    }
-    100% {
-      transform: translateX(-50%);
-    }
-  }
-  
-  .text-shadow {
-    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  }
-  
-  .text-shadow-lg {
-    text-shadow: 0 4px 8px rgba(0, 0, 0, 0.12);
-  }
-  
-  .bg-blur {
-    backdrop-filter: blur(8px);
-  }
-  
-  .glass-card {
-    @apply bg-white/20 dark:bg-black/20 backdrop-blur-lg border border-white/10 dark:border-white/5 rounded-lg;
-  }
-  
-  /* Animated gradient for Glee Club text */
-  .animate-gradient {
-    background-size: 200% 200%;
-    animation: gradient 8s ease infinite; /* Changed from 3s to 8s */
-    background-image: linear-gradient(45deg, white, #0B4EA2, white);
-  }
-  
-  @keyframes gradient {
-    0% {
-      background-position: 0% 50%;
-    }
-    50% {
-      background-position: 100% 50%;
-    }
-    100% {
-      background-position: 0% 50%;
-    }
-  }
-  
-  /* Background slideshow fade transition */
-  .fade-in {
-    animation: fadeIn 1s ease-in-out;
-  }
-  
-  .fade-out {
-    animation: fadeOut 1s ease-in-out;
-  }
-  
-  @keyframes fadeIn {
-    from { opacity: 0; }
-    to { opacity: 1; }
-  }
-  
-  @keyframes fadeOut {
-    from { opacity: 1; }
-    to { opacity: 0; }
-  }
-  
-  /* Custom transition durations */
-  .duration-1500 {
-    transition-duration: 1500ms;
-  }
-  
-  .duration-3000 {
-    transition-duration: 3000ms;
-  }
-  
-  /* Additional line spacing utilities */
-  .leading-extra-tight {
-    line-height: 1.1;
-  }
-  
-  .leading-extra-relaxed {
-    line-height: 2.2; /* Updated from 2.0 to double spacing */
-  }
-  
-  /* Improved paragraph spacing with bottom margin */
-  .prose-spacing p {
-    margin-bottom: 1.8em; /* Increased bottom margin */
-    line-height: 2.2; /* Updated to double spacing */
-  }
-  
-  /* New utility for increased paragraph spacing */
-  .paragraph-spacing {
-    line-height: 2.2; /* Updated to double spacing */
-  }
-  
-  .paragraph-spacing-loose {
-    line-height: 2.4; /* Increased from 2.2 */
-  }
-  
-  /* Mobile-first responsive utilities */
-  .mobile-container {
-    @apply px-4 sm:px-6 md:px-8 w-full max-w-7xl mx-auto;
-  }
-  
-  /* For non-mobile screens only */
-  @media (min-width: 768px) {
-    .mobile-container {
-      @apply px-4 sm:px-6 md:px-8 w-full max-w-7xl mx-auto;
-    }
-  }
-  
-  .mobile-section-padding {
-    @apply py-8 sm:py-12 md:py-16 lg:py-20;
-  }
-  
-  .mobile-card-padding {
-    @apply p-4 sm:p-6 md:p-8;
-  }
-  
-  /* Stack items on mobile */
-  .mobile-stack {
-    @apply flex flex-col sm:flex-row;
-  }
-  
-  .mobile-full-width {
-    @apply w-full sm:w-auto;
-  }
-  
-  /* Enhance readability on mobile */
-  .mobile-readable {
-    @apply max-w-full sm:max-w-md md:max-w-lg lg:max-w-xl mx-auto;
-  }
+/* Add letter spacing utility */
+.letter-spacing-tight {
+  letter-spacing: -0.03em;
 }
