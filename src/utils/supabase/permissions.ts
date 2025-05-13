@@ -46,7 +46,7 @@ export async function fetchUserPermissions(userId: string) {
     ];
 
     // Ensure title is one of the allowed values
-    const title = allowedTitles.includes(rawTitle) ? rawTitle as UserTitle : null;
+    const title = allowedTitles.includes(rawTitle as UserTitle) ? rawTitle as UserTitle : null;
 
     return { permissions, title };
   } catch (error) {

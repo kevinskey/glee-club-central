@@ -52,7 +52,7 @@ export function UserTitleManagement({
   // Update form state when user changes
   useEffect(() => {
     if (user) {
-      setSelectedTitle(user.title || "General Member");
+      setSelectedTitle(user.title as UserTitle || "General Member" as UserTitle);
       setIsSuperAdmin(user.is_super_admin || false);
     }
   }, [user]);
@@ -93,6 +93,10 @@ export function UserTitleManagement({
     }
   };
 
+  const handleTitleChange = (value: string) => {
+    setSelectedTitle(value as UserTitle);
+  };
+
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogContent className="sm:max-w-[425px]">
@@ -116,7 +120,7 @@ export function UserTitleManagement({
             ) : (
               <Select 
                 value={selectedTitle || undefined}
-                onValueChange={setSelectedTitle}
+                onValueChange={handleTitleChange}
               >
                 <SelectTrigger className="col-span-3">
                   <SelectValue placeholder="Select user title" />
