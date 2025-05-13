@@ -42,13 +42,13 @@ export default function ResetPasswordPage() {
     setResetSuccess(false);
 
     try {
-      const { error } = await resetPassword(values.email);
+      const result = await resetPassword(values.email);
       
-      if (error) {
-        console.error("Password reset error:", error);
-        setResetError(error.message || "Failed to send password reset email");
+      if (result?.error) {
+        console.error("Password reset error:", result.error);
+        setResetError(result.error.message || "Failed to send password reset email");
         toast.error("Password reset failed", {
-          description: error.message || "An error occurred"
+          description: result.error.message || "An error occurred"
         });
       } else {
         setResetSuccess(true);

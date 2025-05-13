@@ -99,8 +99,10 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       setProfile(null);
       setSession(null);
       setIsAuthenticated(false);
+      
+      return { error: null };
     } catch (error) {
-      console.error("Error during logout:", error);
+      return { error };
     } finally {
       setIsLoading(false);
     }

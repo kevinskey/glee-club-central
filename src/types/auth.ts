@@ -57,8 +57,8 @@ export interface AuthContextType {
   permissions?: Record<string, boolean>;
   isAdmin: () => boolean;
   login: (email: string, password: string) => Promise<{ error: any } | void>;
-  logout: () => Promise<void>;
-  resetPassword?: (email: string) => Promise<{ error: any } | void>;
+  logout: () => Promise<{ error: any } | void>;
+  resetPassword: (email: string) => Promise<{ error: any } | void>;
   signOut?: () => Promise<void>;
   signIn?: (email: string, password: string) => Promise<any>;
   signUp?: (email: string, password: string, firstName: string, lastName: string, role?: string) => Promise<any>;
