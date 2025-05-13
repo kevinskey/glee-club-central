@@ -1,404 +1,287 @@
 
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { CalendarEvent, EventType } from "@/types/calendar";
 
-// Constants
-const GOOGLE_CALENDAR_API_BASE = "https://www.googleapis.com/calendar/v3";
-const GOOGLE_OAUTH_ENDPOINT = "https://accounts.google.com/o/oauth2/v2/auth";
-const GOOGLE_SCOPE = "https://www.googleapis.com/auth/calendar";
-const SUPABASE_PROJECT_URL = "https://dzzptovqfqausipsgabw.supabase.co";
-
-// Type definitions for Google Calendar
-interface GoogleTokenResponse {
-  access_token: string;
-  refresh_token?: string;
-  expires_in: number;
-  token_type: string;
-}
-
-interface GoogleEvent {
-  id?: string;
+// Types for Google Calendar Events
+export interface GoogleCalendarEvent {
+  id: string;
   summary: string;
-  description?: string;
-  location?: string;
-  start: {
-    dateTime: string;
-    timeZone?: string;
-  };
-  end: {
-    dateTime: string;
-    timeZone?: string;
-  };
+  description: string;
+  location: string;
+  start: { dateTime: string; timeZone: string } | { date: string };
+  end: { dateTime: string; timeZone: string } | { date: string };
+  colorId?: string;
+  status: string;
+  htmlLink: string;
+  created: string;
+  updated: string;
 }
 
 /**
- * Begins OAuth2 flow with Google Calendar
+ * Checks if the current user has connected their Google Calendar
  */
-export const startGoogleOAuth = async (): Promise<string | null> => {
-  const { data: user } = await supabase.auth.getUser();
-  if (!user || !user.user) {
-    toast.error("You need to be logged in to connect Google Calendar");
-    return null;
-  }
-  
+export async function checkGoogleCalendarConnection(): Promise<boolean> {
   try {
-    // Get redirect URL from the edge function
-    const { data, error } = await supabase.functions.invoke('google-calendar-auth', {
-      body: { action: 'get_auth_url' }
+    const { data: authData, error: authError } = await supabase.auth.getSession();
+    
+    if (authError || !authData.session) {
+      console.error("Authentication error:", authError);
+      return false;
+    }
+    
+    const { data, error } = await supabase.functions.invoke("google-calendar-auth", {
+      body: { 
+        action: "check_connection"
+      }
     });
     
-    if (error) throw error;
-    if (!data || !data.authUrl) throw new Error('No auth URL returned');
+    if (error) {
+      console.error("Error checking Google Calendar connection:", error);
+      return false;
+    }
     
-    return data.authUrl;
-  } catch (error) {
-    console.error("Error starting Google OAuth flow:", error);
-    toast.error("Failed to start Google authentication");
-    return null;
-  }
-};
-
-/**
- * Check if the user has a valid Google Calendar connection
- */
-export const checkGoogleCalendarConnection = async (): Promise<boolean> => {
-  const { data: user } = await supabase.auth.getUser();
-  if (!user || !user.user) return false;
-  
-  try {
-    const { data, error } = await supabase.functions.invoke('google-calendar-auth', {
-      body: { action: 'check_connection' }
-    });
-    
-    if (error) throw error;
     return data?.connected || false;
   } catch (error) {
-    console.error("Error checking Google Calendar connection:", error);
+    console.error("Error in checkGoogleCalendarConnection:", error);
     return false;
   }
-};
+}
 
 /**
- * Get access token for Google Calendar API
+ * Gets the Google Calendar authentication URL for connecting a user's calendar
  */
-export const getGoogleCalendarToken = async (): Promise<string | null> => {
-  const { data: user } = await supabase.auth.getUser();
-  if (!user || !user.user) return null;
-  
+export async function getGoogleCalendarAuthUrl(): Promise<string | null> {
   try {
-    const { data, error } = await supabase.functions.invoke('get-google-token', {
-      body: { userId: user.user.id }
+    const { data, error } = await supabase.functions.invoke("google-calendar-auth", {
+      body: { 
+        action: "get_auth_url"
+      }
     });
     
-    if (error) throw error;
-    return data?.token || null;
+    if (error) {
+      console.error("Error getting Google Calendar auth URL:", error);
+      return null;
+    }
+    
+    return data?.authUrl || null;
   } catch (error) {
-    console.error("Error getting Google Calendar token:", error);
+    console.error("Error in getGoogleCalendarAuthUrl:", error);
     return null;
   }
-};
+}
 
 /**
- * Disconnect Google Calendar
+ * Disconnects the current user's Google Calendar
  */
-export const disconnectGoogleCalendar = async (): Promise<boolean> => {
-  const { data: user } = await supabase.auth.getUser();
-  if (!user || !user.user) {
-    toast.error("You need to be logged in to disconnect Google Calendar");
-    return false;
-  }
-  
+export async function disconnectGoogleCalendar(): Promise<boolean> {
   try {
-    const { data, error } = await supabase.functions.invoke('google-calendar-auth', {
-      body: { action: 'disconnect' }
+    const { data, error } = await supabase.functions.invoke("google-calendar-auth", {
+      body: { 
+        action: "disconnect"
+      }
     });
     
-    if (error) throw error;
-    
-    if (data?.success) {
-      toast.success("Google Calendar disconnected successfully");
-      return true;
-    } else {
+    if (error) {
+      console.error("Error disconnecting Google Calendar:", error);
       toast.error("Failed to disconnect Google Calendar");
       return false;
     }
+    
+    toast.success("Google Calendar disconnected successfully");
+    return true;
   } catch (error) {
-    console.error("Error disconnecting from Google Calendar:", error);
-    toast.error("Failed to disconnect Google Calendar");
+    console.error("Error in disconnectGoogleCalendar:", error);
+    toast.error("An error occurred while disconnecting Google Calendar");
     return false;
   }
-};
+}
 
 /**
- * Fetch events from Google Calendar
+ * Syncs events between Google Calendar and local calendar
  */
-export const fetchGoogleCalendarEvents = async (
-  calendarId = 'primary',
-  timeMin = new Date().toISOString(),
-  timeMax = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString()
-): Promise<CalendarEvent[]> => {
-  const token = await getGoogleCalendarToken();
-  if (!token) {
-    return [];
-  }
-  
+export async function syncWithGoogleCalendar(): Promise<boolean> {
   try {
-    const { data, error } = await supabase.functions.invoke('google-calendar-fetch', {
+    const { data, error } = await supabase.functions.invoke("google-calendar-sync", {
       body: { 
-        calendarId,
-        timeMin,
-        timeMax,
-        accessToken: token
+        action: "full_sync"
       }
     });
     
-    if (error) throw error;
-    
-    if (!data?.events) return [];
-    
-    // Fix: Convert dates properly for each event
-    return data.events.map((event: any): CalendarEvent => {
-      // Handle start and end dates correctly - always convert to Date objects first
-      // then convert back to ISO strings for the CalendarEvent interface
-      const startDateTime = new Date(event.start.dateTime || event.start.date);
-      const endDateTime = new Date(event.end.dateTime || event.end.date);
-      
-      return {
-        id: event.id,
-        title: event.summary || 'Untitled Event',
-        description: event.description || '',
-        location: event.location || '',
-        date: startDateTime, 
-        time: startDateTime.toTimeString().substring(0, 5), // Extract HH:MM from time string
-        start: startDateTime.toISOString(), // Convert Date to string for the interface
-        end: endDateTime.toISOString(), // Convert Date to string for the interface
-        type: determineEventType(event),
-        created_by: 'google',
-        source: 'google',
-        allDay: !event.start.dateTime
-      };
-    });
-  } catch (error) {
-    console.error("Error fetching events from Google Calendar:", error);
-    toast.error("Failed to fetch events from Google Calendar");
-    return [];
-  }
-};
-
-/**
- * Create an event in Google Calendar
- */
-export const createGoogleCalendarEvent = async (event: Partial<CalendarEvent>): Promise<string | null> => {
-  const token = await getGoogleCalendarToken();
-  if (!token) return null;
-  
-  try {
-    // Convert our event format to Google Calendar format
-    const googleEvent = convertToGoogleEvent(event);
-    
-    const { data, error } = await supabase.functions.invoke('google-calendar-events', {
-      body: { 
-        action: 'create',
-        calendarId: 'primary',
-        event: googleEvent,
-        accessToken: token
-      }
-    });
-    
-    if (error) throw error;
-    
-    if (data?.id) {
-      // Update local database with Google event ID
-      await supabase
-        .from('calendar_events')
-        .update({ google_event_id: data.id })
-        .match({ id: event.id });
-        
-      return data.id;
-    }
-    
-    return null;
-  } catch (error) {
-    console.error("Error creating event in Google Calendar:", error);
-    toast.error("Failed to create event in Google Calendar");
-    return null;
-  }
-};
-
-/**
- * Update an event in Google Calendar
- */
-export const updateGoogleCalendarEvent = async (event: Partial<CalendarEvent>): Promise<boolean> => {
-  const token = await getGoogleCalendarToken();
-  if (!token) return false;
-  
-  // We need the Google event ID to update it
-  if (!event.id) return false;
-  
-  try {
-    // Get the Google event ID from our database if available
-    let googleEventId = event.id;
-    if (!googleEventId.startsWith('google_')) {
-      const { data } = await supabase
-        .from('calendar_events')
-        .select('google_event_id')
-        .eq('id', event.id)
-        .single();
-        
-      googleEventId = data?.google_event_id || event.id;
-    }
-    
-    // Convert our event format to Google Calendar format
-    const googleEvent = convertToGoogleEvent(event);
-    
-    const { data, error } = await supabase.functions.invoke('google-calendar-events', {
-      body: { 
-        action: 'update',
-        calendarId: 'primary',
-        eventId: googleEventId,
-        event: googleEvent,
-        accessToken: token
-      }
-    });
-    
-    if (error) throw error;
-    
-    return data?.success || false;
-  } catch (error) {
-    console.error("Error updating event in Google Calendar:", error);
-    toast.error("Failed to update event in Google Calendar");
-    return false;
-  }
-};
-
-/**
- * Delete an event from Google Calendar
- */
-export const deleteGoogleCalendarEvent = async (eventId: string): Promise<boolean> => {
-  const token = await getGoogleCalendarToken();
-  if (!token) return false;
-  
-  try {
-    // Get the Google event ID from our database if available
-    let googleEventId = eventId;
-    if (!googleEventId.startsWith('google_')) {
-      const { data } = await supabase
-        .from('calendar_events')
-        .select('google_event_id')
-        .eq('id', eventId)
-        .single();
-        
-      googleEventId = data?.google_event_id || eventId;
-    }
-    
-    const { data, error } = await supabase.functions.invoke('google-calendar-events', {
-      body: { 
-        action: 'delete',
-        calendarId: 'primary',
-        eventId: googleEventId,
-        accessToken: token
-      }
-    });
-    
-    if (error) throw error;
-    
-    return data?.success || false;
-  } catch (error) {
-    console.error("Error deleting event from Google Calendar:", error);
-    toast.error("Failed to delete event from Google Calendar");
-    return false;
-  }
-};
-
-/**
- * Sync all local events with Google Calendar
- */
-export const syncEventsWithGoogleCalendar = async (): Promise<boolean> => {
-  try {
-    const { data, error } = await supabase.functions.invoke('google-calendar-sync', {
-      body: { action: 'full_sync' }
-    });
-    
-    if (error) throw error;
-    
-    if (data?.success) {
-      toast.success("Calendar synced successfully");
-      return true;
-    } else {
-      toast.error("Calendar sync failed");
+    if (error) {
+      console.error("Error syncing with Google Calendar:", error);
+      toast.error("Failed to sync with Google Calendar");
       return false;
     }
+    
+    if (data?.stats) {
+      toast.success(`Sync completed: ${data.stats.eventsCreatedLocally} events imported, ${data.stats.localEventsSyncedToGoogle} events exported`);
+    } else {
+      toast.success("Calendar synchronized successfully");
+    }
+    
+    return true;
   } catch (error) {
-    console.error("Error syncing with Google Calendar:", error);
-    toast.error("Failed to sync with Google Calendar");
+    console.error("Error in syncWithGoogleCalendar:", error);
+    toast.error("An error occurred while syncing with Google Calendar");
     return false;
   }
-};
+}
 
-// Helper function to convert app event format to Google Calendar format
-const convertToGoogleEvent = (event: Partial<CalendarEvent>): GoogleEvent => {
-  // Fix: Use more robust type checking for dates
-  let startDateTime: Date;
-  let endDateTime: Date;
-  
-  // Handle the start date (convert string to Date if needed)
-  if (event.start) {
-    if (typeof event.start === 'string') {
-      startDateTime = new Date(event.start);
-    } else if (typeof event.start === 'object' && 'getTime' in event.start) {
-      startDateTime = event.start as unknown as Date;
-    } else {
-      startDateTime = new Date();
-    }
-  } else {
-    startDateTime = new Date();
+/**
+ * Exports local calendar events to iCal format
+ */
+export function exportCalendarToIcal(events: any[]): void {
+  try {
+    // Basic iCal format
+    let icalContent = [
+      "BEGIN:VCALENDAR",
+      "VERSION:2.0",
+      "PRODID:-//Spelman Glee Club//Calendar//EN"
+    ];
+    
+    // Add each event
+    events.forEach(event => {
+      const startDate = new Date(event.start);
+      const endDate = new Date(event.end || startDate);
+      
+      // Format dates for iCal
+      const formatDate = (date: Date) => {
+        return date.toISOString().replace(/[-:]/g, "").replace(/\.\d{3}/g, "");
+      };
+      
+      icalContent = [
+        ...icalContent,
+        "BEGIN:VEVENT",
+        `UID:${event.id}`,
+        `SUMMARY:${event.title || "Unnamed Event"}`,
+        `DESCRIPTION:${event.description || ""}`,
+        `LOCATION:${event.location || ""}`,
+        `DTSTART:${formatDate(startDate)}`,
+        `DTEND:${formatDate(endDate)}`,
+        "END:VEVENT"
+      ];
+    });
+    
+    // Close the calendar
+    icalContent.push("END:VCALENDAR");
+    
+    // Create blob and download
+    const blob = new Blob([icalContent.join("\r\n")], { type: "text/calendar" });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "glee-club-calendar.ics";
+    document.body.appendChild(a);
+    a.click();
+    window.URL.revokeObjectURL(url);
+    document.body.removeChild(a);
+    
+    toast.success("Calendar exported successfully");
+  } catch (error) {
+    console.error("Error exporting calendar:", error);
+    toast.error("Failed to export calendar");
   }
-  
-  // Handle the end date (convert string to Date if needed)
-  if (event.end) {
-    if (typeof event.end === 'string') {
-      endDateTime = new Date(event.end);
-    } else if (typeof event.end === 'object' && 'getTime' in event.end) {
-      endDateTime = event.end as unknown as Date;
-    } else {
-      // Default to 1 hour later if not provided
-      endDateTime = new Date(startDateTime.getTime() + 60 * 60 * 1000);
-    }
-  } else {
-    // Default to 1 hour later if not provided
-    endDateTime = new Date(startDateTime.getTime() + 60 * 60 * 1000);
-  }
-  
-  return {
-    summary: event.title || 'Untitled Event',
-    description: event.description,
-    location: event.location,
-    start: {
-      dateTime: startDateTime.toISOString(),
-      timeZone: 'America/New_York'
-    },
-    end: {
-      dateTime: endDateTime.toISOString(),
-      timeZone: 'America/New_York'
-    }
-  };
-};
+}
 
-// Helper function to determine event type based on Google Calendar event
-const determineEventType = (googleEvent: any): EventType => {
-  const title = googleEvent.summary?.toLowerCase() || '';
-  const description = googleEvent.description?.toLowerCase() || '';
+/**
+ * Handles import of iCal format calendar files
+ */
+export async function importCalendarFromIcal(file: File): Promise<any[]> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    
+    reader.onload = (e) => {
+      try {
+        const content = e.target?.result as string;
+        if (!content) {
+          toast.error("Could not read file");
+          reject("Could not read file");
+          return;
+        }
+        
+        // Very basic iCal parsing
+        const events: any[] = [];
+        const lines = content.split(/\r\n|\n|\r/);
+        
+        let currentEvent: any = null;
+        
+        lines.forEach(line => {
+          if (line === "BEGIN:VEVENT") {
+            currentEvent = {};
+          } else if (line === "END:VEVENT" && currentEvent) {
+            events.push(currentEvent);
+            currentEvent = null;
+          } else if (currentEvent) {
+            const [key, ...valueParts] = line.split(":");
+            const value = valueParts.join(":");
+            
+            if (key === "SUMMARY") {
+              currentEvent.title = value;
+            } else if (key === "DESCRIPTION") {
+              currentEvent.description = value;
+            } else if (key === "LOCATION") {
+              currentEvent.location = value;
+            } else if (key === "DTSTART") {
+              currentEvent.start = parseIcalDate(value);
+            } else if (key === "DTEND") {
+              currentEvent.end = parseIcalDate(value);
+            } else if (key === "UID") {
+              currentEvent.external_id = value;
+            }
+          }
+        });
+        
+        // Standardize event format
+        const processedEvents = events.map(event => ({
+          ...event,
+          type: determineEventType(event.title, event.description),
+          // Add more fields as needed
+        }));
+        
+        toast.success(`Imported ${processedEvents.length} events`);
+        resolve(processedEvents);
+      } catch (error) {
+        console.error("Error parsing calendar import:", error);
+        toast.error("Failed to parse calendar file");
+        reject(error);
+      }
+    };
+    
+    reader.onerror = (error) => {
+      console.error("Error reading file:", error);
+      toast.error("Error reading file");
+      reject(error);
+    };
+    
+    reader.readAsText(file);
+  });
+}
+
+// Helper function to parse iCal date format
+function parseIcalDate(value: string): string {
+  // Basic implementation - would need enhancement for production
+  const year = value.slice(0, 4);
+  const month = value.slice(4, 6);
+  const day = value.slice(6, 8);
+  const hour = value.slice(9, 11) || "00";
+  const minute = value.slice(11, 13) || "00";
   
-  if (title.includes('rehearsal') || description.includes('rehearsal')) {
-    return 'rehearsal';
-  } else if (title.includes('concert') || description.includes('concert')) {
-    return 'concert';
-  } else if (title.includes('sectional') || description.includes('sectional')) {
-    return 'sectional';
-  } else if (title.includes('tour') || description.includes('tour')) {
-    return 'tour';
+  return `${year}-${month}-${day}T${hour}:${minute}:00`;
+}
+
+// Helper function to determine event type based on title/description
+function determineEventType(title: string, description: string): string {
+  const text = (title + " " + (description || "")).toLowerCase();
+  
+  if (text.includes("concert") || text.includes("performance")) {
+    return "concert";
+  } else if (text.includes("rehearsal")) {
+    return "rehearsal";
+  } else if (text.includes("sectional")) {
+    return "sectional";
+  } else if (text.includes("tour")) {
+    return "tour";
   } else {
-    return 'special';
+    return "special";
   }
-};
+}

@@ -1,7 +1,8 @@
+
 import React, { useState, useCallback, useMemo, useEffect } from "react";
 import { Footer } from "@/components/landing/Footer";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { useCalendarEvents, CalendarEvent, EventType } from "@/hooks/useCalendarEvents";
+import { useCalendarStore } from "@/hooks/useCalendarStore";
 import { AddEventForm } from "@/components/calendar/AddEventForm";
 import { EditEventForm } from "@/components/calendar/EditEventForm";
 import { toast } from "sonner";
@@ -16,32 +17,29 @@ import { CalendarContainer } from "@/components/calendar/CalendarContainer";
 import { EventList } from "@/components/calendar/EventList";
 import { EventDetails } from "@/components/calendar/EventDetails";
 import { CalendarPageHeader } from "@/components/calendar/CalendarPageHeader";
-import { GoogleCalendarToggle } from "@/components/calendar/GoogleCalendarToggle";
 import { CalendarEditTools } from "@/components/calendar/CalendarEditTools";
+import { CalendarTools } from "@/components/calendar/CalendarTools";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 export default function CalendarPage() {
   const [date, setDate] = useState<Date | undefined>(new Date());
-  const [selectedEvent, setSelectedEvent] = useState<CalendarEvent | null>(null);
+  const [selectedEvent, setSelectedEvent] = useState<any | null>(null);
   const [isAddEventOpen, setIsAddEventOpen] = useState(false);
   const [isEditEventOpen, setIsEditEventOpen] = useState(false);
   const [isResetDialogOpen, setIsResetDialogOpen] = useState(false);
   const [searchParams] = useSearchParams();
   const eventId = searchParams.get('event');
+  const isMobile = useIsMobile();
   
   const { 
     events, 
-    loading, 
+    isLoading, 
     addEvent, 
     updateEvent, 
     deleteEvent,
     fetchEvents,
-    useGoogleCalendar,
-    toggleGoogleCalendar,
-    googleCalendarError,
-    daysAhead,
-    setDaysAhead,
-    resetCalendar
-  } = useCalendarEvents();
+    importEvents
+  } = useCalendarStore();
   
   // Use the permissions hook to check for super admin status
   const { isSuperAdmin } = usePermissions();
@@ -59,7 +57,7 @@ export default function CalendarPage() {
   
   // Handle URL event parameter
   useEffect(() => {
-    if (eventId && events.length > 0 && !loading) {
+    if (eventId && events.length > 0 && !isLoading) {
       // Find the event by ID
       const event = events.find(e => e.id === eventId);
       if (event) {
@@ -71,13 +69,13 @@ export default function CalendarPage() {
         toast.error("Event not found");
       }
     }
-  }, [eventId, events, loading]);
+  }, [eventId, events, isLoading]);
     
   // Get days with events for highlighting in the calendar - ensure they are Date objects
   const daysWithEvents = useMemo(() => events.map(event => event.date), [events]);
   
   // Handle event selection
-  const handleEventSelect = useCallback((event: CalendarEvent) => {
+  const handleEventSelect = useCallback((event: any) => {
     setSelectedEvent(event);
   }, []);
 
@@ -91,11 +89,10 @@ export default function CalendarPage() {
     fetchEvents();
   }, [fetchEvents]);
 
-  // Handle adding new event - ensuring event has all required fields
+  // Handle adding new event
   const handleAddEvent = async (formValues: EventFormValues & { start: Date, end: Date }) => {
     // Make sure we have all required fields from formValues
-    // and conform to the requirements for CalendarEvent
-    const eventData: Omit<CalendarEvent, "id"> = {
+    const eventData: any = {
       title: formValues.title,
       description: formValues.description || "",
       date: formValues.date,
@@ -103,13 +100,13 @@ export default function CalendarPage() {
       end: formValues.end,
       time: formValues.time,
       location: formValues.location,
-      type: formValues.type as EventType, // Ensure correct type casting
+      type: formValues.type,
       image_url: formValues.image_url || undefined
     };
     
-    const newEvent = await addEvent(eventData);
+    const success = await addEvent(eventData);
     
-    if (newEvent) {
+    if (success) {
       setIsAddEventOpen(false);
       toast.success("Event added successfully");
       
@@ -120,13 +117,6 @@ export default function CalendarPage() {
           formValues.date.getFullYear() === date.getFullYear()) {
         // Set the date again to trigger a refresh of the events list
         handleDateSelect(new Date(date));
-        
-        // Optionally select the newly added event
-        if (newEvent) {
-          setTimeout(() => {
-            setSelectedEvent(newEvent);
-          }, 100);
-        }
       }
     }
   };
@@ -162,10 +152,22 @@ export default function CalendarPage() {
   
   // Handle calendar reset
   const handleResetCalendar = async () => {
-    if (await resetCalendar()) {
-      toast.success("Calendar has been reset successfully");
-      setIsResetDialogOpen(false);
+    try {
+      // Delete all events
+      const { error } = await supabase
+        .from('calendar_events')
+        .delete()
+        .neq('id', 'none');  // This will match all rows
+      
+      if (error) throw error;
+      
+      // Refresh events
       await fetchEvents();
+      setIsResetDialogOpen(false);
+      toast.success("Calendar has been reset successfully");
+    } catch (error) {
+      console.error("Error resetting calendar:", error);
+      toast.error("Failed to reset calendar");
     }
   };
   
@@ -185,6 +187,12 @@ export default function CalendarPage() {
     }
   }, []);
   
+  // Import events handler
+  const handleImportEvents = async (importedEvents: any[]) => {
+    await importEvents(importedEvents);
+    await fetchEvents();
+  };
+  
   return (
     <div className="flex min-h-screen flex-col">
       <Header initialShowNewsFeed={false} />
@@ -192,17 +200,6 @@ export default function CalendarPage() {
         <div className="container py-8 sm:py-10 md:py-12">
           <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
             <CalendarPageHeader onAddEventClick={handleOpenAddEvent} />
-            
-            {/* Only show Google Calendar toggle for super admins */}
-            {isSuperAdmin && (
-              <GoogleCalendarToggle 
-                useGoogleCalendar={useGoogleCalendar}
-                toggleGoogleCalendar={toggleGoogleCalendar} 
-                googleCalendarError={googleCalendarError}
-                daysAhead={daysAhead}
-                onDaysAheadChange={setDaysAhead}
-              />
-            )}
           </div>
           
           {/* Make sure the CalendarEditTools is visible and working */}
@@ -213,9 +210,9 @@ export default function CalendarPage() {
               onEditSelected={handleEditEvent}
               onDeleteSelected={handleDeleteEvent}
               onResetCalendar={() => setIsResetDialogOpen(true)}
-              onExportCalendar={() => toast.info("Export feature coming soon")}
-              onImportCalendar={() => toast.info("Import feature coming soon")}
-              onShareCalendar={() => toast.info("Share feature coming soon")}
+              onExportCalendar={() => toast.info("Scroll down to use calendar tools")}
+              onImportCalendar={() => toast.info("Scroll down to use calendar tools")}
+              onShareCalendar={() => toast.info("Scroll down to use calendar tools")}
               className="mb-4"
             />
           )}
@@ -227,15 +224,25 @@ export default function CalendarPage() {
                 date={date}
                 setDate={handleDateSelect}
                 daysWithEvents={daysWithEvents}
-                loading={loading}
+                loading={isLoading}
                 events={events}
               />
+              
+              {/* Add CalendarTools component for admins */}
+              {isSuperAdmin && !isMobile && (
+                <div className="mt-6">
+                  <CalendarTools 
+                    events={events} 
+                    onImportEvents={handleImportEvents} 
+                  />
+                </div>
+              )}
             </div>
             
             {/* Event details */}
             <div className="w-full lg:w-1/2 h-full">
               <div className="border rounded-lg p-6 h-full bg-white dark:bg-gray-800 shadow-sm">
-                {loading ? (
+                {isLoading ? (
                   <div className="flex justify-center items-center py-10">
                     <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-glee-purple"></div>
                   </div>
@@ -260,6 +267,16 @@ export default function CalendarPage() {
                   </>
                 )}
               </div>
+              
+              {/* Show calendar tools on mobile at the bottom */}
+              {isSuperAdmin && isMobile && (
+                <div className="mt-6">
+                  <CalendarTools 
+                    events={events} 
+                    onImportEvents={handleImportEvents} 
+                  />
+                </div>
+              )}
             </div>
           </div>
         </div>
