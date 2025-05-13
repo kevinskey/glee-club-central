@@ -101,9 +101,9 @@ export function UserTitleManagement({
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle>Update User Role</DialogTitle>
+          <DialogTitle>Update User Title</DialogTitle>
           <DialogDescription>
-            {user && `Change role settings for ${user.first_name} ${user.last_name}`}
+            {user && `Change title settings for ${user.first_name} ${user.last_name}`}
           </DialogDescription>
         </DialogHeader>
         

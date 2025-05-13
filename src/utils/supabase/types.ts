@@ -37,6 +37,3 @@ export interface MemberNote {
 export interface UserPermissions {
   [permission: string]: boolean;
 }
-
-// Updated to match the UserRole type in auth.ts
-export type UserRole = 'administrator' | 'director' | 'section_leader' | 'singer' | 'student_conductor' | 'accompanist' | 'non_singer' | 'admin' | 'general' | 'staff' | 'student' | 'guest';

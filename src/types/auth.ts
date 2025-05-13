@@ -13,14 +13,13 @@ export interface AuthUser {
     provider?: string;
     [key: string]: any;
   };
-  role?: UserRole;
   aud?: string;
   created_at?: string;
 }
 
 export interface Profile {
   id: string;
-  user_id?: string;  // Made optional to fix setProfile error
+  user_id?: string;
   first_name?: string;
   last_name?: string;
   email?: string;
@@ -31,8 +30,6 @@ export interface Profile {
   class_year?: string;
   bio?: string;
   status?: string;
-  role?: string;
-  title?: string;
   special_roles?: string;
   join_date?: string;
   created_at?: string;
@@ -42,12 +39,8 @@ export interface Profile {
   dues_paid?: boolean;
   is_super_admin?: boolean;
   personal_title?: string;
+  title?: string;
 }
-
-// Updated to string literal type union instead of interface
-export type UserRole = 'admin' | 'director' | 'section_leader' | 'singer' | 
-                      'student_conductor' | 'accompanist' | 'non_singer' | 'general' |
-                      'administrator' | 'member' | 'guest' | 'staff' | 'student';
 
 export interface AuthContextType {
   user: AuthUser | null;
@@ -59,11 +52,10 @@ export interface AuthContextType {
   login: (email: string, password: string) => Promise<{ error: any } | void>;
   logout: () => Promise<{ error: any } | void>;
   resetPassword: (email: string) => Promise<{ error: any } | void>;
-  signOut?: () => Promise<{ error: any } | void>; // Updated return type
+  signOut?: () => Promise<{ error: any } | void>;
   signIn?: (email: string, password: string) => Promise<any>;
-  signUp?: (email: string, password: string, firstName: string, lastName: string, role?: string) => Promise<any>;
+  signUp?: (email: string, password: string, firstName: string, lastName: string) => Promise<any>;
   refreshPermissions?: (userId?: string) => Promise<void>;
   updatePassword?: (newPassword: string) => Promise<{ error: any } | null>;
-  // Add the session property for compatibility
   session: any;
 }

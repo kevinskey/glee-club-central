@@ -30,7 +30,7 @@ export function usePermissions(): UsePermissionsReturn {
   // Derived state for admin roles
   const isSuperAdmin = permissions.includes('admin') || userTitle === 'Super Admin';
   const isAdminRole = isSuperAdmin || permissions.some(p => 
-    p.includes('manage_') || profile?.role === 'admin'
+    p.includes('manage_') || profile?.is_super_admin === true
   );
 
   useEffect(() => {

@@ -10,7 +10,6 @@ export interface User {
   last_name: string;
   phone?: string | null;
   voice_part: string | null;
-  role: string;
   avatar_url?: string | null;
   status: string;
   join_date?: string;
@@ -20,6 +19,8 @@ export interface User {
   created_at: string;
   updated_at?: string | null;
   last_sign_in_at?: string | null;
+  title?: string;
+  is_super_admin?: boolean;
 }
 
 export const userManagementService = {
@@ -66,8 +67,7 @@ export const userManagementService = {
         options: {
           data: {
             first_name: userData.first_name,
-            last_name: userData.last_name,
-            role: userData.role
+            last_name: userData.last_name
           }
         }
       });
@@ -85,7 +85,8 @@ export const userManagementService = {
           class_year: userData.class_year,
           notes: userData.notes,
           dues_paid: userData.dues_paid || false,
-          join_date: userData.join_date || new Date().toISOString().split('T')[0]
+          join_date: userData.join_date || new Date().toISOString().split('T')[0],
+          title: userData.title || 'General Member'
         })
         .eq('id', authData.user.id);
       
@@ -133,24 +134,6 @@ export const userManagementService = {
     } catch (error) {
       console.error('Error deleting user:', error);
       toast.error('Failed to delete user');
-      return false;
-    }
-  },
-  
-  async changeRole(userId: string, role: string): Promise<boolean> {
-    try {
-      const { error } = await supabase
-        .from('profiles')
-        .update({ role })
-        .eq('id', userId);
-      
-      if (error) throw error;
-      
-      toast.success('User role updated successfully');
-      return true;
-    } catch (error) {
-      console.error('Error changing user role:', error);
-      toast.error('Failed to update user role');
       return false;
     }
   }
