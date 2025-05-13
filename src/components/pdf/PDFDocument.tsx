@@ -87,7 +87,7 @@ export const PDFDocument = ({
       {/* Debug info */}
       {process.env.NODE_ENV === 'development' && (
         <div className="absolute top-2 right-2 z-40 bg-background/80 text-xs px-2 py-1 rounded">
-          URL: {url ? url.substring(0, 30) + '...' : 'undefined'}
+          URL: {url ? url.substring(0, 30) + '...' : 'undefined'} | Page: {currentPage}
         </div>
       )}
       

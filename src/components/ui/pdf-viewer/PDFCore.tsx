@@ -91,8 +91,9 @@ export const PDFCore: React.FC<PDFCoreProps> = ({
       return `https://docs.google.com/viewer?url=${encodeURIComponent(sanitizedUrl)}&embedded=true`;
     }
     
-    // Direct URL for PDF viewing - browser's native PDF viewer will handle it
-    return sanitizedUrl;
+    // Direct URL for PDF viewing with page parameter
+    // Using hash parameter (#page=) for browser's native PDF viewers that support it
+    return `${sanitizedUrl}#page=${currentPage}`;
   };
 
   // Error display
@@ -136,7 +137,7 @@ export const PDFCore: React.FC<PDFCoreProps> = ({
         </div>
       )}
       
-      {/* PDF Iframe */}
+      {/* PDF Iframe with improved parameters for full document display */}
       <iframe 
         src={getPdfViewerUrl()}
         className="w-full h-full border-0" 

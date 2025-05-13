@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
-import { FileText } from 'lucide-react';
+import { FileText, Loader2 } from 'lucide-react';
 
 interface PDFThumbnailProps {
   url: string;
@@ -24,6 +24,8 @@ export const PDFThumbnail = ({ url, title, className = '', onClick }: PDFThumbna
 
     const fetchPDF = async () => {
       try {
+        console.log("Generating thumbnail for PDF:", url);
+        
         // Import pdfjs dynamically to reduce initial load time
         const pdfjs = await import('pdfjs-dist');
         const pdfjsWorker = await import('pdfjs-dist/build/pdf.worker.entry');
@@ -39,7 +41,7 @@ export const PDFThumbnail = ({ url, title, className = '', onClick }: PDFThumbna
         const page = await pdf.getPage(1);
         
         // Set scale for the canvas (adjust as needed)
-        const viewport = page.getViewport({ scale: 1.0 });
+        const viewport = page.getViewport({ scale: 1.2 });
         
         // Prepare canvas for rendering
         const canvas = document.createElement('canvas');
@@ -63,6 +65,7 @@ export const PDFThumbnail = ({ url, title, className = '', onClick }: PDFThumbna
         const dataUrl = canvas.toDataURL('image/png');
         setObjectUrl(dataUrl);
         setIsLoading(false);
+        console.log("PDF thumbnail generated successfully");
       } catch (err) {
         console.error("Error generating PDF thumbnail:", err);
         setError("Failed to load thumbnail");
@@ -87,7 +90,7 @@ export const PDFThumbnail = ({ url, title, className = '', onClick }: PDFThumbna
     >
       {isLoading ? (
         <div className="flex items-center justify-center w-full h-full">
-          <FileText className="h-12 w-12 text-muted-foreground/50 animate-pulse" />
+          <Loader2 className="h-12 w-12 text-muted-foreground/50 animate-spin" />
         </div>
       ) : error ? (
         <div className="flex items-center justify-center w-full h-full">

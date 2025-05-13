@@ -69,7 +69,13 @@ export const PDFPreview = ({
   return (
     <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
       <DialogTrigger asChild>
-        <div className={`cursor-pointer ${className}`} onClick={() => console.log("Opening PDF preview:", title)}>
+        <div 
+          className={`cursor-pointer ${className}`} 
+          onClick={() => {
+            console.log("Opening PDF preview:", title);
+            setIsDialogOpen(true);
+          }}
+        >
           {children}
         </div>
       </DialogTrigger>
