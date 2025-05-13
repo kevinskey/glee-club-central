@@ -14,6 +14,7 @@ import { MediaListView } from "@/components/media/MediaListView";
 import { MediaGridView } from "@/components/media/MediaGridView";
 import { Button } from "@/components/ui/button";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { MediaTypeDropdown } from "@/components/media/MediaTypeDropdown";
 
 interface MediaLibraryPageProps {
   isAdminView?: boolean;
@@ -135,6 +136,16 @@ export default function MediaLibraryPage({ isAdminView = false }: MediaLibraryPa
             className="w-full pl-10 pr-3 py-2 rounded-md border border-input bg-background"
           />
         </div>
+        
+        {/* Media Type Dropdown for Mobile */}
+        {isMobile && (
+          <div className="w-full">
+            <MediaTypeDropdown
+              selected={selectedMediaType as MediaType | "all"}
+              onSelect={setSelectedMediaType}
+            />
+          </div>
+        )}
         
         {!isMobile && (
           <MediaFilterBar 

@@ -2,8 +2,9 @@
 import React from 'react';
 import { PageHeader } from '@/components/ui/page-header';
 import { FileImage } from 'lucide-react';
+import MediaLibraryPage from '../media-library/MediaLibraryPage';
 
-const MediaLibraryPage = () => {
+const AdminMediaLibraryPage = () => {
   return (
     <div className="container mx-auto px-4 py-8">
       <PageHeader
@@ -13,10 +14,10 @@ const MediaLibraryPage = () => {
       />
       
       <div className="mt-8">
-        <p>Media library management coming soon...</p>
+        <MediaLibraryPage isAdminView={true} />
       </div>
     </div>
   );
 };
 
-export default MediaLibraryPage;
+export default AdminMediaLibraryPage;
