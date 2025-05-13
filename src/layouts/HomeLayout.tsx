@@ -4,7 +4,8 @@ import { Outlet, useLocation } from "react-router-dom";
 import { Toaster } from "sonner";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { MobileBottomNav } from "@/components/layout/MobileBottomNav";
-import { Header } from "@/components/landing/Header"; // Import the Header component
+import { Header } from "@/components/landing/Header";
+import { Footer } from "@/components/landing/Footer";
 
 interface HomeLayoutProps {
   hideHeader?: boolean;
@@ -27,9 +28,12 @@ const HomeLayout: React.FC<HomeLayoutProps> = ({ hideHeader = false, children })
       <Toaster />
       <div className="min-h-screen flex flex-col bg-background w-full">
         {!shouldHideHeader && <Header initialShowNewsFeed={location.pathname === '/'} />}
+        
         <div className={`flex-1 ${isMobile && showMobileBottomNav ? "pb-20" : "pb-6"}`}>
           {children || <Outlet />}
         </div>
+        
+        <Footer />
         
         {/* Mobile bottom navigation */}
         {isMobile && showMobileBottomNav && <MobileBottomNav />}

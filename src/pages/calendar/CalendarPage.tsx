@@ -1,5 +1,5 @@
+
 import React, { useState, useEffect, useRef } from "react";
-import { Footer } from "@/components/landing/Footer";
 import { CalendarHeader } from "@/components/calendar/CalendarHeader";
 import { CalendarSidebar } from "@/components/calendar/CalendarSidebar";
 import { EventModal } from "@/components/calendar/EventModal";
@@ -111,7 +111,6 @@ const CalendarPage = () => {
 
   return (
     <div className="flex flex-col min-h-screen">
-      {/* Removed the Header component completely */}
       <main className="flex-1 bg-gray-50 dark:bg-gray-900">
         <div className="container mx-auto p-4">
           {/* Use CalendarPageHeader on mobile, CalendarHeader on desktop */}
@@ -177,7 +176,6 @@ const CalendarPage = () => {
           )}
         </div>
       </main>
-      <Footer />
     </div>
   );
 };

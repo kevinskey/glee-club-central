@@ -4,7 +4,6 @@ import { Music, Calendar, Users } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { HeroSection } from '@/components/landing/HeroSection';
 import { useIsMobile } from '@/hooks/use-mobile';
-import { Header } from '@/components/landing/Header';
 import { SidebarProvider } from '@/components/ui/sidebar';
 import { UpcomingEvents } from '@/components/calendar/UpcomingEvents';
 import { EventsSlider } from '@/components/landing/events/EventsSlider';
@@ -18,9 +17,6 @@ const HomePage = () => {
            style={{ backgroundImage: isMobile ? "none" : "url('/lovable-uploads/b57ced8e-7ed7-405b-8302-41ab726303af.png')" }}>
         {/* Semi-transparent overlay */}
         {!isMobile && <div className="absolute inset-0 bg-black/70 z-0"></div>}
-        
-        {/* Add the sticky header */}
-        <Header initialShowNewsFeed={true} />
         
         {/* Display hero section on mobile */}
         {isMobile && <HeroSection />}
@@ -70,10 +66,6 @@ const HomePage = () => {
               </Card>
             </div>
           </main>
-          
-          <footer className="mt-8 md:mt-12 text-white/70 text-center text-sm">
-            <p>© {new Date().getFullYear()} Spelman College Glee Club. All rights reserved.</p>
-          </footer>
         </div>
       </div>
       
