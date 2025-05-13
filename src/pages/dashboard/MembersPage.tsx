@@ -75,9 +75,14 @@ const MembersPage: React.FC = () => {
     }
   };
 
-  // Handle deleting a member
-  const handleDeleteMember = (memberId: string) => {
-    const member = members.find(m => m.id === memberId);
+  // Handle deleting a member - FIXED to work with both User object or string ID
+  const handleDeleteMember = (memberIdOrUser: User | string) => {
+    // Check if the parameter is a string (ID) or a User object
+    const memberId = typeof memberIdOrUser === 'string' ? memberIdOrUser : memberIdOrUser.id;
+    const member = typeof memberIdOrUser === 'string' 
+      ? members.find(m => m.id === memberIdOrUser)
+      : memberIdOrUser;
+      
     if (member) {
       setMemberToDelete(memberId);
       setMemberToDeleteName(`${member.first_name || ''} ${member.last_name || ''}`);

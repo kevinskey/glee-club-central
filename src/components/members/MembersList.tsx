@@ -1,3 +1,4 @@
+
 import React, { memo, useCallback } from "react";
 import { 
   Table, 
@@ -32,9 +33,9 @@ interface MembersListProps {
   onEditUser?: (user: User) => void;
   onDeleteUser?: (userId: string) => void;
   onManagePermissions?: (user: User) => void;
-  // Fix type definitions to match what MembersPage is using
-  onEditMember?: (user: User) => void;
-  onDeleteMember?: (userId: string | User) => void;
+  // Updated type definitions to handle both User and string
+  onEditMember?: (user: User | string) => void;
+  onDeleteMember?: (userId: User | string) => void;
   onStatusUpdate?: (userId: string, status: string) => Promise<boolean>;
   onStatusUpdateSuccess?: () => Promise<void>;
   canEdit?: boolean;
@@ -67,7 +68,7 @@ export const MembersList = memo(function MembersList({
     }
   }, []);
 
-  // Handle user deletion with proper type handling
+  // Updated to handle both User and string types
   const handleDelete = useCallback((member: User) => {
     if (onDeleteMember) {
       onDeleteMember(member);
@@ -76,7 +77,7 @@ export const MembersList = memo(function MembersList({
     }
   }, [onDeleteMember, onDeleteUser]);
 
-  // Handle user editing with proper type handling
+  // Updated to handle both User and string types
   const handleEdit = useCallback((member: User) => {
     if (onEditMember) {
       onEditMember(member);
