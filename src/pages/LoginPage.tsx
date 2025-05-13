@@ -4,7 +4,7 @@ import { useForm } from "react-hook-form";
 import { useNavigate, Link } from "react-router-dom";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { Eye, EyeOff } from "lucide-react";
+import { Eye, EyeOff, Loader2 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
@@ -30,7 +30,7 @@ const formSchema = z.object({
 type FormData = z.infer<typeof formSchema>;
 
 export default function LoginPage() {
-  const { signIn, isAuthenticated, checkRole } = useAuth();
+  const { signIn, isAuthenticated, isAdmin } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
@@ -52,9 +52,8 @@ export default function LoginPage() {
     }
   }, [isAuthenticated]);
 
-  const handleRoleBasedRedirect = async () => {
-    const isAdmin = await checkRole('admin');
-    if (isAdmin) {
+  const handleRoleBasedRedirect = () => {
+    if (isAdmin()) {
       navigate('/dashboard');
     } else {
       navigate('/dashboard');
@@ -175,7 +174,7 @@ export default function LoginPage() {
             >
               {isLoading ? (
                 <div className="flex items-center justify-center">
-                  <Icons.spinner className="mr-2 h-4 w-4 animate-spin" />
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                   <span>Signing In...</span>
                 </div>
               ) : (
