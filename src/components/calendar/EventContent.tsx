@@ -1,7 +1,5 @@
 
-import React from "react";
-import { Clock, MapPin } from "lucide-react";
-import { cn } from "@/lib/utils";
+import React, { useEffect } from "react";
 
 interface EventContentProps {
   eventInfo: any;
@@ -9,90 +7,60 @@ interface EventContentProps {
 }
 
 export const EventContent = ({ eventInfo, view }: EventContentProps) => {
-  const event = eventInfo.event;
-  const { type } = event.extendedProps;
+  useEffect(() => {
+    if (!eventInfo?.event?.title) {
+      console.warn("EventContent received invalid event info", eventInfo);
+      return;
+    }
+    console.log("EventContent rendering for event:", eventInfo.event.title);
+  }, [eventInfo?.event?.title]);
   
-  const getEventTypeColor = () => {
-    switch (type) {
-      case "concert":
-        return "bg-glee-purple text-white";
-      case "rehearsal":
-        return "bg-blue-500 text-white";
-      case "sectional":
-        return "bg-green-500 text-white";
-      case "meeting":
-        return "bg-amber-500 text-white";
-      case "tour":
-        return "bg-red-500 text-white";
-      case "special":
-        return "bg-pink-500 text-white";
-      default:
-        return "bg-gray-500 text-white";
-    }
+  if (!eventInfo?.event) {
+    console.error("EventContent: No event data available");
+    return null;
+  }
+  
+  // Updated type colors to use string keys
+  const typeColors: Record<string, string> = {
+    'rehearsal': 'bg-blue-500 border-blue-600',
+    'performance': 'bg-orange-500 border-orange-600',
+    'concert': 'bg-orange-500 border-orange-600',
+    'sectional': 'bg-green-500 border-green-600',
+    'meeting': 'bg-yellow-500 border-yellow-600',
+    'special': 'bg-purple-500 border-purple-600',
+    'tour': 'bg-teal-500 border-teal-600',
+    'other': 'bg-gray-500 border-gray-600'
   };
 
-  const getEventTypeIcon = () => {
-    switch (type) {
-      case "concert":
-        return "🎵";
-      case "rehearsal":
-        return "🎤";
-      case "sectional":
-        return "👥";
-      case "meeting":
-        return "📋";
-      case "tour":
-        return "🚌";
-      case "special":
-        return "✨";
-      default:
-        return "📅";
-    }
-  };
-
-  // For month view or when allDay is true
-  if (view === "dayGridMonth" || event.allDay) {
+  const eventType = eventInfo.event.extendedProps?.type || 'other';
+  const location = eventInfo.event.extendedProps?.location || '';
+  
+  // Different rendering based on view type
+  if (view === 'dayGridMonth') {
     return (
-      <div className={cn(
-        "px-2 py-1 text-xs rounded truncate",
-        getEventTypeColor()
-      )}>
-        <span className="mr-1">{getEventTypeIcon()}</span>
-        {event.title}
+      <div className="w-full overflow-hidden">
+        <div className={`flex items-center py-1 px-2 rounded-sm ${typeColors[eventType] || typeColors['other']}`}>
+          <div className="flex-1 text-white truncate">
+            <div className="font-medium text-xs md:text-sm truncate">{eventInfo.event.title}</div>
+            {location && <div className="text-xs text-white/80 truncate">{location}</div>}
+          </div>
+        </div>
+      </div>
+    );
+  } else {
+    // Week/Day view with more detailed info
+    return (
+      <div className="w-full h-full overflow-hidden">
+        <div className={`flex flex-col h-full py-1 px-2 ${typeColors[eventType] || typeColors['other']}`}>
+          <div className="font-medium text-xs md:text-sm text-white">{eventInfo.event.title}</div>
+          {location && (
+            <div className="text-xs text-white/80 flex items-center gap-1 mt-1">
+              <span className="w-1.5 h-1.5 rounded-full bg-white/80"></span>
+              <span className="truncate">{location}</span>
+            </div>
+          )}
+        </div>
       </div>
     );
   }
-  
-  // For week or day view
-  return (
-    <div className={cn(
-      "h-full w-full p-1 overflow-hidden",
-      getEventTypeColor()
-    )}>
-      <div className="font-medium">{event.title}</div>
-      
-      {event.extendedProps.location && (
-        <div className="flex items-center text-xs mt-1 opacity-90">
-          <MapPin className="h-3 w-3 mr-1" />
-          <span className="truncate">{event.extendedProps.location}</span>
-        </div>
-      )}
-      
-      {!event.allDay && view !== "listWeek" && (
-        <div className="flex items-center text-xs mt-1 opacity-90">
-          <Clock className="h-3 w-3 mr-1" />
-          <span>
-            {new Date(event.start).toLocaleTimeString([], {
-              hour: "2-digit",
-              minute: "2-digit"
-            })}
-            {event.end && ` - ${new Date(event.end).toLocaleTimeString([], {
-              hour: "2-digit",
-              minute: "2-digit"
-            })}`}
-          </span>
-        </div>
-      )}
-    </div>
-  );
 };

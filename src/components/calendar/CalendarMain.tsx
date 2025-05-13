@@ -11,6 +11,9 @@ import { CalendarEvent } from "@/types/calendar";
 import { useCalendarNavigation } from "@/hooks/useCalendarNavigation";
 import { Card } from "@/components/ui/card";
 
+// Note: Modern FullCalendar versions don't require explicit CSS imports
+// CSS is now included in the package and automatically handled
+
 interface CalendarMainProps {
   events: CalendarEvent[];
   calendarView: 'dayGridMonth' | 'timeGridWeek' | 'timeGridDay' | 'listWeek';
@@ -72,9 +75,7 @@ export const CalendarMain = ({
       end: new Date(Date.now() + 3600000).toISOString(),
       type: "special" as const,
       location: "Test Location",
-      description: "This is a test event to verify calendar rendering",
-      created_by: "system",
-      google_event_id: null
+      description: "This is a test event to verify calendar rendering"
     }
   ];
 
@@ -107,8 +108,7 @@ export const CalendarMain = ({
                 type: event.type,
                 location: event.location || "",
                 description: event.description || "",
-                created_by: event.created_by,
-                google_event_id: event.google_event_id
+                created_by: event.created_by
               }
             }))}
             dateClick={userCanCreate ? handleDateClick : undefined}

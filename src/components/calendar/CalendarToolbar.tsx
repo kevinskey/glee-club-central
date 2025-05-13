@@ -1,8 +1,7 @@
 
 import React from "react";
 import { Button } from "@/components/ui/button";
-import { format } from "date-fns";
-import { ChevronLeft, ChevronRight, Calendar } from "lucide-react";
+import { ChevronLeft, ChevronRight, CalendarClock } from "lucide-react";
 
 interface CalendarToolbarProps {
   onPrevClick: () => void;
@@ -10,7 +9,7 @@ interface CalendarToolbarProps {
   onTodayClick: () => void;
   currentDate: Date;
   calendarView: string;
-  eventsCount?: number;
+  eventsCount: number;
 }
 
 export const CalendarToolbar = ({
@@ -19,77 +18,48 @@ export const CalendarToolbar = ({
   onTodayClick,
   currentDate,
   calendarView,
-  eventsCount = 0
+  eventsCount
 }: CalendarToolbarProps) => {
-  const getFormattedDate = () => {
-    switch (calendarView) {
-      case 'dayGridMonth':
-        return format(currentDate, "MMMM yyyy");
-      case 'timeGridWeek':
-        // Get start of week based on current date
-        const startOfWeek = new Date(currentDate);
-        const dayOfWeek = startOfWeek.getDay();
-        startOfWeek.setDate(startOfWeek.getDate() - dayOfWeek);
-        
-        // Get end of week
-        const endOfWeek = new Date(startOfWeek);
-        endOfWeek.setDate(endOfWeek.getDate() + 6);
-        
-        // Format based on whether they're in the same month/year
-        if (startOfWeek.getMonth() === endOfWeek.getMonth()) {
-          return `${format(startOfWeek, "MMMM d")} - ${format(endOfWeek, "d, yyyy")}`;
-        } else if (startOfWeek.getFullYear() === endOfWeek.getFullYear()) {
-          return `${format(startOfWeek, "MMMM d")} - ${format(endOfWeek, "MMMM d, yyyy")}`;
-        } else {
-          return `${format(startOfWeek, "MMMM d, yyyy")} - ${format(endOfWeek, "MMMM d, yyyy")}`;
-        }
-      case 'timeGridDay':
-        return format(currentDate, "EEEE, MMMM d, yyyy");
-      case 'listWeek':
-        return format(currentDate, "MMMM yyyy");
-      default:
-        return format(currentDate, "MMMM yyyy");
-    }
-  };
-
   return (
-    <div className="flex flex-col sm:flex-row justify-between items-center mb-4">
-      <div className="flex items-center mb-2 sm:mb-0">
+    <div className="flex items-center justify-between mb-4 p-2 bg-white dark:bg-gray-800 rounded-lg shadow-sm">
+      <div className="flex items-center gap-2">
         <Button 
           variant="outline" 
-          size="icon" 
-          onClick={onPrevClick}
-          className="mr-1"
-        >
-          <ChevronLeft className="h-4 w-4" />
-        </Button>
-        
-        <Button 
-          variant="outline" 
-          size="icon" 
-          onClick={onNextClick}
-          className="mr-3"
-        >
-          <ChevronRight className="h-4 w-4" />
-        </Button>
-        
-        <h2 className="text-lg font-semibold mr-3">
-          {getFormattedDate()}
-        </h2>
-        
-        <Button 
-          variant="outline" 
-          size="sm"
+          size="sm" 
           onClick={onTodayClick}
-          className="flex items-center text-xs"
+          id="today-button"
         >
-          <Calendar className="h-3.5 w-3.5 mr-1" />
           Today
         </Button>
+        <div className="flex items-center gap-1">
+          <Button variant="ghost" size="icon" onClick={onPrevClick}>
+            <ChevronLeft className="h-4 w-4" />
+          </Button>
+          <Button variant="ghost" size="icon" onClick={onNextClick}>
+            <ChevronRight className="h-4 w-4" />
+          </Button>
+        </div>
+        <h2 className="text-lg font-semibold ml-2">
+          {new Intl.DateTimeFormat('en-US', { 
+            month: 'long', 
+            year: 'numeric',
+            ...(calendarView === 'timeGridDay' && { day: 'numeric' }),
+            ...(calendarView === 'timeGridWeek' && { day: 'numeric' })
+          }).format(currentDate)}
+          {calendarView === 'timeGridWeek' && (
+            <span> - {new Intl.DateTimeFormat('en-US', { 
+              month: 'long', 
+              day: 'numeric',
+              year: currentDate.getMonth() + 7 > 12 ? 'numeric' : undefined
+            }).format(new Date(currentDate.getTime() + 6 * 24 * 60 * 60 * 1000))}</span>
+          )}
+        </h2>
       </div>
-      
-      <div className="text-sm text-muted-foreground">
-        {eventsCount} {eventsCount === 1 ? 'event' : 'events'} 
+      <div className="flex items-center gap-2">
+        <CalendarClock className="h-4 w-4 mr-1 text-gray-400" />
+        <span className="text-sm text-gray-500 dark:text-gray-400">
+          {eventsCount} {eventsCount === 1 ? 'event' : 'events'}
+        </span>
       </div>
     </div>
   );

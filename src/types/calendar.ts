@@ -24,7 +24,6 @@ export interface CalendarEvent {
   type?: string; // Changed to string to accept all event types
   created_by?: string;
   image_url?: string | null;
-  google_event_id?: string | null; // Added field for Google Calendar integration
 }
 
 // Updated enum to include all event types used in the application

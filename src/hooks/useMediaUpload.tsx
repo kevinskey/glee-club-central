@@ -59,59 +59,37 @@ export function useMediaUpload(onComplete: () => void, defaultCategory: string =
 
     try {
       let successCount = 0;
-      const totalFiles = files.length;
       
-      // Process files in batches of 3 for better UX and to prevent overwhelming the server
-      const batchSize = 3;
-      
-      for (let i = 0; i < totalFiles; i += batchSize) {
-        const batch = files.slice(i, i + batchSize);
-        await Promise.all(batch.map(async (file, batchIndex) => {
-          try {
-            // Generate a unique filename
-            const fileExt = file.name.split('.').pop();
-            const fileName = `${Date.now()}-${Math.random().toString(36).substring(2, 15)}.${fileExt}`;
-            const filePath = `${category}/${fileName}`;
+      for (let i = 0; i < files.length; i++) {
+        const file = files[i];
+        // Generate a unique filename
+        const fileExt = file.name.split('.').pop();
+        const fileName = `${Date.now()}-${Math.random().toString(36).substring(2, 15)}.${fileExt}`;
+        const filePath = `${category}/${fileName}`;
 
-            // Generate a file-specific title if multiple files
-            const fileTitle = files.length > 1 
-              ? `${title} ${i + batchIndex + 1}` 
-              : title;
+        // Generate a file-specific title if multiple files
+        const fileTitle = files.length > 1 
+          ? `${title} ${i + 1}` 
+          : title;
 
-            // Upload file using our utility
-            await uploadMediaFile(file, filePath, {
-              title: fileTitle,
-              description,
-              category,
-              tags,
-              uploadedBy: user.id
-            });
-            
-            successCount++;
-            
-            // Update progress - calculate based on completed files
-            const progress = Math.round(((i + batchIndex + 1) / totalFiles) * 100);
-            setUploadProgress(progress);
-          } catch (error) {
-            console.error(`Error uploading file ${file.name}:`, error);
-            // Continue with other files even if one fails
-          }
-        }));
+        // Upload file using our utility
+        await uploadMediaFile(file, filePath, {
+          title: fileTitle,
+          description,
+          category,
+          tags,
+          uploadedBy: user.id
+        });
+        
+        successCount++;
+        
+        // Update progress
+        setUploadProgress(Math.round((i + 1) / files.length * 100));
       }
 
-      if (successCount === totalFiles) {
-        toast("Upload successful", {
-          description: `All ${successCount} file(s) have been uploaded successfully`,
-        });
-      } else if (successCount > 0) {
-        toast("Partial upload success", {
-          description: `${successCount} of ${totalFiles} file(s) uploaded successfully`,
-        });
-      } else {
-        toast("Upload failed", {
-          description: "None of the files could be uploaded",
-        });
-      }
+      toast("Upload successful", {
+        description: `${successCount} file(s) have been uploaded successfully`,
+      });
       
       resetForm();
       onComplete();
@@ -123,6 +101,7 @@ export function useMediaUpload(onComplete: () => void, defaultCategory: string =
       });
     } finally {
       setUploading(false);
+      setUploadProgress(0);
     }
   };
 

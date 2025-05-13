@@ -9,25 +9,23 @@ import { toast } from "sonner";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { EventFormFields, EventFormValues } from "./EventFormFields";
+import { EventImageUpload } from "./EventImageUpload";
 import { MobileFitCheck } from "./MobileFitCheck";
 import { checkEventMobileFit } from "@/utils/mobileUtils";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { uploadEventImage } from "@/utils/supabase/eventImageUpload";
-import { EventImageUpload } from "./EventImageUpload";
 
 export const formSchema = z.object({
   title: z.string().min(2, { message: "Title must be at least 2 characters" }),
   date: z.date({ required_error: "Please select a date" }),
-  time: z.string().min(1, { message: "Please select a time" }).default("12:00"),
+  time: z.string().min(1, { message: "Please select a time" }),
   location: z.string().min(1, { message: "Please enter a location" }),
   description: z.string().optional(),
   type: z.string().min(1, { message: "Please select an event type" }),
   image_url: z.string().optional().nullable(),
-  imageFile: z.any().optional(),
 });
 
 interface AddEventFormProps {
-  onAddEvent: (event: EventFormValues & { start: Date, end: Date }) => Promise<void>;
+  onAddEvent: (event: EventFormValues & { start: Date, end: Date }) => void;
   onCancel: () => void;
   initialDate?: Date;
 }
@@ -45,10 +43,10 @@ export function AddEventForm({ onAddEvent, onCancel, initialDate }: AddEventForm
     defaultValues: {
       title: "",
       date: initialDate || new Date(),
-      time: "12:00", // Default to noon
+      time: "",
       location: "",
       description: "",
-      type: "concert" as const,
+      type: "concert",
       image_url: null,
     },
   });
@@ -66,8 +64,6 @@ export function AddEventForm({ onAddEvent, onCancel, initialDate }: AddEventForm
   const description = form.watch('description');
 
   async function onSubmit(values: EventFormValues) {
-    console.log("Form submitted with values:", values);
-    
     if (!user) {
       toast.error("You must be logged in to save events");
       return;
@@ -90,24 +86,44 @@ export function AddEventForm({ onAddEvent, onCancel, initialDate }: AddEventForm
       });
     }
     
+    setIsUploading(true);
+    
     try {
-      setIsUploading(true);
-      
       // Handle image upload if there's a selected image
       let imageUrl = values.image_url;
       
       if (selectedImage) {
         try {
-          // Upload the image to the media library
-          imageUrl = await uploadEventImage(selectedImage, values.title);
+          // Create a unique filename with timestamp and original name
+          const fileExt = selectedImage.name.split('.').pop();
+          const fileName = `${Date.now()}-${Math.random().toString(36).substring(2, 15)}.${fileExt}`;
           
-          if (!imageUrl) {
-            toast.error('Failed to upload image');
+          console.log("Uploading image to Supabase:", fileName);
+          
+          // Upload the file to Supabase storage
+          const { data: uploadData, error: uploadError } = await supabase.storage
+            .from('event-images')
+            .upload(fileName, selectedImage, {
+              cacheControl: '3600',
+              upsert: false
+            });
+            
+          if (uploadError) {
+            console.error('Image upload error:', uploadError);
+            toast.error('Failed to upload image: ' + uploadError.message);
             setIsUploading(false);
             return;
           }
           
-          console.log("Image uploaded successfully:", imageUrl);
+          console.log("Image uploaded successfully:", uploadData);
+          
+          // Get the public URL for the uploaded image
+          const { data: { publicUrl } } = supabase.storage
+            .from('event-images')
+            .getPublicUrl(fileName);
+            
+          imageUrl = publicUrl;
+          console.log("Image public URL:", imageUrl);
           
         } catch (err) {
           console.error('Error uploading image:', err);
@@ -117,22 +133,16 @@ export function AddEventForm({ onAddEvent, onCancel, initialDate }: AddEventForm
         }
       }
       
-      // Make sure time is not empty
-      const timeValue = values.time || "12:00";
-      
       // Add the image URL and required start/end dates to the event data
       const enhancedValues = {
         ...values,
-        time: timeValue, // Ensure time is always set
         image_url: imageUrl,
         start: values.date,  // Set start date from form date
         end: values.date     // Set end date (same as start for simplicity)
       };
       
-      console.log("Calling onAddEvent with:", enhancedValues);
-      
       // Pass the enhanced values to the onAddEvent handler
-      await onAddEvent(enhancedValues);
+      onAddEvent(enhancedValues);
       
       // Reset form and state
       form.reset();
@@ -150,12 +160,9 @@ export function AddEventForm({ onAddEvent, onCancel, initialDate }: AddEventForm
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-3 px-1 max-h-[70vh] overflow-y-auto pb-16">
-        <EventFormFields 
-          form={form} 
-          isUploading={isUploading}
-        />
-        
-        <EventImageUpload
+        <EventFormFields form={form} />
+
+        <EventImageUpload 
           form={form}
           isUploading={isUploading}
           selectedImage={selectedImage}
@@ -179,7 +186,7 @@ export function AddEventForm({ onAddEvent, onCancel, initialDate }: AddEventForm
           <Button type="submit" className="bg-glee-purple hover:bg-glee-purple/90 text-sm px-3 py-1 h-8" disabled={isUploading}>
             {isUploading ? (
               <>
-                <span className="mr-2">Saving...</span>
+                <span className="mr-2">Uploading...</span>
                 <div className="h-3 w-3 rounded-full border-2 border-white border-t-transparent animate-spin"></div>
               </>
             ) : (

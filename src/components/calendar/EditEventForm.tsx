@@ -7,11 +7,10 @@ import { Form } from "@/components/ui/form";
 import { Button } from "@/components/ui/button";
 import { CalendarEvent } from "@/types/calendar";
 import { EventFormFields, EventFormValues } from "./EventFormFields";
+import { EventImageUpload } from "./EventImageUpload";
 import { MobileFitCheck } from "./MobileFitCheck";
 import { checkEventMobileFit } from "@/utils/mobileUtils";
 import { toast } from "sonner";
-import { uploadEventImage } from "@/utils/supabase/eventImageUpload";
-import { EventImageUpload } from "./EventImageUpload";
 
 export const formSchema = z.object({
   title: z.string().min(2, { message: "Title must be at least 2 characters" }),
@@ -21,7 +20,6 @@ export const formSchema = z.object({
   description: z.string().optional(),
   type: z.string().min(1, { message: "Please select an event type" }),
   image_url: z.string().optional().nullable(),
-  imageFile: z.any().optional(),
 });
 
 interface EditEventFormProps {
@@ -82,30 +80,6 @@ export function EditEventForm({
     setIsSubmitting(true);
 
     try {
-      // Handle image upload if there's a selected image
-      let imageUrl = values.image_url;
-      
-      if (selectedImage) {
-        try {
-          // Upload the image to the media library
-          imageUrl = await uploadEventImage(selectedImage, values.title);
-          
-          if (!imageUrl) {
-            toast.error('Failed to upload image');
-            setIsSubmitting(false);
-            return;
-          }
-          
-          console.log("Image uploaded successfully:", imageUrl);
-          
-        } catch (err) {
-          console.error('Error uploading image:', err);
-          toast.error('Failed to upload image');
-          setIsSubmitting(false);
-          return;
-        }
-      }
-
       const updatedEvent: CalendarEvent = {
         id: event.id,
         title: values.title,
@@ -116,7 +90,7 @@ export function EditEventForm({
         location: values.location,
         description: values.description,
         type: values.type,
-        image_url: imageUrl,
+        image_url: values.image_url,
       };
 
       const success = await onUpdateEvent(updatedEvent);
@@ -134,12 +108,9 @@ export function EditEventForm({
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-3 px-1 max-h-[70vh] overflow-y-auto pb-16">
-        <EventFormFields 
-          form={form}
-          isUploading={isSubmitting}
-        />
-        
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+        <EventFormFields form={form} />
+
         <EventImageUpload
           form={form}
           isUploading={isSubmitting}
@@ -157,25 +128,24 @@ export function EditEventForm({
           />
         )}
 
-        <div className="flex justify-end gap-2 sticky bottom-0 pt-2 bg-white dark:bg-gray-800 border-t border-gray-100 dark:border-gray-700">
+        <div className="flex justify-end gap-2">
           <Button
             type="button"
             variant="outline"
             onClick={onCancel}
             disabled={isSubmitting}
-            className="bg-white dark:bg-gray-700 text-sm px-3 py-1 h-8"
           >
             Cancel
           </Button>
           <Button
             type="submit"
-            className="bg-glee-purple hover:bg-glee-purple/90 text-sm px-3 py-1 h-8"
+            className="bg-glee-purple hover:bg-glee-purple/90"
             disabled={isSubmitting}
           >
             {isSubmitting ? (
               <>
                 <span className="mr-2">Saving...</span>
-                <div className="h-3 w-3 rounded-full border-2 border-white border-t-transparent animate-spin"></div>
+                <span className="animate-spin">⏳</span>
               </>
             ) : (
               "Save Changes"

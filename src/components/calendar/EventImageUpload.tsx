@@ -1,36 +1,50 @@
 
-import React, { useRef } from 'react';
-import { Button } from '@/components/ui/button';
-import { FormControl } from '@/components/ui/form';
-import { AspectRatio } from '@/components/ui/aspect-ratio';
-import { Upload, X, Image as ImageIcon } from 'lucide-react';
+import React from "react";
+import { UseFormReturn } from "react-hook-form";
+import { Button } from "@/components/ui/button";
+import { FormControl, FormField, FormItem, FormLabel } from "@/components/ui/form";
+import { ImageIcon, Upload, X } from "lucide-react";
+import { EventFormValues } from "./EventFormFields";
+import { toast } from "sonner";
 
 interface EventImageUploadProps {
-  form: any;
+  form: UseFormReturn<EventFormValues>;
+  isUploading: boolean;
   selectedImage: File | null;
-  setSelectedImage: (image: File | null) => void;
+  setSelectedImage: (file: File | null) => void;
   imagePreview: string | null;
-  setImagePreview: (preview: string | null) => void;
-  isUploading?: boolean;
+  setImagePreview: (url: string | null) => void;
 }
 
 export function EventImageUpload({
   form,
+  isUploading,
   selectedImage,
   setSelectedImage,
   imagePreview,
   setImagePreview,
-  isUploading = false
 }: EventImageUploadProps) {
-  const fileInputRef = useRef<HTMLInputElement>(null);
-
   // Handle file selection
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
+  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+
     if (file) {
+      // Check file size (limit to 5MB)
+      if (file.size > 5 * 1024 * 1024) {
+        toast.error("File size exceeds 5MB limit.");
+        return;
+      }
+
+      // Check file type
+      if (!file.type.match('image/(jpeg|jpg|png|gif)')) {
+        toast.error("Only JPEG, PNG and GIF images are allowed.");
+        return;
+      }
+
       setSelectedImage(file);
-      
-      // Create preview URL
+      form.setValue("image_url", null);
+
+      // Create a preview URL
       const reader = new FileReader();
       reader.onloadend = () => {
         setImagePreview(reader.result as string);
@@ -39,74 +53,71 @@ export function EventImageUpload({
     }
   };
 
-  // Trigger file input click
-  const handleUploadClick = () => {
-    fileInputRef.current?.click();
-  };
-
   // Remove selected image
   const handleRemoveImage = () => {
     setSelectedImage(null);
     setImagePreview(null);
-    form.setValue('imageUrl', null);
-    if (fileInputRef.current) {
-      fileInputRef.current.value = '';
-    }
+    form.setValue("image_url", null);
   };
 
   return (
-    <div className="space-y-2">
-      <label className="text-sm font-medium">Event Image</label>
-      <FormControl>
-        <>
-          <input
-            type="file"
-            ref={fileInputRef}
-            accept="image/*"
-            className="hidden"
-            onChange={handleFileChange}
-            disabled={isUploading}
-          />
-          
-          {!imagePreview ? (
-            <Button
-              type="button"
-              variant="outline"
-              className="w-full h-32 flex flex-col items-center justify-center border-dashed gap-2"
-              onClick={handleUploadClick}
-              disabled={isUploading}
-            >
-              <ImageIcon className="h-8 w-8 text-muted-foreground" />
-              <span className="text-sm text-muted-foreground">
-                Upload event image
-              </span>
-            </Button>
-          ) : (
-            <div className="relative">
-              <AspectRatio ratio={16 / 9} className="overflow-hidden rounded-md bg-muted">
-                <img
-                  src={imagePreview}
-                  alt="Event preview"
-                  className="h-full w-full object-cover"
-                />
-              </AspectRatio>
-              <Button
-                type="button"
-                size="icon"
-                variant="destructive"
-                className="absolute top-2 right-2 h-8 w-8 rounded-full"
-                onClick={handleRemoveImage}
-                disabled={isUploading}
-              >
-                <X className="h-4 w-4" />
-              </Button>
+    <FormField
+      control={form.control}
+      name="image_url"
+      render={({ field }) => (
+        <FormItem className="mt-1">
+          <FormLabel className="text-xs">Event Image (Optional)</FormLabel>
+          <FormControl>
+            <div className="space-y-1">
+              {!imagePreview && !field.value ? (
+                <div className="flex flex-col items-center justify-center border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-1 text-center">
+                  <ImageIcon className="h-5 w-5 mb-1 text-gray-400" />
+                  <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">
+                    PNG, JPG or GIF (max. 5MB)
+                  </p>
+                  <div className="flex justify-center">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      className="relative h-7 text-xs"
+                      disabled={isUploading}
+                    >
+                      <input
+                        type="file"
+                        className="absolute inset-0 opacity-0 cursor-pointer"
+                        accept="image/png, image/jpeg, image/gif"
+                        onChange={handleFileChange}
+                        disabled={isUploading}
+                      />
+                      <Upload className="h-3 w-3 mr-1" />
+                      Upload
+                    </Button>
+                  </div>
+                </div>
+              ) : (
+                <div className="relative">
+                  <img
+                    src={imagePreview || field.value || ""}
+                    alt="Event image preview"
+                    className="w-full h-20 object-cover rounded-lg"
+                  />
+                  <Button
+                    type="button"
+                    size="icon"
+                    variant="destructive"
+                    className="absolute top-1 right-1 h-5 w-5"
+                    onClick={handleRemoveImage}
+                    disabled={isUploading}
+                  >
+                    <X className="h-3 w-3" />
+                  </Button>
+                </div>
+              )}
             </div>
-          )}
-        </>
-      </FormControl>
-      <p className="text-xs text-muted-foreground">
-        Upload an image for the event (optional)
-      </p>
-    </div>
+          </FormControl>
+        </FormItem>
+      )}
+    />
   );
 }

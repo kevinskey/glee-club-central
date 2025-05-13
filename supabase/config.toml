@@ -4,18 +4,5 @@ project_id = "glee-club"
 [functions.youtube-videos]
 verify_jwt = false
 
-[functions.google-calendar-auth]
-verify_jwt = true
-
-[functions.google-calendar-sync]
-verify_jwt = true
-
-[functions.get-google-token]
-verify_jwt = true
-
 [storage.media-library]
 public = true
-
-[storage.event-images]
-public = true
-

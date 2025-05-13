@@ -48,7 +48,7 @@ export function useMediaLibrary() {
         category: item.folder || 'general',
         tags: item.tags || [],
         created_at: item.created_at,
-        size: item.size || 0, // Ensure we handle the size, defaulting to 0 if not set
+        size: item.size || 0,
       }));
       
       setMediaFiles(mappedData);
@@ -93,10 +93,7 @@ export function useMediaLibrary() {
       
       setMediaTypes(types);
       
-      const cats = Array.from(new Set(
-        mappedData.map(file => file.category || "general")
-      )) as string[];
-      
+      const cats = Array.from(new Set(mappedData.map(file => file.category || "general")));
       setCategories(cats);
       
     } catch (err: any) {

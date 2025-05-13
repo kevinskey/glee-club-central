@@ -1,69 +1,5 @@
 
-/* Button components */
-.btn-primary {
-  @apply bg-primary text-primary-foreground hover:bg-primary/90;
-}
-
-.btn-secondary {
-  @apply bg-secondary text-secondary-foreground hover:bg-secondary/80;
-}
-
-.btn-outline {
-  @apply border border-input bg-background hover:bg-accent hover:text-accent-foreground;
-}
-
-.btn-ghost {
-  @apply hover:bg-accent hover:text-accent-foreground;
-}
-
-.btn-link {
-  @apply text-primary underline-offset-4 hover:underline;
-}
-
-/* Calendar components */
-.calendar-container .fc .fc-toolbar {
-  @apply flex flex-wrap justify-between items-center gap-4 mb-4;
-}
-
-.calendar-container .fc .fc-button {
-  @apply bg-primary text-primary-foreground border-0 rounded-md text-sm px-3 py-1.5 
-    hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary;
-}
-
-.calendar-container .fc .fc-button-primary:not(:disabled).fc-button-active,
-.calendar-container .fc .fc-button-primary:not(:disabled):active {
-  @apply bg-primary/80 shadow-inner;
-}
-
-.calendar-container .fc .fc-daygrid-day.fc-day-today {
-  @apply bg-primary/10;
-}
-
-.calendar-container .fc .fc-col-header-cell {
-  @apply bg-muted/50 dark:bg-muted/20 font-medium;
-}
-
-.calendar-container .fc-theme-standard td, 
-.calendar-container .fc-theme-standard th,
-.calendar-container .fc-theme-standard .fc-scrollgrid {
-  @apply border-border;
-}
-
-.calendar-container .fc .fc-timegrid-slot-minor {
-  @apply border-dashed;
-}
-
-.calendar-container .fc .fc-list-day > th {
-  @apply bg-muted/50 dark:bg-muted/20;
-}
-
-.calendar-container .fc .fc-list-event:hover td {
-  @apply bg-muted/60 dark:bg-muted/30;
-}
-
-.calendar-container .fc .fc-list-empty {
-  @apply bg-transparent flex items-center justify-center p-12 text-muted-foreground;
-}
+/* ... keep existing code */
 
 /* Media Library components */
 .media-list-item {
@@ -75,7 +11,7 @@
 }
 
 .media-item-icon {
-  @apply flex-shrink-0 w-8 h-8 flex items-center justify-center bg-muted rounded mr-2;
+  @apply flex-shrink-0 w-10 h-10 flex items-center justify-center bg-muted rounded mr-2;
 }
 
 .media-item-content {
@@ -87,12 +23,12 @@
 }
 
 .media-grid {
-  @apply grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3;
+  @apply grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4;
 }
 
-/* Enhanced file type indicators */
+/* Simple file type indicators */
 .file-type-badge {
-  @apply inline-flex items-center rounded-full px-1.5 py-0.5 text-[10px] font-medium;
+  @apply inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium;
 }
 
 .file-type-image {
@@ -113,21 +49,4 @@
 
 .file-type-other {
   @apply bg-gray-50 text-gray-700 dark:bg-gray-800/50 dark:text-gray-400;
-}
-
-/* Media preview thumbnails */
-.media-thumbnail {
-  @apply relative aspect-square bg-muted overflow-hidden;
-}
-
-.media-thumbnail-audio {
-  @apply bg-gradient-to-br from-green-50 to-green-100 dark:from-green-900/20 dark:to-green-800/20;
-}
-
-.media-thumbnail-video {
-  @apply bg-gradient-to-br from-purple-50 to-purple-100 dark:from-purple-900/20 dark:to-purple-800/20;
-}
-
-.media-thumbnail-document {
-  @apply bg-gradient-to-br from-amber-50 to-amber-100 dark:from-amber-900/20 dark:to-amber-800/20;
 }

@@ -1,5 +1,5 @@
 
-import React from "react";
+import { EventType } from "@/types/calendar";
 import { UseFormReturn } from "react-hook-form";
 import {
   FormControl,
@@ -9,15 +9,8 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { GoogleMapAutocomplete } from "./GoogleMapAutocomplete";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
@@ -25,25 +18,37 @@ import { CalendarIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { format } from "date-fns";
 
+// Define form schema values for event creation and editing
 export interface EventFormValues {
-  title: string;
-  date: Date;
-  time: string;
-  location: string;
+  title?: string;
+  date?: Date;
+  time?: string;
+  location?: string;
   description?: string;
-  type: "rehearsal" | "concert" | "sectional" | "special" | "tour";
-  image_url: string | null;
-  imageFile?: File | null;
+  type?: "rehearsal" | "concert" | "sectional" | "special" | "tour" | EventType;
+  image_url?: string | null;
+  archivalNotes?: string;
+  callTime?: string;
+  wakeUpTime?: string;
+  departureTime?: string;
+  performanceTime?: string;
+  contactName?: string;
+  contactEmail?: string;
+  contactPhone?: string;
+  transportationCompany?: string;
+  transportationDetails?: string;
+  contractStatus?: "draft" | "sent" | "signed" | "completed" | "none";
+  contractNotes?: string;
 }
 
 interface EventFormFieldsProps {
   form: UseFormReturn<EventFormValues>;
-  isUploading?: boolean;
 }
 
-export function EventFormFields({ form, isUploading = false }: EventFormFieldsProps) {
+export function EventFormFields({ form }: EventFormFieldsProps) {
   return (
-    <>
+    <div className="space-y-4">
+      {/* Title Field */}
       <FormField
         control={form.control}
         name="title"
@@ -51,68 +56,69 @@ export function EventFormFields({ form, isUploading = false }: EventFormFieldsPr
           <FormItem>
             <FormLabel>Event Title</FormLabel>
             <FormControl>
-              <Input placeholder="Enter event title" {...field} />
+              <Input placeholder="Enter event title" {...field} value={field.value || ''} />
             </FormControl>
             <FormMessage />
           </FormItem>
         )}
       />
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <FormField
-          control={form.control}
-          name="date"
-          render={({ field }) => (
-            <FormItem className="flex flex-col">
-              <FormLabel>Date</FormLabel>
-              <Popover>
-                <PopoverTrigger asChild>
-                  <FormControl>
-                    <Button
-                      variant={"outline"}
-                      className={cn(
-                        "w-full pl-3 text-left font-normal",
-                        !field.value && "text-muted-foreground"
-                      )}
-                    >
-                      {field.value ? (
-                        format(field.value, "PPP")
-                      ) : (
-                        <span>Pick a date</span>
-                      )}
-                      <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                    </Button>
-                  </FormControl>
-                </PopoverTrigger>
-                <PopoverContent className="w-auto p-0" align="start">
-                  <Calendar
-                    mode="single"
-                    selected={field.value}
-                    onSelect={field.onChange}
-                    initialFocus
-                  />
-                </PopoverContent>
-              </Popover>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+      {/* Date Field */}
+      <FormField
+        control={form.control}
+        name="date"
+        render={({ field }) => (
+          <FormItem className="flex flex-col">
+            <FormLabel>Event Date</FormLabel>
+            <Popover>
+              <PopoverTrigger asChild>
+                <FormControl>
+                  <Button
+                    variant={"outline"}
+                    className={cn(
+                      "w-full pl-3 text-left font-normal",
+                      !field.value && "text-muted-foreground"
+                    )}
+                  >
+                    {field.value ? (
+                      format(field.value, "PPP")
+                    ) : (
+                      <span>Pick a date</span>
+                    )}
+                    <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                  </Button>
+                </FormControl>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto p-0" align="start">
+                <Calendar
+                  mode="single"
+                  selected={field.value}
+                  onSelect={field.onChange}
+                  initialFocus
+                />
+              </PopoverContent>
+            </Popover>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
 
-        <FormField
-          control={form.control}
-          name="time"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Time</FormLabel>
-              <FormControl>
-                <Input type="time" {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-      </div>
+      {/* Time Field */}
+      <FormField
+        control={form.control}
+        name="time"
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel>Event Time</FormLabel>
+            <FormControl>
+              <Input type="time" {...field} value={field.value || ''} />
+            </FormControl>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
 
+      {/* Location Field */}
       <FormField
         control={form.control}
         name="location"
@@ -120,32 +126,32 @@ export function EventFormFields({ form, isUploading = false }: EventFormFieldsPr
           <FormItem>
             <FormLabel>Location</FormLabel>
             <FormControl>
-              <GoogleMapAutocomplete
-                value={field.value}
-                onChange={field.onChange}
-                placeholder="Search for a location"
-              />
+              <Input placeholder="Enter event location" {...field} value={field.value || ''} />
             </FormControl>
             <FormMessage />
           </FormItem>
         )}
       />
 
+      {/* Event Type */}
       <FormField
         control={form.control}
         name="type"
         render={({ field }) => (
           <FormItem>
             <FormLabel>Event Type</FormLabel>
-            <Select onValueChange={field.onChange} defaultValue={field.value}>
+            <Select 
+              onValueChange={field.onChange} 
+              defaultValue={field.value as string || "concert"}
+            >
               <FormControl>
                 <SelectTrigger>
                   <SelectValue placeholder="Select event type" />
                 </SelectTrigger>
               </FormControl>
               <SelectContent>
-                <SelectItem value="concert">Concert</SelectItem>
                 <SelectItem value="rehearsal">Rehearsal</SelectItem>
+                <SelectItem value="concert">Concert</SelectItem>
                 <SelectItem value="sectional">Sectional</SelectItem>
                 <SelectItem value="special">Special Event</SelectItem>
                 <SelectItem value="tour">Tour</SelectItem>
@@ -156,23 +162,25 @@ export function EventFormFields({ form, isUploading = false }: EventFormFieldsPr
         )}
       />
 
+      {/* Description Field */}
       <FormField
         control={form.control}
         name="description"
         render={({ field }) => (
           <FormItem>
-            <FormLabel>Description (Optional)</FormLabel>
+            <FormLabel>Description</FormLabel>
             <FormControl>
-              <Textarea
-                placeholder="Event description"
-                className="resize-none"
-                {...field}
+              <Textarea 
+                placeholder="Enter event description" 
+                className="min-h-[100px]" 
+                {...field} 
+                value={field.value || ''} 
               />
             </FormControl>
             <FormMessage />
           </FormItem>
         )}
       />
-    </>
+    </div>
   );
 }

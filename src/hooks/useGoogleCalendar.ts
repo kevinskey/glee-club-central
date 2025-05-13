@@ -1,10 +1,11 @@
 
 import { useState, useEffect } from 'react';
 import { 
-  checkGoogleCalendarConnection, 
-  connectGoogleCalendar, 
-  disconnectGoogleCalendar, 
-  syncWithGoogleCalendar
+  isConnected, 
+  connect, 
+  connectToGoogleCalendar, 
+  disconnect, 
+  syncCalendar
 } from '@/services/googleCalendar';
 
 export const useGoogleCalendar = () => {
@@ -17,7 +18,7 @@ export const useGoogleCalendar = () => {
     const checkConnection = async () => {
       try {
         setIsLoading(true);
-        const connected = await checkGoogleCalendarConnection();
+        const connected = await isConnected();
         setIsGoogleConnected(connected);
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Failed to check Google Calendar connection');
@@ -32,7 +33,7 @@ export const useGoogleCalendar = () => {
 
   const handleConnect = async () => {
     try {
-      await connectGoogleCalendar();
+      await connect();
       setIsGoogleConnected(true);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to connect to Google Calendar');
@@ -42,7 +43,7 @@ export const useGoogleCalendar = () => {
 
   const handleDisconnect = async () => {
     try {
-      await disconnectGoogleCalendar();
+      await disconnect();
       setIsGoogleConnected(false);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to disconnect from Google Calendar');
@@ -53,7 +54,7 @@ export const useGoogleCalendar = () => {
   const handleSyncCalendar = async () => {
     try {
       setIsSyncing(true);
-      await syncWithGoogleCalendar();
+      await syncCalendar();
       // Success would be handled here, possibly with a toast notification
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to sync with Google Calendar');
