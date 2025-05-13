@@ -36,10 +36,8 @@ export function PressKitMediaGrid({ bucketName, folder, title, maxItems = 8 }: P
 
         if (error) {
           console.error('Error fetching files:', error);
-          toast({
-            title: "Error loading media",
-            description: error.message,
-            variant: "destructive"
+          toast.error("Error loading media", {
+            description: error.message
           });
           return;
         }
@@ -72,10 +70,8 @@ export function PressKitMediaGrid({ bucketName, folder, title, maxItems = 8 }: P
         setFiles(mediaFiles);
       } catch (err) {
         console.error('Unexpected error:', err);
-        toast({
-          title: "Error loading media",
-          description: "An unexpected error occurred",
-          variant: "destructive"
+        toast.error("Error loading media", {
+          description: "An unexpected error occurred"
         });
       } finally {
         setLoading(false);
@@ -95,16 +91,13 @@ export function PressKitMediaGrid({ bucketName, folder, title, maxItems = 8 }: P
       link.click();
       document.body.removeChild(link);
       
-      toast({
-        title: "Download started",
-        description: `${fileName} is downloading`,
+      toast.success("Download started", {
+        description: `${fileName} is downloading`
       });
     } catch (err) {
       console.error('Download error:', err);
-      toast({
-        title: "Download failed", 
-        description: "Unable to download the file",
-        variant: "destructive"
+      toast.error("Download failed", {
+        description: "Unable to download the file"
       });
     }
   };

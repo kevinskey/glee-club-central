@@ -36,10 +36,8 @@ export function PressKitDocuments({ bucketName, folder }: PressKitDocumentsProps
 
         if (error) {
           console.error('Error fetching documents:', error);
-          toast({
-            title: "Error loading documents",
-            description: error.message,
-            variant: "destructive"
+          toast.error("Error loading documents", {
+            description: error.message
           });
           return;
         }
@@ -72,10 +70,8 @@ export function PressKitDocuments({ bucketName, folder }: PressKitDocumentsProps
         setDocuments(docs);
       } catch (err) {
         console.error('Unexpected error:', err);
-        toast({
-          title: "Error loading documents",
-          description: "An unexpected error occurred",
-          variant: "destructive"
+        toast.error("Error loading documents", {
+          description: "An unexpected error occurred"
         });
       } finally {
         setLoading(false);
@@ -94,16 +90,13 @@ export function PressKitDocuments({ bucketName, folder }: PressKitDocumentsProps
       link.click();
       document.body.removeChild(link);
       
-      toast({
-        title: "Download started",
-        description: `${fileName} is downloading`,
+      toast.success("Download started", {
+        description: `${fileName} is downloading`
       });
     } catch (err) {
       console.error('Download error:', err);
-      toast({ 
-        title: "Download failed", 
-        description: "Unable to download the file",
-        variant: "destructive"
+      toast.error("Download failed", {
+        description: "Unable to download the file"
       });
     }
   };
