@@ -1,11 +1,12 @@
 
 import React from 'react';
-import { ArrowRight, Music, Calendar, Users } from 'lucide-react';
+import { Music, Calendar, Users } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { HeroSection } from '@/components/landing/HeroSection';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { Header } from '@/components/landing/Header';
 import { SidebarProvider } from '@/components/ui/sidebar';
+import { UpcomingEvents } from '@/components/calendar/UpcomingEvents';
 
 const HomePage = () => {
   const isMobile = useIsMobile();
@@ -24,7 +25,7 @@ const HomePage = () => {
         {isMobile && <HeroSection />}
         
         <div className="container mx-auto px-4 py-12 z-10 relative flex-1 flex flex-col">
-          <main className={`flex-1 flex flex-col items-center justify-center ${isMobile ? "text-foreground" : "text-white"}`}>
+          <main className={`flex-1 flex flex-col items-center justify-start ${isMobile ? "text-foreground" : "text-white"}`}>
             {!isMobile && (
               <div className="text-center max-w-3xl mx-auto">
                 <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6">
@@ -36,6 +37,11 @@ const HomePage = () => {
                 </p>
               </div>
             )}
+            
+            {/* Upcoming Events Section */}
+            <div className={`w-full mt-8 mb-12 ${isMobile ? "bg-white dark:bg-gray-800 py-8 px-4 rounded-lg shadow-sm" : "bg-white/5 backdrop-blur-sm p-6 rounded-lg"}`}>
+              <UpcomingEvents />
+            </div>
             
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 w-full max-w-4xl mt-8">
               <Card className={`${isMobile ? "bg-card" : "bg-white/10 backdrop-blur border-none text-white"}`}>
