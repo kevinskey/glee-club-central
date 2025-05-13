@@ -8,16 +8,17 @@ interface NavItemProps {
   href: string;
   icon?: React.ReactNode;
   external?: boolean;
+  children?: React.ReactNode;
 }
 
-export function NavItem({ title, href, icon, external = false }: NavItemProps) {
-  // Removing active state highlighting by setting isActive to false always
-  const isActive = false;
+export function NavItem({ title, href, icon, external = false, children }: NavItemProps) {
+  const location = useLocation();
+  const isActive = location.pathname === href;
   
   const linkContent = (
     <>
       {icon && <span className="mr-2">{icon}</span>}
-      <span>{title}</span>
+      <span>{children || title}</span>
     </>
   );
   

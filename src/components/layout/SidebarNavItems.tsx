@@ -1,6 +1,6 @@
 
 import React from "react";
-import { NavItem } from "./NavItem";
+import { NavLink } from "./NavLink";
 import {
   Home,
   CalendarDays,
@@ -15,42 +15,29 @@ import {
   BookOpen
 } from "lucide-react";
 
+// Define and export the main navigation items array
+export const mainNavItems = [
+  { title: "Dashboard", href: "/dashboard", icon: <Home /> },
+  { title: "Calendar", href: "/dashboard/calendar", icon: <CalendarDays /> },
+  { title: "Music", href: "/dashboard/music", icon: <Music /> },
+  { title: "Sheet Music", href: "/dashboard/sheet-music", icon: <FileText /> },
+  { title: "Setlists", href: "/dashboard/setlists", icon: <ListMusic /> },
+  { title: "Recordings", href: "/dashboard/recordings", icon: <Mic /> },
+  { title: "Attendance", href: "/dashboard/attendance", icon: <Clock /> },
+  { title: "Members", href: "/dashboard/members", icon: <Users /> },
+  { title: "Media", href: "/dashboard/media", icon: <ImageIcon /> },
+  { title: "My Profile", href: "/dashboard/profile", icon: <User /> },
+  { title: "Resources", href: "/dashboard/resources", icon: <BookOpen /> }
+];
+
 export const SidebarNavItems = () => {
   return (
     <div className="space-y-1">
-      <NavItem icon={<Home />} href="/dashboard">
-        Dashboard
-      </NavItem>
-      <NavItem icon={<CalendarDays />} href="/dashboard/calendar">
-        Calendar
-      </NavItem>
-      <NavItem icon={<Music />} href="/dashboard/music">
-        Music
-      </NavItem>
-      <NavItem icon={<FileText />} href="/dashboard/sheet-music">
-        Sheet Music
-      </NavItem>
-      <NavItem icon={<ListMusic />} href="/dashboard/setlists">
-        Setlists
-      </NavItem>
-      <NavItem icon={<Mic />} href="/dashboard/recordings">
-        Recordings
-      </NavItem>
-      <NavItem icon={<Clock />} href="/dashboard/attendance">
-        Attendance
-      </NavItem>
-      <NavItem icon={<Users />} href="/dashboard/members">
-        Members
-      </NavItem>
-      <NavItem icon={<ImageIcon />} href="/dashboard/media">
-        Media
-      </NavItem>
-      <NavItem icon={<User />} href="/dashboard/profile">
-        My Profile
-      </NavItem>
-      <NavItem icon={<BookOpen />} href="/dashboard/resources">
-        Resources
-      </NavItem>
+      {mainNavItems.map((item) => (
+        <NavLink key={item.href} href={item.href} icon={item.icon}>
+          {item.title}
+        </NavLink>
+      ))}
     </div>
   );
 };

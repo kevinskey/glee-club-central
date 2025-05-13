@@ -21,7 +21,7 @@ export function DesktopSidebar({ isOpen, isAdmin }: DesktopSidebarProps) {
           <h2 className="mb-2 px-2 text-lg font-semibold tracking-tight">
             Main Menu
           </h2>
-          <SidebarNavItems items={mainNavItems} />
+          <SidebarNavItems />
           
           {isAdmin && <AdminNavigation />}
         </div>
