@@ -1,3 +1,4 @@
+
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { CalendarEvent, EventType } from "@/types/calendar";
@@ -156,20 +157,27 @@ export const fetchGoogleCalendarEvents = async (
     
     if (!data?.events) return [];
     
-    // Make sure to convert dates to strings when needed
-    return data.events.map((event: any): CalendarEvent => ({
-      id: event.id,
-      title: event.summary || 'Untitled Event',
-      description: event.description || '',
-      location: event.location || '',
-      // Fix: Convert string dates to Date objects
-      start: new Date(event.start.dateTime || event.start.date),
-      end: new Date(event.end.dateTime || event.end.date),
-      type: determineEventType(event),
-      created_by: 'google',
-      source: 'google',
-      allDay: !event.start.dateTime
-    }));
+    // Fix: Convert dates properly for each event
+    return data.events.map((event: any): CalendarEvent => {
+      // Handle start and end dates correctly - always convert to Date objects
+      const startDate = new Date(event.start.dateTime || event.start.date);
+      const endDate = new Date(event.end.dateTime || event.end.date);
+      
+      return {
+        id: event.id,
+        title: event.summary || 'Untitled Event',
+        description: event.description || '',
+        location: event.location || '',
+        date: startDate, // Use the Date object
+        time: startDate.toTimeString().substring(0, 5), // Extract HH:MM from time string
+        start: startDate,
+        end: endDate,
+        type: determineEventType(event),
+        created_by: 'google',
+        source: 'google',
+        allDay: !event.start.dateTime
+      };
+    });
   } catch (error) {
     console.error("Error fetching events from Google Calendar:", error);
     toast.error("Failed to fetch events from Google Calendar");
@@ -336,14 +344,16 @@ const convertToGoogleEvent = (event: Partial<CalendarEvent>): GoogleEvent => {
   // Handle the start date (convert string to Date if needed)
   if (typeof event.start === 'string') {
     startDate = new Date(event.start);
+  } else if (event.start instanceof Date) {
+    startDate = event.start;
   } else {
-    startDate = event.start || new Date();
+    startDate = new Date();
   }
   
   // Handle the end date (convert string to Date if needed)
   if (typeof event.end === 'string') {
     endDate = new Date(event.end);
-  } else if (event.end) {
+  } else if (event.end instanceof Date) {
     endDate = event.end;
   } else {
     // Default to 1 hour later if not provided

@@ -29,14 +29,14 @@ import { cn } from "@/lib/utils";
 import { MobileFitCheck } from "./MobileFitCheck";
 import { EventType } from "@/types/calendar";
 
-// Fix the EventFormValues interface to ensure all properties match
+// Make all required fields actually optional to match how the form is used
 export interface EventFormValues {
-  title: string;
-  date: Date;
-  time: string;
-  location: string;
-  description: string;
-  type: EventType;
+  title?: string;
+  date?: Date;
+  time?: string;
+  location?: string;
+  description?: string;
+  type?: EventType;
   image_url?: string | null;
   
   // Additional fields

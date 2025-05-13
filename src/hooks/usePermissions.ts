@@ -1,4 +1,3 @@
-
 import { useAuth } from '@/contexts/AuthContext';
 import { useRolePermissions } from '@/contexts/RolePermissionContext';
 import { useState } from 'react';
@@ -7,7 +6,7 @@ import { toast } from 'sonner';
 
 export function usePermissions() {
   const { profile, isAdmin } = useAuth();
-  const { permissions, hasPermission: contextHasPermission } = useRolePermissions();
+  const { permissions, hasPermission: contextHasPermission, refreshPermissions } = useRolePermissions();
   const [isUpdating, setIsUpdating] = useState(false);
   
   // Get permission by name, using the context's hasPermission function
@@ -62,9 +61,7 @@ export function usePermissions() {
         return false;
       }
       
-      // Refresh the permissions to reflect the changes
-      // Fixed: Remove the direct function call that caused recursive dependency
-      const { refreshPermissions } = useRolePermissions();
+      // Refresh permissions via the imported function - fixed recursive reference
       if (refreshPermissions) {
         await refreshPermissions();
       }
