@@ -74,6 +74,43 @@ const CalendarPage = () => {
     setIsCreateModalOpen
   );
 
+  // Handler for creating event - Modified to adapt the return type
+  const onCreateEvent = async (eventData: any): Promise<void> => {
+    try {
+      const success = await handleCreateEvent(eventData);
+      if (success) {
+        setIsCreateModalOpen(false);
+      }
+    } catch (error) {
+      console.error("Error creating event:", error);
+      toast.error("Failed to create event");
+    }
+  };
+
+  // Handler for updating event - Modified to adapt the return type
+  const onUpdateEvent = async (eventData: CalendarEvent): Promise<void> => {
+    try {
+      await handleUpdateEvent(eventData);
+      setIsViewModalOpen(false);
+      setSelectedEvent(null);
+    } catch (error) {
+      console.error("Error updating event:", error);
+      toast.error("Failed to update event");
+    }
+  };
+
+  // Handler for deleting event - Modified to adapt the return type
+  const onDeleteEvent = async (eventId: string): Promise<void> => {
+    try {
+      await handleDeleteEvent(eventId);
+      setIsViewModalOpen(false);
+      setSelectedEvent(null);
+    } catch (error) {
+      console.error("Error deleting event:", error);
+      toast.error("Failed to delete event");
+    }
+  };
+
   return (
     <div className="flex flex-col min-h-screen">
       <main className="flex-1 bg-gray-50 dark:bg-gray-900">
@@ -119,7 +156,7 @@ const CalendarPage = () => {
             <DialogContent className="sm:max-w-md">
               <EventModal 
                 onClose={() => setIsCreateModalOpen(false)} 
-                onSave={handleCreateEvent} 
+                onSave={onCreateEvent} 
                 initialDate={selectedDate}
               />
             </DialogContent>
@@ -132,9 +169,9 @@ const CalendarPage = () => {
                 <ViewEventModal 
                   event={selectedEvent} 
                   onClose={() => setIsViewModalOpen(false)} 
-                  onUpdate={handleUpdateEvent}
-                  onDelete={handleDeleteEvent}
-                  userCanEdit={true}
+                  onUpdate={onUpdateEvent}
+                  onDelete={onDeleteEvent}
+                  userCanEdit={userCanCreate || (profile?.id === selectedEvent.created_by && selectedEvent.type === 'sectional')}
                 />
               </DialogContent>
             </Dialog>
