@@ -1,3 +1,4 @@
+
 import { useAuth } from '@/contexts/AuthContext';
 import { useRolePermissions } from '@/contexts/RolePermissionContext';
 import { useState } from 'react';
@@ -43,9 +44,11 @@ export function usePermissions(): UsePermissionsReturn {
   const isSuperAdmin = Boolean(profile?.is_super_admin);
   
   // Check if the user has an admin-like role
-  const isAdminRole = profile?.role === 'admin' || 
-                     profile?.role === 'administrator' ||
-                     profile?.role === 'director';
+  const isAdminRole = Boolean(
+    profile?.role === 'admin' || 
+    profile?.role === 'administrator' ||
+    profile?.role === 'director'
+  );
   
   // Development function to promote current user to super admin
   const promoteToSuperAdmin = async (): Promise<boolean> => {

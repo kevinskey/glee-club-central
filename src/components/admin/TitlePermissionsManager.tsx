@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { 
   Card, 
@@ -25,6 +24,7 @@ import { Plus } from 'lucide-react';
 import { useTitlesManagement } from '@/hooks/useTitlesManagement';
 import { toast } from 'sonner';
 import { usePermissions } from '@/hooks/usePermissions';
+import { User } from '@/hooks/useUserManagement';
 
 export function TitlePermissionsManager() {
   const { 
