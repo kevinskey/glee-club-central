@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { YouTubeVideo, YouTubeApiResponse, YouTubeApiItem } from '@/types/youtube';
 import { supabase } from '@/integrations/supabase/client';
@@ -167,19 +166,7 @@ export const useYouTubeData = () => {
         if (data && data.videos) {
           setVideos(data.videos);
         } else {
-          // Fallback to direct API call if edge function didn't return expected data
-          // This is a backup approach in case the edge function deployment is delayed
-          const apiUrl = `https://www.googleapis.com/youtube/v3/search?part=snippet&maxResults=10&q=spelman+college+glee+club&type=video&key=${YOUTUBE_API_KEY}`;
-          
-          const response = await fetch(apiUrl);
-          if (!response.ok) {
-            throw new Error(`YouTube API error: ${response.status}`);
-          }
-          
-          const apiData: YouTubeApiResponse = await response.json();
-          const fetchedVideos = mapApiResponseToVideos(apiData.items);
-          
-          setVideos(fetchedVideos);
+          throw new Error('No videos returned from the API');
         }
       } catch (err) {
         console.error("Error fetching YouTube videos:", err);
