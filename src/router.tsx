@@ -6,189 +6,176 @@ import DashboardLayout from './layouts/DashboardLayout';
 import ProfilePage from './pages/ProfilePage';
 import LandingPage from './pages/LandingPage';
 import AboutPage from './pages/AboutPage';
-import CalendarPage from './pages/CalendarPage';
-import AttendancePage from './pages/AttendancePage';
-import SheetMusicPage from './pages/sheet-music/SheetMusicPage';
-import HomeLayout from './layouts/HomeLayout';
-import UpdatePasswordPage from './pages/UpdatePasswordPage';
+import ContactPage from './pages/ContactPage';
+import AnnouncementsPage from './pages/AnnouncementsPage';
 import NotFoundPage from './pages/NotFoundPage';
+import MediaLibraryPage from './pages/MediaLibraryPage';
+import SheetMusicPage from './pages/SheetMusicPage';
 import RecordingsPage from './pages/recordings/RecordingsPage';
 import AdminDashboard from './pages/admin/AdminDashboard';
 import PressKitPage from './pages/PressKitPage';
 import PrivacyPolicyPage from './pages/PrivacyPolicyPage';
 import TermsOfServicePage from './pages/TermsOfServicePage';
 import YoutubeVideosPage from './pages/YoutubeVideosPage';
+import SiteImagesPage from './pages/admin/SiteImagesPage';
 
 // Import auth related pages
 import LoginPage from './pages/auth/LoginPage';
-import SignupPage from './pages/auth/SignupPage';
-import ForgotPasswordPage from './pages/auth/ForgotPasswordPage';
 import ResetPasswordPage from './pages/auth/ResetPasswordPage';
-import UserSetupPage from './pages/auth/UserSetupPage';
+import ForgotPasswordPage from './pages/auth/ForgotPasswordPage';
 
-// Import dashboard pages
-import DashboardHome from './pages/dashboard/DashboardHome';
-import AnnouncementsPage from './pages/announcements/AnnouncementsPage';
-import SettingsPage from './pages/settings/SettingsPage';
-import ResourcesPage from './pages/resources/ResourcesPage';
-import PracticeLogsPage from './pages/practice-logs/PracticeLogsPage';
-import PerformancesPage from './pages/PerformancesPage';
-import MembersPage from './pages/members/MembersPage';
-import MemberProfile from './pages/members/MemberProfile';
-import SetlistsPage from './pages/setlists/SetlistsPage';
+// Import admin pages
+import AdminLayout from './layouts/AdminLayout';
+import AdminRegistrationPage from './pages/admin/AdminRegistrationPage';
+import AdminDashboardPage from './pages/admin/AdminDashboardPage';
+import AnalyticsPage from './pages/admin/AnalyticsPage';
+import UsersPage from './pages/admin/UsersPage';
+import EventCalendar from './pages/admin/EventCalendar';
+import MediaLibrary from './pages/admin/MediaLibrary';
+import SettingsPage from './pages/admin/SettingsPage';
+import LandingPageSettingsPage from './pages/admin/LandingPageSettingsPage';
 
-// Lazy loaded components
-const ContactPage = lazy(() => import('./pages/ContactPage'));
+// Shared components
+import { AdminRoute } from './components/auth/AdminRoute';
+
+// Protected route components
+import RequireAdmin from './components/auth/RequireAdmin';
+
+const DashboardPage = lazy(() => import('./pages/DashboardPage'));
 
 export const router = createBrowserRouter([
   {
     path: '/',
     element: <MainLayout />,
-    errorElement: <NotFoundPage />,
     children: [
       {
         index: true,
-        element: <LandingPage />
+        element: <LandingPage />,
       },
       {
         path: 'about',
-        element: <AboutPage />
+        element: <AboutPage />,
       },
       {
         path: 'contact',
-        element: (
-          <Suspense fallback={<>Loading...</>}>
-            <ContactPage />
-          </Suspense>
-        )
+        element: <ContactPage />,
+      },
+      {
+        path: 'announcements',
+        element: <AnnouncementsPage />,
       },
       {
         path: 'press-kit',
-        element: <PressKitPage />
+        element: <PressKitPage />,
       },
       {
-        path: 'videos',
-        element: <YoutubeVideosPage />
+        path: 'privacy-policy',
+        element: <PrivacyPolicyPage />,
       },
       {
-        path: 'privacy',
-        element: <PrivacyPolicyPage />
+        path: 'terms-of-service',
+        element: <TermsOfServicePage />,
       },
       {
-        path: 'terms',
-        element: <TermsOfServicePage />
-      }
-    ]
-  },
-  {
-    path: '/auth',
-    element: <HomeLayout hideHeader={true} />,
-    children: [
-      {
-        path: 'login',
-        element: <LoginPage />
+        path: 'youtube-videos',
+        element: <YoutubeVideosPage />,
       },
       {
-        path: 'signup',
-        element: <SignupPage />
+        path: '*',
+        element: <NotFoundPage />,
       },
-      {
-        path: 'forgot-password',
-        element: <ForgotPasswordPage />
-      },
-      {
-        path: 'reset-password',
-        element: <ResetPasswordPage />
-      },
-      {
-        path: 'setup',
-        element: <UserSetupPage />
-      }
-    ]
-  },
-  {
-    path: '/login',
-    element: <MainLayout />,
-    children: [
-      {
-        index: true,
-        element: <LoginPage />
-      }
-    ]
+    ],
   },
   {
     path: '/dashboard',
     element: <DashboardLayout />,
-    errorElement: <NotFoundPage />,
     children: [
       {
         index: true,
-        element: <DashboardHome />
+        element: (
+          <Suspense fallback={<div>Loading...</div>}>
+            <DashboardPage />
+          </Suspense>
+        ),
       },
       {
         path: 'profile',
-        element: <ProfilePage />
+        element: <ProfilePage />,
       },
       {
-        path: 'calendar',
-        element: <CalendarPage />
-      },
-      {
-        path: 'attendance',
-        element: <AttendancePage />
+        path: 'media-library',
+        element: <MediaLibraryPage />,
       },
       {
         path: 'sheet-music',
-        element: <SheetMusicPage />
-      },
-      {
-        path: 'setlists',
-        element: <SetlistsPage />
+        element: <SheetMusicPage />,
       },
       {
         path: 'recordings',
-        element: <RecordingsPage />
+        element: <RecordingsPage />,
+      },
+    ],
+  },
+  {
+    path: '/login',
+    element: <LoginPage />,
+  },
+  {
+    path: '/register',
+    element: <AdminRegistrationPage />,
+  },
+  {
+    path: '/forgot-password',
+    element: <ForgotPasswordPage />,
+  },
+  {
+    path: '/reset-password',
+    element: <ResetPasswordPage />,
+  },
+  {
+    path: '/update-password',
+    element: <ResetPasswordPage />,
+  },
+  {
+    path: '/admin',
+    element: (
+      <AdminRoute>
+        <AdminLayout />
+      </AdminRoute>
+    ),
+    children: [
+      {
+        index: true,
+        element: <AdminDashboard />
       },
       {
-        path: 'members',
-        element: <MembersPage />
+        path: 'users',
+        element: <UsersPage />
       },
       {
-        path: 'members/:id',
-        element: <MemberProfile />
+        path: 'analytics',
+        element: <AnalyticsPage />
       },
       {
-        path: 'performances',
-        element: <PerformancesPage />
+        path: 'calendar',
+        element: <EventCalendar />
       },
       {
-        path: 'announcements',
-        element: <AnnouncementsPage />
+        path: 'media',
+        element: <MediaLibrary />
       },
       {
         path: 'settings',
         element: <SettingsPage />
       },
       {
-        path: 'resources',
-        element: <ResourcesPage />
+        path: 'landing-page',
+        element: <LandingPageSettingsPage />
       },
       {
-        path: 'practice-logs',
-        element: <PracticeLogsPage />
-      },
-      {
-        path: 'admin',
-        element: <AdminDashboard />
-      },
-      {
-        path: 'update-password',
-        element: <UpdatePasswordPage />
+        path: 'site-images',
+        element: <SiteImagesPage />
       }
     ]
-  },
-  {
-    path: '*',
-    element: <NotFoundPage />
   }
 ]);
