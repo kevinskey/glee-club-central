@@ -61,6 +61,7 @@ export const router = createBrowserRouter([
   },
   {
     path: '/auth',
+    element: <HomeLayout />,
     children: [
       {
         path: 'login',
