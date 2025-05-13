@@ -6,23 +6,6 @@ import { toast } from 'sonner';
 // YouTube API key
 const YOUTUBE_API_KEY = 'AIzaSyDZ2xlwQIbXgEYlNOxzkWsIG4meKrRdKdo';
 
-// Helper function to convert YouTube API response to our YouTubeVideo format
-const mapApiResponseToVideos = (items: YouTubeApiItem[]): YouTubeVideo[] => {
-  return items.map(item => ({
-    id: item.id.videoId || item.id as unknown as string,
-    title: item.snippet.title,
-    description: item.snippet.description,
-    url: `https://www.youtube.com/watch?v=${item.id.videoId || item.id as unknown as string}`,
-    thumbnailUrl: item.snippet.thumbnails.high?.url || item.snippet.thumbnails.medium?.url || item.snippet.thumbnails.default?.url,
-    publishedAt: item.snippet.publishedAt,
-    channelTitle: item.snippet.channelTitle,
-    viewCount: item.statistics ? parseInt(item.statistics.viewCount, 10) : 0,
-    likeCount: item.statistics ? parseInt(item.statistics.likeCount, 10) : 0,
-    commentCount: item.statistics ? parseInt(item.statistics.commentCount, 10) : 0,
-    duration: item.contentDetails?.duration || ''
-  }));
-};
-
 // Mock data as fallback
 const mockYouTubeVideos: YouTubeVideo[] = [
   {
@@ -131,19 +114,37 @@ const mockYouTubeVideos: YouTubeVideo[] = [
   }
 ];
 
+// Helper function to convert YouTube API response to our YouTubeVideo format
+const mapApiResponseToVideos = (items: YouTubeApiItem[]): YouTubeVideo[] => {
+  return items.map(item => ({
+    id: item.id.videoId || item.id as unknown as string,
+    title: item.snippet.title,
+    description: item.snippet.description,
+    url: `https://www.youtube.com/watch?v=${item.id.videoId || item.id as unknown as string}`,
+    thumbnailUrl: item.snippet.thumbnails.high?.url || item.snippet.thumbnails.medium?.url || item.snippet.thumbnails.default?.url,
+    publishedAt: item.snippet.publishedAt,
+    channelTitle: item.snippet.channelTitle,
+    viewCount: item.statistics ? parseInt(item.statistics.viewCount, 10) : 0,
+    likeCount: item.statistics ? parseInt(item.statistics.likeCount, 10) : 0,
+    commentCount: item.statistics ? parseInt(item.statistics.commentCount, 10) : 0,
+    duration: item.contentDetails?.duration || ''
+  }));
+};
+
 export const useYouTubeData = () => {
   const [videos, setVideos] = useState<YouTubeVideo[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
+  const [useMockData, setUseMockData] = useState(false);
 
   useEffect(() => {
     const fetchYouTubeVideos = async () => {
       try {
         setLoading(true);
         
-        // If we're in development mode and want to use mock data instead of API calls
+        // Always use mock data in development mode if configured
         if (import.meta.env.MODE === 'development' && import.meta.env.VITE_USE_MOCK_DATA === 'true') {
-          // Return mock data after a short delay to simulate network request
+          console.log("Using mock YouTube data due to development environment setting");
           setTimeout(() => {
             setVideos(mockYouTubeVideos);
             setLoading(false);
@@ -159,21 +160,30 @@ export const useYouTubeData = () => {
           }
         });
         
-        if (edgeFunctionError) {
-          throw new Error(`Edge function error: ${edgeFunctionError.message}`);
+        if (edgeFunctionError || !data) {
+          console.error("Edge function error:", edgeFunctionError || "No data returned");
+          throw new Error(`Edge function error: ${edgeFunctionError?.message || "No data returned"}`);
         }
         
         if (data && data.videos) {
           setVideos(data.videos);
         } else {
-          throw new Error('No videos returned from the API');
+          // Specific case for empty results
+          console.warn("No videos returned from the API, using mock data");
+          setUseMockData(true);
+          setVideos(mockYouTubeVideos);
         }
       } catch (err) {
         console.error("Error fetching YouTube videos:", err);
         setError(err instanceof Error ? err : new Error('Unknown error occurred'));
-        toast.error("Failed to load YouTube videos. Using mock data instead.");
         
-        // Fallback to mock data
+        // Only show toast for non-development environments to avoid spam during development
+        if (import.meta.env.MODE !== 'development') {
+          toast.error("Failed to load YouTube videos. Using mock data instead.");
+        }
+        
+        console.log("Falling back to mock YouTube data due to error");
+        setUseMockData(true);
         setVideos(mockYouTubeVideos);
       } finally {
         setLoading(false);
@@ -187,7 +197,8 @@ export const useYouTubeData = () => {
     videos,
     loading,
     error,
-    isLoading: loading // Adding isLoading alias for consistent API
+    isLoading: loading, // Adding isLoading alias for consistent API
+    useMockData
   };
 };
 

@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useYouTubeData } from '@/hooks/useYouTubeData'; // Changed to use named export
 import { Card } from '@/components/ui/card';
@@ -25,7 +24,7 @@ import { VideoPlayer } from '@/components/videos/VideoPlayer';
 import { ScrollArea } from '@/components/ui/scroll-area';
 
 export function YouTubeSection() {
-  const { videos, isLoading, error } = useYouTubeData();
+  const { videos, isLoading, error, useMockData } = useYouTubeData();
   const [selectedVideo, setSelectedVideo] = useState<string | null>(null);
   const [featuredVideoId, setFeaturedVideoId] = useState<string | null>(null);
   const isMobile = useIsMobile();
@@ -86,6 +85,9 @@ export function YouTubeSection() {
             <h2 className="text-3xl md:text-4xl font-bold text-transparent bg-gradient-to-r from-blue-100 to-blue-200 bg-clip-text drop-shadow-[0_2px_2px_rgba(0,0,0,0.3)]">
               Featured Videos
             </h2>
+            {useMockData && (
+              <p className="text-xs text-blue-200/70 mt-1">(Demo content)</p>
+            )}
           </div>
           <div className="flex items-center gap-4">
             <Link 
@@ -111,13 +113,25 @@ export function YouTubeSection() {
 
         {/* Video Selection Dropdown - Improved for mobile */}
         <div className="mb-6">
-          <Select onValueChange={handleSelectVideo} defaultValue={videos[0]?.id}>
+          <Select 
+            onValueChange={handleSelectVideo} 
+            defaultValue={videos.length > 0 ? videos[0]?.id : undefined}
+            disabled={isLoading || videos.length === 0}
+          >
             <SelectTrigger className="bg-black/30 border-blue-800/50 text-blue-100 w-full max-w-full md:max-w-md">
-              <SelectValue placeholder="Select a video to watch" />
+              <SelectValue placeholder={
+                isLoading ? "Loading videos..." : 
+                videos.length === 0 ? "No videos available" :
+                "Select a video to watch"
+              } />
             </SelectTrigger>
             <SelectContent className="bg-glee-spelman border-blue-900 text-blue-100">
               {videos.map((video) => (
-                <SelectItem key={video.id} value={video.id} className="text-blue-100 focus:bg-blue-800/40 focus:text-white cursor-pointer">
+                <SelectItem 
+                  key={video.id} 
+                  value={video.id} 
+                  className="text-blue-100 focus:bg-blue-800/40 focus:text-white cursor-pointer"
+                >
                   {video.title}
                 </SelectItem>
               ))}
@@ -126,7 +140,7 @@ export function YouTubeSection() {
         </div>
 
         {/* Featured Video Player */}
-        {featuredVideoId && (
+        {featuredVideoId && videos.length > 0 && (
           <div className="mb-8 bg-black/30 p-2 md:p-4 rounded-lg">
             <VideoPlayer 
               videoId={featuredVideoId} 
@@ -160,6 +174,10 @@ export function YouTubeSection() {
                   </div>
                 ))}
               </>
+            ) : videos.length === 0 ? (
+              <div className="w-full text-center py-6">
+                <p className="text-blue-100">No videos available at this time.</p>
+              </div>
             ) : (
               <>
                 {videos.map((video) => (
@@ -203,7 +221,7 @@ export function YouTubeSection() {
         </div>
       </div>
 
-      <Dialog open={selectedVideo !== null} onOpenChange={handleCloseDialog}>
+      <Dialog open={selectedVideo !== null} onOpenChange={(open) => !open && setSelectedVideo(null)}>
         <DialogContent className="sm:max-w-3xl p-0 overflow-hidden">
           <DialogHeader className="p-4 pb-0">
             <DialogTitle>

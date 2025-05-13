@@ -13,7 +13,7 @@ export const useYouTubeChannel = ({
   channelId = 'UCk1x0JI7pM6YaBbtP1pKgJw', // Default Spelman College Glee Club channel
   maxResults = 3 
 }: UseYouTubeChannelProps = {}) => {
-  const { videos, loading, error } = useYouTubeData();
+  const { videos, loading, error, useMockData } = useYouTubeData();
   const [channelVideos, setChannelVideos] = useState<YouTubeVideo[]>([]);
   
   useEffect(() => {
@@ -27,14 +27,21 @@ export const useYouTubeChannel = ({
         setChannelVideos(filtered);
       } catch (err) {
         console.error("Error filtering channel videos:", err);
-        toast.error("Failed to filter channel videos");
+        // Only show toast in non-development environments
+        if (import.meta.env.MODE !== 'development') {
+          toast.error("Failed to filter channel videos");
+        }
       }
+    } else if (!loading && videos.length === 0) {
+      // When there are no videos, ensure we return an empty array
+      setChannelVideos([]);
     }
-  }, [videos, channelId, maxResults]);
+  }, [videos, channelId, maxResults, loading]);
   
   return {
     videos: channelVideos,
     loading,
     error,
+    useMockData
   };
 };
