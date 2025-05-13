@@ -1,106 +1,90 @@
-import {
-  createBrowserRouter,
-} from "react-router-dom";
-import DashboardLayout from "@/layouts/DashboardLayout";
-import AdminLayout from "@/layouts/AdminLayout";
-import ErrorBoundary from "@/components/ErrorBoundary";
-import DashboardPage from "@/pages/DashboardPage";
-import AdminDashboardPage from "@/pages/admin/AdminDashboardPage";
-import AnalyticsPage from "@/pages/admin/AnalyticsPage";
-import MembersPage from "@/pages/admin/MembersPage";
-import UsersPage from "@/pages/admin/UsersPage";
-import FinancialRecords from "@/pages/admin/FinancialRecords";
-import MediaLibraryPage from "@/pages/admin/MediaLibraryPage";
-import EventManagerPage from "@/pages/admin/EventManagerPage";
-import SettingsPage from "@/pages/admin/SettingsPage";
-import SectionManagerPage from "@/pages/admin/SectionManagerPage";
-import SiteSettingsPage from "@/pages/admin/SiteSettingsPage";
-import HomePage from "@/pages/HomePage";
-import HomeLayout from "@/layouts/HomeLayout";
-import RecordingsPage from "@/pages/RecordingsPage";
-import { MainLayout } from "@/layouts/MainLayout";
-import PressKitPage from "@/pages/PressKitPage";
-import ContactPage from "@/pages/ContactPage";
-import AboutPage from "@/pages/AboutPage";
-import LandingPageSettingsPage from "@/pages/admin/LandingPageSettingsPage";
-import AdminRegistrationPage from "@/pages/admin/AdminRegistrationPage";
-import CalendarPage from "@/pages/CalendarPage";
+import { createBrowserRouter } from 'react-router-dom';
+import App from './App';
+import LandingPage from './pages/LandingPage';
+import LoginPage from './pages/LoginPage';
+import RegisterPage from './pages/RegisterPage';
+import DashboardLayout from './layouts/DashboardLayout';
+import DashboardPage from './pages/DashboardPage';
+import NotFoundPage from './pages/NotFoundPage';
+import ProfilePage from './pages/profile/ProfilePage'; // Make sure we use the correct ProfilePage
+import CalendarPage from './pages/CalendarPage';
+import MembersPage from './pages/MembersPage';
+import ProtectedRoute from './components/ProtectedRoute';
+import AdminDashboard from './pages/admin/AdminDashboard';
+import SettingsPage from './pages/SettingsPage';
+import MediaPage from './pages/MediaPage';
+import WardrobePage from './pages/WardrobePage';
+import FinancePage from './pages/FinancePage';
+import AttendancePage from './pages/AttendancePage';
 
 const router = createBrowserRouter([
   {
-    path: "/",
-    element: <HomeLayout />,
-    errorElement: <ErrorBoundary children={null} />,
-    children: [
-      { index: true, element: <HomePage /> },
-      { path: "about", element: <AboutPage /> },
-      { path: "contact", element: <ContactPage /> },
-      { path: "press-kit", element: <PressKitPage /> },
-      { path: "recordings", element: <RecordingsPage /> },
-      { path: "calendar", element: <CalendarPage /> }, // Add calendar route
-    ],
-  },
-  {
-    path: "/dashboard",
-    element: <DashboardLayout />,
-    errorElement: <ErrorBoundary children={null} />,
-    children: [
-      { index: true, element: <DashboardPage /> },
-    ],
-  },
-  {
-    path: "/admin",
-    element: <AdminLayout />,
-    errorElement: <ErrorBoundary children={null} />,
-    children: [
-      { index: true, element: <AdminDashboardPage /> },
-      { path: "analytics", element: <AnalyticsPage /> },
-      { path: "members", element: <MembersPage /> },
-      { path: "users", element: <UsersPage /> },
-      { path: "finances", element: <FinancialRecords /> },
-      { path: "media-library", element: <MediaLibraryPage /> },
-      { path: "events", element: <EventManagerPage /> },
-      { path: "settings", element: <SettingsPage /> },
-      { path: "sections", element: <SectionManagerPage /> },
-      { path: "site-settings", element: <SiteSettingsPage /> },
-      { path: "landing-page", element: <LandingPageSettingsPage /> },
-    ],
-  },
-  {
-    path: "/login",
-    element: <MainLayout />,
-    errorElement: <ErrorBoundary children={null} />,
+    path: '/',
+    element: <App />,
+    errorElement: <NotFoundPage />,
     children: [
       {
-        index: true,
-        lazy: async () => {
-          let LoginPage = (await import("./pages/LoginPage")).default
-          return { Component: LoginPage }
-        },
-      },
-    ],
-  },
-  {
-    path: "/register",
-    element: <MainLayout />,
-    errorElement: <ErrorBoundary children={null} />,
-    children: [
-      {
-        index: true,
-        lazy: async () => {
-          let RegisterPage = (await import("./pages/RegisterPage")).default
-          return { Component: RegisterPage }
-        },
+        path: '/',
+        element: <LandingPage />
       },
       {
-        path: "admin",
-        lazy: async () => {
-          // Use the AdminRegistrationPage that is properly imported at the top
-          return { Component: AdminRegistrationPage }
-        },
+        path: 'login',
+        element: <LoginPage />
       },
-    ],
-  },
+      {
+        path: 'register',
+        element: <RegisterPage />
+      },
+      {
+        path: 'dashboard',
+        element: <DashboardLayout />,
+        children: [
+          {
+            path: '',
+            element: <DashboardPage />
+          },
+          {
+            path: 'profile',
+            element: <ProfilePage />
+          },
+          {
+            path: 'calendar',
+            element: <CalendarPage />
+          },
+          {
+            path: 'members',
+            element: <MembersPage />
+          },
+          {
+            path: 'media',
+            element: <MediaPage />
+          },
+           {
+            path: 'wardrobe',
+            element: <WardrobePage />
+          },
+          {
+            path: 'finance',
+            element: <FinancePage />
+          },
+          {
+            path: 'attendance',
+            element: <AttendancePage />
+          },
+        ]
+      },
+      {
+        path: 'admin',
+        element: <ProtectedRoute requiredRole="admin">
+          <AdminDashboard />
+        </ProtectedRoute>
+      },
+      {
+        path: 'settings',
+        element: <SettingsPage />
+      }
+    ]
+  }
 ]);
 
 export default router;

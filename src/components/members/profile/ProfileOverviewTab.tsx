@@ -1,5 +1,4 @@
-
-import React from "react";
+import React, { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { 
   User, 
@@ -12,9 +11,18 @@ import {
   CalendarClock,
   CircleDot,
   FileText,
-  BadgeDollarSign
+  BadgeDollarSign,
+  Save,
+  X
 } from "lucide-react";
 import { Profile } from "@/types/auth";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { toast } from "sonner";
+import { Switch } from "@/components/ui/switch";
+import { formatPhoneNumber } from "@/utils/formatters";
 import { useAuth } from "@/contexts/AuthContext";
 
 interface ProfileOverviewTabProps {
@@ -23,7 +31,11 @@ interface ProfileOverviewTabProps {
   onSave?: (updatedProfile: any) => Promise<void>;
 }
 
-export const ProfileOverviewTab: React.FC<ProfileOverviewTabProps> = ({ profile, isEditable, onSave }) => {
+export const ProfileOverviewTab: React.FC<ProfileOverviewTabProps> = ({ 
+  profile, 
+  isEditable = false,
+  onSave 
+}) => {
   const { refreshPermissions } = useAuth();
   
   // Auto sync profile data when component mounts or profile changes

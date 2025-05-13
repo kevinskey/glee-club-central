@@ -6,14 +6,17 @@ import { AuthProvider } from './contexts/AuthContext';
 import { RolePermissionProvider } from './contexts/RolePermissionContext';
 import { ThemeProvider } from './providers/ThemeProvider';
 import router from './router';
+import ErrorBoundary from './components/ErrorBoundary';
 
 function App() {
   return (
     <ThemeProvider>
       <AuthProvider>
         <RolePermissionProvider>
-          <RouterProvider router={router} />
-          <Toaster position="top-right" />
+          <ErrorBoundary>
+            <RouterProvider router={router} />
+            <Toaster position="top-right" />
+          </ErrorBoundary>
         </RolePermissionProvider>
       </AuthProvider>
     </ThemeProvider>
