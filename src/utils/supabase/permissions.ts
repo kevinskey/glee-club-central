@@ -24,7 +24,7 @@ export async function fetchUserPermissions(userId: string) {
     }
 
     const permissions = userPermissions ? userPermissions.map(p => p.permission as PermissionName) : [];
-    const title = userTitleData?.title || null;
+    const title = userTitleData?.title as UserTitle || null;
 
     return { permissions, title };
   } catch (error) {
