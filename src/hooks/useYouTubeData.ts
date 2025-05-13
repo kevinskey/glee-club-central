@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { YouTubeVideo } from '@/types/youtube';
 
@@ -116,8 +115,9 @@ export const useYouTubeData = () => {
   return {
     videos,
     loading,
-    error
+    error,
+    isLoading: loading // Adding isLoading alias for consistent API
   };
 };
 
-// Remove default export to fix the named export issue
+export default useYouTubeData; // Keep default export for backward compatibility

@@ -11,6 +11,9 @@ interface VideoCardProps {
 }
 
 export function VideoCard({ video, isSelected, onClick }: VideoCardProps) {
+  // Use thumbnailUrl property as it's defined in the Video interface
+  const thumbnailUrl = video.thumbnailUrl;
+  
   return (
     <div
       onClick={onClick}
@@ -21,7 +24,7 @@ export function VideoCard({ video, isSelected, onClick }: VideoCardProps) {
     >
       <div className="relative aspect-video w-32 flex-shrink-0 rounded-md overflow-hidden">
         <img
-          src={video.thumbnail}
+          src={thumbnailUrl}
           alt={video.title}
           className="absolute inset-0 h-full w-full object-cover"
           loading="lazy"
@@ -41,3 +44,5 @@ export function VideoCard({ video, isSelected, onClick }: VideoCardProps) {
     </div>
   );
 }
+
+export default VideoCard;

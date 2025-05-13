@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Video } from '@/types/video';
 import { Card, CardContent } from '@/components/ui/card';
@@ -12,20 +11,17 @@ export interface VideoGridProps {
 }
 
 export function VideoGrid({ videos, loading = false, error = null }: VideoGridProps) {
-  // Show loading state
   if (loading) {
     return (
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {[1, 2, 3, 4, 5, 6].map((i) => (
+        {[...Array(6)].map((_, i) => (
           <Card key={i} className="overflow-hidden">
-            <div className="relative">
-              <AspectRatio ratio={16 / 9}>
-                <Skeleton className="h-full w-full" />
-              </AspectRatio>
-            </div>
+            <AspectRatio ratio={16 / 9}>
+              <Skeleton className="w-full h-full rounded-t-md" />
+            </AspectRatio>
             <CardContent className="p-4">
-              <Skeleton className="h-4 w-2/3 mb-2" />
-              <Skeleton className="h-3 w-full" />
+              <Skeleton className="h-4 w-[70%] mb-2" />
+              <Skeleton className="h-4 w-[50%]" />
             </CardContent>
           </Card>
         ))}
@@ -33,24 +29,12 @@ export function VideoGrid({ videos, loading = false, error = null }: VideoGridPr
     );
   }
 
-  // Show error state
   if (error) {
-    return (
-      <div className="bg-red-50 border border-red-200 rounded-md p-4 text-center">
-        <p className="text-red-600">Error loading videos: {error.message}</p>
-        <p className="text-sm text-red-500 mt-2">Please try again later.</p>
-      </div>
-    );
+    return <div className="text-red-500">Error: {error.message}</div>;
   }
 
-  // Show empty state
   if (!videos || videos.length === 0) {
-    return (
-      <div className="bg-gray-50 border border-gray-200 rounded-md p-8 text-center">
-        <p className="text-gray-600">No videos available.</p>
-        <p className="text-sm text-gray-500 mt-2">Check back later for new content.</p>
-      </div>
-    );
+    return <div>No videos found.</div>;
   }
 
   // Show videos grid
@@ -61,7 +45,7 @@ export function VideoGrid({ videos, loading = false, error = null }: VideoGridPr
           <div className="relative">
             <AspectRatio ratio={16 / 9}>
               <img 
-                src={video.thumbnail} 
+                src={video.thumbnailUrl}
                 alt={video.title} 
                 className="object-cover w-full h-full rounded-t-md"
               />
@@ -93,3 +77,5 @@ export function VideoGrid({ videos, loading = false, error = null }: VideoGridPr
     </div>
   );
 }
+
+export default VideoGrid;

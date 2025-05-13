@@ -7,7 +7,7 @@ interface PDFThumbnailProps {
   className?: string;
 }
 
-const PDFThumbnail: React.FC<PDFThumbnailProps> = ({ url, title, className = '' }) => {
+export const PDFThumbnail: React.FC<PDFThumbnailProps> = ({ url, title, className = '' }) => {
   return (
     <div className={`aspect-[3/4] bg-muted flex items-center justify-center overflow-hidden ${className}`}>
       <div className="text-red-500">

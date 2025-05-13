@@ -1,47 +1,20 @@
-
-import React, { useEffect, useState } from 'react';
-import { VideoGrid } from '@/components/videos/VideoGrid';
-import { VideoFilters } from '@/components/videos/VideoFilters';
-import { useVideoData } from '@/hooks/useVideoData';
+import React from 'react';
 import { PageHeader } from '@/components/ui/page-header';
-import { Separator } from '@/components/ui/separator';
-import { Video } from '@/types/video';
+import { Video } from 'lucide-react';
+import useVideoData from '@/hooks/useVideoData';
+import VideoGrid from '@/components/videos/VideoGrid';
 
 export default function VideosPage() {
-  const { videos, isLoading, error } = useVideoData();
-  const [filteredVideos, setFilteredVideos] = useState<Video[]>([]);
-  const [filterCategory, setFilterCategory] = useState<string>('all');
-  
-  useEffect(() => {
-    if (videos) {
-      if (filterCategory === 'all') {
-        setFilteredVideos(videos);
-      } else {
-        setFilteredVideos(videos.filter(video => video.category === filterCategory));
-      }
-    }
-  }, [videos, filterCategory]);
-
-  const handleCategoryChange = (category: string) => {
-    setFilterCategory(category);
-  };
+  const { videos, loading, error } = useVideoData();
 
   return (
-    <div className="container px-4 py-6 mx-auto">
+    <div className="space-y-6">
       <PageHeader
-        title="Glee Club Videos"
-        description="Watch our performances and rehearsals"
+        title="Videos"
+        description="Watch our latest performances and events"
+        icon={<Video className="h-6 w-6" />}
       />
-      <Separator className="my-6" />
-      
-      <VideoFilters 
-        selectedCategory={filterCategory} 
-        onCategoryChange={handleCategoryChange} 
-      />
-      
-      <div className="mt-6">
-        <VideoGrid videos={filteredVideos} loading={isLoading} error={error} />
-      </div>
+      <VideoGrid videos={videos} loading={loading} error={error} />
     </div>
   );
 }
