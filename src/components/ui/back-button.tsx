@@ -14,12 +14,14 @@ interface BackButtonProps {
   className?: string;
   label?: string;
   fallbackPath?: string;
+  size?: "default" | "sm" | "lg" | "icon";
 }
 
 export const BackButton = ({ 
   className = "", 
   label = "Back", 
-  fallbackPath = "/dashboard"
+  fallbackPath = "/dashboard",
+  size = "default"
 }: BackButtonProps) => {
   const navigate = useNavigate();
   const location = useLocation();
@@ -43,7 +45,7 @@ export const BackButton = ({
         <TooltipTrigger asChild>
           <Button
             variant="ghost"
-            size="sm"
+            size={size}
             onClick={handleGoBack}
             className={`mb-3 sm:mb-0 self-start h-7 sm:h-8 px-2 ${className}`}
           >
