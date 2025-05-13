@@ -25,26 +25,28 @@ export async function fetchUserPermissions(userId: string) {
 
     const permissions = userPermissions ? userPermissions.map(p => p.permission as PermissionName) : [];
     const rawTitle = userTitleData?.title;
-const allowedTitles: UserTitle[] = [
-  "Super Admin",
-  "Treasurer",
-  "Librarian",
-  "Wardrobe Mistress",
-  "Secretary",
-  "President",
-  "Historian",
-  "PR Manager",
-  "Tour Manager",
-  "Stage Manager",
-  "Chaplain",
-  "Section Leader",
-  "Student Worker",
-  "General Member",
-  "Guest User",
-];
+    
+    // Updated list of allowed titles to match the type definition
+    const allowedTitles: UserTitle[] = [
+      "Super Admin",
+      "Treasurer",
+      "Librarian",
+      "Wardrobe Mistress",
+      "Secretary",
+      "President",
+      "Historian",
+      "PR Manager",
+      "Tour Manager",
+      "Stage Manager",
+      "Chaplain",
+      "Section Leader",
+      "Student Worker",
+      "General Member",
+      "Guest User",
+    ];
 
-const title = allowedTitles.includes(rawTitle) ? rawTitle as UserTitle : null;
-
+    // Ensure title is one of the allowed values
+    const title = allowedTitles.includes(rawTitle) ? rawTitle as UserTitle : null;
 
     return { permissions, title };
   } catch (error) {
