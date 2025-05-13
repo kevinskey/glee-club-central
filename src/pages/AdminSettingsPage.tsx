@@ -1,3 +1,4 @@
+
 import React from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { Navigate } from "react-router-dom";
@@ -27,7 +28,6 @@ import {
   SelectTrigger,
   SelectValue
 } from "@/components/ui/select";
-import { TitlePermissionsManager } from "@/components/admin/TitlePermissionsManager";
 
 export default function AdminSettingsPage() {
   const { isAdmin, isLoading, isAuthenticated } = useAuth();
@@ -54,11 +54,10 @@ export default function AdminSettingsPage() {
       />
       
       <Tabs defaultValue="general" className="w-full">
-        <TabsList className="grid grid-cols-5 w-full max-w-3xl mb-4">
+        <TabsList className="grid grid-cols-4 w-full max-w-3xl mb-4">
           <TabsTrigger value="general">General</TabsTrigger>
           <TabsTrigger value="appearance">Appearance</TabsTrigger>
           <TabsTrigger value="notifications">Notifications</TabsTrigger>
-          <TabsTrigger value="permissions">Permissions</TabsTrigger>
           <TabsTrigger value="email">Email</TabsTrigger>
         </TabsList>
         
@@ -158,10 +157,6 @@ export default function AdminSettingsPage() {
                   <Label htmlFor="compact-sidebar">Use compact sidebar by default</Label>
                 </div>
               </div>
-              
-              <div className="flex items-center justify-between pt-2">
-                <Button>Save Appearance</Button>
-              </div>
             </CardContent>
           </Card>
         </TabsContent>
@@ -175,119 +170,28 @@ export default function AdminSettingsPage() {
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="font-medium">Event Reminders</p>
-                    <p className="text-sm text-muted-foreground">Send reminders before scheduled events</p>
-                  </div>
-                  <Switch id="event-reminders" defaultChecked />
-                </div>
-                
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="font-medium">New Music Alerts</p>
-                    <p className="text-sm text-muted-foreground">Notify members when new sheet music is uploaded</p>
-                  </div>
-                  <Switch id="music-alerts" defaultChecked />
-                </div>
-                
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="font-medium">Dues Reminders</p>
-                    <p className="text-sm text-muted-foreground">Send reminders about unpaid dues</p>
-                  </div>
-                  <Switch id="dues-reminders" defaultChecked />
-                </div>
-                
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="font-medium">System Announcements</p>
-                    <p className="text-sm text-muted-foreground">Important system updates and announcements</p>
-                  </div>
-                  <Switch id="system-announcements" defaultChecked />
-                </div>
-                
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="font-medium">Email Notifications</p>
-                    <p className="text-sm text-muted-foreground">Send all notifications via email</p>
-                  </div>
-                  <Switch id="email-notifications" defaultChecked />
-                </div>
-              </div>
-              
-              <div className="flex items-center justify-between pt-2">
-                <Button>Update Notification Settings</Button>
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-        
-        <TabsContent value="permissions" className="space-y-6">
-          <TitlePermissionsManager />
-          
-          <Card>
-            <CardHeader>
-              <CardTitle>Role Permissions</CardTitle>
-              <CardDescription>
-                Configure what different user roles can access
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="space-y-4">
+              <div className="flex items-center justify-between">
                 <div>
-                  <Label>Role to Configure</Label>
-                  <Select defaultValue="section_leader">
-                    <SelectTrigger className="mt-2">
-                      <SelectValue placeholder="Select role" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="administrator">Administrator</SelectItem>
-                      <SelectItem value="section_leader">Section Leader</SelectItem>
-                      <SelectItem value="student_conductor">Student Conductor</SelectItem>
-                      <SelectItem value="singer">Singer</SelectItem>
-                    </SelectContent>
-                  </Select>
+                  <Label htmlFor="email-notifications" className="text-base font-medium">Email Notifications</Label>
+                  <p className="text-sm text-muted-foreground">Receive notifications via email</p>
                 </div>
-                
-                <div className="border rounded-md p-4 space-y-3">
-                  <h4 className="font-medium">Section Leader Permissions</h4>
-                  
-                  <div className="flex items-center justify-between">
-                    <Label htmlFor="can-view-all-members">View all member details</Label>
-                    <Switch id="can-view-all-members" defaultChecked />
-                  </div>
-                  
-                  <div className="flex items-center justify-between">
-                    <Label htmlFor="can-take-attendance">Take attendance</Label>
-                    <Switch id="can-take-attendance" defaultChecked />
-                  </div>
-                  
-                  <div className="flex items-center justify-between">
-                    <Label htmlFor="can-upload-music">Upload sheet music</Label>
-                    <Switch id="can-upload-music" defaultChecked />
-                  </div>
-                  
-                  <div className="flex items-center justify-between">
-                    <Label htmlFor="can-send-announcements">Send section announcements</Label>
-                    <Switch id="can-send-announcements" defaultChecked />
-                  </div>
-                  
-                  <div className="flex items-center justify-between">
-                    <Label htmlFor="can-edit-calendar">Edit calendar events</Label>
-                    <Switch id="can-edit-calendar" />
-                  </div>
-                  
-                  <div className="flex items-center justify-between">
-                    <Label htmlFor="can-manage-wardrobe">Manage section wardrobe</Label>
-                    <Switch id="can-manage-wardrobe" />
-                  </div>
-                </div>
+                <Switch id="email-notifications" defaultChecked />
               </div>
               
-              <div className="flex items-center justify-between pt-2">
-                <Button>Save Permission Settings</Button>
+              <div className="flex items-center justify-between">
+                <div>
+                  <Label htmlFor="push-notifications" className="text-base font-medium">Push Notifications</Label>
+                  <p className="text-sm text-muted-foreground">Receive push notifications in browser</p>
+                </div>
+                <Switch id="push-notifications" />
+              </div>
+              
+              <div className="flex items-center justify-between">
+                <div>
+                  <Label htmlFor="event-reminders" className="text-base font-medium">Event Reminders</Label>
+                  <p className="text-sm text-muted-foreground">Receive reminders about upcoming events</p>
+                </div>
+                <Switch id="event-reminders" defaultChecked />
               </div>
             </CardContent>
           </Card>
@@ -296,52 +200,29 @@ export default function AdminSettingsPage() {
         <TabsContent value="email">
           <Card>
             <CardHeader>
-              <CardTitle>Email Configuration</CardTitle>
+              <CardTitle>Email Settings</CardTitle>
               <CardDescription>
-                Configure email notification templates
+                Configure email templates and sending settings
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="space-y-4">
-                <div>
-                  <Label>Email Template</Label>
-                  <Select defaultValue="welcome">
-                    <SelectTrigger className="mt-2">
-                      <SelectValue placeholder="Select template" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="welcome">Welcome Email</SelectItem>
-                      <SelectItem value="event_reminder">Event Reminder</SelectItem>
-                      <SelectItem value="dues_reminder">Dues Reminder</SelectItem>
-                      <SelectItem value="new_music">New Music Notification</SelectItem>
-                      <SelectItem value="announcement">General Announcement</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                
-                <div className="space-y-2">
-                  <Label htmlFor="email-subject">Email Subject</Label>
-                  <Input id="email-subject" defaultValue="Welcome to Spelman College Glee Club!" />
-                </div>
-                
-                <div className="space-y-2">
-                  <Label htmlFor="email-content">Email Content</Label>
-                  <textarea 
-                    id="email-content"
-                    className="w-full min-h-[200px] p-3 border rounded-md resize-y"
-                    defaultValue={`Dear {first_name},\n\nWelcome to the Spelman College Glee Club! We are delighted to have you join our musical family.\n\nYour account has been created, and you can now log in to access all member resources at GleeWorld.\n\nPlease complete your profile information and review the member handbook at your earliest convenience.\n\nBest regards,\nThe Glee Club Administrative Team`}
-                  ></textarea>
-                </div>
-                
-                <div className="flex items-center space-x-2">
-                  <Switch id="email-active" defaultChecked />
-                  <Label htmlFor="email-active">Template active</Label>
-                </div>
+              <div className="space-y-2">
+                <Label htmlFor="from-email">From Email</Label>
+                <Input id="from-email" placeholder="noreply@gleeworld.org" defaultValue="noreply@gleeworld.org" />
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="reply-to">Reply-To Email</Label>
+                <Input id="reply-to" placeholder="gleeclub@spelman.edu" defaultValue="gleeclub@spelman.edu" />
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="email-signature">Email Signature</Label>
+                <Input id="email-signature" placeholder="Spelman College Glee Club" defaultValue="Spelman College Glee Club" />
               </div>
               
               <div className="flex items-center justify-between pt-2">
-                <Button variant="outline">Send Test Email</Button>
-                <Button>Save Template</Button>
+                <Button>Save Email Settings</Button>
               </div>
             </CardContent>
           </Card>

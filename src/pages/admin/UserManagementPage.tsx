@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { PageHeader } from "@/components/ui/page-header";
 import { Users, Plus, Search, Filter } from "lucide-react";
@@ -12,8 +13,6 @@ import { MembersList } from "@/components/members/MembersList";
 import { AddMemberDialog } from "@/components/members/AddMemberDialog";
 import { EditUserDialog } from "@/components/members/EditUserDialog";
 import { DeleteMemberDialog } from "@/components/members/DeleteMemberDialog";
-import { UserRoleSelector } from "@/components/members/UserRoleSelector";
-import { MemberPermissionsDialog } from "@/components/members/MemberPermissionsDialog";
 import { useMedia } from "@/hooks/use-mobile";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
@@ -23,7 +22,6 @@ export default function UserManagementPage() {
   const [filteredUsers, setFilteredUsers] = useState<User[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
-  const [roleFilter, setRoleFilter] = useState("all");
   const [statusFilter, setStatusFilter] = useState("all");
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
   
@@ -31,8 +29,6 @@ export default function UserManagementPage() {
   const [isAddUserDialogOpen, setIsAddUserDialogOpen] = useState(false);
   const [isEditUserDialogOpen, setIsEditUserDialogOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
-  const [isRoleDialogOpen, setIsRoleDialogOpen] = useState(false);
-  const [isPermissionsDialogOpen, setIsPermissionsDialogOpen] = useState(false);
   
   // Action states
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -51,7 +47,7 @@ export default function UserManagementPage() {
   // Apply filters when users, search query, or filters change
   useEffect(() => {
     filterUsers();
-  }, [users, searchQuery, roleFilter, statusFilter]);
+  }, [users, searchQuery, statusFilter]);
   
   // Fetch users from the service
   const fetchUsers = async () => {
@@ -76,10 +72,9 @@ export default function UserManagementPage() {
         (user.last_name || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
         (user.email || '').toLowerCase().includes(searchQuery.toLowerCase());
         
-      const matchesRole = roleFilter === "all" || user.role === roleFilter;
       const matchesStatus = statusFilter === "all" || user.status === statusFilter;
       
-      return matchesSearch && matchesRole && matchesStatus && user.status !== 'deleted';
+      return matchesSearch && matchesStatus && user.status !== 'deleted';
     });
     
     setFilteredUsers(filtered);
@@ -122,23 +117,6 @@ export default function UserManagementPage() {
     }
   };
   
-  // Handle changing user role
-  const handleChangeRole = (user: User) => {
-    setSelectedUser(user);
-    setIsRoleDialogOpen(true);
-  };
-  
-  // Handle role change success
-  const handleRoleChangeSuccess = async () => {
-    await fetchUsers();
-  };
-  
-  // Handle managing permissions
-  const handleManagePermissions = (user: User) => {
-    setSelectedUser(user);
-    setIsPermissionsDialogOpen(true);
-  };
-  
   // Handle deleting a user
   const handleDeleteClick = (userId: string) => {
     const user = users.find(u => u.id === userId);
@@ -169,7 +147,6 @@ export default function UserManagementPage() {
   // Reset filters
   const handleResetFilters = () => {
     setSearchQuery("");
-    setRoleFilter("all");
     setStatusFilter("all");
   };
 
@@ -185,8 +162,6 @@ export default function UserManagementPage() {
         <UserManagementToolbar
           searchTerm={searchQuery}
           setSearchTerm={setSearchQuery}
-          roleFilter={roleFilter}
-          setRoleFilter={setRoleFilter}
           statusFilter={statusFilter}
           setStatusFilter={setStatusFilter}
           onCreateUserClick={() => setIsAddUserDialogOpen(true)}
@@ -205,8 +180,6 @@ export default function UserManagementPage() {
             members={filteredUsers}
             onEditUser={handleEditUser}
             onDeleteUser={handleDeleteClick}
-            onManagePermissions={handleManagePermissions}
-            onChangeRole={handleChangeRole}
             canEdit={true}
           />
         )}
@@ -238,22 +211,6 @@ export default function UserManagementPage() {
         onConfirm={handleConfirmDelete}
         memberName={userToDeleteName}
         isDeleting={isDeleting}
-      />
-      
-      {/* Role Selection Dialog */}
-      <UserRoleSelector
-        user={selectedUser}
-        isOpen={isRoleDialogOpen}
-        onOpenChange={setIsRoleDialogOpen}
-        onSuccess={handleRoleChangeSuccess}
-      />
-      
-      {/* Permissions Dialog */}
-      <MemberPermissionsDialog
-        user={selectedUser}
-        isOpen={isPermissionsDialogOpen}
-        setIsOpen={setIsPermissionsDialogOpen}
-        onSuccess={fetchUsers}
       />
     </div>
   );

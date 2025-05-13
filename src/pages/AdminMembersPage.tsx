@@ -6,7 +6,6 @@ import { useUserManagement } from "@/hooks/useUserManagement";
 import { toast } from "sonner";
 import { Spinner } from "@/components/ui/spinner";
 import { Navigate } from "react-router-dom";
-import { usePermissions } from "@/hooks/usePermissions";
 
 /**
  * Admin Members Page - Full featured member management for administrators
@@ -14,8 +13,7 @@ import { usePermissions } from "@/hooks/usePermissions";
  */
 export default function AdminMembersPage() {
   // All hooks at the top
-  const { isAuthenticated } = useAuth();
-  const { hasPermission } = usePermissions();
+  const { isAuthenticated, isAdmin } = useAuth();
   const userManagement = useUserManagement();
   const [isLoading, setIsLoading] = useState(true);
   
@@ -49,8 +47,8 @@ export default function AdminMembersPage() {
   // Create memoized userManagementHook prop to prevent unnecessary rerenders
   const memoizedUserManagementHook = useCallback(() => userManagement, [userManagement]);
 
-  // Verify permissions
-  const hasAccess = hasPermission('can_manage_users');
+  // Verify access
+  const hasAccess = isAdmin ? isAdmin() : false;
 
   if (!isAuthenticated) {
     return <Navigate to="/login" replace />;

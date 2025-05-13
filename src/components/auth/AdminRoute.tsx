@@ -2,7 +2,6 @@
 import React from "react";
 import { Navigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
-import { usePermissions } from "@/hooks/usePermissions";
 import { Spinner } from "@/components/ui/spinner";
 import { toast } from "sonner";
 
@@ -11,8 +10,7 @@ interface AdminRouteProps {
 }
 
 export const AdminRoute: React.FC<AdminRouteProps> = ({ children }) => {
-  const { user, profile, isLoading, isAuthenticated } = useAuth();
-  const { hasPermission, isSuperAdmin } = usePermissions();
+  const { user, profile, isLoading, isAuthenticated, isAdmin } = useAuth();
   
   // For development purposes - enable this for easier testing
   const isDevelopmentMode = true; // Set to true during development, false for production
@@ -22,10 +20,7 @@ export const AdminRoute: React.FC<AdminRouteProps> = ({ children }) => {
     isLoading,
     isAuthenticated,
     email: user?.email,
-    role: profile?.role,
-    isSuperAdmin: isSuperAdmin,
-    is_super_admin_flag: profile?.is_super_admin,
-    title: profile?.title
+    isSuperAdmin: profile?.is_super_admin
   });
   
   // Show loading state while checking admin status
@@ -50,16 +45,8 @@ export const AdminRoute: React.FC<AdminRouteProps> = ({ children }) => {
   }
   
   // PRODUCTION CHECKS - Check for admin access
-  // This includes users with admin roles, super admins, or specific permissions
-  const hasAdminAccess = 
-    (profile?.role === 'admin' || profile?.role === 'administrator' || profile?.role === 'director') || 
-    isSuperAdmin || 
-    profile?.is_super_admin === true ||
-    profile?.title === 'Super Admin' ||
-    hasPermission('can_manage_users') ||
-    hasPermission('can_post_announcements') ||
-    hasPermission('can_manage_archives') ||
-    hasPermission('can_edit_financials');
+  // This includes super admin users
+  const hasAdminAccess = isAdmin() || profile?.is_super_admin === true;
   
   // Redirect non-admin users to the dashboard
   if (!hasAdminAccess) {

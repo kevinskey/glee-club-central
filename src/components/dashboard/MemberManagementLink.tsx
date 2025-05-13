@@ -2,11 +2,11 @@
 import React from 'react';
 import { NavLink } from 'react-router-dom';
 import { Users, UserCog } from 'lucide-react';
-import { usePermissions } from '@/hooks/usePermissions';
+import { useAuth } from '@/contexts/AuthContext';
 
 export function MemberManagementLink() {
-  const { hasPermission } = usePermissions();
-  const canManageUsers = hasPermission('can_manage_users');
+  const { isAdmin } = useAuth();
+  const canManageUsers = isAdmin();
   
   return (
     <>

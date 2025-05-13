@@ -39,7 +39,6 @@ export interface Profile {
   dues_paid?: boolean;
   is_super_admin?: boolean;
   personal_title?: string;
-  title?: string;
 }
 
 export interface AuthContextType {
@@ -47,7 +46,6 @@ export interface AuthContextType {
   profile: Profile | null;
   isAuthenticated: boolean;
   isLoading: boolean;
-  permissions?: Record<string, boolean>;
   isAdmin: () => boolean;
   login: (email: string, password: string) => Promise<{ error: any } | void>;
   logout: () => Promise<{ error: any } | void>;
@@ -55,7 +53,6 @@ export interface AuthContextType {
   signOut?: () => Promise<{ error: any } | void>;
   signIn?: (email: string, password: string) => Promise<any>;
   signUp?: (email: string, password: string, firstName: string, lastName: string) => Promise<any>;
-  refreshPermissions?: (userId?: string) => Promise<void>;
   updatePassword?: (newPassword: string) => Promise<{ error: any } | null>;
   session: any;
 }

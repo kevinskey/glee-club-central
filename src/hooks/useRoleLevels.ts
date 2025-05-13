@@ -11,17 +11,12 @@ export function useRoleLevels() {
       return 'admin';
     }
     
-    // Check if profile has guest role
-    if (profile?.role === 'guest') {
-      return 'guest';
-    }
-    
-    // Default to member for all other authenticated users
+    // Default to member for all authenticated users
     return 'member';
   };
   
   const isGuestUser = (): boolean => {
-    return getUserLevel() === 'guest';
+    return false; // No more guest users in the simplified system
   };
   
   const isMemberUser = (): boolean => {

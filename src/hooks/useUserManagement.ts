@@ -12,7 +12,6 @@ export interface User {
   last_name: string;
   phone?: string | null;
   voice_part: string | null;
-  role: string;
   avatar_url?: string | null;
   status: string;
   last_login?: string | null;
@@ -20,7 +19,6 @@ export interface User {
   created_at: string;
   updated_at?: string | null;
   is_super_admin?: boolean;
-  title?: string;
   class_year?: string;
   join_date?: string;
   notes?: string;
@@ -60,15 +58,13 @@ export const useUserManagement = () => {
             first_name: user.first_name || '',
             last_name: user.last_name || '',
             phone: user.phone || null,
-            role: user.role || 'singer',
             voice_part: user.voice_part || null,
             avatar_url: user.avatar_url || null,
             status: user.status || 'pending',
             last_sign_in_at: user.last_sign_in_at || null,
             created_at: user.created_at || new Date().toISOString(),
-            updated_at: null, // These fields may not exist in the DB function response
+            updated_at: null, 
             is_super_admin: false, // Default value if not provided
-            title: user.role_display_name || null, // Use the display name field instead
             class_year: null, // Default value if not provided
             join_date: user.join_date || null,
             notes: null, // Default value if not provided
@@ -224,36 +220,6 @@ export const useUserManagement = () => {
         return false;
       }
     }, []),
-    updateUserRole: useCallback(async (userId: string, role: string) => {
-      try {
-        console.log(`Updating user ${userId} role to ${role}`);
-        
-        // Direct update to the profiles table for more reliability
-        const { error } = await supabase
-          .from('profiles')
-          .update({ role })
-          .eq('id', userId);
-  
-        if (error) {
-          console.error('Error updating user role:', error);
-          toast.error(`Failed to update user role: ${error.message}`);
-          return false;
-        }
-  
-        console.log('User role updated successfully');
-        
-        // Refresh the user list after update if fetchUsers is available
-        if (typeof fetchUsers === 'function') {
-          fetchUsers().catch(err => console.error('Error refreshing users after role update:', err));
-        }
-        
-        return true;
-      } catch (err) {
-        console.error('Unexpected error updating user role:', err);
-        toast.error('An unexpected error occurred while updating the role');
-        return false;
-      }
-    }, [fetchUsers]),
     updateUserStatus: useCallback(async (userId: string, status: string) => {
       try {
         console.log(`Updating user ${userId} status to ${status}`);
@@ -325,7 +291,6 @@ export const useUserManagement = () => {
             first_name: userData.first_name,
             last_name: userData.last_name,
             phone: userData.phone || null,
-            role: userData.role,
             voice_part: userData.voice_part,
             status: userData.status,
             class_year: userData.class_year || null,
@@ -356,7 +321,6 @@ export const useUserManagement = () => {
           first_name: userData.first_name,
           last_name: userData.last_name,
           phone: userData.phone || null,
-          role: userData.role,
           voice_part: userData.voice_part,
           status: userData.status,
           created_at: new Date().toISOString(),

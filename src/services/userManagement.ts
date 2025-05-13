@@ -19,7 +19,6 @@ export interface User {
   created_at: string;
   updated_at?: string | null;
   last_sign_in_at?: string | null;
-  title?: string;
   is_super_admin?: boolean;
 }
 
@@ -86,7 +85,6 @@ export const userManagementService = {
           notes: userData.notes,
           dues_paid: userData.dues_paid || false,
           join_date: userData.join_date || new Date().toISOString().split('T')[0],
-          title: userData.title || 'General Member'
         })
         .eq('id', authData.user.id);
       

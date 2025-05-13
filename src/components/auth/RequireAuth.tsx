@@ -6,10 +6,10 @@ import { Spinner } from '@/components/ui/spinner';
 
 interface RequireAuthProps {
   children: React.ReactNode;
-  requiredRole?: string;
+  requireAdmin?: boolean;
 }
 
-const RequireAuth = ({ children, requiredRole }: RequireAuthProps) => {
+const RequireAuth = ({ children, requireAdmin }: RequireAuthProps) => {
   const { isAuthenticated, isLoading, isAdmin } = useAuth();
   const location = useLocation();
   
@@ -26,7 +26,7 @@ const RequireAuth = ({ children, requiredRole }: RequireAuthProps) => {
   }
   
   // Check if admin access is required
-  if (requiredRole === "admin" && isAdmin && !isAdmin()) {
+  if (requireAdmin && !isAdmin()) {
     return <Navigate to="/dashboard" replace />;
   }
   
