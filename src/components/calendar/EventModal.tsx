@@ -33,7 +33,9 @@ import { cn } from "@/lib/utils";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { CalendarEvent, EventType } from "@/types/calendar";
-import { EventImageUpload } from "@/components/EventImageUpload";
+import { EventImageUpload } from "@/components/calendar/EventImageUpload";
+import { uploadEventImage } from "@/utils/supabase/eventImageUpload";
+import { toast } from "sonner";
 
 // Create a schema for form validation
 const formSchema = z.object({
