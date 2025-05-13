@@ -41,7 +41,7 @@ export const RolePermissionProvider: React.FC<{ children: React.ReactNode }> = (
         // Determine user level
         if (isAdmin()) {
           setUserLevel('admin');
-        } else if (user.role === 'guest') {
+        } else if (user.role === 'guest' || user.role === 'staff') {
           setUserLevel('guest');
         } else {
           setUserLevel('member');

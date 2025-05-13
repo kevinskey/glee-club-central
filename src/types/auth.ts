@@ -1,4 +1,3 @@
-
 export interface AuthUser {
   id: string;
   email?: string;
@@ -47,7 +46,7 @@ export interface Profile {
 // Updated to string literal type union instead of interface
 export type UserRole = 'admin' | 'director' | 'section_leader' | 'singer' | 
                       'student_conductor' | 'accompanist' | 'non_singer' | 'general' |
-                      'administrator' | 'member';
+                      'administrator' | 'member' | 'guest' | 'staff' | 'student';
 
 export interface AuthContextType {
   user: AuthUser | null;

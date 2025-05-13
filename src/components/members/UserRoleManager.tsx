@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Dialog,
   DialogContent,
@@ -17,6 +17,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { User, userManagementService } from '@/services/userManagement';
 import { toast } from 'sonner';
+import { UserRole } from '@/types/auth';
 
 interface UserRoleManagerProps {
   user: User | null;
@@ -31,11 +32,11 @@ export function UserRoleManager({
   onOpenChange,
   onSuccess
 }: UserRoleManagerProps) {
-  const [selectedRole, setSelectedRole] = useState<string>(user?.role || '');
+  const [selectedRole, setSelectedRole] = useState<UserRole | string>(user?.role || '');
   const [isSubmitting, setIsSubmitting] = useState(false);
   
   // Reset selected role when user changes
-  React.useEffect(() => {
+  useEffect(() => {
     if (user && isOpen) {
       setSelectedRole(user.role);
     }
@@ -49,7 +50,7 @@ export function UserRoleManager({
     
     setIsSubmitting(true);
     try {
-      const success = await userManagementService.changeRole(user.id, selectedRole);
+      const success = await userManagementService.changeRole(user.id, selectedRole as string);
       
       if (success) {
         toast.success(`Updated ${user.first_name}'s role to ${selectedRole}`);
@@ -83,7 +84,7 @@ export function UserRoleManager({
             <div className="col-span-4">
               <Select
                 value={selectedRole}
-                onValueChange={setSelectedRole}
+                onValueChange={(value: string) => setSelectedRole(value as UserRole)}
               >
                 <SelectTrigger>
                   <SelectValue placeholder="Select a role" />
@@ -92,8 +93,12 @@ export function UserRoleManager({
                   <SelectItem value="admin">Admin</SelectItem>
                   <SelectItem value="director">Director</SelectItem>
                   <SelectItem value="section_leader">Section Leader</SelectItem>
-                  <SelectItem value="student">Student Member</SelectItem>
+                  <SelectItem value="singer">Singer</SelectItem>
+                  <SelectItem value="student_conductor">Student Conductor</SelectItem>
+                  <SelectItem value="accompanist">Accompanist</SelectItem>
+                  <SelectItem value="non_singer">Non-Singer</SelectItem>
                   <SelectItem value="staff">Staff</SelectItem>
+                  <SelectItem value="student">Student</SelectItem>
                   <SelectItem value="guest">Guest/Alumni</SelectItem>
                 </SelectContent>
               </Select>
