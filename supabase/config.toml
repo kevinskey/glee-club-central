@@ -1,27 +1,5 @@
 
-project_id = "dzzptovqfqausipsgabw"
+project_id = "glee-club"
 
-[api]
-enabled = true
-port = 54321
-schemas = ["public", "storage", "graphql_public"]
-
-[db]
-port = 54322
-shadow_port = 54320
-major_version = 15
-
-[studio]
-enabled = true
-port = 54323
-api_url = "http://localhost"
-
-[[inbucket.patterns]]
-name = "inbucket"
-start = "^.*$"
-
-[functions.google-calendar-auth]
-verify_jwt = true
-
-[functions.google-calendar-sync]
-verify_jwt = true
+[functions.youtube-videos]
+verify_jwt = false

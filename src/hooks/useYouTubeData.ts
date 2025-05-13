@@ -1,5 +1,7 @@
+
 import { useState, useEffect } from 'react';
 import { YouTubeVideo, YouTubeApiResponse, YouTubeApiItem } from '@/types/youtube';
+import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 
 // YouTube API key
@@ -150,21 +152,35 @@ export const useYouTubeData = () => {
           return;
         }
         
-        // Create the API URL for searching videos from Spelman College Glee Club
-        const apiUrl = `https://www.googleapis.com/youtube/v3/search?part=snippet&maxResults=10&q=spelman+college+glee+club&type=video&key=${YOUTUBE_API_KEY}`;
+        // Call our Supabase Edge Function that safely wraps the YouTube API
+        const { data, error: edgeFunctionError } = await supabase.functions.invoke('youtube-videos', {
+          body: { 
+            channelId: 'UCk1x0JI7pM6YaBbtP1pKgJw', // Spelman Glee Club channel ID
+            maxResults: 10
+          }
+        });
         
-        // Fetch videos from YouTube API
-        const response = await fetch(apiUrl);
-        if (!response.ok) {
-          throw new Error(`YouTube API error: ${response.status}`);
+        if (edgeFunctionError) {
+          throw new Error(`Edge function error: ${edgeFunctionError.message}`);
         }
         
-        const data: YouTubeApiResponse = await response.json();
-        
-        // Map the API response to our format
-        const fetchedVideos = mapApiResponseToVideos(data.items);
-        
-        setVideos(fetchedVideos);
+        if (data && data.videos) {
+          setVideos(data.videos);
+        } else {
+          // Fallback to direct API call if edge function didn't return expected data
+          // This is a backup approach in case the edge function deployment is delayed
+          const apiUrl = `https://www.googleapis.com/youtube/v3/search?part=snippet&maxResults=10&q=spelman+college+glee+club&type=video&key=${YOUTUBE_API_KEY}`;
+          
+          const response = await fetch(apiUrl);
+          if (!response.ok) {
+            throw new Error(`YouTube API error: ${response.status}`);
+          }
+          
+          const apiData: YouTubeApiResponse = await response.json();
+          const fetchedVideos = mapApiResponseToVideos(apiData.items);
+          
+          setVideos(fetchedVideos);
+        }
       } catch (err) {
         console.error("Error fetching YouTube videos:", err);
         setError(err instanceof Error ? err : new Error('Unknown error occurred'));
