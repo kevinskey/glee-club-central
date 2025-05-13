@@ -23,6 +23,7 @@ export default function UserManagementPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
+  const [roleFilter, setRoleFilter] = useState("all"); // Added for compatibility
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
   
   // Dialog states
@@ -162,6 +163,8 @@ export default function UserManagementPage() {
         <UserManagementToolbar
           searchTerm={searchQuery}
           setSearchTerm={setSearchQuery}
+          roleFilter={roleFilter}
+          setRoleFilter={setRoleFilter}
           statusFilter={statusFilter}
           setStatusFilter={setStatusFilter}
           onCreateUserClick={() => setIsAddUserDialogOpen(true)}

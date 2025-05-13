@@ -60,13 +60,14 @@ export function AddMemberDialog({
       email: initialValues?.email || '',
       password: '',
       phone: initialValues?.phone || '',
-      role: initialValues?.role || 'student',
+      role: initialValues?.role || 'student', // Kept for backward compatibility
       voice_part: initialValues?.voice_part || 'soprano_1',
       status: initialValues?.status || 'active',
       join_date: initialValues?.join_date || format(new Date(), 'yyyy-MM-dd'),
       class_year: initialValues?.class_year || '',
       notes: initialValues?.notes || '',
       dues_paid: initialValues?.dues_paid || false,
+      is_admin: initialValues?.is_admin || false
     },
   });
 
@@ -190,13 +191,17 @@ export function AddMemberDialog({
 
               <FormField
                 control={form.control}
-                name="role"
+                name="role" // Using role field for backward compatibility
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Role</FormLabel>
                     <Select 
-                      onValueChange={field.onChange} 
-                      defaultValue={field.value}
+                      onValueChange={(value) => {
+                        field.onChange(value);
+                        // Also set is_admin field based on role selection
+                        form.setValue("is_admin", value === "admin");
+                      }}
+                      defaultValue={field.value || "student"}
                     >
                       <FormControl>
                         <SelectTrigger>
@@ -250,7 +255,11 @@ export function AddMemberDialog({
                   <FormItem>
                     <FormLabel>Join Date</FormLabel>
                     <FormControl>
-                      <Input type="date" {...field} />
+                      <Input 
+                        type="date" 
+                        value={field.value || ''} 
+                        onChange={(e) => field.onChange(e.target.value)}
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>

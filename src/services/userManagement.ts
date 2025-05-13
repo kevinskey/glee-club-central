@@ -20,6 +20,7 @@ export interface User {
   updated_at?: string | null;
   last_sign_in_at?: string | null;
   is_super_admin?: boolean;
+  role?: string; // Added for backward compatibility
 }
 
 export const userManagementService = {
@@ -74,6 +75,9 @@ export const userManagementService = {
       if (authError) throw authError;
       if (!authData.user?.id) throw new Error('User creation failed');
       
+      // Determine admin status from role field
+      const isAdmin = userData.role === 'admin' || userData.is_admin;
+      
       // Then update the profile with additional data
       const { error: profileError } = await supabase
         .from('profiles')
@@ -85,6 +89,7 @@ export const userManagementService = {
           notes: userData.notes,
           dues_paid: userData.dues_paid || false,
           join_date: userData.join_date || new Date().toISOString().split('T')[0],
+          is_super_admin: isAdmin,
         })
         .eq('id', authData.user.id);
       

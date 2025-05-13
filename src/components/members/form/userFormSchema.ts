@@ -15,7 +15,10 @@ export const userFormSchema = z.object({
   class_year: z.string().optional(),
   notes: z.string().optional(),
   dues_paid: z.boolean().default(false),
-  is_admin: z.boolean().default(false)
+  is_admin: z.boolean().default(false),
+  // Adding fields for backward compatibility
+  join_date: z.string().optional(),
+  role: z.string().optional() // Kept for backward compatibility
 });
 
 export type UserFormValues = z.infer<typeof userFormSchema>;

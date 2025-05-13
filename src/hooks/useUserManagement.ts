@@ -66,7 +66,8 @@ export const useUserManagement = () => {
             last_sign_in_at: user.last_sign_in_at || null,
             created_at: user.created_at || new Date().toISOString(),
             updated_at: null, 
-            is_super_admin: false, // Default value if not provided
+            // Handle is_super_admin regardless of whether it exists in API response
+            is_super_admin: user.is_super_admin || user.role === 'admin' || false,
             class_year: null, // Default value if not provided
             join_date: user.join_date || null,
             notes: null, // Default value if not provided
@@ -173,6 +174,11 @@ export const useUserManagement = () => {
           return null;
         }
   
+        // Add backward compatibility field
+        if (data[0]) {
+          data[0].role = data[0].is_super_admin ? 'admin' : 'member';
+        }
+
         return data[0];
       } catch (err) {
         console.error('Unexpected error getting user by ID:', err);
@@ -201,6 +207,13 @@ export const useUserManagement = () => {
             }
           }
         });
+        
+        // Convert role field to is_super_admin
+        if (userData.role === 'admin') {
+          filteredData.is_super_admin = true;
+        } else if (userData.role === 'member') {
+          filteredData.is_super_admin = false;
+        }
         
         console.log("Filtered data for update:", filteredData);
         
@@ -287,6 +300,9 @@ export const useUserManagement = () => {
           return false;
         }
         
+        // Determine admin status from role
+        const isAdmin = userData.role === 'admin' || userData.is_admin;
+        
         // Then update the profile with additional information
         const { error: profileError } = await supabase
           .from('profiles')
@@ -299,6 +315,8 @@ export const useUserManagement = () => {
             class_year: userData.class_year || null,
             notes: userData.notes || null,
             dues_paid: userData.dues_paid || false,
+            join_date: userData.join_date || new Date().toISOString().split('T')[0],
+            is_super_admin: isAdmin,
           })
           .eq('id', authData.user.id);
         
@@ -329,7 +347,10 @@ export const useUserManagement = () => {
           created_at: new Date().toISOString(),
           class_year: userData.class_year,
           notes: userData.notes,
-          dues_paid: userData.dues_paid
+          dues_paid: userData.dues_paid,
+          is_super_admin: isAdmin,
+          role: isAdmin ? 'admin' : 'member',
+          join_date: userData.join_date
         };
         
         setUsers(currentUsers => [...currentUsers, newUser]);

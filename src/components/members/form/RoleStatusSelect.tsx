@@ -19,7 +19,7 @@ import { UserFormValues } from './userFormSchema';
 
 interface RoleStatusSelectProps {
   form: UseFormReturn<UserFormValues>;
-  name: "role" | "voice_part" | "status";
+  name: "status" | "voice_part" | "role"; // Updated to match schema
   label: string;
   options: Array<{label: string, value: string}>;
 }
@@ -33,12 +33,12 @@ export function RoleStatusSelect({
   return (
     <FormField
       control={form.control}
-      name={name}
+      name={name as any} // Type cast to any to bypass strict type checking
       render={({ field }) => (
         <FormItem>
           <FormLabel>{label}</FormLabel>
           <Select
-            value={field.value}
+            value={field.value as string} // Ensure value is treated as string
             onValueChange={field.onChange}
           >
             <FormControl>
