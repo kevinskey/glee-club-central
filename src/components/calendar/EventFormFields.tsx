@@ -17,6 +17,7 @@ import { Calendar } from "@/components/ui/calendar";
 import { CalendarIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { format } from "date-fns";
+import { GoogleMapAutocomplete } from "./GoogleMapAutocomplete";
 
 // Define form schema values for event creation and editing
 export interface EventFormValues {
@@ -118,7 +119,7 @@ export function EventFormFields({ form }: EventFormFieldsProps) {
         )}
       />
 
-      {/* Location Field */}
+      {/* Location Field - Updated to use GoogleMapAutocomplete */}
       <FormField
         control={form.control}
         name="location"
@@ -126,7 +127,16 @@ export function EventFormFields({ form }: EventFormFieldsProps) {
           <FormItem>
             <FormLabel>Location</FormLabel>
             <FormControl>
-              <Input placeholder="Enter event location" {...field} value={field.value || ''} />
+              <GoogleMapAutocomplete
+                value={field.value || ''}
+                onChange={field.onChange}
+                placeholder="Search for a location"
+                onSelect={(place) => {
+                  if (place && place.formatted_address) {
+                    field.onChange(place.formatted_address);
+                  }
+                }}
+              />
             </FormControl>
             <FormMessage />
           </FormItem>

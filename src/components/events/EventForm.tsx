@@ -1,4 +1,3 @@
-
 import React from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -27,6 +26,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
 import { EventType } from "@/types/calendar";
+import { GoogleMapAutocomplete } from "@/components/ui/google-map-autocomplete";
 
 // Define form schema
 const eventFormSchema = z.object({
@@ -170,6 +170,7 @@ export function EventForm({
               )}
             />
 
+            {/* Replace location with Google Maps autocomplete */}
             <FormField
               control={form.control}
               name="location"
@@ -177,7 +178,11 @@ export function EventForm({
                 <FormItem>
                   <FormLabel>Location</FormLabel>
                   <FormControl>
-                    <Input placeholder="Enter location" {...field} />
+                    <GoogleMapAutocomplete 
+                      value={field.value || ''}
+                      onChange={field.onChange}
+                      placeholder="Search for a location"
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
