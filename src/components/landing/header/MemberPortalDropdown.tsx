@@ -31,41 +31,12 @@ export function MemberPortalDropdown() {
   };
   
   return isAuthenticated ? (
-    <DropdownMenuProvider>
-      <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <Button 
-            size="sm"
-            variant="outline"
-            className="h-8 px-3 text-xs flex items-center gap-1 font-inter"
-          >
-            Member Portal
-          </Button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent align="end" className="w-48 bg-popover">
-          <DropdownMenuLabel className="font-inter text-sm">Member Options</DropdownMenuLabel>
-          <DropdownMenuSeparator />
-          <DropdownMenuItem onClick={() => navigate("/dashboard")} className="font-inter text-sm">
-            Dashboard
-          </DropdownMenuItem>
-          <DropdownMenuItem onClick={() => navigate("/dashboard/profile")} className="font-inter text-sm">
-            Profile
-          </DropdownMenuItem>
-          <DropdownMenuSeparator />
-          <DropdownMenuItem onClick={handleSignOut} className="font-inter text-sm">
-            Sign Out
-          </DropdownMenuItem>
-        </DropdownMenuContent>
-      </DropdownMenu>
-    </DropdownMenuProvider>
+    <DropdownMenuItem onClick={() => navigate("/dashboard")}>
+      Member Portal
+    </DropdownMenuItem>
   ) : (
-    <Button 
-      size="sm"
-      variant="spelman"
-      className="h-8 px-3 text-xs flex items-center gap-1 font-inter"
-      onClick={navigateToLogin}
-    >
-      <LogIn className="h-3.5 w-3.5 mr-1" /> Login
-    </Button>
+    <DropdownMenuItem onClick={navigateToLogin}>
+      Member Portal
+    </DropdownMenuItem>
   );
 }

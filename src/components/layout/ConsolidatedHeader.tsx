@@ -93,17 +93,7 @@ export function ConsolidatedHeader() {
           
         {/* Right side: Login, Metronome, theme toggle, and menu dropdown */}
         <div className="flex items-center gap-2">
-          {/* Login Button (outside dropdown) */}
-          {!isAuthenticated && (
-            <Button
-              variant="spelman"
-              size={isMobile ? "sm" : "default"}
-              className={`${isMobile ? 'h-8 text-xs' : 'h-9'} flex items-center gap-1`}
-              onClick={() => navigate("/login")}
-            >
-              <LogIn className={`${isMobile ? 'h-3.5 w-3.5' : 'h-4 w-4'} mr-1`} /> Login
-            </Button>
-          )}
+          {/* Login Button removed from outside dropdown */}
           
           {/* Metronome Icon */}
           <Dialog open={metronomeOpen} onOpenChange={setMetronomeOpen}>
@@ -158,6 +148,10 @@ export function ConsolidatedHeader() {
                     <DropdownMenuItem onClick={() => navigate("/dashboard/profile")}>
                       <User className="h-4 w-4 mr-2" />
                       <span>My Profile</span>
+                    </DropdownMenuItem>
+                    
+                    <DropdownMenuItem onClick={() => navigate("/dashboard")}>
+                      Member Portal
                     </DropdownMenuItem>
                     
                     <DropdownMenuItem onClick={() => navigate("/update-password")}>
@@ -217,6 +211,10 @@ export function ConsolidatedHeader() {
                     <DropdownMenuItem onClick={() => navigate("/login")}>
                       <LogIn className="h-4 w-4 mr-2" />
                       <span>Login</span>
+                    </DropdownMenuItem>
+                    
+                    <DropdownMenuItem onClick={() => navigate("/login")}>
+                      Member Portal
                     </DropdownMenuItem>
                     
                     <DropdownMenuItem onClick={() => navigate("/register")}>

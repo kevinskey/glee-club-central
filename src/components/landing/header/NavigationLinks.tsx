@@ -84,6 +84,18 @@ export function NavigationLinks({ className, onLinkClick }: NavigationLinksProps
         {!isAuthenticated && (
           <NavigationMenuItem>
             <Link
+              to="/login"
+              className="text-base md:text-lg font-inter font-medium text-muted-foreground transition-colors hover:text-foreground"
+              onClick={handleLinkClick}
+            >
+              Member Portal
+            </Link>
+          </NavigationMenuItem>
+        )}
+        
+        {!isAuthenticated && (
+          <NavigationMenuItem>
+            <Link
               to="/register"
               className="text-base md:text-lg font-inter font-medium text-muted-foreground transition-colors hover:text-foreground"
               onClick={handleLinkClick}

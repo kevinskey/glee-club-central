@@ -92,17 +92,7 @@ export function MobileHeader() {
           
           {/* Right side: Login, Metronome, theme toggle, and menu button */}
           <div className="flex items-center gap-2">
-            {/* Login Button */}
-            {!isAuthenticated && (
-              <Button
-                variant="spelman"
-                size="sm"
-                className="h-8 text-xs flex items-center gap-1"
-                onClick={handleLoginClick}
-              >
-                <LogIn className="h-3.5 w-3.5 mr-1" /> Login
-              </Button>
-            )}
+            {/* Login Button - Removed */}
             
             <Dialog open={metronomeOpen} onOpenChange={setMetronomeOpen}>
               <DialogTrigger asChild>
@@ -173,22 +163,29 @@ export function MobileHeader() {
                     </DropdownMenuItem>
                   )}
                   
-                  {isAuthenticated && (
+                  {isAuthenticated ? (
                     <>
                       <DropdownMenuItem onClick={() => navigate("/dashboard/profile")}>
                         Profile
+                      </DropdownMenuItem>
+                      <DropdownMenuItem onClick={() => navigate("/dashboard")}>
+                        Member Portal
                       </DropdownMenuItem>
                       <DropdownMenuSeparator />
                       <DropdownMenuItem onClick={handleSignOut}>
                         Sign Out
                       </DropdownMenuItem>
                     </>
-                  )}
-                  
-                  {!isAuthenticated && (
-                    <DropdownMenuItem onClick={() => navigate("/login")}>
-                      Login
-                    </DropdownMenuItem>
+                  ) : (
+                    <>
+                      <DropdownMenuItem onClick={() => navigate("/login")}>
+                        <LogIn className="h-4 w-4 mr-2" />
+                        Login
+                      </DropdownMenuItem>
+                      <DropdownMenuItem onClick={() => navigate("/login")}>
+                        Member Portal
+                      </DropdownMenuItem>
+                    </>
                   )}
                   
                   {!isAuthenticated && (

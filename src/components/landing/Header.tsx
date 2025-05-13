@@ -2,7 +2,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Logo } from "@/components/landing/header/Logo";
-import { MemberPortalDropdown } from "@/components/landing/header/MemberPortalDropdown";
 import { Clock, Menu, X, LogIn } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription } from "@/components/ui/dialog";
@@ -85,7 +84,7 @@ export function Header({ initialShowNewsFeed = true }: HeaderProps) {
         
         {/* Right side: Metronome, theme toggle, login buttons, and navigation dropdown */}
         <div className="flex items-center gap-3">
-          {/* Login Buttons - Only show when not authenticated */}
+          {/* Login Button - Only show when not authenticated */}
           {!isAuthenticated && (
             <div className="flex items-center space-x-2">
               <Button
@@ -96,19 +95,8 @@ export function Header({ initialShowNewsFeed = true }: HeaderProps) {
               >
                 Guest Login
               </Button>
-              <Button 
-                variant="spelman"
-                size="sm"
-                className="h-8 px-3 text-xs flex items-center gap-1 font-inter"
-                onClick={handleLoginClick}
-              >
-                <LogIn className="h-3.5 w-3.5 mr-1" /> Member Portal
-              </Button>
             </div>
           )}
-
-          {/* Member Portal Dropdown - Only show when authenticated */}
-          {isAuthenticated && <MemberPortalDropdown />}
           
           {/* Metronome Icon */}
           <Dialog open={metronomeOpen} onOpenChange={setMetronomeOpen}>
@@ -179,9 +167,14 @@ export function Header({ initialShowNewsFeed = true }: HeaderProps) {
                   </DropdownMenuItem>
                 )}
                 
-                {!isAuthenticated && (
+                {!isAuthenticated ? (
                   <DropdownMenuItem onClick={() => navigate("/login")}>
+                    <LogIn className="h-4 w-4 mr-2" />
                     Login
+                  </DropdownMenuItem>
+                ) : (
+                  <DropdownMenuItem onClick={() => navigate("/login")}>
+                    Member Portal
                   </DropdownMenuItem>
                 )}
                 
