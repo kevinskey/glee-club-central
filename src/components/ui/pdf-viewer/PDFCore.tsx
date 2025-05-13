@@ -86,14 +86,17 @@ export const PDFCore: React.FC<PDFCoreProps> = ({
   const getPdfViewerUrl = () => {
     if (!sanitizedUrl) return "";
     
+    // Add a cache-busting parameter to prevent stale PDFs when updated
+    const cacheBuster = `?cache=${Date.now()}`;
+    
     // Use Google PDF Viewer as fallback if direct embed fails
     if (fallbackMode) {
-      return `https://docs.google.com/viewer?url=${encodeURIComponent(sanitizedUrl)}&embedded=true`;
+      return `https://docs.google.com/viewer?url=${encodeURIComponent(sanitizedUrl + cacheBuster)}&embedded=true`;
     }
     
     // Direct URL for PDF viewing with page parameter
     // Using hash parameter (#page=) for browser's native PDF viewers that support it
-    return `${sanitizedUrl}#page=${currentPage}`;
+    return `${sanitizedUrl}${cacheBuster}#page=${currentPage}`;
   };
 
   // Error display
@@ -157,6 +160,7 @@ export const PDFCore: React.FC<PDFCoreProps> = ({
         frameBorder="0"
         sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-downloads allow-presentation"
         allowFullScreen
+        referrerPolicy="no-referrer"
       />
       
       {/* Fallback Mode Indicator */}

@@ -63,6 +63,23 @@ export const PDFPreview = ({
       console.error("No PDF URL provided for preview");
     } else {
       console.log("Preparing PDF preview with URL:", url);
+      
+      // Add cache busting to ensure we're getting the latest version
+      const urlWithCacheBuster = `${url}?t=${new Date().getTime()}`;
+      
+      // Preload the PDF to ensure it's in the browser cache
+      const preloadLink = document.createElement('link');
+      preloadLink.rel = 'preload';
+      preloadLink.as = 'fetch';
+      preloadLink.href = urlWithCacheBuster;
+      document.head.appendChild(preloadLink);
+      
+      // Remove the preload link after a few seconds
+      setTimeout(() => {
+        if (document.head.contains(preloadLink)) {
+          document.head.removeChild(preloadLink);
+        }
+      }, 5000);
     }
   }, [url]);
   

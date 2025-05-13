@@ -41,7 +41,7 @@ export const PDFThumbnail = ({ url, title, className = '', onClick }: PDFThumbna
         const page = await pdf.getPage(1);
         
         // Set scale for the canvas (adjust as needed)
-        const viewport = page.getViewport({ scale: 1.2 });
+        const viewport = page.getViewport({ scale: 1.5 });
         
         // Prepare canvas for rendering
         const canvas = document.createElement('canvas');
@@ -55,17 +55,26 @@ export const PDFThumbnail = ({ url, title, className = '', onClick }: PDFThumbna
         canvas.height = viewport.height;
         canvas.width = viewport.width;
         
-        // Render PDF page to canvas
-        await page.render({
-          canvasContext: context,
-          viewport: viewport
-        }).promise;
-        
-        // Convert the canvas to a data URL
-        const dataUrl = canvas.toDataURL('image/png');
-        setObjectUrl(dataUrl);
-        setIsLoading(false);
-        console.log("PDF thumbnail generated successfully");
+        try {
+          // Render PDF page to canvas - with better error handling
+          await page.render({
+            canvasContext: context,
+            viewport: viewport,
+            // Enable image resources to be rendered
+            enableWebGL: true,
+            renderInteractiveForms: true
+          }).promise;
+          
+          // Convert the canvas to a data URL with higher quality
+          const dataUrl = canvas.toDataURL('image/png', 1.0);
+          setObjectUrl(dataUrl);
+          setIsLoading(false);
+          console.log("PDF thumbnail generated successfully");
+        } catch (renderError) {
+          console.error("Error rendering PDF to canvas:", renderError);
+          setError("Failed to render thumbnail");
+          setIsLoading(false);
+        }
       } catch (err) {
         console.error("Error generating PDF thumbnail:", err);
         setError("Failed to load thumbnail");
