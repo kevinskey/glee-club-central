@@ -2,7 +2,7 @@
 import { useAuth } from "@/contexts/AuthContext";
 
 /**
- * A simplified hook for checking user permissions based on admin status
+ * A hook for checking user permissions based on roles and admin status
  */
 export const usePermissions = () => {
   const { isAdmin, profile, user } = useAuth();
@@ -13,7 +13,7 @@ export const usePermissions = () => {
   // Check if user has admin role
   const isAdminRole = isAdmin ? isAdmin() : false;
 
-  // Simple permission check function that allows any authenticated user for basic actions
+  // Permission check function that allows any authenticated user for basic actions
   const hasPermission = (permission: string): boolean => {
     // If no user is logged in, they have no permissions
     if (!user) return false;

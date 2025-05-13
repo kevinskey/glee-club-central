@@ -1,9 +1,9 @@
-
 import { useState, useEffect } from "react";
 import { MediaFile, MediaStats } from "@/types/media";
 import { supabase } from "@/integrations/supabase/client";
-import { useToast } from "@/components/ui/use-toast";
+import { toast } from "sonner";
 import { MediaType } from "@/utils/mediaUtils";
+import { getAllMediaFiles, deleteMediaFile } from "@/utils/supabase/media";
 
 export function useMediaLibrary() {
   const [isLoading, setIsLoading] = useState(true);
@@ -11,7 +11,6 @@ export function useMediaLibrary() {
   const [mediaFiles, setMediaFiles] = useState<MediaFile[]>([]);
   const [filteredMediaFiles, setFilteredMediaFiles] = useState<MediaFile[]>([]);
   const [mediaStats, setMediaStats] = useState<MediaStats | null>(null);
-  const { toast } = useToast();
   
   // Filter states
   const [searchQuery, setSearchQuery] = useState("");
@@ -23,7 +22,7 @@ export function useMediaLibrary() {
   const [mediaTypes, setMediaTypes] = useState<MediaType[]>([]);
   const [categories, setCategories] = useState<string[]>([]);
   
-  // Fetch all media
+  // Fetch all media - updated to use our utility function
   const fetchAllMedia = async () => {
     setIsLoading(true);
     setError(null);
@@ -31,13 +30,8 @@ export function useMediaLibrary() {
     try {
       console.log("Fetching all media files without filtering...");
       
-      // Fetch media files from Supabase - use no filter to get everything
-      const { data, error } = await supabase
-        .from('media_library')
-        .select('*')
-        .order('created_at', { ascending: false });
-        
-      if (error) throw error;
+      // Use our utility function
+      const data = await getAllMediaFiles();
       
       console.log(`Retrieved ${data?.length || 0} media files from database`);
       
@@ -162,29 +156,10 @@ export function useMediaLibrary() {
     setFilteredMediaFiles(filtered);
   };
   
-  // Delete media item
+  // Delete media item - updated to use our utility function
   const deleteMediaItem = async (mediaId: string) => {
     try {
-      // Find the file to delete
-      const fileToDelete = mediaFiles.find(f => f.id === mediaId);
-      if (!fileToDelete) {
-        throw new Error("Media file not found");
-      }
-      
-      // Delete from storage
-      const { error: storageError } = await supabase.storage
-        .from('media-library')
-        .remove([fileToDelete.file_path]);
-        
-      if (storageError) throw storageError;
-      
-      // Delete from database
-      const { error: dbError } = await supabase
-        .from('media_library')
-        .delete()
-        .eq('id', mediaId);
-        
-      if (dbError) throw dbError;
+      await deleteMediaFile(mediaId);
       
       toast({
         title: "Media deleted",

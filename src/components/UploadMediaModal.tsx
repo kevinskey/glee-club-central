@@ -30,9 +30,8 @@ export function UploadMediaModal({
 }: UploadMediaModalProps) {
   const [internalOpen, setInternalOpen] = useState(false);
   const isMobile = useIsMobile();
-  const { user, profile } = useAuth();
+  const { user } = useAuth();
   
-  // Check if user has permission to upload files - simplified approach
   // Allow any authenticated user to upload media
   const canUpload = !!user;
   
@@ -80,7 +79,8 @@ export function UploadMediaModal({
           </Button>
         </DialogTrigger>
       )}
-      <DialogContent className={`${isMobile ? 'w-[calc(100%-2rem)]' : 'sm:max-w-[500px]'} overflow-y-auto max-h-[90vh]`}>
+      <DialogContent className={`${isMobile ? 'w-[calc(100%-2rem)]' : 'sm:max-w-[500px]'} overflow-y-auto max-h-[90vh]`}
+        data-testid="upload-media-modal">
         <DialogHeader>
           <DialogTitle>Upload Media Files</DialogTitle>
           <DialogDescription>

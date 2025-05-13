@@ -1,8 +1,8 @@
 
 import { useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
+import { uploadMediaFile } from "@/utils/supabase/media";
 
 export function useMediaUpload(onComplete: () => void, defaultCategory: string = "general") {
   const [uploading, setUploading] = useState(false);
@@ -60,9 +60,6 @@ export function useMediaUpload(onComplete: () => void, defaultCategory: string =
     try {
       let successCount = 0;
       
-      // Create the media-library bucket if it doesn't exist (this will be handled by Supabase)
-      // The bucket should be created via SQL migration
-      
       for (let i = 0; i < files.length; i++) {
         const file = files[i];
         // Generate a unique filename
@@ -70,51 +67,19 @@ export function useMediaUpload(onComplete: () => void, defaultCategory: string =
         const fileName = `${Date.now()}-${Math.random().toString(36).substring(2, 15)}.${fileExt}`;
         const filePath = `${category}/${fileName}`;
 
-        // Upload file to Supabase Storage
-        const { data: uploadData, error: uploadError } = await supabase.storage
-          .from('media-library')
-          .upload(filePath, file);
-
-        if (uploadError) {
-          console.error("Storage upload error:", uploadError);
-          throw uploadError;
-        }
-
-        // Get public URL
-        const { data: publicURL } = supabase.storage
-          .from('media-library')
-          .getPublicUrl(filePath);
-
-        if (!publicURL) throw new Error("Failed to get public URL");
-
         // Generate a file-specific title if multiple files
         const fileTitle = files.length > 1 
           ? `${title} ${i + 1}` 
           : title;
 
-        // Get file size from the File object
-        const fileSize = file.size;
-
-        // Insert record in database with the correct user ID
-        const { error: dbError } = await supabase
-          .from('media_library')
-          .insert({
-            title: fileTitle,
-            description: description || null,
-            file_path: filePath,
-            file_url: publicURL.publicUrl,
-            file_type: file.type,
-            uploaded_by: user.id,
-            category: category,
-            tags: tags,
-            folder: category, // Use category as folder for organization
-            size: fileSize // Store file size for statistics
-          });
-
-        if (dbError) {
-          console.error("Database insertion error:", dbError);
-          throw dbError;
-        }
+        // Upload file using our utility
+        await uploadMediaFile(file, filePath, {
+          title: fileTitle,
+          description,
+          category,
+          tags,
+          uploadedBy: user.id
+        });
         
         successCount++;
         

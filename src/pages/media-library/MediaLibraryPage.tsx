@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { PageHeader } from "@/components/ui/page-header";
 import { FilesIcon } from "lucide-react";
@@ -11,19 +12,19 @@ import { MediaLoadingState } from "@/components/media/MediaLoadingState";
 import { MediaAccordionView } from "@/components/media/MediaAccordionView";
 import { UploadMediaButton } from "@/components/media/UploadMediaButton";
 import { MediaType } from "@/utils/mediaUtils";
-import { PermissionName } from "@/types/permissions";
 
 interface MediaLibraryPageProps {
   isAdminView?: boolean;
 }
 
 export default function MediaLibraryPage({ isAdminView = false }: MediaLibraryPageProps) {
-  const { isLoggedIn, hasPermission, isSuperAdmin } = usePermissions();
+  const { isLoggedIn, hasPermission, isSuperAdmin, isAdminRole } = usePermissions();
   
-  // Check if user has permission based on roles - simplified to allow any authenticated user
+  // Allow any authenticated user to upload media
   const canUploadMedia = isLoggedIn;
-  const canEditMedia = isAdminView || isSuperAdmin || hasPermission('can_edit_media');
-  const canDeleteMedia = isAdminView || isSuperAdmin || hasPermission('can_delete_media');
+  // Admin permissions for editing and deleting
+  const canEditMedia = isAdminView || isSuperAdmin || isAdminRole || hasPermission('can_edit_media');
+  const canDeleteMedia = isAdminView || isSuperAdmin || isAdminRole || hasPermission('can_delete_media');
   
   const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");

@@ -5,3 +5,4 @@ export * from './payments';
 export * from './sections';
 export * from './practiceLogs';
 export * from './auth';
+export * from './media';
