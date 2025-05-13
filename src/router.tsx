@@ -1,4 +1,3 @@
-
 import {
   createBrowserRouter,
 } from "react-router-dom";
@@ -25,6 +24,7 @@ import ContactPage from "@/pages/ContactPage";
 import AboutPage from "@/pages/AboutPage";
 import LandingPageSettingsPage from "@/pages/admin/LandingPageSettingsPage";
 import AdminRegistrationPage from "@/pages/admin/AdminRegistrationPage";
+import CalendarPage from "@/pages/CalendarPage";
 
 const router = createBrowserRouter([
   {
@@ -37,6 +37,7 @@ const router = createBrowserRouter([
       { path: "contact", element: <ContactPage /> },
       { path: "press-kit", element: <PressKitPage /> },
       { path: "recordings", element: <RecordingsPage /> },
+      { path: "calendar", element: <CalendarPage /> }, // Add calendar route
     ],
   },
   {
