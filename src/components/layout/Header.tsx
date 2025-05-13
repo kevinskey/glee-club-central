@@ -63,13 +63,16 @@ export function Header() {
   return (
     <header className="bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 sticky top-0 z-50 w-full border-b hidden md:block">
       <div className="container flex h-16 items-center justify-between px-4">
-        {/* Left side: Logo, title, metronome */}
+        {/* Left side: Logo and site name */}
         <div className="flex items-center gap-4">
           <Link to="/" className="font-bold flex items-center gap-2 hover:text-primary transition-colors">
             <Icons.logo className="h-6 w-auto" />
             <span className="text-base text-foreground">Glee World</span>
           </Link>
+        </div>
           
+        {/* Right side: Metronome, theme toggle, and user dropdown */}
+        <div className="flex items-center gap-3">
           {/* Metronome Icon */}
           <Dialog open={metronomeOpen} onOpenChange={setMetronomeOpen}>
             <DialogTrigger asChild>
@@ -88,10 +91,7 @@ export function Header() {
               <EnhancedMetronome showControls={true} size="md" audioContextRef={audioContextRef} />
             </DialogContent>
           </Dialog>
-        </div>
-
-        {/* Right side: Theme toggle and user dropdown */}
-        <div className="flex items-center gap-3">
+          
           <ThemeToggle />
           
           <DropdownMenuProvider>

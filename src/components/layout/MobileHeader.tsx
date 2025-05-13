@@ -1,3 +1,4 @@
+
 import React, { useState, useRef } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { Icons } from "@/components/Icons";
@@ -78,13 +79,16 @@ export function MobileHeader() {
     <>
       <header className="md:hidden sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
         <div className="container px-4 flex h-14 items-center justify-between">
-          {/* Left side: Logo and metronome */}
+          {/* Left side: Logo and site name */}
           <div className="flex items-center gap-3">
             <Link to="/" className="font-bold flex items-center hover:text-primary transition-colors">
               <Icons.logo className="h-6 w-auto" />
               <span className="text-base ml-2 text-foreground">Glee World</span>
             </Link>
-            
+          </div>
+          
+          {/* Right side: Metronome, theme toggle, and menu button */}
+          <div className="flex items-center gap-2">
             <Dialog open={metronomeOpen} onOpenChange={setMetronomeOpen}>
               <DialogTrigger asChild>
                 <Button 
@@ -106,10 +110,7 @@ export function MobileHeader() {
                 <EnhancedMetronome showControls={true} size="md" audioContextRef={audioContextRef} />
               </DialogContent>
             </Dialog>
-          </div>
-          
-          {/* Right side: Theme toggle and dropdown menu */}
-          <div className="flex items-center gap-2">
+            
             <ThemeToggle />
             
             <DropdownMenuProvider>

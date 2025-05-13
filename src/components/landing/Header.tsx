@@ -74,10 +74,13 @@ export function Header({ initialShowNewsFeed = true }: HeaderProps) {
   return (
     <header className="sticky top-0 z-50 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container px-2 flex h-16 items-center justify-between">
-        {/* Left side: Logo, Title, Metronome */}
+        {/* Left side: Logo and site name */}
         <div className="flex items-center gap-4">
           <Logo />
-          
+        </div>
+        
+        {/* Right side: Metronome, theme toggle, and navigation dropdown */}
+        <div className="flex items-center gap-3">
           {/* Metronome Icon */}
           <Dialog open={metronomeOpen} onOpenChange={setMetronomeOpen}>
             <DialogTrigger asChild>
@@ -101,10 +104,7 @@ export function Header({ initialShowNewsFeed = true }: HeaderProps) {
               <EnhancedMetronome showControls={true} size="md" audioContextRef={audioContextRef} />
             </DialogContent>
           </Dialog>
-        </div>
-        
-        {/* Right side: Theme toggle and navigation dropdown */}
-        <div className="flex items-center gap-3">
+          
           <ThemeToggle />
           
           <DropdownMenuProvider>
