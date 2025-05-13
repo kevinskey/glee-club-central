@@ -30,15 +30,15 @@ import { cn } from "@/lib/utils";
 import { MobileFitCheck } from "./MobileFitCheck";
 import { EventType } from "@/types/calendar";
 
-// Define a proper type for the form values to exactly match EventFormValues in EventForm
+// Update interface to match the schema in EventForm.tsx
 export interface EventFormValues {
   title: string;
   date: Date;
   time: string;
   location: string;
-  description: string;
+  description?: string;
   type: EventType;
-  image_url: string | null;
+  image_url?: string | null;
   
   // Additional fields to match EventForm
   archivalNotes?: string;
