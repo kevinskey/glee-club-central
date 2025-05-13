@@ -3,6 +3,7 @@ import React from "react";
 import { createBrowserRouter, Navigate } from "react-router-dom";
 import HomePage from "@/pages/HomePage";
 import NotFoundPage from "@/pages/NotFoundPage";
+import CalendarPage from "@/pages/CalendarPage";
 import DashboardCalendarPage from "@/pages/dashboard/calendar/index";
 import DashboardLayout from "@/layouts/DashboardLayout";
 import HomeLayout from "@/layouts/HomeLayout";
@@ -22,7 +23,7 @@ export const router = createBrowserRouter([
       },
       {
         path: "calendar",
-        element: <Navigate to="/dashboard/calendar" replace />,
+        element: <CalendarPage />,
       },
       // Add other public routes as needed
     ],
