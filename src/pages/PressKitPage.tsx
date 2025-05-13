@@ -10,29 +10,14 @@ import { FlickrGallery } from "@/components/media/FlickrGallery";
 import { PressKitMediaGrid } from "@/components/media/PressKitMediaGrid";
 import { PressKitDocuments } from "@/components/media/PressKitDocuments";
 import { VideoPlayer } from "@/components/videos/VideoPlayer";
+import { useYouTubeChannel } from "@/hooks/useYouTubeChannel";
+import { Spinner } from "@/components/ui/spinner";
 
 export default function PressKitPage() {
   const navigate = useNavigate();
+  const { videos, loading, error } = useYouTubeChannel({ maxResults: 3 });
+  const [selectedVideoIndex, setSelectedVideoIndex] = useState<number | null>(0);
   
-  // YouTube videos for press kit
-  const featuredVideos = [
-    {
-      id: "xT5PxedM9jo",
-      title: "Spelman College Glee Club - Lift Every Voice and Sing",
-      description: "Performance at the Kennedy Center"
-    },
-    {
-      id: "xT5PxedM9jo",
-      title: "Spelman Glee Club - Amazing Grace",
-      description: "Carnegie Hall Concert, 2023"
-    },
-    {
-      id: "xT5PxedM9jo",
-      title: "Interview with Dr. Kevin Johnson",
-      description: "Director discusses the Glee Club legacy"
-    }
-  ];
-
   return (
     <Layout>
       <main className="flex-1 bg-white dark:bg-gray-950">
@@ -253,17 +238,55 @@ export default function PressKitPage() {
                 Selected performance videos showcasing the Spelman College Glee Club. These videos may be embedded in media coverage with proper attribution.
               </p>
 
-              <div className="space-y-8">
-                {featuredVideos.map((video, index) => (
-                  <div key={index} className="mb-8">
-                    <VideoPlayer
-                      videoId={video.id}
-                      title={video.title}
-                      description={video.description}
-                    />
+              {loading ? (
+                <div className="flex justify-center py-12">
+                  <Spinner size="lg" />
+                </div>
+              ) : error ? (
+                <div className="bg-red-50 dark:bg-red-900/20 p-4 rounded-md text-red-600 dark:text-red-400 text-center mb-8">
+                  Unable to load videos. Please try again later.
+                </div>
+              ) : (
+                <div className="space-y-8">
+                  {selectedVideoIndex !== null && videos[selectedVideoIndex] && (
+                    <div className="mb-8">
+                      <VideoPlayer
+                        videoId={videos[selectedVideoIndex].id}
+                        title={videos[selectedVideoIndex].title}
+                        description={videos[selectedVideoIndex].description}
+                      />
+                    </div>
+                  )}
+                  
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {videos.map((video, index) => (
+                      <Card 
+                        key={video.id} 
+                        className={`cursor-pointer hover:shadow-md transition-shadow ${selectedVideoIndex === index ? 'ring-2 ring-glee-purple' : ''}`}
+                        onClick={() => setSelectedVideoIndex(index)}
+                      >
+                        <div className="relative">
+                          <AspectRatio ratio={16/9}>
+                            <img 
+                              src={video.thumbnailUrl} 
+                              alt={video.title}
+                              className="w-full h-full object-cover"
+                            />
+                          </AspectRatio>
+                          <div className="absolute inset-0 flex items-center justify-center bg-black/30 opacity-0 hover:opacity-100 transition-opacity">
+                            <Button size="sm" variant="secondary">
+                              Select Video
+                            </Button>
+                          </div>
+                        </div>
+                        <CardContent className="p-3">
+                          <h3 className="font-medium text-sm line-clamp-2">{video.title}</h3>
+                        </CardContent>
+                      </Card>
+                    ))}
                   </div>
-                ))}
-              </div>
+                </div>
+              )}
             </div>
           </div>
         </div>
