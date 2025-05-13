@@ -5,7 +5,7 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { toast } from "sonner";
-
+import { Layout } from "@/components/landing/Layout";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -140,106 +140,114 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-background bg-cover bg-center px-4"
-         style={{ backgroundImage: "url('/lovable-uploads/b57ced8e-7ed7-405b-8302-41ab726303af.png')" }}>
-      {/* Semi-transparent overlay */}
-      <div className="absolute inset-0 bg-black/60"></div>
-      
-      <Card className="w-full max-w-md relative z-10 bg-white dark:bg-black dark:bg-opacity-80 bg-opacity-90 backdrop-blur-sm">
-        <CardHeader className="text-center">
-          <div className="flex justify-center mb-4">
-            <Music className="h-12 w-12 text-glee-purple" />
-          </div>
-          <CardTitle className="text-2xl font-bold">Welcome to Glee World</CardTitle>
-          <CardDescription>
-            Log in to access the Spelman College Glee Club portal
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          {loginError && (
-            <Alert variant="destructive" className="mb-4">
-              <AlertCircle className="h-4 w-4" />
-              <AlertDescription className="ml-2">
-                {loginError}
-              </AlertDescription>
-            </Alert>
-          )}
-          {statusMessage && (
-            <Alert className="mb-4">
-              <AlertDescription className="ml-2">
-                {statusMessage}
-              </AlertDescription>
-            </Alert>
-          )}
-          <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-              <FormField
-                control={form.control}
-                name="email"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Email</FormLabel>
-                    <FormControl>
-                      <Input placeholder="your.email@example.com" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="password"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Password</FormLabel>
-                    <FormControl>
-                      <div className="relative">
-                        <Input 
-                          type={showPassword ? "text" : "password"} 
-                          placeholder="Enter your password"
-                          {...field} 
-                        />
-                        <button 
-                          type="button"
-                          onClick={togglePasswordVisibility}
-                          className="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700 focus:outline-none"
-                          tabIndex={-1} // Prevent tab focus for better accessibility
-                        >
-                          {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
-                        </button>
-                      </div>
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <Button type="submit" className="w-full" disabled={isSubmitting}>
-                {isSubmitting ? (
-                  <>
-                    <span className="mr-2">Logging in...</span>
-                    <div className="h-4 w-4 rounded-full border-2 border-white border-t-transparent animate-spin"></div>
-                  </>
-                ) : (
-                  <>
-                    <LogIn className="mr-2 h-4 w-4" /> Log In
-                  </>
-                )}
-              </Button>
-            </form>
-          </Form>
-        </CardContent>
-        <CardFooter className="flex flex-col items-center space-y-2">
-          <Link to="/reset-password" className="text-sm text-muted-foreground hover:underline">
-            Forgot password?
-          </Link>
-          <p className="text-sm text-muted-foreground">
-            Don't have an account?{" "}
-            <Link to="/register" className="text-glee-purple hover:underline">
-              Create one
-            </Link>
-          </p>
-        </CardFooter>
-      </Card>
-    </div>
+    <Layout>
+      <div className="container mx-auto px-4 py-12">
+        <div className="max-w-md mx-auto">
+          <h1 className="text-3xl font-bold text-center mb-8">Member Login</h1>
+          
+          <Card className="w-full bg-white dark:bg-black dark:bg-opacity-80 bg-opacity-90 backdrop-blur-sm">
+            <CardHeader className="text-center">
+              <div className="flex justify-center mb-4">
+                <Music className="h-12 w-12 text-glee-purple" />
+              </div>
+              <CardTitle className="text-2xl font-bold">Welcome Back</CardTitle>
+              <CardDescription>
+                Log in to access the Spelman College Glee Club portal
+              </CardDescription>
+            </CardHeader>
+            
+            <CardContent>
+              {loginError && (
+                <Alert variant="destructive" className="mb-4">
+                  <AlertCircle className="h-4 w-4" />
+                  <AlertDescription className="ml-2">
+                    {loginError}
+                  </AlertDescription>
+                </Alert>
+              )}
+              
+              {statusMessage && (
+                <Alert className="mb-4">
+                  <AlertDescription className="ml-2">
+                    {statusMessage}
+                  </AlertDescription>
+                </Alert>
+              )}
+              
+              <Form {...form}>
+                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+                  <FormField
+                    control={form.control}
+                    name="email"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Email</FormLabel>
+                        <FormControl>
+                          <Input placeholder="your.email@example.com" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  
+                  <FormField
+                    control={form.control}
+                    name="password"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Password</FormLabel>
+                        <FormControl>
+                          <div className="relative">
+                            <Input 
+                              type={showPassword ? "text" : "password"} 
+                              placeholder="Enter your password"
+                              {...field} 
+                            />
+                            <button 
+                              type="button"
+                              onClick={togglePasswordVisibility}
+                              className="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700 focus:outline-none"
+                              tabIndex={-1} // Prevent tab focus for better accessibility
+                            >
+                              {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                            </button>
+                          </div>
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  
+                  <Button type="submit" className="w-full" disabled={isSubmitting}>
+                    {isSubmitting ? (
+                      <>
+                        <span className="mr-2">Logging in...</span>
+                        <div className="h-4 w-4 rounded-full border-2 border-white border-t-transparent animate-spin"></div>
+                      </>
+                    ) : (
+                      <>
+                        <LogIn className="mr-2 h-4 w-4" /> Log In
+                      </>
+                    )}
+                  </Button>
+                </form>
+              </Form>
+            </CardContent>
+            
+            <CardFooter className="flex flex-col items-center space-y-2">
+              <Link to="/reset-password" className="text-sm text-muted-foreground hover:underline">
+                Forgot password?
+              </Link>
+              <p className="text-sm text-muted-foreground">
+                Don't have an account?{" "}
+                <Link to="/register" className="text-glee-purple hover:underline">
+                  Create one
+                </Link>
+              </p>
+            </CardFooter>
+          </Card>
+        </div>
+      </div>
+    </Layout>
   );
 }
