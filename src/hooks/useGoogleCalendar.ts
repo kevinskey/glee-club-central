@@ -1,94 +1,79 @@
 
 import { useState, useEffect } from 'react';
-import { useAuth } from '@/contexts/AuthContext';
 import { 
-  checkGoogleCalendarAuth, 
-  connectGoogleCalendar, 
-  fetchGoogleCalendarEvents,
-  addGoogleCalendarEvent
+  isConnected, 
+  connect, 
+  connectToGoogleCalendar, 
+  disconnect, 
+  syncCalendar
 } from '@/services/googleCalendar';
 
 export const useGoogleCalendar = () => {
-  const { user } = useAuth();
-  const [isConnected, setIsConnected] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [isGoogleConnected, setIsGoogleConnected] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isSyncing, setIsSyncing] = useState(false);
+  const [error, setError] = useState('');
 
   useEffect(() => {
     const checkConnection = async () => {
-      if (!user) return;
-      
-      setIsLoading(true);
       try {
-        const connected = await checkGoogleCalendarAuth(user.id);
-        setIsConnected(connected);
+        setIsLoading(true);
+        const connected = await isConnected();
+        setIsGoogleConnected(connected);
       } catch (err) {
+        setError(err instanceof Error ? err.message : 'Failed to check Google Calendar connection');
         console.error('Error checking Google Calendar connection:', err);
-        setError('Failed to check Google Calendar connection status');
       } finally {
         setIsLoading(false);
       }
     };
 
     checkConnection();
-  }, [user]);
+  }, []);
 
   const handleConnect = async () => {
-    setIsLoading(true);
     try {
-      const result = await connectGoogleCalendar();
-      if (result) {
-        setIsConnected(true);
-        setError(null);
-      } else {
-        throw new Error('Failed to connect to Google Calendar');
-      }
-    } catch (err: any) {
+      await connect();
+      setIsGoogleConnected(true);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to connect to Google Calendar');
       console.error('Error connecting to Google Calendar:', err);
-      setError(err.message || 'Failed to connect to Google Calendar');
-    } finally {
-      setIsLoading(false);
     }
   };
 
-  const fetchEvents = async (startDate: Date, endDate: Date) => {
-    if (!user) return [];
-    
-    setIsLoading(true);
+  const handleDisconnect = async () => {
     try {
-      const events = await fetchGoogleCalendarEvents(user.id, startDate, endDate);
-      return events;
+      await disconnect();
+      setIsGoogleConnected(false);
     } catch (err) {
-      console.error('Error fetching Google Calendar events:', err);
-      setError('Failed to fetch events from Google Calendar');
-      return [];
-    } finally {
-      setIsLoading(false);
+      setError(err instanceof Error ? err.message : 'Failed to disconnect from Google Calendar');
+      console.error('Error disconnecting from Google Calendar:', err);
     }
   };
 
-  const addEvent = async (eventData: any) => {
-    if (!user) return { success: false, error: 'Not authenticated' };
-    
-    setIsLoading(true);
+  const handleSyncCalendar = async () => {
     try {
-      const result = await addGoogleCalendarEvent(user.id, eventData);
-      return result;
+      setIsSyncing(true);
+      await syncCalendar();
+      // Success would be handled here, possibly with a toast notification
     } catch (err) {
-      console.error('Error adding event to Google Calendar:', err);
-      setError('Failed to add event to Google Calendar');
-      return { success: false, error: err };
+      setError(err instanceof Error ? err.message : 'Failed to sync with Google Calendar');
+      console.error('Error syncing with Google Calendar:', err);
     } finally {
-      setIsLoading(false);
+      setIsSyncing(false);
     }
   };
 
   return {
-    isConnected,
+    isConnected: isGoogleConnected,
     isLoading,
+    isSyncing,
     error,
     connect: handleConnect,
-    fetchEvents,
-    addEvent
+    disconnect: handleDisconnect,
+    connectToGoogleCalendar: handleConnect,  // Alias for backward compatibility
+    syncCalendar: handleSyncCalendar
   };
 };
+
+export default useGoogleCalendar;

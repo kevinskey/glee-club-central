@@ -12,3 +12,13 @@ export interface YouTubeVideo {
   commentCount: number;
   duration: string;
 }
+
+export interface YouTubeChannel {
+  id: string;
+  title: string;
+  description: string;
+  url: string;
+  thumbnailUrl: string;
+  subscriberCount: number;
+  videoCount: number;
+}

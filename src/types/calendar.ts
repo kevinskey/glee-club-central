@@ -1,18 +1,25 @@
 
-export type EventType = "rehearsal" | "concert" | "sectional" | "special" | "tour";
-
 export interface CalendarEvent {
   id: string;
   title: string;
-  type: EventType;
-  start: string; // ISO date string
-  end: string;   // ISO date string
-  date?: Date;    // For UI display
-  time?: string;  // For UI display
-  location?: string;
+  start: string;
+  end: string;
+  allDay?: boolean;
   description?: string;
-  created_by: string; // user ID
-  allDay?: boolean;   // Added allDay property
-  google_event_id?: string; // Added for Google Calendar integration
-  source?: string;    // For tracking event source (google, supabase, etc.)
+  location?: string;
+  url?: string;
+  classNames?: string[];
+  extendedProps?: Record<string, any>;
+}
+
+export interface CalendarSettings {
+  defaultView: string;
+  firstDay: number;
+  businessHours: {
+    start: string;
+    end: string;
+    daysOfWeek: number[];
+  };
+  showWeekends: boolean;
+  showEventTimes: boolean;
 }
