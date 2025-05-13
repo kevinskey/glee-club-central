@@ -1,118 +1,159 @@
-
 import { createBrowserRouter } from 'react-router-dom';
-import { Outlet } from 'react-router-dom';
-import LandingPage from './pages/LandingPage';
-import LoginPage from './pages/LoginPage';
-import RegisterPage from './pages/RegisterPage';
+import { Suspense, lazy } from 'react';
+
 import DashboardLayout from './layouts/DashboardLayout';
-import GuestDashboardPage from './pages/dashboard/GuestDashboardPage';
-import MemberDashboardPage from './pages/dashboard/MemberDashboardPage';
-import AdminDashboardPage from './pages/dashboard/AdminDashboardPage';
-import NotFoundPage from './pages/NotFoundPage';
+import DashboardHome from './pages/dashboard/DashboardHome';
 import ProfilePage from './pages/profile/ProfilePage';
+import LandingPage from './pages/LandingPage';
+import AboutPage from './pages/AboutPage';
+import LoginPage from './pages/auth/LoginPage';
+import SignupPage from './pages/auth/SignupPage';
+import ForgotPasswordPage from './pages/auth/ForgotPasswordPage';
+import ResetPasswordPage from './pages/auth/ResetPasswordPage';
 import CalendarPage from './pages/CalendarPage';
-import MembersPage from './pages/MembersPage';
-import { ProtectedRoute } from './components/auth/ProtectedRoute';
+import MembersPage from './pages/members/MembersPage';
 import AdminDashboard from './pages/admin/AdminDashboard';
 import AttendancePage from './pages/AttendancePage';
-import MediaLibraryPage from './pages/MediaLibraryPage';
 import SheetMusicPage from './pages/sheet-music/SheetMusicPage';
 import HomeLayout from './layouts/HomeLayout';
 import UpdatePasswordPage from './pages/UpdatePasswordPage';
+import MemberProfile from './pages/members/MemberProfile';
+import AnnouncementsPage from './pages/announcements/AnnouncementsPage';
+import SettingsPage from './pages/settings/SettingsPage';
+import ResourcesPage from './pages/resources/ResourcesPage';
+import NotFoundPage from './pages/NotFoundPage';
+import PracticeLogsPage from './pages/practice-logs/PracticeLogsPage';
+import RecordingsPage from './pages/recordings/RecordingsPage';
+import PerformancesPage from './pages/PerformancesPage';
+import UserSetupPage from './pages/auth/UserSetupPage';
+import SetlistsPage from './pages/setlists/SetlistsPage';
 
-// Root layout component with outlet
-const RootLayout = () => {
-  return (
-    <>
-      <Outlet />
-      {/* Any UI elements that should appear on all pages can go here */}
-    </>
-  );
-};
+// Lazy loaded components
+const ContactPage = lazy(() => import('./pages/ContactPage'));
 
-// Create router with proper structure
-const router = createBrowserRouter([
+export const router = createBrowserRouter([
   {
     path: '/',
-    element: <RootLayout />,
+    element: <HomeLayout />,
     errorElement: <NotFoundPage />,
     children: [
       {
-        path: '/',
-        element: <HomeLayout />,
-        children: [
-          {
-            path: '',
-            element: <LandingPage />
-          }
-        ]
+        index: true,
+        element: <LandingPage />
       },
       {
-        path: '/login',
+        path: 'about',
+        element: <AboutPage />
+      },
+      {
+        path: 'contact',
+        element: (
+          <Suspense fallback={<>Loading...</>}>
+            <ContactPage />
+          </Suspense>
+        )
+      }
+    ]
+  },
+  {
+    path: '/auth',
+    children: [
+      {
+        path: 'login',
         element: <LoginPage />
       },
       {
-        path: '/register',
-        element: <RegisterPage />
+        path: 'signup',
+        element: <SignupPage />
       },
       {
-        path: '/reset-password',
-        element: <UpdatePasswordPage />
+        path: 'forgot-password',
+        element: <ForgotPasswordPage />
       },
       {
-        path: '/dashboard',
-        element: <ProtectedRoute><DashboardLayout /></ProtectedRoute>,
-        children: [
-          {
-            path: '',
-            element: <MemberDashboardPage />
-          },
-          {
-            path: 'guest',
-            element: <GuestDashboardPage />
-          },
-          {
-            path: 'admin',
-            element: <AdminDashboardPage />
-          },
-          {
-            path: 'profile',
-            element: <ProfilePage />
-          },
-          {
-            path: 'calendar',
-            element: <CalendarPage />
-          },
-          {
-            path: 'members',
-            element: <MembersPage />
-          },
-          {
-            path: 'media',
-            element: <MediaLibraryPage />
-          },
-          {
-            path: 'attendance',
-            element: <AttendancePage />
-          },
-          {
-            path: 'sheet-music',
-            element: <SheetMusicPage />
-          },
-          {
-            path: 'sheet-music/:id',
-            element: <SheetMusicPage />
-          }
-        ]
+        path: 'reset-password',
+        element: <ResetPasswordPage />
       },
       {
-        path: '/admin',
-        element: <ProtectedRoute adminOnly={true}>
-          <AdminDashboard />
-        </ProtectedRoute>
+        path: 'setup',
+        element: <UserSetupPage />
       }
     ]
+  },
+  {
+    path: '/dashboard',
+    element: <DashboardLayout />,
+    errorElement: <NotFoundPage />,
+    children: [
+      {
+        index: true,
+        element: <DashboardHome />
+      },
+      {
+        path: 'profile',
+        element: <ProfilePage />
+      },
+      {
+        path: 'calendar',
+        element: <CalendarPage />
+      },
+      {
+        path: 'attendance',
+        element: <AttendancePage />
+      },
+      {
+        path: 'sheet-music',
+        element: <SheetMusicPage />
+      },
+      {
+        path: 'setlists',
+        element: <SetlistsPage />
+      },
+      {
+        path: 'recordings',
+        element: <RecordingsPage />
+      },
+      {
+        path: 'members',
+        element: <MembersPage />
+      },
+      {
+        path: 'members/:id',
+        element: <MemberProfile />
+      },
+      {
+        path: 'performances',
+        element: <PerformancesPage />
+      },
+      {
+        path: 'announcements',
+        element: <AnnouncementsPage />
+      },
+      {
+        path: 'settings',
+        element: <SettingsPage />
+      },
+      {
+        path: 'resources',
+        element: <ResourcesPage />
+      },
+      {
+        path: 'practice-logs',
+        element: <PracticeLogsPage />
+      },
+      {
+        path: 'admin',
+        element: <AdminDashboard />
+      },
+      {
+        path: 'update-password',
+        element: <UpdatePasswordPage />
+      }
+      // Removed handbook and PDF viewer routes
+    ]
+  },
+  {
+    path: '*',
+    element: <NotFoundPage />
   }
 ]);
-
-export default router;
