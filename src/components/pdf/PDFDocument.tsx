@@ -12,6 +12,8 @@ interface PDFDocumentProps {
   onError: () => void;
   error: string | null;
   title: string;
+  mediaSourceId?: string;
+  category?: string;
 }
 
 export const PDFDocument: React.FC<PDFDocumentProps> = ({
@@ -22,7 +24,10 @@ export const PDFDocument: React.FC<PDFDocumentProps> = ({
   onLoad,
   onError,
   error,
-  title
+  title,
+  // We don't need to use these props, but we need to include them in the interface
+  mediaSourceId,
+  category
 }) => {
   const isMobile = useIsMobile();
   const [pdfLoaded, setPdfLoaded] = useState(false);
