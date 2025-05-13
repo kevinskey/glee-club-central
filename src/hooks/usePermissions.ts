@@ -1,3 +1,4 @@
+
 import { useAuth } from '@/contexts/AuthContext';
 import { useRolePermissions } from '@/contexts/RolePermissionContext';
 import { useState } from 'react';
@@ -132,6 +133,7 @@ export function usePermissions(): UsePermissionsReturn {
     }
   };
   
+  // Return the object directly to fix the deep instantiation issue
   return {
     hasPermission,
     isSuperAdmin,

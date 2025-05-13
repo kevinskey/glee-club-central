@@ -54,6 +54,7 @@ export function UserTitleManagement({
     }
   }, [user]);
 
+  // Make sure this array includes all UserTitle values
   const titles: UserTitle[] = [
     'Super Admin',
     'Treasurer',
