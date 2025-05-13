@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
@@ -7,7 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/components/ui/use-toast";
-import { Icons } from "@/components/ui/icons";
+import { UserIcon, LockIcon } from "lucide-react";
 
 export default function LoginPage() {
   const { signIn, signUp, isLoading } = useAuth();
@@ -116,7 +117,7 @@ export default function LoginPage() {
             </div>
             <Button disabled={isLoading} onClick={handleSignIn}>
               {isLoading && (
-                <Icons.spinner className="mr-2 h-4 w-4 animate-spin" />
+                <span className="mr-2 h-4 w-4 animate-spin">⌛</span>
               )}
               Sign In
             </Button>
@@ -169,7 +170,7 @@ export default function LoginPage() {
             </div>
             <Button disabled={isLoading} onClick={handleSignUp}>
               {isLoading && (
-                <Icons.spinner className="mr-2 h-4 w-4 animate-spin" />
+                <span className="mr-2 h-4 w-4 animate-spin">⌛</span>
               )}
               Sign Up
             </Button>
@@ -190,7 +191,7 @@ export default function LoginPage() {
       <div className="relative hidden h-full flex-col bg-muted p-10 text-white lg:flex">
         <div className="absolute inset-0 bg-zinc-900" />
         <div className="relative z-20 flex items-center text-lg font-medium">
-          <Icons.logo className="mr-2 h-6 w-6" /> Glee Club Portal
+          <UserIcon className="mr-2 h-6 w-6" /> Glee Club Portal
         </div>
         <div className="relative z-20 mt-auto">
           <blockquote className="space-y-2">
@@ -205,7 +206,7 @@ export default function LoginPage() {
       <div className="lg:p-8">
         <div className="mx-auto flex w-full flex-col justify-center space-y-6 sm:w-[350px]">
           <div className="flex flex-col space-y-2 text-center">
-            <Icons.logo className="mx-auto h-6 w-6" />
+            <UserIcon className="mx-auto h-6 w-6" />
             <h1 className="text-2xl font-semibold tracking-tight">
               Authenticate
             </h1>
