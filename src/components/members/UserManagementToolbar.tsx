@@ -1,9 +1,15 @@
 
-import React from 'react';
-import { Button } from "@/components/ui/button";
+import React from "react";
 import { Input } from "@/components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Search, RefreshCw, Filter, UserPlus } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Search, UserPlus, RefreshCw } from "lucide-react";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 interface UserManagementToolbarProps {
   searchTerm: string;
@@ -14,9 +20,9 @@ interface UserManagementToolbarProps {
   setStatusFilter: (status: string) => void;
   onCreateUserClick: () => void;
   onRefreshClick: () => void;
-  isLoading: boolean;
-  isMobile: boolean;
-  canCreate: boolean;
+  isLoading?: boolean;
+  isMobile?: boolean;
+  canCreate?: boolean;
 }
 
 export function UserManagementToolbar({
@@ -28,89 +34,77 @@ export function UserManagementToolbar({
   setStatusFilter,
   onCreateUserClick,
   onRefreshClick,
-  isLoading,
-  isMobile,
-  canCreate
+  isLoading = false,
+  isMobile = false,
+  canCreate = true
 }: UserManagementToolbarProps) {
-  const handleCreateUserClick = () => {
-    console.log("Create user button clicked!");
-    onCreateUserClick();
-  };
-
   return (
-    <div className="mb-4 flex flex-col space-y-3 sm:space-y-0 sm:flex-row justify-between">
-      <div className="flex flex-1 items-center space-x-2">
-        <div className="relative flex-1 max-w-sm">
+    <div className="mb-6 space-y-4">
+      <div className="flex flex-col sm:flex-row gap-4">
+        <div className="relative flex-1">
           <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
           <Input
             placeholder="Search members..."
+            className="pl-8"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="pl-8"
           />
         </div>
         
-        {!isMobile && (
-          <>
-            <Select
-              value={roleFilter}
-              onValueChange={setRoleFilter}
+        <div className="flex gap-2">
+          {canCreate && (
+            <Button 
+              onClick={onCreateUserClick}
+              className="bg-brand hover:bg-brand/90"
+              size={isMobile ? "sm" : "default"}
             >
-              <SelectTrigger className="w-[150px]">
-                <SelectValue placeholder="Role" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Roles</SelectItem>
-                <SelectItem value="administrator">Administrator</SelectItem>
-                <SelectItem value="section_leader">Section Leader</SelectItem>
-                <SelectItem value="singer">Singer</SelectItem>
-                <SelectItem value="student_conductor">Student Conductor</SelectItem>
-                <SelectItem value="accompanist">Accompanist</SelectItem>
-                <SelectItem value="non_singer">Non-Singer</SelectItem>
-              </SelectContent>
-            </Select>
-            
-            <Select
-              value={statusFilter}
-              onValueChange={setStatusFilter}
-            >
-              <SelectTrigger className="w-[150px]">
-                <SelectValue placeholder="Status" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Statuses</SelectItem>
-                <SelectItem value="active">Active</SelectItem>
-                <SelectItem value="pending">Pending</SelectItem>
-                <SelectItem value="inactive">Inactive</SelectItem>
-                <SelectItem value="alumni">Alumni</SelectItem>
-              </SelectContent>
-            </Select>
-          </>
-        )}
+              <UserPlus className="h-4 w-4 mr-1" />
+              {isMobile ? 'Add' : 'Add Member'}
+            </Button>
+          )}
+          
+          <Button
+            variant="outline"
+            onClick={onRefreshClick}
+            disabled={isLoading}
+            size={isMobile ? "icon" : "default"}
+          >
+            <RefreshCw className={`h-4 w-4 ${isLoading ? "animate-spin" : ""} ${!isMobile && "mr-1"}`} />
+            {!isMobile && "Refresh"}
+          </Button>
+        </div>
       </div>
       
-      <div className="flex space-x-2">
-        {isMobile && (
-          <Button variant="outline" size="sm">
-            <Filter className="h-4 w-4" />
-          </Button>
-        )}
-        
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={onRefreshClick}
-          disabled={isLoading}
+      <div className="flex flex-col sm:flex-row gap-4">
+        <Select
+          value={roleFilter}
+          onValueChange={setRoleFilter}
         >
-          <RefreshCw className={`h-4 w-4 ${isLoading ? 'animate-spin' : ''}`} />
-        </Button>
+          <SelectTrigger className="w-full sm:w-[180px]">
+            <SelectValue placeholder="Filter by role" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All Roles</SelectItem>
+            <SelectItem value="admin">Administrators</SelectItem>
+            <SelectItem value="member">Regular Members</SelectItem>
+            <SelectItem value="section_leader">Section Leaders</SelectItem>
+          </SelectContent>
+        </Select>
         
-        {canCreate && (
-          <Button onClick={handleCreateUserClick} data-testid="add-member-button">
-            <UserPlus className="h-4 w-4 mr-2" />
-            Add Member
-          </Button>
-        )}
+        <Select
+          value={statusFilter}
+          onValueChange={setStatusFilter}
+        >
+          <SelectTrigger className="w-full sm:w-[180px]">
+            <SelectValue placeholder="Filter by status" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All Statuses</SelectItem>
+            <SelectItem value="active">Active</SelectItem>
+            <SelectItem value="pending">Pending</SelectItem>
+            <SelectItem value="inactive">Inactive</SelectItem>
+          </SelectContent>
+        </Select>
       </div>
     </div>
   );
