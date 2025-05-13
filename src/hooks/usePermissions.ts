@@ -132,16 +132,8 @@ export function usePermissions(): UsePermissionsReturn {
     }
   };
   
-  // Log permissions for debugging
-  console.log('usePermissions hook:', {
-    isSuperAdmin,
-    isAdmin: isAdmin ? isAdmin() : false,
-    isAdminRole,
-    profileSuperAdmin: profile?.is_super_admin,
-    permissions
-  });
-  
-  return {
+  // Return the stable object with the functions to avoid recreating them on each render
+  const permissionsAPI: UsePermissionsReturn = {
     hasPermission,
     isSuperAdmin,
     isAdminRole,
@@ -149,4 +141,6 @@ export function usePermissions(): UsePermissionsReturn {
     setKevinJohnsonAsSuperAdmin,
     isUpdating
   };
+  
+  return permissionsAPI;
 }

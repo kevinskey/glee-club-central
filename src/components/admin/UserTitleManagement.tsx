@@ -39,7 +39,7 @@ export function UserTitleManagement({
   onSuccess
 }: UserTitleManagementProps) {
   const [selectedTitle, setSelectedTitle] = useState<UserTitle | null>(
-    user?.title as UserTitle || null
+    (user?.title as UserTitle) || null
   );
   const [isSuperAdmin, setIsSuperAdmin] = useState<boolean>(
     user?.is_super_admin || false
@@ -49,7 +49,7 @@ export function UserTitleManagement({
   // Update form state when user changes
   useEffect(() => {
     if (user) {
-      setSelectedTitle(user.title as UserTitle || 'General Member');
+      setSelectedTitle((user.title as UserTitle) || "General Member");
       setIsSuperAdmin(user.is_super_admin || false);
     }
   }, [user]);
