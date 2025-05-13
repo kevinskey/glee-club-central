@@ -12,7 +12,7 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Music, AlertCircle } from "lucide-react";
+import { Music, AlertCircle, Eye, EyeOff } from "lucide-react";
 import { supabase, cleanupAuthState } from "@/integrations/supabase/client";
 
 const loginSchema = z.object({
@@ -35,6 +35,7 @@ export default function LoginPage() {
   const [statusMessage, setStatusMessage] = useState<string | null>(
     location.state?.message || null
   );
+  const [showPassword, setShowPassword] = useState(false);
   
   // Initialize the form with useForm hook
   const form = useForm<LoginFormValues>({
@@ -80,6 +81,10 @@ export default function LoginPage() {
     } finally {
       setIsSubmitting(false);
     }
+  };
+
+  const togglePasswordVisibility = () => {
+    setShowPassword(!showPassword);
   };
 
   const onSubmit = async (values: LoginFormValues) => {
@@ -188,7 +193,21 @@ export default function LoginPage() {
                   <FormItem>
                     <FormLabel>Password</FormLabel>
                     <FormControl>
-                      <Input type="password" {...field} />
+                      <div className="relative">
+                        <Input 
+                          type={showPassword ? "text" : "password"} 
+                          placeholder="Enter your password"
+                          {...field} 
+                        />
+                        <button 
+                          type="button"
+                          onClick={togglePasswordVisibility}
+                          className="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700 focus:outline-none"
+                          tabIndex={-1} // Prevent tab focus for better accessibility
+                        >
+                          {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                        </button>
+                      </div>
                     </FormControl>
                     <FormMessage />
                   </FormItem>

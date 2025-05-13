@@ -156,6 +156,18 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       return { error };
     }
   };
+  
+  const resetPassword = async (email: string) => {
+    try {
+      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: `${window.location.origin}/update-password`,
+      });
+      
+      return { error };
+    } catch (error) {
+      return { error };
+    }
+  };
 
   const userPermissions = {
     can_manage_users: isAdmin(),
@@ -180,6 +192,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     refreshPermissions,
     isAdmin,
     updatePassword,
+    resetPassword,
   };
 
   return <AuthContext.Provider value={contextValue}>{children}</AuthContext.Provider>;

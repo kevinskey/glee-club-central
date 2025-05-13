@@ -17,6 +17,7 @@ import MediaLibraryPage from './pages/MediaLibraryPage';
 import MusicPage from './pages/dashboard/MusicPage';
 import SheetMusicPage from './pages/sheet-music/SheetMusicPage';
 import HomeLayout from './layouts/HomeLayout';
+import UpdatePasswordPage from './pages/UpdatePasswordPage';
 
 // Root layout component with outlet
 const RootLayout = () => {
@@ -52,6 +53,10 @@ const router = createBrowserRouter([
       {
         path: '/register',
         element: <RegisterPage />
+      },
+      {
+        path: '/reset-password',
+        element: <UpdatePasswordPage />
       },
       {
         path: '/dashboard',
