@@ -1,3 +1,4 @@
+
 import React, { useState, useCallback } from "react";
 import { User } from "@/hooks/useUserManagement";
 import { Navigate } from "react-router-dom";
@@ -144,6 +145,22 @@ export function MembersPageComponent({ useUserManagementHook }: MembersPageProps
     }
   }, [selectedUser, updateUser, refreshUsers]);
   
+  // Fixed: Handle user selection, ensuring we get a User object even if given an ID
+  const handleUserSelection = useCallback((userOrId: User | string) => {
+    // If we received a user ID string, find the user object
+    if (typeof userOrId === 'string') {
+      const userObj = members.find(m => m.id === userOrId);
+      if (userObj) {
+        setSelectedUser(userObj);
+      } else {
+        console.error("User not found with ID:", userOrId);
+      }
+    } else {
+      // We received a User object directly
+      setSelectedUser(userOrId);
+    }
+  }, [members]);
+  
   // Handle deleting a user
   const handleDeleteUser = useCallback((userId: string) => {
     const user = members.find(m => m.id === userId);
@@ -252,22 +269,22 @@ export function MembersPageComponent({ useUserManagementHook }: MembersPageProps
           <MembersList 
             members={members} 
             onEditUser={(user) => {
-              setSelectedUser(user);
+              handleUserSelection(user);
               setIsEditUserOpen(true);
             }}
             onDeleteUser={handleDeleteUser}
             onManagePermissions={(user) => {
-              setSelectedUser(user);
+              handleUserSelection(user);
               setIsPermissionsOpen(true);
             }}
             onChangeRole={(user) => {
-              setSelectedUser(user);
+              handleUserSelection(user);
               setIsManageRoleOpen(true);
             }}
             canEdit={hasAdminAccess}
             // Pass both onEditMember and onDeleteMember to maintain compatibility
             onEditMember={(user) => {
-              setSelectedUser(user);
+              handleUserSelection(user);
               setIsEditUserOpen(true);
             }}
             onDeleteMember={handleDeleteUser}
