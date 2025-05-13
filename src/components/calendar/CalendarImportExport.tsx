@@ -3,7 +3,7 @@ import React, { useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Download, Upload } from "lucide-react";
 import { toast } from "sonner";
-import { exportCalendarToIcal, importCalendarFromIcal } from "@/utils/supabase/calendar";
+import { exportCalendarToIcal, importCalendarFromIcal } from "@/services/googleCalendar";
 import { CalendarEvent } from "@/types/calendar";
 
 interface CalendarImportExportProps {

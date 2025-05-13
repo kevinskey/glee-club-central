@@ -1,3 +1,4 @@
+
 import React, { useState, useCallback, useMemo, useEffect } from "react";
 import { Footer } from "@/components/landing/Footer";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -241,7 +242,7 @@ export default function CalendarPage() {
             <CalendarEditTools 
               onAddEvent={handleOpenAddEvent}
               selectedEventId={selectedEvent?.id}
-              onEditSelected={handleEditEvent}
+              onEditSelected={() => setIsEditEventOpen(true)}
               onDeleteSelected={handleDeleteEvent}
               onResetCalendar={() => setIsResetDialogOpen(true)}
               onExportCalendar={() => toast.info("Scroll down to use calendar tools")}
@@ -294,7 +295,7 @@ export default function CalendarPage() {
                       <EventDetails 
                         event={selectedEvent} 
                         onDelete={handleDeleteEvent}
-                        onEdit={handleEditEvent}
+                        onEdit={() => setIsEditEventOpen(true)}
                         isAdmin={isSuperAdmin && (!selectedEvent.source || selectedEvent.source === 'local')} 
                       />
                     )}
@@ -340,7 +341,7 @@ export default function CalendarPage() {
             </DialogHeader>
             <EditEventForm 
               event={selectedEvent}
-              onUpdateEvent={handleEditEvent}  {/* Using the fixed handler here */}
+              onUpdateEvent={handleEditEvent}
               onCancel={() => setIsEditEventOpen(false)} 
             />
           </DialogContent>
