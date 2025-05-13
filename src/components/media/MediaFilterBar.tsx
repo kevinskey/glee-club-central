@@ -1,6 +1,6 @@
 
 import React from "react";
-import { FilterIcon, SortIcon, Calendar, Grid, List } from "lucide-react";
+import { FilterIcon, ArrowDownAZ, Calendar, Grid, List } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { MediaType } from "@/utils/mediaUtils";
 import { 
