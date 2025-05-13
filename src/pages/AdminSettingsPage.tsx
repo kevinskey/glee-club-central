@@ -1,4 +1,3 @@
-
 import React from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { Navigate } from "react-router-dom";
@@ -28,6 +27,7 @@ import {
   SelectTrigger,
   SelectValue
 } from "@/components/ui/select";
+import { TitlePermissionsManager } from "@/components/admin/TitlePermissionsManager";
 
 export default function AdminSettingsPage() {
   const { isAdmin, isLoading, isAuthenticated } = useAuth();
@@ -62,7 +62,7 @@ export default function AdminSettingsPage() {
           <TabsTrigger value="email">Email</TabsTrigger>
         </TabsList>
         
-        <TabsContent value="general" className="space-y-4">
+        <TabsContent value="general">
           <Card>
             <CardHeader>
               <CardTitle>General Settings</CardTitle>
@@ -117,7 +117,7 @@ export default function AdminSettingsPage() {
           </Card>
         </TabsContent>
         
-        <TabsContent value="appearance" className="space-y-4">
+        <TabsContent value="appearance">
           <Card>
             <CardHeader>
               <CardTitle>Appearance Settings</CardTitle>
@@ -166,7 +166,7 @@ export default function AdminSettingsPage() {
           </Card>
         </TabsContent>
         
-        <TabsContent value="notifications" className="space-y-4">
+        <TabsContent value="notifications">
           <Card>
             <CardHeader>
               <CardTitle>Notification Settings</CardTitle>
@@ -224,7 +224,9 @@ export default function AdminSettingsPage() {
           </Card>
         </TabsContent>
         
-        <TabsContent value="permissions" className="space-y-4">
+        <TabsContent value="permissions" className="space-y-6">
+          <TitlePermissionsManager />
+          
           <Card>
             <CardHeader>
               <CardTitle>Role Permissions</CardTitle>
@@ -291,7 +293,7 @@ export default function AdminSettingsPage() {
           </Card>
         </TabsContent>
         
-        <TabsContent value="email" className="space-y-4">
+        <TabsContent value="email">
           <Card>
             <CardHeader>
               <CardTitle>Email Configuration</CardTitle>

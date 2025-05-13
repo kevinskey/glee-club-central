@@ -20,10 +20,10 @@ import {
   SelectValue
 } from '@/components/ui/select';
 import { UserTitle } from '@/types/permissions';
-import { updateUserTitle, toggleSuperAdmin } from '@/utils/supabase/permissions';
 import { Switch } from '@/components/ui/switch';
 import { toast } from 'sonner';
-import { supabase } from '@/integrations/supabase/client';
+import { useTitlesManagement } from '@/hooks/useTitlesManagement';
+import { Spinner } from '@/components/ui/spinner';
 
 interface UserTitleManagementProps {
   user: User | null;
@@ -38,42 +38,23 @@ export function UserTitleManagement({
   setIsOpen,
   onSuccess
 }: UserTitleManagementProps) {
-  const [selectedTitle, setSelectedTitle] = useState<UserTitle | null>(
-    (user?.title as UserTitle) || null
-  );
-  const [isSuperAdmin, setIsSuperAdmin] = useState<boolean>(
-    user?.is_super_admin || false
-  );
+  const [selectedTitle, setSelectedTitle] = useState<string | null>(null);
+  const [isSuperAdmin, setIsSuperAdmin] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState(false);
+  
+  const { 
+    titles, 
+    isLoading: titlesLoading, 
+    updateUserTitle 
+  } = useTitlesManagement();
   
   // Update form state when user changes
   useEffect(() => {
     if (user) {
-      setSelectedTitle((user.title as UserTitle) || "General Member");
+      setSelectedTitle(user.title || "General Member");
       setIsSuperAdmin(user.is_super_admin || false);
     }
   }, [user]);
-
-  // Make sure this array includes all UserTitle values
-  const titles: UserTitle[] = [
-    'Super Admin',
-    'Treasurer',
-    'Librarian',
-    'Wardrobe Mistress',
-    'Secretary',
-    'President',
-    'Historian',
-    'PR Manager',
-    'Tour Manager',
-    'Stage Manager',
-    'Chaplain',
-    'Section Leader',
-    'Student Worker',
-    'General Member',
-    'Assistant Director',
-    'Director',
-    'Administrator'
-  ];
 
   const handleSave = async () => {
     if (!user || !selectedTitle) {
@@ -83,16 +64,17 @@ export function UserTitleManagement({
 
     setIsLoading(true);
     try {
-      // Update title using RPC function
+      // Update title using the dynamic function
       const titleUpdated = await updateUserTitle(user.id, selectedTitle);
       
-      // Update admin status directly
+      if (!titleUpdated) {
+        throw new Error("Failed to update title");
+      }
+      
+      // Update super admin status separately
       const { error } = await supabase
         .from('profiles')
-        .update({ 
-          is_super_admin: isSuperAdmin,
-          title: selectedTitle
-        })
+        .update({ is_super_admin: isSuperAdmin })
         .eq('id', user.id);
       
       if (error) {
@@ -125,23 +107,30 @@ export function UserTitleManagement({
             <Label htmlFor="title" className="text-right">
               Title
             </Label>
-            <Select 
-              value={selectedTitle || undefined}
-              onValueChange={(value) => setSelectedTitle(value as UserTitle)}
-            >
-              <SelectTrigger className="col-span-3">
-                <SelectValue placeholder="Select user title" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectGroup>
-                  {titles.map((title) => (
-                    <SelectItem key={title} value={title}>
-                      {title}
-                    </SelectItem>
-                  ))}
-                </SelectGroup>
-              </SelectContent>
-            </Select>
+            {titlesLoading ? (
+              <div className="col-span-3 flex items-center space-x-2">
+                <Spinner size="sm" />
+                <span className="text-sm text-muted-foreground">Loading titles...</span>
+              </div>
+            ) : (
+              <Select 
+                value={selectedTitle || undefined}
+                onValueChange={setSelectedTitle}
+              >
+                <SelectTrigger className="col-span-3">
+                  <SelectValue placeholder="Select user title" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectGroup>
+                    {titles.map((title) => (
+                      <SelectItem key={title.id} value={title.name}>
+                        {title.name}
+                      </SelectItem>
+                    ))}
+                  </SelectGroup>
+                </SelectContent>
+              </Select>
+            )}
           </div>
           
           <div className="grid grid-cols-4 items-center gap-4">

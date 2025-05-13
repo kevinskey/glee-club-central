@@ -339,6 +339,27 @@ export type Database = {
           },
         ]
       }
+      permissions: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          name: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          name: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          name?: string
+        }
+        Relationships: []
+      }
       practice_logs: {
         Row: {
           category: string
@@ -518,6 +539,45 @@ export type Database = {
         }
         Relationships: []
       }
+      title_permissions: {
+        Row: {
+          created_at: string
+          granted: boolean
+          id: string
+          permission_id: string
+          title_id: string
+        }
+        Insert: {
+          created_at?: string
+          granted?: boolean
+          id?: string
+          permission_id: string
+          title_id: string
+        }
+        Update: {
+          created_at?: string
+          granted?: boolean
+          id?: string
+          permission_id?: string
+          title_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "title_permissions_permission_id_fkey"
+            columns: ["permission_id"]
+            isOneToOne: false
+            referencedRelation: "permissions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "title_permissions_title_id_fkey"
+            columns: ["title_id"]
+            isOneToOne: false
+            referencedRelation: "user_titles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_google_tokens: {
         Row: {
           access_token: string
@@ -605,6 +665,30 @@ export type Database = {
         }
         Relationships: []
       }
+      user_titles: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          name: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          name: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          name?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
@@ -659,6 +743,13 @@ export type Database = {
           granted: boolean
         }[]
       }
+      get_user_permissions_dynamic: {
+        Args: { p_user_id: string }
+        Returns: {
+          permission: string
+          granted: boolean
+        }[]
+      }
       handle_user_role: {
         Args: { p_user_id: string; p_role: string }
         Returns: undefined
@@ -677,6 +768,10 @@ export type Database = {
       update_user_status: {
         Args: { p_user_id: string; p_status: string }
         Returns: undefined
+      }
+      update_user_title_dynamic: {
+        Args: { p_user_id: string; p_title: string }
+        Returns: boolean
       }
     }
     Enums: {

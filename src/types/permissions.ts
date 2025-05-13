@@ -15,21 +15,6 @@ export type PermissionName =
   | "can_post_announcements"
   | "can_manage_users";
 
-export type UserTitle = 
-  | "General Member" 
-  | "Section Leader"
-  | "Assistant Director" 
-  | "Director" 
-  | "Administrator" 
-  | "Super Admin"
-  | "Treasurer"
-  | "Librarian"
-  | "Wardrobe Mistress"
-  | "Secretary"
-  | "President"
-  | "Historian"
-  | "PR Manager"
-  | "Tour Manager"
-  | "Stage Manager"
-  | "Chaplain"
-  | "Student Worker";
+// Now UserTitle is just a string, no longer a union type
+// This allows for dynamic titles from the database
+export type UserTitle = string;

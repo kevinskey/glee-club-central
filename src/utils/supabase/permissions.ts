@@ -1,6 +1,5 @@
 
 import { supabase } from '@/integrations/supabase/client';
-import { UserTitle } from '@/types/permissions';
 
 export async function fetchUserPermissions(userId: string) {
   try {
@@ -17,6 +16,33 @@ export async function fetchUserPermissions(userId: string) {
     
     console.log('Fetching permissions for user:', userId);
     
+    // Try the new dynamic function first
+    try {
+      const { data: dynamicData, error: dynamicError } = await supabase.rpc(
+        'get_user_permissions_dynamic',
+        { p_user_id: userId }
+      );
+
+      if (dynamicError) {
+        console.warn("Dynamic permissions function failed, falling back to legacy method:", dynamicError);
+      } else {
+        // Convert response to permissions map
+        const permissionsMap: Record<string, boolean> = {};
+        if (Array.isArray(dynamicData)) {
+          dynamicData.forEach((item: any) => {
+            permissionsMap[item.permission] = item.granted;
+          });
+        }
+        
+        console.log("Dynamic permissions loaded:", Object.keys(permissionsMap).length);
+        return permissionsMap;
+      }
+    } catch (dynamicErr) {
+      console.warn("Error calling dynamic permissions function, falling back:", dynamicErr);
+    }
+    
+    // Fallback to legacy methods below
+    
     // First check if user is a super admin
     const { data: profileData } = await supabase
       .from('profiles')
@@ -30,20 +56,15 @@ export async function fetchUserPermissions(userId: string) {
       
       // Fetch all available permissions to grant them
       const { data: allPermissions } = await supabase
-        .from('role_permissions')
-        .select('permission');
+        .from('permissions')
+        .select('name');
         
       if (allPermissions) {
         // Create a Set to ensure unique permissions
-        const uniquePermissions = new Set();
         const permissionsMap: Record<string, boolean> = {};
         
         allPermissions.forEach((item) => {
-          // Only add each permission once
-          if (!uniquePermissions.has(item.permission)) {
-            uniquePermissions.add(item.permission);
-            permissionsMap[item.permission] = true;
-          }
+          permissionsMap[item.name] = true;
         });
         
         console.log("Granted permissions for super admin:", Object.keys(permissionsMap).length);
@@ -54,7 +75,7 @@ export async function fetchUserPermissions(userId: string) {
       return {};
     }
     
-    // For regular users, fetch their permissions based on role
+    // For regular users, try the legacy function
     try {
       const { data, error } = await supabase.rpc('get_user_permissions', {
         p_user_id: userId
@@ -143,12 +164,12 @@ export async function fetchUserPermissions(userId: string) {
 }
 
 /**
- * Updates a user's title in the profiles table
+ * Updates a user's title in the profiles table using the dynamic function
  * @param userId The ID of the user to update
  * @param title The new title to set for the user
  * @returns True if successful, false otherwise
  */
-export async function updateUserTitle(userId: string, title: UserTitle): Promise<boolean> {
+export async function updateUserTitle(userId: string, title: string): Promise<boolean> {
   try {
     if (!userId) {
       console.warn('No user ID provided to updateUserTitle');
@@ -161,6 +182,24 @@ export async function updateUserTitle(userId: string, title: UserTitle): Promise
       return false;
     }
     
+    // Try to use the dynamic function first
+    try {
+      const { data, error } = await supabase.rpc('update_user_title_dynamic', {
+        p_user_id: userId,
+        p_title: title
+      });
+      
+      if (error) {
+        console.warn("Error using dynamic title update function, falling back:", error);
+      } else if (data === true) {
+        console.log(`User ${userId} title updated to ${title} using dynamic function`);
+        return true;
+      }
+    } catch (dynamicErr) {
+      console.warn("Dynamic title update function failed, falling back:", dynamicErr);
+    }
+    
+    // Fallback to direct update
     const { error } = await supabase
       .from('profiles')
       .update({ title })
@@ -171,7 +210,7 @@ export async function updateUserTitle(userId: string, title: UserTitle): Promise
       return false;
     }
     
-    console.log(`User ${userId} title updated to ${title}`);
+    console.log(`User ${userId} title updated to ${title} using direct update`);
     return true;
   } catch (error) {
     console.error("Error updating user title:", error);

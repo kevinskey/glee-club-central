@@ -1,4 +1,3 @@
-
 import { useAuth } from '@/contexts/AuthContext';
 import { useRolePermissions } from '@/contexts/RolePermissionContext';
 import { useState } from 'react';
@@ -45,8 +44,8 @@ export function usePermissions(): UsePermissionsReturn {
   
   // Check if the user has an admin-like role
   const isAdminRole = profile?.role === 'admin' || 
-                      profile?.role === 'administrator' ||
-                      profile?.role === 'director';
+                     profile?.role === 'administrator' ||
+                     profile?.role === 'director';
   
   // Development function to promote current user to super admin
   const promoteToSuperAdmin = async (): Promise<boolean> => {
@@ -133,7 +132,6 @@ export function usePermissions(): UsePermissionsReturn {
     }
   };
   
-  // Return the object directly to fix the deep instantiation issue
   return {
     hasPermission,
     isSuperAdmin,

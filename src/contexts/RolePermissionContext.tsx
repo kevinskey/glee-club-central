@@ -1,7 +1,7 @@
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { useAuth } from './AuthContext';
-import { fetchUserPermissions } from '@/utils/supabase/permissions';
+import { supabase } from '@/integrations/supabase/client';
 
 interface PermissionsState {
   isLoading: boolean;
@@ -61,15 +61,82 @@ export const RolePermissionProvider: React.FC<{ children: React.ReactNode }> = (
       }
       
       console.log("Loading permissions for user:", user.id);
-      const userPermissions = await fetchUserPermissions(user.id);
-      console.log("Loaded permissions:", userPermissions);
       
-      setPermissions(userPermissions || {});
+      // Use the new dynamic function to get permissions
+      const { data, error } = await supabase
+        .rpc('get_user_permissions_dynamic', {
+          p_user_id: user.id
+        });
+      
+      if (error) {
+        console.error("Error loading permissions:", error);
+        setError("Failed to load permissions");
+        
+        // Fall back to the old method if the new function fails
+        const oldPermissions = await fetchLegacyPermissions(user.id);
+        setPermissions(oldPermissions || {});
+        return;
+      }
+      
+      console.log("Loaded dynamic permissions:", data);
+      
+      if (data) {
+        // Convert array of permission objects to a simple map
+        const permissionsMap: Record<string, boolean> = {};
+        
+        data.forEach((item: { permission: string; granted: boolean }) => {
+          permissionsMap[item.permission] = item.granted;
+        });
+        
+        setPermissions(permissionsMap);
+      } else {
+        setPermissions({});
+      }
     } catch (err) {
       console.error("Error loading permissions:", err);
       setError("Failed to load permissions");
+      setPermissions({});
     } finally {
       setIsLoading(false);
+    }
+  };
+  
+  // Legacy permission loading function as fallback
+  const fetchLegacyPermissions = async (userId: string) => {
+    try {
+      // Use the old function to get permissions
+      const { data, error } = await supabase.rpc('get_user_permissions', {
+        p_user_id: userId
+      });
+
+      if (error) {
+        console.error("Error fetching legacy permissions:", error);
+        return null;
+      }
+
+      if (!data || data.length === 0) {
+        console.warn("No legacy permissions returned");
+        return {};
+      }
+
+      // Convert array of permission objects to a simple map
+      const permissionsMap: Record<string, boolean> = {};
+      
+      if (Array.isArray(data)) {
+        data.forEach((item: any) => {
+          if (item && typeof item === 'object' && 'permission' in item && 'granted' in item) {
+            permissionsMap[item.permission] = item.granted;
+          } else if (typeof item === 'string') {
+            permissionsMap[item] = true;
+          }
+        });
+      }
+
+      console.log("Legacy permissions loaded:", Object.keys(permissionsMap).length);
+      return permissionsMap;
+    } catch (error) {
+      console.error("Error in legacy permissions:", error);
+      return {};
     }
   };
 
@@ -83,12 +150,12 @@ export const RolePermissionProvider: React.FC<{ children: React.ReactNode }> = (
     }
   }, [user?.id]);
 
-  // Reload permissions when profile role changes
+  // Reload permissions when profile role or title changes
   useEffect(() => {
-    if (user?.id && profile?.role) {
+    if (user?.id && (profile?.role || profile?.title)) {
       loadPermissions();
     }
-  }, [profile?.role]);
+  }, [profile?.role, profile?.title]);
 
   const refreshPermissions = async () => {
     if (user?.id) {
