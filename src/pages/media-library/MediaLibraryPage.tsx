@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { PageHeader } from "@/components/ui/page-header";
 import { FilesIcon, Search, FilterIcon, Grid, List } from "lucide-react";
@@ -94,7 +95,6 @@ export default function MediaLibraryPage({ isAdminView = false }: MediaLibraryPa
       {!isAdminView && (
         <PageHeader
           title="Media Library"
-          description="Access and manage all your media files in one place"
           icon={<FilesIcon className="h-6 w-6" />}
         />
       )}

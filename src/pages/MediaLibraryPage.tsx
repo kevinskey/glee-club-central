@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { PageHeader } from "@/components/ui/page-header";
 import { Library, FileText, Image, Music, Video, Search, Filter, Upload } from "lucide-react";
@@ -50,7 +49,6 @@ const MediaLibraryPage: React.FC = () => {
     <div className="container mx-auto px-4 py-6">
       <PageHeader
         title="Media Library"
-        description="Manage your media files for sheet music, audio, images, and videos"
         icon={<Library className="h-6 w-6" />}
         actions={
           <Button className="bg-glee-purple hover:bg-glee-purple/90">
