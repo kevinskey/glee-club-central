@@ -1,6 +1,7 @@
 
-import React from "react";
+import React, { useState } from "react";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Skeleton } from "@/components/ui/skeleton";
 
 interface VideoPlayerProps {
   videoId: string;
@@ -9,10 +10,21 @@ interface VideoPlayerProps {
 }
 
 export function VideoPlayer({ videoId, title, description }: VideoPlayerProps) {
+  const [isLoading, setIsLoading] = useState(true);
+  const [loadError, setLoadError] = useState(false);
+  
   // Construct a proper YouTube embed URL with additional parameters
-  // Use the current window origin only in browser environments
   const origin = typeof window !== 'undefined' ? window.location.origin : '';
   const youtubeEmbedUrl = `https://www.youtube.com/embed/${videoId}?autoplay=0&origin=${origin}&rel=0`;
+  
+  const handleIframeLoad = () => {
+    setIsLoading(false);
+  };
+  
+  const handleIframeError = () => {
+    setIsLoading(false);
+    setLoadError(true);
+  };
   
   return (
     <Card className="overflow-hidden">
@@ -22,6 +34,12 @@ export function VideoPlayer({ videoId, title, description }: VideoPlayerProps) {
       </CardHeader>
       <CardContent className="p-0">
         <div className="relative aspect-video w-full overflow-hidden">
+          {isLoading && (
+            <div className="absolute inset-0 bg-muted flex items-center justify-center">
+              <Skeleton className="h-full w-full" />
+            </div>
+          )}
+          
           <iframe
             src={youtubeEmbedUrl}
             title={title}
@@ -29,7 +47,15 @@ export function VideoPlayer({ videoId, title, description }: VideoPlayerProps) {
             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
             allowFullScreen
             className="absolute inset-0 h-full w-full"
+            onLoad={handleIframeLoad}
+            onError={handleIframeError}
           ></iframe>
+          
+          {loadError && (
+            <div className="absolute inset-0 bg-muted/80 flex items-center justify-center">
+              <p className="text-muted-foreground">Failed to load video</p>
+            </div>
+          )}
         </div>
       </CardContent>
       {description && (

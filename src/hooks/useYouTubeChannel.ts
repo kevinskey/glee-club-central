@@ -2,6 +2,7 @@
 import { useState, useEffect } from 'react';
 import { YouTubeVideo } from '@/types/youtube';
 import { useYouTubeData } from './useYouTubeData';
+import { toast } from 'sonner';
 
 interface UseYouTubeChannelProps {
   channelId?: string;
@@ -12,19 +13,22 @@ export const useYouTubeChannel = ({
   channelId = 'UCk1x0JI7pM6YaBbtP1pKgJw', // Default Spelman College Glee Club channel
   maxResults = 3 
 }: UseYouTubeChannelProps = {}) => {
-  // Currently using mock data from useYouTubeData
-  // In a production app, this would call a real YouTube API
   const { videos, loading, error } = useYouTubeData();
   const [channelVideos, setChannelVideos] = useState<YouTubeVideo[]>([]);
   
   useEffect(() => {
-    // For now, we're just filtering the mock data to simulate getting videos from a specific channel
-    // In production, you would make an API call to YouTube Data API with the channelId
     if (videos && videos.length > 0) {
-      const filtered = videos
-        .filter(video => video.channelTitle.includes('Spelman'))
-        .slice(0, maxResults);
-      setChannelVideos(filtered);
+      try {
+        // Filter videos by channel if needed, then limit by maxResults
+        const filtered = videos
+          .filter(video => !channelId || video.channelTitle.toLowerCase().includes('spelman'))
+          .slice(0, maxResults);
+          
+        setChannelVideos(filtered);
+      } catch (err) {
+        console.error("Error filtering channel videos:", err);
+        toast.error("Failed to filter channel videos");
+      }
     }
   }, [videos, channelId, maxResults]);
   
