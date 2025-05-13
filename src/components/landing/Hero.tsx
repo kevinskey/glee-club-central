@@ -10,7 +10,7 @@ export function Hero() {
     <section className="w-full py-16 md:py-24 bg-gradient-to-br from-glee-spelman to-glee-purple/80 text-white relative overflow-hidden">
       <div className="absolute inset-0 bg-grid-pattern opacity-10" />
       <div className="container px-4 md:px-6 relative z-10">
-        <div className="flex flex-col items-center md:items-start space-y-6 text-center md:text-left">
+        <div className="flex flex-col items-center space-y-6 text-center">
           <HeroContent />
           
           <div className="flex flex-wrap gap-4 mt-6">
