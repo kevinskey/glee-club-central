@@ -4,8 +4,6 @@ import { Outlet, useLocation } from "react-router-dom";
 import { Toaster } from "sonner";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { MobileBottomNav } from "@/components/layout/MobileBottomNav";
-import { Header } from "@/components/landing/Header";
-import { Footer } from "@/components/landing/Footer";
 
 interface HomeLayoutProps {
   hideHeader?: boolean;
@@ -19,21 +17,13 @@ const HomeLayout: React.FC<HomeLayoutProps> = ({ hideHeader = false, children })
   // Routes where we want to show the bottom navigation
   const showMobileBottomNav = ["/", "/about", "/videos", "/contact", "/press-kit", "/privacy", "/social", "/recordings", "/recordings/submit"].includes(location.pathname);
   
-  // Don't show header on login/auth pages based on prop or path check
-  const isAuthPage = location.pathname.startsWith('/auth/');
-  const shouldHideHeader = hideHeader || isAuthPage;
-  
   return (
     <>
       <Toaster />
       <div className="min-h-screen flex flex-col bg-background w-full">
-        {!shouldHideHeader && <Header initialShowNewsFeed={location.pathname === '/'} />}
-        
         <div className={`flex-1 ${isMobile && showMobileBottomNav ? "pb-20" : "pb-6"}`}>
           {children || <Outlet />}
         </div>
-        
-        <Footer />
         
         {/* Mobile bottom navigation */}
         {isMobile && showMobileBottomNav && <MobileBottomNav />}

@@ -1,6 +1,7 @@
 import { createBrowserRouter, Navigate } from 'react-router-dom';
 import { Suspense, lazy } from 'react';
 
+import MainLayout from './layouts/MainLayout';
 import DashboardLayout from './layouts/DashboardLayout';
 import ProfilePage from './pages/ProfilePage';
 import LandingPage from './pages/LandingPage';
@@ -14,6 +15,9 @@ import NotFoundPage from './pages/NotFoundPage';
 import RecordingsPage from './pages/recordings/RecordingsPage';
 import AdminDashboard from './pages/admin/AdminDashboard';
 import PressKitPage from './pages/PressKitPage';
+import PrivacyPolicyPage from './pages/PrivacyPolicyPage';
+import TermsOfServicePage from './pages/TermsOfServicePage';
+import YoutubeVideosPage from './pages/YoutubeVideosPage';
 
 // Import auth related pages
 import LoginPage from './pages/auth/LoginPage';
@@ -39,7 +43,7 @@ const ContactPage = lazy(() => import('./pages/ContactPage'));
 export const router = createBrowserRouter([
   {
     path: '/',
-    element: <HomeLayout />,
+    element: <MainLayout />,
     errorElement: <NotFoundPage />,
     children: [
       {
@@ -61,6 +65,18 @@ export const router = createBrowserRouter([
       {
         path: 'press-kit',
         element: <PressKitPage />
+      },
+      {
+        path: 'videos',
+        element: <YoutubeVideosPage />
+      },
+      {
+        path: 'privacy',
+        element: <PrivacyPolicyPage />
+      },
+      {
+        path: 'terms',
+        element: <TermsOfServicePage />
       }
     ]
   },
@@ -92,7 +108,13 @@ export const router = createBrowserRouter([
   },
   {
     path: '/login',
-    element: <HomeLayout hideHeader={false}><LoginPage /></HomeLayout>
+    element: <MainLayout />,
+    children: [
+      {
+        index: true,
+        element: <LoginPage />
+      }
+    ]
   },
   {
     path: '/dashboard',

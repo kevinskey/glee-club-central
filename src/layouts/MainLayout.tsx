@@ -1,18 +1,17 @@
 
 import React from 'react';
 import { Outlet } from 'react-router-dom';
+import { Header } from "@/components/landing/Header";
+import { Footer } from "@/components/landing/Footer";
 
 export const MainLayout = () => {
   return (
     <div className="flex flex-col min-h-screen">
+      <Header initialShowNewsFeed={false} />
       <main className="flex-1">
         <Outlet />
       </main>
-      <footer className="bg-background border-t">
-        <div className="container mx-auto py-4 text-center text-sm text-muted-foreground">
-          © {new Date().getFullYear()} Spelman College Glee Club
-        </div>
-      </footer>
+      <Footer />
     </div>
   );
 };
