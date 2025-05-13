@@ -31,11 +31,11 @@ export const EventList = React.memo(({
 
   return (
     <div className="mb-4">
-      <h2 className={`${isMobile ? 'text-lg' : 'text-xl'} font-semibold mb-2 md:mb-3 text-gray-800 dark:text-gray-800`}>
+      <h2 className={`${isMobile ? 'text-lg' : 'text-xl'} font-semibold mb-2 md:mb-3 text-gray-800 dark:text-white`}>
         Events on {format(date, isMobile ? 'MMM d, yyyy' : 'MMMM d, yyyy')}
       </h2>
       {eventsOnSelectedDate.length === 0 ? (
-        <p className="text-sm md:text-base text-gray-700 dark:text-gray-700">No events scheduled for this date.</p>
+        <p className="text-sm md:text-base text-gray-500 dark:text-gray-400">No events scheduled for this date.</p>
       ) : (
         <div className="space-y-3 md:space-y-4 mt-3 md:mt-4">
           {eventsOnSelectedDate.map((event) => (

@@ -1,3 +1,4 @@
+
 import React, { useState, useCallback, useMemo, useEffect } from "react";
 import { Footer } from "@/components/landing/Footer";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -8,6 +9,7 @@ import { toast } from "sonner";
 import { usePermissions } from "@/hooks/usePermissions";
 import { useLocation, useSearchParams } from "react-router-dom";
 import { EventFormValues } from "@/components/calendar/EventFormFields";
+import { Header } from "@/components/landing/Header";
 
 // Components
 import { CalendarContainer } from "@/components/calendar/CalendarContainer";
@@ -171,20 +173,22 @@ export default function CalendarPage() {
   
   return (
     <div className="flex min-h-screen flex-col">
-      {/* Removed the duplicate Header component here */}
+      <Header initialShowNewsFeed={false} />
       <main className="flex-1 bg-gray-50 dark:bg-gray-900">
         <div className="container py-8 sm:py-10 md:py-12">
           <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
             <CalendarPageHeader onAddEventClick={handleOpenAddEvent} />
             
             {/* Only show Google Calendar toggle for super admins */}
-            <GoogleCalendarToggle 
-              useGoogleCalendar={useGoogleCalendar}
-              toggleGoogleCalendar={toggleGoogleCalendar} 
-              googleCalendarError={googleCalendarError}
-              daysAhead={daysAhead}
-              onDaysAheadChange={setDaysAhead}
-            />
+            {isSuperAdmin && (
+              <GoogleCalendarToggle 
+                useGoogleCalendar={useGoogleCalendar}
+                toggleGoogleCalendar={toggleGoogleCalendar} 
+                googleCalendarError={googleCalendarError}
+                daysAhead={daysAhead}
+                onDaysAheadChange={setDaysAhead}
+              />
+            )}
           </div>
           
           <div className="flex flex-col lg:flex-row gap-8 h-full">
@@ -264,20 +268,4 @@ export default function CalendarPage() {
       )}
     </div>
   );
-}
-
-// Needed to prevent TypeScript error - not included in original
-function getEventTypeColor(type: string) {
-  switch (type) {
-    case "concert":
-      return "bg-glee-purple hover:bg-glee-purple/90";
-    case "rehearsal":
-      return "bg-blue-500 hover:bg-blue-500/90";
-    case "tour":
-      return "bg-green-500 hover:bg-green-500/90";
-    case "special":
-      return "bg-amber-500 hover:bg-amber-500/90";
-    default:
-      return "bg-gray-500 hover:bg-gray-500/90";
-  }
 }

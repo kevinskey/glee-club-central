@@ -3,7 +3,7 @@ import React, { useState, useEffect, useRef } from "react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Logo } from "@/components/landing/header/Logo";
 import { MemberPortalDropdown } from "@/components/landing/header/MemberPortalDropdown";
-import { Clock, Menu, X, LogIn } from "lucide-react";
+import { Clock, Menu, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription } from "@/components/ui/dialog";
 import { EnhancedMetronome } from "@/components/ui/enhanced-metronome";
@@ -71,10 +71,6 @@ export function Header({ initialShowNewsFeed = true }: HeaderProps) {
     setMetronomeOpen(true);
   };
 
-  const handleLoginClick = () => {
-    navigate("/login");
-  };
-
   return (
     <header className="sticky top-0 z-50 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container px-2 flex h-16 items-center justify-between">
@@ -83,20 +79,8 @@ export function Header({ initialShowNewsFeed = true }: HeaderProps) {
           <Logo />
         </div>
         
-        {/* Right side: Login, Metronome, theme toggle, and navigation dropdown */}
+        {/* Right side: Metronome, theme toggle, and navigation dropdown */}
         <div className="flex items-center gap-3">
-          {/* Login Button */}
-          {!isAuthenticated && (
-            <Button
-              variant="spelman"
-              size="sm"
-              className="h-9 flex items-center gap-1 mr-1"
-              onClick={handleLoginClick}
-            >
-              <LogIn className="h-4 w-4 mr-1" /> Login
-            </Button>
-          )}
-          
           {/* Metronome Icon */}
           <Dialog open={metronomeOpen} onOpenChange={setMetronomeOpen}>
             <DialogTrigger asChild>
