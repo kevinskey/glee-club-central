@@ -32,7 +32,8 @@ CREATE TYPE public.user_title AS ENUM (
   'Chaplain',
   'Section Leader',
   'Student Worker',
-  'General Member'
+  'General Member',
+  'Guest User'
 );
 
 -- Create user roles table
@@ -50,7 +51,8 @@ VALUES
   ('Librarian', 'Manages sheet music library'),
   ('Section Leader', 'Leads voice section and helps with sectional rehearsals'),
   ('Student Worker', 'Student with limited admin privileges'),
-  ('General Member', 'Regular member with basic access')
+  ('General Member', 'Regular member with basic access'),
+  ('Guest User', 'Limited access for guests')
 ON CONFLICT (title) DO NOTHING;
 
 -- Add title field to profiles
