@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useRef, useCallback, MutableRefObject } from "react";
 
 export type TimeSignature = "2/4" | "3/4" | "4/4" | "6/8";
@@ -72,108 +71,58 @@ export function useMetronomeEngine({
         gainNode.current.gain.value = volume;
         gainNode.current.connect(audioContext.current.destination);
         
-        // Create sound buffers programmatically instead of using base64
-        const createSoundBuffer = (type: SoundType) => {
-          const context = audioContext.current;
-          if (!context) return null;
-
-          // Create click sound
-          const createClickBuffer = () => {
-            const sampleRate = context.sampleRate;
-            const duration = 0.05; // 50ms
-            const bufferSize = Math.floor(sampleRate * duration);
-            const buffer = context.createBuffer(1, bufferSize, sampleRate);
-            const data = buffer.getChannelData(0);
-            
-            // Create a short sharp burst
-            for (let i = 0; i < bufferSize; i++) {
-              // Quick decay
-              data[i] = (1 - i / bufferSize) * 
-                        (Math.random() * 0.3 - 0.15 + // Add noise
-                        (i < 0.01 * sampleRate ? 0.8 : 0.2)); // Initial spike
-            }
-            
-            return buffer;
-          };
-          
-          // Create beep sound
-          const createBeepBuffer = () => {
-            const sampleRate = context.sampleRate;
-            const duration = 0.1; // 100ms
-            const bufferSize = Math.floor(sampleRate * duration);
-            const buffer = context.createBuffer(1, bufferSize, sampleRate);
-            const data = buffer.getChannelData(0);
-            
-            // Create a sine wave
-            for (let i = 0; i < bufferSize; i++) {
-              // Frequency 880Hz for beep
-              data[i] = Math.sin(2 * Math.PI * 880 * i / sampleRate) * 
-                        // Add envelope for smoother sound
-                        (i < 0.01 * sampleRate ? i / (0.01 * sampleRate) : 
-                         i > (duration - 0.01) * sampleRate ? (bufferSize - i) / (0.01 * sampleRate) : 1);
-            }
-            
-            return buffer;
-          };
-          
-          // Create woodblock sound
-          const createWoodblockBuffer = () => {
-            const sampleRate = context.sampleRate;
-            const duration = 0.15;
-            const bufferSize = Math.floor(sampleRate * duration);
-            const buffer = context.createBuffer(1, bufferSize, sampleRate);
-            const data = buffer.getChannelData(0);
-            
-            // Frequencies for a woodblock-like sound
-            const frequencies = [1200, 800];
-            
-            for (let i = 0; i < bufferSize; i++) {
-              const t = i / sampleRate;
-              let sample = 0;
-              
-              // Mix frequencies
-              for (const freq of frequencies) {
-                sample += Math.sin(2 * Math.PI * freq * t) * Math.exp(-15 * t);
-              }
-              
-              // Add envelope
-              data[i] = sample * 0.5;
-            }
-            
-            return buffer;
-          };
-          
-          // Select the appropriate sound type
-          switch (type) {
-            case "beep":
-              return createBeepBuffer();
-            case "woodblock":
-              return createWoodblockBuffer();
-            case "click":
-            default:
-              return createClickBuffer();
-          }
-        };
-        
-        // Create audio buffers instead of trying to decode base64
+        // Load the audio files based on sound type
         const loadSounds = async () => {
           try {
-            // Generate sounds directly instead of loading from files
-            const normalBufferResult = createSoundBuffer(soundType);
-            const accentBufferResult = createSoundBuffer(soundType);
+            // Determine which sound files to load
+            let normalSoundPath, accentSoundPath;
             
-            if (!normalBufferResult || !accentBufferResult) {
-              throw new Error("Failed to create audio buffers");
+            switch (soundType) {
+              case "beep":
+                normalSoundPath = "/sounds/beep.wav";
+                accentSoundPath = "/sounds/beep.wav"; // Same sound for accent and normal
+                break;
+              case "woodblock":
+                normalSoundPath = "/sounds/woodblock.wav";
+                accentSoundPath = "/sounds/woodblock.wav"; // Same sound for accent and normal
+                break;
+              case "click":
+              default:
+                normalSoundPath = "/sounds/click.wav";
+                accentSoundPath = "/sounds/click.wav"; // Same sound for accent and normal
+                break;
+            }
+
+            // Fetch and decode the audio files
+            const [normalResponse, accentResponse] = await Promise.all([
+              fetch(normalSoundPath),
+              fetch(accentSoundPath),
+            ]);
+            
+            if (!normalResponse.ok || !accentResponse.ok) {
+              throw new Error("Failed to load audio files");
             }
             
-            normalBuffer.current = normalBufferResult;
-            accentBuffer.current = accentBufferResult;
+            const [normalArrayBuffer, accentArrayBuffer] = await Promise.all([
+              normalResponse.arrayBuffer(),
+              accentResponse.arrayBuffer(),
+            ]);
             
-            setAudioLoaded(true);
-            console.log("✅ Metronome: Audio buffers created successfully");
+            if (audioContext.current) {
+              const [normalBufferResult, accentBufferResult] = await Promise.all([
+                audioContext.current.decodeAudioData(normalArrayBuffer),
+                audioContext.current.decodeAudioData(accentArrayBuffer),
+              ]);
+              
+              normalBuffer.current = normalBufferResult;
+              accentBuffer.current = accentBufferResult;
+              
+              setAudioLoaded(true);
+              console.log("✅ Metronome: Audio buffers loaded successfully");
+            }
           } catch (error) {
-            console.error("Failed to create metronome sounds:", error);
-            setAudioError("Failed to load audio. Please try again.");
+            console.error("Failed to load metronome sounds:", error);
+            setAudioError("Failed to load audio files. Please check your connection and refresh.");
             setAudioLoaded(false);
           }
         };
@@ -191,7 +140,7 @@ export function useMetronomeEngine({
         clearTimeout(timerID.current);
       }
     };
-  }, [soundType, audioContextRef]);
+  }, [soundType, audioContextRef, volume]);
   
   // Handle volume changes
   useEffect(() => {
