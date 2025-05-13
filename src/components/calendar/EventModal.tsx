@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -53,7 +52,7 @@ const formSchema = z.object({
 
 interface EventModalProps {
   onClose: () => void;
-  onSave: (event: any) => Promise<void>;
+  onSave: (event: any) => Promise<void | boolean>; // Updated to accept both void and boolean returns
   initialDate: Date | null;
   defaultValues?: Partial<CalendarEvent>;
   mode?: "create" | "edit";
