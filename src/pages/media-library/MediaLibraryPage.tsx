@@ -29,7 +29,7 @@ export default function MediaLibraryPage({ isAdminView = false }: MediaLibraryPa
   const canDeleteMedia = isAdminView || isSuperAdmin || isAdminRole || hasPermission('can_delete_media');
   
   const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
-  const [viewMode, setViewMode] = useState<"grid" | "list">("list"); // Default to list view
+  const [viewMode, setViewMode] = useState<"grid" | "list">("grid"); // Default to grid view for more compact display
   const isMobile = useIsMobile();
 
   const { 
@@ -90,7 +90,7 @@ export default function MediaLibraryPage({ isAdminView = false }: MediaLibraryPa
   }
 
   return (
-    <div className="space-y-4 md:space-y-6">
+    <div className="space-y-3 md:space-y-4">
       {!isAdminView && (
         <PageHeader
           title="Media Library"
@@ -104,8 +104,8 @@ export default function MediaLibraryPage({ isAdminView = false }: MediaLibraryPa
       {/* Upload Button */}
       <div className="flex justify-between items-center">
         <UploadMediaButton 
-          onClick={openUploadModal} 
-          canUpload={canUploadMedia}
+          onClick={() => setIsUploadModalOpen(true)} 
+          canUpload={true}
         />
         
         {/* View toggle buttons */}
@@ -138,7 +138,7 @@ export default function MediaLibraryPage({ isAdminView = false }: MediaLibraryPa
             placeholder="Search media..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-10 pr-3 py-2 rounded-md border border-input bg-background"
+            className="w-full pl-10 pr-3 py-2 rounded-md border border-input bg-background text-sm"
           />
         </div>
         
@@ -174,8 +174,8 @@ export default function MediaLibraryPage({ isAdminView = false }: MediaLibraryPa
       <MediaLoadingState 
         isLoading={isLoading}
         isEmpty={filteredMediaFiles.length === 0}
-        canUpload={canUploadMedia}
-        onUploadClick={openUploadModal}
+        canUpload={true}
+        onUploadClick={() => setIsUploadModalOpen(true)}
       />
       
       {/* Media Files Display */}
@@ -184,16 +184,16 @@ export default function MediaLibraryPage({ isAdminView = false }: MediaLibraryPa
           {viewMode === "grid" ? (
             <MediaGridView 
               mediaFiles={filteredMediaFiles} 
-              canEdit={canEditMedia}
-              canDelete={canDeleteMedia}
-              onDelete={handleDeleteMedia}
+              canEdit={true}
+              canDelete={true}
+              onDelete={deleteMediaItem}
             />
           ) : (
             <MediaListView 
               mediaFiles={filteredMediaFiles} 
-              canEdit={canEditMedia}
-              canDelete={canDeleteMedia}
-              onDelete={handleDeleteMedia}
+              canEdit={true}
+              canDelete={true}
+              onDelete={deleteMediaItem}
             />
           )}
         </>
@@ -201,7 +201,10 @@ export default function MediaLibraryPage({ isAdminView = false }: MediaLibraryPa
       
       {/* Upload Modal */}
       <UploadMediaModal 
-        onUploadComplete={handleUploadComplete}
+        onUploadComplete={() => {
+          fetchAllMedia();
+          setIsUploadModalOpen(false);
+        }}
         open={isUploadModalOpen}
         onOpenChange={setIsUploadModalOpen}
       />

@@ -1,140 +1,137 @@
 
-import React from "react";
-import { MediaFile } from "@/types/media";
-import { formatFileSize, getFileTypeIcon } from "@/utils/file-utils";
-import { Button } from "@/components/ui/button";
-import { Eye, Download, Pencil, Trash2 } from "lucide-react";
-import { formatDistanceToNow } from "date-fns";
-import { Badge } from "@/components/ui/badge";
-import { getMediaType } from "@/utils/mediaUtils";
+import React from 'react';
+import { Button } from '@/components/ui/button';
+import { MediaFile } from '@/types/media';
+import { Download, Eye, Trash, FileText, Music, Image, Video, File } from 'lucide-react';
+import { getMediaType, getMediaTypeLabel } from '@/utils/mediaUtils';
+import { formatFileSize } from '@/utils/file-utils';
+import { formatDistanceToNow } from 'date-fns';
+import { cn } from '@/lib/utils';
 
 interface MediaListViewProps {
   mediaFiles: MediaFile[];
   canEdit?: boolean;
   canDelete?: boolean;
-  onDelete?: (mediaId: string) => void;
+  onDelete?: (id: string) => void;
 }
 
 export function MediaListView({ 
   mediaFiles, 
-  canEdit = false,
+  canEdit = false, 
   canDelete = false,
-  onDelete 
+  onDelete
 }: MediaListViewProps) {
-  const handleDelete = (id: string, e: React.MouseEvent) => {
-    e.stopPropagation();
-    e.preventDefault();
-    
-    if (onDelete && window.confirm("Are you sure you want to delete this media file?")) {
-      onDelete(id);
+  const getMediaIcon = (fileType: string) => {
+    const type = getMediaType(fileType);
+    switch (type) {
+      case 'pdf':
+        return <FileText className="h-4 w-4 text-muted-foreground" />;
+      case 'audio':
+        return <Music className="h-4 w-4 text-muted-foreground" />;
+      case 'image':
+        return <Image className="h-4 w-4 text-muted-foreground" />;
+      case 'video':
+        return <Video className="h-4 w-4 text-muted-foreground" />;
+      default:
+        return <File className="h-4 w-4 text-muted-foreground" />;
     }
   };
-  
+
+  const handleDownload = (url: string, fileName: string) => {
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = fileName;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
+  const handleViewMedia = (file: MediaFile) => {
+    window.open(file.file_url, '_blank');
+  };
+
   return (
-    <div className="space-y-2">
-      {mediaFiles.map((file) => {
-        const FileTypeIcon = getFileTypeIcon(file.file_type);
-        const fileType = getMediaType(file.file_type);
-        const formattedDate = file.created_at 
-          ? formatDistanceToNow(new Date(file.created_at), { addSuffix: true })
-          : '';
-        
-        return (
-          <div 
-            key={file.id} 
-            className="flex items-center p-2 border rounded-md hover:bg-muted/20 transition-colors"
-            onClick={() => window.open(file.file_url, "_blank")}
-          >
-            {/* Icon or thumbnail */}
-            <div className="flex-shrink-0 w-12 h-12 flex items-center justify-center bg-muted rounded mr-3">
-              {fileType === 'image' ? (
-                <img 
-                  src={file.file_url} 
-                  alt={file.title || ''} 
-                  className="w-12 h-12 object-cover rounded"
-                />
-              ) : (
-                <FileTypeIcon className="h-6 w-6 text-muted-foreground" />
-              )}
-            </div>
-            
-            {/* File info */}
-            <div className="flex-grow min-w-0">
-              <h3 className="text-sm font-medium truncate">{file.title}</h3>
-              <div className="flex items-center text-xs text-muted-foreground">
-                <span className="truncate">{formattedDate} • {formatFileSize(file.size || 0)}</span>
-              </div>
-              {file.category && (
-                <Badge variant="outline" className="mt-1 text-xs">
-                  {file.category}
-                </Badge>
-              )}
-            </div>
-            
-            {/* Actions */}
-            <div className="flex-shrink-0 flex ml-2 gap-1">
-              <Button 
-                variant="ghost" 
-                size="icon" 
-                className="h-8 w-8" 
-                onClick={(e) => {
-                  e.stopPropagation();
-                  e.preventDefault();
-                  window.open(file.file_url, "_blank");
-                }}
-              >
-                <Eye className="h-4 w-4" />
-              </Button>
+    <div className="border rounded-md overflow-hidden">
+      <div className="overflow-x-auto">
+        <table className="w-full">
+          <thead className="bg-muted/50">
+            <tr className="text-xs">
+              <th className="px-2 py-2 text-left font-medium text-muted-foreground">Type</th>
+              <th className="px-2 py-2 text-left font-medium text-muted-foreground">Name</th>
+              <th className="px-2 py-2 text-left font-medium text-muted-foreground hidden md:table-cell">Size</th>
+              <th className="px-2 py-2 text-left font-medium text-muted-foreground hidden lg:table-cell">Added</th>
+              <th className="px-2 py-2 text-right font-medium text-muted-foreground">Actions</th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-border">
+            {mediaFiles.map((file) => {
+              const mediaType = getMediaType(file.file_type);
+              const isImage = mediaType === 'image';
               
-              <Button 
-                variant="ghost" 
-                size="icon" 
-                className="h-8 w-8"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  e.preventDefault();
-                  
-                  // Create a temporary link to download the file
-                  const link = document.createElement('a');
-                  link.href = file.file_url;
-                  link.download = file.title || 'download';
-                  document.body.appendChild(link);
-                  link.click();
-                  document.body.removeChild(link);
-                }}
-              >
-                <Download className="h-4 w-4" />
-              </Button>
-              
-              {canEdit && (
-                <Button 
-                  variant="ghost" 
-                  size="icon" 
-                  className="h-8 w-8"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    e.preventDefault();
-                    alert('Edit functionality coming soon');
-                  }}
-                >
-                  <Pencil className="h-4 w-4" />
-                </Button>
-              )}
-              
-              {canDelete && onDelete && (
-                <Button 
-                  variant="ghost" 
-                  size="icon" 
-                  className="h-8 w-8 text-destructive hover:text-destructive hover:bg-destructive/10"
-                  onClick={(e) => handleDelete(file.id, e)}
-                >
-                  <Trash2 className="h-4 w-4" />
-                </Button>
-              )}
-            </div>
-          </div>
-        );
-      })}
+              return (
+                <tr key={file.id} className="hover:bg-muted/50 text-xs">
+                  <td className="px-2 py-2">
+                    <div className="flex items-center">
+                      <div className={cn(
+                        "h-6 w-6 rounded flex items-center justify-center",
+                        mediaType === 'image' && "bg-blue-50 text-blue-600",
+                        mediaType === 'audio' && "bg-green-50 text-green-600",
+                        mediaType === 'video' && "bg-purple-50 text-purple-600",
+                        mediaType === 'pdf' && "bg-amber-50 text-amber-600",
+                        mediaType === 'other' && "bg-gray-50 text-gray-600",
+                      )}>
+                        {getMediaIcon(file.file_type)}
+                      </div>
+                    </div>
+                  </td>
+                  <td className="px-2 py-2">
+                    <div className="flex flex-col">
+                      <span className="font-medium truncate max-w-[180px] sm:max-w-[250px] md:max-w-[300px]">{file.title}</span>
+                      <span className="text-muted-foreground text-[10px] truncate max-w-[180px] sm:max-w-[250px] md:max-w-[300px]">
+                        {file.description || getMediaTypeLabel(mediaType)}
+                      </span>
+                    </div>
+                  </td>
+                  <td className="px-2 py-2 hidden md:table-cell text-muted-foreground">{formatFileSize(file.size)}</td>
+                  <td className="px-2 py-2 hidden lg:table-cell text-muted-foreground">
+                    {formatDistanceToNow(new Date(file.created_at), { addSuffix: true })}
+                  </td>
+                  <td className="px-2 py-2 text-right">
+                    <div className="flex items-center justify-end gap-1">
+                      <Button 
+                        variant="ghost" 
+                        size="icon" 
+                        className="h-6 w-6"
+                        onClick={() => handleViewMedia(file)}
+                      >
+                        <Eye className="h-3.5 w-3.5" />
+                      </Button>
+                      <Button 
+                        variant="ghost" 
+                        size="icon" 
+                        className="h-6 w-6"
+                        onClick={() => handleDownload(file.file_url, file.title)}
+                      >
+                        <Download className="h-3.5 w-3.5" />
+                      </Button>
+                      {canDelete && (
+                        <Button 
+                          variant="ghost" 
+                          size="icon" 
+                          className="h-6 w-6 hover:text-destructive"
+                          onClick={() => onDelete && onDelete(file.id)}
+                        >
+                          <Trash className="h-3.5 w-3.5" />
+                        </Button>
+                      )}
+                    </div>
+                  </td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+      </div>
     </div>
   );
 }

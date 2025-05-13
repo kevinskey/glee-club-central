@@ -11,7 +11,7 @@
 }
 
 .media-item-icon {
-  @apply flex-shrink-0 w-10 h-10 flex items-center justify-center bg-muted rounded mr-2;
+  @apply flex-shrink-0 w-8 h-8 flex items-center justify-center bg-muted rounded mr-2;
 }
 
 .media-item-content {
@@ -23,12 +23,12 @@
 }
 
 .media-grid {
-  @apply grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4;
+  @apply grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3;
 }
 
 /* Simple file type indicators */
 .file-type-badge {
-  @apply inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium;
+  @apply inline-flex items-center rounded-full px-1.5 py-0.5 text-[10px] font-medium;
 }
 
 .file-type-image {
