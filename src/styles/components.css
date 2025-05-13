@@ -1,60 +1,52 @@
 
-@tailwind components;
+/* ... keep existing code */
 
-@layer components {
-  /* Container and spacing */
-  .container-fluid {
-    @apply w-full px-4 sm:px-6 md:px-8 lg:px-12;
-  }
-  
-  .section-padding {
-    @apply py-mobile-section md:py-tablet-section lg:py-desktop-section;
-  }
-  
-  /* Custom typography classes */
-  .heading-xl {
-    @apply font-playfair text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-bold tracking-tight;
-  }
-  
-  .heading-large {
-    @apply font-playfair text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold tracking-tight;
-  }
-  
-  .heading-medium {
-    @apply font-playfair text-xl sm:text-2xl md:text-3xl font-bold tracking-tight;
-  }
-  
-  .heading-small {
-    @apply font-playfair text-lg sm:text-xl md:text-2xl font-semibold;
-  }
-  
-  .body-large {
-    @apply text-base sm:text-lg leading-relaxed;
-  }
-  
-  .body-medium {
-    @apply text-sm sm:text-base leading-relaxed;
-  }
-  
-  .body-small {
-    @apply text-xs sm:text-sm leading-relaxed;
-  }
-  
-  .caption {
-    @apply text-xs text-muted-foreground;
-  }
-  
-  .quote {
-    @apply font-playfair italic text-base sm:text-lg md:text-xl leading-relaxed border-l-4 border-glee-spelman pl-4 py-2;
-  }
-  
-  /* Apply responsive button text size */
-  button, .btn {
-    @apply text-fluid-btn;
-  }
-  
-  /* Improve spacing for mobile */
-  .card, .form-group, .input-group {
-    @apply mb-4 sm:mb-6;
-  }
+/* Media Library components */
+.media-list-item {
+  @apply flex items-center p-2 border rounded-md cursor-pointer transition-colors;
+}
+
+.media-list-item:hover {
+  @apply bg-muted/20;
+}
+
+.media-item-icon {
+  @apply flex-shrink-0 w-10 h-10 flex items-center justify-center bg-muted rounded mr-2;
+}
+
+.media-item-content {
+  @apply flex-grow min-w-0;
+}
+
+.media-item-actions {
+  @apply flex-shrink-0 flex gap-1;
+}
+
+.media-grid {
+  @apply grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4;
+}
+
+/* Simple file type indicators */
+.file-type-badge {
+  @apply inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium;
+}
+
+.file-type-image {
+  @apply bg-blue-50 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400;
+}
+
+.file-type-audio {
+  @apply bg-green-50 text-green-700 dark:bg-green-900/30 dark:text-green-400;
+}
+
+.file-type-video {
+  @apply bg-purple-50 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400;
+}
+
+.file-type-document {
+  @apply bg-amber-50 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400;
+}
+
+.file-type-other {
+  @apply bg-gray-50 text-gray-700 dark:bg-gray-800/50 dark:text-gray-400;
 }

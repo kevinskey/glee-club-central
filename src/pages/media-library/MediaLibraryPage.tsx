@@ -1,17 +1,19 @@
 
 import React, { useState } from "react";
 import { PageHeader } from "@/components/ui/page-header";
-import { FilesIcon } from "lucide-react";
+import { FilesIcon, Search, FilterIcon, Grid, List } from "lucide-react";
 import { useMediaLibrary } from "@/hooks/useMediaLibrary";
-import { MediaFilesSection } from "@/components/media/MediaFilesSection";
-import { UploadMediaModal } from "@/components/UploadMediaModal";
+import { MediaType } from "@/utils/mediaUtils";
 import { usePermissions } from "@/hooks/usePermissions";
 import { MediaStatsDisplay } from "@/components/media/MediaStatsDisplay";
 import { MediaFilterBar } from "@/components/media/MediaFilterBar";
 import { MediaLoadingState } from "@/components/media/MediaLoadingState";
-import { MediaAccordionView } from "@/components/media/MediaAccordionView";
 import { UploadMediaButton } from "@/components/media/UploadMediaButton";
-import { MediaType } from "@/utils/mediaUtils";
+import { UploadMediaModal } from "@/components/UploadMediaModal";
+import { MediaListView } from "@/components/media/MediaListView";
+import { MediaGridView } from "@/components/media/MediaGridView";
+import { Button } from "@/components/ui/button";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 interface MediaLibraryPageProps {
   isAdminView?: boolean;
@@ -27,7 +29,8 @@ export default function MediaLibraryPage({ isAdminView = false }: MediaLibraryPa
   const canDeleteMedia = isAdminView || isSuperAdmin || isAdminRole || hasPermission('can_delete_media');
   
   const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
-  const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
+  const [viewMode, setViewMode] = useState<"grid" | "list">("list"); // Default to list view
+  const isMobile = useIsMobile();
 
   const { 
     isLoading,
@@ -80,7 +83,7 @@ export default function MediaLibraryPage({ isAdminView = false }: MediaLibraryPa
   }
 
   return (
-    <div className="space-y-6 md:space-y-8">
+    <div className="space-y-4 md:space-y-6">
       {!isAdminView && (
         <PageHeader
           title="Media Library"
@@ -89,30 +92,67 @@ export default function MediaLibraryPage({ isAdminView = false }: MediaLibraryPa
         />
       )}
       
-      {/* Stats Row */}
-      <MediaStatsDisplay stats={mediaStats} />
+      {/* Stats Row - simplified on mobile */}
+      {!isMobile && <MediaStatsDisplay stats={mediaStats} />}
       
       {/* Upload Button */}
-      <UploadMediaButton 
-        onClick={() => setIsUploadModalOpen(true)} 
-        canUpload={canUploadMedia}
-      />
+      <div className="flex justify-between items-center">
+        <UploadMediaButton 
+          onClick={() => setIsUploadModalOpen(true)} 
+          canUpload={canUploadMedia}
+        />
+        
+        {/* View toggle buttons */}
+        <div className="flex gap-1">
+          <Button 
+            variant={viewMode === "list" ? "default" : "outline"} 
+            size="sm" 
+            onClick={() => setViewMode("list")}
+            className="px-2"
+          >
+            <List className="h-4 w-4" />
+          </Button>
+          <Button 
+            variant={viewMode === "grid" ? "default" : "outline"} 
+            size="sm" 
+            onClick={() => setViewMode("grid")}
+            className="px-2"
+          >
+            <Grid className="h-4 w-4" />
+          </Button>
+        </div>
+      </div>
       
-      {/* Search and Filter Bar */}
-      <MediaFilterBar 
-        searchQuery={searchQuery}
-        setSearchQuery={setSearchQuery}
-        selectedMediaType={selectedMediaType as MediaType | "all"}
-        setSelectedMediaType={setSelectedMediaType}
-        selectedCategory={selectedCategory}
-        setSelectedCategory={setSelectedCategory}
-        dateFilter={dateFilter as "newest" | "oldest"}
-        setDateFilter={setDateFilter}
-        viewMode={viewMode}
-        setViewMode={setViewMode}
-        mediaTypes={mediaTypes as MediaType[]}
-        categories={categories}
-      />
+      {/* Search and Filter Bar - simplified for mobile */}
+      <div className="flex flex-col gap-2">
+        <div className="relative w-full">
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <input
+            type="text"
+            placeholder="Search media..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="w-full pl-10 pr-3 py-2 rounded-md border border-input bg-background"
+          />
+        </div>
+        
+        {!isMobile && (
+          <MediaFilterBar 
+            searchQuery={searchQuery}
+            setSearchQuery={setSearchQuery}
+            selectedMediaType={selectedMediaType as MediaType | "all"}
+            setSelectedMediaType={setSelectedMediaType}
+            selectedCategory={selectedCategory}
+            setSelectedCategory={setSelectedCategory}
+            dateFilter={dateFilter as "newest" | "oldest"}
+            setDateFilter={setDateFilter}
+            viewMode={viewMode}
+            setViewMode={setViewMode}
+            mediaTypes={mediaTypes as MediaType[]}
+            categories={categories}
+          />
+        )}
+      </div>
       
       {/* Loading State or Empty State */}
       <MediaLoadingState 
@@ -126,14 +166,14 @@ export default function MediaLibraryPage({ isAdminView = false }: MediaLibraryPa
       {!isLoading && filteredMediaFiles.length > 0 && (
         <>
           {viewMode === "grid" ? (
-            <MediaFilesSection 
+            <MediaGridView 
               mediaFiles={filteredMediaFiles} 
               canEdit={canEditMedia}
               canDelete={canDeleteMedia}
               onDelete={handleDeleteMedia}
             />
           ) : (
-            <MediaAccordionView 
+            <MediaListView 
               mediaFiles={filteredMediaFiles} 
               canEdit={canEditMedia}
               canDelete={canDeleteMedia}
