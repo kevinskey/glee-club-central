@@ -1,4 +1,5 @@
 
+
 export type PermissionName = 
   | "can_view_financials"
   | "can_edit_financials"
@@ -18,3 +19,4 @@ export type PermissionName =
 // Now UserTitle is just a string, no longer a union type
 // This allows for dynamic titles from the database
 export type UserTitle = string;
+

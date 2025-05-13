@@ -1,4 +1,5 @@
 
+// Import the UserTitle type which is now a simple string type
 import { supabase } from '@/integrations/supabase/client';
 
 export async function fetchUserPermissions(userId: string) {

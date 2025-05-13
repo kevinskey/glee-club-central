@@ -1,6 +1,5 @@
 
 import React, { useState, useEffect } from 'react';
-import { User } from '@/hooks/useUserManagement';
 import { 
   Dialog, 
   DialogContent, 
@@ -24,6 +23,7 @@ import { Switch } from '@/components/ui/switch';
 import { toast } from 'sonner';
 import { useTitlesManagement } from '@/hooks/useTitlesManagement';
 import { Spinner } from '@/components/ui/spinner';
+import { supabase } from '@/integrations/supabase/client';
 
 interface UserTitleManagementProps {
   user: User | null;
