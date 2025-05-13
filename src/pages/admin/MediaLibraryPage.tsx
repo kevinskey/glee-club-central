@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { PageHeader } from '@/components/ui/page-header';
 import { FileImage } from 'lucide-react';
 import MediaLibraryPage from '../media-library/MediaLibraryPage';

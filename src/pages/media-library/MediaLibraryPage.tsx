@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { PageHeader } from "@/components/ui/page-header";
 import { FilesIcon, Search, FilterIcon, Grid, List } from "lucide-react";
@@ -55,6 +54,7 @@ export default function MediaLibraryPage({ isAdminView = false }: MediaLibraryPa
   const handleUploadComplete = () => {
     console.log("Upload complete, refreshing data");
     fetchAllMedia();
+    setIsUploadModalOpen(false); // Close the modal after upload completes
   };
 
   const handleDeleteMedia = async (mediaId: string) => {
@@ -66,6 +66,12 @@ export default function MediaLibraryPage({ isAdminView = false }: MediaLibraryPa
     } catch (error) {
       console.error("Error deleting media:", error);
     }
+  };
+
+  // Function to open upload modal
+  const openUploadModal = () => {
+    console.log("Opening upload modal");
+    setIsUploadModalOpen(true);
   };
 
   if (error) {
@@ -99,7 +105,7 @@ export default function MediaLibraryPage({ isAdminView = false }: MediaLibraryPa
       {/* Upload Button */}
       <div className="flex justify-between items-center">
         <UploadMediaButton 
-          onClick={() => setIsUploadModalOpen(true)} 
+          onClick={openUploadModal} 
           canUpload={canUploadMedia}
         />
         
@@ -170,7 +176,7 @@ export default function MediaLibraryPage({ isAdminView = false }: MediaLibraryPa
         isLoading={isLoading}
         isEmpty={filteredMediaFiles.length === 0}
         canUpload={canUploadMedia}
-        onUploadClick={() => setIsUploadModalOpen(true)}
+        onUploadClick={openUploadModal}
       />
       
       {/* Media Files Display */}

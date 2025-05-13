@@ -66,8 +66,11 @@ export function UploadMediaModal({
     return null;
   }
 
+  console.log("Upload modal open state:", open);
+
   return (
     <Dialog open={open} onOpenChange={(isOpen) => {
+      console.log("Dialog onOpenChange called with:", isOpen);
       setOpen(isOpen);
       if (!isOpen) resetForm();
     }}>

@@ -24,7 +24,12 @@ export function UploadMediaButton({
   
   return (
     <div className="flex justify-between items-center">
-      <Button onClick={onClick} className="bg-brand hover:bg-brand/90" data-testid="upload-media-button">
+      <Button 
+        onClick={onClick} 
+        className="bg-brand hover:bg-brand/90" 
+        data-testid="upload-media-button"
+        type="button"
+      >
         <FileUp className="mr-2 h-4 w-4" />
         {label}
       </Button>
