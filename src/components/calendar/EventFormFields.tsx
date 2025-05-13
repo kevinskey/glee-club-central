@@ -21,7 +21,7 @@ import { GoogleMapAutocomplete } from "./GoogleMapAutocomplete";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
-import { CalendarIcon, ImageIcon, Upload } from "lucide-react";
+import { CalendarIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { format } from "date-fns";
 
@@ -38,18 +38,10 @@ export interface EventFormValues {
 
 interface EventFormFieldsProps {
   form: UseFormReturn<EventFormValues>;
-  onImageSelected?: (file: File) => void;
-  imagePreview?: string | null;
+  isUploading?: boolean;
 }
 
-export function EventFormFields({ form, onImageSelected, imagePreview }: EventFormFieldsProps) {
-  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (file && onImageSelected) {
-      onImageSelected(file);
-    }
-  };
-
+export function EventFormFields({ form, isUploading = false }: EventFormFieldsProps) {
   return (
     <>
       <FormField
@@ -176,71 +168,6 @@ export function EventFormFields({ form, onImageSelected, imagePreview }: EventFo
                 className="resize-none"
                 {...field}
               />
-            </FormControl>
-            <FormMessage />
-          </FormItem>
-        )}
-      />
-
-      <FormField
-        control={form.control}
-        name="image_url"
-        render={({ field }) => (
-          <FormItem>
-            <FormLabel>Event Image</FormLabel>
-            <FormControl>
-              <div className="space-y-2">
-                {!imagePreview ? (
-                  <>
-                    <Input
-                      type="text"
-                      placeholder="Image URL (optional)"
-                      {...field}
-                      value={field.value || ''}
-                    />
-                    <div className="flex items-center gap-2">
-                      <span className="text-sm text-muted-foreground">Or upload an image:</span>
-                      <div className="relative">
-                        <Button
-                          type="button"
-                          variant="outline"
-                          size="sm"
-                          className="relative"
-                        >
-                          <input
-                            type="file"
-                            className="absolute inset-0 opacity-0 cursor-pointer"
-                            accept="image/*"
-                            onChange={handleFileChange}
-                          />
-                          <Upload className="h-4 w-4 mr-2" />
-                          Upload
-                        </Button>
-                      </div>
-                    </div>
-                  </>
-                ) : (
-                  <div className="relative">
-                    <img 
-                      src={imagePreview} 
-                      alt="Event preview" 
-                      className="w-full h-32 object-cover rounded-md"
-                    />
-                    <Button
-                      type="button"
-                      variant="destructive"
-                      size="sm"
-                      className="absolute top-2 right-2"
-                      onClick={() => {
-                        form.setValue("image_url", null);
-                        if (onImageSelected) onImageSelected(null as unknown as File);
-                      }}
-                    >
-                      Remove
-                    </Button>
-                  </div>
-                )}
-              </div>
             </FormControl>
             <FormMessage />
           </FormItem>

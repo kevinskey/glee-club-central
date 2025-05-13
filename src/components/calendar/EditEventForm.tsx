@@ -11,6 +11,7 @@ import { MobileFitCheck } from "./MobileFitCheck";
 import { checkEventMobileFit } from "@/utils/mobileUtils";
 import { toast } from "sonner";
 import { uploadEventImage } from "@/utils/supabase/eventImageUpload";
+import { EventImageUpload } from "./EventImageUpload";
 
 export const formSchema = z.object({
   title: z.string().min(2, { message: "Title must be at least 2 characters" }),
@@ -59,24 +60,6 @@ export function EditEventForm({
   const title = form.watch('title');
   const location = form.watch('location');
   const description = form.watch('description');
-
-  const handleImageSelected = (file: File | null) => {
-    setSelectedImage(file);
-    
-    if (file) {
-      // Create a preview URL
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setImagePreview(reader.result as string);
-      };
-      reader.readAsDataURL(file);
-      
-      // Clear any previously entered image URL
-      form.setValue("image_url", null);
-    } else {
-      setImagePreview(null);
-    }
-  };
 
   const onSubmit = async (values: EventFormValues) => {
     // Check mobile fit before saving
@@ -151,11 +134,19 @@ export function EditEventForm({
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-3 px-1 max-h-[70vh] overflow-y-auto pb-16">
         <EventFormFields 
-          form={form} 
-          onImageSelected={handleImageSelected}
+          form={form}
+          isUploading={isSubmitting}
+        />
+        
+        <EventImageUpload
+          form={form}
+          isUploading={isSubmitting}
+          selectedImage={selectedImage}
+          setSelectedImage={setSelectedImage}
           imagePreview={imagePreview}
+          setImagePreview={setImagePreview}
         />
 
         {mobileFitIssues && !mobileFitIssues.fits && (
@@ -166,24 +157,25 @@ export function EditEventForm({
           />
         )}
 
-        <div className="flex justify-end gap-2">
+        <div className="flex justify-end gap-2 sticky bottom-0 pt-2 bg-white dark:bg-gray-800 border-t border-gray-100 dark:border-gray-700">
           <Button
             type="button"
             variant="outline"
             onClick={onCancel}
             disabled={isSubmitting}
+            className="bg-white dark:bg-gray-700 text-sm px-3 py-1 h-8"
           >
             Cancel
           </Button>
           <Button
             type="submit"
-            className="bg-glee-purple hover:bg-glee-purple/90"
+            className="bg-glee-purple hover:bg-glee-purple/90 text-sm px-3 py-1 h-8"
             disabled={isSubmitting}
           >
             {isSubmitting ? (
               <>
                 <span className="mr-2">Saving...</span>
-                <span className="animate-spin">⏳</span>
+                <div className="h-3 w-3 rounded-full border-2 border-white border-t-transparent animate-spin"></div>
               </>
             ) : (
               "Save Changes"

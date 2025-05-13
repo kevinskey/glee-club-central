@@ -13,6 +13,7 @@ import { MobileFitCheck } from "./MobileFitCheck";
 import { checkEventMobileFit } from "@/utils/mobileUtils";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { uploadEventImage } from "@/utils/supabase/eventImageUpload";
+import { EventImageUpload } from "./EventImageUpload";
 
 export const formSchema = z.object({
   title: z.string().min(2, { message: "Title must be at least 2 characters" }),
@@ -63,24 +64,6 @@ export function AddEventForm({ onAddEvent, onCancel, initialDate }: AddEventForm
   const title = form.watch('title');
   const location = form.watch('location');
   const description = form.watch('description');
-
-  const handleImageSelected = (file: File | null) => {
-    setSelectedImage(file);
-    
-    if (file) {
-      // Create a preview URL
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setImagePreview(reader.result as string);
-      };
-      reader.readAsDataURL(file);
-      
-      // Clear any previously entered image URL
-      form.setValue("image_url", null);
-    } else {
-      setImagePreview(null);
-    }
-  };
 
   async function onSubmit(values: EventFormValues) {
     if (!user) {
@@ -161,8 +144,16 @@ export function AddEventForm({ onAddEvent, onCancel, initialDate }: AddEventForm
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-3 px-1 max-h-[70vh] overflow-y-auto pb-16">
         <EventFormFields 
           form={form} 
-          onImageSelected={handleImageSelected}
+          isUploading={isUploading}
+        />
+        
+        <EventImageUpload
+          form={form}
+          isUploading={isUploading}
+          selectedImage={selectedImage}
+          setSelectedImage={setSelectedImage}
           imagePreview={imagePreview}
+          setImagePreview={setImagePreview}
         />
 
         {mobileFitIssues && !mobileFitIssues.fits && (
