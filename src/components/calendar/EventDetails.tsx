@@ -3,7 +3,7 @@ import React from "react";
 import { Button } from "@/components/ui/button";
 import { Edit2, Trash2 } from "lucide-react";
 import { format } from "date-fns";
-import { CalendarEvent } from "@/hooks/useCalendarEvents";
+import { CalendarEvent } from "@/types/calendar";
 import { AlertDialog, AlertDialogTrigger, AlertDialogContent, AlertDialogTitle, AlertDialogDescription, AlertDialogCancel, AlertDialogAction } from "@/components/ui/alert-dialog";
 
 export interface EventDetailsProps {

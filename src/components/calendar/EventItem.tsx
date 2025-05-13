@@ -1,6 +1,6 @@
 
 import React from "react";
-import { CalendarEvent } from "@/hooks/useCalendarEvents";
+import { CalendarEvent } from "@/types/calendar";
 import { Button } from "@/components/ui/button";
 import { Clock, MapPin } from "lucide-react";
 import { cn } from "@/lib/utils";

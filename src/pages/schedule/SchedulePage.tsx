@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { PageHeader } from "@/components/ui/page-header";
 import { Calendar, Plus, RefreshCw } from "lucide-react";
@@ -7,7 +6,7 @@ import { CalendarContainer } from "@/components/calendar/CalendarContainer";
 import { EventList } from "@/components/calendar/EventList";
 import { useAuth } from "@/contexts/AuthContext";
 import { useCalendarEvents } from "@/hooks/useCalendarEvents";
-import { CalendarEvent } from "@/types/calendar";
+import { CalendarEvent, EventType } from "@/types/calendar";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { AddEventForm } from "@/components/calendar/AddEventForm";
 import { EditEventForm } from "@/components/calendar/EditEventForm";
@@ -54,7 +53,9 @@ export default function SchedulePage() {
   const isAdmin = isSuperAdmin;
 
   // Get days with events for the calendar
-  const daysWithEvents = events.map(event => event.start);
+  const daysWithEvents = events.map(event => {
+    return event.start instanceof Date ? event.start : new Date(event.start);
+  });
   
   // Helper function to get event type color
   const getEventTypeColor = (type: string) => {

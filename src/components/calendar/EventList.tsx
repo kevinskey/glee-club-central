@@ -1,7 +1,7 @@
 
 import React from "react";
 import { format, isSameDay } from "date-fns";
-import { CalendarEvent } from "@/hooks/useCalendarEvents";
+import { CalendarEvent } from "@/types/calendar";
 import { EventItem } from "./EventItem";
 import { useIsMobile } from "@/hooks/use-mobile";
 

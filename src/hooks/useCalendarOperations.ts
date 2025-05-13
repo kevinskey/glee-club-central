@@ -2,7 +2,7 @@
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { CalendarEvent } from "./useCalendarEvents";
+import { CalendarEvent } from "@/types/calendar";
 import { useAuth } from "@/contexts/AuthContext";
 
 export function useCalendarOperations(refreshEvents: () => Promise<void>) {

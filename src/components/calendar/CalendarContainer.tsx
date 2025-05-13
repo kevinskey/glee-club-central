@@ -3,7 +3,7 @@ import React from "react";
 import { Card } from "@/components/ui/card";
 import { Calendar } from "@/components/ui/calendar";
 import { format, isSameDay } from "date-fns";
-import { CalendarEvent } from "@/hooks/useCalendarEvents";
+import { CalendarEvent } from "@/types/calendar";
 import { useIsMobile } from "@/hooks/use-mobile";
 
 interface CalendarContainerProps {
