@@ -6,7 +6,7 @@ export function HeroContent() {
   const isMobile = useIsMobile();
   
   return (
-    <div className="text-white flex flex-col justify-between h-full w-full text-left pl-4 sm:pl-6 md:pl-8 lg:pl-10 py-4 sm:py-6 md:py-8 lg:py-10">
+    <div className="text-white flex flex-col justify-center h-full w-full text-left pl-4 sm:pl-6 md:pl-8 lg:pl-10 py-4 sm:py-6 md:py-8 lg:py-10">
       <div>
         <h1 className="font-playfair tracking-tight mb-0">
           <span className="block text-xl sm:text-2xl md:text-[2.6rem] lg:text-[2.75rem] xl:text-[3.5rem] font-bold mb-0.5 sm:mb-1 md:mb-1.5 text-shadow-lg">
