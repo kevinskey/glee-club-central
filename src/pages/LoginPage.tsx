@@ -12,7 +12,7 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Music, AlertCircle, Eye, EyeOff } from "lucide-react";
+import { Music, AlertCircle, Eye, EyeOff, LogIn } from "lucide-react";
 import { supabase, cleanupAuthState } from "@/integrations/supabase/client";
 
 const loginSchema = z.object({
@@ -220,7 +220,9 @@ export default function LoginPage() {
                     <div className="h-4 w-4 rounded-full border-2 border-white border-t-transparent animate-spin"></div>
                   </>
                 ) : (
-                  "Log In"
+                  <>
+                    <LogIn className="mr-2 h-4 w-4" /> Log In
+                  </>
                 )}
               </Button>
             </form>
