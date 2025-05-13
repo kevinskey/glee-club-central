@@ -71,18 +71,8 @@ export function Header() {
           </Link>
         </div>
           
-        {/* Right side: Dashboard button, Metronome, theme toggle, and user dropdown */}
-        <div className="flex items-center gap-3">
-          {/* Dashboard Button */}
-          <Button
-            variant="spelman"
-            size="sm"
-            className="h-9 flex items-center gap-1"
-            onClick={() => navigate("/dashboard")}
-          >
-            Dashboard
-          </Button>
-          
+        {/* Right side: Metronome, theme toggle, and user dropdown */}
+        <div className="flex items-center gap-3">          
           {/* Metronome Icon */}
           <Dialog open={metronomeOpen} onOpenChange={setMetronomeOpen}>
             <DialogTrigger asChild>
@@ -117,6 +107,10 @@ export function Header() {
                   {profile?.first_name} {profile?.last_name}
                 </DropdownMenuLabel>
                 <DropdownMenuSeparator />
+                
+                <DropdownMenuItem onClick={() => navigate("/dashboard")}>
+                  Dashboard
+                </DropdownMenuItem>
                 
                 <DropdownMenuItem onClick={() => navigate("/dashboard/profile")}>
                   <User className="h-4 w-4 mr-2" />

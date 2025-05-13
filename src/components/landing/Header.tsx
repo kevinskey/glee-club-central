@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useRef } from "react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Logo } from "@/components/landing/header/Logo";
@@ -96,18 +97,6 @@ export function Header({ initialShowNewsFeed = true }: HeaderProps) {
             </Button>
           )}
           
-          {/* Dashboard Button for authenticated users */}
-          {isAuthenticated && (
-            <Button
-              variant="spelman"
-              size="sm"
-              className="h-9 flex items-center gap-1 mr-1"
-              onClick={() => navigate("/dashboard")}
-            >
-              Dashboard
-            </Button>
-          )}
-          
           {/* Metronome Icon */}
           <Dialog open={metronomeOpen} onOpenChange={setMetronomeOpen}>
             <DialogTrigger asChild>
@@ -170,6 +159,12 @@ export function Header({ initialShowNewsFeed = true }: HeaderProps) {
                 </DropdownMenuItem>
                 
                 <DropdownMenuSeparator />
+                
+                {isAuthenticated && (
+                  <DropdownMenuItem onClick={() => navigate("/dashboard")}>
+                    Dashboard
+                  </DropdownMenuItem>
+                )}
                 
                 {!isAuthenticated && (
                   <DropdownMenuItem onClick={() => navigate("/register/admin")}>
