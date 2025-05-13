@@ -1,4 +1,3 @@
-
 import { createBrowserRouter, Navigate } from 'react-router-dom';
 import { Suspense, lazy } from 'react';
 
@@ -14,6 +13,7 @@ import UpdatePasswordPage from './pages/UpdatePasswordPage';
 import NotFoundPage from './pages/NotFoundPage';
 import RecordingsPage from './pages/recordings/RecordingsPage';
 import AdminDashboard from './pages/admin/AdminDashboard';
+import PressKitPage from './pages/PressKitPage';
 
 // Import auth related pages
 import LoginPage from './pages/auth/LoginPage';
@@ -57,6 +57,10 @@ export const router = createBrowserRouter([
             <ContactPage />
           </Suspense>
         )
+      },
+      {
+        path: 'press-kit',
+        element: <PressKitPage />
       }
     ]
   },
@@ -86,7 +90,6 @@ export const router = createBrowserRouter([
       }
     ]
   },
-  // Add a direct route for /login
   {
     path: '/login',
     element: <HomeLayout hideHeader={false}><LoginPage /></HomeLayout>

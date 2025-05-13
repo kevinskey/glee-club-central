@@ -1,19 +1,40 @@
-import React from "react";
-import { Header } from "@/components/landing/Header";
-import { Footer } from "@/components/landing/Footer";
+
+import React, { useState, useEffect } from "react";
+import { Layout } from "@/components/landing/Layout";
 import { AspectRatio } from "@/components/ui/aspect-ratio";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { DownloadCloud, FileText, Image, Music, Users } from "lucide-react";
+import { DownloadCloud, FileText, Image, Music, Users, ExternalLink, Mail, Phone } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { FlickrGallery } from "@/components/media/FlickrGallery";
+import { PressKitMediaGrid } from "@/components/media/PressKitMediaGrid";
+import { PressKitDocuments } from "@/components/media/PressKitDocuments";
+import { VideoPlayer } from "@/components/videos/VideoPlayer";
 
 export default function PressKitPage() {
   const navigate = useNavigate();
   
+  // YouTube videos for press kit
+  const featuredVideos = [
+    {
+      id: "xT5PxedM9jo",
+      title: "Spelman College Glee Club - Lift Every Voice and Sing",
+      description: "Performance at the Kennedy Center"
+    },
+    {
+      id: "xT5PxedM9jo",
+      title: "Spelman Glee Club - Amazing Grace",
+      description: "Carnegie Hall Concert, 2023"
+    },
+    {
+      id: "xT5PxedM9jo",
+      title: "Interview with Dr. Kevin Johnson",
+      description: "Director discusses the Glee Club legacy"
+    }
+  ];
+
   return (
-    <div className="flex min-h-screen flex-col">
-      <Header initialShowNewsFeed={false} />
+    <Layout>
       <main className="flex-1 bg-white dark:bg-gray-950">
         {/* Hero Section */}
         <div className="relative overflow-hidden bg-glee-purple py-16">
@@ -54,26 +75,34 @@ export default function PressKitPage() {
                 <Button 
                   variant="outline"
                   className="flex items-center gap-2 hover:bg-glee-purple hover:text-white"
-                  onClick={() => document.getElementById('fact-sheet')?.scrollIntoView({ behavior: 'smooth' })}
+                  onClick={() => document.getElementById('logos')?.scrollIntoView({ behavior: 'smooth' })}
+                >
+                  <Image className="h-4 w-4" />
+                  Logos
+                </Button>
+                <Button 
+                  variant="outline"
+                  className="flex items-center gap-2 hover:bg-glee-purple hover:text-white"
+                  onClick={() => document.getElementById('videos')?.scrollIntoView({ behavior: 'smooth' })}
+                >
+                  <Music className="h-4 w-4" />
+                  Videos
+                </Button>
+                <Button 
+                  variant="outline"
+                  className="flex items-center gap-2 hover:bg-glee-purple hover:text-white"
+                  onClick={() => document.getElementById('documents')?.scrollIntoView({ behavior: 'smooth' })}
                 >
                   <FileText className="h-4 w-4" />
-                  Fact Sheet
+                  Documents
                 </Button>
                 <Button 
                   variant="outline"
                   className="flex items-center gap-2 hover:bg-glee-purple hover:text-white"
-                  onClick={() => document.getElementById('director')?.scrollIntoView({ behavior: 'smooth' })}
+                  onClick={() => document.getElementById('contact')?.scrollIntoView({ behavior: 'smooth' })}
                 >
                   <Users className="h-4 w-4" />
-                  Director
-                </Button>
-                <Button 
-                  variant="outline"
-                  className="flex items-center gap-2 hover:bg-glee-purple hover:text-white"
-                  onClick={() => document.getElementById('downloads')?.scrollIntoView({ behavior: 'smooth' })}
-                >
-                  <DownloadCloud className="h-4 w-4" />
-                  Downloads
+                  Contact
                 </Button>
               </div>
             </div>
@@ -130,6 +159,18 @@ export default function PressKitPage() {
                 and has collaborated with renowned orchestras and artists, continuing to uphold its reputation for 
                 exceptional musicianship and cultural significance.
               </p>
+
+              <div className="mt-8 flex flex-wrap gap-4">
+                <Button className="bg-glee-purple hover:bg-glee-spelman">
+                  <DownloadCloud className="mr-2 h-4 w-4" /> Download Full Bio (PDF)
+                </Button>
+                <Button variant="outline" className="flex gap-2">
+                  <ExternalLink className="h-4 w-4" />
+                  <a href="https://www.spelman.edu/academics/majors-and-programs/music/ensembles/glee-club" target="_blank" rel="noopener noreferrer">
+                    Official Spelman Website
+                  </a>
+                </Button>
+              </div>
             </div>
           </div>
         </div>
@@ -149,38 +190,19 @@ export default function PressKitPage() {
                 <a href="/contact" className="text-glee-purple hover:text-glee-accent mx-1">contact us</a>.
               </p>
 
-              {/* Our Curated Press Photos */}
-              <h3 className="text-xl font-semibold mb-4 text-glee-purple">Official Press Images</h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-12">
-                <div className="rounded-xl overflow-hidden shadow-md hover:shadow-lg transition-shadow">
-                  <AspectRatio ratio={4/3}>
-                    <img 
-                      src="/lovable-uploads/3ad02de0-04d1-4a5e-9279-898e9c317d80.png" 
-                      alt="Spelman College Glee Club performing" 
-                      className="object-cover w-full h-full"
-                    />
-                  </AspectRatio>
-                  <div className="p-3 bg-white dark:bg-gray-800">
-                    <p className="text-sm text-gray-600 dark:text-gray-400">Spelman College Glee Club in Performance, 2023</p>
-                  </div>
-                </div>
-                <div className="rounded-xl overflow-hidden shadow-md hover:shadow-lg transition-shadow">
-                  <AspectRatio ratio={4/3}>
-                    <img 
-                      src="/lovable-uploads/e06ff100-0add-4adc-834f-50ef81098d35.png" 
-                      alt="Spelman College Glee Club with orchestra" 
-                      className="object-cover w-full h-full"
-                    />
-                  </AspectRatio>
-                  <div className="p-3 bg-white dark:bg-gray-800">
-                    <p className="text-sm text-gray-600 dark:text-gray-400">Glee Club with Orchestra, Carnegie Hall</p>
-                  </div>
-                </div>
-              </div>
+              {/* High-Resolution Press Images */}
+              <PressKitMediaGrid 
+                bucketName="glee-presskit"
+                folder="images"
+                title="High Resolution Press Images"
+                maxItems={8}
+              />
               
               {/* Flickr Gallery Section */}
-              <h3 className="text-xl font-semibold mb-4 text-glee-purple">From Our Flickr Gallery</h3>
-              <FlickrGallery photoCount={6} />
+              <div className="mt-12">
+                <h3 className="text-xl font-semibold mb-4 text-glee-purple">From Our Flickr Gallery</h3>
+                <FlickrGallery photoCount={6} />
+              </div>
 
               <div className="text-center mt-8">
                 <Button className="bg-glee-purple hover:bg-glee-spelman">
@@ -191,206 +213,152 @@ export default function PressKitPage() {
           </div>
         </div>
 
-        {/* Fact Sheet */}
-        <div id="fact-sheet" className="container mx-auto px-4 py-16">
+        {/* Logos Section */}
+        <div id="logos" className="container mx-auto px-4 py-16">
           <div className="max-w-4xl mx-auto">
             <div className="flex items-center gap-3 mb-6">
-              <FileText className="h-8 w-8 text-glee-accent" />
-              <h2 className="font-playfair text-3xl font-bold text-gray-800 dark:text-gray-100">Fact Sheet</h2>
+              <Image className="h-8 w-8 text-glee-accent" />
+              <h2 className="font-playfair text-3xl font-bold text-gray-800 dark:text-gray-100">Logo Files</h2>
             </div>
             
-            <Card className="border-none shadow-lg">
-              <CardContent className="p-6">
-                <div className="space-y-6">
-                  <div>
-                    <h3 className="text-xl font-semibold mb-2 text-glee-purple">Full Name</h3>
-                    <p className="text-gray-700 dark:text-gray-300">Spelman College Glee Club</p>
-                  </div>
-                  
-                  <div>
-                    <h3 className="text-xl font-semibold mb-2 text-glee-purple">Founded</h3>
-                    <p className="text-gray-700 dark:text-gray-300">1925</p>
-                  </div>
-                  
-                  <div>
-                    <h3 className="text-xl font-semibold mb-2 text-glee-purple">Ensemble Size</h3>
-                    <p className="text-gray-700 dark:text-gray-300">Approximately 50 vocalists, representing all academic disciplines at Spelman College</p>
-                  </div>
-                  
-                  <div>
-                    <h3 className="text-xl font-semibold mb-2 text-glee-purple">Repertoire</h3>
-                    <p className="text-gray-700 dark:text-gray-300">Classical choral literature, Negro spirituals, contemporary compositions, gospel, and jazz arrangements</p>
-                  </div>
-                  
-                  <div>
-                    <h3 className="text-xl font-semibold mb-2 text-glee-purple">Notable Performances</h3>
-                    <ul className="list-disc pl-5 text-gray-700 dark:text-gray-300 space-y-1">
-                      <li>Carnegie Hall (New York, NY)</li>
-                      <li>The Kennedy Center (Washington, DC)</li>
-                      <li>Lincoln Center (New York, NY)</li>
-                      <li>International tours across Europe, Africa, and South America</li>
-                      <li>White House performances for multiple U.S. Presidents</li>
-                      <li>Atlanta Symphony Hall with the Atlanta Symphony Orchestra</li>
-                    </ul>
-                  </div>
-                  
-                  <div>
-                    <h3 className="text-xl font-semibold mb-2 text-glee-purple">Notable Collaborations</h3>
-                    <ul className="list-disc pl-5 text-gray-700 dark:text-gray-300 space-y-1">
-                      <li>The Atlanta Symphony Orchestra</li>
-                      <li>The Morehouse College Glee Club</li>
-                      <li>Grammy-winning artists and composers</li>
-                    </ul>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+            <p className="text-lg mb-8 text-gray-700 dark:text-gray-300">
+              Official Spelman College Glee Club logos in various formats for media use. Please do not alter or modify these logos.
+            </p>
+
+            <PressKitMediaGrid 
+              bucketName="glee-presskit"
+              folder="logos"
+              title="Logo Package"
+              maxItems={8}
+            />
+            
+            <div className="mt-8 text-center">
+              <Button className="bg-glee-purple hover:bg-glee-spelman">
+                <DownloadCloud className="mr-2 h-4 w-4" /> Download Complete Logo Package
+              </Button>
+            </div>
           </div>
         </div>
 
-        {/* Director Section */}
-        <div id="director" className="bg-gray-50 dark:bg-gray-900 py-16">
+        {/* Videos Section */}
+        <div id="videos" className="bg-gray-50 dark:bg-gray-900 py-16">
+          <div className="container mx-auto px-4">
+            <div className="max-w-4xl mx-auto">
+              <div className="flex items-center gap-3 mb-6">
+                <Music className="h-8 w-8 text-glee-accent" />
+                <h2 className="font-playfair text-3xl font-bold text-gray-800 dark:text-gray-100">Performance Videos</h2>
+              </div>
+              
+              <p className="text-lg mb-8 text-gray-700 dark:text-gray-300">
+                Selected performance videos showcasing the Spelman College Glee Club. These videos may be embedded in media coverage with proper attribution.
+              </p>
+
+              <div className="space-y-8">
+                {featuredVideos.map((video, index) => (
+                  <div key={index} className="mb-8">
+                    <VideoPlayer
+                      videoId={video.id}
+                      title={video.title}
+                      description={video.description}
+                    />
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Documents Section */}
+        <div id="documents" className="container mx-auto px-4 py-16">
+          <div className="max-w-4xl mx-auto">
+            <div className="flex items-center gap-3 mb-6">
+              <FileText className="h-8 w-8 text-glee-accent" />
+              <h2 className="font-playfair text-3xl font-bold text-gray-800 dark:text-gray-100">Press Documents</h2>
+            </div>
+            
+            <p className="text-lg mb-8 text-gray-700 dark:text-gray-300">
+              Press materials and official documents for media, presenters, and partners. Click to download each file.
+            </p>
+
+            <PressKitDocuments 
+              bucketName="glee-presskit"
+              folder="docs"
+            />
+          </div>
+        </div>
+
+        {/* Contact Information */}
+        <div id="contact" className="bg-gray-50 dark:bg-gray-900 py-16">
           <div className="container mx-auto px-4">
             <div className="max-w-4xl mx-auto">
               <div className="flex items-center gap-3 mb-6">
                 <Users className="h-8 w-8 text-glee-accent" />
-                <h2 className="font-playfair text-3xl font-bold text-gray-800 dark:text-gray-100">Director</h2>
+                <h2 className="font-playfair text-3xl font-bold text-gray-800 dark:text-gray-100">Contact Information</h2>
               </div>
               
-              <Card className="bg-white dark:bg-gray-800 border-none shadow-lg max-w-3xl mx-auto">
-                <CardContent className="py-8 px-6 md:px-10">
-                  <h3 className="text-2xl font-bold mb-2 text-glee-purple">Dr. Kevin Phillip Johnson</h3>
-                  <p className="text-lg font-medium mb-6 text-gray-600 dark:text-gray-400">
-                    Director, Spelman College Glee Club
-                  </p>
-                  <div className="space-y-4 text-gray-700 dark:text-gray-300">
-                    <p>
-                      Dr. Kevin Phillip Johnson is an award-winning composer, arranger, and Associate Professor of Music 
-                      at Spelman College, where he directs the renowned Spelman College Glee Club. A dynamic educator 
-                      and cultural visionary, Dr. Johnson integrates African-American musical traditions with cutting-edge 
-                      technology in both performance and pedagogy.
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                {/* Director Contact Card */}
+                <Card className="bg-white dark:bg-gray-800 border-none shadow-lg h-full">
+                  <CardContent className="py-8 px-6 md:px-10">
+                    <h3 className="text-2xl font-bold mb-2 text-glee-purple">Dr. Kevin Phillip Johnson</h3>
+                    <p className="text-lg font-medium mb-6 text-gray-600 dark:text-gray-400">
+                      Director, Spelman College Glee Club
                     </p>
-                    <p>
-                      His innovative work includes the Hip-Hop Mass, the Black Music Scholar Academy, and original 
-                      compositions published through Carl Fischer and Lion & Lamb Publishing. With a creative portfolio 
-                      spanning choral music, screenwriting, and product development, Dr. Johnson continues to shape 
-                      the future of music education and Black cultural expression.
+                    <div className="space-y-4">
+                      <div className="flex items-center gap-3">
+                        <Mail className="h-5 w-5 text-glee-spelman" />
+                        <a href="mailto:kevin@spelman.edu" className="text-glee-spelman hover:underline">
+                          kevin@spelman.edu
+                        </a>
+                      </div>
+                      <div className="flex items-center gap-3">
+                        <Phone className="h-5 w-5 text-glee-spelman" />
+                        <a href="tel:+14045551234" className="text-glee-spelman hover:underline">
+                          (404) 555-1234
+                        </a>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                {/* Media Relations Contact Card */}
+                <Card className="bg-white dark:bg-gray-800 border-none shadow-lg h-full">
+                  <CardContent className="py-8 px-6 md:px-10">
+                    <h3 className="text-2xl font-bold mb-2 text-glee-purple">Media Relations</h3>
+                    <p className="text-lg font-medium mb-6 text-gray-600 dark:text-gray-400">
+                      Spelman College Office of Communications
                     </p>
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
-          </div>
-        </div>
+                    <div className="space-y-4">
+                      <div className="flex items-center gap-3">
+                        <Mail className="h-5 w-5 text-glee-spelman" />
+                        <a href="mailto:media@spelman.edu" className="text-glee-spelman hover:underline">
+                          media@spelman.edu
+                        </a>
+                      </div>
+                      <div className="flex items-center gap-3">
+                        <Phone className="h-5 w-5 text-glee-spelman" />
+                        <a href="tel:+14045552345" className="text-glee-spelman hover:underline">
+                          (404) 555-2345
+                        </a>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
 
-        {/* Downloads Section */}
-        <div id="downloads" className="container mx-auto px-4 py-16">
-          <div className="max-w-4xl mx-auto">
-            <div className="flex items-center gap-3 mb-6">
-              <DownloadCloud className="h-8 w-8 text-glee-accent" />
-              <h2 className="font-playfair text-3xl font-bold text-gray-800 dark:text-gray-100">Downloads</h2>
-            </div>
-            
-            <p className="text-lg mb-8 text-gray-700 dark:text-gray-300">
-              Download official materials for media and promotional use. For additional resources or specific requests, please 
-              <a href="/contact" className="text-glee-purple hover:text-glee-accent mx-1">contact us</a>.
-            </p>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <Card className="border-none shadow-md hover:shadow-lg transition-shadow">
-                <CardContent className="p-6">
-                  <div className="flex items-center gap-4">
-                    <FileText className="h-12 w-12 text-glee-purple" />
-                    <div>
-                      <h3 className="text-xl font-semibold mb-1">Press Release</h3>
-                      <p className="text-gray-600 dark:text-gray-400 mb-4">Latest press release about upcoming performances (PDF)</p>
-                      <Button size="sm" className="bg-glee-purple hover:bg-glee-spelman">
-                        <DownloadCloud className="mr-2 h-4 w-4" /> Download
-                      </Button>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-              
-              <Card className="border-none shadow-md hover:shadow-lg transition-shadow">
-                <CardContent className="p-6">
-                  <div className="flex items-center gap-4">
-                    <Image className="h-12 w-12 text-glee-purple" />
-                    <div>
-                      <h3 className="text-xl font-semibold mb-1">Logo Package</h3>
-                      <p className="text-gray-600 dark:text-gray-400 mb-4">Official logos in various formats (ZIP)</p>
-                      <Button size="sm" className="bg-glee-purple hover:bg-glee-spelman">
-                        <DownloadCloud className="mr-2 h-4 w-4" /> Download
-                      </Button>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-              
-              <Card className="border-none shadow-md hover:shadow-lg transition-shadow">
-                <CardContent className="p-6">
-                  <div className="flex items-center gap-4">
-                    <Music className="h-12 w-12 text-glee-purple" />
-                    <div>
-                      <h3 className="text-xl font-semibold mb-1">Performance Rider</h3>
-                      <p className="text-gray-600 dark:text-gray-400 mb-4">Technical and logistical requirements (PDF)</p>
-                      <Button size="sm" className="bg-glee-purple hover:bg-glee-spelman">
-                        <DownloadCloud className="mr-2 h-4 w-4" /> Download
-                      </Button>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-              
-              <Card className="border-none shadow-md hover:shadow-lg transition-shadow">
-                <CardContent className="p-6">
-                  <div className="flex items-center gap-4">
-                    <FileText className="h-12 w-12 text-glee-purple" />
-                    <div>
-                      <h3 className="text-xl font-semibold mb-1">Full Media Kit</h3>
-                      <p className="text-gray-600 dark:text-gray-400 mb-4">Complete press kit with all materials (ZIP)</p>
-                      <Button size="sm" className="bg-glee-purple hover:bg-glee-spelman">
-                        <DownloadCloud className="mr-2 h-4 w-4" /> Download
-                      </Button>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
-          </div>
-        </div>
-
-        {/* Contact CTA */}
-        <div className="bg-glee-purple text-white py-16">
-          <div className="container mx-auto px-4">
-            <div className="max-w-4xl mx-auto text-center">
-              <h2 className="font-playfair text-3xl font-bold mb-6">Media Inquiries</h2>
-              <p className="text-lg mb-8 text-white/90 max-w-2xl mx-auto">
-                For interview requests, booking inquiries, or additional press materials, 
-                please contact our media relations team.
-              </p>
-              <div className="flex flex-wrap gap-4 justify-center">
+              <div className="mt-12 text-center">
                 <Button 
-                  size="lg"
-                  className="bg-white text-glee-purple hover:bg-gray-100"
+                  variant="outline"
+                  className="border-glee-purple text-glee-purple hover:bg-glee-purple hover:text-white"
                   onClick={() => navigate("/contact")}
                 >
-                  Contact Us
-                </Button>
-                <Button 
-                  size="lg" 
-                  variant="outline" 
-                  className="border-white text-white hover:bg-white/20"
-                  onClick={() => navigate("/")}
-                >
-                  Return to Homepage
+                  Contact Us Through Our Online Form
                 </Button>
               </div>
             </div>
           </div>
         </div>
       </main>
-      <Footer />
-    </div>
+    </Layout>
   );
 }

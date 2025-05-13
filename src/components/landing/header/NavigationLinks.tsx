@@ -48,21 +48,21 @@ export function NavigationLinks({ className, onLinkClick }: NavigationLinksProps
         
         <NavigationMenuItem>
           <Link
-            to="/privacy"
+            to="/social"
             className="text-base md:text-lg font-inter font-medium text-muted-foreground transition-colors hover:text-foreground"
             onClick={handleLinkClick}
           >
-            Privacy
+            Social
           </Link>
         </NavigationMenuItem>
         
         <NavigationMenuItem>
           <Link
-            to="/terms"
+            to="/contact"
             className="text-base md:text-lg font-inter font-medium text-muted-foreground transition-colors hover:text-foreground"
             onClick={handleLinkClick}
           >
-            Terms
+            Contact
           </Link>
         </NavigationMenuItem>
       </NavigationMenuList>
