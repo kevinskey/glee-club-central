@@ -147,41 +147,41 @@ export default function ProfilePage() {
             className="w-full"
           >
             {/* Improved mobile tab styling with more padding and better touch targets */}
-            <div className="overflow-x-auto pb-1">
-              <TabsList className={`mb-4 ${isMobile ? 'w-full grid-cols-3 gap-1 p-1.5' : 'grid grid-cols-6'}`}>
+            <div className="overflow-x-auto pb-2">
+              <TabsList className={`mb-4 ${isMobile ? 'w-max min-w-full grid grid-cols-3 gap-2 p-2' : 'grid grid-cols-6'}`}>
                 <TabsTrigger 
                   value="overview" 
-                  className={`${isMobile ? 'py-2.5 px-1 text-xs' : ''}`}
+                  className={`${isMobile ? 'py-3 px-3 text-xs' : ''}`}
                 >
                   Overview
                 </TabsTrigger>
                 <TabsTrigger 
                   value="participation" 
-                  className={`${isMobile ? 'py-2.5 px-1 text-xs' : ''}`}
+                  className={`${isMobile ? 'py-3 px-3 text-xs' : ''}`}
                 >
                   Participation
                 </TabsTrigger>
                 <TabsTrigger 
                   value="music" 
-                  className={`${isMobile ? 'py-2.5 px-1 text-xs' : ''}`}
+                  className={`${isMobile ? 'py-3 px-3 text-xs' : ''}`}
                 >
                   Music
                 </TabsTrigger>
                 <TabsTrigger 
                   value="wardrobe" 
-                  className={`${isMobile ? 'py-2.5 px-1 text-xs' : ''}`}
+                  className={`${isMobile ? 'py-3 px-3 text-xs' : ''}`}
                 >
                   Wardrobe
                 </TabsTrigger>
                 <TabsTrigger 
                   value="financial" 
-                  className={`${isMobile ? 'py-2.5 px-1 text-xs' : ''}`}
+                  className={`${isMobile ? 'py-3 px-3 text-xs' : ''}`}
                 >
                   Financial
                 </TabsTrigger>
                 <TabsTrigger 
                   value="media" 
-                  className={`${isMobile ? 'py-2.5 px-1 text-xs' : ''}`}
+                  className={`${isMobile ? 'py-3 px-3 text-xs' : ''}`}
                 >
                   Media
                 </TabsTrigger>
