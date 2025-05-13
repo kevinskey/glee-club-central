@@ -36,7 +36,7 @@ export function CTASection() {
             <Button 
               size={isMobile ? "default" : "lg"} 
               className="bg-white text-glee-dark hover:bg-white/90 w-full sm:w-auto font-inter"
-              onClick={() => navigate("/login")}
+              onClick={() => navigate("/auth/login")}
             >
               Member Portal
             </Button>

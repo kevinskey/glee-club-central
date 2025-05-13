@@ -72,7 +72,7 @@ export function NavigationLinks({ className, onLinkClick }: NavigationLinksProps
         {!isAuthenticated && (
           <NavigationMenuItem>
             <Link
-              to="/login"
+              to="/auth/login"
               className="text-base md:text-lg font-inter font-medium text-glee-purple transition-colors hover:text-glee-purple/80"
               onClick={handleLinkClick}
             >
@@ -84,7 +84,7 @@ export function NavigationLinks({ className, onLinkClick }: NavigationLinksProps
         {!isAuthenticated && (
           <NavigationMenuItem>
             <Link
-              to="/login"
+              to="/auth/login"
               className="text-base md:text-lg font-inter font-medium text-muted-foreground transition-colors hover:text-foreground"
               onClick={handleLinkClick}
             >
@@ -96,7 +96,7 @@ export function NavigationLinks({ className, onLinkClick }: NavigationLinksProps
         {!isAuthenticated && (
           <NavigationMenuItem>
             <Link
-              to="/register"
+              to="/auth/signup"
               className="text-base md:text-lg font-inter font-medium text-muted-foreground transition-colors hover:text-foreground"
               onClick={handleLinkClick}
             >
@@ -108,7 +108,7 @@ export function NavigationLinks({ className, onLinkClick }: NavigationLinksProps
         {!isAuthenticated && (
           <NavigationMenuItem>
             <Link
-              to="/register/admin"
+              to="/auth/signup?admin=true"
               className="text-base md:text-lg font-inter font-medium text-muted-foreground transition-colors hover:text-foreground"
               onClick={handleLinkClick}
             >

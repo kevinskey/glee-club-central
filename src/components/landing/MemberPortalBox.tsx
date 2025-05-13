@@ -36,7 +36,7 @@ export function MemberPortalBox() {
             </Button>
             <Button 
               variant="outline"
-              onClick={() => navigate('/auth/login')} 
+              onClick={() => navigate('/fan-page')} 
               className="border-white text-white hover:bg-white/20"
             >
               Guest Access
