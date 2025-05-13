@@ -1,0 +1,131 @@
+
+@tailwind base;
+
+@layer base {
+  :root {
+    /* Light Theme - Default */
+    --background: 0 0% 100%; /* #FFFFFF */
+    --foreground: 0 0% 0%; /* #000000 */
+
+    --muted: 0 0% 96%;
+    --muted-foreground: 0 0% 50%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 0 0% 0%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 0 0% 0%;
+
+    --border: 0 0% 90%;
+    --input: 0 0% 90%;
+
+    --primary: 0 0% 20%; /* Changed to dark gray from blue */
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 0 0% 96%;
+    --secondary-foreground: 0 0% 0%;
+
+    --accent: 0 0% 20%; /* Changed to dark gray from Spelman Blue */
+    --accent-foreground: 0 0% 100%; 
+
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 0 0% 98%;
+
+    --ring: 0 0% 0%;
+
+    --radius: 0.5rem;
+  }
+
+  .dark, [data-theme="dark"] {
+    /* Dark Theme */
+    --background: 0 0% 7%; /* #121212 */
+    --foreground: 0 0% 100%; /* #FFFFFF */
+
+    --muted: 0 0% 15%;
+    --muted-foreground: 0 0% 70%;
+
+    --popover: 0 0% 7%;
+    --popover-foreground: 0 0% 100%;
+
+    --card: 0 0% 10%;
+    --card-foreground: 0 0% 100%;
+
+    --border: 0 0% 20%;
+    --input: 0 0% 20%;
+
+    --primary: 0 0% 80%; /* Changed to light gray from blue */
+    --primary-foreground: 0 0% 10%;
+
+    --secondary: 0 0% 15%;
+    --secondary-foreground: 0 0% 100%;
+
+    --accent: 0 0% 20%; /* Changed to dark gray from Spelman Blue */
+    --accent-foreground: 0 0% 100%;
+
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 0 85.7% 97.3%;
+
+    --ring: 0 0% 70%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+    transition-property: color, background-color, border-color, text-decoration-color, fill, stroke;
+    transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+    transition-duration: 300ms;
+  }
+  
+  html {
+    font-size: 16px;
+    @apply scroll-smooth font-inter;
+  }
+  
+  body {
+    @apply bg-background text-foreground font-inter;
+  }
+  
+  /* Typography system - Base elements with responsive sizes */
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-playfair font-bold tracking-tight;
+    line-height: 1.2;
+  }
+  
+  h1 {
+    @apply text-fluid-h1 mb-4 md:mb-6;
+  }
+  
+  h2 {
+    @apply text-fluid-h2 mb-3 md:mb-5;
+  }
+  
+  h3 {
+    @apply text-fluid-h3 mb-3 md:mb-4;
+  }
+  
+  h4 {
+    @apply text-xl md:text-2xl mb-2 md:mb-3;
+  }
+  
+  h5 {
+    @apply text-lg md:text-xl font-semibold mb-2 md:mb-3;
+  }
+  
+  h6 {
+    @apply text-base md:text-lg font-semibold mb-2;
+  }
+  
+  p {
+    @apply text-fluid-p leading-relaxed mb-4;
+    line-height: 1.8;
+  }
+  
+  a {
+    @apply text-glee-spelman hover:text-glee-spelman/80 transition-colors duration-200;
+  }
+  
+  small {
+    @apply text-sm text-muted-foreground;
+  }
+}

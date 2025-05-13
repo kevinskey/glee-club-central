@@ -1,0 +1,60 @@
+
+@tailwind components;
+
+@layer components {
+  /* Container and spacing */
+  .container-fluid {
+    @apply w-full px-4 sm:px-6 md:px-8 lg:px-12;
+  }
+  
+  .section-padding {
+    @apply py-mobile-section md:py-tablet-section lg:py-desktop-section;
+  }
+  
+  /* Custom typography classes */
+  .heading-xl {
+    @apply font-playfair text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-bold tracking-tight;
+  }
+  
+  .heading-large {
+    @apply font-playfair text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold tracking-tight;
+  }
+  
+  .heading-medium {
+    @apply font-playfair text-xl sm:text-2xl md:text-3xl font-bold tracking-tight;
+  }
+  
+  .heading-small {
+    @apply font-playfair text-lg sm:text-xl md:text-2xl font-semibold;
+  }
+  
+  .body-large {
+    @apply text-base sm:text-lg leading-relaxed;
+  }
+  
+  .body-medium {
+    @apply text-sm sm:text-base leading-relaxed;
+  }
+  
+  .body-small {
+    @apply text-xs sm:text-sm leading-relaxed;
+  }
+  
+  .caption {
+    @apply text-xs text-muted-foreground;
+  }
+  
+  .quote {
+    @apply font-playfair italic text-base sm:text-lg md:text-xl leading-relaxed border-l-4 border-glee-spelman pl-4 py-2;
+  }
+  
+  /* Apply responsive button text size */
+  button, .btn {
+    @apply text-fluid-btn;
+  }
+  
+  /* Improve spacing for mobile */
+  .card, .form-group, .input-group {
+    @apply mb-4 sm:mb-6;
+  }
+}
