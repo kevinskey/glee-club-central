@@ -1,9 +1,10 @@
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { Clock as ClockIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { EnhancedMetronome } from "@/components/ui/enhanced-metronome";
+import { resumeAudioContext } from "@/utils/audioUtils";
 
 interface ClockProps {
   showTime?: boolean;
@@ -13,7 +14,7 @@ interface ClockProps {
 export const Clock = ({ showTime = false, size = "md" }: ClockProps) => {
   const [currentTime, setCurrentTime] = useState<Date>(new Date());
   const [metronomeOpen, setMetronomeOpen] = useState(false);
-  const audioContextRef = React.useRef<AudioContext | null>(null);
+  const audioContextRef = useRef<AudioContext | null>(null);
   
   // Update the time every second
   useEffect(() => {
@@ -25,7 +26,7 @@ export const Clock = ({ showTime = false, size = "md" }: ClockProps) => {
   }, []);
   
   // Initialize audio context on first interaction
-  const handleOpenMetronome = () => {
+  const handleOpenMetronome = async () => {
     // Create AudioContext on first click if it doesn't exist
     if (!audioContextRef.current) {
       try {
@@ -36,8 +37,8 @@ export const Clock = ({ showTime = false, size = "md" }: ClockProps) => {
     }
     
     // Resume audio context if needed (for mobile browsers)
-    if (audioContextRef.current && audioContextRef.current.state === 'suspended') {
-      audioContextRef.current.resume().catch(console.error);
+    if (audioContextRef.current) {
+      await resumeAudioContext(audioContextRef.current);
     }
     
     setMetronomeOpen(true);

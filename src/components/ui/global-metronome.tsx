@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Toggle } from "@/components/ui/toggle";
 import { motion, AnimatePresence } from "framer-motion";
+import { resumeAudioContext, audioLogger } from "@/utils/audioUtils";
 
 export function GlobalMetronome() {
   const [isExpanded, setIsExpanded] = useState(false);
@@ -13,8 +14,22 @@ export function GlobalMetronome() {
   const [isVisible, setIsVisible] = useState(true);
   const audioContextRef = useRef<AudioContext | null>(null);
 
-  // Clean up audio context when component unmounts or is hidden
+  // Initialize audio context
   useEffect(() => {
+    const createAudioContext = () => {
+      if (!audioContextRef.current) {
+        try {
+          audioContextRef.current = new AudioContext();
+          audioLogger.log('Global metronome: Audio context created');
+        } catch (error) {
+          audioLogger.error('Global metronome: Failed to create audio context', error);
+        }
+      }
+    };
+
+    // Create context but don't autoplay (will be done on user interaction)
+    createAudioContext();
+
     return () => {
       if (isActive) {
         setIsActive(false);
@@ -36,7 +51,12 @@ export function GlobalMetronome() {
   };
   
   // Properly handle metronome activation
-  const toggleActive = () => {
+  const toggleActive = async () => {
+    // On activation, ensure audio context is resumed
+    if (!isActive && audioContextRef.current) {
+      await resumeAudioContext(audioContextRef.current);
+    }
+    
     setIsActive(!isActive);
   };
 
