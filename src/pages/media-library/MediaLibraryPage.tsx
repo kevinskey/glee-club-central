@@ -18,12 +18,12 @@ interface MediaLibraryPageProps {
 }
 
 export default function MediaLibraryPage({ isAdminView = false }: MediaLibraryPageProps) {
-  const { isSuperAdmin, hasPermission } = usePermissions();
+  const { isLoggedIn, hasPermission, isSuperAdmin } = usePermissions();
   
-  // Check if user has permission based on roles
-  const canUploadMedia = isSuperAdmin || hasPermission('can_upload_media');
-  const canEditMedia = isAdminView || isSuperAdmin || hasPermission('can_edit_media' as PermissionName);
-  const canDeleteMedia = isAdminView || isSuperAdmin || hasPermission('can_delete_media' as PermissionName);
+  // Check if user has permission based on roles - simplified to allow any authenticated user
+  const canUploadMedia = isLoggedIn;
+  const canEditMedia = isAdminView || isSuperAdmin || hasPermission('can_edit_media');
+  const canDeleteMedia = isAdminView || isSuperAdmin || hasPermission('can_delete_media');
   
   const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");

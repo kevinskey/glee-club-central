@@ -3,3 +3,6 @@ project_id = "glee-club"
 
 [functions.youtube-videos]
 verify_jwt = false
+
+[storage.media-library]
+public = true

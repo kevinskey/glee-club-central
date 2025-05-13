@@ -12,7 +12,7 @@ export function useMediaUpload(onComplete: () => void, defaultCategory: string =
   const [tags, setTags] = useState<string[]>([]);
   const [files, setFiles] = useState<File[]>([]);
   const [uploadProgress, setUploadProgress] = useState(0);
-  const { profile, user } = useAuth();
+  const { user } = useAuth();
 
   const resetForm = () => {
     setTitle("");
@@ -60,6 +60,9 @@ export function useMediaUpload(onComplete: () => void, defaultCategory: string =
     try {
       let successCount = 0;
       
+      // Create the media-library bucket if it doesn't exist (this will be handled by Supabase)
+      // The bucket should be created via SQL migration
+      
       for (let i = 0; i < files.length; i++) {
         const file = files[i];
         // Generate a unique filename
@@ -68,11 +71,14 @@ export function useMediaUpload(onComplete: () => void, defaultCategory: string =
         const filePath = `${category}/${fileName}`;
 
         // Upload file to Supabase Storage
-        const { error: uploadError } = await supabase.storage
+        const { data: uploadData, error: uploadError } = await supabase.storage
           .from('media-library')
           .upload(filePath, file);
 
-        if (uploadError) throw uploadError;
+        if (uploadError) {
+          console.error("Storage upload error:", uploadError);
+          throw uploadError;
+        }
 
         // Get public URL
         const { data: publicURL } = supabase.storage
