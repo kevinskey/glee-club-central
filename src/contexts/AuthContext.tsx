@@ -2,6 +2,22 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { AuthUser, AuthContextType, Profile, UserRole } from '@/types/auth';
 import { supabase } from '@/integrations/supabase/client';
+import { User } from '@supabase/supabase-js';
+
+// Helper function to convert Supabase User to AuthUser
+const mapUserToAuthUser = (user: User | null): AuthUser | null => {
+  if (!user) return null;
+  
+  return {
+    id: user.id,
+    email: user.email,
+    user_metadata: user.user_metadata,
+    app_metadata: user.app_metadata,
+    role: (user.app_metadata?.role || 'member') as UserRole,
+    aud: user.aud,
+    created_at: user.created_at
+  };
+};
 
 // Create a context with a more complete type definition that includes all required properties
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -20,7 +36,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       (event, currentSession) => {
         console.log("Auth state changed:", event);
         setSession(currentSession);
-        setUser(currentSession?.user ?? null);
+        setUser(currentSession?.user ? mapUserToAuthUser(currentSession.user) : null);
         setIsAuthenticated(!!currentSession);
         setIsLoading(false);
       }
@@ -31,7 +47,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       try {
         const { data: { session: currentSession } } = await supabase.auth.getSession();
         setSession(currentSession);
-        setUser(currentSession?.user ?? null);
+        setUser(currentSession?.user ? mapUserToAuthUser(currentSession.user) : null);
         setIsAuthenticated(!!currentSession);
       } catch (error) {
         console.error("Error fetching auth session:", error);
@@ -57,7 +73,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       
       if (error) throw error;
       
-      setUser(data.user);
+      setUser(data.user ? mapUserToAuthUser(data.user) : null);
       setSession(data.session);
       setIsAuthenticated(true);
       
