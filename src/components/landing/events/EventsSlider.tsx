@@ -28,7 +28,7 @@ export function EventsSlider() {
   
   if (isLoading) {
     return (
-      <div className="py-12 flex justify-center">
+      <div className="py-8 flex justify-center">
         <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-glee-purple"></div>
       </div>
     );
@@ -40,9 +40,9 @@ export function EventsSlider() {
   }
 
   return (
-    <section className="bg-gray-50 dark:bg-gray-900 py-12 md:py-16">
+    <section className="py-8 md:py-12">
       <div className="container px-4 md:px-6">
-        <div className="flex items-center justify-between mb-8">
+        <div className="flex items-center justify-between mb-6">
           <div className="flex items-center gap-2">
             <Calendar className="h-5 w-5 text-glee-purple" />
             <h2 className="text-2xl md:text-3xl font-playfair font-bold">Upcoming Performances</h2>
@@ -62,7 +62,7 @@ export function EventsSlider() {
             {events.map((event) => (
               <CarouselItem key={event.id} className="pl-2 md:pl-4 basis-full sm:basis-1/2 lg:basis-1/3">
                 <Link to={`/calendar?event=${event.id}`} className="h-full">
-                  <div className="h-full overflow-hidden rounded-lg bg-white dark:bg-gray-800 shadow-md hover:shadow-lg transition-shadow duration-300">
+                  <div className="h-full overflow-hidden rounded-lg bg-white dark:bg-gray-800 shadow-md hover:shadow-lg transition-shadow duration-300 border border-gray-100 dark:border-gray-700">
                     <div className={`${isMobile ? 'h-36' : 'h-48'} bg-muted relative`}>
                       {event.image ? (
                         <img
@@ -89,8 +89,8 @@ export function EventsSlider() {
               </CarouselItem>
             ))}
           </CarouselContent>
-          <CarouselPrevious className="hidden md:flex -left-12" />
-          <CarouselNext className="hidden md:flex -right-12" />
+          <CarouselPrevious className="hidden md:flex -left-5" />
+          <CarouselNext className="hidden md:flex -right-5" />
         </Carousel>
       </div>
     </section>

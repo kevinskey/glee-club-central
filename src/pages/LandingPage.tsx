@@ -14,8 +14,10 @@ const LandingPage: React.FC = () => {
       <div className="min-h-screen w-full">
         <main>
           <HeroSection />
-          <EventsSlider />
-          <PerformanceSection />
+          <div className="bg-gradient-to-b from-glee-purple/10 to-transparent py-8">
+            <EventsSlider />
+            <PerformanceSection />
+          </div>
           <YouTubeSection />
           <TestimonialSection />
           <CTASection />
