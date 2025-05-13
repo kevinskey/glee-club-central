@@ -19,17 +19,22 @@ export interface CalendarEvent {
   textColor?: string;
   extendedProps?: Record<string, any>;
   source?: any;
-  date?: string; // Added missing property
-  time?: string; // Added missing property
-  type?: EventType; // Added missing property
-  created_by?: string; // Added missing property
+  date?: Date | string; // Updated to accept both Date and string
+  time?: string;
+  type?: string; // Changed to string to accept all event types
+  created_by?: string;
 }
 
+// Updated enum to include all event types used in the application
 export enum EventType {
   REHEARSAL = "rehearsal",
   PERFORMANCE = "performance",
   MEETING = "meeting",
-  OTHER = "other"
+  OTHER = "other",
+  CONCERT = "concert",
+  SECTIONAL = "sectional",
+  SPECIAL = "special",
+  TOUR = "tour"
 }
 
 export interface CalendarState {

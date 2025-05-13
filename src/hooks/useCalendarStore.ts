@@ -39,10 +39,10 @@ export function useCalendarStore() {
           title: event.title,
           description: event.description || '',
           location: event.location || '',
-          date: new Date(event.date),
+          date: event.date, // Keep as string as defined in interface
           time: event.time || '00:00',
-          start: startDate.toISOString(),
-          end: event.end_time ? new Date(`${event.date}T${event.end_time}`).toISOString() : endDate.toISOString(),
+          start: startDate, // Convert to Date object
+          end: endDate, // Convert to Date object
           type: event.type,
           created_by: event.user_id,
           allDay: event.allday || false,
@@ -68,7 +68,15 @@ export function useCalendarStore() {
     
     try {
       // Format date for database
-      const formattedDate = new Date(eventData.date).toISOString().split('T')[0];
+      let formattedDate: string;
+      if (typeof eventData.date === 'string') {
+        formattedDate = eventData.date;
+      } else if (eventData.date instanceof Date) {
+        formattedDate = eventData.date.toISOString().split('T')[0];
+      } else {
+        // Default to today if date is missing
+        formattedDate = new Date().toISOString().split('T')[0];
+      }
       
       const { data, error } = await supabase
         .from('calendar_events')
@@ -98,8 +106,8 @@ export function useCalendarStore() {
       const newEvent: CalendarEvent = {
         ...eventData,
         id: data[0].id,
-        start: startDate.toISOString(),
-        end: endDate.toISOString(),
+        start: startDate,
+        end: endDate,
         created_by: user.id,
         source: 'local'
       };
@@ -122,9 +130,15 @@ export function useCalendarStore() {
     
     try {
       // Format date for database
-      const formattedDate = new Date(typeof eventData.date === 'string' 
-        ? eventData.date 
-        : eventData.date).toISOString().split('T')[0];
+      let formattedDate: string;
+      if (typeof eventData.date === 'string') {
+        formattedDate = eventData.date;
+      } else if (eventData.date instanceof Date) {
+        formattedDate = eventData.date.toISOString().split('T')[0];
+      } else {
+        // Use start date if date field is missing
+        formattedDate = new Date(eventData.start).toISOString().split('T')[0];
+      }
       
       const { error } = await supabase
         .from('calendar_events')
@@ -145,15 +159,11 @@ export function useCalendarStore() {
         return false;
       }
       
-      // Convert start and end dates to strings if they are Date objects
+      // Convert start and end dates to their appropriate types
       const updatedEvent = {
         ...eventData,
-        start: typeof eventData.start === 'object' 
-          ? (eventData.start as Date).toISOString() 
-          : eventData.start,
-        end: typeof eventData.end === 'object' 
-          ? (eventData.end as Date).toISOString() 
-          : eventData.end
+        start: typeof eventData.start === 'string' ? new Date(eventData.start) : eventData.start,
+        end: typeof eventData.end === 'string' ? new Date(eventData.end) : eventData.end
       };
       
       // Update the event in the local state

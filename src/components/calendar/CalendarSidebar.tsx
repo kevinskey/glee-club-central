@@ -29,16 +29,17 @@ export function CalendarSidebar() {
   }).slice(0, 5); // Show only 5 upcoming events
 
   // Format time from ISO string
-  const formatTime = (isoString: string) => {
-    return new Date(isoString).toLocaleTimeString([], {
+  const formatTime = (timeValue: string | Date) => {
+    const dateObj = typeof timeValue === 'string' ? new Date(timeValue) : timeValue;
+    return dateObj.toLocaleTimeString([], {
       hour: '2-digit',
       minute: '2-digit'
     });
   };
 
   // Format date for upcoming events
-  const formatDate = (isoString: string) => {
-    const eventDate = new Date(isoString);
+  const formatDate = (dateValue: string | Date) => {
+    const eventDate = typeof dateValue === 'string' ? new Date(dateValue) : dateValue;
     const today = new Date();
     const tomorrow = new Date(today);
     tomorrow.setDate(tomorrow.getDate() + 1);
@@ -54,6 +55,25 @@ export function CalendarSidebar() {
         month: 'short',
         day: 'numeric'
       });
+    }
+  };
+
+  // Get color based on event type
+  const getEventTypeColor = (type?: string) => {
+    switch(type) {
+      case 'rehearsal':
+        return 'border-blue-500';
+      case 'concert':
+      case 'performance':
+        return 'border-orange-500';
+      case 'sectional':
+        return 'border-green-500';
+      case 'meeting':
+        return 'border-yellow-500';
+      case 'special':
+      case 'tour':
+      default:
+        return 'border-purple-500';
     }
   };
 
@@ -93,13 +113,7 @@ export function CalendarSidebar() {
           {todaysEvents.length > 0 ? (
             <div className="space-y-3">
               {todaysEvents.map(event => (
-                <div key={event.id} className="border-l-4 pl-3 py-1 text-sm" 
-                     style={{ 
-                       borderColor: event.type === 'rehearsal' ? '#3b82f6' :
-                                  event.type === 'concert' ? '#f97316' :
-                                  event.type === 'sectional' ? '#22c55e' :
-                                  '#a855f7'
-                     }}>
+                <div key={event.id} className={`border-l-4 pl-3 py-1 text-sm ${getEventTypeColor(event.type)}`}>
                   <div className="font-medium">{event.title}</div>
                   <div className="text-gray-500 dark:text-gray-400">
                     {formatTime(event.start)} - {formatTime(event.end)}
@@ -126,13 +140,7 @@ export function CalendarSidebar() {
           {upcomingEvents.length > 0 ? (
             <div className="space-y-3">
               {upcomingEvents.map(event => (
-                <div key={event.id} className="border-l-4 pl-3 py-1 text-sm" 
-                     style={{ 
-                       borderColor: event.type === 'rehearsal' ? '#3b82f6' :
-                                  event.type === 'concert' ? '#f97316' :
-                                  event.type === 'sectional' ? '#22c55e' :
-                                  '#a855f7'
-                     }}>
+                <div key={event.id} className={`border-l-4 pl-3 py-1 text-sm ${getEventTypeColor(event.type)}`}>
                   <div className="text-xs font-medium text-gray-500">
                     {formatDate(event.start)}
                   </div>

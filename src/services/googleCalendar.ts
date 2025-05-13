@@ -1,90 +1,117 @@
 
-import { supabase } from '@/integrations/supabase/client';
+import { supabase } from "@/integrations/supabase/client";
+import { GoogleCalendarToken } from "@/types/calendar"; 
 
-// Define interface for calendar token
-interface CalendarToken {
-  id: string;
-  user_id: string;
-  access_token: string;
-  refresh_token: string;
-  expires_at: number;
-  created_at: string;
-}
-
-// Check if the user is connected to Google Calendar
-export const isConnected = async (): Promise<boolean> => {
+// Function to connect Google Calendar
+export const connectGoogleCalendar = async (code: string, userId: string) => {
   try {
-    const { data: user } = await supabase.auth.getUser();
-    if (!user?.user) return false;
+    // Exchange authorization code for tokens
+    const response = await fetch('/api/google-calendar/auth', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ code, userId }),
+    });
 
-    // Mock check for existing connection
-    // In a real implementation, we would query the database
-    console.log("Checking if user is connected to Google Calendar");
-    return false; // Mock implementation
-  } catch (error) {
-    console.error('Error checking Google Calendar connection:', error);
-    return false;
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.message || 'Failed to connect to Google Calendar');
+    }
+
+    const data = await response.json();
+    return data;
+  } catch (error: any) {
+    console.error('Error connecting to Google Calendar:', error);
+    throw new Error(error.message || 'Failed to connect to Google Calendar');
   }
 };
 
-// Connect to Google Calendar
-export const connect = async (): Promise<void> => {
-  console.log("Connecting to Google Calendar");
-  // Mock implementation
+// Function to check if user has connected Google Calendar
+export const checkGoogleCalendarConnection = async (userId: string) => {
+  try {
+    const { data, error } = await supabase
+      .from('google_calendar_tokens')
+      .select('*')
+      .eq('user_id', userId)
+      .single();
+      
+    if (error) {
+      return { connected: false, token: null };
+    }
+    
+    return { 
+      connected: !!data, 
+      token: data as GoogleCalendarToken
+    };
+  } catch (error) {
+    console.error('Error checking Google Calendar connection:', error);
+    return { connected: false, token: null };
+  }
 };
 
-// Connect to Google Calendar (alias for backward compatibility)
-export const connectToGoogleCalendar = async (): Promise<void> => {
-  return connect();
+// Function to disconnect Google Calendar
+export const disconnectGoogleCalendar = async (userId: string) => {
+  try {
+    const { error } = await supabase
+      .from('google_calendar_tokens')
+      .delete()
+      .eq('user_id', userId);
+      
+    if (error) {
+      throw new Error(error.message);
+    }
+    
+    return { success: true };
+  } catch (error: any) {
+    console.error('Error disconnecting Google Calendar:', error);
+    throw new Error(error.message || 'Failed to disconnect Google Calendar');
+  }
 };
 
-// Disconnect from Google Calendar
-export const disconnect = async (): Promise<void> => {
-  console.log("Disconnecting from Google Calendar");
-  // Mock implementation
+// Function to fetch events from Google Calendar
+export const fetchGoogleCalendarEvents = async (userId: string) => {
+  try {
+    const response = await fetch(`/api/google-calendar/events?userId=${userId}`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.message || 'Failed to fetch Google Calendar events');
+    }
+
+    const data = await response.json();
+    return data.events;
+  } catch (error: any) {
+    console.error('Error fetching Google Calendar events:', error);
+    throw new Error(error.message || 'Failed to fetch Google Calendar events');
+  }
 };
 
-// Sync calendar with Google Calendar
-export const syncCalendar = async (): Promise<void> => {
-  console.log("Syncing calendar with Google Calendar");
-  // Mock implementation
-};
+// Function to sync events to Google Calendar
+export const syncEventsToGoogle = async (userId: string, events: any[]) => {
+  try {
+    const response = await fetch('/api/google-calendar/sync', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ userId, events }),
+    });
 
-// Fetch events from Google Calendar
-export const fetchEvents = async (startDate: Date, endDate: Date): Promise<any[]> => {
-  console.log("Fetching events from Google Calendar", { startDate, endDate });
-  // Mock implementation
-  return [];
-};
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.message || 'Failed to sync events to Google Calendar');
+    }
 
-// Add event to Google Calendar
-export const addEvent = async (eventData: any): Promise<string> => {
-  console.log("Adding event to Google Calendar", eventData);
-  // Mock implementation
-  return "mock-event-id";
-};
-
-// Update event in Google Calendar
-export const updateEvent = async (eventId: string, eventData: any): Promise<void> => {
-  console.log("Updating event in Google Calendar", { eventId, eventData });
-  // Mock implementation
-};
-
-// Delete event from Google Calendar
-export const deleteEvent = async (eventId: string): Promise<void> => {
-  console.log("Deleting event from Google Calendar", eventId);
-  // Mock implementation
-};
-
-// Define types for exported functions
-export type GoogleCalendarFunctions = {
-  isConnected: () => Promise<boolean>;
-  connect: () => Promise<void>;
-  connectToGoogleCalendar: () => Promise<void>;
-  disconnect: () => Promise<void>;
-  syncCalendar: () => Promise<void>;
-  fetchEvents: (startDate: Date, endDate: Date) => Promise<any[]>;
-  addEvent: (eventData: any) => Promise<string>;
-  updateEvent: (eventId: string, eventData: any) => Promise<void>;
-  deleteEvent: (eventId: string) => Promise<void>;
+    const data = await response.json();
+    return data;
+  } catch (error: any) {
+    console.error('Error syncing events to Google Calendar:', error);
+    throw new Error(error.message || 'Failed to sync events to Google Calendar');
+  }
 };

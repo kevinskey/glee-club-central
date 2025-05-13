@@ -42,21 +42,26 @@ export function ViewEventModal({
     await onUpdate(event);
   };
 
-  const formatDate = (dateString: string) => {
-    return format(new Date(dateString), "EEEE, MMMM d, yyyy");
+  const formatDate = (dateValue: string | Date) => {
+    const date = typeof dateValue === 'string' ? new Date(dateValue) : dateValue;
+    return format(date, "EEEE, MMMM d, yyyy");
   };
 
-  const formatTime = (dateString: string) => {
-    return format(new Date(dateString), "h:mm a");
+  const formatTime = (dateValue: string | Date) => {
+    const date = typeof dateValue === 'string' ? new Date(dateValue) : dateValue;
+    return format(date, "h:mm a");
   };
 
-  const getEventTypeLabel = (type: string) => {
+  const getEventTypeLabel = (type?: string) => {
     switch(type) {
       case 'rehearsal': return 'Rehearsal';
       case 'concert': return 'Concert';
+      case 'performance': return 'Performance';
       case 'sectional': return 'Sectional';
       case 'special': return 'Special Event';
-      default: return type;
+      case 'tour': return 'Tour';
+      case 'meeting': return 'Meeting';
+      default: return type || 'Event';
     }
   };
 
