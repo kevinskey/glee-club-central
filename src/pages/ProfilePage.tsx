@@ -4,7 +4,7 @@ import { PageHeader } from "@/components/ui/page-header";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useAuth } from "@/contexts/AuthContext";
 import { User, Edit, Save } from "lucide-react";
-import { ProfileOverviewTab } from "@/components/profile/ProfileOverviewTab";
+import { ProfileOverviewTab } from "@/components/members/profile/ProfileOverviewTab";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
