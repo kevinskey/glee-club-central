@@ -36,7 +36,8 @@ export function UpcomingEvents() {
           type: event.type as EventType,
           allDay: event.allday || false,
           image_url: event.image_url || event.image,
-          created_by: event.user_id
+          created_by: event.user_id,
+          google_event_id: event.google_event_id
         }));
         
         setEvents(transformedEvents);
@@ -61,6 +62,18 @@ export function UpcomingEvents() {
   const handleViewEvent = (event: CalendarEvent) => {
     setSelectedEvent(event);
     setIsViewModalOpen(true);
+  };
+  
+  // Mock update function that returns Promise<boolean>
+  const handleUpdateEvent = async (event: CalendarEvent): Promise<boolean> => {
+    console.log("Update event action not available in public view", event);
+    return true; // Always return true in the public view
+  };
+  
+  // Mock delete function that returns Promise<boolean>
+  const handleDeleteEvent = async (eventId: string): Promise<boolean> => {
+    console.log("Delete event action not available in public view", eventId);
+    return true; // Always return true in the public view
   };
   
   // Function to get event type icon
@@ -204,8 +217,8 @@ export function UpcomingEvents() {
             <ViewEventModal 
               event={selectedEvent} 
               onClose={() => setIsViewModalOpen(false)} 
-              onUpdate={async () => {}} // Empty function since we're in read-only mode
-              onDelete={async () => {}} // Empty function since we're in read-only mode
+              onUpdate={handleUpdateEvent}
+              onDelete={handleDeleteEvent}
               userCanEdit={false} // No editing in public view
             />
           </DialogContent>
