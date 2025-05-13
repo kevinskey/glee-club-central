@@ -1,4 +1,3 @@
-
 import React, { useState, useRef } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
@@ -173,7 +172,6 @@ export function ConsolidatedHeader() {
                   </>
                 ) : (
                   <>
-                    <DropdownMenuLabel>Navigation</DropdownMenuLabel>
                     <DropdownMenuSeparator />
                     
                     <DropdownMenuItem onClick={() => navigate("/")}>

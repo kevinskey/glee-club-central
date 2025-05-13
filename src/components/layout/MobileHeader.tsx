@@ -1,4 +1,3 @@
-
 import React, { useState, useRef } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { Icons } from "@/components/Icons";
@@ -17,7 +16,6 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
   DropdownMenuSeparator,
-  DropdownMenuLabel,
   DropdownMenuProvider
 } from "@/components/ui/dropdown-menu";
 
@@ -126,7 +124,6 @@ export function MobileHeader() {
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="w-56 bg-popover">
-                  <DropdownMenuLabel>Navigation</DropdownMenuLabel>
                   <DropdownMenuSeparator />
                   
                   <DropdownMenuItem onClick={() => navigate("/")}>
