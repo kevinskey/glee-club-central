@@ -27,7 +27,7 @@ export const formSchema = z.object({
 });
 
 interface AddEventFormProps {
-  onAddEvent: (event: EventFormValues & { start: Date, end: Date }) => void;
+  onAddEvent: (event: EventFormValues & { start: Date, end: Date }) => Promise<void>;
   onCancel: () => void;
   initialDate?: Date;
 }
@@ -66,6 +66,8 @@ export function AddEventForm({ onAddEvent, onCancel, initialDate }: AddEventForm
   const description = form.watch('description');
 
   async function onSubmit(values: EventFormValues) {
+    console.log("Form submitted with values:", values);
+    
     if (!user) {
       toast.error("You must be logged in to save events");
       return;
@@ -88,9 +90,9 @@ export function AddEventForm({ onAddEvent, onCancel, initialDate }: AddEventForm
       });
     }
     
-    setIsUploading(true);
-    
     try {
+      setIsUploading(true);
+      
       // Handle image upload if there's a selected image
       let imageUrl = values.image_url;
       
@@ -127,8 +129,10 @@ export function AddEventForm({ onAddEvent, onCancel, initialDate }: AddEventForm
         end: values.date     // Set end date (same as start for simplicity)
       };
       
+      console.log("Calling onAddEvent with:", enhancedValues);
+      
       // Pass the enhanced values to the onAddEvent handler
-      onAddEvent(enhancedValues);
+      await onAddEvent(enhancedValues);
       
       // Reset form and state
       form.reset();

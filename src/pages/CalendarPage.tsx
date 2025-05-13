@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useRef } from "react";
 import { Footer } from "@/components/landing/Footer";
 import { CalendarHeader } from "@/components/calendar/CalendarHeader";
@@ -82,8 +83,12 @@ const CalendarPage = () => {
   });
 
   // Handler for creating event
-  const onCreateEvent = async (eventData: any): Promise<boolean> => {
-    return await handleCreateEvent(eventData);
+  const onCreateEvent = async (eventData: any): Promise<void> => {
+    console.log("onCreateEvent called with:", eventData);
+    const success = await handleCreateEvent(eventData);
+    if (success) {
+      setIsCreateModalOpen(false);
+    }
   };
 
   // Handler for updating event

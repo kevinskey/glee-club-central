@@ -53,7 +53,7 @@ const formSchema = z.object({
 
 interface EventModalProps {
   onClose: () => void;
-  onSave: (event: any) => Promise<boolean>;
+  onSave: (event: any) => Promise<void>;
   initialDate: Date | null;
   defaultValues?: Partial<CalendarEvent>;
   mode?: "create" | "edit";
@@ -117,6 +117,7 @@ export const EventModal = ({
   // Handle form submission
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     try {
+      console.log("EventModal onSubmit with values:", values);
       setIsSubmitting(true);
 
       // Handle image upload if there's a selected image
@@ -173,12 +174,10 @@ export const EventModal = ({
         image_url: imageUrl,
       };
 
+      console.log("Calling onSave with eventData:", eventData);
+
       // Save the event
-      const success = await onSave(eventData);
-      
-      if (success) {
-        onClose();
-      }
+      await onSave(eventData);
     } catch (error) {
       console.error("Error submitting event:", error);
       toast.error("Failed to save event");
@@ -402,8 +401,8 @@ export const EventModal = ({
             <Button type="submit" disabled={isSubmitting}>
               {isSubmitting ? (
                 <>
-                  <span className="animate-spin mr-2">⚪</span>
-                  {isEditMode ? "Updating..." : "Saving..."}
+                  <span className="mr-2">Saving...</span>
+                  <div className="h-4 w-4 rounded-full border-2 border-white border-t-transparent animate-spin"></div>
                 </>
               ) : (
                 <>{isEditMode ? "Update Event" : "Save Event"}</>
