@@ -1,4 +1,3 @@
-
 import React, { useState, useRef } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
@@ -105,6 +104,18 @@ export function ConsolidatedHeader() {
             </Button>
           )}
           
+          {/* Dashboard Button for authenticated users */}
+          {isAuthenticated && (
+            <Button
+              variant="spelman"
+              size={isMobile ? "sm" : "default"}
+              className={`${isMobile ? 'h-8 text-xs' : 'h-9'} flex items-center gap-1`}
+              onClick={() => navigate("/dashboard")}
+            >
+              Dashboard
+            </Button>
+          )}
+          
           {/* Metronome Icon */}
           <Dialog open={metronomeOpen} onOpenChange={setMetronomeOpen}>
             <DialogTrigger asChild>
@@ -150,10 +161,6 @@ export function ConsolidatedHeader() {
                       {profile?.first_name} {profile?.last_name}
                     </DropdownMenuLabel>
                     <DropdownMenuSeparator />
-                    
-                    <DropdownMenuItem onClick={() => navigate("/dashboard")}>
-                      Dashboard
-                    </DropdownMenuItem>
                     
                     <DropdownMenuItem onClick={() => navigate("/dashboard/profile")}>
                       <User className="h-4 w-4 mr-2" />

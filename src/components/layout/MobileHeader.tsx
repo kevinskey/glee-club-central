@@ -1,4 +1,3 @@
-
 import React, { useState, useRef } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { Icons } from "@/components/Icons";
@@ -100,6 +99,18 @@ export function MobileHeader() {
               </Button>
             )}
             
+            {/* Dashboard Button for authenticated users */}
+            {isAuthenticated && (
+              <Button
+                variant="spelman"
+                size="sm"
+                className="h-8 text-xs flex items-center gap-1"
+                onClick={() => navigate("/dashboard")}
+              >
+                Dashboard
+              </Button>
+            )}
+            
             <Dialog open={metronomeOpen} onOpenChange={setMetronomeOpen}>
               <DialogTrigger asChild>
                 <Button 
@@ -165,9 +176,6 @@ export function MobileHeader() {
                   
                   {isAuthenticated && (
                     <>
-                      <DropdownMenuItem onClick={() => navigate("/dashboard")}>
-                        Dashboard
-                      </DropdownMenuItem>
                       <DropdownMenuItem onClick={() => navigate("/dashboard/profile")}>
                         Profile
                       </DropdownMenuItem>

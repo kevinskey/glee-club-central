@@ -71,8 +71,18 @@ export function Header() {
           </Link>
         </div>
           
-        {/* Right side: Metronome, theme toggle, and user dropdown */}
+        {/* Right side: Dashboard button, Metronome, theme toggle, and user dropdown */}
         <div className="flex items-center gap-3">
+          {/* Dashboard Button */}
+          <Button
+            variant="spelman"
+            size="sm"
+            className="h-9 flex items-center gap-1"
+            onClick={() => navigate("/dashboard")}
+          >
+            Dashboard
+          </Button>
+          
           {/* Metronome Icon */}
           <Dialog open={metronomeOpen} onOpenChange={setMetronomeOpen}>
             <DialogTrigger asChild>
