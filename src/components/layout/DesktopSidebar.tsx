@@ -1,8 +1,8 @@
 
 import React from "react";
 import { cn } from "@/lib/utils";
-import { SidebarNavItems, mainNavItems } from "@/components/layout/SidebarNavItems";
-import { AdminNavigation } from "@/components/layout/AdminNavItems";
+import { SidebarNavItems } from "@/components/layout/SidebarNavItems";
+import { AdminNavItems } from "@/components/layout/AdminNavItems";
 import { SidebarHelp } from "@/components/layout/SidebarHelp";
 
 interface DesktopSidebarProps {
@@ -23,7 +23,7 @@ export function DesktopSidebar({ isOpen, isAdmin }: DesktopSidebarProps) {
           </h2>
           <SidebarNavItems />
           
-          {isAdmin && <AdminNavigation />}
+          {isAdmin && <AdminNavItems />}
         </div>
         
         <SidebarHelp />

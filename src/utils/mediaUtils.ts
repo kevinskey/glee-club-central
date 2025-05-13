@@ -13,3 +13,29 @@ export function getMediaType(fileType: string): MediaType {
     return "other";
   }
 }
+
+export function getMediaTypeLabel(type: MediaType): string {
+  switch (type) {
+    case "image":
+      return "Image";
+    case "video":
+      return "Video";
+    case "audio":
+      return "Audio";
+    case "pdf":
+      return "PDF";
+    default:
+      return "Other";
+  }
+}
+
+export async function fetchFlickrPhotos(options: any = {}): Promise<any[]> {
+  try {
+    console.log('Flickr fetch not implemented yet');
+    // This is a placeholder - the real implementation would fetch from Flickr API
+    return [];
+  } catch (error) {
+    console.error("Error fetching Flickr photos:", error);
+    return [];
+  }
+}
