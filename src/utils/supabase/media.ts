@@ -46,7 +46,7 @@ export const uploadMediaFile = async (
         uploaded_by: metadata.uploadedBy,
         folder: metadata.category || 'general',
         tags: metadata.tags || [],
-        size: file.size
+        size: file.size // Now properly adding the file size
       })
       .select()
       .single();

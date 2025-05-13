@@ -192,6 +192,7 @@ export type Database = {
           folder: string | null
           id: string
           is_public: boolean | null
+          size: number | null
           tags: string[] | null
           title: string
           uploaded_by: string
@@ -205,6 +206,7 @@ export type Database = {
           folder?: string | null
           id?: string
           is_public?: boolean | null
+          size?: number | null
           tags?: string[] | null
           title: string
           uploaded_by: string
@@ -218,6 +220,7 @@ export type Database = {
           folder?: string | null
           id?: string
           is_public?: boolean | null
+          size?: number | null
           tags?: string[] | null
           title?: string
           uploaded_by?: string

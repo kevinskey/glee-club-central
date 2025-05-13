@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { MediaFile, MediaStats } from "@/types/media";
 import { supabase } from "@/integrations/supabase/client";
@@ -48,7 +47,7 @@ export function useMediaLibrary() {
         category: item.folder || 'general',
         tags: item.tags || [],
         created_at: item.created_at,
-        size: item.size || 0,
+        size: item.size || 0, // Ensure we handle the size, defaulting to 0 if not set
       }));
       
       setMediaFiles(mappedData);
