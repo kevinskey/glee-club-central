@@ -1,3 +1,4 @@
+
 import React, { useState, useRef } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { Icons } from "@/components/Icons";
@@ -6,7 +7,7 @@ import { useIsMobile } from "@/hooks/use-mobile";
 import { useAuth } from "@/contexts/AuthContext";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription } from "@/components/ui/dialog";
 import { EnhancedMetronome } from "@/components/ui/enhanced-metronome";
-import { Clock, Menu, X } from "lucide-react";
+import { Clock, Menu, X, LogIn } from "lucide-react";
 import { MobileMenu } from "@/components/landing/header/MobileMenu";
 import { useSidebar } from "@/components/ui/sidebar";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
@@ -85,8 +86,31 @@ export function MobileHeader() {
             </Link>
           </div>
           
-          {/* Right side: Metronome, theme toggle, and menu button */}
+          {/* Right side: Login, Metronome, theme toggle, and menu button */}
           <div className="flex items-center gap-2">
+            {/* Login Button */}
+            {!isAuthenticated && (
+              <Button
+                variant="spelman"
+                size="sm"
+                className="h-8 text-xs flex items-center gap-1"
+                onClick={() => navigate("/login")}
+              >
+                <LogIn className="h-3.5 w-3.5 mr-1" /> Login
+              </Button>
+            )}
+            
+            {isAuthenticated && (
+              <Button
+                variant="outline"
+                size="sm"
+                className="h-8 text-xs flex items-center"
+                onClick={() => navigate("/dashboard")}
+              >
+                Dashboard
+              </Button>
+            )}
+            
             <Dialog open={metronomeOpen} onOpenChange={setMetronomeOpen}>
               <DialogTrigger asChild>
                 <Button 
@@ -164,12 +188,6 @@ export function MobileHeader() {
                       </DropdownMenuItem>
                     </>
                   ) : (
-                    <DropdownMenuItem onClick={() => navigate("/login")}>
-                      Member Login
-                    </DropdownMenuItem>
-                  )}
-                  
-                  {!isAuthenticated && (
                     <DropdownMenuItem onClick={() => navigate("/register/admin")}>
                       Admin Registration
                     </DropdownMenuItem>

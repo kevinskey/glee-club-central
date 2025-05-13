@@ -1,3 +1,4 @@
+
 import React, { useState, useRef } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
@@ -16,7 +17,8 @@ import {
   User,
   Settings,
   LogOut,
-  Clock
+  Clock,
+  LogIn
 } from "lucide-react";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { Icons } from "@/components/Icons";
@@ -89,8 +91,31 @@ export function ConsolidatedHeader() {
           </Link>
         </div>
           
-        {/* Right side: Metronome, theme toggle, and menu dropdown */}
+        {/* Right side: Login, Metronome, theme toggle, and menu dropdown */}
         <div className="flex items-center gap-2">
+          {/* Login Button (outside dropdown) */}
+          {!isAuthenticated && (
+            <Button
+              variant="spelman"
+              size={isMobile ? "sm" : "default"}
+              className={`${isMobile ? 'h-8 text-xs' : 'h-9'} flex items-center gap-1`}
+              onClick={() => navigate("/login")}
+            >
+              <LogIn className={`${isMobile ? 'h-3.5 w-3.5' : 'h-4 w-4'} mr-1`} /> Login
+            </Button>
+          )}
+          
+          {isAuthenticated && !isDashboardPath && (
+            <Button
+              variant="outline"
+              size={isMobile ? "sm" : "default"}
+              className={`${isMobile ? 'h-8 text-xs' : 'h-9'} flex items-center gap-1`}
+              onClick={() => navigate("/dashboard")}
+            >
+              Dashboard
+            </Button>
+          )}
+          
           {/* Metronome Icon */}
           <Dialog open={metronomeOpen} onOpenChange={setMetronomeOpen}>
             <DialogTrigger asChild>
@@ -195,10 +220,6 @@ export function ConsolidatedHeader() {
                     </DropdownMenuItem>
                     
                     <DropdownMenuSeparator />
-                    
-                    <DropdownMenuItem onClick={() => navigate("/login")}>
-                      Member Login
-                    </DropdownMenuItem>
                     
                     <DropdownMenuItem onClick={() => navigate("/register/admin")}>
                       Admin Registration
