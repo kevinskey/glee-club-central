@@ -1,6 +1,7 @@
 
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { useAuth } from "@/contexts/AuthContext";
 
 /**
  * Upload an event image to the media library
@@ -10,6 +11,15 @@ export const uploadEventImage = async (
   eventName: string
 ): Promise<string | null> => {
   try {
+    // Get the current user ID
+    const { data: { user } } = await supabase.auth.getUser();
+    
+    if (!user) {
+      console.error("No authenticated user found");
+      toast.error("You must be logged in to upload images");
+      return null;
+    }
+
     // Create a unique filename
     const fileExt = file.name.split('.').pop();
     const fileName = `event-${Date.now()}-${Math.random().toString(36).substring(2, 15)}.${fileExt}`;
@@ -42,7 +52,9 @@ export const uploadEventImage = async (
         file_url: publicURLData.publicUrl,
         file_type: file.type,
         folder: 'events',
-        size: file.size
+        size: file.size,
+        uploaded_by: user.id,  // Add the required uploaded_by field with the current user ID
+        tags: ['event', 'calendar']  // Add some default tags
       })
       .select()
       .single();
