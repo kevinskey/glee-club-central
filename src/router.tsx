@@ -1,3 +1,4 @@
+
 import {
   createBrowserRouter,
 } from "react-router-dom";
@@ -18,39 +19,30 @@ import SiteSettingsPage from "@/pages/admin/SiteSettingsPage";
 import HomePage from "@/pages/HomePage";
 import HomeLayout from "@/layouts/HomeLayout";
 import RecordingsPage from "@/pages/RecordingsPage";
-import SubmitRecordingPage from "@/pages/SubmitRecordingPage";
 import { MainLayout } from "@/layouts/MainLayout";
-import TermsPage from "@/pages/TermsPage";
-import PrivacyPage from "@/pages/PrivacyPage";
 import PressKitPage from "@/pages/PressKitPage";
-import SocialLinksPage from "@/pages/SocialLinksPage";
 import ContactPage from "@/pages/ContactPage";
 import AboutPage from "@/pages/AboutPage";
-import VideosPage from "@/pages/VideosPage";
 import LandingPageSettingsPage from "@/pages/admin/LandingPageSettingsPage";
+import AdminRegistrationPage from "@/pages/admin/AdminRegistrationPage";
 
 const router = createBrowserRouter([
   {
     path: "/",
     element: <HomeLayout />,
-    errorElement: <ErrorBoundary />,
+    errorElement: <ErrorBoundary children={null} />,
     children: [
       { index: true, element: <HomePage /> },
       { path: "about", element: <AboutPage /> },
-      { path: "videos", element: <VideosPage /> },
       { path: "contact", element: <ContactPage /> },
       { path: "press-kit", element: <PressKitPage /> },
-      { path: "privacy", element: <PrivacyPage /> },
-      { path: "social", element: <SocialLinksPage /> },
-      { path: "terms", element: <TermsPage /> },
       { path: "recordings", element: <RecordingsPage /> },
-      { path: "recordings/submit", element: <SubmitRecordingPage /> },
     ],
   },
   {
     path: "/dashboard",
     element: <DashboardLayout />,
-    errorElement: <ErrorBoundary />,
+    errorElement: <ErrorBoundary children={null} />,
     children: [
       { index: true, element: <DashboardPage /> },
     ],
@@ -58,7 +50,7 @@ const router = createBrowserRouter([
   {
     path: "/admin",
     element: <AdminLayout />,
-    errorElement: <ErrorBoundary />,
+    errorElement: <ErrorBoundary children={null} />,
     children: [
       { index: true, element: <AdminDashboardPage /> },
       { path: "analytics", element: <AnalyticsPage /> },
@@ -70,13 +62,13 @@ const router = createBrowserRouter([
       { path: "settings", element: <SettingsPage /> },
       { path: "sections", element: <SectionManagerPage /> },
       { path: "site-settings", element: <SiteSettingsPage /> },
-      { path: "landing-page", element: <LandingPageSettingsPage /> }, // New route
+      { path: "landing-page", element: <LandingPageSettingsPage /> },
     ],
   },
   {
     path: "/login",
     element: <MainLayout />,
-    errorElement: <ErrorBoundary />,
+    errorElement: <ErrorBoundary children={null} />,
     children: [
       {
         index: true,
@@ -90,7 +82,7 @@ const router = createBrowserRouter([
   {
     path: "/register",
     element: <MainLayout />,
-    errorElement: <ErrorBoundary />,
+    errorElement: <ErrorBoundary children={null} />,
     children: [
       {
         index: true,
@@ -102,8 +94,8 @@ const router = createBrowserRouter([
       {
         path: "admin",
         lazy: async () => {
-          let RegisterAdminPage = (await import("./pages/RegisterAdminPage")).default
-          return { Component: RegisterAdminPage }
+          // Use the AdminRegistrationPage that is properly imported at the top
+          return { Component: AdminRegistrationPage }
         },
       },
     ],
