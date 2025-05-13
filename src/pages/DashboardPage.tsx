@@ -1,6 +1,8 @@
 
 import React from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Link } from "react-router-dom";
+import { Music, Calendar, Users, FileText } from "lucide-react";
 
 const DashboardPage: React.FC = () => {
   return (
@@ -25,15 +27,29 @@ const DashboardPage: React.FC = () => {
           </CardHeader>
           <CardContent>
             <ul className="space-y-2">
-              <li>
-                <a href="/dashboard/profile" className="text-primary hover:underline">
-                  My Profile
-                </a>
+              <li className="flex items-center">
+                <FileText className="h-4 w-4 mr-2 text-glee-purple" />
+                <Link to="/dashboard/sheet-music" className="text-primary hover:underline">
+                  Sheet Music Library
+                </Link>
               </li>
-              <li>
-                <a href="/dashboard/members" className="text-primary hover:underline">
+              <li className="flex items-center">
+                <Music className="h-4 w-4 mr-2 text-glee-purple" />
+                <Link to="/dashboard/music" className="text-primary hover:underline">
+                  Music Portal
+                </Link>
+              </li>
+              <li className="flex items-center">
+                <Calendar className="h-4 w-4 mr-2 text-glee-purple" />
+                <Link to="/dashboard/calendar" className="text-primary hover:underline">
+                  Calendar
+                </Link>
+              </li>
+              <li className="flex items-center">
+                <Users className="h-4 w-4 mr-2 text-glee-purple" />
+                <Link to="/dashboard/members" className="text-primary hover:underline">
                   Members Directory
-                </a>
+                </Link>
               </li>
             </ul>
           </CardContent>

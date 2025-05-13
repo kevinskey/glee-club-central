@@ -1,110 +1,56 @@
 
-import React from 'react';
-import { NavLink } from 'react-router-dom';
-import { Home, Calendar, Music, FileText, Mic2, Video, 
-         BookOpen, Settings, Users, Shield } from 'lucide-react';
-import { AdminNavigation } from './AdminNavItems';
-import { usePermissions } from '@/hooks/usePermissions';
-import { useAuth } from '@/contexts/AuthContext';
-import { MemberManagementLink } from '@/components/dashboard/MemberManagementLink';
+import React from "react";
+import { NavItem } from "./NavItem";
+import {
+  Home,
+  CalendarDays,
+  Music,
+  Users,
+  User,
+  FileText,
+  Clock,
+  ImageIcon,
+  ListMusic,
+  Mic,
+  BookOpen
+} from "lucide-react";
 
-// Export the main nav items as an array for reuse
-export const mainNavItems = [
-  {
-    title: "Dashboard",
-    href: "/dashboard",
-    icon: <Home className="h-4 w-4" />,
-  },
-  {
-    title: "Calendar",
-    href: "/dashboard/calendar",
-    icon: <Calendar className="h-4 w-4" />,
-  },
-  {
-    title: "Sheet Music",
-    href: "/dashboard/sheet-music",
-    icon: <Music className="h-4 w-4" />,
-  },
-  {
-    title: "Practice",
-    href: "/dashboard/practice",
-    icon: <FileText className="h-4 w-4" />,
-  },
-  {
-    title: "Recordings",
-    href: "/dashboard/recordings",
-    icon: <Mic2 className="h-4 w-4" />,
-  },
-  {
-    title: "Videos",
-    href: "/dashboard/videos",
-    icon: <Video className="h-4 w-4" />,
-  },
-];
-
-// Define the props interface for SidebarNavItems
-interface SidebarNavItemsProps {
-  items?: Array<{
-    title: string;
-    href: string;
-    icon: React.ReactNode;
-  }>;
-}
-
-export function SidebarNavItems({ items }: SidebarNavItemsProps = {}) {
-  const { isAuthenticated, isAdmin } = useAuth();
-  const { hasPermission } = usePermissions();
-  const isUserAdmin = isAdmin && isAdmin();
-  const canManageUsers = hasPermission('can_manage_users');
-
-  if (!isAuthenticated) {
-    return null;
-  }
-
-  // If items are provided, render them
-  if (items) {
-    return (
-      <nav className="space-y-1">
-        {items.map((item) => (
-          <NavLink
-            key={item.href}
-            to={item.href}
-            className="flex items-center px-3 py-2 rounded-md text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground"
-          >
-            {item.icon}
-            <span className="ml-2">{item.title}</span>
-          </NavLink>
-        ))}
-      </nav>
-    );
-  }
-
-  // Default rendering for when no items are provided
+export const SidebarNavItems = () => {
   return (
-    <nav className="space-y-1">
-      {/* Main Navigation */}
-      <NavLink
-        to="/dashboard"
-        end
-        className="flex items-center px-3 py-2 rounded-md text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground"
-      >
-        <Home className="h-4 w-4 mr-2" />
-        <span>Dashboard</span>
-      </NavLink>
-
-      <NavLink
-        to="/dashboard/calendar"
-        className="flex items-center px-3 py-2 rounded-md text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground"
-      >
-        <Calendar className="h-4 w-4 mr-2" />
-        <span>Calendar</span>
-      </NavLink>
-
-      {/* Member Management Link for Users with Permission */}
-      <MemberManagementLink />
-      
-      {/* Admin Navigation */}
-      {isUserAdmin && <AdminNavigation />}
-    </nav>
+    <div className="space-y-1">
+      <NavItem icon={<Home />} href="/dashboard">
+        Dashboard
+      </NavItem>
+      <NavItem icon={<CalendarDays />} href="/dashboard/calendar">
+        Calendar
+      </NavItem>
+      <NavItem icon={<Music />} href="/dashboard/music">
+        Music
+      </NavItem>
+      <NavItem icon={<FileText />} href="/dashboard/sheet-music">
+        Sheet Music
+      </NavItem>
+      <NavItem icon={<ListMusic />} href="/dashboard/setlists">
+        Setlists
+      </NavItem>
+      <NavItem icon={<Mic />} href="/dashboard/recordings">
+        Recordings
+      </NavItem>
+      <NavItem icon={<Clock />} href="/dashboard/attendance">
+        Attendance
+      </NavItem>
+      <NavItem icon={<Users />} href="/dashboard/members">
+        Members
+      </NavItem>
+      <NavItem icon={<ImageIcon />} href="/dashboard/media">
+        Media
+      </NavItem>
+      <NavItem icon={<User />} href="/dashboard/profile">
+        My Profile
+      </NavItem>
+      <NavItem icon={<BookOpen />} href="/dashboard/resources">
+        Resources
+      </NavItem>
+    </div>
   );
-}
+};

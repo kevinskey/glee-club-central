@@ -14,6 +14,8 @@ import { ProtectedRoute } from './components/auth/ProtectedRoute';
 import AdminDashboard from './pages/admin/AdminDashboard';
 import AttendancePage from './pages/AttendancePage';
 import MediaLibraryPage from './pages/MediaLibraryPage';
+import MusicPage from './pages/dashboard/MusicPage';
+import SheetMusicPage from './pages/sheet-music/SheetMusicPage';
 
 // Root layout component with outlet
 const RootLayout = () => {
@@ -71,6 +73,18 @@ const router = createBrowserRouter([
           {
             path: 'attendance',
             element: <AttendancePage />
+          },
+          {
+            path: 'music',
+            element: <MusicPage />
+          },
+          {
+            path: 'sheet-music',
+            element: <SheetMusicPage />
+          },
+          {
+            path: 'sheet-music/:id',
+            element: <SheetMusicPage />
           }
         ]
       },
