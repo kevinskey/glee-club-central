@@ -28,13 +28,13 @@ export function MediaListView({
   const getMediaIcon = (fileType: string) => {
     const type = getMediaType(fileType);
     switch (type) {
-      case 'pdf':
+      case "pdf":
         return <FileText className="h-4 w-4 text-red-400" />;
-      case 'audio':
+      case "audio":
         return <Music className="h-4 w-4 text-green-400" />;
-      case 'image':
+      case "image":
         return <Image className="h-4 w-4 text-blue-400" />;
-      case 'video':
+      case "video":
         return <Video className="h-4 w-4 text-purple-400" />;
       default:
         return <File className="h-4 w-4 text-muted-foreground" />;
