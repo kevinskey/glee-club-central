@@ -36,7 +36,11 @@ export function PressKitMediaGrid({ bucketName, folder, title, maxItems = 8 }: P
 
         if (error) {
           console.error('Error fetching files:', error);
-          toast({ title: 'Error loading media', description: error.message, variant: 'destructive' });
+          toast({
+            title: "Error loading media",
+            description: error.message,
+            variant: "destructive"
+          });
           return;
         }
 
@@ -68,7 +72,11 @@ export function PressKitMediaGrid({ bucketName, folder, title, maxItems = 8 }: P
         setFiles(mediaFiles);
       } catch (err) {
         console.error('Unexpected error:', err);
-        toast({ title: 'Error loading media', description: 'An unexpected error occurred', variant: 'destructive' });
+        toast({
+          title: "Error loading media",
+          description: "An unexpected error occurred",
+          variant: "destructive"
+        });
       } finally {
         setLoading(false);
       }
@@ -88,15 +96,15 @@ export function PressKitMediaGrid({ bucketName, folder, title, maxItems = 8 }: P
       document.body.removeChild(link);
       
       toast({
-        title: 'Download started',
+        title: "Download started",
         description: `${fileName} is downloading`,
       });
     } catch (err) {
       console.error('Download error:', err);
-      toast({ 
-        title: 'Download failed', 
-        description: 'Unable to download the file',
-        variant: 'destructive'
+      toast({
+        title: "Download failed", 
+        description: "Unable to download the file",
+        variant: "destructive"
       });
     }
   };
@@ -176,12 +184,7 @@ export function PressKitMediaGrid({ bucketName, folder, title, maxItems = 8 }: P
       <Dialog open={lightboxOpen} onOpenChange={setLightboxOpen}>
         <DialogContent className="max-w-4xl w-[95vw]">
           <DialogHeader>
-            <DialogTitle className="flex justify-between items-center">
-              <span>Preview</span>
-              <Button variant="ghost" size="sm" onClick={() => setLightboxOpen(false)}>
-                <X className="h-4 w-4" />
-              </Button>
-            </DialogTitle>
+            <DialogTitle>Preview</DialogTitle>
           </DialogHeader>
           <div className="mt-2 relative">
             {selectedImage && (

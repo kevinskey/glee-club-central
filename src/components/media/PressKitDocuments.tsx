@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Download, FileText, FilePdf, FileImage } from 'lucide-react';
+import { Download, FileText, FileIcon, FileImage } from 'lucide-react';
 import { formatFileSize } from '@/utils/file-utils';
 import { toast } from '@/components/ui/use-toast';
 
@@ -36,7 +36,11 @@ export function PressKitDocuments({ bucketName, folder }: PressKitDocumentsProps
 
         if (error) {
           console.error('Error fetching documents:', error);
-          toast({ title: 'Error loading documents', description: error.message, variant: 'destructive' });
+          toast({
+            title: "Error loading documents",
+            description: error.message,
+            variant: "destructive"
+          });
           return;
         }
 
@@ -68,7 +72,11 @@ export function PressKitDocuments({ bucketName, folder }: PressKitDocumentsProps
         setDocuments(docs);
       } catch (err) {
         console.error('Unexpected error:', err);
-        toast({ title: 'Error loading documents', description: 'An unexpected error occurred', variant: 'destructive' });
+        toast({
+          title: "Error loading documents",
+          description: "An unexpected error occurred",
+          variant: "destructive"
+        });
       } finally {
         setLoading(false);
       }
@@ -87,22 +95,22 @@ export function PressKitDocuments({ bucketName, folder }: PressKitDocumentsProps
       document.body.removeChild(link);
       
       toast({
-        title: 'Download started',
+        title: "Download started",
         description: `${fileName} is downloading`,
       });
     } catch (err) {
       console.error('Download error:', err);
       toast({ 
-        title: 'Download failed', 
-        description: 'Unable to download the file',
-        variant: 'destructive'
+        title: "Download failed", 
+        description: "Unable to download the file",
+        variant: "destructive"
       });
     }
   };
 
   // Determine the appropriate icon based on file type
   const getFileIcon = (type: string) => {
-    if (type.includes('pdf')) return <FilePdf className="h-8 w-8 text-red-500" />;
+    if (type.includes('pdf')) return <FileIcon className="h-8 w-8 text-red-500" />;
     if (type.startsWith('image/')) return <FileImage className="h-8 w-8 text-blue-500" />;
     return <FileText className="h-8 w-8 text-gray-500" />;
   };
