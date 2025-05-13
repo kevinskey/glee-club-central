@@ -89,7 +89,7 @@ export default function MemberDashboardPage() {
   return (
     <div className="space-y-6">
       <PageHeader
-        heading={`Welcome, ${profile?.first_name || 'Member'}`}
+        title={`Welcome, ${profile?.first_name || 'Member'}`}
         description="Your Spelman College Glee Club member dashboard"
       />
       

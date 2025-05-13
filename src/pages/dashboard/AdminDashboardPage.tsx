@@ -61,7 +61,7 @@ const AdminDashboardPage = () => {
       <div className="space-y-6">
         <div className="flex justify-between items-center">
           <PageHeader
-            heading={`Admin Dashboard`}
+            title={`Admin Dashboard`}
             description={`Welcome, ${profile?.first_name || 'Administrator'} - Full administrative access`}
           />
           <div className="hidden md:flex items-center bg-amber-100 text-amber-800 px-4 py-2 rounded-md">

@@ -13,7 +13,10 @@ export type PermissionName =
   | 'can_manage_stage'
   | 'can_view_prayer_box'
   | 'can_post_announcements'
-  | 'can_manage_users';
+  | 'can_manage_users'
+  | 'can_manage_archives'
+  | 'can_edit_media'
+  | 'can_delete_media';
 
 export type UserLevel = 'guest' | 'member' | 'admin';
 

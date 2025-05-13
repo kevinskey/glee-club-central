@@ -13,7 +13,7 @@ export default function GuestDashboardPage() {
   return (
     <div className="space-y-6">
       <PageHeader
-        heading={`Welcome, ${profile?.first_name || 'Guest'}`}
+        title={`Welcome, ${profile?.first_name || 'Guest'}`}
         description="Guest access to Spelman College Glee Club resources"
       />
       
