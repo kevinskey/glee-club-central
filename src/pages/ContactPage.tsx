@@ -38,15 +38,17 @@ export default function ContactPage() {
   // Define contact information
   const contactInfo = {
     address: {
-      name: "Spelman College Glee Club",
-      street: "350 Spelman Ln SW",
+      name: "Dr. Kevin P. Johnson",
+      title: "Spelman College Glee Club",
+      street: "350 Spelman Lane SW",
+      box: "Box 312",
       city: "Atlanta",
       state: "GA",
       zip: "30314",
       country: "United States"
     },
-    phone: "(404) 555-1234",
-    email: "gleeclub@spelman.edu",
+    phone: "404-270-5480",
+    email: "kjohns10@spelman.edu",
     hours: {
       academic: {
         weekdays: "Monday - Friday: 9:00 AM - 5:00 PM",
@@ -113,7 +115,7 @@ export default function ContactPage() {
     } catch (error) {
       console.error("Error sending message:", error);
       toast.error("Failed to send message", {
-        description: "Please try again or contact us directly at gleeclub@spelman.edu"
+        description: "Please try again or contact us directly at kjohns10@spelman.edu"
       });
     } finally {
       setIsSubmitting(false);
@@ -247,7 +249,9 @@ export default function ContactPage() {
                     <MapPin className="h-5 w-5 text-glee-purple shrink-0 mt-1" />
                     <div>
                       <p className="font-medium">{contactInfo.address.name}</p>
+                      <p className="text-gray-600 dark:text-gray-400">{contactInfo.address.title}</p>
                       <p className="text-gray-600 dark:text-gray-400">{contactInfo.address.street}</p>
+                      <p className="text-gray-600 dark:text-gray-400">{contactInfo.address.box}</p>
                       <p className="text-gray-600 dark:text-gray-400">
                         {contactInfo.address.city}, {contactInfo.address.state} {contactInfo.address.zip}
                       </p>
