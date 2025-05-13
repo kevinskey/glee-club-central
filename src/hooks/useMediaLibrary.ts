@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { MediaFile, MediaStats } from "@/types/media";
 import { supabase } from "@/integrations/supabase/client";
@@ -92,7 +93,10 @@ export function useMediaLibrary() {
       
       setMediaTypes(types);
       
-      const cats = Array.from(new Set(mappedData.map(file => file.category || "general")));
+      const cats = Array.from(new Set(
+        mappedData.map(file => file.category || "general")
+      )) as string[];
+      
       setCategories(cats);
       
     } catch (err: any) {

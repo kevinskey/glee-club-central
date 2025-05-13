@@ -43,14 +43,14 @@ export async function uploadMediaFile(
     
     // Insert metadata into database
     const { data: mediaData, error: mediaError } = await supabase
-      .from("media_files")
+      .from("media_library")
       .insert({
         title: metadata.title,
         description: metadata.description || null,
         file_url: publicUrl,
         file_path: filePath,
         file_type: file.type,
-        file_size: file.size,
+        size: file.size,
         category: metadata.category,
         tags: metadata.tags || [],
         uploaded_by: metadata.uploadedBy
@@ -75,6 +75,68 @@ export async function uploadMediaFile(
   } catch (error) {
     console.error("Error in uploadMediaFile:", error);
     return { success: false };
+  }
+}
+
+/**
+ * Get all media files from the database
+ * @returns Array of media files
+ */
+export async function getAllMediaFiles() {
+  try {
+    const { data, error } = await supabase
+      .from("media_library")
+      .select('*')
+      .order('created_at', { ascending: false });
+      
+    if (error) throw error;
+    return data || [];
+  } catch (error) {
+    console.error("Error fetching media files:", error);
+    return [];
+  }
+}
+
+/**
+ * Delete a media file from storage and database
+ * @param mediaId ID of the media file to delete
+ * @returns Object with success status
+ */
+export async function deleteMediaFile(mediaId: string) {
+  try {
+    // First get the file path
+    const { data: mediaData, error: fetchError } = await supabase
+      .from("media_library")
+      .select('file_path')
+      .eq('id', mediaId)
+      .single();
+      
+    if (fetchError) throw fetchError;
+    
+    if (mediaData?.file_path) {
+      // Delete from storage
+      const { error: storageError } = await supabase.storage
+        .from("media_library")
+        .remove([mediaData.file_path]);
+        
+      if (storageError) {
+        console.error("Storage delete error:", storageError);
+        // Continue with database deletion even if storage deletion fails
+      }
+    }
+    
+    // Delete from database
+    const { error: dbError } = await supabase
+      .from("media_library")
+      .delete()
+      .eq('id', mediaId);
+      
+    if (dbError) throw dbError;
+    
+    return { success: true };
+  } catch (error) {
+    console.error("Error deleting media:", error);
+    throw error;
   }
 }
 

@@ -141,8 +141,8 @@ export function MediaUploadForm({
           
           <div>
             <Label htmlFor="category" className="font-medium">Category</Label>
-            <Select value={category} onValueChange={setCategory} className="mt-1.5">
-              <SelectTrigger>
+            <Select value={category} onValueChange={setCategory}>
+              <SelectTrigger className="mt-1.5">
                 <SelectValue placeholder="Select a category" />
               </SelectTrigger>
               <SelectContent>
