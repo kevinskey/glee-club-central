@@ -97,17 +97,6 @@ export function Header({ initialShowNewsFeed = true }: HeaderProps) {
             </Button>
           )}
           
-          {isAuthenticated && (
-            <Button
-              variant="outline"
-              size="sm"
-              className="h-9 flex items-center gap-1 mr-1"
-              onClick={() => navigate("/dashboard")}
-            >
-              Dashboard
-            </Button>
-          )}
-          
           {/* Metronome Icon */}
           <Dialog open={metronomeOpen} onOpenChange={setMetronomeOpen}>
             <DialogTrigger asChild>
@@ -143,7 +132,7 @@ export function Header({ initialShowNewsFeed = true }: HeaderProps) {
                   className="h-11 w-11"
                 >
                   <Menu className="h-7 w-7 text-foreground" />
-                  <span className="sr-only">Navigation menu</span>
+                  <span className="sr-only">Menu</span>
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-56 bg-popover">

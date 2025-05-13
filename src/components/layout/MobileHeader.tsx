@@ -100,17 +100,6 @@ export function MobileHeader() {
               </Button>
             )}
             
-            {isAuthenticated && (
-              <Button
-                variant="outline"
-                size="sm"
-                className="h-8 text-xs flex items-center"
-                onClick={() => navigate("/dashboard")}
-              >
-                Dashboard
-              </Button>
-            )}
-            
             <Dialog open={metronomeOpen} onOpenChange={setMetronomeOpen}>
               <DialogTrigger asChild>
                 <Button 
@@ -144,7 +133,7 @@ export function MobileHeader() {
                     className="flex-shrink-0 h-10 w-10"
                   >
                     <Menu className="h-6 w-6 text-foreground" />
-                    <span className="sr-only">Navigation menu</span>
+                    <span className="sr-only">Menu</span>
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="w-56 bg-popover">
@@ -174,7 +163,7 @@ export function MobileHeader() {
                     </DropdownMenuItem>
                   )}
                   
-                  {isAuthenticated ? (
+                  {isAuthenticated && (
                     <>
                       <DropdownMenuItem onClick={() => navigate("/dashboard")}>
                         Dashboard
@@ -187,7 +176,9 @@ export function MobileHeader() {
                         Sign Out
                       </DropdownMenuItem>
                     </>
-                  ) : (
+                  )}
+                  
+                  {!isAuthenticated && (
                     <DropdownMenuItem onClick={() => navigate("/register/admin")}>
                       Admin Registration
                     </DropdownMenuItem>

@@ -105,17 +105,6 @@ export function ConsolidatedHeader() {
             </Button>
           )}
           
-          {isAuthenticated && !isDashboardPath && (
-            <Button
-              variant="outline"
-              size={isMobile ? "sm" : "default"}
-              className={`${isMobile ? 'h-8 text-xs' : 'h-9'} flex items-center gap-1`}
-              onClick={() => navigate("/dashboard")}
-            >
-              Dashboard
-            </Button>
-          )}
-          
           {/* Metronome Icon */}
           <Dialog open={metronomeOpen} onOpenChange={setMetronomeOpen}>
             <DialogTrigger asChild>
@@ -161,6 +150,10 @@ export function ConsolidatedHeader() {
                       {profile?.first_name} {profile?.last_name}
                     </DropdownMenuLabel>
                     <DropdownMenuSeparator />
+                    
+                    <DropdownMenuItem onClick={() => navigate("/dashboard")}>
+                      Dashboard
+                    </DropdownMenuItem>
                     
                     <DropdownMenuItem onClick={() => navigate("/dashboard/profile")}>
                       <User className="h-4 w-4 mr-2" />
