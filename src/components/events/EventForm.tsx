@@ -84,6 +84,7 @@ export function EventForm({
   const [imagePreview, setImagePreview] = useState<string | null>(defaultValues?.image_url || null);
   const [activeTab, setActiveTab] = useState("details");
 
+  // Fix: Ensure defaultValues match the EventFormValues type
   const form = useForm<EventFormValues>({
     resolver: zodResolver(eventFormSchema),
     defaultValues: {

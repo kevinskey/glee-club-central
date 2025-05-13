@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { useFormContext, UseFormReturn } from "react-hook-form";
 import { 
@@ -30,17 +29,17 @@ import { cn } from "@/lib/utils";
 import { MobileFitCheck } from "./MobileFitCheck";
 import { EventType } from "@/types/calendar";
 
-// Make EventFormValues match EventForm schema exactly
+// Fix the EventFormValues interface to ensure all properties match
 export interface EventFormValues {
   title: string;
   date: Date;
   time: string;
   location: string;
-  description?: string;
+  description: string;
   type: EventType;
   image_url?: string | null;
   
-  // Additional fields to match EventForm
+  // Additional fields
   archivalNotes?: string;
   callTime?: string;
   wakeUpTime?: string;

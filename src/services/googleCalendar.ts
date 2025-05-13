@@ -1,7 +1,6 @@
-
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { CalendarEvent } from "@/types/calendar";
+import { CalendarEvent, EventType } from "@/types/calendar";
 
 // Constants
 const GOOGLE_CALENDAR_API_BASE = "https://www.googleapis.com/calendar/v3";
@@ -157,12 +156,13 @@ export const fetchGoogleCalendarEvents = async (
     
     if (!data?.events) return [];
     
-    // Map Google Calendar events to our app's event format
+    // Make sure to convert dates to strings when needed
     return data.events.map((event: any): CalendarEvent => ({
       id: event.id,
       title: event.summary || 'Untitled Event',
       description: event.description || '',
       location: event.location || '',
+      // Fix: Convert string dates to Date objects
       start: new Date(event.start.dateTime || event.start.date),
       end: new Date(event.end.dateTime || event.end.date),
       type: determineEventType(event),
@@ -329,11 +329,26 @@ export const syncEventsWithGoogleCalendar = async (): Promise<boolean> => {
 
 // Helper function to convert app event format to Google Calendar format
 const convertToGoogleEvent = (event: Partial<CalendarEvent>): GoogleEvent => {
-  // Make sure we have a start date
-  const startDate = event.start || new Date();
+  // Fix: Ensure dates are properly handled
+  let startDate: Date;
+  let endDate: Date;
   
-  // Calculate end date (default to 1 hour later if not provided)
-  const endDate = event.end || new Date(startDate.getTime() + 60 * 60 * 1000);
+  // Handle the start date (convert string to Date if needed)
+  if (typeof event.start === 'string') {
+    startDate = new Date(event.start);
+  } else {
+    startDate = event.start || new Date();
+  }
+  
+  // Handle the end date (convert string to Date if needed)
+  if (typeof event.end === 'string') {
+    endDate = new Date(event.end);
+  } else if (event.end) {
+    endDate = event.end;
+  } else {
+    // Default to 1 hour later if not provided
+    endDate = new Date(startDate.getTime() + 60 * 60 * 1000);
+  }
   
   return {
     summary: event.title || 'Untitled Event',

@@ -1,3 +1,4 @@
+
 import { useAuth } from '@/contexts/AuthContext';
 import { useRolePermissions } from '@/contexts/RolePermissionContext';
 import { useState } from 'react';
@@ -62,8 +63,10 @@ export function usePermissions() {
       }
       
       // Refresh the permissions to reflect the changes
-      if (useRolePermissions().refreshPermissions) {
-        await useRolePermissions().refreshPermissions();
+      // Fixed: Remove the direct function call that caused recursive dependency
+      const { refreshPermissions } = useRolePermissions();
+      if (refreshPermissions) {
+        await refreshPermissions();
       }
       
       toast.success("You are now a Super Admin");
