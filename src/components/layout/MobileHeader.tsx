@@ -74,6 +74,10 @@ export function MobileHeader() {
     }
   };
 
+  const handleLoginClick = () => {
+    navigate("/login");
+  };
+
   return (
     <>
       <header className="md:hidden sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
@@ -94,7 +98,7 @@ export function MobileHeader() {
                 variant="spelman"
                 size="sm"
                 className="h-8 text-xs flex items-center gap-1"
-                onClick={() => navigate("/login")}
+                onClick={handleLoginClick}
               >
                 <LogIn className="h-3.5 w-3.5 mr-1" /> Login
               </Button>
@@ -179,6 +183,18 @@ export function MobileHeader() {
                         Sign Out
                       </DropdownMenuItem>
                     </>
+                  )}
+                  
+                  {!isAuthenticated && (
+                    <DropdownMenuItem onClick={() => navigate("/login")}>
+                      Login
+                    </DropdownMenuItem>
+                  )}
+                  
+                  {!isAuthenticated && (
+                    <DropdownMenuItem onClick={() => navigate("/register")}>
+                      Register
+                    </DropdownMenuItem>
                   )}
                   
                   {!isAuthenticated && (

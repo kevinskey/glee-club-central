@@ -15,6 +15,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Music, AlertCircle, Eye, EyeOff, LogIn } from "lucide-react";
 import { supabase, cleanupAuthState } from "@/integrations/supabase/client";
 
+// Login form schema
 const loginSchema = z.object({
   email: z.string().email({
     message: "Please enter a valid email address."
@@ -27,7 +28,7 @@ const loginSchema = z.object({
 type LoginFormValues = z.infer<typeof loginSchema>;
 
 export default function LoginPage() {
-  const { signIn, isAuthenticated, isLoading } = useAuth();
+  const { signIn, isAuthenticated, isLoading, user, profile } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -46,13 +47,29 @@ export default function LoginPage() {
     },
   });
 
-  // If user is already authenticated, redirect to dashboard
+  // If user is already authenticated, redirect to appropriate dashboard
   useEffect(() => {
     if (isAuthenticated && !isLoading) {
+      // Get the return URL if it exists
       const returnTo = new URLSearchParams(location.search).get('returnTo');
-      navigate(returnTo || "/dashboard");
+      
+      // Route based on user role or provided return URL
+      if (returnTo) {
+        navigate(returnTo);
+      } else if (profile?.role === 'admin' || profile?.role === 'administrator') {
+        navigate('/admin');
+      } else {
+        navigate('/dashboard');
+      }
+      
+      // Show welcome toast
+      if (profile?.first_name) {
+        toast.success(`Welcome back, ${profile.first_name}!`);
+      } else {
+        toast.success("Welcome back!");
+      }
     }
-  }, [isAuthenticated, isLoading, navigate, location.search]);
+  }, [isAuthenticated, isLoading, navigate, location.search, profile]);
 
   const handleResendVerification = async (email: string) => {
     try {
@@ -129,6 +146,33 @@ export default function LoginPage() {
       toast.error("Login failed", {
         description: error.message || "An unexpected error occurred"
       });
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  // Guest login function for demo purposes
+  const handleGuestLogin = async () => {
+    setIsSubmitting(true);
+    setLoginError(null);
+
+    try {
+      cleanupAuthState();
+      
+      // Use demo credentials - in a real app, you'd have a special guest login endpoint
+      const { error } = await signIn("guest@example.com", "guestpassword");
+      
+      if (error) {
+        console.error("Guest login error:", error);
+        setLoginError("Guest login unavailable. Please try again later.");
+        toast.error("Guest login failed");
+      } else {
+        toast.success("Logged in as guest");
+      }
+    } catch (error: any) {
+      console.error("Unexpected error during guest login:", error);
+      setLoginError("Guest login unavailable. Please try again later.");
+      toast.error("Guest login failed");
     } finally {
       setIsSubmitting(false);
     }
@@ -218,18 +262,30 @@ export default function LoginPage() {
                     )}
                   />
                   
-                  <Button type="submit" className="w-full" disabled={isSubmitting}>
-                    {isSubmitting ? (
-                      <>
-                        <span className="mr-2">Logging in...</span>
-                        <div className="h-4 w-4 rounded-full border-2 border-white border-t-transparent animate-spin"></div>
-                      </>
-                    ) : (
-                      <>
-                        <LogIn className="mr-2 h-4 w-4" /> Log In
-                      </>
-                    )}
-                  </Button>
+                  <div className="flex flex-col space-y-2">
+                    <Button type="submit" className="w-full" disabled={isSubmitting}>
+                      {isSubmitting ? (
+                        <>
+                          <span className="mr-2">Logging in...</span>
+                          <div className="h-4 w-4 rounded-full border-2 border-white border-t-transparent animate-spin"></div>
+                        </>
+                      ) : (
+                        <>
+                          <LogIn className="mr-2 h-4 w-4" /> Member Login
+                        </>
+                      )}
+                    </Button>
+                    
+                    <Button 
+                      type="button" 
+                      variant="outline" 
+                      className="w-full" 
+                      onClick={handleGuestLogin}
+                      disabled={isSubmitting}
+                    >
+                      Guest Login
+                    </Button>
+                  </div>
                 </form>
               </Form>
             </CardContent>

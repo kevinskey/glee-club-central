@@ -214,6 +214,15 @@ export function ConsolidatedHeader() {
                     
                     <DropdownMenuSeparator />
                     
+                    <DropdownMenuItem onClick={() => navigate("/login")}>
+                      <LogIn className="h-4 w-4 mr-2" />
+                      <span>Login</span>
+                    </DropdownMenuItem>
+                    
+                    <DropdownMenuItem onClick={() => navigate("/register")}>
+                      Register
+                    </DropdownMenuItem>
+                    
                     <DropdownMenuItem onClick={() => navigate("/register/admin")}>
                       Admin Registration
                     </DropdownMenuItem>
