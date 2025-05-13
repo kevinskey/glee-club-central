@@ -4,15 +4,10 @@ export interface Video {
   title: string;
   description?: string;
   url: string;
-  thumbnail?: string;
-  datePublished?: string;
-  category?: string;
+  thumbnailUrl?: string;
+  publishedAt: string;
   duration?: string;
-  views?: number;
-}
-
-export interface VideoCategory {
-  id: string;
-  name: string;
-  count: number;
+  viewCount?: number;
+  category?: string;
+  tags?: string[];
 }

@@ -15,8 +15,23 @@ import NotFoundPage from './pages/NotFoundPage';
 import RecordingsPage from './pages/recordings/RecordingsPage';
 import AdminDashboard from './pages/admin/AdminDashboard';
 
-// Create DashboardHome component
+// Import auth related pages
+import LoginPage from './pages/auth/LoginPage';
+import SignupPage from './pages/auth/SignupPage';
+import ForgotPasswordPage from './pages/auth/ForgotPasswordPage';
+import ResetPasswordPage from './pages/auth/ResetPasswordPage';
+import UserSetupPage from './pages/auth/UserSetupPage';
+
+// Import dashboard pages
 import DashboardHome from './pages/dashboard/DashboardHome';
+import AnnouncementsPage from './pages/announcements/AnnouncementsPage';
+import SettingsPage from './pages/settings/SettingsPage';
+import ResourcesPage from './pages/resources/ResourcesPage';
+import PracticeLogsPage from './pages/practice-logs/PracticeLogsPage';
+import PerformancesPage from './pages/PerformancesPage';
+import MembersPage from './pages/members/MembersPage';
+import MemberProfile from './pages/members/MemberProfile';
+import SetlistsPage from './pages/setlists/SetlistsPage';
 
 // Lazy loaded components
 const ContactPage = lazy(() => import('./pages/ContactPage'));

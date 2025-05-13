@@ -1,51 +1,30 @@
 
-import React, { useState, useEffect } from 'react';
-import { Skeleton } from "@/components/ui/skeleton";
+import React from 'react';
 
 interface PDFThumbnailProps {
   url: string;
   title: string;
-  className?: string;
+  width?: number;
+  height?: number;
 }
 
-export const PDFThumbnail: React.FC<PDFThumbnailProps> = ({ url, title, className = "" }) => {
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(false);
-  
-  // Default placeholder thumbnail
-  const placeholderImage = "/placeholder.svg";
-  
-  useEffect(() => {
-    // Reset states when url changes
-    setLoading(true);
-    setError(false);
-  }, [url]);
-  
+const PDFThumbnail: React.FC<PDFThumbnailProps> = ({ url, title, width = 150, height = 200 }) => {
   return (
-    <div className={`relative aspect-[3/4] bg-muted ${className}`}>
-      {loading && (
-        <Skeleton className="absolute inset-0 w-full h-full" />
-      )}
-      
-      <img
-        src={error ? placeholderImage : url + '#page=1'}
-        alt={title}
-        className={`w-full h-full object-cover transition-opacity ${loading || error ? 'opacity-0' : 'opacity-100'}`}
-        onLoad={() => setLoading(false)}
-        onError={() => {
-          setLoading(false);
-          setError(true);
-        }}
-      />
-      
-      {/* Fallback for when PDF preview fails */}
-      {error && (
-        <div className="absolute inset-0 flex items-center justify-center bg-muted border rounded-sm">
-          <span className="text-xs text-muted-foreground text-center p-2">
-            PDF Preview
-          </span>
+    <div className="relative" style={{ width, height }}>
+      <div className="absolute inset-0 bg-gray-100 border flex items-center justify-center rounded-md">
+        <div className="text-center p-2">
+          <div className="text-red-500 text-2xl mb-2">
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 mx-auto" viewBox="0 0 20 20" fill="currentColor">
+              <path fillRule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4z" clipRule="evenodd" />
+            </svg>
+          </div>
+          <div className="text-xs font-medium truncate" title={title}>
+            {title}
+          </div>
         </div>
-      )}
+      </div>
     </div>
   );
 };
+
+export default PDFThumbnail;
