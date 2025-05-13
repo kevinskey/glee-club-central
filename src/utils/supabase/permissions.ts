@@ -55,6 +55,22 @@ export async function fetchUserPermissions(userId: string) {
   }
 }
 
+export type UserTitle =
+  | "Super Admin"
+  | "Treasurer"
+  | "Librarian"
+  | "Wardrobe Mistress"
+  | "Secretary"
+  | "President"
+  | "Historian"
+  | "PR Manager"
+  | "Tour Manager"
+  | "Stage Manager"
+  | "Chaplain"
+  | "Section Leader"
+  | "Student Worker"
+  | "General Member"
+  | "Guest User";
 export async function updateUserTitle(userId: string, title: UserTitle) {
   try {
     const { error } = await supabase
