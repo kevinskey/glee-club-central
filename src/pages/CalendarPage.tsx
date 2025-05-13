@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useRef } from "react";
 import { Footer } from "@/components/landing/Footer";
 import { CalendarHeader } from "@/components/calendar/CalendarHeader";
@@ -82,12 +81,15 @@ const CalendarPage = () => {
     setIsCreateModalOpen
   );
 
-  // Handler for creating event
+  // Handler for creating event - Modified to not test void for truthiness
   const onCreateEvent = async (eventData: any) => {
-    const success = await handleCreateEvent(eventData);
-    if (success) {
+    try {
+      await handleCreateEvent(eventData);
       toast.success("Event created successfully");
       setIsCreateModalOpen(false);
+    } catch (error) {
+      console.error("Error creating event:", error);
+      toast.error("Failed to create event");
     }
   };
 

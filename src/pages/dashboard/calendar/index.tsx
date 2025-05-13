@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { PageHeader } from "@/components/ui/page-header";
 import { Calendar, Plus, RefreshCw } from "lucide-react";
@@ -104,8 +103,8 @@ export default function CalendarPage() {
     }
   };
 
-  // Handle edit event form submission - fixing the Promise<void> issue
-  const handleUpdateEvent = async (event: CalendarEvent): Promise<void> => {
+  // Handle edit event form submission - Modified to return boolean
+  const handleUpdateEvent = async (event: CalendarEvent): Promise<boolean> => {
     try {
       const success = await updateEvent(event);
       if (success) {
@@ -114,13 +113,15 @@ export default function CalendarPage() {
         setSelectedEvent(null);
         toast.success("Event updated successfully");
       }
+      return success;
     } catch (error) {
       console.error("Error updating event:", error);
       toast.error("Failed to update event");
+      return false;
     }
   };
 
-  // Handle event deletion - fixing the Promise<void> issue
+  // Handle event deletion
   const handleDeleteEvent = async (): Promise<void> => {
     if (!selectedEvent) return;
     
@@ -213,7 +214,7 @@ export default function CalendarPage() {
         </DialogContent>
       </Dialog>
 
-      {/* View/Edit Event Dialog - Also with improved mobile handling */}
+      {/* View/Edit Event Modal - Also with improved mobile handling */}
       {selectedEvent && (
         <>
           <Dialog open={isViewEventOpen} onOpenChange={setIsViewEventOpen}>

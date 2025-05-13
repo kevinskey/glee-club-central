@@ -79,40 +79,48 @@ export const useCalendarEventHandlers = (
     }
   };
 
-  // Fix the return type issue by making these functions return Promise<void> as expected
-  const handleCreateEvent = async (eventData: any): Promise<void> => {
+  // Modified to return Promise<boolean> instead of Promise<void>
+  const handleCreateEvent = async (eventData: any): Promise<boolean> => {
     try {
       const success = await addEvent(eventData);
       if (success) {
         toast.success("Event created successfully");
       }
+      return success;
     } catch (error) {
       console.error("Error creating event:", error);
       toast.error("Failed to create event");
+      return false;
     }
   };
 
-  const handleUpdateEvent = async (eventData: CalendarEvent): Promise<void> => {
+  // Modified to return Promise<boolean> instead of Promise<void>
+  const handleUpdateEvent = async (eventData: CalendarEvent): Promise<boolean> => {
     try {
       const success = await updateEvent(eventData);
       if (success) {
         toast.success("Event updated successfully");
       }
+      return success;
     } catch (error) {
       console.error("Error updating event:", error);
       toast.error("Failed to update event");
+      return false;
     }
   };
 
-  const handleDeleteEvent = async (eventId: string): Promise<void> => {
+  // Modified to return Promise<boolean> instead of Promise<void>
+  const handleDeleteEvent = async (eventId: string): Promise<boolean> => {
     try {
       const success = await deleteEvent(eventId);
       if (success) {
         toast.success("Event deleted successfully");
       }
+      return success;
     } catch (error) {
       console.error("Error deleting event:", error);
       toast.error("Failed to delete event");
+      return false;
     }
   };
 
