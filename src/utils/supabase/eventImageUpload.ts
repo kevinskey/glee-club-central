@@ -15,33 +15,15 @@ export async function uploadEventImage(file: File, eventTitle: string): Promise<
       return null;
     }
     
-    // Ensure storage bucket exists
-    const { data: buckets } = await supabase.storage.listBuckets();
-    const eventsBucketExists = buckets?.some(bucket => bucket.name === 'events');
-    
-    if (!eventsBucketExists) {
-      // Create bucket if it doesn't exist
-      const { error } = await supabase.storage.createBucket('events', {
-        public: true,
-        fileSizeLimit: 5242880, // 5MB
-        allowedMimeTypes: ['image/png', 'image/jpeg', 'image/jpg', 'image/webp']
-      });
-      
-      if (error) {
-        console.error("Error creating bucket:", error);
-        return null;
-      }
-    }
-    
     // Generate unique filename to prevent overwrites
     const fileExt = file.name.split('.').pop();
     const sanitizedEventName = eventTitle.toLowerCase().replace(/[^a-z0-9]/g, '-').substring(0, 20);
-    const uniqueFileName = `${sanitizedEventName}-${uuidv4().substring(0, 8)}.${fileExt}`;
+    const uniqueFileName = `events/${sanitizedEventName}-${uuidv4().substring(0, 8)}.${fileExt}`;
     
-    // Upload file to Supabase Storage
+    // Upload file to the media_library bucket
     const { data, error } = await supabase.storage
-      .from('events')
-      .upload(`images/${uniqueFileName}`, file, {
+      .from('media_library')
+      .upload(uniqueFileName, file, {
         cacheControl: '3600',
         upsert: false
       });
@@ -53,8 +35,8 @@ export async function uploadEventImage(file: File, eventTitle: string): Promise<
     
     // Get public URL
     const { data: { publicUrl } } = supabase.storage
-      .from('events')
-      .getPublicUrl(`images/${uniqueFileName}`);
+      .from('media_library')
+      .getPublicUrl(uniqueFileName);
     
     return publicUrl;
   } catch (err) {
@@ -71,7 +53,7 @@ export async function uploadEventImage(file: File, eventTitle: string): Promise<
 export async function deleteEventImage(imageUrl: string): Promise<boolean> {
   try {
     // Extract the file path from the URL
-    const urlPattern = /.*\/storage\/v1\/object\/public\/events\/(.*)/;
+    const urlPattern = /.*\/storage\/v1\/object\/public\/media_library\/(.*)/;
     const match = imageUrl.match(urlPattern);
     
     if (!match || !match[1]) {
@@ -83,7 +65,7 @@ export async function deleteEventImage(imageUrl: string): Promise<boolean> {
     
     // Delete the file
     const { error } = await supabase.storage
-      .from('events')
+      .from('media_library')
       .remove([filePath]);
     
     if (error) {
