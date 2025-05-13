@@ -11,6 +11,7 @@ import { useLocation, useSearchParams } from "react-router-dom";
 import { EventFormValues } from "@/components/calendar/EventFormFields";
 import { Header } from "@/components/landing/Header";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
+import { supabase } from "@/integrations/supabase/client";
 
 // Components
 import { CalendarContainer } from "@/components/calendar/CalendarContainer";
@@ -48,11 +49,18 @@ export default function CalendarPage() {
   const eventsOnSelectedDate = useMemo(() => {
     if (!date) return [];
     
-    return events.filter(event => 
-      event.start.getDate() === date.getDate() && 
-      event.start.getMonth() === date.getMonth() && 
-      event.start.getFullYear() === date.getFullYear()
-    );
+    return events.filter(event => {
+      // Convert the start property to a Date object if it's a string
+      const eventStart = typeof event.start === 'string' 
+        ? new Date(event.start) 
+        : event.start;
+      
+      return (
+        eventStart.getDate() === date.getDate() && 
+        eventStart.getMonth() === date.getMonth() && 
+        eventStart.getFullYear() === date.getFullYear()
+      );
+    });
   }, [date, events]);
   
   // Handle URL event parameter
@@ -62,7 +70,7 @@ export default function CalendarPage() {
       const event = events.find(e => e.id === eventId);
       if (event) {
         // Set the selected date to the event's date
-        setDate(new Date(event.start));
+        setDate(typeof event.start === 'string' ? new Date(event.start) : event.start);
         // Select the event
         setSelectedEvent(event);
       } else {
@@ -72,7 +80,9 @@ export default function CalendarPage() {
   }, [eventId, events, isLoading]);
     
   // Get days with events for highlighting in the calendar - ensure they are Date objects
-  const daysWithEvents = useMemo(() => events.map(event => event.date), [events]);
+  const daysWithEvents = useMemo(() => 
+    events.map(event => typeof event.start === 'string' ? new Date(event.start) : event.start), 
+  [events]);
   
   // Handle event selection
   const handleEventSelect = useCallback((event: any) => {
@@ -193,6 +203,18 @@ export default function CalendarPage() {
     await fetchEvents();
   };
   
+  // Convert CalendarEvent[] between types as needed
+  const convertEvents = useCallback((events: any[]) => {
+    return events.map(event => ({
+      ...event,
+      // Ensure description is present
+      description: event.description || "",
+      // Ensure start and end are Date objects
+      start: typeof event.start === 'string' ? new Date(event.start) : event.start,
+      end: typeof event.end === 'string' ? new Date(event.end) : event.end
+    }));
+  }, []);
+  
   return (
     <div className="flex min-h-screen flex-col">
       <Header initialShowNewsFeed={false} />
@@ -225,14 +247,14 @@ export default function CalendarPage() {
                 setDate={handleDateSelect}
                 daysWithEvents={daysWithEvents}
                 loading={isLoading}
-                events={events}
+                events={convertEvents(events)}
               />
               
               {/* Add CalendarTools component for admins */}
               {isSuperAdmin && !isMobile && (
                 <div className="mt-6">
                   <CalendarTools 
-                    events={events} 
+                    events={convertEvents(events)} 
                     onImportEvents={handleImportEvents} 
                   />
                 </div>
@@ -250,7 +272,7 @@ export default function CalendarPage() {
                   <>
                     <EventList 
                       date={date}
-                      events={eventsOnSelectedDate}
+                      events={convertEvents(eventsOnSelectedDate)}
                       selectedEvent={selectedEvent}
                       onSelectEvent={handleEventSelect}
                       getEventTypeColor={getEventTypeColor}
@@ -272,7 +294,7 @@ export default function CalendarPage() {
               {isSuperAdmin && isMobile && (
                 <div className="mt-6">
                   <CalendarTools 
-                    events={events} 
+                    events={convertEvents(events)} 
                     onImportEvents={handleImportEvents} 
                   />
                 </div>

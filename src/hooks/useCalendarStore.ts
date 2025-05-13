@@ -41,8 +41,8 @@ export function useCalendarStore() {
           location: event.location || '',
           date: new Date(event.date),
           time: event.time || '00:00',
-          start: startDate,
-          end: event.end_time ? new Date(`${event.date}T${event.end_time}`) : endDate,
+          start: startDate.toISOString(),
+          end: event.end_time ? new Date(`${event.date}T${event.end_time}`).toISOString() : endDate.toISOString(),
           type: event.type,
           created_by: event.user_id,
           allDay: event.allday || false,
@@ -68,7 +68,7 @@ export function useCalendarStore() {
     
     try {
       // Format date for database
-      const formattedDate = eventData.date.toISOString().split('T')[0];
+      const formattedDate = new Date(eventData.date).toISOString().split('T')[0];
       
       const { data, error } = await supabase
         .from('calendar_events')
@@ -91,9 +91,15 @@ export function useCalendarStore() {
       }
       
       // Add the new event to the local state
+      const startDate = new Date(`${formattedDate}T${eventData.time || '00:00:00'}`);
+      const endDate = new Date(startDate);
+      endDate.setHours(endDate.getHours() + 1);
+      
       const newEvent: CalendarEvent = {
         ...eventData,
         id: data[0].id,
+        start: startDate.toISOString(),
+        end: endDate.toISOString(),
         created_by: user.id,
         source: 'local'
       };
@@ -116,7 +122,9 @@ export function useCalendarStore() {
     
     try {
       // Format date for database
-      const formattedDate = eventData.date.toISOString().split('T')[0];
+      const formattedDate = new Date(typeof eventData.date === 'string' 
+        ? eventData.date 
+        : eventData.date).toISOString().split('T')[0];
       
       const { error } = await supabase
         .from('calendar_events')
@@ -137,10 +145,21 @@ export function useCalendarStore() {
         return false;
       }
       
+      // Convert start and end dates to strings if they are Date objects
+      const updatedEvent = {
+        ...eventData,
+        start: typeof eventData.start === 'object' 
+          ? (eventData.start as Date).toISOString() 
+          : eventData.start,
+        end: typeof eventData.end === 'object' 
+          ? (eventData.end as Date).toISOString() 
+          : eventData.end
+      };
+      
       // Update the event in the local state
       setEvents(prevEvents => 
         prevEvents.map(event => 
-          event.id === eventData.id ? eventData : event
+          event.id === eventData.id ? updatedEvent : event
         )
       );
       

@@ -1,71 +1,123 @@
 
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { Calendar, RefreshCw, Link, LinkOff } from "lucide-react";
-import { useGoogleCalendar } from "@/hooks/useGoogleCalendar";
-import { Skeleton } from "@/components/ui/skeleton";
+import { toast } from "sonner";
+import { Link2Off, Calendar, RefreshCw } from "lucide-react";
+import { 
+  isConnectedToGoogle, 
+  startGoogleAuth, 
+  disconnectGoogleCalendar, 
+  syncWithGoogleCalendar 
+} from "@/services/googleCalendar";
 
 export function GoogleCalendarConnect() {
-  const {
-    isConnected,
-    isLoading,
-    isSyncing,
-    connectToGoogleCalendar,
-    disconnect,
-    syncCalendar
-  } = useGoogleCalendar();
+  const [isConnected, setIsConnected] = useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+
+  const checkConnection = async () => {
+    try {
+      const connected = await isConnectedToGoogle();
+      setIsConnected(connected);
+    } catch (error) {
+      console.error("Error checking Google connection:", error);
+    }
+  };
+
+  // Check connection status on mount
+  useEffect(() => {
+    checkConnection();
+  }, []);
+
+  const handleConnect = async () => {
+    setIsLoading(true);
+    try {
+      await startGoogleAuth();
+      // The connection status will be updated when the user completes the OAuth flow
+      // We can't immediately check the status here since OAuth happens in a separate window
+    } catch (error) {
+      console.error("Error connecting to Google Calendar:", error);
+      toast.error("Failed to connect to Google Calendar");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleDisconnect = async () => {
+    setIsLoading(true);
+    try {
+      const success = await disconnectGoogleCalendar();
+      if (success) {
+        setIsConnected(false);
+        toast.success("Successfully disconnected from Google Calendar");
+      }
+    } catch (error) {
+      console.error("Error disconnecting from Google Calendar:", error);
+      toast.error("Failed to disconnect from Google Calendar");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleSync = async () => {
+    setIsLoading(true);
+    try {
+      await syncWithGoogleCalendar();
+    } catch (error) {
+      console.error("Error syncing with Google Calendar:", error);
+      toast.error("Failed to sync with Google Calendar");
+    } finally {
+      setIsLoading(false);
+      // Refresh connection status after sync attempt
+      checkConnection();
+    }
+  };
 
   return (
-    <div className="rounded-lg border p-4 space-y-4 bg-white dark:bg-gray-800">
-      <div className="flex items-center space-x-2">
-        <Calendar className="h-5 w-5 text-primary" />
-        <h3 className="text-lg font-medium">Google Calendar Integration</h3>
-      </div>
-
-      {isLoading ? (
-        <div className="space-y-2">
-          <Skeleton className="h-8 w-full" />
-          <Skeleton className="h-4 w-3/4" />
-        </div>
-      ) : (
-        <>
-          <p className="text-sm text-muted-foreground">
-            {isConnected
-              ? "Your Google Calendar is connected. You can sync events between Glee World and Google Calendar."
-              : "Connect your Google Calendar to sync events between Glee World and Google Calendar."}
-          </p>
-
-          <div className="flex flex-wrap gap-2">
-            {!isConnected ? (
-              <Button onClick={connectToGoogleCalendar} size="sm">
-                <Link className="mr-2 h-4 w-4" />
-                Connect Calendar
+    <div className="space-y-3">
+      <h3 className="font-semibold text-base">Google Calendar</h3>
+      <div className="flex flex-col gap-2">
+        {isConnected ? (
+          <>
+            <div className="flex items-center gap-2">
+              <div className="h-2 w-2 rounded-full bg-green-500"></div>
+              <span className="text-sm text-green-600 dark:text-green-400">Connected</span>
+            </div>
+            <div className="flex flex-wrap gap-2 mt-2">
+              <Button
+                variant="destructive"
+                size="sm"
+                onClick={handleDisconnect}
+                disabled={isLoading}
+                className="flex items-center gap-1"
+              >
+                <Link2Off className="h-4 w-4" />
+                Disconnect
               </Button>
-            ) : (
-              <>
-                <Button 
-                  onClick={syncCalendar} 
-                  disabled={isSyncing} 
-                  variant="outline" 
-                  size="sm"
-                >
-                  <RefreshCw className={`mr-2 h-4 w-4 ${isSyncing ? 'animate-spin' : ''}`} />
-                  {isSyncing ? 'Syncing...' : 'Sync Now'}
-                </Button>
-                <Button 
-                  onClick={disconnect} 
-                  variant="outline" 
-                  size="sm" 
-                  className="text-red-500 hover:text-red-700 border-red-200 hover:bg-red-50"
-                >
-                  <LinkOff className="mr-2 h-4 w-4" />
-                  Disconnect
-                </Button>
-              </>
-            )}
-          </div>
-        </>
-      )}
+              <Button
+                variant="secondary"
+                size="sm"
+                onClick={handleSync}
+                disabled={isLoading}
+                className="flex items-center gap-1"
+              >
+                <RefreshCw className={`h-4 w-4 ${isLoading ? 'animate-spin' : ''}`} />
+                Sync Now
+              </Button>
+            </div>
+          </>
+        ) : (
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handleConnect}
+            disabled={isLoading}
+            className="w-full flex items-center justify-center gap-2"
+          >
+            <Calendar className="h-4 w-4" />
+            Connect Google Calendar
+          </Button>
+        )}
+      </div>
     </div>
   );
 }
