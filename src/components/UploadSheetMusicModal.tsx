@@ -1,4 +1,3 @@
-
 import React, { useState, useRef, useCallback } from "react";
 import { FileUp, Loader2, X, Upload, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -49,7 +48,7 @@ export function UploadSheetMusicModal({
   const [overallProgress, setOverallProgress] = useState(0);
   const [isDragging, setIsDragging] = useState(false);
   const { toast } = useToast();
-  const { profile } = useAuth();
+  const { user, profile } = useAuth();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const dropZoneRef = useRef<HTMLDivElement>(null);
   
@@ -196,6 +195,19 @@ export function UploadSheetMusicModal({
       return;
     }
 
+    // Get user ID from user or profile
+    const userId = user?.id || profile?.id;
+    
+    // Check if user ID is available
+    if (!userId) {
+      toast({
+        title: "Authentication required",
+        description: "You must be logged in to upload files",
+        variant: "destructive",
+      });
+      return;
+    }
+
     setUploading(true);
     setOverallProgress(0);
     let successCount = 0;
@@ -242,7 +254,7 @@ export function UploadSheetMusicModal({
             file_url: publicURL.publicUrl,
             file_type: "application/pdf",
             folder: "sheet-music", // Explicitly categorize as sheet music
-            uploaded_by: profile?.id,
+            uploaded_by: userId, // Use the checked user ID value
             tags: ["sheet-music", "pdf", "music", file.composer.toLowerCase().replace(/\s+/g, '-')], // Add more detailed tags
             is_public: true // Make sheet music publicly accessible
           });
