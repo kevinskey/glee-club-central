@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { MediaFile, MediaStats } from "@/types/media";
 import { supabase } from "@/integrations/supabase/client";
@@ -161,18 +162,17 @@ export function useMediaLibrary() {
     try {
       await deleteMediaFile(mediaId);
       
-      toast({
-        title: "Media deleted",
+      // Fix: Update the toast call to use the correct format for sonner
+      toast.success("Media deleted", {
         description: "The media file has been successfully deleted",
       });
       
       return true;
     } catch (err: any) {
       console.error('Error deleting media:', err);
-      toast({
-        title: "Delete failed",
+      // Fix: Update the toast call to use the correct format for sonner
+      toast.error("Delete failed", {
         description: err.message || "Failed to delete media file",
-        variant: "destructive"
       });
       throw err;
     }
