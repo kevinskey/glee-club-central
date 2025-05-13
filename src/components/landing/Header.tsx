@@ -24,7 +24,7 @@ interface HeaderProps {
 
 export function Header({ initialShowNewsFeed = true }: HeaderProps) {
   const isMobile = useIsMobile();
-  const [showNewsFeed, setShowNewsFeed] = useState(false); // Start hidden to avoid flicker
+  const [showNewsFeed, setShowNewsFeed] = useState(false);
   const [metronomeOpen, setMetronomeOpen] = useState(false);
   const audioContextRef = useRef<AudioContext | null>(null);
   const navigate = useNavigate();
@@ -69,8 +69,8 @@ export function Header({ initialShowNewsFeed = true }: HeaderProps) {
   };
 
   return (
-    <header className="sticky top-0 z-50 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-      <div className="container px-2 flex h-16 items-center justify-between">
+    <header className="sticky top-0 z-50 border-b bg-background/95 backdrop-blur-md supports-[backdrop-filter]:bg-background/60">
+      <div className="container px-4 flex h-16 items-center justify-between">
         {/* Left side: Logo and site name */}
         <div className="flex items-center gap-4">
           <Logo />
@@ -84,10 +84,10 @@ export function Header({ initialShowNewsFeed = true }: HeaderProps) {
               <Button 
                 variant="ghost" 
                 size="icon" 
-                className="h-10 w-10" 
+                className="h-10 w-10 rounded-full" 
                 onClick={handleOpenMetronome}
               >
-                <Clock className="h-6 w-6 text-foreground" />
+                <Clock className="h-5 w-5 text-foreground" />
                 <span className="sr-only">Open metronome</span>
               </Button>
             </DialogTrigger>
@@ -110,32 +110,33 @@ export function Header({ initialShowNewsFeed = true }: HeaderProps) {
                 <Button 
                   variant="ghost" 
                   size="icon" 
-                  className="h-11 w-11"
+                  className="h-10 w-10 rounded-full"
                 >
-                  <Menu className="h-7 w-7 text-foreground" />
+                  <Menu className="h-5 w-5 text-foreground" />
                   <span className="sr-only">Menu</span>
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-56 bg-popover">
+                <DropdownMenuLabel className="font-playfair text-sm">Navigation</DropdownMenuLabel>
                 <DropdownMenuSeparator />
                 
-                <DropdownMenuItem onClick={() => navigate("/")}>
+                <DropdownMenuItem onClick={() => navigate("/")} className="py-2">
                   Home
                 </DropdownMenuItem>
                 
-                <DropdownMenuItem onClick={() => navigate("/about")}>
+                <DropdownMenuItem onClick={() => navigate("/about")} className="py-2">
                   About
                 </DropdownMenuItem>
                 
-                <DropdownMenuItem onClick={() => navigate("/privacy")}>
+                <DropdownMenuItem onClick={() => navigate("/privacy")} className="py-2">
                   Privacy Policy
                 </DropdownMenuItem>
                 
-                <DropdownMenuItem onClick={() => navigate("/terms")}>
+                <DropdownMenuItem onClick={() => navigate("/terms")} className="py-2">
                   Terms of Service
                 </DropdownMenuItem>
                 
-                <DropdownMenuItem onClick={() => navigate("/press-kit")}>
+                <DropdownMenuItem onClick={() => navigate("/press-kit")} className="py-2">
                   Press Kit
                 </DropdownMenuItem>
               </DropdownMenuContent>

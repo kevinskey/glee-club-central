@@ -7,14 +7,14 @@ export function TestimonialSection() {
   const isMobile = useIsMobile();
   
   return (
-    <section className="py-8 sm:py-12 md:py-16 lg:py-20 bg-glee-purple/5 dark:bg-glee-light">
-      <div className="container px-4 md:px-6 lg:px-8">
+    <section className="py-12 sm:py-16 md:py-20 lg:py-24 bg-glee-purple/5 dark:bg-glee-light">
+      <div className="container px-4 md:px-6 lg:px-8 max-w-5xl mx-auto">
         <div className="max-w-3xl lg:max-w-4xl mx-auto text-center">
-          <Music className="h-5 w-5 sm:h-6 sm:w-6 md:h-7 md:w-7 text-glee-purple mx-auto mb-3 sm:mb-4 md:mb-5 opacity-70" />
-          <blockquote className="font-playfair text-lg sm:text-xl md:text-2xl lg:text-3xl italic mb-6 sm:mb-8 md:mb-10 leading-relaxed flex items-center justify-center min-h-[5rem] md:min-h-[6rem] text-pretty">
+          <Music className="h-6 w-6 sm:h-7 sm:w-7 md:h-8 md:w-8 text-glee-purple mx-auto mb-4 sm:mb-5 md:mb-6 opacity-70" />
+          <blockquote className="font-playfair text-xl sm:text-2xl md:text-3xl lg:text-3xl italic mb-8 sm:mb-10 md:mb-12 leading-relaxed flex items-center justify-center min-h-[5rem] md:min-h-[6rem] text-pretty">
             "The Spelman College Glee Club represents the pinnacle of collegiate choral excellence, with a century-long tradition of magnificent performances."
           </blockquote>
-          <div className="text-sm sm:text-base md:text-lg font-medium text-gray-700 dark:text-gray-700 mt-5 font-inter">
+          <div className="text-base sm:text-lg font-medium text-gray-700 dark:text-gray-700 mt-6 font-inter">
             — The New York Times
           </div>
         </div>

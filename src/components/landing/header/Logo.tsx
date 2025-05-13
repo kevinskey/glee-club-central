@@ -15,22 +15,23 @@ export function Logo() {
   const isMobile = useIsMobile();
   
   return (
-    <div className="flex items-center gap-2">
-      <TooltipProvider>
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <div className="flex items-center gap-2 cursor-pointer" onClick={() => navigate("/")}>
-              <Icons.logo className={`${isMobile ? "h-8" : "h-6"} w-auto`} />
-              <span className={`font-playfair ${isMobile ? "text-xl" : "text-lg"} font-semibold text-foreground tracking-tight`}>
-                Glee World
-              </span>
-            </div>
-          </TooltipTrigger>
-          <TooltipContent>
-            <p className="font-inter text-sm">Go to homepage</p>
-          </TooltipContent>
-        </Tooltip>
-      </TooltipProvider>
-    </div>
+    <TooltipProvider>
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <div 
+            className="flex items-center gap-3 cursor-pointer py-2" 
+            onClick={() => navigate("/")}
+          >
+            <Icons.logo className={`${isMobile ? "h-7 w-auto" : "h-6 w-auto"}`} />
+            <span className={`font-playfair ${isMobile ? "text-xl" : "text-lg"} font-semibold text-foreground tracking-tight`}>
+              Glee World
+            </span>
+          </div>
+        </TooltipTrigger>
+        <TooltipContent>
+          <p className="font-inter text-sm">Go to homepage</p>
+        </TooltipContent>
+      </Tooltip>
+    </TooltipProvider>
   );
 }
