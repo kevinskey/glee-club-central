@@ -38,6 +38,10 @@ export function ViewEventModal({
     await onDelete(event.id);
   };
 
+  const handleUpdate = async () => {
+    await onUpdate(event);
+  };
+
   const formatDate = (dateString: string) => {
     return format(new Date(dateString), "EEEE, MMMM d, yyyy");
   };
@@ -102,7 +106,7 @@ export function ViewEventModal({
           <>
             <Button 
               variant="outline"
-              onClick={() => onUpdate(event)}
+              onClick={handleUpdate}
             >
               <Edit2 className="w-4 h-4 mr-2" /> Edit
             </Button>

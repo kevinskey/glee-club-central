@@ -15,6 +15,7 @@ import { toast } from "sonner";
 import { CalendarPageHeader } from "@/components/calendar/CalendarPageHeader";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { usePermissions } from "@/hooks/usePermissions";
+import { CalendarEvent } from "@/types/calendar";
 
 const CalendarPage = () => {
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
@@ -90,26 +91,18 @@ const CalendarPage = () => {
     }
   };
 
-  // Handler for updating event
-  const onUpdateEvent = async (eventData: any) => {
-    const success = await handleUpdateEvent(eventData);
-    if (success) {
-      toast.success("Event updated successfully");
-      setIsViewModalOpen(false);
-      setSelectedEvent(null);
-    }
-    return success;
+  // Handler for updating event - Modified to match expected return type
+  const onUpdateEvent = async (eventData: CalendarEvent): Promise<void> => {
+    await handleUpdateEvent(eventData);
+    setIsViewModalOpen(false);
+    setSelectedEvent(null);
   };
 
-  // Handler for deleting event
-  const onDeleteEvent = async (eventId: string) => {
-    const success = await handleDeleteEvent(eventId);
-    if (success) {
-      toast.success("Event deleted successfully");
-      setIsViewModalOpen(false);
-      setSelectedEvent(null);
-    }
-    return success;
+  // Handler for deleting event - Modified to match expected return type
+  const onDeleteEvent = async (eventId: string): Promise<void> => {
+    await handleDeleteEvent(eventId);
+    setIsViewModalOpen(false);
+    setSelectedEvent(null);
   };
 
   return (

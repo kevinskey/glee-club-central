@@ -1,5 +1,6 @@
 
 import { supabase } from "@/integrations/supabase/client";
+import { CalendarEvent } from "@/types/calendar";
 
 // Function to check if user has connected Google Calendar
 export const checkGoogleCalendarConnection = async (): Promise<boolean> => {
@@ -62,7 +63,7 @@ export const syncWithGoogleCalendar = async (): Promise<boolean> => {
 };
 
 // Function to export calendar to iCal format
-export const exportCalendarToIcal = (events: any[]): string => {
+export const exportCalendarToIcal = (events: CalendarEvent[]): string => {
   // iCal format specification: https://icalendar.org/
   let iCalContent = [
     'BEGIN:VCALENDAR',
@@ -96,13 +97,27 @@ export const exportCalendarToIcal = (events: any[]): string => {
   });
   
   iCalContent.push('END:VCALENDAR');
+  
+  // Create a Blob and trigger a download
+  const blob = new Blob([iCalContent.join('\r\n')], { type: 'text/calendar' });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = 'glee-club-calendar.ics';
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  URL.revokeObjectURL(url);
+  
   return iCalContent.join('\r\n');
 };
 
-// Function to import calendar from iCal format
-export const importCalendarFromIcal = (iCalData: string): any[] => {
+// Function to import calendar from iCal format - updated to accept File instead of string
+export const importCalendarFromIcal = async (file: File): Promise<any[]> => {
+  // Read the file content as text
+  const fileContent = await file.text();
   const events: any[] = [];
-  const lines = iCalData.split(/\r\n|\n|\r/);
+  const lines = fileContent.split(/\r\n|\n|\r/);
   
   let currentEvent: any = null;
   let inEvent = false;

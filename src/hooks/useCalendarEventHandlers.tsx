@@ -1,152 +1,170 @@
 
-import { useCallback, useEffect } from "react";
-import { CalendarEvent } from "@/types/calendar";
+import { useState } from "react";
 import { toast } from "sonner";
-import { useAuth } from "@/contexts/AuthContext";
+import { CalendarEvent, EventType } from "@/types/calendar";
 
 export const useCalendarEventHandlers = (
   events: CalendarEvent[],
   updateEvent: (event: CalendarEvent) => Promise<boolean>,
-  addEvent: (event: Omit<CalendarEvent, 'id'>) => Promise<boolean>,
+  addEvent: (event: Omit<CalendarEvent, "id">) => Promise<boolean>,
   deleteEvent: (id: string) => Promise<boolean>,
   setSelectedEvent: (event: CalendarEvent | null) => void,
-  setIsViewModalOpen: (isOpen: boolean) => void,
+  setIsViewModalOpen: (open: boolean) => void,
   setSelectedDate: (date: Date | null) => void,
-  setIsCreateModalOpen: (isOpen: boolean) => void
+  setIsCreateModalOpen: (open: boolean) => void
 ) => {
-  const { isAdmin, profile } = useAuth();
-  const userCanCreate = profile?.is_super_admin || (isAdmin && isAdmin());
+  const [isProcessing, setIsProcessing] = useState(false);
 
-  useEffect(() => {
-    console.log("useCalendarEventHandlers initialized with events:", events.length);
-    return () => {
-      console.log("useCalendarEventHandlers cleanup");
-    };
-  }, [events.length]);
-
-  const handleDateClick = useCallback((info: any) => {
-    console.log("Date clicked:", info.date);
-    if (userCanCreate) {
-      setSelectedDate(info.date);
+  // Handle clicking on a date
+  const handleDateClick = (date: Date) => {
+    if (date) {
+      setSelectedDate(date);
       setIsCreateModalOpen(true);
     }
-  }, [userCanCreate, setSelectedDate, setIsCreateModalOpen]);
+  };
 
-  const handleEventClick = useCallback((info: any) => {
+  // Handle clicking on an event
+  const handleEventClick = (eventInfo: any) => {
+    const eventId = eventInfo.event.id;
+    const eventObj = events.find(e => e.id === eventId);
+    
+    if (eventObj) {
+      setSelectedEvent(eventObj);
+      setIsViewModalOpen(true);
+    } else {
+      toast.error("Event details could not be found");
+    }
+  };
+
+  // Handle dragging and dropping events
+  const handleEventDrop = async (info: any) => {
+    setIsProcessing(true);
     try {
-      console.log("Event clicked:", info.event.id);
       const eventId = info.event.id;
-      const event = events.find(e => e.id === eventId);
-      if (event) {
-        console.log("Found clicked event:", event);
-        setSelectedEvent(event);
-        setIsViewModalOpen(true);
+      const eventObj = events.find(e => e.id === eventId);
+      
+      if (!eventObj) {
+        toast.error("Event not found");
+        info.revert();
+        return;
+      }
+      
+      // Create a copy of the event with updated dates
+      const updatedEvent: CalendarEvent = {
+        ...eventObj,
+        start: info.event.start.toISOString(),
+        end: info.event.end ? info.event.end.toISOString() : info.event.start.toISOString()
+      };
+      
+      const success = await updateEvent(updatedEvent);
+      
+      if (!success) {
+        toast.error("Failed to update event");
+        info.revert();
       } else {
-        console.warn("Could not find clicked event in events array");
-      }
-    } catch (error) {
-      console.error("Error handling event click:", error);
-    }
-  }, [events, setSelectedEvent, setIsViewModalOpen]);
-
-  const handleEventDrop = useCallback(async (info: any) => {
-    console.log("Event dropped:", info.event.id);
-    if (!userCanCreate) {
-      toast.error("You don't have permission to move events");
-      info.revert();
-      return;
-    }
-    
-    try {
-      const eventId = info.event.id;
-      const event = events.find(e => e.id === eventId);
-      
-      if (event) {
-        const updatedEvent = {
-          ...event,
-          start: info.event.start.toISOString(),
-          end: info.event.end ? info.event.end.toISOString() : info.event.start.toISOString()
-        };
-        
-        await updateEvent(updatedEvent);
         toast.success("Event updated successfully");
       }
     } catch (error) {
-      console.error("Error updating event:", error);
-      toast.error("Failed to update event");
+      console.error("Error in handleEventDrop:", error);
+      toast.error("An error occurred while updating the event");
       info.revert();
+    } finally {
+      setIsProcessing(false);
     }
-  }, [events, updateEvent, userCanCreate]);
+  };
 
-  const handleEventResize = useCallback(async (info: any) => {
-    console.log("Event resized:", info.event.id);
-    if (!userCanCreate) {
-      toast.error("You don't have permission to resize events");
-      info.revert();
-      return;
-    }
-    
+  // Handle resizing events
+  const handleEventResize = async (info: any) => {
+    setIsProcessing(true);
     try {
       const eventId = info.event.id;
-      const event = events.find(e => e.id === eventId);
+      const eventObj = events.find(e => e.id === eventId);
       
-      if (event) {
-        const updatedEvent = {
-          ...event,
-          end: info.event.end.toISOString()
-        };
-        
-        await updateEvent(updatedEvent);
+      if (!eventObj) {
+        toast.error("Event not found");
+        info.revert();
+        return;
+      }
+      
+      // Create a copy of the event with updated end time
+      const updatedEvent: CalendarEvent = {
+        ...eventObj,
+        end: info.event.end.toISOString()
+      };
+      
+      const success = await updateEvent(updatedEvent);
+      
+      if (!success) {
+        toast.error("Failed to update event");
+        info.revert();
+      } else {
         toast.success("Event updated successfully");
       }
     } catch (error) {
-      console.error("Error updating event:", error);
-      toast.error("Failed to update event");
+      console.error("Error in handleEventResize:", error);
+      toast.error("An error occurred while updating the event");
       info.revert();
+    } finally {
+      setIsProcessing(false);
     }
-  }, [events, updateEvent, userCanCreate]);
+  };
 
-  const handleCreateEvent = async (eventData: Omit<CalendarEvent, 'id' | 'created_by'>) => {
-    if (!profile) {
-      toast.error("You must be logged in to create events");
-      return false;
-    }
-    
-    console.log("Creating event:", eventData);
-    
+  // Create event
+  const handleCreateEvent = async (eventData: any): Promise<boolean> => {
+    setIsProcessing(true);
     try {
-      const newEvent = {
-        ...eventData,
-        created_by: profile.id
+      // Ensure we have the necessary type safety
+      const newEvent: Omit<CalendarEvent, "id"> = {
+        title: eventData.title,
+        description: eventData.description || "",
+        start: eventData.start, 
+        end: eventData.end,
+        location: eventData.location || "",
+        type: eventData.type as EventType,
+        created_by: eventData.created_by
       };
       
       return await addEvent(newEvent);
     } catch (error) {
-      console.error("Error creating event:", error);
+      console.error("Error in handleCreateEvent:", error);
       toast.error("Failed to create event");
       return false;
+    } finally {
+      setIsProcessing(false);
     }
   };
 
-  const handleUpdateEvent = async (eventData: CalendarEvent) => {
-    console.log("Updating event:", eventData);
+  // Update event
+  const handleUpdateEvent = async (eventData: CalendarEvent): Promise<boolean> => {
+    setIsProcessing(true);
     try {
-      return await updateEvent(eventData);
+      // Ensure event has necessary fields
+      const updatedEvent: CalendarEvent = {
+        ...eventData,
+        description: eventData.description || ""
+      };
+      
+      return await updateEvent(updatedEvent);
     } catch (error) {
-      console.error("Error updating event:", error);
+      console.error("Error in handleUpdateEvent:", error);
       toast.error("Failed to update event");
       return false;
+    } finally {
+      setIsProcessing(false);
     }
   };
 
-  const handleDeleteEvent = async (eventId: string) => {
-    console.log("Deleting event:", eventId);
+  // Delete event
+  const handleDeleteEvent = async (eventId: string): Promise<boolean> => {
+    setIsProcessing(true);
     try {
       return await deleteEvent(eventId);
     } catch (error) {
-      console.error("Error deleting event:", error);
+      console.error("Error in handleDeleteEvent:", error);
       toast.error("Failed to delete event");
       return false;
+    } finally {
+      setIsProcessing(false);
     }
   };
 
@@ -158,6 +176,8 @@ export const useCalendarEventHandlers = (
     handleCreateEvent,
     handleUpdateEvent,
     handleDeleteEvent,
-    userCanCreate
+    isProcessing
   };
 };
+
+export default useCalendarEventHandlers;
