@@ -12,8 +12,8 @@ const HomeLayout: React.FC = () => {
   const isMobile = useIsMobile();
   const location = useLocation();
   
-  // Only show header on specific routes
-  const shouldShowHeader = ["/", "/about", "/contact", "/press-kit", "/privacy"].includes(location.pathname);
+  // Always show header on public routes
+  const isPublicRoute = !["/login", "/register", "/register/admin", "/reset-password"].includes(location.pathname);
   
   // Routes where we want to show the bottom navigation
   const showMobileBottomNav = ["/", "/about", "/videos", "/contact", "/press-kit", "/privacy", "/social", "/recordings", "/recordings/submit"].includes(location.pathname);
@@ -23,8 +23,8 @@ const HomeLayout: React.FC = () => {
       <Toaster />
       <SidebarProvider>
         <div className="min-h-screen flex flex-col bg-background w-full">
-          {/* Only show headers on main public routes */}
-          {shouldShowHeader && (
+          {/* Display header on public routes */}
+          {isPublicRoute && (
             <>
               {isMobile ? (
                 <MobileHeader />
