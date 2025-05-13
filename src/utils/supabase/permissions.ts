@@ -24,7 +24,27 @@ export async function fetchUserPermissions(userId: string) {
     }
 
     const permissions = userPermissions ? userPermissions.map(p => p.permission as PermissionName) : [];
-    const title = userTitleData?.title as UserTitle || null;
+    const rawTitle = userTitleData?.title;
+const allowedTitles: UserTitle[] = [
+  "Super Admin",
+  "Treasurer",
+  "Librarian",
+  "Wardrobe Mistress",
+  "Secretary",
+  "President",
+  "Historian",
+  "PR Manager",
+  "Tour Manager",
+  "Stage Manager",
+  "Chaplain",
+  "Section Leader",
+  "Student Worker",
+  "General Member",
+  "Guest User",
+];
+
+const title = allowedTitles.includes(rawTitle) ? rawTitle as UserTitle : null;
+
 
     return { permissions, title };
   } catch (error) {
