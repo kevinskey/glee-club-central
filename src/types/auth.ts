@@ -38,6 +38,9 @@ export interface Profile {
   notes?: string;
   dues_paid?: boolean;
   is_super_admin?: boolean;
+  // Add backward compatibility fields 
+  role?: string; // Add for backward compatibility
+  title?: string; // Add for backward compatibility
   personal_title?: string;
 }
 
@@ -55,4 +58,6 @@ export interface AuthContextType {
   signUp?: (email: string, password: string, firstName: string, lastName: string) => Promise<any>;
   updatePassword?: (newPassword: string) => Promise<{ error: any } | null>;
   session: any;
+  // Add backward compatibility methods
+  refreshPermissions?: () => Promise<void>; // Add for backward compatibility
 }

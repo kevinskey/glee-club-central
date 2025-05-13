@@ -15,7 +15,7 @@ export const useCalendarEventHandlers = (
   setIsCreateModalOpen: (isOpen: boolean) => void
 ) => {
   const { isAdmin, profile } = useAuth();
-  const userCanCreate = profile?.role === "admin" || profile?.role === "section_leader";
+  const userCanCreate = profile?.is_super_admin || (isAdmin && isAdmin());
 
   useEffect(() => {
     console.log("useCalendarEventHandlers initialized with events:", events.length);

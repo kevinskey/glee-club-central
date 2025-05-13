@@ -1,4 +1,3 @@
-
 import React, { memo, useCallback } from "react";
 import { 
   Table, 
@@ -98,7 +97,7 @@ export const MembersList = memo(function MembersList({
             <TableHead>Name</TableHead>
             <TableHead>Email</TableHead>
             <TableHead className="hidden md:table-cell">Voice Part</TableHead>
-            <TableHead className="hidden md:table-cell">Role</TableHead>
+            <TableHead className="hidden md:table-cell">Status</TableHead>
             <TableHead className="hidden lg:table-cell">Last Seen</TableHead>
             {canEdit && <TableHead className="text-right">Actions</TableHead>}
           </TableRow>
@@ -121,7 +120,7 @@ export const MembersList = memo(function MembersList({
                   {formatVoicePart(member.voice_part)}
                 </TableCell>
                 <TableCell className="hidden md:table-cell">
-                  <Badge variant="outline">{formatRole(member.role)}</Badge>
+                  <Badge variant="outline">{member.is_super_admin ? "Admin" : "Member"}</Badge>
                 </TableCell>
                 <TableCell className="hidden lg:table-cell">
                   {formatLastLogin(member.last_sign_in_at)}

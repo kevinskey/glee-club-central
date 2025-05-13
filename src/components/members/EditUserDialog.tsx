@@ -57,12 +57,12 @@ export function EditUserDialog({
       last_name: user?.last_name || '',
       email: user?.email || '',
       phone: user?.phone || '',
-      role: (user?.role as "admin" | "student" | "section_leader" | "staff" | "guest") || 'student',
       voice_part: (user?.voice_part as "soprano_1" | "soprano_2" | "alto_1" | "alto_2" | "tenor" | "bass" | null) || null,
       status: (user?.status as "active" | "pending" | "inactive" | "alumni") || 'active',
       class_year: user?.class_year || '',
       notes: user?.notes || '',
-      dues_paid: user?.dues_paid || false
+      dues_paid: user?.dues_paid || false,
+      is_admin: user?.is_super_admin || false
     }
   });
 
@@ -74,12 +74,12 @@ export function EditUserDialog({
         last_name: user.last_name || '',
         email: user.email || '',
         phone: user.phone || '',
-        role: (user.role as "admin" | "student" | "section_leader" | "staff" | "guest") || 'student',
         voice_part: (user.voice_part as "soprano_1" | "soprano_2" | "alto_1" | "alto_2" | "tenor" | "bass" | null) || null,
         status: (user.status as "active" | "pending" | "inactive" | "alumni") || 'active',
         class_year: user.class_year || '',
         notes: user.notes || '',
-        dues_paid: user.dues_paid || false
+        dues_paid: user.dues_paid || false,
+        is_admin: user.is_super_admin || false
       });
     }
   }, [user, isOpen, form]);
@@ -169,25 +169,20 @@ export function EditUserDialog({
             <div className="grid grid-cols-2 gap-4">
               <FormField
                 control={form.control}
-                name="role"
+                name="is_admin"
                 render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Role</FormLabel>
-                    <Select onValueChange={field.onChange} defaultValue={field.value}>
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select role" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        <SelectItem value="admin">Admin</SelectItem>
-                        <SelectItem value="student">Student Member</SelectItem>
-                        <SelectItem value="section_leader">Section Leader</SelectItem>
-                        <SelectItem value="staff">Staff</SelectItem>
-                        <SelectItem value="guest">Guest/Alumni</SelectItem>
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
+                  <FormItem className="flex flex-row items-start space-x-3 space-y-0">
+                    <FormControl>
+                      <Checkbox
+                        checked={field.value}
+                        onCheckedChange={field.onChange}
+                      />
+                    </FormControl>
+                    <div className="space-y-1 leading-none">
+                      <FormLabel>
+                        Administrator
+                      </FormLabel>
+                    </div>
                   </FormItem>
                 )}
               />

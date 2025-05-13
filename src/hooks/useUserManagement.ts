@@ -23,6 +23,8 @@ export interface User {
   join_date?: string;
   notes?: string;
   dues_paid?: boolean;
+  // Add backward compatibility fields
+  role?: string; // Kept for backward compatibility
 }
 
 export const useUserManagement = () => {
@@ -68,7 +70,8 @@ export const useUserManagement = () => {
             class_year: null, // Default value if not provided
             join_date: user.join_date || null,
             notes: null, // Default value if not provided
-            dues_paid: false // Default value if not provided
+            dues_paid: false, // Default value if not provided
+            role: user.is_super_admin ? 'admin' : 'member', // For backward compatibility
           };
           
           return processedUser;
