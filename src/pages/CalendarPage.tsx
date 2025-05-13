@@ -10,6 +10,7 @@ import { usePermissions } from "@/hooks/usePermissions";
 import { useLocation, useSearchParams } from "react-router-dom";
 import { EventFormValues } from "@/components/calendar/EventFormFields";
 import { Header } from "@/components/landing/Header";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 
 // Components
 import { CalendarContainer } from "@/components/calendar/CalendarContainer";
@@ -17,12 +18,14 @@ import { EventList } from "@/components/calendar/EventList";
 import { EventDetails } from "@/components/calendar/EventDetails";
 import { CalendarPageHeader } from "@/components/calendar/CalendarPageHeader";
 import { GoogleCalendarToggle } from "@/components/calendar/GoogleCalendarToggle";
+import { CalendarEditTools } from "@/components/calendar/CalendarEditTools";
 
 export default function CalendarPage() {
   const [date, setDate] = useState<Date | undefined>(new Date());
   const [selectedEvent, setSelectedEvent] = useState<CalendarEvent | null>(null);
   const [isAddEventOpen, setIsAddEventOpen] = useState(false);
   const [isEditEventOpen, setIsEditEventOpen] = useState(false);
+  const [isResetDialogOpen, setIsResetDialogOpen] = useState(false);
   const [searchParams] = useSearchParams();
   const eventId = searchParams.get('event');
   
@@ -37,7 +40,8 @@ export default function CalendarPage() {
     toggleGoogleCalendar,
     googleCalendarError,
     daysAhead,
-    setDaysAhead
+    setDaysAhead,
+    resetCalendar
   } = useCalendarEvents();
   
   // Use the permissions hook to check for super admin status
@@ -152,6 +156,17 @@ export default function CalendarPage() {
   const handleOpenAddEvent = () => {
     if (isSuperAdmin) {
       setIsAddEventOpen(true);
+    } else {
+      toast.info("You need admin privileges to add events");
+    }
+  };
+  
+  // Handle calendar reset
+  const handleResetCalendar = async () => {
+    if (await resetCalendar()) {
+      toast.success("Calendar has been reset successfully");
+      setIsResetDialogOpen(false);
+      await fetchEvents();
     }
   };
   
@@ -191,6 +206,18 @@ export default function CalendarPage() {
             )}
           </div>
           
+          {/* Add the new CalendarEditTools component */}
+          {isSuperAdmin && (
+            <CalendarEditTools 
+              onAddEvent={handleOpenAddEvent}
+              selectedEventId={selectedEvent?.id}
+              onEditSelected={handleEditEvent}
+              onDeleteSelected={handleDeleteEvent}
+              onResetCalendar={() => setIsResetDialogOpen(true)}
+              className="mb-4"
+            />
+          )}
+          
           <div className="flex flex-col lg:flex-row gap-8 h-full">
             {/* Calendar */}
             <div className="w-full lg:w-1/2">
@@ -225,7 +252,7 @@ export default function CalendarPage() {
                         event={selectedEvent} 
                         onDelete={handleDeleteEvent}
                         onEdit={handleEditEvent}
-                        isAdmin={!selectedEvent.source || selectedEvent.source === 'local'} 
+                        isAdmin={isSuperAdmin && (!selectedEvent.source || selectedEvent.source === 'local')} 
                       />
                     )}
                   </>
@@ -237,7 +264,7 @@ export default function CalendarPage() {
       </main>
       <Footer />
 
-      {/* Add Event Dialog - Modified to limit width to 90% of viewport */}
+      {/* Add Event Dialog */}
       <Dialog open={isAddEventOpen} onOpenChange={setIsAddEventOpen}>
         <DialogContent className="w-[90vw] max-w-[600px] bg-white dark:bg-gray-800">
           <DialogHeader>
@@ -251,7 +278,7 @@ export default function CalendarPage() {
         </DialogContent>
       </Dialog>
 
-      {/* Edit Event Dialog - Also modified for consistency */}
+      {/* Edit Event Dialog */}
       {selectedEvent && (
         <Dialog open={isEditEventOpen} onOpenChange={setIsEditEventOpen}>
           <DialogContent className="w-[90vw] max-w-[600px] bg-white dark:bg-gray-800">
@@ -266,6 +293,27 @@ export default function CalendarPage() {
           </DialogContent>
         </Dialog>
       )}
+      
+      {/* Reset Calendar Confirmation Dialog */}
+      <AlertDialog open={isResetDialogOpen} onOpenChange={setIsResetDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Reset Calendar</AlertDialogTitle>
+            <AlertDialogDescription>
+              This will permanently delete all calendar events. This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction 
+              onClick={handleResetCalendar}
+              className="bg-red-500 hover:bg-red-600"
+            >
+              Reset Calendar
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

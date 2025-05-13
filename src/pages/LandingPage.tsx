@@ -8,6 +8,7 @@ import { PerformanceSection } from "@/components/landing/performance/Performance
 import { YouTubeSection } from "@/components/landing/youtube/YouTubeSection";
 import { Header } from "@/components/landing/Header";
 import { SidebarProvider } from "@/components/ui/sidebar";
+import { EventsSlider } from "@/components/landing/events/EventsSlider";
 
 const LandingPage: React.FC = () => {
   return (
@@ -16,6 +17,7 @@ const LandingPage: React.FC = () => {
         <Header initialShowNewsFeed={true} />
         <main>
           <HeroSection />
+          <EventsSlider />
           <PerformanceSection />
           <YouTubeSection />
           <TestimonialSection />

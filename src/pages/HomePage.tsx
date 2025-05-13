@@ -7,6 +7,7 @@ import { useIsMobile } from '@/hooks/use-mobile';
 import { Header } from '@/components/landing/Header';
 import { SidebarProvider } from '@/components/ui/sidebar';
 import { UpcomingEvents } from '@/components/calendar/UpcomingEvents';
+import { EventsSlider } from '@/components/landing/events/EventsSlider';
 
 const HomePage = () => {
   const isMobile = useIsMobile();
@@ -75,6 +76,9 @@ const HomePage = () => {
           </footer>
         </div>
       </div>
+      
+      {/* Add events slider section outside the hero area */}
+      <EventsSlider />
     </SidebarProvider>
   );
 };
