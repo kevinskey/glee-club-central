@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
@@ -10,7 +9,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { EventFormFields, EventFormValues } from "./EventFormFields";
 import { EventImageUpload } from "./EventImageUpload";
-import { EventType } from "@/hooks/useCalendarEvents";
+import { EventType } from "@/types/calendar";
 import { MobileFitCheck } from "./MobileFitCheck";
 import { checkEventMobileFit } from "@/utils/mobileUtils";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -21,9 +20,7 @@ export const formSchema = z.object({
   time: z.string().min(1, { message: "Please select a time" }),
   location: z.string().min(1, { message: "Please enter a location" }),
   description: z.string().optional(),
-  type: z.enum(["concert", "rehearsal", "sectional", "special"], {
-    required_error: "Please select an event type",
-  }),
+  type: z.string().min(1, { message: "Please select an event type" }),
   image_url: z.string().optional().nullable(),
 });
 

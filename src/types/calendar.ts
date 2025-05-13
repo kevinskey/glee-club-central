@@ -23,6 +23,7 @@ export interface CalendarEvent {
   time?: string;
   type?: string; // Changed to string to accept all event types
   created_by?: string;
+  image_url?: string | null;
 }
 
 // Updated enum to include all event types used in the application

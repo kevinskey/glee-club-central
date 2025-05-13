@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { useFormContext, UseFormReturn } from "react-hook-form";
 import { 
@@ -27,7 +28,6 @@ import { CalendarIcon, Smartphone } from "lucide-react";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
 import { MobileFitCheck } from "./MobileFitCheck";
-import { EventType } from "@/types/calendar";
 
 // Make all required fields actually optional to match how the form is used
 export interface EventFormValues {
@@ -36,7 +36,7 @@ export interface EventFormValues {
   time?: string;
   location?: string;
   description?: string;
-  type?: EventType;
+  type?: string; // Changed to string to be compatible
   image_url?: string | null;
   
   // Additional fields

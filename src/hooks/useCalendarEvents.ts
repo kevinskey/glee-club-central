@@ -3,23 +3,7 @@ import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { useAuth } from '@/contexts/AuthContext';
-import { EventType } from '@/types/calendar';
-
-export interface CalendarEvent {
-  id: string;
-  title: string;
-  description?: string;
-  location?: string;
-  start: Date;
-  end: Date;
-  date: Date;
-  time?: string;
-  type: string; // Use string to match with EventType enum string values
-  image_url?: string | null;
-  created_by?: string;
-  allDay?: boolean;
-  source?: string;
-}
+import { CalendarEvent, EventType } from '@/types/calendar';
 
 export function useCalendarEvents() {
   const [events, setEvents] = useState<CalendarEvent[]>([]);
@@ -77,7 +61,10 @@ export function useCalendarEvents() {
       }
 
       // Format date for database
-      const formattedDate = event.date.toISOString().split('T')[0];
+      const formattedDate = event.date instanceof Date ? 
+        event.date.toISOString().split('T')[0] : 
+        typeof event.date === 'string' ? event.date : new Date().toISOString().split('T')[0];
+      
       const formattedTime = event.time || '00:00';
 
       const { data, error } = await supabase
@@ -115,7 +102,10 @@ export function useCalendarEvents() {
       }
 
       // Format date for database
-      const formattedDate = event.date.toISOString().split('T')[0];
+      const formattedDate = event.date instanceof Date ? 
+        event.date.toISOString().split('T')[0] : 
+        typeof event.date === 'string' ? event.date : new Date().toISOString().split('T')[0];
+        
       const formattedTime = event.time || '00:00';
 
       const { error } = await supabase

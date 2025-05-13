@@ -1,11 +1,10 @@
-
 import React, { useState } from "react";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Form } from "@/components/ui/form";
 import { Button } from "@/components/ui/button";
-import { CalendarEvent, EventType } from "@/hooks/useCalendarEvents";
+import { CalendarEvent } from "@/types/calendar";
 import { EventFormFields, EventFormValues } from "./EventFormFields";
 import { EventImageUpload } from "./EventImageUpload";
 import { MobileFitCheck } from "./MobileFitCheck";
@@ -18,9 +17,7 @@ export const formSchema = z.object({
   time: z.string().min(1, { message: "Please select a time" }),
   location: z.string().min(1, { message: "Please enter a location" }),
   description: z.string().optional(),
-  type: z.enum(["concert", "rehearsal", "tour", "special"], {
-    required_error: "Please select an event type",
-  }),
+  type: z.string().min(1, { message: "Please select an event type" }),
   image_url: z.string().optional().nullable(),
 });
 

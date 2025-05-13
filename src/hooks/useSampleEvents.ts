@@ -1,6 +1,6 @@
 
 // Sample events hook to provide fallback data
-import { CalendarEvent, EventType } from "./useCalendarEvents";
+import { CalendarEvent, EventType } from "@/types/calendar";
 
 export function useSampleEvents() {
   // Sample/fallback events
@@ -16,7 +16,7 @@ export function useSampleEvents() {
         time: "7:00 PM - 9:00 PM",
         location: "Sisters Chapel",
         description: "Our annual showcase featuring classical and contemporary pieces.",
-        type: "concert" as EventType,
+        type: "concert",
         image_url: "/lovable-uploads/3ad02de0-04d1-4a5e-9279-898e9c317d80.png"
       },
       {
@@ -28,7 +28,7 @@ export function useSampleEvents() {
         time: "8:00 PM - 10:00 PM",
         location: "Atlanta Symphony Hall",
         description: "Celebrating the season with festive music and traditional carols.",
-        type: "concert" as EventType,
+        type: "concert",
         image_url: "/lovable-uploads/3ad02de0-04d1-4a5e-9279-898e9c317d80.png"
       },
       {
@@ -40,7 +40,7 @@ export function useSampleEvents() {
         time: "Various Times",
         location: "Various Venues",
         description: "Our annual tour across the southeastern United States.",
-        type: "tour" as EventType,
+        type: "tour",
         image_url: "/lovable-uploads/3ad02de0-04d1-4a5e-9279-898e9c317d80.png"
       },
       {
@@ -52,7 +52,7 @@ export function useSampleEvents() {
         time: "10:00 AM - 11:30 AM",
         location: "Spelman College Oval",
         description: "Special performance for the graduating class of 2026.",
-        type: "special" as EventType,
+        type: "special",
         image_url: "/lovable-uploads/3ad02de0-04d1-4a5e-9279-898e9c317d80.png"
       },
       {
@@ -64,7 +64,7 @@ export function useSampleEvents() {
         time: "6:00 PM - 8:00 PM",
         location: "Music Building, Room 101",
         description: "Regular weekly choir rehearsal.",
-        type: "rehearsal" as EventType
+        type: "rehearsal"
       },
       {
         id: "6",
@@ -75,7 +75,7 @@ export function useSampleEvents() {
         time: "6:00 PM - 8:00 PM",
         location: "Music Building, Room 101",
         description: "Regular weekly choir rehearsal.",
-        type: "rehearsal" as EventType
+        type: "rehearsal"
       }
     ];
   };
