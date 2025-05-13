@@ -29,13 +29,16 @@ export function useCalendarOperations(refreshEvents: () => Promise<void>) {
         : typeof event.start === 'string' 
           ? event.start.split('T')[0] 
           : new Date().toISOString().split('T')[0];
+      
+      // Ensure we always have a time value - default to noon if not provided
+      const timeStr = event.time || "12:00";
 
       const newEvent = {
         title: event.title,
         date: dateStr,
-        time: event.time,
-        location: event.location,
-        description: event.description,
+        time: timeStr,
+        location: event.location || "TBD", // Provide default location
+        description: event.description || "",
         type: event.type,
         image_url: event.image_url || null,
         user_id: user.id
@@ -105,15 +108,18 @@ export function useCalendarOperations(refreshEvents: () => Promise<void>) {
         : typeof event.start === 'string' 
           ? event.start.split('T')[0] 
           : new Date().toISOString().split('T')[0];
+      
+      // Ensure we always have a time value - default to noon if not provided
+      const timeStr = event.time || "12:00";
 
       const { error } = await supabase
         .from("calendar_events")
         .update({
           title: event.title,
           date: dateStr,
-          time: event.time,
-          location: event.location,
-          description: event.description,
+          time: timeStr,
+          location: event.location || "TBD",
+          description: event.description || "",
           type: event.type,
           image_url: event.image_url,
           updated_at: new Date().toISOString()

@@ -11,14 +11,14 @@ import { supabase } from "@/integrations/supabase/client";
 import { EventFormFields, EventFormValues } from "./EventFormFields";
 import { MobileFitCheck } from "./MobileFitCheck";
 import { checkEventMobileFit } from "@/utils/mobileUtils";
-import { useIsMobile } from "@/hooks/use-mobile";
+import { useIsMobile } from "@/hooks/useMobile";
 import { uploadEventImage } from "@/utils/supabase/eventImageUpload";
 import { EventImageUpload } from "./EventImageUpload";
 
 export const formSchema = z.object({
   title: z.string().min(2, { message: "Title must be at least 2 characters" }),
   date: z.date({ required_error: "Please select a date" }),
-  time: z.string().min(1, { message: "Please select a time" }),
+  time: z.string().min(1, { message: "Please select a time" }).default("12:00"),
   location: z.string().min(1, { message: "Please enter a location" }),
   description: z.string().optional(),
   type: z.string().min(1, { message: "Please select an event type" }),
@@ -45,7 +45,7 @@ export function AddEventForm({ onAddEvent, onCancel, initialDate }: AddEventForm
     defaultValues: {
       title: "",
       date: initialDate || new Date(),
-      time: "",
+      time: "12:00", // Default to noon
       location: "",
       description: "",
       type: "concert" as const,
@@ -115,9 +115,13 @@ export function AddEventForm({ onAddEvent, onCancel, initialDate }: AddEventForm
         }
       }
       
+      // Make sure time is not empty
+      const timeValue = values.time || "12:00";
+      
       // Add the image URL and required start/end dates to the event data
       const enhancedValues = {
         ...values,
+        time: timeValue, // Ensure time is always set
         image_url: imageUrl,
         start: values.date,  // Set start date from form date
         end: values.date     // Set end date (same as start for simplicity)

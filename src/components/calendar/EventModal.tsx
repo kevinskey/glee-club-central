@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -41,7 +42,7 @@ import { toast } from "sonner";
 const formSchema = z.object({
   title: z.string().min(2, "Title must have at least 2 characters"),
   date: z.date(),
-  startTime: z.string().optional(),
+  startTime: z.string().default("12:00"),
   endTime: z.string().optional(),
   location: z.string().optional(),
   description: z.string().optional(),
@@ -80,7 +81,7 @@ export const EventModal = ({
       date: defaultValues?.start ? new Date(defaultValues.start) : initialDate || new Date(),
       startTime: defaultValues?.start
         ? format(new Date(defaultValues.start), "HH:mm")
-        : "",
+        : "12:00",
       endTime: defaultValues?.end && defaultValues.end !== defaultValues.start
         ? format(new Date(defaultValues.end), "HH:mm")
         : "",
@@ -100,7 +101,7 @@ export const EventModal = ({
         date: defaultValues?.start ? new Date(defaultValues.start) : initialDate || new Date(),
         startTime: defaultValues?.start
           ? format(new Date(defaultValues.start), "HH:mm")
-          : "",
+          : "12:00",
         endTime: defaultValues?.end && defaultValues.end !== defaultValues.start
           ? format(new Date(defaultValues.end), "HH:mm")
           : "",
@@ -141,15 +142,16 @@ export const EventModal = ({
 
       // Create event start and end dates
       const dateString = format(values.date, "yyyy-MM-dd");
+      const defaultTime = "12:00:00"; // Default time if none is provided
+      const timeValue = values.startTime || defaultTime;
+      
       let startDate, endDate;
 
       if (values.allDay) {
         startDate = new Date(`${dateString}T00:00:00`);
         endDate = new Date(`${dateString}T23:59:59`);
       } else {
-        startDate = values.startTime
-          ? new Date(`${dateString}T${values.startTime}:00`)
-          : new Date(`${dateString}T00:00:00`);
+        startDate = new Date(`${dateString}T${timeValue}`);
         
         endDate = values.endTime
           ? new Date(`${dateString}T${values.endTime}:00`)
@@ -162,8 +164,10 @@ export const EventModal = ({
         title: values.title,
         start: startDate.toISOString(),
         end: endDate.toISOString(),
-        location: values.location,
-        description: values.description,
+        date: dateString,
+        time: timeValue,
+        location: values.location || "TBD",
+        description: values.description || "",
         type: values.type as EventType,
         allDay: values.allDay,
         image_url: imageUrl,
@@ -177,6 +181,7 @@ export const EventModal = ({
       }
     } catch (error) {
       console.error("Error submitting event:", error);
+      toast.error("Failed to save event");
     } finally {
       setIsSubmitting(false);
     }
@@ -316,6 +321,7 @@ export const EventModal = ({
                           type="time"
                           placeholder="Start Time"
                           {...field}
+                          defaultValue="12:00"
                         />
                       </FormControl>
                     </div>
