@@ -1,4 +1,3 @@
-
 import { useAuth } from '@/contexts/AuthContext';
 import { useRolePermissions } from '@/contexts/RolePermissionContext';
 import { useState } from 'react';
@@ -94,25 +93,7 @@ export function usePermissions(): UsePermissionsReturn {
     setIsUpdating(true);
     try {
       // First find the user by email
-      type SimpleUser = {
-  id: string;
-  email?: string;
-  role?: string;
-  permissions?: string[]; // or more specific if you have a list
-};
-
-const { data, error } = await supabase
-  .from("users")
-  .select("id, email, role, permissions")
-  .eq("id", userId)
-  .single();
-
-const userData = data as SimpleUser | null;
-
-if (error) {
-  console.error("Error fetching user:", error);
-}
-
+      const { data: userData, error: userError } = await supabase
         .from('profiles')
         .select('id')
         .eq('email', email)
