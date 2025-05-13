@@ -9,10 +9,10 @@ import { toast } from "sonner";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { EventFormFields, EventFormValues } from "./EventFormFields";
-import { EventImageUpload } from "./EventImageUpload";
 import { MobileFitCheck } from "./MobileFitCheck";
 import { checkEventMobileFit } from "@/utils/mobileUtils";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { uploadEventImage } from "@/utils/supabase/eventImageUpload";
 
 export const formSchema = z.object({
   title: z.string().min(2, { message: "Title must be at least 2 characters" }),
@@ -22,6 +22,7 @@ export const formSchema = z.object({
   description: z.string().optional(),
   type: z.string().min(1, { message: "Please select an event type" }),
   image_url: z.string().optional().nullable(),
+  imageFile: z.any().optional(),
 });
 
 interface AddEventFormProps {
@@ -46,7 +47,7 @@ export function AddEventForm({ onAddEvent, onCancel, initialDate }: AddEventForm
       time: "",
       location: "",
       description: "",
-      type: "concert",
+      type: "concert" as const,
       image_url: null,
     },
   });
@@ -62,6 +63,24 @@ export function AddEventForm({ onAddEvent, onCancel, initialDate }: AddEventForm
   const title = form.watch('title');
   const location = form.watch('location');
   const description = form.watch('description');
+
+  const handleImageSelected = (file: File | null) => {
+    setSelectedImage(file);
+    
+    if (file) {
+      // Create a preview URL
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setImagePreview(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+      
+      // Clear any previously entered image URL
+      form.setValue("image_url", null);
+    } else {
+      setImagePreview(null);
+    }
+  };
 
   async function onSubmit(values: EventFormValues) {
     if (!user) {
@@ -94,36 +113,16 @@ export function AddEventForm({ onAddEvent, onCancel, initialDate }: AddEventForm
       
       if (selectedImage) {
         try {
-          // Create a unique filename with timestamp and original name
-          const fileExt = selectedImage.name.split('.').pop();
-          const fileName = `${Date.now()}-${Math.random().toString(36).substring(2, 15)}.${fileExt}`;
+          // Upload the image to the media library
+          imageUrl = await uploadEventImage(selectedImage, values.title);
           
-          console.log("Uploading image to Supabase:", fileName);
-          
-          // Upload the file to Supabase storage
-          const { data: uploadData, error: uploadError } = await supabase.storage
-            .from('event-images')
-            .upload(fileName, selectedImage, {
-              cacheControl: '3600',
-              upsert: false
-            });
-            
-          if (uploadError) {
-            console.error('Image upload error:', uploadError);
-            toast.error('Failed to upload image: ' + uploadError.message);
+          if (!imageUrl) {
+            toast.error('Failed to upload image');
             setIsUploading(false);
             return;
           }
           
-          console.log("Image uploaded successfully:", uploadData);
-          
-          // Get the public URL for the uploaded image
-          const { data: { publicUrl } } = supabase.storage
-            .from('event-images')
-            .getPublicUrl(fileName);
-            
-          imageUrl = publicUrl;
-          console.log("Image public URL:", imageUrl);
+          console.log("Image uploaded successfully:", imageUrl);
           
         } catch (err) {
           console.error('Error uploading image:', err);
@@ -160,15 +159,10 @@ export function AddEventForm({ onAddEvent, onCancel, initialDate }: AddEventForm
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-3 px-1 max-h-[70vh] overflow-y-auto pb-16">
-        <EventFormFields form={form} />
-
-        <EventImageUpload 
-          form={form}
-          isUploading={isUploading}
-          selectedImage={selectedImage}
-          setSelectedImage={setSelectedImage}
+        <EventFormFields 
+          form={form} 
+          onImageSelected={handleImageSelected}
           imagePreview={imagePreview}
-          setImagePreview={setImagePreview}
         />
 
         {mobileFitIssues && !mobileFitIssues.fits && (
@@ -186,7 +180,7 @@ export function AddEventForm({ onAddEvent, onCancel, initialDate }: AddEventForm
           <Button type="submit" className="bg-glee-purple hover:bg-glee-purple/90 text-sm px-3 py-1 h-8" disabled={isUploading}>
             {isUploading ? (
               <>
-                <span className="mr-2">Uploading...</span>
+                <span className="mr-2">Saving...</span>
                 <div className="h-3 w-3 rounded-full border-2 border-white border-t-transparent animate-spin"></div>
               </>
             ) : (

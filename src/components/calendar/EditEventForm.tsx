@@ -7,10 +7,10 @@ import { Form } from "@/components/ui/form";
 import { Button } from "@/components/ui/button";
 import { CalendarEvent } from "@/types/calendar";
 import { EventFormFields, EventFormValues } from "./EventFormFields";
-import { EventImageUpload } from "./EventImageUpload";
 import { MobileFitCheck } from "./MobileFitCheck";
 import { checkEventMobileFit } from "@/utils/mobileUtils";
 import { toast } from "sonner";
+import { uploadEventImage } from "@/utils/supabase/eventImageUpload";
 
 export const formSchema = z.object({
   title: z.string().min(2, { message: "Title must be at least 2 characters" }),
@@ -20,6 +20,7 @@ export const formSchema = z.object({
   description: z.string().optional(),
   type: z.string().min(1, { message: "Please select an event type" }),
   image_url: z.string().optional().nullable(),
+  imageFile: z.any().optional(),
 });
 
 interface EditEventFormProps {
@@ -59,6 +60,24 @@ export function EditEventForm({
   const location = form.watch('location');
   const description = form.watch('description');
 
+  const handleImageSelected = (file: File | null) => {
+    setSelectedImage(file);
+    
+    if (file) {
+      // Create a preview URL
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setImagePreview(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+      
+      // Clear any previously entered image URL
+      form.setValue("image_url", null);
+    } else {
+      setImagePreview(null);
+    }
+  };
+
   const onSubmit = async (values: EventFormValues) => {
     // Check mobile fit before saving
     const mobileFitCheck = checkEventMobileFit(values.title, values.location, values.description);
@@ -80,6 +99,30 @@ export function EditEventForm({
     setIsSubmitting(true);
 
     try {
+      // Handle image upload if there's a selected image
+      let imageUrl = values.image_url;
+      
+      if (selectedImage) {
+        try {
+          // Upload the image to the media library
+          imageUrl = await uploadEventImage(selectedImage, values.title);
+          
+          if (!imageUrl) {
+            toast.error('Failed to upload image');
+            setIsSubmitting(false);
+            return;
+          }
+          
+          console.log("Image uploaded successfully:", imageUrl);
+          
+        } catch (err) {
+          console.error('Error uploading image:', err);
+          toast.error('Failed to upload image');
+          setIsSubmitting(false);
+          return;
+        }
+      }
+
       const updatedEvent: CalendarEvent = {
         id: event.id,
         title: values.title,
@@ -90,7 +133,7 @@ export function EditEventForm({
         location: values.location,
         description: values.description,
         type: values.type,
-        image_url: values.image_url,
+        image_url: imageUrl,
       };
 
       const success = await onUpdateEvent(updatedEvent);
@@ -109,15 +152,10 @@ export function EditEventForm({
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-        <EventFormFields form={form} />
-
-        <EventImageUpload
-          form={form}
-          isUploading={isSubmitting}
-          selectedImage={selectedImage}
-          setSelectedImage={setSelectedImage}
+        <EventFormFields 
+          form={form} 
+          onImageSelected={handleImageSelected}
           imagePreview={imagePreview}
-          setImagePreview={setImagePreview}
         />
 
         {mobileFitIssues && !mobileFitIssues.fits && (

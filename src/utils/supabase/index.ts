@@ -6,3 +6,4 @@ export * from './sections';
 export * from './practiceLogs';
 export * from './auth';
 export * from './media';
+export * from './eventImageUpload';
