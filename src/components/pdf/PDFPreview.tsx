@@ -1,4 +1,3 @@
-
 import React from 'react';
 
 export interface PDFPreviewProps {
@@ -13,7 +12,7 @@ export interface PDFPreviewProps {
   children?: React.ReactNode; // Add children prop for custom rendering
 }
 
-const PDFPreview: React.FC<PDFPreviewProps> = ({
+export const PDFPreview: React.FC<PDFPreviewProps> = ({
   url,
   title,
   mediaSourceId,
@@ -55,4 +54,5 @@ const PDFPreview: React.FC<PDFPreviewProps> = ({
   );
 };
 
+// Keep the default export for backward compatibility, but we're now using the named export
 export default PDFPreview;

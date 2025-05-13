@@ -2,7 +2,7 @@
 import { useState, useEffect } from 'react';
 import { YouTubeVideo } from '@/types/youtube';
 
-const useYouTubeData = () => {
+export const useYouTubeData = () => {
   const [videos, setVideos] = useState<YouTubeVideo[]>([
     {
       id: 'video1',
@@ -120,4 +120,4 @@ const useYouTubeData = () => {
   };
 };
 
-export default useYouTubeData;
+// Remove default export to fix the named export issue

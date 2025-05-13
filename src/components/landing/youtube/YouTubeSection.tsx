@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { useYouTubeData } from '@/hooks/useYouTubeData';
+import { useYouTubeData } from '@/hooks/useYouTubeData'; // Changed to use named export
 import { Card } from '@/components/ui/card';
 import { AspectRatio } from '@/components/ui/aspect-ratio';
 import { Skeleton } from '@/components/ui/skeleton';
