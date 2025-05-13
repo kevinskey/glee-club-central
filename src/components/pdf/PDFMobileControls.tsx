@@ -44,16 +44,16 @@ export const PDFMobileControls: React.FC<PDFMobileControlsProps> = ({
   onDelete
 }) => {
   return (
-    <div className="sticky top-0 z-30 w-full bg-background/95 backdrop-blur-sm border-b py-1 px-1.5 flex flex-wrap justify-between items-center gap-1.5 shadow-sm">
+    <div className="sticky top-0 z-30 w-full bg-background/95 backdrop-blur-sm border-b py-1.5 px-2 flex flex-wrap justify-between items-center gap-2 shadow-sm">
       <div className="flex items-center gap-1.5">
         <Button
           variant="outline"
           size="icon"
           onClick={onPrevPage}
           disabled={currentPage <= 1}
-          className="h-8 w-8"
+          className="h-9 w-9" // Larger touch target
         >
-          <ChevronLeft className="h-4 w-4" />
+          <ChevronLeft className="h-5 w-5" />
         </Button>
         
         <span className="text-xs font-medium bg-muted px-2 py-1 rounded">
@@ -65,9 +65,9 @@ export const PDFMobileControls: React.FC<PDFMobileControlsProps> = ({
           size="icon"
           onClick={onNextPage}
           disabled={currentPage >= totalPages}
-          className="h-8 w-8"
+          className="h-9 w-9" // Larger touch target
         >
-          <ChevronRight className="h-4 w-4" />
+          <ChevronRight className="h-5 w-5" />
         </Button>
       </div>
       
@@ -76,33 +76,33 @@ export const PDFMobileControls: React.FC<PDFMobileControlsProps> = ({
           variant="outline"
           size="icon"
           onClick={onZoomOut}
-          className="h-8 w-8"
+          className="h-9 w-9" // Larger touch target
           title="Zoom Out"
         >
-          <ZoomOut className="h-4 w-4" />
+          <ZoomOut className="h-5 w-5" />
         </Button>
         
         <Button
           variant="outline"
           size="icon"
           onClick={onZoomIn}
-          className="h-8 w-8"
+          className="h-9 w-9" // Larger touch target
           title="Zoom In"
         >
-          <ZoomIn className="h-4 w-4" />
+          <ZoomIn className="h-5 w-5" />
         </Button>
         
         <Button
           variant="outline"
           size="icon"
           onClick={onFullscreen}
-          className="h-8 w-8"
+          className="h-9 w-9" // Larger touch target
           title={isFullscreen ? "Exit Fullscreen" : "Full Screen"}
         >
           {isFullscreen ? (
-            <Minimize className="h-4 w-4" />
+            <Minimize className="h-5 w-5" />
           ) : (
-            <Maximize className="h-4 w-4" />
+            <Maximize className="h-5 w-5" />
           )}
         </Button>
       </div>
@@ -113,10 +113,10 @@ export const PDFMobileControls: React.FC<PDFMobileControlsProps> = ({
             variant={showAnnotations ? "secondary" : "outline"}
             size="icon"
             onClick={toggleAnnotations}
-            className="h-8 w-8"
+            className="h-9 w-9" // Larger touch target
             title={showAnnotations ? "Hide Annotations" : "Show Annotations"}
           >
-            <Pencil className="h-4 w-4" />
+            <Pencil className="h-5 w-5" />
           </Button>
         )}
         
@@ -125,10 +125,10 @@ export const PDFMobileControls: React.FC<PDFMobileControlsProps> = ({
             variant={isSetlistOpen ? "secondary" : "outline"}
             size="icon"
             onClick={toggleSetlist}
-            className="h-8 w-8"
+            className="h-9 w-9" // Larger touch target
             title={isSetlistOpen ? "Close Setlist" : "Add to Setlist"}
           >
-            <ListMusic className="h-4 w-4" />
+            <ListMusic className="h-5 w-5" />
           </Button>
         )}
         
@@ -136,10 +136,10 @@ export const PDFMobileControls: React.FC<PDFMobileControlsProps> = ({
           variant="outline"
           size="icon"
           onClick={() => window.open(url, "_blank")}
-          className="h-8 w-8"
+          className="h-9 w-9" // Larger touch target
           title="Download PDF"
         >
-          <Download className="h-4 w-4" />
+          <Download className="h-5 w-5" />
         </Button>
         
         {canDelete && onDelete && (
@@ -147,10 +147,10 @@ export const PDFMobileControls: React.FC<PDFMobileControlsProps> = ({
             variant="outline"
             size="icon"
             onClick={onDelete}
-            className="h-8 w-8 text-destructive hover:bg-destructive/10"
+            className="h-9 w-9 text-destructive hover:bg-destructive/10" // Larger touch target
             title="Delete PDF"
           >
-            <Trash2 className="h-4 w-4" />
+            <Trash2 className="h-5 w-5" />
           </Button>
         )}
       </div>

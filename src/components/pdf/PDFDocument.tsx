@@ -1,8 +1,7 @@
 
-import React from "react";
-import { FileText, Link } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
-import { PDFCore } from "@/components/pdf/PDFCore";
+import React, { useState, useEffect } from "react";
+import { Spinner } from "@/components/ui/spinner";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 interface PDFDocumentProps {
   url: string;
@@ -13,11 +12,9 @@ interface PDFDocumentProps {
   onError: () => void;
   error: string | null;
   title: string;
-  mediaSourceId?: string;
-  category?: string;
 }
 
-export const PDFDocument = ({
+export const PDFDocument: React.FC<PDFDocumentProps> = ({
   url,
   currentPage,
   zoom,
@@ -25,49 +22,92 @@ export const PDFDocument = ({
   onLoad,
   onError,
   error,
-  title,
-  mediaSourceId,
-  category,
-}: PDFDocumentProps) => {
-  // Handle view to Media Library
-  const goToMediaLibrary = () => {
-    if (mediaSourceId) {
-      window.open(`/dashboard/admin/media?id=${mediaSourceId}`, "_blank");
-    }
+  title
+}) => {
+  const isMobile = useIsMobile();
+  const [pdfLoaded, setPdfLoaded] = useState(false);
+  
+  // Handle load event
+  const handleLoad = () => {
+    setPdfLoaded(true);
+    onLoad();
   };
+  
+  // Mobile touch navigation
+  const [touchStartX, setTouchStartX] = useState<number | null>(null);
+  
+  const handleTouchStart = (e: React.TouchEvent) => {
+    setTouchStartX(e.touches[0].clientX);
+  };
+  
+  const handleTouchEnd = (e: React.TouchEvent) => {
+    if (touchStartX === null) return;
+    
+    const touchEndX = e.changedTouches[0].clientX;
+    const difference = touchStartX - touchEndX;
+    
+    // If swipe distance is significant (more than 50px)
+    if (Math.abs(difference) > 50) {
+      // Right to left swipe (next page)
+      if (difference > 0) {
+        // Handle next page logic if needed
+      }
+      // Left to right swipe (previous page)
+      else {
+        // Handle previous page logic if needed
+      }
+    }
+    
+    setTouchStartX(null);
+  };
+  
+  // Simple sanity check for valid URL
+  if (!url) {
+    return (
+      <div className="flex flex-col items-center justify-center w-full h-full bg-muted/30">
+        <p className="text-muted-foreground">No PDF URL provided</p>
+      </div>
+    );
+  }
+
+  // Show error state
+  if (error) {
+    return (
+      <div className="flex flex-col items-center justify-center w-full h-full bg-muted/30">
+        <p className="text-destructive font-medium">Failed to load PDF</p>
+        <p className="text-sm text-muted-foreground mt-2">{error}</p>
+      </div>
+    );
+  }
+
+  // Show loading state
+  if (isLoading || !pdfLoaded) {
+    return (
+      <div className="flex flex-col items-center justify-center w-full h-full bg-muted/30">
+        <Spinner size="lg" />
+        <p className="text-sm text-muted-foreground mt-4">Loading PDF...</p>
+      </div>
+    );
+  }
 
   return (
-    <div className="relative w-full h-full flex flex-col justify-center overflow-hidden bg-muted/20">
-      {/* Source Badge */}
-      {mediaSourceId && category && (
-        <div className="absolute top-12 right-2 z-40 md:left-2 md:right-auto">
-          <Badge 
-            variant="outline" 
-            className="bg-background/90 cursor-pointer hover:bg-background shadow-sm"
-            onClick={goToMediaLibrary}
-          >
-            <Link className="h-3 w-3 mr-1" />
-            From {category}
-          </Badge>
-        </div>
-      )}
-      
-      {/* Debug info for development */}
-      {process.env.NODE_ENV === 'development' && (
-        <div className="absolute top-2 right-2 z-40 bg-background/80 text-xs px-2 py-1 rounded shadow-sm">
-          URL: {url ? url.substring(0, 30) + '...' : 'undefined'} | Page: {currentPage}
-        </div>
-      )}
-      
-      <PDFCore
-        url={url}
-        title={title}
-        currentPage={currentPage}
-        zoom={zoom}
-        viewMode="page"
-        onLoad={onLoad}
+    <div 
+      className="relative pdf-container max-w-full"
+      onTouchStart={isMobile ? handleTouchStart : undefined}
+      onTouchEnd={isMobile ? handleTouchEnd : undefined}
+    >
+      <iframe
+        src={`${url}#page=${currentPage}`}
+        title={`PDF Viewer - ${title}`}
+        className="border-0 w-full"
+        style={{
+          transform: `scale(${zoom / 100})`,
+          transformOrigin: 'top center',
+          height: zoom === 100 ? '100%' : `${zoom * 1.3}%`,
+          width: zoom === 100 ? '100%' : `${100 * (100 / zoom)}%`,
+        }}
+        onLoad={handleLoad}
         onError={onError}
-        className="w-full h-full shadow-lg"
       />
     </div>
   );

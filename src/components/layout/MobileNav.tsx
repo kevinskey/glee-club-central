@@ -1,3 +1,4 @@
+
 import React from "react";
 import { Link, useLocation } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
@@ -6,7 +7,8 @@ import {
   LayoutDashboard, 
   Music, 
   Calendar, 
-  User
+  User,
+  FileText
 } from "lucide-react";
 
 interface MobileNavProps {
@@ -22,9 +24,12 @@ export function MobileNav({ isAdmin }: MobileNavProps) {
   // Only show in dashboard paths
   if (!pathname.startsWith('/dashboard')) return null;
   
-  // Bottom navigation tabs (remains unchanged)
+  // Don't show in PDF viewer pages
+  if (pathname.includes('/sheet-music/') && pathname.split('/').length > 3) return null;
+  
+  // Bottom navigation tabs
   return (
-    <div className="fixed bottom-0 left-0 right-0 z-40 bg-background border-t md:hidden">
+    <div className="fixed bottom-0 left-0 right-0 z-40 bg-background/95 backdrop-blur border-t md:hidden">
       <div className="flex items-center justify-between px-4 py-2">
         <div className="flex items-center justify-around w-full">
           <Link 
@@ -44,8 +49,8 @@ export function MobileNav({ isAdmin }: MobileNavProps) {
               pathname === "/dashboard/sheet-music" ? "text-glee-spelman" : "text-muted-foreground"
             )}
           >
-            <Music className="h-5 w-5" />
-            <span className="text-xs mt-1">Music</span>
+            <FileText className="h-5 w-5" />
+            <span className="text-xs mt-1">Sheet Music</span>
           </Link>
           <Link 
             to="/dashboard/calendar" 

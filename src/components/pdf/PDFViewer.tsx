@@ -124,6 +124,7 @@ export const PDFViewer = ({
     <div 
       ref={viewerRef}
       className={`relative flex flex-col w-full rounded-lg border border-border overflow-hidden ${isFullscreen ? 'fixed inset-0 z-50 bg-background' : ''}`}
+      style={{ maxHeight: isMobile ? '100%' : undefined }}
     >
       {/* Mobile Controls */}
       {isMobile && (
@@ -175,19 +176,20 @@ export const PDFViewer = ({
       {/* PDF Document Container */}
       <div 
         ref={containerRef} 
-        className="relative w-full flex justify-center overflow-hidden" 
+        className="relative w-full flex justify-center overflow-auto" 
         style={{ 
           height: fullHeight ? "calc(100vh - 60px)" : 
                   isFullscreen ? "calc(100vh - 60px)" : 
-                  isMobile ? "calc(100vh - 150px)" : "70vh",
+                  isMobile ? "calc(100vh - 160px)" : "70vh",
           position: "relative",
           backgroundColor: "#f4f4f5", // Light gray background
+          WebkitOverflowScrolling: "touch", // Smooth scrolling on iOS
         }}
       >
         <PDFDocument
           url={url}
           currentPage={currentPage}
-          zoom={zoom}
+          zoom={isMobile ? Math.min(zoom, 150) : zoom} // Limit zoom on mobile
           isLoading={isLoading}
           onLoad={handleLoad}
           onError={handleError}

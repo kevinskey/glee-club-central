@@ -64,3 +64,71 @@ export function truncateForMobile(text: string, maxLength: number): string {
   if (text.length <= maxLength) return text;
   return text.substring(0, maxLength - 3) + '...';
 }
+
+/**
+ * Detects touch gesture direction and distance
+ * @param startX Touch start X position
+ * @param endX Touch end X position
+ * @param startY Touch start Y position
+ * @param endY Touch end Y position
+ * @param threshold Minimum distance to consider a swipe
+ * @returns Object with swipe information
+ */
+export function detectSwipe(
+  startX: number,
+  endX: number,
+  startY: number,
+  endY: number,
+  threshold: number = 50
+): {
+  direction: 'left' | 'right' | 'up' | 'down' | 'none';
+  distance: number;
+  isHorizontal: boolean;
+} {
+  const deltaX = startX - endX;
+  const deltaY = startY - endY;
+  
+  const absDeltaX = Math.abs(deltaX);
+  const absDeltaY = Math.abs(deltaY);
+  
+  // If movement is below threshold, no swipe detected
+  if (absDeltaX < threshold && absDeltaY < threshold) {
+    return {
+      direction: 'none',
+      distance: Math.max(absDeltaX, absDeltaY),
+      isHorizontal: absDeltaX > absDeltaY
+    };
+  }
+  
+  // Determine direction based on which delta is larger
+  if (absDeltaX > absDeltaY) {
+    return {
+      direction: deltaX > 0 ? 'left' : 'right',
+      distance: absDeltaX,
+      isHorizontal: true
+    };
+  } else {
+    return {
+      direction: deltaY > 0 ? 'up' : 'down',
+      distance: absDeltaY,
+      isHorizontal: false
+    };
+  }
+}
+
+/**
+ * Checks if a viewport size is considered mobile
+ * @returns Boolean indicating if current viewport is mobile
+ */
+export function isMobileViewport(): boolean {
+  if (typeof window === 'undefined') return false;
+  return window.innerWidth < 768; // 768px is standard mobile breakpoint
+}
+
+/**
+ * Gets appropriate margins for mobile navigation elements
+ * @returns CSS class string with appropriate margins
+ */
+export function getMobileNavMargins(): string {
+  return "mb-16 pb-4"; // Bottom margin to accommodate mobile nav
+}
