@@ -15,6 +15,6 @@ export type PermissionName =
   | "can_post_announcements"
   | "can_manage_users";
 
-// Now UserTitle is just a string, no longer a union type
+// Changed from a union type to a simple string type
 // This allows for dynamic titles from the database
 export type UserTitle = string;
