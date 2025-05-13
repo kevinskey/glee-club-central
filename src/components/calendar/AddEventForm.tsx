@@ -11,7 +11,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { EventFormFields, EventFormValues } from "./EventFormFields";
 import { MobileFitCheck } from "./MobileFitCheck";
 import { checkEventMobileFit } from "@/utils/mobileUtils";
-import { useIsMobile } from "@/hooks/useMobile";
+import { useIsMobile } from "@/hooks/use-mobile";
 import { uploadEventImage } from "@/utils/supabase/eventImageUpload";
 import { EventImageUpload } from "./EventImageUpload";
 
