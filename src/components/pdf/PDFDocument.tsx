@@ -31,11 +31,46 @@ export const PDFDocument: React.FC<PDFDocumentProps> = ({
 }) => {
   const isMobile = useIsMobile();
   const [pdfLoaded, setPdfLoaded] = useState(false);
+  const [loadAttempts, setLoadAttempts] = useState(0);
+  const [finalUrl, setFinalUrl] = useState(url);
+  
+  // Handle URL update and add cache-busting
+  useEffect(() => {
+    if (!url) return;
+    
+    // Add cache busting to ensure we're getting the latest PDF version
+    // This helps solve caching issues that might prevent PDFs from loading
+    const cacheBuster = `?t=${new Date().getTime()}`;
+    const newUrl = url.includes('?') ? `${url}&cb=${Date.now()}` : `${url}${cacheBuster}`;
+    setFinalUrl(newUrl);
+    console.log("PDF URL prepared:", newUrl);
+    
+    // Reset load state when URL changes
+    setPdfLoaded(false);
+    setLoadAttempts(0);
+  }, [url]);
   
   // Handle load event
   const handleLoad = () => {
+    console.log("PDF loaded successfully:", title);
     setPdfLoaded(true);
     onLoad();
+  };
+  
+  // Handle error event with retry logic
+  const handleError = () => {
+    console.error("PDF load error for:", title, "URL:", url);
+    setLoadAttempts(prev => prev + 1);
+    
+    if (loadAttempts < 2) {
+      // Try one more time with a fresh cache buster
+      console.log("Attempting to reload PDF...");
+      const retryUrl = `${url}?retry=${Date.now()}`;
+      setFinalUrl(retryUrl);
+    } else {
+      // Give up after multiple attempts
+      onError();
+    }
   };
   
   // Mobile touch navigation
@@ -56,10 +91,12 @@ export const PDFDocument: React.FC<PDFDocumentProps> = ({
       // Right to left swipe (next page)
       if (difference > 0) {
         // Handle next page logic if needed
+        console.log("Swipe detected: next page");
       }
       // Left to right swipe (previous page)
       else {
         // Handle previous page logic if needed
+        console.log("Swipe detected: previous page");
       }
     }
     
@@ -81,6 +118,12 @@ export const PDFDocument: React.FC<PDFDocumentProps> = ({
       <div className="flex flex-col items-center justify-center w-full h-full bg-muted/30">
         <p className="text-destructive font-medium">Failed to load PDF</p>
         <p className="text-sm text-muted-foreground mt-2">{error}</p>
+        <button 
+          onClick={() => window.open(url, '_blank')} 
+          className="mt-4 text-sm text-blue-600 hover:underline"
+        >
+          Try opening in new tab
+        </button>
       </div>
     );
   }
@@ -102,7 +145,7 @@ export const PDFDocument: React.FC<PDFDocumentProps> = ({
       onTouchEnd={isMobile ? handleTouchEnd : undefined}
     >
       <iframe
-        src={`${url}#page=${currentPage}`}
+        src={`${finalUrl}#page=${currentPage}`}
         title={`PDF Viewer - ${title}`}
         className="border-0 w-full"
         style={{
@@ -112,7 +155,8 @@ export const PDFDocument: React.FC<PDFDocumentProps> = ({
           width: zoom === 100 ? '100%' : `${100 * (100 / zoom)}%`,
         }}
         onLoad={handleLoad}
-        onError={onError}
+        onError={handleError}
+        sandbox="allow-scripts allow-same-origin allow-forms allow-downloads"
       />
     </div>
   );

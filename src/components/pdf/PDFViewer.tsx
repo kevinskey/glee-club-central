@@ -38,12 +38,34 @@ export const PDFViewer = ({
   const [showAnnotations, setShowAnnotations] = useState(false);
   const [isSetlistOpen, setIsSetlistOpen] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
+  const [loadAttempt, setLoadAttempt] = useState(0);
   
   const isMobile = useIsMobile();
   const navigate = useNavigate();
   
   const containerRef = React.useRef<HTMLDivElement>(null);
   const viewerRef = React.useRef<HTMLDivElement>(null);
+  
+  // Validate URL early
+  useEffect(() => {
+    if (!url || url.trim() === '') {
+      setError("No PDF URL provided");
+      setIsLoading(false);
+      toast.error("Missing PDF URL", {
+        description: "No PDF URL was provided to display"
+      });
+    } else {
+      // Reset error state when URL changes
+      setError(null);
+      setIsLoading(true);
+      
+      // Attempt to preload the PDF
+      const img = new Image();
+      img.src = url;
+      
+      console.log(`Attempting to load PDF: ${url}`);
+    }
+  }, [url]);
   
   // Handle fullscreen changes
   useEffect(() => {
@@ -106,18 +128,34 @@ export const PDFViewer = ({
     setIsSetlistOpen(!isSetlistOpen);
   };
 
-  // Handle PDF load and error
+  // Handle PDF load and error with retry logic
   const handleLoad = () => {
     setIsLoading(false);
     setTotalPages(1); // In a real implementation, this would come from the PDF
+    console.log(`PDF loaded successfully: ${title}`);
   };
   
   const handleError = () => {
+    // Retry logic - attempt to load up to 3 times
+    if (loadAttempt < 2) {
+      setLoadAttempt(loadAttempt + 1);
+      console.log(`PDF load failed, retrying (${loadAttempt + 1}/3)...`);
+      
+      // Force reload after a short delay
+      setTimeout(() => {
+        setIsLoading(true);
+      }, 1000);
+      
+      return;
+    }
+    
+    // After retries, show error
     setIsLoading(false);
     setError("Failed to load PDF. Please try again later or download it directly.");
     toast.error("The PDF could not be loaded", {
       description: "Please try downloading it instead."
     });
+    console.error(`Failed to load PDF: ${url}`);
   };
   
   return (
