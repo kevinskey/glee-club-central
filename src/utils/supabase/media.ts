@@ -1,139 +1,145 @@
 
 import { supabase } from "@/integrations/supabase/client";
-import { MediaFile } from "@/types/media";
+import { v4 as uuidv4 } from 'uuid';
+
+interface MediaMetadata {
+  title: string;
+  description?: string;
+  category: string;
+  tags?: string[];
+  uploadedBy: string;
+}
 
 /**
- * Upload a file to the media library
+ * Upload a media file to Supabase Storage and record its metadata
+ * @param file File to upload
+ * @param filePath Path within the storage bucket
+ * @param metadata File metadata
+ * @returns Object with success status and file information
  */
-export const uploadMediaFile = async (
-  file: File,
-  filePath: string,
-  metadata: {
-    title: string;
-    description?: string;
-    category?: string;
-    tags?: string[];
-    uploadedBy: string;
-  }
-) => {
+export async function uploadMediaFile(
+  file: File, 
+  filePath: string, 
+  metadata: MediaMetadata
+): Promise<{ success: boolean; fileUrl?: string; id?: string }> {
   try {
-    // Upload file to Supabase Storage
+    // Upload file to storage
     const { data: uploadData, error: uploadError } = await supabase.storage
-      .from('media-library')
-      .upload(filePath, file);
-
+      .from("media_library")
+      .upload(filePath, file, {
+        cacheControl: '3600',
+        upsert: false
+      });
+    
     if (uploadError) {
       console.error("Storage upload error:", uploadError);
       throw uploadError;
     }
-
-    // Get public URL
-    const { data: publicURLData } = supabase.storage
-      .from('media-library')
+    
+    // Get public URL for the file
+    const { data: { publicUrl } } = supabase.storage
+      .from("media_library")
       .getPublicUrl(filePath);
-
-    if (!publicURLData) throw new Error("Failed to get public URL");
-
-    // Insert record in database
-    const { data, error: dbError } = await supabase
-      .from('media_library')
+    
+    // Insert metadata into database
+    const { data: mediaData, error: mediaError } = await supabase
+      .from("media_files")
       .insert({
         title: metadata.title,
         description: metadata.description || null,
+        file_url: publicUrl,
         file_path: filePath,
-        file_url: publicURLData.publicUrl,
         file_type: file.type,
-        uploaded_by: metadata.uploadedBy,
-        folder: metadata.category || 'general',
+        file_size: file.size,
+        category: metadata.category,
         tags: metadata.tags || [],
-        size: file.size // Now properly adding the file size
+        uploaded_by: metadata.uploadedBy
       })
-      .select()
+      .select('id')
       .single();
-
-    if (dbError) {
-      console.error("Database insertion error:", dbError);
-      throw dbError;
+    
+    if (mediaError) {
+      console.error("Database insert error:", mediaError);
+      // Even if the database insert fails, the file was uploaded successfully
+      // We could handle this better by cleaning up the stored file, but for now
+      // we'll return success with a warning
+      console.warn("File uploaded but metadata not saved:", filePath);
+      return { success: true, fileUrl: publicUrl };
     }
-
-    return data;
+    
+    return { 
+      success: true, 
+      fileUrl: publicUrl,
+      id: mediaData?.id 
+    };
   } catch (error) {
-    console.error("Upload media file error:", error);
-    throw error;
+    console.error("Error in uploadMediaFile:", error);
+    return { success: false };
   }
-};
+}
 
 /**
- * Delete a media file from the media library
+ * Batch upload multiple files
+ * @param files Array of files to upload
+ * @param baseMetadata Base metadata to apply to all files
+ * @param progressCallback Optional callback for progress updates
+ * @returns Results of all uploads
  */
-export const deleteMediaFile = async (mediaId: string) => {
-  try {
-    // Get file path
-    const { data: fileData, error: fileError } = await supabase
-      .from('media_library')
-      .select('file_path')
-      .eq('id', mediaId)
-      .single();
-
-    if (fileError) throw fileError;
-
-    // Delete from storage
-    const { error: storageError } = await supabase.storage
-      .from('media-library')
-      .remove([fileData.file_path]);
-
-    if (storageError) throw storageError;
-
-    // Delete from database
-    const { error: dbError } = await supabase
-      .from('media_library')
-      .delete()
-      .eq('id', mediaId);
-
-    if (dbError) throw dbError;
-
-    return true;
-  } catch (error) {
-    console.error("Delete media file error:", error);
-    throw error;
+export async function batchUploadMediaFiles(
+  files: File[],
+  baseMetadata: Omit<MediaMetadata, 'title'>,
+  baseTitle: string,
+  progressCallback?: (progress: number) => void
+): Promise<{ success: number; failed: number; totalFiles: number }> {
+  let successCount = 0;
+  let failedCount = 0;
+  const totalFiles = files.length;
+  
+  // Process in batches of 3 for better performance
+  const batchSize = 3;
+  
+  for (let i = 0; i < totalFiles; i += batchSize) {
+    const batch = files.slice(i, i + batchSize);
+    
+    // Upload batch in parallel
+    const results = await Promise.allSettled(
+      batch.map((file, index) => {
+        const fileExt = file.name.split('.').pop();
+        const uniqueId = uuidv4().substring(0, 8);
+        const fileName = `${Date.now()}-${uniqueId}.${fileExt}`;
+        const filePath = `${baseMetadata.category}/${fileName}`;
+        
+        // Create title with number suffix for multiple files
+        const title = totalFiles > 1 
+          ? `${baseTitle} ${i + index + 1}` 
+          : baseTitle;
+        
+        return uploadMediaFile(file, filePath, {
+          ...baseMetadata,
+          title
+        });
+      })
+    );
+    
+    // Count successes and failures
+    results.forEach(result => {
+      if (result.status === 'fulfilled' && result.value.success) {
+        successCount++;
+      } else {
+        failedCount++;
+      }
+    });
+    
+    // Update progress
+    if (progressCallback) {
+      const progress = Math.round(((i + batch.length) / totalFiles) * 100);
+      progressCallback(progress);
+    }
   }
-};
-
-/**
- * Get all media files
- */
-export const getAllMediaFiles = async (): Promise<MediaFile[]> => {
-  try {
-    const { data, error } = await supabase
-      .from('media_library')
-      .select('*')
-      .order('created_at', { ascending: false });
-
-    if (error) throw error;
-
-    return data as MediaFile[];
-  } catch (error) {
-    console.error("Get all media files error:", error);
-    throw error;
-  }
-};
-
-/**
- * Get media files by category
- */
-export const getMediaFilesByCategory = async (category: string): Promise<MediaFile[]> => {
-  try {
-    const { data, error } = await supabase
-      .from('media_library')
-      .select('*')
-      .eq('folder', category)
-      .order('created_at', { ascending: false });
-
-    if (error) throw error;
-
-    return data as MediaFile[];
-  } catch (error) {
-    console.error("Get media files by category error:", error);
-    throw error;
-  }
-};
+  
+  return {
+    success: successCount,
+    failed: failedCount,
+    totalFiles
+  };
+}

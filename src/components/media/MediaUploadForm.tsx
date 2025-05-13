@@ -1,6 +1,6 @@
 
 import React from "react";
-import { Loader2, X, Tag, Plus } from "lucide-react";
+import { Loader2, X, Tag, Plus, Upload, Image } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -15,6 +15,9 @@ import {
   SelectValue 
 } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
+import { AspectRatio } from "@/components/ui/aspect-ratio";
+import { Card, CardContent } from "@/components/ui/card";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 interface MediaUploadFormProps {
   title: string;
@@ -66,10 +69,10 @@ export function MediaUploadForm({
         return;
       }
       
-      setFiles(selectedFiles);
+      setFiles([...files, ...selectedFiles]);
       
-      // Auto-detect category based on file type
-      if (selectedFiles.length === 1) {
+      // Auto-detect category based on file type if no files were previously selected
+      if (files.length === 0 && selectedFiles.length > 0) {
         const file = selectedFiles[0];
         if (file.type.startsWith('audio/')) {
           setCategory('audio');
@@ -82,6 +85,12 @@ export function MediaUploadForm({
         }
       }
     }
+  };
+
+  const removeFile = (index: number) => {
+    const newFiles = [...files];
+    newFiles.splice(index, 1);
+    setFiles(newFiles);
   };
 
   const addTag = () => {
@@ -102,54 +111,67 @@ export function MediaUploadForm({
     }
   };
 
+  const getFileTypeIcon = (file: File) => {
+    if (file.type.startsWith('image/')) return <Image className="h-4 w-4" />;
+    if (file.type.startsWith('audio/')) return <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 2v20M6 18v4M18 18v4M4 12v8M16 10v10M8 6v14M20 6v14"></path></svg>;
+    if (file.type.startsWith('video/')) return <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>;
+    return <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"></path><polyline points="14 2 14 8 20 8"></polyline></svg>;
+  };
+
   return (
-    <>
-      <div className="grid gap-4 py-3">
-        <div className="grid gap-2">
-          <Label htmlFor="title">Title</Label>
-          <Input
-            id="title"
-            placeholder="Media file title"
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-            required
-          />
-          {files.length > 1 && (
-            <p className="text-xs text-muted-foreground">
-              For multiple files, numbers will be appended to the title (e.g., {title} 1, {title} 2)
-            </p>
-          )}
+    <div className="flex flex-col h-full">
+      <div className="grid gap-4 py-3 flex-1 overflow-hidden">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <Label htmlFor="title" className="font-medium">Title</Label>
+            <Input
+              id="title"
+              placeholder="Media file title"
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              className="mt-1.5"
+              required
+            />
+            {files.length > 1 && (
+              <p className="text-xs text-muted-foreground mt-1">
+                For multiple files, numbers will be appended to the title (e.g., {title} 1, {title} 2)
+              </p>
+            )}
+          </div>
+          
+          <div>
+            <Label htmlFor="category" className="font-medium">Category</Label>
+            <Select value={category} onValueChange={setCategory} className="mt-1.5">
+              <SelectTrigger>
+                <SelectValue placeholder="Select a category" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="sheet_music">Sheet Music</SelectItem>
+                <SelectItem value="audio">Audio</SelectItem>
+                <SelectItem value="video">Video</SelectItem>
+                <SelectItem value="photo">Photos</SelectItem>
+                <SelectItem value="document">Document</SelectItem>
+                <SelectItem value="other">Other</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
         </div>
         
-        <div className="grid gap-2">
-          <Label htmlFor="category">Category</Label>
-          <Select value={category} onValueChange={setCategory}>
-            <SelectTrigger>
-              <SelectValue placeholder="Select a category" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="sheet_music">Sheet Music</SelectItem>
-              <SelectItem value="audio">Audio</SelectItem>
-              <SelectItem value="video">Video</SelectItem>
-              <SelectItem value="other">Other</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-        
-        <div className="grid gap-2">
-          <Label htmlFor="description">Description (Optional)</Label>
+        <div>
+          <Label htmlFor="description" className="font-medium">Description (Optional)</Label>
           <Textarea
             id="description"
             placeholder="Brief description of the file(s)"
             value={description}
             onChange={(e) => setDescription(e.target.value)}
             rows={isMobile ? 2 : 3}
+            className="mt-1.5"
           />
         </div>
         
-        <div className="grid gap-2">
-          <Label htmlFor="tags">Tags</Label>
-          <div className="flex gap-2">
+        <div>
+          <Label htmlFor="tags" className="font-medium">Tags</Label>
+          <div className="flex gap-2 mt-1.5">
             <Input
               id="tags"
               placeholder="Add tags and press Enter"
@@ -184,72 +206,125 @@ export function MediaUploadForm({
           )}
         </div>
         
-        <FileInput 
-          files={files} 
-          handleFileChange={handleFileChange} 
-        />
+        <div>
+          <div className="flex items-center justify-between mb-2">
+            <Label htmlFor="files" className="font-medium">Files ({files.length})</Label>
+            {files.length > 0 && (
+              <Button 
+                type="button" 
+                variant="outline" 
+                size="sm" 
+                onClick={() => setFiles([])}
+                className="text-xs h-8"
+              >
+                Clear All
+              </Button>
+            )}
+          </div>
+          
+          <Card className="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg">
+            <CardContent className="p-4 flex flex-col items-center justify-center">
+              <Input
+                id="files"
+                type="file"
+                onChange={handleFileChange}
+                className="text-sm hidden"
+                multiple
+                disabled={uploading}
+              />
+              <div 
+                className="w-full h-32 flex flex-col items-center justify-center cursor-pointer hover:bg-muted/50 transition-colors rounded-md"
+                onClick={() => document.getElementById('files')?.click()}
+              >
+                <Upload className="h-8 w-8 text-muted-foreground mb-2" />
+                <p className="text-sm text-muted-foreground">
+                  Click to select files or drop them here
+                </p>
+                <p className="text-xs text-muted-foreground mt-1">
+                  Maximum 25MB per file
+                </p>
+              </div>
+            </CardContent>
+          </Card>
+          
+          {files.length > 0 && (
+            <ScrollArea className="mt-4 h-[200px] rounded-md border">
+              <div className="p-4 space-y-2">
+                {files.map((file, index) => (
+                  <div key={index} className="flex items-center justify-between gap-2 p-2 rounded-md bg-card border">
+                    <div className="flex items-center gap-2 truncate">
+                      <div className="flex-shrink-0 h-8 w-8 rounded bg-muted flex items-center justify-center">
+                        {file.type.startsWith('image/') ? (
+                          <div className="h-8 w-8 overflow-hidden rounded">
+                            <AspectRatio ratio={1/1}>
+                              <img 
+                                src={URL.createObjectURL(file)} 
+                                alt="" 
+                                className="h-full w-full object-cover" 
+                              />
+                            </AspectRatio>
+                          </div>
+                        ) : (
+                          getFileTypeIcon(file)
+                        )}
+                      </div>
+                      <div className="truncate">
+                        <p className="text-sm font-medium truncate" title={file.name}>
+                          {file.name}
+                        </p>
+                        <p className="text-xs text-muted-foreground">
+                          {(file.size / 1024 / 1024).toFixed(2)} MB
+                        </p>
+                      </div>
+                    </div>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      className="flex-shrink-0 h-8 w-8 p-0"
+                      onClick={() => removeFile(index)}
+                      disabled={uploading}
+                    >
+                      <X size={16} />
+                    </Button>
+                  </div>
+                ))}
+              </div>
+            </ScrollArea>
+          )}
+        </div>
         
         {uploading && uploadProgress > 0 && (
-          <UploadProgressBar progress={uploadProgress} />
+          <div className="w-full bg-muted rounded-full h-3">
+            <div 
+              className="bg-primary h-3 rounded-full" 
+              style={{ width: `${uploadProgress}%` }}
+            ></div>
+            <p className="text-xs text-muted-foreground mt-1">
+              Uploading... {uploadProgress}%
+            </p>
+          </div>
         )}
       </div>
-      <div className={`flex ${isMobile ? 'flex-col space-y-2' : 'justify-end space-x-2'} mt-4`}>
+      
+      <div className={`flex ${isMobile ? 'flex-col space-y-2' : 'justify-end space-x-2'} mt-6 pt-4 border-t`}>
         <Button variant="outline" onClick={onCancel} disabled={uploading} className={isMobile ? 'w-full' : ''}>
           Cancel
         </Button>
-        <Button onClick={onUpload} disabled={uploading} className={isMobile ? 'w-full' : ''}>
+        <Button 
+          onClick={onUpload} 
+          disabled={uploading || files.length === 0 || !title} 
+          className={isMobile ? 'w-full' : ''}
+        >
           {uploading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
           {uploading ? `Uploading ${files.length} file(s)...` : `Upload ${files.length || 0} file(s)`}
         </Button>
       </div>
-    </>
-  );
-}
-
-interface FileInputProps {
-  files: File[];
-  handleFileChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
-}
-
-function FileInput({ files, handleFileChange }: FileInputProps) {
-  return (
-    <div className="grid gap-2">
-      <Label htmlFor="files">Files</Label>
-      <div className="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-4">
-        <Input
-          id="files"
-          type="file"
-          onChange={handleFileChange}
-          required
-          className="text-sm"
-          multiple
-        />
-        <p className="text-xs text-muted-foreground mt-2">
-          Drag and drop files here or click to select files. Maximum 25MB per file.
-        </p>
-      </div>
-      {files.length > 0 && (
-        <div className="text-xs text-muted-foreground mt-1">
-          <p>{files.length} file(s) selected:</p>
-          <ul className="mt-1 ml-4 list-disc space-y-1">
-            {files.slice(0, 5).map((file, index) => (
-              <li key={index} className="break-all">
-                {file.name} ({(file.size / 1024 / 1024).toFixed(2)} MB)
-              </li>
-            ))}
-            {files.length > 5 && <li>...and {files.length - 5} more</li>}
-          </ul>
-        </div>
-      )}
     </div>
   );
 }
 
-interface UploadProgressBarProps {
-  progress: number;
-}
-
-function UploadProgressBar({ progress }: UploadProgressBarProps) {
+function UploadProgressBar({ progress }: { progress: number }) {
   return (
     <div className="w-full bg-gray-200 rounded-full h-2.5 dark:bg-gray-700">
       <div 
