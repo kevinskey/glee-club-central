@@ -77,6 +77,8 @@ export function MediaListView({
             <tbody className="divide-y divide-border">
               {mediaFiles.map((file) => {
                 const mediaType = getMediaType(file.file_type);
+                
+                // Use boolean flags instead of direct string comparisons
                 const isImage = mediaType === 'image';
                 const isVideo = mediaType === 'video';
                 const isAudio = mediaType === 'audio';
@@ -107,10 +109,10 @@ export function MediaListView({
                         ) : (
                           <div className={cn(
                             "h-full w-full rounded flex items-center justify-center",
-                            mediaType === 'image' && "bg-blue-50 text-blue-600",
-                            mediaType === 'audio' && "bg-green-50 text-green-600",
-                            mediaType === 'video' && "bg-purple-50 text-purple-600",
-                            mediaType === 'pdf' && "bg-amber-50 text-amber-600",
+                            isImage && "bg-blue-50 text-blue-600",
+                            isAudio && "bg-green-50 text-green-600",
+                            isVideo && "bg-purple-50 text-purple-600",
+                            isPdf && "bg-amber-50 text-amber-600",
                             mediaType === 'other' && "bg-gray-50 text-gray-600",
                           )}>
                             {getMediaIcon(file.file_type)}
