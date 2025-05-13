@@ -60,8 +60,8 @@ export const PDFThumbnail = ({ url, title, className = '', onClick }: PDFThumbna
           await page.render({
             canvasContext: context,
             viewport: viewport,
-            // Enable image resources to be rendered
-            renderInteractiveForms: true
+            // Remove the incorrect property
+            // renderInteractiveForms: true
           }).promise;
           
           // Convert the canvas to a data URL with higher quality

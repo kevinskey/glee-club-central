@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
@@ -57,6 +56,10 @@ const eventFormSchema = z.object({
   
   // Image
   image_url: z.string().optional().nullable(),
+  
+  // Additional required fields to match EventFormValues in EventFormFields
+  time: z.string().default(""),
+  type: z.enum(["rehearsal", "concert", "sectional", "special"]).default("concert"),
 });
 
 export type EventFormValues = z.infer<typeof eventFormSchema>;
@@ -99,6 +102,9 @@ export function EventForm({
       contractStatus: defaultValues?.contractStatus || "none",
       contractNotes: defaultValues?.contractNotes || "",
       image_url: defaultValues?.image_url || null,
+      // Add the missing properties
+      time: defaultValues?.performanceTime || "",
+      type: "concert",
     },
   });
 

@@ -5,7 +5,7 @@ import { Toaster } from 'sonner';
 import { AuthProvider } from './contexts/AuthContext';
 import { RolePermissionProvider } from './contexts/RolePermissionContext';
 import { ThemeProvider } from './providers/ThemeProvider';
-import { router } from './router';
+import router from './router';
 
 function App() {
   return (
