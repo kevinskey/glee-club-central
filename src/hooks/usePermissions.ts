@@ -1,10 +1,25 @@
+
 import { useAuth } from '@/contexts/AuthContext';
 import { useRolePermissions } from '@/contexts/RolePermissionContext';
 import { useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 
-export function usePermissions() {
+// Define explicit types to avoid deep instantiation
+type PermissionResult = boolean;
+type PermissionMap = Record<string, boolean>;
+
+// Define return type interface to avoid recursion
+interface PermissionsHookResult {
+  hasPermission: (permissionName: string) => PermissionResult;
+  isSuperAdmin: boolean;
+  isAdminRole: boolean;
+  promoteToSuperAdmin: () => Promise<boolean>;
+  setKevinJohnsonAsSuperAdmin: (email: string) => Promise<boolean>;
+  isUpdating: boolean;
+}
+
+export function usePermissions(): PermissionsHookResult {
   const { profile, isAdmin } = useAuth();
   const { permissions, hasPermission: contextHasPermission, refreshPermissions } = useRolePermissions();
   const [isUpdating, setIsUpdating] = useState(false);

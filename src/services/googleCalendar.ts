@@ -159,19 +159,20 @@ export const fetchGoogleCalendarEvents = async (
     
     // Fix: Convert dates properly for each event
     return data.events.map((event: any): CalendarEvent => {
-      // Handle start and end dates correctly - always convert to Date objects
-      const startDate = new Date(event.start.dateTime || event.start.date);
-      const endDate = new Date(event.end.dateTime || event.end.date);
+      // Handle start and end dates correctly - always convert to Date objects first
+      // then convert back to ISO strings for the CalendarEvent interface
+      const startDateTime = new Date(event.start.dateTime || event.start.date);
+      const endDateTime = new Date(event.end.dateTime || event.end.date);
       
       return {
         id: event.id,
         title: event.summary || 'Untitled Event',
         description: event.description || '',
         location: event.location || '',
-        date: startDate, // Use the Date object
-        time: startDate.toTimeString().substring(0, 5), // Extract HH:MM from time string
-        start: startDate,
-        end: endDate,
+        date: startDateTime, 
+        time: startDateTime.toTimeString().substring(0, 5), // Extract HH:MM from time string
+        start: startDateTime.toISOString(), // Convert Date to string for the interface
+        end: endDateTime.toISOString(), // Convert Date to string for the interface
         type: determineEventType(event),
         created_by: 'google',
         source: 'google',
@@ -337,27 +338,36 @@ export const syncEventsWithGoogleCalendar = async (): Promise<boolean> => {
 
 // Helper function to convert app event format to Google Calendar format
 const convertToGoogleEvent = (event: Partial<CalendarEvent>): GoogleEvent => {
-  // Fix: Ensure dates are properly handled
-  let startDate: Date;
-  let endDate: Date;
+  // Fix: Use more robust type checking for dates
+  let startDateTime: Date;
+  let endDateTime: Date;
   
   // Handle the start date (convert string to Date if needed)
-  if (typeof event.start === 'string') {
-    startDate = new Date(event.start);
-  } else if (event.start instanceof Date) {
-    startDate = event.start;
+  if (event.start) {
+    if (typeof event.start === 'string') {
+      startDateTime = new Date(event.start);
+    } else if (typeof event.start === 'object' && 'getTime' in event.start) {
+      startDateTime = event.start as unknown as Date;
+    } else {
+      startDateTime = new Date();
+    }
   } else {
-    startDate = new Date();
+    startDateTime = new Date();
   }
   
   // Handle the end date (convert string to Date if needed)
-  if (typeof event.end === 'string') {
-    endDate = new Date(event.end);
-  } else if (event.end instanceof Date) {
-    endDate = event.end;
+  if (event.end) {
+    if (typeof event.end === 'string') {
+      endDateTime = new Date(event.end);
+    } else if (typeof event.end === 'object' && 'getTime' in event.end) {
+      endDateTime = event.end as unknown as Date;
+    } else {
+      // Default to 1 hour later if not provided
+      endDateTime = new Date(startDateTime.getTime() + 60 * 60 * 1000);
+    }
   } else {
     // Default to 1 hour later if not provided
-    endDate = new Date(startDate.getTime() + 60 * 60 * 1000);
+    endDateTime = new Date(startDateTime.getTime() + 60 * 60 * 1000);
   }
   
   return {
@@ -365,11 +375,11 @@ const convertToGoogleEvent = (event: Partial<CalendarEvent>): GoogleEvent => {
     description: event.description,
     location: event.location,
     start: {
-      dateTime: startDate.toISOString(),
+      dateTime: startDateTime.toISOString(),
       timeZone: 'America/New_York'
     },
     end: {
-      dateTime: endDate.toISOString(),
+      dateTime: endDateTime.toISOString(),
       timeZone: 'America/New_York'
     }
   };
