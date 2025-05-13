@@ -1,60 +1,50 @@
 
-import React from "react";
-import { 
-  Users, 
-  Calendar, 
-  BarChart,
-  Settings
-} from "lucide-react";
-import { NavLink } from 'react-router-dom';
+import React from 'react';
+import { NavLink } from '@/components/layout/NavLink';
+import { BarChart3, Users, CalendarDays, FileText, Settings, Image, Layers, Home } from 'lucide-react';
+import { usePermissions } from '@/hooks/usePermissions';
 
-export const adminNavItems = [
-  {
-    title: "User Management",
-    href: "/dashboard/admin/members",
-    icon: <Users className="h-4 w-4" />,
-  },
-  {
-    title: "Event Manager",
-    href: "/dashboard/admin/events",
-    icon: <Calendar className="h-4 w-4" />,
-  },
-  {
-    title: "Analytics",
-    href: "/dashboard/admin/analytics",
-    icon: <BarChart className="h-4 w-4" />,
-  },
-  {
-    title: "Site Settings",
-    href: "/dashboard/admin/settings",
-    icon: <Settings className="h-4 w-4" />,
-  },
-];
-
-export function AdminNavigation() {
+export function AdminNavItems() {
+  const { hasPermission } = usePermissions();
+  
   return (
-    <div className="px-4 py-2">
-      <h2 className="mb-2 px-2 text-lg font-semibold tracking-tight">
-        Admin Menu
-      </h2>
-      <nav className="space-y-1">
-        {adminNavItems.map((item) => (
-          <NavLink
-            key={item.href}
-            to={item.href}
-            className={({ isActive }) =>
-              `flex items-center px-3 py-2 rounded-md text-sm font-medium transition-colors ${
-                isActive
-                  ? 'bg-accent text-accent-foreground'
-                  : 'hover:bg-accent hover:text-accent-foreground'
-              }`
-            }
-          >
-            {item.icon}
-            <span className="ml-2">{item.title}</span>
-          </NavLink>
-        ))}
-      </nav>
+    <div className="flex flex-col gap-1">
+      <NavLink to="/admin" exact>
+        <BarChart3 className="h-4 w-4 mr-2" />
+        Dashboard
+      </NavLink>
+      
+      {hasPermission('can_manage_users') && (
+        <NavLink to="/admin/members">
+          <Users className="h-4 w-4 mr-2" />
+          Members
+        </NavLink>
+      )}
+      
+      <NavLink to="/admin/events">
+        <CalendarDays className="h-4 w-4 mr-2" />
+        Events
+      </NavLink>
+      
+      <NavLink to="/admin/media-library">
+        <FileText className="h-4 w-4 mr-2" />
+        Media Library
+      </NavLink>
+      
+      <NavLink to="/admin/sections">
+        <Layers className="h-4 w-4 mr-2" />
+        Sections
+      </NavLink>
+      
+      <NavLink to="/admin/landing-page">
+        <Home className="h-4 w-4 mr-2" />
+        Landing Page
+      </NavLink>
+      
+      <NavLink to="/admin/settings">
+        <Settings className="h-4 w-4 mr-2" />
+        Settings
+      </NavLink>
     </div>
   );
 }
