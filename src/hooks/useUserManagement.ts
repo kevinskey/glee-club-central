@@ -54,6 +54,9 @@ export const useUserManagement = () => {
         // Process the data to ensure consistent field formats
         const processedData = data.map(user => {
           // Create a consistent User object with all required fields
+          // Determine admin status from the role property since the database doesn't provide is_super_admin
+          const isAdmin = user.role === 'admin' || user.role === 'administrator';
+          
           const processedUser: User = {
             id: user.id,
             email: user.email || null,
@@ -66,13 +69,12 @@ export const useUserManagement = () => {
             last_sign_in_at: user.last_sign_in_at || null,
             created_at: user.created_at || new Date().toISOString(),
             updated_at: null, 
-            // Handle is_super_admin regardless of whether it exists in API response
-            is_super_admin: user.is_super_admin || user.role === 'admin' || false,
+            is_super_admin: isAdmin,
             class_year: null, // Default value if not provided
             join_date: user.join_date || null,
             notes: null, // Default value if not provided
             dues_paid: false, // Default value if not provided
-            role: user.is_super_admin ? 'admin' : 'member', // For backward compatibility
+            role: user.role || (isAdmin ? 'admin' : 'member'), // Keep the original role if available
           };
           
           return processedUser;
@@ -173,13 +175,19 @@ export const useUserManagement = () => {
           console.log('No user found with that ID');
           return null;
         }
-  
-        // Add backward compatibility field
-        if (data[0]) {
-          data[0].role = data[0].is_super_admin ? 'admin' : 'member';
-        }
+        
+        // Process the user data to add the is_super_admin property based on role
+        const userData = data[0];
+        const isAdmin = userData.role === 'admin' || userData.role === 'administrator';
+        
+        // Create a new object with all the original properties plus the computed ones
+        const processedUser = {
+          ...userData,
+          is_super_admin: isAdmin,
+          role: userData.role || (isAdmin ? 'admin' : 'member'), // Ensure role is always defined
+        };
 
-        return data[0];
+        return processedUser;
       } catch (err) {
         console.error('Unexpected error getting user by ID:', err);
         return null;
