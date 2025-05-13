@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
@@ -47,9 +48,10 @@ export default function LoginPage() {
   // If user is already authenticated, redirect to dashboard
   useEffect(() => {
     if (isAuthenticated && !isLoading) {
-      navigate("/dashboard");
+      const returnTo = new URLSearchParams(location.search).get('returnTo');
+      navigate(returnTo || "/dashboard");
     }
-  }, [isAuthenticated, isLoading, navigate]);
+  }, [isAuthenticated, isLoading, navigate, location.search]);
 
   const handleResendVerification = async (email: string) => {
     try {
@@ -138,14 +140,14 @@ export default function LoginPage() {
       {/* Semi-transparent overlay */}
       <div className="absolute inset-0 bg-black/60"></div>
       
-      <Card className="w-full max-w-md relative z-10 bg-white dark:bg-black backdrop-blur-sm">
+      <Card className="w-full max-w-md relative z-10 bg-white dark:bg-black dark:bg-opacity-80 bg-opacity-90 backdrop-blur-sm">
         <CardHeader className="text-center">
           <div className="flex justify-center mb-4">
             <Music className="h-12 w-12 text-glee-purple" />
           </div>
-          <CardTitle className="text-2xl font-bold">Welcome back</CardTitle>
+          <CardTitle className="text-2xl font-bold">Welcome to Glee World</CardTitle>
           <CardDescription>
-            Log in to your Glee World account
+            Log in to access the Spelman College Glee Club portal
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -173,7 +175,7 @@ export default function LoginPage() {
                   <FormItem>
                     <FormLabel>Email</FormLabel>
                     <FormControl>
-                      <Input placeholder="john.doe@example.com" {...field} />
+                      <Input placeholder="your.email@example.com" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>

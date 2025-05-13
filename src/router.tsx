@@ -16,6 +16,7 @@ import AttendancePage from './pages/AttendancePage';
 import MediaLibraryPage from './pages/MediaLibraryPage';
 import MusicPage from './pages/dashboard/MusicPage';
 import SheetMusicPage from './pages/sheet-music/SheetMusicPage';
+import HomeLayout from './layouts/HomeLayout';
 
 // Root layout component with outlet
 const RootLayout = () => {
@@ -36,19 +37,25 @@ const router = createBrowserRouter([
     children: [
       {
         path: '/',
-        element: <LandingPage />
+        element: <HomeLayout />,
+        children: [
+          {
+            path: '',
+            element: <LandingPage />
+          }
+        ]
       },
       {
-        path: 'login',
+        path: '/login',
         element: <LoginPage />
       },
       {
-        path: 'register',
+        path: '/register',
         element: <RegisterPage />
       },
       {
-        path: 'dashboard',
-        element: <DashboardLayout />,
+        path: '/dashboard',
+        element: <ProtectedRoute><DashboardLayout /></ProtectedRoute>,
         children: [
           {
             path: '',
@@ -89,7 +96,7 @@ const router = createBrowserRouter([
         ]
       },
       {
-        path: 'admin',
+        path: '/admin',
         element: <ProtectedRoute adminOnly={true}>
           <AdminDashboard />
         </ProtectedRoute>
