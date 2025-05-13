@@ -1,73 +1,66 @@
 
 import { supabase } from "@/integrations/supabase/client";
-import { toast } from "sonner";
-import { useAuth } from "@/contexts/AuthContext";
+import { v4 as uuidv4 } from "uuid";
 
 /**
- * Upload an event image to the media library
+ * Uploads an image to Supabase storage and returns the URL
+ * @param file The image file to upload
+ * @param title Title for the uploaded file (used for naming)
+ * @returns URL to the uploaded image or null if upload failed
  */
-export const uploadEventImage = async (
-  file: File,
-  eventName: string
-): Promise<string | null> => {
+export const uploadEventImage = async (file: File, title: string): Promise<string | null> => {
   try {
-    // Get the current user ID
-    const { data: { user } } = await supabase.auth.getUser();
+    // Generate a unique filename to prevent collisions
+    const fileExt = file.name.split('.').pop();
+    const fileName = `${title.replace(/\s+/g, '-').toLowerCase()}-${uuidv4()}.${fileExt}`;
+    const filePath = `calendar_events/${fileName}`;
     
-    if (!user) {
-      console.error("No authenticated user found");
-      toast.error("You must be logged in to upload images");
+    // Upload file to storage
+    const { data: uploadData, error: uploadError } = await supabase.storage
+      .from('media')
+      .upload(filePath, file, {
+        cacheControl: '3600',
+        upsert: false
+      });
+    
+    if (uploadError) {
+      console.error('Error uploading image:', uploadError);
       return null;
     }
-
-    // Create a unique filename
-    const fileExt = file.name.split('.').pop();
-    const fileName = `event-${Date.now()}-${Math.random().toString(36).substring(2, 15)}.${fileExt}`;
-    const filePath = `events/${fileName}`;
-
-    // Upload file to Supabase Storage
-    const { data: uploadData, error: uploadError } = await supabase.storage
-      .from('media-library')
-      .upload(filePath, file);
-
-    if (uploadError) {
-      console.error("Storage upload error:", uploadError);
-      throw uploadError;
-    }
-
-    // Get public URL
-    const { data: publicURLData } = supabase.storage
-      .from('media-library')
+    
+    // Get the public URL
+    const { data: publicUrlData } = supabase.storage
+      .from('media')
       .getPublicUrl(filePath);
-
-    if (!publicURLData) throw new Error("Failed to get public URL");
-
-    // Insert record in media_library table
-    const { data, error: dbError } = await supabase
+      
+    const publicUrl = publicUrlData.publicUrl;
+    
+    // Get the current user
+    const { data: userData, error: userError } = await supabase.auth.getUser();
+    
+    if (userError || !userData?.user) {
+      console.error('Error getting user:', userError);
+      return publicUrl; // Still return the URL even if we can't log it to media library
+    }
+    
+    // Log to media library
+    await supabase
       .from('media_library')
       .insert({
-        title: `Event Image: ${eventName}`,
-        description: `Image for event: ${eventName}`,
+        title: `Event Image: ${title}`,
+        description: `Calendar event image for "${title}"`,
         file_path: filePath,
-        file_url: publicURLData.publicUrl,
+        file_url: publicUrl,
         file_type: file.type,
-        folder: 'events',
+        folder: 'calendar_events',
         size: file.size,
-        uploaded_by: user.id,  // Add the required uploaded_by field with the current user ID
-        tags: ['event', 'calendar']  // Add some default tags
-      })
-      .select()
-      .single();
-
-    if (dbError) {
-      console.error("Database insertion error:", dbError);
-      throw dbError;
-    }
-
-    return publicURLData.publicUrl;
+        tags: ['event', 'calendar'],
+        uploaded_by: userData.user.id
+      });
+    
+    return publicUrl;
   } catch (error) {
-    console.error("Upload event image error:", error);
-    toast.error("Failed to upload image");
+    console.error('Error in uploadEventImage:', error);
     return null;
   }
 };

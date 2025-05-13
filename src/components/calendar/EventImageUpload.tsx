@@ -4,11 +4,10 @@ import { UseFormReturn } from "react-hook-form";
 import { Button } from "@/components/ui/button";
 import { FormControl, FormField, FormItem, FormLabel } from "@/components/ui/form";
 import { ImageIcon, Upload, X } from "lucide-react";
-import { EventFormValues } from "./EventFormFields";
 import { toast } from "sonner";
 
 interface EventImageUploadProps {
-  form: UseFormReturn<EventFormValues>;
+  form: UseFormReturn<any>;
   isUploading: boolean;
   selectedImage: File | null;
   setSelectedImage: (file: File | null) => void;
@@ -42,7 +41,7 @@ export function EventImageUpload({
       }
 
       setSelectedImage(file);
-      form.setValue("image_url", null);
+      form.setValue("imageUrl", null);
 
       // Create a preview URL
       const reader = new FileReader();
@@ -57,22 +56,22 @@ export function EventImageUpload({
   const handleRemoveImage = () => {
     setSelectedImage(null);
     setImagePreview(null);
-    form.setValue("image_url", null);
+    form.setValue("imageUrl", null);
   };
 
   return (
     <FormField
       control={form.control}
-      name="image_url"
+      name="imageUrl"
       render={({ field }) => (
         <FormItem className="mt-1">
           <FormLabel className="text-xs">Event Image (Optional)</FormLabel>
           <FormControl>
             <div className="space-y-1">
               {!imagePreview && !field.value ? (
-                <div className="flex flex-col items-center justify-center border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-1 text-center">
-                  <ImageIcon className="h-5 w-5 mb-1 text-gray-400" />
-                  <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">
+                <div className="flex flex-col items-center justify-center border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-4 text-center">
+                  <ImageIcon className="h-5 w-5 mb-2 text-gray-400" />
+                  <p className="text-xs text-gray-500 dark:text-gray-400 mb-2">
                     PNG, JPG or GIF (max. 5MB)
                   </p>
                   <div className="flex justify-center">
@@ -80,7 +79,7 @@ export function EventImageUpload({
                       type="button"
                       variant="outline"
                       size="sm"
-                      className="relative h-7 text-xs"
+                      className="relative h-8 text-xs"
                       disabled={isUploading}
                     >
                       <input
@@ -90,7 +89,7 @@ export function EventImageUpload({
                         onChange={handleFileChange}
                         disabled={isUploading}
                       />
-                      <Upload className="h-3 w-3 mr-1" />
+                      <Upload className="h-3.5 w-3.5 mr-1" />
                       Upload
                     </Button>
                   </div>
@@ -100,13 +99,13 @@ export function EventImageUpload({
                   <img
                     src={imagePreview || field.value || ""}
                     alt="Event image preview"
-                    className="w-full h-20 object-cover rounded-lg"
+                    className="w-full h-32 object-cover rounded-lg"
                   />
                   <Button
                     type="button"
                     size="icon"
                     variant="destructive"
-                    className="absolute top-1 right-1 h-5 w-5"
+                    className="absolute top-1 right-1 h-6 w-6"
                     onClick={handleRemoveImage}
                     disabled={isUploading}
                   >

@@ -1,4 +1,3 @@
-
 import React from "react";
 import { format } from "date-fns";
 import { Button } from "@/components/ui/button";
@@ -20,6 +19,7 @@ import {
 } from "@/components/ui/dialog";
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
+import { uploadEventImage } from "@/utils/supabase/eventImageUpload";
 
 interface ViewEventModalProps {
   event: CalendarEvent;

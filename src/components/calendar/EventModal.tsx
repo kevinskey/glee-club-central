@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -34,6 +33,7 @@ import { cn } from "@/lib/utils";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { CalendarEvent, EventType } from "@/types/calendar";
+import { EventImageUpload } from "@/components/EventImageUpload";
 
 // Create a schema for form validation
 const formSchema = z.object({
@@ -64,6 +64,10 @@ export const EventModal = ({
   mode = "create",
 }: EventModalProps) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [selectedImage, setSelectedImage] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState<string | null>(
+    defaultValues?.image_url || null
+  );
   const isEditMode = mode === "edit";
 
   // Initialize form with default values
@@ -112,6 +116,27 @@ export const EventModal = ({
     try {
       setIsSubmitting(true);
 
+      // Handle image upload if there's a selected image
+      let imageUrl = values.imageUrl;
+      
+      if (selectedImage) {
+        try {
+          // Upload the image to the media library
+          imageUrl = await uploadEventImage(selectedImage, values.title);
+          
+          if (!imageUrl) {
+            toast.error('Failed to upload image');
+            setIsSubmitting(false);
+            return;
+          }
+        } catch (err) {
+          console.error('Error uploading image:', err);
+          toast.error('Failed to upload image');
+          setIsSubmitting(false);
+          return;
+        }
+      }
+
       // Create event start and end dates
       const dateString = format(values.date, "yyyy-MM-dd");
       let startDate, endDate;
@@ -139,7 +164,7 @@ export const EventModal = ({
         description: values.description,
         type: values.type as EventType,
         allDay: values.allDay,
-        image_url: values.imageUrl,
+        image_url: imageUrl,
       };
 
       // Save the event
@@ -172,7 +197,7 @@ export const EventModal = ({
       </DialogHeader>
       
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 mt-4">
+        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 mt-4 max-h-[70vh] overflow-y-auto pb-16">
           <FormField
             control={form.control}
             name="title"
@@ -352,21 +377,17 @@ export const EventModal = ({
             )}
           />
 
-          <FormField
-            control={form.control}
-            name="imageUrl"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Image URL</FormLabel>
-                <FormControl>
-                  <Input placeholder="Enter image URL (optional)" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
+          {/* Add the image upload component */}
+          <EventImageUpload
+            form={form}
+            isUploading={isSubmitting}
+            selectedImage={selectedImage}
+            setSelectedImage={setSelectedImage}
+            imagePreview={imagePreview}
+            setImagePreview={setImagePreview}
           />
 
-          <div className="flex justify-end space-x-2 pt-4">
+          <div className="flex justify-end space-x-2 pt-4 sticky bottom-0 bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700">
             <Button type="button" variant="outline" onClick={onClose}>
               Cancel
             </Button>
