@@ -41,14 +41,6 @@ const HomePage = () => {
             
             <div className={`flex flex-wrap gap-4 justify-center ${isMobile ? "mt-6" : "mb-12"}`}>
               <Button 
-                size="lg"
-                className="bg-glee-purple hover:bg-glee-purple/90"
-              >
-                <Link to="/login" className="flex items-center gap-2">
-                  Member Login <ArrowRight className="h-4 w-4" />
-                </Link>
-              </Button>
-              <Button 
                 variant="outline"
                 size="lg" 
                 className={`${isMobile ? "border-glee-purple text-glee-purple" : "text-white border-white"} hover:bg-white/20`}
