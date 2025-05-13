@@ -1,271 +1,187 @@
 
 import { supabase } from "@/integrations/supabase/client";
-import { toast } from "sonner";
-import { CalendarEvent } from "@/types/calendar";
 
-// Export calendar functions directly
-export const exportCalendarToIcal = (events: CalendarEvent[]): void => {
-  try {
-    // Create iCal content
-    let icalContent = "BEGIN:VCALENDAR\r\n";
-    icalContent += "VERSION:2.0\r\n";
-    icalContent += "PRODID:-//Spelman Glee Club//Calendar//EN\r\n";
-    icalContent += "CALSCALE:GREGORIAN\r\n";
-    icalContent += "METHOD:PUBLISH\r\n";
-    
-    // Add each event to the iCal content
-    events.forEach(event => {
-      const startDate = new Date(event.start);
-      const endDate = new Date(event.end);
-      
-      // Format dates for iCal (YYYYMMDDTHHmmssZ)
-      const formatDate = (date: Date) => {
-        return date.toISOString().replace(/[-:]/g, '').replace(/\.\d+/g, '');
-      };
-      
-      icalContent += "BEGIN:VEVENT\r\n";
-      icalContent += `SUMMARY:${event.title}\r\n`;
-      icalContent += `DTSTART:${formatDate(startDate)}\r\n`;
-      icalContent += `DTEND:${formatDate(endDate)}\r\n`;
-      icalContent += `UID:${event.id}\r\n`;
-      
-      if (event.description) {
-        icalContent += `DESCRIPTION:${event.description.replace(/\n/g, '\\n')}\r\n`;
-      }
-      
-      if (event.location) {
-        icalContent += `LOCATION:${event.location}\r\n`;
-      }
-      
-      icalContent += "END:VEVENT\r\n";
-    });
-    
-    icalContent += "END:VCALENDAR\r\n";
-    
-    // Create a Blob with the iCal content
-    const blob = new Blob([icalContent], { type: 'text/calendar' });
-    const url = URL.createObjectURL(blob);
-    
-    // Create a link element to download the file
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = 'spelman-glee-club-calendar.ics';
-    document.body.appendChild(a);
-    a.click();
-    
-    // Clean up
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
-    
-    toast.success('Calendar exported successfully');
-  } catch (error) {
-    console.error('Error exporting calendar:', error);
-    toast.error('Failed to export calendar');
-  }
-};
-
-export const importCalendarFromIcal = async (file: File): Promise<any[]> => {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    
-    reader.onload = (e) => {
-      try {
-        const content = e.target?.result as string;
-        if (!content) {
-          reject(new Error('Failed to read file'));
-          return;
-        }
-        
-        const events: any[] = [];
-        const eventBlocks = content.split('BEGIN:VEVENT');
-        
-        // Skip the first element as it's the header
-        eventBlocks.slice(1).forEach(block => {
-          const endIndex = block.indexOf('END:VEVENT');
-          if (endIndex > -1) {
-            const eventData = block.substring(0, endIndex);
-            
-            // Parse event data
-            const summary = extractIcalProperty(eventData, 'SUMMARY');
-            const dtstart = extractIcalProperty(eventData, 'DTSTART');
-            const dtend = extractIcalProperty(eventData, 'DTEND');
-            const description = extractIcalProperty(eventData, 'DESCRIPTION');
-            const location = extractIcalProperty(eventData, 'LOCATION');
-            const uid = extractIcalProperty(eventData, 'UID');
-            
-            if (summary && dtstart) {
-              // Parse dates
-              const startDate = parseIcalDate(dtstart);
-              const endDate = dtend ? parseIcalDate(dtend) : new Date(startDate.getTime() + 60 * 60 * 1000); // Default to 1 hour
-              
-              events.push({
-                title: summary,
-                start: startDate.toISOString(),
-                end: endDate.toISOString(),
-                description: description?.replace(/\\n/g, '\n') || '',
-                location: location || '',
-                type: 'special', // Default type
-                id: uid || crypto.randomUUID(), // Use UID if available, or generate new ID
-                allDay: false,
-              });
-            }
-          }
-        });
-        
-        toast.success(`Imported ${events.length} events`);
-        resolve(events);
-      } catch (error) {
-        console.error('Error parsing iCal file:', error);
-        reject(error);
-      }
-    };
-    
-    reader.onerror = (error) => {
-      reject(error);
-    };
-    
-    reader.readAsText(file);
-  });
-};
-
-// Helper function to extract properties from iCal data
-const extractIcalProperty = (data: string, property: string): string | undefined => {
-  const regex = new RegExp(`${property}[;:]([^\\r\\n]+)`, 'i');
-  const match = data.match(regex);
-  return match ? match[1].trim() : undefined;
-};
-
-// Helper function to parse iCal date strings
-const parseIcalDate = (dateStr: string): Date => {
-  // Handle dates with timezone info
-  if (dateStr.includes('T')) {
-    // Format: YYYYMMDDTHHmmssZ
-    const year = parseInt(dateStr.substring(0, 4));
-    const month = parseInt(dateStr.substring(4, 6)) - 1; // 0-based month
-    const day = parseInt(dateStr.substring(6, 8));
-    const hour = parseInt(dateStr.substring(9, 11));
-    const minute = parseInt(dateStr.substring(11, 13));
-    const second = parseInt(dateStr.substring(13, 15));
-    
-    return new Date(Date.UTC(year, month, day, hour, minute, second));
-  } else {
-    // Format: YYYYMMDD (all-day event)
-    const year = parseInt(dateStr.substring(0, 4));
-    const month = parseInt(dateStr.substring(4, 6)) - 1; // 0-based month
-    const day = parseInt(dateStr.substring(6, 8));
-    
-    return new Date(Date.UTC(year, month, day));
-  }
-};
-
-// Check if user is connected to Google Calendar
+// Function to check if user has connected Google Calendar
 export const checkGoogleCalendarConnection = async (): Promise<boolean> => {
   try {
-    const { data: user } = await supabase.auth.getUser();
-    if (!user || !user.user) {
-      return false;
-    }
+    const { data, error } = await supabase.functions.invoke('google-calendar-auth', {
+      body: { action: 'check_connection' }
+    });
     
-    const { data, error } = await supabase
-      .from('user_google_tokens')
-      .select('*')
-      .eq('user_id', user.user.id)
-      .single();
-    
-    if (error || !data) {
-      return false;
-    }
-    
-    return true;
+    if (error) throw error;
+    return data.connected;
   } catch (error) {
     console.error('Error checking Google Calendar connection:', error);
     return false;
   }
 };
 
-// Get Google Calendar Auth URL
+// Function to get Google Calendar authentication URL
 export const getGoogleCalendarAuthUrl = async (): Promise<string | null> => {
   try {
-    const response = await fetch('/api/google-auth/start', {
-      method: 'POST',
+    const { data, error } = await supabase.functions.invoke('google-calendar-auth', {
+      body: { action: 'get_auth_url' }
     });
     
-    if (!response.ok) {
-      throw new Error('Failed to start Google auth flow');
-    }
-    
-    const data = await response.json();
-    
-    if (data.url) {
-      return data.url;
-    }
-    
-    return null;
+    if (error) throw error;
+    return data.authUrl;
   } catch (error) {
     console.error('Error getting Google Calendar auth URL:', error);
-    toast.error('Failed to start Google Calendar authorization');
     return null;
   }
 };
 
-// Disconnect from Google Calendar
+// Function to disconnect from Google Calendar
 export const disconnectGoogleCalendar = async (): Promise<boolean> => {
   try {
-    const { data: userData } = await supabase.auth.getUser();
-    if (!userData || !userData.user) {
-      toast.error('User not authenticated');
-      return false;
-    }
-    
-    const { error } = await supabase
-      .from('user_google_tokens')
-      .delete()
-      .eq('user_id', userData.user.id);
-    
-    if (error) {
-      console.error('Error disconnecting Google Calendar:', error);
-      toast.error('Failed to disconnect from Google Calendar');
-      return false;
-    }
-    
-    toast.success('Successfully disconnected from Google Calendar');
-    return true;
-  } catch (error) {
-    console.error('Error in disconnectGoogleCalendar:', error);
-    toast.error('An error occurred while disconnecting from Google Calendar');
-    return false;
-  }
-};
-
-// Sync events with Google Calendar
-export const syncWithGoogleCalendar = async (): Promise<boolean> => {
-  try {
-    toast.info('Syncing with Google Calendar...');
-    
-    // Call your backend function to sync events
-    const response = await fetch('/api/google-calendar/sync', {
-      method: 'POST',
+    const { data, error } = await supabase.functions.invoke('google-calendar-auth', {
+      body: { action: 'disconnect' }
     });
     
-    if (!response.ok) {
-      throw new Error('Failed to sync with Google Calendar');
-    }
-    
-    const data = await response.json();
-    
-    if (data.success) {
-      toast.success('Successfully synced with Google Calendar');
-      return true;
-    }
-    
-    toast.error(data.message || 'Failed to sync with Google Calendar');
-    return false;
+    if (error) throw error;
+    return data.success;
   } catch (error) {
-    console.error('Error syncing with Google Calendar:', error);
-    toast.error('An error occurred while syncing with Google Calendar');
+    console.error('Error disconnecting Google Calendar:', error);
     return false;
   }
 };
 
-// Re-export calendar utilities for backward compatibility
-export * from "@/utils/supabase/calendar";
+// Function to sync with Google Calendar
+export const syncWithGoogleCalendar = async (): Promise<boolean> => {
+  try {
+    const { data, error } = await supabase.functions.invoke('google-calendar-sync', {
+      body: { action: 'full_sync' }
+    });
+    
+    if (error) throw error;
+    return data.success;
+  } catch (error) {
+    console.error('Error syncing with Google Calendar:', error);
+    return false;
+  }
+};
+
+// Function to export calendar to iCal format
+export const exportCalendarToIcal = (events: any[]): string => {
+  // iCal format specification: https://icalendar.org/
+  let iCalContent = [
+    'BEGIN:VCALENDAR',
+    'VERSION:2.0',
+    'PRODID:-//Spelman Glee Club//GleeWorld//EN',
+    'CALSCALE:GREGORIAN',
+    'METHOD:PUBLISH'
+  ];
+  
+  events.forEach(event => {
+    const startDate = new Date(event.start);
+    const endDate = event.end ? new Date(event.end) : new Date(startDate.getTime() + 60 * 60 * 1000); // Default to 1 hour duration
+    
+    // Format dates for iCal: YYYYMMDDTHHmmssZ
+    const formatDate = (date: Date) => {
+      return date.toISOString().replace(/[-:]/g, '').replace(/\.\d{3}/g, '');
+    };
+    
+    iCalContent = [
+      ...iCalContent,
+      'BEGIN:VEVENT',
+      `UID:${event.id}@glee-world-calendar`,
+      `DTSTAMP:${formatDate(new Date())}`,
+      `DTSTART:${formatDate(startDate)}`,
+      `DTEND:${formatDate(endDate)}`,
+      `SUMMARY:${event.title || 'Untitled Event'}`,
+      `DESCRIPTION:${(event.description || '').replace(/\n/g, '\\n')}`,
+      `LOCATION:${event.location || ''}`,
+      'END:VEVENT'
+    ];
+  });
+  
+  iCalContent.push('END:VCALENDAR');
+  return iCalContent.join('\r\n');
+};
+
+// Function to import calendar from iCal format
+export const importCalendarFromIcal = (iCalData: string): any[] => {
+  const events: any[] = [];
+  const lines = iCalData.split(/\r\n|\n|\r/);
+  
+  let currentEvent: any = null;
+  let inEvent = false;
+  
+  const parseICalDate = (dateStr: string): Date => {
+    // Handle basic ISO format
+    if (dateStr.includes('T')) {
+      const year = parseInt(dateStr.substr(0, 4));
+      const month = parseInt(dateStr.substr(4, 2)) - 1;
+      const day = parseInt(dateStr.substr(6, 2));
+      const hour = parseInt(dateStr.substr(9, 2));
+      const minute = parseInt(dateStr.substr(11, 2));
+      const second = parseInt(dateStr.substr(13, 2));
+      
+      return new Date(Date.UTC(year, month, day, hour, minute, second));
+    } else {
+      // All day event
+      const year = parseInt(dateStr.substr(0, 4));
+      const month = parseInt(dateStr.substr(4, 2)) - 1;
+      const day = parseInt(dateStr.substr(6, 2));
+      
+      return new Date(Date.UTC(year, month, day));
+    }
+  };
+  
+  lines.forEach(line => {
+    if (line === 'BEGIN:VEVENT') {
+      inEvent = true;
+      currentEvent = {};
+    } else if (line === 'END:VEVENT' && currentEvent) {
+      inEvent = false;
+      if (currentEvent.start) {
+        // Format the date in ISO format
+        const startDate = new Date(currentEvent.start);
+        currentEvent.date = startDate.toISOString().split('T')[0];
+        currentEvent.time = startDate.toISOString().split('T')[1].substr(0, 5);
+        
+        // Determine event type based on summary/description if needed
+        const title = (currentEvent.title || '').toLowerCase();
+        const desc = (currentEvent.description || '').toLowerCase();
+        
+        if (title.includes('concert') || desc.includes('concert')) {
+          currentEvent.type = 'concert';
+        } else if (title.includes('rehearsal') || desc.includes('rehearsal')) {
+          currentEvent.type = 'rehearsal';
+        } else if (title.includes('tour') || desc.includes('tour')) {
+          currentEvent.type = 'tour';
+        } else {
+          currentEvent.type = 'special';
+        }
+        
+        events.push(currentEvent);
+      }
+      currentEvent = null;
+    } else if (inEvent && currentEvent) {
+      if (line.startsWith('SUMMARY:')) {
+        currentEvent.title = line.substring(8).trim();
+      } else if (line.startsWith('DESCRIPTION:')) {
+        currentEvent.description = line.substring(12).trim().replace(/\\n/g, '\n');
+      } else if (line.startsWith('LOCATION:')) {
+        currentEvent.location = line.substring(9).trim();
+      } else if (line.startsWith('DTSTART:')) {
+        currentEvent.start = parseICalDate(line.substring(8).trim());
+      } else if (line.startsWith('DTEND:')) {
+        currentEvent.end = parseICalDate(line.substring(6).trim());
+      } else if (line.startsWith('UID:')) {
+        currentEvent.external_id = line.substring(4).trim();
+      }
+    }
+  });
+  
+  return events;
+};
+
+// Function to share calendar (generate a shareable link)
+export const shareCalendar = (calendarId?: string): string => {
+  // For now, we'll just generate a URL to the calendar page with a share token
+  // In a real implementation, this could create a special shared view with limited permissions
+  const shareToken = btoa(`share-${Date.now()}`);
+  const baseUrl = window.location.origin;
+  return `${baseUrl}/calendar?share=${shareToken}${calendarId ? `&calendar=${calendarId}` : ''}`;
+};

@@ -4,11 +4,6 @@ import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
-import { 
-  startGoogleAuth, 
-  syncWithGoogleCalendar, 
-  isConnectedToGoogle 
-} from "@/services/googleCalendar";
 
 interface GoogleCalendarToggleProps {
   connected: boolean;

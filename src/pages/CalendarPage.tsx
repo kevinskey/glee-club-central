@@ -1,373 +1,188 @@
 
-import React, { useState, useCallback, useMemo, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { Footer } from "@/components/landing/Footer";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { CalendarHeader } from "@/components/calendar/CalendarHeader";
+import { CalendarSidebar } from "@/components/calendar/CalendarSidebar";
+import { EventModal } from "@/components/calendar/EventModal";
+import { ViewEventModal } from "@/components/calendar/ViewEventModal";
 import { useCalendarStore } from "@/hooks/useCalendarStore";
-import { AddEventForm } from "@/components/calendar/AddEventForm";
-import { EditEventForm } from "@/components/calendar/EditEventForm";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { useAuth } from "@/contexts/AuthContext";
+import { Spinner } from "@/components/ui/spinner";
+import { CalendarMain } from "@/components/calendar/CalendarMain";
+import { useCalendarEventHandlers } from "@/hooks/useCalendarEventHandlers";
 import { toast } from "sonner";
-import { usePermissions } from "@/hooks/usePermissions";
-import { useLocation, useSearchParams } from "react-router-dom";
-import { EventFormValues } from "@/components/calendar/EventFormFields";
-import { Header } from "@/components/landing/Header";
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
-import { supabase } from "@/integrations/supabase/client";
-
-// Components
-import { CalendarContainer } from "@/components/calendar/CalendarContainer";
-import { EventList } from "@/components/calendar/EventList";
-import { EventDetails } from "@/components/calendar/EventDetails";
 import { CalendarPageHeader } from "@/components/calendar/CalendarPageHeader";
-import { CalendarEditTools } from "@/components/calendar/CalendarEditTools";
-import { CalendarTools } from "@/components/calendar/CalendarTools";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { usePermissions } from "@/hooks/usePermissions";
 
-export default function CalendarPage() {
-  const [date, setDate] = useState<Date | undefined>(new Date());
+const CalendarPage = () => {
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [isViewModalOpen, setIsViewModalOpen] = useState(false);
+  const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [selectedEvent, setSelectedEvent] = useState<any | null>(null);
-  const [isAddEventOpen, setIsAddEventOpen] = useState(false);
-  const [isEditEventOpen, setIsEditEventOpen] = useState(false);
-  const [isResetDialogOpen, setIsResetDialogOpen] = useState(false);
-  const [searchParams] = useSearchParams();
-  const eventId = searchParams.get('event');
+  const [isLoading, setIsLoading] = useState(true);
+  const [calendarView, setCalendarView] = useState<'dayGridMonth' | 'timeGridWeek' | 'timeGridDay' | 'listWeek'>('dayGridMonth');
+  const [currentDate, setCurrentDate] = useState(new Date());
   const isMobile = useIsMobile();
   
-  const { 
-    events, 
-    isLoading, 
-    addEvent, 
-    updateEvent, 
-    deleteEvent,
-    fetchEvents,
-    importEvents
-  } = useCalendarStore();
-  
-  // Use the permissions hook to check for super admin status
+  const { events, fetchEvents, addEvent, updateEvent, deleteEvent } = useCalendarStore();
+  const { isAdmin, profile, isLoading: authLoading } = useAuth();
   const { isSuperAdmin } = usePermissions();
-  
-  // Filter events for the selected date - memoized
-  const eventsOnSelectedDate = useMemo(() => {
-    if (!date) return [];
-    
-    return events.filter(event => {
-      // Convert the start property to a Date object if it's a string
-      const eventStart = typeof event.start === 'string' 
-        ? new Date(event.start) 
-        : event.start;
-      
-      return (
-        eventStart.getDate() === date.getDate() && 
-        eventStart.getMonth() === date.getMonth() && 
-        eventStart.getFullYear() === date.getFullYear()
-      );
-    });
-  }, [date, events]);
-  
-  // Handle URL event parameter
+
+  console.log("CalendarPage rendering with view:", calendarView);
+  console.log("Current events count:", events.length);
+
+  // Only super admins can create events
+  const userCanCreate = isSuperAdmin;
+
   useEffect(() => {
-    if (eventId && events.length > 0 && !isLoading) {
-      // Find the event by ID
-      const event = events.find(e => e.id === eventId);
-      if (event) {
-        // Set the selected date to the event's date
-        setDate(typeof event.start === 'string' ? new Date(event.start) : event.start);
-        // Select the event
-        setSelectedEvent(event);
-      } else {
-        toast.error("Event not found");
+    console.log("CalendarPage - Initializing");
+    
+    const loadEvents = async () => {
+      console.log("CalendarPage - Loading events. Auth loading:", authLoading);
+      if (!authLoading) {
+        try {
+          setIsLoading(true);
+          console.log("CalendarPage - Fetching events");
+          await fetchEvents();
+          console.log("CalendarPage - Events loaded successfully");
+        } catch (error) {
+          console.error("Error loading events:", error);
+          toast.error("Failed to load calendar events");
+        } finally {
+          setIsLoading(false);
+        }
       }
-    }
-  }, [eventId, events, isLoading]);
-    
-  // Get days with events for highlighting in the calendar - ensure they are Date objects
-  const daysWithEvents = useMemo(() => 
-    events.map(event => typeof event.start === 'string' ? new Date(event.start) : event.start), 
-  [events]);
-  
-  // Handle event selection
-  const handleEventSelect = useCallback((event: any) => {
-    setSelectedEvent(event);
-  }, []);
-
-  // Handle date selection and reset selected event
-  const handleDateSelect = useCallback((newDate: Date | undefined) => {
-    setDate(newDate);
-    // Always reset selected event when changing dates to avoid showing events from a different date
-    setSelectedEvent(null);
-    
-    // Fetch events when changing dates
-    fetchEvents();
-  }, [fetchEvents]);
-
-  // Handle adding new event
-  const handleAddEvent = async (formValues: EventFormValues & { start: Date, end: Date }) => {
-    // Make sure we have all required fields from formValues
-    const eventData: any = {
-      title: formValues.title,
-      description: formValues.description || "",
-      date: formValues.date,
-      start: formValues.start,
-      end: formValues.end,
-      time: formValues.time,
-      location: formValues.location,
-      type: formValues.type,
-      image_url: formValues.image_url || undefined
     };
     
-    const success = await addEvent(eventData);
-    
+    loadEvents();
+  }, [authLoading, fetchEvents]);
+
+  console.log("CalendarPage - Render state:", { isLoading, eventsCount: events.length, view: calendarView });
+
+  // Use our custom hook for event handling
+  const {
+    handleDateClick,
+    handleEventClick,
+    handleEventDrop,
+    handleEventResize,
+    handleCreateEvent,
+    handleUpdateEvent,
+    handleDeleteEvent
+  } = useCalendarEventHandlers(
+    events,
+    updateEvent,
+    addEvent,
+    deleteEvent,
+    setSelectedEvent,
+    setIsViewModalOpen,
+    setSelectedDate,
+    setIsCreateModalOpen
+  );
+
+  // Handler for creating event
+  const onCreateEvent = async (eventData: any) => {
+    const success = await handleCreateEvent(eventData);
     if (success) {
-      setIsAddEventOpen(false);
-      toast.success("Event added successfully");
-      
-      // If the new event is on the currently selected date, select it
-      if (date && 
-          formValues.date.getDate() === date.getDate() && 
-          formValues.date.getMonth() === date.getMonth() && 
-          formValues.date.getFullYear() === date.getFullYear()) {
-        // Set the date again to trigger a refresh of the events list
-        handleDateSelect(new Date(date));
-      }
+      toast.success("Event created successfully");
+      setIsCreateModalOpen(false);
     }
   };
 
-  // Fix the handleEditEvent function to ensure type compatibility 
-  // Only updating the necessary function to fix the build error
-  const handleEditEvent = async (eventData: any) => {
-    if (selectedEvent) {
-      // Convert date strings to appropriate format if needed
-      const processedEventData = {
-        ...eventData,
-        // Ensure start and end are strings as expected by the CalendarEvent type
-        start: typeof eventData.start === 'string' ? eventData.start : eventData.start.toISOString(),
-        end: typeof eventData.end === 'string' ? eventData.end : eventData.end.toISOString()
-      };
-
-      if (await updateEvent(processedEventData)) {
-        setIsEditEventOpen(false);
-        setSelectedEvent(null);
-        toast.success("Event updated successfully");
-      }
-    }
-  };
-
-  // Handle deleting an event
-  const handleDeleteEvent = async () => {
-    if (!selectedEvent) return;
-    
-    if (await deleteEvent(selectedEvent.id)) {
+  // Handler for updating event
+  const onUpdateEvent = async (eventData: any) => {
+    const success = await handleUpdateEvent(eventData);
+    if (success) {
+      toast.success("Event updated successfully");
+      setIsViewModalOpen(false);
       setSelectedEvent(null);
+    }
+    return success;
+  };
+
+  // Handler for deleting event
+  const onDeleteEvent = async (eventId: string) => {
+    const success = await handleDeleteEvent(eventId);
+    if (success) {
       toast.success("Event deleted successfully");
-      
-      // Force refresh to ensure the deleted event is removed from the UI
-      await fetchEvents();
+      setIsViewModalOpen(false);
+      setSelectedEvent(null);
     }
+    return success;
   };
-  
-  // Open add event dialog with current date selected
-  const handleOpenAddEvent = () => {
-    if (isSuperAdmin) {
-      setIsAddEventOpen(true);
-    } else {
-      toast.info("You need admin privileges to add events");
-    }
-  };
-  
-  // Handle calendar reset
-  const handleResetCalendar = async () => {
-    try {
-      // Delete all events
-      const { error } = await supabase
-        .from('calendar_events')
-        .delete()
-        .neq('id', 'none');  // This will match all rows
-      
-      if (error) throw error;
-      
-      // Refresh events
-      await fetchEvents();
-      setIsResetDialogOpen(false);
-      toast.success("Calendar has been reset successfully");
-    } catch (error) {
-      console.error("Error resetting calendar:", error);
-      toast.error("Failed to reset calendar");
-    }
-  };
-  
-  // Get badge color based on event type
-  const getEventTypeColor = useCallback((type: string) => {
-    switch (type) {
-      case "concert":
-        return "bg-glee-purple hover:bg-glee-purple/90";
-      case "rehearsal":
-        return "bg-blue-500 hover:bg-blue-500/90";
-      case "tour":
-        return "bg-green-500 hover:bg-green-500/90";
-      case "special":
-        return "bg-amber-500 hover:bg-amber-500/90";
-      default:
-        return "bg-gray-500 hover:bg-gray-500/90";
-    }
-  }, []);
-  
-  // Import events handler
-  const handleImportEvents = async (importedEvents: any[]) => {
-    await importEvents(importedEvents);
-    await fetchEvents();
-  };
-  
-  // Convert CalendarEvent[] between types as needed
-  const convertEvents = useCallback((events: any[]) => {
-    return events.map(event => ({
-      ...event,
-      // Ensure description is present
-      description: event.description || "",
-      // Ensure start and end are Date objects
-      start: typeof event.start === 'string' ? new Date(event.start) : event.start,
-      end: typeof event.end === 'string' ? new Date(event.end) : event.end
-    }));
-  }, []);
-  
+
   return (
-    <div className="flex min-h-screen flex-col">
-      <Header initialShowNewsFeed={false} />
+    <div className="flex flex-col min-h-screen">
+      {/* Removed the Header component completely */}
       <main className="flex-1 bg-gray-50 dark:bg-gray-900">
-        <div className="container py-8 sm:py-10 md:py-12">
-          <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
-            <CalendarPageHeader onAddEventClick={handleOpenAddEvent} />
-          </div>
-          
-          {/* Make sure the CalendarEditTools is visible and working */}
-          {isSuperAdmin && (
-            <CalendarEditTools 
-              onAddEvent={handleOpenAddEvent}
-              selectedEventId={selectedEvent?.id}
-              onEditSelected={() => setIsEditEventOpen(true)}
-              onDeleteSelected={handleDeleteEvent}
-              onResetCalendar={() => setIsResetDialogOpen(true)}
-              onExportCalendar={() => toast.info("Scroll down to use calendar tools")}
-              onImportCalendar={() => toast.info("Scroll down to use calendar tools")}
-              onShareCalendar={() => toast.info("Scroll down to use calendar tools")}
-              className="mb-4"
+        <div className="container mx-auto p-4">
+          {/* Use CalendarPageHeader on mobile, CalendarHeader on desktop */}
+          {isMobile ? (
+            <CalendarPageHeader onAddEventClick={() => userCanCreate && setIsCreateModalOpen(true)} />
+          ) : (
+            <CalendarHeader 
+              onAddEvent={() => userCanCreate && setIsCreateModalOpen(true)} 
+              view={calendarView}
+              onViewChange={setCalendarView}
+              userCanCreate={userCanCreate}
             />
           )}
           
-          <div className="flex flex-col lg:flex-row gap-8 h-full">
-            {/* Calendar */}
-            <div className="w-full lg:w-1/2">
-              <CalendarContainer 
-                date={date}
-                setDate={handleDateSelect}
-                daysWithEvents={daysWithEvents}
-                loading={isLoading}
-                events={convertEvents(events)}
-              />
-              
-              {/* Add CalendarTools component for admins */}
-              {isSuperAdmin && !isMobile && (
-                <div className="mt-6">
-                  <CalendarTools 
-                    events={convertEvents(events)} 
-                    onImportEvents={handleImportEvents} 
-                  />
-                </div>
-              )}
+          {isLoading ? (
+            <div className="flex justify-center items-center h-96">
+              <Spinner size="lg" />
             </div>
-            
-            {/* Event details */}
-            <div className="w-full lg:w-1/2 h-full">
-              <div className="border rounded-lg p-6 h-full bg-white dark:bg-gray-800 shadow-sm">
-                {isLoading ? (
-                  <div className="flex justify-center items-center py-10">
-                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-glee-purple"></div>
-                  </div>
-                ) : (
-                  <>
-                    <EventList 
-                      date={date}
-                      events={convertEvents(eventsOnSelectedDate)}
-                      selectedEvent={selectedEvent}
-                      onSelectEvent={handleEventSelect}
-                      getEventTypeColor={getEventTypeColor}
-                    />
-                    
-                    {selectedEvent && (
-                      <EventDetails 
-                        event={selectedEvent} 
-                        onDelete={handleDeleteEvent}
-                        onEdit={() => setIsEditEventOpen(true)}
-                        isAdmin={isSuperAdmin && (!selectedEvent.source || selectedEvent.source === 'local')} 
-                      />
-                    )}
-                  </>
-                )}
+          ) : (
+            <div className="flex flex-col lg:flex-row gap-6 mt-6">
+              <div className="hidden lg:block lg:w-64">
+                <CalendarSidebar />
               </div>
               
-              {/* Show calendar tools on mobile at the bottom */}
-              {isSuperAdmin && isMobile && (
-                <div className="mt-6">
-                  <CalendarTools 
-                    events={convertEvents(events)} 
-                    onImportEvents={handleImportEvents} 
-                  />
-                </div>
-              )}
+              <CalendarMain 
+                events={events}
+                calendarView={calendarView}
+                currentDate={currentDate}
+                setCurrentDate={setCurrentDate}
+                userCanCreate={userCanCreate}
+                handleDateClick={handleDateClick}
+                handleEventClick={handleEventClick}
+                handleEventDrop={handleEventDrop}
+                handleEventResize={handleEventResize}
+              />
             </div>
-          </div>
+          )}
+
+          {/* Create Event Modal */}
+          <Dialog open={isCreateModalOpen} onOpenChange={setIsCreateModalOpen}>
+            <DialogContent className="sm:max-w-md">
+              <EventModal 
+                onClose={() => setIsCreateModalOpen(false)} 
+                onSave={onCreateEvent} 
+                initialDate={selectedDate}
+              />
+            </DialogContent>
+          </Dialog>
+
+          {/* View/Edit Event Modal */}
+          {selectedEvent && (
+            <Dialog open={isViewModalOpen} onOpenChange={setIsViewModalOpen}>
+              <DialogContent className="sm:max-w-md">
+                <ViewEventModal 
+                  event={selectedEvent} 
+                  onClose={() => setIsViewModalOpen(false)} 
+                  onUpdate={onUpdateEvent}
+                  onDelete={onDeleteEvent}
+                  userCanEdit={userCanCreate || (profile?.id === selectedEvent.created_by && selectedEvent.type === 'sectional')}
+                />
+              </DialogContent>
+            </Dialog>
+          )}
         </div>
       </main>
       <Footer />
-
-      {/* Add Event Dialog */}
-      <Dialog open={isAddEventOpen} onOpenChange={setIsAddEventOpen}>
-        <DialogContent className="w-[90vw] max-w-[600px] bg-white dark:bg-gray-800">
-          <DialogHeader>
-            <DialogTitle>Add New Event</DialogTitle>
-          </DialogHeader>
-          <AddEventForm 
-            onAddEvent={handleAddEvent} 
-            onCancel={() => setIsAddEventOpen(false)}
-            initialDate={date} 
-          />
-        </DialogContent>
-      </Dialog>
-
-      {/* Edit Event Dialog */}
-      {selectedEvent && (
-        <Dialog open={isEditEventOpen} onOpenChange={setIsEditEventOpen}>
-          <DialogContent className="w-[90vw] max-w-[600px] bg-white dark:bg-gray-800">
-            <DialogHeader>
-              <DialogTitle>Edit Event</DialogTitle>
-            </DialogHeader>
-            <EditEventForm 
-              event={selectedEvent}
-              onUpdateEvent={handleEditEvent}
-              onCancel={() => setIsEditEventOpen(false)} 
-            />
-          </DialogContent>
-        </Dialog>
-      )}
-      
-      {/* Reset Calendar Confirmation Dialog */}
-      <AlertDialog open={isResetDialogOpen} onOpenChange={setIsResetDialogOpen}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Reset Calendar</AlertDialogTitle>
-            <AlertDialogDescription>
-              This will permanently delete all calendar events. This action cannot be undone.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction 
-              onClick={handleResetCalendar}
-              className="bg-red-500 hover:bg-red-600"
-            >
-              Reset Calendar
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
     </div>
   );
-}
+};
+
+export default CalendarPage;

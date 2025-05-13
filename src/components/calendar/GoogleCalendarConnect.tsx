@@ -2,7 +2,7 @@
 import React from "react";
 import { Button } from "@/components/ui/button";
 import { useGoogleCalendar } from "@/hooks/useGoogleCalendar";
-import { RefreshCw, Link, LinkOff } from "lucide-react";
+import { RefreshCw, Link, Link2Off } from "lucide-react";
 
 export function GoogleCalendarConnect() {
   const { 
@@ -31,7 +31,7 @@ export function GoogleCalendarConnect() {
               onClick={disconnect}
               disabled={isLoading}
             >
-              <LinkOff className="mr-2 h-4 w-4" />
+              <Link2Off className="mr-2 h-4 w-4" />
               Disconnect Google Calendar
             </Button>
             
