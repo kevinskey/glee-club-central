@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { PageHeader } from "@/components/ui/page-header";
 import { Library, FileText, Image, Music, Video, Search, Filter, Upload } from "lucide-react";
@@ -12,6 +13,7 @@ import { formatFileSize } from "@/utils/file-utils";
 import { MediaType } from "@/utils/mediaUtils";
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
+import { UploadMediaModal } from "@/components/UploadMediaModal";
 
 const MediaLibraryPage: React.FC = () => {
   const navigate = useNavigate();
@@ -29,10 +31,14 @@ const MediaLibraryPage: React.FC = () => {
     setDateFilter,
     mediaTypes,
     categories,
+    fetchAllMedia,
   } = useMediaLibrary();
   
   // State for active tab
   const [activeTab, setActiveTab] = useState<MediaType | "all">("all");
+  
+  // State for upload modal
+  const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
   
   // Update state when mediaType is changed
   useEffect(() => {
@@ -45,13 +51,22 @@ const MediaLibraryPage: React.FC = () => {
     });
   };
 
+  const handleUploadComplete = () => {
+    console.log("Upload complete, refreshing media files");
+    fetchAllMedia();
+    setIsUploadModalOpen(false);
+  };
+
   return (
     <div className="container mx-auto px-4 py-6">
       <PageHeader
         title="Media Library"
         icon={<Library className="h-6 w-6" />}
         actions={
-          <Button className="bg-glee-purple hover:bg-glee-purple/90">
+          <Button 
+            className="bg-glee-purple hover:bg-glee-purple/90"
+            onClick={() => setIsUploadModalOpen(true)}
+          >
             <Upload className="mr-2 h-4 w-4" /> Upload Media
           </Button>
         }
@@ -115,6 +130,13 @@ const MediaLibraryPage: React.FC = () => {
           </TabsContent>
         ))}
       </Tabs>
+
+      {/* Upload Media Modal */}
+      <UploadMediaModal
+        open={isUploadModalOpen}
+        onOpenChange={setIsUploadModalOpen}
+        onUploadComplete={handleUploadComplete}
+      />
     </div>
   );
 };

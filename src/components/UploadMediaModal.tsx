@@ -1,5 +1,5 @@
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { FileUp } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -40,6 +40,11 @@ export function UploadMediaModal({
   const open = isControlled ? controlledOpen : internalOpen;
   const setOpen = isControlled ? setControlledOpen : setInternalOpen;
 
+  // Log the open state changes for debugging
+  useEffect(() => {
+    console.log("UploadMediaModal open state changed to:", open);
+  }, [open]);
+
   const {
     title,
     setTitle,
@@ -58,22 +63,23 @@ export function UploadMediaModal({
   } = useMediaUpload(onUploadComplete, defaultCategory);
 
   const handleClose = () => {
+    console.log("Closing upload modal");
     setOpen(false);
     resetForm();
+  };
+
+  const handleDialogOpenChange = (isOpen: boolean) => {
+    console.log("Dialog onOpenChange called with:", isOpen);
+    setOpen(isOpen);
+    if (!isOpen) resetForm();
   };
 
   if (!canUpload) {
     return null;
   }
 
-  console.log("Upload modal open state:", open);
-
   return (
-    <Dialog open={open} onOpenChange={(isOpen) => {
-      console.log("Dialog onOpenChange called with:", isOpen);
-      setOpen(isOpen);
-      if (!isOpen) resetForm();
-    }}>
+    <Dialog open={open} onOpenChange={handleDialogOpenChange}>
       {!isControlled && (
         <DialogTrigger asChild>
           <Button size="sm">
