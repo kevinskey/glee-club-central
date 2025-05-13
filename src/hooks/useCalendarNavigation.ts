@@ -1,38 +1,38 @@
 
-import { useRef, useCallback } from "react";
+import { RefObject } from "react";
 import FullCalendar from "@fullcalendar/react";
 
 export const useCalendarNavigation = (
-  calendarRef: React.RefObject<FullCalendar>,
+  calendarRef: RefObject<FullCalendar>,
   setCurrentDate: (date: Date) => void
 ) => {
-  const handlePrevClick = useCallback(() => {
+  const handlePrevClick = () => {
     if (calendarRef.current) {
       const calendarApi = calendarRef.current.getApi();
       calendarApi.prev();
       setCurrentDate(calendarApi.getDate());
     }
-  }, [calendarRef, setCurrentDate]);
+  };
 
-  const handleNextClick = useCallback(() => {
+  const handleNextClick = () => {
     if (calendarRef.current) {
       const calendarApi = calendarRef.current.getApi();
       calendarApi.next();
       setCurrentDate(calendarApi.getDate());
     }
-  }, [calendarRef, setCurrentDate]);
+  };
 
-  const handleTodayClick = useCallback(() => {
+  const handleTodayClick = () => {
     if (calendarRef.current) {
       const calendarApi = calendarRef.current.getApi();
       calendarApi.today();
       setCurrentDate(calendarApi.getDate());
     }
-  }, [calendarRef, setCurrentDate]);
+  };
 
   return {
     handlePrevClick,
     handleNextClick,
-    handleTodayClick
+    handleTodayClick,
   };
 };
