@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from '@/components/ui/button';
@@ -19,7 +20,7 @@ export function UserRoleEditor() {
   const { profile, refreshPermissions } = useAuth();
   const { updateUserRole } = useUserManagement();
   const { isAdminRole, isSuperAdmin } = usePermissions();
-  const [selectedRole, setSelectedRole] = useState<string>(profile?.role || '');
+  const [selectedRole, setSelectedRole] = useState<UserRole | string>(profile?.role || '');
   const [isLoading, setIsLoading] = useState(false);
 
   // Update selected role when profile changes
@@ -30,7 +31,7 @@ export function UserRoleEditor() {
   }, [profile?.role]);
 
   // Determine available roles based on user permissions
-  const roles: { value: string; label: string }[] = [
+  const roles: { value: UserRole | string; label: string }[] = [
     { value: "singer", label: "Singer" },
     { value: "section_leader", label: "Section Leader" },
     { value: "student_conductor", label: "Student Conductor" },

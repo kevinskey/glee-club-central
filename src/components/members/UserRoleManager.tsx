@@ -17,7 +17,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { User, userManagementService } from '@/services/userManagement';
 import { toast } from 'sonner';
-import { UserRole } from '@/types/auth';
+import { UserRole } from '@/types/auth'; // Updated import
 
 interface UserRoleManagerProps {
   user: User | null;

@@ -14,6 +14,7 @@ import { Separator } from "@/components/ui/separator";
 import { User } from "@/hooks/useUserManagement";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { UserRole } from "@/types/auth"; // Updated import
 
 interface UserRoleSelectorProps {
   user: User | null;
@@ -28,7 +29,7 @@ export const UserRoleSelector = memo(({
   onOpenChange,
   onSuccess
 }: UserRoleSelectorProps) => {
-  const [selectedRole, setSelectedRole] = useState<string>('general');
+  const [selectedRole, setSelectedRole] = useState<UserRole | string>('general');
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   
@@ -41,7 +42,7 @@ export const UserRoleSelector = memo(({
   }, [user, isOpen]); // Also reset when dialog opens
   
   // Define available roles
-  const roles: { value: string; label: string; description: string }[] = [
+  const roles: { value: UserRole; label: string; description: string }[] = [
     { value: 'admin', label: 'Admin', description: 'Full access to all features' },
     { value: 'director', label: 'Director', description: 'Administrative access with artistic oversight' },
     { value: 'general', label: 'General User', description: 'Regular member access' }

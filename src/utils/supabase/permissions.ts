@@ -55,7 +55,6 @@ export async function fetchUserPermissions(userId: string) {
   }
 }
 
-// Remove the duplicate UserTitle type definition
 export async function updateUserTitle(userId: string, title: UserTitle) {
   try {
     const { error } = await supabase
