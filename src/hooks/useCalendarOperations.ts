@@ -37,7 +37,7 @@ export function useCalendarOperations(refreshEvents: () => Promise<void>) {
         location: event.location,
         description: event.description,
         type: event.type,
-        image_url: event.image_url,
+        image_url: event.image_url || null,
         user_id: user.id
       };
 

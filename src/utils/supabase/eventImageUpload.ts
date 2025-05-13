@@ -1,66 +1,99 @@
 
 import { supabase } from "@/integrations/supabase/client";
-import { v4 as uuidv4 } from "uuid";
+import { v4 as uuidv4 } from 'uuid';
 
 /**
- * Uploads an image to Supabase storage and returns the URL
+ * Upload an event image to Supabase Storage
  * @param file The image file to upload
- * @param title Title for the uploaded file (used for naming)
- * @returns URL to the uploaded image or null if upload failed
+ * @param eventTitle The title of the event (used for naming)
+ * @returns URL of the uploaded image, or null if upload failed
  */
-export const uploadEventImage = async (file: File, title: string): Promise<string | null> => {
+export async function uploadEventImage(file: File, eventTitle: string): Promise<string | null> {
   try {
-    // Generate a unique filename to prevent collisions
-    const fileExt = file.name.split('.').pop();
-    const fileName = `${title.replace(/\s+/g, '-').toLowerCase()}-${uuidv4()}.${fileExt}`;
-    const filePath = `calendar_events/${fileName}`;
+    if (!file) {
+      console.error("No file provided for upload");
+      return null;
+    }
     
-    // Upload file to storage
-    const { data: uploadData, error: uploadError } = await supabase.storage
-      .from('media')
-      .upload(filePath, file, {
+    // Ensure storage bucket exists
+    const { data: buckets } = await supabase.storage.listBuckets();
+    const eventsBucketExists = buckets?.some(bucket => bucket.name === 'events');
+    
+    if (!eventsBucketExists) {
+      // Create bucket if it doesn't exist
+      const { error } = await supabase.storage.createBucket('events', {
+        public: true,
+        fileSizeLimit: 5242880, // 5MB
+        allowedMimeTypes: ['image/png', 'image/jpeg', 'image/jpg', 'image/webp']
+      });
+      
+      if (error) {
+        console.error("Error creating bucket:", error);
+        return null;
+      }
+    }
+    
+    // Generate unique filename to prevent overwrites
+    const fileExt = file.name.split('.').pop();
+    const sanitizedEventName = eventTitle.toLowerCase().replace(/[^a-z0-9]/g, '-').substring(0, 20);
+    const uniqueFileName = `${sanitizedEventName}-${uuidv4().substring(0, 8)}.${fileExt}`;
+    
+    // Upload file to Supabase Storage
+    const { data, error } = await supabase.storage
+      .from('events')
+      .upload(`images/${uniqueFileName}`, file, {
         cacheControl: '3600',
         upsert: false
       });
     
-    if (uploadError) {
-      console.error('Error uploading image:', uploadError);
+    if (error) {
+      console.error("Error uploading event image:", error);
       return null;
     }
     
-    // Get the public URL
-    const { data: publicUrlData } = supabase.storage
-      .from('media')
-      .getPublicUrl(filePath);
-      
-    const publicUrl = publicUrlData.publicUrl;
-    
-    // Get the current user
-    const { data: userData, error: userError } = await supabase.auth.getUser();
-    
-    if (userError || !userData?.user) {
-      console.error('Error getting user:', userError);
-      return publicUrl; // Still return the URL even if we can't log it to media library
-    }
-    
-    // Log to media library
-    await supabase
-      .from('media_library')
-      .insert({
-        title: `Event Image: ${title}`,
-        description: `Calendar event image for "${title}"`,
-        file_path: filePath,
-        file_url: publicUrl,
-        file_type: file.type,
-        folder: 'calendar_events',
-        size: file.size,
-        tags: ['event', 'calendar'],
-        uploaded_by: userData.user.id
-      });
+    // Get public URL
+    const { data: { publicUrl } } = supabase.storage
+      .from('events')
+      .getPublicUrl(`images/${uniqueFileName}`);
     
     return publicUrl;
-  } catch (error) {
-    console.error('Error in uploadEventImage:', error);
+  } catch (err) {
+    console.error("Unexpected error in uploadEventImage:", err);
     return null;
   }
-};
+}
+
+/**
+ * Delete an event image from Supabase Storage
+ * @param imageUrl The URL of the image to delete
+ * @returns Boolean indicating success
+ */
+export async function deleteEventImage(imageUrl: string): Promise<boolean> {
+  try {
+    // Extract the file path from the URL
+    const urlPattern = /.*\/storage\/v1\/object\/public\/events\/(.*)/;
+    const match = imageUrl.match(urlPattern);
+    
+    if (!match || !match[1]) {
+      console.error("Invalid image URL format");
+      return false;
+    }
+    
+    const filePath = match[1];
+    
+    // Delete the file
+    const { error } = await supabase.storage
+      .from('events')
+      .remove([filePath]);
+    
+    if (error) {
+      console.error("Error deleting event image:", error);
+      return false;
+    }
+    
+    return true;
+  } catch (err) {
+    console.error("Unexpected error in deleteEventImage:", err);
+    return false;
+  }
+}
