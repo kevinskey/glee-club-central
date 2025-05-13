@@ -13,9 +13,13 @@ const DashboardLayout: React.FC = () => {
   const isMobile = useMedia("(max-width: 768px)");
   
   useEffect(() => {
-    console.log("DashboardLayout - Current route:", location.pathname);
-  }, [location.pathname]);
-  
+    // Set viewport-specific body class
+    document.body.classList.toggle('is-mobile-view', isMobile);
+    return () => {
+      document.body.classList.remove('is-mobile-view');
+    }
+  }, [isMobile]);
+
   if (isLoading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
@@ -37,7 +41,9 @@ const DashboardLayout: React.FC = () => {
           <Sidebar />
           
           <main className="flex-1 p-3 sm:p-4 md:p-5 lg:p-6 md:ml-64 pb-20 md:pb-6 overflow-x-hidden">
-            <Outlet />
+            <div className="mobile-container">
+              <Outlet />
+            </div>
           </main>
         </div>
       </div>

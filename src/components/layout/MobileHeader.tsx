@@ -1,3 +1,4 @@
+
 import React, { useState, useRef } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { Icons } from "@/components/Icons";
@@ -82,17 +83,15 @@ export function MobileHeader() {
       <header className="md:hidden sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
         <div className="container px-4 flex h-14 items-center justify-between">
           {/* Left side: Logo and site name */}
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2">
             <Link to="/" className="font-bold flex items-center hover:text-primary transition-colors">
               <Icons.logo className="h-6 w-auto" />
-              <span className="text-base ml-2 text-foreground">Glee World</span>
+              <span className="text-sm font-medium ml-2 text-foreground">Glee World</span>
             </Link>
           </div>
           
           {/* Right side: Login, Metronome, theme toggle, and menu button */}
-          <div className="flex items-center gap-2">
-            {/* Login Button - Removed */}
-            
+          <div className="flex items-center gap-1 sm:gap-2">
             <Dialog open={metronomeOpen} onOpenChange={setMetronomeOpen}>
               <DialogTrigger asChild>
                 <Button 
@@ -125,7 +124,7 @@ export function MobileHeader() {
                     size="icon" 
                     className="flex-shrink-0 h-10 w-10"
                   >
-                    <Menu className="h-6 w-6 text-foreground" />
+                    <Menu className="h-5 w-5 text-foreground" />
                     <span className="sr-only">Menu</span>
                   </Button>
                 </DropdownMenuTrigger>

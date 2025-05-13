@@ -13,8 +13,16 @@ export default {
 	theme: {
 		container: {
 			center: true,
-			padding: '2rem',
+			padding: {
+				DEFAULT: '1rem',
+				sm: '1.5rem',
+				md: '2rem',
+			},
 			screens: {
+				'sm': '640px',
+				'md': '768px', 
+				'lg': '1024px',
+				'xl': '1280px',
 				'2xl': '1400px'
 			}
 		},
@@ -22,6 +30,14 @@ export default {
 			fontFamily: {
 				playfair: ['Playfair Display', 'serif'],
 				inter: ['Inter', 'sans-serif'],
+			},
+			fontSize: {
+				// Fluid typography scale using clamp
+				'fluid-h1': 'clamp(1.75rem, 5vw, 3rem)',
+				'fluid-h2': 'clamp(1.5rem, 4.2vw, 2.5rem)',
+				'fluid-h3': 'clamp(1.25rem, 3.8vw, 2rem)',
+				'fluid-p': 'clamp(0.875rem, 3.5vw, 1.125rem)',
+				'fluid-btn': 'clamp(0.875rem, 4vw, 1rem)',
 			},
 			colors: {
 				border: 'hsl(var(--border))',
@@ -114,6 +130,12 @@ export default {
 				widest: '.1em',
 				spaced: '.2em',
 			},
+			spacing: {
+				// Responsive spacing scale
+				'mobile-section': '1.5rem',
+				'tablet-section': '2.5rem',
+				'desktop-section': '4rem',
+			}
 		}
 	},
 	plugins: [require("tailwindcss-animate")],

@@ -5,7 +5,11 @@ import { router } from './router';
 import './App.css';
 
 function App() {
-  return <RouterProvider router={router} />;
+  return (
+    <div className="min-h-screen w-full bg-background font-inter">
+      <RouterProvider router={router} />
+    </div>
+  );
 }
 
 export default App;
