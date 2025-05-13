@@ -44,7 +44,7 @@ export default function ResetPasswordPage() {
     try {
       const result = await resetPassword(values.email);
       
-      if (result?.error) {
+      if (result && result.error) {
         console.error("Password reset error:", result.error);
         setResetError(result.error.message || "Failed to send password reset email");
         toast.error("Password reset failed", {

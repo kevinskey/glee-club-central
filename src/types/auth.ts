@@ -59,7 +59,7 @@ export interface AuthContextType {
   login: (email: string, password: string) => Promise<{ error: any } | void>;
   logout: () => Promise<{ error: any } | void>;
   resetPassword: (email: string) => Promise<{ error: any } | void>;
-  signOut?: () => Promise<void>;
+  signOut?: () => Promise<{ error: any } | void>; // Updated return type
   signIn?: (email: string, password: string) => Promise<any>;
   signUp?: (email: string, password: string, firstName: string, lastName: string, role?: string) => Promise<any>;
   refreshPermissions?: (userId?: string) => Promise<void>;
