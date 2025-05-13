@@ -132,8 +132,7 @@ export function usePermissions(): UsePermissionsReturn {
     }
   };
   
-  // Return the stable object with the functions to avoid recreating them on each render
-  const permissionsAPI: UsePermissionsReturn = {
+  return {
     hasPermission,
     isSuperAdmin,
     isAdminRole,
@@ -141,6 +140,4 @@ export function usePermissions(): UsePermissionsReturn {
     setKevinJohnsonAsSuperAdmin,
     isUpdating
   };
-  
-  return permissionsAPI;
 }

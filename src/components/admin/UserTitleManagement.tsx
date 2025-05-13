@@ -68,7 +68,10 @@ export function UserTitleManagement({
     'Chaplain',
     'Section Leader',
     'Student Worker',
-    'General Member'
+    'General Member',
+    'Assistant Director',
+    'Director',
+    'Administrator'
   ];
 
   const handleSave = async () => {
