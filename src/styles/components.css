@@ -26,7 +26,7 @@
   @apply grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3;
 }
 
-/* Simple file type indicators */
+/* Enhanced file type indicators */
 .file-type-badge {
   @apply inline-flex items-center rounded-full px-1.5 py-0.5 text-[10px] font-medium;
 }
@@ -49,4 +49,21 @@
 
 .file-type-other {
   @apply bg-gray-50 text-gray-700 dark:bg-gray-800/50 dark:text-gray-400;
+}
+
+/* Media preview thumbnails */
+.media-thumbnail {
+  @apply relative aspect-square bg-muted overflow-hidden;
+}
+
+.media-thumbnail-audio {
+  @apply bg-gradient-to-br from-green-50 to-green-100 dark:from-green-900/20 dark:to-green-800/20;
+}
+
+.media-thumbnail-video {
+  @apply bg-gradient-to-br from-purple-50 to-purple-100 dark:from-purple-900/20 dark:to-purple-800/20;
+}
+
+.media-thumbnail-document {
+  @apply bg-gradient-to-br from-amber-50 to-amber-100 dark:from-amber-900/20 dark:to-amber-800/20;
 }
