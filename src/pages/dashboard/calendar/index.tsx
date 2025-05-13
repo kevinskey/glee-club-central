@@ -103,7 +103,7 @@ export default function CalendarPage() {
     }
   };
 
-  // Handle edit event form submission - Modified to return boolean
+  // Handle edit event form submission - Modified to return Promise<boolean>
   const handleUpdateEvent = async (event: CalendarEvent): Promise<boolean> => {
     try {
       const success = await updateEvent(event);
@@ -121,7 +121,7 @@ export default function CalendarPage() {
     }
   };
 
-  // Handle event deletion
+  // Handle event deletion - Modified to match expected return type in component props
   const handleDeleteEvent = async (): Promise<void> => {
     if (!selectedEvent) return;
     

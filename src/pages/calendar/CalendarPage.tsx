@@ -74,20 +74,18 @@ const CalendarPage = () => {
     setIsCreateModalOpen
   );
 
-  // Handler for creating event - Modified to adapt the return type
+  // Handler for creating event - Modified to ensure it returns void
   const onCreateEvent = async (eventData: any): Promise<void> => {
     try {
-      const success = await handleCreateEvent(eventData);
-      if (success) {
-        setIsCreateModalOpen(false);
-      }
+      await handleCreateEvent(eventData);
+      setIsCreateModalOpen(false);
     } catch (error) {
       console.error("Error creating event:", error);
       toast.error("Failed to create event");
     }
   };
 
-  // Handler for updating event - Modified to adapt the return type
+  // Handler for updating event - Modified to ensure it returns void
   const onUpdateEvent = async (eventData: CalendarEvent): Promise<void> => {
     try {
       await handleUpdateEvent(eventData);
@@ -99,7 +97,7 @@ const CalendarPage = () => {
     }
   };
 
-  // Handler for deleting event - Modified to adapt the return type
+  // Handler for deleting event - Modified to ensure it returns void
   const onDeleteEvent = async (eventId: string): Promise<void> => {
     try {
       await handleDeleteEvent(eventId);

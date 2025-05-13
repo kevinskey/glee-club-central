@@ -79,7 +79,7 @@ export const useCalendarEventHandlers = (
     }
   };
 
-  // Modified to return Promise<boolean> instead of Promise<void>
+  // Consistently return Promise<boolean> as defined in the interface
   const handleCreateEvent = async (eventData: any): Promise<boolean> => {
     try {
       const success = await addEvent(eventData);
@@ -94,7 +94,7 @@ export const useCalendarEventHandlers = (
     }
   };
 
-  // Modified to return Promise<boolean> instead of Promise<void>
+  // Consistently return Promise<boolean> as defined in the interface
   const handleUpdateEvent = async (eventData: CalendarEvent): Promise<boolean> => {
     try {
       const success = await updateEvent(eventData);
@@ -109,7 +109,7 @@ export const useCalendarEventHandlers = (
     }
   };
 
-  // Modified to return Promise<boolean> instead of Promise<void>
+  // Consistently return Promise<boolean> as defined in the interface
   const handleDeleteEvent = async (eventId: string): Promise<boolean> => {
     try {
       const success = await deleteEvent(eventId);
