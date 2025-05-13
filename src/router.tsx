@@ -1,3 +1,4 @@
+
 import { createBrowserRouter } from 'react-router-dom';
 import App from './App';
 import LandingPage from './pages/LandingPage';
@@ -6,16 +7,13 @@ import RegisterPage from './pages/RegisterPage';
 import DashboardLayout from './layouts/DashboardLayout';
 import DashboardPage from './pages/DashboardPage';
 import NotFoundPage from './pages/NotFoundPage';
-import ProfilePage from './pages/profile/ProfilePage'; // Make sure we use the correct ProfilePage
+import ProfilePage from './pages/profile/ProfilePage';
 import CalendarPage from './pages/CalendarPage';
 import MembersPage from './pages/MembersPage';
-import ProtectedRoute from './components/ProtectedRoute';
+import { ProtectedRoute } from './components/auth/ProtectedRoute';
 import AdminDashboard from './pages/admin/AdminDashboard';
-import SettingsPage from './pages/SettingsPage';
-import MediaPage from './pages/MediaPage';
-import WardrobePage from './pages/WardrobePage';
-import FinancePage from './pages/FinancePage';
 import AttendancePage from './pages/AttendancePage';
+import MediaLibraryPage from './pages/MediaLibraryPage';
 
 const router = createBrowserRouter([
   {
@@ -57,31 +55,19 @@ const router = createBrowserRouter([
           },
           {
             path: 'media',
-            element: <MediaPage />
-          },
-           {
-            path: 'wardrobe',
-            element: <WardrobePage />
-          },
-          {
-            path: 'finance',
-            element: <FinancePage />
+            element: <MediaLibraryPage />
           },
           {
             path: 'attendance',
             element: <AttendancePage />
-          },
+          }
         ]
       },
       {
         path: 'admin',
-        element: <ProtectedRoute requiredRole="admin">
+        element: <ProtectedRoute adminOnly={true}>
           <AdminDashboard />
         </ProtectedRoute>
-      },
-      {
-        path: 'settings',
-        element: <SettingsPage />
       }
     ]
   }
