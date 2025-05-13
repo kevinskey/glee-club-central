@@ -82,32 +82,18 @@ const CalendarPage = () => {
   });
 
   // Handler for creating event
-  const onCreateEvent = async (eventData: any) => {
-    const success = await handleCreateEvent(eventData);
-    if (success) {
-      toast.success("Event created successfully");
-      setIsCreateModalOpen(false);
-    }
+  const onCreateEvent = async (eventData: any): Promise<boolean> => {
+    return await handleCreateEvent(eventData);
   };
 
   // Handler for updating event
   const onUpdateEvent = async (eventData: CalendarEvent): Promise<boolean> => {
-    const success = await handleUpdateEvent(eventData);
-    if (success) {
-      setIsViewModalOpen(false);
-      setSelectedEvent(null);
-    }
-    return success;
+    return await handleUpdateEvent(eventData);
   };
 
   // Handler for deleting event
   const onDeleteEvent = async (eventId: string): Promise<boolean> => {
-    const success = await handleDeleteEvent(eventId);
-    if (success) {
-      setIsViewModalOpen(false);
-      setSelectedEvent(null);
-    }
-    return success;
+    return await handleDeleteEvent(eventId);
   };
 
   return (

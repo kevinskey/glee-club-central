@@ -24,8 +24,8 @@ import { Badge } from "@/components/ui/badge";
 interface ViewEventModalProps {
   event: CalendarEvent;
   onClose: () => void;
-  onUpdate: (event: CalendarEvent) => Promise<void>;
-  onDelete: (eventId: string) => Promise<void>;
+  onUpdate: (event: CalendarEvent) => Promise<boolean>;
+  onDelete: (eventId: string) => Promise<boolean>;
   userCanEdit: boolean;
 }
 

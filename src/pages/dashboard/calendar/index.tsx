@@ -205,8 +205,8 @@ const CalendarPage = () => {
             <ViewEventModal 
               event={selectedEvent} 
               onClose={() => setIsViewModalOpen(false)} 
-              onUpdate={(eventData: CalendarEvent) => handleUpdateEvent(eventData)}
-              onDelete={(eventId: string) => handleDeleteEvent(eventId)}
+              onUpdate={handleUpdateEvent}
+              onDelete={handleDeleteEvent}
               userCanEdit={userCanCreate || (profile?.id === selectedEvent.created_by && selectedEvent.type === 'sectional')}
             />
           </DialogContent>
