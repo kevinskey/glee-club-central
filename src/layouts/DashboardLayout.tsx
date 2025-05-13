@@ -1,26 +1,17 @@
 
 import React, { useEffect } from "react";
 import { Outlet, Navigate, useLocation } from "react-router-dom";
-import { Header } from "@/components/layout/Header";
+import { ConsolidatedHeader } from "@/components/layout/ConsolidatedHeader";
 import { Sidebar } from "@/components/layout/Sidebar";
 import { useAuth } from "@/contexts/AuthContext";
 import { Spinner } from "@/components/ui/spinner";
 import { SidebarProvider } from "@/components/ui/sidebar";
 import { useMedia } from "@/hooks/use-mobile";
-import { MobileHeader } from "@/components/layout/MobileHeader";
 
 const DashboardLayout: React.FC = () => {
   const { isAuthenticated, isLoading } = useAuth();
   const location = useLocation();
   const isMobile = useMedia("(max-width: 768px)");
-  
-  // Show header only on main dashboard routes
-  const shouldShowHeader = [
-    "/dashboard", 
-    "/dashboard/profile",
-    "/dashboard/calendar",
-    "/dashboard/sheet-music"
-  ].includes(location.pathname);
   
   useEffect(() => {
     console.log("DashboardLayout - Current route:", location.pathname);
@@ -43,15 +34,8 @@ const DashboardLayout: React.FC = () => {
   return (
     <SidebarProvider>
       <div className="min-h-screen flex flex-col bg-background w-full">
-        {shouldShowHeader && (
-          <>
-            {isMobile ? (
-              <MobileHeader />
-            ) : (
-              <Header />
-            )}
-          </>
-        )}
+        {/* Always show the consolidated header */}
+        <ConsolidatedHeader />
         
         <div className="flex-1 flex flex-col md:flex-row">
           <Sidebar />

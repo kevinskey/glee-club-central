@@ -1,20 +1,6 @@
 
-// Define UserTitle as a union type of specific strings
-export type UserTitle = 
-  | "Super Admin" 
-  | "Treasurer" 
-  | "Librarian" 
-  | "Wardrobe Mistress" 
-  | "Secretary" 
-  | "President" 
-  | "Historian" 
-  | "PR Manager" 
-  | "Tour Manager" 
-  | "Stage Manager" 
-  | "Chaplain" 
-  | "Section Leader" 
-  | "Student Worker" 
-  | "General Member";
+// Define UserTitle as a string to avoid type issues
+export type UserTitle = string;
 
 export type PermissionName = 
   | "manage_users"
@@ -45,7 +31,25 @@ export type PermissionName =
   | "delete_announcements"
   | "manage_wardrobe"
   | "view_wardrobe"
-  | "edit_wardrobe";
+  | "edit_wardrobe"
+  // Additional permissions needed by the application
+  | "can_manage_users"
+  | "can_view_financials"
+  | "can_edit_financials"
+  | "can_upload_sheet_music"
+  | "can_view_sheet_music"
+  | "can_edit_attendance"
+  | "can_view_attendance"
+  | "can_view_wardrobe"
+  | "can_edit_wardrobe"
+  | "can_upload_media"
+  | "can_edit_media"
+  | "can_delete_media"
+  | "can_manage_tour"
+  | "can_manage_stage"
+  | "can_view_prayer_box"
+  | "can_post_announcements"
+  | "can_manage_archives";
 
 export interface Permission {
   id: string;

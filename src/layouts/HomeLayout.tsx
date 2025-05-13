@@ -3,8 +3,7 @@ import React from "react";
 import { Outlet, useLocation } from "react-router-dom";
 import { Toaster } from "sonner";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { MobileHeader } from "@/components/layout/MobileHeader";
-import { Header } from "@/components/landing/Header";
+import { ConsolidatedHeader } from "@/components/layout/ConsolidatedHeader";
 import { SidebarProvider } from "@/components/ui/sidebar";
 import { MobileBottomNav } from "@/components/layout/MobileBottomNav";
 
@@ -23,16 +22,9 @@ const HomeLayout: React.FC = () => {
       <Toaster />
       <SidebarProvider>
         <div className="min-h-screen flex flex-col bg-background w-full">
-          {/* Display header on public routes */}
-          {isPublicRoute && (
-            <>
-              {isMobile ? (
-                <MobileHeader />
-              ) : (
-                <Header initialShowNewsFeed={false} />
-              )}
-            </>
-          )}
+          {/* Display header on public routes using our consolidated header */}
+          {isPublicRoute && <ConsolidatedHeader />}
+          
           <div className={`flex-1 ${isMobile && showMobileBottomNav ? "pb-20" : "pb-6"}`}>
             <Outlet />
           </div>

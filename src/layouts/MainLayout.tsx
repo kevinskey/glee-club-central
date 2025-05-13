@@ -1,15 +1,12 @@
 
 import React from 'react';
 import { Outlet } from 'react-router-dom';
+import { ConsolidatedHeader } from "@/components/layout/ConsolidatedHeader";
 
 export const MainLayout = () => {
   return (
     <div className="flex flex-col min-h-screen">
-      <header className="bg-background border-b">
-        <div className="container mx-auto py-4">
-          <h1 className="text-2xl font-bold">Glee World</h1>
-        </div>
-      </header>
+      <ConsolidatedHeader />
       <main className="flex-1">
         <Outlet />
       </main>
