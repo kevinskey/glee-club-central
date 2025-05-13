@@ -1,8 +1,6 @@
 
 import React from 'react';
-import { Link } from 'react-router-dom';
 import { ArrowRight, Music, Calendar, Users } from 'lucide-react';
-import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { HeroSection } from '@/components/landing/HeroSection';
 import { useIsMobile } from '@/hooks/use-mobile';
@@ -38,16 +36,6 @@ const HomePage = () => {
                 </p>
               </div>
             )}
-            
-            <div className={`flex flex-wrap gap-4 justify-center ${isMobile ? "mt-6" : "mb-12"}`}>
-              <Button 
-                variant="outline"
-                size="lg" 
-                className={`${isMobile ? "border-glee-purple text-glee-purple" : "text-white border-white"} hover:bg-white/20`}
-              >
-                <Link to="/register">New Member Registration</Link>
-              </Button>
-            </div>
             
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 w-full max-w-4xl mt-8">
               <Card className={`${isMobile ? "bg-card" : "bg-white/10 backdrop-blur border-none text-white"}`}>
