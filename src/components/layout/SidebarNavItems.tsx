@@ -4,7 +4,6 @@ import { NavLink } from "./NavLink";
 import {
   Home,
   CalendarDays,
-  Music,
   Users,
   User,
   FileText,
@@ -19,7 +18,6 @@ import {
 export const mainNavItems = [
   { title: "Dashboard", href: "/dashboard", icon: <Home /> },
   { title: "Calendar", href: "/dashboard/calendar", icon: <CalendarDays /> },
-  { title: "Music", href: "/dashboard/music", icon: <Music /> },
   { title: "Sheet Music", href: "/dashboard/sheet-music", icon: <FileText /> },
   { title: "Setlists", href: "/dashboard/setlists", icon: <ListMusic /> },
   { title: "Recordings", href: "/dashboard/recordings", icon: <Mic /> },

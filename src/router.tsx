@@ -16,7 +16,6 @@ import { ProtectedRoute } from './components/auth/ProtectedRoute';
 import AdminDashboard from './pages/admin/AdminDashboard';
 import AttendancePage from './pages/AttendancePage';
 import MediaLibraryPage from './pages/MediaLibraryPage';
-import MusicPage from './pages/dashboard/MusicPage';
 import SheetMusicPage from './pages/sheet-music/SheetMusicPage';
 import HomeLayout from './layouts/HomeLayout';
 import UpdatePasswordPage from './pages/UpdatePasswordPage';
@@ -95,10 +94,6 @@ const router = createBrowserRouter([
           {
             path: 'attendance',
             element: <AttendancePage />
-          },
-          {
-            path: 'music',
-            element: <MusicPage />
           },
           {
             path: 'sheet-music',

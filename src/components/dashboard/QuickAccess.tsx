@@ -4,7 +4,6 @@ import { Link } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import {
-  Music,
   Calendar,
   CheckSquare,
   Bell,
@@ -21,7 +20,7 @@ export function QuickAccess() {
       href: "/dashboard/profile"
     },
     {
-      icon: <Music className="h-4 w-4" />,
+      icon: <FileText className="h-4 w-4" />,
       label: "Sheet Music",
       href: "/dashboard/sheet-music"
     },
