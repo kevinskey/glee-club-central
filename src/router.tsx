@@ -1,6 +1,5 @@
 
 import { createBrowserRouter } from 'react-router-dom';
-import App from './App';
 import LandingPage from './pages/LandingPage';
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
@@ -15,10 +14,11 @@ import AdminDashboard from './pages/admin/AdminDashboard';
 import AttendancePage from './pages/AttendancePage';
 import MediaLibraryPage from './pages/MediaLibraryPage';
 
+// Create router without direct reference to App component
 const router = createBrowserRouter([
   {
     path: '/',
-    element: <App />,
+    element: null, // This will be replaced by the App component later
     errorElement: <NotFoundPage />,
     children: [
       {
