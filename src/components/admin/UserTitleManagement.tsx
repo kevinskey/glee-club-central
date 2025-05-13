@@ -39,7 +39,7 @@ export function UserTitleManagement({
   setIsOpen,
   onSuccess
 }: UserTitleManagementProps) {
-  const [selectedTitle, setSelectedTitle] = useState<string | null>(null);
+  const [selectedTitle, setSelectedTitle] = useState<UserTitle | null>(null);
   const [isSuperAdmin, setIsSuperAdmin] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState(false);
   
