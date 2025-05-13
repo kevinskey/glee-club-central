@@ -69,7 +69,7 @@ const MusicPage: React.FC = () => {
   };
   
   return (
-    <div className="container mx-auto px-4 py-8">
+    <div className="container mx-auto px-4 py-6 md:py-8">
       <PageHeader
         title="Sheet Music"
         description="Access your sheet music for upcoming performances"
@@ -85,7 +85,7 @@ const MusicPage: React.FC = () => {
         }
       />
       
-      <div className="mt-8 space-y-6">
+      <div className="mt-6 md:mt-8 space-y-4 md:space-y-6">
         {/* Search bar */}
         <div className="relative">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
@@ -99,14 +99,14 @@ const MusicPage: React.FC = () => {
         
         {/* Recently Assigned Music */}
         <Tabs defaultValue="assigned" className="w-full">
-          <TabsList className="mb-4">
-            <TabsTrigger value="assigned">Assigned Music</TabsTrigger>
-            <TabsTrigger value="downloads">Downloaded</TabsTrigger>
-            <TabsTrigger value="favorites">Favorites</TabsTrigger>
+          <TabsList className="mb-4 w-full md:w-auto">
+            <TabsTrigger value="assigned" className="flex-1 md:flex-none">Assigned Music</TabsTrigger>
+            <TabsTrigger value="downloads" className="flex-1 md:flex-none">Downloaded</TabsTrigger>
+            <TabsTrigger value="favorites" className="flex-1 md:flex-none">Favorites</TabsTrigger>
           </TabsList>
           
           <TabsContent value="assigned">
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-4">
               {filteredMusic.map((item) => (
                 <Card 
                   key={item.id} 
@@ -116,9 +116,9 @@ const MusicPage: React.FC = () => {
                   <div className="aspect-[3/4] bg-muted flex items-center justify-center">
                     <FileText className="h-16 w-16 text-muted-foreground" />
                   </div>
-                  <CardContent className="p-4">
-                    <h3 className="font-medium truncate">{item.title}</h3>
-                    <p className="text-sm text-muted-foreground">{item.composer}</p>
+                  <CardContent className="p-3 md:p-4">
+                    <h3 className="font-medium text-sm md:text-base truncate">{item.title}</h3>
+                    <p className="text-xs md:text-sm text-muted-foreground">{item.composer}</p>
                     <div className="mt-2">
                       <span className="inline-flex items-center rounded-md bg-blue-50 px-2 py-1 text-xs font-medium text-blue-700 ring-1 ring-inset ring-blue-700/10">
                         {item.voicing}
@@ -131,17 +131,17 @@ const MusicPage: React.FC = () => {
               {/* Add new sheet music card */}
               <button
                 onClick={() => navigate('/dashboard/sheet-music')}
-                className="flex flex-col items-center justify-center rounded-md border-2 border-dashed p-6 hover:border-primary/50 hover:bg-muted/50 transition-colors h-full"
+                className="flex flex-col items-center justify-center rounded-md border-2 border-dashed p-4 md:p-6 hover:border-primary/50 hover:bg-muted/50 transition-colors h-full"
               >
-                <Plus className="h-8 w-8 mb-2 text-muted-foreground" />
+                <Plus className="h-6 w-6 md:h-8 md:w-8 mb-2 text-muted-foreground" />
                 <p className="text-sm font-medium">View All Music</p>
               </button>
             </div>
           </TabsContent>
           
           <TabsContent value="downloads">
-            <div className="flex flex-col items-center justify-center rounded-lg border border-dashed p-8 text-center">
-              <FileText className="mb-4 h-12 w-12 text-muted-foreground" />
+            <div className="flex flex-col items-center justify-center rounded-lg border border-dashed p-6 md:p-8 text-center">
+              <FileText className="mb-4 h-10 w-10 md:h-12 md:w-12 text-muted-foreground" />
               <h3 className="mb-2 text-lg font-medium">No downloaded sheet music</h3>
               <p className="mb-4 text-sm text-muted-foreground">
                 Your downloaded sheet music will appear here
@@ -150,8 +150,8 @@ const MusicPage: React.FC = () => {
           </TabsContent>
           
           <TabsContent value="favorites">
-            <div className="flex flex-col items-center justify-center rounded-lg border border-dashed p-8 text-center">
-              <FileText className="mb-4 h-12 w-12 text-muted-foreground" />
+            <div className="flex flex-col items-center justify-center rounded-lg border border-dashed p-6 md:p-8 text-center">
+              <FileText className="mb-4 h-10 w-10 md:h-12 md:w-12 text-muted-foreground" />
               <h3 className="mb-2 text-lg font-medium">No favorites yet</h3>
               <p className="mb-4 text-sm text-muted-foreground">
                 Mark sheet music as favorite to find it quickly

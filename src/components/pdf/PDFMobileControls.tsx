@@ -44,8 +44,8 @@ export const PDFMobileControls: React.FC<PDFMobileControlsProps> = ({
   onDelete
 }) => {
   return (
-    <div className="sticky top-0 z-30 w-full bg-background/95 backdrop-blur-sm border-b p-1.5 flex flex-wrap justify-between items-center gap-1 shadow-sm">
-      <div className="flex items-center gap-1">
+    <div className="sticky top-0 z-30 w-full bg-background/95 backdrop-blur-sm border-b py-1 px-1.5 flex flex-wrap justify-between items-center gap-1.5 shadow-sm">
+      <div className="flex items-center gap-1.5">
         <Button
           variant="outline"
           size="icon"
@@ -56,7 +56,7 @@ export const PDFMobileControls: React.FC<PDFMobileControlsProps> = ({
           <ChevronLeft className="h-4 w-4" />
         </Button>
         
-        <span className="text-xs font-medium bg-muted/50 px-2 py-1 rounded">
+        <span className="text-xs font-medium bg-muted px-2 py-1 rounded">
           {currentPage}/{totalPages}
         </span>
         
@@ -71,7 +71,7 @@ export const PDFMobileControls: React.FC<PDFMobileControlsProps> = ({
         </Button>
       </div>
       
-      <div className="flex items-center gap-1">
+      <div className="flex items-center gap-1.5">
         <Button
           variant="outline"
           size="icon"
@@ -107,7 +107,7 @@ export const PDFMobileControls: React.FC<PDFMobileControlsProps> = ({
         </Button>
       </div>
       
-      <div className="flex items-center gap-1">
+      <div className="flex items-center gap-1.5 ml-auto">
         {user && hasAnnotationSupport && (
           <Button
             variant={showAnnotations ? "secondary" : "outline"}

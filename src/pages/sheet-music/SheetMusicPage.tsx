@@ -333,7 +333,7 @@ export default function SheetMusicPage() {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 md:space-y-6">
       <PageHeader
         title="Sheet Music Library"
         description="Browse, view, and annotate your sheet music"
@@ -369,8 +369,8 @@ export default function SheetMusicPage() {
       />
 
       {/* Search and filter controls */}
-      <div className="flex flex-col md:flex-row gap-4 items-start">
-        <div className="relative flex-1">
+      <div className="flex flex-col md:flex-row gap-3 md:gap-4 items-start">
+        <div className="relative flex-1 w-full">
           <AdvancedSearch
             placeholder="Search sheet music..."
             items={musicFilesToSearchItems()}
@@ -382,54 +382,57 @@ export default function SheetMusicPage() {
           />
         </div>
         
-        {/* Setlist filter dropdown */}
-        <div className="w-full md:w-64">
-          <Select
-            value={selectedSetlistId || ""}
-            onValueChange={(value) => setSelectedSetlistId(value || null)}
-          >
-            <SelectTrigger>
-              <SelectValue placeholder="Filter by setlist" />
-            </SelectTrigger>
-            <SelectContent>
-              {availableSetlists.length === 0 ? (
-                <div className="py-2 px-2 text-sm text-center text-muted-foreground">
-                  No setlists available
-                </div>
-              ) : (
-                availableSetlists.map((setlist) => (
-                  <SelectItem key={setlist.id} value={setlist.id}>
-                    {setlist.name} 
-                    <span className="text-xs text-muted-foreground ml-2">
-                      ({setlist.sheet_music_ids?.length || 0})
-                    </span>
-                  </SelectItem>
-                ))
-              )}
-            </SelectContent>
-          </Select>
+        <div className="flex flex-col sm:flex-row w-full md:w-auto gap-3">
+          {/* Setlist filter dropdown */}
+          <div className="w-full sm:w-64">
+            <Select
+              value={selectedSetlistId || ""}
+              onValueChange={(value) => setSelectedSetlistId(value || null)}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Filter by setlist" />
+              </SelectTrigger>
+              <SelectContent>
+                {availableSetlists.length === 0 ? (
+                  <div className="py-2 px-2 text-sm text-center text-muted-foreground">
+                    No setlists available
+                  </div>
+                ) : (
+                  availableSetlists.map((setlist) => (
+                    <SelectItem key={setlist.id} value={setlist.id}>
+                      {setlist.name} 
+                      <span className="text-xs text-muted-foreground ml-2">
+                        ({setlist.sheet_music_ids?.length || 0})
+                      </span>
+                    </SelectItem>
+                  ))
+                )}
+              </SelectContent>
+            </Select>
+          </div>
+          
+          <div className="w-full sm:w-48">
+            <Select
+              value={sortOrder}
+              onValueChange={(value) => setSortOrder(value as SortOption)}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Sort by" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="newest">Newest first</SelectItem>
+                <SelectItem value="oldest">Oldest first</SelectItem>
+                <SelectItem value="title">Title (A-Z)</SelectItem>
+                <SelectItem value="composer">Composer (A-Z)</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
         </div>
         
-        <div className="w-full md:w-48">
-          <Select
-            value={sortOrder}
-            onValueChange={(value) => setSortOrder(value as SortOption)}
-          >
-            <SelectTrigger>
-              <SelectValue placeholder="Sort by" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="newest">Newest first</SelectItem>
-              <SelectItem value="oldest">Oldest first</SelectItem>
-              <SelectItem value="title">Title (A-Z)</SelectItem>
-              <SelectItem value="composer">Composer (A-Z)</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-        <div className="flex gap-2">
+        <div className="flex w-full md:w-auto">
           <Button 
             variant="outline" 
-            className="flex-shrink-0"
+            className="w-full md:w-auto"
             onClick={() => setIsSetlistDrawerOpen(true)}
           >
             <ListMusic className="h-4 w-4 mr-2" /> Manage Setlists
@@ -460,14 +463,13 @@ export default function SheetMusicPage() {
       
       {/* Music Library */}
       <Tabs defaultValue="grid" className="w-full">
-        
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-xl font-semibold">Your Sheet Music</h2>
-          <TabsList>
-            <TabsTrigger value="grid" className="flex items-center gap-1">
+          <TabsList className="w-full md:w-auto">
+            <TabsTrigger value="grid" className="flex-1 md:flex-none flex items-center gap-1">
               <FolderOpen className="h-4 w-4" /> Grid View
             </TabsTrigger>
-            <TabsTrigger value="list" className="flex items-center gap-1">
+            <TabsTrigger value="list" className="flex-1 md:flex-none flex items-center gap-1">
               <TableIcon className="h-4 w-4" /> List View
             </TabsTrigger>
           </TabsList>
@@ -520,7 +522,7 @@ export default function SheetMusicPage() {
           <>
             {/* Grid View */}
             <TabsContent value="grid">
-              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3 md:gap-4">
                 {filteredFiles.map((file) => (
                   <div 
                     key={file.id} 
@@ -535,16 +537,16 @@ export default function SheetMusicPage() {
                       title={file.title}
                       mediaSourceId={file.mediaSourceId}
                       category={file.category}
-                      previewWidth={400}
-                      previewHeight={500}
+                      previewWidth={300}
+                      previewHeight={400}
                     >
                       <Card 
                         className="overflow-hidden hover:shadow-md transition-shadow cursor-pointer"
                         onClick={() => viewSheetMusic(file.id)}
                       >
                         <PDFThumbnail url={file.file_url} title={file.title} />
-                        <CardContent className="p-3">
-                          <h3 className="font-medium text-sm truncate">{file.title}</h3>
+                        <CardContent className="p-2 md:p-3">
+                          <h3 className="font-medium text-xs sm:text-sm truncate">{file.title}</h3>
                           <p className="text-xs text-muted-foreground truncate">{file.composer}</p>
                         </CardContent>
                       </Card>
@@ -555,25 +557,25 @@ export default function SheetMusicPage() {
                 {/* Add new sheet music card */}
                 <button
                   onClick={() => setIsUploadModalOpen(true)} 
-                  className="flex flex-col items-center justify-center rounded-md border-2 border-dashed p-6 hover:border-primary/50 hover:bg-muted/50 transition-colors aspect-[3/4]"
+                  className="flex flex-col items-center justify-center rounded-md border-2 border-dashed p-4 sm:p-6 hover:border-primary/50 hover:bg-muted/50 transition-colors aspect-[3/4]"
                 >
-                  <Plus className="h-8 w-8 mb-2 text-muted-foreground" />
-                  <p className="text-sm font-medium">Add Music</p>
+                  <Plus className="h-6 w-6 sm:h-8 sm:w-8 mb-2 text-muted-foreground" />
+                  <p className="text-xs sm:text-sm font-medium">Add Music</p>
                 </button>
               </div>
             </TabsContent>
             
             {/* List View */}
             <TabsContent value="list">
-              <div className="rounded-md border">
+              <div className="rounded-md border overflow-x-auto">
                 <Table>
                   <TableHeader>
                     <TableRow>
                       <TableHead className="w-12"></TableHead>
                       <TableHead>Title</TableHead>
-                      <TableHead>Composer</TableHead>
-                      <TableHead>Category</TableHead>
-                      <TableHead>Date Added</TableHead>
+                      <TableHead className="hidden sm:table-cell">Composer</TableHead>
+                      <TableHead className="hidden md:table-cell">Category</TableHead>
+                      <TableHead className="hidden lg:table-cell">Date Added</TableHead>
                       <TableHead className="text-right">Actions</TableHead>
                     </TableRow>
                   </TableHeader>
@@ -593,24 +595,24 @@ export default function SheetMusicPage() {
                             title={file.title}
                             mediaSourceId={file.mediaSourceId}
                             category={file.category}
-                            previewWidth={400}
-                            previewHeight={500}
+                            previewWidth={300}
+                            previewHeight={400}
                           >
                             <PDFThumbnail 
                               url={file.file_url} 
                               title={file.title} 
-                              className="w-12 h-12 rounded-sm" 
+                              className="w-10 h-10 md:w-12 md:h-12 rounded-sm" 
                             />
                           </PDFPreview>
                         </TableCell>
-                        <TableCell className="font-medium">{file.title}</TableCell>
-                        <TableCell>{file.composer}</TableCell>
-                        <TableCell>
+                        <TableCell className="font-medium text-sm">{file.title}</TableCell>
+                        <TableCell className="hidden sm:table-cell">{file.composer}</TableCell>
+                        <TableCell className="hidden md:table-cell">
                           {file.category && (
-                            <Badge variant="outline">{file.category}</Badge>
+                            <Badge variant="outline" className="text-xs whitespace-nowrap">{file.category}</Badge>
                           )}
                         </TableCell>
-                        <TableCell>{file.created_at}</TableCell>
+                        <TableCell className="hidden lg:table-cell">{file.created_at}</TableCell>
                         <TableCell className="text-right">
                           <Button 
                             variant="outline" 

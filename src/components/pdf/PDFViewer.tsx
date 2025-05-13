@@ -179,7 +179,7 @@ export const PDFViewer = ({
         style={{ 
           height: fullHeight ? "calc(100vh - 60px)" : 
                   isFullscreen ? "calc(100vh - 60px)" : 
-                  isMobile ? "calc(100vh - 180px)" : "70vh",
+                  isMobile ? "calc(100vh - 150px)" : "70vh",
           position: "relative",
           backgroundColor: "#f4f4f5", // Light gray background
         }}
@@ -197,14 +197,14 @@ export const PDFViewer = ({
       </div>
       
       {/* Footer with Back Button */}
-      <div className="p-3 border-t bg-muted/30 flex justify-between items-center shadow-sm">
+      <div className="p-2 md:p-3 border-t bg-muted/30 flex justify-between items-center shadow-sm">
         <Button 
           variant="ghost"
           size="sm"
           onClick={() => navigate(-1)}
-          className="flex items-center gap-1.5 text-sm"
+          className="flex items-center gap-1.5 text-xs md:text-sm"
         >
-          <ArrowLeft className="h-4 w-4" />
+          <ArrowLeft className="h-3 w-3 md:h-4 md:w-4" />
           Back
         </Button>
         <div className="text-xs text-muted-foreground">

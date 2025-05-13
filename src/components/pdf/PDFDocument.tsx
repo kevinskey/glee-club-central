@@ -40,7 +40,7 @@ export const PDFDocument = ({
     <div className="relative w-full h-full flex flex-col justify-center overflow-hidden bg-muted/20">
       {/* Source Badge */}
       {mediaSourceId && category && (
-        <div className="absolute top-12 left-2 z-40">
+        <div className="absolute top-12 right-2 z-40 md:left-2 md:right-auto">
           <Badge 
             variant="outline" 
             className="bg-background/90 cursor-pointer hover:bg-background shadow-sm"

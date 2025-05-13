@@ -94,15 +94,15 @@ export const PDFCore: React.FC<PDFCoreProps> = ({
   // Error display
   if (error) {
     return (
-      <div className="flex h-full items-center justify-center p-8 text-center bg-muted/20">
-        <div className="bg-background p-6 rounded-lg shadow-lg max-w-md">
-          <FileText className="h-16 w-16 mx-auto text-muted-foreground mb-4" />
-          <p className="mb-4 text-muted-foreground">{error}</p>
+      <div className="flex h-full items-center justify-center p-4 md:p-8 text-center bg-muted/20">
+        <div className="bg-background p-4 md:p-6 rounded-lg shadow-lg max-w-md">
+          <FileText className="h-12 w-12 md:h-16 md:w-16 mx-auto text-muted-foreground mb-4" />
+          <p className="mb-4 text-sm md:text-base text-muted-foreground">{error}</p>
           {sanitizedUrl && (
             <div className="flex flex-col gap-2 items-center">
               <Button 
                 onClick={() => window.open(sanitizedUrl, "_blank")}
-                className="w-full sm:w-auto"
+                className="w-full"
                 variant="default"
               >
                 <ExternalLink className="mr-2 h-4 w-4" /> Open PDF in New Tab
@@ -114,7 +114,7 @@ export const PDFCore: React.FC<PDFCoreProps> = ({
                   setError(null);
                   setIsLoading(true);
                 }}
-                className="w-full sm:w-auto"
+                className="w-full mt-2"
               >
                 Try Alternative Viewer
               </Button>
@@ -161,7 +161,7 @@ export const PDFCore: React.FC<PDFCoreProps> = ({
       
       {/* Fallback Mode Indicator */}
       {fallbackMode && (
-        <div className="absolute top-0 left-0 bg-background/70 text-sm p-2 z-10 rounded-md m-2 shadow-sm">
+        <div className="absolute top-0 left-0 bg-background/70 text-xs p-1 md:p-2 z-10 rounded-md m-1 md:m-2 shadow-sm">
           <span className="text-xs font-medium">Using alternative viewer</span>
         </div>
       )}
