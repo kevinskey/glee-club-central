@@ -1,7 +1,12 @@
 
 import React from "react";
 import { Button } from "@/components/ui/button";
-import { ChevronLeft, ChevronRight, CalendarClock } from "lucide-react";
+import { 
+  ChevronLeft, 
+  ChevronRight, 
+  Calendar as CalendarIcon 
+} from "lucide-react";
+import { format } from "date-fns";
 
 interface CalendarToolbarProps {
   onPrevClick: () => void;
@@ -9,7 +14,7 @@ interface CalendarToolbarProps {
   onTodayClick: () => void;
   currentDate: Date;
   calendarView: string;
-  eventsCount: number;
+  eventsCount?: number;
 }
 
 export const CalendarToolbar = ({
@@ -18,48 +23,67 @@ export const CalendarToolbar = ({
   onTodayClick,
   currentDate,
   calendarView,
-  eventsCount
+  eventsCount = 0
 }: CalendarToolbarProps) => {
+  // Determine the current view's title format
+  const getFormattedDate = () => {
+    if (calendarView === "dayGridMonth") {
+      return format(currentDate, "MMMM yyyy");
+    } else if (calendarView === "timeGridWeek") {
+      const weekStart = new Date(currentDate);
+      weekStart.setDate(weekStart.getDate() - weekStart.getDay());
+      const weekEnd = new Date(weekStart);
+      weekEnd.setDate(weekEnd.getDate() + 6);
+      
+      if (weekStart.getMonth() === weekEnd.getMonth()) {
+        return `${format(weekStart, "MMM d")} - ${format(weekEnd, "d, yyyy")}`;
+      } else if (weekStart.getFullYear() === weekEnd.getFullYear()) {
+        return `${format(weekStart, "MMM d")} - ${format(weekEnd, "MMM d, yyyy")}`;
+      } else {
+        return `${format(weekStart, "MMM d, yyyy")} - ${format(weekEnd, "MMM d, yyyy")}`;
+      }
+    } else if (calendarView === "timeGridDay") {
+      return format(currentDate, "EEEE, MMMM d, yyyy");
+    } else {
+      return format(currentDate, "MMMM yyyy");
+    }
+  };
+
   return (
-    <div className="flex items-center justify-between mb-4 p-2 bg-white dark:bg-gray-800 rounded-lg shadow-sm">
-      <div className="flex items-center gap-2">
+    <div className="flex items-center justify-between border-b border-gray-200 dark:border-gray-700 pb-4">
+      <div className="flex items-center">
         <Button 
           variant="outline" 
-          size="sm" 
+          size="icon" 
+          onClick={onPrevClick}
+          className="h-8 w-8 rounded-full"
+        >
+          <ChevronLeft className="h-4 w-4" />
+        </Button>
+        
+        <Button 
+          variant="outline" 
           onClick={onTodayClick}
-          id="today-button"
+          className="mx-2 h-8 px-3 text-xs"
         >
           Today
         </Button>
-        <div className="flex items-center gap-1">
-          <Button variant="ghost" size="icon" onClick={onPrevClick}>
-            <ChevronLeft className="h-4 w-4" />
-          </Button>
-          <Button variant="ghost" size="icon" onClick={onNextClick}>
-            <ChevronRight className="h-4 w-4" />
-          </Button>
-        </div>
-        <h2 className="text-lg font-semibold ml-2">
-          {new Intl.DateTimeFormat('en-US', { 
-            month: 'long', 
-            year: 'numeric',
-            ...(calendarView === 'timeGridDay' && { day: 'numeric' }),
-            ...(calendarView === 'timeGridWeek' && { day: 'numeric' })
-          }).format(currentDate)}
-          {calendarView === 'timeGridWeek' && (
-            <span> - {new Intl.DateTimeFormat('en-US', { 
-              month: 'long', 
-              day: 'numeric',
-              year: currentDate.getMonth() + 7 > 12 ? 'numeric' : undefined
-            }).format(new Date(currentDate.getTime() + 6 * 24 * 60 * 60 * 1000))}</span>
-          )}
-        </h2>
+        
+        <Button 
+          variant="outline" 
+          size="icon" 
+          onClick={onNextClick}
+          className="h-8 w-8 rounded-full"
+        >
+          <ChevronRight className="h-4 w-4" />
+        </Button>
+        
+        <h2 className="ml-4 text-lg font-medium">{getFormattedDate()}</h2>
       </div>
-      <div className="flex items-center gap-2">
-        <CalendarClock className="h-4 w-4 mr-1 text-gray-400" />
-        <span className="text-sm text-gray-500 dark:text-gray-400">
-          {eventsCount} {eventsCount === 1 ? 'event' : 'events'}
-        </span>
+      
+      <div className="text-sm text-muted-foreground flex items-center">
+        <CalendarIcon className="h-4 w-4 mr-2" />
+        <span>{eventsCount} {eventsCount === 1 ? "event" : "events"}</span>
       </div>
     </div>
   );
