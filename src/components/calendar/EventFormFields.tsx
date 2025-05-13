@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { useFormContext, UseFormReturn } from "react-hook-form";
 import { 
   FormControl, 
@@ -28,9 +28,9 @@ import { CalendarIcon, Smartphone } from "lucide-react";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
 import { MobileFitCheck } from "./MobileFitCheck";
-import { EventType } from "@/hooks/useCalendarEvents";
+import { EventType } from "@/types/calendar";
 
-// Define a proper type for the form values to match both AddEventForm and EditEventForm
+// Define a proper type for the form values to exactly match EventFormValues in EventForm
 export interface EventFormValues {
   title: string;
   date: Date;
@@ -39,6 +39,20 @@ export interface EventFormValues {
   description: string;
   type: EventType;
   image_url: string | null;
+  
+  // Additional fields to match EventForm
+  archivalNotes?: string;
+  callTime?: string;
+  wakeUpTime?: string;
+  departureTime?: string;
+  performanceTime?: string;
+  contactName?: string;
+  contactEmail?: string;
+  contactPhone?: string;
+  transportationCompany?: string;
+  transportationDetails?: string;
+  contractStatus?: "draft" | "sent" | "signed" | "completed" | "none";
+  contractNotes?: string;
 }
 
 interface EventFormFieldsProps {
@@ -47,7 +61,7 @@ interface EventFormFieldsProps {
 
 export const EventFormFields = ({ form }: EventFormFieldsProps) => {
   const [showMobileFit, setShowMobileFit] = useState(false);
-  const formMethods = useFormContext();
+  const formMethods = useFormContext<EventFormValues>();
   
   // Watch for title, location and description changes to update the mobile fit check
   const title = formMethods.watch('title') || '';

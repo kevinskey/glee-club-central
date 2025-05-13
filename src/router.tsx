@@ -14,13 +14,17 @@ import LoginPage from "@/pages/LoginPage";
 import RegisterPage from "@/pages/RegisterPage";
 import EventManagerPage from "@/pages/admin/EventManagerPage";
 import EventCalendar from "@/pages/admin/EventCalendar";
+import MainLayout from "@/layouts/MainLayout";
+import UsersPage from "@/pages/admin/UsersPage";
+import MediaLibraryPage from "@/pages/admin/MediaLibraryPage"; 
+import SectionManagerPage from "@/pages/admin/SectionManagerPage";
 import { useAuth } from "@/contexts/AuthContext";
 
 const router = createBrowserRouter([
   {
     id: "main",
     path: "/",
-    element: <div className="main-layout"><Outlet /></div>,
+    element: <MainLayout />,
     children: [
       {
         index: true,
@@ -102,12 +106,23 @@ const router = createBrowserRouter([
         path: "events/edit/:id",
         element: <EditEventPage />,
       },
+      {
+        path: "users",
+        element: <UsersPage />,
+      },
+      {
+        path: "media-library",
+        element: <MediaLibraryPage />,
+      },
+      {
+        path: "sections",
+        element: <SectionManagerPage />,
+      },
     ],
   },
 ]);
 
-// Add import for Outlet
-import { Outlet } from "react-router-dom";
+// Import for Outlet removed since we're now using MainLayout
 
-// Export as default instead of named export
+// Export as default
 export default router;

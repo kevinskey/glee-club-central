@@ -28,6 +28,7 @@ import { EventImageUpload } from "@/components/calendar/EventImageUpload";
 import { Separator } from "@/components/ui/separator";
 import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { EventType } from "@/types/calendar";
 
 // Define the schema for the form
 const eventFormSchema = z.object({
@@ -102,9 +103,9 @@ export function EventForm({
       contractStatus: defaultValues?.contractStatus || "none",
       contractNotes: defaultValues?.contractNotes || "",
       image_url: defaultValues?.image_url || null,
-      // Add the missing properties
-      time: defaultValues?.performanceTime || "",
-      type: "concert",
+      // Add the required fields with defaults
+      time: defaultValues?.time || "",
+      type: defaultValues?.type || "concert",
     },
   });
 
