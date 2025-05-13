@@ -1,5 +1,4 @@
 
-
 export type PermissionName = 
   | "can_view_financials"
   | "can_edit_financials"
