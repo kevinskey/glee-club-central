@@ -33,8 +33,8 @@ const CalendarPage = () => {
   console.log("CalendarPage rendering with view:", calendarView);
   console.log("Current events count:", events.length);
 
-  // Only super admins can create events
-  const userCanCreate = isSuperAdmin;
+  // Allow all authenticated users to create events
+  const userCanCreate = true;
 
   useEffect(() => {
     console.log("CalendarPage - Initializing");
@@ -102,10 +102,10 @@ const CalendarPage = () => {
         <div className="container mx-auto p-4">
           {/* Use CalendarPageHeader on mobile, CalendarHeader on desktop */}
           {isMobile ? (
-            <CalendarPageHeader onAddEventClick={() => userCanCreate && setIsCreateModalOpen(true)} />
+            <CalendarPageHeader onAddEventClick={() => setIsCreateModalOpen(true)} />
           ) : (
             <CalendarHeader 
-              onAddEvent={() => userCanCreate && setIsCreateModalOpen(true)} 
+              onAddEvent={() => setIsCreateModalOpen(true)} 
               view={calendarView}
               onViewChange={setCalendarView}
               userCanCreate={userCanCreate}
@@ -141,7 +141,7 @@ const CalendarPage = () => {
             <DialogContent className="sm:max-w-md">
               <EventModal 
                 onClose={() => setIsCreateModalOpen(false)} 
-                onSave={onCreateEvent} 
+                onSave={handleCreateEvent} 
                 initialDate={selectedDate}
               />
             </DialogContent>
@@ -154,8 +154,8 @@ const CalendarPage = () => {
                 <ViewEventModal 
                   event={selectedEvent} 
                   onClose={() => setIsViewModalOpen(false)} 
-                  onUpdate={onUpdateEvent}
-                  onDelete={onDeleteEvent}
+                  onUpdate={handleUpdateEvent}
+                  onDelete={handleDeleteEvent}
                   userCanEdit={userCanCreate || (profile?.id === selectedEvent.created_by && selectedEvent.type === 'sectional')}
                 />
               </DialogContent>

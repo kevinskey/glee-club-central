@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { CalendarHeader } from "@/components/calendar/CalendarHeader";
 import { CalendarMain } from "@/components/calendar/CalendarMain";
@@ -54,8 +53,8 @@ const CalendarPage = () => {
   const { isAdmin, profile, isLoading: authLoading } = useAuth();
   const { isSuperAdmin } = usePermissions();
   
-  // Check if user can create/edit events
-  const userCanCreate = isSuperAdmin;
+  // Allow all authenticated users to create/edit events
+  const userCanCreate = true;
 
   // Initialize event handlers
   const {
@@ -127,10 +126,10 @@ const CalendarPage = () => {
     <div className="container mx-auto px-4 py-6">
       {/* Show CalendarPageHeader on mobile, CalendarHeader on desktop */}
       {isMobile ? (
-        <CalendarPageHeader onAddEventClick={() => userCanCreate && setIsCreateModalOpen(true)} />
+        <CalendarPageHeader onAddEventClick={() => setIsCreateModalOpen(true)} />
       ) : (
         <CalendarHeader 
-          onAddEvent={() => userCanCreate && setIsCreateModalOpen(true)} 
+          onAddEvent={() => setIsCreateModalOpen(true)} 
           view={calendarView}
           onViewChange={setCalendarView}
           userCanCreate={userCanCreate}

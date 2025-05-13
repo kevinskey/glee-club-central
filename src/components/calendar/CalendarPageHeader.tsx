@@ -26,4 +26,4 @@ export const CalendarPageHeader = ({ onAddEventClick }: CalendarPageHeaderProps)
       </Button>
     </div>
   );
-};
+}
