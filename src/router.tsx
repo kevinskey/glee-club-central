@@ -5,7 +5,9 @@ import LandingPage from './pages/LandingPage';
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
 import DashboardLayout from './layouts/DashboardLayout';
-import DashboardPage from './pages/DashboardPage';
+import GuestDashboardPage from './pages/dashboard/GuestDashboardPage';
+import MemberDashboardPage from './pages/dashboard/MemberDashboardPage';
+import AdminDashboardPage from './pages/dashboard/AdminDashboardPage';
 import NotFoundPage from './pages/NotFoundPage';
 import ProfilePage from './pages/profile/ProfilePage';
 import CalendarPage from './pages/CalendarPage';
@@ -64,7 +66,15 @@ const router = createBrowserRouter([
         children: [
           {
             path: '',
-            element: <DashboardPage />
+            element: <MemberDashboardPage />
+          },
+          {
+            path: 'guest',
+            element: <GuestDashboardPage />
+          },
+          {
+            path: 'admin',
+            element: <AdminDashboardPage />
           },
           {
             path: 'profile',

@@ -1,12 +1,12 @@
 
 import React, { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
-import { useNavigate, Link } from "react-router-dom";
+import { useNavigate, Link, useSearchParams } from "react-router-dom";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { Eye, EyeOff, Loader2 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
-import { useToast } from "@/hooks/use-toast";
+import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import {
@@ -30,9 +30,10 @@ const formSchema = z.object({
 type FormData = z.infer<typeof formSchema>;
 
 export default function LoginPage() {
-  const { signIn, isAuthenticated, isAdmin } = useAuth();
+  const { signIn, isAuthenticated, isAdmin, profile } = useAuth();
   const navigate = useNavigate();
-  const { toast } = useToast();
+  const [searchParams] = useSearchParams();
+  const returnTo = searchParams.get('returnTo') || '/dashboard';
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [errorMsg, setErrorMsg] = useState("");
@@ -53,10 +54,18 @@ export default function LoginPage() {
   }, [isAuthenticated]);
 
   const handleRoleBasedRedirect = () => {
+    if (!profile) {
+      navigate('/dashboard');
+      return;
+    }
+
+    // Determine user level and redirect accordingly
     if (isAdmin()) {
-      navigate('/dashboard');
+      navigate('/dashboard/admin');
+    } else if (profile.role === 'guest') {
+      navigate('/dashboard/guest');
     } else {
-      navigate('/dashboard');
+      navigate(returnTo);
     }
   };
 
@@ -191,6 +200,11 @@ export default function LoginPage() {
               className="text-glee-purple underline underline-offset-4 hover:text-glee-purple/80"
             >
               Sign Up
+            </Link>
+          </div>
+          <div className="text-center text-xs text-muted-foreground">
+            <Link to="/dashboard/guest" className="hover:underline">
+              Continue as guest
             </Link>
           </div>
         </CardFooter>
