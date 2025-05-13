@@ -1,9 +1,9 @@
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Logo } from "@/components/landing/header/Logo";
 import { MemberPortalDropdown } from "@/components/landing/header/MemberPortalDropdown";
-import { Clock, Menu } from "lucide-react";
+import { Clock, Menu, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription } from "@/components/ui/dialog";
 import { EnhancedMetronome } from "@/components/ui/enhanced-metronome";
@@ -28,7 +28,7 @@ export function Header({ initialShowNewsFeed = true }: HeaderProps) {
   const isMobile = useIsMobile();
   const [showNewsFeed, setShowNewsFeed] = useState(false); // Start hidden to avoid flicker
   const [metronomeOpen, setMetronomeOpen] = useState(false);
-  const audioContextRef = React.useRef<AudioContext | null>(null);
+  const audioContextRef = useRef<AudioContext | null>(null);
   const navigate = useNavigate();
   const { isAuthenticated } = useAuth();
   

@@ -1,12 +1,10 @@
 
 import React from 'react';
 import { Outlet } from 'react-router-dom';
-import { ConsolidatedHeader } from "@/components/layout/ConsolidatedHeader";
 
 export const MainLayout = () => {
   return (
     <div className="flex flex-col min-h-screen">
-      <ConsolidatedHeader />
       <main className="flex-1">
         <Outlet />
       </main>

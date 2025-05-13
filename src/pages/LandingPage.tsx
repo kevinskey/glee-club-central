@@ -6,14 +6,14 @@ import { CTASection } from "@/components/landing/CTASection";
 import { Footer } from "@/components/landing/Footer";
 import { PerformanceSection } from "@/components/landing/performance/PerformanceSection";
 import { YouTubeSection } from "@/components/landing/youtube/YouTubeSection";
-import { ConsolidatedHeader } from "@/components/layout/ConsolidatedHeader";
+import { Header } from "@/components/landing/Header";
 import { SidebarProvider } from "@/components/ui/sidebar";
 
 const LandingPage: React.FC = () => {
   return (
     <SidebarProvider>
       <div className="min-h-screen w-full">
-        <ConsolidatedHeader />
+        <Header initialShowNewsFeed={true} />
         <main>
           <HeroSection />
           <PerformanceSection />

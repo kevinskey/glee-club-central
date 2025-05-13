@@ -1,7 +1,6 @@
 
 import React, { useEffect } from "react";
 import { Outlet, Navigate, useLocation } from "react-router-dom";
-import { ConsolidatedHeader } from "@/components/layout/ConsolidatedHeader";
 import { Sidebar } from "@/components/layout/Sidebar";
 import { useAuth } from "@/contexts/AuthContext";
 import { Spinner } from "@/components/ui/spinner";
@@ -34,9 +33,6 @@ const DashboardLayout: React.FC = () => {
   return (
     <SidebarProvider>
       <div className="min-h-screen flex flex-col bg-background w-full">
-        {/* Always show the consolidated header */}
-        <ConsolidatedHeader />
-        
         <div className="flex-1 flex flex-col md:flex-row">
           <Sidebar />
           
