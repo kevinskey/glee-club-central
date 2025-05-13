@@ -13,7 +13,6 @@ interface PDFCoreProps {
   onLoad: () => void;
   onError: () => void;
   className?: string;
-  children?: React.ReactNode;
 }
 
 export const PDFCore: React.FC<PDFCoreProps> = ({
@@ -24,13 +23,11 @@ export const PDFCore: React.FC<PDFCoreProps> = ({
   viewMode = 'page',
   onLoad,
   onError,
-  className = '',
-  children
+  className = ''
 }) => {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [fallbackMode, setFallbackMode] = useState(false);
-  const [pdfAttempted, setPdfAttempted] = useState(false);
   
   // Ensure the URL is properly sanitized
   const sanitizedUrl = url ? url.trim() : "";
@@ -41,11 +38,8 @@ export const PDFCore: React.FC<PDFCoreProps> = ({
   useEffect(() => {
     // Reset states when URL changes
     setFallbackMode(false);
-    setPdfAttempted(false);
     setIsLoading(true);
     setError(null);
-    
-    console.log("PDFCore: Loading PDF with URL:", sanitizedUrl);
     
     // Auto-switch to fallback for iOS devices which often have PDF display issues
     if (isIOS && !fallbackMode) {
@@ -59,35 +53,12 @@ export const PDFCore: React.FC<PDFCoreProps> = ({
       setError("No PDF URL provided");
       setIsLoading(false);
       onError();
-      return;
-    }
-
-    // Verify URL is accessible by making a HEAD request
-    const checkUrl = async () => {
-      try {
-        const response = await fetch(sanitizedUrl, { method: 'HEAD' });
-        if (!response.ok) {
-          console.error(`PDF URL returned status: ${response.status}`);
-          setError(`Unable to access PDF (status: ${response.status})`);
-          setIsLoading(false);
-          onError();
-        }
-      } catch (err) {
-        console.error("Error checking PDF URL:", err);
-        // Don't set error here as it might be due to CORS, but the PDF could still load in the iframe
-      }
-    };
-    
-    // Only check URL if it's not from a blob or data URL (which won't allow HEAD requests)
-    if (!sanitizedUrl.startsWith('blob:') && !sanitizedUrl.startsWith('data:')) {
-      checkUrl();
     }
   }, [url, isIOS, onError, fallbackMode]);
 
   // Handle iframe load
   const handleIframeLoad = () => {
     console.log("PDF iframe loaded successfully");
-    setPdfAttempted(true);
     setIsLoading(false);
     onLoad();
   };
@@ -108,13 +79,16 @@ export const PDFCore: React.FC<PDFCoreProps> = ({
   const getPdfViewerUrl = () => {
     if (!sanitizedUrl) return "";
     
+    // Add a cache-busting parameter
+    const cacheBuster = `?cache=${Date.now()}`;
+    
     // Use Google PDF Viewer as fallback if direct embed fails
     if (fallbackMode) {
-      return `https://docs.google.com/viewer?url=${encodeURIComponent(sanitizedUrl)}&embedded=true`;
+      return `https://docs.google.com/viewer?url=${encodeURIComponent(sanitizedUrl + cacheBuster)}&embedded=true`;
     }
     
-    // Direct URL for PDF viewing - browser's native PDF viewer will handle it
-    return sanitizedUrl;
+    // Direct URL for PDF viewing
+    return `${sanitizedUrl}${cacheBuster}#page=${currentPage}`;
   };
 
   // Error display
@@ -186,15 +160,6 @@ export const PDFCore: React.FC<PDFCoreProps> = ({
           Using alternative viewer
         </div>
       )}
-      
-      {/* Debug Info */}
-      {process.env.NODE_ENV === 'development' && (
-        <div className="absolute bottom-0 left-0 bg-background/70 text-xs p-1 z-10 m-1 rounded">
-          URL: {sanitizedUrl ? (sanitizedUrl.length > 30 ? sanitizedUrl.substring(0, 30) + '...' : sanitizedUrl) : 'undefined'}
-        </div>
-      )}
-      
-      {children}
     </div>
   );
 };

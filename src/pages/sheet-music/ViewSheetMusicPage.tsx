@@ -1,5 +1,5 @@
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import { useParams, useNavigate, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, Download, ListMusic, TableIcon, Bookmark, BookmarkPlus, Music } from "lucide-react";
@@ -7,12 +7,14 @@ import { Link } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { SetlistDrawer } from "@/components/setlist/SetlistDrawer";
-import { PDFViewer } from "@/components/PDFViewer";
+import { PDFViewer } from "@/components/pdf/PDFViewer";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Metronome } from "@/components/ui/metronome";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
+import { useAuth } from "@/contexts/AuthContext";
+import { BackButton } from "@/components/ui/back-button";
 
 interface SheetMusic {
   id: string;
@@ -33,6 +35,7 @@ export default function ViewSheetMusicPage() {
   const [sheetMusic, setSheetMusic] = useState<SheetMusic | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const isMobile = useIsMobile();
+  const { user } = useAuth();
   
   // ForScore-like features
   const [isFullscreenMode, setIsFullscreenMode] = useState(false);
@@ -80,7 +83,7 @@ export default function ViewSheetMusicPage() {
         if (mediaData) {
           setSheetMusic({
             id: mediaData.id,
-            title: mediaData.title,
+            title: mediaData.title || "Untitled",
             composer: mediaData.description || "Unknown",
             file_url: mediaData.file_url,
             voicing: mediaData.folder,
@@ -169,22 +172,95 @@ export default function ViewSheetMusicPage() {
   const toggleMetronome = () => {
     // If turning on, inform user about sound
     if (!isMetronomeActive) {
-      // Using the proper Sonner toast syntax
       toast.message("Starting metronome - ensure your volume is on");
     }
     setIsMetronomeActive(!isMetronomeActive);
+  };
+  
+  // Handle delete
+  const handleDelete = async () => {
+    if (!sheetMusicId) return;
+    
+    try {
+      // Find the file in media_library
+      const { data: mediaData, error: mediaError } = await supabase
+        .from('media_library')
+        .select('file_path, id')
+        .eq('id', sheetMusicId)
+        .maybeSingle();
+      
+      if (mediaError) throw mediaError;
+      
+      if (!mediaData) {
+        toast.error("File not found", {
+          description: "Could not locate the file in the database"
+        });
+        return;
+      }
+      
+      // Delete annotations if exist
+      const { error: annotationsError } = await supabase
+        .from('pdf_annotations')
+        .delete()
+        .eq('sheet_music_id', sheetMusicId);
+      
+      if (annotationsError) {
+        console.error("Error deleting annotations:", annotationsError);
+      }
+      
+      // Delete from setlists
+      const { data: setlists, error: setlistsError } = await supabase
+        .from('setlists')
+        .select('id, sheet_music_ids');
+        
+      if (!setlistsError && setlists) {
+        for (const setlist of setlists) {
+          if (setlist.sheet_music_ids?.includes(sheetMusicId)) {
+            const updatedIds = setlist.sheet_music_ids.filter(id => id !== sheetMusicId);
+            await supabase
+              .from('setlists')
+              .update({ sheet_music_ids: updatedIds })
+              .eq('id', setlist.id);
+          }
+        }
+      }
+      
+      // Delete from storage
+      if (mediaData.file_path) {
+        await supabase.storage
+          .from('media-library')
+          .remove([mediaData.file_path]);
+      }
+      
+      // Delete from database
+      await supabase
+        .from('media_library')
+        .delete()
+        .eq('id', sheetMusicId);
+        
+      toast.success("Sheet music deleted", {
+        description: "The file has been successfully removed"
+      });
+      
+      // Navigate back
+      navigate('/dashboard/sheet-music');
+      
+    } catch (error: any) {
+      console.error("Error deleting sheet music:", error);
+      toast.error("Failed to delete", {
+        description: error.message || "An unexpected error occurred"
+      });
+    }
   };
 
   return (
     <div className={`space-y-4 ${isFullscreenMode ? 'fixed inset-0 z-50 bg-background p-0' : ''}`}>
       {!isFullscreenMode && (
         <div className="flex items-center justify-between mb-2">
-          <Button asChild variant="ghost">
-            <Link to="/dashboard/sheet-music" className="flex items-center">
-              <ArrowLeft className="mr-2 h-4 w-4" />
-              Back to Music Library
-            </Link>
-          </Button>
+          <BackButton 
+            fallbackPath="/dashboard/sheet-music" 
+            size="default"
+          />
           
           <div className="flex gap-2">
             <Button 
@@ -322,7 +398,6 @@ export default function ViewSheetMusicPage() {
                           size="sm"
                           className="w-12 h-12 flex flex-col items-center justify-center p-0"
                           onClick={() => {
-                            // Play note sound (would normally use Tone.js or similar)
                             toast.message(`Playing ${note}`, {
                               description: "Pitch reference tone"
                             });
@@ -349,7 +424,7 @@ export default function ViewSheetMusicPage() {
           </div>
         )}
 
-        {/* PDF viewer with enhanced features */}
+        {/* PDF viewer */}
         <div className={`${showDetails ? 'lg:w-3/4 xl:w-4/5' : 'w-full'}`}>
           {isLoading ? (
             <div className="flex items-center justify-center h-64">
@@ -365,6 +440,9 @@ export default function ViewSheetMusicPage() {
               title={sheetMusic.title}
               sheetMusicId={sheetMusicId}
               fullHeight={isFullscreenMode}
+              canDelete={true}
+              onDelete={handleDelete}
+              user={user}
             />
           )}
         </div>

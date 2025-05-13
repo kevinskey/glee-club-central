@@ -1,29 +1,8 @@
 
 import React from "react";
 import { Button } from "@/components/ui/button";
-import { 
-  ChevronLeft, ChevronRight, ZoomIn, ZoomOut, Download, 
-  Pencil, ListMusic, Maximize, Minimize, Menu, Trash2 
-} from "lucide-react";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-  DropdownMenuSeparator
-} from "@/components/ui/dropdown-menu";
+import { ChevronLeft, ChevronRight, ZoomIn, ZoomOut, Download, Trash2, Pencil, ListMusic, Maximize, Minimize } from "lucide-react";
 import { AuthUser } from "@/types/auth";
-import { toast } from "sonner";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
 
 interface PDFMobileControlsProps {
   currentPage: number;
@@ -32,13 +11,13 @@ interface PDFMobileControlsProps {
   onNextPage: () => void;
   onZoomIn: () => void;
   onZoomOut: () => void;
+  onFullscreen: () => void;
+  isFullscreen: boolean;
   hasAnnotationSupport?: boolean;
   showAnnotations: boolean;
   toggleAnnotations: () => void;
   isSetlistOpen: boolean;
   toggleSetlist: () => void;
-  onFullscreen: () => void;
-  isFullscreen: boolean;
   url: string;
   user: AuthUser | null;
   onDelete?: () => void;
@@ -52,160 +31,129 @@ export const PDFMobileControls: React.FC<PDFMobileControlsProps> = ({
   onNextPage,
   onZoomIn,
   onZoomOut,
+  onFullscreen,
+  isFullscreen,
   hasAnnotationSupport = false,
   showAnnotations,
   toggleAnnotations,
   isSetlistOpen,
   toggleSetlist,
-  onFullscreen,
-  isFullscreen,
   url,
   user,
-  onDelete,
-  canDelete = false
+  canDelete = false,
+  onDelete
 }) => {
-  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = React.useState(false);
-  
-  const handleDelete = () => {
-    if (onDelete) {
-      setIsDeleteDialogOpen(false);
-      onDelete();
-    } else {
-      toast.error("Unable to delete", {
-        description: "Delete functionality is not available"
-      });
-    }
-  };
-  
   return (
-    <>
-      <div className="flex items-center justify-between p-2 border-b bg-card/60">
-        <div className="flex items-center space-x-1">
-          <Button
-            variant="outline"
-            size="icon"
-            onClick={onPrevPage}
-            disabled={currentPage <= 1}
-            className="h-8 w-8"
-            title="Previous Page"
-          >
-            <ChevronLeft className="h-4 w-4" />
-          </Button>
-          
-          <div className="text-sm">
-            {currentPage}/{totalPages}
-          </div>
-          
-          <Button
-            variant="outline"
-            size="icon"
-            onClick={onNextPage}
-            disabled={currentPage >= totalPages}
-            className="h-8 w-8"
-            title="Next Page"
-          >
-            <ChevronRight className="h-4 w-4" />
-          </Button>
-        </div>
-
-        <div className="flex items-center space-x-1">
-          <Button
-            variant="outline"
-            size="icon"
-            onClick={onZoomOut}
-            className="h-8 w-8"
-            title="Zoom Out"
-          >
-            <ZoomOut className="h-4 w-4" />
-          </Button>
-          
-          <Button
-            variant="outline"
-            size="icon"
-            onClick={onZoomIn}
-            className="h-8 w-8"
-            title="Zoom In"
-          >
-            <ZoomIn className="h-4 w-4" />
-          </Button>
-          
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="outline" size="icon" className="h-8 w-8" title="Menu">
-                <Menu className="h-4 w-4" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-56">
-              {hasAnnotationSupport && user && (
-                <DropdownMenuItem onClick={toggleAnnotations}>
-                  <Pencil className="h-4 w-4 mr-2" />
-                  {showAnnotations ? "Hide Markup" : "Add Markup"}
-                </DropdownMenuItem>
-              )}
-              
-              {user && (
-                <DropdownMenuItem onClick={toggleSetlist}>
-                  <ListMusic className="h-4 w-4 mr-2" />
-                  {isSetlistOpen ? "Close Setlist" : "Add to Setlist"}
-                </DropdownMenuItem>
-              )}
-              
-              <DropdownMenuItem onClick={onFullscreen}>
-                {isFullscreen ? (
-                  <>
-                    <Minimize className="h-4 w-4 mr-2" />
-                    Exit Fullscreen
-                  </>
-                ) : (
-                  <>
-                    <Maximize className="h-4 w-4 mr-2" />
-                    Fullscreen
-                  </>
-                )}
-              </DropdownMenuItem>
-              
-              <DropdownMenuItem onClick={() => window.open(url, "_blank")}>
-                <Download className="h-4 w-4 mr-2" />
-                Download
-              </DropdownMenuItem>
-              
-              {canDelete && onDelete && (
-                <>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem 
-                    onClick={() => setIsDeleteDialogOpen(true)}
-                    className="text-destructive focus:text-destructive"
-                  >
-                    <Trash2 className="h-4 w-4 mr-2" />
-                    Delete PDF
-                  </DropdownMenuItem>
-                </>
-              )}
-            </DropdownMenuContent>
-          </DropdownMenu>
-        </div>
+    <div className="sticky top-0 z-30 w-full bg-background border-b p-1.5 flex flex-wrap justify-between items-center gap-1">
+      <div className="flex items-center gap-1">
+        <Button
+          variant="outline"
+          size="icon"
+          onClick={onPrevPage}
+          disabled={currentPage <= 1}
+          className="h-8 w-8"
+        >
+          <ChevronLeft className="h-4 w-4" />
+        </Button>
+        
+        <span className="text-xs px-1">
+          {currentPage}/{totalPages}
+        </span>
+        
+        <Button
+          variant="outline"
+          size="icon"
+          onClick={onNextPage}
+          disabled={currentPage >= totalPages}
+          className="h-8 w-8"
+        >
+          <ChevronRight className="h-4 w-4" />
+        </Button>
       </div>
       
-      {/* Delete confirmation dialog */}
-      <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
-        <AlertDialogContent className="sm:max-w-md">
-          <AlertDialogHeader>
-            <AlertDialogTitle>Are you sure you want to delete this PDF?</AlertDialogTitle>
-            <AlertDialogDescription>
-              This action cannot be undone. This will permanently delete the PDF file.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter className="flex flex-col sm:flex-row gap-2">
-            <AlertDialogCancel className="mt-0 sm:mt-0 w-full sm:w-auto">Cancel</AlertDialogCancel>
-            <AlertDialogAction 
-              onClick={handleDelete}
-              className="bg-destructive hover:bg-destructive/90 w-full sm:w-auto"
-            >
-              Delete
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
-    </>
+      <div className="flex items-center gap-1">
+        <Button
+          variant="outline"
+          size="icon"
+          onClick={onZoomOut}
+          className="h-8 w-8"
+          title="Zoom Out"
+        >
+          <ZoomOut className="h-4 w-4" />
+        </Button>
+        
+        <Button
+          variant="outline"
+          size="icon"
+          onClick={onZoomIn}
+          className="h-8 w-8"
+          title="Zoom In"
+        >
+          <ZoomIn className="h-4 w-4" />
+        </Button>
+        
+        <Button
+          variant="outline"
+          size="icon"
+          onClick={onFullscreen}
+          className="h-8 w-8"
+          title={isFullscreen ? "Exit Fullscreen" : "Full Screen"}
+        >
+          {isFullscreen ? (
+            <Minimize className="h-4 w-4" />
+          ) : (
+            <Maximize className="h-4 w-4" />
+          )}
+        </Button>
+      </div>
+      
+      <div className="flex items-center gap-1">
+        {user && hasAnnotationSupport && (
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={toggleAnnotations}
+            className="h-8"
+            title={showAnnotations ? "Hide Annotations" : "Show Annotations"}
+          >
+            <Pencil className="h-4 w-4" />
+          </Button>
+        )}
+        
+        {user && (
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={toggleSetlist}
+            className="h-8"
+            title={isSetlistOpen ? "Close Setlist" : "Add to Setlist"}
+          >
+            <ListMusic className="h-4 w-4" />
+          </Button>
+        )}
+        
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => window.open(url, "_blank")}
+          className="h-8"
+          title="Download PDF"
+        >
+          <Download className="h-4 w-4" />
+        </Button>
+        
+        {canDelete && onDelete && (
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={onDelete}
+            className="h-8 text-destructive"
+            title="Delete PDF"
+          >
+            <Trash2 className="h-4 w-4" />
+          </Button>
+        )}
+      </div>
+    </div>
   );
 };
