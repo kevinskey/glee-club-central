@@ -18,4 +18,3 @@ export type PermissionName =
 // Now UserTitle is just a string, no longer a union type
 // This allows for dynamic titles from the database
 export type UserTitle = string;
-
