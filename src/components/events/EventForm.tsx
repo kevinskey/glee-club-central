@@ -26,7 +26,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
 import { EventType } from "@/types/calendar";
-import { GoogleMapAutocomplete } from "@/components/ui/google-map-autocomplete";
+import { GoogleMapAutocomplete } from "@/components/calendar/GoogleMapAutocomplete";
 
 // Define form schema
 const eventFormSchema = z.object({

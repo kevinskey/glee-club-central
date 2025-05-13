@@ -13,13 +13,6 @@ interface GoogleMapAutocompleteProps {
   disabled?: boolean;
 }
 
-declare global {
-  interface Window {
-    google: any;
-    initGoogleMapsAutocomplete: () => void;
-  }
-}
-
 export function GoogleMapAutocomplete({
   value,
   onChange,
