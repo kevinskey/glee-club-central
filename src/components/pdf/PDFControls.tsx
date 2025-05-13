@@ -1,7 +1,7 @@
 
 import React from "react";
 import { Button } from "@/components/ui/button";
-import { ChevronLeft, ChevronRight, ZoomIn, ZoomOut, Download, Trash2, Pencil, ListMusic } from "lucide-react";
+import { ChevronLeft, ChevronRight, ZoomIn, ZoomOut, Download, Trash2, Pencil, ListMusic, Maximize, Minimize } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -38,6 +38,8 @@ interface PDFControlsProps {
   user: AuthUser | null;
   onDelete?: () => void;
   canDelete?: boolean;
+  onFullscreen?: () => void;
+  isFullscreen?: boolean;
 }
 
 export const PDFControls: React.FC<PDFControlsProps> = ({
@@ -57,6 +59,8 @@ export const PDFControls: React.FC<PDFControlsProps> = ({
   user,
   onDelete,
   canDelete = false,
+  onFullscreen,
+  isFullscreen = false,
 }) => {
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = React.useState(false);
   
@@ -73,20 +77,21 @@ export const PDFControls: React.FC<PDFControlsProps> = ({
   
   return (
     <>
-      <div className="flex flex-wrap items-center justify-between p-2 border-b bg-card/60">
-        <div className="flex items-center space-x-1 mb-2 sm:mb-0">
+      <div className="flex flex-wrap items-center justify-between p-2 border-b bg-card/80 backdrop-blur-sm shadow-sm">
+        <div className="flex items-center space-x-2 mb-2 sm:mb-0">
           <Button
             variant="outline"
             size="sm"
             onClick={onPrevPage}
             disabled={currentPage <= 1}
+            className="h-9"
           >
             <ChevronLeft className="h-4 w-4 mr-1" />
-            <span className="hidden sm:inline">Prev</span>
+            <span className="hidden sm:inline">Previous</span>
           </Button>
           
-          <div className="text-sm font-medium px-2">
-            <span className="hidden sm:inline">Page </span>{currentPage}<span className="hidden sm:inline"> of</span><span className="inline sm:hidden">/</span>{totalPages}
+          <div className="text-sm font-medium px-3 py-1.5 bg-muted/50 rounded">
+            <span className="hidden sm:inline">Page </span>{currentPage}<span className="hidden sm:inline"> of </span><span className="inline sm:hidden">/</span>{totalPages}
           </div>
           
           <Button
@@ -94,70 +99,118 @@ export const PDFControls: React.FC<PDFControlsProps> = ({
             size="sm"
             onClick={onNextPage}
             disabled={currentPage >= totalPages}
+            className="h-9"
           >
             <span className="hidden sm:inline">Next</span>
             <ChevronRight className="h-4 w-4 ml-1" />
           </Button>
         </div>
 
-        <div className="flex flex-wrap items-center gap-1">
-          <Button
-            variant="outline"
-            size="icon"
-            onClick={onZoomOut}
-            className="h-8 w-8"
-            title="Zoom Out"
-          >
-            <ZoomOut className="h-4 w-4" />
-          </Button>
-          
-          <Button
-            variant="outline"
-            size="icon"
-            onClick={onZoomIn}
-            className="h-8 w-8"
-            title="Zoom In"
-          >
-            <ZoomIn className="h-4 w-4" />
-          </Button>
+        <div className="flex flex-wrap items-center gap-2">
+          <div className="flex items-center gap-1 border-r pr-2 mr-1">
+            <Button
+              variant="outline"
+              size="icon"
+              onClick={onZoomOut}
+              className="h-8 w-8"
+              title="Zoom Out"
+            >
+              <ZoomOut className="h-4 w-4" />
+            </Button>
+            
+            <Button
+              variant="outline"
+              size="icon"
+              onClick={onZoomIn}
+              className="h-8 w-8"
+              title="Zoom In"
+            >
+              <ZoomIn className="h-4 w-4" />
+            </Button>
+            
+            {onFullscreen && (
+              <Button
+                variant="outline"
+                size="icon"
+                onClick={onFullscreen}
+                className="h-8 w-8 hidden sm:flex"
+                title={isFullscreen ? "Exit Fullscreen" : "Full Screen"}
+              >
+                {isFullscreen ? (
+                  <Minimize className="h-4 w-4" />
+                ) : (
+                  <Maximize className="h-4 w-4" />
+                )}
+              </Button>
+            )}
+          </div>
           
           {user && (
             <>
               {hasAnnotationSupport && (
                 <Button
-                  variant="outline"
+                  variant={showAnnotations ? "secondary" : "outline"}
                   size="sm"
                   onClick={toggleAnnotations}
-                  className="hidden sm:flex"
+                  className="hidden sm:flex h-9"
                 >
-                  <Pencil className="h-4 w-4 mr-1" />
-                  {showAnnotations ? "Hide Markup" : "Add Markup"}
+                  <Pencil className="h-4 w-4 mr-1.5" />
+                  {showAnnotations ? "Hide Annotations" : "Add Annotations"}
                 </Button>
               )}
               
               <Button
-                variant="outline"
+                variant={isSetlistOpen ? "secondary" : "outline"}
                 size="sm"
                 onClick={toggleSetlist}
-                className="hidden sm:flex"
+                className="hidden sm:flex h-9"
               >
-                <ListMusic className="h-4 w-4 mr-1" />
+                <ListMusic className="h-4 w-4 mr-1.5" />
                 {isSetlistOpen ? "Close Setlist" : "Add to Setlist"}
               </Button>
             </>
           )}
           
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={onDownload}
+            className="hidden sm:flex h-9"
+          >
+            <Download className="h-4 w-4 mr-1.5" />
+            Download
+          </Button>
+          
+          {canDelete && onDelete && (
+            <Button 
+              variant="outline"
+              size="sm"
+              onClick={() => setIsDeleteDialogOpen(true)}
+              className="hidden sm:flex text-destructive hover:bg-destructive/10 h-9"
+            >
+              <Trash2 className="h-4 w-4 mr-1.5" />
+              Delete
+            </Button>
+          )}
+          
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="outline" size="sm">
+              <Button variant="outline" size="sm" className="h-9">
                 Actions
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
+            <DropdownMenuContent align="end" className="w-56">
+              {onFullscreen && (
+                <DropdownMenuItem onClick={onFullscreen} className="sm:hidden">
+                  {isFullscreen ? <Minimize className="h-4 w-4 mr-2" /> : <Maximize className="h-4 w-4 mr-2" />}
+                  {isFullscreen ? "Exit Fullscreen" : "Fullscreen"}
+                </DropdownMenuItem>
+              )}
+              
               {user && hasAnnotationSupport && (
                 <DropdownMenuItem onClick={toggleAnnotations} className="sm:hidden">
                   <Pencil className="h-4 w-4 mr-2" />
-                  {showAnnotations ? "Hide Markup" : "Add Markup"}
+                  {showAnnotations ? "Hide Annotations" : "Show Annotations"}
                 </DropdownMenuItem>
               )}
               
@@ -168,7 +221,7 @@ export const PDFControls: React.FC<PDFControlsProps> = ({
                 </DropdownMenuItem>
               )}
               
-              <DropdownMenuItem onClick={onDownload}>
+              <DropdownMenuItem onClick={onDownload} className="sm:hidden">
                 <Download className="h-4 w-4 mr-2" />
                 Download PDF
               </DropdownMenuItem>
@@ -176,7 +229,7 @@ export const PDFControls: React.FC<PDFControlsProps> = ({
               {canDelete && onDelete && (
                 <DropdownMenuItem 
                   onClick={() => setIsDeleteDialogOpen(true)}
-                  className="text-destructive focus:text-destructive"
+                  className="text-destructive focus:text-destructive sm:hidden"
                 >
                   <Trash2 className="h-4 w-4 mr-2" />
                   Delete PDF

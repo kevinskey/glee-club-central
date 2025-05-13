@@ -94,15 +94,16 @@ export const PDFCore: React.FC<PDFCoreProps> = ({
   // Error display
   if (error) {
     return (
-      <div className="flex h-full items-center justify-center p-8 text-center">
-        <div>
+      <div className="flex h-full items-center justify-center p-8 text-center bg-muted/20">
+        <div className="bg-background p-6 rounded-lg shadow-lg max-w-md">
           <FileText className="h-16 w-16 mx-auto text-muted-foreground mb-4" />
           <p className="mb-4 text-muted-foreground">{error}</p>
           {sanitizedUrl && (
             <div className="flex flex-col gap-2 items-center">
               <Button 
                 onClick={() => window.open(sanitizedUrl, "_blank")}
-                className="px-4 py-2 border rounded-md hover:bg-muted"
+                className="w-full sm:w-auto"
+                variant="default"
               >
                 <ExternalLink className="mr-2 h-4 w-4" /> Open PDF in New Tab
               </Button>
@@ -113,6 +114,7 @@ export const PDFCore: React.FC<PDFCoreProps> = ({
                   setError(null);
                   setIsLoading(true);
                 }}
+                className="w-full sm:w-auto"
               >
                 Try Alternative Viewer
               </Button>
@@ -128,14 +130,17 @@ export const PDFCore: React.FC<PDFCoreProps> = ({
       {/* Loading Indicator */}
       {isLoading && (
         <div className="absolute inset-0 flex items-center justify-center bg-background/80 z-30">
-          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+          <div className="flex flex-col items-center">
+            <Loader2 className="h-8 w-8 animate-spin text-primary mb-2" />
+            <p className="text-sm text-muted-foreground">Loading PDF...</p>
+          </div>
         </div>
       )}
       
       {/* PDF Iframe */}
       <iframe 
         src={getPdfViewerUrl()}
-        className="w-full h-full border-0" 
+        className="w-full h-full border-0 rounded" 
         style={{ 
           transformOrigin: 'top center',
           position: 'absolute',
@@ -156,8 +161,8 @@ export const PDFCore: React.FC<PDFCoreProps> = ({
       
       {/* Fallback Mode Indicator */}
       {fallbackMode && (
-        <div className="absolute top-0 left-0 bg-background/70 text-sm p-2 z-10 rounded-md m-2">
-          Using alternative viewer
+        <div className="absolute top-0 left-0 bg-background/70 text-sm p-2 z-10 rounded-md m-2 shadow-sm">
+          <span className="text-xs font-medium">Using alternative viewer</span>
         </div>
       )}
     </div>

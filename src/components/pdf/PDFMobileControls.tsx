@@ -44,7 +44,7 @@ export const PDFMobileControls: React.FC<PDFMobileControlsProps> = ({
   onDelete
 }) => {
   return (
-    <div className="sticky top-0 z-30 w-full bg-background border-b p-1.5 flex flex-wrap justify-between items-center gap-1">
+    <div className="sticky top-0 z-30 w-full bg-background/95 backdrop-blur-sm border-b p-1.5 flex flex-wrap justify-between items-center gap-1 shadow-sm">
       <div className="flex items-center gap-1">
         <Button
           variant="outline"
@@ -56,7 +56,7 @@ export const PDFMobileControls: React.FC<PDFMobileControlsProps> = ({
           <ChevronLeft className="h-4 w-4" />
         </Button>
         
-        <span className="text-xs px-1">
+        <span className="text-xs font-medium bg-muted/50 px-2 py-1 rounded">
           {currentPage}/{totalPages}
         </span>
         
@@ -110,10 +110,10 @@ export const PDFMobileControls: React.FC<PDFMobileControlsProps> = ({
       <div className="flex items-center gap-1">
         {user && hasAnnotationSupport && (
           <Button
-            variant="outline"
-            size="sm"
+            variant={showAnnotations ? "secondary" : "outline"}
+            size="icon"
             onClick={toggleAnnotations}
-            className="h-8"
+            className="h-8 w-8"
             title={showAnnotations ? "Hide Annotations" : "Show Annotations"}
           >
             <Pencil className="h-4 w-4" />
@@ -122,10 +122,10 @@ export const PDFMobileControls: React.FC<PDFMobileControlsProps> = ({
         
         {user && (
           <Button
-            variant="outline"
-            size="sm"
+            variant={isSetlistOpen ? "secondary" : "outline"}
+            size="icon"
             onClick={toggleSetlist}
-            className="h-8"
+            className="h-8 w-8"
             title={isSetlistOpen ? "Close Setlist" : "Add to Setlist"}
           >
             <ListMusic className="h-4 w-4" />
@@ -134,9 +134,9 @@ export const PDFMobileControls: React.FC<PDFMobileControlsProps> = ({
         
         <Button
           variant="outline"
-          size="sm"
+          size="icon"
           onClick={() => window.open(url, "_blank")}
-          className="h-8"
+          className="h-8 w-8"
           title="Download PDF"
         >
           <Download className="h-4 w-4" />
@@ -145,9 +145,9 @@ export const PDFMobileControls: React.FC<PDFMobileControlsProps> = ({
         {canDelete && onDelete && (
           <Button
             variant="outline"
-            size="sm"
+            size="icon"
             onClick={onDelete}
-            className="h-8 text-destructive"
+            className="h-8 w-8 text-destructive hover:bg-destructive/10"
             title="Delete PDF"
           >
             <Trash2 className="h-4 w-4" />

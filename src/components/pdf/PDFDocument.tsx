@@ -37,13 +37,13 @@ export const PDFDocument = ({
   };
 
   return (
-    <div className="relative w-full h-full flex flex-col justify-center overflow-hidden">
+    <div className="relative w-full h-full flex flex-col justify-center overflow-hidden bg-muted/20">
       {/* Source Badge */}
       {mediaSourceId && category && (
         <div className="absolute top-12 left-2 z-40">
           <Badge 
             variant="outline" 
-            className="bg-background/90 cursor-pointer hover:bg-background"
+            className="bg-background/90 cursor-pointer hover:bg-background shadow-sm"
             onClick={goToMediaLibrary}
           >
             <Link className="h-3 w-3 mr-1" />
@@ -54,7 +54,7 @@ export const PDFDocument = ({
       
       {/* Debug info for development */}
       {process.env.NODE_ENV === 'development' && (
-        <div className="absolute top-2 right-2 z-40 bg-background/80 text-xs px-2 py-1 rounded">
+        <div className="absolute top-2 right-2 z-40 bg-background/80 text-xs px-2 py-1 rounded shadow-sm">
           URL: {url ? url.substring(0, 30) + '...' : 'undefined'} | Page: {currentPage}
         </div>
       )}
@@ -67,7 +67,7 @@ export const PDFDocument = ({
         viewMode="page"
         onLoad={onLoad}
         onError={onError}
-        className="w-full h-full"
+        className="w-full h-full shadow-lg"
       />
     </div>
   );

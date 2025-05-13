@@ -8,6 +8,8 @@ import { SetlistDrawer } from "@/components/setlist/SetlistDrawer";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
 import { AuthUser } from "@/types/auth";
+import { Button } from "@/components/ui/button";
+import { ArrowLeft } from "lucide-react";
 
 interface PDFViewerProps {
   url: string;
@@ -160,6 +162,8 @@ export const PDFViewer = ({
           toggleAnnotations={toggleAnnotations}
           isSetlistOpen={isSetlistOpen}
           toggleSetlist={toggleSetlist}
+          onFullscreen={toggleFullscreen}
+          isFullscreen={isFullscreen}
           url={url}
           hasAnnotationSupport={!!sheetMusicId}
           user={user}
@@ -171,12 +175,13 @@ export const PDFViewer = ({
       {/* PDF Document Container */}
       <div 
         ref={containerRef} 
-        className="relative w-full flex justify-center bg-gray-100 overflow-hidden" 
+        className="relative w-full flex justify-center overflow-hidden" 
         style={{ 
           height: fullHeight ? "calc(100vh - 60px)" : 
                   isFullscreen ? "calc(100vh - 60px)" : 
                   isMobile ? "calc(100vh - 180px)" : "70vh",
-          position: "relative"
+          position: "relative",
+          backgroundColor: "#f4f4f5", // Light gray background
         }}
       >
         <PDFDocument
@@ -192,14 +197,17 @@ export const PDFViewer = ({
       </div>
       
       {/* Footer with Back Button */}
-      <div className="p-2 border-t bg-muted/30 flex justify-between items-center">
-        <button 
+      <div className="p-3 border-t bg-muted/30 flex justify-between items-center shadow-sm">
+        <Button 
+          variant="ghost"
+          size="sm"
           onClick={() => navigate(-1)}
-          className="px-3 py-1.5 text-sm rounded hover:bg-muted transition-colors flex items-center gap-1"
+          className="flex items-center gap-1.5 text-sm"
         >
-          ← Back
-        </button>
-        <div className="text-sm text-muted-foreground">
+          <ArrowLeft className="h-4 w-4" />
+          Back
+        </Button>
+        <div className="text-xs text-muted-foreground">
           {error ? "Error loading PDF" : isLoading ? "Loading..." : `Page ${currentPage} of ${totalPages}`}
         </div>
       </div>
