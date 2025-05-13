@@ -1,4 +1,3 @@
-
 import React from "react";
 import { BackgroundSlideshow } from "./BackgroundSlideshow";
 import { HeroContent } from "./hero/HeroContent";
@@ -29,7 +28,7 @@ export function HeroSection() {
         />
       </div>
       
-      <div className="relative z-10 mx-auto px-2 md:px-4 lg:px-6 md:container h-full flex items-center justify-start w-full">
+      <div className="relative z-10 mx-auto px-4 sm:px-6 md:px-8 w-full flex items-center justify-start">
         <HeroContent />
       </div>
 

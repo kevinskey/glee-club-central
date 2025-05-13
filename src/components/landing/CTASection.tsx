@@ -18,7 +18,7 @@ export function CTASection() {
           }}
         ></div>
       </div>
-      <div className="px-2 sm:px-4 md:container relative z-10">
+      <div className="px-4 sm:px-6 md:container relative z-10">
         <div className="max-w-xs sm:max-w-sm md:max-w-lg lg:max-w-2xl xl:max-w-3xl mx-auto text-center">
           <h2 className="font-playfair text-xl sm:text-2xl md:text-3xl font-bold mb-2 sm:mb-3 md:mb-4 tracking-tight">Join Our Digital Choir Community</h2>
           <p className="font-inter text-sm sm:text-base md:text-lg mb-6 sm:mb-7 md:mb-8 opacity-90 text-pretty leading-relaxed">

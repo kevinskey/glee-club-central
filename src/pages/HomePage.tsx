@@ -21,7 +21,7 @@ const HomePage = () => {
         {/* Display hero section on mobile */}
         {isMobile && <HeroSection />}
         
-        <div className="container mx-auto px-4 py-6 md:py-12 z-10 relative flex-1 flex flex-col">
+        <div className="container mx-auto px-4 sm:px-6 md:px-8 py-6 md:py-12 z-10 relative flex-1 flex flex-col">
           <main className={`flex-1 flex flex-col items-center justify-start ${isMobile ? "text-foreground" : "text-white"}`}>
             {!isMobile && (
               <div className="text-center max-w-3xl mx-auto">
@@ -36,7 +36,7 @@ const HomePage = () => {
             )}
             
             {/* Upcoming Events Section - More compact on mobile */}
-            <div className={`w-full mt-4 md:mt-8 mb-6 md:mb-12 ${isMobile ? "bg-white dark:bg-gray-800 py-4 px-3 rounded-lg shadow-sm" : "bg-white/5 backdrop-blur-sm p-6 rounded-lg"}`}>
+            <div className={`w-full mt-4 md:mt-8 mb-6 md:mb-12 ${isMobile ? "bg-white dark:bg-gray-800 py-4 px-4 rounded-lg shadow-sm" : "bg-white/5 backdrop-blur-sm p-6 rounded-lg"}`}>
               <UpcomingEvents />
             </div>
             

@@ -105,9 +105,9 @@ export default function YoutubeVideosPage() {
           <>
             <h3 className="text-xl font-bold mb-4">Browse All Videos</h3>
             
-            {/* Horizontal scrolling on mobile */}
+            {/* Horizontal scrolling on mobile with improved padding */}
             <ScrollArea className="w-full pb-4 md:hidden" type="scroll">
-              <div className="flex gap-4">
+              <div className="flex gap-4 px-1">
                 {filteredVideos.map((video) => (
                   <div key={video.id} className="min-w-[250px] max-w-[250px] flex-none">
                     <VideoCard video={video} onClick={() => setSelectedVideo(video.id)} />
