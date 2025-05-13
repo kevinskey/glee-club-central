@@ -17,6 +17,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { usePermissions } from '@/hooks/usePermissions';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { toast } from "sonner";
+import { CalendarEvent } from "@/types/calendar";
 import {
   connectGoogleCalendar,
   disconnectGoogleCalendar,
@@ -204,8 +205,8 @@ const CalendarPage = () => {
             <ViewEventModal 
               event={selectedEvent} 
               onClose={() => setIsViewModalOpen(false)} 
-              onUpdate={handleUpdateEvent}
-              onDelete={handleDeleteEvent}
+              onUpdate={(eventData: CalendarEvent) => handleUpdateEvent(eventData)}
+              onDelete={(eventId: string) => handleDeleteEvent(eventId)}
               userCanEdit={userCanCreate || (profile?.id === selectedEvent.created_by && selectedEvent.type === 'sectional')}
             />
           </DialogContent>

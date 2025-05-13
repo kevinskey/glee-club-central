@@ -71,7 +71,7 @@ const CalendarPage = () => {
     handleCreateEvent,
     handleUpdateEvent,
     handleDeleteEvent
-  } = useCalendarEventHandlers(
+  } = useCalendarEventHandlers({
     events,
     updateEvent,
     addEvent,
@@ -80,29 +80,34 @@ const CalendarPage = () => {
     setIsViewModalOpen,
     setSelectedDate,
     setIsCreateModalOpen
-  );
+  });
 
   // Handler for creating event
   const onCreateEvent = async (eventData: any) => {
     const success = await handleCreateEvent(eventData);
     if (success) {
-      toast.success("Event created successfully");
       setIsCreateModalOpen(false);
     }
   };
 
-  // Handler for updating event - Modified to match expected return type
-  const onUpdateEvent = async (eventData: CalendarEvent): Promise<void> => {
-    await handleUpdateEvent(eventData);
-    setIsViewModalOpen(false);
-    setSelectedEvent(null);
+  // Handler for updating event
+  const onUpdateEvent = async (eventData: CalendarEvent): Promise<boolean> => {
+    const success = await handleUpdateEvent(eventData);
+    if (success) {
+      setIsViewModalOpen(false);
+      setSelectedEvent(null);
+    }
+    return success;
   };
 
-  // Handler for deleting event - Modified to match expected return type
-  const onDeleteEvent = async (eventId: string): Promise<void> => {
-    await handleDeleteEvent(eventId);
-    setIsViewModalOpen(false);
-    setSelectedEvent(null);
+  // Handler for deleting event
+  const onDeleteEvent = async (eventId: string): Promise<boolean> => {
+    const success = await handleDeleteEvent(eventId);
+    if (success) {
+      setIsViewModalOpen(false);
+      setSelectedEvent(null);
+    }
+    return success;
   };
 
   return (

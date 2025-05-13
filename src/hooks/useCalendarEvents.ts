@@ -3,6 +3,7 @@ import { useState, useEffect, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { CalendarEvent, EventType } from "@/types/calendar";
 import { toast } from "sonner";
+import { useAuth } from "@/contexts/AuthContext";
 import {
   checkGoogleCalendarConnection,
   createGoogleCalendarEvent,
@@ -15,6 +16,7 @@ export const useCalendarEvents = () => {
   const [loading, setLoading] = useState(true);
   const [googleCalendarConnected, setGoogleCalendarConnected] = useState(false);
   const [syncing, setSyncing] = useState(false);
+  const { user } = useAuth(); // Get current user to use for user_id
 
   // Check if Google Calendar is connected
   const checkGoogleConnection = useCallback(async () => {
@@ -64,6 +66,11 @@ export const useCalendarEvents = () => {
   // Add a new event
   const addEvent = async (eventData: Partial<CalendarEvent>): Promise<boolean> => {
     try {
+      if (!user) {
+        toast.error("You must be logged in to add events");
+        return false;
+      }
+
       // Format date and time for database
       const eventDate = new Date(eventData.start || "");
       const formattedDate = eventDate.toISOString().split("T")[0];
@@ -86,7 +93,8 @@ export const useCalendarEvents = () => {
         type: eventData.type,
         allday: eventData.allDay || false,
         image_url: eventData.image_url,
-        google_event_id: googleEventId
+        google_event_id: googleEventId,
+        user_id: user.id // Add the user_id field here
       };
 
       // Insert the event into the database

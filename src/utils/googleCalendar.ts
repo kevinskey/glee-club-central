@@ -1,3 +1,3 @@
 
-// Re-export all functionality from the services file for backward compatibility
+// Re-export all functionality from the services file
 export * from "@/services/googleCalendar";
