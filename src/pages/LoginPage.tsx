@@ -1,309 +1,201 @@
 
-import React, { useEffect, useState } from "react";
-import { zodResolver } from "@hookform/resolvers/zod";
+import React, { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
+import { useNavigate, Link } from "react-router-dom";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { Link, useNavigate, useLocation } from "react-router-dom";
-import { toast } from "sonner";
-import { Layout } from "@/components/landing/Layout";
+import { Eye, EyeOff } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
+import { useToast } from "@/hooks/use-toast";
+import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Music, AlertCircle, Eye, EyeOff, LogIn } from "lucide-react";
-import { supabase, cleanupAuthState } from "@/integrations/supabase/client";
+import { Label } from "@/components/ui/label";
+import { Icons } from "@/components/Icons";
 
-// Login form schema
-const loginSchema = z.object({
-  email: z.string().email({
-    message: "Please enter a valid email address."
-  }),
-  password: z.string().min(1, {
-    message: "Password is required."
-  }),
+// Form schema
+const formSchema = z.object({
+  email: z.string().email("Please enter a valid email address"),
+  password: z.string().min(1, "Password is required"),
 });
 
-type LoginFormValues = z.infer<typeof loginSchema>;
+type FormData = z.infer<typeof formSchema>;
 
 export default function LoginPage() {
-  const { signIn, isAuthenticated, isLoading, user, profile } = useAuth();
+  const { signIn, isAuthenticated, checkRole } = useAuth();
   const navigate = useNavigate();
-  const location = useLocation();
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [loginError, setLoginError] = useState<string | null>(null);
-  const [statusMessage, setStatusMessage] = useState<string | null>(
-    location.state?.message || null
-  );
+  const { toast } = useToast();
+  const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
-  
-  // Initialize the form with useForm hook
-  const form = useForm<LoginFormValues>({
-    resolver: zodResolver(loginSchema),
-    defaultValues: {
-      email: "",
-      password: "",
-    },
+  const [errorMsg, setErrorMsg] = useState("");
+
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<FormData>({
+    resolver: zodResolver(formSchema),
   });
 
-  // If user is already authenticated, redirect to appropriate dashboard
+  // Check if user is already logged in
   useEffect(() => {
-    if (isAuthenticated && !isLoading) {
-      // Get the return URL if it exists
-      const returnTo = new URLSearchParams(location.search).get('returnTo');
-      
-      // Route based on user role or provided return URL
-      if (returnTo) {
-        navigate(returnTo);
-      } else if (profile?.role === 'admin' || profile?.role === 'administrator') {
-        navigate('/admin');
-      } else {
-        navigate('/dashboard');
-      }
-      
-      // Show welcome toast
-      if (profile?.first_name) {
-        toast.success(`Welcome back, ${profile.first_name}!`);
-      } else {
-        toast.success("Welcome back!");
-      }
+    if (isAuthenticated) {
+      handleRoleBasedRedirect();
     }
-  }, [isAuthenticated, isLoading, navigate, location.search, profile]);
+  }, [isAuthenticated]);
 
-  const handleResendVerification = async (email: string) => {
-    try {
-      setIsSubmitting(true);
-      console.log("Resending verification email to:", email);
-      
-      const { error } = await supabase.auth.resend({
-        type: 'signup',
-        email: email,
-        options: {
-          emailRedirectTo: `${window.location.origin}/login`,
-        }
-      });
-      
-      if (error) {
-        toast.error("Failed to resend verification email");
-        console.error("Error resending verification:", error);
-      } else {
-        toast.success("Verification email sent", {
-          description: "Please check your inbox and spam folder"
-        });
-      }
-    } catch (error) {
-      console.error("Error resending verification:", error);
-      toast.error("Failed to resend verification email");
-    } finally {
-      setIsSubmitting(false);
+  const handleRoleBasedRedirect = async () => {
+    const isAdmin = await checkRole('admin');
+    if (isAdmin) {
+      navigate('/dashboard');
+    } else {
+      navigate('/dashboard');
     }
   };
 
-  const togglePasswordVisibility = () => {
+  const onSubmit = async (data: FormData) => {
+    setIsLoading(true);
+    setErrorMsg("");
+
+    try {
+      const { error } = await signIn(data.email, data.password);
+      
+      if (error) {
+        if (error.message.includes("Email not confirmed")) {
+          setErrorMsg("Please check your email to confirm your account before logging in.");
+        } else {
+          setErrorMsg(error.message || "Failed to sign in");
+        }
+        toast({
+          title: "Login failed",
+          description: error.message || "Failed to sign in",
+          variant: "destructive",
+        });
+      } else {
+        toast({
+          title: "Welcome back!",
+          description: "Successfully logged in",
+        });
+        handleRoleBasedRedirect();
+      }
+    } catch (error) {
+      console.error("Login error:", error);
+      setErrorMsg("An unexpected error occurred. Please try again.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const toggleShowPassword = () => {
     setShowPassword(!showPassword);
   };
 
-  const onSubmit = async (values: LoginFormValues) => {
-    console.log("Login attempt with:", values.email);
-    setIsSubmitting(true);
-    setLoginError(null);
-
-    try {
-      // Clean up any existing auth state first to prevent conflicts
-      cleanupAuthState();
-      
-      // Attempt sign in
-      const { error } = await signIn(values.email, values.password);
-      
-      if (error) {
-        console.error("Login error:", error);
-        
-        // Check for specific error messages related to email verification
-        if (error.message?.includes("Email not confirmed") || 
-            error.message?.toLowerCase().includes("email not verified") ||
-            error.message?.toLowerCase().includes("not confirmed")) {
-          
-          setLoginError("Please verify your email address before logging in. Check your inbox and spam folder for a verification email.");
-          toast.error("Email not verified", {
-            description: "Check your inbox for a verification email",
-            action: {
-              label: "Resend",
-              onClick: () => handleResendVerification(values.email),
-            },
-          });
-        } else {
-          setLoginError(error.message || "Invalid login credentials");
-          toast.error(error.message || "Login failed");
-        }
-      } else {
-        toast.success("Login successful!");
-        // Navigate is now handled by the auth state change in AuthContext
-      }
-    } catch (error: any) {
-      console.error("Unexpected error during login:", error);
-      setLoginError(error.message || "An unexpected error occurred");
-      toast.error("Login failed", {
-        description: error.message || "An unexpected error occurred"
-      });
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
-
-  // Guest login function for demo purposes
-  const handleGuestLogin = async () => {
-    setIsSubmitting(true);
-    setLoginError(null);
-
-    try {
-      cleanupAuthState();
-      
-      // Use demo credentials - in a real app, you'd have a special guest login endpoint
-      const { error } = await signIn("guest@example.com", "guestpassword");
-      
-      if (error) {
-        console.error("Guest login error:", error);
-        setLoginError("Guest login unavailable. Please try again later.");
-        toast.error("Guest login failed");
-      } else {
-        toast.success("Logged in as guest");
-      }
-    } catch (error: any) {
-      console.error("Unexpected error during guest login:", error);
-      setLoginError("Guest login unavailable. Please try again later.");
-      toast.error("Guest login failed");
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
-
-  // If already authenticated and not loading, don't render the login form
-  if (isAuthenticated && !isLoading) {
-    return null; // Will redirect in the useEffect
-  }
-
   return (
-    <Layout>
-      <div className="container mx-auto px-4 py-12">
-        <div className="max-w-md mx-auto">
-          <h1 className="text-3xl font-bold text-center mb-8">Member Login</h1>
-          
-          <Card className="w-full bg-white dark:bg-black dark:bg-opacity-80 bg-opacity-90 backdrop-blur-sm">
-            <CardHeader className="text-center">
-              <div className="flex justify-center mb-4">
-                <Music className="h-12 w-12 text-glee-purple" />
-              </div>
-              <CardTitle className="text-2xl font-bold">Welcome Back</CardTitle>
-              <CardDescription>
-                Log in to access the Spelman College Glee Club portal
-              </CardDescription>
-            </CardHeader>
-            
-            <CardContent>
-              {loginError && (
-                <Alert variant="destructive" className="mb-4">
-                  <AlertCircle className="h-4 w-4" />
-                  <AlertDescription className="ml-2">
-                    {loginError}
-                  </AlertDescription>
-                </Alert>
+    <div className="flex min-h-screen items-center justify-center bg-background px-4 py-8 md:px-0">
+      <Card className="w-full max-w-md shadow-lg">
+        <CardHeader className="space-y-1 text-center">
+          <div className="flex justify-center mb-4">
+            <Icons.logo className="h-12 w-auto" />
+          </div>
+          <CardTitle className="text-2xl font-bold">Sign In</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="email">Email</Label>
+              <Input
+                id="email"
+                type="email"
+                placeholder="name@example.com"
+                autoComplete="email"
+                disabled={isLoading}
+                {...register("email")}
+                className={cn(errors.email && "border-destructive")}
+              />
+              {errors.email && (
+                <p className="text-sm text-destructive">{errors.email.message}</p>
               )}
-              
-              {statusMessage && (
-                <Alert className="mb-4">
-                  <AlertDescription className="ml-2">
-                    {statusMessage}
-                  </AlertDescription>
-                </Alert>
-              )}
-              
-              <Form {...form}>
-                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-                  <FormField
-                    control={form.control}
-                    name="email"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Email</FormLabel>
-                        <FormControl>
-                          <Input placeholder="your.email@example.com" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  
-                  <FormField
-                    control={form.control}
-                    name="password"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Password</FormLabel>
-                        <FormControl>
-                          <div className="relative">
-                            <Input 
-                              type={showPassword ? "text" : "password"} 
-                              placeholder="Enter your password"
-                              {...field} 
-                            />
-                            <button 
-                              type="button"
-                              onClick={togglePasswordVisibility}
-                              className="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700 focus:outline-none"
-                              tabIndex={-1} // Prevent tab focus for better accessibility
-                            >
-                              {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
-                            </button>
-                          </div>
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  
-                  <div className="flex flex-col space-y-2">
-                    <Button type="submit" className="w-full" disabled={isSubmitting}>
-                      {isSubmitting ? (
-                        <>
-                          <span className="mr-2">Logging in...</span>
-                          <div className="h-4 w-4 rounded-full border-2 border-white border-t-transparent animate-spin"></div>
-                        </>
-                      ) : (
-                        <>
-                          <LogIn className="mr-2 h-4 w-4" /> Member Login
-                        </>
-                      )}
-                    </Button>
-                    
-                    <Button 
-                      type="button" 
-                      variant="outline" 
-                      className="w-full" 
-                      onClick={handleGuestLogin}
-                      disabled={isSubmitting}
-                    >
-                      Guest Login
-                    </Button>
-                  </div>
-                </form>
-              </Form>
-            </CardContent>
-            
-            <CardFooter className="flex flex-col items-center space-y-2">
-              <Link to="/reset-password" className="text-sm text-muted-foreground hover:underline">
-                Forgot password?
-              </Link>
-              <p className="text-sm text-muted-foreground">
-                Don't have an account?{" "}
-                <Link to="/register" className="text-glee-purple hover:underline">
-                  Create one
+            </div>
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <Label htmlFor="password">Password</Label>
+                <Link 
+                  to="/reset-password" 
+                  className="text-sm text-glee-purple underline underline-offset-4 hover:text-glee-purple/80"
+                >
+                  Forgot password?
                 </Link>
-              </p>
-            </CardFooter>
-          </Card>
-        </div>
-      </div>
-    </Layout>
+              </div>
+              <div className="relative">
+                <Input
+                  id="password"
+                  type={showPassword ? "text" : "password"}
+                  placeholder="••••••••"
+                  autoComplete="current-password"
+                  disabled={isLoading}
+                  {...register("password")}
+                  className={cn(errors.password && "border-destructive")}
+                />
+                <button
+                  type="button"
+                  onClick={toggleShowPassword}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                >
+                  {showPassword ? (
+                    <EyeOff className="h-5 w-5" />
+                  ) : (
+                    <Eye className="h-5 w-5" />
+                  )}
+                  <span className="sr-only">
+                    {showPassword ? "Hide password" : "Show password"}
+                  </span>
+                </button>
+              </div>
+              {errors.password && (
+                <p className="text-sm text-destructive">{errors.password.message}</p>
+              )}
+            </div>
+            {errorMsg && (
+              <div className="rounded-md bg-destructive/10 p-3 text-sm text-destructive">
+                {errorMsg}
+              </div>
+            )}
+            <Button
+              type="submit"
+              className="w-full bg-glee-purple hover:bg-glee-purple/90"
+              disabled={isLoading}
+            >
+              {isLoading ? (
+                <div className="flex items-center justify-center">
+                  <Icons.spinner className="mr-2 h-4 w-4 animate-spin" />
+                  <span>Signing In...</span>
+                </div>
+              ) : (
+                "Sign In"
+              )}
+            </Button>
+          </form>
+        </CardContent>
+        <CardFooter className="flex flex-col space-y-4">
+          <div className="text-center text-sm">
+            Don't have an account?{" "}
+            <Link
+              to="/register"
+              className="text-glee-purple underline underline-offset-4 hover:text-glee-purple/80"
+            >
+              Sign Up
+            </Link>
+          </div>
+        </CardFooter>
+      </Card>
+    </div>
   );
 }
