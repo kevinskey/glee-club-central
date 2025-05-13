@@ -1,3 +1,4 @@
+
 import React from "react";
 import { createBrowserRouter, Navigate } from "react-router-dom";
 import HomePage from "@/pages/HomePage";
@@ -6,7 +7,7 @@ import CalendarPage from "@/pages/CalendarPage";
 import DashboardCalendarPage from "@/pages/dashboard/calendar/index";
 import DashboardLayout from "@/layouts/DashboardLayout";
 import HomeLayout from "@/layouts/HomeLayout";
-import { RequireAuth } from "@/components/auth/RequireAuth";
+import RequireAuth from "@/components/auth/RequireAuth";  // Fixed: import as default export
 
 // Add other imports as needed
 
