@@ -20,13 +20,13 @@ export function MemberPortalDropdown() {
   
   const navigateToLogin = () => {
     console.log("Navigating to login");
-    navigate("/login");
+    navigate("/auth/login");
   };
 
   const handleSignOut = async () => {
     if (signOut) {
       await signOut();
-      navigate("/login");
+      navigate("/auth/login");
     }
   };
   

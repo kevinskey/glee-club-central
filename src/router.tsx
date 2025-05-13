@@ -85,6 +85,11 @@ export const router = createBrowserRouter([
       }
     ]
   },
+  // Add a redirect for the old login path to the new auth/login path
+  {
+    path: '/login',
+    element: <Navigate to="/auth/login" replace />
+  },
   {
     path: '/dashboard',
     element: <DashboardLayout />,
