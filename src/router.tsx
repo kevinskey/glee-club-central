@@ -61,7 +61,7 @@ export const router = createBrowserRouter([
   },
   {
     path: '/auth',
-    element: <HomeLayout />,
+    element: <HomeLayout hideHeader={false} />,
     children: [
       {
         path: 'login',
@@ -85,10 +85,10 @@ export const router = createBrowserRouter([
       }
     ]
   },
-  // Add a direct route for /login to redirect to /auth/login
+  // Add a direct route for /login that does not hide the UI
   {
     path: '/login',
-    element: <Navigate to="/auth/login" replace />
+    element: <LoginPage />
   },
   {
     path: '/dashboard',

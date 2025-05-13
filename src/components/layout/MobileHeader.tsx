@@ -1,4 +1,3 @@
-
 import React, { useState, useRef } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { Icons } from "@/components/Icons";
@@ -182,6 +181,7 @@ export function MobileHeader() {
                         <LogIn className="h-4 w-4 mr-2" />
                         Login
                       </DropdownMenuItem>
+                      
                       <DropdownMenuItem onClick={() => navigate("/login")}>
                         Member Portal
                       </DropdownMenuItem>
