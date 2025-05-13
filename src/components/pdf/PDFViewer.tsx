@@ -8,19 +8,15 @@ interface PDFViewerProps {
 
 const PDFViewer: React.FC<PDFViewerProps> = ({ url, title }) => {
   return (
-    <div className="pdf-viewer w-full h-full flex flex-col">
-      <div className="bg-gray-50 p-4 border-b">
-        <h2 className="text-xl font-semibold">{title}</h2>
-      </div>
-      <div className="flex-grow relative">
+    <div className="w-full h-full flex flex-col">
+      <h2 className="text-xl font-bold mb-4">{title}</h2>
+      <div className="flex-1 border rounded-md overflow-hidden">
         <iframe 
-          src={`${url}#toolbar=1&navpanes=1`} 
-          className="w-full h-full border-0" 
+          src={`${url}#view=FitH`} 
           title={title}
-          sandbox="allow-scripts allow-same-origin"
-        >
-          Your browser does not support PDF viewing. Please <a href={url} target="_blank" rel="noopener noreferrer">download the PDF</a> to view it.
-        </iframe>
+          className="w-full h-full"
+          allowFullScreen
+        />
       </div>
     </div>
   );

@@ -1,78 +1,152 @@
 
 import React from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Music, Calendar, Bell, FileText } from 'lucide-react';
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { FileText, Calendar, Bell, Users, Music, Settings } from "lucide-react";
+import { Link } from 'react-router-dom';
 
-export default function DashboardHome() {
+const DashboardHome: React.FC = () => {
   return (
-    <div className="container mx-auto p-6">
-      <h1 className="text-3xl font-bold mb-6">Welcome to Glee World</h1>
-      
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-lg flex items-center">
-              <Music className="mr-2 h-5 w-5" /> Sheet Music
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-muted-foreground">Access your choir's sheet music library.</p>
-          </CardContent>
-        </Card>
-        
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-lg flex items-center">
-              <Calendar className="mr-2 h-5 w-5" /> Calendar
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-muted-foreground">View rehearsals and performance schedules.</p>
-          </CardContent>
-        </Card>
-        
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-lg flex items-center">
-              <Bell className="mr-2 h-5 w-5" /> Announcements
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-muted-foreground">Latest announcements from the directors.</p>
-          </CardContent>
-        </Card>
-        
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-lg flex items-center">
-              <FileText className="mr-2 h-5 w-5" /> Resources
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-muted-foreground">Access club resources and documents.</p>
-          </CardContent>
-        </Card>
+    <div className="space-y-6">
+      <div className="flex justify-between items-center">
+        <h1 className="text-3xl font-bold">Glee Club Dashboard</h1>
       </div>
       
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <Card className="col-span-1 lg:col-span-2">
-          <CardHeader>
-            <CardTitle>Upcoming Events</CardTitle>
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="flex items-center">
+              <FileText className="mr-2 h-5 w-5 text-glee-purple" />
+              Sheet Music
+            </CardTitle>
+            <CardDescription>
+              Access your sheet music library
+            </CardDescription>
           </CardHeader>
-          <CardContent>
-            <p className="text-muted-foreground mb-4">No upcoming events scheduled.</p>
+          <CardContent className="pt-0">
+            <p className="text-sm text-muted-foreground">
+              View, annotate, and organize your vocal scores
+            </p>
           </CardContent>
+          <CardFooter>
+            <Button asChild className="w-full">
+              <Link to="/dashboard/sheet-music">View Sheet Music</Link>
+            </Button>
+          </CardFooter>
         </Card>
         
         <Card>
-          <CardHeader>
-            <CardTitle>Quick Links</CardTitle>
+          <CardHeader className="pb-2">
+            <CardTitle className="flex items-center">
+              <Calendar className="mr-2 h-5 w-5 text-glee-purple" />
+              Calendar
+            </CardTitle>
+            <CardDescription>
+              Upcoming rehearsals and performances
+            </CardDescription>
           </CardHeader>
-          <CardContent className="space-y-2">
-            <p className="text-muted-foreground">No quick links available.</p>
+          <CardContent className="pt-0">
+            <p className="text-sm text-muted-foreground">
+              Stay updated with all Glee Club events
+            </p>
           </CardContent>
+          <CardFooter>
+            <Button asChild className="w-full">
+              <Link to="/dashboard/calendar">View Calendar</Link>
+            </Button>
+          </CardFooter>
+        </Card>
+        
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="flex items-center">
+              <Bell className="mr-2 h-5 w-5 text-glee-purple" />
+              Announcements
+            </CardTitle>
+            <CardDescription>
+              Important updates and notices
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="pt-0">
+            <p className="text-sm text-muted-foreground">
+              Read the latest announcements from the directors
+            </p>
+          </CardContent>
+          <CardFooter>
+            <Button asChild className="w-full">
+              <Link to="/dashboard/announcements">View Announcements</Link>
+            </Button>
+          </CardFooter>
+        </Card>
+        
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="flex items-center">
+              <Users className="mr-2 h-5 w-5 text-glee-purple" />
+              Members
+            </CardTitle>
+            <CardDescription>
+              View the Glee Club roster
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="pt-0">
+            <p className="text-sm text-muted-foreground">
+              Contact information and voice parts
+            </p>
+          </CardContent>
+          <CardFooter>
+            <Button asChild className="w-full">
+              <Link to="/dashboard/members">View Members</Link>
+            </Button>
+          </CardFooter>
+        </Card>
+        
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="flex items-center">
+              <Music className="mr-2 h-5 w-5 text-glee-purple" />
+              Recordings
+            </CardTitle>
+            <CardDescription>
+              Practice recordings and performances
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="pt-0">
+            <p className="text-sm text-muted-foreground">
+              Listen to recordings for practice and reference
+            </p>
+          </CardContent>
+          <CardFooter>
+            <Button asChild className="w-full">
+              <Link to="/dashboard/recordings">View Recordings</Link>
+            </Button>
+          </CardFooter>
+        </Card>
+        
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="flex items-center">
+              <Settings className="mr-2 h-5 w-5 text-glee-purple" />
+              Profile
+            </CardTitle>
+            <CardDescription>
+              Manage your account settings
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="pt-0">
+            <p className="text-sm text-muted-foreground">
+              Update your personal information and preferences
+            </p>
+          </CardContent>
+          <CardFooter>
+            <Button asChild className="w-full">
+              <Link to="/dashboard/profile">View Profile</Link>
+            </Button>
+          </CardFooter>
         </Card>
       </div>
     </div>
   );
-}
+};
+
+export default DashboardHome;

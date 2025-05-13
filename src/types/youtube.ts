@@ -2,13 +2,13 @@
 export interface YouTubeVideo {
   id: string;
   title: string;
-  description?: string;
-  videoId: string;
+  description: string;
+  url: string;
   thumbnailUrl: string;
   publishedAt: string;
-  channelId?: string;
-  channelTitle?: string;
-  viewCount?: number;
-  likeCount?: number;
-  duration?: string;
+  channelTitle: string;
+  viewCount: number;
+  likeCount: number;
+  commentCount: number;
+  duration: string;
 }

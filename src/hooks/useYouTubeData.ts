@@ -2,121 +2,122 @@
 import { useState, useEffect } from 'react';
 import { YouTubeVideo } from '@/types/youtube';
 
-// Enhanced sample YouTube data - in a real implementation, this would fetch from YouTube API
-const sampleYouTubeVideos: YouTubeVideo[] = [
-  {
-    id: "hYbHCl8gW-U",
-    title: "Spelman College Glee Club - Deep River",
-    description: "Spelman College Glee Club performing Deep River at the Sisters Chapel.",
-    thumbnailUrl: "https://i3.ytimg.com/vi/hYbHCl8gW-U/maxresdefault.jpg",
-    publishedAt: "2024-02-15",
-    videoUrl: "https://www.youtube.com/watch?v=hYbHCl8gW-U"
-  },
-  {
-    id: "EI-IGy8BFZ0",
-    title: "Spelman College Glee Club - Fix Me Jesus",
-    description: "Spelman College Glee Club performs Fix Me Jesus at the annual Christmas Carol Concert.",
-    thumbnailUrl: "https://i3.ytimg.com/vi/EI-IGy8BFZ0/maxresdefault.jpg",
-    publishedAt: "2023-12-10",
-    videoUrl: "https://www.youtube.com/watch?v=EI-IGy8BFZ0"
-  },
-  {
-    id: "c4Z8E4WMat4",
-    title: "Spelman College Glee Club - Wade in the Water",
-    description: "Spelman College Glee Club performing Wade in the Water during the spring concert tour.",
-    thumbnailUrl: "https://i3.ytimg.com/vi/c4Z8E4WMat4/maxresdefault.jpg",
-    publishedAt: "2023-10-05",
-    videoUrl: "https://www.youtube.com/watch?v=c4Z8E4WMat4"
-  },
-  {
-    id: "wQFVgRBDykY",
-    title: "Spelman College Glee Club - Lift Every Voice and Sing",
-    description: "Spelman College Glee Club performing Lift Every Voice and Sing at the annual Founders Day celebration.",
-    thumbnailUrl: "https://i3.ytimg.com/vi/wQFVgRBDykY/maxresdefault.jpg",
-    publishedAt: "2023-08-22",
-    videoUrl: "https://www.youtube.com/watch?v=wQFVgRBDykY"
-  },
-  {
-    id: "XmvKMxxWBOw",
-    title: "Spelman College Glee Club - Behind the Scenes Rehearsal",
-    description: "Go behind the scenes with the Spelman College Glee Club as they prepare for their upcoming tour.",
-    thumbnailUrl: "https://i3.ytimg.com/vi/XmvKMxxWBOw/maxresdefault.jpg",
-    publishedAt: "2023-07-15",
-    videoUrl: "https://www.youtube.com/watch?v=XmvKMxxWBOw"
-  },
-  {
-    id: "KqZG5hHgArQ",
-    title: "Spelman College Glee Club - Hallelujah Chorus",
-    description: "Performance from the Spring Concert featuring the full ensemble.",
-    thumbnailUrl: "https://i3.ytimg.com/vi/KqZG5hHgArQ/maxresdefault.jpg",
-    publishedAt: "2023-05-18",
-    videoUrl: "https://www.youtube.com/watch?v=KqZG5hHgArQ"
-  },
-  {
-    id: "YM3g8Hz1J4Y",
-    title: "Spelman College Glee Club - Tour Vlog: New York City",
-    description: "Join us on our East Coast tour as we perform at venues in New York City and connect with alumni.",
-    thumbnailUrl: "https://i3.ytimg.com/vi/YM3g8Hz1J4Y/maxresdefault.jpg",
-    publishedAt: "2023-04-05",
-    videoUrl: "https://www.youtube.com/watch?v=YM3g8Hz1J4Y"
-  },
-  {
-    id: "dRLRQUcoCO4",
-    title: "Spelman College Glee Club - Alto Section Warm-up Techniques",
-    description: "Our vocal coach demonstrates warm-up techniques specifically for the alto section.",
-    thumbnailUrl: "https://i3.ytimg.com/vi/dRLRQUcoCO4/maxresdefault.jpg",
-    publishedAt: "2023-03-12",
-    videoUrl: "https://www.youtube.com/watch?v=dRLRQUcoCO4"
-  }
-];
+const useYouTubeData = () => {
+  const [videos, setVideos] = useState<YouTubeVideo[]>([
+    {
+      id: 'video1',
+      title: 'Spelman College Glee Club - Amazing Grace',
+      description: 'Spelman College Glee Club performs Amazing Grace at the 2023 Spring Concert.',
+      url: 'https://www.youtube.com/watch?v=example1',
+      thumbnailUrl: '/lovable-uploads/8aa13e63-fb9a-4c52-95cf-86b458c58f1c.png',
+      publishedAt: '2023-04-15T12:00:00Z',
+      channelTitle: 'Spelman College',
+      viewCount: 12500,
+      likeCount: 750,
+      commentCount: 86,
+      duration: 'PT3M45S'
+    },
+    {
+      id: 'video2',
+      title: 'Lift Every Voice and Sing - Spelman Glee Club',
+      description: 'Spelman College Glee Club performs the Black National Anthem at Founders Day.',
+      url: 'https://www.youtube.com/watch?v=example2',
+      thumbnailUrl: '/lovable-uploads/9a044e72-80dc-40a6-b716-2d5c2d35b878.png',
+      publishedAt: '2023-02-10T15:30:00Z',
+      channelTitle: 'Spelman College',
+      viewCount: 9800,
+      likeCount: 620,
+      commentCount: 45,
+      duration: 'PT4M20S'
+    },
+    {
+      id: 'video3',
+      title: 'Behind the Scenes with the Spelman Glee Club',
+      description: 'A behind the scenes look at the rehearsal process of the Spelman College Glee Club.',
+      url: 'https://www.youtube.com/watch?v=example3',
+      thumbnailUrl: '/lovable-uploads/a2e734d0-cb83-4b32-be93-9f3f0da03fc4.png',
+      publishedAt: '2023-03-05T09:15:00Z',
+      channelTitle: 'Spelman College',
+      viewCount: 7560,
+      likeCount: 380,
+      commentCount: 32,
+      duration: 'PT8M12S'
+    },
+    {
+      id: 'video4',
+      title: 'Interview: Spelman Glee Club Director',
+      description: 'An exclusive interview with the director of the Spelman College Glee Club.',
+      url: 'https://www.youtube.com/watch?v=example4',
+      thumbnailUrl: '/lovable-uploads/10bab1e7-0f4e-402f-ab65-feb4710b5eaf.png',
+      publishedAt: '2023-01-20T14:45:00Z',
+      channelTitle: 'Spelman College',
+      viewCount: 8200,
+      likeCount: 410,
+      commentCount: 28,
+      duration: 'PT12M35S'
+    },
+    {
+      id: 'video5',
+      title: 'Spelman Glee Club European Tour Highlights',
+      description: 'Highlights from the Spelman College Glee Club European summer tour.',
+      url: 'https://www.youtube.com/watch?v=example5',
+      thumbnailUrl: '/lovable-uploads/312fd1a4-7f46-4000-8711-320383aa565a.png',
+      publishedAt: '2022-08-30T18:20:00Z',
+      channelTitle: 'Spelman College',
+      viewCount: 15300,
+      likeCount: 870,
+      commentCount: 93,
+      duration: 'PT15M20S'
+    },
+    {
+      id: 'video6',
+      title: 'Spelman and Morehouse College Glee Clubs Joint Concert',
+      description: 'Annual joint concert featuring the Spelman and Morehouse College Glee Clubs.',
+      url: 'https://www.youtube.com/watch?v=example6',
+      thumbnailUrl: '/lovable-uploads/642b93d7-fc15-4c2c-a7df-fe81aadb2f3b.png',
+      publishedAt: '2022-11-15T19:00:00Z',
+      channelTitle: 'Spelman College',
+      viewCount: 18700,
+      likeCount: 1200,
+      commentCount: 145,
+      duration: 'PT1H25M'
+    },
+    {
+      id: 'video7',
+      title: 'Spelman Glee Club Christmas Concert',
+      description: 'The annual Christmas Concert featuring the Spelman College Glee Club.',
+      url: 'https://www.youtube.com/watch?v=example7',
+      thumbnailUrl: '/lovable-uploads/8fa96710-a03a-4033-9ee0-032306d74daa.png',
+      publishedAt: '2022-12-10T20:30:00Z',
+      channelTitle: 'Spelman College',
+      viewCount: 22400,
+      likeCount: 1500,
+      commentCount: 210,
+      duration: 'PT1H10M'
+    },
+    {
+      id: 'video8',
+      title: 'Spelman Glee Club - Alumnae Concert',
+      description: 'Special performance featuring current members and alumnae of the Spelman College Glee Club.',
+      url: 'https://www.youtube.com/watch?v=example8',
+      thumbnailUrl: '/lovable-uploads/cb5429e5-ef5e-4b87-8109-1e1216828e19.png',
+      publishedAt: '2022-10-05T16:45:00Z',
+      channelTitle: 'Spelman College',
+      viewCount: 16800,
+      likeCount: 920,
+      commentCount: 105,
+      duration: 'PT1H30M'
+    }
+  ]);
 
-export function useYouTubeData() {
-  const [videos, setVideos] = useState<YouTubeVideo[]>([]);
-  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState<Error | null>(null);
 
-  useEffect(() => {
-    const fetchVideos = async () => {
-      try {
-        // Simulate API call with a timeout
-        setTimeout(() => {
-          setVideos(sampleYouTubeVideos);
-          setIsLoading(false);
-        }, 800);
-        
-        // For a real implementation, you would use the YouTube API here:
-        /*
-        const apiKey = 'YOUR_YOUTUBE_API_KEY';
-        const channelId = 'UCxxxxxxxxxxxxxxxxxxxxxxx'; // Spelman Glee Club YouTube channel ID
-        const url = `https://www.googleapis.com/youtube/v3/search?key=${apiKey}&channelId=${channelId}&part=snippet,id&order=date&maxResults=20`;
-        
-        const response = await fetch(url);
-        const data = await response.json();
-        
-        if (data.items) {
-          const formattedVideos = data.items
-            .filter(item => item.id.kind === 'youtube#video')
-            .map(item => ({
-              id: item.id.videoId,
-              title: item.snippet.title,
-              description: item.snippet.description,
-              thumbnailUrl: item.snippet.thumbnails.high.url,
-              publishedAt: item.snippet.publishedAt,
-              videoUrl: `https://www.youtube.com/watch?v=${item.id.videoId}`
-            }));
-          setVideos(formattedVideos);
-        }
-        */
-      } catch (err) {
-        console.error('Error fetching YouTube videos:', err);
-        setError(err instanceof Error ? err : new Error('Failed to fetch YouTube videos'));
-      } finally {
-        setIsLoading(false);
-      }
-    };
+  return {
+    videos,
+    loading,
+    error
+  };
+};
 
-    fetchVideos();
-  }, []);
-
-  return { videos, isLoading, error };
-}
+export default useYouTubeData;

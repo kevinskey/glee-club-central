@@ -1,145 +1,94 @@
 
-import { useState, useCallback, useEffect } from 'react';
-import { 
-  checkGoogleCalendarConnection, 
-  getGoogleCalendarAuthUrl, 
-  disconnectGoogleCalendar,
-  syncWithGoogleCalendar
-} from '@/services/googleCalendar';
-import { toast } from 'sonner';
+import { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
-import { usePermissions } from './usePermissions';
+import { 
+  checkGoogleCalendarAuth, 
+  connectGoogleCalendar, 
+  fetchGoogleCalendarEvents,
+  addGoogleCalendarEvent
+} from '@/services/googleCalendar';
 
 export const useGoogleCalendar = () => {
-  const [isConnected, setIsConnected] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
-  const [isSyncing, setIsSyncing] = useState(false);
   const { user } = useAuth();
-  const { isSuperAdmin } = usePermissions();
+  const [isConnected, setIsConnected] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  // Check if connected when the hook loads
   useEffect(() => {
-    if (user) {
-      checkConnection();
-    }
+    const checkConnection = async () => {
+      if (!user) return;
+      
+      setIsLoading(true);
+      try {
+        const connected = await checkGoogleCalendarAuth(user.id);
+        setIsConnected(connected);
+      } catch (err) {
+        console.error('Error checking Google Calendar connection:', err);
+        setError('Failed to check Google Calendar connection status');
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    checkConnection();
   }, [user]);
 
-  // Function to check connection status
-  const checkConnection = useCallback(async () => {
-    if (!user) return;
-
+  const handleConnect = async () => {
     setIsLoading(true);
     try {
-      const connected = await checkGoogleCalendarConnection();
-      setIsConnected(connected);
-    } catch (error) {
-      console.error("Error checking Google Calendar connection:", error);
-    } finally {
-      setIsLoading(false);
-    }
-  }, [user]);
-
-  // Function to connect to Google Calendar
-  const connectToGoogleCalendar = useCallback(async () => {
-    if (!user) {
-      toast.error("You must be logged in to connect Google Calendar");
-      return;
-    }
-
-    if (!isSuperAdmin) {
-      toast.error("Only administrators can connect Google Calendar");
-      return;
-    }
-
-    try {
-      setIsLoading(true);
-      const authUrl = await getGoogleCalendarAuthUrl();
-      
-      if (authUrl) {
-        // Open the auth URL in a new window
-        const authWindow = window.open(authUrl, "_blank", "width=800,height=600");
-        
-        // Check periodically if the window is closed
-        const checkWindowClosed = setInterval(() => {
-          if (authWindow?.closed) {
-            clearInterval(checkWindowClosed);
-            checkConnection();
-          }
-        }, 1000);
+      const result = await connectGoogleCalendar();
+      if (result) {
+        setIsConnected(true);
+        setError(null);
       } else {
-        toast.error("Failed to get Google Calendar authorization URL");
+        throw new Error('Failed to connect to Google Calendar');
       }
-    } catch (error) {
-      console.error("Error connecting to Google Calendar:", error);
-      toast.error("Failed to connect to Google Calendar");
+    } catch (err: any) {
+      console.error('Error connecting to Google Calendar:', err);
+      setError(err.message || 'Failed to connect to Google Calendar');
     } finally {
       setIsLoading(false);
     }
-  }, [user, isSuperAdmin, checkConnection]);
+  };
 
-  // Function to disconnect from Google Calendar
-  const disconnect = useCallback(async () => {
-    if (!user) {
-      toast.error("You must be logged in to disconnect Google Calendar");
-      return;
-    }
-
-    if (!isSuperAdmin) {
-      toast.error("Only administrators can disconnect Google Calendar");
-      return;
-    }
-
+  const fetchEvents = async (startDate: Date, endDate: Date) => {
+    if (!user) return [];
+    
+    setIsLoading(true);
     try {
-      setIsLoading(true);
-      const success = await disconnectGoogleCalendar();
-      
-      if (success) {
-        setIsConnected(false);
-      }
-    } catch (error) {
-      console.error("Error disconnecting Google Calendar:", error);
+      const events = await fetchGoogleCalendarEvents(user.id, startDate, endDate);
+      return events;
+    } catch (err) {
+      console.error('Error fetching Google Calendar events:', err);
+      setError('Failed to fetch events from Google Calendar');
+      return [];
     } finally {
       setIsLoading(false);
     }
-  }, [user, isSuperAdmin]);
+  };
 
-  // Function to sync with Google Calendar
-  const syncCalendar = useCallback(async () => {
-    if (!user) {
-      toast.error("You must be logged in to sync with Google Calendar");
-      return false;
-    }
-
-    if (!isSuperAdmin) {
-      toast.error("Only administrators can sync with Google Calendar");
-      return false;
-    }
-
-    if (!isConnected) {
-      toast.error("Please connect Google Calendar first");
-      return false;
-    }
-
+  const addEvent = async (eventData: any) => {
+    if (!user) return { success: false, error: 'Not authenticated' };
+    
+    setIsLoading(true);
     try {
-      setIsSyncing(true);
-      const success = await syncWithGoogleCalendar();
-      return success;
-    } catch (error) {
-      console.error("Error syncing with Google Calendar:", error);
-      toast.error("Failed to sync with Google Calendar");
-      return false;
+      const result = await addGoogleCalendarEvent(user.id, eventData);
+      return result;
+    } catch (err) {
+      console.error('Error adding event to Google Calendar:', err);
+      setError('Failed to add event to Google Calendar');
+      return { success: false, error: err };
     } finally {
-      setIsSyncing(false);
+      setIsLoading(false);
     }
-  }, [user, isSuperAdmin, isConnected]);
+  };
 
   return {
     isConnected,
     isLoading,
-    isSyncing,
-    checkConnection,
-    connectToGoogleCalendar,
-    disconnect,
-    syncCalendar
+    error,
+    connect: handleConnect,
+    fetchEvents,
+    addEvent
   };
 };

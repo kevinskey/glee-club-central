@@ -1,74 +1,64 @@
 
-import { supabase } from '@/integrations/supabase/client';
-import { toast } from 'sonner';
+import { supabase } from "@/integrations/supabase/client";
 
-// Mock implementations for Google Calendar integration
-export const connectGoogleCalendar = async () => {
+/**
+ * Check if the user has authorized Google Calendar integration
+ */
+export const checkGoogleCalendarAuth = async (userId: string): Promise<boolean> => {
   try {
-    // This would typically redirect to Google OAuth
-    console.log('Connecting to Google Calendar...');
-    return { success: true };
+    const { data, error } = await supabase
+      .from('google_calendar_tokens')
+      .select('*')
+      .eq('user_id', userId)
+      .single();
+    
+    if (error) throw error;
+    
+    return !!data && !!data.access_token;
+  } catch (error) {
+    console.error('Error checking Google Calendar auth:', error);
+    return false;
+  }
+};
+
+/**
+ * Connect to Google Calendar by initiating the OAuth flow
+ */
+export const connectGoogleCalendar = async (): Promise<boolean> => {
+  try {
+    // This would normally redirect to Google OAuth
+    console.log("Would redirect to Google OAuth flow");
+    return true;
   } catch (error) {
     console.error('Error connecting to Google Calendar:', error);
-    return { success: false, error };
+    return false;
   }
 };
 
-export const getGoogleCalendarAuthUrl = () => {
-  // This would normally return an OAuth URL
-  return 'https://accounts.google.com/o/oauth2/auth';
-};
-
-export const checkGoogleCalendarConnection = async () => {
+/**
+ * Fetch events from Google Calendar
+ */
+export const fetchGoogleCalendarEvents = async (userId: string, startDate: Date, endDate: Date) => {
   try {
-    // Mock implementation
-    return { isConnected: false };
+    // Mock implementation - in a real app this would fetch from Google Calendar API
+    console.log(`Fetching Google Calendar events for user ${userId} from ${startDate} to ${endDate}`);
+    return [];
   } catch (error) {
-    console.error('Error checking Google Calendar connection:', error);
-    return { isConnected: false, error };
+    console.error('Error fetching Google Calendar events:', error);
+    return [];
   }
 };
 
-export const disconnectGoogleCalendar = async () => {
+/**
+ * Add an event to Google Calendar
+ */
+export const addGoogleCalendarEvent = async (userId: string, eventData: any) => {
   try {
-    // Mock implementation
-    toast.success('Disconnected from Google Calendar');
+    // Mock implementation - in a real app this would add to Google Calendar API
+    console.log(`Adding event to Google Calendar for user ${userId}:`, eventData);
     return { success: true };
   } catch (error) {
-    console.error('Error disconnecting from Google Calendar:', error);
-    return { success: false, error };
-  }
-};
-
-export const syncWithGoogleCalendar = async () => {
-  try {
-    // Mock implementation
-    toast.success('Calendar synced successfully');
-    return { success: true };
-  } catch (error) {
-    console.error('Error syncing with Google Calendar:', error);
-    return { success: false, error };
-  }
-};
-
-export const exportCalendarToIcal = async () => {
-  try {
-    // Mock implementation
-    toast.success('Calendar exported successfully');
-    return { success: true };
-  } catch (error) {
-    console.error('Error exporting calendar:', error);
-    return { success: false, error };
-  }
-};
-
-export const importCalendarFromIcal = async (file: File) => {
-  try {
-    // Mock implementation
-    toast.success('Calendar imported successfully');
-    return { success: true };
-  } catch (error) {
-    console.error('Error importing calendar:', error);
+    console.error('Error adding Google Calendar event:', error);
     return { success: false, error };
   }
 };

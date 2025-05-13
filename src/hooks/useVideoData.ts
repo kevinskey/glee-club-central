@@ -2,84 +2,78 @@
 import { useState, useEffect } from 'react';
 import { Video } from '@/types/video';
 
-// Sample video data to display - replace with actual data fetching from your API/Supabase
-const sampleVideos: Video[] = [
-  {
-    id: '1',
-    title: 'Spring Concert Highlights',
-    description: 'Highlights from our annual Spring Concert featuring selections from our tour repertoire.',
-    thumbnail: 'https://images.unsplash.com/photo-1514320291840-2e0a9bf2a9ae?q=80&w=600&auto=format&fit=crop',
-    publishedAt: '2025-04-01',
-    category: 'performance'
-  },
-  {
-    id: '2',
-    title: 'Alto Sectional Rehearsal',
-    description: 'Rehearsal footage from the alto section preparing for the upcoming concert.',
-    thumbnail: 'https://images.unsplash.com/photo-1516280440614-37939bbacd81?q=80&w=600&auto=format&fit=crop',
-    publishedAt: '2025-03-20',
-    category: 'rehearsal'
-  },
-  {
-    id: '3',
-    title: 'Tour Performance in Chicago',
-    description: 'Live recording of our performance at the Chicago Cultural Center during our Midwest tour.',
-    thumbnail: 'https://images.unsplash.com/photo-1515187029135-18ee286d815b?q=80&w=600&auto=format&fit=crop',
-    publishedAt: '2025-02-15',
-    category: 'tour'
-  },
-  {
-    id: '4',
-    title: 'Holiday Concert',
-    description: 'Annual holiday concert featuring seasonal favorites and spirituals.',
-    thumbnail: 'https://images.unsplash.com/photo-1522839209177-1d1997b7e5b6?q=80&w=600&auto=format&fit=crop',
-    publishedAt: '2024-12-10',
-    category: 'performance'
-  },
-  {
-    id: '5',
-    title: 'Spelman College Glee Club Promo',
-    description: 'Official promotional video for the Spelman College Glee Club featuring interviews and performance clips.',
-    thumbnail: 'https://images.unsplash.com/photo-1557682250-4b256635a863?q=80&w=600&auto=format&fit=crop',
-    publishedAt: '2024-11-05',
-    category: 'events'
-  }
-];
+const useVideoData = () => {
+  const [videos, setVideos] = useState<Video[]>([
+    {
+      id: '1',
+      title: 'Spelman Glee Club - Amazing Grace',
+      description: 'Performance at the Annual Spring Concert',
+      url: 'https://example.com/video1',
+      thumbnailUrl: '/lovable-uploads/8aa13e63-fb9a-4c52-95cf-86b458c58f1c.png',
+      publishedAt: '2023-04-15',
+      duration: '3:45',
+      viewCount: 1200,
+      category: 'Performance',
+      tags: ['concert', 'spiritual']
+    },
+    {
+      id: '2',
+      title: 'Spelman Glee Club - Lift Every Voice and Sing',
+      description: 'Performance at the Founders Day Celebration',
+      url: 'https://example.com/video2',
+      thumbnailUrl: '/lovable-uploads/9a044e72-80dc-40a6-b716-2d5c2d35b878.png',
+      publishedAt: '2023-02-10',
+      duration: '4:20',
+      viewCount: 950,
+      category: 'Performance',
+      tags: ['concert', 'anthem']
+    },
+    {
+      id: '3',
+      title: 'Behind the Scenes - Glee Club Rehearsal',
+      description: 'A look at our rehearsal process',
+      url: 'https://example.com/video3',
+      thumbnailUrl: '/lovable-uploads/a2e734d0-cb83-4b32-be93-9f3f0da03fc4.png',
+      publishedAt: '2023-03-05',
+      duration: '8:12',
+      viewCount: 750,
+      category: 'Rehearsal',
+      tags: ['behind-the-scenes', 'rehearsal']
+    },
+    {
+      id: '4',
+      title: 'Interview with Glee Club Director',
+      description: 'Learn about our musical direction and philosophy',
+      url: 'https://example.com/video4',
+      thumbnailUrl: '/lovable-uploads/10bab1e7-0f4e-402f-ab65-feb4710b5eaf.png',
+      publishedAt: '2023-01-20',
+      duration: '12:35',
+      viewCount: 820,
+      category: 'Interview',
+      tags: ['interview', 'director']
+    },
+    {
+      id: '5',
+      title: 'Spelman Glee Club - European Tour Highlights',
+      description: 'Highlights from our summer tour of Europe',
+      url: 'https://example.com/video5',
+      thumbnailUrl: '/lovable-uploads/312fd1a4-7f46-4000-8711-320383aa565a.png',
+      publishedAt: '2022-08-30',
+      duration: '15:20',
+      viewCount: 1500,
+      category: 'Tour',
+      tags: ['tour', 'europe', 'travel']
+    }
+  ]);
 
-export function useVideoData() {
-  const [videos, setVideos] = useState<Video[]>([]);
-  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState<Error | null>(null);
 
-  useEffect(() => {
-    const fetchVideos = async () => {
-      try {
-        // Simulate API call with a timeout
-        setTimeout(() => {
-          setVideos(sampleVideos);
-          setIsLoading(false);
-        }, 1000);
+  return {
+    videos,
+    loading,
+    error
+  };
+};
 
-        // For a real implementation, you would use Supabase here:
-        /*
-        const { data, error } = await supabase
-          .from('videos')
-          .select('*')
-          .order('publishedAt', { ascending: false });
-
-        if (error) throw error;
-        setVideos(data);
-        */
-      } catch (err) {
-        console.error('Error fetching videos:', err);
-        setError(err instanceof Error ? err : new Error('Failed to fetch videos'));
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchVideos();
-  }, []);
-
-  return { videos, isLoading, error };
-}
+export default useVideoData;

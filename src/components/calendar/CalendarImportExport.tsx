@@ -1,89 +1,132 @@
 
-import React, { useRef, useState } from "react";
-import { Button } from "@/components/ui/button";
-import { Download, Upload } from "lucide-react";
-import { toast } from "sonner";
-import { exportCalendarToIcal, importCalendarFromIcal } from "@/services/googleCalendar";
-import { CalendarEvent } from "@/types/calendar";
+import React, { useState } from 'react';
+import { Button } from '@/components/ui/button';
+import { useToast } from '@/hooks/use-toast';
+import { Download, Upload, Calendar } from 'lucide-react';
+import { useGoogleCalendar } from '@/hooks/useGoogleCalendar';
 
 interface CalendarImportExportProps {
-  events: CalendarEvent[];
-  onImport: (events: any[]) => Promise<void>;
+  onImport?: (events: any[]) => void;
+  events?: any[];
 }
 
-export function CalendarImportExport({ events, onImport }: CalendarImportExportProps) {
-  const fileInputRef = useRef<HTMLInputElement>(null);
+const CalendarImportExport: React.FC<CalendarImportExportProps> = ({ onImport, events = [] }) => {
+  const { toast } = useToast();
+  const [isExporting, setIsExporting] = useState(false);
   const [isImporting, setIsImporting] = useState(false);
-  
-  const handleExportClick = () => {
-    if (events.length === 0) {
-      toast.warning("There are no events to export");
+  const { isConnected, connect, isLoading, error, fetchEvents, addEvent } = useGoogleCalendar();
+
+  const handleExport = async () => {
+    setIsExporting(true);
+    try {
+      // Export events to a file
+      const eventsJson = JSON.stringify(events, null, 2);
+      const blob = new Blob([eventsJson], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      
+      // Create download link and trigger download
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `spelman-glee-events-${new Date().toISOString().split('T')[0]}.json`;
+      document.body.appendChild(a);
+      a.click();
+      
+      // Clean up
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      
+      toast({
+        title: "Export successful",
+        description: `${events.length} events exported to JSON file`,
+      });
+    } catch (error) {
+      console.error('Error exporting events:', error);
+      toast({
+        title: "Export failed",
+        description: "Could not export events. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsExporting(false);
+    }
+  };
+
+  const handleImport = async () => {
+    // Implementation would handle file input and parsing
+    // Then call onImport with the parsed events
+    toast({
+      title: "Import feature",
+      description: "Import functionality would be implemented here",
+    });
+  };
+
+  const handleConnectGoogleCalendar = async () => {
+    if (isConnected) {
+      // Already connected, show toast
+      toast({
+        title: "Google Calendar",
+        description: "Already connected to Google Calendar",
+      });
       return;
     }
     
-    exportCalendarToIcal(events);
-  };
-  
-  const handleImportClick = () => {
-    fileInputRef.current?.click();
-  };
-  
-  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    
     try {
-      setIsImporting(true);
-      const importedEvents = await importCalendarFromIcal(file);
-      await onImport(importedEvents);
-      // Reset file input
-      if (fileInputRef.current) {
-        fileInputRef.current.value = '';
-      }
-    } catch (error) {
-      console.error("Import error:", error);
-      toast.error("Failed to import calendar");
-    } finally {
-      setIsImporting(false);
+      await connect();
+      toast({
+        title: "Google Calendar",
+        description: "Successfully connected to Google Calendar",
+      });
+    } catch (err) {
+      console.error('Error connecting to Google Calendar:', err);
+      toast({
+        title: "Google Calendar",
+        description: "Failed to connect to Google Calendar",
+        variant: "destructive",
+      });
     }
   };
-  
+
   return (
-    <div className="rounded-lg border p-4 space-y-4 bg-white dark:bg-gray-800">
-      <h3 className="text-lg font-medium">Calendar Import/Export</h3>
+    <div className="flex flex-wrap gap-2 mb-4">
+      <Button 
+        variant="outline" 
+        size="sm" 
+        onClick={handleExport} 
+        disabled={isExporting || events.length === 0}
+        className="flex items-center gap-1"
+      >
+        <Download className="w-4 h-4" />
+        {isExporting ? 'Exporting...' : 'Export Events'}
+      </Button>
       
-      <p className="text-sm text-muted-foreground">
-        Export your calendar to iCal format or import events from an iCal file.
-      </p>
+      <Button 
+        variant="outline" 
+        size="sm" 
+        onClick={handleImport} 
+        disabled={isImporting}
+        className="flex items-center gap-1"
+      >
+        <Upload className="w-4 h-4" />
+        {isImporting ? 'Importing...' : 'Import Events'}
+      </Button>
       
-      <div className="flex flex-wrap gap-2">
-        <Button 
-          onClick={handleExportClick} 
-          variant="outline" 
-          size="sm"
-        >
-          <Download className="mr-2 h-4 w-4" />
-          Export (.ics)
-        </Button>
-        
-        <Button 
-          onClick={handleImportClick} 
-          variant="outline" 
-          size="sm"
-          disabled={isImporting}
-        >
-          <Upload className={`mr-2 h-4 w-4 ${isImporting ? 'animate-spin' : ''}`} />
-          {isImporting ? 'Importing...' : 'Import (.ics)'}
-        </Button>
-        
-        <input
-          type="file"
-          ref={fileInputRef}
-          onChange={handleFileChange}
-          accept=".ics"
-          className="hidden"
-        />
-      </div>
+      <Button 
+        variant="outline" 
+        size="sm" 
+        onClick={handleConnectGoogleCalendar} 
+        disabled={isLoading}
+        className={`flex items-center gap-1 ${isConnected ? 'bg-green-50 text-green-700 border-green-300' : ''}`}
+      >
+        <Calendar className="w-4 h-4" />
+        {isLoading 
+          ? 'Connecting...' 
+          : isConnected 
+            ? 'Google Calendar Connected' 
+            : 'Connect Google Calendar'
+        }
+      </Button>
     </div>
   );
-}
+};
+
+export default CalendarImportExport;
