@@ -7,20 +7,23 @@ import { Footer } from "@/components/landing/Footer";
 import { PerformanceSection } from "@/components/landing/performance/PerformanceSection";
 import { YouTubeSection } from "@/components/landing/youtube/YouTubeSection";
 import { ConsolidatedHeader } from "@/components/layout/ConsolidatedHeader";
+import { SidebarProvider } from "@/components/ui/sidebar";
 
 const LandingPage: React.FC = () => {
   return (
-    <div className="min-h-screen">
-      <ConsolidatedHeader />
-      <main>
-        <HeroSection />
-        <PerformanceSection />
-        <YouTubeSection />
-        <TestimonialSection />
-        <CTASection />
-      </main>
-      <Footer />
-    </div>
+    <SidebarProvider>
+      <div className="min-h-screen w-full">
+        <ConsolidatedHeader />
+        <main>
+          <HeroSection />
+          <PerformanceSection />
+          <YouTubeSection />
+          <TestimonialSection />
+          <CTASection />
+        </main>
+        <Footer />
+      </div>
+    </SidebarProvider>
   );
 };
 

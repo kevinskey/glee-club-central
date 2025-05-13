@@ -19,7 +19,6 @@ import {
   LogOut,
   Clock
 } from "lucide-react";
-import { useSidebar } from "@/components/ui/sidebar";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { Icons } from "@/components/Icons";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -28,7 +27,6 @@ import { EnhancedMetronome } from "@/components/ui/enhanced-metronome";
 
 export function ConsolidatedHeader() {
   const { profile, signOut, isAuthenticated } = useAuth();
-  const { toggleSidebar, open } = useSidebar();
   const navigate = useNavigate();
   const location = useLocation();
   const [metronomeOpen, setMetronomeOpen] = useState(false);
@@ -36,6 +34,24 @@ export function ConsolidatedHeader() {
   const audioContextRef = useRef<AudioContext | null>(null);
   
   const isDashboardPath = location.pathname.startsWith("/dashboard") || location.pathname.startsWith("/admin");
+  
+  // Function to determine if we can use the sidebar functionality
+  const useSidebarIfAvailable = () => {
+    try {
+      // Dynamically import to avoid the error when no SidebarProvider exists
+      const sidebarModule = require("@/components/ui/sidebar");
+      return sidebarModule.useSidebar();
+    } catch (e) {
+      // Return fallback values if sidebar is not available
+      return {
+        toggleSidebar: () => {},
+        open: false
+      };
+    }
+  };
+
+  // Get sidebar functionality or fallback values
+  const { toggleSidebar } = useSidebarIfAvailable();
   
   const handleSignOut = async () => {
     if (signOut) {

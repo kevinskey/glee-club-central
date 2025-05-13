@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { AuthUser, AuthContextType, Profile, UserRole } from '@/types/auth';
 
@@ -27,6 +26,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     title: 'Administrator',
     is_super_admin: true,
   });
+
+  const [session, setSession] = useState<any>(null); // Add this line to include session in the context value
 
   const login = async (email: string, password: string) => {
     setIsLoading(true);
@@ -71,6 +72,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     setIsAuthenticated(false);
     setUser(null);
     setProfile(null);
+    setSession(null);
     setIsLoading(false);
   };
 
@@ -133,17 +135,22 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     }
   };
 
-  const value: AuthContextType = {
+  const userPermissions = {
+    can_manage_users: true,
+    can_post_announcements: true,
+    can_manage_archives: true,
+    can_edit_financials: true,
+  };
+
+  // In the AuthProvider component, add the session property to the context value:
+  const contextValue: AuthContextType = {
     isAuthenticated,
     isLoading,
     user,
     profile,
-    permissions: {
-      can_manage_users: true,
-      can_post_announcements: true,
-      can_manage_archives: true,
-      can_edit_financials: true,
-    },
+    permissions: userPermissions,
+    session, // Add this line to include session in the context value
+    
     login,
     logout,
     signIn,
@@ -154,7 +161,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     updatePassword,
   };
 
-  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
+  return <AuthContext.Provider value={contextValue}>{children}</AuthContext.Provider>;
 };
 
 export const useAuth = (): AuthContextType => {

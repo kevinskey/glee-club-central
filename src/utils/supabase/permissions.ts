@@ -4,10 +4,9 @@ import { UserTitle, PermissionName } from '@/types/permissions';
 
 export async function fetchUserPermissions(userId: string) {
   try {
-    // Fetch user permissions
+    // Fetch user permissions from a view or custom function
     const { data: userPermissions, error: permissionsError } = await supabase
-      .from('user_permissions_view')
-      .select('permission_name');
+      .rpc('get_user_permissions', { user_id: userId });
 
     if (permissionsError) {
       throw permissionsError;
@@ -24,7 +23,7 @@ export async function fetchUserPermissions(userId: string) {
       throw titleError;
     }
 
-    const permissions = userPermissions ? userPermissions.map(p => p.permission_name as string) : [];
+    const permissions = userPermissions ? userPermissions.map(p => p.permission_name as PermissionName) : [];
     const title = userTitleData?.title || null;
 
     return { permissions, title };
@@ -34,7 +33,7 @@ export async function fetchUserPermissions(userId: string) {
   }
 }
 
-export async function updateUserTitle(userId: string, title: string) {
+export async function updateUserTitle(userId: string, title: UserTitle) {
   try {
     const { error } = await supabase
       .from('profiles')
@@ -44,6 +43,7 @@ export async function updateUserTitle(userId: string, title: string) {
     if (error) {
       throw error;
     }
+    return true;
   } catch (error) {
     console.error('Error updating user title:', error);
     throw error;

@@ -1,6 +1,21 @@
 
-// Define UserTitle as a string to avoid type issues
-export type UserTitle = string;
+// Define UserTitle as a union of specific title strings
+export type UserTitle = 
+  | "Super Admin"
+  | "Treasurer"
+  | "Librarian"
+  | "Wardrobe Mistress"
+  | "Secretary"
+  | "President"
+  | "Historian"
+  | "PR Manager"
+  | "Tour Manager"
+  | "Stage Manager"
+  | "Chaplain"
+  | "Section Leader"
+  | "Student Worker"
+  | "General Member"
+  | null;
 
 export type PermissionName = 
   | "manage_users"

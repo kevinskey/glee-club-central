@@ -1,7 +1,8 @@
-
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import { UserTitle } from '@/types/permissions';
+import { updateUserTitle } from '@/utils/supabase/permissions';
 
 interface Title {
   id: string;
@@ -190,13 +191,12 @@ export function useTitlesManagement() {
     }
   };
 
-  const updateUserTitle = async (userId: string, title: string): Promise<boolean> => {
+  const setUserTitle = async (userId: string, title: UserTitle): Promise<boolean> => {
     try {
-      // We'll use the utility function from permissions.ts
-      const { updateUserTitle: updateTitle } = await import('@/utils/supabase/permissions');
-      return await updateTitle(userId, title);
-    } catch (err: any) {
-      toast.error(err.message || 'Failed to update user title');
+      await updateUserTitle(userId, title);
+      return true;
+    } catch (error) {
+      console.error("Error setting user title:", error);
       return false;
     }
   };
@@ -215,7 +215,7 @@ export function useTitlesManagement() {
     addTitle,
     updateTitle,
     deleteTitle,
-    updateUserTitle,
+    setUserTitle,
     fetchTitlePermissions,
     updateTitlePermissions,
     addNewTitle
