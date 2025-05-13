@@ -30,7 +30,7 @@ import { cn } from "@/lib/utils";
 import { MobileFitCheck } from "./MobileFitCheck";
 import { EventType } from "@/types/calendar";
 
-// Update interface to match the schema in EventForm.tsx
+// Make EventFormValues match EventForm schema exactly
 export interface EventFormValues {
   title: string;
   date: Date;
@@ -177,6 +177,7 @@ export const EventFormFields = ({ form }: EventFormFieldsProps) => {
                 <SelectItem value="rehearsal">Rehearsal</SelectItem>
                 <SelectItem value="sectional">Sectional</SelectItem>
                 <SelectItem value="special">Special Event</SelectItem>
+                <SelectItem value="tour">Tour</SelectItem>
               </SelectContent>
             </Select>
             <FormMessage className="text-xs" />
@@ -195,6 +196,7 @@ export const EventFormFields = ({ form }: EventFormFieldsProps) => {
                 placeholder="Event description"
                 className="min-h-[80px] text-sm resize-none"
                 {...field}
+                value={field.value || ''}
               />
             </FormControl>
             <FormMessage className="text-xs" />

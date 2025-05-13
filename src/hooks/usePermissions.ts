@@ -1,4 +1,3 @@
-
 import { useAuth } from '@/contexts/AuthContext';
 import { useRolePermissions } from '@/contexts/RolePermissionContext';
 import { useState } from 'react';
@@ -11,13 +10,30 @@ export function usePermissions() {
   const [isUpdating, setIsUpdating] = useState(false);
   
   // Get permission by name, using the context's hasPermission function
-  const hasPermission = contextHasPermission;
+  const hasPermission = (permissionName: string): boolean => {
+    // If user has no permissions loaded or if permissions is null, deny access
+    if (!permissions) return false;
+    
+    // If user is a super admin, grant all permissions
+    if (profile?.is_super_admin) return true;
+    
+    // If user has an admin-like role, grant all permissions
+    if (profile?.role === 'admin' || 
+        profile?.role === 'administrator' || 
+        profile?.role === 'director') {
+      return true;
+    }
+    
+    // Otherwise, check if the specific permission is granted
+    return contextHasPermission(permissionName);
+  };
   
   // Check if the user is a super admin
   const isSuperAdmin = Boolean(profile?.is_super_admin);
   
   // Check if the user has an admin-like role
   const isAdminRole = profile?.role === 'admin' || 
+                      profile?.role === 'administrator' ||
                       profile?.role === 'director';
   
   // Development function to promote current user to super admin
@@ -34,7 +50,8 @@ export function usePermissions() {
         .from('profiles')
         .update({ 
           is_super_admin: true,
-          title: 'Super Admin' 
+          title: 'Super Admin',
+          role: 'admin'
         })
         .eq('id', profile.id);
       
@@ -45,9 +62,55 @@ export function usePermissions() {
       }
       
       // Refresh the permissions to reflect the changes
-      await useRolePermissions().refreshPermissions();
+      if (useRolePermissions().refreshPermissions) {
+        await useRolePermissions().refreshPermissions();
+      }
       
-      toast.success("You are now a Super Admin for development");
+      toast.success("You are now a Super Admin");
+      return true;
+    } catch (err) {
+      console.error("Error updating admin status:", err);
+      toast.error("Failed to update admin status");
+      return false;
+    } finally {
+      setIsUpdating(false);
+    }
+  };
+  
+  // Set Dr. Kevin Johnson as Super Admin
+  const setKevinJohnsonAsSuperAdmin = async (email: string): Promise<boolean> => {
+    setIsUpdating(true);
+    try {
+      // First find the user by email
+      const { data: userData, error: userError } = await supabase
+        .from('profiles')
+        .select('id')
+        .eq('email', email)
+        .maybeSingle();
+      
+      if (userError || !userData) {
+        console.error("Failed to find user by email:", userError);
+        toast.error("Failed to find user by email");
+        return false;
+      }
+      
+      // Update the profile to make user a super admin
+      const { error } = await supabase
+        .from('profiles')
+        .update({ 
+          is_super_admin: true,
+          title: 'Super Admin',
+          role: 'admin'
+        })
+        .eq('id', userData.id);
+      
+      if (error) {
+        console.error("Failed to set super admin status:", error);
+        toast.error("Failed to update admin permissions");
+        return false;
+      }
+      
+      toast.success("Dr. Kevin Johnson is now set as Super Admin");
       return true;
     } catch (err) {
       console.error("Error updating admin status:", err);
@@ -72,6 +135,7 @@ export function usePermissions() {
     isSuperAdmin,
     isAdminRole,
     promoteToSuperAdmin,
+    setKevinJohnsonAsSuperAdmin,
     isUpdating
   };
 }

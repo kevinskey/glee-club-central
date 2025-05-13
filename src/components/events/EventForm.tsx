@@ -31,7 +31,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { EventType } from "@/types/calendar";
 
-// Define the schema for the form
+// Define the schema for the form - make this match exactly with EventFormValues
 const eventFormSchema = z.object({
   title: z.string().min(2, { message: "Title must be at least 2 characters long" }),
   date: z.date({ required_error: "Event date is required" }),
@@ -61,7 +61,7 @@ const eventFormSchema = z.object({
   
   // Required fields
   time: z.string().min(1, { message: "Please select a time" }),
-  type: z.enum(["rehearsal", "concert", "sectional", "special"]).default("concert"),
+  type: z.enum(["rehearsal", "concert", "sectional", "special", "tour"]).default("concert"),
 });
 
 export type EventFormValues = z.infer<typeof eventFormSchema>;

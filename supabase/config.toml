@@ -4,28 +4,24 @@ project_id = "dzzptovqfqausipsgabw"
 [api]
 enabled = true
 port = 54321
-schemas = ["public", "storage"]
+schemas = ["public", "storage", "graphql_public"]
 
 [db]
 port = 54322
+shadow_port = 54320
+major_version = 15
 
 [studio]
+enabled = true
 port = 54323
+api_url = "http://localhost"
 
-[inbucket]
-port = 54324
+[[inbucket.patterns]]
+name = "inbucket"
+start = "^.*$"
 
-[auth]
-enabled = true
-port = 54325
-
-[storage]
-enabled = true
-port = 54326
-
-[functions]
 [functions.google-calendar-auth]
-verify_jwt = false
+verify_jwt = true
 
-[functions.get-google-token]
+[functions.google-calendar-sync]
 verify_jwt = true

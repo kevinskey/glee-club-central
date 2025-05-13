@@ -1,3 +1,4 @@
+
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { useAuth } from './AuthContext';
 import { fetchUserPermissions } from '@/utils/supabase/permissions';
@@ -37,7 +38,9 @@ export const RolePermissionProvider: React.FC<{ children: React.ReactNode }> = (
     if (profile?.is_super_admin) return true;
     
     // If user has an admin-like role, grant all permissions
-    if (profile?.role === 'admin' || profile?.role === 'administrator' || profile?.role === 'director') {
+    if (profile?.role === 'admin' || 
+        profile?.role === 'administrator' || 
+        profile?.role === 'director') {
       return true;
     }
     

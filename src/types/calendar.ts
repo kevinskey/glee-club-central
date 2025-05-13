@@ -11,4 +11,5 @@ export interface CalendarEvent {
   description?: string;
   created_by: string; // user ID
   allDay?: boolean;   // Added allDay property
+  google_event_id?: string; // Added for Google Calendar integration
 }

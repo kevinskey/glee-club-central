@@ -7,7 +7,8 @@ import { Button } from "@/components/ui/button";
 import { 
   disconnectGoogleCalendar, 
   startGoogleOAuth, 
-  checkGoogleCalendarConnection 
+  checkGoogleCalendarConnection,
+  syncEventsWithGoogleCalendar
 } from "@/services/googleCalendar";
 import { useAuth } from "@/contexts/AuthContext";
 import { usePermissions } from "@/hooks/usePermissions";
@@ -31,8 +32,10 @@ export const GoogleCalendarToggle = ({
   const [isConnected, setIsConnected] = useState<boolean>(false);
   const [isChecking, setIsChecking] = useState<boolean>(true);
   const [isConnecting, setIsConnecting] = useState<boolean>(false);
-  const { isSuperAdmin } = usePermissions();
+  const [isSyncing, setIsSyncing] = useState<boolean>(false);
+  const { isSuperAdmin, isAdminRole } = usePermissions();
   const { isAuthenticated, user } = useAuth();
+  const isAdmin = isSuperAdmin || isAdminRole;
 
   const checkConnection = async () => {
     if (!isAuthenticated || !user) {
@@ -159,8 +162,27 @@ export const GoogleCalendarToggle = ({
     }
   };
 
-  // If the user isn't a super admin, don't show the component
-  if (!isSuperAdmin) {
+  const handleSync = async () => {
+    if (!isAuthenticated || !user || !isConnected) {
+      return;
+    }
+    
+    setIsSyncing(true);
+    try {
+      const success = await syncEventsWithGoogleCalendar();
+      if (success) {
+        toast.success("Calendar synced successfully");
+      }
+    } catch (error) {
+      console.error("Error syncing calendar:", error);
+      toast.error("Failed to sync calendar");
+    } finally {
+      setIsSyncing(false);
+    }
+  };
+
+  // Only certain users can view/modify the calendar integration
+  if (!isAdmin && !isSuperAdmin) {
     return null;
   }
 
@@ -194,10 +216,21 @@ export const GoogleCalendarToggle = ({
               </Button>
             ) : (
               <>
-                <div className="mt-2">
-                  <Label className="text-xs text-green-600 dark:text-green-400 mb-2 block">
+                <div className="mt-2 space-y-2">
+                  <Label className="text-xs text-green-600 dark:text-green-400 block">
                     Connected to Google Calendar
                   </Label>
+                  
+                  <Button 
+                    onClick={handleSync} 
+                    variant="outline" 
+                    size="sm" 
+                    className="w-full text-xs bg-white dark:bg-gray-800"
+                    disabled={isSyncing}
+                  >
+                    {isSyncing ? "Syncing..." : "Sync Calendar Now"}
+                  </Button>
+                  
                   <Button 
                     onClick={handleDisconnect} 
                     variant="outline" 
