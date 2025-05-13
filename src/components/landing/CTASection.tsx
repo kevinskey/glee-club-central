@@ -22,7 +22,7 @@ export function CTASection() {
         <div className="max-w-xs sm:max-w-sm md:max-w-lg lg:max-w-2xl xl:max-w-3xl mx-auto text-center">
           <h2 className="font-playfair text-xl sm:text-2xl md:text-3xl font-bold mb-2 sm:mb-3 md:mb-4 tracking-tight">Join Our Digital Choir Community</h2>
           <p className="font-inter text-sm sm:text-base md:text-lg mb-6 sm:mb-7 md:mb-8 opacity-90 text-pretty leading-relaxed">
-            Access sheet music, submit recordings, check schedules, and connect with fellow members.
+            Connect with the Spelman College Glee Club community and stay updated with our performances and events.
           </p>
           <div className="flex flex-col sm:flex-row justify-center gap-3">
             <Button 
@@ -32,13 +32,6 @@ export function CTASection() {
               onClick={() => navigate("/fan-page")}
             >
               Guest Access
-            </Button>
-            <Button 
-              size={isMobile ? "default" : "lg"} 
-              className="bg-white text-glee-dark hover:bg-white/90 w-full sm:w-auto font-inter"
-              onClick={() => navigate("/auth/login")}
-            >
-              Member Portal
             </Button>
           </div>
         </div>

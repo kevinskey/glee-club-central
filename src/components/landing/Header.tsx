@@ -2,7 +2,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Logo } from "@/components/landing/header/Logo";
-import { Clock, Menu, X, LogIn } from "lucide-react";
+import { Clock, Menu, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription } from "@/components/ui/dialog";
 import { EnhancedMetronome } from "@/components/ui/enhanced-metronome";
@@ -17,7 +17,6 @@ import {
   DropdownMenuProvider
 } from "@/components/ui/dropdown-menu";
 import { useNavigate } from "react-router-dom";
-import { useAuth } from "@/contexts/AuthContext";
 
 interface HeaderProps {
   initialShowNewsFeed?: boolean;
@@ -29,7 +28,6 @@ export function Header({ initialShowNewsFeed = true }: HeaderProps) {
   const [metronomeOpen, setMetronomeOpen] = useState(false);
   const audioContextRef = useRef<AudioContext | null>(null);
   const navigate = useNavigate();
-  const { isAuthenticated } = useAuth();
   
   // Set the news feed state after component mounts with a slight delay
   useEffect(() => {
@@ -70,10 +68,6 @@ export function Header({ initialShowNewsFeed = true }: HeaderProps) {
     setMetronomeOpen(true);
   };
 
-  const handleLoginClick = () => {
-    navigate("/login");
-  };
-
   return (
     <header className="sticky top-0 z-50 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container px-2 flex h-16 items-center justify-between">
@@ -82,22 +76,8 @@ export function Header({ initialShowNewsFeed = true }: HeaderProps) {
           <Logo />
         </div>
         
-        {/* Right side: Metronome, theme toggle, login buttons, and navigation dropdown */}
+        {/* Right side: Metronome, theme toggle, and navigation dropdown */}
         <div className="flex items-center gap-3">
-          {/* Login Button - Only show when not authenticated */}
-          {!isAuthenticated && (
-            <div className="flex items-center space-x-2">
-              <Button
-                variant="outline"
-                size="sm"
-                className="h-8 px-3 text-xs flex items-center gap-1 font-inter"
-                onClick={handleLoginClick}
-              >
-                Guest Login
-              </Button>
-            </div>
-          )}
-          
           {/* Metronome Icon */}
           <Dialog open={metronomeOpen} onOpenChange={setMetronomeOpen}>
             <DialogTrigger asChild>
@@ -158,37 +138,6 @@ export function Header({ initialShowNewsFeed = true }: HeaderProps) {
                 <DropdownMenuItem onClick={() => navigate("/press-kit")}>
                   Press Kit
                 </DropdownMenuItem>
-                
-                <DropdownMenuSeparator />
-                
-                {isAuthenticated && (
-                  <DropdownMenuItem onClick={() => navigate("/dashboard")}>
-                    Dashboard
-                  </DropdownMenuItem>
-                )}
-                
-                {!isAuthenticated ? (
-                  <DropdownMenuItem onClick={() => navigate("/login")}>
-                    <LogIn className="h-4 w-4 mr-2" />
-                    Login
-                  </DropdownMenuItem>
-                ) : (
-                  <DropdownMenuItem onClick={() => navigate("/login")}>
-                    Member Portal
-                  </DropdownMenuItem>
-                )}
-                
-                {!isAuthenticated && (
-                  <DropdownMenuItem onClick={() => navigate("/register")}>
-                    Register
-                  </DropdownMenuItem>
-                )}
-                
-                {!isAuthenticated && (
-                  <DropdownMenuItem onClick={() => navigate("/register/admin")}>
-                    Admin Registration
-                  </DropdownMenuItem>
-                )}
               </DropdownMenuContent>
             </DropdownMenu>
           </DropdownMenuProvider>

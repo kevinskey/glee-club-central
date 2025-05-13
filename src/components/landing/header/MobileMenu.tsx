@@ -8,7 +8,6 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { useAuth } from "@/contexts/AuthContext";
 
 interface MobileMenuProps {
   onClose: () => void;
@@ -16,7 +15,6 @@ interface MobileMenuProps {
 
 export function MobileMenu({ onClose }: MobileMenuProps) {
   const navigate = useNavigate();
-  const { isAuthenticated } = useAuth();
   
   const handleNavigation = (path: string) => {
     navigate(path);
@@ -48,34 +46,6 @@ export function MobileMenu({ onClose }: MobileMenuProps) {
         >
           Press Kit
         </Button>
-        {isAuthenticated ? (
-          <>
-            <Button 
-              variant="ghost" 
-              className="justify-start py-3 hover:bg-accent hover:text-accent-foreground font-inter text-base" 
-              onClick={() => handleNavigation("/dashboard")}
-            >
-              Dashboard
-            </Button>
-          </>
-        ) : (
-          <>
-            <Button 
-              variant="ghost" 
-              className="justify-start py-3 hover:bg-accent hover:text-accent-foreground font-inter text-base" 
-              onClick={() => handleNavigation("/login")}
-            >
-              Login
-            </Button>
-            <Button 
-              variant="ghost" 
-              className="justify-start py-3 hover:bg-accent hover:text-accent-foreground font-inter text-base" 
-              onClick={() => handleNavigation("/register")}
-            >
-              Register
-            </Button>
-          </>
-        )}
         <Button 
           variant="ghost" 
           className="justify-start py-3 hover:bg-accent hover:text-accent-foreground font-inter text-base" 

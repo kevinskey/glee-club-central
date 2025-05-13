@@ -2,7 +2,6 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import { Music, Instagram, Facebook, Youtube } from "lucide-react";
-import { Button } from "@/components/ui/button";
 import { Icons } from "@/components/Icons";
 
 export function Footer() {
@@ -25,22 +24,6 @@ export function Footer() {
             <a href="/terms" className="text-sm sm:text-base text-gray-600 dark:text-gray-600 hover:text-glee-spelman transition-colors">Terms of Service</a>
             <a href="/about" className="text-sm sm:text-base text-gray-600 dark:text-gray-600 hover:text-glee-spelman transition-colors">About</a>
             <a href="/contact" className="text-sm sm:text-base text-gray-600 dark:text-gray-600 hover:text-glee-spelman transition-colors">Contact</a>
-            <div className="flex gap-3 mt-3 sm:mt-0">
-              <Button 
-                variant="ghost" 
-                className="text-glee-spelman hover:text-white hover:bg-glee-spelman"
-                onClick={() => navigate("/fan-page")}
-              >
-                Guest Access
-              </Button>
-              <Button 
-                variant="ghost" 
-                className="text-glee-spelman hover:text-white hover:bg-glee-spelman"
-                onClick={() => navigate("/login")}
-              >
-                Member Portal
-              </Button>
-            </div>
           </div>
         </div>
         
