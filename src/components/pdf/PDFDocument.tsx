@@ -1,5 +1,5 @@
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { FileText, Link } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { PDFCore } from "@/components/ui/pdf-viewer/PDFCore";
@@ -33,6 +33,7 @@ export const PDFDocument = ({
   children,
 }: PDFDocumentProps) => {
   const [viewMode, setViewMode] = useState<'scroll' | 'page'>('page');
+  const [pdfLoadAttempts, setPdfLoadAttempts] = useState(0);
   
   // Handle view to Media Library
   const goToMediaLibrary = () => {
@@ -42,7 +43,7 @@ export const PDFDocument = ({
   };
 
   // Show a console log to help debug PDF loading issues
-  React.useEffect(() => {
+  useEffect(() => {
     console.log("PDFDocument rendering with URL:", url);
     
     // Check if URL is valid
@@ -53,6 +54,19 @@ export const PDFDocument = ({
       });
     }
   }, [url]);
+  
+  // Handle PDF load errors
+  const handleError = () => {
+    setPdfLoadAttempts(prev => prev + 1);
+    onError();
+    
+    // If multiple failures, suggest solutions
+    if (pdfLoadAttempts >= 2) {
+      toast.error("PDF Loading Issues", {
+        description: "Try opening in a new tab or check that the URL is accessible"
+      });
+    }
+  };
 
   return (
     <div className="relative w-full h-full flex flex-col justify-center overflow-hidden">
@@ -84,7 +98,7 @@ export const PDFDocument = ({
         zoom={zoom}
         viewMode={viewMode}
         onLoad={onLoad}
-        onError={onError}
+        onError={handleError}
         className="w-full h-full"
       />
       

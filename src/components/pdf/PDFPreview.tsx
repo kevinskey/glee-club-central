@@ -5,6 +5,7 @@ import { FileText, Link } from "lucide-react";
 import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
 import { useNavigate } from "react-router-dom";
+import { toast } from "sonner";
 
 interface PDFPreviewProps {
   url: string;
@@ -36,11 +37,16 @@ export const PDFPreview = ({
   
   const handleLoad = () => {
     setIsLoading(false);
+    console.log("PDF preview loaded successfully:", title);
   };
   
   const handleError = () => {
     setIsLoading(false);
     setError("Failed to load PDF preview");
+    console.error("Failed to load PDF preview:", url);
+    toast.error("Failed to load PDF preview", {
+      description: "The PDF could not be loaded. Please try again later."
+    });
   };
   
   const goToMediaLibrary = (e: React.MouseEvent) => {
@@ -49,11 +55,21 @@ export const PDFPreview = ({
       navigate(`/dashboard/admin/media?id=${mediaSourceId}`);
     }
   };
+
+  // Verify URL is valid before attempting to display
+  React.useEffect(() => {
+    if (!url || url.trim() === "") {
+      setError("No PDF URL provided");
+      console.error("No PDF URL provided for preview");
+    } else {
+      console.log("Preparing PDF preview with URL:", url);
+    }
+  }, [url]);
   
   return (
     <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
       <DialogTrigger asChild>
-        <div className={`cursor-pointer ${className}`}>
+        <div className={`cursor-pointer ${className}`} onClick={() => console.log("Opening PDF preview:", title)}>
           {children}
         </div>
       </DialogTrigger>
