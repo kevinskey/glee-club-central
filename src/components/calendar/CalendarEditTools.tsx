@@ -49,7 +49,7 @@ export function CalendarEditTools({
   if (!isSuperAdmin) return null;
   
   return (
-    <div className={`bg-white dark:bg-gray-800 rounded-lg shadow-sm border p-2 ${className}`}>
+    <div className={`bg-white dark:bg-gray-800 rounded-lg shadow-sm border p-2 mb-4 ${className}`}>
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-1">
           <TooltipProvider>
@@ -58,7 +58,7 @@ export function CalendarEditTools({
                 <Button 
                   variant="ghost" 
                   size="icon" 
-                  className="h-8 w-8" 
+                  className="h-8 w-8 bg-glee-purple/10 text-glee-purple hover:bg-glee-purple/20" 
                   onClick={onAddEvent}
                 >
                   <Plus className="h-4 w-4" />

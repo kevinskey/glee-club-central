@@ -1,4 +1,3 @@
-
 import React, { useState, useCallback, useMemo, useEffect } from "react";
 import { Footer } from "@/components/landing/Footer";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -206,7 +205,7 @@ export default function CalendarPage() {
             )}
           </div>
           
-          {/* Add the new CalendarEditTools component */}
+          {/* Make sure the CalendarEditTools is visible and working */}
           {isSuperAdmin && (
             <CalendarEditTools 
               onAddEvent={handleOpenAddEvent}
@@ -214,6 +213,9 @@ export default function CalendarPage() {
               onEditSelected={handleEditEvent}
               onDeleteSelected={handleDeleteEvent}
               onResetCalendar={() => setIsResetDialogOpen(true)}
+              onExportCalendar={() => toast.info("Export feature coming soon")}
+              onImportCalendar={() => toast.info("Import feature coming soon")}
+              onShareCalendar={() => toast.info("Share feature coming soon")}
               className="mb-4"
             />
           )}
