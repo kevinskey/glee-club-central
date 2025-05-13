@@ -8,9 +8,10 @@ import { Header } from "@/components/landing/Header"; // Import the Header compo
 
 interface HomeLayoutProps {
   hideHeader?: boolean;
+  children?: React.ReactNode;
 }
 
-const HomeLayout: React.FC<HomeLayoutProps> = ({ hideHeader = false }) => {
+const HomeLayout: React.FC<HomeLayoutProps> = ({ hideHeader = false, children }) => {
   const isMobile = useIsMobile();
   const location = useLocation();
   
@@ -27,7 +28,7 @@ const HomeLayout: React.FC<HomeLayoutProps> = ({ hideHeader = false }) => {
       <div className="min-h-screen flex flex-col bg-background w-full">
         {!shouldHideHeader && <Header initialShowNewsFeed={location.pathname === '/'} />}
         <div className={`flex-1 ${isMobile && showMobileBottomNav ? "pb-20" : "pb-6"}`}>
-          <Outlet />
+          {children || <Outlet />}
         </div>
         
         {/* Mobile bottom navigation */}

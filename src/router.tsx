@@ -1,3 +1,4 @@
+
 import { createBrowserRouter, Navigate } from 'react-router-dom';
 import { Suspense, lazy } from 'react';
 
@@ -61,7 +62,7 @@ export const router = createBrowserRouter([
   },
   {
     path: '/auth',
-    element: <HomeLayout hideHeader={false} />,
+    element: <HomeLayout hideHeader={true} />,
     children: [
       {
         path: 'login',
@@ -85,10 +86,10 @@ export const router = createBrowserRouter([
       }
     ]
   },
-  // Add a direct route for /login that does not hide the UI
+  // Add a direct route for /login
   {
     path: '/login',
-    element: <LoginPage />
+    element: <HomeLayout hideHeader={false}><LoginPage /></HomeLayout>
   },
   {
     path: '/dashboard',
