@@ -16,7 +16,6 @@ export type PermissionName =
   | "can_manage_users";
 
 export type UserTitle = 
-  | "Member"
   | "General Member" 
   | "Section Leader"
   | "Assistant Director" 
