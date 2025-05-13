@@ -1,6 +1,4 @@
-
 import React from "react";
-import { Footer } from "@/components/landing/Footer";
 import { PageHeaderWithToggle } from "@/components/ui/page-header-with-toggle";
 import { Shield } from "lucide-react";
 
@@ -112,7 +110,6 @@ const PrivacyPolicyPage = () => {
           </div>
         </div>
       </main>
-      <Footer />
     </div>
   );
 };

@@ -123,182 +123,178 @@ export default function ContactPage() {
   };
 
   return (
-    <div className="flex min-h-screen flex-col">
-      <Header initialShowNewsFeed={false} />
-      <main className="flex-1 bg-white dark:bg-gray-950">
-        <div className="container mx-auto px-4 py-12">
-          <div className="max-w-4xl mx-auto">
-            <h1 className="font-playfair text-3xl md:text-4xl lg:text-5xl font-bold text-glee-purple mb-6">
-              Contact Us
-            </h1>
-            <p className="text-lg mb-8 text-gray-700 dark:text-gray-300">
-              We'd love to hear from you. Whether you have questions about upcoming performances, 
-              membership, or would like to support the Glee Club, please don't hesitate to reach out.
-            </p>
-            
-            <div className="grid gap-8 md:grid-cols-2">
-              <div>
-                <h2 className="text-xl font-semibold mb-4">Send Us a Message</h2>
-                
-                {submitted ? (
-                  <div className="bg-green-50 dark:bg-green-900/20 p-6 rounded-lg text-center">
-                    <div className="mx-auto w-12 h-12 bg-green-100 dark:bg-green-800 rounded-full flex items-center justify-center mb-4">
-                      <Check className="h-6 w-6 text-green-600 dark:text-green-300" />
-                    </div>
-                    <h3 className="text-lg font-medium mb-2">Message Sent Successfully!</h3>
-                    <p className="text-gray-600 dark:text-gray-400 mb-4">
-                      Thank you for reaching out to us. We'll get back to you as soon as possible.
-                    </p>
-                    <Button 
-                      variant="outline"
-                      onClick={() => setSubmitted(false)}
-                      className="bg-white dark:bg-gray-800"
-                    >
-                      Send Another Message
-                    </Button>
-                  </div>
-                ) : (
-                  <Form {...form}>
-                    <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-                      <FormField
-                        control={form.control}
-                        name="name"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Your Name</FormLabel>
-                            <FormControl>
-                              <Input placeholder="Enter your name" {...field} />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                      
-                      <FormField
-                        control={form.control}
-                        name="email"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Your Email</FormLabel>
-                            <FormControl>
-                              <Input type="email" placeholder="Enter your email" {...field} />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                      
-                      <FormField
-                        control={form.control}
-                        name="subject"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Subject</FormLabel>
-                            <FormControl>
-                              <Input placeholder="What is your message about?" {...field} />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                      
-                      <FormField
-                        control={form.control}
-                        name="message"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Message</FormLabel>
-                            <FormControl>
-                              <Textarea 
-                                placeholder="Your message..." 
-                                className="min-h-[150px]" 
-                                {...field} 
-                              />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                      
-                      <Button 
-                        type="submit"
-                        className="bg-glee-purple hover:bg-glee-purple/90 text-white"
-                        disabled={isSubmitting}
-                      >
-                        {isSubmitting ? (
-                          <>
-                            <span className="mr-2">Sending...</span>
-                            <span className="animate-spin">⏳</span>
-                          </>
-                        ) : (
-                          <>
-                            <Send className="mr-2 h-4 w-4" />
-                            Send Message
-                          </>
-                        )}
-                      </Button>
-                    </form>
-                  </Form>
-                )}
-              </div>
+    <div className="bg-background min-h-screen flex flex-col">
+      <main className="flex-1">
+        <div className="container max-w-4xl px-4 py-8 md:py-12">
+          <h1 className="font-playfair text-3xl md:text-4xl lg:text-5xl font-bold text-glee-purple mb-6">
+            Contact Us
+          </h1>
+          <p className="text-lg mb-8 text-gray-700 dark:text-gray-300">
+            We'd love to hear from you. Whether you have questions about upcoming performances, 
+            membership, or would like to support the Glee Club, please don't hesitate to reach out.
+          </p>
+          
+          <div className="grid gap-8 md:grid-cols-2">
+            <div>
+              <h2 className="text-xl font-semibold mb-4">Send Us a Message</h2>
               
-              <div>
-                <h2 className="text-xl font-semibold mb-4">Contact Information</h2>
-                <div className="bg-gray-100 dark:bg-gray-800 p-6 rounded-lg space-y-6">
-                  <div className="flex gap-4">
-                    <MapPin className="h-5 w-5 text-glee-purple shrink-0 mt-1" />
-                    <div>
-                      <p className="font-medium">{contactInfo.address.name}</p>
-                      <p className="text-gray-600 dark:text-gray-400">{contactInfo.address.title}</p>
-                      <p className="text-gray-600 dark:text-gray-400">{contactInfo.address.street}</p>
-                      <p className="text-gray-600 dark:text-gray-400">{contactInfo.address.box}</p>
-                      <p className="text-gray-600 dark:text-gray-400">
-                        {contactInfo.address.city}, {contactInfo.address.state} {contactInfo.address.zip}
-                      </p>
-                      <p className="text-gray-600 dark:text-gray-400">{contactInfo.address.country}</p>
-                    </div>
+              {submitted ? (
+                <div className="bg-green-50 dark:bg-green-900/20 p-6 rounded-lg text-center">
+                  <div className="mx-auto w-12 h-12 bg-green-100 dark:bg-green-800 rounded-full flex items-center justify-center mb-4">
+                    <Check className="h-6 w-6 text-green-600 dark:text-green-300" />
                   </div>
-                  
-                  <div className="flex gap-4">
-                    <Phone className="h-5 w-5 text-glee-purple shrink-0 mt-1" />
-                    <div>
-                      <p className="font-medium">Phone</p>
-                      <p className="text-gray-600 dark:text-gray-400">{contactInfo.phone}</p>
-                    </div>
-                  </div>
-                  
-                  <div className="flex gap-4">
-                    <AtSign className="h-5 w-5 text-glee-purple shrink-0 mt-1" />
-                    <div>
-                      <p className="font-medium">Email</p>
-                      <a 
-                        href={`mailto:${contactInfo.email}`}
-                        className="text-gray-600 dark:text-gray-400 hover:text-glee-purple dark:hover:text-glee-accent"
-                      >
-                        {contactInfo.email}
-                      </a>
-                    </div>
+                  <h3 className="text-lg font-medium mb-2">Message Sent Successfully!</h3>
+                  <p className="text-gray-600 dark:text-gray-400 mb-4">
+                    Thank you for reaching out to us. We'll get back to you as soon as possible.
+                  </p>
+                  <Button 
+                    variant="outline"
+                    onClick={() => setSubmitted(false)}
+                    className="bg-white dark:bg-gray-800"
+                  >
+                    Send Another Message
+                  </Button>
+                </div>
+              ) : (
+                <Form {...form}>
+                  <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+                    <FormField
+                      control={form.control}
+                      name="name"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Your Name</FormLabel>
+                          <FormControl>
+                            <Input placeholder="Enter your name" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    
+                    <FormField
+                      control={form.control}
+                      name="email"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Your Email</FormLabel>
+                          <FormControl>
+                            <Input type="email" placeholder="Enter your email" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    
+                    <FormField
+                      control={form.control}
+                      name="subject"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Subject</FormLabel>
+                          <FormControl>
+                            <Input placeholder="What is your message about?" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    
+                    <FormField
+                      control={form.control}
+                      name="message"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Message</FormLabel>
+                          <FormControl>
+                            <Textarea 
+                              placeholder="Your message..." 
+                              className="min-h-[150px]" 
+                              {...field} 
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    
+                    <Button 
+                      type="submit"
+                      className="bg-glee-purple hover:bg-glee-purple/90 text-white"
+                      disabled={isSubmitting}
+                    >
+                      {isSubmitting ? (
+                        <>
+                          <span className="mr-2">Sending...</span>
+                          <span className="animate-spin">⏳</span>
+                        </>
+                      ) : (
+                        <>
+                          <Send className="mr-2 h-4 w-4" />
+                          Send Message
+                        </>
+                      )}
+                    </Button>
+                  </form>
+                </Form>
+              )}
+            </div>
+            
+            <div>
+              <h2 className="text-xl font-semibold mb-4">Contact Information</h2>
+              <div className="bg-gray-100 dark:bg-gray-800 p-6 rounded-lg flex flex-col items-center text-center space-y-6">
+                <div className="flex flex-col items-center">
+                  <MapPin className="h-5 w-5 text-glee-purple mb-2" />
+                  <div>
+                    <p className="font-medium">{contactInfo.address.name}</p>
+                    <p className="text-gray-600 dark:text-gray-400">{contactInfo.address.title}</p>
+                    <p className="text-gray-600 dark:text-gray-400">{contactInfo.address.street}</p>
+                    <p className="text-gray-600 dark:text-gray-400">{contactInfo.address.box}</p>
+                    <p className="text-gray-600 dark:text-gray-400">
+                      {contactInfo.address.city}, {contactInfo.address.state} {contactInfo.address.zip}
+                    </p>
+                    <p className="text-gray-600 dark:text-gray-400">{contactInfo.address.country}</p>
                   </div>
                 </div>
                 
-                <div className="mt-8">
-                  <h2 className="text-xl font-semibold mb-4">Office Hours</h2>
-                  <div className="bg-gray-100 dark:bg-gray-800 p-6 rounded-lg">
-                    <p className="font-medium mb-2">During Academic Year</p>
-                    <p className="text-gray-600 dark:text-gray-400">{contactInfo.hours.academic.weekdays}</p>
-                    <p className="text-gray-600 dark:text-gray-400">{contactInfo.hours.academic.weekend}</p>
-                    
-                    <p className="font-medium mb-2 mt-4">Summer Hours</p>
-                    <p className="text-gray-600 dark:text-gray-400">{contactInfo.hours.summer.weekdays}</p>
-                    <p className="text-gray-600 dark:text-gray-400">{contactInfo.hours.summer.weekend}</p>
+                <div className="flex flex-col items-center">
+                  <Phone className="h-5 w-5 text-glee-purple mb-2" />
+                  <div>
+                    <p className="font-medium">Phone</p>
+                    <p className="text-gray-600 dark:text-gray-400">{contactInfo.phone}</p>
                   </div>
+                </div>
+                
+                <div className="flex flex-col items-center">
+                  <AtSign className="h-5 w-5 text-glee-purple mb-2" />
+                  <div>
+                    <p className="font-medium">Email</p>
+                    <a 
+                      href={`mailto:${contactInfo.email}`}
+                      className="text-gray-600 dark:text-gray-400 hover:text-glee-purple dark:hover:text-glee-accent"
+                    >
+                      {contactInfo.email}
+                    </a>
+                  </div>
+                </div>
+              </div>
+              
+              <div className="mt-8">
+                <h2 className="text-xl font-semibold mb-4">Office Hours</h2>
+                <div className="bg-gray-100 dark:bg-gray-800 p-6 rounded-lg text-center">
+                  <p className="font-medium mb-2">During Academic Year</p>
+                  <p className="text-gray-600 dark:text-gray-400">{contactInfo.hours.academic.weekdays}</p>
+                  <p className="text-gray-600 dark:text-gray-400">{contactInfo.hours.academic.weekend}</p>
+                  
+                  <p className="font-medium mb-2 mt-4">Summer Hours</p>
+                  <p className="text-gray-600 dark:text-gray-400">{contactInfo.hours.summer.weekdays}</p>
+                  <p className="text-gray-600 dark:text-gray-400">{contactInfo.hours.summer.weekend}</p>
                 </div>
               </div>
             </div>
           </div>
         </div>
       </main>
-      <Footer />
     </div>
   );
 }

@@ -1,7 +1,5 @@
 import React, { useState } from 'react';
 import { useYouTubeData } from '@/hooks/useYouTubeData';
-import { Header } from "@/components/landing/Header";
-import { Footer } from "@/components/landing/Footer";
 import { PageHeader } from '@/components/ui/page-header';
 import { Card } from '@/components/ui/card';
 import { AspectRatio } from '@/components/ui/aspect-ratio';
@@ -48,8 +46,6 @@ export default function YoutubeVideosPage() {
   
   return (
     <div className="min-h-screen flex flex-col">
-      <Header initialShowNewsFeed={false} />
-      
       <main className="flex-1 container px-4 py-8">
         <PageHeader
           title="Spelman College Glee Club Videos"
@@ -162,8 +158,6 @@ export default function YoutubeVideosPage() {
           </div>
         </DialogContent>
       </Dialog>
-      
-      <Footer />
     </div>
   );
 }

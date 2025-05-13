@@ -1,3 +1,4 @@
+
 import { createBrowserRouter, Navigate } from 'react-router-dom';
 import { Suspense, lazy } from 'react';
 
@@ -18,11 +19,13 @@ import PrivacyPolicyPage from './pages/PrivacyPolicyPage';
 import TermsOfServicePage from './pages/TermsOfServicePage';
 import YoutubeVideosPage from './pages/YoutubeVideosPage';
 import SiteImagesPage from './pages/admin/SiteImagesPage';
+import SocialPage from './pages/SocialPage';
 
 // Import auth related pages
 import LoginPage from './pages/auth/LoginPage';
 import ResetPasswordPage from './pages/auth/ResetPasswordPage';
 import ForgotPasswordPage from './pages/auth/ForgotPasswordPage';
+import UpdatePasswordPage from './pages/UpdatePasswordPage';
 
 // Import admin pages
 import AdminLayout from './layouts/AdminLayout';
@@ -69,16 +72,20 @@ export const router = createBrowserRouter([
         element: <PressKitPage />,
       },
       {
-        path: 'privacy-policy',
+        path: 'privacy',
         element: <PrivacyPolicyPage />,
       },
       {
-        path: 'terms-of-service',
+        path: 'terms',
         element: <TermsOfServicePage />,
       },
       {
         path: 'youtube-videos',
         element: <YoutubeVideosPage />,
+      },
+      {
+        path: 'social',
+        element: <SocialPage />,
       },
       {
         path: '*',
