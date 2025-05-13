@@ -1,8 +1,37 @@
+
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
-// Start Google OAuth flow
-export const startGoogleAuth = async (): Promise<boolean> => {
+// Re-export the calendar utilities for backward compatibility
+export * from "@/utils/supabase/calendar";
+
+// Check if user is connected to Google Calendar
+export const checkGoogleCalendarConnection = async (): Promise<boolean> => {
+  try {
+    const { data: user } = await supabase.auth.getUser();
+    if (!user || !user.user) {
+      return false;
+    }
+    
+    const { data, error } = await supabase
+      .from('user_google_tokens')
+      .select('*')
+      .eq('user_id', user.user.id)
+      .single();
+    
+    if (error || !data) {
+      return false;
+    }
+    
+    return true;
+  } catch (error) {
+    console.error('Error checking Google Calendar connection:', error);
+    return false;
+  }
+};
+
+// Get Google Calendar Auth URL
+export const getGoogleCalendarAuthUrl = async (): Promise<string | null> => {
   try {
     const response = await fetch('/api/google-auth/start', {
       method: 'POST',
@@ -15,8 +44,24 @@ export const startGoogleAuth = async (): Promise<boolean> => {
     const data = await response.json();
     
     if (data.url) {
+      return data.url;
+    }
+    
+    return null;
+  } catch (error) {
+    console.error('Error getting Google Calendar auth URL:', error);
+    toast.error('Failed to start Google Calendar authorization');
+    return null;
+  }
+};
+
+// Start Google OAuth flow
+export const startGoogleAuth = async (): Promise<boolean> => {
+  try {
+    const authUrl = await getGoogleCalendarAuthUrl();
+    if (authUrl) {
       // Open Google auth URL in a new window
-      window.open(data.url, '_blank', 'width=800,height=600');
+      window.open(authUrl, '_blank', 'width=800,height=600');
       return true;
     }
     
@@ -31,10 +76,16 @@ export const startGoogleAuth = async (): Promise<boolean> => {
 // Disconnect from Google Calendar
 export const disconnectGoogleCalendar = async (): Promise<boolean> => {
   try {
+    const { data: userData } = await supabase.auth.getUser();
+    if (!userData || !userData.user) {
+      toast.error('User not authenticated');
+      return false;
+    }
+    
     const { error } = await supabase
       .from('user_google_tokens')
       .delete()
-      .eq('user_id', supabase.auth.getUser()?.id);
+      .eq('user_id', userData.user.id);
     
     if (error) {
       console.error('Error disconnecting Google Calendar:', error);
@@ -51,23 +102,60 @@ export const disconnectGoogleCalendar = async (): Promise<boolean> => {
   }
 };
 
-// Check if user is connected to Google Calendar
-export const isConnectedToGoogle = async (): Promise<boolean> => {
-  try {
-    const { data, error } = await supabase
-      .from('user_google_tokens')
-      .select('*')
-      .eq('user_id', (await supabase.auth.getUser()).data.user?.id)
-      .single();
+// Export calendar data in different formats (including iCal)
+export const exportCalendarData = async (events: any[], format: 'ical' | 'json' = 'ical'): Promise<void> => {
+  // Re-use the existing function from utils
+  if (format === 'ical') {
+    const { exportCalendarToIcal } = await import('@/utils/supabase/calendar');
+    exportCalendarToIcal(events);
+  } else {
+    // Export as JSON
+    const jsonString = JSON.stringify(events, null, 2);
+    const blob = new Blob([jsonString], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
     
-    if (error || !data) {
-      return false;
-    }
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'spelman-glee-club-calendar.json';
+    document.body.appendChild(a);
+    a.click();
     
-    return true;
-  } catch (error) {
-    console.error('Error checking Google Calendar connection:', error);
-    return false;
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    
+    toast.success('Calendar exported successfully as JSON');
+  }
+};
+
+// Import calendar data from different formats
+export const importCalendarData = async (file: File): Promise<any[]> => {
+  // Check file type
+  if (file.name.endsWith('.ics')) {
+    const { importCalendarFromIcal } = await import('@/utils/supabase/calendar');
+    return importCalendarFromIcal(file);
+  } else if (file.name.endsWith('.json')) {
+    // Import from JSON
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      
+      reader.onload = (e) => {
+        try {
+          const content = e.target?.result as string;
+          const events = JSON.parse(content);
+          resolve(events);
+        } catch (error) {
+          reject(error);
+        }
+      };
+      
+      reader.onerror = (error) => {
+        reject(error);
+      };
+      
+      reader.readAsText(file);
+    });
+  } else {
+    throw new Error('Unsupported file format. Please upload an .ics or .json file.');
   }
 };
 
@@ -130,6 +218,3 @@ export const importGoogleEvents = async (): Promise<any[]> => {
     return [];
   }
 };
-
-// Re-exporting from utils for backward compatibility
-export * from "@/utils/supabase/calendar";

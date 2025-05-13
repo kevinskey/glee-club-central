@@ -1,4 +1,3 @@
-
 import React, { useState, useCallback, useMemo, useEffect } from "react";
 import { Footer } from "@/components/landing/Footer";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -131,10 +130,23 @@ export default function CalendarPage() {
     }
   };
 
-  // Handle editing an event
-  const handleEditEvent = () => {
+  // Fix the handleEditEvent function to ensure type compatibility 
+  // Only updating the necessary function to fix the build error
+  const handleEditEvent = async (eventData: any) => {
     if (selectedEvent) {
-      setIsEditEventOpen(true);
+      // Convert date strings to appropriate format if needed
+      const processedEventData = {
+        ...eventData,
+        // Ensure start and end are strings as expected by the CalendarEvent type
+        start: typeof eventData.start === 'string' ? eventData.start : eventData.start.toISOString(),
+        end: typeof eventData.end === 'string' ? eventData.end : eventData.end.toISOString()
+      };
+
+      if (await updateEvent(processedEventData)) {
+        setIsEditEventOpen(false);
+        setSelectedEvent(null);
+        toast.success("Event updated successfully");
+      }
     }
   };
 
@@ -328,7 +340,7 @@ export default function CalendarPage() {
             </DialogHeader>
             <EditEventForm 
               event={selectedEvent}
-              onUpdateEvent={updateEvent}
+              onUpdateEvent={handleEditEvent}  {/* Using the fixed handler here */}
               onCancel={() => setIsEditEventOpen(false)} 
             />
           </DialogContent>
