@@ -1,3 +1,4 @@
+
 export type MediaType = "image" | "video" | "audio" | "pdf" | "other";
 
 export function getMediaType(fileType: string): MediaType {
@@ -29,9 +30,9 @@ export function getMediaTypeLabel(type: MediaType): string {
   }
 }
 
-export async function fetchFlickrPhotos(options: any = {}): Promise<any[]> {
+export async function fetchFlickrPhotos(userId?: string, photoCount?: number): Promise<any[]> {
   try {
-    console.log('Flickr fetch not implemented yet');
+    console.log('Flickr fetch not implemented yet', { userId, photoCount });
     // This is a placeholder - the real implementation would fetch from Flickr API
     return [];
   } catch (error) {
