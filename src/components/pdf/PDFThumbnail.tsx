@@ -61,7 +61,6 @@ export const PDFThumbnail = ({ url, title, className = '', onClick }: PDFThumbna
             canvasContext: context,
             viewport: viewport,
             // Enable image resources to be rendered
-            enableWebGL: true,
             renderInteractiveForms: true
           }).promise;
           
