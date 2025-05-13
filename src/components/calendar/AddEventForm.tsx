@@ -138,7 +138,9 @@ export function AddEventForm({ onAddEvent, onCancel, initialDate }: AddEventForm
         ...values,
         image_url: imageUrl,
         start: values.date,  // Set start date from form date
-        end: values.date     // Set end date (same as start for simplicity)
+        end: values.date,    // Set end date (same as start for simplicity)
+        // Add the user id as created_by
+        created_by: user.id
       };
       
       // Pass the enhanced values to the onAddEvent handler

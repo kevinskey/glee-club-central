@@ -1,170 +1,118 @@
 
 import { useState } from "react";
+import { CalendarEvent } from "@/types/calendar";
 import { toast } from "sonner";
-import { CalendarEvent, EventType } from "@/types/calendar";
 
 export const useCalendarEventHandlers = (
   events: CalendarEvent[],
   updateEvent: (event: CalendarEvent) => Promise<boolean>,
-  addEvent: (event: Omit<CalendarEvent, "id">) => Promise<boolean>,
+  addEvent: (event: any) => Promise<boolean>,
   deleteEvent: (id: string) => Promise<boolean>,
   setSelectedEvent: (event: CalendarEvent | null) => void,
   setIsViewModalOpen: (open: boolean) => void,
   setSelectedDate: (date: Date | null) => void,
   setIsCreateModalOpen: (open: boolean) => void
 ) => {
-  const [isProcessing, setIsProcessing] = useState(false);
 
-  // Handle clicking on a date
-  const handleDateClick = (date: Date) => {
-    if (date) {
-      setSelectedDate(date);
-      setIsCreateModalOpen(true);
-    }
+  const handleDateClick = (info: any) => {
+    const date = info.date;
+    setSelectedDate(date);
+    setIsCreateModalOpen(true);
   };
 
-  // Handle clicking on an event
-  const handleEventClick = (eventInfo: any) => {
-    const eventId = eventInfo.event.id;
-    const eventObj = events.find(e => e.id === eventId);
+  const handleEventClick = (info: any) => {
+    const clickedEvent = events.find(
+      (event) => event.id === info.event.id
+    );
     
-    if (eventObj) {
-      setSelectedEvent(eventObj);
+    if (clickedEvent) {
+      setSelectedEvent(clickedEvent);
       setIsViewModalOpen(true);
-    } else {
-      toast.error("Event details could not be found");
     }
   };
 
-  // Handle dragging and dropping events
   const handleEventDrop = async (info: any) => {
-    setIsProcessing(true);
     try {
       const eventId = info.event.id;
-      const eventObj = events.find(e => e.id === eventId);
+      const newStart = info.event.start;
       
-      if (!eventObj) {
-        toast.error("Event not found");
-        info.revert();
-        return;
-      }
+      const eventToUpdate = events.find(event => event.id === eventId);
       
-      // Create a copy of the event with updated dates
-      const updatedEvent: CalendarEvent = {
-        ...eventObj,
-        start: info.event.start.toISOString(),
-        end: info.event.end ? info.event.end.toISOString() : info.event.start.toISOString()
-      };
-      
-      const success = await updateEvent(updatedEvent);
-      
-      if (!success) {
-        toast.error("Failed to update event");
-        info.revert();
-      } else {
+      if (eventToUpdate) {
+        const updatedEvent = {
+          ...eventToUpdate,
+          start: newStart,
+          end: info.event.end || newStart,
+          date: newStart
+        };
+        
+        await updateEvent(updatedEvent);
         toast.success("Event updated successfully");
       }
     } catch (error) {
-      console.error("Error in handleEventDrop:", error);
-      toast.error("An error occurred while updating the event");
-      info.revert();
-    } finally {
-      setIsProcessing(false);
-    }
-  };
-
-  // Handle resizing events
-  const handleEventResize = async (info: any) => {
-    setIsProcessing(true);
-    try {
-      const eventId = info.event.id;
-      const eventObj = events.find(e => e.id === eventId);
-      
-      if (!eventObj) {
-        toast.error("Event not found");
-        info.revert();
-        return;
-      }
-      
-      // Create a copy of the event with updated end time
-      const updatedEvent: CalendarEvent = {
-        ...eventObj,
-        end: info.event.end.toISOString()
-      };
-      
-      const success = await updateEvent(updatedEvent);
-      
-      if (!success) {
-        toast.error("Failed to update event");
-        info.revert();
-      } else {
-        toast.success("Event updated successfully");
-      }
-    } catch (error) {
-      console.error("Error in handleEventResize:", error);
-      toast.error("An error occurred while updating the event");
-      info.revert();
-    } finally {
-      setIsProcessing(false);
-    }
-  };
-
-  // Create event
-  const handleCreateEvent = async (eventData: any): Promise<boolean> => {
-    setIsProcessing(true);
-    try {
-      // Ensure we have the necessary type safety
-      const newEvent: Omit<CalendarEvent, "id"> = {
-        title: eventData.title,
-        description: eventData.description || "",
-        start: eventData.start, 
-        end: eventData.end,
-        location: eventData.location || "",
-        type: eventData.type as EventType,
-        created_by: eventData.created_by
-      };
-      
-      return await addEvent(newEvent);
-    } catch (error) {
-      console.error("Error in handleCreateEvent:", error);
-      toast.error("Failed to create event");
-      return false;
-    } finally {
-      setIsProcessing(false);
-    }
-  };
-
-  // Update event
-  const handleUpdateEvent = async (eventData: CalendarEvent): Promise<boolean> => {
-    setIsProcessing(true);
-    try {
-      // Ensure event has necessary fields
-      const updatedEvent: CalendarEvent = {
-        ...eventData,
-        description: eventData.description || ""
-      };
-      
-      return await updateEvent(updatedEvent);
-    } catch (error) {
-      console.error("Error in handleUpdateEvent:", error);
+      console.error("Error updating event:", error);
       toast.error("Failed to update event");
-      return false;
-    } finally {
-      setIsProcessing(false);
+      info.revert();
     }
   };
 
-  // Delete event
-  const handleDeleteEvent = async (eventId: string): Promise<boolean> => {
-    setIsProcessing(true);
+  const handleEventResize = async (info: any) => {
     try {
-      return await deleteEvent(eventId);
+      const eventId = info.event.id;
+      const newEnd = info.event.end;
+      
+      const eventToUpdate = events.find(event => event.id === eventId);
+      
+      if (eventToUpdate) {
+        const updatedEvent = {
+          ...eventToUpdate,
+          end: newEnd
+        };
+        
+        await updateEvent(updatedEvent);
+        toast.success("Event updated successfully");
+      }
     } catch (error) {
-      console.error("Error in handleDeleteEvent:", error);
+      console.error("Error updating event:", error);
+      toast.error("Failed to update event");
+      info.revert();
+    }
+  };
+
+  // Fix the return type issue by making these functions return Promise<void> as expected
+  const handleCreateEvent = async (eventData: any): Promise<void> => {
+    try {
+      const success = await addEvent(eventData);
+      if (success) {
+        toast.success("Event created successfully");
+      }
+    } catch (error) {
+      console.error("Error creating event:", error);
+      toast.error("Failed to create event");
+    }
+  };
+
+  const handleUpdateEvent = async (eventData: CalendarEvent): Promise<void> => {
+    try {
+      const success = await updateEvent(eventData);
+      if (success) {
+        toast.success("Event updated successfully");
+      }
+    } catch (error) {
+      console.error("Error updating event:", error);
+      toast.error("Failed to update event");
+    }
+  };
+
+  const handleDeleteEvent = async (eventId: string): Promise<void> => {
+    try {
+      const success = await deleteEvent(eventId);
+      if (success) {
+        toast.success("Event deleted successfully");
+      }
+    } catch (error) {
+      console.error("Error deleting event:", error);
       toast.error("Failed to delete event");
-      return false;
-    } finally {
-      setIsProcessing(false);
     }
   };
 
@@ -175,9 +123,6 @@ export const useCalendarEventHandlers = (
     handleEventResize,
     handleCreateEvent,
     handleUpdateEvent,
-    handleDeleteEvent,
-    isProcessing
+    handleDeleteEvent
   };
 };
-
-export default useCalendarEventHandlers;

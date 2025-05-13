@@ -1,6 +1,6 @@
 
 import { create } from 'zustand';
-import { CalendarEvent, EventType } from '@/types/calendar'; // Import EventType alongside CalendarEvent
+import { CalendarEvent, EventType } from '@/types/calendar';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 
@@ -34,9 +34,10 @@ export const useCalendarStore = create<CalendarStore>((set, get) => ({
         title: event.title,
         type: event.type as EventType,
         start: new Date(`${event.date}T${event.time || '00:00:00'}`).toISOString(),
-        end: new Date(`${event.date}T${event.time || '00:00:00'}`).toISOString(), // Default end to same as start
+        end: new Date(`${event.date}T${event.time || '00:00:00'}`).toISOString(),
         location: event.location || '',
         description: event.description || '',
+        image_url: event.image_url || null,
         created_by: event.user_id
       }));
       
@@ -49,14 +50,18 @@ export const useCalendarStore = create<CalendarStore>((set, get) => ({
   
   addEvent: async (event) => {
     try {
+      // Handle file upload if there's a selected image
+      let imageUrl = event.image_url;
+      
       // Transform our CalendarEvent type to match DB schema
       const dbEvent = {
         title: event.title,
-        type: event.type,
+        type: event.type || 'concert',
         date: new Date(event.start).toISOString().split('T')[0], // Extract YYYY-MM-DD
         time: new Date(event.start).toISOString().split('T')[1].substring(0, 8), // Extract HH:MM:SS
         location: event.location || '',
         description: event.description || '',
+        image_url: imageUrl,
         user_id: event.created_by
       };
       
@@ -81,6 +86,7 @@ export const useCalendarStore = create<CalendarStore>((set, get) => ({
         end: new Date(`${data.date}T${data.time || '00:00:00'}`).toISOString(),
         location: data.location || '',
         description: data.description || '',
+        image_url: data.image_url || null,
         created_by: data.user_id
       };
       
@@ -106,6 +112,7 @@ export const useCalendarStore = create<CalendarStore>((set, get) => ({
         time: new Date(event.start).toISOString().split('T')[1].substring(0, 8),
         location: event.location || '',
         description: event.description || '',
+        image_url: event.image_url || null,
       };
       
       const { error } = await supabase

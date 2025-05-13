@@ -1,5 +1,6 @@
 
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect } from "react";
+import { Footer } from "@/components/landing/Footer";
 import { CalendarHeader } from "@/components/calendar/CalendarHeader";
 import { CalendarSidebar } from "@/components/calendar/CalendarSidebar";
 import { EventModal } from "@/components/calendar/EventModal";
@@ -14,6 +15,7 @@ import { toast } from "sonner";
 import { CalendarPageHeader } from "@/components/calendar/CalendarPageHeader";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { usePermissions } from "@/hooks/usePermissions";
+import { CalendarEvent } from "@/types/calendar";
 
 const CalendarPage = () => {
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
@@ -26,39 +28,31 @@ const CalendarPage = () => {
   const isMobile = useIsMobile();
   
   const { events, fetchEvents, addEvent, updateEvent, deleteEvent } = useCalendarStore();
-  const { isAdmin, profile, isLoading: authLoading } = useAuth();
+  const { isAdmin, profile } = useAuth();
   const { isSuperAdmin } = usePermissions();
 
-  console.log("CalendarPage rendering with view:", calendarView);
-  console.log("Current events count:", events.length);
-
-  // Only super admins can create events
-  const userCanCreate = isSuperAdmin;
+  // Always allow users to create events - for this specific page
+  const userCanCreate = true;
 
   useEffect(() => {
     console.log("CalendarPage - Initializing");
     
     const loadEvents = async () => {
-      console.log("CalendarPage - Loading events. Auth loading:", authLoading);
-      if (!authLoading) {
-        try {
-          setIsLoading(true);
-          console.log("CalendarPage - Fetching events");
-          await fetchEvents();
-          console.log("CalendarPage - Events loaded successfully");
-        } catch (error) {
-          console.error("Error loading events:", error);
-          toast.error("Failed to load calendar events");
-        } finally {
-          setIsLoading(false);
-        }
+      try {
+        setIsLoading(true);
+        console.log("CalendarPage - Fetching events");
+        await fetchEvents();
+        console.log("CalendarPage - Events loaded successfully");
+      } catch (error) {
+        console.error("Error loading events:", error);
+        toast.error("Failed to load calendar events");
+      } finally {
+        setIsLoading(false);
       }
     };
     
     loadEvents();
-  }, [authLoading, fetchEvents]);
-
-  console.log("CalendarPage - Render state:", { isLoading, eventsCount: events.length, view: calendarView });
+  }, [fetchEvents]);
 
   // Use our custom hook for event handling
   const {
@@ -79,35 +73,6 @@ const CalendarPage = () => {
     setSelectedDate,
     setIsCreateModalOpen
   );
-
-  // Handler for creating event
-  const onCreateEvent = async (eventData: any) => {
-    const success = await handleCreateEvent(eventData);
-    if (success) {
-      toast.success("Event created successfully");
-      setIsCreateModalOpen(false);
-    }
-  };
-
-  // Handler for updating event
-  const onUpdateEvent = async (eventData: any) => {
-    const success = await handleUpdateEvent(eventData);
-    if (success) {
-      toast.success("Event updated successfully");
-      setIsViewModalOpen(false);
-      setSelectedEvent(null);
-    }
-  };
-
-  // Handler for deleting event
-  const onDeleteEvent = async (eventId: string) => {
-    const success = await handleDeleteEvent(eventId);
-    if (success) {
-      toast.success("Event deleted successfully");
-      setIsViewModalOpen(false);
-      setSelectedEvent(null);
-    }
-  };
 
   return (
     <div className="flex flex-col min-h-screen">
@@ -154,7 +119,7 @@ const CalendarPage = () => {
             <DialogContent className="sm:max-w-md">
               <EventModal 
                 onClose={() => setIsCreateModalOpen(false)} 
-                onSave={onCreateEvent} 
+                onSave={handleCreateEvent} 
                 initialDate={selectedDate}
               />
             </DialogContent>
@@ -167,15 +132,16 @@ const CalendarPage = () => {
                 <ViewEventModal 
                   event={selectedEvent} 
                   onClose={() => setIsViewModalOpen(false)} 
-                  onUpdate={onUpdateEvent}
-                  onDelete={onDeleteEvent}
-                  userCanEdit={userCanCreate || (profile?.id === selectedEvent.created_by && selectedEvent.type === 'sectional')}
+                  onUpdate={handleUpdateEvent}
+                  onDelete={handleDeleteEvent}
+                  userCanEdit={true}
                 />
               </DialogContent>
             </Dialog>
           )}
         </div>
       </main>
+      <Footer />
     </div>
   );
 };
