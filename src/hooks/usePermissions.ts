@@ -1,3 +1,4 @@
+
 import { useAuth } from '@/contexts/AuthContext';
 import { useRolePermissions } from '@/contexts/RolePermissionContext';
 import { useState } from 'react';
@@ -72,7 +73,7 @@ export function usePermissions(): UsePermissionsReturn {
         return false;
       }
       
-      // Refresh permissions via the imported function
+      // Use refreshPermissions from the context directly
       if (refreshPermissions) {
         await refreshPermissions();
       }
