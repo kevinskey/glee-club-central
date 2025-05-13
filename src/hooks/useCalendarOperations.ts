@@ -23,9 +23,16 @@ export function useCalendarOperations(refreshEvents: () => Promise<void>) {
         return null;
       }
 
+      // Safely handle date conversion
+      const dateStr = event.start instanceof Date 
+        ? event.start.toISOString().split('T')[0]
+        : typeof event.start === 'string' 
+          ? event.start.split('T')[0] 
+          : new Date().toISOString().split('T')[0];
+
       const newEvent = {
         title: event.title,
-        date: event.start.toISOString().split('T')[0],
+        date: dateStr,
         time: event.time,
         location: event.location,
         description: event.description,
@@ -92,11 +99,18 @@ export function useCalendarOperations(refreshEvents: () => Promise<void>) {
         return false;
       }
 
+      // Safely handle date conversion
+      const dateStr = event.start instanceof Date 
+        ? event.start.toISOString().split('T')[0]
+        : typeof event.start === 'string' 
+          ? event.start.split('T')[0] 
+          : new Date().toISOString().split('T')[0];
+
       const { error } = await supabase
         .from("calendar_events")
         .update({
           title: event.title,
-          date: event.start.toISOString().split('T')[0],
+          date: dateStr,
           time: event.time,
           location: event.location,
           description: event.description,

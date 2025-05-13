@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { PageHeader } from "@/components/ui/page-header";
 import { Calendar, Plus, RefreshCw } from "lucide-react";
@@ -6,7 +7,7 @@ import { CalendarContainer } from "@/components/calendar/CalendarContainer";
 import { EventList } from "@/components/calendar/EventList";
 import { useAuth } from "@/contexts/AuthContext";
 import { useCalendarEvents } from "@/hooks/useCalendarEvents";
-import { CalendarEvent, EventType } from "@/types/calendar";
+import { CalendarEvent } from "@/types/calendar";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { AddEventForm } from "@/components/calendar/AddEventForm";
 import { EditEventForm } from "@/components/calendar/EditEventForm";
@@ -52,9 +53,12 @@ export default function SchedulePage() {
   // Check if user is admin - now check for super admin
   const isAdmin = isSuperAdmin;
 
-  // Get days with events for the calendar
+  // Get days with events for the calendar - safely convert to Date objects
   const daysWithEvents = events.map(event => {
-    return event.start instanceof Date ? event.start : new Date(event.start);
+    if (event.start instanceof Date) {
+      return event.start;
+    }
+    return new Date(event.start);
   });
   
   // Helper function to get event type color
@@ -86,7 +90,7 @@ export default function SchedulePage() {
         ...formValues,
         start: formValues.date, // Ensure start is set
         end: formValues.date,   // Ensure end is set
-        type: formValues.type as EventType
+        type: formValues.type
       };
       
       const result = await addEvent(eventData);

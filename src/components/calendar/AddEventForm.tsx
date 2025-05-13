@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
@@ -9,7 +10,6 @@ import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { EventFormFields, EventFormValues } from "./EventFormFields";
 import { EventImageUpload } from "./EventImageUpload";
-import { EventType } from "@/types/calendar";
 import { MobileFitCheck } from "./MobileFitCheck";
 import { checkEventMobileFit } from "@/utils/mobileUtils";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -46,7 +46,7 @@ export function AddEventForm({ onAddEvent, onCancel, initialDate }: AddEventForm
       time: "",
       location: "",
       description: "",
-      type: "concert" as EventType,
+      type: "concert",
       image_url: null,
     },
   });

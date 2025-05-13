@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
@@ -48,7 +49,7 @@ export function EditEventForm({
       time: event.time || "",
       location: event.location,
       description: event.description || "",
-      type: event.type,
+      type: event.type as "rehearsal" | "concert" | "sectional" | "special" | "tour",
       image_url: event.image_url || null,
     },
   });
