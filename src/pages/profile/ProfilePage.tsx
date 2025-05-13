@@ -19,6 +19,7 @@ import { useUserManagement } from "@/hooks/useUserManagement";
 import { Spinner } from "@/components/ui/spinner";
 import { Profile } from "@/types/auth";
 import { User as UserType } from "@/hooks/useUserManagement";
+import { useMedia } from "@/hooks/use-mobile";
 
 export default function ProfilePage() {
   const { profile, isLoading, refreshPermissions } = useAuth();
@@ -27,6 +28,7 @@ export default function ProfilePage() {
   const canManageRoles = hasPermission('can_manage_users');
   const [isEditing, setIsEditing] = useState(false);
   const [activeTab, setActiveTab] = useState("overview");
+  const isMobile = useMedia('(max-width: 640px)');
   
   // Auto sync profile data at regular intervals
   useEffect(() => {
@@ -144,14 +146,47 @@ export default function ProfilePage() {
             onValueChange={handleTabChange}
             className="w-full"
           >
-            <TabsList className="grid grid-cols-3 md:grid-cols-6 mb-4">
-              <TabsTrigger value="overview">Overview</TabsTrigger>
-              <TabsTrigger value="participation">Participation</TabsTrigger>
-              <TabsTrigger value="music">Music</TabsTrigger>
-              <TabsTrigger value="wardrobe">Wardrobe</TabsTrigger>
-              <TabsTrigger value="financial">Financial</TabsTrigger>
-              <TabsTrigger value="media">Media</TabsTrigger>
-            </TabsList>
+            {/* Improved mobile tab styling with more padding and better touch targets */}
+            <div className="overflow-x-auto pb-1">
+              <TabsList className={`mb-4 ${isMobile ? 'w-full grid-cols-3 gap-1 p-1.5' : 'grid grid-cols-6'}`}>
+                <TabsTrigger 
+                  value="overview" 
+                  className={`${isMobile ? 'py-2.5 px-1 text-xs' : ''}`}
+                >
+                  Overview
+                </TabsTrigger>
+                <TabsTrigger 
+                  value="participation" 
+                  className={`${isMobile ? 'py-2.5 px-1 text-xs' : ''}`}
+                >
+                  Participation
+                </TabsTrigger>
+                <TabsTrigger 
+                  value="music" 
+                  className={`${isMobile ? 'py-2.5 px-1 text-xs' : ''}`}
+                >
+                  Music
+                </TabsTrigger>
+                <TabsTrigger 
+                  value="wardrobe" 
+                  className={`${isMobile ? 'py-2.5 px-1 text-xs' : ''}`}
+                >
+                  Wardrobe
+                </TabsTrigger>
+                <TabsTrigger 
+                  value="financial" 
+                  className={`${isMobile ? 'py-2.5 px-1 text-xs' : ''}`}
+                >
+                  Financial
+                </TabsTrigger>
+                <TabsTrigger 
+                  value="media" 
+                  className={`${isMobile ? 'py-2.5 px-1 text-xs' : ''}`}
+                >
+                  Media
+                </TabsTrigger>
+              </TabsList>
+            </div>
             
             <TabsContent value="overview">
               <ProfileOverviewTab 
