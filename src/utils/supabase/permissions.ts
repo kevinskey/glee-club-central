@@ -6,7 +6,7 @@ export async function fetchUserPermissions(userId: string) {
   try {
     // Fetch user permissions from a view or custom function
     const { data: userPermissions, error: permissionsError } = await supabase
-      .rpc('get_user_permissions', { user_id: userId });
+      .rpc('get_user_permissions', { p_user_id: userId });
 
     if (permissionsError) {
       throw permissionsError;
@@ -23,7 +23,7 @@ export async function fetchUserPermissions(userId: string) {
       throw titleError;
     }
 
-    const permissions = userPermissions ? userPermissions.map(p => p.permission_name as PermissionName) : [];
+    const permissions = userPermissions ? userPermissions.map(p => p.permission as PermissionName) : [];
     const title = userTitleData?.title || null;
 
     return { permissions, title };

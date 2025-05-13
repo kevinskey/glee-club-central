@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { 
   Dialog, 
@@ -45,7 +46,7 @@ export function UserTitleManagement({
   const { 
     titles, 
     isLoading: titlesLoading, 
-    updateUserTitle 
+    setUserTitle 
   } = useTitlesManagement();
   
   // Update form state when user changes
@@ -64,8 +65,8 @@ export function UserTitleManagement({
 
     setIsLoading(true);
     try {
-      // Update title using the dynamic function
-      const titleUpdated = await updateUserTitle(user.id, selectedTitle);
+      // Update title using the function from the hook
+      const titleUpdated = await setUserTitle(user.id, selectedTitle as UserTitle);
       
       if (!titleUpdated) {
         throw new Error("Failed to update title");

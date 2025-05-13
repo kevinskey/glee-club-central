@@ -191,6 +191,7 @@ export function useTitlesManagement() {
     }
   };
 
+  // Make sure we're explicitly exposing the updateUserTitle function
   const setUserTitle = async (userId: string, title: UserTitle): Promise<boolean> => {
     try {
       await updateUserTitle(userId, title);
@@ -218,6 +219,7 @@ export function useTitlesManagement() {
     setUserTitle,
     fetchTitlePermissions,
     updateTitlePermissions,
-    addNewTitle
+    addNewTitle,
+    updateUserTitle: setUserTitle // Explicitly export the function with both names
   };
 }
