@@ -23,7 +23,7 @@ const HomeLayout: React.FC<HomeLayoutProps> = ({ hideHeader = false, children })
       <div className="min-h-screen flex flex-col bg-background w-full">
         <div className={`flex-1 ${isMobile && showMobileBottomNav ? "pb-20" : "pb-6"}`}>
           {children || (
-            <div className="mobile-container">
+            <div className={isMobile ? "w-full" : "mobile-container"}>
               <Outlet />
             </div>
           )}
