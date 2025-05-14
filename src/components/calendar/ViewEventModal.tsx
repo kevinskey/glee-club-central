@@ -1,138 +1,183 @@
 
-import React from "react";
+import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { format } from "date-fns";
 import { CalendarEvent } from "@/types/calendar";
-import { CalendarIcon, Clock, MapPin, Edit, Trash2 } from "lucide-react";
+import { 
+  AlertDialog, 
+  AlertDialogAction, 
+  AlertDialogCancel, 
+  AlertDialogContent, 
+  AlertDialogDescription, 
+  AlertDialogFooter, 
+  AlertDialogHeader, 
+  AlertDialogTitle 
+} from "@/components/ui/alert-dialog";
+import { EditEventForm } from "./EditEventForm";
 
 interface ViewEventModalProps {
   event: CalendarEvent;
   onClose: () => void;
-  onUpdate: (event: CalendarEvent) => Promise<void>;
-  onDelete: () => Promise<void>;
-  userCanEdit: boolean;
+  onUpdate: (event: CalendarEvent) => Promise<void> | Promise<boolean>;
+  onDelete: (eventId: string) => Promise<void>;
+  userCanEdit?: boolean;
 }
 
-export const ViewEventModal: React.FC<ViewEventModalProps> = ({
-  event,
-  onClose,
-  onUpdate,
-  onDelete,
-  userCanEdit
-}) => {
-  const [isDeleting, setIsDeleting] = React.useState(false);
-  const [isEditing, setIsEditing] = React.useState(false);
+export function ViewEventModal({ event, onClose, onUpdate, onDelete, userCanEdit = false }: ViewEventModalProps) {
+  const [isEditing, setIsEditing] = useState(false);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  
+  const handleDelete = async () => {
+    await onDelete(event.id);
+    onClose();
+  };
 
+  // If editing, show the edit form
   if (isEditing) {
-    const editableEvent = { ...event };
-    const handleSave = async (updatedData: any) => {
-      await onUpdate({
-        ...event,
-        ...updatedData
-      });
-    };
-    
-    // We would render the edit form here, but to avoid duplication,
-    // we'll just close the view modal and rely on the parent component
-    // to open an edit modal
     return (
-      <div className="flex flex-col space-y-4">
-        <p>Loading editor...</p>
-      </div>
+      <EditEventForm
+        event={event}
+        onUpdateEvent={onUpdate}
+        onCancel={() => setIsEditing(false)}
+      />
     );
   }
 
-  // Helper function to get event type color
-  const getEventTypeColor = (type: string) => {
-    switch (type) {
+  // Format dates for display
+  const eventDate = event.date instanceof Date
+    ? event.date.toLocaleDateString()
+    : new Date(event.date).toLocaleDateString();
+
+  // Determine event type color
+  const getEventTypeColor = () => {
+    switch (event.type) {
       case "concert":
-        return "bg-glee-purple";
+        return "text-glee-purple";
       case "rehearsal":
-        return "bg-blue-500";
+        return "text-blue-500";
       case "sectional":
-        return "bg-green-500";
+        return "text-green-500";
+      case "special":
+        return "text-amber-500";
+      case "tour":
+        return "text-purple-500";
       default:
-        return "bg-amber-500";
+        return "text-gray-500";
     }
   };
 
-  // Format the event date 
-  const eventDate = event.date instanceof Date ? event.date : new Date(event.date);
-  
-  const handleDelete = async () => {
-    setIsDeleting(true);
-    try {
-      await onDelete();
-    } finally {
-      setIsDeleting(false);
+  // Get formatted event type display name
+  const getEventTypeDisplay = () => {
+    switch (event.type) {
+      case "concert":
+        return "Concert";
+      case "rehearsal":
+        return "Rehearsal";
+      case "sectional":
+        return "Sectional";
+      case "special":
+        return "Special Event";
+      case "tour":
+        return "Tour";
+      default:
+        return event.type;
     }
   };
 
   return (
-    <div className="space-y-4">
-      <div className={`inline-block px-3 py-1 rounded-full text-white text-sm ${getEventTypeColor(event.type)}`}>
-        {event.type.charAt(0).toUpperCase() + event.type.slice(1)}
-      </div>
-      
-      <h3 className="text-xl font-semibold">{event.title}</h3>
-      
-      <div className="space-y-2">
-        <div className="flex items-center gap-2 text-gray-600 dark:text-gray-400">
-          <CalendarIcon className="h-4 w-4" />
-          <span>{format(eventDate, "EEEE, MMMM d, yyyy")}</span>
+    <div className="space-y-6">
+      <div>
+        <h2 className="text-xl font-semibold mb-1">{event.title}</h2>
+        <div className="flex items-center gap-2">
+          <span className={`font-medium ${getEventTypeColor()}`}>
+            {getEventTypeDisplay()}
+          </span>
         </div>
-        
-        {event.time && (
-          <div className="flex items-center gap-2 text-gray-600 dark:text-gray-400">
-            <Clock className="h-4 w-4" />
-            <span>{event.time}</span>
-          </div>
-        )}
-        
+      </div>
+
+      <div className="space-y-4">
+        <div>
+          <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400">Date & Time</h3>
+          <p>{eventDate} {event.time}</p>
+        </div>
+
         {event.location && (
-          <div className="flex items-center gap-2 text-gray-600 dark:text-gray-400">
-            <MapPin className="h-4 w-4" />
-            <span>{event.location}</span>
+          <div>
+            <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400">Location</h3>
+            <p>{event.location}</p>
+          </div>
+        )}
+
+        {event.description && (
+          <div>
+            <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400">Description</h3>
+            <p className="whitespace-pre-wrap">{event.description}</p>
+          </div>
+        )}
+
+        {event.image_url && (
+          <div>
+            <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400">Event Image</h3>
+            <div className="mt-1 overflow-hidden rounded-md border border-gray-200 dark:border-gray-700">
+              <img
+                src={event.image_url}
+                alt={event.title}
+                className="h-auto w-full object-cover"
+              />
+            </div>
           </div>
         )}
       </div>
-      
-      {event.description && (
-        <div className="border-t pt-3 mt-3">
-          <p className="text-sm whitespace-pre-wrap">{event.description}</p>
-        </div>
-      )}
-      
-      <div className="flex justify-end space-x-2 border-t pt-4 mt-4">
-        <Button type="button" variant="outline" onClick={onClose}>
+
+      <div className="flex justify-end gap-2">
+        <Button
+          type="button"
+          variant="outline"
+          onClick={onClose}
+        >
           Close
         </Button>
         
         {userCanEdit && (
           <>
-            <Button 
-              type="button" 
-              variant="outline" 
+            <Button
+              type="button"
               onClick={() => setIsEditing(true)}
-              className="flex items-center"
+              className="bg-glee-purple hover:bg-glee-purple/90"
             >
-              <Edit className="h-4 w-4 mr-2" />
               Edit
             </Button>
             
-            <Button 
-              type="button" 
+            <Button
+              type="button"
               variant="destructive"
-              onClick={handleDelete}
-              disabled={isDeleting}
-              className="flex items-center"
+              onClick={() => setIsDeleteDialogOpen(true)}
             >
-              <Trash2 className="h-4 w-4 mr-2" />
-              {isDeleting ? "Deleting..." : "Delete"}
+              Delete
             </Button>
           </>
         )}
       </div>
+
+      {/* Delete Confirmation Dialog */}
+      <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete Event</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete "{event.title}"? This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleDelete}
+              className="bg-red-500 hover:bg-red-600 text-white"
+            >
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
-};
+}

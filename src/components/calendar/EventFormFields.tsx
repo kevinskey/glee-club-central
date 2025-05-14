@@ -25,7 +25,7 @@ export interface EventFormValues {
   time?: string;
   location?: string;
   description?: string;
-  type?: "rehearsal" | "concert" | "sectional" | "special" | "tour" | EventType;
+  type?: EventType;
   image_url?: string | null;
   archivalNotes?: string;
   callTime?: string;

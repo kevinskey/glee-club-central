@@ -5,7 +5,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Form } from "@/components/ui/form";
 import { Button } from "@/components/ui/button";
-import { CalendarEvent } from "@/types/calendar";
+import { CalendarEvent, EventType } from "@/types/calendar";
 import { EventFormFields, EventFormValues } from "./EventFormFields";
 import { EventImageUpload } from "./EventImageUpload";
 import { MobileFitCheck } from "./MobileFitCheck";
@@ -49,7 +49,7 @@ export function EditEventForm({
       time: event.time || "",
       location: event.location,
       description: event.description || "",
-      type: event.type as "rehearsal" | "concert" | "sectional" | "special" | "tour",
+      type: event.type,
       image_url: event.image_url || null,
     },
   });
@@ -89,7 +89,7 @@ export function EditEventForm({
         time: values.time,
         location: values.location,
         description: values.description,
-        type: values.type,
+        type: values.type as EventType,
         image_url: values.image_url,
       };
 

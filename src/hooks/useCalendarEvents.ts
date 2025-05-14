@@ -1,7 +1,7 @@
 
 import { useState, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { CalendarEvent } from '@/types/calendar';
+import { CalendarEvent, EventType } from '@/types/calendar';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from "sonner";
 
@@ -28,8 +28,8 @@ export function useCalendarEvents() {
         throw new Error(error.message);
       }
       
-      // Transform database records to CalendarEvent format
-      const formattedEvents: CalendarEvent[] = data.map(event => ({
+      // Transform database records to CalendarEvent format with proper type casting
+      const formattedEvents: CalendarEvent[] = data.map((event: any) => ({
         id: event.id,
         title: event.title,
         description: event.description,
@@ -38,7 +38,7 @@ export function useCalendarEvents() {
         date: event.date,
         time: event.time,
         location: event.location,
-        type: event.type,
+        type: event.type as EventType, // Cast string to EventType
         image_url: event.image_url,
         created_by: event.user_id
       }));
@@ -61,18 +61,26 @@ export function useCalendarEvents() {
     
     try {
       // Format the event data for database insertion
-      const date = eventData.date instanceof Date 
-        ? eventData.date.toISOString().split('T')[0] 
-        : new Date(eventData.date).toISOString().split('T')[0];
-        
+      let formattedDate: string;
+      if (typeof eventData.date === 'string') {
+        formattedDate = eventData.date;
+      } else if (eventData.date instanceof Date) {
+        formattedDate = eventData.date.toISOString().split('T')[0];
+      } else {
+        // Default to today if date is missing
+        formattedDate = new Date().toISOString().split('T')[0];
+      }
+      
+      const eventType = eventData.type as EventType || 'special';
+      
       const event = {
         user_id: user.id,
         title: eventData.title,
-        date: date,
+        date: formattedDate,
         time: eventData.time || '00:00:00',
         location: eventData.location || '',
         description: eventData.description || '',
-        type: eventData.type || 'special',
+        type: eventType,
         image_url: eventData.image_url || null
       };
       
@@ -96,7 +104,7 @@ export function useCalendarEvents() {
         date: data.date,
         time: data.time,
         location: data.location,
-        type: data.type,
+        type: data.type as EventType,
         image_url: data.image_url,
         created_by: data.user_id
       };
@@ -112,69 +120,148 @@ export function useCalendarEvents() {
   };
   
   // Update an existing event
-  const updateEvent = async (eventData: CalendarEvent): Promise<boolean> => {
+  const updateEvent = useCallback(async (eventData: CalendarEvent) => {
+    if (!user) {
+      toast.error("You must be logged in to update events");
+      return false;
+    }
+    
     try {
-      const date = eventData.date instanceof Date 
-        ? eventData.date.toISOString().split('T')[0] 
-        : typeof eventData.date === 'string' 
-          ? eventData.date 
-          : new Date(eventData.date).toISOString().split('T')[0];
-          
-      const event = {
-        title: eventData.title,
-        date: date,
-        time: eventData.time || '00:00:00',
-        location: eventData.location || '',
-        description: eventData.description || '',
-        type: eventData.type || 'special',
-        image_url: eventData.image_url
-      };
+      // Format date for database
+      let formattedDate: string;
+      if (typeof eventData.date === 'string') {
+        formattedDate = eventData.date;
+      } else if (eventData.date instanceof Date) {
+        formattedDate = eventData.date.toISOString().split('T')[0];
+      } else {
+        // Use start date if date field is missing
+        formattedDate = new Date(eventData.start).toISOString().split('T')[0];
+      }
       
       const { error } = await supabase
         .from('calendar_events')
-        .update(event)
+        .update({
+          title: eventData.title,
+          description: eventData.description,
+          location: eventData.location,
+          date: formattedDate,
+          time: eventData.time,
+          type: eventData.type,
+          allday: eventData.allDay || false
+        })
         .eq('id', eventData.id);
-        
+      
       if (error) {
-        throw error;
+        console.error("Error updating event:", error);
+        toast.error("Failed to update event");
+        return false;
       }
       
-      // Update the event in the state
-      setEvents(prev => 
-        prev.map(e => e.id === eventData.id ? { ...e, ...eventData } : e)
+      // Convert start and end dates to their appropriate types
+      const updatedEvent = {
+        ...eventData,
+        start: typeof eventData.start === 'string' ? new Date(eventData.start) : eventData.start,
+        end: typeof eventData.end === 'string' ? new Date(eventData.end) : eventData.end
+      };
+      
+      // Update the event in the local state
+      setEvents(prevEvents => 
+        prevEvents.map(event => 
+          event.id === eventData.id ? updatedEvent : event
+        )
       );
       
-      toast.success('Event updated successfully');
       return true;
     } catch (error) {
-      console.error('Error updating event:', error);
-      toast.error('Failed to update event');
+      console.error("Error in updateEvent:", error);
+      toast.error("An error occurred while updating the event");
       return false;
     }
-  };
+  }, [user]);
   
   // Delete an event
-  const deleteEvent = async (eventId: string): Promise<boolean> => {
+  const deleteEvent = useCallback(async (id: string) => {
+    if (!user) {
+      toast.error("You must be logged in to delete events");
+      return false;
+    }
+    
     try {
       const { error } = await supabase
         .from('calendar_events')
         .delete()
-        .eq('id', eventId);
-        
+        .eq('id', id);
+      
       if (error) {
-        throw error;
+        console.error("Error deleting event:", error);
+        toast.error("Failed to delete event");
+        return false;
       }
       
-      // Remove the event from the state
-      setEvents(prev => prev.filter(e => e.id !== eventId));
-      toast.success('Event deleted successfully');
+      // Remove the event from the local state
+      setEvents(prevEvents => prevEvents.filter(event => event.id !== id));
+      
       return true;
     } catch (error) {
-      console.error('Error deleting event:', error);
-      toast.error('Failed to delete event');
+      console.error("Error in deleteEvent:", error);
+      toast.error("An error occurred while deleting the event");
       return false;
     }
-  };
+  }, [user]);
+  
+  // Import multiple events (from iCal or Google Calendar)
+  const importEvents = useCallback(async (importedEvents: any[]) => {
+    if (!user) {
+      toast.error("You must be logged in to import events");
+      return;
+    }
+    
+    try {
+      const eventsToAdd = [];
+      
+      for (const event of importedEvents) {
+        // Format the event for the database
+        const formattedDate = new Date(event.start).toISOString().split('T')[0];
+        const formattedTime = new Date(event.start).toTimeString().slice(0, 5);
+        const eventType = (event.type || 'special') as EventType;
+        
+        const eventData = {
+          title: event.title || 'Imported Event',
+          description: event.description || '',
+          location: event.location || '',
+          date: formattedDate,
+          time: formattedTime,
+          user_id: user.id,
+          type: eventType,
+          allday: event.allDay || false,
+          external_id: event.external_id || null
+        };
+        
+        eventsToAdd.push(eventData);
+      }
+      
+      if (eventsToAdd.length > 0) {
+        const { data, error } = await supabase
+          .from('calendar_events')
+          .insert(eventsToAdd)
+          .select();
+        
+        if (error) {
+          console.error("Error importing events:", error);
+          toast.error("Failed to import events");
+          return;
+        }
+        
+        // Add the imported events to the local state
+        await fetchEvents();
+        
+        toast.success(`Imported ${eventsToAdd.length} events successfully`);
+      }
+    } catch (error) {
+      console.error("Error in importEvents:", error);
+      toast.error("An error occurred while importing events");
+    }
+  }, [user, fetchEvents]);
   
   // Reset all calendar events (admin function)
   const resetCalendar = async (): Promise<boolean> => {
@@ -199,9 +286,11 @@ export function useCalendarEvents() {
     }
   };
   
-  // Load events when the component mounts
+  // Initialize events
   useState(() => {
-    fetchEvents();
+    if (user) {
+      fetchEvents();
+    }
   });
   
   return {
@@ -211,6 +300,7 @@ export function useCalendarEvents() {
     addEvent,
     updateEvent,
     deleteEvent,
+    importEvents,
     resetCalendar
   };
 }

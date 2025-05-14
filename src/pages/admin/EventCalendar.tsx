@@ -67,7 +67,7 @@ const EventCalendar: React.FC = () => {
     }
   };
   
-  const handleUpdateEvent = async (eventData: CalendarEvent) => {
+  const handleUpdateEvent = async (eventData: CalendarEvent): Promise<void> => {
     try {
       await updateEvent(eventData);
       setIsViewModalOpen(false);
@@ -79,7 +79,8 @@ const EventCalendar: React.FC = () => {
     }
   };
   
-  const handleDeleteEvent = async (eventId: string) => {
+  // Fixed signature to match ViewEventModal's onDelete prop
+  const handleDeleteEvent = async (eventId: string): Promise<void> => {
     try {
       await deleteEvent(eventId);
       setIsViewModalOpen(false);

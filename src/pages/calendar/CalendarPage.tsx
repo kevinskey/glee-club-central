@@ -74,7 +74,7 @@ const CalendarPage = () => {
     setIsCreateModalOpen
   );
 
-  // Handler for creating event - Modified to ensure it returns void
+  // Handler for creating event
   const onCreateEvent = async (eventData: any): Promise<void> => {
     try {
       await handleCreateEvent(eventData);
@@ -85,7 +85,7 @@ const CalendarPage = () => {
     }
   };
 
-  // Handler for updating event - Modified to ensure it returns void
+  // Handler for updating event - Modified to match expected signature
   const onUpdateEvent = async (eventData: CalendarEvent): Promise<void> => {
     try {
       await handleUpdateEvent(eventData);
@@ -97,7 +97,7 @@ const CalendarPage = () => {
     }
   };
 
-  // Handler for deleting event - Modified to ensure it returns void
+  // Handler for deleting event - Fixed signature
   const onDeleteEvent = async (eventId: string): Promise<void> => {
     try {
       await handleDeleteEvent(eventId);

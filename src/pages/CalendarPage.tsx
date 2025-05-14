@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useRef } from "react";
 import { Footer } from "@/components/landing/Footer";
 import { CalendarHeader } from "@/components/calendar/CalendarHeader";
@@ -30,9 +31,6 @@ const CalendarPage = () => {
   const { isAdmin, profile, isLoading: authLoading } = useAuth();
   const { isSuperAdmin } = usePermissions();
 
-  console.log("CalendarPage rendering with view:", calendarView);
-  console.log("Current events count:", events.length);
-
   // Only super admins can create events
   const userCanCreate = isSuperAdmin;
 
@@ -59,8 +57,6 @@ const CalendarPage = () => {
     loadEvents();
   }, [authLoading, fetchEvents]);
 
-  console.log("CalendarPage - Render state:", { isLoading, eventsCount: events.length, view: calendarView });
-
   // Use our custom hook for event handling
   const {
     handleDateClick,
@@ -81,7 +77,7 @@ const CalendarPage = () => {
     setIsCreateModalOpen
   );
 
-  // Handler for creating event - Modified to not test void for truthiness
+  // Handler for creating event
   const onCreateEvent = async (eventData: any) => {
     try {
       await handleCreateEvent(eventData);
@@ -93,18 +89,28 @@ const CalendarPage = () => {
     }
   };
 
-  // Handler for updating event - Modified to match expected return type
+  // Handler for updating event - Corrected signature
   const onUpdateEvent = async (eventData: CalendarEvent): Promise<void> => {
-    await handleUpdateEvent(eventData);
-    setIsViewModalOpen(false);
-    setSelectedEvent(null);
+    try {
+      await handleUpdateEvent(eventData);
+      setIsViewModalOpen(false);
+      setSelectedEvent(null);
+    } catch (error) {
+      console.error("Error updating event:", error);
+      toast.error("Failed to update event");
+    }
   };
 
-  // Handler for deleting event - Modified to match expected return type
+  // Handler for deleting event - Corrected signature
   const onDeleteEvent = async (eventId: string): Promise<void> => {
-    await handleDeleteEvent(eventId);
-    setIsViewModalOpen(false);
-    setSelectedEvent(null);
+    try {
+      await handleDeleteEvent(eventId);
+      setIsViewModalOpen(false);
+      setSelectedEvent(null);
+    } catch (error) {
+      console.error("Error deleting event:", error);
+      toast.error("Failed to delete event");
+    }
   };
 
   return (
