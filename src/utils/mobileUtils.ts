@@ -1,39 +1,31 @@
 
 /**
- * Check if event details will fit well on mobile screens
+ * Checks if event content will display well on mobile devices
  */
-export const checkEventMobileFit = (
-  title?: string, 
-  location?: string, 
+export function checkEventMobileFit(
+  title: string, 
+  location: string, 
   description?: string
-) => {
+) {
   const issues: string[] = [];
   const suggestions: string[] = [];
   
   // Check title length
-  if (title && title.length > 40) {
-    issues.push("Title is too long for mobile screens");
-    suggestions.push("Keep title under 40 characters");
+  if (title && title.length > 30) {
+    issues.push("Title is too long for small screens");
+    suggestions.push("Consider shortening the title to 30 characters or less");
   }
   
   // Check location length
-  if (location && location.length > 35) {
-    issues.push("Location is too long for mobile screens");
-    suggestions.push("Abbreviate location to under 35 characters");
+  if (location && location.length > 25) {
+    issues.push("Location name is too long for small screens");
+    suggestions.push("Consider using abbreviations or shorter location name");
   }
   
-  // Check description length and paragraphs
-  if (description) {
-    if (description.length > 300) {
-      issues.push("Description is quite long for mobile screens");
-      suggestions.push("Consider shortening description or breaking into bullet points");
-    }
-    
-    const paragraphs = description.split('\n').filter(p => p.trim().length > 0);
-    if (paragraphs.length > 4) {
-      issues.push("Too many paragraphs for mobile display");
-      suggestions.push("Limit description to 3-4 paragraphs");
-    }
+  // Check description
+  if (description && description.length > 100) {
+    issues.push("Long description might not display well on mobile");
+    suggestions.push("Consider using shorter descriptions or formatting with line breaks");
   }
   
   return {
@@ -41,4 +33,4 @@ export const checkEventMobileFit = (
     issues,
     suggestions
   };
-};
+}

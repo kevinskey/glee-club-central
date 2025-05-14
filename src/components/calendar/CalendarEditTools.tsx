@@ -1,15 +1,18 @@
 
 import React from "react";
 import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
+import { 
+  CalendarPlus, 
+  Pencil, 
+  Trash2 
+} from "lucide-react";
 import { cn } from "@/lib/utils";
-import { CalendarPlus, Pencil, Trash2 } from "lucide-react";
 
 interface CalendarEditToolsProps {
   onAddEvent: () => void;
   selectedEventId?: string;
-  onEditSelected: () => void;
-  onDeleteSelected: () => void;
+  onEditSelected?: () => void;
+  onDeleteSelected?: () => void;
   className?: string;
 }
 
@@ -18,36 +21,52 @@ export function CalendarEditTools({
   selectedEventId,
   onEditSelected,
   onDeleteSelected,
-  className,
+  className
 }: CalendarEditToolsProps) {
+  const hasSelectedEvent = !!selectedEventId;
+  
   return (
-    <Card className={cn("p-2 flex flex-col sm:flex-row items-center gap-2 dark:bg-gray-800/50", className)}>
-      <Button onClick={onAddEvent} className="w-full sm:w-auto bg-glee-purple hover:bg-glee-purple/90 dark:bg-glee-purple dark:hover:bg-glee-purple/90">
+    <div className={cn("flex flex-wrap gap-2", className)}>
+      <Button 
+        type="button"
+        onClick={onAddEvent} 
+        size="sm"
+        variant="outline"
+        className="bg-white hover:bg-gray-100 dark:bg-gray-800 dark:hover:bg-gray-700"
+      >
         <CalendarPlus className="h-4 w-4 mr-2" />
         Add Event
       </Button>
       
-      <div className="w-full sm:w-auto flex gap-2 mt-2 sm:mt-0">
-        <Button
-          variant="outline"
-          className="flex-1 sm:flex-auto"
-          onClick={onEditSelected}
-          disabled={!selectedEventId}
-        >
-          <Pencil className="h-4 w-4 mr-2" />
-          Edit
-        </Button>
-        
-        <Button
-          variant="outline"
-          className="flex-1 sm:flex-auto text-red-500 border-red-200 hover:bg-red-50 hover:text-red-600 dark:text-red-400 dark:border-red-900/30 dark:hover:bg-red-900/20"
-          onClick={onDeleteSelected}
-          disabled={!selectedEventId}
-        >
-          <Trash2 className="h-4 w-4 mr-2" />
-          Delete
-        </Button>
-      </div>
-    </Card>
+      {hasSelectedEvent && (
+        <>
+          {onEditSelected && (
+            <Button 
+              type="button"
+              onClick={onEditSelected} 
+              size="sm"
+              variant="outline"
+              className="bg-white hover:bg-gray-100 dark:bg-gray-800 dark:hover:bg-gray-700"
+            >
+              <Pencil className="h-4 w-4 mr-2" />
+              Edit Selected
+            </Button>
+          )}
+          
+          {onDeleteSelected && (
+            <Button 
+              type="button"
+              onClick={onDeleteSelected} 
+              size="sm"
+              variant="outline"
+              className="bg-white hover:bg-gray-100 text-red-500 hover:text-red-600 dark:bg-gray-800 dark:hover:bg-gray-700"
+            >
+              <Trash2 className="h-4 w-4 mr-2" />
+              Delete Selected
+            </Button>
+          )}
+        </>
+      )}
+    </div>
   );
 }
