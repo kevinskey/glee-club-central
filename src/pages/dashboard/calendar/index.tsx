@@ -175,17 +175,10 @@ export default function CalendarPage() {
           className="mb-4 border-glee-purple/20 bg-glee-purple/5 dark:bg-glee-purple/10"
         />
         
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 gap-6">
           {/* Calendar widget takes full width now */}
-          <Card className="col-span-1 md:col-span-3">
-            <CardHeader className="flex flex-row items-center justify-between">
-              <CardTitle>Calendar</CardTitle>
-              {/* Removed the Previous/Next buttons as they're redundant with the arrows in CalendarToolbar */}
-              <div className="text-sm font-medium">
-                {format(new Date(currentYear, currentMonth, 1), 'MMMM yyyy')}
-              </div>
-            </CardHeader>
-            <CardContent>
+          <Card className="col-span-1">
+            <CardContent className="p-0 sm:p-2">
               <MonthlyCalendar
                 events={transformedEvents}
                 className=""
