@@ -17,8 +17,8 @@ import { EditEventForm } from "./EditEventForm";
 interface ViewEventModalProps {
   event: CalendarEvent;
   onClose: () => void;
-  onUpdate: (event: CalendarEvent) => Promise<boolean | void>; // Updated to accept both return types
-  onDelete: (eventId: string) => Promise<boolean | void>; // Updated to maintain consistency
+  onUpdate: (event: CalendarEvent) => Promise<boolean | void>;
+  onDelete: (eventId: string) => Promise<boolean | void>;
   userCanEdit?: boolean;
 }
 
@@ -174,7 +174,7 @@ export function ViewEventModal({ event, onClose, onUpdate, onDelete, userCanEdit
               className="bg-red-500 hover:bg-red-600 text-white"
             >
               Delete
-            </AlertDialogAction>
+            </Button>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>

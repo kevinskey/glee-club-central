@@ -1,6 +1,7 @@
+
 import React, { useState, useEffect } from 'react';
 import { PageHeader } from "@/components/ui/page-header";
-import { Calendar, CalendarPlus, Cloud, RefreshCcw } from "lucide-react";
+import { Calendar, CalendarPlus, Cloud } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useCalendarStore } from "@/hooks/useCalendarStore";
 import { CalendarMain } from "@/components/calendar/CalendarMain";
@@ -66,7 +67,6 @@ const EventCalendar: React.FC = () => {
     }
   };
   
-  // Handler for updating event - Updated signature to match the interface
   const handleUpdateEvent = async (eventData: CalendarEvent): Promise<boolean | void> => {
     try {
       await updateEvent(eventData);
@@ -79,7 +79,6 @@ const EventCalendar: React.FC = () => {
     }
   };
   
-  // Handler for deleting event - Updated signature to match the interface
   const handleDeleteEvent = async (eventId: string): Promise<boolean | void> => {
     try {
       await deleteEvent(eventId);
@@ -106,7 +105,12 @@ const EventCalendar: React.FC = () => {
       
       if (!token) {
         // If no token, initiate OAuth flow
-        window.location.href = connectToGoogleCalendar();
+        const connectUrl = connectToGoogleCalendar();
+        if (connectUrl) {
+          window.location.href = connectUrl;
+        } else {
+          toast.error("Failed to connect to Google Calendar");
+        }
         return;
       }
       
@@ -116,6 +120,9 @@ const EventCalendar: React.FC = () => {
       if (success) {
         // Reload events after sync
         await fetchEvents();
+        toast.success("Calendar synced successfully");
+      } else {
+        toast.error("Failed to sync calendar");
       }
     } catch (error) {
       console.error("Error syncing with Google Calendar:", error);
@@ -138,6 +145,7 @@ const EventCalendar: React.FC = () => {
           <Button 
             onClick={() => setIsCreateModalOpen(true)}
             className="bg-glee-purple hover:bg-glee-purple/90"
+            type="button"
           >
             <CalendarPlus className="mr-2 h-4 w-4" />
             Add Event
@@ -147,6 +155,7 @@ const EventCalendar: React.FC = () => {
             variant="outline" 
             onClick={handleGoogleCalendarSync}
             disabled={isSyncing}
+            type="button"
           >
             {isSyncing ? (
               <Spinner className="mr-2 h-4 w-4" />
@@ -169,6 +178,7 @@ const EventCalendar: React.FC = () => {
             <Button 
               onClick={() => setIsCreateModalOpen(true)}
               className="bg-glee-purple hover:bg-glee-purple/90"
+              type="button"
             >
               <CalendarPlus className="mr-2 h-4 w-4" />
               Add Your First Event
