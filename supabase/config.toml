@@ -6,3 +6,7 @@ verify_jwt = false
 
 [storage.media-library]
 public = true
+
+[storage.event-images]
+public = true
+

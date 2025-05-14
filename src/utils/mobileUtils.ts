@@ -1,46 +1,38 @@
 
 /**
- * Utility function to check if an event will display well on mobile screens
- * 
- * @param title The event title
- * @param location The event location
- * @param description The event description
- * @returns Object with fit status, issues, and suggestions
+ * Check if event details will fit well on mobile screens
  */
-export function checkEventMobileFit(title: string | undefined, location: string | undefined, description: string | undefined) {
+export const checkEventMobileFit = (
+  title?: string, 
+  location?: string, 
+  description?: string
+) => {
   const issues: string[] = [];
   const suggestions: string[] = [];
   
   // Check title length
-  if (title && title.length > 60) {
-    issues.push("Title is too long for mobile displays");
-    suggestions.push("Keep the title under 60 characters");
+  if (title && title.length > 40) {
+    issues.push("Title is too long for mobile screens");
+    suggestions.push("Keep title under 40 characters");
   }
   
   // Check location length
-  if (location && location.length > 80) {
-    issues.push("Location text is too long for mobile displays");
-    suggestions.push("Consider abbreviating the location");
+  if (location && location.length > 35) {
+    issues.push("Location is too long for mobile screens");
+    suggestions.push("Abbreviate location to under 35 characters");
   }
   
-  // Check description length and formatting
+  // Check description length and paragraphs
   if (description) {
-    if (description.length > 500) {
-      issues.push("Description is very long for mobile displays");
-      suggestions.push("Consider condensing the description or using bullet points");
+    if (description.length > 300) {
+      issues.push("Description is quite long for mobile screens");
+      suggestions.push("Consider shortening description or breaking into bullet points");
     }
     
-    // Check for long words that might break layout
-    const longWords = description.split(' ').filter(word => word.length > 25);
-    if (longWords.length > 0) {
-      issues.push("Description contains very long words that may break mobile layout");
-      suggestions.push("Break up long words or URLs with hyphens");
-    }
-    
-    // Check for excessive line breaks
-    if ((description.match(/\n/g) || []).length > 8) {
-      issues.push("Description has too many line breaks for mobile display");
-      suggestions.push("Reduce the number of line breaks");
+    const paragraphs = description.split('\n').filter(p => p.trim().length > 0);
+    if (paragraphs.length > 4) {
+      issues.push("Too many paragraphs for mobile display");
+      suggestions.push("Limit description to 3-4 paragraphs");
     }
   }
   
@@ -49,4 +41,4 @@ export function checkEventMobileFit(title: string | undefined, location: string 
     issues,
     suggestions
   };
-}
+};

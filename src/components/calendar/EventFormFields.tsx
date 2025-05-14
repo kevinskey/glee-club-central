@@ -27,18 +27,6 @@ export interface EventFormValues {
   description?: string;
   type?: EventType;
   image_url?: string | null;
-  archivalNotes?: string;
-  callTime?: string;
-  wakeUpTime?: string;
-  departureTime?: string;
-  performanceTime?: string;
-  contactName?: string;
-  contactEmail?: string;
-  contactPhone?: string;
-  transportationCompany?: string;
-  transportationDetails?: string;
-  contractStatus?: "draft" | "sent" | "signed" | "completed" | "none";
-  contractNotes?: string;
 }
 
 interface EventFormFieldsProps {
@@ -140,18 +128,15 @@ export function EventFormFields({ form }: EventFormFieldsProps) {
         render={({ field }) => (
           <FormItem>
             <FormLabel>Event Type</FormLabel>
-            <Select 
-              onValueChange={field.onChange} 
-              defaultValue={field.value as string || "concert"}
-            >
+            <Select onValueChange={field.onChange} defaultValue={field.value}>
               <FormControl>
                 <SelectTrigger>
                   <SelectValue placeholder="Select event type" />
                 </SelectTrigger>
               </FormControl>
               <SelectContent>
-                <SelectItem value="rehearsal">Rehearsal</SelectItem>
                 <SelectItem value="concert">Concert</SelectItem>
+                <SelectItem value="rehearsal">Rehearsal</SelectItem>
                 <SelectItem value="sectional">Sectional</SelectItem>
                 <SelectItem value="special">Special Event</SelectItem>
                 <SelectItem value="tour">Tour</SelectItem>
@@ -172,7 +157,7 @@ export function EventFormFields({ form }: EventFormFieldsProps) {
             <FormControl>
               <Textarea 
                 placeholder="Enter event description" 
-                className="min-h-[100px]" 
+                className="min-h-[100px]"
                 {...field} 
                 value={field.value || ''} 
               />

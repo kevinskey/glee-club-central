@@ -4,25 +4,23 @@ export type EventType = "concert" | "rehearsal" | "sectional" | "special" | "tou
 export interface CalendarEvent {
   id: string;
   title: string;
-  date: Date | string; // Date object or ISO string
-  time?: string; // Optional time in "HH:MM" format
-  location?: string;
+  start: string | Date;
+  end: string | Date;
   description?: string;
+  location?: string;
   type: EventType;
-  start: Date | string; // Date object or ISO string for FullCalendar
-  end: Date | string; // Date object or ISO string for FullCalendar
-  allDay?: boolean;
-  created_by?: string;
   image_url?: string | null;
-  source?: "google" | "local"; // Source of the event (google calendar or local)
+  created_by?: string;
+  source?: "local" | "google";
+  date?: string | Date; // For backward compatibility
+  time?: string;
 }
 
-// Add missing GoogleCalendarToken interface
-export interface GoogleCalendarToken {
+export interface GoogleCalendarEvent {
   id: string;
-  user_id: string;
-  access_token: string;
-  refresh_token: string;
-  expiry_date: number;
-  created_at: string;
+  summary: string;
+  start: { dateTime: string, timeZone?: string } | { date: string };
+  end: { dateTime: string, timeZone?: string } | { date: string };
+  description: string;
+  location: string;
 }
