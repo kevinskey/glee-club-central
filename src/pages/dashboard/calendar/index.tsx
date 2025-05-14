@@ -15,12 +15,16 @@ import { useCalendarStore } from "@/hooks/useCalendarStore";
 import { toast } from "sonner";
 import { CalendarEvent, EventType } from "@/types/calendar";
 import { usePermissions } from "@/hooks/usePermissions";
+import { MobileHeader } from "@/components/layout/MobileHeader";
+import { Header } from "@/components/layout/Header";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 export default function CalendarPage() {
   const [date, setDate] = useState<Date | undefined>(new Date());
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [isViewModalOpen, setIsViewModalOpen] = useState(false);
   const [selectedEvent, setSelectedEvent] = useState<CalendarEvent | null>(null);
+  const isMobile = useIsMobile();
   
   // Use the calendar store instead of mock data
   const { events, addEvent, updateEvent, deleteEvent, fetchEvents } = useCalendarStore();
@@ -141,125 +145,138 @@ export default function CalendarPage() {
       return false;
     }
   };
+  
+  // Transform events for MonthlyCalendar component
+  const transformedEvents = events.map(event => ({
+    id: event.id,
+    title: event.title,
+    date: event.date instanceof Date ? event.date : new Date(event.date),
+    type: event.type
+  }));
 
   return (
-    <div className="container mx-auto p-4 space-y-6">
-      <PageHeader
-        title="Glee Club Calendar"
-        description="View upcoming rehearsals, performances and events"
-        icon={<CalendarIcon className="h-6 w-6" />}
-      />
+    <>
+      {/* Add the correct header based on screen size */}
+      {isMobile ? <MobileHeader /> : <Header />}
       
-      {/* Highlight the edit tools more prominently */}
-      <CalendarEditTools 
-        onAddEvent={() => setIsCreateModalOpen(true)}
-        selectedEventId={selectedEvent?.id}
-        onEditSelected={() => isViewModalOpen && setIsViewModalOpen(true)}
-        onDeleteSelected={() => selectedEvent && handleDeleteEvent(selectedEvent.id)}
-        className="mb-4 border-glee-purple/20 bg-glee-purple/5"
-      />
-      
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        {/* Calendar widget */}
-        <Card className="md:col-span-2">
-          <CardHeader className="flex flex-row items-center justify-between">
-            <CardTitle>Calendar</CardTitle>
-            <div className="flex items-center gap-2">
-              <Button variant="outline" size="sm" onClick={handlePrevMonth}>
-                Previous
-              </Button>
-              <span className="text-sm font-medium">
-                {format(new Date(currentYear, currentMonth, 1), 'MMMM yyyy')}
-              </span>
-              <Button variant="outline" size="sm" onClick={handleNextMonth}>
-                Next
-              </Button>
-            </div>
-          </CardHeader>
-          <CardContent>
-            <MonthlyCalendar
-              events={events}
-              className=""
-            />
-          </CardContent>
-        </Card>
+      <div className="container mx-auto p-4 space-y-6">
+        <PageHeader
+          title="Glee Club Calendar"
+          description="View upcoming rehearsals, performances and events"
+          icon={<CalendarIcon className="h-6 w-6" />}
+        />
         
-        {/* Events for selected date */}
-        <Card>
-          <CardHeader>
-            <CardTitle>
-              {date ? format(date, "MMMM d, yyyy") : "Select a date"}
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            {eventsForSelectedDate.length === 0 ? (
-              <p className="text-muted-foreground">No events scheduled for this date</p>
-            ) : (
-              <div className="space-y-4">
-                {eventsForSelectedDate.map((event) => (
-                  <div 
-                    key={event.id} 
-                    className="border rounded-lg p-3 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
-                    onClick={() => handleEventClick(event)}
-                  >
-                    <div className="flex justify-between items-start">
-                      <div>
-                        <h3 className="font-medium">{event.title}</h3>
-                        <p className="text-sm text-muted-foreground">
-                          {event.time} • {event.location}
-                        </p>
-                      </div>
-                      <Badge 
-                        variant={
-                          event.type === "concert" ? "default" : 
-                          event.type === "rehearsal" ? "secondary" :
-                          "outline"
-                        }
-                      >
-                        {event.type}
-                      </Badge>
-                    </div>
-                  </div>
-                ))}
+        {/* Highlight the edit tools more prominently */}
+        <CalendarEditTools 
+          onAddEvent={() => setIsCreateModalOpen(true)}
+          selectedEventId={selectedEvent?.id}
+          onEditSelected={() => isViewModalOpen && setIsViewModalOpen(true)}
+          onDeleteSelected={() => selectedEvent && handleDeleteEvent(selectedEvent.id)}
+          className="mb-4 border-glee-purple/20 bg-glee-purple/5"
+        />
+        
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          {/* Calendar widget */}
+          <Card className="md:col-span-2">
+            <CardHeader className="flex flex-row items-center justify-between">
+              <CardTitle>Calendar</CardTitle>
+              <div className="flex items-center gap-2">
+                <Button variant="outline" size="sm" onClick={handlePrevMonth}>
+                  Previous
+                </Button>
+                <span className="text-sm font-medium">
+                  {format(new Date(currentYear, currentMonth, 1), 'MMMM yyyy')}
+                </span>
+                <Button variant="outline" size="sm" onClick={handleNextMonth}>
+                  Next
+                </Button>
               </div>
-            )}
-            <div className="mt-4">
-              <Button 
-                className="w-full bg-glee-purple hover:bg-glee-purple/90" 
-                onClick={() => setIsCreateModalOpen(true)}
-              >
-                Add Event
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
+            </CardHeader>
+            <CardContent>
+              <MonthlyCalendar
+                events={transformedEvents}
+                className=""
+              />
+            </CardContent>
+          </Card>
+          
+          {/* Events for selected date */}
+          <Card>
+            <CardHeader>
+              <CardTitle>
+                {date ? format(date, "MMMM d, yyyy") : "Select a date"}
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              {eventsForSelectedDate.length === 0 ? (
+                <p className="text-muted-foreground">No events scheduled for this date</p>
+              ) : (
+                <div className="space-y-4">
+                  {eventsForSelectedDate.map((event) => (
+                    <div 
+                      key={event.id} 
+                      className="border rounded-lg p-3 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+                      onClick={() => handleEventClick(event)}
+                    >
+                      <div className="flex justify-between items-start">
+                        <div>
+                          <h3 className="font-medium">{event.title}</h3>
+                          <p className="text-sm text-muted-foreground">
+                            {event.time} • {event.location}
+                          </p>
+                        </div>
+                        <Badge 
+                          variant={
+                            event.type === "concert" ? "default" : 
+                            event.type === "rehearsal" ? "secondary" :
+                            "outline"
+                          }
+                        >
+                          {event.type}
+                        </Badge>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+              <div className="mt-4">
+                <Button 
+                  className="w-full bg-glee-purple hover:bg-glee-purple/90" 
+                  onClick={() => setIsCreateModalOpen(true)}
+                >
+                  Add Event
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
 
-      {/* Create Event Modal */}
-      <Dialog open={isCreateModalOpen} onOpenChange={setIsCreateModalOpen}>
-        <DialogContent className="sm:max-w-md">
-          <EventModal 
-            onClose={() => setIsCreateModalOpen(false)} 
-            onSave={handleAddEvent}
-            initialDate={date}
-          />
-        </DialogContent>
-      </Dialog>
-
-      {/* View/Edit Event Modal */}
-      {selectedEvent && (
-        <Dialog open={isViewModalOpen} onOpenChange={setIsViewModalOpen}>
+        {/* Create Event Modal */}
+        <Dialog open={isCreateModalOpen} onOpenChange={setIsCreateModalOpen}>
           <DialogContent className="sm:max-w-md">
-            <ViewEventModal 
-              event={selectedEvent} 
-              onClose={() => setIsViewModalOpen(false)} 
-              onUpdate={handleUpdateEvent}
-              onDelete={handleDeleteEvent}
-              userCanEdit={userCanEdit}
+            <EventModal 
+              onClose={() => setIsCreateModalOpen(false)} 
+              onSave={handleAddEvent}
+              initialDate={date}
             />
           </DialogContent>
         </Dialog>
-      )}
-    </div>
+
+        {/* View/Edit Event Modal */}
+        {selectedEvent && (
+          <Dialog open={isViewModalOpen} onOpenChange={setIsViewModalOpen}>
+            <DialogContent className="sm:max-w-md">
+              <ViewEventModal 
+                event={selectedEvent} 
+                onClose={() => setIsViewModalOpen(false)} 
+                onUpdate={handleUpdateEvent}
+                onDelete={handleDeleteEvent}
+                userCanEdit={userCanEdit}
+              />
+            </DialogContent>
+          </Dialog>
+        )}
+      </div>
+    </>
   );
 }
