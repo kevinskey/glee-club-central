@@ -17,12 +17,12 @@ import {
 export function EventsSlider() {
   const isMobile = useIsMobile();
   
-  // Use React Query to fetch upcoming events
+  // Use React Query to fetch upcoming events - removed the limit parameter
   const { data: events = [], isLoading } = useQuery({
     queryKey: ['upcomingEvents'],
     queryFn: async () => {
-      // Fetch more events for the slider (up to 6)
-      return fetchUpcomingPerformances(6);
+      // Fetch all upcoming events without a limit
+      return fetchUpcomingPerformances();
     }
   });
   
@@ -44,11 +44,11 @@ export function EventsSlider() {
       <div className="container px-4 md:px-6">
         <div className="flex items-center justify-between mb-8">
           <div className="flex items-center gap-2">
-            <Calendar className="h-5 w-5 text-glee-purple" />
+            <Calendar className="h-5 w-5 text-glee-spelman" />
             <h2 className="text-2xl md:text-3xl font-playfair font-bold">Upcoming Performances</h2>
           </div>
           <Link to="/calendar">
-            <Button variant="ghost" className="text-glee-purple hover:text-glee-purple/90">
+            <Button variant="ghost" className="text-glee-spelman hover:text-glee-spelman/90">
               View All <ArrowRight className="ml-1 h-4 w-4" />
             </Button>
           </Link>
@@ -71,8 +71,8 @@ export function EventsSlider() {
                           className="w-full h-full object-cover"
                         />
                       ) : (
-                        <div className="w-full h-full bg-gradient-to-r from-glee-purple/20 to-glee-purple/10 flex items-center justify-center">
-                          <Calendar className="h-12 w-12 text-glee-purple/40" />
+                        <div className="w-full h-full bg-gradient-to-r from-glee-spelman/20 to-glee-spelman/10 flex items-center justify-center">
+                          <Calendar className="h-12 w-12 text-glee-spelman/40" />
                         </div>
                       )}
                       <div className="absolute bottom-0 w-full p-3 md:p-4 bg-gradient-to-t from-black/60 to-transparent">

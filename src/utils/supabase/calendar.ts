@@ -21,8 +21,8 @@ export interface PerformanceEvent {
   last_synced_at?: string;
 }
 
-// Function to fetch upcoming performances
-export const fetchUpcomingPerformances = async (limit = 3) => {
+// Function to fetch upcoming performances - made limit optional with a high default
+export const fetchUpcomingPerformances = async (limit = 100) => {
   const currentDate = new Date().toISOString().split('T')[0];
   
   const { data, error } = await supabase
