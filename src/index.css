@@ -3,3 +3,63 @@
 @import './styles/base.css';
 @import './styles/components.css';
 @import './styles/utilities.css';
+
+/* Mobile Calendar Optimizations */
+@media (max-width: 640px) {
+  .fc-daygrid-day-number {
+    font-size: 0.875rem;
+    padding: 4px !important;
+  }
+  
+  .fc-col-header-cell-cushion {
+    padding: 4px 2px !important;
+    font-size: 0.75rem;
+  }
+  
+  .fc-timegrid-slot-label-cushion {
+    font-size: 0.75rem;
+  }
+  
+  .fc-list-day-cushion {
+    padding: 4px 8px !important;
+  }
+  
+  /* Improve tap targets on mobile */
+  .fc .fc-button {
+    padding: 0.25rem 0.5rem !important;
+    font-size: 0.875rem !important;
+  }
+  
+  /* Make event content more readable on small screens */
+  .fc-event-title {
+    font-size: 0.75rem !important;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+}
+
+/* Fix calendar display issues on small screens */
+.calendar-container .fc-view-harness {
+  min-height: 400px !important;
+}
+
+/* Improve event spacing and appearance */
+.fc-event {
+  margin: 1px 0 !important;
+  border-radius: 4px !important;
+}
+
+/* Remove extra padding on mobile */
+@media (max-width: 640px) {
+  .fc-toolbar-title {
+    font-size: 1.1rem !important; 
+  }
+  
+  .fc-header-toolbar {
+    margin-bottom: 0.5rem !important;
+    gap: 0.5rem !important;
+    flex-wrap: wrap !important;
+  }
+}
+

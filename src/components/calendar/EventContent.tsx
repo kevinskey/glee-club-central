@@ -1,75 +1,93 @@
 
 import React from "react";
-import { useIsMobile } from "@/hooks/use-mobile";
+import { formatEventForMobile } from "@/utils/mobileUtils";
 
 interface EventContentProps {
   eventInfo: any;
   view: string;
+  isMobile?: boolean;
 }
 
-export function EventContent({ eventInfo, view }: EventContentProps) {
-  const { event, timeText } = eventInfo;
-  const isMobile = useIsMobile();
+export const EventContent: React.FC<EventContentProps> = ({ eventInfo, view, isMobile = false }) => {
+  const { title, extendedProps } = eventInfo.event;
+  const { type, location } = extendedProps;
   
-  // Get event type from extended props
-  const eventType = event.extendedProps?.type || "default";
-  
-  // Get appropriate styling based on event type
-  const getEventTypeStyles = () => {
-    switch (eventType) {
-      case "concert":
-        return "bg-glee-purple border-glee-purple/70 text-white";
-      case "rehearsal":
-        return "bg-blue-500 border-blue-400 text-white";
-      case "sectional":
-        return "bg-green-500 border-green-400 text-white";
-      case "special":
-        return "bg-amber-500 border-amber-400 text-white";
-      case "tour":
-        return "bg-purple-500 border-purple-400 text-white";
-      default:
-        return "bg-gray-500 border-gray-400 text-white";
+  // Get event colors based on type
+  const getEventColor = () => {
+    switch (type) {
+      case "concert": 
+        return { bg: "bg-glee-purple", text: "text-white" };
+      case "rehearsal": 
+        return { bg: "bg-blue-500", text: "text-white" };
+      case "sectional": 
+        return { bg: "bg-green-500", text: "text-white" };
+      case "special": 
+        return { bg: "bg-amber-500", text: "text-white" };
+      default: 
+        return { bg: "bg-gray-500", text: "text-white" };
     }
   };
+
+  const { bg, text } = getEventColor();
   
-  const styles = getEventTypeStyles();
+  // Format event for mobile if needed
+  const mobileFormat = isMobile ? formatEventForMobile(eventInfo.event) : null;
   
-  // Different rendering for list view
-  if (view === 'listWeek') {
+  // In list view, show more details
+  if (view === "listWeek") {
     return (
-      <div className="flex items-center">
-        <div className={`w-2 h-2 rounded-full mr-2 ${styles.split(' ')[0]}`}></div>
-        <div className="flex flex-col">
-          <div className="font-medium">{event.title}</div>
-          {event.extendedProps.location && !isMobile && (
-            <div className="text-xs text-muted-foreground">{event.extendedProps.location}</div>
-          )}
+      <div className="flex flex-col">
+        <div className={`${bg} ${text} px-2 py-1 rounded-sm text-xs font-medium self-start`}>
+          {type}
         </div>
+        <div className="font-medium mt-1">
+          {isMobile && mobileFormat ? mobileFormat.formattedTitle : title}
+        </div>
+        {location && (
+          <div className="text-xs text-muted-foreground mt-0.5 truncate max-w-[200px]">
+            {isMobile && mobileFormat ? mobileFormat.location : location}
+          </div>
+        )}
       </div>
     );
   }
-
-  // Smaller content for mobile month view
-  if (isMobile && view === 'dayGridMonth') {
+  
+  // For month view on mobile, show very compact display
+  if (view === "dayGridMonth" && isMobile) {
     return (
-      <div className={`p-1 rounded text-xs ${styles}`}>
-        <div className="font-medium truncate">{event.title}</div>
+      <div className={`${bg} ${text} px-1.5 py-0.5 rounded text-xs truncate w-full`}>
+        {mobileFormat ? mobileFormat.formattedTitle : title}
       </div>
     );
   }
-
-  // Standard rendering for day/week grid views
-  return (
-    <div className={`p-1 rounded ${styles}`}>
-      <div className="font-medium text-xs sm:text-sm truncate">
-        {event.title}
+  
+  // For day/week view on mobile, show compact but with a bit more detail
+  if ((view === "timeGridDay" || view === "timeGridWeek") && isMobile) {
+    return (
+      <div className={`${bg} ${text} px-1.5 py-0.5 rounded text-xs flex flex-col h-full`}>
+        <div className="font-medium truncate">
+          {mobileFormat ? mobileFormat.formattedTitle : title}
+        </div>
+        {location && !eventInfo.timeText && (
+          <div className="truncate opacity-80 text-[10px]">
+            {mobileFormat ? mobileFormat.location : location}
+          </div>
+        )}
       </div>
-      {timeText && (
-        <div className="text-xs opacity-90">{timeText}</div>
-      )}
-      {event.extendedProps.location && !isMobile && view !== 'dayGridMonth' && (
-        <div className="text-xs opacity-90 truncate">{event.extendedProps.location}</div>
+    );
+  }
+  
+  // Default display for desktop
+  return (
+    <div className={`${bg} ${text} px-2 py-1 rounded flex flex-col h-full`}>
+      <div className="font-medium">
+        {title}
+      </div>
+      {location && !eventInfo.timeText && (
+        <div className="text-xs opacity-90 truncate">
+          {location}
+        </div>
       )}
     </div>
   );
-}
+};

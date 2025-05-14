@@ -1,4 +1,3 @@
-
 import React, { useRef, useEffect, useState } from "react";
 import FullCalendar from "@fullcalendar/react";
 import dayGridPlugin from "@fullcalendar/daygrid";
@@ -11,6 +10,8 @@ import { CalendarEvent } from "@/types/calendar";
 import { useCalendarNavigation } from "@/hooks/useCalendarNavigation";
 import { Card } from "@/components/ui/card";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { getMobileCalendarSettings } from "@/utils/mobileUtils";
+import { Spinner } from "@/components/ui/spinner";
 
 interface CalendarMainProps {
   events: CalendarEvent[];
@@ -45,8 +46,16 @@ export const CalendarMain = ({
     handleTodayClick 
   } = useCalendarNavigation(calendarRef, setCurrentDate);
   
-  // Determine the best view based on screen size
-  const initialView = isMobile && calendarView === 'dayGridMonth' ? 'listWeek' : calendarView;
+  // Get best view based on screen size
+  const getBestView = () => {
+    if (isMobile) {
+      // Use list view on mobile for month view, otherwise keep the selected view
+      return calendarView === 'dayGridMonth' ? 'listWeek' : calendarView;
+    }
+    return calendarView;
+  };
+  
+  const initialView = getBestView();
   
   useEffect(() => {
     console.log("CalendarMain mounted, view:", calendarView);
@@ -56,7 +65,7 @@ export const CalendarMain = ({
     const timer = setTimeout(() => {
       setCalendarReady(true);
       console.log("Calendar ready state set to true");
-    }, 500); // Increased timeout to ensure DOM is fully ready
+    }, 500);
     
     return () => {
       console.log("CalendarMain unmounting");
@@ -65,7 +74,7 @@ export const CalendarMain = ({
   }, [calendarView, events]);
   
   const eventContent = (eventInfo: any) => {
-    return <EventContent eventInfo={eventInfo} view={calendarView} />;
+    return <EventContent eventInfo={eventInfo} view={calendarView} isMobile={isMobile} />;
   };
 
   // Add a sample event if events array is empty (for testing purposes)
@@ -81,7 +90,8 @@ export const CalendarMain = ({
     }
   ];
 
-  console.log("CalendarMain rendering with events:", events.length, "View:", calendarView);
+  // Get mobile optimized settings
+  const mobileSettings = isMobile ? getMobileCalendarSettings() : {};
 
   return (
     <Card className="flex-1 bg-white dark:bg-gray-800 rounded-lg shadow-sm p-2 sm:p-4 overflow-visible">
@@ -102,6 +112,12 @@ export const CalendarMain = ({
         }} 
         className="calendar-container"
       >
+        {!calendarReady && (
+          <div className="h-full flex items-center justify-center">
+            <Spinner size="lg" />
+          </div>
+        )}
+        
         {calendarReady && (
           <FullCalendar
             ref={calendarRef}
@@ -135,18 +151,20 @@ export const CalendarMain = ({
             allDaySlot={true}
             allDayText="All day"
             slotLabelFormat={{
-              hour: '2-digit',
+              hour: 'numeric',
               minute: '2-digit',
-              meridiem: 'short'
+              meridiem: 'short',
+              omitZeroMinute: true
             }}
             datesSet={(dateInfo) => {
               console.log("Calendar datesSet:", dateInfo.view.title);
               setCurrentDate(dateInfo.view.currentStart);
             }}
             eventTimeFormat={{
-              hour: '2-digit',
+              hour: 'numeric',
               minute: '2-digit',
-              meridiem: 'short'
+              meridiem: 'short',
+              omitZeroMinute: true
             }}
             views={{
               dayGridMonth: {
@@ -171,6 +189,7 @@ export const CalendarMain = ({
                 listDaySideFormat: false
               }
             }}
+            {...mobileSettings}
           />
         )}
       </div>
