@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { Calendar as CalendarIcon } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
@@ -88,9 +87,13 @@ export default function CalendarPage() {
         image_url: eventData.image_url || null
       };
       
-      await addEvent(newEvent);
-      toast.success("Event created successfully");
-      setIsCreateModalOpen(false);
+      const success = await addEvent(newEvent);
+      if (success) {
+        toast.success("Event created successfully");
+        setIsCreateModalOpen(false);
+      } else {
+        toast.error("Failed to create event");
+      }
       return Promise.resolve();
     } catch (error) {
       console.error("Error adding event:", error);
@@ -106,8 +109,10 @@ export default function CalendarPage() {
       if (success) {
         toast.success("Event updated successfully");
         setIsViewModalOpen(false);
+        return true;
       }
-      return success;
+      toast.error("Failed to update event");
+      return false;
     } catch (error) {
       console.error("Error updating event:", error);
       toast.error("Failed to update event");
@@ -123,8 +128,10 @@ export default function CalendarPage() {
         toast.success("Event deleted successfully");
         setIsViewModalOpen(false);
         setSelectedEvent(null);
+        return true;
       }
-      return success;
+      toast.error("Failed to delete event");
+      return false;
     } catch (error) {
       console.error("Error deleting event:", error);
       toast.error("Failed to delete event");

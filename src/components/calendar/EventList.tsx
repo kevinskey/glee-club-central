@@ -6,7 +6,8 @@ import { Button } from '@/components/ui/button';
 
 export interface EventListProps {
   events: CalendarEvent[];
-  selectedEvent: CalendarEvent | null;
+  emptyMessage?: string;
+  selectedEvent?: CalendarEvent | null;
   onSelectEvent: (event: CalendarEvent) => void;
   getEventTypeColor?: (type: string) => string;
   className?: string;
@@ -16,6 +17,7 @@ export interface EventListProps {
 
 export const EventList: React.FC<EventListProps> = ({
   events,
+  emptyMessage = "No events found",
   selectedEvent,
   onSelectEvent,
   getEventTypeColor,
@@ -59,7 +61,7 @@ export const EventList: React.FC<EventListProps> = ({
   if (filteredEvents.length === 0) {
     return (
       <div className={`flex flex-col items-center justify-center p-4 ${className}`}>
-        <p className="text-muted-foreground">No events found</p>
+        <p className="text-muted-foreground">{emptyMessage}</p>
       </div>
     );
   }

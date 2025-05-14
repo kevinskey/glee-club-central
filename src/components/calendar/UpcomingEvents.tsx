@@ -12,11 +12,6 @@ interface UpcomingEventsProps {
   onAddClick?: () => void;
 }
 
-interface EventListProps {
-  events: CalendarEvent[];
-  emptyMessage: string;
-}
-
 export const UpcomingEvents = ({ 
   limit = 5,
   showAddButton = false,
@@ -24,6 +19,7 @@ export const UpcomingEvents = ({
 }: UpcomingEventsProps) => {
   const [events, setEvents] = useState<CalendarEvent[]>([]);
   const [loading, setLoading] = useState(true);
+  const [selectedEvent, setSelectedEvent] = useState<CalendarEvent | null>(null);
   
   useEffect(() => {
     const fetchEvents = async () => {
@@ -48,6 +44,12 @@ export const UpcomingEvents = ({
     
     fetchEvents();
   }, [limit]);
+
+  // Placeholder event handler for event selection
+  const handleSelectEvent = (event: CalendarEvent) => {
+    setSelectedEvent(event);
+    // Additional handling could be added here
+  };
   
   return (
     <div className="space-y-4">
@@ -72,7 +74,12 @@ export const UpcomingEvents = ({
           ))}
         </div>
       ) : (
-        <EventList events={events} emptyMessage="No upcoming events" />
+        <EventList 
+          events={events} 
+          onSelectEvent={handleSelectEvent}
+          selectedEvent={selectedEvent}
+          emptyMessage="No upcoming events" 
+        />
       )}
     </div>
   );

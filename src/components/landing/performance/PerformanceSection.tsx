@@ -1,6 +1,6 @@
 
 import React, { useEffect, useState } from "react";
-import { getPerformanceEvents } from "@/utils/performanceSync";
+import { fetchPerformanceEvents, getPerformanceEvents } from "@/utils/performanceSync";
 import { CalendarEvent } from "@/types/calendar";
 
 // Rename this interface to avoid name clash with the imported type

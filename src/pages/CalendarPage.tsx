@@ -121,9 +121,10 @@ const CalendarPage = () => {
   };
   
   // Handle event click from the upcoming events list
-  const handleUpcomingEventClick = (event: CalendarEvent) => {
+  const handleUpcomingEventClick = async (event: CalendarEvent): Promise<boolean> => {
     setSelectedEvent(event);
     setIsViewModalOpen(true);
+    return Promise.resolve(true);
   };
 
   return (

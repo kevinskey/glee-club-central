@@ -1,6 +1,7 @@
 
 import { supabase } from "@/integrations/supabase/client";
 import { PerformanceEvent } from "@/types/performance";
+import { CalendarEvent } from "@/types/calendar";
 
 /**
  * Fetches upcoming performance events
@@ -40,6 +41,33 @@ export const fetchPerformanceEvents = async (limit: number = 4): Promise<Perform
     return performanceEvents;
   } catch (error) {
     console.error("Failed to fetch performance events:", error);
+    return [];
+  }
+};
+
+/**
+ * Gets performance events formatted as calendar events
+ * @param limit Maximum number of events to return
+ * @returns Array of calendar events
+ */
+export const getPerformanceEvents = async (limit: number = 10): Promise<CalendarEvent[]> => {
+  try {
+    const performanceEvents = await fetchPerformanceEvents(limit);
+    
+    // Convert to CalendarEvent format
+    return performanceEvents.map(event => ({
+      id: event.id,
+      title: event.title,
+      start: event.date,
+      end: event.date,
+      description: event.description,
+      location: event.location,
+      type: 'concert',
+      image_url: event.image_url,
+      allDay: event.allday || false
+    }));
+  } catch (error) {
+    console.error("Error converting performance events:", error);
     return [];
   }
 };

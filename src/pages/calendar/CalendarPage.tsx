@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { Footer } from "@/components/landing/Footer";
 import { CalendarHeader } from "@/components/calendar/CalendarHeader";
@@ -106,6 +105,13 @@ const CalendarPage = () => {
       toast.error("Failed to update event");
       return Promise.resolve(false);
     }
+  };
+
+  // Handler for handling event clicks from UpcomingEventsList
+  const handleUpcomingEventClick = async (event: CalendarEvent): Promise<boolean> => {
+    setSelectedEvent(event);
+    setIsViewModalOpen(true);
+    return Promise.resolve(true);
   };
 
   // Handler for deleting event - Updated to return a Promise

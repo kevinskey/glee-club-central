@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { format } from 'date-fns';
 import { Calendar as CalendarIcon } from "lucide-react";
@@ -38,6 +37,7 @@ import { Loader2, X } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useForm } from "react-hook-form";
+import { Calendar } from "@/components/ui/calendar";
 
 export interface AddEventFormProps {
   defaultValues?: any;

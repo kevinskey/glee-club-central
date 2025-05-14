@@ -5,7 +5,7 @@ import { Loader2, RefreshCw } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 
-interface CalendarSyncButtonProps {
+export interface CalendarSyncButtonProps {
   size?: "default" | "sm" | "lg" | "icon";
   variant?: "default" | "destructive" | "outline" | "secondary" | "ghost" | "link";
 }
