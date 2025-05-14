@@ -1,27 +1,27 @@
 
 import React from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { PageHeader } from '@/components/ui/page-header';
 import { FileText, ArrowLeft } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import PDFViewer from '@/components/pdf/PDFViewer';
+import EnhancedPDFViewer from '@/components/pdf/EnhancedPDFViewer';
 
 const ViewSheetMusicPage = () => {
   const { id } = useParams<{ id: string }>();
+  const location = useLocation();
   
-  // In a real implementation, we would fetch the sheet music data here
-  // For now, we'll use dummy data
-  const sheetMusic = {
+  // Get PDF data from location state or use fallback
+  const pdfData = location.state?.file || {
     id: id || '1',
-    title: 'Sample Sheet Music',
-    url: 'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf',
+    title: location.state?.title || 'Sheet Music',
+    url: location.state?.url || 'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf',
   };
 
   return (
     <div className="space-y-6 h-full flex flex-col">
       <PageHeader
-        title={sheetMusic.title}
+        title={pdfData.title}
         description="Sheet Music Viewer"
         icon={<FileText className="h-6 w-6" />}
         actions={
@@ -34,7 +34,10 @@ const ViewSheetMusicPage = () => {
       />
       
       <div className="flex-1">
-        <PDFViewer url={sheetMusic.url} title={sheetMusic.title} />
+        <EnhancedPDFViewer 
+          url={pdfData.url || pdfData.file_url} 
+          title={pdfData.title} 
+        />
       </div>
     </div>
   );

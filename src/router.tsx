@@ -16,6 +16,8 @@ import PressKitPage from './pages/PressKitPage';
 import PrivacyPolicyPage from './pages/PrivacyPolicyPage';
 import TermsOfServicePage from './pages/TermsOfServicePage';
 import SocialPage from './pages/SocialPage';
+import PDFViewerPage from './pages/PDFViewerPage';
+import ViewSheetMusicPage from './pages/sheet-music/ViewSheetMusicPage';
 
 // Admin components
 import AdminLayout from './layouts/AdminLayout';
@@ -105,6 +107,14 @@ export const router = createBrowserRouter([
       {
         path: 'sheet-music',
         element: <SheetMusicPage />,
+      },
+      {
+        path: 'sheet-music/:id',
+        element: <PDFViewerPage />,
+      },
+      {
+        path: 'media/pdf/:id',
+        element: <PDFViewerPage />,
       },
       {
         path: 'recordings',

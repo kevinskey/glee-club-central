@@ -3,6 +3,7 @@ import * as React from "react";
 import { toast as sonnerToast } from "sonner";
 
 export type ToastProps = {
+  id?: string;
   title?: string;
   description?: string;
   duration?: number;
