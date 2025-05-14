@@ -30,7 +30,7 @@ export function useAudioRecorder() {
   useEffect(() => {
     const initAudio = async () => {
       try {
-        const state = await initializeAudioSystem();
+        const state = initializeAudioSystem();
         setPermissionState(state.microphonePermission);
         setIsInitialized(state.initialized);
       } catch (error) {

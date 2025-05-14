@@ -61,8 +61,8 @@ export function RecordingSection({ onRecordingSaved }: RecordingSectionProps) {
   // Check audio system status on load
   useEffect(() => {
     setAudioSystemReady(isInitialized);
-    audioLogger.debug('Recording section - Audio system initialized:', isInitialized);
-    audioLogger.debug('Recording section - Permission state:', permissionState);
+    audioLogger.log('Recording section - Audio system initialized:', isInitialized);
+    audioLogger.log('Recording section - Permission state:', permissionState);
   }, [isInitialized, permissionState]);
 
   // Download recording
