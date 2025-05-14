@@ -1,100 +1,141 @@
-import React from 'react';
-import { format, isToday, isTomorrow, addDays, isSameDay } from 'date-fns';
-import { CalendarEvent } from '@/types/calendar';
-import { CalendarDays, Clock } from 'lucide-react';
-import { cn } from '@/lib/utils';
+
+import React, { useState, useEffect, useRef } from "react";
+import { CalendarEvent } from "@/types/calendar";
+import { format, isToday, isTomorrow } from "date-fns";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { useIntersection } from "@/hooks/use-intersection";
+import { CalendarClock, Loader2 } from "lucide-react";
 
 interface UpcomingEventsListProps {
   events: CalendarEvent[];
-  onEventClick?: (event: CalendarEvent) => void;
+  onEventClick: (event: CalendarEvent) => void;
   className?: string;
+  initialLimit?: number;
+  increment?: number;
 }
 
-export function UpcomingEventsList({ events, onEventClick, className }: UpcomingEventsListProps) {
-  // Get today and sort events by date
-  const now = new Date();
-  const sortedEvents = [...events]
-    .filter(event => {
-      const eventDate = new Date(event.start);
-      return eventDate >= now;
-    })
-    .sort((a, b) => new Date(a.start).getTime() - new Date(b.start).getTime())
-    .slice(0, 5); // Only show the next 5 events
+export function UpcomingEventsList({ 
+  events, 
+  onEventClick, 
+  className = "",
+  initialLimit = 5,
+  increment = 5
+}: UpcomingEventsListProps) {
+  const [visibleEvents, setVisibleEvents] = useState<CalendarEvent[]>([]);
+  const [limit, setLimit] = useState(initialLimit);
+  const [isLoading, setIsLoading] = useState(false);
   
-  const formatEventDate = (date: Date | string) => {
+  const ref = useRef<HTMLDivElement>(null);
+  const entry = useIntersection(ref, {
+    root: null,
+    rootMargin: '0px',
+    threshold: 0.5
+  });
+  
+  // Format the event date for display
+  const formatEventDate = (date: string | Date) => {
     const eventDate = new Date(date);
     
-    if (isToday(eventDate)) return 'Today';
-    if (isTomorrow(eventDate)) return 'Tomorrow';
-    
-    // If within next 7 days, show day name
-    const nextWeek = addDays(now, 7);
-    if (eventDate <= nextWeek) {
-      return format(eventDate, 'EEEE'); // Day name (Monday, Tuesday, etc)
+    if (isToday(eventDate)) {
+      return "Today";
+    } else if (isTomorrow(eventDate)) {
+      return "Tomorrow";
+    } else {
+      return format(eventDate, 'EEE, MMM d');
     }
-    
-    // Otherwise show full date
-    return format(eventDate, 'MMM d, yyyy');
   };
-
-  const getEventTypeColor = (type: string) => {
+  
+  // Get event type color
+  const getEventTypeColor = (type: string): string => {
     switch (type) {
-      case "concert":
-        return "bg-glee-purple";
-      case "rehearsal":
-        return "bg-blue-500";
-      case "sectional":
-        return "bg-green-500";
-      case "special":
-        return "bg-amber-500";
+      case 'concert':
+        return 'bg-glee-purple text-white';
+      case 'rehearsal':
+        return 'bg-blue-500 text-white';
+      case 'sectional':
+        return 'bg-green-500 text-white';
+      case 'special':
+        return 'bg-amber-500 text-white';
+      case 'tour':
+        return 'bg-rose-500 text-white';
       default:
-        return "bg-gray-500";
+        return 'bg-gray-500 text-white';
     }
   };
-
-  if (sortedEvents.length === 0) {
-    return (
-      <div className={cn("bg-white dark:bg-gray-800 rounded-lg shadow p-4 text-center", className)}>
-        <CalendarDays className="h-8 w-8 mx-auto text-gray-400 mb-2" />
-        <p className="text-muted-foreground">No upcoming events</p>
-      </div>
-    );
-  }
-
+  
+  // Load more events when intersection observer triggers
+  useEffect(() => {
+    if (entry?.isIntersecting && visibleEvents.length < events.length && !isLoading) {
+      setIsLoading(true);
+      
+      // Simulate loading delay (remove in production if not needed)
+      setTimeout(() => {
+        setLimit(prevLimit => prevLimit + increment);
+        setIsLoading(false);
+      }, 300);
+    }
+  }, [entry, events.length, increment, isLoading, visibleEvents.length]);
+  
+  // Update visible events when limit changes or events change
+  useEffect(() => {
+    setVisibleEvents(events.slice(0, limit));
+  }, [events, limit]);
+  
   return (
-    <div className={cn("bg-white dark:bg-gray-800 rounded-lg shadow", className)}>
-      <h3 className="font-medium text-lg px-4 pt-3 pb-2 border-b flex items-center">
-        <CalendarDays className="h-5 w-5 mr-2 text-glee-purple" />
-        Upcoming Events
-      </h3>
-      <ul className="divide-y">
-        {sortedEvents.map((event) => {
-          const eventDate = new Date(event.start);
-          const colorClass = getEventTypeColor(event.type);
-          
-          return (
-            <li 
-              key={event.id} 
-              className="p-3 hover:bg-gray-50 dark:hover:bg-gray-700/50 cursor-pointer"
-              onClick={() => onEventClick?.(event)}
-            >
-              <div className="flex items-center">
-                <div className={cn("h-10 w-2 rounded-sm mr-3", colorClass)} />
-                <div className="flex-1">
-                  <h4 className="font-medium text-sm">{event.title}</h4>
-                  <div className="flex items-center text-xs text-muted-foreground mt-1">
-                    <div className="mr-3">{formatEventDate(eventDate)}</div>
-                    <div className="flex items-center">
-                      <Clock className="h-3 w-3 mr-1" />
-                      {format(eventDate, 'h:mm a')}
-                    </div>
-                  </div>
+    <Card className={className}>
+      <CardHeader className="pb-2">
+        <CardTitle className="text-lg font-semibold flex items-center gap-2">
+          <CalendarClock className="h-5 w-5" />
+          Upcoming Events
+        </CardTitle>
+      </CardHeader>
+      <CardContent className="pt-0">
+        {events.length === 0 ? (
+          <p className="text-sm text-muted-foreground py-4 text-center">
+            No upcoming events scheduled
+          </p>
+        ) : (
+          <div className="space-y-3">
+            {visibleEvents.map((event) => (
+              <div 
+                key={event.id}
+                className="flex items-center gap-3 p-2 rounded-md border border-border hover:bg-accent/50 cursor-pointer transition-colors"
+                onClick={() => onEventClick(event)}
+              >
+                <div className="flex-shrink-0 w-12 h-12 flex flex-col items-center justify-center rounded-md bg-muted">
+                  <span className="text-xs font-medium">{format(new Date(event.start), "MMM")}</span>
+                  <span className="text-lg font-bold">{format(new Date(event.start), "dd")}</span>
                 </div>
+                
+                <div className="flex-1 min-w-0">
+                  <h4 className="font-medium truncate">{event.title}</h4>
+                  <p className="text-xs text-muted-foreground">
+                    {formatEventDate(event.start)}
+                    {event.time && ` • ${event.time}`}
+                    {event.location && ` • ${event.location}`}
+                  </p>
+                </div>
+                
+                <Badge variant="secondary" className={getEventTypeColor(event.type)}>
+                  {event.type}
+                </Badge>
               </div>
-            </li>
-          );
-        })}
-      </ul>
-    </div>
+            ))}
+            
+            {/* Loading indicator and intersection observer element */}
+            <div 
+              ref={ref} 
+              className="flex justify-center py-2"
+              style={{ display: visibleEvents.length >= events.length ? 'none' : 'flex' }}
+            >
+              {isLoading && (
+                <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+              )}
+            </div>
+          </div>
+        )}
+      </CardContent>
+    </Card>
   );
 }

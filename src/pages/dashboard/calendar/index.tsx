@@ -197,9 +197,14 @@ export default function CalendarPage() {
           </Card>
         </div>
 
-        {/* Upcoming events list */}
+        {/* Upcoming events list with infinite scroll */}
         <div className="mt-4">
-          <UpcomingEventsList events={upcomingEvents} onEventClick={handleEventClick} />
+          <UpcomingEventsList 
+            events={upcomingEvents} 
+            onEventClick={handleEventClick}
+            initialLimit={10}
+            increment={5}
+          />
         </div>
 
         {/* Create Event Modal */}
