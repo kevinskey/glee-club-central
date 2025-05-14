@@ -1,5 +1,5 @@
 
-import * as React from "react";
+import React from "react";
 import { Toaster } from "@/components/ui/sonner";
 import { toast } from "sonner";
 
