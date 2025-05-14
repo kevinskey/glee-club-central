@@ -31,9 +31,12 @@ export default function ForgotPasswordPage() {
       setIsLoading(true);
       
       if (resetPassword) {
-        const { error } = await resetPassword(email);
+        const result = await resetPassword(email);
         
-        if (error) throw error;
+        // Check if result exists and has an error property
+        if (result && 'error' in result && result.error) {
+          throw result.error;
+        }
         
         setIsSubmitted(true);
         toast({
