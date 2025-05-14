@@ -1,4 +1,3 @@
-
 import { createBrowserRouter, Navigate } from 'react-router-dom';
 import { Suspense, lazy } from 'react';
 
@@ -40,9 +39,11 @@ import AdminRegistrationPage from './pages/admin/AdminRegistrationPage';
 // Import admin pages
 import { AdminRoute } from './components/auth/AdminRoute';
 
+// Import dashboard calendar page
+import CalendarPage from './pages/dashboard/calendar/index';
+
 // Lazy-loaded components
 const DashboardPage = lazy(() => import('./pages/DashboardPage'));
-const CalendarDashboard = lazy(() => import('./pages/dashboard/CalendarDashboard'));
 
 export const router = createBrowserRouter([
   {
@@ -121,11 +122,7 @@ export const router = createBrowserRouter([
       },
       {
         path: 'calendar',
-        element: (
-          <Suspense fallback={<div>Loading...</div>}>
-            <CalendarDashboard />
-          </Suspense>
-        ),
+        element: <CalendarPage />,
       },
     ],
   },

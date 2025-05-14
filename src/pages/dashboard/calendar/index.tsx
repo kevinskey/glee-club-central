@@ -6,6 +6,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Calendar } from "@/components/ui/calendar";
 import { format } from "date-fns";
 import { Badge } from "@/components/ui/badge";
+import Calendar from "@/components/dashboard/Calendar";
+import { Button } from "@/components/ui/button";
 
 export default function CalendarPage() {
   const [date, setDate] = useState<Date | undefined>(new Date());
@@ -37,6 +39,30 @@ export default function CalendarPage() {
       type: "sectional"
     }
   ];
+
+  // Current date for calendar
+  const currentDate = new Date();
+  const [currentMonth, setCurrentMonth] = useState(currentDate.getMonth());
+  const [currentYear, setCurrentYear] = useState(currentDate.getFullYear());
+  
+  // Handlers for month navigation
+  const handlePrevMonth = () => {
+    if (currentMonth === 0) {
+      setCurrentMonth(11);
+      setCurrentYear(prevYear => prevYear - 1);
+    } else {
+      setCurrentMonth(prevMonth => prevMonth - 1);
+    }
+  };
+
+  const handleNextMonth = () => {
+    if (currentMonth === 11) {
+      setCurrentMonth(0);
+      setCurrentYear(prevYear => prevYear + 1);
+    } else {
+      setCurrentMonth(prevMonth => prevMonth + 1);
+    }
+  };
   
   // Get events for the selected date
   const eventsForSelectedDate = date ? events.filter(event => 
@@ -61,10 +87,11 @@ export default function CalendarPage() {
           </CardHeader>
           <CardContent>
             <Calendar
-              mode="single"
-              selected={date}
-              onSelect={setDate}
-              className="rounded-md border"
+              month={currentMonth} 
+              year={currentYear}
+              onPrevMonth={handlePrevMonth}
+              onNextMonth={handleNextMonth}
+              events={events}
             />
           </CardContent>
         </Card>
@@ -104,6 +131,11 @@ export default function CalendarPage() {
                 ))}
               </div>
             )}
+            <div className="mt-4">
+              <Button className="w-full" variant="outline">
+                View All Events
+              </Button>
+            </div>
           </CardContent>
         </Card>
       </div>
