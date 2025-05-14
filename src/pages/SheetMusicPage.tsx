@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useRef } from "react";
 import { PageHeader } from "@/components/ui/page-header";
 import { FileText, Search, Plus, Upload, FolderOpen, ListMusic, Check, TableIcon, ArrowUpDown } from "lucide-react";
@@ -345,8 +346,12 @@ export default function SheetMusicPage() {
                             className="h-5 w-5 border-2" // Make checkbox larger for touch
                           />
                         </div>
-                        <div className="aspect-[3/4] bg-muted flex items-center justify-center">
-                          <FileText className="h-12 w-12 sm:h-16 sm:w-16 text-muted-foreground" />
+                        <div className="aspect-[3/4] bg-muted relative">
+                          <PDFThumbnail 
+                            url={file.file_url}
+                            title={file.title}
+                            className="w-full h-full"
+                          />
                         </div>
                         <CardContent className="p-2 sm:p-3">
                           <h3 className="font-medium text-xs sm:text-sm truncate">{file.title}</h3>
@@ -365,8 +370,12 @@ export default function SheetMusicPage() {
                         className="cursor-pointer"
                         onClick={() => openSheetMusic(file)}
                       >
-                        <div className="aspect-[3/4] bg-muted flex items-center justify-center">
-                          <FileText className="h-12 w-12 sm:h-16 sm:w-16 text-muted-foreground" />
+                        <div className="aspect-[3/4] bg-muted relative">
+                          <PDFThumbnail 
+                            url={file.file_url}
+                            title={file.title}
+                            className="w-full h-full"
+                          />
                         </div>
                         <CardContent className="p-2 sm:p-3">
                           <h3 className="font-medium text-xs sm:text-sm truncate">{file.title}</h3>

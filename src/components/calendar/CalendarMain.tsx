@@ -1,4 +1,3 @@
-
 import React, { useRef, useEffect, useState } from "react";
 import FullCalendar from "@fullcalendar/react";
 import dayGridPlugin from "@fullcalendar/daygrid";
@@ -91,8 +90,8 @@ export const CalendarMain = ({
     }
   ];
 
-  // Get mobile optimized settings
-  const mobileSettings = isMobile ? getMobileCalendarSettings() : {};
+  // Use the getMobileCalendarSettings function in your component
+  const mobileSettings = getMobileCalendarSettings();
 
   return (
     <Card className="flex-1 bg-white dark:bg-gray-800 rounded-lg shadow-sm p-2 sm:p-4 overflow-visible">

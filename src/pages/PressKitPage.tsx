@@ -1,71 +1,102 @@
 
 import React from 'react';
 import { PageHeader } from "@/components/ui/page-header";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { PressKitDocuments } from "@/components/media/PressKitDocuments";
-import { PressKitMediaGrid } from "@/components/media/PressKitMediaGrid";
-import { FileText, Image, Download } from "lucide-react";
+import { ExternalLink, FileText, Image } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Card } from '@/components/ui/card';
+import { Separator } from '@/components/ui/separator';
+import { PressKitMediaGrid } from '@/components/media/PressKitMediaGrid';
+import { PressKitDocuments } from '@/components/media/PressKitDocuments';
 
-export default function PressKitPage() {
+const PressKitPage: React.FC = () => {
   return (
-    <div className="container mx-auto p-4 space-y-6">
+    <div className="container mx-auto px-4 py-8">
       <PageHeader
         title="Press Kit"
-        description="Media resources for press and promotional use"
+        description="Access promotional materials and resources for the Spelman College Glee Club"
         icon={<FileText className="h-6 w-6" />}
       />
       
-      <Card className="border-accent">
-        <CardHeader>
-          <CardTitle>About the Spelman College Glee Club</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <p>
-            The Spelman College Glee Club, founded in the early 1900s, has a distinguished legacy 
-            of musical excellence spanning more than a century. As one of the oldest and most 
-            respected collegiate choral ensembles in the nation, the Glee Club carries the distinction 
-            of being the official ambassadorial vocal ensemble for Spelman College.
-          </p>
-          
-          <p>
-            Under the direction of Dr. Kevin Johnson, the Glee Club performs a diverse repertoire 
-            that includes classical masterpieces, spirituals, contemporary compositions, and works by 
-            African American composers. The ensemble regularly tours domestically and internationally, 
-            showcasing the musical talents of Spelman women while embodying the college's commitment 
-            to academic and artistic excellence.
-          </p>
-          
-          <div className="flex justify-center mt-4">
-            <Button variant="outline" className="flex items-center gap-2">
-              <Download className="h-4 w-4" />
-              Download Full Biography (PDF)
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
-      
-      <Tabs defaultValue="images">
-        <TabsList className="w-full grid grid-cols-2 mb-6">
-          <TabsTrigger value="images">
-            <Image className="h-4 w-4 mr-2" />
-            Images
+      <Tabs defaultValue="media" className="mt-8">
+        <TabsList className="mb-4">
+          <TabsTrigger value="media" className="flex items-center gap-1">
+            <Image className="w-4 h-4" />
+            <span>Media</span>
           </TabsTrigger>
-          <TabsTrigger value="documents">
-            <FileText className="h-4 w-4 mr-2" />
-            Documents
+          <TabsTrigger value="documents" className="flex items-center gap-1">
+            <FileText className="w-4 h-4" />
+            <span>Documents</span>
           </TabsTrigger>
         </TabsList>
         
-        <TabsContent value="images" className="mt-6">
-          <PressKitMediaGrid />
+        <TabsContent value="media" className="space-y-6">
+          <Card className="p-6">
+            <h2 className="text-2xl font-bold mb-4">Official Images</h2>
+            <p className="text-muted-foreground mb-6">
+              These images are approved for use in promotional materials, press releases, and publications. 
+              When using these images, please credit: "Courtesy of Spelman College Glee Club."
+            </p>
+            
+            <div className="space-y-8">
+              <PressKitMediaGrid 
+                bucketName="event-images" 
+                folder="press-kit" 
+                title="Performance Photos" 
+                maxItems={8} 
+              />
+              
+              <Separator className="my-8" />
+              
+              <PressKitMediaGrid 
+                bucketName="event-images" 
+                folder="logos" 
+                title="Logos & Branding" 
+                maxItems={4} 
+              />
+            </div>
+          </Card>
         </TabsContent>
         
-        <TabsContent value="documents" className="mt-6">
-          <PressKitDocuments />
+        <TabsContent value="documents" className="space-y-6">
+          <Card className="p-6">
+            <h2 className="text-2xl font-bold mb-4">Press Documents</h2>
+            <p className="text-muted-foreground mb-6">
+              Below you'll find press releases, fact sheets, and biographies for the Spelman College Glee Club.
+            </p>
+            
+            <div className="space-y-6">
+              <div>
+                <h3 className="text-xl font-semibold mb-3">Press Releases & Media Kits</h3>
+                <PressKitDocuments bucketName="media-library" folder="press-releases" />
+              </div>
+              
+              <div className="mt-8">
+                <h3 className="text-xl font-semibold mb-3">Biographies & Program Notes</h3>
+                <PressKitDocuments bucketName="media-library" folder="biographies" />
+              </div>
+            </div>
+            
+            <div className="mt-8">
+              <h3 className="text-xl font-semibold mb-3">Contact Information</h3>
+              <p className="mb-4">For media inquiries and interview requests, please contact:</p>
+              <div className="bg-muted p-4 rounded-md">
+                <p className="font-medium">Media Relations Department</p>
+                <p className="text-muted-foreground">media@spelmanglee.example.com</p>
+                <p className="text-muted-foreground">+1 (404) 555-0123</p>
+                <Button variant="outline" className="mt-4 gap-2" asChild>
+                  <a href="mailto:media@spelmanglee.example.com">
+                    <ExternalLink className="h-4 w-4" />
+                    Contact Media Team
+                  </a>
+                </Button>
+              </div>
+            </div>
+          </Card>
         </TabsContent>
       </Tabs>
     </div>
   );
-}
+};
+
+export default PressKitPage;

@@ -87,15 +87,13 @@ export const MediaFileCard = ({
               className="w-full h-full object-cover"
             />
           ) : mediaType === 'pdf' ? (
-            <PDFPreview 
-              url={file.file_url} 
-              title={file.title || ''} 
-              mediaSourceId={file.id}
-              category={file.category || 'media-library'}
-              isMediaLibraryFile={true}
-            >
-              <PDFThumbnail url={file.file_url} title={file.title || ''} />
-            </PDFPreview>
+            <div className="w-full h-full">
+              <PDFThumbnail 
+                url={file.file_url} 
+                title={file.title || ''} 
+                className="w-full h-full"
+              />
+            </div>
           ) : (
             <div className="flex items-center justify-center h-full">
               {mediaType === 'audio' ? (

@@ -1,72 +1,84 @@
 
-/**
- * Utility functions for mobile calendar display
- */
-import { EventContentArg } from '@fullcalendar/core';
+import { EventInput } from '@fullcalendar/core';
 
-// Interface for mobile calendar display settings
-export interface MobileCalendarSettings {
-  initialView: string;
-  headerToolbar: {
-    left: string;
-    center: string;
-    right: string;
-  };
-  footerToolbar: {
-    left: string;
-    center: string;
-    right: string;
-  } | null;
-  height: string | number;
+// Interface for the mobile fit check result
+export interface MobileFitCheckResult {
+  fits: boolean;
+  issues: string[];
+  suggestions: string[];
 }
 
 /**
- * Get calendar settings optimized for mobile view
+ * Check if an event will fit well on mobile displays
+ * @param title Event title
+ * @param description Event description
+ * @param location Event location
+ * @returns Object with fit status, issues and suggestions
  */
-export const getMobileCalendarSettings = (isMobile: boolean): MobileCalendarSettings => {
-  if (isMobile) {
-    return {
-      initialView: 'listMonth',
-      headerToolbar: {
-        left: 'title',
-        center: '',
-        right: 'prev,next today'
-      },
-      footerToolbar: {
-        left: 'dayGridMonth,listMonth',
-        center: '',
-        right: ''
-      },
-      height: 'auto'
-    };
-  } else {
-    return {
-      initialView: 'dayGridMonth',
-      headerToolbar: {
-        left: 'prev,next today',
-        center: 'title',
-        right: 'dayGridMonth,timeGridWeek,timeGridDay,listMonth'
-      },
-      footerToolbar: null,
-      height: 'auto'
-    };
+export function checkEventMobileFit(
+  title: string,
+  description?: string,
+  location?: string
+): MobileFitCheckResult {
+  const issues: string[] = [];
+  const suggestions: string[] = [];
+  
+  // Check title length
+  if (title && title.length > 30) {
+    issues.push("Title is too long for mobile view");
+    suggestions.push("Consider shortening the title to 30 characters or less");
   }
-};
+  
+  // Check description length
+  if (description && description.length > 200) {
+    issues.push("Description is too long for mobile view");
+    suggestions.push("Consider shortening the description to improve mobile experience");
+  }
+  
+  // Check location length
+  if (location && location.length > 40) {
+    issues.push("Location text is too long for mobile view");
+    suggestions.push("Consider using a shorter location or abbreviation");
+  }
+  
+  return {
+    fits: issues.length === 0,
+    issues,
+    suggestions
+  };
+}
 
 /**
- * Check if an event will fit properly on mobile devices
+ * Get optimal calendar settings for mobile view
+ * @returns Object with mobile-optimized calendar settings
  */
-export const checkEventMobileFit = (eventInfo: EventContentArg): boolean => {
-  const { event } = eventInfo;
-  const start = event.start;
-  const end = event.end;
-  
-  // If we don't have both start and end times, no issue with fit
-  if (!start || !end) return true;
-  
-  // Calculate duration in hours
-  const durationHours = (end.getTime() - start.getTime()) / (1000 * 60 * 60);
-  
-  // For mobile views, events less than 1.5 hours might be too small to display well
-  return durationHours >= 1.5;
-};
+export function getMobileCalendarSettings() {
+  return {
+    headerToolbar: {
+      left: 'prev,next',
+      center: 'title',
+      right: 'today'
+    },
+    dayMaxEventRows: 2,
+    eventTimeFormat: {
+      hour: 'numeric',
+      minute: '2-digit',
+      meridiem: 'short'
+    },
+    views: {
+      timeGridDay: {
+        slotDuration: '00:30:00',
+        slotLabelFormat: {
+          hour: 'numeric',
+          minute: '2-digit',
+          omitZeroMinute: true,
+          meridiem: 'short'
+        }
+      },
+      listWeek: {
+        listDayFormat: { weekday: 'short' },
+        listDayAltFormat: { month: 'short', day: 'numeric' }
+      }
+    }
+  };
+}

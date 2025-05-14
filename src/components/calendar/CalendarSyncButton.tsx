@@ -1,59 +1,63 @@
 
-import React, { useState } from "react";
-import { Button } from "@/components/ui/button";
-import { Loader2, RefreshCw } from "lucide-react";
-import { toast } from "sonner";
-import { synchronizePerformances } from "@/utils/performanceSync";
-import { useCalendarStore } from "@/hooks/useCalendarStore";
+import React from 'react';
+import { Button } from '@/components/ui/button';
+import { Calendar, RefreshCw } from 'lucide-react';
+import { getPerformanceEvents } from '@/utils/performanceSync';
+import { useToast } from '@/hooks/use-toast';
+import { useCalendarStore } from '@/hooks/useCalendarStore';
 
 interface CalendarSyncButtonProps {
+  variant?: 'default' | 'outline' | 'secondary' | 'ghost';
   className?: string;
-  variant?: "default" | "outline" | "secondary";
-  size?: "default" | "sm" | "lg" | "icon";
 }
 
-export function CalendarSyncButton({ className, variant = "outline", size = "sm" }: CalendarSyncButtonProps) {
-  const [isSyncing, setIsSyncing] = useState(false);
-  const { fetchEvents } = useCalendarStore();
+export const CalendarSyncButton = ({ 
+  variant = 'outline',
+  className = ''
+}: CalendarSyncButtonProps) => {
+  const { toast } = useToast();
+  const { addEvents } = useCalendarStore();
+  const [syncing, setSyncing] = React.useState(false);
 
   const handleSync = async () => {
+    setSyncing(true);
     try {
-      setIsSyncing(true);
+      // Get performance events
+      const performanceEvents = await getPerformanceEvents();
       
-      // Sync calendar events first
-      await fetchEvents();
+      // Add them to calendar
+      addEvents(performanceEvents);
       
-      // Then sync performances with calendar events
-      await synchronizePerformances();
-      
-      toast.success("Calendar and performances synced successfully");
+      toast({
+        title: 'Calendar synced',
+        description: `Successfully imported ${performanceEvents.length} performances`,
+      });
     } catch (error) {
-      console.error("Error syncing calendar:", error);
-      toast.error("Failed to sync calendar data");
+      console.error("Error syncing performances:", error);
+      toast({
+        title: 'Sync failed',
+        description: 'Could not import performances. Please try again.',
+        variant: 'destructive',
+      });
     } finally {
-      setIsSyncing(false);
+      setSyncing(false);
     }
   };
-
+  
   return (
     <Button 
       variant={variant} 
-      size={size} 
+      size="sm" 
       onClick={handleSync} 
-      disabled={isSyncing}
-      className={className}
+      disabled={syncing}
+      className={`gap-2 ${className}`}
     >
-      {isSyncing ? (
-        <>
-          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-          Syncing...
-        </>
+      {syncing ? (
+        <RefreshCw className="h-4 w-4 animate-spin" />
       ) : (
-        <>
-          <RefreshCw className="mr-2 h-4 w-4" />
-          Sync Calendar
-        </>
+        <Calendar className="h-4 w-4" />
       )}
+      {syncing ? 'Syncing...' : 'Sync Performances'}
     </Button>
   );
-}
+};

@@ -1,176 +1,82 @@
 
 import { supabase } from '@/integrations/supabase/client';
+import { EventType, CalendarEvent } from '@/types/calendar';
 
-// Define the common interface to be used across components
 export interface PerformanceEvent {
   id: string;
   title: string;
-  date: string;
-  time?: string;
-  location: string;
+  date: Date | string;
+  location?: string;
   description?: string;
-  image?: string;
-  type: string;
+  imageUrl?: string;
+  eventUrl?: string;
 }
 
-// Define the CalendarEvent interface
-export interface CalendarEvent {
-  id: string;
-  title: string;
-  start: Date;
-  end: Date;
-  description: string;
-  location: string;
-  type: 'event' | 'rehearsal' | 'performance';
-  allDay?: boolean;
-  image_url?: string;
-}
+// Helper function to convert date strings to Date objects
+const ensureDate = (dateStr: string | Date): Date => {
+  return typeof dateStr === 'string' ? new Date(dateStr) : dateStr;
+};
 
-/**
- * Fetch upcoming performance events from Supabase calendar_events table
- */
-export async function fetchUpcomingPerformances(limit: number = 3): Promise<PerformanceEvent[]> {
-  try {
-    const { data, error } = await supabase
-      .from('calendar_events')
-      .select('*')
-      .eq('type', 'performance')
-      .gte('date', new Date().toISOString().split('T')[0])
-      .order('date', { ascending: true })
-      .limit(limit);
-    
-    if (error) {
-      console.error('Error fetching performances:', error);
-      return [];
+// Placeholder for external API that fetches performance events
+const fetchEventsFromAPI = async (): Promise<PerformanceEvent[]> => {
+  // This would normally call an API
+  // For demo purposes, we'll return mock data
+  return [
+    {
+      id: 'perf-1',
+      title: 'Annual Spring Concert',
+      date: new Date(new Date().getFullYear(), 3, 15, 19, 0), // April 15 this year, 7pm
+      location: 'Sisters Chapel, Spelman College',
+      description: 'Join us for our annual spring concert featuring classic and contemporary choral works.',
+      imageUrl: '/lovable-uploads/b57ced8e-7ed7-405b-8302-41ab726303af.png'
+    },
+    {
+      id: 'perf-2',
+      title: 'Christmas Carol Service',
+      date: new Date(new Date().getFullYear(), 11, 10, 19, 30), // Dec 10 this year, 7:30pm
+      location: 'Martin Luther King Jr. International Chapel',
+      description: 'A beloved holiday tradition featuring seasonal classics and spirituals.',
+      imageUrl: '/lovable-uploads/9a044e72-80dc-40a6-b716-2d5c2d35b878.png'
+    },
+    {
+      id: 'perf-3',
+      title: 'Alumnae Reunion Performance',
+      date: new Date(new Date().getFullYear(), 4, 20, 14, 0), // May 20 this year, 2pm
+      location: 'Reynolds Cottage',
+      description: 'Special performance for Spelman alumnae during reunion weekend.',
+      imageUrl: '/lovable-uploads/312fd1a4-7f46-4000-8711-320383aa565a.png'
     }
-    
-    if (!data) {
-      return [];
-    }
-    
-    // Map database results to PerformanceEvent interface
-    return data.map(item => ({
-      id: item.id,
-      title: item.title,
-      date: item.date,
-      time: item.time,
-      location: item.location,
-      description: item.description,
-      image: item.image_url,
-      type: item.type
-    }));
-  } catch (error) {
-    console.error('Unexpected error fetching performances:', error);
-    return [];
-  }
-}
+  ];
+};
 
-/**
- * Convert database calendar events to format needed for the calendar component
- */
-export function convertToCalendarEvents(events: any[]): CalendarEvent[] {
-  return events.map(event => {
-    // Parse date and time strings
-    const eventDate = new Date(event.date);
-    
-    // Create start and end times (defaults to all-day if no time specified)
-    let start = new Date(eventDate);
-    let end = new Date(eventDate);
-    let allDay = true;
-    
-    if (event.time) {
-      const timeParts = event.time.split(' - ');
-      if (timeParts.length > 0) {
-        // Try to parse start time
-        const startTime = parseTimeString(timeParts[0]);
-        if (startTime) {
-          start.setHours(startTime.hours, startTime.minutes);
-          allDay = false;
-        }
-        
-        // Try to parse end time if available
-        if (timeParts.length > 1) {
-          const endTime = parseTimeString(timeParts[1]);
-          if (endTime) {
-            end.setHours(endTime.hours, endTime.minutes);
-            allDay = false;
-          } else {
-            // If no valid end time, set default duration of 1 hour
-            end.setHours(start.getHours() + 1, start.getMinutes());
-          }
-        } else {
-          // If no end time specified, default to 1 hour duration
-          end.setHours(start.getHours() + 1, start.getMinutes());
-        }
-      }
-    }
-    
-    // Ensure the event type matches the CalendarEvent type
-    const eventType = (event.type === 'event' || event.type === 'rehearsal' || event.type === 'performance')
-      ? event.type as 'event' | 'rehearsal' | 'performance'
-      : 'event';
-      
+// Function to convert performance events to calendar events format
+const transformToCalendarEvents = (performances: PerformanceEvent[]): CalendarEvent[] => {
+  return performances.map(perf => {
+    const startDate = ensureDate(perf.date);
+    const endDate = new Date(startDate);
+    endDate.setHours(endDate.getHours() + 2); // Default to 2 hour duration
+
     return {
-      id: event.id,
-      title: event.title,
-      start: start,
-      end: end,
-      description: event.description || '',
-      location: event.location || '',
-      type: eventType,
-      allDay: allDay,
-      image_url: event.image_url,
+      id: perf.id,
+      title: perf.title,
+      start: startDate,
+      end: endDate,
+      description: perf.description || '',
+      location: perf.location || '',
+      type: "event" as EventType,
+      image_url: perf.imageUrl || '',
+      allDay: false
     };
   });
-}
+};
 
-/**
- * Parse time strings in various formats
- */
-function parseTimeString(timeStr: string): { hours: number, minutes: number } | null {
-  // Remove any whitespace
-  timeStr = timeStr.trim();
-  
-  // Try various time formats
-  
-  // Format: "HH:MM AM/PM"
-  const standardMatch = timeStr.match(/^(\d{1,2}):(\d{2})\s*(AM|PM|am|pm)$/);
-  if (standardMatch) {
-    let hours = parseInt(standardMatch[1], 10);
-    const minutes = parseInt(standardMatch[2], 10);
-    const period = standardMatch[3].toLowerCase();
-    
-    if (period === 'pm' && hours < 12) {
-      hours += 12;
-    } else if (period === 'am' && hours === 12) {
-      hours = 0;
-    }
-    
-    return { hours, minutes };
+// Public function to get performance events in calendar format
+export const getPerformanceEvents = async (): Promise<CalendarEvent[]> => {
+  try {
+    const performances = await fetchEventsFromAPI();
+    return transformToCalendarEvents(performances);
+  } catch (error) {
+    console.error("Error fetching performance events:", error);
+    return [];
   }
-  
-  // Format: "HH:MM" (24-hour)
-  const militaryMatch = timeStr.match(/^(\d{1,2}):(\d{2})$/);
-  if (militaryMatch) {
-    const hours = parseInt(militaryMatch[1], 10);
-    const minutes = parseInt(militaryMatch[2], 10);
-    return { hours, minutes };
-  }
-  
-  // Format: "HH AM/PM" (no minutes)
-  const shortMatch = timeStr.match(/^(\d{1,2})\s*(AM|PM|am|pm)$/);
-  if (shortMatch) {
-    let hours = parseInt(shortMatch[1], 10);
-    const period = shortMatch[2].toLowerCase();
-    
-    if (period === 'pm' && hours < 12) {
-      hours += 12;
-    } else if (period === 'am' && hours === 12) {
-      hours = 0;
-    }
-    
-    return { hours, minutes: 0 };
-  }
-  
-  return null;
-}
+};
