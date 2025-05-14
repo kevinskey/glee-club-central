@@ -1,26 +1,22 @@
 
-import React from "react";
-import { HeroSection } from "@/components/landing/HeroSection";
-import { TestimonialSection } from "@/components/landing/TestimonialSection";
-import { CTASection } from "@/components/landing/CTASection";
-import { YouTubeSection } from "@/components/landing/youtube/YouTubeSection";
-import { SidebarProvider } from "@/components/ui/sidebar";
-import { EventsSlider } from "@/components/landing/events/EventsSlider";
+import React from 'react';
+import { HeroSection } from '@/components/landing/HeroSection';
+import { PerformanceSection } from '@/components/landing/performance/PerformanceSection';
+import { TestimonialSection } from '@/components/landing/TestimonialSection';
+import { CTASection } from '@/components/landing/CTASection';
+import { FeaturesSection } from '@/components/landing/FeaturesSection';
+import { MemberPortalBox } from '@/components/landing/MemberPortalBox';
 
-const LandingPage: React.FC = () => {
+export default function LandingPage() {
   return (
-    <SidebarProvider>
-      <div className="min-h-screen w-full">
-        <main>
-          <HeroSection />
-          <EventsSlider />
-          <YouTubeSection />
-          <TestimonialSection />
-          <CTASection />
-        </main>
-      </div>
-    </SidebarProvider>
+    <>
+      <HeroSection />
+      <PerformanceSection />
+      <FeaturesSection />
+      {/* YouTube section removed */}
+      <TestimonialSection />
+      <CTASection />
+      <MemberPortalBox />
+    </>
   );
-};
-
-export default LandingPage;
+}

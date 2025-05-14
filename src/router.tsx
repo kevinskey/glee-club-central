@@ -1,4 +1,3 @@
-
 import { createBrowserRouter, Navigate } from 'react-router-dom';
 import { Suspense, lazy } from 'react';
 
@@ -16,7 +15,6 @@ import RecordingsPage from './pages/recordings/RecordingsPage';
 import PressKitPage from './pages/PressKitPage';
 import PrivacyPolicyPage from './pages/PrivacyPolicyPage';
 import TermsOfServicePage from './pages/TermsOfServicePage';
-import YoutubeVideosPage from './pages/YoutubeVideosPage';
 import SocialPage from './pages/SocialPage';
 
 // Admin components
@@ -77,10 +75,6 @@ export const router = createBrowserRouter([
       {
         path: 'terms',
         element: <TermsOfServicePage />,
-      },
-      {
-        path: 'youtube-videos',
-        element: <YoutubeVideosPage />,
       },
       {
         path: 'social',
