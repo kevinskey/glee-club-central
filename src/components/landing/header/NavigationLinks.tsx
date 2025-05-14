@@ -2,6 +2,7 @@
 import React from "react";
 import { cn } from "@/lib/utils";
 import { Link } from "react-router-dom";
+import { LogIn } from "lucide-react";
 import {
   NavigationMenu,
   NavigationMenuContent,
@@ -63,6 +64,17 @@ export function NavigationLinks({ className, onLinkClick }: NavigationLinksProps
             onClick={handleLinkClick}
           >
             Contact
+          </Link>
+        </NavigationMenuItem>
+        
+        <NavigationMenuItem>
+          <Link
+            to="/login"
+            className="text-base md:text-lg font-inter font-medium flex items-center gap-1 text-primary hover:text-primary/80 transition-colors"
+            onClick={handleLinkClick}
+          >
+            <LogIn className="h-4 w-4" />
+            Login
           </Link>
         </NavigationMenuItem>
       </NavigationMenuList>

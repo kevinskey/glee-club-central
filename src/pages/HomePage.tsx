@@ -7,6 +7,9 @@ import { useIsMobile } from '@/hooks/use-mobile';
 import { SidebarProvider } from '@/components/ui/sidebar';
 import { UpcomingEvents } from '@/components/calendar/UpcomingEvents';
 import { EventsSlider } from '@/components/landing/events/EventsSlider';
+import { NavigationLinks } from '@/components/landing/header/NavigationLinks';
+import { Button } from '@/components/ui/button';
+import { Link } from 'react-router-dom';
 
 const HomePage = () => {
   const isMobile = useIsMobile();
@@ -22,6 +25,12 @@ const HomePage = () => {
         {isMobile && <HeroSection />}
         
         <div className="container mx-auto px-4 sm:px-6 md:px-8 py-6 md:py-12 z-10 relative flex-1 flex flex-col">
+          {!isMobile && (
+            <div className="flex justify-end mb-6">
+              <NavigationLinks className="text-white" />
+            </div>
+          )}
+          
           <main className={`flex-1 flex flex-col items-center justify-start ${isMobile ? "text-foreground" : "text-white"}`}>
             {!isMobile && (
               <div className="text-center max-w-3xl mx-auto">
@@ -32,6 +41,12 @@ const HomePage = () => {
                   Welcome to the central digital hub for the Spelman College Glee Club. 
                   Manage sheet music, attendance, calendar events, and more in one seamless platform.
                 </p>
+                
+                <Link to="/login">
+                  <Button size="lg" className="bg-primary hover:bg-primary/90 text-white">
+                    Member Login
+                  </Button>
+                </Link>
               </div>
             )}
             
