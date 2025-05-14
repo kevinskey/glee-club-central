@@ -7,7 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/components/ui/select';
 import { format } from 'date-fns';
-import { CalendarEvent } from '@/types/calendar';
+import { CalendarEvent, EventType } from '@/types/calendar';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
 import { Upload } from 'lucide-react';
@@ -37,7 +37,7 @@ export function EventModal({ onClose, onSave, initialDate, initialData }: EventM
   const [time, setTime] = useState(initialData?.time || '');
   const [location, setLocation] = useState(initialData?.location || '');
   const [description, setDescription] = useState(initialData?.description || '');
-  const [type, setType] = useState(initialData?.type || 'special');
+  const [type, setType] = useState<EventType>(initialData?.type as EventType || 'special');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [selectedImage, setSelectedImage] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string>(initialData?.image_url || '');
@@ -58,6 +58,11 @@ export function EventModal({ onClose, onSave, initialDate, initialData }: EventM
     // Create preview URL
     const previewUrl = URL.createObjectURL(file);
     setImagePreview(previewUrl);
+  };
+
+  // Handle type selection (fixing the type issue)
+  const handleTypeChange = (value: string) => {
+    setType(value as EventType);
   };
 
   const handleSave = async () => {
@@ -174,7 +179,10 @@ export function EventModal({ onClose, onSave, initialDate, initialData }: EventM
           
           <div>
             <Label htmlFor="type">Event Type</Label>
-            <Select value={type} onValueChange={setType}>
+            <Select 
+              value={type} 
+              onValueChange={handleTypeChange}
+            >
               <SelectTrigger id="type" className="mt-1">
                 <SelectValue placeholder="Select event type" />
               </SelectTrigger>
