@@ -10,3 +10,6 @@ public = true
 [storage.event-images]
 public = true
 
+[storage]
+file_size_limit = "10MB"
+

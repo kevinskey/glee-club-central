@@ -1,144 +1,161 @@
 
-import React, { useState } from "react";
-import {
-  DialogHeader,
-  DialogTitle,
-  DialogFooter,
-} from "@/components/ui/dialog";
+import React from 'react';
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { format } from "date-fns";
-import { CalendarEvent } from "@/types/calendar";
-import { Trash2, Edit, MapPin, Calendar, Clock } from "lucide-react";
-import { MobileFitCheck } from "./MobileFitCheck";
-import { useIsMobile } from "@/hooks/use-mobile";
+import { DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { CalendarIcon, Clock, MapPin, User, Trash2, Edit, FileText } from "lucide-react";
+import { CalendarEvent } from '@/types/calendar';
+import { useIsMobile } from '@/hooks/use-mobile';
+import { AspectRatio } from "@/components/ui/aspect-ratio";
 
 interface ViewEventModalProps {
   event: CalendarEvent;
   onClose: () => void;
   onUpdate: (event: CalendarEvent) => Promise<boolean | void>;
-  onDelete: (id: string) => Promise<boolean | void>;
+  onDelete: (eventId: string) => Promise<boolean | void>;
   userCanEdit: boolean;
 }
 
-export const ViewEventModal = ({
-  event,
-  onClose,
-  onUpdate,
-  onDelete,
-  userCanEdit
-}: ViewEventModalProps) => {
-  const [isLoading, setIsLoading] = useState(false);
+export function ViewEventModal({ 
+  event, 
+  onClose, 
+  onUpdate, 
+  onDelete, 
+  userCanEdit 
+}: ViewEventModalProps) {
   const isMobile = useIsMobile();
 
   const handleDelete = async () => {
-    if (confirm("Are you sure you want to delete this event?")) {
-      setIsLoading(true);
-      try {
-        await onDelete(event.id);
-      } catch (error) {
-        console.error("Error deleting event:", error);
-      } finally {
-        setIsLoading(false);
-      }
+    if (window.confirm("Are you sure you want to delete this event?")) {
+      await onDelete(event.id);
     }
   };
-
-  // Get badge color based on event type
-  const getBadgeVariant = () => {
-    switch (event.type) {
-      case "concert":
-        return "default";
-      case "rehearsal":
-        return "secondary";
-      case "sectional":
-        return "outline";
-      case "special":
-        return "destructive";
-      default:
-        return "outline";
-    }
-  };
-
-  const eventDate = event.date instanceof Date ? event.date : new Date(event.date);
 
   return (
-    <div className="space-y-4">
+    <>
       <DialogHeader>
         <DialogTitle className="text-xl">{event.title}</DialogTitle>
-        <div className="flex items-center mt-2">
-          <Badge variant={getBadgeVariant()} className="mr-2">
-            {event.type}
-          </Badge>
-        </div>
       </DialogHeader>
 
-      <div className="space-y-4 py-2">
-        <div className="flex flex-col gap-3">
-          <div className="flex items-center gap-2">
-            <Calendar className="h-4 w-4 text-muted-foreground" />
-            <span>
-              {format(eventDate, isMobile ? "MMM d, yyyy" : "MMMM d, yyyy")}
-            </span>
-          </div>
-          
-          {event.time && (
-            <div className="flex items-center gap-2">
-              <Clock className="h-4 w-4 text-muted-foreground" />
-              <span>{event.time}</span>
-            </div>
-          )}
-          
-          {event.location && (
-            <div className="flex items-center gap-2">
-              <MapPin className="h-4 w-4 text-muted-foreground" />
-              <span>{event.location}</span>
-            </div>
-          )}
+      {/* Event Image (if available) */}
+      {event.image_url && (
+        <div className="mt-4 rounded-md overflow-hidden border">
+          <AspectRatio ratio={16/9}>
+            <img 
+              src={event.image_url}
+              alt={event.title}
+              className="h-full w-full object-cover"
+            />
+          </AspectRatio>
         </div>
-
-        {event.description && (
-          <div className="mt-4">
-            <h3 className="font-medium mb-2">Description</h3>
-            <p className="text-sm text-muted-foreground whitespace-pre-wrap">
-              {event.description}
-            </p>
+      )}
+      
+      <div className="mt-4 space-y-2">
+        <div className="flex items-center">
+          <CalendarIcon className="mr-2 h-4 w-4 text-muted-foreground" />
+          <span>{formatDate(event.start)}</span>
+        </div>
+        
+        {event.time && (
+          <div className="flex items-center">
+            <Clock className="mr-2 h-4 w-4 text-muted-foreground" />
+            <span>{formatTime(event.time)}</span>
           </div>
         )}
         
-        {/* Show mobile fit check warning if needed */}
-        <MobileFitCheck 
-          title={event.title} 
-          location={event.location || ""} 
-          description={event.description} 
-        />
-      </div>
-
-      <DialogFooter className="gap-2 sm:gap-0">
-        {userCanEdit && (
-          <div className={`flex ${isMobile ? 'flex-col w-full gap-2' : 'gap-2'}`}>
-            <Button
-              type="button"
-              onClick={handleDelete}
-              variant="destructive"
-              disabled={isLoading}
-              className={isMobile ? "w-full" : ""}
-            >
-              <Trash2 className="mr-2 h-4 w-4" />
-              Delete
-            </Button>
-            <Button
-              type="button"
-              onClick={() => onUpdate(event)}
-              disabled={isLoading}
-              className={isMobile ? "w-full" : ""}
-            >
-              <Edit className="mr-2 h-4 w-4" />
-              Edit
-            </Button>
+        {event.location && (
+          <div className="flex items-center">
+            <MapPin className="mr-2 h-4 w-4 text-muted-foreground" />
+            <span>{event.location}</span>
           </div>
         )}
+        
+        <div className="flex items-center">
+          <div className={`px-3 py-1 rounded-full text-xs ${getEventTypeBadgeStyle(event.type)}`}>
+            {capitalizeFirstLetter(event.type)}
+          </div>
+        </div>
+        
+        {event.description && (
+          <div className="pt-2">
+            <div className="flex items-start">
+              <FileText className="mr-2 h-4 w-4 text-muted-foreground mt-0.5" />
+              <div className="whitespace-pre-wrap">{event.description}</div>
+            </div>
+          </div>
+        )}
+        
+        {event.created_by && (
+          <div className="flex items-center pt-2">
+            <User className="mr-2 h-4 w-4 text-muted-foreground" />
+            <span className="text-sm text-muted-foreground">Created by: {truncateId(event.created_by)}</span>
+          </div>
+        )}
+      </div>
+      
+      <DialogFooter className="flex gap-2 mt-4">
+        {userCanEdit && (
+          <Button variant="destructive" onClick={handleDelete}>
+            <Trash2 className="h-4 w-4 mr-2" />
+            Delete
+          </Button>
+        )}
+        <Button variant="outline" onClick={onClose}>
+          Close
+        </Button>
       </DialogFooter>
-    </div>
+    </>
   );
+}
+
+// Helper functions
+const formatDate = (date: string | Date): string => {
+  try {
+    const d = typeof date === 'string' ? new Date(date) : date;
+    return d.toLocaleDateString(undefined, { 
+      weekday: 'long', 
+      year: 'numeric', 
+      month: 'long', 
+      day: 'numeric' 
+    });
+  } catch (e) {
+    return String(date);
+  }
+};
+
+const formatTime = (time: string): string => {
+  try {
+    const [hours, minutes] = time.split(':');
+    const date = new Date();
+    date.setHours(parseInt(hours, 10));
+    date.setMinutes(parseInt(minutes, 10));
+    return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+  } catch (e) {
+    return time;
+  }
+};
+
+const getEventTypeBadgeStyle = (type: string): string => {
+  switch (type) {
+    case 'concert': 
+      return 'bg-glee-purple/20 text-glee-purple';
+    case 'rehearsal': 
+      return 'bg-blue-500/20 text-blue-600';
+    case 'sectional': 
+      return 'bg-green-500/20 text-green-600';
+    case 'special': 
+      return 'bg-amber-500/20 text-amber-600';
+    case 'tour': 
+      return 'bg-purple-500/20 text-purple-600';
+    default: 
+      return 'bg-gray-200 text-gray-700';
+  }
+};
+
+const capitalizeFirstLetter = (string: string): string => {
+  return string.charAt(0).toUpperCase() + string.slice(1);
+};
+
+const truncateId = (id: string): string => {
+  if (id.length <= 8) return id;
+  return `${id.substring(0, 6)}...`;
 };
