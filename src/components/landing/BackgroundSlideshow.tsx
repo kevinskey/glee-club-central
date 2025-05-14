@@ -6,12 +6,14 @@ interface BackgroundSlideshowProps {
   images: string[];
   duration?: number;
   transition?: number;
+  overlayOpacity?: number;
 }
 
 export function BackgroundSlideshow({
   images,
   duration = 10000, // 10 seconds between transitions
   transition = 2000, // 2 seconds for the transition effect
+  overlayOpacity = 0.7, // Default overlay opacity (70%)
 }: BackgroundSlideshowProps) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [nextIndex, setNextIndex] = useState(1);
@@ -95,12 +97,19 @@ export function BackgroundSlideshow({
   // Special case for single image (no transitions needed)
   if (images.length === 1) {
     return (
-      <div 
-        className="absolute inset-0 bg-cover bg-center bg-no-repeat"
-        style={{ 
-          backgroundImage: `url('${images[0]}')`,
-        }}
-      />
+      <div className="absolute inset-0">
+        <div 
+          className="absolute inset-0 bg-cover bg-center bg-no-repeat"
+          style={{ 
+            backgroundImage: `url('${images[0]}')`,
+          }}
+        />
+        {/* Black overlay with configurable opacity */}
+        <div 
+          className="absolute inset-0 bg-black" 
+          style={{ opacity: overlayOpacity }}
+        />
+      </div>
     );
   }
 
@@ -129,6 +138,12 @@ export function BackgroundSlideshow({
           transitionDuration: `${transition}ms`,
           transitionTimingFunction: 'ease',
         }}
+      />
+
+      {/* Black overlay with configurable opacity */}
+      <div 
+        className="absolute inset-0 bg-black" 
+        style={{ opacity: overlayOpacity }}
       />
     </div>
   );

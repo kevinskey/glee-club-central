@@ -59,11 +59,12 @@ export function HeroSection() {
   
   return (
     <section className="relative bg-glee-dark py-4 sm:py-5 md:py-8 lg:py-12 xl:py-20 min-h-[320px] sm:min-h-[360px] md:min-h-[440px] lg:min-h-[520px] xl:min-h-[600px] w-full overflow-hidden flex items-center justify-start">
-      <div className="absolute inset-0 bg-black opacity-70 z-[1]">
+      <div className="absolute inset-0 z-[1]">
         <BackgroundSlideshow 
           images={backgroundImages} 
           duration={10000} 
           transition={2000}
+          overlayOpacity={0.75} // Set black overlay to 75% opacity
         />
       </div>
       
