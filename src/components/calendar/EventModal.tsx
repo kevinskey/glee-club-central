@@ -1,316 +1,259 @@
 
-import React, { useState } from 'react';
-import { Button } from "@/components/ui/button";
-import { DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Textarea } from "@/components/ui/textarea";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import * as z from "zod";
-import { CalendarIcon } from "lucide-react";
-import { cn } from "@/lib/utils";
-import { format } from "date-fns";
-import { Calendar } from "@/components/ui/calendar";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { useIsMobile } from "@/hooks/use-mobile";
-import { supabase } from "@/integrations/supabase/client";
-import { v4 as uuidv4 } from "uuid";
-import { AspectRatio } from "@/components/ui/aspect-ratio";
-import { toast } from "sonner";
-
-// Form schema
-const eventFormSchema = z.object({
-  title: z.string().min(2, "Title must be at least 2 characters."),
-  description: z.string().optional(),
-  date: z.date({
-    required_error: "Please select a date.",
-  }),
-  time: z.string().optional(),
-  location: z.string().optional(),
-  type: z.string().default("special"),
-  image_url: z.string().optional()
-});
-
-type EventFormValues = z.infer<typeof eventFormSchema>;
+import React, { useState, useEffect } from 'react';
+import { DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
+import { Label } from '@/components/ui/label';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/components/ui/select';
+import { format } from 'date-fns';
+import { CalendarEvent } from '@/types/calendar';
+import { useAuth } from '@/contexts/AuthContext';
+import { toast } from 'sonner';
+import { Upload } from 'lucide-react';
+import { useIsMobile } from '@/hooks/use-mobile';
+import { supabase } from '@/integrations/supabase/client';
 
 interface EventModalProps {
   onClose: () => void;
-  onSave: (event: EventFormValues) => void;
+  onSave: (event: any) => Promise<boolean | void>;
   initialDate?: Date | null;
+  initialData?: CalendarEvent;
 }
 
-export function EventModal({ onClose, onSave, initialDate }: EventModalProps) {
+export function EventModal({ onClose, onSave, initialDate, initialData }: EventModalProps) {
+  const { user } = useAuth();
   const isMobile = useIsMobile();
-  const [imageFile, setImageFile] = useState<File | null>(null);
-  const [imagePreview, setImagePreview] = useState<string | null>(null);
-  const [uploading, setUploading] = useState(false);
+  
+  // Initialize state with initialData if provided (for edit mode)
+  const [title, setTitle] = useState(initialData?.title || '');
+  const [date, setDate] = useState(initialData?.date 
+    ? typeof initialData.date === 'string' 
+      ? initialData.date 
+      : format(initialData.date, 'yyyy-MM-dd')
+    : initialDate 
+      ? format(initialDate, 'yyyy-MM-dd') 
+      : format(new Date(), 'yyyy-MM-dd'));
+  const [time, setTime] = useState(initialData?.time || '');
+  const [location, setLocation] = useState(initialData?.location || '');
+  const [description, setDescription] = useState(initialData?.description || '');
+  const [type, setType] = useState(initialData?.type || 'special');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [selectedImage, setSelectedImage] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState<string>(initialData?.image_url || '');
 
-  const form = useForm<EventFormValues>({
-    resolver: zodResolver(eventFormSchema),
-    defaultValues: {
-      title: "",
-      description: "",
-      date: initialDate || new Date(),
-      time: "",
-      location: "",
-      type: "special",
-      image_url: ""
-    }
-  });
-
-  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  // Handle image selection
+  const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-
-    // Check file type
-    if (!file.type.startsWith('image/')) {
-      toast.error('Please select an image file');
-      return;
-    }
-
-    // Check file size (limit to 5MB)
-    if (file.size > 5 * 1024 * 1024) {
-      toast.error('Image must be smaller than 5MB');
-      return;
-    }
-
-    setImageFile(file);
-
-    // Create preview
-    const reader = new FileReader();
-    reader.onloadend = () => {
-      setImagePreview(reader.result as string);
-    };
-    reader.readAsDataURL(file);
-  };
-
-  const uploadImage = async (): Promise<string | null> => {
-    if (!imageFile) return null;
     
-    setUploading(true);
-    try {
-      const fileExt = imageFile.name.split('.').pop();
-      const fileName = `${uuidv4()}.${fileExt}`;
-      const filePath = `event-images/${fileName}`;
-      
-      const { error: uploadError } = await supabase.storage
-        .from('event-images')
-        .upload(filePath, imageFile);
-      
-      if (uploadError) {
-        console.error('Error uploading image:', uploadError);
-        toast.error('Failed to upload image');
-        return null;
-      }
-      
-      // Get the public URL
-      const { data } = supabase.storage
-        .from('event-images')
-        .getPublicUrl(filePath);
-        
-      return data.publicUrl;
-    } catch (error) {
-      console.error('Error in image upload:', error);
-      toast.error('An error occurred during image upload');
-      return null;
-    } finally {
-      setUploading(false);
+    // Check file size (max 5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error('Image size must be less than 5MB');
+      return;
     }
+    
+    setSelectedImage(file);
+    
+    // Create preview URL
+    const previewUrl = URL.createObjectURL(file);
+    setImagePreview(previewUrl);
   };
 
-  const onSubmit = async (data: EventFormValues) => {
+  const handleSave = async () => {
+    if (!title) {
+      toast.error('Please enter a title');
+      return;
+    }
+
+    if (!date) {
+      toast.error('Please select a date');
+      return;
+    }
+
     try {
+      setIsSubmitting(true);
+      
       // Upload image if selected
-      if (imageFile) {
-        const imageUrl = await uploadImage();
-        if (imageUrl) {
-          data.image_url = imageUrl;
+      let imageUrl = initialData?.image_url || null;
+      
+      if (selectedImage) {
+        const fileExt = selectedImage.name.split('.').pop();
+        const fileName = `${Date.now()}-${Math.random().toString(36).substring(2, 15)}.${fileExt}`;
+        const filePath = `event-images/${fileName}`;
+        
+        const { data, error } = await supabase
+          .storage
+          .from('event-images')
+          .upload(filePath, selectedImage);
+        
+        if (error) {
+          throw new Error(`Error uploading image: ${error.message}`);
         }
+        
+        // Get public URL
+        const { data: { publicUrl } } = supabase
+          .storage
+          .from('event-images')
+          .getPublicUrl(filePath);
+        
+        imageUrl = publicUrl;
       }
       
-      onSave(data);
+      const eventData = {
+        title,
+        date,
+        time,
+        location,
+        description,
+        type,
+        image_url: imageUrl,
+        created_by: user?.id
+      };
+      
+      await onSave(eventData);
     } catch (error) {
-      console.error('Error creating event:', error);
-      toast.error('Failed to create event');
+      console.error('Error saving event:', error);
+      toast.error('Failed to save event');
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
   return (
     <>
       <DialogHeader>
-        <DialogTitle>Create Event</DialogTitle>
+        <DialogTitle>{initialData ? 'Edit Event' : 'Create Event'}</DialogTitle>
       </DialogHeader>
       
-      <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 mt-4">
-          <FormField
-            control={form.control}
-            name="title"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Title</FormLabel>
-                <FormControl>
-                  <Input placeholder="Event title" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+      <div className="py-4">
+        <div className="space-y-4">
+          <div>
+            <Label htmlFor="title">Title*</Label>
+            <Input
+              id="title"
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              placeholder="Event title"
+              className="mt-1"
+            />
+          </div>
           
-          <FormField
-            control={form.control}
-            name="date"
-            render={({ field }) => (
-              <FormItem className="flex flex-col">
-                <FormLabel>Date</FormLabel>
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <FormControl>
-                      <Button
-                        variant="outline"
-                        className={cn(
-                          "w-full pl-3 text-left font-normal",
-                          !field.value && "text-muted-foreground"
-                        )}
-                      >
-                        {field.value ? (
-                          format(field.value, "PPP")
-                        ) : (
-                          <span>Pick a date</span>
-                        )}
-                        <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                      </Button>
-                    </FormControl>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0" align="start">
-                    <Calendar
-                      mode="single"
-                      selected={field.value}
-                      onSelect={field.onChange}
-                      initialFocus
-                    />
-                  </PopoverContent>
-                </Popover>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+          <div>
+            <Label htmlFor="date">Date*</Label>
+            <Input
+              id="date"
+              type="date"
+              value={date}
+              onChange={(e) => setDate(e.target.value)}
+              className="mt-1"
+            />
+          </div>
           
-          <FormField
-            control={form.control}
-            name="time"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Time (optional)</FormLabel>
-                <FormControl>
-                  <Input type="time" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+          <div>
+            <Label htmlFor="time">Time</Label>
+            <Input
+              id="time"
+              type="time"
+              value={time}
+              onChange={(e) => setTime(e.target.value)}
+              className="mt-1"
+            />
+          </div>
           
-          <FormField
-            control={form.control}
-            name="location"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Location (optional)</FormLabel>
-                <FormControl>
-                  <Input placeholder="Event location" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+          <div>
+            <Label htmlFor="location">Location</Label>
+            <Input
+              id="location"
+              value={location}
+              onChange={(e) => setLocation(e.target.value)}
+              placeholder="Event location"
+              className="mt-1"
+            />
+          </div>
           
-          <FormField
-            control={form.control}
-            name="type"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Event Type</FormLabel>
-                <Select
-                  value={field.value}
-                  onValueChange={field.onChange}
-                >
-                  <FormControl>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select event type" />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    <SelectItem value="rehearsal">Rehearsal</SelectItem>
-                    <SelectItem value="concert">Concert/Performance</SelectItem>
-                    <SelectItem value="sectional">Sectional</SelectItem>
-                    <SelectItem value="special">Special Event</SelectItem>
-                    <SelectItem value="tour">Tour</SelectItem>
-                  </SelectContent>
-                </Select>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+          <div>
+            <Label htmlFor="type">Event Type</Label>
+            <Select value={type} onValueChange={setType}>
+              <SelectTrigger id="type" className="mt-1">
+                <SelectValue placeholder="Select event type" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="concert">Concert</SelectItem>
+                <SelectItem value="rehearsal">Rehearsal</SelectItem>
+                <SelectItem value="sectional">Sectional</SelectItem>
+                <SelectItem value="special">Special Event</SelectItem>
+                <SelectItem value="tour">Tour</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
           
-          <FormItem>
-            <FormLabel>Event Image (optional)</FormLabel>
-            <FormControl>
-              <div className="space-y-2">
-                <Input 
-                  type="file" 
-                  accept="image/*" 
+          <div>
+            <Label htmlFor="description">Description</Label>
+            <Textarea
+              id="description"
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              placeholder="Event description"
+              className="mt-1 min-h-[100px]"
+            />
+          </div>
+          
+          <div>
+            <Label htmlFor="image">Event Image</Label>
+            <div className="mt-1 flex items-center">
+              <label 
+                htmlFor="image-upload" 
+                className="cursor-pointer flex items-center gap-2 px-4 py-2 border rounded-md hover:bg-gray-50 dark:hover:bg-gray-800"
+              >
+                <Upload size={16} />
+                <span>Upload Image</span>
+                <input
+                  id="image-upload"
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
                   onChange={handleImageChange}
-                  className="cursor-pointer"
                 />
-                {imagePreview && (
-                  <div className="mt-2 border rounded-md overflow-hidden">
-                    <AspectRatio ratio={16/9}>
-                      <img 
-                        src={imagePreview} 
-                        alt="Event image preview" 
-                        className="h-full w-full object-cover"
-                      />
-                    </AspectRatio>
-                  </div>
-                )}
+              </label>
+            </div>
+            
+            {/* Image preview */}
+            {imagePreview && (
+              <div className="mt-3">
+                <img 
+                  src={imagePreview} 
+                  alt="Preview" 
+                  className="max-h-48 rounded-md object-cover"
+                />
+                <button 
+                  type="button"
+                  className="mt-2 text-sm text-red-600 dark:text-red-400"
+                  onClick={() => {
+                    setImagePreview('');
+                    setSelectedImage(null);
+                  }}
+                >
+                  Remove image
+                </button>
               </div>
-            </FormControl>
-          </FormItem>
-          
-          <FormField
-            control={form.control}
-            name="description"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Description (optional)</FormLabel>
-                <FormControl>
-                  <Textarea
-                    placeholder="Add details about the event"
-                    className="resize-none"
-                    {...field}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
             )}
-          />
-          
-          <DialogFooter className={cn(isMobile && "flex-col-reverse gap-2")}>
-            <Button type="button" variant="outline" onClick={onClose}>
-              Cancel
-            </Button>
-            <Button 
-              type="submit" 
-              className="bg-glee-purple hover:bg-glee-purple/90"
-              disabled={uploading}
-            >
-              {uploading ? 'Uploading...' : 'Create Event'}
-            </Button>
-          </DialogFooter>
-        </form>
-      </Form>
+          </div>
+        </div>
+      </div>
+      
+      <DialogFooter>
+        <Button type="button" variant="outline" onClick={onClose}>
+          Cancel
+        </Button>
+        <Button 
+          type="button"
+          onClick={handleSave} 
+          disabled={isSubmitting || !title || !date}
+        >
+          {isSubmitting ? 'Saving...' : (initialData ? 'Update' : 'Create')}
+        </Button>
+      </DialogFooter>
     </>
   );
 }

@@ -1,11 +1,12 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { CalendarIcon, Clock, MapPin, User, Trash2, Edit, FileText } from "lucide-react";
 import { CalendarEvent } from '@/types/calendar';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { AspectRatio } from "@/components/ui/aspect-ratio";
+import { EventModal } from "./EventModal";
 
 interface ViewEventModalProps {
   event: CalendarEvent;
@@ -23,12 +24,30 @@ export function ViewEventModal({
   userCanEdit 
 }: ViewEventModalProps) {
   const isMobile = useIsMobile();
+  const [isEditing, setIsEditing] = useState(false);
 
   const handleDelete = async () => {
     if (window.confirm("Are you sure you want to delete this event?")) {
       await onDelete(event.id);
     }
   };
+
+  // If in edit mode, show the EventModal component instead
+  if (isEditing) {
+    return (
+      <EventModal
+        onClose={() => setIsEditing(false)}
+        onSave={async (updatedEvent) => {
+          const success = await onUpdate({ ...event, ...updatedEvent });
+          if (success) {
+            setIsEditing(false);
+          }
+          return success;
+        }}
+        initialData={event}
+      />
+    );
+  }
 
   return (
     <>
@@ -94,10 +113,16 @@ export function ViewEventModal({
       
       <DialogFooter className="flex gap-2 mt-4">
         {userCanEdit && (
-          <Button variant="destructive" onClick={handleDelete}>
-            <Trash2 className="h-4 w-4 mr-2" />
-            Delete
-          </Button>
+          <>
+            <Button variant="outline" onClick={() => setIsEditing(true)}>
+              <Edit className="h-4 w-4 mr-2" />
+              Edit
+            </Button>
+            <Button variant="destructive" onClick={handleDelete}>
+              <Trash2 className="h-4 w-4 mr-2" />
+              Delete
+            </Button>
+          </>
         )}
         <Button variant="outline" onClick={onClose}>
           Close
