@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useRef } from "react";
 import { Footer } from "@/components/landing/Footer";
 import { CalendarHeader } from "@/components/calendar/CalendarHeader";
@@ -15,6 +16,7 @@ import { CalendarPageHeader } from "@/components/calendar/CalendarPageHeader";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { usePermissions } from "@/hooks/usePermissions";
 import { CalendarEvent } from "@/types/calendar";
+import { UpcomingEventsList } from "@/components/calendar/UpcomingEventsList";
 
 const CalendarPage = () => {
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
@@ -111,6 +113,12 @@ const CalendarPage = () => {
       toast.error("Failed to delete event");
     }
   };
+  
+  // Handle event click from the upcoming events list
+  const handleUpcomingEventClick = (event: CalendarEvent) => {
+    setSelectedEvent(event);
+    setIsViewModalOpen(true);
+  };
 
   return (
     <div className="flex flex-col min-h-screen">
@@ -119,7 +127,11 @@ const CalendarPage = () => {
         <div className="container mx-auto p-4">
           {/* Use CalendarPageHeader on mobile, CalendarHeader on desktop */}
           {isMobile ? (
-            <CalendarPageHeader onAddEventClick={() => userCanCreate && setIsCreateModalOpen(true)} />
+            <CalendarPageHeader 
+              onAddEventClick={() => userCanCreate && setIsCreateModalOpen(true)} 
+              view={calendarView}
+              onViewChange={setCalendarView}
+            />
           ) : (
             <CalendarHeader 
               onAddEvent={() => userCanCreate && setIsCreateModalOpen(true)} 
@@ -139,17 +151,28 @@ const CalendarPage = () => {
                 <CalendarSidebar />
               </div>
               
-              <CalendarMain 
-                events={events}
-                calendarView={calendarView}
-                currentDate={currentDate}
-                setCurrentDate={setCurrentDate}
-                userCanCreate={userCanCreate}
-                handleDateClick={handleDateClick}
-                handleEventClick={handleEventClick}
-                handleEventDrop={handleEventDrop}
-                handleEventResize={handleEventResize}
-              />
+              <div className="flex-1 flex flex-col gap-4">
+                <CalendarMain 
+                  events={events}
+                  calendarView={calendarView}
+                  currentDate={currentDate}
+                  setCurrentDate={setCurrentDate}
+                  userCanCreate={userCanCreate}
+                  handleDateClick={handleDateClick}
+                  handleEventClick={handleEventClick}
+                  handleEventDrop={handleEventDrop}
+                  handleEventResize={handleEventResize}
+                />
+                
+                {/* Show upcoming events in list view below calendar on mobile */}
+                {isMobile && (
+                  <UpcomingEventsList 
+                    events={events} 
+                    onEventClick={handleUpcomingEventClick}
+                    className="mt-4"
+                  />
+                )}
+              </div>
             </div>
           )}
 

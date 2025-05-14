@@ -2,6 +2,7 @@
 import { Button } from "@/components/ui/button";
 import { Calendar, CalendarPlus, ViewIcon } from "lucide-react";
 import { CalendarSyncButton } from "./CalendarSyncButton";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 interface CalendarHeaderProps {
   onAddEvent: () => void;
@@ -16,10 +17,12 @@ export function CalendarHeader({
   onViewChange,
   userCanCreate
 }: CalendarHeaderProps) {
+  const isMobile = useIsMobile();
+
   return (
     <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between space-y-2 sm:space-y-0">
       <div className="flex items-center">
-        <Calendar className="h-6 w-6 mr-2" />
+        <Calendar className="h-7 w-7 mr-2" />
         <div>
           <h1 className="text-2xl font-bold tracking-tight">Calendar</h1>
           <p className="text-sm text-muted-foreground">
@@ -33,14 +36,14 @@ export function CalendarHeader({
         <CalendarSyncButton />
         
         {/* View options */}
-        <div className="hidden md:flex border rounded-md">
+        <div className="border rounded-md">
           <Button
             variant={view === 'dayGridMonth' ? 'default' : 'ghost'}
             size="sm"
             onClick={() => onViewChange('dayGridMonth')}
             className="rounded-r-none"
           >
-            Month
+            {isMobile ? "M" : "Month"}
           </Button>
           <Button
             variant={view === 'timeGridWeek' ? 'default' : 'ghost'}
@@ -48,7 +51,7 @@ export function CalendarHeader({
             onClick={() => onViewChange('timeGridWeek')}
             className="rounded-none border-x"
           >
-            Week
+            {isMobile ? "W" : "Week"}
           </Button>
           <Button
             variant={view === 'timeGridDay' ? 'default' : 'ghost'}
@@ -56,14 +59,14 @@ export function CalendarHeader({
             onClick={() => onViewChange('timeGridDay')}
             className="rounded-l-none"
           >
-            Day
+            {isMobile ? "D" : "Day"}
           </Button>
         </div>
         
         {/* Add Event button (if user has permission) */}
         {userCanCreate && (
           <Button onClick={onAddEvent} className="bg-glee-purple hover:bg-glee-purple/90">
-            <CalendarPlus className="h-4 w-4 mr-2" />
+            <CalendarPlus className="h-5 w-5 mr-2" />
             Add Event
           </Button>
         )}

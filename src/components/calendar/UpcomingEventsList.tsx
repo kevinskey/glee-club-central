@@ -1,115 +1,100 @@
-
 import React from 'react';
+import { format, isToday, isTomorrow, addDays, isSameDay } from 'date-fns';
 import { CalendarEvent } from '@/types/calendar';
-import { format } from 'date-fns';
-import { CalendarIcon, Clock, MapPin } from 'lucide-react';
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { CalendarDays, Clock } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
 interface UpcomingEventsListProps {
   events: CalendarEvent[];
-  onEventClick: (event: CalendarEvent) => void;
+  onEventClick?: (event: CalendarEvent) => void;
+  className?: string;
 }
 
-export function UpcomingEventsList({ events, onEventClick }: UpcomingEventsListProps) {
-  if (events.length === 0) {
+export function UpcomingEventsList({ events, onEventClick, className }: UpcomingEventsListProps) {
+  // Get today and sort events by date
+  const now = new Date();
+  const sortedEvents = [...events]
+    .filter(event => {
+      const eventDate = new Date(event.start);
+      return eventDate >= now;
+    })
+    .sort((a, b) => new Date(a.start).getTime() - new Date(b.start).getTime())
+    .slice(0, 5); // Only show the next 5 events
+  
+  const formatEventDate = (date: Date | string) => {
+    const eventDate = new Date(date);
+    
+    if (isToday(eventDate)) return 'Today';
+    if (isTomorrow(eventDate)) return 'Tomorrow';
+    
+    // If within next 7 days, show day name
+    const nextWeek = addDays(now, 7);
+    if (eventDate <= nextWeek) {
+      return format(eventDate, 'EEEE'); // Day name (Monday, Tuesday, etc)
+    }
+    
+    // Otherwise show full date
+    return format(eventDate, 'MMM d, yyyy');
+  };
+
+  const getEventTypeColor = (type: string) => {
+    switch (type) {
+      case "concert":
+        return "bg-glee-purple";
+      case "rehearsal":
+        return "bg-blue-500";
+      case "sectional":
+        return "bg-green-500";
+      case "special":
+        return "bg-amber-500";
+      default:
+        return "bg-gray-500";
+    }
+  };
+
+  if (sortedEvents.length === 0) {
     return (
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-center text-lg">Upcoming Events</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <p className="text-center text-muted-foreground py-4">No upcoming events scheduled</p>
-        </CardContent>
-      </Card>
+      <div className={cn("bg-white dark:bg-gray-800 rounded-lg shadow p-4 text-center", className)}>
+        <CalendarDays className="h-8 w-8 mx-auto text-gray-400 mb-2" />
+        <p className="text-muted-foreground">No upcoming events</p>
+      </div>
     );
   }
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="text-center text-lg">Upcoming Events</CardTitle>
-      </CardHeader>
-      <CardContent className="px-1">
-        <div className="space-y-2">
-          {events.map((event) => (
-            <div
-              key={event.id}
-              className="border rounded-md p-2 cursor-pointer hover:bg-accent"
-              onClick={() => onEventClick(event)}
+    <div className={cn("bg-white dark:bg-gray-800 rounded-lg shadow", className)}>
+      <h3 className="font-medium text-lg px-4 pt-3 pb-2 border-b flex items-center">
+        <CalendarDays className="h-5 w-5 mr-2 text-glee-purple" />
+        Upcoming Events
+      </h3>
+      <ul className="divide-y">
+        {sortedEvents.map((event) => {
+          const eventDate = new Date(event.start);
+          const colorClass = getEventTypeColor(event.type);
+          
+          return (
+            <li 
+              key={event.id} 
+              className="p-3 hover:bg-gray-50 dark:hover:bg-gray-700/50 cursor-pointer"
+              onClick={() => onEventClick?.(event)}
             >
-              <div className="flex items-start gap-2">
-                <div className={`w-1 h-full min-h-[40px] rounded-full ${getEventTypeColor(event.type)}`} />
+              <div className="flex items-center">
+                <div className={cn("h-10 w-2 rounded-sm mr-3", colorClass)} />
                 <div className="flex-1">
-                  <h4 className="font-medium">{event.title}</h4>
-                  <div className="grid grid-cols-1 gap-0.5 mt-1 text-xs text-muted-foreground">
+                  <h4 className="font-medium text-sm">{event.title}</h4>
+                  <div className="flex items-center text-xs text-muted-foreground mt-1">
+                    <div className="mr-3">{formatEventDate(eventDate)}</div>
                     <div className="flex items-center">
-                      <CalendarIcon className="h-3 w-3 mr-1" />
-                      {formatEventDate(event.start)}
+                      <Clock className="h-3 w-3 mr-1" />
+                      {format(eventDate, 'h:mm a')}
                     </div>
-                    {event.time && (
-                      <div className="flex items-center">
-                        <Clock className="h-3 w-3 mr-1" />
-                        {formatTime(event.time)}
-                      </div>
-                    )}
-                    {event.location && (
-                      <div className="flex items-center">
-                        <MapPin className="h-3 w-3 mr-1" />
-                        {event.location}
-                      </div>
-                    )}
                   </div>
                 </div>
-                <div className={`text-xs px-2 py-1 rounded-full ${getEventTypeBadgeColor(event.type)}`}>
-                  {capitalizeFirstLetter(event.type)}
-                </div>
               </div>
-            </div>
-          ))}
-        </div>
-      </CardContent>
-    </Card>
+            </li>
+          );
+        })}
+      </ul>
+    </div>
   );
 }
-
-// Helper functions
-const formatEventDate = (date: Date | string): string => {
-  const eventDate = typeof date === 'string' ? new Date(date) : date;
-  return format(eventDate, 'EEE, MMM d, yyyy');
-};
-
-const formatTime = (time: string): string => {
-  try {
-    const [hours, minutes] = time.split(':');
-    const date = new Date();
-    date.setHours(parseInt(hours, 10));
-    date.setMinutes(parseInt(minutes, 10));
-    return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-  } catch (e) {
-    return time;
-  }
-};
-
-const capitalizeFirstLetter = (string: string): string => {
-  return string.charAt(0).toUpperCase() + string.slice(1);
-};
-
-const getEventTypeColor = (type: string): string => {
-  switch (type) {
-    case 'concert': return 'bg-glee-purple';
-    case 'rehearsal': return 'bg-blue-500';
-    case 'sectional': return 'bg-green-500';
-    case 'special': return 'bg-amber-500';
-    default: return 'bg-gray-500';
-  }
-};
-
-const getEventTypeBadgeColor = (type: string): string => {
-  switch (type) {
-    case 'concert': return 'bg-glee-purple/20 text-glee-purple';
-    case 'rehearsal': return 'bg-blue-500/20 text-blue-600';
-    case 'sectional': return 'bg-green-500/20 text-green-600';
-    case 'special': return 'bg-amber-500/20 text-amber-600';
-    default: return 'bg-gray-500/20 text-gray-600';
-  }
-};
