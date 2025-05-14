@@ -5,7 +5,8 @@ import { Card, CardContent } from '@/components/ui/card';
 import { AspectRatio } from '@/components/ui/aspect-ratio';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useIsMobile } from '@/hooks/use-mobile';
-import { MobileVideoCard } from './MobileVideoCard';
+import { CalendarDays, Eye } from 'lucide-react';
+import { formatDistanceToNow } from 'date-fns';
 
 export interface VideoGridProps {
   videos: Video[];
@@ -49,51 +50,54 @@ export function VideoGrid({ videos, loading = false, error = null, onVideoSelect
     return <div>No videos found.</div>;
   }
 
-  // Show videos grid with different layouts for mobile vs desktop
+  // Show unified video card design for both mobile and desktop
   return (
-    <div className={`grid gap-4 sm:gap-6 ${isMobile ? 'grid-cols-1 sm:grid-cols-2' : 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3'}`}>
+    <div className={`grid gap-4 sm:gap-6 grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3`}>
       {videos.map((video) => (
-        isMobile ? (
-          <MobileVideoCard 
-            key={video.id} 
-            video={video} 
-            onClick={handleVideoClick}
-          />
-        ) : (
-          <Card key={video.id} className="overflow-hidden hover:shadow-lg transition-shadow">
-            <div className="relative">
-              <AspectRatio ratio={16 / 9}>
-                <img 
-                  src={video.thumbnailUrl}
-                  alt={video.title} 
-                  className="object-cover w-full h-full rounded-t-md"
-                  loading="lazy"
-                />
-              </AspectRatio>
-              <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 hover:opacity-100 transition-opacity flex items-end">
-                <div className="p-4 text-white w-full">
-                  <h3 className="font-medium truncate">{video.title}</h3>
+        <Card 
+          key={video.id} 
+          className="overflow-hidden hover:shadow-lg transition-shadow cursor-pointer"
+          onClick={() => handleVideoClick(video)}
+        >
+          <div className="relative">
+            <AspectRatio ratio={16 / 9}>
+              <img 
+                src={video.thumbnailUrl}
+                alt={video.title} 
+                className="object-cover w-full h-full rounded-t-md"
+                loading="lazy"
+              />
+              {video.duration && (
+                <div className="absolute bottom-2 right-2 bg-black/70 text-white text-xs px-1.5 py-0.5 rounded">
+                  {video.duration}
                 </div>
-              </div>
-            </div>
-            <CardContent className="p-4">
-              <h3 className="font-medium truncate">{video.title}</h3>
-              {video.description && (
-                <p className="text-sm text-gray-500 mt-1 line-clamp-2">{video.description}</p>
               )}
-              <div className="mt-2 flex justify-between items-center">
-                <span className="text-xs text-gray-400">
-                  {new Date(video.publishedAt).toLocaleDateString()}
-                </span>
-                {video.category && (
-                  <span className="text-xs px-2 py-1 bg-orange-100 text-orange-800 rounded-full">
-                    {video.category}
-                  </span>
-                )}
+            </AspectRatio>
+          </div>
+          <CardContent className="p-4">
+            <h3 className="font-medium truncate">{video.title}</h3>
+            {video.description && (
+              <p className="text-sm text-gray-500 mt-1 line-clamp-2">{video.description}</p>
+            )}
+            <div className="mt-2 flex justify-between items-center">
+              <div className="flex items-center text-muted-foreground text-xs">
+                <CalendarDays className="h-3 w-3 mr-1" />
+                {formatDistanceToNow(new Date(video.publishedAt), { addSuffix: true })}
               </div>
-            </CardContent>
-          </Card>
-        )
+              {video.viewCount && (
+                <div className="flex items-center text-muted-foreground text-xs">
+                  <Eye className="h-3 w-3 mr-1" />
+                  {video.viewCount} views
+                </div>
+              )}
+              {video.category && (
+                <span className="text-xs px-2 py-1 bg-orange-100 text-orange-800 rounded-full">
+                  {video.category}
+                </span>
+              )}
+            </div>
+          </CardContent>
+        </Card>
       ))}
     </div>
   );
