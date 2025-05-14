@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { Footer } from "@/components/landing/Footer";
 import { CalendarHeader } from "@/components/calendar/CalendarHeader";
@@ -15,6 +16,7 @@ import { CalendarPageHeader } from "@/components/calendar/CalendarPageHeader";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { usePermissions } from "@/hooks/usePermissions";
 import { CalendarEvent } from "@/types/calendar";
+import { CalendarEditTools } from "@/components/calendar/CalendarEditTools";
 
 const CalendarPage = () => {
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
@@ -123,6 +125,15 @@ const CalendarPage = () => {
               userCanCreate={userCanCreate}
             />
           )}
+          
+          {/* Add CalendarEditTools */}
+          <CalendarEditTools 
+            onAddEvent={() => setIsCreateModalOpen(true)}
+            selectedEventId={selectedEvent?.id}
+            onEditSelected={() => setIsViewModalOpen(true)}
+            onDeleteSelected={() => onDeleteEvent(selectedEvent?.id)}
+            className="mt-4"
+          />
           
           {isLoading ? (
             <div className="flex justify-center items-center h-96">
