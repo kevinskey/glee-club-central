@@ -5,11 +5,22 @@ import { Calendar as CalendarIcon } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { format } from "date-fns";
 import { Badge } from "@/components/ui/badge";
-import { MonthlyCalendar } from "@/components/dashboard/Calendar";
+import { MonthlyCalendar } from "@/components/dashboard/MonthlyCalendar";
 import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { ViewEventModal } from "@/components/calendar/ViewEventModal";
+import { EventModal } from "@/components/calendar/EventModal";
+import { CalendarEditTools } from "@/components/calendar/CalendarEditTools";
+import { useCalendarStore } from "@/hooks/useCalendarStore";
+import { toast } from "sonner";
+import { CalendarEvent } from "@/types/calendar";
+import { usePermissions } from "@/hooks/usePermissions";
 
 export default function CalendarPage() {
   const [date, setDate] = useState<Date | undefined>(new Date());
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [isViewModalOpen, setIsViewModalOpen] = useState(false);
+  const [selectedEvent, setSelectedEvent] = useState<CalendarEvent | null>(null);
   
   // Example events - in a real app, these would come from your API or database
   const events = [
@@ -19,7 +30,9 @@ export default function CalendarPage() {
       date: new Date(2025, 4, 17), 
       time: "7:00 PM",
       location: "Sisters Chapel",
-      type: "concert"
+      type: "concert",
+      start: new Date(2025, 4, 17),
+      end: new Date(2025, 4, 17)
     },
     { 
       id: "2", 
@@ -27,7 +40,9 @@ export default function CalendarPage() {
       date: new Date(2025, 4, 14), 
       time: "5:00 PM",
       location: "Fine Arts Building",
-      type: "rehearsal"
+      type: "rehearsal",
+      start: new Date(2025, 4, 14),
+      end: new Date(2025, 4, 14)
     },
     {
       id: "3",
@@ -35,7 +50,9 @@ export default function CalendarPage() {
       date: new Date(2025, 4, 15),
       time: "4:30 PM",
       location: "Practice Room 2",
-      type: "sectional"
+      type: "sectional",
+      start: new Date(2025, 4, 15),
+      end: new Date(2025, 4, 15)
     }
   ];
 
@@ -43,6 +60,10 @@ export default function CalendarPage() {
   const currentDate = new Date();
   const [currentMonth, setCurrentMonth] = useState(currentDate.getMonth());
   const [currentYear, setCurrentYear] = useState(currentDate.getFullYear());
+  const { isSuperAdmin } = usePermissions();
+  
+  // Allow editing for all users on this page
+  const userCanEdit = true;
   
   // Handlers for month navigation
   const handlePrevMonth = () => {
@@ -70,12 +91,47 @@ export default function CalendarPage() {
     event.date.getDate() === date.getDate()
   ) : [];
 
+  // Handle opening the event modal
+  const handleEventClick = (event: CalendarEvent) => {
+    setSelectedEvent(event);
+    setIsViewModalOpen(true);
+  };
+
+  // Handle adding event
+  const handleAddEvent = async (eventData: any) => {
+    toast.success("Event created successfully");
+    setIsCreateModalOpen(false);
+  };
+
+  // Handle updating event
+  const handleUpdateEvent = async (eventData: CalendarEvent): Promise<boolean | void> => {
+    toast.success("Event updated successfully");
+    setIsViewModalOpen(false);
+    return true;
+  };
+
+  // Handle deleting event
+  const handleDeleteEvent = async (eventId: string): Promise<boolean | void> => {
+    toast.success("Event deleted successfully");
+    setIsViewModalOpen(false);
+    return true;
+  };
+
   return (
     <div className="container mx-auto p-4 space-y-6">
       <PageHeader
         title="Glee Club Calendar"
         description="View upcoming rehearsals, performances and events"
         icon={<CalendarIcon className="h-6 w-6" />}
+      />
+      
+      {/* Add Calendar Edit Tools */}
+      <CalendarEditTools 
+        onAddEvent={() => setIsCreateModalOpen(true)}
+        selectedEventId={selectedEvent?.id}
+        onEditSelected={() => isViewModalOpen && setIsViewModalOpen(true)}
+        onDeleteSelected={() => selectedEvent && handleDeleteEvent(selectedEvent.id)}
+        className="mb-4"
       />
       
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -108,7 +164,7 @@ export default function CalendarPage() {
             ) : (
               <div className="space-y-4">
                 {eventsForSelectedDate.map((event) => (
-                  <div key={event.id} className="border rounded-lg p-3">
+                  <div key={event.id} className="border rounded-lg p-3 cursor-pointer" onClick={() => handleEventClick(event)}>
                     <div className="flex justify-between items-start">
                       <div>
                         <h3 className="font-medium">{event.title}</h3>
@@ -138,6 +194,32 @@ export default function CalendarPage() {
           </CardContent>
         </Card>
       </div>
+
+      {/* Create Event Modal */}
+      <Dialog open={isCreateModalOpen} onOpenChange={setIsCreateModalOpen}>
+        <DialogContent className="sm:max-w-md">
+          <EventModal 
+            onClose={() => setIsCreateModalOpen(false)} 
+            onSave={handleAddEvent}
+            initialDate={date}
+          />
+        </DialogContent>
+      </Dialog>
+
+      {/* View/Edit Event Modal */}
+      {selectedEvent && (
+        <Dialog open={isViewModalOpen} onOpenChange={setIsViewModalOpen}>
+          <DialogContent className="sm:max-w-md">
+            <ViewEventModal 
+              event={selectedEvent} 
+              onClose={() => setIsViewModalOpen(false)} 
+              onUpdate={handleUpdateEvent}
+              onDelete={handleDeleteEvent}
+              userCanEdit={userCanEdit}
+            />
+          </DialogContent>
+        </Dialog>
+      )}
     </div>
   );
 }
