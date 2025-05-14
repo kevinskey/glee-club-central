@@ -40,34 +40,71 @@ export const MobileBottomNav: React.FC = () => {
     return location.pathname === path || location.pathname.startsWith(path + '/');
   };
 
+  const navigationItems = [
+    { 
+      icon: <Home size={18} />, 
+      label: "Home", 
+      path: "/" 
+    },
+    { 
+      icon: <Camera size={18} />, 
+      label: "Media", 
+      path: "/recordings" 
+    },
+    { 
+      icon: <Clock size={18} className="text-glee-purple" />, 
+      label: "Metronome", 
+      onClick: handleOpenMetronome 
+    },
+    { 
+      icon: <BookOpen size={18} />, 
+      label: "Music", 
+      path: "/sheet-music" 
+    },
+    { 
+      icon: <Users size={18} />, 
+      label: "Members", 
+      path: "/members" 
+    }
+  ];
+
   return (
     <>
       <nav className="fixed bottom-0 left-0 right-0 z-30 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-t h-16 flex items-center justify-around md:hidden">
-        <Link to="/" className={cn("flex flex-col items-center justify-center px-2 py-1", isActive('/') ? "text-primary" : "text-muted-foreground")}>
-          <Home size={18} className="mb-1" />
-          <span className="text-[10px]">Home</span>
-        </Link>
-        <Link to="/recordings" className={cn("flex flex-col items-center justify-center px-2 py-1", isActive('/recordings') ? "text-primary" : "text-muted-foreground")}>
-          <Camera size={18} className="mb-1" />
-          <span className="text-[10px]">Media</span>
-        </Link>
-        <div className="flex flex-col items-center justify-center px-2 py-1 cursor-pointer" onClick={handleOpenMetronome}>
-          <Clock size={18} className="mb-1 text-glee-purple" />
-          <span className="text-[10px]">Metronome</span>
-        </div>
-        <Link to="/sheet-music" className={cn("flex flex-col items-center justify-center px-2 py-1", isActive('/sheet-music') ? "text-primary" : "text-muted-foreground")}>
-          <BookOpen size={18} className="mb-1" />
-          <span className="text-[10px]">Music</span>
-        </Link>
-        <Link to="/members" className={cn("flex flex-col items-center justify-center px-2 py-1", isActive('/members') ? "text-primary" : "text-muted-foreground")}>
-          <Users size={18} className="mb-1" />
-          <span className="text-[10px]">Members</span>
-        </Link>
+        {navigationItems.map((item, index) => (
+          item.onClick ? (
+            <div 
+              key={index}
+              className="flex flex-col items-center justify-center px-2 py-1 cursor-pointer" 
+              onClick={item.onClick}
+            >
+              <div className="mb-1">{item.icon}</div>
+              <span className="text-[10px]">{item.label}</span>
+            </div>
+          ) : (
+            <Link 
+              key={index}
+              to={item.path} 
+              className={cn(
+                "flex flex-col items-center justify-center px-2 py-1", 
+                isActive(item.path) 
+                  ? "text-primary" 
+                  : "text-muted-foreground"
+              )}
+            >
+              <div className="mb-1">{item.icon}</div>
+              <span className="text-[10px]">{item.label}</span>
+              {isActive(item.path) && (
+                <div className="absolute bottom-0 w-6 h-0.5 bg-glee-spelman rounded-t-sm" />
+              )}
+            </Link>
+          )
+        ))}
       </nav>
       
       {/* Metronome Dialog */}
       <Dialog open={metronomeOpen} onOpenChange={setMetronomeOpen}>
-        <DialogContent className="sm:max-w-md max-w-[95%] h-auto">
+        <DialogContent className="sm:max-w-md max-w-[95%] h-auto p-4 sm:p-6">
           <DialogHeader>
             <DialogTitle>Metronome</DialogTitle>
             <DialogDescription>
@@ -80,4 +117,3 @@ export const MobileBottomNav: React.FC = () => {
     </>
   );
 };
-

@@ -4,14 +4,25 @@ import { Video } from '@/types/video';
 import { Card, CardContent } from '@/components/ui/card';
 import { AspectRatio } from '@/components/ui/aspect-ratio';
 import { Skeleton } from '@/components/ui/skeleton';
+import { useIsMobile } from '@/hooks/use-mobile';
+import { MobileVideoCard } from './MobileVideoCard';
 
 export interface VideoGridProps {
   videos: Video[];
   loading?: boolean;
   error?: Error | null;
+  onVideoSelect?: (video: Video) => void;
 }
 
-export function VideoGrid({ videos, loading = false, error = null }: VideoGridProps) {
+export function VideoGrid({ videos, loading = false, error = null, onVideoSelect }: VideoGridProps) {
+  const isMobile = useIsMobile();
+  
+  const handleVideoClick = (video: Video) => {
+    if (onVideoSelect) {
+      onVideoSelect(video);
+    }
+  };
+  
   if (loading) {
     return (
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -38,42 +49,51 @@ export function VideoGrid({ videos, loading = false, error = null }: VideoGridPr
     return <div>No videos found.</div>;
   }
 
-  // Show videos grid
+  // Show videos grid with different layouts for mobile vs desktop
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+    <div className={`grid gap-4 sm:gap-6 ${isMobile ? 'grid-cols-1 sm:grid-cols-2' : 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3'}`}>
       {videos.map((video) => (
-        <Card key={video.id} className="overflow-hidden hover:shadow-lg transition-shadow">
-          <div className="relative">
-            <AspectRatio ratio={16 / 9}>
-              <img 
-                src={video.thumbnailUrl}
-                alt={video.title} 
-                className="object-cover w-full h-full rounded-t-md"
-              />
-            </AspectRatio>
-            <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 hover:opacity-100 transition-opacity flex items-end">
-              <div className="p-4 text-white w-full">
-                <h3 className="font-medium truncate">{video.title}</h3>
+        isMobile ? (
+          <MobileVideoCard 
+            key={video.id} 
+            video={video} 
+            onClick={handleVideoClick}
+          />
+        ) : (
+          <Card key={video.id} className="overflow-hidden hover:shadow-lg transition-shadow">
+            <div className="relative">
+              <AspectRatio ratio={16 / 9}>
+                <img 
+                  src={video.thumbnailUrl}
+                  alt={video.title} 
+                  className="object-cover w-full h-full rounded-t-md"
+                  loading="lazy"
+                />
+              </AspectRatio>
+              <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 hover:opacity-100 transition-opacity flex items-end">
+                <div className="p-4 text-white w-full">
+                  <h3 className="font-medium truncate">{video.title}</h3>
+                </div>
               </div>
             </div>
-          </div>
-          <CardContent className="p-4">
-            <h3 className="font-medium truncate">{video.title}</h3>
-            {video.description && (
-              <p className="text-sm text-gray-500 mt-1 line-clamp-2">{video.description}</p>
-            )}
-            <div className="mt-2 flex justify-between items-center">
-              <span className="text-xs text-gray-400">
-                {new Date(video.publishedAt).toLocaleDateString()}
-              </span>
-              {video.category && (
-                <span className="text-xs px-2 py-1 bg-orange-100 text-orange-800 rounded-full">
-                  {video.category}
-                </span>
+            <CardContent className="p-4">
+              <h3 className="font-medium truncate">{video.title}</h3>
+              {video.description && (
+                <p className="text-sm text-gray-500 mt-1 line-clamp-2">{video.description}</p>
               )}
-            </div>
-          </CardContent>
-        </Card>
+              <div className="mt-2 flex justify-between items-center">
+                <span className="text-xs text-gray-400">
+                  {new Date(video.publishedAt).toLocaleDateString()}
+                </span>
+                {video.category && (
+                  <span className="text-xs px-2 py-1 bg-orange-100 text-orange-800 rounded-full">
+                    {video.category}
+                  </span>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+        )
       ))}
     </div>
   );

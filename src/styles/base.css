@@ -73,10 +73,24 @@
 
   body {
     @apply bg-background text-foreground font-inter;
+    -webkit-tap-highlight-color: transparent; /* Remove tap highlight on mobile */
+    overscroll-behavior-y: none; /* Prevent pull-to-refresh on mobile */
   }
   
   h1, h2, h3, h4, h5, h6 {
     @apply font-playfair;
+  }
+  
+  /* Optimize text inputs for mobile */
+  input, select, textarea {
+    @apply text-base;
+    font-size: 16px !important; /* Prevents zoom on focus in iOS */
+  }
+  
+  /* Ensure buttons are large enough for comfortable tapping */
+  button, .btn, [role="button"] {
+    @apply min-h-9;
+    min-height: 44px; /* Apple recommended touch target size */
   }
   
   /* Mobile calendar optimizations */
@@ -124,6 +138,41 @@
     
     .fc .fc-day {
       min-height: 2.5rem !important;
+    }
+    
+    /* Fix mobile scrolling in modals */
+    .dialog-content {
+      max-height: 80vh;
+      overflow-y: auto;
+    }
+    
+    /* Improve table display on mobile */
+    table {
+      display: block;
+      overflow-x: auto;
+      white-space: nowrap;
+    }
+    
+    /* Better spacing for mobile form elements */
+    form .form-group {
+      margin-bottom: 1rem;
+    }
+    
+    /* Prevent text from being too small */
+    .text-xs {
+      font-size: 0.75rem !important; /* Minimum readable text size */
+    }
+  }
+
+  /* Fix iOS safe area issues */
+  @supports (padding: max(0px)) {
+    .fixed-bottom {
+      padding-bottom: max(0.5rem, env(safe-area-inset-bottom));
+    }
+    
+    body {
+      padding-top: env(safe-area-inset-top);
+      padding-bottom: env(safe-area-inset-bottom);
     }
   }
 }

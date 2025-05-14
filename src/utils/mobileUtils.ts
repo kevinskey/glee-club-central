@@ -85,3 +85,69 @@ export function formatEventForMobile(event: any) {
     location: location && location.length > 15 ? `${location.substring(0, 13)}...` : location
   };
 }
+
+/**
+ * Returns appropriate sizes for UI elements based on screen size
+ */
+export function getResponsiveSizes() {
+  const isMobile = useIsMobile();
+  
+  return {
+    buttonSize: isMobile ? "default" : "lg",
+    iconSize: isMobile ? 18 : 24,
+    padding: isMobile ? "p-3 sm:p-4" : "p-4 md:p-6",
+    gap: isMobile ? "gap-3" : "gap-4 md:gap-6",
+    fontSize: isMobile ? "text-sm" : "text-base",
+    headingSize: isMobile ? "text-xl" : "text-2xl md:text-3xl",
+    containerWidth: isMobile ? "w-full px-4" : "container",
+    imageQuality: isMobile ? "quality-auto" : "quality-high"
+  };
+}
+
+/**
+ * Helper for proper touch handling on mobile
+ */
+export function addTouchSupport(element: HTMLElement) {
+  // Convert mouse events to touch for better mobile experience
+  const touchEvents: Record<string, (e: TouchEvent) => void> = {};
+  
+  // Map mouse events to touch events
+  const mapTouch = (mouseHandler: (e: MouseEvent) => void) => {
+    return (e: TouchEvent) => {
+      e.preventDefault();
+      const touch = e.touches[0];
+      if (touch) {
+        const mouseEvent = new MouseEvent('mousedown', {
+          clientX: touch.clientX,
+          clientY: touch.clientY,
+          bubbles: true
+        });
+        mouseHandler(mouseEvent);
+      }
+    };
+  };
+  
+  // Get all mouse event handlers
+  const mouseEvents = element.getEventListeners?.('mousedown') || [];
+  
+  // Add equivalent touch events
+  mouseEvents.forEach(event => {
+    const touchHandler = mapTouch(event.listener as (e: MouseEvent) => void);
+    element.addEventListener('touchstart', touchHandler);
+    touchEvents.touchstart = touchHandler;
+  });
+  
+  // Return cleanup function
+  return () => {
+    Object.entries(touchEvents).forEach(([event, handler]) => {
+      element.removeEventListener(event, handler);
+    });
+  };
+}
+
+/**
+ * Function to adjust font size for better mobile readability
+ */
+export function getResponsiveFontSize(baseSize: number): string {
+  return `clamp(${baseSize * 0.85}rem, ${baseSize * 0.65}rem + 1vw, ${baseSize}rem)`;
+}
