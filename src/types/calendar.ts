@@ -31,7 +31,8 @@ export interface GoogleCalendarToken {
   user_id: string;
   access_token: string;
   refresh_token: string;
-  expires_at: number;
-  calendar_id: string;
+  expires_at: number | string; // Updated to accept string as well
+  calendar_id?: string; // Made optional since it's not present in the database
   created_at?: string;
+  updated_at?: string; // Added this property to match the database
 }

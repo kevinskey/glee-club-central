@@ -159,7 +159,20 @@ export const fetchGoogleCalendarToken = async (userId: string): Promise<GoogleCa
       return null;
     }
     
-    return data as GoogleCalendarToken;
+    // Convert the database response to match the GoogleCalendarToken type
+    // This ensures the types are compatible even if the database schema doesn't exactly match
+    const token: GoogleCalendarToken = {
+      id: data.id,
+      user_id: data.user_id,
+      access_token: data.access_token,
+      refresh_token: data.refresh_token,
+      expires_at: data.expires_at,
+      calendar_id: data.calendar_id || 'primary', // Default to 'primary' if calendar_id is missing
+      created_at: data.created_at,
+      updated_at: data.updated_at
+    };
+    
+    return token;
   } catch (error) {
     console.error("Error fetching Google Calendar token:", error);
     return null;
