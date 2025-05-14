@@ -13,7 +13,6 @@ export default function LandingPage() {
       <HeroSection />
       <PerformanceSection />
       <FeaturesSection />
-      {/* YouTube section removed */}
       <TestimonialSection />
       <CTASection />
       <MemberPortalBox />

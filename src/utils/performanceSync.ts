@@ -27,13 +27,12 @@ export async function fetchPerformanceEvents(limit = 10): Promise<PerformanceEve
     }
     
     // Map the calendar events to performance events format
-    // Do not include description in the response for homepage display
     const performances: PerformanceEvent[] = data.map(event => ({
       id: event.id,
       title: event.title,
       date: event.date,
-      location: event.location,
-      description: "", // Empty description for homepage
+      location: event.location || '',
+      description: event.description || '',
       image: event.image_url || '',
       type: event.type
     }));
@@ -56,7 +55,7 @@ export function mapCalendarToPerformanceEvent(event: CalendarEvent): Performance
     title: event.title,
     date: typeof event.date === 'string' ? event.date : event.date?.toISOString().split('T')[0] || '',
     location: event.location || '',
-    description: "", // Empty description for homepage
+    description: event.description || '',
     image: event.image_url || '',
     type: event.type
   };
