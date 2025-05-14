@@ -135,7 +135,7 @@ export function PerformanceSection() {
                   <CarouselItem key={event.id} className="pl-2 md:pl-4 md:basis-1/2 lg:basis-1/3">
                     <div className="p-1">
                       <Card className="overflow-hidden h-full border-none bg-black/40 backdrop-blur-sm text-white">
-                        <div className="relative h-60 md:h-72 bg-muted">
+                        <div className="relative h-80 bg-muted">
                           {!imageErrors[event.id] ? (
                             <img 
                               src={event.image} 
@@ -146,35 +146,33 @@ export function PerformanceSection() {
                           ) : (
                             <div className="absolute inset-0 flex items-center justify-center bg-glee-purple/30">
                               <div className="flex flex-col items-center justify-center">
-                                <Calendar className="h-12 w-12 text-white/70 mb-2" />
-                                <p className="text-white/80">Performance Event</p>
+                                <Calendar className="h-16 w-16 text-white/70 mb-2" />
+                                <p className="text-white/80 text-lg">Performance Event</p>
                               </div>
                             </div>
                           )}
-                          <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/50 to-black/20 flex flex-col justify-end p-4">
+                          <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/60 to-black/10 flex flex-col justify-end p-6">
                             <div className="w-full">
-                              <div className="flex justify-between items-start mb-2">
-                                <h3 className="font-bold text-white text-xl md:text-2xl leading-tight">{event.title}</h3>
-                                <span className="bg-glee-purple text-white text-xs font-bold px-2 py-1 rounded-md">
+                              <h3 className="font-bold text-white text-2xl md:text-3xl leading-tight text-shadow mb-3">{event.title}</h3>
+                              <div className="flex flex-wrap items-center gap-4 text-white text-sm md:text-base mb-4">
+                                <span className="bg-glee-purple px-3 py-1 rounded-md font-semibold">
                                   {formatEventDate(event.date)}
                                 </span>
-                              </div>
-                              <div className="flex items-center space-x-3 text-white/90 text-sm mb-3">
                                 <div className="flex items-center">
-                                  <Clock className="h-3.5 w-3.5 mr-1 text-white/70" />
+                                  <Clock className="h-4 w-4 mr-1.5 text-white/80" />
                                   <span>7:00 PM</span>
                                 </div>
                                 <div className="flex items-center">
-                                  <MapPin className="h-3.5 w-3.5 mr-1 text-white/70" />
+                                  <MapPin className="h-4 w-4 mr-1.5 text-white/80" />
                                   <span className="truncate max-w-[150px]">{event.location}</span>
                                 </div>
                               </div>
+                              <Link to={`/calendar?event=${event.id}`} className="w-full">
+                                <Button variant="outline" className="w-full bg-white/10 border-white/20 hover:bg-white/20 text-white">
+                                  View Details
+                                </Button>
+                              </Link>
                             </div>
-                            <Link to={`/calendar?event=${event.id}`} className="w-full">
-                              <Button variant="outline" size="sm" className="w-full bg-white/10 border-white/20 hover:bg-white/20 text-white">
-                                View Details
-                              </Button>
-                            </Link>
                           </div>
                         </div>
                       </Card>
