@@ -70,7 +70,7 @@ export default function CalendarPage() {
     setIsViewModalOpen(true);
   };
 
-  // Handler for adding event - use the actual store now
+  // Handler for adding event - Fixed to correctly handle asynchronous operations
   const handleAddEvent = async (eventData: any): Promise<void> => {
     try {
       // Format the data to match what the store expects and ensure id is present
@@ -87,13 +87,9 @@ export default function CalendarPage() {
         image_url: eventData.image_url || null
       };
       
-      const success = await addEvent(newEvent);
-      if (success) {
-        toast.success("Event created successfully");
-        setIsCreateModalOpen(false);
-      } else {
-        toast.error("Failed to create event");
-      }
+      await addEvent(newEvent);
+      toast.success("Event created successfully");
+      setIsCreateModalOpen(false);
       return Promise.resolve();
     } catch (error) {
       console.error("Error adding event:", error);
@@ -102,17 +98,13 @@ export default function CalendarPage() {
     }
   };
 
-  // Handle updating event - use the actual store now
+  // Handle updating event - Fixed to correctly handle asynchronous operations
   const handleUpdateEvent = async (eventData: CalendarEvent): Promise<boolean> => {
     try {
-      const success = await updateEvent(eventData);
-      if (success) {
-        toast.success("Event updated successfully");
-        setIsViewModalOpen(false);
-        return true;
-      }
-      toast.error("Failed to update event");
-      return false;
+      await updateEvent(eventData);
+      toast.success("Event updated successfully");
+      setIsViewModalOpen(false);
+      return true;
     } catch (error) {
       console.error("Error updating event:", error);
       toast.error("Failed to update event");
@@ -120,18 +112,14 @@ export default function CalendarPage() {
     }
   };
 
-  // Handle deleting event - use the actual store now
+  // Handle deleting event - Fixed to correctly handle asynchronous operations
   const handleDeleteEvent = async (eventId: string): Promise<boolean> => {
     try {
-      const success = await deleteEvent(eventId);
-      if (success) {
-        toast.success("Event deleted successfully");
-        setIsViewModalOpen(false);
-        setSelectedEvent(null);
-        return true;
-      }
-      toast.error("Failed to delete event");
-      return false;
+      await deleteEvent(eventId);
+      toast.success("Event deleted successfully");
+      setIsViewModalOpen(false);
+      setSelectedEvent(null);
+      return true;
     } catch (error) {
       console.error("Error deleting event:", error);
       toast.error("Failed to delete event");

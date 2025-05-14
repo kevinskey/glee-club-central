@@ -1,3 +1,4 @@
+
 import React, { useRef, useEffect, useState } from "react";
 import FullCalendar from "@fullcalendar/react";
 import dayGridPlugin from "@fullcalendar/daygrid";
@@ -123,7 +124,7 @@ export const CalendarMain = ({
             ref={calendarRef}
             plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin, listPlugin]}
             initialView={initialView}
-            headerToolbar={false} // We use our custom header
+            headerToolbar={false}
             events={displayEvents.map(event => ({
               id: event.id,
               title: event.title,
