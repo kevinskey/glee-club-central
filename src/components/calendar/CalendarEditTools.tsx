@@ -1,15 +1,15 @@
 
 import React from "react";
 import { Button } from "@/components/ui/button";
-import { CalendarPlus, Edit, Trash2 } from "lucide-react";
 import { Card } from "@/components/ui/card";
+import { CalendarPlus, Edit, Trash } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
 
 interface CalendarEditToolsProps {
   onAddEvent: () => void;
-  selectedEventId: string | null | undefined;
-  onEditSelected: () => void;
-  onDeleteSelected: () => void;
+  selectedEventId?: string;
+  onEditSelected?: () => void;
+  onDeleteSelected?: () => void;
   className?: string;
 }
 
@@ -18,28 +18,39 @@ export function CalendarEditTools({
   selectedEventId,
   onEditSelected,
   onDeleteSelected,
-  className = "",
+  className = ""
 }: CalendarEditToolsProps) {
   const isMobile = useIsMobile();
   
   return (
-    <Card className={`p-2 flex gap-2 border-2 border-glee-purple/30 ${className}`}>
-      <Button onClick={onAddEvent} className="bg-glee-purple hover:bg-glee-purple/90 font-medium">
-        <CalendarPlus className="mr-2 h-5 w-5" />
+    <Card className={`p-1 flex gap-1 border border-glee-purple/30 ${className}`}>
+      <Button onClick={onAddEvent} className="bg-glee-purple hover:bg-glee-purple/90 font-medium p-1 h-auto text-xs" size="sm">
+        <CalendarPlus className="h-3.5 w-3.5 mr-1" />
         Add Event
       </Button>
       
-      {selectedEventId && (
-        <>
-          <Button onClick={onEditSelected} variant="outline" className="border-glee-purple/30 hover:bg-glee-purple/10">
-            <Edit className="mr-2 h-5 w-5" />
-            Edit
-          </Button>
-          <Button onClick={onDeleteSelected} variant="destructive">
-            <Trash2 className="mr-2 h-5 w-5" />
-            Delete
-          </Button>
-        </>
+      {selectedEventId && onEditSelected && (
+        <Button 
+          onClick={onEditSelected} 
+          variant="outline"
+          size="sm"
+          className="p-1 h-auto text-xs"
+        >
+          <Edit className="h-3.5 w-3.5 mr-1" />
+          Edit
+        </Button>
+      )}
+      
+      {selectedEventId && onDeleteSelected && (
+        <Button 
+          onClick={onDeleteSelected} 
+          variant="outline"
+          size="sm"
+          className="text-red-500 hover:text-red-700 hover:bg-red-50 p-1 h-auto text-xs"
+        >
+          <Trash className="h-3.5 w-3.5 mr-1" />
+          Delete
+        </Button>
       )}
     </Card>
   );

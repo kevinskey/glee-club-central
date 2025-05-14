@@ -35,17 +35,17 @@ const MonthlyCalendar: React.FC<MonthlyCalendarProps> = ({ events, className }) 
 
   const renderHeader = () => {
     return (
-      <div className="flex items-center justify-between p-1 sm:p-2">
+      <div className="flex items-center justify-between p-0.5 sm:p-1">
         <Button 
           variant="outline" 
           size="icon" 
           onClick={prevMonth}
           aria-label="Previous month"
-          className="h-7 w-7"
+          className="h-6 w-6"
         >
-          <ChevronLeft className="h-4 w-4" />
+          <ChevronLeft className="h-3 w-3" />
         </Button>
-        <h2 className="text-base font-medium">
+        <h2 className="text-sm font-medium">
           {format(currentMonth, "MMMM yyyy")}
         </h2>
         <Button 
@@ -53,9 +53,9 @@ const MonthlyCalendar: React.FC<MonthlyCalendarProps> = ({ events, className }) 
           size="icon" 
           onClick={nextMonth}
           aria-label="Next month"
-          className="h-7 w-7"
+          className="h-6 w-6"
         >
-          <ChevronRight className="h-4 w-4" />
+          <ChevronRight className="h-3 w-3" />
         </Button>
       </div>
     );
@@ -67,7 +67,7 @@ const MonthlyCalendar: React.FC<MonthlyCalendarProps> = ({ events, className }) 
 
     for (let i = 0; i < 7; i++) {
       days.push(
-        <div key={i} className="text-center text-xs text-muted-foreground py-1">
+        <div key={i} className="text-center text-xs text-muted-foreground py-0.5">
           {daysOfWeek[i]}
         </div>
       );
@@ -85,7 +85,7 @@ const MonthlyCalendar: React.FC<MonthlyCalendarProps> = ({ events, className }) 
     const rows = [];
     let days = [];
     let day = startDate;
-    const cellHeight = isMobile ? "h-10" : "h-16";
+    const cellHeight = isMobile ? "h-11" : "h-[4.5rem]";
 
     while (day <= endDate) {
       for (let i = 0; i < 7; i++) {
@@ -99,19 +99,19 @@ const MonthlyCalendar: React.FC<MonthlyCalendarProps> = ({ events, className }) 
           <div
             key={day.toString()}
             className={cn(
-              `${cellHeight} border border-gray-200 dark:border-gray-700 p-1 relative`,
+              `${cellHeight} border border-gray-200 dark:border-gray-700 p-0.5 relative`,
               !isSameMonth(day, monthStart) && "bg-gray-50 dark:bg-gray-800/50 text-gray-400 dark:text-gray-500",
               isSameDay(day, selectedDate) && "border-orange-500 border-2"
             )}
             onClick={() => onDateClick(cloneDay)}
           >
             <span className="text-xs">{formattedDate}</span>
-            <div className="overflow-y-auto max-h-[60%]">
-              {dayEvents.slice(0, isMobile ? 1 : 2).map(event => (
+            <div className="overflow-y-auto max-h-[80%]">
+              {dayEvents.slice(0, isMobile ? 2 : 3).map(event => (
                 <div 
                   key={event.id} 
                   className={cn(
-                    "text-xs p-0.5 mb-0.5 rounded truncate",
+                    "text-2xs p-0.5 mb-0.5 rounded truncate",
                     event.type === "concert" && "bg-glee-purple text-white",
                     event.type === "rehearsal" && "bg-blue-500 text-white",
                     event.type === "sectional" && "bg-green-500 text-white",
@@ -119,12 +119,12 @@ const MonthlyCalendar: React.FC<MonthlyCalendarProps> = ({ events, className }) 
                     event.type === "tour" && "bg-purple-500 text-white"
                   )}
                 >
-                  {isMobile && event.title.length > 6 ? `${event.title.substring(0, 6)}...` : event.title}
+                  {isMobile && event.title.length > 8 ? `${event.title.substring(0, 8)}...` : event.title}
                 </div>
               ))}
-              {dayEvents.length > (isMobile ? 1 : 2) && (
-                <div className="text-xs text-center text-muted-foreground">
-                  +{dayEvents.length - (isMobile ? 1 : 2)}
+              {dayEvents.length > (isMobile ? 2 : 3) && (
+                <div className="text-2xs text-center text-muted-foreground">
+                  +{dayEvents.length - (isMobile ? 2 : 3)}
                 </div>
               )}
             </div>
@@ -143,7 +143,7 @@ const MonthlyCalendar: React.FC<MonthlyCalendarProps> = ({ events, className }) 
       days = [];
     }
     
-    return <div className="space-y-0.5">{rows}</div>;
+    return <div className="space-y-0">{rows}</div>;
   };
 
   return (

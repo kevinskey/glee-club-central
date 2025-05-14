@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { Calendar as CalendarIcon, CalendarPlus } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
@@ -138,8 +139,8 @@ export default function CalendarPage() {
       {/* Add the correct header based on screen size */}
       {isMobile ? <MobileHeader /> : <Header />}
       
-      <div className="container mx-auto p-2 space-y-4 h-full">
-        <div className="flex items-center justify-between">
+      <div className="container mx-auto px-1 py-2 space-y-3 h-full">
+        <div className="flex items-center justify-between mb-0">
           <div className="flex items-center gap-2">
             <CalendarIcon className="h-5 w-5" />
             <h1 className="text-sm sm:text-lg font-semibold">Glee Club Calendar</h1>
@@ -152,13 +153,13 @@ export default function CalendarPage() {
           selectedEventId={selectedEvent?.id}
           onEditSelected={() => isViewModalOpen && setIsViewModalOpen(true)}
           onDeleteSelected={() => selectedEvent && handleDeleteEvent(selectedEvent.id)}
-          className="mb-2 border-glee-purple/20 bg-glee-purple/5 dark:bg-glee-purple/10 sticky top-0 z-10"
+          className="mb-1 border-glee-purple/20 bg-glee-purple/5 dark:bg-glee-purple/10 sticky top-0 z-10"
         />
         
-        <div className="grid grid-cols-1 gap-2">
+        <div className="grid grid-cols-1 gap-1">
           {/* Calendar widget takes full width now */}
-          <Card className="col-span-1">
-            <CardContent className="p-0 sm:p-1">
+          <Card className="col-span-1 border-0 shadow-sm">
+            <CardContent className="p-0">
               <MonthlyCalendar
                 events={transformedEvents}
                 className="w-full"
