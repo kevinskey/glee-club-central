@@ -15,8 +15,8 @@ export const Icons = {
     
     // Use different logo based on theme
     const logoSrc = theme === "dark" 
-      ? "/lovable-uploads/312fd1a4-7f46-4000-8711-320383aa565a.png" 
-      : "/lovable-uploads/8fa96710-a03a-4033-9ee0-032306d74daa.png";
+      ? "/lovable-uploads/312fd1a4-7f46-4000-8711-320383aa565a.png" // Dark mode logo
+      : "/lovable-uploads/8fa96710-a03a-4033-9ee0-032306d74daa.png"; // Light mode logo
     
     return (
       <img 
@@ -28,7 +28,7 @@ export const Icons = {
     );
   },
   globe: (props: IconProps) => (
-    <Globe className={cn("h-6 w-6 text-black dark:text-white", props.className)} {...props} />
+    <Globe className={cn("h-6 w-6 text-foreground", props.className)} {...props} />
   ),
   tiktok: (props: IconProps) => (
     <svg
