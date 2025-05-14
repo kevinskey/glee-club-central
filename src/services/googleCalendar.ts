@@ -52,13 +52,14 @@ export const fetchGoogleCalendarToken = async (userId: string): Promise<GoogleCa
     }
     
     // Safely cast data to GoogleCalendarToken type
+    // Handle the case where calendar_id might not exist in the database
     const token: GoogleCalendarToken = {
       id: data.id,
       user_id: data.user_id,
       access_token: data.access_token,
       refresh_token: data.refresh_token,
       expires_at: new Date(data.expires_at).getTime(),
-      calendar_id: data.calendar_id || 'primary'
+      calendar_id: data.calendar_id || 'primary' // Default to 'primary' if not provided
     };
     
     return token;
