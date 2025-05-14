@@ -1,5 +1,5 @@
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { PageHeader } from "@/components/ui/page-header";
 import { Calendar as CalendarIcon } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -22,40 +22,10 @@ export default function CalendarPage() {
   const [isViewModalOpen, setIsViewModalOpen] = useState(false);
   const [selectedEvent, setSelectedEvent] = useState<CalendarEvent | null>(null);
   
-  // Example events - in a real app, these would come from your API or database
-  const events = [
-    { 
-      id: "1", 
-      title: "Spring Concert", 
-      date: new Date(2025, 4, 17), 
-      time: "7:00 PM",
-      location: "Sisters Chapel",
-      type: "concert" as EventType,
-      start: new Date(2025, 4, 17),
-      end: new Date(2025, 4, 17)
-    },
-    { 
-      id: "2", 
-      title: "Rehearsal", 
-      date: new Date(2025, 4, 14), 
-      time: "5:00 PM",
-      location: "Fine Arts Building",
-      type: "rehearsal" as EventType,
-      start: new Date(2025, 4, 14),
-      end: new Date(2025, 4, 14)
-    },
-    {
-      id: "3",
-      title: "Soprano Sectional",
-      date: new Date(2025, 4, 15),
-      time: "4:30 PM",
-      location: "Practice Room 2",
-      type: "sectional" as EventType,
-      start: new Date(2025, 4, 15),
-      end: new Date(2025, 4, 15)
-    }
-  ];
-
+  // Use the calendar store instead of mock data
+  const { events, addEvent, updateEvent, deleteEvent, fetchEvents } = useCalendarStore();
+  const [isLoading, setIsLoading] = useState(true);
+  
   // Current date for calendar
   const currentDate = new Date();
   const [currentMonth, setCurrentMonth] = useState(currentDate.getMonth());
@@ -64,6 +34,23 @@ export default function CalendarPage() {
   
   // Allow editing for all users on this page
   const userCanEdit = true;
+  
+  // Load real events on component mount
+  useEffect(() => {
+    const loadEvents = async () => {
+      try {
+        setIsLoading(true);
+        await fetchEvents();
+      } catch (error) {
+        console.error("Error loading events:", error);
+        toast.error("Failed to load calendar events");
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    
+    loadEvents();
+  }, [fetchEvents]);
   
   // Handlers for month navigation
   const handlePrevMonth = () => {
@@ -85,11 +72,12 @@ export default function CalendarPage() {
   };
   
   // Get events for the selected date
-  const eventsForSelectedDate = date ? events.filter(event => 
-    event.date.getFullYear() === date.getFullYear() &&
-    event.date.getMonth() === date.getMonth() &&
-    event.date.getDate() === date.getDate()
-  ) : [];
+  const eventsForSelectedDate = date ? events.filter(event => {
+    const eventDate = new Date(event.start);
+    return eventDate.getFullYear() === date.getFullYear() &&
+      eventDate.getMonth() === date.getMonth() &&
+      eventDate.getDate() === date.getDate();
+  }) : [];
 
   // Handle opening the event modal
   const handleEventClick = (event: CalendarEvent) => {
@@ -97,24 +85,61 @@ export default function CalendarPage() {
     setIsViewModalOpen(true);
   };
 
-  // Handle adding event
+  // Handle adding event - use the actual store now
   const handleAddEvent = async (eventData: any) => {
-    toast.success("Event created successfully");
-    setIsCreateModalOpen(false);
+    try {
+      // Format the data to match what the store expects
+      const newEvent = {
+        title: eventData.title,
+        description: eventData.description || "",
+        date: eventData.date,
+        time: eventData.time,
+        location: eventData.location || "",
+        type: eventData.type as EventType,
+        start: new Date(eventData.date),
+        end: new Date(eventData.date)
+      };
+      
+      await addEvent(newEvent);
+      toast.success("Event created successfully");
+      setIsCreateModalOpen(false);
+    } catch (error) {
+      console.error("Error adding event:", error);
+      toast.error("Failed to create event");
+    }
   };
 
-  // Handle updating event
+  // Handle updating event - use the actual store now
   const handleUpdateEvent = async (eventData: CalendarEvent): Promise<boolean | void> => {
-    toast.success("Event updated successfully");
-    setIsViewModalOpen(false);
-    return true;
+    try {
+      const success = await updateEvent(eventData);
+      if (success) {
+        toast.success("Event updated successfully");
+        setIsViewModalOpen(false);
+      }
+      return success;
+    } catch (error) {
+      console.error("Error updating event:", error);
+      toast.error("Failed to update event");
+      return false;
+    }
   };
 
-  // Handle deleting event
+  // Handle deleting event - use the actual store now
   const handleDeleteEvent = async (eventId: string): Promise<boolean | void> => {
-    toast.success("Event deleted successfully");
-    setIsViewModalOpen(false);
-    return true;
+    try {
+      const success = await deleteEvent(eventId);
+      if (success) {
+        toast.success("Event deleted successfully");
+        setIsViewModalOpen(false);
+        setSelectedEvent(null);
+      }
+      return success;
+    } catch (error) {
+      console.error("Error deleting event:", error);
+      toast.error("Failed to delete event");
+      return false;
+    }
   };
 
   return (
