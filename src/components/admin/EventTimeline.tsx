@@ -43,9 +43,6 @@ export function EventTimeline({ events = [] }: EventTimelineProps) {
                 <div>
                   <p className="font-medium text-sm">{event.title}</p>
                   <p className="text-xs text-muted-foreground">{event.date}</p>
-                  {event.description && (
-                    <p className="text-xs mt-1">{event.description}</p>
-                  )}
                 </div>
               </div>
             ))

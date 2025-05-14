@@ -83,7 +83,6 @@ export const PerformanceEventDetails = ({
         </div>
       </div>
       <div className="p-4 md:p-6">
-        <p className="text-gray-700 dark:text-white">{event.description}</p>
         <div className="mt-4 flex flex-wrap gap-3">
           {onViewCalendar && (
             <Button

@@ -94,15 +94,6 @@ export function ViewEventModal({
           </div>
         </div>
         
-        {event.description && (
-          <div className="pt-2">
-            <div className="flex items-start">
-              <FileText className="mr-2 h-4 w-4 text-muted-foreground mt-0.5" />
-              <div className="whitespace-pre-wrap">{event.description}</div>
-            </div>
-          </div>
-        )}
-        
         {event.created_by && (
           <div className="flex items-center pt-2">
             <User className="mr-2 h-4 w-4 text-muted-foreground" />

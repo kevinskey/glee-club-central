@@ -29,13 +29,6 @@ export function EventDetails({ event, onEdit, onDelete, isAdmin }: EventDetailsP
         <p className="text-sm">{event.location}</p>
       </div>
       
-      {event.description && (
-        <div>
-          <h4 className="text-sm font-medium">Description</h4>
-          <p className="text-sm whitespace-pre-wrap">{event.description}</p>
-        </div>
-      )}
-      
       {event.image_url && (
         <div>
           <h4 className="text-sm font-medium">Event Image</h4>

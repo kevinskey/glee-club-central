@@ -68,11 +68,6 @@ export function VideoPlayer({ videoId, title, description }: VideoPlayerProps) {
           )}
         </div>
       </CardContent>
-      {description && !loadError && (
-        <CardFooter className="p-4 md:p-6">
-          <p className="text-sm text-muted-foreground">{description}</p>
-        </CardFooter>
-      )}
     </Card>
   );
 }
