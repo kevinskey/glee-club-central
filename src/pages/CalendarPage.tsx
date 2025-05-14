@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useRef } from "react";
 import { Footer } from "@/components/landing/Footer";
 import { CalendarHeader } from "@/components/calendar/CalendarHeader";
@@ -170,6 +169,7 @@ const CalendarPage = () => {
                     events={events} 
                     onEventClick={handleUpcomingEventClick}
                     className="mt-4"
+                    maxHeight="350px"
                   />
                 )}
               </div>
