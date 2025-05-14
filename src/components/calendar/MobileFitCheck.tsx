@@ -18,7 +18,7 @@ export function MobileFitCheck({ title, location, description }: MobileFitCheckP
   }
   
   return (
-    <Alert variant="warning" className="bg-amber-50 text-amber-800 border-amber-200 dark:bg-amber-900/20 dark:text-amber-400 dark:border-amber-800/30">
+    <Alert variant="warning">
       <AlertCircle className="h-4 w-4" />
       <AlertTitle>Mobile display warning</AlertTitle>
       <AlertDescription>
