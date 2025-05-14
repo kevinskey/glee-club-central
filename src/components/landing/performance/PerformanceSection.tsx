@@ -1,10 +1,10 @@
 
 import React, { useState, useEffect } from "react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
 import { Link } from "react-router-dom";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, Calendar, Clock, MapPin } from "lucide-react";
 import { toast } from "sonner";
 import { 
   Carousel,
@@ -13,7 +13,6 @@ import {
   CarouselNext,
   CarouselPrevious
 } from "@/components/ui/carousel";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { fetchPerformanceEvents } from "@/utils/performanceSync";
 
@@ -32,7 +31,7 @@ export function PerformanceSection() {
   const [events, setEvents] = useState<PerformanceEvent[]>([]);
   const [loading, setLoading] = useState(true);
   const isMobile = useIsMobile();
-
+  
   // Get the authenticated user
   const { isAuthenticated, profile } = useAuth();
   
@@ -64,9 +63,18 @@ export function PerformanceSection() {
       [eventId]: true
     }));
   };
+  
+  // Format date to display day and month
+  const formatEventDate = (dateStr: string) => {
+    const date = new Date(dateStr);
+    return date.toLocaleDateString('en-US', { 
+      month: 'short', 
+      day: 'numeric' 
+    });
+  };
 
   return (
-    <section id="performances" className="py-0 relative overflow-hidden min-h-[400px] flex items-center">
+    <section id="performances" className="py-0 relative overflow-hidden min-h-[500px] flex items-center">
       {/* Stage Curtain Background */}
       <div className="absolute inset-0 z-0">
         <div className="absolute inset-0 bg-glee-spelman z-0">
@@ -127,7 +135,7 @@ export function PerformanceSection() {
                   <CarouselItem key={event.id} className="pl-2 md:pl-4 md:basis-1/2 lg:basis-1/3">
                     <div className="p-1">
                       <Card className="overflow-hidden h-full border-none bg-black/40 backdrop-blur-sm text-white">
-                        <div className="relative h-40 bg-muted">
+                        <div className="relative h-60 md:h-72 bg-muted">
                           {!imageErrors[event.id] ? (
                             <img 
                               src={event.image} 
@@ -136,27 +144,39 @@ export function PerformanceSection() {
                               onError={() => handleImageError(event.id)}
                             />
                           ) : (
-                            <div className="absolute inset-0 flex items-center justify-center bg-muted">
-                              <p className="text-muted-foreground text-sm">{event.title} - Image unavailable</p>
+                            <div className="absolute inset-0 flex items-center justify-center bg-glee-purple/30">
+                              <div className="flex flex-col items-center justify-center">
+                                <Calendar className="h-12 w-12 text-white/70 mb-2" />
+                                <p className="text-white/80">Performance Event</p>
+                              </div>
                             </div>
                           )}
-                          <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent flex items-end p-3">
+                          <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/50 to-black/20 flex flex-col justify-end p-4">
                             <div className="w-full">
-                              <h3 className="font-bold text-white text-lg truncate">{event.title}</h3>
-                              <p className="text-white/80 text-xs">{event.date} | {event.location}</p>
+                              <div className="flex justify-between items-start mb-2">
+                                <h3 className="font-bold text-white text-xl md:text-2xl leading-tight">{event.title}</h3>
+                                <span className="bg-glee-purple text-white text-xs font-bold px-2 py-1 rounded-md">
+                                  {formatEventDate(event.date)}
+                                </span>
+                              </div>
+                              <div className="flex items-center space-x-3 text-white/90 text-sm mb-3">
+                                <div className="flex items-center">
+                                  <Clock className="h-3.5 w-3.5 mr-1 text-white/70" />
+                                  <span>7:00 PM</span>
+                                </div>
+                                <div className="flex items-center">
+                                  <MapPin className="h-3.5 w-3.5 mr-1 text-white/70" />
+                                  <span className="truncate max-w-[150px]">{event.location}</span>
+                                </div>
+                              </div>
                             </div>
+                            <Link to={`/calendar?event=${event.id}`} className="w-full">
+                              <Button variant="outline" size="sm" className="w-full bg-white/10 border-white/20 hover:bg-white/20 text-white">
+                                View Details
+                              </Button>
+                            </Link>
                           </div>
                         </div>
-                        <CardContent className="p-4 pt-3">
-                          <ScrollArea className="h-20 mb-4">
-                            <p className="text-sm text-white/80">{event.description}</p>
-                          </ScrollArea>
-                          <Link to={`/calendar?event=${event.id}`}>
-                            <Button variant="outline" size="sm" className="w-full bg-white/10 border-white/20 hover:bg-white/20 text-white">
-                              View Details
-                            </Button>
-                          </Link>
-                        </CardContent>
                       </Card>
                     </div>
                   </CarouselItem>
