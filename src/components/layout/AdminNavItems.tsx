@@ -1,9 +1,8 @@
+
 import React from "react";
 import { NavItem } from "@/components/ui/nav-item";
 import {
   BarChart,
-  Calendar,
-  FileMusic,
   ImageIcon,
   LayoutDashboard,
   Settings,
@@ -31,13 +30,8 @@ export const AdminNavItems = () => {
         label="Analytics" 
       />
       <NavItem 
-        to="/admin/calendar" 
-        icon={<Calendar size={18} />} 
-        label="Calendar" 
-      />
-      <NavItem 
         to="/admin/media" 
-        icon={<FileMusic size={18} />} 
+        icon={<ImageIcon size={18} />} 
         label="Media Library" 
       />
       <NavItem

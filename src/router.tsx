@@ -1,3 +1,4 @@
+
 import { createBrowserRouter, Navigate } from 'react-router-dom';
 import { Suspense, lazy } from 'react';
 
@@ -24,7 +25,6 @@ import AdminDashboard from './pages/admin/AdminDashboard';
 import SiteImagesPage from './pages/admin/SiteImagesPage';
 import AnalyticsPage from './pages/admin/AnalyticsPage';
 import UsersPage from './pages/admin/UsersPage';
-import EventCalendar from './pages/admin/EventCalendar';
 import MediaLibrary from './pages/admin/MediaLibrary';
 import SettingsPage from './pages/admin/SettingsPage';
 import LandingPageSettingsPage from './pages/admin/LandingPageSettingsPage';
@@ -165,10 +165,6 @@ export const router = createBrowserRouter([
       {
         path: 'analytics',
         element: <AnalyticsPage />
-      },
-      {
-        path: 'calendar',
-        element: <EventCalendar />
       },
       {
         path: 'media',
