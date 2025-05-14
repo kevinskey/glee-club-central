@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useRef } from "react";
 import { Spinner } from "@/components/ui/spinner";
 
@@ -13,7 +12,7 @@ export function BackgroundSlideshow({
   images,
   duration = 10000, // 10 seconds between transitions
   transition = 2000, // 2 seconds for the transition effect
-  overlayOpacity = 0.7, // Default overlay opacity (70%)
+  overlayOpacity = 0.5, // Changed from 0.7 to 0.5 for lighter overlay
 }: BackgroundSlideshowProps) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [nextIndex, setNextIndex] = useState(1);

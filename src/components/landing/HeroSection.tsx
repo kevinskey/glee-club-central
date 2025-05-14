@@ -64,7 +64,7 @@ export function HeroSection() {
           images={backgroundImages} 
           duration={10000} 
           transition={2000}
-          overlayOpacity={0.75} // Set black overlay to 75% opacity
+          overlayOpacity={0.5} // Changed from 0.75 to 0.5 to make it less dark
         />
       </div>
       
