@@ -1,66 +1,75 @@
 
-import React, { useEffect } from "react";
+import React from "react";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 interface EventContentProps {
   eventInfo: any;
   view: string;
 }
 
-export const EventContent = ({ eventInfo, view }: EventContentProps) => {
-  useEffect(() => {
-    if (!eventInfo?.event?.title) {
-      console.warn("EventContent received invalid event info", eventInfo);
-      return;
+export function EventContent({ eventInfo, view }: EventContentProps) {
+  const { event, timeText } = eventInfo;
+  const isMobile = useIsMobile();
+  
+  // Get event type from extended props
+  const eventType = event.extendedProps?.type || "default";
+  
+  // Get appropriate styling based on event type
+  const getEventTypeStyles = () => {
+    switch (eventType) {
+      case "concert":
+        return "bg-glee-purple border-glee-purple/70 text-white";
+      case "rehearsal":
+        return "bg-blue-500 border-blue-400 text-white";
+      case "sectional":
+        return "bg-green-500 border-green-400 text-white";
+      case "special":
+        return "bg-amber-500 border-amber-400 text-white";
+      case "tour":
+        return "bg-purple-500 border-purple-400 text-white";
+      default:
+        return "bg-gray-500 border-gray-400 text-white";
     }
-    console.log("EventContent rendering for event:", eventInfo.event.title);
-  }, [eventInfo?.event?.title]);
-  
-  if (!eventInfo?.event) {
-    console.error("EventContent: No event data available");
-    return null;
-  }
-  
-  // Updated type colors to use string keys
-  const typeColors: Record<string, string> = {
-    'rehearsal': 'bg-blue-500 border-blue-600',
-    'performance': 'bg-orange-500 border-orange-600',
-    'concert': 'bg-orange-500 border-orange-600',
-    'sectional': 'bg-green-500 border-green-600',
-    'meeting': 'bg-yellow-500 border-yellow-600',
-    'special': 'bg-purple-500 border-purple-600',
-    'tour': 'bg-teal-500 border-teal-600',
-    'other': 'bg-gray-500 border-gray-600'
   };
-
-  const eventType = eventInfo.event.extendedProps?.type || 'other';
-  const location = eventInfo.event.extendedProps?.location || '';
   
-  // Different rendering based on view type
-  if (view === 'dayGridMonth') {
+  const styles = getEventTypeStyles();
+  
+  // Different rendering for list view
+  if (view === 'listWeek') {
     return (
-      <div className="w-full overflow-hidden">
-        <div className={`flex items-center py-1 px-2 rounded-sm ${typeColors[eventType] || typeColors['other']}`}>
-          <div className="flex-1 text-white truncate">
-            <div className="font-medium text-xs md:text-sm truncate">{eventInfo.event.title}</div>
-            {location && <div className="text-xs text-white/80 truncate">{location}</div>}
-          </div>
-        </div>
-      </div>
-    );
-  } else {
-    // Week/Day view with more detailed info
-    return (
-      <div className="w-full h-full overflow-hidden">
-        <div className={`flex flex-col h-full py-1 px-2 ${typeColors[eventType] || typeColors['other']}`}>
-          <div className="font-medium text-xs md:text-sm text-white">{eventInfo.event.title}</div>
-          {location && (
-            <div className="text-xs text-white/80 flex items-center gap-1 mt-1">
-              <span className="w-1.5 h-1.5 rounded-full bg-white/80"></span>
-              <span className="truncate">{location}</span>
-            </div>
+      <div className="flex items-center">
+        <div className={`w-2 h-2 rounded-full mr-2 ${styles.split(' ')[0]}`}></div>
+        <div className="flex flex-col">
+          <div className="font-medium">{event.title}</div>
+          {event.extendedProps.location && !isMobile && (
+            <div className="text-xs text-muted-foreground">{event.extendedProps.location}</div>
           )}
         </div>
       </div>
     );
   }
-};
+
+  // Smaller content for mobile month view
+  if (isMobile && view === 'dayGridMonth') {
+    return (
+      <div className={`p-1 rounded text-xs ${styles}`}>
+        <div className="font-medium truncate">{event.title}</div>
+      </div>
+    );
+  }
+
+  // Standard rendering for day/week grid views
+  return (
+    <div className={`p-1 rounded ${styles}`}>
+      <div className="font-medium text-xs sm:text-sm truncate">
+        {event.title}
+      </div>
+      {timeText && (
+        <div className="text-xs opacity-90">{timeText}</div>
+      )}
+      {event.extendedProps.location && !isMobile && view !== 'dayGridMonth' && (
+        <div className="text-xs opacity-90 truncate">{event.extendedProps.location}</div>
+      )}
+    </div>
+  );
+}

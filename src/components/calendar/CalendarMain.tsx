@@ -10,9 +10,7 @@ import { CalendarToolbar } from "./CalendarToolbar";
 import { CalendarEvent } from "@/types/calendar";
 import { useCalendarNavigation } from "@/hooks/useCalendarNavigation";
 import { Card } from "@/components/ui/card";
-
-// Note: Modern FullCalendar versions don't require explicit CSS imports
-// CSS is now included in the package and automatically handled
+import { useIsMobile } from "@/hooks/use-mobile";
 
 interface CalendarMainProps {
   events: CalendarEvent[];
@@ -39,12 +37,16 @@ export const CalendarMain = ({
 }: CalendarMainProps) => {
   const calendarRef = useRef<FullCalendar>(null);
   const [calendarReady, setCalendarReady] = useState(false);
+  const isMobile = useIsMobile();
   
   const { 
     handlePrevClick, 
     handleNextClick, 
     handleTodayClick 
   } = useCalendarNavigation(calendarRef, setCurrentDate);
+  
+  // Determine the best view based on screen size
+  const initialView = isMobile && calendarView === 'dayGridMonth' ? 'listWeek' : calendarView;
   
   useEffect(() => {
     console.log("CalendarMain mounted, view:", calendarView);
@@ -82,7 +84,7 @@ export const CalendarMain = ({
   console.log("CalendarMain rendering with events:", events.length, "View:", calendarView);
 
   return (
-    <Card className="flex-1 bg-white dark:bg-gray-800 rounded-lg shadow-sm p-4 overflow-visible">
+    <Card className="flex-1 bg-white dark:bg-gray-800 rounded-lg shadow-sm p-2 sm:p-4 overflow-visible">
       <CalendarToolbar 
         onPrevClick={handlePrevClick}
         onNextClick={handleNextClick}
@@ -92,12 +94,19 @@ export const CalendarMain = ({
         eventsCount={events.length}
       />
 
-      <div style={{ minHeight: "600px", height: "70vh", marginTop: "1rem" }} className="calendar-container">
+      <div 
+        style={{ 
+          minHeight: isMobile ? "450px" : "600px", 
+          height: isMobile ? "60vh" : "70vh", 
+          marginTop: "1rem" 
+        }} 
+        className="calendar-container"
+      >
         {calendarReady && (
           <FullCalendar
             ref={calendarRef}
             plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin, listPlugin]}
-            initialView={calendarView}
+            initialView={initialView}
             headerToolbar={false} // We use our custom header
             events={displayEvents.map(event => ({
               id: event.id,
@@ -113,14 +122,14 @@ export const CalendarMain = ({
             }))}
             dateClick={userCanCreate ? handleDateClick : undefined}
             eventClick={handleEventClick}
-            editable={userCanCreate}
+            editable={userCanCreate && !isMobile} // Disable drag/drop on mobile
             eventDrop={handleEventDrop}
             eventResize={handleEventResize}
             eventContent={eventContent}
             height="100%"
             firstDay={0} // Start week on Sunday
             nowIndicator={true}
-            dayMaxEvents={true}
+            dayMaxEvents={isMobile ? 2 : true} // Limit visible events on mobile
             slotMinTime="07:00:00"
             slotMaxTime="22:00:00"
             allDaySlot={true}
@@ -141,22 +150,24 @@ export const CalendarMain = ({
             }}
             views={{
               dayGridMonth: {
-                dayMaxEventRows: 3,
+                dayMaxEventRows: isMobile ? 2 : 3,
                 titleFormat: { month: 'long', year: 'numeric' }
               },
               timeGridWeek: {
-                titleFormat: { month: 'long', year: 'numeric' },
+                titleFormat: isMobile ? { month: 'short', year: 'numeric' } : { month: 'long', year: 'numeric' },
                 slotDuration: '00:30:00',
                 slotLabelInterval: '01:00'
               },
               timeGridDay: {
-                titleFormat: { month: 'long', day: 'numeric', year: 'numeric' },
+                titleFormat: isMobile ? 
+                  { month: 'short', day: 'numeric' } : 
+                  { month: 'long', day: 'numeric', year: 'numeric' },
                 slotDuration: '00:30:00',
                 slotLabelInterval: '01:00'
               },
               listWeek: {
                 titleFormat: { month: 'long', year: 'numeric' },
-                listDayFormat: { weekday: 'long', month: 'short', day: 'numeric' },
+                listDayFormat: { weekday: 'short', month: 'short', day: 'numeric' },
                 listDaySideFormat: false
               }
             }}

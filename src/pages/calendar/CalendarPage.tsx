@@ -113,7 +113,7 @@ const CalendarPage = () => {
   return (
     <div className="flex flex-col min-h-screen">
       <main className="flex-1 bg-gray-50 dark:bg-gray-900">
-        <div className="container mx-auto p-4">
+        <div className="container mx-auto p-2 sm:p-4">
           {/* Use CalendarPageHeader on mobile, CalendarHeader on desktop */}
           {isMobile ? (
             <CalendarPageHeader onAddEventClick={() => userCanCreate && setIsCreateModalOpen(true)} />
@@ -126,21 +126,23 @@ const CalendarPage = () => {
             />
           )}
           
-          {/* Add CalendarEditTools */}
-          <CalendarEditTools 
-            onAddEvent={() => setIsCreateModalOpen(true)}
-            selectedEventId={selectedEvent?.id}
-            onEditSelected={() => setIsViewModalOpen(true)}
-            onDeleteSelected={() => onDeleteEvent(selectedEvent?.id)}
-            className="mt-4"
-          />
+          {/* Add CalendarEditTools differently based on device */}
+          {!isMobile && (
+            <CalendarEditTools 
+              onAddEvent={() => setIsCreateModalOpen(true)}
+              selectedEventId={selectedEvent?.id}
+              onEditSelected={() => isViewModalOpen && setIsViewModalOpen(true)}
+              onDeleteSelected={() => selectedEvent && onDeleteEvent(selectedEvent?.id)}
+              className="mt-4"
+            />
+          )}
           
           {isLoading ? (
             <div className="flex justify-center items-center h-96">
               <Spinner size="lg" />
             </div>
           ) : (
-            <div className="flex flex-col lg:flex-row gap-6 mt-6">
+            <div className="flex flex-col lg:flex-row gap-4 lg:gap-6 mt-4 lg:mt-6">
               <div className="hidden lg:block lg:w-64">
                 <CalendarSidebar />
               </div>
@@ -159,9 +161,19 @@ const CalendarPage = () => {
             </div>
           )}
 
+          {/* CalendarEditTools for mobile */}
+          {isMobile && userCanCreate && (
+            <CalendarEditTools 
+              onAddEvent={() => setIsCreateModalOpen(true)}
+              selectedEventId={selectedEvent?.id}
+              onEditSelected={() => setIsViewModalOpen(true)}
+              onDeleteSelected={() => selectedEvent && onDeleteEvent(selectedEvent?.id)}
+            />
+          )}
+
           {/* Create Event Modal */}
           <Dialog open={isCreateModalOpen} onOpenChange={setIsCreateModalOpen}>
-            <DialogContent className="sm:max-w-md">
+            <DialogContent className={isMobile ? "w-[95vw] max-w-md p-4" : "sm:max-w-md"}>
               <EventModal 
                 onClose={() => setIsCreateModalOpen(false)} 
                 onSave={onCreateEvent} 
@@ -173,7 +185,7 @@ const CalendarPage = () => {
           {/* View/Edit Event Modal */}
           {selectedEvent && (
             <Dialog open={isViewModalOpen} onOpenChange={setIsViewModalOpen}>
-              <DialogContent className="sm:max-w-md">
+              <DialogContent className={isMobile ? "w-[95vw] max-w-md p-4" : "sm:max-w-md"}>
                 <ViewEventModal 
                   event={selectedEvent} 
                   onClose={() => setIsViewModalOpen(false)} 

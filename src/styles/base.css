@@ -3,183 +3,123 @@
 
 @layer base {
   :root {
-    /* Light Theme - Default */
-    --background: 0 0% 100%; /* #FFFFFF */
-    --foreground: 0 0% 0%; /* #000000 */
-
-    --muted: 0 0% 96%;
-    --muted-foreground: 0 0% 50%;
-
-    --popover: 0 0% 100%;
-    --popover-foreground: 0 0% 0%;
+    --background: 0 0% 100%;
+    --foreground: 240 10% 3.9%;
 
     --card: 0 0% 100%;
-    --card-foreground: 0 0% 0%;
+    --card-foreground: 240 10% 3.9%;
 
-    --border: 0 0% 90%;
-    --input: 0 0% 90%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 240 10% 3.9%;
 
-    --primary: 0 0% 20%; /* Changed to dark gray from blue */
-    --primary-foreground: 0 0% 100%;
+    --primary: 240 5.9% 10%;
+    --primary-foreground: 0 0% 98%;
 
-    --secondary: 0 0% 96%;
-    --secondary-foreground: 0 0% 0%;
+    --secondary: 240 4.8% 95.9%;
+    --secondary-foreground: 240 5.9% 10%;
 
-    --accent: 213 94% 25%; /* Spelman Blue */
-    --accent-foreground: 0 0% 100%; 
+    --muted: 240 4.8% 95.9%;
+    --muted-foreground: 240 3.8% 46.1%;
+
+    --accent: 240 4.8% 95.9%;
+    --accent-foreground: 240 5.9% 10%;
 
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 0 0% 98%;
 
-    --ring: 0 0% 0%;
+    --border: 240 5.9% 90%;
+    --input: 240 5.9% 90%;
+    --ring: 240 10% 3.9%;
 
     --radius: 0.5rem;
-
-    /* Sidebar Variables */
-    --sidebar-background: 0 0% 100%;
-    --sidebar-foreground: 0 0% 0%;
-    --sidebar-primary: 213 94% 25%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 0 0% 96%;
-    --sidebar-accent-foreground: 0 0% 0%;
-    --sidebar-border: 0 0% 90%;
-    --sidebar-ring: 0 0% 0%;
+    
+    --glee-purple: 258 74% 74%;
+    --glee-spelman: 22 100% 50%;
   }
 
-  .dark, [data-theme="dark"] {
-    /* Dark Theme */
-    --background: 0 0% 10%; /* #1A1A1A */
-    --foreground: 0 0% 100%; /* #FFFFFF */
+  .dark {
+    --background: 240 10% 3.9%;
+    --foreground: 0 0% 98%;
 
-    --muted: 0 0% 15%;
-    --muted-foreground: 0 0% 70%;
+    --card: 240 10% 3.9%;
+    --card-foreground: 0 0% 98%;
 
-    --popover: 0 0% 10%;
-    --popover-foreground: 0 0% 100%;
+    --popover: 240 10% 3.9%;
+    --popover-foreground: 0 0% 98%;
 
-    --card: 0 0% 13%; /* #212121 */
-    --card-foreground: 0 0% 100%;
+    --primary: 0 0% 98%;
+    --primary-foreground: 240 5.9% 10%;
 
-    --border: 0 0% 20%;
-    --input: 0 0% 20%;
+    --secondary: 240 3.7% 15.9%;
+    --secondary-foreground: 0 0% 98%;
 
-    --primary: 0 0% 90%; /* Changed to light gray for better contrast */
-    --primary-foreground: 0 0% 10%;
+    --muted: 240 3.7% 15.9%;
+    --muted-foreground: 240 5% 64.9%;
 
-    --secondary: 0 0% 15%;
-    --secondary-foreground: 0 0% 100%;
-
-    --accent: 213 94% 60%; /* Lighter Spelman Blue for dark mode */
-    --accent-foreground: 0 0% 100%;
+    --accent: 240 3.7% 15.9%;
+    --accent-foreground: 0 0% 98%;
 
     --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 0 85.7% 97.3%;
+    --destructive-foreground: 0 0% 98%;
 
-    --ring: 0 0% 70%;
-
-    /* Sidebar Variables for Dark Mode */
-    --sidebar-background: 0 0% 8%;
-    --sidebar-foreground: 0 0% 100%;
-    --sidebar-primary: 213 94% 60%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 0 0% 15%;
-    --sidebar-accent-foreground: 0 0% 100%;
-    --sidebar-border: 0 0% 20%;
-    --sidebar-ring: 0 0% 70%;
+    --border: 240 3.7% 15.9%;
+    --input: 240 3.7% 15.9%;
+    --ring: 240 4.9% 83.9%;
   }
-}
 
-@layer base {
   * {
     @apply border-border;
-    transition-property: color, background-color, border-color, text-decoration-color, fill, stroke;
-    transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
-    transition-duration: 300ms;
   }
-  
-  html {
-    font-size: 16px;
-    @apply scroll-smooth font-inter;
-  }
-  
+
   body {
-    @apply bg-background text-foreground font-inter;
+    @apply bg-background text-foreground;
   }
   
-  /* Typography system - Base elements with responsive sizes */
-  h1, h2, h3, h4, h5, h6 {
-    @apply font-playfair font-bold tracking-tight;
-    line-height: 1.2;
+  /* Mobile calendar optimizations */
+  @media (max-width: 640px) {
+    .fc .fc-toolbar-title {
+      font-size: 1.2rem !important;
+    }
+    
+    .fc .fc-daygrid-day-number,
+    .fc .fc-col-header-cell-cushion {
+      font-size: 0.875rem !important;
+      padding: 4px !important;
+    }
+    
+    .fc .fc-daygrid-day-top {
+      justify-content: center !important;
+    }
+    
+    .fc .fc-event {
+      font-size: 0.75rem !important;
+    }
+    
+    .fc .fc-list-event-title,
+    .fc .fc-list-event-time {
+      font-size: 0.875rem !important;
+    }
   }
   
-  h1 {
-    @apply text-fluid-h1 mb-4 md:mb-6;
+  /* Calendar spacing and padding optimization */
+  .fc {
+    width: 100% !important;
+    height: auto !important;
   }
   
-  h2 {
-    @apply text-fluid-h2 mb-3 md:mb-5;
+  .fc .fc-daygrid-day {
+    position: relative;
   }
   
-  h3 {
-    @apply text-fluid-h3 mb-3 md:mb-4;
-  }
-  
-  h4 {
-    @apply text-xl md:text-2xl mb-2 md:mb-3;
-  }
-  
-  h5 {
-    @apply text-lg md:text-xl font-semibold mb-2 md:mb-3;
-  }
-  
-  h6 {
-    @apply text-base md:text-lg font-semibold mb-2;
-  }
-  
-  p {
-    @apply text-fluid-p leading-relaxed mb-4;
-    line-height: 1.8;
-  }
-  
-  a {
-    @apply text-glee-spelman hover:text-glee-spelman/80 transition-colors duration-200;
-  }
-  
-  small {
-    @apply text-sm text-muted-foreground;
-  }
-
-  /* Dark mode calendar styles */
-  .dark .fc-theme-standard td, 
-  .dark .fc-theme-standard th,
-  .dark .fc-theme-standard .fc-scrollgrid {
-    @apply border-gray-700;
-  }
-
-  .dark .fc-theme-standard .fc-scrollgrid {
-    @apply border-gray-700;
-  }
-
-  .dark .fc .fc-daygrid-day.fc-day-today {
-    @apply bg-blue-900/20;
-  }
-
-  .dark .fc .fc-button-primary {
-    @apply bg-gray-700 border-gray-600;
-  }
-
-  .dark .fc .fc-button-primary:not(:disabled).fc-button-active,
-  .dark .fc .fc-button-primary:not(:disabled):active {
-    @apply bg-blue-800 border-blue-700;
-  }
-
-  .dark .fc-daygrid-day-number,
-  .dark .fc-col-header-cell-cushion {
-    @apply text-gray-200;
-  }
-
-  /* Theme toggle toast style overrides */
-  .theme-toggle-toast {
-    @apply font-inter text-sm;
+  /* Improve tap targets for mobile */
+  @media (max-width: 640px) {
+    .fc .fc-button {
+      padding: 0.3rem 0.6rem !important;
+      font-size: 0.875rem !important;
+    }
+    
+    .fc .fc-day {
+      min-height: 2.5rem !important;
+    }
   }
 }

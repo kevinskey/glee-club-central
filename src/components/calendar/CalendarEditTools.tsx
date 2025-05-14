@@ -1,18 +1,15 @@
 
 import React from "react";
 import { Button } from "@/components/ui/button";
-import { 
-  CalendarPlus, 
-  Pencil, 
-  Trash2 
-} from "lucide-react";
-import { cn } from "@/lib/utils";
+import { CalendarPlus, Edit, Trash2 } from "lucide-react";
+import { Card } from "@/components/ui/card";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 interface CalendarEditToolsProps {
   onAddEvent: () => void;
-  selectedEventId?: string;
-  onEditSelected?: () => void;
-  onDeleteSelected?: () => void;
+  selectedEventId: string | null | undefined;
+  onEditSelected: () => void;
+  onDeleteSelected: () => void;
   className?: string;
 }
 
@@ -21,52 +18,43 @@ export function CalendarEditTools({
   selectedEventId,
   onEditSelected,
   onDeleteSelected,
-  className
+  className = "",
 }: CalendarEditToolsProps) {
-  const hasSelectedEvent = !!selectedEventId;
+  const isMobile = useIsMobile();
+  
+  if (isMobile) {
+    return (
+      <div className={`fixed bottom-16 right-4 z-30 ${className}`}>
+        <Button
+          onClick={onAddEvent}
+          size="icon"
+          className="rounded-full h-12 w-12 shadow-lg bg-glee-purple hover:bg-glee-purple/90"
+        >
+          <CalendarPlus className="h-6 w-6" />
+        </Button>
+      </div>
+    );
+  }
   
   return (
-    <div className={cn("flex flex-wrap gap-2", className)}>
-      <Button 
-        type="button"
-        onClick={onAddEvent} 
-        size="sm"
-        variant="outline"
-        className="bg-white hover:bg-gray-100 dark:bg-gray-800 dark:hover:bg-gray-700"
-      >
-        <CalendarPlus className="h-4 w-4 mr-2" />
+    <Card className={`p-2 flex gap-2 ${className}`}>
+      <Button onClick={onAddEvent} className="bg-glee-purple hover:bg-glee-purple/90">
+        <CalendarPlus className="mr-2 h-4 w-4" />
         Add Event
       </Button>
       
-      {hasSelectedEvent && (
+      {selectedEventId && (
         <>
-          {onEditSelected && (
-            <Button 
-              type="button"
-              onClick={onEditSelected} 
-              size="sm"
-              variant="outline"
-              className="bg-white hover:bg-gray-100 dark:bg-gray-800 dark:hover:bg-gray-700"
-            >
-              <Pencil className="h-4 w-4 mr-2" />
-              Edit Selected
-            </Button>
-          )}
-          
-          {onDeleteSelected && (
-            <Button 
-              type="button"
-              onClick={onDeleteSelected} 
-              size="sm"
-              variant="outline"
-              className="bg-white hover:bg-gray-100 text-red-500 hover:text-red-600 dark:bg-gray-800 dark:hover:bg-gray-700"
-            >
-              <Trash2 className="h-4 w-4 mr-2" />
-              Delete Selected
-            </Button>
-          )}
+          <Button onClick={onEditSelected} variant="outline">
+            <Edit className="mr-2 h-4 w-4" />
+            Edit
+          </Button>
+          <Button onClick={onDeleteSelected} variant="destructive">
+            <Trash2 className="mr-2 h-4 w-4" />
+            Delete
+          </Button>
         </>
       )}
-    </div>
+    </Card>
   );
 }
