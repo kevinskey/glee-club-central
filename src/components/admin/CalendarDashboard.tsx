@@ -66,7 +66,6 @@ const EventCalendar: React.FC = () => {
     }
   };
   
-  // Handler for updating event - Updated signature to match the interface
   const handleUpdateEvent = async (eventData: CalendarEvent): Promise<boolean | void> => {
     try {
       await updateEvent(eventData);
@@ -79,7 +78,6 @@ const EventCalendar: React.FC = () => {
     }
   };
   
-  // Handler for deleting event - Updated signature to match the interface
   const handleDeleteEvent = async (eventId: string): Promise<boolean | void> => {
     try {
       await deleteEvent(eventId);

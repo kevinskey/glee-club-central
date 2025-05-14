@@ -17,8 +17,8 @@ import { EditEventForm } from "./EditEventForm";
 interface ViewEventModalProps {
   event: CalendarEvent;
   onClose: () => void;
-  onUpdate: (event: CalendarEvent) => Promise<void> | Promise<boolean>;
-  onDelete: (eventId: string) => Promise<void>;
+  onUpdate: (event: CalendarEvent) => Promise<boolean | void>; // Updated to accept both return types
+  onDelete: (eventId: string) => Promise<boolean | void>; // Updated to maintain consistency
   userCanEdit?: boolean;
 }
 

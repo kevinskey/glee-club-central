@@ -1,158 +1,122 @@
+import React from 'react';
+import { z } from 'zod';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { Button } from '@/components/ui/button';
+import { CalendarEvent } from '@/types/calendar';
 
-import React, { useState } from "react";
-import { z } from "zod";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { Form } from "@/components/ui/form";
-import { Button } from "@/components/ui/button";
-import { CalendarEvent, EventType } from "@/types/calendar";
-import { EventFormFields, EventFormValues } from "./EventFormFields";
-import { EventImageUpload } from "./EventImageUpload";
-import { MobileFitCheck } from "./MobileFitCheck";
-import { checkEventMobileFit } from "@/utils/mobileUtils";
-import { toast } from "sonner";
-
-export const formSchema = z.object({
-  title: z.string().min(2, { message: "Title must be at least 2 characters" }),
-  date: z.date({ required_error: "Please select a date" }),
-  time: z.string().min(1, { message: "Please select a time" }),
-  location: z.string().min(1, { message: "Please enter a location" }),
-  description: z.string().optional(),
-  type: z.string().min(1, { message: "Please select an event type" }),
-  image_url: z.string().optional().nullable(),
-});
-
+// Define the prop interface with the updated onUpdateEvent type
 interface EditEventFormProps {
   event: CalendarEvent;
-  onUpdateEvent: (event: CalendarEvent) => Promise<boolean>;
+  onUpdateEvent: (event: CalendarEvent) => Promise<boolean | void>; // Updated return type
   onCancel: () => void;
 }
 
-export function EditEventForm({
-  event,
-  onUpdateEvent,
-  onCancel,
-}: EditEventFormProps) {
-  const [selectedImage, setSelectedImage] = useState<File | null>(null);
-  const [imagePreview, setImagePreview] = useState<string | null>(
-    event.image_url || null
-  );
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [mobileFitIssues, setMobileFitIssues] = useState<{ fits: boolean; issues: string[]; suggestions: string[] } | null>(null);
+// Define your form schema
+const eventSchema = z.object({
+  title: z.string().min(1, "Title is required"),
+  date: z.string().min(1, "Date is required"),
+  time: z.string().optional(),
+  location: z.string().optional(),
+  description: z.string().optional(),
+  type: z.enum(["concert", "rehearsal", "sectional", "special", "tour"]),
+});
 
-  // Create form with default values from the event
-  const form = useForm<EventFormValues>({
-    resolver: zodResolver(formSchema),
+export function EditEventForm({ event, onUpdateEvent, onCancel }: EditEventFormProps) {
+  const { register, handleSubmit, formState: { errors } } = useForm({
+    resolver: zodResolver(eventSchema),
     defaultValues: {
       title: event.title,
-      date: new Date(event.date),
-      time: event.time || "",
+      date: event.date,
+      time: event.time,
       location: event.location,
-      description: event.description || "",
+      description: event.description,
       type: event.type,
-      image_url: event.image_url || null,
     },
   });
 
-  // Watch form fields to check mobile fit
-  const title = form.watch('title');
-  const location = form.watch('location');
-  const description = form.watch('description');
-
-  const onSubmit = async (values: EventFormValues) => {
-    // Check mobile fit before saving
-    const mobileFitCheck = checkEventMobileFit(values.title, values.location, values.description);
-    
-    // If there are mobile fit issues, show a warning but allow continuing
-    if (!mobileFitCheck.fits) {
-      setMobileFitIssues(mobileFitCheck);
-      
-      // Show toast with warning but continue with saving
-      toast.warning("Event may not display optimally on mobile devices", {
-        description: "You can continue saving or go back and make adjustments.",
-        action: {
-          label: "View Details",
-          onClick: () => setMobileFitIssues(mobileFitCheck)
-        }
-      });
-    }
-    
-    setIsSubmitting(true);
-
+  const onSubmit = async (data: any) => {
     try {
-      const updatedEvent: CalendarEvent = {
-        id: event.id,
-        title: values.title,
-        date: values.date,
-        start: values.date,
-        end: values.date,
-        time: values.time,
-        location: values.location,
-        description: values.description,
-        type: values.type as EventType,
-        image_url: values.image_url,
-      };
-
-      const success = await onUpdateEvent(updatedEvent);
-      if (success) {
-        toast.success("Event updated successfully");
-        onCancel();
-      }
+      await onUpdateEvent({
+        ...event,
+        ...data,
+      });
+      onCancel(); // Close the form on success
     } catch (error) {
       console.error("Error updating event:", error);
-      toast.error("Failed to update event");
-    } finally {
-      setIsSubmitting(false);
     }
   };
 
   return (
-    <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-        <EventFormFields form={form} />
-
-        <EventImageUpload
-          form={form}
-          isUploading={isSubmitting}
-          selectedImage={selectedImage}
-          setSelectedImage={setSelectedImage}
-          imagePreview={imagePreview}
-          setImagePreview={setImagePreview}
+    <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+      <div>
+        <label htmlFor="title" className="block text-sm font-medium">Title</label>
+        <input
+          id="title"
+          {...register("title")}
+          className={`mt-1 block w-full border ${errors.title ? 'border-red-500' : 'border-gray-300'} rounded-md shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-200`}
         />
+        {errors.title && <p className="text-red-500 text-sm">{errors.title.message}</p>}
+      </div>
 
-        {mobileFitIssues && !mobileFitIssues.fits && (
-          <MobileFitCheck 
-            title={title}
-            location={location}
-            description={description}
-          />
-        )}
+      <div>
+        <label htmlFor="date" className="block text-sm font-medium">Date</label>
+        <input
+          type="date"
+          id="date"
+          {...register("date")}
+          className={`mt-1 block w-full border ${errors.date ? 'border-red-500' : 'border-gray-300'} rounded-md shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-200`}
+        />
+        {errors.date && <p className="text-red-500 text-sm">{errors.date.message}</p>}
+      </div>
 
-        <div className="flex justify-end gap-2">
-          <Button
-            type="button"
-            variant="outline"
-            onClick={onCancel}
-            disabled={isSubmitting}
-          >
-            Cancel
-          </Button>
-          <Button
-            type="submit"
-            className="bg-glee-purple hover:bg-glee-purple/90"
-            disabled={isSubmitting}
-          >
-            {isSubmitting ? (
-              <>
-                <span className="mr-2">Saving...</span>
-                <span className="animate-spin">⏳</span>
-              </>
-            ) : (
-              "Save Changes"
-            )}
-          </Button>
-        </div>
-      </form>
-    </Form>
+      <div>
+        <label htmlFor="time" className="block text-sm font-medium">Time</label>
+        <input
+          type="time"
+          id="time"
+          {...register("time")}
+          className={`mt-1 block w-full border ${errors.time ? 'border-red-500' : 'border-gray-300'} rounded-md shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-200`}
+        />
+      </div>
+
+      <div>
+        <label htmlFor="location" className="block text-sm font-medium">Location</label>
+        <input
+          id="location"
+          {...register("location")}
+          className={`mt-1 block w-full border ${errors.location ? 'border-red-500' : 'border-gray-300'} rounded-md shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-200`}
+        />
+      </div>
+
+      <div>
+        <label htmlFor="description" className="block text-sm font-medium">Description</label>
+        <textarea
+          id="description"
+          {...register("description")}
+          className={`mt-1 block w-full border ${errors.description ? 'border-red-500' : 'border-gray-300'} rounded-md shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-200`}
+        />
+      </div>
+
+      <div>
+        <label htmlFor="type" className="block text-sm font-medium">Event Type</label>
+        <select
+          id="type"
+          {...register("type")}
+          className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-200"
+        >
+          <option value="concert">Concert</option>
+          <option value="rehearsal">Rehearsal</option>
+          <option value="sectional">Sectional</option>
+          <option value="special">Special Event</option>
+          <option value="tour">Tour</option>
+        </select>
+      </div>
+
+      <div className="flex justify-end">
+        <Button type="button" variant="outline" onClick={onCancel}>Cancel</Button>
+        <Button type="submit" className="ml-2">Update Event</Button>
+      </div>
+    </form>
   );
 }

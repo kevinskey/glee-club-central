@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { Footer } from "@/components/landing/Footer";
 import { CalendarHeader } from "@/components/calendar/CalendarHeader";
@@ -85,8 +84,8 @@ const CalendarPage = () => {
     }
   };
 
-  // Handler for updating event - Modified to match expected signature
-  const onUpdateEvent = async (eventData: CalendarEvent): Promise<void> => {
+  // Handler for updating event - Updated signature to match the interface
+  const onUpdateEvent = async (eventData: CalendarEvent): Promise<boolean | void> => {
     try {
       await handleUpdateEvent(eventData);
       setIsViewModalOpen(false);
@@ -97,8 +96,8 @@ const CalendarPage = () => {
     }
   };
 
-  // Handler for deleting event - Fixed signature
-  const onDeleteEvent = async (eventId: string): Promise<void> => {
+  // Handler for deleting event - Updated signature to match the interface
+  const onDeleteEvent = async (eventId: string): Promise<boolean | void> => {
     try {
       await handleDeleteEvent(eventId);
       setIsViewModalOpen(false);
