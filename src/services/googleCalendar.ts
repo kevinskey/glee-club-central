@@ -4,6 +4,36 @@ import { GoogleCalendarToken } from '@/types/calendar';
 import { toast } from 'sonner';
 
 /**
+ * Check if the user has connected Google Calendar
+ * @returns Boolean indicating if Google Calendar is connected
+ */
+export const isConnected = async (): Promise<boolean> => {
+  try {
+    const userId = (await supabase.auth.getUser()).data.user?.id;
+    if (!userId) {
+      return false;
+    }
+    
+    // We use the user_google_tokens table that was created in the migration
+    const { data, error } = await supabase
+      .from('user_google_tokens')
+      .select('*')
+      .eq('user_id', userId)
+      .single();
+      
+    if (error || !data) {
+      console.log("No Google Calendar connection found:", error);
+      return false;
+    }
+    
+    return true;
+  } catch (error) {
+    console.error('Error checking Google Calendar connection:', error);
+    return false;
+  }
+};
+
+/**
  * Fetches Google Calendar access token from Supabase
  * @param userId The user's ID
  * @returns Google Calendar token object or null
@@ -11,7 +41,7 @@ import { toast } from 'sonner';
 export const fetchGoogleCalendarToken = async (userId: string): Promise<GoogleCalendarToken | null> => {
   try {
     const { data, error } = await supabase
-      .from('google_calendar_tokens')
+      .from('user_google_tokens')
       .select('*')
       .eq('user_id', userId)
       .single();
@@ -21,10 +51,89 @@ export const fetchGoogleCalendarToken = async (userId: string): Promise<GoogleCa
       return null;
     }
     
-    return data as GoogleCalendarToken;
+    // Safely cast data to GoogleCalendarToken type
+    const token: GoogleCalendarToken = {
+      id: data.id,
+      user_id: data.user_id,
+      access_token: data.access_token,
+      refresh_token: data.refresh_token,
+      expiry_date: new Date(data.expires_at).getTime(),
+      created_at: data.created_at
+    };
+    
+    return token;
   } catch (error) {
     console.error('Exception fetching Google Calendar token:', error);
     return null;
+  }
+};
+
+/**
+ * Syncs events with Google Calendar
+ * @returns Boolean indicating success/failure
+ */
+export const syncCalendar = async (): Promise<boolean> => {
+  try {
+    const userId = (await supabase.auth.getUser()).data.user?.id;
+    if (!userId) {
+      toast.error('You must be logged in to sync with Google Calendar');
+      return false;
+    }
+    
+    // Get the token from the database
+    const token = await fetchGoogleCalendarToken(userId);
+    if (!token) {
+      toast.error('Google Calendar not connected');
+      return false;
+    }
+    
+    // Call the sync function with the calendar ID and token
+    const success = await syncWithGoogleCalendar('primary', token.access_token);
+    return success;
+  } catch (error) {
+    console.error('Error in syncCalendar:', error);
+    toast.error('Failed to sync calendar');
+    return false;
+  }
+};
+
+/**
+ * Connect the user account to Google Calendar
+ */
+export const connect = async (): Promise<void> => {
+  const redirectUrl = connectToGoogleCalendar();
+  window.location.href = redirectUrl;
+};
+
+/**
+ * Disconnect the user account from Google Calendar
+ */
+export const disconnect = async (): Promise<boolean> => {
+  try {
+    const userId = (await supabase.auth.getUser()).data.user?.id;
+    if (!userId) {
+      toast.error('You must be logged in to disconnect Google Calendar');
+      return false;
+    }
+    
+    // Delete the token from the database
+    const { error } = await supabase
+      .from('user_google_tokens')
+      .delete()
+      .eq('user_id', userId);
+      
+    if (error) {
+      console.error('Error disconnecting from Google Calendar:', error);
+      toast.error('Failed to disconnect from Google Calendar');
+      return false;
+    }
+    
+    toast.success('Successfully disconnected from Google Calendar');
+    return true;
+  } catch (error) {
+    console.error('Error disconnecting from Google Calendar:', error);
+    toast.error('Failed to disconnect from Google Calendar');
+    return false;
   }
 };
 

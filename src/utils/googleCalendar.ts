@@ -1,3 +1,12 @@
 
 // Re-export all functionality from the services file for backward compatibility
-export * from "@/services/googleCalendar";
+export {
+  isConnected,
+  connect,
+  connectToGoogleCalendar, 
+  disconnect, 
+  syncCalendar,
+  syncWithGoogleCalendar,
+  fetchGoogleCalendarToken,
+  handleGoogleCalendarCallback
+} from "@/services/googleCalendar";
