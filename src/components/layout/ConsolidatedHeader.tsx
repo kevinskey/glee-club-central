@@ -1,4 +1,3 @@
-
 import React, { useState, useRef } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
@@ -111,9 +110,6 @@ export function ConsolidatedHeader() {
             <DialogContent className="sm:max-w-md">
               <DialogHeader>
                 <DialogTitle>Metronome</DialogTitle>
-                <DialogDescription>
-                  Use the metronome to practice at different tempos and time signatures.
-                </DialogDescription>
               </DialogHeader>
               <EnhancedMetronome showControls={true} size="md" audioContextRef={audioContextRef} />
             </DialogContent>

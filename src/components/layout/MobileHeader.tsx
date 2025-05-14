@@ -1,4 +1,3 @@
-
 import React, { useState, useRef } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { Icons } from "@/components/Icons";
@@ -106,9 +105,6 @@ export function MobileHeader() {
               <DialogContent className="sm:max-w-md">
                 <DialogHeader>
                   <DialogTitle>Metronome</DialogTitle>
-                  <DialogDescription>
-                    Use the metronome to practice at different tempos and time signatures.
-                  </DialogDescription>
                 </DialogHeader>
                 <EnhancedMetronome showControls={true} size="md" audioContextRef={audioContextRef} />
               </DialogContent>
@@ -129,8 +125,6 @@ export function MobileHeader() {
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="w-56 bg-popover">
-                  <DropdownMenuSeparator />
-                  
                   <DropdownMenuItem onClick={() => navigate("/")}>
                     Home
                   </DropdownMenuItem>
