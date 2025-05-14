@@ -59,3 +59,6 @@ export const AdminRoute: React.FC<AdminRouteProps> = ({ children }) => {
   console.log('User has admin access, displaying admin content');
   return <>{children}</>;
 };
+
+// Add a default export for backward compatibility
+export default AdminRoute;

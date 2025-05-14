@@ -1,4 +1,3 @@
-
 import React from "react";
 import { Button } from "@/components/ui/button";
 import { 
@@ -314,3 +313,6 @@ export function EditUserDialog({
     </Dialog>
   );
 }
+
+// Add default export for compatibility
+export default EditUserDialog;

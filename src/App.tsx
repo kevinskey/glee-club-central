@@ -15,15 +15,15 @@ import Dashboard from "@/pages/DashboardPage";
 import ProfilePage from "@/pages/ProfilePage";
 import AdminDashboard from "@/pages/admin/AdminDashboard";
 import UsersPage from "@/pages/admin/UsersPage";
-import EditUserPage from "@/components/members/EditUserDialog";
+import { EditUserDialog } from "@/components/members/EditUserDialog";
 import UnauthorizedPage from "@/pages/NotFoundPage"; // Using NotFoundPage as a fallback
 import ForgotPasswordPage from "@/pages/auth/ForgotPasswordPage";
 import ResetPasswordPage from "@/pages/auth/ResetPasswordPage";
 import SchedulePage from "@/pages/schedule/SchedulePage";
 import AttendancePage from "@/pages/dashboard/AttendancePage";
 import MediaLibraryPage from "@/pages/MediaLibraryPage";
-import PrivateRoute from "@/components/auth/ProtectedRoute";
-import AdminRoute from "@/components/auth/AdminRoute";
+import ProtectedRoute from "@/components/auth/ProtectedRoute";
+import { AdminRoute } from "@/components/auth/AdminRoute";
 import NotFoundPage from "@/pages/NotFoundPage";
 import EventCalendar from "@/pages/admin/EventCalendar";
 import CalendarDashboard from "@/pages/dashboard/CalendarDashboard";
@@ -101,7 +101,7 @@ function App() {
         <Route
           path="/admin/users/:id/edit"
           element={
-            isAuthenticated && isAdmin ? <EditUserPage /> : <Navigate to="/unauthorized" />
+            isAuthenticated && isAdmin ? <EditUserDialog isOpen={true} onOpenChange={() => {}} onSave={async () => {}} isSubmitting={false} user={null} /> : <Navigate to="/unauthorized" />
           }
         />
          <Route

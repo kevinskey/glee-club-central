@@ -3,7 +3,7 @@ import React from 'react';
 import { Navigate, Route, RouteProps } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 
-interface PrivateRouteProps extends RouteProps {
+interface PrivateRouteProps {
   path: string;
   element: React.ReactNode;
 }
