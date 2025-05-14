@@ -7,12 +7,12 @@ export function HeroContent() {
   
   return (
     <div className="text-white flex flex-col justify-center h-full w-full text-left pl-5 sm:pl-8 md:pl-12 lg:pl-16 py-6 sm:py-8 md:py-10 lg:py-12">
-      <div className="max-w-3xl">
+      <div className="max-w-4xl">
         <h1 className="font-playfair tracking-tight mb-0">
-          <span className="block text-xl sm:text-2xl md:text-[2.6rem] lg:text-[2.75rem] xl:text-[3.5rem] font-bold mb-1 sm:mb-2 md:mb-2 text-shadow-lg">
+          <span className="block text-xl sm:text-2xl md:text-3xl lg:text-4xl xl:text-5xl font-bold mb-1 sm:mb-2 md:mb-2 text-shadow-lg">
             Spelman College
           </span>
-          <span className="animate-gradient bg-clip-text text-transparent text-[2.2rem] sm:text-[3.3rem] md:text-[3.3rem] lg:text-[4.4rem] xl:text-[6rem] font-bold letter-spacing-tight">
+          <span className="animate-gradient bg-clip-text text-transparent text-[2.5rem] sm:text-[3.5rem] md:text-[4.5rem] lg:text-[5.5rem] xl:text-[7rem] font-bold letter-spacing-tight">
             Glee Club
           </span>
         </h1>
