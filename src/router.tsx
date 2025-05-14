@@ -40,8 +40,8 @@ import { AdminRoute } from './components/auth/AdminRoute';
 // Import dashboard calendar page
 import CalendarPage from './pages/dashboard/calendar/index';
 
-// Lazy-loaded components
-const DashboardPage = lazy(() => import('./pages/DashboardPage'));
+// Import the correct DashboardPage directly without lazy loading
+import DashboardPage from './pages/dashboard/DashboardPage';
 
 export const router = createBrowserRouter([
   {
@@ -92,11 +92,7 @@ export const router = createBrowserRouter([
     children: [
       {
         index: true,
-        element: (
-          <Suspense fallback={<div>Loading...</div>}>
-            <DashboardPage />
-          </Suspense>
-        ),
+        element: <DashboardPage />,
       },
       {
         path: 'profile',
