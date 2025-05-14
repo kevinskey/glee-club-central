@@ -9,6 +9,7 @@ export interface SiteImage {
   file_path: string;
   file_url: string;
   category?: string;
+  position?: number;
   created_at: string;
   updated_at: string;
 }
@@ -47,6 +48,18 @@ export async function uploadSiteImage({ file, name, description, category = "gen
       
     if (!urlData) throw new Error("Failed to get public URL");
     
+    // Get the highest position value for this category to place new image at the end
+    const { data: positionData } = await supabase
+      .from('site_images')
+      .select('position')
+      .eq('category', category)
+      .order('position', { ascending: false })
+      .limit(1);
+      
+    const newPosition = positionData && positionData[0]?.position !== undefined 
+      ? positionData[0].position + 1 
+      : 0;
+    
     // Store metadata in the site_images table
     const { error: dbError } = await supabase
       .from('site_images')
@@ -55,7 +68,8 @@ export async function uploadSiteImage({ file, name, description, category = "gen
         description,
         file_path: filePath,
         file_url: urlData.publicUrl,
-        category
+        category,
+        position: newPosition
       });
       
     if (dbError) throw dbError;
@@ -82,7 +96,7 @@ export async function listSiteImages(category?: string): Promise<SiteImage[]> {
     let query = supabase
       .from('site_images')
       .select('*')
-      .order('created_at', { ascending: false });
+      .order('position', { ascending: true });
       
     if (category) {
       query = query.eq('category', category);
