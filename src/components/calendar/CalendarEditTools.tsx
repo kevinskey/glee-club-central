@@ -1,201 +1,53 @@
 
 import React from "react";
-import {
-  Pencil,
-  Trash2,
-  Plus,
-  File,
-  Download,
-  Upload,
-  Calendar,
-  Share2,
-  FilterX
-} from "lucide-react";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
 import { Button } from "@/components/ui/button";
-import { Separator } from "@/components/ui/separator";
-import { usePermissions } from "@/hooks/usePermissions";
+import { Card } from "@/components/ui/card";
+import { cn } from "@/lib/utils";
+import { CalendarPlus, Pencil, Trash2 } from "lucide-react";
 
 interface CalendarEditToolsProps {
   onAddEvent: () => void;
-  onExportCalendar?: () => void;
-  onImportCalendar?: () => void;
-  onResetCalendar?: () => void;
-  onShareCalendar?: () => void;
-  selectedEventId?: string | null;
-  onEditSelected?: () => void;
-  onDeleteSelected?: () => void;
+  selectedEventId?: string;
+  onEditSelected: () => void;
+  onDeleteSelected: () => void;
   className?: string;
 }
 
 export function CalendarEditTools({
   onAddEvent,
-  onExportCalendar,
-  onImportCalendar,
-  onResetCalendar,
-  onShareCalendar,
   selectedEventId,
   onEditSelected,
   onDeleteSelected,
   className,
 }: CalendarEditToolsProps) {
-  const { isSuperAdmin } = usePermissions();
-  
-  if (!isSuperAdmin) return null;
-  
   return (
-    <div className={`bg-white dark:bg-gray-800 rounded-lg shadow-sm border p-2 mb-4 ${className}`}>
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-1">
-          <TooltipProvider>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button 
-                  variant="ghost" 
-                  size="icon" 
-                  className="h-8 w-8 bg-glee-purple/10 text-glee-purple hover:bg-glee-purple/20" 
-                  onClick={onAddEvent}
-                >
-                  <Plus className="h-4 w-4" />
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent>
-                <p>Add new event</p>
-              </TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
-          
-          {selectedEventId && (
-            <>
-              <TooltipProvider>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Button 
-                      variant="ghost" 
-                      size="icon" 
-                      className="h-8 w-8" 
-                      onClick={onEditSelected}
-                    >
-                      <Pencil className="h-4 w-4" />
-                    </Button>
-                  </TooltipTrigger>
-                  <TooltipContent>
-                    <p>Edit selected event</p>
-                  </TooltipContent>
-                </Tooltip>
-              </TooltipProvider>
-              
-              <TooltipProvider>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Button 
-                      variant="ghost" 
-                      size="icon" 
-                      className="h-8 w-8 text-red-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20" 
-                      onClick={onDeleteSelected}
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
-                  </TooltipTrigger>
-                  <TooltipContent>
-                    <p>Delete selected event</p>
-                  </TooltipContent>
-                </Tooltip>
-              </TooltipProvider>
-              
-              <Separator orientation="vertical" className="h-6 mx-1" />
-            </>
-          )}
-          
-          {onExportCalendar && (
-            <TooltipProvider>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button 
-                    variant="ghost" 
-                    size="icon" 
-                    className="h-8 w-8" 
-                    onClick={onExportCalendar}
-                  >
-                    <Download className="h-4 w-4" />
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent>
-                  <p>Export calendar</p>
-                </TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
-          )}
-          
-          {onImportCalendar && (
-            <TooltipProvider>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button 
-                    variant="ghost" 
-                    size="icon" 
-                    className="h-8 w-8" 
-                    onClick={onImportCalendar}
-                  >
-                    <Upload className="h-4 w-4" />
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent>
-                  <p>Import calendar</p>
-                </TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
-          )}
-          
-          {onShareCalendar && (
-            <TooltipProvider>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button 
-                    variant="ghost" 
-                    size="icon" 
-                    className="h-8 w-8" 
-                    onClick={onShareCalendar}
-                  >
-                    <Share2 className="h-4 w-4" />
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent>
-                  <p>Share calendar</p>
-                </TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
-          )}
-          
-          {onResetCalendar && (
-            <>
-              <Separator orientation="vertical" className="h-6 mx-1" />
-              <TooltipProvider>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Button 
-                      variant="ghost" 
-                      size="icon" 
-                      className="h-8 w-8 text-red-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20" 
-                      onClick={onResetCalendar}
-                    >
-                      <FilterX className="h-4 w-4" />
-                    </Button>
-                  </TooltipTrigger>
-                  <TooltipContent>
-                    <p>Reset calendar (danger)</p>
-                  </TooltipContent>
-                </Tooltip>
-              </TooltipProvider>
-            </>
-          )}
-        </div>
+    <Card className={cn("p-2 flex flex-col sm:flex-row items-center gap-2 dark:bg-gray-800/50", className)}>
+      <Button onClick={onAddEvent} className="w-full sm:w-auto bg-glee-purple hover:bg-glee-purple/90 dark:bg-glee-purple dark:hover:bg-glee-purple/90">
+        <CalendarPlus className="h-4 w-4 mr-2" />
+        Add Event
+      </Button>
+      
+      <div className="w-full sm:w-auto flex gap-2 mt-2 sm:mt-0">
+        <Button
+          variant="outline"
+          className="flex-1 sm:flex-auto"
+          onClick={onEditSelected}
+          disabled={!selectedEventId}
+        >
+          <Pencil className="h-4 w-4 mr-2" />
+          Edit
+        </Button>
+        
+        <Button
+          variant="outline"
+          className="flex-1 sm:flex-auto text-red-500 border-red-200 hover:bg-red-50 hover:text-red-600 dark:text-red-400 dark:border-red-900/30 dark:hover:bg-red-900/20"
+          onClick={onDeleteSelected}
+          disabled={!selectedEventId}
+        >
+          <Trash2 className="h-4 w-4 mr-2" />
+          Delete
+        </Button>
       </div>
-    </div>
+    </Card>
   );
 }

@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from "react";
-import { PageHeader } from "@/components/ui/page-header";
+import { PageHeaderWithToggle } from "@/components/ui/page-header-with-toggle";
 import { Calendar as CalendarIcon } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { format } from "date-fns";
@@ -160,7 +160,7 @@ export default function CalendarPage() {
       {isMobile ? <MobileHeader /> : <Header />}
       
       <div className="container mx-auto p-4 space-y-6">
-        <PageHeader
+        <PageHeaderWithToggle
           title="Glee Club Calendar"
           description="View upcoming rehearsals, performances and events"
           icon={<CalendarIcon className="h-6 w-6" />}
@@ -172,7 +172,7 @@ export default function CalendarPage() {
           selectedEventId={selectedEvent?.id}
           onEditSelected={() => isViewModalOpen && setIsViewModalOpen(true)}
           onDeleteSelected={() => selectedEvent && handleDeleteEvent(selectedEvent.id)}
-          className="mb-4 border-glee-purple/20 bg-glee-purple/5"
+          className="mb-4 border-glee-purple/20 bg-glee-purple/5 dark:bg-glee-purple/10"
         />
         
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">

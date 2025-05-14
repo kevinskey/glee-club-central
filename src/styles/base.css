@@ -25,7 +25,7 @@
     --secondary: 0 0% 96%;
     --secondary-foreground: 0 0% 0%;
 
-    --accent: 0 0% 20%; /* Changed to dark gray from Spelman Blue */
+    --accent: 213 94% 25%; /* Spelman Blue */
     --accent-foreground: 0 0% 100%; 
 
     --destructive: 0 84.2% 60.2%;
@@ -38,28 +38,28 @@
 
   .dark, [data-theme="dark"] {
     /* Dark Theme */
-    --background: 0 0% 7%; /* #121212 */
+    --background: 0 0% 10%; /* #1A1A1A */
     --foreground: 0 0% 100%; /* #FFFFFF */
 
     --muted: 0 0% 15%;
     --muted-foreground: 0 0% 70%;
 
-    --popover: 0 0% 7%;
+    --popover: 0 0% 10%;
     --popover-foreground: 0 0% 100%;
 
-    --card: 0 0% 10%;
+    --card: 0 0% 13%; /* #212121 */
     --card-foreground: 0 0% 100%;
 
     --border: 0 0% 20%;
     --input: 0 0% 20%;
 
-    --primary: 0 0% 80%; /* Changed to light gray from blue */
+    --primary: 0 0% 90%; /* Changed to light gray for better contrast */
     --primary-foreground: 0 0% 10%;
 
     --secondary: 0 0% 15%;
     --secondary-foreground: 0 0% 100%;
 
-    --accent: 0 0% 20%; /* Changed to dark gray from Spelman Blue */
+    --accent: 213 94% 60%; /* Lighter Spelman Blue for dark mode */
     --accent-foreground: 0 0% 100%;
 
     --destructive: 0 62.8% 30.6%;

@@ -85,8 +85,8 @@ const MonthlyCalendar: React.FC<MonthlyCalendarProps> = ({ events, className }) 
           <div
             key={day.toString()}
             className={cn(
-              "h-20 border border-gray-200 p-1 relative",
-              !isSameMonth(day, monthStart) && "bg-gray-50 text-gray-400",
+              "h-20 border border-gray-200 dark:border-gray-700 p-1 relative",
+              !isSameMonth(day, monthStart) && "bg-gray-50 dark:bg-gray-800/50 text-gray-400 dark:text-gray-500",
               isSameDay(day, selectedDate) && "border-orange-500 border-2"
             )}
             onClick={() => onDateClick(cloneDay)}
