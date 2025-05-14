@@ -1,99 +1,70 @@
+
 import React, { useState, useEffect } from "react";
 import { PageHeader } from "@/components/ui/page-header";
-import { Calendar, Plus, RefreshCw } from "lucide-react";
+import { Calendar as CalendarIcon, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { CalendarContainer } from "@/components/calendar/CalendarContainer";
-import { EventList } from "@/components/calendar/EventList";
-import { useAuth } from "@/contexts/AuthContext";
-import { useCalendarEvents } from "@/hooks/useCalendarEvents";
-import { CalendarEvent } from "@/types/calendar";
+import { Calendar } from "@/components/ui/calendar";
+import { Card } from "@/components/ui/card";
+import { useCalendarStore } from "@/hooks/useCalendarStore";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { AddEventForm } from "@/components/calendar/AddEventForm";
-import { EditEventForm } from "@/components/calendar/EditEventForm";
-import { EventDetails } from "@/components/calendar/EventDetails";
 import { toast } from "sonner";
-import { usePermissions } from '@/hooks/usePermissions';
-import { useIsMobile } from '@/hooks/use-mobile';
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
+import { useAuth } from "@/contexts/AuthContext";
+import { format } from "date-fns";
+import { Spinner } from "@/components/ui/spinner";
+import { CalendarEvent } from "@/types/calendar";
+import { EventModal } from "@/components/calendar/EventModal";
+import { ViewEventModal } from "@/components/calendar/ViewEventModal";
 
 export default function CalendarPage() {
-  const [view, setView] = useState<"calendar" | "list">("calendar");
-  const { isAuthenticated, profile } = useAuth();
-  const { isSuperAdmin } = usePermissions();
-  const isMobile = useIsMobile();
-  
-  // Initialize state for calendar
   const [date, setDate] = useState<Date | undefined>(new Date());
   const [selectedEvent, setSelectedEvent] = useState<CalendarEvent | null>(null);
   const [isAddEventOpen, setIsAddEventOpen] = useState(false);
-  const [isEditEventOpen, setIsEditEventOpen] = useState(false);
   const [isViewEventOpen, setIsViewEventOpen] = useState(false);
-  const [isResetConfirmOpen, setIsResetConfirmOpen] = useState(false);
-  
-  // Get calendar events using the hook
-  const { 
-    events, 
-    loading, 
-    addEvent, 
-    updateEvent, 
-    deleteEvent, 
-    resetCalendar 
-  } = useCalendarEvents();
-  
-  // Always allow management of calendar events for this page
-  const isAdmin = true;
+  const [loading, setLoading] = useState(true);
+  const { events, fetchEvents, addEvent, updateEvent, deleteEvent } = useCalendarStore();
+  const { isAuthenticated } = useAuth();
 
-  // Get days with events for the calendar - safely convert to Date objects
+  // Get events for the selected date
+  const eventsForSelectedDate = date ? 
+    events.filter(event => {
+      const eventDate = new Date(event.start);
+      return eventDate.setHours(0,0,0,0) === date.setHours(0,0,0,0);
+    }) : [];
+
+  // Get days with events for highlighting on the calendar
   const daysWithEvents = events.map(event => {
     if (event.start instanceof Date) {
       return event.start;
     }
     return new Date(event.start);
   });
-  
-  // Helper function to get event type color
-  const getEventTypeColor = (type: string) => {
-    switch (type) {
-      case "concert":
-        return "bg-glee-purple hover:bg-glee-purple/90";
-      case "rehearsal":
-        return "bg-blue-500 hover:bg-blue-500/90";
-      case "sectional":
-        return "bg-green-500 hover:bg-green-500/90";
-      case "special":
-        return "bg-amber-500 hover:bg-amber-500/90";
-      default:
-        return "bg-gray-500 hover:bg-gray-500/90";
-    }
-  };
-  
-  // Handle event selection
-  const handleEventSelect = (event: CalendarEvent) => {
-    setSelectedEvent(event);
-    setIsViewEventOpen(true);
-  };
 
-  // Handle add event form submission
-  const handleAddEvent = async (formValues: any) => {
+  useEffect(() => {
+    const loadEvents = async () => {
+      try {
+        setLoading(true);
+        await fetchEvents();
+      } catch (error) {
+        console.error("Error loading events:", error);
+        toast.error("Failed to load calendar events");
+      } finally {
+        setLoading(false);
+      }
+    };
+    
+    loadEvents();
+  }, [fetchEvents]);
+
+  const handleAddEvent = async (eventData: any): Promise<void> => {
     try {
-      const eventData = {
-        ...formValues,
-        start: formValues.date, // Ensure start is set
-        end: formValues.date,   // Ensure end is set
-        type: formValues.type
-      };
+      const success = await addEvent({
+        ...eventData,
+        start: eventData.date,
+        end: eventData.date,
+        date: eventData.date
+      });
       
-      const result = await addEvent(eventData);
-      if (result) {
+      if (success) {
         setIsAddEventOpen(false);
         toast.success("Event added successfully");
       }
@@ -103,174 +74,135 @@ export default function CalendarPage() {
     }
   };
 
-  // Handle edit event form submission - Modified to return Promise<boolean>
-  const handleUpdateEvent = async (event: CalendarEvent): Promise<boolean> => {
+  const handleUpdateEvent = async (event: CalendarEvent): Promise<void> => {
     try {
-      const success = await updateEvent(event);
-      if (success) {
-        setIsEditEventOpen(false);
-        setIsViewEventOpen(false);
-        setSelectedEvent(null);
-        toast.success("Event updated successfully");
-      }
-      return success;
+      await updateEvent(event);
+      setIsViewEventOpen(false);
+      setSelectedEvent(null);
     } catch (error) {
       console.error("Error updating event:", error);
       toast.error("Failed to update event");
-      return false;
     }
   };
 
-  // Handle event deletion - Modified to match expected return type in component props
   const handleDeleteEvent = async (): Promise<void> => {
     if (!selectedEvent) return;
     
     try {
-      const success = await deleteEvent(selectedEvent.id);
-      if (success) {
-        setIsViewEventOpen(false);
-        setSelectedEvent(null);
-        toast.success("Event deleted successfully");
-      }
+      await deleteEvent(selectedEvent.id);
+      setIsViewEventOpen(false);
+      setSelectedEvent(null);
     } catch (error) {
       console.error("Error deleting event:", error);
       toast.error("Failed to delete event");
     }
   };
-  
-  // Handle calendar reset
-  const handleResetCalendar = async () => {
-    const success = await resetCalendar();
-    if (success) {
-      setIsResetConfirmOpen(false);
-      toast.success("Calendar has been reset");
-    }
-  };
-  
+
   return (
     <div className="container mx-auto p-4 space-y-6">
       <div className="flex items-center justify-between">
         <PageHeader
-          title="Glee Club Schedule"
-          description="Rehearsals, performances, and important dates"
-          icon={<Calendar className="h-6 w-6" />}
+          title="Glee Club Calendar"
+          description="View and manage your calendar events"
+          icon={<CalendarIcon className="h-6 w-6" />}
         />
         
-        <div className="flex gap-2">
-          {isAdmin && (
-            <>
-              <Button onClick={() => setIsAddEventOpen(true)}>
-                <Plus className="mr-2 h-4 w-4" />
-                Add Event
-              </Button>
-              <Button 
-                variant="outline" 
-                onClick={() => setIsResetConfirmOpen(true)}
-                className="text-red-500 border-red-200 hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-900/20"
-              >
-                <RefreshCw className="mr-2 h-4 w-4" />
-                Reset
-              </Button>
-            </>
-          )}
-        </div>
+        <Button onClick={() => setIsAddEventOpen(true)}>
+          <Plus className="mr-2 h-4 w-4" />
+          Add Event
+        </Button>
       </div>
       
-      <div className="flex flex-col-reverse md:flex-row gap-6">
-        <div className={`${view === "calendar" ? "w-full" : "md:w-1/3 w-full"}`}>
-          {view === "calendar" ? (
-            <CalendarContainer 
-              date={date}
-              setDate={setDate}
-              daysWithEvents={daysWithEvents}
-              loading={loading}
-              events={events}
-            />
+      <div className="flex flex-col md:flex-row gap-6">
+        <Card className="md:w-1/2 p-4">
+          {loading ? (
+            <div className="flex justify-center items-center h-80">
+              <Spinner size="lg" />
+            </div>
           ) : (
-            <EventList 
-              date={date}
-              events={events}
-              selectedEvent={selectedEvent}
-              onSelectEvent={handleEventSelect}
-              getEventTypeColor={getEventTypeColor}
+            <Calendar
+              mode="single"
+              selected={date}
+              onSelect={setDate}
+              className="rounded-md pointer-events-auto"
+              disabled={(date) => date < new Date(new Date().setDate(new Date().getDate() - 60))}
             />
           )}
-        </div>
+        </Card>
+        
+        <Card className="md:w-1/2 p-4">
+          <h2 className="font-semibold text-lg mb-4">
+            {date ? format(date, "MMMM d, yyyy") : "Select a date"}
+          </h2>
+          
+          {eventsForSelectedDate.length === 0 ? (
+            <div className="text-center py-8 text-gray-500">
+              No events scheduled for this date
+            </div>
+          ) : (
+            <div className="space-y-3">
+              {eventsForSelectedDate.map((event) => (
+                <Card 
+                  key={event.id}
+                  className="p-3 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+                  onClick={() => {
+                    setSelectedEvent(event);
+                    setIsViewEventOpen(true);
+                  }}
+                >
+                  <div className="flex items-center">
+                    <div className={`w-2 h-10 rounded-full mr-3 ${
+                      event.type === 'concert' ? 'bg-glee-purple' :
+                      event.type === 'rehearsal' ? 'bg-blue-500' :
+                      event.type === 'sectional' ? 'bg-green-500' :
+                      'bg-amber-500'
+                    }`} />
+                    <div>
+                      <p className="font-medium">{event.title}</p>
+                      <p className="text-sm text-gray-500">
+                        {event.time ? event.time : 'All day'} 
+                        {event.location ? ` • ${event.location}` : ''}
+                      </p>
+                    </div>
+                  </div>
+                </Card>
+              ))}
+            </div>
+          )}
+        </Card>
       </div>
 
-      {/* Add Event Dialog with improved mobile handling */}
+      {/* Add Event Dialog */}
       <Dialog open={isAddEventOpen} onOpenChange={setIsAddEventOpen}>
-        <DialogContent className={`${isMobile ? 'w-[95vw] max-h-[85vh]' : 'w-[90vw]'} max-w-[550px]`}>
+        <DialogContent className="sm:max-w-md">
           <DialogHeader>
             <DialogTitle>Add New Event</DialogTitle>
           </DialogHeader>
-          <div className="overflow-hidden">
-            <AddEventForm 
-              onAddEvent={handleAddEvent}
-              onCancel={() => setIsAddEventOpen(false)}
-              initialDate={date}
-            />
-          </div>
+          <EventModal
+            onClose={() => setIsAddEventOpen(false)}
+            onSave={handleAddEvent}
+            initialDate={date}
+          />
         </DialogContent>
       </Dialog>
 
-      {/* View/Edit Event Modal - Also with improved mobile handling */}
+      {/* View Event Dialog */}
       {selectedEvent && (
-        <>
-          <Dialog open={isViewEventOpen} onOpenChange={setIsViewEventOpen}>
-            <DialogContent className={`${isMobile ? 'w-[95vw] max-h-[85vh]' : 'w-[90vw]'} max-w-[550px]`}>
-              <DialogHeader>
-                <DialogTitle>Event Details</DialogTitle>
-              </DialogHeader>
-              <EventDetails 
-                event={selectedEvent} 
-                onEdit={() => {
-                  setIsViewEventOpen(false);
-                  setIsEditEventOpen(true);
-                }}
-                onDelete={handleDeleteEvent}
-                isAdmin={isAdmin}
-              />
-            </DialogContent>
-          </Dialog>
-
-          <Dialog open={isEditEventOpen} onOpenChange={setIsEditEventOpen}>
-            <DialogContent className={`${isMobile ? 'w-[95vw] max-h-[85vh]' : 'w-[90vw]'} max-w-[550px]`}>
-              <DialogHeader>
-                <DialogTitle>Edit Event</DialogTitle>
-              </DialogHeader>
-              <div className="overflow-hidden">
-                <EditEventForm 
-                  event={selectedEvent} 
-                  onUpdateEvent={handleUpdateEvent}
-                  onCancel={() => setIsEditEventOpen(false)}
-                />
-              </div>
-            </DialogContent>
-          </Dialog>
-        </>
+        <Dialog open={isViewEventOpen} onOpenChange={setIsViewEventOpen}>
+          <DialogContent className="sm:max-w-md">
+            <DialogHeader>
+              <DialogTitle>Event Details</DialogTitle>
+            </DialogHeader>
+            <ViewEventModal
+              event={selectedEvent}
+              onClose={() => setIsViewEventOpen(false)}
+              onUpdate={handleUpdateEvent}
+              onDelete={handleDeleteEvent}
+              userCanEdit={true}
+            />
+          </DialogContent>
+        </Dialog>
       )}
-      
-      {/* Reset Confirmation Dialog */}
-      <AlertDialog open={isResetConfirmOpen} onOpenChange={setIsResetConfirmOpen}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Reset Calendar</AlertDialogTitle>
-            <AlertDialogDescription>
-              This will permanently delete all calendar events. This action cannot be undone.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction 
-              onClick={handleResetCalendar} 
-              className="bg-red-500 hover:bg-red-600"
-            >
-              Reset Calendar
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
     </div>
   );
 }

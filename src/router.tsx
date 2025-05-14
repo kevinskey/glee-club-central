@@ -1,4 +1,3 @@
-
 import { createBrowserRouter, Navigate } from 'react-router-dom';
 import { Suspense, lazy } from 'react';
 
@@ -44,7 +43,9 @@ import { AdminRoute } from './components/auth/AdminRoute';
 // Protected route components
 import RequireAdmin from './components/auth/RequireAdmin';
 
+// Lazy-loaded components
 const DashboardPage = lazy(() => import('./pages/DashboardPage'));
+const CalendarPage = lazy(() => import('./pages/dashboard/calendar'));
 
 export const router = createBrowserRouter([
   {
@@ -120,6 +121,14 @@ export const router = createBrowserRouter([
       {
         path: 'recordings',
         element: <RecordingsPage />,
+      },
+      {
+        path: 'calendar',
+        element: (
+          <Suspense fallback={<div>Loading...</div>}>
+            <CalendarPage />
+          </Suspense>
+        ),
       },
     ],
   },
