@@ -13,6 +13,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
 import { CalendarEvent } from "@/types/calendar";
 import { connectToGoogleCalendar, syncWithGoogleCalendar, fetchGoogleCalendarToken } from "@/services/googleCalendar";
+import { updateHeroImageWithEvents } from "@/utils/heroImageUtils";
 
 const EventCalendar: React.FC = () => {
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
@@ -61,6 +62,10 @@ const EventCalendar: React.FC = () => {
       await addEvent(eventData);
       setIsCreateModalOpen(false);
       toast.success("Event created successfully");
+      
+      // Update hero images with current events after creating a new one
+      const updatedEvents = [...events, eventData];
+      await updateHeroImageWithEvents(updatedEvents);
     } catch (error) {
       console.error("Error creating event:", error);
       toast.error("Failed to create event");
@@ -73,6 +78,12 @@ const EventCalendar: React.FC = () => {
       setIsViewModalOpen(false);
       setSelectedEvent(null);
       toast.success("Event updated successfully");
+      
+      // Update hero images with current events after updating
+      const updatedEvents = events.map(event => 
+        event.id === eventData.id ? eventData : event
+      );
+      await updateHeroImageWithEvents(updatedEvents);
     } catch (error) {
       console.error("Error updating event:", error);
       toast.error("Failed to update event");
@@ -85,6 +96,10 @@ const EventCalendar: React.FC = () => {
       setIsViewModalOpen(false);
       setSelectedEvent(null);
       toast.success("Event deleted successfully");
+      
+      // Update hero images after deleting an event
+      const remainingEvents = events.filter(event => event.id !== eventId);
+      await updateHeroImageWithEvents(remainingEvents);
     } catch (error) {
       console.error("Error deleting event:", error);
       toast.error("Failed to delete event");

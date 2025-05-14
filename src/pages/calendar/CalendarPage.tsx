@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { Footer } from "@/components/landing/Footer";
 import { CalendarHeader } from "@/components/calendar/CalendarHeader";
@@ -17,6 +16,7 @@ import { useIsMobile } from "@/hooks/use-mobile";
 import { usePermissions } from "@/hooks/usePermissions";
 import { CalendarEvent } from "@/types/calendar";
 import { CalendarEditTools } from "@/components/calendar/CalendarEditTools";
+import { updateHeroImageWithEvents } from "@/utils/heroImageUtils";
 
 const CalendarPage = () => {
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
@@ -80,6 +80,8 @@ const CalendarPage = () => {
     try {
       await handleCreateEvent(eventData);
       setIsCreateModalOpen(false);
+      // Update hero image after creating an event
+      await updateHeroImageWithEvents(events);
     } catch (error) {
       console.error("Error creating event:", error);
       toast.error("Failed to create event");
@@ -92,6 +94,9 @@ const CalendarPage = () => {
       await handleUpdateEvent(eventData);
       setIsViewModalOpen(false);
       setSelectedEvent(null);
+      
+      // Update hero image after updating an event
+      await updateHeroImageWithEvents(events);
     } catch (error) {
       console.error("Error updating event:", error);
       toast.error("Failed to update event");
@@ -104,6 +109,9 @@ const CalendarPage = () => {
       await handleDeleteEvent(eventId);
       setIsViewModalOpen(false);
       setSelectedEvent(null);
+      
+      // Update hero image after deleting an event
+      await updateHeroImageWithEvents(events.filter(e => e.id !== eventId));
     } catch (error) {
       console.error("Error deleting event:", error);
       toast.error("Failed to delete event");
