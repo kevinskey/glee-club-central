@@ -128,6 +128,15 @@ export default function CalendarPage() {
       return false;
     }
   };
+
+  // Handle event click from the monthly calendar
+  const handleCalendarEventClick = (eventId: string) => {
+    const event = events.find(e => e.id === eventId);
+    if (event) {
+      setSelectedEvent(event);
+      setIsViewModalOpen(true);
+    }
+  };
   
   // Get upcoming events for list view (next 30 days)
   const upcomingEvents = events
@@ -190,6 +199,7 @@ export default function CalendarPage() {
                       type: event.type
                     }))}
                     className="w-full"
+                    onEventClick={handleCalendarEventClick}
                   />
                 </TabsContent>
               </Tabs>
@@ -204,6 +214,7 @@ export default function CalendarPage() {
             onEventClick={handleEventClick}
             initialLimit={10}
             increment={5}
+            maxHeight="350px"
           />
         </div>
 

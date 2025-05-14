@@ -14,9 +14,10 @@ interface MonthlyCalendarProps {
     type: string;
   }>;
   className?: string;
+  onEventClick?: (eventId: string) => void;
 }
 
-const MonthlyCalendar: React.FC<MonthlyCalendarProps> = ({ events, className }) => {
+const MonthlyCalendar: React.FC<MonthlyCalendarProps> = ({ events, className, onEventClick }) => {
   const [currentMonth, setCurrentMonth] = useState(new Date());
   const [selectedDate, setSelectedDate] = useState(new Date());
   const isMobile = useIsMobile();
@@ -111,13 +112,19 @@ const MonthlyCalendar: React.FC<MonthlyCalendarProps> = ({ events, className }) 
                 <div 
                   key={event.id} 
                   className={cn(
-                    "text-2xs p-0.5 mb-0.5 rounded truncate",
+                    "text-2xs p-0.5 mb-0.5 rounded truncate cursor-pointer",
                     event.type === "concert" && "bg-glee-purple text-white",
                     event.type === "rehearsal" && "bg-blue-500 text-white",
                     event.type === "sectional" && "bg-green-500 text-white",
                     event.type === "special" && "bg-amber-500 text-white",
                     event.type === "tour" && "bg-purple-500 text-white"
                   )}
+                  onClick={(e) => {
+                    e.stopPropagation(); // Prevent triggering the date click
+                    if (onEventClick) {
+                      onEventClick(event.id);
+                    }
+                  }}
                 >
                   {isMobile && event.title.length > 8 ? `${event.title.substring(0, 8)}...` : event.title}
                 </div>
