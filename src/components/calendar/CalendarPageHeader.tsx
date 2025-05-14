@@ -21,7 +21,7 @@ export function CalendarPageHeader({ onAddEventClick }: CalendarPageHeaderProps)
         <div className="flex gap-2 items-center justify-center mt-2">
           <CalendarSyncButton size="sm" />
           <Button 
-            size="md" 
+            size="default" 
             onClick={onAddEventClick} 
             className="bg-glee-purple hover:bg-glee-purple/90 px-4"
           >
