@@ -57,8 +57,8 @@ export const fetchGoogleCalendarToken = async (userId: string): Promise<GoogleCa
       user_id: data.user_id,
       access_token: data.access_token,
       refresh_token: data.refresh_token,
-      expiry_date: new Date(data.expires_at).getTime(),
-      created_at: data.created_at
+      expires_at: new Date(data.expires_at).getTime(),
+      calendar_id: data.calendar_id || 'primary'
     };
     
     return token;

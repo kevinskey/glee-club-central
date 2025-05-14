@@ -1,3 +1,4 @@
+
 export type EventType = "concert" | "rehearsal" | "sectional" | "special" | "tour";
 
 export interface CalendarEvent {
@@ -13,6 +14,7 @@ export interface CalendarEvent {
   source?: "local" | "google";
   date?: string | Date; // For backward compatibility
   time?: string;
+  allDay?: boolean; // Added missing property
 }
 
 export interface GoogleCalendarEvent {
@@ -31,4 +33,5 @@ export interface GoogleCalendarToken {
   refresh_token: string;
   expires_at: number;
   calendar_id: string;
+  created_at?: string;
 }
