@@ -5,8 +5,16 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Glee World</title>
+  
+  <!-- PWA Manifest -->
+  <link rel="manifest" href="/manifest.json" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black" />
+  <meta name="apple-mobile-web-app-title" content="Glee World" />
+  
   <!-- Add favicon using the existing logo -->
   <link rel="icon" href="/lovable-uploads/8fa96710-a03a-4033-9ee0-032306d74daa.png" type="image/png">
+  <link rel="apple-touch-icon" href="/lovable-uploads/8fa96710-a03a-4033-9ee0-032306d74daa.png">
   
   <!-- Add Google Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -16,5 +24,6 @@
 <body>
   <div id="root"></div>
   <script type="module" src="/src/main.tsx"></script>
+  <noscript>You need to enable JavaScript to run this app.</noscript>
 </body>
 </html>
