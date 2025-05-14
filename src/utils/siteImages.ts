@@ -9,7 +9,7 @@ export interface SiteImage {
   file_path: string;
   file_url: string;
   category?: string;
-  position?: number;
+  position: number;
   created_at: string;
   updated_at: string;
 }
@@ -49,14 +49,14 @@ export async function uploadSiteImage({ file, name, description, category = "gen
     if (!urlData) throw new Error("Failed to get public URL");
     
     // Get the highest position value for this category to place new image at the end
-    const { data: positionData } = await supabase
+    const { data: positionData, error: positionError } = await supabase
       .from('site_images')
       .select('position')
       .eq('category', category)
       .order('position', { ascending: false })
       .limit(1);
       
-    const newPosition = positionData && positionData[0]?.position !== undefined 
+    const newPosition = (positionData && positionData.length > 0 && positionData[0]?.position !== undefined) 
       ? positionData[0].position + 1 
       : 0;
     

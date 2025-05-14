@@ -551,6 +551,7 @@ export type Database = {
           file_url: string
           id: string
           name: string
+          position: number | null
           updated_at: string | null
           uploaded_by: string | null
         }
@@ -562,6 +563,7 @@ export type Database = {
           file_url: string
           id?: string
           name: string
+          position?: number | null
           updated_at?: string | null
           uploaded_by?: string | null
         }
@@ -573,6 +575,7 @@ export type Database = {
           file_url?: string
           id?: string
           name?: string
+          position?: number | null
           updated_at?: string | null
           uploaded_by?: string | null
         }
