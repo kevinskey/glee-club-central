@@ -1,5 +1,5 @@
 
-import { isMobile } from "@/hooks/use-mobile";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 /**
  * Checks if an event title, location, and description will fit well on mobile screens
@@ -85,4 +85,3 @@ export function formatEventForMobile(event: any) {
     location: location && location.length > 15 ? `${location.substring(0, 13)}...` : location
   };
 }
-
