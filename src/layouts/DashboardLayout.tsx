@@ -38,7 +38,10 @@ const DashboardLayout: React.FC = () => {
     <SidebarProvider>
       <div className="min-h-screen flex flex-col bg-background w-full">
         <div className="flex-1 flex flex-col md:flex-row">
-          <Sidebar />
+          {/* Only show sidebar on desktop */}
+          <div className="hidden md:block">
+            <Sidebar />
+          </div>
           
           <main className="flex-1 p-3 sm:p-4 md:p-5 lg:p-6 md:ml-64 pb-20 md:pb-6 overflow-x-hidden">
             <div className="mobile-container">
