@@ -1,13 +1,126 @@
 
-import React from 'react';
+import React, { useState } from "react";
+import { Link } from "react-router-dom";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Button } from "@/components/ui/button";
+import { useToast } from "@/components/ui/use-toast";
+import { useAuth } from "@/contexts/AuthContext";
 
 export default function ForgotPasswordPage() {
+  const [email, setEmail] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const [isSubmitted, setIsSubmitted] = useState(false);
+  const { resetPassword } = useAuth();
+  const { toast } = useToast();
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!email.trim()) {
+      toast({
+        title: "Error",
+        description: "Please enter your email address.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      setIsLoading(true);
+      
+      if (resetPassword) {
+        const { error } = await resetPassword(email);
+        
+        if (error) throw error;
+        
+        setIsSubmitted(true);
+        toast({
+          title: "Success",
+          description: "If your email is registered, you'll receive password reset instructions shortly.",
+        });
+      } else {
+        throw new Error("Password reset functionality not available");
+      }
+    } catch (error: any) {
+      console.error("Error requesting password reset:", error);
+      toast({
+        title: "Error",
+        description: error.message || "An error occurred while processing your request.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   return (
-    <div className="flex items-center justify-center min-h-screen">
-      <div className="max-w-md w-full mx-auto p-8 border rounded-lg shadow-lg">
-        <h1 className="text-2xl font-bold mb-6 text-center">Forgot Password</h1>
-        <p className="text-center text-muted-foreground">Reset your password</p>
+    <div className="container relative min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+      <div className="w-full max-w-md space-y-8">
+        <div>
+          <h1 className="text-center text-3xl font-extrabold text-glee-spelman">
+            Forgot Your Password?
+          </h1>
+          <p className="mt-2 text-center text-sm text-gray-600">
+            Enter your email address and we'll send you a link to reset your password.
+          </p>
+        </div>
+        
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-center">Password Reset</CardTitle>
+            <CardDescription className="text-center">
+              Get a link to create a new password
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            {isSubmitted ? (
+              <div className="text-center space-y-4">
+                <p>
+                  If an account exists for <strong>{email}</strong>, you'll receive an email with
+                  instructions on how to reset your password.
+                </p>
+                <p>Please check your email and follow the instructions.</p>
+                <Button variant="outline" asChild className="mt-4">
+                  <Link to="/login">Return to Login</Link>
+                </Button>
+              </div>
+            ) : (
+              <form onSubmit={handleSubmit} className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="email">Email Address</Label>
+                  <Input
+                    id="email"
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    placeholder="Enter your email address"
+                    required
+                  />
+                </div>
+                
+                <Button 
+                  type="submit" 
+                  className="w-full" 
+                  variant="spelman" 
+                  disabled={isLoading}
+                >
+                  {isLoading ? "Sending..." : "Send Reset Link"}
+                </Button>
+                
+                <div className="text-center mt-4">
+                  <Link 
+                    to="/login" 
+                    className="text-sm text-primary hover:underline"
+                  >
+                    Return to Login
+                  </Link>
+                </div>
+              </form>
+            )}
+          </CardContent>
+        </Card>
       </div>
     </div>
   );
-}

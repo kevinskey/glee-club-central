@@ -1,23 +1,36 @@
 
-import React, { useState } from "react";
-import { useNavigate, Link } from "react-router-dom";
+import React, { useState, useEffect } from "react";
+import { useNavigate, Link, useLocation } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/components/ui/use-toast";
 import { UserIcon, LockIcon, LogIn, UserPlus } from "lucide-react";
+import { cleanupAuthState } from "@/integrations/supabase/client";
 
 export default function LoginPage() {
-  const { signIn, signUp, isLoading } = useAuth();
+  const { signIn, signUp, isLoading, isAuthenticated } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const navigate = useNavigate();
+  const location = useLocation();
   const { toast } = useToast();
+
+  // Extract return URL from query params if available
+  const searchParams = new URLSearchParams(location.search);
+  const returnTo = searchParams.get("returnTo") || "/dashboard";
+
+  // Redirect authenticated users
+  useEffect(() => {
+    if (isAuthenticated) {
+      navigate(returnTo);
+    }
+  }, [isAuthenticated, navigate, returnTo]);
 
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -31,6 +44,9 @@ export default function LoginPage() {
     }
 
     try {
+      // Clean up any existing auth state first
+      cleanupAuthState();
+      
       const { error } = await signIn(email, password);
       if (error) {
         toast({
@@ -43,7 +59,7 @@ export default function LoginPage() {
           title: "Success",
           description: "Signed in successfully!",
         });
-        navigate("/dashboard");
+        // Let the useEffect handle navigation
       }
     } catch (error: any) {
       toast({
@@ -66,6 +82,9 @@ export default function LoginPage() {
     }
 
     try {
+      // Clean up any existing auth state first
+      cleanupAuthState();
+      
       const { error } = await signUp(email, password, firstName, lastName);
       if (error) {
         toast({
@@ -78,7 +97,7 @@ export default function LoginPage() {
           title: "Success",
           description: "Signed up successfully! Please check your email to verify your account.",
         });
-        navigate("/dashboard");
+        // Let the useEffect handle navigation after successful sign-up
       }
     } catch (error: any) {
       toast({
@@ -116,6 +135,11 @@ export default function LoginPage() {
               onChange={(e) => setPassword(e.target.value)}
               className="bg-background"
             />
+            <div className="text-right">
+              <Link to="/forgot-password" className="text-sm text-primary hover:underline">
+                Forgot password?
+              </Link>
+            </div>
           </div>
           <Button 
             type="submit" 
