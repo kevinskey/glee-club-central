@@ -56,14 +56,15 @@ export const synchronizePerformances = async (): Promise<boolean> => {
     
     // Convert calendar events to the format expected by updateHeroImageWithEvents
     if (data && data.length > 0) {
-      const calendarEvents: CalendarEvent[] = data.map(event => ({
+      // Convert event type to "event" to match CalendarEvent type requirements
+      const calendarEvents = data.map(event => ({
         id: event.id,
         title: event.title,
         start: new Date(event.date),
         end: new Date(event.date),
         description: event.description,
         location: event.location,
-        type: event.type,
+        type: "event" as const, // Cast to proper EventType
         image_url: event.image_url,
         allDay: event.allday
       }));
