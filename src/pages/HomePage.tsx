@@ -51,7 +51,7 @@ const HomePage = () => {
             )}
             
             {/* Upcoming Events Section - More compact on mobile */}
-            <div className={`w-full mt-4 md:mt-8 mb-6 md:mb-12 ${isMobile ? "bg-white dark:bg-gray-800 py-4 px-4 rounded-lg shadow-sm" : "bg-white/5 backdrop-blur-sm p-6 rounded-lg"}`}>
+            <div className={`w-full mt-4 md:mt-8 mb-6 md:mb-12 ${isMobile ? "bg-white dark:bg-gray-800 py-4 px-4 rounded-lg shadow-sm" : "bg-white/5 backdrop-blur-sm rounded-lg"}`}>
               <UpcomingEvents />
             </div>
             
