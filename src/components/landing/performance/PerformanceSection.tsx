@@ -74,7 +74,7 @@ export function PerformanceSection() {
   };
 
   return (
-    <section id="performances" className="py-0 relative overflow-hidden min-h-[500px] flex items-center">
+    <section id="performances" className="py-0 relative overflow-hidden min-h-[600px] md:min-h-[700px] xl:min-h-[800px] flex items-center">
       {/* Stage Curtain Background */}
       <div className="absolute inset-0 z-0">
         <div className="absolute inset-0 bg-glee-spelman z-0">
@@ -136,7 +136,7 @@ export function PerformanceSection() {
                     <div className="p-1">
                       <Card className="overflow-hidden h-full border-none bg-black/40 backdrop-blur-sm text-white">
                         <Link to={`/dashboard/calendar?event=${event.id}`} className="block h-full">
-                          <div className="relative h-80 bg-muted w-full">
+                          <div className="relative h-96 md:h-[450px] xl:h-[550px] bg-muted w-full">
                             {!imageErrors[event.id] ? (
                               <img 
                                 src={event.image} 

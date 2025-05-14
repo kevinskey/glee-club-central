@@ -10,6 +10,7 @@ interface SiteImageProps {
   fallbackSrc?: string;
   width?: number | string;
   height?: number | string;
+  objectFit?: "cover" | "contain" | "fill" | "none" | "scale-down";
 }
 
 export const SiteImage: React.FC<SiteImageProps> = ({
@@ -19,7 +20,8 @@ export const SiteImage: React.FC<SiteImageProps> = ({
   className = "",
   fallbackSrc = "/placeholder.svg",
   width,
-  height
+  height,
+  objectFit = "cover"
 }) => {
   const [imgSrc, setImgSrc] = React.useState<string>(src);
   const [isLoading, setIsLoading] = React.useState<boolean>(true);
@@ -44,7 +46,8 @@ export const SiteImage: React.FC<SiteImageProps> = ({
           <img
             src={imgSrc}
             alt={alt}
-            className={`w-full h-full object-cover transition-opacity duration-300 ${isLoading ? 'opacity-0' : 'opacity-100'}`}
+            className={`w-full h-full transition-opacity duration-300 ${isLoading ? 'opacity-0' : 'opacity-100'}`}
+            style={{ objectFit }}
             onError={handleError}
             onLoad={handleLoad}
           />
@@ -59,7 +62,8 @@ export const SiteImage: React.FC<SiteImageProps> = ({
           <img
             src={imgSrc}
             alt={alt}
-            className={`w-full h-full object-cover transition-opacity duration-300 ${isLoading ? 'opacity-0' : 'opacity-100'}`}
+            className={`w-full h-full transition-opacity duration-300 ${isLoading ? 'opacity-0' : 'opacity-100'}`}
+            style={{ objectFit }}
             onError={handleError}
             onLoad={handleLoad}
           />
