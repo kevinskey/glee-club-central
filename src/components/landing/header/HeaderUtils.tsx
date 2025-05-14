@@ -11,6 +11,7 @@ import {
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { EnhancedMetronome } from "@/components/ui/enhanced-metronome";
+import { PitchPipeDialog } from "@/components/ui/pitch-pipe-dialog";
 import { Button } from "@/components/ui/button";
 import { resumeAudioContext, audioLogger } from "@/utils/audioUtils";
 
@@ -41,6 +42,9 @@ export function HeaderUtils() {
   
   return (
     <>
+      {/* Pitch Pipe */}
+      <PitchPipeDialog />
+      
       <Dialog open={metronomeOpen} onOpenChange={setMetronomeOpen}>
         <DialogTrigger asChild>
           <TooltipProvider>

@@ -1,3 +1,4 @@
+
 import React, { useState, useRef } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { Icons } from "@/components/Icons";
@@ -6,6 +7,7 @@ import { useIsMobile } from "@/hooks/use-mobile";
 import { useAuth } from "@/contexts/AuthContext";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription } from "@/components/ui/dialog";
 import { EnhancedMetronome } from "@/components/ui/enhanced-metronome";
+import { PitchPipeDialog } from "@/components/ui/pitch-pipe-dialog";
 import { Clock, Menu, X, LogIn } from "lucide-react";
 import { MobileMenu } from "@/components/landing/header/MobileMenu";
 import { useSidebar } from "@/components/ui/sidebar";
@@ -89,8 +91,12 @@ export function MobileHeader() {
             </Link>
           </div>
           
-          {/* Right side: Login, Metronome, theme toggle, and menu button */}
+          {/* Right side: Login, Pitch Pipe, Metronome, theme toggle, and menu button */}
           <div className="flex items-center gap-0.5">
+            {/* Pitch Pipe */}
+            <PitchPipeDialog triggerClassName="flex items-center px-1.5 h-10 w-10" />
+            
+            {/* Metronome */}
             <Dialog open={metronomeOpen} onOpenChange={setMetronomeOpen}>
               <DialogTrigger asChild>
                 <Button 

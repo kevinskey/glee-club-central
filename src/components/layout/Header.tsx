@@ -1,3 +1,4 @@
+
 import React, { useState, useRef } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
@@ -24,6 +25,7 @@ import { Icons } from "@/components/Icons";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription } from "@/components/ui/dialog";
 import { EnhancedMetronome } from "@/components/ui/enhanced-metronome";
+import { PitchPipeDialog } from "@/components/ui/pitch-pipe-dialog";
 
 export function Header() {
   const { profile, signOut } = useAuth();
@@ -70,8 +72,11 @@ export function Header() {
           </Link>
         </div>
           
-        {/* Right side: Metronome, theme toggle, and user dropdown */}
-        <div className="flex items-center gap-3">          
+        {/* Right side: Pitch Pipe, Metronome, theme toggle, and user dropdown */}
+        <div className="flex items-center gap-3">
+          {/* Pitch Pipe */}
+          <PitchPipeDialog triggerClassName="h-9 w-9" />
+          
           {/* Metronome Icon */}
           <Dialog open={metronomeOpen} onOpenChange={setMetronomeOpen}>
             <DialogTrigger asChild>

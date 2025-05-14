@@ -1,3 +1,4 @@
+
 import React, { useState, useRef } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
@@ -24,6 +25,7 @@ import { Icons } from "@/components/Icons";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription } from "@/components/ui/dialog";
 import { EnhancedMetronome } from "@/components/ui/enhanced-metronome";
+import { PitchPipeDialog } from "@/components/ui/pitch-pipe-dialog";
 
 export function ConsolidatedHeader() {
   const { profile, signOut, isAuthenticated } = useAuth();
@@ -90,9 +92,10 @@ export function ConsolidatedHeader() {
           </Link>
         </div>
           
-        {/* Right side: Login, Metronome, theme toggle, and menu dropdown */}
+        {/* Right side: Login, Pitch Pipe, Metronome, theme toggle, and menu dropdown */}
         <div className="flex items-center gap-2">
-          {/* Login Button removed from outside dropdown */}
+          {/* Pitch Pipe */}
+          <PitchPipeDialog triggerClassName={`${isMobile ? 'h-8 w-8' : 'h-9 w-9'}`} />
           
           {/* Metronome Icon */}
           <Dialog open={metronomeOpen} onOpenChange={setMetronomeOpen}>

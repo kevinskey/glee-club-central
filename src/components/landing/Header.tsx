@@ -2,10 +2,11 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Logo } from "@/components/landing/header/Logo";
-import { Clock, Menu, X } from "lucide-react";
+import { Clock, Menu, X, Music2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { EnhancedMetronome } from "@/components/ui/enhanced-metronome";
+import { PitchPipeDialog } from "@/components/ui/pitch-pipe-dialog";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
 import {
   DropdownMenu,
@@ -76,8 +77,11 @@ export function Header({ initialShowNewsFeed = true }: HeaderProps) {
           <Logo />
         </div>
         
-        {/* Right side: Metronome, theme toggle, and navigation dropdown */}
+        {/* Right side: Pitch Pipe, Metronome, theme toggle, and navigation dropdown */}
         <div className="flex items-center gap-3">
+          {/* Pitch Pipe Icon */}
+          <PitchPipeDialog triggerClassName="h-10 w-10 rounded-full" />
+          
           {/* Metronome Icon */}
           <Dialog open={metronomeOpen} onOpenChange={setMetronomeOpen}>
             <DialogTrigger asChild>
@@ -124,6 +128,10 @@ export function Header({ initialShowNewsFeed = true }: HeaderProps) {
                   About
                 </DropdownMenuItem>
                 
+                <DropdownMenuItem onClick={() => navigate("/login")} className="py-2">
+                  Login
+                </DropdownMenuItem>
+                
                 <DropdownMenuItem onClick={() => navigate("/privacy")} className="py-2">
                   Privacy Policy
                 </DropdownMenuItem>
@@ -134,10 +142,6 @@ export function Header({ initialShowNewsFeed = true }: HeaderProps) {
                 
                 <DropdownMenuItem onClick={() => navigate("/press-kit")} className="py-2">
                   Press Kit
-                </DropdownMenuItem>
-                
-                <DropdownMenuItem onClick={() => navigate("/login")} className="py-2">
-                  Login
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
