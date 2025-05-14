@@ -1,5 +1,6 @@
+
 import React, { useState } from 'react';
-import { useYouTubeData } from '@/hooks/useYouTubeData'; // Changed to use named export
+import { useYouTubeData } from '@/hooks/useYouTubeData'; 
 import { Card } from '@/components/ui/card';
 import { AspectRatio } from '@/components/ui/aspect-ratio';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -13,20 +14,11 @@ import {
   DialogDescription
 } from '@/components/ui/dialog';
 import { useIsMobile } from '@/hooks/use-mobile';
-import { 
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { VideoPlayer } from '@/components/videos/VideoPlayer';
 import { ScrollArea } from '@/components/ui/scroll-area';
 
 export function YouTubeSection() {
   const { videos, isLoading, error, useMockData } = useYouTubeData();
   const [selectedVideo, setSelectedVideo] = useState<string | null>(null);
-  const [featuredVideoId, setFeaturedVideoId] = useState<string | null>(null);
   const isMobile = useIsMobile();
   
   const handleVideoClick = (videoId: string) => {
@@ -35,10 +27,6 @@ export function YouTubeSection() {
 
   const handleCloseDialog = () => {
     setSelectedVideo(null);
-  };
-  
-  const handleSelectVideo = (videoId: string) => {
-    setFeaturedVideoId(videoId);
   };
 
   if (error) {
@@ -111,48 +99,9 @@ export function YouTubeSection() {
           </div>
         </div>
 
-        {/* Video Selection Dropdown - Improved for mobile */}
-        <div className="mb-6">
-          <Select 
-            onValueChange={handleSelectVideo} 
-            defaultValue={videos.length > 0 ? videos[0]?.id : undefined}
-            disabled={isLoading || videos.length === 0}
-          >
-            <SelectTrigger className="bg-black/30 border-blue-800/50 text-blue-100 w-full max-w-full md:max-w-md">
-              <SelectValue placeholder={
-                isLoading ? "Loading videos..." : 
-                videos.length === 0 ? "No videos available" :
-                "Select a video to watch"
-              } />
-            </SelectTrigger>
-            <SelectContent className="bg-glee-spelman border-blue-900 text-blue-100">
-              {videos.map((video) => (
-                <SelectItem 
-                  key={video.id} 
-                  value={video.id} 
-                  className="text-blue-100 focus:bg-blue-800/40 focus:text-white cursor-pointer"
-                >
-                  {video.title}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-
-        {/* Featured Video Player */}
-        {featuredVideoId && videos.length > 0 && (
-          <div className="mb-8 bg-black/30 p-2 md:p-4 rounded-lg">
-            <VideoPlayer 
-              videoId={featuredVideoId} 
-              title={videos.find(v => v.id === featuredVideoId)?.title || ""}
-              description={videos.find(v => v.id === featuredVideoId)?.description || ""}
-            />
-          </div>
-        )}
-
         {/* Mobile/Desktop headers with consistent styling */}
         <h3 className="text-xl font-semibold text-transparent bg-gradient-to-r from-blue-100 to-blue-200 bg-clip-text mb-4">
-          More Videos
+          Our Videos
         </h3>
         
         {/* Horizontal Scrolling Video Cards - Improved for mobile */}
