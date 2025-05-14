@@ -24,33 +24,33 @@ export function CalendarEditTools({
   
   if (isMobile) {
     return (
-      <div className={`fixed bottom-16 right-4 z-30 ${className}`}>
+      <div className={`fixed bottom-24 right-4 z-50 ${className}`}>
         <Button
           onClick={onAddEvent}
           size="icon"
-          className="rounded-full h-12 w-12 shadow-lg bg-glee-purple hover:bg-glee-purple/90"
+          className="rounded-full h-14 w-14 shadow-lg bg-glee-purple hover:bg-glee-purple/90"
         >
-          <CalendarPlus className="h-6 w-6" />
+          <CalendarPlus className="h-7 w-7" />
         </Button>
       </div>
     );
   }
   
   return (
-    <Card className={`p-2 flex gap-2 ${className}`}>
-      <Button onClick={onAddEvent} className="bg-glee-purple hover:bg-glee-purple/90">
-        <CalendarPlus className="mr-2 h-4 w-4" />
+    <Card className={`p-2 flex gap-2 border-2 border-glee-purple/30 ${className}`}>
+      <Button onClick={onAddEvent} className="bg-glee-purple hover:bg-glee-purple/90 font-medium">
+        <CalendarPlus className="mr-2 h-5 w-5" />
         Add Event
       </Button>
       
       {selectedEventId && (
         <>
-          <Button onClick={onEditSelected} variant="outline">
-            <Edit className="mr-2 h-4 w-4" />
+          <Button onClick={onEditSelected} variant="outline" className="border-glee-purple/30 hover:bg-glee-purple/10">
+            <Edit className="mr-2 h-5 w-5" />
             Edit
           </Button>
           <Button onClick={onDeleteSelected} variant="destructive">
-            <Trash2 className="mr-2 h-4 w-4" />
+            <Trash2 className="mr-2 h-5 w-5" />
             Delete
           </Button>
         </>

@@ -143,17 +143,17 @@ export default function CalendarPage() {
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <CalendarIcon className="h-5 w-5" />
-            <h1 className="text-lg sm:text-xl font-semibold">Glee Club Calendar</h1>
+            <h1 className="text-sm sm:text-lg font-semibold">Glee Club Calendar</h1>
           </div>
         </div>
         
-        {/* Highlight the edit tools more prominently */}
+        {/* Make the edit tools prominently displayed at the top for better visibility */}
         <CalendarEditTools 
           onAddEvent={() => setIsCreateModalOpen(true)}
           selectedEventId={selectedEvent?.id}
           onEditSelected={() => isViewModalOpen && setIsViewModalOpen(true)}
           onDeleteSelected={() => selectedEvent && handleDeleteEvent(selectedEvent.id)}
-          className="mb-2 border-glee-purple/20 bg-glee-purple/5 dark:bg-glee-purple/10"
+          className="mb-2 border-glee-purple/20 bg-glee-purple/5 dark:bg-glee-purple/10 sticky top-0 z-10"
         />
         
         <div className="grid grid-cols-1 gap-2">
@@ -192,6 +192,19 @@ export default function CalendarPage() {
               />
             </DialogContent>
           </Dialog>
+        )}
+        
+        {/* Add another floating button for mobile UI */}
+        {isMobile && (
+          <div className="fixed bottom-24 right-4 z-50">
+            <Button
+              onClick={() => setIsCreateModalOpen(true)}
+              size="icon"
+              className="rounded-full h-14 w-14 shadow-lg bg-glee-purple hover:bg-glee-purple/90"
+            >
+              <CalendarPlus className="h-7 w-7" />
+            </Button>
+          </div>
         )}
       </div>
     </>
