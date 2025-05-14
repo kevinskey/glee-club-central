@@ -129,7 +129,7 @@ export function EnhancedMetronome({
         {audioError ? (
           <div className="text-red-500">{audioError}</div>
         ) : (
-          <div className="animate-pulse">Loading metronome...</div>
+          <div className="animate-pulse">Loading metronome sounds...</div>
         )}
       </div>
     );

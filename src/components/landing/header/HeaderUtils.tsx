@@ -12,6 +12,7 @@ import { useIsMobile } from "@/hooks/use-mobile";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { EnhancedMetronome } from "@/components/ui/enhanced-metronome";
 import { Button } from "@/components/ui/button";
+import { resumeAudioContext, audioLogger } from "@/utils/audioUtils";
 
 export function HeaderUtils() {
   const isMobile = useIsMobile();
@@ -24,6 +25,7 @@ export function HeaderUtils() {
     if (!audioContextRef.current) {
       try {
         audioContextRef.current = new AudioContext();
+        audioLogger.log('HeaderUtils: Audio context created');
       } catch (e) {
         console.error("Failed to create AudioContext:", e);
       }
@@ -31,7 +33,7 @@ export function HeaderUtils() {
     
     // Resume audio context if needed (for mobile browsers)
     if (audioContextRef.current && audioContextRef.current.state === 'suspended') {
-      audioContextRef.current.resume().catch(console.error);
+      resumeAudioContext(audioContextRef.current);
     }
     
     setMetronomeOpen(true);

@@ -37,8 +37,7 @@ export function useMetronomeEngine({
   const timerID = useRef<number | null>(null);
   const currentBeat = useRef(0);
   const currentSubBeat = useRef(0);
-  const normalBuffer = useRef<AudioBuffer | null>(null);
-  const accentBuffer = useRef<AudioBuffer | null>(null);
+  const audioBuffers = useRef<{ [key: string]: AudioBuffer }>({});
   
   // Calculate beats based on time signature
   const getBeatsPerMeasure = useCallback(() => {
@@ -56,7 +55,7 @@ export function useMetronomeEngine({
     }
   }, [subdivision]);
   
-  // Generate audio buffers programmatically
+  // Load audio files
   useEffect(() => {
     if (!audioContext.current) {
       try {
@@ -71,102 +70,39 @@ export function useMetronomeEngine({
         gainNode.current.gain.value = volume;
         gainNode.current.connect(audioContext.current.destination);
         
-        // Create sound buffers programmatically
         const ctx = audioContext.current;
-        const createClickSound = () => {
-          const sampleRate = ctx.sampleRate;
-          const duration = 0.05; // 50ms
-          const bufferSize = sampleRate * duration;
-          const buffer = ctx.createBuffer(1, bufferSize, sampleRate);
-          const data = buffer.getChannelData(0);
-          
-          // Create a short percussive click
-          for (let i = 0; i < bufferSize; i++) {
-            // Quick decay
-            data[i] = (1 - i / bufferSize) * 
-                    (Math.random() * 0.2 + 
-                    (i < 0.01 * sampleRate ? 0.8 : 0.2)); // Initial spike with noise
+        
+        // Function to fetch and decode audio
+        const loadSoundFile = async (soundName: string, url: string) => {
+          try {
+            const response = await fetch(url);
+            const arrayBuffer = await response.arrayBuffer();
+            const audioBuffer = await ctx.decodeAudioData(arrayBuffer);
+            return audioBuffer;
+          } catch (error) {
+            console.error(`Failed to load sound: ${soundName}`, error);
+            throw error;
           }
-          
-          return buffer;
         };
         
-        const createBeepSound = () => {
-          const sampleRate = ctx.sampleRate;
-          const duration = 0.08;
-          const bufferSize = sampleRate * duration;
-          const buffer = ctx.createBuffer(1, bufferSize, sampleRate);
-          const data = buffer.getChannelData(0);
-          
-          // Create a sine wave beep with envelope
-          for (let i = 0; i < bufferSize; i++) {
-            const t = i / sampleRate;
-            // Sine wave at 880Hz
-            const wave = Math.sin(2 * Math.PI * 880 * t);
-            
-            // Apply envelope (attack, decay)
-            let envelope;
-            if (t < 0.01) { 
-              envelope = t / 0.01; // Attack
-            } else {
-              envelope = 1.0 - ((t - 0.01) / (duration - 0.01)); // Decay
-            }
-            
-            data[i] = wave * envelope;
-          }
-          
-          return buffer;
-        };
+        // Load all the sound files
+        Promise.all([
+          loadSoundFile('click', '/sounds/click.wav'),
+          loadSoundFile('beep', '/sounds/beep.wav'),
+          loadSoundFile('woodblock', '/sounds/woodblock.wav'),
+        ]).then(([clickBuffer, beepBuffer, woodblockBuffer]) => {
+          audioBuffers.current = {
+            click: clickBuffer,
+            beep: beepBuffer,
+            woodblock: woodblockBuffer
+          };
+          setAudioLoaded(true);
+          console.log("✅ Metronome: Audio files loaded successfully");
+        }).catch(error => {
+          setAudioError("Failed to load audio files. Please check your connection.");
+          console.error("Metronome audio loading failed:", error);
+        });
         
-        const createWoodblockSound = () => {
-          const sampleRate = ctx.sampleRate;
-          const duration = 0.15;
-          const bufferSize = sampleRate * duration;
-          const buffer = ctx.createBuffer(1, bufferSize, sampleRate);
-          const data = buffer.getChannelData(0);
-          
-          // Create a woodblock-like sound (multiple frequencies with quick decay)
-          const frequencies = [800, 1200]; 
-          
-          for (let i = 0; i < bufferSize; i++) {
-            const t = i / sampleRate;
-            let sample = 0;
-            
-            // Mix frequencies
-            for (const freq of frequencies) {
-              sample += Math.sin(2 * Math.PI * freq * t) * Math.exp(-12 * t);
-            }
-            
-            // Add noise at the beginning for attack
-            if (t < 0.01) {
-              sample += (Math.random() * 2 - 1) * (0.01 - t) / 0.01;
-            }
-            
-            data[i] = sample * 0.5;
-          }
-          
-          return buffer;
-        };
-        
-        // Create buffers based on selected sound type
-        switch (soundType) {
-          case "beep":
-            normalBuffer.current = createBeepSound();
-            accentBuffer.current = createBeepSound(); // Same for now, could be modified
-            break;
-          case "woodblock":
-            normalBuffer.current = createWoodblockSound();
-            accentBuffer.current = createWoodblockSound(); // Same for now, could be modified
-            break;
-          case "click":
-          default:
-            normalBuffer.current = createClickSound();
-            accentBuffer.current = createClickSound(); // Same for now, could be modified
-            break;
-        }
-        
-        setAudioLoaded(true);
-        console.log("✅ Metronome: Audio buffers created successfully");
       } catch (error) {
         console.error("Failed to initialize audio system:", error);
         setAudioError("Your browser doesn't support Web Audio API or it's restricted.");
@@ -179,107 +115,7 @@ export function useMetronomeEngine({
         clearTimeout(timerID.current);
       }
     };
-  }, [soundType, audioContextRef, volume]);
-  
-  // Update sound when sound type changes
-  useEffect(() => {
-    if (!audioContext.current || !audioLoaded) return;
-    
-    const ctx = audioContext.current;
-    
-    // Create sound buffers programmatically based on the selected sound type
-    const createClickSound = () => {
-      const sampleRate = ctx.sampleRate;
-      const duration = 0.05; // 50ms
-      const bufferSize = sampleRate * duration;
-      const buffer = ctx.createBuffer(1, bufferSize, sampleRate);
-      const data = buffer.getChannelData(0);
-      
-      // Create a short percussive click
-      for (let i = 0; i < bufferSize; i++) {
-        // Quick decay
-        data[i] = (1 - i / bufferSize) * 
-                (Math.random() * 0.2 + 
-                (i < 0.01 * sampleRate ? 0.8 : 0.2)); // Initial spike with noise
-      }
-      
-      return buffer;
-    };
-    
-    const createBeepSound = () => {
-      const sampleRate = ctx.sampleRate;
-      const duration = 0.08;
-      const bufferSize = sampleRate * duration;
-      const buffer = ctx.createBuffer(1, bufferSize, sampleRate);
-      const data = buffer.getChannelData(0);
-      
-      // Create a sine wave beep with envelope
-      for (let i = 0; i < bufferSize; i++) {
-        const t = i / sampleRate;
-        // Sine wave at 880Hz
-        const wave = Math.sin(2 * Math.PI * 880 * t);
-        
-        // Apply envelope (attack, decay)
-        let envelope;
-        if (t < 0.01) { 
-          envelope = t / 0.01; // Attack
-        } else {
-          envelope = 1.0 - ((t - 0.01) / (duration - 0.01)); // Decay
-        }
-        
-        data[i] = wave * envelope;
-      }
-      
-      return buffer;
-    };
-    
-    const createWoodblockSound = () => {
-      const sampleRate = ctx.sampleRate;
-      const duration = 0.15;
-      const bufferSize = sampleRate * duration;
-      const buffer = ctx.createBuffer(1, bufferSize, sampleRate);
-      const data = buffer.getChannelData(0);
-      
-      // Create a woodblock-like sound (multiple frequencies with quick decay)
-      const frequencies = [800, 1200]; 
-      
-      for (let i = 0; i < bufferSize; i++) {
-        const t = i / sampleRate;
-        let sample = 0;
-        
-        // Mix frequencies
-        for (const freq of frequencies) {
-          sample += Math.sin(2 * Math.PI * freq * t) * Math.exp(-12 * t);
-        }
-        
-        // Add noise at the beginning for attack
-        if (t < 0.01) {
-          sample += (Math.random() * 2 - 1) * (0.01 - t) / 0.01;
-        }
-        
-        data[i] = sample * 0.5;
-      }
-      
-      return buffer;
-    };
-    
-    // Create buffers based on selected sound type
-    switch (soundType) {
-      case "beep":
-        normalBuffer.current = createBeepSound();
-        accentBuffer.current = createBeepSound(); // Same for now, could be modified
-        break;
-      case "woodblock":
-        normalBuffer.current = createWoodblockSound();
-        accentBuffer.current = createWoodblockSound(); // Same for now, could be modified
-        break;
-      case "click":
-      default:
-        normalBuffer.current = createClickSound();
-        accentBuffer.current = createClickSound(); // Same for now, could be modified
-        break;
-    }
-  }, [soundType, audioLoaded]);
+  }, [audioContextRef, volume]);
   
   // Handle volume changes
   useEffect(() => {
@@ -290,7 +126,7 @@ export function useMetronomeEngine({
   
   // Schedule the next tick and play sound
   const scheduleSound = useCallback((time: number) => {
-    if (!audioContext.current || !gainNode.current || !normalBuffer.current || !accentBuffer.current) {
+    if (!audioContext.current || !gainNode.current || !audioBuffers.current[soundType]) {
       return;
     }
     
@@ -298,13 +134,7 @@ export function useMetronomeEngine({
     const isMainBeat = currentSubBeat.current === 0;
     
     const source = audioContext.current.createBufferSource();
-    
-    // Use accent sound for first beat if accent is enabled
-    if (isFirstBeat && accentFirstBeat) {
-      source.buffer = accentBuffer.current;
-    } else {
-      source.buffer = normalBuffer.current;
-    }
+    source.buffer = audioBuffers.current[soundType];
     
     // Adjust volume for subdivisions
     const subVolume = isMainBeat ? 1.0 : 0.75;
@@ -326,7 +156,7 @@ export function useMetronomeEngine({
       currentSubBeat.current = 0;
       currentBeat.current = (currentBeat.current + 1) % getBeatsPerMeasure();
     }
-  }, [accentFirstBeat, getBeatsPerMeasure, getSubdivisionsPerBeat, onTick]);
+  }, [soundType, getBeatsPerMeasure, getSubdivisionsPerBeat, onTick]);
   
   // Scheduler loop that keeps the metronome accurate
   const scheduler = useCallback(() => {
