@@ -5,7 +5,7 @@ import { Calendar as CalendarIcon } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { format } from "date-fns";
 import { Badge } from "@/components/ui/badge";
-import { MonthlyCalendar } from "@/components/dashboard/MonthlyCalendar";
+import MonthlyCalendar from "@/components/dashboard/MonthlyCalendar"; // Changed to default import
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { ViewEventModal } from "@/components/calendar/ViewEventModal";
@@ -13,7 +13,7 @@ import { EventModal } from "@/components/calendar/EventModal";
 import { CalendarEditTools } from "@/components/calendar/CalendarEditTools";
 import { useCalendarStore } from "@/hooks/useCalendarStore";
 import { toast } from "sonner";
-import { CalendarEvent } from "@/types/calendar";
+import { CalendarEvent, EventType } from "@/types/calendar"; // Added EventType import
 import { usePermissions } from "@/hooks/usePermissions";
 
 export default function CalendarPage() {
@@ -30,7 +30,7 @@ export default function CalendarPage() {
       date: new Date(2025, 4, 17), 
       time: "7:00 PM",
       location: "Sisters Chapel",
-      type: "concert",
+      type: "concert" as EventType, // Fixed type casting to EventType
       start: new Date(2025, 4, 17),
       end: new Date(2025, 4, 17)
     },
@@ -40,7 +40,7 @@ export default function CalendarPage() {
       date: new Date(2025, 4, 14), 
       time: "5:00 PM",
       location: "Fine Arts Building",
-      type: "rehearsal",
+      type: "rehearsal" as EventType, // Fixed type casting to EventType
       start: new Date(2025, 4, 14),
       end: new Date(2025, 4, 14)
     },
@@ -50,7 +50,7 @@ export default function CalendarPage() {
       date: new Date(2025, 4, 15),
       time: "4:30 PM",
       location: "Practice Room 2",
-      type: "sectional",
+      type: "sectional" as EventType, // Fixed type casting to EventType
       start: new Date(2025, 4, 15),
       end: new Date(2025, 4, 15)
     }
@@ -142,11 +142,8 @@ export default function CalendarPage() {
           </CardHeader>
           <CardContent>
             <MonthlyCalendar
-              month={currentMonth} 
-              year={currentYear}
-              onPrevMonth={handlePrevMonth}
-              onNextMonth={handleNextMonth}
-              events={events}
+              events={events} 
+              className=""
             />
           </CardContent>
         </Card>
