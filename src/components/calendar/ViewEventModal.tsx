@@ -174,7 +174,7 @@ export function ViewEventModal({ event, onClose, onUpdate, onDelete, userCanEdit
               className="bg-red-500 hover:bg-red-600 text-white"
             >
               Delete
-            </Button>
+            </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
