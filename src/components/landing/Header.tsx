@@ -8,6 +8,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { EnhancedMetronome } from "@/components/ui/enhanced-metronome";
 import { PitchPipeDialog } from "@/components/ui/pitch-pipe-dialog";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
+import { NavigationLinks } from "@/components/landing/header/NavigationLinks";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -75,6 +76,9 @@ export function Header({ initialShowNewsFeed = true }: HeaderProps) {
         {/* Left side: Logo and site name */}
         <div className="flex items-center gap-4">
           <Logo />
+          
+          {/* Show navigation links in desktop view */}
+          {!isMobile && <NavigationLinks className="ml-6" />}
         </div>
         
         {/* Right side: Pitch Pipe, Metronome, theme toggle, and navigation dropdown */}
@@ -105,47 +109,50 @@ export function Header({ initialShowNewsFeed = true }: HeaderProps) {
           
           <ThemeToggle />
           
-          <DropdownMenuProvider>
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button 
-                  variant="ghost" 
-                  size="icon" 
-                  className="h-10 w-10 rounded-full"
-                >
-                  <Menu className="h-5 w-5 text-foreground" />
-                  <span className="sr-only">Menu</span>
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-56 bg-popover">
-                <DropdownMenuSeparator />
-                
-                <DropdownMenuItem onClick={() => navigate("/")} className="py-2">
-                  Home
-                </DropdownMenuItem>
-                
-                <DropdownMenuItem onClick={() => navigate("/about")} className="py-2">
-                  About
-                </DropdownMenuItem>
-                
-                <DropdownMenuItem onClick={() => navigate("/login")} className="py-2">
-                  Login
-                </DropdownMenuItem>
-                
-                <DropdownMenuItem onClick={() => navigate("/privacy")} className="py-2">
-                  Privacy Policy
-                </DropdownMenuItem>
-                
-                <DropdownMenuItem onClick={() => navigate("/terms")} className="py-2">
-                  Terms of Service
-                </DropdownMenuItem>
-                
-                <DropdownMenuItem onClick={() => navigate("/press-kit")} className="py-2">
-                  Press Kit
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          </DropdownMenuProvider>
+          {/* Only show dropdown menu on mobile */}
+          {isMobile && (
+            <DropdownMenuProvider>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button 
+                    variant="ghost" 
+                    size="icon" 
+                    className="h-10 w-10 rounded-full"
+                  >
+                    <Menu className="h-5 w-5 text-foreground" />
+                    <span className="sr-only">Menu</span>
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-56 bg-popover">
+                  <DropdownMenuSeparator />
+                  
+                  <DropdownMenuItem onClick={() => navigate("/")} className="py-2">
+                    Home
+                  </DropdownMenuItem>
+                  
+                  <DropdownMenuItem onClick={() => navigate("/about")} className="py-2">
+                    About
+                  </DropdownMenuItem>
+                  
+                  <DropdownMenuItem onClick={() => navigate("/social")} className="py-2">
+                    Social
+                  </DropdownMenuItem>
+                  
+                  <DropdownMenuItem onClick={() => navigate("/contact")} className="py-2">
+                    Contact
+                  </DropdownMenuItem>
+                  
+                  <DropdownMenuItem onClick={() => navigate("/press-kit")} className="py-2">
+                    Press Kit
+                  </DropdownMenuItem>
+                  
+                  <DropdownMenuItem onClick={() => navigate("/login")} className="py-2">
+                    Login
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </DropdownMenuProvider>
+          )}
         </div>
       </div>
     </header>
