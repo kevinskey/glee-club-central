@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { fetchPerformanceEvents } from "@/utils/performanceSync";
 import { 
@@ -12,16 +11,7 @@ import { Button } from "@/components/ui/button";
 import { CalendarClock, MapPin, ArrowRight } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { formatDate } from "@/lib/utils";
-
-export interface PerformanceEvent {
-  id: string;
-  title: string;
-  date: string;
-  location: string;
-  description: string;
-  image: string;
-  type?: string;
-}
+import { PerformanceEvent } from "@/types/performance";
 
 export function PerformanceSection() {
   const [events, setEvents] = useState<PerformanceEvent[]>([]);

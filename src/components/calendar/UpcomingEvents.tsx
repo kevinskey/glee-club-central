@@ -3,10 +3,10 @@ import React, { useState, useEffect } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Calendar, ArrowRight, Calendar as CalendarIcon, Clock } from "lucide-react";
-import { PerformanceEvent } from "@/components/landing/performance/PerformanceSection";
 import { Link } from "react-router-dom";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { fetchPerformanceEvents } from "@/utils/performanceSync";
+import { PerformanceEvent } from "@/types/performance";
 
 export function UpcomingEvents() {
   const [events, setEvents] = useState<PerformanceEvent[]>([]);

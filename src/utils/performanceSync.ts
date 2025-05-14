@@ -1,18 +1,8 @@
 
 import { supabase } from "@/integrations/supabase/client";
 import { updateHeroImageWithEvents } from "./heroImageUtils";
-
-export interface PerformanceEvent {
-  id: string;
-  title: string;
-  description: string;
-  date: string;
-  time: string;
-  location: string;
-  image?: string;
-  type: string;
-  allday: boolean;
-}
+import { PerformanceEvent } from "@/types/performance";
+import { CalendarEvent } from "@/types/calendar";
 
 /**
  * Fetches performance events from the calendar_events table
@@ -33,7 +23,7 @@ export const fetchPerformanceEvents = async (limit = 3): Promise<PerformanceEven
     return [];
   }
   
-  // Map the data to include an image property
+  // Map the data to include both image and image_url properties for compatibility
   return data.map(event => ({
     id: event.id,
     title: event.title,
@@ -41,7 +31,8 @@ export const fetchPerformanceEvents = async (limit = 3): Promise<PerformanceEven
     date: event.date,
     time: event.time,
     location: event.location || '',
-    image: event.image_url,
+    image: event.image_url, // Map image_url to image for backwards compatibility
+    image_url: event.image_url,
     type: event.type,
     allday: event.allday || false
   }));
@@ -63,9 +54,21 @@ export const synchronizePerformances = async (): Promise<boolean> => {
       return false;
     }
     
-    // Update hero images with these events
+    // Convert calendar events to the format expected by updateHeroImageWithEvents
     if (data && data.length > 0) {
-      await updateHeroImageWithEvents(data);
+      const calendarEvents: CalendarEvent[] = data.map(event => ({
+        id: event.id,
+        title: event.title,
+        start: new Date(event.date),
+        end: new Date(event.date),
+        description: event.description,
+        location: event.location,
+        type: event.type,
+        image_url: event.image_url,
+        allDay: event.allday
+      }));
+      
+      await updateHeroImageWithEvents(calendarEvents);
     }
     
     return true;

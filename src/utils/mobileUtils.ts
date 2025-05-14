@@ -1,4 +1,3 @@
-
 import { useIsMobile } from "@/hooks/use-mobile";
 
 /**
@@ -127,12 +126,12 @@ export function addTouchSupport(element: HTMLElement) {
     };
   };
   
-  // Get all mouse event handlers
-  const mouseEvents = element.getEventListeners?.('mousedown') || [];
+  // Get all mouse event handlers - remove the getEventListeners call which isn't standard
+  const mouseHandlers: ((e: MouseEvent) => void)[] = [];
   
-  // Add equivalent touch events
-  mouseEvents.forEach(event => {
-    const touchHandler = mapTouch(event.listener as (e: MouseEvent) => void);
+  // Add equivalent touch events for any mouse handlers we know about
+  mouseHandlers.forEach(handler => {
+    const touchHandler = mapTouch(handler);
     element.addEventListener('touchstart', touchHandler);
     touchEvents.touchstart = touchHandler;
   });
