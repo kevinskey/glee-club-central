@@ -1,7 +1,6 @@
 
 import React from "react";
 import { cn } from "@/lib/utils";
-import { ThemeToggle } from "@/components/ui/theme-toggle";
 
 interface PageHeaderWithToggleProps {
   title: string;
@@ -32,7 +31,6 @@ export function PageHeaderWithToggle({
           </h1>
         </div>
         <div className="flex items-center gap-3">
-          <ThemeToggle />
           {actions && <div>{actions}</div>}
         </div>
       </div>

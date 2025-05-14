@@ -160,10 +160,12 @@ export default function CalendarPage() {
       {isMobile ? <MobileHeader /> : <Header />}
       
       <div className="container mx-auto p-4 space-y-6">
-        <PageHeaderWithToggle
-          title="Glee Club Calendar"
-          icon={<CalendarIcon className="h-6 w-6" />}
-        />
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <CalendarIcon className="h-6 w-6" />
+            <h1 className="text-3xl font-bold tracking-tight">Glee Club Calendar</h1>
+          </div>
+        </div>
         
         {/* Highlight the edit tools more prominently */}
         <CalendarEditTools 
