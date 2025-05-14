@@ -1,13 +1,15 @@
 
 import React, { createContext, useState, ReactNode, useCallback } from "react";
-import { useSidebar } from "./useSidebar";
+import { SidebarContext as BaseSidebarContext, SidebarContextType } from "./useSidebar";
+import { useMedia } from "@/hooks/use-mobile";
 
 interface SidebarProviderProps {
   children: ReactNode;
   defaultState?: "expanded" | "collapsed";
 }
 
-export const SidebarContext = useSidebar().SidebarContext;
+// Use the imported SidebarContext directly
+export const SidebarContext = BaseSidebarContext;
 
 export function SidebarProvider({ 
   children, 
@@ -16,7 +18,7 @@ export function SidebarProvider({
   const [state, setState] = useState<"expanded" | "collapsed">(defaultState);
   const [open, setOpen] = useState(true);
   const [openMobile, setOpenMobile] = useState(false);
-  const isMobile = window.innerWidth < 768;
+  const isMobile = useMedia("(max-width: 768px)");
   
   const toggleSidebar = useCallback(() => {
     if (isMobile) {
