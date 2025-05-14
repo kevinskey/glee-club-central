@@ -1,6 +1,6 @@
 
 import * as React from "react";
-import { toast } from "sonner";
+import { toast as sonnerToast } from "sonner";
 
 export type ToastProps = {
   title?: string;
@@ -9,20 +9,41 @@ export type ToastProps = {
   variant?: "default" | "destructive";
 };
 
+type ToastActionElement = React.ReactElement;
+
 export const useToast = () => {
+  const [toasts, setToasts] = React.useState<ToastProps[]>([]);
+
   const showToast = ({ title, description, variant, duration = 3000 }: ToastProps) => {
+    const id = Date.now().toString();
+    const newToast = { id, title, description, variant, duration };
+    
+    setToasts((currentToasts) => [...currentToasts, newToast]);
+    
     if (variant === "destructive") {
-      toast.error(title, {
+      sonnerToast.error(title, {
         description,
         duration,
       });
     } else {
-      toast(title, {
+      sonnerToast(title, {
         description,
         duration,
       });
     }
+    
+    return id;
   };
 
-  return { toast: showToast };
+  const dismissToast = (id: string) => {
+    setToasts((currentToasts) => currentToasts.filter((toast) => toast.id !== id));
+  };
+
+  return { 
+    toast: showToast,
+    toasts,
+    dismiss: dismissToast
+  };
 };
+
+export type { ToastActionElement };
