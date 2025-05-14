@@ -98,9 +98,11 @@ const MonthlyCalendar: React.FC<MonthlyCalendarProps> = ({ events, className }) 
                   key={event.id} 
                   className={cn(
                     "text-xs p-1 mb-1 rounded truncate",
-                    event.type === "concert" && "bg-orange-500 text-white",
+                    event.type === "concert" && "bg-glee-purple text-white",
                     event.type === "rehearsal" && "bg-blue-500 text-white",
-                    event.type === "sectional" && "bg-green-500 text-white"
+                    event.type === "sectional" && "bg-green-500 text-white",
+                    event.type === "special" && "bg-amber-500 text-white",
+                    event.type === "tour" && "bg-purple-500 text-white"
                   )}
                 >
                   {event.title}
@@ -126,16 +128,11 @@ const MonthlyCalendar: React.FC<MonthlyCalendarProps> = ({ events, className }) 
   };
 
   return (
-    <Card className={cn("w-full", className)}>
-      <CardHeader>
-        <CardTitle>Monthly Calendar</CardTitle>
-      </CardHeader>
-      <CardContent>
-        {renderHeader()}
-        {renderDays()}
-        {renderCells()}
-      </CardContent>
-    </Card>
+    <div className={cn("w-full", className)}>
+      {renderHeader()}
+      {renderDays()}
+      {renderCells()}
+    </div>
   );
 };
 

@@ -5,7 +5,7 @@ import { Calendar as CalendarIcon } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { format } from "date-fns";
 import { Badge } from "@/components/ui/badge";
-import MonthlyCalendar from "@/components/dashboard/MonthlyCalendar"; // Changed to default import
+import MonthlyCalendar from "@/components/dashboard/MonthlyCalendar";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { ViewEventModal } from "@/components/calendar/ViewEventModal";
@@ -13,7 +13,7 @@ import { EventModal } from "@/components/calendar/EventModal";
 import { CalendarEditTools } from "@/components/calendar/CalendarEditTools";
 import { useCalendarStore } from "@/hooks/useCalendarStore";
 import { toast } from "sonner";
-import { CalendarEvent, EventType } from "@/types/calendar"; // Added EventType import
+import { CalendarEvent, EventType } from "@/types/calendar";
 import { usePermissions } from "@/hooks/usePermissions";
 
 export default function CalendarPage() {
@@ -30,7 +30,7 @@ export default function CalendarPage() {
       date: new Date(2025, 4, 17), 
       time: "7:00 PM",
       location: "Sisters Chapel",
-      type: "concert" as EventType, // Fixed type casting to EventType
+      type: "concert" as EventType,
       start: new Date(2025, 4, 17),
       end: new Date(2025, 4, 17)
     },
@@ -40,7 +40,7 @@ export default function CalendarPage() {
       date: new Date(2025, 4, 14), 
       time: "5:00 PM",
       location: "Fine Arts Building",
-      type: "rehearsal" as EventType, // Fixed type casting to EventType
+      type: "rehearsal" as EventType,
       start: new Date(2025, 4, 14),
       end: new Date(2025, 4, 14)
     },
@@ -50,7 +50,7 @@ export default function CalendarPage() {
       date: new Date(2025, 4, 15),
       time: "4:30 PM",
       location: "Practice Room 2",
-      type: "sectional" as EventType, // Fixed type casting to EventType
+      type: "sectional" as EventType,
       start: new Date(2025, 4, 15),
       end: new Date(2025, 4, 15)
     }
@@ -125,24 +125,35 @@ export default function CalendarPage() {
         icon={<CalendarIcon className="h-6 w-6" />}
       />
       
-      {/* Add Calendar Edit Tools */}
+      {/* Highlight the edit tools more prominently */}
       <CalendarEditTools 
         onAddEvent={() => setIsCreateModalOpen(true)}
         selectedEventId={selectedEvent?.id}
         onEditSelected={() => isViewModalOpen && setIsViewModalOpen(true)}
         onDeleteSelected={() => selectedEvent && handleDeleteEvent(selectedEvent.id)}
-        className="mb-4"
+        className="mb-4 border-glee-purple/20 bg-glee-purple/5"
       />
       
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         {/* Calendar widget */}
         <Card className="md:col-span-2">
-          <CardHeader>
+          <CardHeader className="flex flex-row items-center justify-between">
             <CardTitle>Calendar</CardTitle>
+            <div className="flex items-center gap-2">
+              <Button variant="outline" size="sm" onClick={handlePrevMonth}>
+                Previous
+              </Button>
+              <span className="text-sm font-medium">
+                {format(new Date(currentYear, currentMonth, 1), 'MMMM yyyy')}
+              </span>
+              <Button variant="outline" size="sm" onClick={handleNextMonth}>
+                Next
+              </Button>
+            </div>
           </CardHeader>
           <CardContent>
             <MonthlyCalendar
-              events={events} 
+              events={events}
               className=""
             />
           </CardContent>
@@ -161,7 +172,11 @@ export default function CalendarPage() {
             ) : (
               <div className="space-y-4">
                 {eventsForSelectedDate.map((event) => (
-                  <div key={event.id} className="border rounded-lg p-3 cursor-pointer" onClick={() => handleEventClick(event)}>
+                  <div 
+                    key={event.id} 
+                    className="border rounded-lg p-3 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+                    onClick={() => handleEventClick(event)}
+                  >
                     <div className="flex justify-between items-start">
                       <div>
                         <h3 className="font-medium">{event.title}</h3>
@@ -184,8 +199,11 @@ export default function CalendarPage() {
               </div>
             )}
             <div className="mt-4">
-              <Button className="w-full" variant="outline">
-                View All Events
+              <Button 
+                className="w-full bg-glee-purple hover:bg-glee-purple/90" 
+                onClick={() => setIsCreateModalOpen(true)}
+              >
+                Add Event
               </Button>
             </div>
           </CardContent>
