@@ -1,7 +1,6 @@
 
 import React, { useState, useEffect } from "react";
 import { fetchPerformanceEvents } from "@/utils/performanceSync";
-import { AspectRatio } from "@/components/ui/aspect-ratio";
 import { 
   Carousel,
   CarouselContent,
@@ -96,68 +95,70 @@ export function PerformanceSection() {
   }
 
   return (
-    <section className="w-full bg-glee-spelman relative overflow-hidden">
-      <div className="relative z-10">
+    <section className="w-full bg-black overflow-hidden">
+      <div className="py-8 mb-4">
+        <div className="container mx-auto px-4">
+          <h2 className="text-3xl font-bold text-white mb-2">Upcoming Performances</h2>
+          <p className="text-lg text-white/80">Join us at our next events</p>
+        </div>
+      </div>
+      
+      <div className="relative">
         <Carousel 
           className="w-full"
           opts={{
             align: "start",
             loop: true,
-            direction: "ltr",
+            dragFree: true
           }}
         >
-          <CarouselContent>
+          <CarouselContent className="flex">
             {events.map(event => (
-              <CarouselItem key={event.id} className="pl-0 basis-full">
-                <div className="relative w-full">
-                  {/* Performance Event Image */}
-                  <div className="relative w-full h-[50vh] bg-glee-purple/30 overflow-hidden">
-                    {!imageErrors[event.id] && event.image ? (
-                      <img 
-                        src={event.image} 
-                        alt={event.title} 
-                        className="absolute inset-0 w-full h-full object-cover"
-                        onError={() => handleImageError(event.id)}
-                      />
-                    ) : (
-                      <div className="absolute inset-0 bg-glee-purple/30 flex items-center justify-center">
-                        <div className="text-4xl text-white/40 font-bold">SPELMAN GLEE</div>
-                      </div>
-                    )}
-                    {/* Overlay with gradient */}
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent"></div>
-                    
-                    {/* Event content overlay */}
-                    <div className="absolute bottom-0 left-0 w-full p-6 md:p-10">
-                      <div className="container mx-auto">
-                        <div className="flex flex-col max-w-3xl">
-                          <h2 className="text-2xl md:text-4xl font-bold text-white mb-2">
-                            {event.title}
-                          </h2>
-                          
-                          <div className="flex flex-col sm:flex-row gap-4 sm:items-center mb-4">
-                            <div className="flex items-center text-white/90">
-                              <CalendarClock className="h-5 w-5 mr-2" />
-                              <span>{formatEventDate(event.date)}</span>
-                            </div>
-                            
-                            {event.location && (
-                              <div className="flex items-center text-white/90">
-                                <MapPin className="h-5 w-5 mr-2" />
-                                <span>{event.location}</span>
-                              </div>
-                            )}
-                          </div>
-                          
-                          <Button 
-                            className="mt-4 sm:self-start bg-glee-gold text-black hover:bg-white"
-                            onClick={() => navigate('/calendar')}
-                          >
-                            View All Events <ArrowRight className="ml-2 h-4 w-4" />
-                          </Button>
-                        </div>
-                      </div>
+              <CarouselItem key={event.id} className="basis-full md:basis-1/2 lg:basis-1/3 xl:basis-1/4 pl-4">
+                <div className="relative h-[400px] rounded-lg overflow-hidden group transition-all duration-300 hover:shadow-xl">
+                  {!imageErrors[event.id] && event.image ? (
+                    <img 
+                      src={event.image} 
+                      alt={event.title} 
+                      className="absolute inset-0 w-full h-full object-cover transition-transform group-hover:scale-105"
+                      onError={() => handleImageError(event.id)}
+                    />
+                  ) : (
+                    <div className="absolute inset-0 bg-glee-purple/30 flex items-center justify-center">
+                      <div className="text-4xl text-white/40 font-bold">SPELMAN GLEE</div>
                     </div>
+                  )}
+                  
+                  {/* Dark overlay */}
+                  <div className="absolute inset-0 bg-gradient-to-t from-black via-black/60 to-transparent"></div>
+                  
+                  {/* Event details overlay */}
+                  <div className="absolute bottom-0 left-0 right-0 p-6">
+                    <h3 className="text-xl font-bold text-white mb-2">
+                      {event.title}
+                    </h3>
+                    
+                    <div className="flex flex-col space-y-1 mb-4">
+                      <div className="flex items-center text-white/90">
+                        <CalendarClock className="h-4 w-4 mr-2" />
+                        <span>{formatEventDate(event.date)}</span>
+                      </div>
+                      
+                      {event.location && (
+                        <div className="flex items-center text-white/90">
+                          <MapPin className="h-4 w-4 mr-2" />
+                          <span className="line-clamp-1">{event.location}</span>
+                        </div>
+                      )}
+                    </div>
+                    
+                    <Button 
+                      className="w-full bg-glee-orange hover:bg-glee-orange/80 text-white"
+                      onClick={() => navigate('/calendar')}
+                      size="sm"
+                    >
+                      Details
+                    </Button>
                   </div>
                 </div>
               </CarouselItem>
@@ -165,10 +166,22 @@ export function PerformanceSection() {
           </CarouselContent>
           
           <div className="container mx-auto relative">
-            <CarouselPrevious className="absolute left-4 md:left-10 bottom-24 bg-white/10 hover:bg-white/20 border-white/20 text-white" />
-            <CarouselNext className="absolute right-4 md:right-10 bottom-24 bg-white/10 hover:bg-white/20 border-white/20 text-white" />
+            <div className="hidden md:block">
+              <CarouselPrevious className="absolute -left-4 top-1/2 -translate-y-1/2 bg-white/10 hover:bg-white/20 border-white/20 text-white" />
+              <CarouselNext className="absolute -right-4 top-1/2 -translate-y-1/2 bg-white/10 hover:bg-white/20 border-white/20 text-white" />
+            </div>
           </div>
         </Carousel>
+      </div>
+      
+      <div className="container mx-auto px-4 py-8 flex justify-end">
+        <Button 
+          variant="outline"
+          className="border-white text-white hover:bg-white hover:text-black"
+          onClick={() => navigate('/calendar')}
+        >
+          View All Events <ArrowRight className="ml-2 h-4 w-4" />
+        </Button>
       </div>
     </section>
   );
