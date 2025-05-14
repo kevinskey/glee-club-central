@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { Footer } from "@/components/landing/Footer";
 import { CalendarHeader } from "@/components/calendar/CalendarHeader";
@@ -82,14 +83,16 @@ const CalendarPage = () => {
       setIsCreateModalOpen(false);
       // Update hero image after creating an event
       await updateHeroImageWithEvents(events);
+      return Promise.resolve();
     } catch (error) {
       console.error("Error creating event:", error);
       toast.error("Failed to create event");
+      return Promise.reject(error);
     }
   };
 
-  // Handler for updating event - Updated signature to match the interface
-  const onUpdateEvent = async (eventData: CalendarEvent): Promise<boolean | void> => {
+  // Handler for updating event - Updated to return a Promise
+  const onUpdateEvent = async (eventData: CalendarEvent): Promise<boolean> => {
     try {
       await handleUpdateEvent(eventData);
       setIsViewModalOpen(false);
@@ -97,14 +100,16 @@ const CalendarPage = () => {
       
       // Update hero image after updating an event
       await updateHeroImageWithEvents(events);
+      return Promise.resolve(true);
     } catch (error) {
       console.error("Error updating event:", error);
       toast.error("Failed to update event");
+      return Promise.resolve(false);
     }
   };
 
-  // Handler for deleting event - Updated signature to match the interface
-  const onDeleteEvent = async (eventId: string): Promise<boolean | void> => {
+  // Handler for deleting event - Updated to return a Promise
+  const onDeleteEvent = async (eventId: string): Promise<boolean> => {
     try {
       await handleDeleteEvent(eventId);
       setIsViewModalOpen(false);
@@ -112,9 +117,11 @@ const CalendarPage = () => {
       
       // Update hero image after deleting an event
       await updateHeroImageWithEvents(events.filter(e => e.id !== eventId));
+      return Promise.resolve(true);
     } catch (error) {
       console.error("Error deleting event:", error);
       toast.error("Failed to delete event");
+      return Promise.resolve(false);
     }
   };
 

@@ -1,8 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
-import { Calendar } from 'lucide-react';
 import { format } from 'date-fns';
-import { Calendar as CalendarIcon } from "@/components/ui/calendar";
+import { Calendar as CalendarIcon } from "lucide-react";
 import { DateRange } from "react-day-picker";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -34,35 +33,26 @@ import { useToast } from "@/hooks/use-toast";
 import { useCalendarStore } from '@/hooks/useCalendarStore';
 import { EventType } from '@/types/calendar';
 import { MobileFitCheck } from './MobileFitCheck';
-import { checkEventMobileFit, MobileFitCheckResult } from '@/utils/calendarMobileUtils';
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
+import { MobileFitCheckResult } from '@/utils/calendarMobileUtils';
 import { Loader2, X } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import * as z from "zod";
 
-interface AddEventFormProps {
+export interface AddEventFormProps {
   defaultValues?: any;
   onCancel: () => void;
+  onSave: (formValues: any) => Promise<void>;
+  initialDate?: Date | null;
 }
 
-export function AddEventForm({ defaultValues, onCancel }: AddEventFormProps) {
+export function AddEventForm({ defaultValues, onCancel, onSave, initialDate }: AddEventFormProps) {
   const { toast } = useToast();
-  const { addEvent, updateEvent } = useCalendarStore();
-  const [date, setDate] = React.useState<DateRange | undefined>(defaultValues?.start ? {
+  const [date, setDate] = useState<DateRange | undefined>(defaultValues?.start ? {
     from: new Date(defaultValues?.start),
     to: new Date(defaultValues?.end)
-  } : undefined);
-  const [isAllDay, setIsAllDay] = React.useState(defaultValues?.allDay || false);
+  } : initialDate ? { from: initialDate, to: initialDate } : undefined);
+  const [isAllDay, setIsAllDay] = useState(defaultValues?.allDay || false);
   const [mobileFitResult, setMobileFitResult] = useState<MobileFitCheckResult | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [imageUrl, setImageUrl] = useState<string>(defaultValues?.image_url || '');
@@ -70,7 +60,6 @@ export function AddEventForm({ defaultValues, onCancel }: AddEventFormProps) {
   const { user, profile } = useAuth();
 
   const form = useForm({
-    // Resolver hook will be added here
     defaultValues: {
       title: defaultValues?.title || "",
       description: defaultValues?.description || "",
@@ -89,8 +78,13 @@ export function AddEventForm({ defaultValues, onCancel }: AddEventFormProps) {
         from: new Date(defaultValues.start),
         to: new Date(defaultValues.end),
       });
+    } else if (initialDate) {
+      setDate({
+        from: initialDate,
+        to: initialDate
+      });
     }
-  }, [defaultValues]);
+  }, [defaultValues, initialDate]);
 
   useEffect(() => {
     // Set initial allDay state if defaultValues are provided
@@ -98,15 +92,6 @@ export function AddEventForm({ defaultValues, onCancel }: AddEventFormProps) {
       setIsAllDay(defaultValues.allDay);
     }
   }, [defaultValues]);
-
-  const handleMobilePreviewCheck = () => {
-    const result = checkEventMobileFit(
-      form.getValues("title"),
-      form.getValues("description"),
-      form.getValues("location")
-    );
-    setMobileFitResult(result);
-  };
 
   function onSubmit(values: any) {
     setIsSubmitting(true);
@@ -149,22 +134,19 @@ export function AddEventForm({ defaultValues, onCancel }: AddEventFormProps) {
       user_id: userId,
     };
 
-    if (defaultValues) {
-      updateEvent(newEvent);
-      toast({
-        title: "Success",
-        description: "Event updated successfully",
+    onSave(newEvent)
+      .then(() => {
+        setIsSubmitting(false);
+      })
+      .catch((error) => {
+        console.error("Error saving event:", error);
+        toast({
+          title: "Error",
+          description: "Failed to save event",
+          variant: "destructive",
+        });
+        setIsSubmitting(false);
       });
-    } else {
-      addEvent(newEvent);
-      toast({
-        title: "Success",
-        description: "Event added successfully",
-      });
-    }
-    
-    setIsSubmitting(false);
-    onCancel();
   }
 
   const handleImageUpload = async (file: File) => {
@@ -327,6 +309,7 @@ export function AddEventForm({ defaultValues, onCancel }: AddEventFormProps) {
           <Popover>
             <PopoverTrigger asChild>
               <Button
+                id="date"
                 variant={"outline"}
                 className={cn(
                   "w-[240px] pl-3 text-left font-normal",
@@ -347,15 +330,12 @@ export function AddEventForm({ defaultValues, onCancel }: AddEventFormProps) {
             </PopoverTrigger>
             <PopoverContent className="w-auto p-0" align="start">
               <Calendar
+                initialFocus
                 mode="range"
                 defaultMonth={date?.from}
                 selected={date}
                 onSelect={setDate}
-                disabled={(date) =>
-                  date < new Date()
-                }
                 numberOfMonths={2}
-                pagedNavigation
               />
             </PopoverContent>
           </Popover>
@@ -396,6 +376,7 @@ export function AddEventForm({ defaultValues, onCancel }: AddEventFormProps) {
                   setImageUrl('');
                   form.setValue("image_url", "");
                 }}
+                type="button"
               >
                 <X className="h-4 w-4" />
               </Button>

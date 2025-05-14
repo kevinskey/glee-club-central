@@ -16,7 +16,7 @@ import { Header } from "@/components/layout/Header";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { CalendarPageHeader } from "@/components/calendar/CalendarPageHeader";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import { format, addDays, startOfWeek, startOfDay } from "date-fns";
+import { format, addDays, startOfWeek } from "date-fns";
 import { UpcomingEventsList } from "@/components/calendar/UpcomingEventsList";
 
 export default function CalendarPage() {
@@ -72,10 +72,11 @@ export default function CalendarPage() {
   };
 
   // Handler for adding event - use the actual store now
-  const handleAddEvent = async (eventData: any) => {
+  const handleAddEvent = async (eventData: any): Promise<void> => {
     try {
-      // Format the data to match what the store expects
+      // Format the data to match what the store expects and ensure id is present
       const newEvent = {
+        id: Math.random().toString(36).substring(2),
         title: eventData.title,
         description: eventData.description || "",
         date: eventData.date,
@@ -90,14 +91,16 @@ export default function CalendarPage() {
       await addEvent(newEvent);
       toast.success("Event created successfully");
       setIsCreateModalOpen(false);
+      return Promise.resolve();
     } catch (error) {
       console.error("Error adding event:", error);
       toast.error("Failed to create event");
+      return Promise.reject(error);
     }
   };
 
   // Handle updating event - use the actual store now
-  const handleUpdateEvent = async (eventData: CalendarEvent): Promise<boolean | void> => {
+  const handleUpdateEvent = async (eventData: CalendarEvent): Promise<boolean> => {
     try {
       const success = await updateEvent(eventData);
       if (success) {
@@ -113,7 +116,7 @@ export default function CalendarPage() {
   };
 
   // Handle deleting event - use the actual store now
-  const handleDeleteEvent = async (eventId: string): Promise<boolean | void> => {
+  const handleDeleteEvent = async (eventId: string): Promise<boolean> => {
     try {
       const success = await deleteEvent(eventId);
       if (success) {
@@ -224,7 +227,7 @@ export default function CalendarPage() {
             <EventModal 
               onClose={() => setIsCreateModalOpen(false)} 
               onSave={handleAddEvent}
-              initialDate={date}
+              initialDate={date || undefined}
             />
           </DialogContent>
         </Dialog>

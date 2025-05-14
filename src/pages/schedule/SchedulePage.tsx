@@ -98,9 +98,11 @@ export default function SchedulePage() {
         setIsAddEventOpen(false);
         toast.success("Event added successfully");
       }
+      return Promise.resolve();
     } catch (error) {
       console.error("Error adding event:", error);
       toast.error("Failed to add event");
+      return Promise.reject(error);
     }
   };
 
@@ -186,7 +188,6 @@ export default function SchedulePage() {
             />
           ) : (
             <EventList 
-              date={date}
               events={events}
               selectedEvent={selectedEvent}
               onSelectEvent={handleEventSelect}
@@ -204,7 +205,7 @@ export default function SchedulePage() {
           </DialogHeader>
           <div className="overflow-hidden">
             <AddEventForm 
-              onAddEvent={handleAddEvent}
+              onSave={handleAddEvent}
               onCancel={() => setIsAddEventOpen(false)}
               initialDate={date}
             />
