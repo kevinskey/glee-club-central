@@ -1,11 +1,7 @@
-
 import React, { useState, useEffect } from "react";
-import { Calendar as CalendarIcon, CalendarPlus } from "lucide-react";
+import { Calendar as CalendarIcon } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
-import { format } from "date-fns";
-import { Badge } from "@/components/ui/badge";
 import MonthlyCalendar from "@/components/dashboard/MonthlyCalendar";
-import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { ViewEventModal } from "@/components/calendar/ViewEventModal";
 import { EventModal } from "@/components/calendar/EventModal";
@@ -17,6 +13,7 @@ import { usePermissions } from '@/hooks/usePermissions';
 import { MobileHeader } from "@/components/layout/MobileHeader";
 import { Header } from "@/components/layout/Header";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { CalendarPageHeader } from "@/components/calendar/CalendarPageHeader";
 
 export default function CalendarPage() {
   const [date, setDate] = useState<Date | undefined>(new Date());
@@ -35,8 +32,8 @@ export default function CalendarPage() {
   const [currentYear, setCurrentYear] = useState(currentDate.getFullYear());
   const { isSuperAdmin } = usePermissions();
   
-  // Allow editing for all users on this page
-  const userCanEdit = true;
+  // Always allow users to create events - for this specific page
+  const userCanCreate = true;
   
   // Load real events on component mount
   useEffect(() => {
@@ -69,7 +66,7 @@ export default function CalendarPage() {
     setIsViewModalOpen(true);
   };
 
-  // Handle adding event - use the actual store now
+  // Handler for adding event - use the actual store now
   const handleAddEvent = async (eventData: any) => {
     try {
       // Format the data to match what the store expects
@@ -81,7 +78,8 @@ export default function CalendarPage() {
         location: eventData.location || "",
         type: eventData.type as EventType,
         start: new Date(eventData.date),
-        end: new Date(eventData.date)
+        end: new Date(eventData.date),
+        image_url: eventData.image_url || null
       };
       
       await addEvent(newEvent);
@@ -140,21 +138,8 @@ export default function CalendarPage() {
       {isMobile ? <MobileHeader /> : <Header />}
       
       <div className="container mx-auto px-1 py-2 space-y-3 h-full">
-        <div className="flex items-center justify-between mb-0">
-          <div className="flex items-center gap-2">
-            <CalendarIcon className="h-5 w-5" />
-            <h1 className="text-sm sm:text-lg font-semibold">Glee Club Calendar</h1>
-          </div>
-        </div>
-        
-        {/* Make the edit tools prominently displayed at the top for better visibility */}
-        <CalendarEditTools 
-          onAddEvent={() => setIsCreateModalOpen(true)}
-          selectedEventId={selectedEvent?.id}
-          onEditSelected={() => isViewModalOpen && setIsViewModalOpen(true)}
-          onDeleteSelected={() => selectedEvent && handleDeleteEvent(selectedEvent.id)}
-          className="mb-1 border-glee-purple/20 bg-glee-purple/5 dark:bg-glee-purple/10 sticky top-0 z-10"
-        />
+        {/* Center the calendar header */}
+        <CalendarPageHeader onAddEventClick={() => setIsCreateModalOpen(true)} />
         
         <div className="grid grid-cols-1 gap-1">
           {/* Calendar widget takes full width now */}
@@ -188,7 +173,7 @@ export default function CalendarPage() {
                 onClose={() => setIsViewModalOpen(false)} 
                 onUpdate={handleUpdateEvent}
                 onDelete={handleDeleteEvent}
-                userCanEdit={userCanEdit}
+                userCanEdit={userCanCreate}
               />
             </DialogContent>
           </Dialog>
