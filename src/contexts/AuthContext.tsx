@@ -1,5 +1,5 @@
 
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { AuthUser, AuthContextType, Profile } from '@/types/auth';
 import { supabase } from '@/integrations/supabase/client';
 import { User } from '@supabase/supabase-js';
@@ -28,6 +28,32 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [profile, setProfile] = useState<Profile | null>(null);
   const [session, setSession] = useState<any>(null);
   
+  // Function to fetch the user profile from Supabase
+  const fetchUserProfile = useCallback(async (userId: string) => {
+    try {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', userId)
+        .single();
+      
+      if (error) {
+        console.error("Error fetching profile:", error);
+        return null;
+      }
+      
+      if (data) {
+        setProfile(data);
+        return data;
+      }
+      
+      return null;
+    } catch (error) {
+      console.error("Unexpected error fetching profile:", error);
+      return null;
+    }
+  }, []);
+  
   // Initialize auth state
   useEffect(() => {
     // First, set up the auth state listener
@@ -37,6 +63,16 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         setSession(currentSession);
         setUser(currentSession?.user ? mapUserToAuthUser(currentSession.user) : null);
         setIsAuthenticated(!!currentSession);
+        
+        // Defer profile fetching to avoid potential race conditions
+        if (currentSession?.user) {
+          setTimeout(() => {
+            fetchUserProfile(currentSession.user.id);
+          }, 0);
+        } else {
+          setProfile(null);
+        }
+        
         setIsLoading(false);
       }
     );
@@ -48,6 +84,10 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         setSession(currentSession);
         setUser(currentSession?.user ? mapUserToAuthUser(currentSession.user) : null);
         setIsAuthenticated(!!currentSession);
+        
+        if (currentSession?.user) {
+          await fetchUserProfile(currentSession.user.id);
+        }
       } catch (error) {
         console.error("Error fetching auth session:", error);
       } finally {
@@ -60,7 +100,21 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     return () => {
       subscription.unsubscribe();
     };
-  }, []);
+  }, [fetchUserProfile]);
+
+  // Function to refresh user permissions and profile data
+  const refreshPermissions = useCallback(async () => {
+    if (!user?.id) return;
+    
+    try {
+      const updatedProfile = await fetchUserProfile(user.id);
+      if (updatedProfile) {
+        console.log("Profile refreshed successfully");
+      }
+    } catch (error) {
+      console.error("Error refreshing permissions:", error);
+    }
+  }, [user?.id, fetchUserProfile]);
 
   const login = async (email: string, password: string) => {
     setIsLoading(true);
@@ -75,6 +129,10 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       setUser(data.user ? mapUserToAuthUser(data.user) : null);
       setSession(data.session);
       setIsAuthenticated(true);
+      
+      if (data.user) {
+        await fetchUserProfile(data.user.id);
+      }
       
       return { error: null };
     } catch (error) {
@@ -179,6 +237,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     isAdmin,
     updatePassword,
     resetPassword,
+    refreshPermissions,
   };
 
   return <AuthContext.Provider value={contextValue}>{children}</AuthContext.Provider>;

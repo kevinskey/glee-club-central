@@ -1,211 +1,88 @@
 
-import { useIsMobile } from "@/hooks/use-mobile";
-import { CalendarEvent } from "@/types/calendar";
-import { isSameDay } from "date-fns";
+/**
+ * Utilities for mobile device detection and handling
+ */
 
 /**
- * Custom hook that returns optimized event handlers for both touch and mouse
- * Useful for interactive elements that need to work on both mobile and desktop
+ * Check if the current device is a mobile device based on user agent
  */
-export const useUnifiedInteractionHandlers = () => {
-  const isMobile = useIsMobile();
+export const isMobileDevice = (): boolean => {
+  const userAgent = navigator.userAgent;
+  return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(userAgent);
+};
 
-  const onPointerDown = (mouseHandler: (e: MouseEvent) => void, touchHandler: (e: TouchEvent) => void) => {
-    return (e: React.PointerEvent) => {
-      if (isMobile && e.pointerType === 'touch') {
-        // Convert to a TouchEvent or execute touch-specific logic
-        touchHandler(e.nativeEvent as unknown as TouchEvent);
-      } else {
-        mouseHandler(e.nativeEvent as MouseEvent);
-      }
+/**
+ * Check if the current device has touch capabilities
+ */
+export const hasTouchCapability = (): boolean => {
+  return 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+};
+
+/**
+ * Convert a pointer event to touch coordinates safely
+ * @param event The pointer or touch event
+ * @returns Object with x and y coordinates
+ */
+export const getEventCoordinates = (event: MouseEvent | TouchEvent | PointerEvent): { x: number, y: number } => {
+  if ('touches' in event && event.touches.length) {
+    // It's a TouchEvent
+    return {
+      x: event.touches[0].clientX,
+      y: event.touches[0].clientY
     };
-  };
-
-  const onClick = (mouseHandler: (e: MouseEvent) => void, touchHandler: (e: TouchEvent) => void) => {
-    return (e: React.MouseEvent | React.TouchEvent) => {
-      if (isMobile && e.type === 'touchstart') {
-        touchHandler(e.nativeEvent as TouchEvent);
-      } else {
-        mouseHandler(e.nativeEvent as MouseEvent);
-      }
+  } else if ('clientX' in event) {
+    // It's a MouseEvent or PointerEvent
+    return {
+      x: event.clientX,
+      y: event.clientY
     };
-  };
-
-  return {
-    onPointerDown,
-    onClick,
-    isMobile
-  };
-};
-
-/**
- * Adds mouse event handlers to an element
- * @param element HTML Element to attach handlers to
- * @param eventListeners Object containing event listeners to add
- */
-export const addMouseHandlers = (element: HTMLElement, eventListeners: Record<string, EventListener>) => {
-  if (!element) return;
-
-  Object.entries(eventListeners).forEach(([event, listener]) => {
-    element.addEventListener(event, listener);
-  });
-};
-
-/**
- * Removes mouse event handlers from an element
- * @param element HTML Element to remove handlers from
- * @param eventListeners Object containing event listeners to remove
- */
-export const removeMouseHandlers = (element: HTMLElement, eventListeners: Record<string, EventListener>) => {
-  if (!element) return;
-
-  Object.entries(eventListeners).forEach(([event, listener]) => {
-    element.removeEventListener(event, listener);
-  });
-};
-
-/**
- * Adds touch event handlers that mimic mouse events
- * @param element HTML Element to attach handlers to
- * @returns Object containing touch handlers that were added
- */
-export const addTouchHandlers = (element: HTMLElement) => {
-  const touchEvents: Record<string, EventListener> = {};
-  
-  if (!element) return touchEvents;
-  
-  // Convert mouse event to touch event
-  const mapTouch = (mouseHandler: (e: MouseEvent) => void) => {
-    return (e: TouchEvent) => {
-      // Prevent default to avoid double events
-      e.preventDefault();
-      
-      // Create a synthetic mouse event from touch data
-      const touch = e.touches[0] || e.changedTouches[0];
-      const mouseEvent = new MouseEvent('mousedown', {
-        bubbles: true,
-        cancelable: true,
-        view: window,
-        clientX: touch.clientX,
-        clientY: touch.clientY,
-        screenX: touch.screenX,
-        screenY: touch.screenY
-      });
-      
-      // Call the original mouse handler with our synthetic event
-      mouseHandler(mouseEvent);
-    };
-  };
-  
-  // We can't access event listeners directly in standard DOM
-  // Instead, let's just add touch handlers for common interactions
-  const addCommonTouchHandlers = () => {
-    // For elements that might have click handlers
-    if (element.onclick) {
-      const touchHandler = (e: TouchEvent) => {
-        e.preventDefault();
-        element.click();
-      };
-      element.addEventListener('touchend', touchHandler);
-      touchEvents.touchend = touchHandler;
-    }
-  };
-  
-  addCommonTouchHandlers();
-  return touchEvents;
-};
-
-/**
- * Removes touch event handlers from an element
- * @param element HTML Element to remove handlers from
- * @param touchEvents Object containing touch event listeners to remove
- */
-export const removeTouchHandlers = (element: HTMLElement, touchEvents: Record<string, EventListener>) => {
-  if (!element) return;
-
-  Object.entries(touchEvents).forEach(([event, listener]) => {
-    element.removeEventListener(event, listener);
-  });
-};
-
-/**
- * Gets events for a specific date from the events array
- */
-export function getEventsForDate(date: Date, events: CalendarEvent[]): CalendarEvent[] {
-  return events.filter(event => {
-    const eventDate = event.start instanceof Date ? event.start : new Date(event.start);
-    return isSameDay(eventDate, date);
-  });
-}
-
-/**
- * Formats time text for mobile display
- */
-export function formatTimeForMobile(timeStr: string): string {
-  if (!timeStr) return "";
-  
-  // Try to parse time if it's in HH:MM format
-  if (timeStr.includes(':')) {
-    const [hours, minutes] = timeStr.split(':').map(Number);
-    if (!isNaN(hours) && !isNaN(minutes)) {
-      const period = hours >= 12 ? 'PM' : 'AM';
-      const displayHours = hours % 12 || 12; // Convert 0 to 12 for 12 AM
-      return `${displayHours}:${minutes.toString().padStart(2, '0')} ${period}`;
-    }
   }
   
-  return timeStr;
-}
+  // Fallback
+  return { x: 0, y: 0 };
+};
 
 /**
- * Get mobile optimized settings for FullCalendar
+ * Detect the most appropriate swipe direction from a start and end point
  */
-export function getMobileCalendarSettings() {
-  return {
-    headerToolbar: false,
-    dayMaxEventRows: 2,
-    dayMaxEvents: 2,
-    eventTimeFormat: {
-      hour: 'numeric',
-      minute: '2-digit',
-      meridiem: 'short'
-    },
-    moreLinkText: count => `+${count} more`
-  };
-}
+export const getSwipeDirection = (startX: number, startY: number, endX: number, endY: number): 'left' | 'right' | 'up' | 'down' | null => {
+  const xDiff = startX - endX;
+  const yDiff = startY - endY;
+  
+  // Check if the swipe was primarily horizontal or vertical
+  if (Math.abs(xDiff) > Math.abs(yDiff)) {
+    return xDiff > 0 ? 'left' : 'right';
+  } else if (Math.abs(yDiff) > Math.abs(xDiff)) {
+    return yDiff > 0 ? 'up' : 'down';
+  }
+  
+  return null; // No significant direction detected
+};
 
 /**
- * Check if an event's text will fit nicely on mobile displays
+ * Check if screen size matches mobile viewport
  */
-export function checkEventMobileFit(title: string, location: string, description?: string): { 
-  fits: boolean;
-  issues: string[];
-  suggestions: string[];
-} {
-  const issues: string[] = [];
-  const suggestions: string[] = [];
+export const isMobileViewport = (): boolean => {
+  return window.innerWidth < 768;
+};
+
+/**
+ * Get device orientation: portrait or landscape
+ */
+export const getOrientation = (): 'portrait' | 'landscape' => {
+  return window.innerHeight > window.innerWidth ? 'portrait' : 'landscape';
+};
+
+/**
+ * Update CSS variables based on viewport and device characteristics
+ */
+export const updateCSSVariables = (): void => {
+  const isMobile = isMobileViewport();
+  const orientation = getOrientation();
   
-  // Check title length
-  if (title.length > 30) {
-    issues.push(`Title is too long (${title.length} characters) for mobile displays.`);
-    suggestions.push('Shorten the title to 30 characters or less for better mobile display.');
-  }
-  
-  // Check location length
-  if (location.length > 20) {
-    issues.push(`Location is too long (${location.length} characters) for mobile displays.`);
-    suggestions.push('Use abbreviations or shorter location names for mobile displays.');
-  }
-  
-  // Check description if provided
-  if (description && description.length > 100) {
-    issues.push(`Description is too long (${description.length} characters) for mobile displays.`);
-    suggestions.push('Keep descriptions concise for mobile users or provide key details only.');
-  }
-  
-  return {
-    fits: issues.length === 0,
-    issues,
-    suggestions
-  };
-}
+  document.documentElement.style.setProperty('--is-mobile', isMobile ? '1' : '0');
+  document.documentElement.style.setProperty('--orientation', orientation);
+  document.documentElement.classList.toggle('is-mobile', isMobile);
+  document.documentElement.classList.toggle('is-portrait', orientation === 'portrait');
+  document.documentElement.classList.toggle('is-landscape', orientation === 'landscape');
+};

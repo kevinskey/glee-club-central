@@ -5,7 +5,6 @@ import { useUsers } from './useUsers';
 import { useUserUpdate } from './useUserUpdate';
 import { useUserCreate } from './useUserCreate';
 import { useUserDelete } from './useUserDelete';
-import { createMemberRefreshFunction } from '@/components/members/MembersPageRefactor';
 
 // Re-export the User type
 export type { User };
@@ -23,17 +22,26 @@ export const useUserManagement = () => {
     getUserById
   } = useUsers();
   
-  // Create a wrapper function for refreshUsers that returns void
-  const refreshUsers = createMemberRefreshFunction(fetchUsers);
+  // Create a wrapper function for refreshUsers
+  const refreshUsers = async () => {
+    const fetchedUsers = await fetchUsers();
+    if (fetchedUsers) {
+      setUsers(fetchedUsers);
+      return fetchedUsers;
+    }
+    return [];
+  };
   
-  const { updateUser, updateUserStatus } = useUserUpdate(fetchUsers);
+  const { updateUser, updateUserStatus } = useUserUpdate(refreshUsers);
   const { addUser } = useUserCreate(setUsers);
   const { deleteUser } = useUserDelete(setUsers);
   
-  // Initialize users from the useUsers hook
-  if (users.length === 0) {
+  // Initialize users from the useUsers hook if not loaded yet
+  if (users.length === 0 && !isLoading) {
     fetchUsers().then(fetchedUsers => {
-      setUsers(fetchedUsers);
+      if (fetchedUsers) {
+        setUsers(fetchedUsers);
+      }
     });
   }
 
@@ -42,6 +50,7 @@ export const useUserManagement = () => {
     isLoading,
     error,
     fetchUsers,
+    refreshUsers,
     deleteUser,
     getUserCount,
     userCount,
