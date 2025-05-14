@@ -1,6 +1,5 @@
 
 import React, { useState, useEffect } from "react";
-import { PageHeaderWithToggle } from "@/components/ui/page-header-with-toggle";
 import { Calendar as CalendarIcon } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { format } from "date-fns";
@@ -14,7 +13,7 @@ import { CalendarEditTools } from "@/components/calendar/CalendarEditTools";
 import { useCalendarStore } from "@/hooks/useCalendarStore";
 import { toast } from "sonner";
 import { CalendarEvent, EventType } from "@/types/calendar";
-import { usePermissions } from "@/hooks/usePermissions";
+import { usePermissions } from '@/hooks/usePermissions';
 import { MobileHeader } from "@/components/layout/MobileHeader";
 import { Header } from "@/components/layout/Header";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -181,16 +180,9 @@ export default function CalendarPage() {
           <Card className="col-span-1 md:col-span-3">
             <CardHeader className="flex flex-row items-center justify-between">
               <CardTitle>Calendar</CardTitle>
-              <div className="flex items-center gap-2">
-                <Button variant="outline" size="sm" onClick={handlePrevMonth}>
-                  Previous
-                </Button>
-                <span className="text-sm font-medium">
-                  {format(new Date(currentYear, currentMonth, 1), 'MMMM yyyy')}
-                </span>
-                <Button variant="outline" size="sm" onClick={handleNextMonth}>
-                  Next
-                </Button>
+              {/* Removed the Previous/Next buttons as they're redundant with the arrows in CalendarToolbar */}
+              <div className="text-sm font-medium">
+                {format(new Date(currentYear, currentMonth, 1), 'MMMM yyyy')}
               </div>
             </CardHeader>
             <CardContent>

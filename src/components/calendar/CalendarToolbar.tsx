@@ -32,11 +32,11 @@ export const CalendarToolbar = ({
           Today
         </Button>
         <div className="flex items-center gap-1">
-          <Button variant="ghost" size="icon" onClick={onPrevClick}>
-            <ChevronLeft className="h-4 w-4" />
+          <Button variant="outline" size="icon" onClick={onPrevClick} aria-label="Previous">
+            <ChevronLeft className="h-5 w-5" />
           </Button>
-          <Button variant="ghost" size="icon" onClick={onNextClick}>
-            <ChevronRight className="h-4 w-4" />
+          <Button variant="outline" size="icon" onClick={onNextClick} aria-label="Next">
+            <ChevronRight className="h-5 w-5" />
           </Button>
         </div>
         <h2 className="text-lg font-semibold ml-2">
