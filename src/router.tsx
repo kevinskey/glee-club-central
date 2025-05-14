@@ -1,3 +1,4 @@
+
 import { createBrowserRouter, Navigate } from 'react-router-dom';
 import { Suspense, lazy } from 'react';
 
@@ -12,24 +13,16 @@ import NotFoundPage from './pages/NotFoundPage';
 import MediaLibraryPage from './pages/MediaLibraryPage';
 import SheetMusicPage from './pages/SheetMusicPage';
 import RecordingsPage from './pages/recordings/RecordingsPage';
-import AdminDashboard from './pages/admin/AdminDashboard';
 import PressKitPage from './pages/PressKitPage';
 import PrivacyPolicyPage from './pages/PrivacyPolicyPage';
 import TermsOfServicePage from './pages/TermsOfServicePage';
 import YoutubeVideosPage from './pages/YoutubeVideosPage';
-import SiteImagesPage from './pages/admin/SiteImagesPage';
 import SocialPage from './pages/SocialPage';
 
-// Import auth related pages
-import LoginPage from './pages/auth/LoginPage';
-import ResetPasswordPage from './pages/auth/ResetPasswordPage';
-import ForgotPasswordPage from './pages/auth/ForgotPasswordPage';
-import UpdatePasswordPage from './pages/UpdatePasswordPage';
-
-// Import admin pages
+// Admin components
 import AdminLayout from './layouts/AdminLayout';
-import AdminRegistrationPage from './pages/admin/AdminRegistrationPage';
-import AdminDashboardPage from './pages/admin/AdminDashboardPage';
+import AdminDashboard from './pages/admin/AdminDashboard';
+import SiteImagesPage from './pages/admin/SiteImagesPage';
 import AnalyticsPage from './pages/admin/AnalyticsPage';
 import UsersPage from './pages/admin/UsersPage';
 import EventCalendar from './pages/admin/EventCalendar';
@@ -37,11 +30,15 @@ import MediaLibrary from './pages/admin/MediaLibrary';
 import SettingsPage from './pages/admin/SettingsPage';
 import LandingPageSettingsPage from './pages/admin/LandingPageSettingsPage';
 
-// Shared components
-import { AdminRoute } from './components/auth/AdminRoute';
+// Import auth related pages
+import LoginPage from './pages/auth/LoginPage';
+import ResetPasswordPage from './pages/auth/ResetPasswordPage';
+import ForgotPasswordPage from './pages/auth/ForgotPasswordPage';
+import UpdatePasswordPage from './pages/UpdatePasswordPage';
+import AdminRegistrationPage from './pages/admin/AdminRegistrationPage';
 
-// Protected route components
-import RequireAdmin from './components/auth/RequireAdmin';
+// Import admin pages
+import { AdminRoute } from './components/auth/AdminRoute';
 
 // Lazy-loaded components
 const DashboardPage = lazy(() => import('./pages/DashboardPage'));
