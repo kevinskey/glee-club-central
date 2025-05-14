@@ -42,7 +42,7 @@ import { AdminRoute } from './components/auth/AdminRoute';
 
 // Lazy-loaded components
 const DashboardPage = lazy(() => import('./pages/DashboardPage'));
-const CalendarPage = lazy(() => import('./pages/dashboard/calendar'));
+const CalendarDashboard = lazy(() => import('./pages/dashboard/CalendarDashboard'));
 
 export const router = createBrowserRouter([
   {
@@ -123,7 +123,7 @@ export const router = createBrowserRouter([
         path: 'calendar',
         element: (
           <Suspense fallback={<div>Loading...</div>}>
-            <CalendarPage />
+            <CalendarDashboard />
           </Suspense>
         ),
       },
