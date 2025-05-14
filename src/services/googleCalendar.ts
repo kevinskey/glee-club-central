@@ -167,7 +167,7 @@ export const fetchGoogleCalendarToken = async (userId: string): Promise<GoogleCa
       access_token: data.access_token,
       refresh_token: data.refresh_token,
       expires_at: data.expires_at,
-      calendar_id: data.calendar_id || 'primary', // Default to 'primary' if calendar_id is missing
+      calendar_id: 'primary', // Default to 'primary' since this field doesn't exist in the database
       created_at: data.created_at,
       updated_at: data.updated_at
     };
