@@ -11,7 +11,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { EventFormFields, EventFormValues } from "./EventFormFields";
 import { EventImageUpload } from "./EventImageUpload";
 import { MobileFitCheck } from "./MobileFitCheck";
-import { checkEventMobileFit } from "@/utils/mobileUtils";
+import { checkEventMobileFit } from "@/utils/calendarMobileUtils";
 import { useIsMobile } from "@/hooks/use-mobile";
 
 export const formSchema = z.object({

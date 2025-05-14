@@ -1,3 +1,4 @@
+
 import React, { useRef, useEffect, useState } from "react";
 import FullCalendar from "@fullcalendar/react";
 import dayGridPlugin from "@fullcalendar/daygrid";
@@ -10,7 +11,7 @@ import { CalendarEvent } from "@/types/calendar";
 import { useCalendarNavigation } from "@/hooks/useCalendarNavigation";
 import { Card } from "@/components/ui/card";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { getMobileCalendarSettings } from "@/utils/mobileUtils";
+import { getMobileCalendarSettings } from "@/utils/calendarMobileUtils";
 import { Spinner } from "@/components/ui/spinner";
 
 interface CalendarMainProps {

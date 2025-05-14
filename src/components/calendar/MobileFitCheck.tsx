@@ -2,7 +2,7 @@
 import React from "react";
 import { AlertCircle } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { checkEventMobileFit } from "@/utils/mobileUtils";
+import { checkEventMobileFit } from "@/utils/calendarMobileUtils";
 
 interface MobileFitCheckProps {
   title: string;

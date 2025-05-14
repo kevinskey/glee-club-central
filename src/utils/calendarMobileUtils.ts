@@ -77,3 +77,56 @@ export function getCompressedEventTitle(title: string): string {
   
   return title.substring(0, 17) + '...';
 }
+
+/**
+ * Get mobile optimized settings for FullCalendar
+ */
+export function getMobileCalendarSettings() {
+  return {
+    headerToolbar: false,
+    dayMaxEventRows: 2,
+    dayMaxEvents: 2,
+    eventTimeFormat: {
+      hour: 'numeric',
+      minute: '2-digit',
+      meridiem: 'short'
+    },
+    moreLinkText: (count: number) => `+${count} more`
+  };
+}
+
+/**
+ * Check if an event's text will fit nicely on mobile displays
+ */
+export function checkEventMobileFit(title: string, location: string, description?: string): { 
+  fits: boolean;
+  issues: string[];
+  suggestions: string[];
+} {
+  const issues: string[] = [];
+  const suggestions: string[] = [];
+  
+  // Check title length
+  if (title.length > 30) {
+    issues.push(`Title is too long (${title.length} characters) for mobile displays.`);
+    suggestions.push('Shorten the title to 30 characters or less for better mobile display.');
+  }
+  
+  // Check location length
+  if (location.length > 20) {
+    issues.push(`Location is too long (${location.length} characters) for mobile displays.`);
+    suggestions.push('Use abbreviations or shorter location names for mobile displays.');
+  }
+  
+  // Check description if provided
+  if (description && description.length > 100) {
+    issues.push(`Description is too long (${description.length} characters) for mobile displays.`);
+    suggestions.push('Keep descriptions concise for mobile users or provide key details only.');
+  }
+  
+  return {
+    fits: issues.length === 0,
+    issues,
+    suggestions
+  };
+}

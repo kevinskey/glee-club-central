@@ -9,14 +9,9 @@ import { useNavigate } from "react-router-dom";
 import { FlickrGallery } from "@/components/media/FlickrGallery";
 import { PressKitMediaGrid } from "@/components/media/PressKitMediaGrid";
 import { PressKitDocuments } from "@/components/media/PressKitDocuments";
-import { VideoPlayer } from "@/components/videos/VideoPlayer";
-import { useYouTubeChannel } from "@/hooks/useYouTubeChannel";
-import { Spinner } from "@/components/ui/spinner";
 
 export default function PressKitPage() {
   const navigate = useNavigate();
-  const { videos, loading, error } = useYouTubeChannel({ maxResults: 3 });
-  const [selectedVideoIndex, setSelectedVideoIndex] = useState<number | null>(0);
   
   return (
     <Layout>
@@ -64,14 +59,6 @@ export default function PressKitPage() {
                 >
                   <Image className="h-4 w-4" />
                   Logos
-                </Button>
-                <Button 
-                  variant="outline"
-                  className="flex items-center gap-2 hover:bg-glee-purple hover:text-white"
-                  onClick={() => document.getElementById('videos')?.scrollIntoView({ behavior: 'smooth' })}
-                >
-                  <Music className="h-4 w-4" />
-                  Videos
                 </Button>
                 <Button 
                   variant="outline"
@@ -221,72 +208,6 @@ export default function PressKitPage() {
               <Button className="bg-glee-purple hover:bg-glee-spelman">
                 <DownloadCloud className="mr-2 h-4 w-4" /> Download Complete Logo Package
               </Button>
-            </div>
-          </div>
-        </div>
-
-        {/* Videos Section */}
-        <div id="videos" className="bg-gray-50 dark:bg-gray-900 py-16">
-          <div className="container mx-auto px-4">
-            <div className="max-w-4xl mx-auto">
-              <div className="flex items-center gap-3 mb-6">
-                <Music className="h-8 w-8 text-glee-accent" />
-                <h2 className="font-playfair text-3xl font-bold text-gray-800 dark:text-gray-100">Performance Videos</h2>
-              </div>
-              
-              <p className="text-lg mb-8 text-gray-700 dark:text-gray-300">
-                Selected performance videos showcasing the Spelman College Glee Club. These videos may be embedded in media coverage with proper attribution.
-              </p>
-
-              {loading ? (
-                <div className="flex justify-center py-12">
-                  <Spinner size="lg" />
-                </div>
-              ) : error ? (
-                <div className="bg-red-50 dark:bg-red-900/20 p-4 rounded-md text-red-600 dark:text-red-400 text-center mb-8">
-                  Unable to load videos. Please try again later.
-                </div>
-              ) : (
-                <div className="space-y-8">
-                  {selectedVideoIndex !== null && videos[selectedVideoIndex] && (
-                    <div className="mb-8">
-                      <VideoPlayer
-                        videoId={videos[selectedVideoIndex].id}
-                        title={videos[selectedVideoIndex].title}
-                        description={videos[selectedVideoIndex].description}
-                      />
-                    </div>
-                  )}
-                  
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                    {videos.map((video, index) => (
-                      <Card 
-                        key={video.id} 
-                        className={`cursor-pointer hover:shadow-md transition-shadow ${selectedVideoIndex === index ? 'ring-2 ring-glee-purple' : ''}`}
-                        onClick={() => setSelectedVideoIndex(index)}
-                      >
-                        <div className="relative">
-                          <AspectRatio ratio={16/9}>
-                            <img 
-                              src={video.thumbnailUrl} 
-                              alt={video.title}
-                              className="w-full h-full object-cover"
-                            />
-                          </AspectRatio>
-                          <div className="absolute inset-0 flex items-center justify-center bg-black/30 opacity-0 hover:opacity-100 transition-opacity">
-                            <Button size="sm" variant="secondary">
-                              Select Video
-                            </Button>
-                          </div>
-                        </div>
-                        <CardContent className="p-3">
-                          <h3 className="font-medium text-sm line-clamp-2">{video.title}</h3>
-                        </CardContent>
-                      </Card>
-                    ))}
-                  </div>
-                </div>
-              )}
             </div>
           </div>
         </div>

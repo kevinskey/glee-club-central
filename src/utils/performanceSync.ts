@@ -2,7 +2,7 @@
 import { supabase } from "@/integrations/supabase/client";
 import { updateHeroImageWithEvents } from "./heroImageUtils";
 import { PerformanceEvent } from "@/types/performance";
-import { CalendarEvent } from "@/types/calendar";
+import { CalendarEvent, EventType } from "@/types/calendar";
 
 /**
  * Fetches performance events from the calendar_events table
@@ -56,15 +56,15 @@ export const synchronizePerformances = async (): Promise<boolean> => {
     
     // Convert calendar events to the format expected by updateHeroImageWithEvents
     if (data && data.length > 0) {
-      // Convert event type to "event" to match CalendarEvent type requirements
-      const calendarEvents = data.map(event => ({
+      // Convert event type to match EventType for CalendarEvent requirements
+      const calendarEvents: CalendarEvent[] = data.map(event => ({
         id: event.id,
         title: event.title,
         start: new Date(event.date),
         end: new Date(event.date),
         description: event.description,
         location: event.location,
-        type: "event" as const, // Cast to proper EventType
+        type: event.type as EventType, // Cast to proper EventType
         image_url: event.image_url,
         allDay: event.allday
       }));
