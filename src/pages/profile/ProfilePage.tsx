@@ -30,7 +30,7 @@ export default function ProfilePage() {
   const [activeTab, setActiveTab] = useState("overview");
   const isMobile = useMedia('(max-width: 640px)');
   
-  // Auto sync profile data at regular intervals
+  // Auto sync profile data at regular intervals - using useEffect with proper dependency array
   useEffect(() => {
     if (!refreshPermissions) return;
     
