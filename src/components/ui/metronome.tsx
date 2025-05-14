@@ -6,7 +6,7 @@ import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { toast } from "sonner";
-import { audioLogger, initializeAudioSystem } from "@/utils/audioUtils";
+import { audioLogger } from "@/utils/audioUtils";
 
 interface MetronomeProps {
   isPlaying?: boolean;
@@ -26,12 +26,12 @@ export function Metronome({
   const [timeSignature, setTimeSignature] = useState(propTimeSignature);
   const [volume, setVolume] = useState(0.5);
   const [soundType, setSoundType] = useState<"click" | "beep" | "woodblock">("click");
-  const [audioLoaded, setAudioLoaded] = useState(false);
   
   const audioContextRef = useRef<AudioContext | null>(null);
-  const audioBuffersRef = useRef<{[key: string]: AudioBuffer}>({});
   const timerRef = useRef<number | null>(null);
   const beatCountRef = useRef(0);
+  const oscillatorsRef = useRef<OscillatorNode[]>([]);
+  const gainNodesRef = useRef<GainNode[]>([]);
   
   // Beats per measure based on time signature
   const getBeatsPerMeasure = () => {
@@ -61,116 +61,49 @@ export function Metronome({
     }
   };
 
-  // Load sound buffers once on component mount
+  // Initialize audio system once on component mount
   useEffect(() => {
-    let isMounted = true;
-    const audioContext = initAudioContext();
+    initAudioContext();
     
-    if (!audioContext) return;
-
-    const loadSounds = async () => {
-      try {
-        audioLogger.log('Metronome: Loading audio files...');
-        
-        // Create static sine wave buffers for sounds to avoid file loading issues
-        const createBeepBuffer = () => {
-          const sampleRate = audioContext.sampleRate;
-          const duration = 0.1; // 100ms
-          const bufferSize = sampleRate * duration;
-          const buffer = audioContext.createBuffer(1, bufferSize, sampleRate);
-          const data = buffer.getChannelData(0);
-          
-          // Create a sine wave
-          for (let i = 0; i < bufferSize; i++) {
-            // Frequency 880Hz for beep
-            data[i] = Math.sin(2 * Math.PI * 880 * i / sampleRate) * 
-                      // Add envelope for smoother sound
-                      (i < 0.01 * sampleRate ? i / (0.01 * sampleRate) : 
-                       i > (duration - 0.01) * sampleRate ? (bufferSize - i) / (0.01 * sampleRate) : 1);
-          }
-          
-          return buffer;
-        };
-        
-        // Create click sound
-        const createClickBuffer = () => {
-          const sampleRate = audioContext.sampleRate;
-          const duration = 0.05; // 50ms
-          const bufferSize = sampleRate * duration;
-          const buffer = audioContext.createBuffer(1, bufferSize, sampleRate);
-          const data = buffer.getChannelData(0);
-          
-          // Create a short sharp burst
-          for (let i = 0; i < bufferSize; i++) {
-            // Quick decay
-            data[i] = (1 - i / bufferSize) * 
-                      (Math.random() * 0.3 - 0.15 + // Add noise
-                      (i < 0.01 * sampleRate ? 0.8 : 0.2)); // Initial spike
-          }
-          
-          return buffer;
-        };
-        
-        // Create woodblock sound
-        const createWoodblockBuffer = () => {
-          const sampleRate = audioContext.sampleRate;
-          const duration = 0.15;
-          const bufferSize = sampleRate * duration;
-          const buffer = audioContext.createBuffer(1, bufferSize, sampleRate);
-          const data = buffer.getChannelData(0);
-          
-          // Frequencies for a woodblock-like sound
-          const frequencies = [1200, 800];
-          
-          for (let i = 0; i < bufferSize; i++) {
-            const t = i / sampleRate;
-            let sample = 0;
-            
-            // Mix frequencies
-            for (const freq of frequencies) {
-              sample += Math.sin(2 * Math.PI * freq * t) * Math.exp(-15 * t);
-            }
-            
-            // Add envelope
-            data[i] = sample * 0.5;
-          }
-          
-          return buffer;
-        };
-        
-        // Generate all our sounds programmatically
-        const clickBuffer = createClickBuffer();
-        const beepBuffer = createBeepBuffer();
-        const woodblockBuffer = createWoodblockBuffer();
-        
-        if (!isMounted) return;
-
-        audioBuffersRef.current = {
-          click: clickBuffer,
-          beep: beepBuffer,
-          woodblock: woodblockBuffer
-        };
-        
-        setAudioLoaded(true);
-        audioLogger.log("✅ Metronome: All sounds generated successfully");
-      } catch (error) {
-        audioLogger.error("Metronome: Failed to generate sounds:", error);
-        if (isMounted) {
-          toast.error("Failed to initialize metronome. Please refresh the page.");
-        }
-      }
-    };
-    
-    loadSounds();
-    
-    // Cleanup function
     return () => {
-      isMounted = false;
+      stopAllSounds();
+      
       if (timerRef.current !== null) {
         clearInterval(timerRef.current);
       }
+      
+      // Close context on unmount
+      if (audioContextRef.current && audioContextRef.current.state !== 'closed') {
+        audioContextRef.current.close().catch(console.error);
+      }
     };
   }, []);
+
+  // Clean up any lingering sounds
+  const stopAllSounds = () => {
+    // Stop all oscillators
+    oscillatorsRef.current.forEach(osc => {
+      try {
+        osc.stop();
+        osc.disconnect();
+      } catch (e) {
+        // Oscillator might already be stopped
+      }
+    });
+    
+    // Disconnect all gain nodes
+    gainNodesRef.current.forEach(gain => {
+      try {
+        gain.disconnect();
+      } catch (e) {
+        // Gain might already be disconnected
+      }
+    });
+    
+    // Clear the arrays
+    oscillatorsRef.current = [];
+    gainNodesRef.current = [];
+  };
 
   // Update isPlaying state when prop changes
   useEffect(() => {
@@ -183,14 +116,14 @@ export function Metronome({
   }, [propBpm]);
 
   // Play a sound with Web Audio API
-  const playSound = (soundName: string, isAccent: boolean = false) => {
+  const playSound = (isAccent: boolean = false) => {
     const audioContext = audioContextRef.current;
     if (!audioContext || audioContext.state !== 'running') {
       // Try to resume the context if it's suspended (mobile browser policy)
       if (audioContext && audioContext.state === 'suspended') {
         audioContext.resume().then(() => {
           // Retry playing after resuming
-          setTimeout(() => playSound(soundName, isAccent), 10);
+          setTimeout(() => playSound(isAccent), 10);
         }).catch(err => {
           audioLogger.error("Metronome: Failed to resume audio context:", err);
         });
@@ -199,27 +132,59 @@ export function Metronome({
       return;
     }
     
-    const buffer = audioBuffersRef.current[soundName || 'click'];
-    if (!buffer) {
-      audioLogger.error(`Metronome: Sound buffer not found for: ${soundName}`);
-      return;
-    }
-    
     try {
-      // Create a new source for each sound (required for Web Audio API)
-      const source = audioContext.createBufferSource();
-      source.buffer = buffer;
-      
-      // Create gain node for volume
+      // Create oscillator
+      const oscillator = audioContext.createOscillator();
       const gainNode = audioContext.createGain();
+      
+      // Store references for cleanup
+      oscillatorsRef.current.push(oscillator);
+      gainNodesRef.current.push(gainNode);
+      
+      // Configure sound based on type
+      switch (soundType) {
+        case "beep":
+          oscillator.type = "sine";
+          oscillator.frequency.value = isAccent ? 880 : 660;
+          break;
+        case "woodblock":
+          oscillator.type = "triangle";
+          oscillator.frequency.value = isAccent ? 1200 : 900;
+          break;
+        case "click":
+        default:
+          oscillator.type = "square";
+          oscillator.frequency.value = isAccent ? 1800 : 1600;
+          break;
+      }
+      
+      // Set volume based on accent and user volume setting
       gainNode.gain.value = isAccent ? Math.min(volume * 1.5, 1.0) : volume;
       
-      // Connect the nodes
-      source.connect(gainNode);
-      gainNode.connect(audioContext.destination);
+      // Create envelope for the sound
+      const now = audioContext.currentTime;
+      gainNode.gain.setValueAtTime(gainNode.gain.value, now);
       
-      // Start the sound
-      source.start(0);
+      if (soundType === 'click') {
+        gainNode.gain.exponentialRampToValueAtTime(0.001, now + 0.05);
+      } else {
+        gainNode.gain.exponentialRampToValueAtTime(0.001, now + (soundType === 'beep' ? 0.1 : 0.08));
+      }
+      
+      // Connect and start
+      oscillator.connect(gainNode);
+      gainNode.connect(audioContext.destination);
+      oscillator.start();
+      oscillator.stop(now + 0.15);
+      
+      // Clean up after sound finishes
+      setTimeout(() => {
+        const index = oscillatorsRef.current.indexOf(oscillator);
+        if (index !== -1) {
+          oscillatorsRef.current.splice(index, 1);
+          gainNodesRef.current.splice(index, 1);
+        }
+      }, 200);
     } catch (error) {
       audioLogger.error("Metronome: Error playing sound:", error);
     }
@@ -230,7 +195,7 @@ export function Metronome({
     const audioContext = audioContextRef.current;
     
     const startMetronome = () => {
-      if (!audioLoaded || !audioContext) {
+      if (!audioContext) {
         audioLogger.log("Metronome: Audio not ready yet, waiting...");
         return;
       }
@@ -257,11 +222,7 @@ export function Metronome({
         // First beat is accented
         const isFirstBeat = beatCountRef.current === 0;
         
-        if (isFirstBeat) {
-          playSound(soundType, true);
-        } else {
-          playSound(soundType, false);
-        }
+        playSound(isFirstBeat);
         
         // Update beat counter
         beatCountRef.current = (beatCountRef.current + 1) % beatsPerMeasure;
@@ -273,23 +234,16 @@ export function Metronome({
     } else if (timerRef.current !== null) {
       clearInterval(timerRef.current);
       timerRef.current = null;
+      stopAllSounds();
     }
     
     return () => {
       if (timerRef.current !== null) {
         clearInterval(timerRef.current);
+        stopAllSounds();
       }
     };
-  }, [isPlaying, bpm, timeSignature, soundType, volume, audioLoaded]);
-  
-  // Cleanup audio context on unmount
-  useEffect(() => {
-    return () => {
-      if (audioContextRef.current && audioContextRef.current.state !== 'closed') {
-        audioContextRef.current.close().catch(console.error);
-      }
-    };
-  }, []);
+  }, [isPlaying, bpm, timeSignature, soundType, volume]);
   
   if (!showControls) {
     return null; // Don't render UI if controls are hidden
@@ -308,11 +262,13 @@ export function Metronome({
     
     // Play a silent sound to unlock audio on iOS
     if (!isPlaying && audioContext) {
-      const silentBuffer = audioContext.createBuffer(1, 1, 22050);
-      const source = audioContext.createBufferSource();
-      source.buffer = silentBuffer;
-      source.connect(audioContext.destination);
-      source.start(0);
+      const silentOscillator = audioContext.createOscillator();
+      const silentGain = audioContext.createGain();
+      silentGain.gain.value = 0.001;
+      silentOscillator.connect(silentGain);
+      silentGain.connect(audioContext.destination);
+      silentOscillator.start();
+      silentOscillator.stop(audioContext.currentTime + 0.001);
     }
     
     setIsPlaying(!isPlaying);
@@ -330,9 +286,8 @@ export function Metronome({
             size="sm"
             variant={isPlaying ? "destructive" : "default"}
             onClick={handleToggleClick}
-            disabled={!audioLoaded}
           >
-            {!audioLoaded ? "Loading..." : isPlaying ? "Stop" : "Start"}
+            {isPlaying ? "Stop" : "Start"}
           </Button>
         </div>
         

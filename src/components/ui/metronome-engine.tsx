@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef, useCallback, MutableRefObject } from "react";
+import { audioLogger } from "@/utils/audioUtils";
 
 export type TimeSignature = "2/4" | "3/4" | "4/4" | "6/8";
 export type Subdivision = "quarter" | "eighth" | "triplet" | "sixteenth";
@@ -27,7 +28,7 @@ export function useMetronomeEngine({
   onTick,
   audioContextRef,
 }: MetronomeEngineOptions) {
-  const [audioLoaded, setAudioLoaded] = useState(false);
+  const [audioReady, setAudioReady] = useState(false);
   const [audioError, setAudioError] = useState<string | null>(null);
   
   // Internal refs
@@ -37,7 +38,6 @@ export function useMetronomeEngine({
   const timerID = useRef<number | null>(null);
   const currentBeat = useRef(0);
   const currentSubBeat = useRef(0);
-  const audioBuffers = useRef<{ [key: string]: AudioBuffer }>({});
   
   // Calculate beats based on time signature
   const getBeatsPerMeasure = useCallback(() => {
@@ -55,7 +55,7 @@ export function useMetronomeEngine({
     }
   }, [subdivision]);
   
-  // Load audio files
+  // Initialize audio system
   useEffect(() => {
     if (!audioContext.current) {
       try {
@@ -70,49 +70,19 @@ export function useMetronomeEngine({
         gainNode.current.gain.value = volume;
         gainNode.current.connect(audioContext.current.destination);
         
-        const ctx = audioContext.current;
-        
-        // Function to fetch and decode audio
-        const loadSoundFile = async (soundName: string, url: string) => {
-          try {
-            const response = await fetch(url);
-            const arrayBuffer = await response.arrayBuffer();
-            const audioBuffer = await ctx.decodeAudioData(arrayBuffer);
-            return audioBuffer;
-          } catch (error) {
-            console.error(`Failed to load sound: ${soundName}`, error);
-            throw error;
-          }
-        };
-        
-        // Load all the sound files
-        Promise.all([
-          loadSoundFile('click', '/sounds/click.wav'),
-          loadSoundFile('beep', '/sounds/beep.wav'),
-          loadSoundFile('woodblock', '/sounds/woodblock.wav'),
-        ]).then(([clickBuffer, beepBuffer, woodblockBuffer]) => {
-          audioBuffers.current = {
-            click: clickBuffer,
-            beep: beepBuffer,
-            woodblock: woodblockBuffer
-          };
-          setAudioLoaded(true);
-          console.log("✅ Metronome: Audio files loaded successfully");
-        }).catch(error => {
-          setAudioError("Failed to load audio files. Please check your connection.");
-          console.error("Metronome audio loading failed:", error);
-        });
+        setAudioReady(true);
+        audioLogger.log("Metronome engine: Audio context initialized");
         
       } catch (error) {
         console.error("Failed to initialize audio system:", error);
         setAudioError("Your browser doesn't support Web Audio API or it's restricted.");
-        setAudioLoaded(false);
+        setAudioReady(false);
       }
     }
     
     return () => {
       if (timerID.current) {
-        clearTimeout(timerID.current);
+        window.clearTimeout(timerID.current);
       }
     };
   }, [audioContextRef, volume]);
@@ -124,26 +94,75 @@ export function useMetronomeEngine({
     }
   }, [volume]);
   
+  // Create and play a sound
+  const createSound = (time: number, isAccented: boolean): void => {
+    if (!audioContext.current || !gainNode.current) return;
+
+    try {
+      // Create oscillator for the sound
+      const oscillator = audioContext.current.createOscillator();
+      const soundGain = audioContext.current.createGain();
+      
+      // Configure sound based on type
+      switch (soundType) {
+        case "click":
+          oscillator.type = "square";
+          oscillator.frequency.value = isAccented ? 1800 : 1600;
+          // Short click sound with quick attack and release
+          soundGain.gain.setValueAtTime(0, time);
+          soundGain.gain.linearRampToValueAtTime(isAccented ? 1.0 : 0.7, time + 0.001);
+          soundGain.gain.linearRampToValueAtTime(0, time + 0.05);
+          break;
+          
+        case "beep":
+          oscillator.type = "sine";
+          oscillator.frequency.value = isAccented ? 880 : 660;
+          // Slightly longer beep with softer attack
+          soundGain.gain.setValueAtTime(0, time);
+          soundGain.gain.linearRampToValueAtTime(isAccented ? 0.9 : 0.6, time + 0.005);
+          soundGain.gain.linearRampToValueAtTime(0, time + 0.1);
+          break;
+          
+        case "woodblock":
+          oscillator.type = "triangle";
+          oscillator.frequency.value = isAccented ? 1200 : 900;
+          // Woodblock-like sound
+          soundGain.gain.setValueAtTime(0, time);
+          soundGain.gain.linearRampToValueAtTime(isAccented ? 1.0 : 0.6, time + 0.002);
+          soundGain.gain.exponentialRampToValueAtTime(0.001, time + 0.08);
+          soundGain.gain.linearRampToValueAtTime(0, time + 0.09);
+          break;
+      }
+      
+      // Connect and start
+      oscillator.connect(soundGain);
+      soundGain.connect(gainNode.current);
+      
+      oscillator.start(time);
+      oscillator.stop(time + 0.1);
+      
+      // Auto-disconnect after sound finishes
+      setTimeout(() => {
+        soundGain.disconnect();
+        oscillator.disconnect();
+      }, (time - audioContext.current!.currentTime + 0.2) * 1000);
+      
+    } catch (error) {
+      console.error("Error creating metronome sound:", error);
+    }
+  };
+  
   // Schedule the next tick and play sound
   const scheduleSound = useCallback((time: number) => {
-    if (!audioContext.current || !gainNode.current || !audioBuffers.current[soundType]) {
+    if (!audioContext.current || !gainNode.current) {
       return;
     }
     
     const isFirstBeat = currentBeat.current === 0 && currentSubBeat.current === 0;
     const isMainBeat = currentSubBeat.current === 0;
     
-    const source = audioContext.current.createBufferSource();
-    source.buffer = audioBuffers.current[soundType];
-    
-    // Adjust volume for subdivisions
-    const subVolume = isMainBeat ? 1.0 : 0.75;
-    const subGain = audioContext.current.createGain();
-    subGain.gain.value = subVolume;
-    
-    source.connect(subGain);
-    subGain.connect(gainNode.current);
-    source.start(time);
+    // Create appropriate sound
+    createSound(time, isFirstBeat && accentFirstBeat);
     
     if (onTick) {
       onTick(currentBeat.current, currentSubBeat.current);
@@ -156,7 +175,7 @@ export function useMetronomeEngine({
       currentSubBeat.current = 0;
       currentBeat.current = (currentBeat.current + 1) % getBeatsPerMeasure();
     }
-  }, [soundType, getBeatsPerMeasure, getSubdivisionsPerBeat, onTick]);
+  }, [soundType, getBeatsPerMeasure, getSubdivisionsPerBeat, onTick, accentFirstBeat]);
   
   // Scheduler loop that keeps the metronome accurate
   const scheduler = useCallback(() => {
@@ -182,7 +201,7 @@ export function useMetronomeEngine({
   
   // Start or stop the metronome based on isPlaying
   useEffect(() => {
-    if (isPlaying && audioLoaded) {
+    if (isPlaying && audioReady) {
       // Resume audio context if it was suspended (browser policy)
       if (audioContext.current && audioContext.current.state === 'suspended') {
         audioContext.current.resume();
@@ -213,7 +232,7 @@ export function useMetronomeEngine({
         timerID.current = null;
       }
     };
-  }, [isPlaying, audioLoaded, scheduler]);
+  }, [isPlaying, audioReady, scheduler]);
   
   // Cleanup audio context on unmount
   useEffect(() => {
@@ -239,7 +258,7 @@ export function useMetronomeEngine({
   }, []);
   
   return {
-    audioLoaded,
+    audioLoaded: audioReady,
     audioError,
     resumeAudioSystem,
   };

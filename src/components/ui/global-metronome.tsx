@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Toggle } from "@/components/ui/toggle";
 import { motion, AnimatePresence } from "framer-motion";
-import { resumeAudioContext, audioLogger } from "@/utils/audioUtils";
+import { audioLogger, resumeAudioContext } from "@/utils/audioUtils";
 
 export function GlobalMetronome() {
   const [isExpanded, setIsExpanded] = useState(false);
