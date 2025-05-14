@@ -1,12 +1,12 @@
 
 import React from "react";
-import { cn } from "@/lib/utils";
-import { Link } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { LogIn } from "lucide-react";
 import {
   NavigationMenu,
   NavigationMenuContent,
   NavigationMenuItem,
+  NavigationMenuLink,
   NavigationMenuList,
   NavigationMenuTrigger,
   navigationMenuTriggerStyle,
@@ -15,33 +15,33 @@ import { Button } from "@/components/ui/button";
 
 interface NavigationLinksProps {
   className?: string;
-  onLinkClick?: () => void;
 }
 
-export function NavigationLinks({ className, onLinkClick }: NavigationLinksProps) {
+export function NavigationLinks({ className = "" }: NavigationLinksProps) {
+  const navigate = useNavigate();
+  
   const handleLinkClick = () => {
-    if (onLinkClick) {
-      onLinkClick();
-    }
+    // Close any open navigation menu items when a link is clicked
+    document.body.click();
   };
   
   return (
-    <NavigationMenu className={cn("", className)}>
-      <NavigationMenuList className="gap-4">
+    <NavigationMenu className={`${className}`}>
+      <NavigationMenuList>
         <NavigationMenuItem>
           <Link
-            to="/press-kit"
-            className="text-base md:text-lg font-inter font-medium text-muted-foreground transition-colors hover:text-foreground"
+            to="/"
+            className="text-base md:text-lg font-inter font-medium text-foreground hover:text-primary transition-colors"
             onClick={handleLinkClick}
           >
-            Press Kit
+            Home
           </Link>
         </NavigationMenuItem>
         
         <NavigationMenuItem>
           <Link
             to="/about"
-            className="text-base md:text-lg font-inter font-medium text-muted-foreground transition-colors hover:text-foreground"
+            className="text-base md:text-lg font-inter font-medium text-foreground hover:text-primary transition-colors"
             onClick={handleLinkClick}
           >
             About
@@ -51,7 +51,7 @@ export function NavigationLinks({ className, onLinkClick }: NavigationLinksProps
         <NavigationMenuItem>
           <Link
             to="/social"
-            className="text-base md:text-lg font-inter font-medium text-muted-foreground transition-colors hover:text-foreground"
+            className="text-base md:text-lg font-inter font-medium text-foreground hover:text-primary transition-colors"
             onClick={handleLinkClick}
           >
             Social
@@ -61,7 +61,7 @@ export function NavigationLinks({ className, onLinkClick }: NavigationLinksProps
         <NavigationMenuItem>
           <Link
             to="/contact"
-            className="text-base md:text-lg font-inter font-medium text-muted-foreground transition-colors hover:text-foreground"
+            className="text-base md:text-lg font-inter font-medium text-foreground hover:text-primary transition-colors"
             onClick={handleLinkClick}
           >
             Contact
@@ -69,8 +69,18 @@ export function NavigationLinks({ className, onLinkClick }: NavigationLinksProps
         </NavigationMenuItem>
         
         <NavigationMenuItem>
+          <Link
+            to="/press-kit"
+            className="text-base md:text-lg font-inter font-medium text-foreground hover:text-primary transition-colors"
+            onClick={handleLinkClick}
+          >
+            Press Kit
+          </Link>
+        </NavigationMenuItem>
+        
+        <NavigationMenuItem>
           <Button
-            variant="primary"
+            variant="spelman"
             size="sm"
             className="px-4 py-1 h-auto rounded-full"
             asChild

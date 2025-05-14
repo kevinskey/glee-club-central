@@ -2,13 +2,13 @@
 import React, { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/components/ui/use-toast";
-import { UserIcon, LockIcon } from "lucide-react";
+import { UserIcon, LockIcon, LogIn, UserPlus } from "lucide-react";
 
 export default function LoginPage() {
   const { signIn, signUp, isLoading } = useAuth();
@@ -93,103 +93,123 @@ export default function LoginPage() {
     {
       value: "signin",
       label: "Sign In",
+      icon: <LogIn className="h-4 w-4 mr-2" />,
       content: (
-        <>
-          <div className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
-              <Input
-                id="email"
-                placeholder="m@example.com"
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="password">Password</Label>
-              <Input
-                id="password"
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-              />
-            </div>
-            <Button disabled={isLoading} onClick={handleSignIn}>
-              {isLoading && (
-                <span className="mr-2 h-4 w-4 animate-spin">⌛</span>
-              )}
-              Sign In
-            </Button>
+        <form onSubmit={handleSignIn} className="space-y-4">
+          <div className="space-y-2">
+            <Label htmlFor="signin-email">Email</Label>
+            <Input
+              id="signin-email"
+              placeholder="m@example.com"
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              className="bg-background"
+            />
           </div>
-        </>
+          <div className="space-y-2">
+            <Label htmlFor="signin-password">Password</Label>
+            <Input
+              id="signin-password"
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              className="bg-background"
+            />
+          </div>
+          <Button 
+            type="submit" 
+            className="w-full" 
+            variant="spelman" 
+            disabled={isLoading}
+          >
+            {isLoading ? (
+              <span className="mr-2 h-4 w-4 animate-spin">⌛</span>
+            ) : (
+              <LogIn className="mr-2 h-4 w-4" />
+            )}
+            Sign In
+          </Button>
+        </form>
       )
     },
     {
       value: "signup",
       label: "Sign Up",
+      icon: <UserPlus className="h-4 w-4 mr-2" />,
       content: (
-        <>
-          <div className="space-y-4">
+        <form onSubmit={handleSignUp} className="space-y-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="firstName">First Name</Label>
+              <Label htmlFor="signup-firstName">First Name</Label>
               <Input
-                id="firstName"
+                id="signup-firstName"
                 placeholder="First Name"
                 value={firstName}
                 onChange={(e) => setFirstName(e.target.value)}
+                className="bg-background"
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="lastName">Last Name</Label>
+              <Label htmlFor="signup-lastName">Last Name</Label>
               <Input
-                id="lastName"
+                id="signup-lastName"
                 placeholder="Last Name"
                 value={lastName}
                 onChange={(e) => setLastName(e.target.value)}
+                className="bg-background"
               />
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
-              <Input
-                id="email"
-                placeholder="m@example.com"
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="password">Password</Label>
-              <Input
-                id="password"
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-              />
-            </div>
-            <Button disabled={isLoading} onClick={handleSignUp}>
-              {isLoading && (
-                <span className="mr-2 h-4 w-4 animate-spin">⌛</span>
-              )}
-              Sign Up
-            </Button>
           </div>
-        </>
+          <div className="space-y-2">
+            <Label htmlFor="signup-email">Email</Label>
+            <Input
+              id="signup-email"
+              placeholder="m@example.com"
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              className="bg-background"
+            />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="signup-password">Password</Label>
+            <Input
+              id="signup-password"
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              className="bg-background"
+            />
+          </div>
+          <Button 
+            type="submit" 
+            className="w-full" 
+            variant="spelman" 
+            disabled={isLoading}
+          >
+            {isLoading ? (
+              <span className="mr-2 h-4 w-4 animate-spin">⌛</span>
+            ) : (
+              <UserPlus className="mr-2 h-4 w-4" />
+            )}
+            Sign Up
+          </Button>
+        </form>
       )
     }
   ];
 
   return (
-    <div className="container relative hidden h-[800px] flex-col items-center justify-center md:grid lg:max-w-none lg:grid-cols-2 lg:px-0">
+    <div className="container relative min-h-[800px] flex items-center justify-center py-12 md:grid lg:max-w-none lg:grid-cols-2 lg:px-0">
       <Link
         to="/"
-        className="absolute right-4 top-4 md:right-8 md:top-8"
+        className="absolute right-4 top-4 md:right-8 md:top-8 text-foreground hover:text-primary transition-colors"
       >
         Back to Home
       </Link>
-      <div className="relative hidden h-full flex-col bg-muted p-10 text-white lg:flex">
-        <div className="absolute inset-0 bg-zinc-900" />
+      <div className="relative hidden h-full flex-col bg-muted p-10 text-white dark:border-r lg:flex">
+        <div className="absolute inset-0 bg-glee-spelman" />
         <div className="relative z-20 flex items-center text-lg font-medium">
           <UserIcon className="mr-2 h-6 w-6" /> Glee Club Portal
         </div>
@@ -204,32 +224,37 @@ export default function LoginPage() {
         </div>
       </div>
       <div className="lg:p-8">
-        <div className="mx-auto flex w-full flex-col justify-center space-y-6 sm:w-[350px]">
+        <div className="mx-auto flex w-full flex-col justify-center space-y-6 sm:w-[380px]">
           <div className="flex flex-col space-y-2 text-center">
-            <UserIcon className="mx-auto h-6 w-6" />
+            <UserIcon className="mx-auto h-6 w-6 text-glee-spelman" />
             <h1 className="text-2xl font-semibold tracking-tight">
-              Authenticate
+              Welcome to the Glee Club Portal
             </h1>
             <p className="text-sm text-muted-foreground">
-              Enter your email below to create or sign in to your account
+              Enter your details to access the member dashboard
             </p>
           </div>
-          <Tabs defaultValue="signin" className="w-full">
-            <TabsList className="grid w-full grid-cols-2">
-              {tabs.map((tab) => (
-                <TabsTrigger key={tab.value} value={tab.value}>
-                  {tab.label}
-                </TabsTrigger>
-              ))}
-            </TabsList>
-            {tabs.map((tab) => (
-              <TabsContent key={tab.value} value={tab.value} className="mt-8">
-                {tab.content}
-              </TabsContent>
-            ))}
-          </Tabs>
+          <Card>
+            <CardContent className="pt-6">
+              <Tabs defaultValue="signin" className="w-full">
+                <TabsList className="grid w-full grid-cols-2">
+                  {tabs.map((tab) => (
+                    <TabsTrigger key={tab.value} value={tab.value} className="flex items-center">
+                      {tab.icon}
+                      {tab.label}
+                    </TabsTrigger>
+                  ))}
+                </TabsList>
+                {tabs.map((tab) => (
+                  <TabsContent key={tab.value} value={tab.value} className="mt-6">
+                    {tab.content}
+                  </TabsContent>
+                ))}
+              </Tabs>
+            </CardContent>
+          </Card>
           <p className="px-8 text-center text-sm text-muted-foreground">
-            By continuing, you are creating an account and agree to our{" "}
+            By continuing, you agree to our{" "}
             <Link
               to="/terms"
               className="hover:text-foreground underline underline-offset-4"

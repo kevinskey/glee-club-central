@@ -63,7 +63,8 @@ module.exports = {
           darkPurple: "#7E69AB",
           lightPurple: "#D6BCFA",
           gray: "#8E9196",
-        }
+        },
+        'glee-spelman': "#FF6B00"
       },
       borderRadius: {
         lg: "var(--radius)",
