@@ -162,7 +162,6 @@ export default function CalendarPage() {
       <div className="container mx-auto p-4 space-y-6">
         <PageHeaderWithToggle
           title="Glee Club Calendar"
-          description="View upcoming rehearsals, performances and events"
           icon={<CalendarIcon className="h-6 w-6" />}
         />
         
@@ -176,8 +175,8 @@ export default function CalendarPage() {
         />
         
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {/* Calendar widget */}
-          <Card className="md:col-span-2">
+          {/* Calendar widget takes full width now */}
+          <Card className="col-span-1 md:col-span-3">
             <CardHeader className="flex flex-row items-center justify-between">
               <CardTitle>Calendar</CardTitle>
               <div className="flex items-center gap-2">
@@ -197,56 +196,6 @@ export default function CalendarPage() {
                 events={transformedEvents}
                 className=""
               />
-            </CardContent>
-          </Card>
-          
-          {/* Events for selected date */}
-          <Card>
-            <CardHeader>
-              <CardTitle>
-                {date ? format(date, "MMMM d, yyyy") : "Select a date"}
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              {eventsForSelectedDate.length === 0 ? (
-                <p className="text-muted-foreground">No events scheduled for this date</p>
-              ) : (
-                <div className="space-y-4">
-                  {eventsForSelectedDate.map((event) => (
-                    <div 
-                      key={event.id} 
-                      className="border rounded-lg p-3 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
-                      onClick={() => handleEventClick(event)}
-                    >
-                      <div className="flex justify-between items-start">
-                        <div>
-                          <h3 className="font-medium">{event.title}</h3>
-                          <p className="text-sm text-muted-foreground">
-                            {event.time} • {event.location}
-                          </p>
-                        </div>
-                        <Badge 
-                          variant={
-                            event.type === "concert" ? "default" : 
-                            event.type === "rehearsal" ? "secondary" :
-                            "outline"
-                          }
-                        >
-                          {event.type}
-                        </Badge>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
-              <div className="mt-4">
-                <Button 
-                  className="w-full bg-glee-purple hover:bg-glee-purple/90" 
-                  onClick={() => setIsCreateModalOpen(true)}
-                >
-                  Add Event
-                </Button>
-              </div>
             </CardContent>
           </Card>
         </div>
