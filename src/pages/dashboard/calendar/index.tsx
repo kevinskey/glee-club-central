@@ -3,10 +3,9 @@ import React, { useState } from "react";
 import { PageHeader } from "@/components/ui/page-header";
 import { Calendar as CalendarIcon } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Calendar } from "@/components/ui/calendar";
 import { format } from "date-fns";
 import { Badge } from "@/components/ui/badge";
-import Calendar from "@/components/dashboard/Calendar";
+import { MonthlyCalendar } from "@/components/dashboard/Calendar";
 import { Button } from "@/components/ui/button";
 
 export default function CalendarPage() {
@@ -86,7 +85,7 @@ export default function CalendarPage() {
             <CardTitle>Calendar</CardTitle>
           </CardHeader>
           <CardContent>
-            <Calendar
+            <MonthlyCalendar
               month={currentMonth} 
               year={currentYear}
               onPrevMonth={handlePrevMonth}

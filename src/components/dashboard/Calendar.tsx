@@ -1,4 +1,3 @@
-
 import React from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
@@ -65,7 +64,7 @@ const Day: React.FC<DayProps> = ({ date, isCurrentMonth, isToday, events = [] })
   );
 };
 
-export const Calendar: React.FC<CalendarProps> = ({
+export const MonthlyCalendar: React.FC<CalendarProps> = ({
   month,
   year,
   onPrevMonth,
@@ -168,4 +167,5 @@ export const Calendar: React.FC<CalendarProps> = ({
   );
 };
 
-export default Calendar;
+// Keep the default export for backward compatibility
+export default MonthlyCalendar;
