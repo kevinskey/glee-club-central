@@ -22,20 +22,6 @@ export function CalendarEditTools({
 }: CalendarEditToolsProps) {
   const isMobile = useIsMobile();
   
-  if (isMobile) {
-    return (
-      <div className={`fixed bottom-24 right-4 z-50 ${className}`}>
-        <Button
-          onClick={onAddEvent}
-          size="icon"
-          className="rounded-full h-14 w-14 shadow-lg bg-glee-purple hover:bg-glee-purple/90"
-        >
-          <CalendarPlus className="h-7 w-7" />
-        </Button>
-      </div>
-    );
-  }
-  
   return (
     <Card className={`p-2 flex gap-2 border-2 border-glee-purple/30 ${className}`}>
       <Button onClick={onAddEvent} className="bg-glee-purple hover:bg-glee-purple/90 font-medium">

@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { Calendar as CalendarIcon, CalendarPlus } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
@@ -194,18 +193,7 @@ export default function CalendarPage() {
           </Dialog>
         )}
         
-        {/* Add another floating button for mobile UI */}
-        {isMobile && (
-          <div className="fixed bottom-24 right-4 z-50">
-            <Button
-              onClick={() => setIsCreateModalOpen(true)}
-              size="icon"
-              className="rounded-full h-14 w-14 shadow-lg bg-glee-purple hover:bg-glee-purple/90"
-            >
-              <CalendarPlus className="h-7 w-7" />
-            </Button>
-          </div>
-        )}
+        {/* Removed the duplicate floating button for mobile UI */}
       </div>
     </>
   );
