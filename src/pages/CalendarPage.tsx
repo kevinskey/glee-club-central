@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { Footer } from "@/components/landing/Footer";
 import { CalendarHeader } from "@/components/calendar/CalendarHeader";
