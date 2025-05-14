@@ -104,7 +104,7 @@ export function PerformanceSection() {
           <div className="absolute left-0 top-0 z-10 px-4 md:px-6 py-4 flex items-center justify-between w-full">
             <h2 className="text-2xl font-bold tracking-tight text-white">Upcoming Performances</h2>
             
-            <Link to="/calendar">
+            <Link to="/dashboard/calendar">
               <Button size="sm" variant="outline" className="bg-white/20 backdrop-blur-sm text-white border-white/40 hover:bg-white/30">
                 View All
                 <ArrowRight className="ml-2 h-4 w-4" />
@@ -130,51 +130,51 @@ export function PerformanceSection() {
                 direction: "ltr",
               }}
             >
-              <CarouselContent className="-ml-2 md:-ml-4">
+              <CarouselContent className="-ml-0 md:-ml-0">
                 {events.map(event => (
-                  <CarouselItem key={event.id} className="pl-2 md:pl-4 md:basis-1/2 lg:basis-1/3">
+                  <CarouselItem key={event.id} className="pl-0 md:pl-0 md:basis-1/2 lg:basis-1/3">
                     <div className="p-1">
                       <Card className="overflow-hidden h-full border-none bg-black/40 backdrop-blur-sm text-white">
-                        <div className="relative h-80 bg-muted">
-                          {!imageErrors[event.id] ? (
-                            <img 
-                              src={event.image} 
-                              alt={event.title} 
-                              className="absolute inset-0 w-full h-full object-cover"
-                              onError={() => handleImageError(event.id)}
-                            />
-                          ) : (
-                            <div className="absolute inset-0 flex items-center justify-center bg-glee-purple/30">
-                              <div className="flex flex-col items-center justify-center">
-                                <Calendar className="h-16 w-16 text-white/70 mb-2" />
-                                <p className="text-white/80 text-lg">Performance Event</p>
-                              </div>
-                            </div>
-                          )}
-                          <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/60 to-black/10 flex flex-col justify-end p-6">
-                            <div className="w-full">
-                              <h3 className="font-bold text-white text-2xl md:text-3xl leading-tight text-shadow mb-3">{event.title}</h3>
-                              <div className="flex flex-wrap items-center gap-4 text-white text-sm md:text-base mb-4">
-                                <span className="bg-glee-purple px-3 py-1 rounded-md font-semibold">
-                                  {formatEventDate(event.date)}
-                                </span>
-                                <div className="flex items-center">
-                                  <Clock className="h-4 w-4 mr-1.5 text-white/80" />
-                                  <span>7:00 PM</span>
-                                </div>
-                                <div className="flex items-center">
-                                  <MapPin className="h-4 w-4 mr-1.5 text-white/80" />
-                                  <span className="truncate max-w-[150px]">{event.location}</span>
+                        <Link to={`/dashboard/calendar?event=${event.id}`} className="block h-full">
+                          <div className="relative h-80 bg-muted w-full">
+                            {!imageErrors[event.id] ? (
+                              <img 
+                                src={event.image} 
+                                alt={event.title} 
+                                className="absolute inset-0 w-full h-full object-cover"
+                                onError={() => handleImageError(event.id)}
+                              />
+                            ) : (
+                              <div className="absolute inset-0 flex items-center justify-center bg-glee-purple/30">
+                                <div className="flex flex-col items-center justify-center">
+                                  <Calendar className="h-16 w-16 text-white/70 mb-2" />
+                                  <p className="text-white/80 text-lg">Performance Event</p>
                                 </div>
                               </div>
-                              <Link to={`/calendar?event=${event.id}`} className="w-full">
+                            )}
+                            <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/60 to-black/10 flex flex-col justify-end p-6">
+                              <div className="w-full">
+                                <h3 className="font-bold text-white text-2xl md:text-3xl leading-tight text-shadow mb-3">{event.title}</h3>
+                                <div className="flex flex-wrap items-center gap-4 text-white text-sm md:text-base mb-4">
+                                  <span className="bg-glee-purple px-3 py-1 rounded-md font-semibold">
+                                    {formatEventDate(event.date)}
+                                  </span>
+                                  <div className="flex items-center">
+                                    <Clock className="h-4 w-4 mr-1.5 text-white/80" />
+                                    <span>7:00 PM</span>
+                                  </div>
+                                  <div className="flex items-center">
+                                    <MapPin className="h-4 w-4 mr-1.5 text-white/80" />
+                                    <span className="truncate max-w-[150px]">{event.location}</span>
+                                  </div>
+                                </div>
                                 <Button variant="outline" className="w-full bg-white/10 border-white/20 hover:bg-white/20 text-white">
                                   View Details
                                 </Button>
-                              </Link>
+                              </div>
                             </div>
                           </div>
-                        </div>
+                        </Link>
                       </Card>
                     </div>
                   </CarouselItem>
