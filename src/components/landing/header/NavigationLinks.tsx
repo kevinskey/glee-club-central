@@ -11,6 +11,7 @@ import {
   NavigationMenuTrigger,
   navigationMenuTriggerStyle,
 } from "@/components/ui/navigation-menu";
+import { Button } from "@/components/ui/button";
 
 interface NavigationLinksProps {
   className?: string;
@@ -68,14 +69,21 @@ export function NavigationLinks({ className, onLinkClick }: NavigationLinksProps
         </NavigationMenuItem>
         
         <NavigationMenuItem>
-          <Link
-            to="/login"
-            className="text-base md:text-lg font-inter font-medium flex items-center gap-1 text-primary hover:text-primary/80 transition-colors"
-            onClick={handleLinkClick}
+          <Button
+            variant="primary"
+            size="sm"
+            className="px-4 py-1 h-auto rounded-full"
+            asChild
           >
-            <LogIn className="h-4 w-4" />
-            Login
-          </Link>
+            <Link
+              to="/login"
+              className="text-base md:text-lg font-inter font-medium flex items-center gap-1"
+              onClick={handleLinkClick}
+            >
+              <LogIn className="h-4 w-4" />
+              Login
+            </Link>
+          </Button>
         </NavigationMenuItem>
       </NavigationMenuList>
     </NavigationMenu>
