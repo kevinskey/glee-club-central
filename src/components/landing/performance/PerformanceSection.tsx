@@ -12,7 +12,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { CalendarClock, MapPin, ArrowRight } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import { formatDate } from "@/utils/format";
+import { formatDate } from "@/lib/utils";
 
 export interface PerformanceEvent {
   id: string;
@@ -61,7 +61,7 @@ export function PerformanceSection() {
   // Format date for display
   const formatEventDate = (dateStr: string) => {
     try {
-      return formatDate(new Date(dateStr), "EEEE, MMMM d, yyyy");
+      return formatDate(new Date(dateStr));
     } catch (e) {
       return dateStr;
     }
