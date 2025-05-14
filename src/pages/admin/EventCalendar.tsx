@@ -1,20 +1,240 @@
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { PageHeader } from "@/components/ui/page-header";
-import { Calendar } from "lucide-react";
+import { Calendar, CalendarPlus, Cloud, RefreshCcw } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { useCalendarStore } from "@/hooks/useCalendarStore";
+import { CalendarMain } from "@/components/calendar/CalendarMain";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { EventModal } from "@/components/calendar/EventModal";
+import { ViewEventModal } from "@/components/calendar/ViewEventModal";
+import { Spinner } from "@/components/ui/spinner";
+import { useAuth } from "@/contexts/AuthContext";
+import { toast } from "sonner";
+import { CalendarEvent } from "@/types/calendar";
+import { connectToGoogleCalendar, syncWithGoogleCalendar, fetchGoogleCalendarToken } from "@/services/googleCalendar";
 
 const EventCalendar: React.FC = () => {
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [isViewModalOpen, setIsViewModalOpen] = useState(false);
+  const [selectedEvent, setSelectedEvent] = useState<CalendarEvent | null>(null);
+  const [selectedDate, setSelectedDate] = useState<Date | null>(null);
+  const [calendarView, setCalendarView] = useState<'dayGridMonth' | 'timeGridWeek' | 'timeGridDay' | 'listWeek'>('dayGridMonth');
+  const [currentDate, setCurrentDate] = useState(new Date());
+  const [isSyncing, setIsSyncing] = useState(false);
+  
+  const { events, fetchEvents, addEvent, updateEvent, deleteEvent } = useCalendarStore();
+  const { user } = useAuth();
+  
+  // Load calendar events on component mount
+  useEffect(() => {
+    const loadEvents = async () => {
+      try {
+        await fetchEvents();
+      } catch (error) {
+        console.error("Error loading calendar events:", error);
+        toast.error("Failed to load calendar events");
+      }
+    };
+    
+    loadEvents();
+  }, [fetchEvents]);
+  
+  // Event handlers
+  const handleDateClick = (info: any) => {
+    setSelectedDate(info.date);
+    setIsCreateModalOpen(true);
+  };
+  
+  const handleEventClick = (info: any) => {
+    const eventId = info.event.id;
+    const clickedEvent = events.find(e => e.id === eventId);
+    
+    if (clickedEvent) {
+      setSelectedEvent(clickedEvent);
+      setIsViewModalOpen(true);
+    }
+  };
+  
+  const handleCreateEvent = async (eventData: any) => {
+    try {
+      await addEvent(eventData);
+      setIsCreateModalOpen(false);
+      toast.success("Event created successfully");
+    } catch (error) {
+      console.error("Error creating event:", error);
+      toast.error("Failed to create event");
+    }
+  };
+  
+  const handleUpdateEvent = async (eventData: CalendarEvent) => {
+    try {
+      await updateEvent(eventData);
+      setIsViewModalOpen(false);
+      setSelectedEvent(null);
+      toast.success("Event updated successfully");
+    } catch (error) {
+      console.error("Error updating event:", error);
+      toast.error("Failed to update event");
+    }
+  };
+  
+  const handleDeleteEvent = async (eventId: string) => {
+    try {
+      await deleteEvent(eventId);
+      setIsViewModalOpen(false);
+      setSelectedEvent(null);
+      toast.success("Event deleted successfully");
+    } catch (error) {
+      console.error("Error deleting event:", error);
+      toast.error("Failed to delete event");
+    }
+  };
+  
+  const handleGoogleCalendarSync = async () => {
+    if (!user) {
+      toast.error("You must be logged in to sync with Google Calendar");
+      return;
+    }
+    
+    try {
+      setIsSyncing(true);
+      
+      // Check if user has already connected Google Calendar
+      const token = await fetchGoogleCalendarToken(user.id);
+      
+      if (!token) {
+        // If no token, initiate OAuth flow
+        window.location.href = connectToGoogleCalendar();
+        return;
+      }
+      
+      // If token exists, sync events
+      const success = await syncWithGoogleCalendar("primary", token.access_token);
+      
+      if (success) {
+        // Reload events after sync
+        await fetchEvents();
+      }
+    } catch (error) {
+      console.error("Error syncing with Google Calendar:", error);
+      toast.error("Failed to sync with Google Calendar");
+    } finally {
+      setIsSyncing(false);
+    }
+  };
+
   return (
     <div className="container mx-auto px-4 py-8">
-      <PageHeader
-        title="Event Calendar"
-        description="Manage Glee Club events and schedule"
-        icon={<Calendar className="h-6 w-6" />}
-      />
-      
-      <div className="mt-8">
-        <p className="text-muted-foreground">Event calendar management is under construction.</p>
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6">
+        <PageHeader
+          title="Event Calendar"
+          description="Manage Glee Club events and schedule"
+          icon={<Calendar className="h-6 w-6" />}
+        />
+        
+        <div className="flex gap-2 mt-4 sm:mt-0">
+          <Button 
+            onClick={() => setIsCreateModalOpen(true)}
+            className="bg-glee-purple hover:bg-glee-purple/90"
+          >
+            <CalendarPlus className="mr-2 h-4 w-4" />
+            Add Event
+          </Button>
+          
+          <Button 
+            variant="outline" 
+            onClick={handleGoogleCalendarSync}
+            disabled={isSyncing}
+          >
+            {isSyncing ? (
+              <Spinner className="mr-2 h-4 w-4" />
+            ) : (
+              <Cloud className="mr-2 h-4 w-4" />
+            )}
+            Sync Calendar
+          </Button>
+        </div>
       </div>
+      
+      <div className="mt-6">
+        {events.length === 0 ? (
+          <div className="flex flex-col items-center justify-center p-10 bg-white dark:bg-gray-800 rounded-lg shadow">
+            <Calendar className="h-12 w-12 text-gray-400 mb-4" />
+            <h3 className="text-xl font-medium mb-2">No events scheduled</h3>
+            <p className="text-gray-500 dark:text-gray-400 mb-6">
+              Click the "Add Event" button to create your first calendar event.
+            </p>
+            <Button 
+              onClick={() => setIsCreateModalOpen(true)}
+              className="bg-glee-purple hover:bg-glee-purple/90"
+            >
+              <CalendarPlus className="mr-2 h-4 w-4" />
+              Add Your First Event
+            </Button>
+          </div>
+        ) : (
+          <CalendarMain
+            events={events}
+            calendarView={calendarView}
+            currentDate={currentDate}
+            setCurrentDate={setCurrentDate}
+            userCanCreate={true}
+            handleDateClick={handleDateClick}
+            handleEventClick={handleEventClick}
+            handleEventDrop={(info) => {
+              // Handle event drag and drop
+              const eventId = info.event.id;
+              const updatedEvent = events.find(e => e.id === eventId);
+              if (updatedEvent) {
+                updateEvent({
+                  ...updatedEvent,
+                  start: info.event.start,
+                  end: info.event.end || info.event.start
+                });
+              }
+            }}
+            handleEventResize={(info) => {
+              // Handle event resize
+              const eventId = info.event.id;
+              const updatedEvent = events.find(e => e.id === eventId);
+              if (updatedEvent) {
+                updateEvent({
+                  ...updatedEvent,
+                  start: info.event.start,
+                  end: info.event.end
+                });
+              }
+            }}
+          />
+        )}
+      </div>
+      
+      {/* Create Event Modal */}
+      <Dialog open={isCreateModalOpen} onOpenChange={setIsCreateModalOpen}>
+        <DialogContent className="sm:max-w-md">
+          <EventModal 
+            onClose={() => setIsCreateModalOpen(false)} 
+            onSave={handleCreateEvent} 
+            initialDate={selectedDate}
+          />
+        </DialogContent>
+      </Dialog>
+      
+      {/* View/Edit Event Modal */}
+      {selectedEvent && (
+        <Dialog open={isViewModalOpen} onOpenChange={setIsViewModalOpen}>
+          <DialogContent className="sm:max-w-md">
+            <ViewEventModal 
+              event={selectedEvent} 
+              onClose={() => setIsViewModalOpen(false)} 
+              onUpdate={handleUpdateEvent}
+              onDelete={handleDeleteEvent}
+              userCanEdit={true}
+            />
+          </DialogContent>
+        </Dialog>
+      )}
     </div>
   );
 };
