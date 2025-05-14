@@ -35,17 +35,17 @@ const MonthlyCalendar: React.FC<MonthlyCalendarProps> = ({ events, className }) 
 
   const renderHeader = () => {
     return (
-      <div className="flex items-center justify-between p-2">
+      <div className="flex items-center justify-between p-1 sm:p-2">
         <Button 
           variant="outline" 
           size="icon" 
           onClick={prevMonth}
           aria-label="Previous month"
-          className="h-8 w-8 sm:h-10 sm:w-10"
+          className="h-7 w-7"
         >
-          <ChevronLeft className="h-4 w-4 sm:h-5 sm:w-5" />
+          <ChevronLeft className="h-4 w-4" />
         </Button>
-        <h2 className="text-lg font-medium">
+        <h2 className="text-base font-medium">
           {format(currentMonth, "MMMM yyyy")}
         </h2>
         <Button 
@@ -53,9 +53,9 @@ const MonthlyCalendar: React.FC<MonthlyCalendarProps> = ({ events, className }) 
           size="icon" 
           onClick={nextMonth}
           aria-label="Next month"
-          className="h-8 w-8 sm:h-10 sm:w-10"
+          className="h-7 w-7"
         >
-          <ChevronRight className="h-4 w-4 sm:h-5 sm:w-5" />
+          <ChevronRight className="h-4 w-4" />
         </Button>
       </div>
     );
@@ -63,11 +63,11 @@ const MonthlyCalendar: React.FC<MonthlyCalendarProps> = ({ events, className }) 
 
   const renderDays = () => {
     const days = [];
-    const daysOfWeek = isMobile ? ["S", "M", "T", "W", "T", "F", "S"] : ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+    const daysOfWeek = isMobile ? ["S", "M", "T", "W", "T", "F", "S"] : ["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"];
 
     for (let i = 0; i < 7; i++) {
       days.push(
-        <div key={i} className="text-center text-xs sm:text-sm text-muted-foreground py-1 sm:py-2">
+        <div key={i} className="text-center text-xs text-muted-foreground py-1">
           {daysOfWeek[i]}
         </div>
       );
@@ -85,7 +85,7 @@ const MonthlyCalendar: React.FC<MonthlyCalendarProps> = ({ events, className }) 
     const rows = [];
     let days = [];
     let day = startDate;
-    const cellHeight = isMobile ? "h-12" : "h-20";
+    const cellHeight = isMobile ? "h-10" : "h-16";
 
     while (day <= endDate) {
       for (let i = 0; i < 7; i++) {
@@ -105,13 +105,13 @@ const MonthlyCalendar: React.FC<MonthlyCalendarProps> = ({ events, className }) 
             )}
             onClick={() => onDateClick(cloneDay)}
           >
-            <span className="text-xs sm:text-sm">{formattedDate}</span>
+            <span className="text-xs">{formattedDate}</span>
             <div className="overflow-y-auto max-h-[60%]">
               {dayEvents.slice(0, isMobile ? 1 : 2).map(event => (
                 <div 
                   key={event.id} 
                   className={cn(
-                    "text-xs p-1 mb-1 rounded truncate",
+                    "text-xs p-0.5 mb-0.5 rounded truncate",
                     event.type === "concert" && "bg-glee-purple text-white",
                     event.type === "rehearsal" && "bg-blue-500 text-white",
                     event.type === "sectional" && "bg-green-500 text-white",
@@ -119,12 +119,12 @@ const MonthlyCalendar: React.FC<MonthlyCalendarProps> = ({ events, className }) 
                     event.type === "tour" && "bg-purple-500 text-white"
                   )}
                 >
-                  {isMobile && event.title.length > 8 ? `${event.title.substring(0, 8)}...` : event.title}
+                  {isMobile && event.title.length > 6 ? `${event.title.substring(0, 6)}...` : event.title}
                 </div>
               ))}
               {dayEvents.length > (isMobile ? 1 : 2) && (
                 <div className="text-xs text-center text-muted-foreground">
-                  +{dayEvents.length - (isMobile ? 1 : 2)} more
+                  +{dayEvents.length - (isMobile ? 1 : 2)}
                 </div>
               )}
             </div>
@@ -143,7 +143,7 @@ const MonthlyCalendar: React.FC<MonthlyCalendarProps> = ({ events, className }) 
       days = [];
     }
     
-    return <div className="space-y-1">{rows}</div>;
+    return <div className="space-y-0.5">{rows}</div>;
   };
 
   return (

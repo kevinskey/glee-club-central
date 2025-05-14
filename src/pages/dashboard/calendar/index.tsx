@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect } from "react";
 import { Calendar as CalendarIcon } from "lucide-react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { format } from "date-fns";
 import { Badge } from "@/components/ui/badge";
 import MonthlyCalendar from "@/components/dashboard/MonthlyCalendar";
@@ -54,26 +54,7 @@ export default function CalendarPage() {
     
     loadEvents();
   }, [fetchEvents]);
-  
-  // Handlers for month navigation
-  const handlePrevMonth = () => {
-    if (currentMonth === 0) {
-      setCurrentMonth(11);
-      setCurrentYear(prevYear => prevYear - 1);
-    } else {
-      setCurrentMonth(prevMonth => prevMonth - 1);
-    }
-  };
 
-  const handleNextMonth = () => {
-    if (currentMonth === 11) {
-      setCurrentMonth(0);
-      setCurrentYear(prevYear => prevYear + 1);
-    } else {
-      setCurrentMonth(prevMonth => prevMonth + 1);
-    }
-  };
-  
   // Get events for the selected date
   const eventsForSelectedDate = date ? events.filter(event => {
     const eventDate = new Date(event.start);
@@ -158,11 +139,11 @@ export default function CalendarPage() {
       {/* Add the correct header based on screen size */}
       {isMobile ? <MobileHeader /> : <Header />}
       
-      <div className="container mx-auto p-4 space-y-6">
+      <div className="container mx-auto p-2 space-y-4 h-full">
         <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <CalendarIcon className="h-6 w-6" />
-            <h1 className="text-3xl font-bold tracking-tight">Glee Club Calendar</h1>
+          <div className="flex items-center gap-2">
+            <CalendarIcon className="h-5 w-5" />
+            <h1 className="text-lg sm:text-xl font-semibold">Glee Club Calendar</h1>
           </div>
         </div>
         
@@ -172,16 +153,16 @@ export default function CalendarPage() {
           selectedEventId={selectedEvent?.id}
           onEditSelected={() => isViewModalOpen && setIsViewModalOpen(true)}
           onDeleteSelected={() => selectedEvent && handleDeleteEvent(selectedEvent.id)}
-          className="mb-4 border-glee-purple/20 bg-glee-purple/5 dark:bg-glee-purple/10"
+          className="mb-2 border-glee-purple/20 bg-glee-purple/5 dark:bg-glee-purple/10"
         />
         
-        <div className="grid grid-cols-1 gap-6">
+        <div className="grid grid-cols-1 gap-2">
           {/* Calendar widget takes full width now */}
           <Card className="col-span-1">
-            <CardContent className="p-0 sm:p-2">
+            <CardContent className="p-0 sm:p-1">
               <MonthlyCalendar
                 events={transformedEvents}
-                className=""
+                className="w-full"
               />
             </CardContent>
           </Card>
