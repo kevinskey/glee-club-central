@@ -3,9 +3,10 @@ import React, { useState, useEffect } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Calendar, ArrowRight, Calendar as CalendarIcon, Clock } from "lucide-react";
-import { fetchUpcomingPerformances, PerformanceEvent } from "@/utils/supabase/calendar";
+import { PerformanceEvent } from "@/components/landing/performance/PerformanceSection";
 import { Link } from "react-router-dom";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { fetchPerformanceEvents } from "@/utils/performanceSync";
 
 export function UpcomingEvents() {
   const [events, setEvents] = useState<PerformanceEvent[]>([]);
@@ -16,7 +17,7 @@ export function UpcomingEvents() {
     const loadEvents = async () => {
       try {
         setLoading(true);
-        const performances = await fetchUpcomingPerformances(isMobile ? 2 : 3); // Reduced to 2 on mobile
+        const performances = await fetchPerformanceEvents(isMobile ? 2 : 3); // Reduced to 2 on mobile
         setEvents(performances);
       } catch (error) {
         console.error("Error loading upcoming events:", error);

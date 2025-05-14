@@ -5,7 +5,6 @@ import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
 import { Link } from "react-router-dom";
 import { ArrowRight } from "lucide-react";
-import { fetchUpcomingPerformances } from "@/utils/supabase/calendar";
 import { toast } from "sonner";
 import { 
   Carousel,
@@ -16,6 +15,7 @@ import {
 } from "@/components/ui/carousel";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { fetchPerformanceEvents } from "@/utils/performanceSync";
 
 export interface PerformanceEvent {
   id: string;
@@ -36,19 +36,19 @@ export function PerformanceSection() {
   // Get the authenticated user
   const { isAuthenticated, profile } = useAuth();
   
-  // Fetch upcoming performance events from the calendar
+  // Fetch upcoming performance events using our centralized utility
   useEffect(() => {
     const getPerformances = async () => {
       try {
         setLoading(true);
-        const performances = await fetchUpcomingPerformances(10);
+        const performances = await fetchPerformanceEvents(10);
         // Sort events chronologically by date
         const sortedEvents = [...performances].sort((a, b) => {
           return new Date(a.date).getTime() - new Date(b.date).getTime();
         });
         setEvents(sortedEvents);
       } catch (err) {
-        console.error("Error in fetchUpcomingPerformances:", err);
+        console.error("Error in fetchPerformanceEvents:", err);
         toast.error("Failed to load upcoming performances");
       } finally {
         setLoading(false);

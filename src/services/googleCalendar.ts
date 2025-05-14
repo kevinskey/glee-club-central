@@ -1,42 +1,151 @@
 
-import { supabase } from '@/integrations/supabase/client';
-import { GoogleCalendarToken } from '@/types/calendar';
-import { toast } from 'sonner';
+// Service for handling Google Calendar integration and synchronization
+
+import { createClient } from "@supabase/supabase-js";
+import { supabase } from "@/integrations/supabase/client";
+import { CalendarEvent, GoogleCalendarEvent, GoogleCalendarToken } from "@/types/calendar";
+import { toast } from "sonner";
+
+// Constants for Google OAuth
+const GOOGLE_OAUTH_REDIRECT_URI = window.location.origin + "/calendar-callback";
+const GOOGLE_OAUTH_CLIENT_ID = "YOUR_GOOGLE_OAUTH_CLIENT_ID"; // Replace with env variable when available
 
 /**
- * Check if the user has connected Google Calendar
- * @returns Boolean indicating if Google Calendar is connected
+ * Check if the user has already connected their Google Calendar
  */
 export const isConnected = async (): Promise<boolean> => {
   try {
-    const userId = (await supabase.auth.getUser()).data.user?.id;
-    if (!userId) {
+    const { data: user } = await supabase.auth.getUser();
+    if (!user || !user.user) {
       return false;
     }
     
-    // We use the user_google_tokens table that was created in the migration
     const { data, error } = await supabase
       .from('user_google_tokens')
       .select('*')
-      .eq('user_id', userId)
+      .eq('user_id', user.user.id)
       .single();
       
     if (error || !data) {
-      console.log("No Google Calendar connection found:", error);
       return false;
     }
     
-    return true;
+    // Check if token is expired
+    const expiresAt = new Date(data.expires_at);
+    const now = new Date();
+    
+    return expiresAt > now;
   } catch (error) {
-    console.error('Error checking Google Calendar connection:', error);
+    console.error("Error checking Google Calendar connection status:", error);
     return false;
   }
 };
 
 /**
- * Fetches Google Calendar access token from Supabase
- * @param userId The user's ID
- * @returns Google Calendar token object or null
+ * Connect to Google Calendar using OAuth
+ * Alias for backward compatibility
+ */
+export const connect = (): string => {
+  return connectToGoogleCalendar();
+};
+
+/**
+ * Start the OAuth flow to connect to Google Calendar
+ */
+export const connectToGoogleCalendar = (): string => {
+  const scopes = [
+    'https://www.googleapis.com/auth/calendar',
+    'https://www.googleapis.com/auth/calendar.events'
+  ];
+  
+  const authUrl = new URL('https://accounts.google.com/o/oauth2/v2/auth');
+  authUrl.searchParams.append('client_id', GOOGLE_OAUTH_CLIENT_ID);
+  authUrl.searchParams.append('redirect_uri', GOOGLE_OAUTH_REDIRECT_URI);
+  authUrl.searchParams.append('response_type', 'code');
+  authUrl.searchParams.append('scope', scopes.join(' '));
+  authUrl.searchParams.append('access_type', 'offline');
+  authUrl.searchParams.append('prompt', 'consent');
+  
+  // Return the URL string that the frontend can use to redirect
+  return authUrl.toString();
+};
+
+/**
+ * Disconnect from Google Calendar
+ */
+export const disconnect = async (): Promise<boolean> => {
+  try {
+    const { data: user } = await supabase.auth.getUser();
+    if (!user || !user.user) {
+      console.error("No authenticated user");
+      return false;
+    }
+    
+    const { error } = await supabase
+      .from('user_google_tokens')
+      .delete()
+      .eq('user_id', user.user.id);
+      
+    if (error) {
+      throw error;
+    }
+    
+    return true;
+  } catch (error) {
+    console.error("Error disconnecting from Google Calendar:", error);
+    return false;
+  }
+};
+
+/**
+ * Handle the callback from Google OAuth flow
+ */
+export const handleGoogleCalendarCallback = async (code: string): Promise<boolean> => {
+  try {
+    // Exchange code for tokens using Supabase Edge Function
+    const { data: user } = await supabase.auth.getUser();
+    if (!user || !user.user) {
+      throw new Error("No authenticated user");
+    }
+    
+    const { data, error } = await supabase.functions.invoke('google-calendar-auth', {
+      body: { code, redirect_uri: GOOGLE_OAUTH_REDIRECT_URI }
+    });
+    
+    if (error) {
+      throw error;
+    }
+    
+    // Store tokens in Supabase
+    const { access_token, refresh_token, expires_in } = data;
+    
+    // Calculate expiration date
+    const expiresAt = new Date();
+    expiresAt.setSeconds(expiresAt.getSeconds() + expires_in);
+    
+    // Store in Supabase
+    const { error: insertError } = await supabase
+      .from('user_google_tokens')
+      .upsert({
+        user_id: user.user.id,
+        access_token,
+        refresh_token,
+        expires_at: expiresAt.toISOString()
+      });
+      
+    if (insertError) {
+      throw insertError;
+    }
+    
+    return true;
+  } catch (error) {
+    console.error("Error handling Google Calendar callback:", error);
+    return false;
+  }
+};
+
+/**
+ * Fetch Google Calendar token for a user
  */
 export const fetchGoogleCalendarToken = async (userId: string): Promise<GoogleCalendarToken | null> => {
   try {
@@ -47,195 +156,69 @@ export const fetchGoogleCalendarToken = async (userId: string): Promise<GoogleCa
       .single();
       
     if (error || !data) {
-      console.error('Error fetching Google Calendar token:', error);
       return null;
     }
     
-    // Safely cast data to GoogleCalendarToken type
-    // Handle the case where calendar_id might not exist in the database
-    const token: GoogleCalendarToken = {
-      id: data.id,
-      user_id: data.user_id,
-      access_token: data.access_token,
-      refresh_token: data.refresh_token,
-      expires_at: new Date(data.expires_at).getTime(),
-      // TypeScript doesn't know about calendar_id, so we need to use type assertion
-      calendar_id: (data as any).calendar_id || 'primary' // Default to 'primary' if not provided
-    };
-    
-    return token;
+    return data as GoogleCalendarToken;
   } catch (error) {
-    console.error('Exception fetching Google Calendar token:', error);
+    console.error("Error fetching Google Calendar token:", error);
     return null;
   }
 };
 
 /**
- * Syncs events with Google Calendar
- * @returns Boolean indicating success/failure
+ * Sync calendar with Google Calendar
+ * Alias for backward compatibility
  */
 export const syncCalendar = async (): Promise<boolean> => {
+  return await syncWithGoogleCalendar();
+};
+
+/**
+ * Sync with Google Calendar
+ */
+export const syncWithGoogleCalendar = async (calendarId = 'primary', accessToken?: string): Promise<boolean> => {
   try {
-    const userId = (await supabase.auth.getUser()).data.user?.id;
-    if (!userId) {
-      toast.error('You must be logged in to sync with Google Calendar');
+    const { data: user } = await supabase.auth.getUser();
+    if (!user || !user.user) {
+      toast.error("You must be logged in to sync with Google Calendar");
       return false;
     }
     
-    // Get the token from the database
-    const token = await fetchGoogleCalendarToken(userId);
+    // Either use provided token or fetch from database
+    let token = accessToken;
     if (!token) {
-      toast.error('Google Calendar not connected');
-      return false;
-    }
-    
-    // Call the sync function with the calendar ID and token
-    const success = await syncWithGoogleCalendar('primary', token.access_token);
-    return success;
-  } catch (error) {
-    console.error('Error in syncCalendar:', error);
-    toast.error('Failed to sync calendar');
-    return false;
-  }
-};
-
-/**
- * Connect the user account to Google Calendar
- */
-export const connect = async (): Promise<void> => {
-  const redirectUrl = connectToGoogleCalendar();
-  window.location.href = redirectUrl;
-};
-
-/**
- * Disconnect the user account from Google Calendar
- */
-export const disconnect = async (): Promise<boolean> => {
-  try {
-    const userId = (await supabase.auth.getUser()).data.user?.id;
-    if (!userId) {
-      toast.error('You must be logged in to disconnect Google Calendar');
-      return false;
-    }
-    
-    // Delete the token from the database
-    const { error } = await supabase
-      .from('user_google_tokens')
-      .delete()
-      .eq('user_id', userId);
-      
-    if (error) {
-      console.error('Error disconnecting from Google Calendar:', error);
-      toast.error('Failed to disconnect from Google Calendar');
-      return false;
-    }
-    
-    toast.success('Successfully disconnected from Google Calendar');
-    return true;
-  } catch (error) {
-    console.error('Error disconnecting from Google Calendar:', error);
-    toast.error('Failed to disconnect from Google Calendar');
-    return false;
-  }
-};
-
-/**
- * Syncs events with Google Calendar
- * @param calendarId Google Calendar ID to sync with
- * @param accessToken Google OAuth access token
- * @returns Boolean indicating success/failure
- */
-export const syncWithGoogleCalendar = async (calendarId: string, accessToken: string): Promise<boolean> => {
-  try {
-    // Get start and end dates for sync (last 30 days to next 90 days)
-    const startDate = new Date();
-    startDate.setDate(startDate.getDate() - 30);
-    
-    const endDate = new Date();
-    endDate.setDate(endDate.getDate() + 90);
-    
-    // Format dates for Google Calendar API
-    const timeMin = startDate.toISOString();
-    const timeMax = endDate.toISOString();
-    
-    // Fetch events from Google Calendar API
-    const response = await fetch(
-      `https://www.googleapis.com/calendar/v3/calendars/${encodeURIComponent(calendarId)}/events?timeMin=${timeMin}&timeMax=${timeMax}&singleEvents=true`,
-      {
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-          'Content-Type': 'application/json',
-        },
+      const tokenData = await fetchGoogleCalendarToken(user.user.id);
+      if (!tokenData) {
+        toast.error("Google Calendar not connected");
+        return false;
       }
-    );
-    
-    if (!response.ok) {
-      throw new Error(`Google Calendar API error: ${response.status}`);
+      token = tokenData.access_token;
     }
     
-    const data = await response.json();
+    // Call the sync function
+    const { data, error } = await supabase.functions.invoke('google-calendar-sync', {
+      body: { 
+        action: 'full_sync', 
+        calendar_id: calendarId,
+        access_token: token 
+      }
+    });
     
-    if (!data.items || !Array.isArray(data.items)) {
-      toast.error('No events found in Google Calendar');
+    if (error) {
+      throw error;
+    }
+    
+    if (data?.success) {
+      toast.success("Calendar synced successfully");
+      return true;
+    } else {
+      toast.error(data?.message || "Failed to sync calendar");
       return false;
     }
-    
-    // Process events here - this would typically involve storing them in Supabase
-    // This is a simplified implementation
-    console.log(`Fetched ${data.items.length} events from Google Calendar`);
-    toast.success(`Successfully synced ${data.items.length} events from Google Calendar`);
-    
-    return true;
   } catch (error) {
-    console.error('Error syncing with Google Calendar:', error);
-    toast.error('Failed to sync with Google Calendar');
-    return false;
-  }
-};
-
-/**
- * Connects user account to Google Calendar
- * @returns URL to redirect user to for Google OAuth
- */
-export const connectToGoogleCalendar = (): string => {
-  // This is a placeholder - in a real implementation, you would:
-  // 1. Generate OAuth URL with proper scopes for Google Calendar
-  // 2. Store state in session for security
-  // 3. Redirect user to Google consent screen
-  
-  const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID || '';
-  const redirectUri = `${window.location.origin}/auth/google-callback`;
-  const scope = encodeURIComponent('https://www.googleapis.com/auth/calendar.readonly');
-  const state = crypto.randomUUID();
-  
-  // Store state in session storage for verification when user returns
-  sessionStorage.setItem('googleOAuthState', state);
-  
-  return `https://accounts.google.com/o/oauth2/v2/auth?client_id=${clientId}&redirect_uri=${redirectUri}&response_type=code&scope=${scope}&state=${state}&access_type=offline&prompt=consent`;
-};
-
-/**
- * Handles OAuth callback from Google
- * @param code Authorization code from Google
- * @param userId User ID to associate the token with
- * @returns Boolean indicating success/failure
- */
-export const handleGoogleCalendarCallback = async (code: string, userId: string): Promise<boolean> => {
-  try {
-    // This is a placeholder function that would:
-    // 1. Exchange code for access/refresh tokens
-    // 2. Store the tokens in Supabase
-    // 3. Return success/failure
-    
-    // In a real implementation, you would make a server call to exchange the code
-    console.log('Processing Google Calendar authorization code for user:', userId);
-    
-    // Simulate success for now
-    toast.success('Successfully connected to Google Calendar');
-    return true;
-  } catch (error) {
-    console.error('Error handling Google Calendar callback:', error);
-    toast.error('Failed to connect to Google Calendar');
+    console.error("Error syncing with Google Calendar:", error);
+    toast.error("Error syncing with Google Calendar");
     return false;
   }
 };
