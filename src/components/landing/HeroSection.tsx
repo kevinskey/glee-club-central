@@ -58,7 +58,7 @@ export function HeroSection() {
   }, []);
   
   return (
-    <section className="relative bg-glee-dark py-4 sm:py-6 md:py-10 lg:py-16 xl:py-24 min-h-[400px] sm:min-h-[450px] md:min-h-[550px] lg:min-h-[650px] xl:min-h-[750px] w-full overflow-hidden flex items-center justify-start">
+    <section className="relative bg-glee-dark py-4 sm:py-5 md:py-8 lg:py-12 xl:py-20 min-h-[320px] sm:min-h-[360px] md:min-h-[440px] lg:min-h-[520px] xl:min-h-[600px] w-full overflow-hidden flex items-center justify-start">
       <div className="absolute inset-0 opacity-50 bg-blend-overlay bg-black">
         <BackgroundSlideshow 
           images={backgroundImages} 
