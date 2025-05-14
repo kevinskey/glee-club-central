@@ -1,69 +1,71 @@
 
-import React from "react";
-import { Button } from "@/components/ui/button";
-import { Calendar, CalendarPlus } from "lucide-react";
-import { CalendarSyncButton } from "./CalendarSyncButton";
+import React from 'react';
+import { Button } from '@/components/ui/button';
+import { CalendarPlus, Calendar } from 'lucide-react';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { CalendarResetButton } from './CalendarResetButton';
+import { usePermissions } from '@/hooks/usePermissions';
+
+type CalendarView = 'dayGridMonth' | 'timeGridWeek' | 'timeGridDay' | 'listWeek';
 
 interface CalendarPageHeaderProps {
   onAddEventClick: () => void;
-  view?: 'dayGridMonth' | 'timeGridWeek' | 'timeGridDay' | 'listWeek';
-  onViewChange?: (view: 'dayGridMonth' | 'timeGridWeek' | 'timeGridDay' | 'listWeek') => void;
+  view?: CalendarView;
+  onViewChange?: (view: CalendarView) => void;
+  onResetCalendar?: () => Promise<boolean>;
 }
 
 export function CalendarPageHeader({ 
-  onAddEventClick,
-  view,
-  onViewChange
+  onAddEventClick, 
+  view, 
+  onViewChange,
+  onResetCalendar
 }: CalendarPageHeaderProps) {
+  const { isSuperAdmin } = usePermissions();
+  
   return (
-    <div className="flex flex-col items-center justify-center">
-      <div className="flex items-center mb-2">
-        <Calendar className="h-6 w-6 mr-2 text-glee-purple" />
-        <h1 className="text-2xl font-bold text-center">Calendar</h1>
+    <div className="flex flex-col space-y-4 mb-4">
+      <div className="flex items-center justify-between">
+        <div className="flex items-center">
+          <Calendar className="h-6 w-6 mr-2 text-brand" />
+          <h1 className="text-xl font-bold">Calendar</h1>
+        </div>
+        
+        <Button 
+          onClick={onAddEventClick} 
+          size="sm" 
+          className="bg-brand hover:bg-brand/90"
+        >
+          <CalendarPlus className="h-4 w-4 mr-2" />
+          Add
+        </Button>
       </div>
       
-      <div className="flex flex-col gap-2 items-center justify-center w-full">
-        {/* View Selection Buttons */}
+      <div className="flex items-center justify-between">
         {view && onViewChange && (
-          <div className="border rounded-md flex w-full max-w-xs mb-2">
-            <Button
-              variant={view === 'dayGridMonth' ? 'default' : 'ghost'}
-              size="sm"
-              onClick={() => onViewChange('dayGridMonth')}
-              className="rounded-r-none flex-1"
-            >
-              Month
-            </Button>
-            <Button
-              variant={view === 'timeGridWeek' ? 'default' : 'ghost'}
-              size="sm"
-              onClick={() => onViewChange('timeGridWeek')}
-              className="rounded-none border-x flex-1"
-            >
-              Week
-            </Button>
-            <Button
-              variant={view === 'timeGridDay' ? 'default' : 'ghost'}
-              size="sm"
-              onClick={() => onViewChange('timeGridDay')}
-              className="rounded-l-none flex-1"
-            >
-              Day
-            </Button>
-          </div>
-        )}
-      
-        <div className="flex gap-2 items-center justify-center w-full">
-          <CalendarSyncButton size="sm" />
-          <Button 
-            size="default" 
-            onClick={onAddEventClick} 
-            className="bg-glee-purple hover:bg-glee-purple/90 px-4 w-full max-w-[200px]"
+          <Select 
+            value={view}
+            onValueChange={(value) => onViewChange(value as CalendarView)}
           >
-            <CalendarPlus className="h-5 w-5 mr-2" />
-            Add Event
-          </Button>
-        </div>
+            <SelectTrigger className="w-[140px]">
+              <SelectValue placeholder="View" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="dayGridMonth">Month</SelectItem>
+              <SelectItem value="timeGridWeek">Week</SelectItem>
+              <SelectItem value="timeGridDay">Day</SelectItem>
+              <SelectItem value="listWeek">List</SelectItem>
+            </SelectContent>
+          </Select>
+        )}
+        
+        {isSuperAdmin && onResetCalendar && (
+          <CalendarResetButton 
+            onResetCalendar={onResetCalendar} 
+            variant="outline" 
+            size="sm" 
+          />
+        )}
       </div>
     </div>
   );

@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { Footer } from "@/components/landing/Footer";
 import { CalendarHeader } from "@/components/calendar/CalendarHeader";
@@ -28,7 +29,7 @@ const CalendarPage = () => {
   const [currentDate, setCurrentDate] = useState(new Date());
   const isMobile = useIsMobile();
   
-  const { events, fetchEvents, addEvent, updateEvent, deleteEvent } = useCalendarStore();
+  const { events, fetchEvents, addEvent, updateEvent, deleteEvent, resetCalendar } = useCalendarStore();
   const { isAdmin, profile } = useAuth();
   const { isSuperAdmin } = usePermissions();
 
@@ -130,6 +131,30 @@ const CalendarPage = () => {
       return Promise.resolve(false);
     }
   };
+  
+  // New handler for resetting the calendar
+  const handleResetCalendar = async (): Promise<boolean> => {
+    if (window.confirm("Are you sure you want to reset the calendar? This will delete all events.")) {
+      try {
+        setIsLoading(true);
+        const success = await resetCalendar();
+        if (success) {
+          toast.success("Calendar has been reset successfully");
+          return true;
+        } else {
+          toast.error("Failed to reset calendar");
+          return false;
+        }
+      } catch (error) {
+        console.error("Error resetting calendar:", error);
+        toast.error("An error occurred while resetting the calendar");
+        return false;
+      } finally {
+        setIsLoading(false);
+      }
+    }
+    return false;
+  };
 
   return (
     <div className="flex flex-col min-h-screen">
@@ -137,13 +162,17 @@ const CalendarPage = () => {
         <div className="container mx-auto p-2 sm:p-4">
           {/* Use CalendarPageHeader on mobile, CalendarHeader on desktop */}
           {isMobile ? (
-            <CalendarPageHeader onAddEventClick={() => userCanCreate && setIsCreateModalOpen(true)} />
+            <CalendarPageHeader 
+              onAddEventClick={() => userCanCreate && setIsCreateModalOpen(true)}
+              onResetCalendar={handleResetCalendar}
+            />
           ) : (
             <CalendarHeader 
               onAddEvent={() => userCanCreate && setIsCreateModalOpen(true)} 
               view={calendarView}
               onViewChange={setCalendarView}
               userCanCreate={userCanCreate}
+              onResetCalendar={handleResetCalendar}
             />
           )}
           
@@ -154,6 +183,7 @@ const CalendarPage = () => {
               selectedEventId={selectedEvent?.id}
               onEditSelected={() => isViewModalOpen && setIsViewModalOpen(true)}
               onDeleteSelected={() => selectedEvent && onDeleteEvent(selectedEvent?.id)}
+              onResetCalendar={handleResetCalendar}
               className="mt-4"
             />
           )}
@@ -189,6 +219,7 @@ const CalendarPage = () => {
               selectedEventId={selectedEvent?.id}
               onEditSelected={() => setIsViewModalOpen(true)}
               onDeleteSelected={() => selectedEvent && onDeleteEvent(selectedEvent?.id)}
+              onResetCalendar={handleResetCalendar}
             />
           )}
 

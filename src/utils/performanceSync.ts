@@ -35,7 +35,8 @@ export const fetchPerformanceEvents = async (limit: number = 4): Promise<Perform
       location: event.location || '',
       image: event.image_url, // Map image_url to image
       image_url: event.image_url,
-      type: event.type
+      type: event.type,
+      allday: event.allday || false
     }));
     
     return performanceEvents;

@@ -1,15 +1,19 @@
 
-import React from "react";
-import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
-import { CalendarPlus, Edit, Trash } from "lucide-react";
-import { useIsMobile } from "@/hooks/use-mobile";
+import React from 'react';
+import { Button } from '@/components/ui/button';
+import { Pencil, Trash2, Plus, RotateCcw } from 'lucide-react';
+import { toast } from 'sonner';
+import { Card } from '@/components/ui/card';
+import { usePermissions } from '@/hooks/usePermissions';
+import { CalendarResetButton } from './CalendarResetButton';
 
 interface CalendarEditToolsProps {
   onAddEvent: () => void;
   selectedEventId?: string;
   onEditSelected?: () => void;
-  onDeleteSelected?: () => void;
+  onDeleteSelected?: () => Promise<boolean | void>;
+  onResetCalendar?: () => Promise<boolean>;
+  compact?: boolean;
   className?: string;
 }
 
@@ -18,39 +22,75 @@ export function CalendarEditTools({
   selectedEventId,
   onEditSelected,
   onDeleteSelected,
-  className = ""
+  onResetCalendar,
+  compact = false,
+  className = ''
 }: CalendarEditToolsProps) {
-  const isMobile = useIsMobile();
+  const { isSuperAdmin } = usePermissions();
+  
+  const handleDeleteEvent = async () => {
+    if (!selectedEventId) {
+      toast.error("No event selected");
+      return;
+    }
+    
+    if (window.confirm("Are you sure you want to delete this event?")) {
+      try {
+        await onDeleteSelected?.();
+      } catch (error) {
+        console.error("Error deleting event:", error);
+        toast.error("Failed to delete event");
+      }
+    }
+  };
+  
+  const buttonClassName = compact ? "px-2" : "";
   
   return (
-    <Card className={`p-1 flex gap-1 border border-glee-purple/30 ${className}`}>
-      <Button onClick={onAddEvent} className="bg-glee-purple hover:bg-glee-purple/90 font-medium p-1 h-auto text-xs" size="sm">
-        <CalendarPlus className="h-3.5 w-3.5 mr-1" />
-        Add Event
+    <Card className={`p-2 flex flex-wrap gap-2 ${className}`}>
+      <Button 
+        variant="outline" 
+        size={compact ? "sm" : "default"}
+        onClick={onAddEvent}
+        className={buttonClassName}
+      >
+        <Plus className="h-4 w-4 mr-2" />
+        {!compact && "Add Event"}
       </Button>
       
-      {selectedEventId && onEditSelected && (
-        <Button 
-          onClick={onEditSelected} 
-          variant="outline"
-          size="sm"
-          className="p-1 h-auto text-xs"
-        >
-          <Edit className="h-3.5 w-3.5 mr-1" />
-          Edit
-        </Button>
+      {selectedEventId && (
+        <>
+          <Button 
+            variant="outline" 
+            size={compact ? "sm" : "default"} 
+            onClick={onEditSelected}
+            disabled={!onEditSelected}
+            className={buttonClassName}
+          >
+            <Pencil className="h-4 w-4 mr-2" />
+            {!compact && "Edit"}
+          </Button>
+          
+          <Button 
+            variant="outline" 
+            size={compact ? "sm" : "default"} 
+            onClick={handleDeleteEvent}
+            disabled={!onDeleteSelected}
+            className={`text-red-500 hover:text-red-700 hover:bg-red-100 dark:hover:bg-red-950/20 border-red-200 dark:border-red-800 ${buttonClassName}`}
+          >
+            <Trash2 className="h-4 w-4 mr-2" />
+            {!compact && "Delete"}
+          </Button>
+        </>
       )}
       
-      {selectedEventId && onDeleteSelected && (
-        <Button 
-          onClick={onDeleteSelected} 
+      {isSuperAdmin && onResetCalendar && (
+        <CalendarResetButton 
+          onResetCalendar={onResetCalendar}
           variant="outline"
-          size="sm"
-          className="text-red-500 hover:text-red-700 hover:bg-red-50 p-1 h-auto text-xs"
-        >
-          <Trash className="h-3.5 w-3.5 mr-1" />
-          Delete
-        </Button>
+          size={compact ? "sm" : "default"}
+          className="ml-auto"
+        />
       )}
     </Card>
   );

@@ -11,7 +11,8 @@ export interface CalendarState {
   addEvent: (event: CalendarEvent) => void;
   updateEvent: (event: CalendarEvent) => void;
   deleteEvent: (id: string) => void;
-  addEvents: (events: CalendarEvent[]) => void; // Added this method
+  addEvents: (events: CalendarEvent[]) => void;
+  resetCalendar: () => Promise<boolean>; // Added this method
 }
 
 // Create the calendar store
@@ -67,5 +68,16 @@ export const useCalendarStore = create<CalendarState>((set, get) => ({
     set((state) => ({
       events: state.events.filter((event) => event.id !== id)
     }));
+  },
+  resetCalendar: async () => {
+    try {
+      // In a real implementation, this would make an API call to delete all events
+      // For now, we'll just clear the events array
+      set({ events: [] });
+      return true;
+    } catch (error) {
+      console.error('Error resetting calendar:', error);
+      return false;
+    }
   }
 }));

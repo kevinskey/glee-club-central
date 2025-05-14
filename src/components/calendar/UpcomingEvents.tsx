@@ -12,6 +12,13 @@ interface UpcomingEventsProps {
   onAddClick?: () => void;
 }
 
+interface EventListProps {
+  events: CalendarEvent[];
+  onSelectEvent?: (event: CalendarEvent) => Promise<boolean>;
+  selectedEvent?: CalendarEvent | null;
+  emptyMessage?: string;
+}
+
 export const UpcomingEvents = ({ 
   limit = 5,
   showAddButton = false,
@@ -46,9 +53,10 @@ export const UpcomingEvents = ({
   }, [limit]);
 
   // Placeholder event handler for event selection
-  const handleSelectEvent = (event: CalendarEvent) => {
+  const handleSelectEvent = async (event: CalendarEvent): Promise<boolean> => {
     setSelectedEvent(event);
     // Additional handling could be added here
+    return Promise.resolve(true);
   };
   
   return (

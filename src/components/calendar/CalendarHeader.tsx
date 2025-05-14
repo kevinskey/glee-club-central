@@ -1,74 +1,82 @@
 
-import { Button } from "@/components/ui/button";
-import { Calendar, CalendarPlus, ViewIcon } from "lucide-react";
-import { CalendarSyncButton } from "./CalendarSyncButton";
-import { useIsMobile } from "@/hooks/use-mobile";
+import React from 'react';
+import { Button } from '@/components/ui/button';
+import { PlusCircle } from 'lucide-react';
+import { CalendarResetButton } from './CalendarResetButton';
+import { usePermissions } from '@/hooks/usePermissions';
+
+type CalendarView = 'dayGridMonth' | 'timeGridWeek' | 'timeGridDay' | 'listWeek';
 
 interface CalendarHeaderProps {
   onAddEvent: () => void;
-  view: 'dayGridMonth' | 'timeGridWeek' | 'timeGridDay' | 'listWeek';
-  onViewChange: (view: 'dayGridMonth' | 'timeGridWeek' | 'timeGridDay' | 'listWeek') => void;
-  userCanCreate: boolean;
+  view?: CalendarView;
+  onViewChange?: (view: CalendarView) => void;
+  userCanCreate?: boolean;
+  onResetCalendar?: () => Promise<boolean>;
 }
 
-export function CalendarHeader({ 
-  onAddEvent, 
-  view, 
+export function CalendarHeader({
+  onAddEvent,
+  view = 'dayGridMonth',
   onViewChange,
-  userCanCreate
+  userCanCreate = true,
+  onResetCalendar
 }: CalendarHeaderProps) {
-  const isMobile = useIsMobile();
-
+  const { isSuperAdmin } = usePermissions();
+  
+  const handleViewChange = (newView: CalendarView) => {
+    onViewChange?.(newView);
+  };
+  
   return (
-    <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between space-y-2 sm:space-y-0">
-      <div className="flex items-center">
-        <Calendar className="h-7 w-7 mr-2" />
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight">Calendar</h1>
-          <p className="text-sm text-muted-foreground">
-            View and manage upcoming events and performances.
-          </p>
-        </div>
+    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+      <div>
+        <h1 className="text-2xl font-bold tracking-tight">Calendar</h1>
+        <p className="text-muted-foreground">
+          Manage and view your events and rehearsals
+        </p>
       </div>
       
-      <div className="flex items-center space-x-2">
-        {/* Sync Calendar Button */}
-        <CalendarSyncButton />
+      <div className="flex items-center gap-2">
+        {onViewChange && (
+          <div className="bg-muted rounded-md p-1 mr-2">
+            <div className="flex items-center">
+              <Button
+                variant={view === 'dayGridMonth' ? 'default' : 'ghost'}
+                size="sm"
+                onClick={() => handleViewChange('dayGridMonth')}
+                className="rounded-l-md"
+              >
+                Month
+              </Button>
+              <Button
+                variant={view === 'timeGridWeek' ? 'default' : 'ghost'}
+                size="sm"
+                onClick={() => handleViewChange('timeGridWeek')}
+              >
+                Week
+              </Button>
+              <Button
+                variant={view === 'timeGridDay' ? 'default' : 'ghost'}
+                size="sm"
+                onClick={() => handleViewChange('timeGridDay')}
+                className="rounded-r-md"
+              >
+                Day
+              </Button>
+            </div>
+          </div>
+        )}
         
-        {/* View options */}
-        <div className="border rounded-md">
-          <Button
-            variant={view === 'dayGridMonth' ? 'default' : 'ghost'}
-            size="sm"
-            onClick={() => onViewChange('dayGridMonth')}
-            className="rounded-r-none"
-          >
-            {isMobile ? "M" : "Month"}
-          </Button>
-          <Button
-            variant={view === 'timeGridWeek' ? 'default' : 'ghost'}
-            size="sm"
-            onClick={() => onViewChange('timeGridWeek')}
-            className="rounded-none border-x"
-          >
-            {isMobile ? "W" : "Week"}
-          </Button>
-          <Button
-            variant={view === 'timeGridDay' ? 'default' : 'ghost'}
-            size="sm"
-            onClick={() => onViewChange('timeGridDay')}
-            className="rounded-l-none"
-          >
-            {isMobile ? "D" : "Day"}
-          </Button>
-        </div>
-        
-        {/* Add Event button (if user has permission) */}
         {userCanCreate && (
-          <Button onClick={onAddEvent} className="bg-glee-purple hover:bg-glee-purple/90">
-            <CalendarPlus className="h-5 w-5 mr-2" />
+          <Button onClick={onAddEvent} className="ml-auto">
+            <PlusCircle className="h-4 w-4 mr-2" />
             Add Event
           </Button>
+        )}
+        
+        {isSuperAdmin && onResetCalendar && (
+          <CalendarResetButton onResetCalendar={onResetCalendar} className="ml-2" />
         )}
       </div>
     </div>

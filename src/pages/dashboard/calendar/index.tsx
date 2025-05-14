@@ -1,8 +1,11 @@
 
-// Updating the event handlers to properly handle promises and avoid void checks
+import React from 'react';
+import { toast } from 'sonner';
+import { v4 as uuidv4 } from 'uuid';
+import { CalendarEvent, EventType } from '@/types/calendar';
 
 // Handler for adding event - Fixed to correctly handle asynchronous operations
-const handleAddEvent = async (eventData: any): Promise<void> => {
+const handleAddEvent = async (eventData: any, addEvent: Function, setIsCreateModalOpen: Function): Promise<void> => {
   try {
     // Format the data to match what the store expects and ensure id is present
     const newEvent: CalendarEvent = {
@@ -30,7 +33,7 @@ const handleAddEvent = async (eventData: any): Promise<void> => {
 };
 
 // Handle updating event - Fixed to correctly handle asynchronous operations
-const handleUpdateEvent = async (eventData: CalendarEvent): Promise<boolean> => {
+const handleUpdateEvent = async (eventData: CalendarEvent, updateEvent: Function, setIsViewModalOpen: Function): Promise<boolean> => {
   try {
     await updateEvent(eventData);
     toast.success("Event updated successfully");
@@ -44,7 +47,7 @@ const handleUpdateEvent = async (eventData: CalendarEvent): Promise<boolean> => 
 };
 
 // Handle deleting event - Fixed to correctly handle asynchronous operations
-const handleDeleteEvent = async (eventId: string): Promise<boolean> => {
+const handleDeleteEvent = async (eventId: string, deleteEvent: Function, setIsViewModalOpen: Function, setSelectedEvent: Function): Promise<boolean> => {
   try {
     await deleteEvent(eventId);
     toast.success("Event deleted successfully");
@@ -57,3 +60,5 @@ const handleDeleteEvent = async (eventId: string): Promise<boolean> => {
     return false;
   }
 };
+
+export { handleAddEvent, handleUpdateEvent, handleDeleteEvent };
