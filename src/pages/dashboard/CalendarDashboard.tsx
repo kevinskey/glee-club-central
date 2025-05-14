@@ -1,51 +1,52 @@
 
 import React, { useState } from 'react';
-import Calendar from '@/components/dashboard/Calendar';
+import { PageHeaderWithToggle } from "@/components/ui/page-header-with-toggle";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { CalendarIcon, Clock, MapPin } from "lucide-react";
+import { MonthlyCalendar } from "@/components/dashboard/Calendar";
 
 // Sample events data
 const SAMPLE_EVENTS = [
   {
     date: new Date(2025, 4, 15),
     title: "Weekly Rehearsal",
-    color: "bg-blue-100 text-blue-700",
+    color: "bg-blue-100 text-blue-700 dark:bg-blue-900/50 dark:text-blue-300",
     time: "6:00 PM - 8:00 PM",
     location: "Music Hall Room 101"
   },
   {
     date: new Date(2025, 4, 18),
     title: "Spring Concert",
-    color: "bg-purple-100 text-purple-700",
+    color: "bg-purple-100 text-purple-700 dark:bg-purple-900/50 dark:text-purple-300",
     time: "7:30 PM - 9:30 PM",
     location: "Spelman Auditorium"
   },
   {
     date: new Date(2025, 4, 22),
     title: "Weekly Rehearsal",
-    color: "bg-blue-100 text-blue-700",
+    color: "bg-blue-100 text-blue-700 dark:bg-blue-900/50 dark:text-blue-300",
     time: "6:00 PM - 8:00 PM",
     location: "Music Hall Room 101"
   },
   {
     date: new Date(2025, 4, 25),
     title: "Community Performance",
-    color: "bg-amber-100 text-amber-700",
+    color: "bg-amber-100 text-amber-700 dark:bg-amber-900/50 dark:text-amber-300",
     time: "2:00 PM - 3:30 PM",
     location: "Downtown Arts Center"
   },
   {
     date: new Date(2025, 4, 29),
     title: "Weekly Rehearsal",
-    color: "bg-blue-100 text-blue-700",
+    color: "bg-blue-100 text-blue-700 dark:bg-blue-900/50 dark:text-blue-300",
     time: "6:00 PM - 8:00 PM",
     location: "Music Hall Room 101"
   },
   {
     date: new Date(2025, 5, 5),
     title: "Alumni Event",
-    color: "bg-green-100 text-green-700",
+    color: "bg-green-100 text-green-700 dark:bg-green-900/50 dark:text-green-300",
     time: "5:00 PM - 7:00 PM",
     location: "Spelman College Alumni Hall"
   }
@@ -90,11 +91,14 @@ export default function CalendarDashboard() {
 
   return (
     <div className="container mx-auto py-8">
-      <h1 className="text-3xl font-bold mb-8">Calendar</h1>
+      <PageHeaderWithToggle 
+        title="Calendar"
+        icon={<CalendarIcon className="h-6 w-6" />}
+      />
       
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-6">
         <div className="lg:col-span-2">
-          <Calendar 
+          <MonthlyCalendar 
             month={currentMonth} 
             year={currentYear}
             onPrevMonth={handlePrevMonth}

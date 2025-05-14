@@ -1,3 +1,4 @@
+
 import React from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
@@ -33,9 +34,9 @@ const Day: React.FC<DayProps> = ({ date, isCurrentMonth, isToday, events = [] })
   return (
     <div
       className={cn(
-        "h-12 border-t p-1 sm:h-20 sm:p-2",
+        "h-12 border-t p-1 sm:h-20 sm:p-2 transition-colors",
         !isCurrentMonth && "bg-muted/50 text-muted-foreground",
-        isToday && "bg-accent/50"
+        isToday && "bg-accent/10 dark:bg-accent/5"
       )}
     >
       <time
@@ -53,7 +54,7 @@ const Day: React.FC<DayProps> = ({ date, isCurrentMonth, isToday, events = [] })
             key={idx}
             className={cn(
               "truncate rounded-md px-1 py-0.5 text-xs font-medium",
-              event.color || "bg-blue-100 text-blue-700"
+              event.color || "bg-blue-100 text-blue-700 dark:bg-blue-900/50 dark:text-blue-300"
             )}
           >
             {event.title}
@@ -107,7 +108,7 @@ export const MonthlyCalendar: React.FC<CalendarProps> = ({
              eventDate.getFullYear() === year;
     }).map(event => ({
       title: event.title,
-      color: event.color || "bg-blue-100 text-blue-700"
+      color: event.color || "bg-blue-100 text-blue-700 dark:bg-blue-900/50 dark:text-blue-300"
     }));
     
     days.push({

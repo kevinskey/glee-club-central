@@ -7,9 +7,7 @@ import { useAuth } from "@/contexts/AuthContext";
 function App() {
   const { isLoading } = useAuth();
 
-  useEffect(() => {
-    document.body.className = "dark"; // Force dark mode
-  }, []);
+  // Removed the forced dark mode
 
   if (isLoading) {
     return <div>Loading...</div>;

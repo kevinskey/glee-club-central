@@ -34,6 +34,16 @@
     --ring: 0 0% 0%;
 
     --radius: 0.5rem;
+
+    /* Sidebar Variables */
+    --sidebar-background: 0 0% 100%;
+    --sidebar-foreground: 0 0% 0%;
+    --sidebar-primary: 213 94% 25%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 0 0% 96%;
+    --sidebar-accent-foreground: 0 0% 0%;
+    --sidebar-border: 0 0% 90%;
+    --sidebar-ring: 0 0% 0%;
   }
 
   .dark, [data-theme="dark"] {
@@ -66,6 +76,16 @@
     --destructive-foreground: 0 85.7% 97.3%;
 
     --ring: 0 0% 70%;
+
+    /* Sidebar Variables for Dark Mode */
+    --sidebar-background: 0 0% 8%;
+    --sidebar-foreground: 0 0% 100%;
+    --sidebar-primary: 213 94% 60%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 0 0% 15%;
+    --sidebar-accent-foreground: 0 0% 100%;
+    --sidebar-border: 0 0% 20%;
+    --sidebar-ring: 0 0% 70%;
   }
 }
 
@@ -127,5 +147,39 @@
   
   small {
     @apply text-sm text-muted-foreground;
+  }
+
+  /* Dark mode calendar styles */
+  .dark .fc-theme-standard td, 
+  .dark .fc-theme-standard th,
+  .dark .fc-theme-standard .fc-scrollgrid {
+    @apply border-gray-700;
+  }
+
+  .dark .fc-theme-standard .fc-scrollgrid {
+    @apply border-gray-700;
+  }
+
+  .dark .fc .fc-daygrid-day.fc-day-today {
+    @apply bg-blue-900/20;
+  }
+
+  .dark .fc .fc-button-primary {
+    @apply bg-gray-700 border-gray-600;
+  }
+
+  .dark .fc .fc-button-primary:not(:disabled).fc-button-active,
+  .dark .fc .fc-button-primary:not(:disabled):active {
+    @apply bg-blue-800 border-blue-700;
+  }
+
+  .dark .fc-daygrid-day-number,
+  .dark .fc-col-header-cell-cushion {
+    @apply text-gray-200;
+  }
+
+  /* Theme toggle toast style overrides */
+  .theme-toggle-toast {
+    @apply font-inter text-sm;
   }
 }

@@ -1,4 +1,3 @@
-
 export type EventType = "concert" | "rehearsal" | "sectional" | "special" | "tour";
 
 export interface CalendarEvent {
@@ -23,4 +22,13 @@ export interface GoogleCalendarEvent {
   end: { dateTime: string, timeZone?: string } | { date: string };
   description: string;
   location: string;
+}
+
+export interface GoogleCalendarToken {
+  id: string;
+  user_id: string;
+  access_token: string;
+  refresh_token: string;
+  expires_at: number;
+  calendar_id: string;
 }
