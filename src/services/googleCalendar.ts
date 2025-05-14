@@ -59,7 +59,8 @@ export const fetchGoogleCalendarToken = async (userId: string): Promise<GoogleCa
       access_token: data.access_token,
       refresh_token: data.refresh_token,
       expires_at: new Date(data.expires_at).getTime(),
-      calendar_id: data.calendar_id || 'primary' // Default to 'primary' if not provided
+      // TypeScript doesn't know about calendar_id, so we need to use type assertion
+      calendar_id: (data as any).calendar_id || 'primary' // Default to 'primary' if not provided
     };
     
     return token;
