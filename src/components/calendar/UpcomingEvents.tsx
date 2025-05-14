@@ -12,6 +12,11 @@ interface UpcomingEventsProps {
   onAddClick?: () => void;
 }
 
+interface EventListProps {
+  events: CalendarEvent[];
+  emptyMessage: string;
+}
+
 export const UpcomingEvents = ({ 
   limit = 5,
   showAddButton = false,
@@ -60,7 +65,15 @@ export const UpcomingEvents = ({
           </Button>
         )}
       </div>
-      <EventList events={events} loading={loading} emptyMessage="No upcoming events" />
+      {loading ? (
+        <div className="animate-pulse space-y-2">
+          {[...Array(3)].map((_, i) => (
+            <div key={i} className="h-16 bg-gray-100 dark:bg-gray-800 rounded-md"></div>
+          ))}
+        </div>
+      ) : (
+        <EventList events={events} emptyMessage="No upcoming events" />
+      )}
     </div>
   );
 };

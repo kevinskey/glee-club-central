@@ -11,8 +11,8 @@ export interface MobileFitCheckResult {
 /**
  * Check if an event will fit well on mobile displays
  * @param title Event title
- * @param description Event description
- * @param location Event location
+ * @param description Event description (optional)
+ * @param location Event location (optional)
  * @returns Object with fit status, issues and suggestions
  */
 export function checkEventMobileFit(

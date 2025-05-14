@@ -1,5 +1,5 @@
 
-export type EventType = "concert" | "rehearsal" | "sectional" | "special" | "tour";
+export type EventType = "concert" | "rehearsal" | "sectional" | "special" | "tour" | "event" | "meeting" | "performance" | "other";
 
 export interface CalendarEvent {
   id: string;

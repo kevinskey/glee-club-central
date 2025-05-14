@@ -26,12 +26,21 @@ export const CalendarSyncButton = ({
       const performanceEvents = await getPerformanceEvents();
       
       // Add them to calendar
-      addEvents(performanceEvents);
-      
-      toast({
-        title: 'Calendar synced',
-        description: `Successfully imported ${performanceEvents.length} performances`,
-      });
+      if (addEvents) {
+        addEvents(performanceEvents);
+        
+        toast({
+          title: 'Calendar synced',
+          description: `Successfully imported ${performanceEvents.length} performances`,
+        });
+      } else {
+        console.error("addEvents function not available in calendar store");
+        toast({
+          title: 'Sync failed',
+          description: 'Could not import performances due to a technical issue.',
+          variant: 'destructive',
+        });
+      }
     } catch (error) {
       console.error("Error syncing performances:", error);
       toast({

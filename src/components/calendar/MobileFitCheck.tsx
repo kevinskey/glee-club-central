@@ -18,7 +18,7 @@ export const MobileFitCheck: React.FC<MobileFitCheckProps> = ({
   className = ''
 }) => {
   // Call the checkEventMobileFit function from calendarMobileUtils
-  const result = checkEventMobileFit(title, description, location);
+  const result: MobileFitCheckResult = checkEventMobileFit(title, description, location);
 
   if (!result.issues.length) {
     return (

@@ -172,14 +172,12 @@ export const CalendarMain = ({
                 titleFormat: { month: 'long', year: 'numeric' }
               },
               timeGridWeek: {
-                titleFormat: isMobile ? { month: 'short', year: 'numeric' } : { month: 'long', year: 'numeric' },
+                titleFormat: { month: 'long', year: 'numeric' },
                 slotDuration: '00:30:00',
                 slotLabelInterval: '01:00'
               },
               timeGridDay: {
-                titleFormat: isMobile ? 
-                  { month: 'short', day: 'numeric' } : 
-                  { month: 'long', day: 'numeric', year: 'numeric' },
+                titleFormat: { month: 'long', day: 'numeric', year: 'numeric' },
                 slotDuration: '00:30:00',
                 slotLabelInterval: '01:00'
               },

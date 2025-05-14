@@ -1,15 +1,16 @@
+
 import React, { useState, useEffect } from 'react';
 import { Calendar } from 'lucide-react';
 import { format } from 'date-fns';
-import { Calendar as CalendarIcon } from "@/components/ui/calendar"
-import { DateRange } from "react-day-picker"
-import { cn } from "@/lib/utils"
-import { Button } from "@/components/ui/button"
+import { Calendar as CalendarIcon } from "@/components/ui/calendar";
+import { DateRange } from "react-day-picker";
+import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
-} from "@/components/ui/popover"
+} from "@/components/ui/popover";
 import {
   Form,
   FormControl,
@@ -18,18 +19,18 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "@/components/ui/form"
-import { Input } from "@/components/ui/input"
-import { Textarea } from "@/components/ui/textarea"
+} from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select"
-import { Switch } from "@/components/ui/switch"
-import { useToast } from "@/hooks/use-toast"
+} from "@/components/ui/select";
+import { Switch } from "@/components/ui/switch";
+import { useToast } from "@/hooks/use-toast";
 import { useCalendarStore } from '@/hooks/useCalendarStore';
 import { EventType } from '@/types/calendar';
 import { MobileFitCheck } from './MobileFitCheck';
@@ -41,10 +42,13 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "@/components/ui/dialog"
-import { Loader2 } from 'lucide-react';
+} from "@/components/ui/dialog";
+import { Loader2, X } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import * as z from "zod";
 
 interface AddEventFormProps {
   defaultValues?: any;
@@ -52,12 +56,12 @@ interface AddEventFormProps {
 }
 
 export function AddEventForm({ defaultValues, onCancel }: AddEventFormProps) {
-  const { toast } = useToast()
+  const { toast } = useToast();
   const { addEvent, updateEvent } = useCalendarStore();
   const [date, setDate] = React.useState<DateRange | undefined>(defaultValues?.start ? {
     from: new Date(defaultValues?.start),
     to: new Date(defaultValues?.end)
-  } : undefined)
+  } : undefined);
   const [isAllDay, setIsAllDay] = React.useState(defaultValues?.allDay || false);
   const [mobileFitResult, setMobileFitResult] = useState<MobileFitCheckResult | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -76,7 +80,7 @@ export function AddEventForm({ defaultValues, onCancel }: AddEventFormProps) {
       image_url: defaultValues?.image_url || "",
     },
     mode: "onChange",
-  })
+  });
 
   useEffect(() => {
     // Set initial date range if defaultValues are provided
@@ -94,6 +98,15 @@ export function AddEventForm({ defaultValues, onCancel }: AddEventFormProps) {
       setIsAllDay(defaultValues.allDay);
     }
   }, [defaultValues]);
+
+  const handleMobilePreviewCheck = () => {
+    const result = checkEventMobileFit(
+      form.getValues("title"),
+      form.getValues("description"),
+      form.getValues("location")
+    );
+    setMobileFitResult(result);
+  };
 
   function onSubmit(values: any) {
     setIsSubmitting(true);
@@ -134,34 +147,25 @@ export function AddEventForm({ defaultValues, onCancel }: AddEventFormProps) {
       allDay: isAllDay,
       image_url: imageUrl,
       user_id: userId,
-    }
+    };
 
     if (defaultValues) {
       updateEvent(newEvent);
       toast({
         title: "Success",
         description: "Event updated successfully",
-      })
+      });
     } else {
-      addEvent(newEvent)
+      addEvent(newEvent);
       toast({
         title: "Success",
         description: "Event added successfully",
-      })
+      });
     }
     
     setIsSubmitting(false);
     onCancel();
   }
-  
-  const handleMobilePreviewCheck = () => {
-    const result = checkEventMobileFit(
-      form.values.title,
-      form.values.description,
-      form.values.location
-    );
-    setMobileFitResult(result);
-  };
 
   const handleImageUpload = async (file: File) => {
     setUploading(true);
@@ -308,8 +312,8 @@ export function AddEventForm({ defaultValues, onCancel }: AddEventFormProps) {
                   <Switch
                     checked={isAllDay}
                     onCheckedChange={(checked) => {
-                      setIsAllDay(checked)
-                      field.onChange(checked)
+                      setIsAllDay(checked);
+                      field.onChange(checked);
                     }}
                   />
                 </FormControl>
@@ -318,53 +322,44 @@ export function AddEventForm({ defaultValues, onCancel }: AddEventFormProps) {
           />
         </div>
 
-        <FormField
-          control={form.control}
-          name="date"
-          render={() => (
-            <FormItem className="flex flex-col">
-              <FormLabel>Date</FormLabel>
-              <Popover>
-                <PopoverTrigger asChild>
-                  <FormControl>
-                    <Button
-                      variant={"outline"}
-                      className={cn(
-                        "w-[240px] pl-3 text-left font-normal",
-                        !date && "text-muted-foreground"
-                      )}
-                    >
-                      <CalendarIcon className="mr-2 h-4 w-4" />
-                      {date?.from ? (
-                        date.to ? (
-                          `${format(date.from, "LLL dd, y")} - ${format(date.to, "LLL dd, y")}`
-                        ) : (
-                          format(date.from, "LLL dd, y")
-                        )
-                      ) : (
-                        <span>Pick a date</span>
-                      )}
-                    </Button>
-                  </FormControl>
-                </PopoverTrigger>
-                <PopoverContent className="w-auto p-0" align="start">
-                  <Calendar
-                    mode="range"
-                    defaultMonth={date?.from}
-                    selected={date}
-                    onSelect={setDate}
-                    disabled={(date) =>
-                      date < new Date()
-                    }
-                    numberOfMonths={2}
-                    pagedNavigation
-                  />
-                </PopoverContent>
-              </Popover>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+        <div className="flex flex-col">
+          <FormLabel>Date</FormLabel>
+          <Popover>
+            <PopoverTrigger asChild>
+              <Button
+                variant={"outline"}
+                className={cn(
+                  "w-[240px] pl-3 text-left font-normal",
+                  !date && "text-muted-foreground"
+                )}
+              >
+                <CalendarIcon className="mr-2 h-4 w-4" />
+                {date?.from ? (
+                  date.to ? (
+                    `${format(date.from, "LLL dd, y")} - ${format(date.to, "LLL dd, y")}`
+                  ) : (
+                    format(date.from, "LLL dd, y")
+                  )
+                ) : (
+                  <span>Pick a date</span>
+                )}
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-auto p-0" align="start">
+              <Calendar
+                mode="range"
+                defaultMonth={date?.from}
+                selected={date}
+                onSelect={setDate}
+                disabled={(date) =>
+                  date < new Date()
+                }
+                numberOfMonths={2}
+                pagedNavigation
+              />
+            </PopoverContent>
+          </Popover>
+        </div>
         
         <div className="grid gap-2">
           <FormLabel htmlFor="image">Image Upload</FormLabel>
@@ -424,11 +419,5 @@ export function AddEventForm({ defaultValues, onCancel }: AddEventFormProps) {
         </div>
       </form>
     </Form>
-  )
+  );
 }
-
-import * as React from "react"
-import { useForm } from "react-hook-form"
-import { zodResolver } from "@hookform/resolvers/zod"
-import * as z from "zod"
-import { X } from "lucide-react"

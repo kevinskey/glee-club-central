@@ -63,7 +63,7 @@ const transformToCalendarEvents = (performances: PerformanceEvent[]): CalendarEv
       end: endDate,
       description: perf.description || '',
       location: perf.location || '',
-      type: "event" as EventType,
+      type: "concert" as EventType, // Explicitly cast as valid EventType
       image_url: perf.imageUrl || '',
       allDay: false
     };

@@ -1,82 +1,61 @@
 
-import React from "react";
-import { format, isSameDay } from "date-fns";
-import { CalendarEvent } from "@/types/calendar";
-import { EventItem } from "./EventItem";
-import { useIsMobile } from "@/hooks/use-mobile";
+import React from 'react';
+import { CalendarEvent } from '@/types/calendar';
+import { format } from 'date-fns';
+import { Calendar, MapPin } from 'lucide-react';
 
-interface EventListProps {
-  date: Date | undefined;
+export interface EventListProps {
   events: CalendarEvent[];
-  selectedEvent: CalendarEvent | null;
-  onSelectEvent: (event: CalendarEvent) => void;
-  getEventTypeColor: (type: string) => string;
+  emptyMessage: string;
 }
 
-export const EventList = React.memo(({
-  date,
-  events,
-  selectedEvent,
-  onSelectEvent,
-  getEventTypeColor
-}: EventListProps) => {
-  const isMobile = useIsMobile();
-  
-  if (!date) return null;
-
-  // Filter events for the selected date using isSameDay
-  const eventsOnSelectedDate = events.filter(event => 
-    isSameDay(event.start, date)
-  );
+export const EventList: React.FC<EventListProps> = ({ events, emptyMessage }) => {
+  if (events.length === 0) {
+    return (
+      <div className="text-center text-muted-foreground py-4">
+        {emptyMessage}
+      </div>
+    );
+  }
 
   return (
-    <div className="mb-4">
-      <h2 className={`${isMobile ? 'text-lg' : 'text-xl'} font-semibold mb-2 md:mb-3 text-gray-800 dark:text-white`}>
-        Events on {format(date, isMobile ? 'MMM d, yyyy' : 'MMMM d, yyyy')}
-      </h2>
-      {eventsOnSelectedDate.length === 0 ? (
-        <p className="text-sm md:text-base text-gray-500 dark:text-gray-400">No events scheduled for this date.</p>
-      ) : (
-        <div className="space-y-3 md:space-y-4 mt-3 md:mt-4">
-          {eventsOnSelectedDate.map((event) => (
-            <EventItem
-              key={event.id}
-              event={event}
-              isSelected={selectedEvent?.id === event.id}
-              onSelect={onSelectEvent}
-              typeColor={getEventTypeColor(event.type)}
-            />
-          ))}
-        </div>
-      )}
+    <div className="space-y-3">
+      {events.map((event) => {
+        // Convert start to Date if it's a string
+        const startDate = typeof event.start === 'string' 
+          ? new Date(event.start) 
+          : event.start;
+        
+        return (
+          <div key={event.id} className="p-3 border rounded-md bg-white dark:bg-gray-800 shadow-sm hover:shadow-md transition-shadow">
+            <div className="flex items-start gap-3">
+              <div className="rounded-md bg-primary/10 p-2 flex-shrink-0">
+                <Calendar className="h-4 w-4 text-primary" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <h4 className="font-medium text-sm sm:text-base text-foreground truncate">
+                  {event.title}
+                </h4>
+                <div className="flex items-center gap-2 text-xs text-muted-foreground mt-1 flex-wrap">
+                  <span>
+                    {format(startDate, 'MMM d, yyyy')}
+                    {!event.allDay && ` • ${format(startDate, 'h:mm a')}`}
+                  </span>
+                  {event.location && (
+                    <>
+                      <span>•</span>
+                      <span className="flex items-center gap-1">
+                        <MapPin className="h-3 w-3" />
+                        <span className="truncate max-w-[150px]">{event.location}</span>
+                      </span>
+                    </>
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>
+        );
+      })}
     </div>
   );
-}, (prevProps, nextProps) => {
-  // Implement custom compare function for memoization
-  if (!prevProps.date && !nextProps.date) return true;
-  if (!prevProps.date || !nextProps.date) return false;
-  
-  // Compare date values using isSameDay for better comparison
-  const dateEqual = isSameDay(prevProps.date, nextProps.date);
-  
-  // Compare events length
-  const eventsLengthEqual = prevProps.events.length === nextProps.events.length;
-  
-  // Compare selectedEvent
-  const selectedEventEqual = 
-    (!prevProps.selectedEvent && !nextProps.selectedEvent) ||
-    (prevProps.selectedEvent?.id === nextProps.selectedEvent?.id);
-  
-  // Compare events content if lengths match
-  let eventsContentEqual = true;
-  if (eventsLengthEqual && prevProps.events.length > 0) {
-    eventsContentEqual = prevProps.events.every((event, index) => {
-      const nextEvent = nextProps.events[index];
-      return event.id === nextEvent.id;
-    });
-  }
-  
-  return dateEqual && eventsLengthEqual && selectedEventEqual && eventsContentEqual;
-});
-
-EventList.displayName = "EventList";
+};
