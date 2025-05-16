@@ -1,263 +1,76 @@
-import React, { useState, useEffect } from "react";
-import { Footer } from "@/components/landing/Footer";
-import { CalendarHeader } from "@/components/calendar/CalendarHeader";
-import { CalendarSidebar } from "@/components/calendar/CalendarSidebar";
-import { EventModal } from "@/components/calendar/EventModal";
-import { ViewEventModal } from "@/components/calendar/ViewEventModal";
-import { useCalendarStore } from "@/hooks/useCalendarStore";
-import { Dialog, DialogContent } from "@/components/ui/dialog";
-import { useAuth } from "@/contexts/AuthContext";
-import { Spinner } from "@/components/ui/spinner";
-import CalendarMain from "@/components/calendar/CalendarMain";
-import { useCalendarEventHandlers } from "@/hooks/useCalendarEventHandlers";
-import { toast } from "sonner";
-import { CalendarPageHeader } from "@/components/calendar/CalendarPageHeader";
-import { useIsMobile } from "@/hooks/use-mobile";
-import { usePermissions } from "@/hooks/usePermissions";
-import { CalendarEvent } from "@/types/calendar";
-import { CalendarEditTools } from "@/components/calendar/CalendarEditTools";
-import { updateHeroImageWithEvents } from "@/utils/heroImageUtils";
 
-const CalendarPage = () => {
-  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+import React from 'react';
+import { Layout } from '@/components/landing/Layout';
+import { PageHeader } from '@/components/ui/page-header';
+import { CalendarContainer } from '@/components/calendar/CalendarContainer';
+import { useCalendarStore } from '@/hooks/useCalendarStore';
+import { useState, useEffect } from 'react';
+import { CalendarEvent } from '@/types/calendar';
+import { CalendarHeader } from '@/components/calendar/CalendarHeader';
+import { ViewEventModal } from '@/components/calendar/ViewEventModal';
+
+export default function CalendarPage() {
+  const [events, setEvents] = useState<CalendarEvent[]>([]);
+  const [view, setView] = useState('dayGridMonth');
+  const [loading, setLoading] = useState(true);
+  const [selectedEvent, setSelectedEvent] = useState<CalendarEvent | null>(null);
   const [isViewModalOpen, setIsViewModalOpen] = useState(false);
-  const [selectedDate, setSelectedDate] = useState<Date | null>(null);
-  const [selectedEvent, setSelectedEvent] = useState<any | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [calendarView, setCalendarView] = useState<'dayGridMonth' | 'timeGridWeek' | 'timeGridDay' | 'listWeek'>('dayGridMonth');
-  const [currentDate, setCurrentDate] = useState(new Date());
-  const isMobile = useIsMobile();
+  const { fetchEvents } = useCalendarStore();
   
-  const { events, fetchEvents, addEvent, updateEvent, deleteEvent, resetCalendar } = useCalendarStore();
-  const { isAdmin, profile } = useAuth();
-  const { isSuperAdmin } = usePermissions();
-
-  // Always allow users to create events - for this specific page
-  const userCanCreate = true;
-
   useEffect(() => {
-    console.log("CalendarPage - Initializing");
-    
     const loadEvents = async () => {
       try {
-        setIsLoading(true);
-        console.log("CalendarPage - Fetching events");
-        await fetchEvents();
-        console.log("CalendarPage - Events loaded successfully");
+        setLoading(true);
+        const calendarEvents = await fetchEvents();
+        if (calendarEvents) {
+          setEvents(calendarEvents);
+        }
       } catch (error) {
-        console.error("Error loading events:", error);
-        toast.error("Failed to load calendar events");
+        console.error('Error loading events:', error);
       } finally {
-        setIsLoading(false);
+        setLoading(false);
       }
     };
     
     loadEvents();
   }, [fetchEvents]);
-
-  // Use our custom hook for event handling
-  const {
-    handleDateClick,
-    handleEventClick: hookEventClick,
-    handleEventDrop,
-    handleEventResize,
-    handleCreateEvent,
-    handleUpdateEvent,
-    handleDeleteEvent
-  } = useCalendarEventHandlers(
-    events,
-    updateEvent,
-    addEvent,
-    deleteEvent,
-    setSelectedEvent,
-    setIsViewModalOpen,
-    setSelectedDate,
-    setIsCreateModalOpen
-  );
   
-  // Create Promise-returning event click handler to satisfy type requirements
-  const handleEventClick = (event: CalendarEvent): Promise<boolean> => {
-    hookEventClick(event);
-    return Promise.resolve(true);
-  };
-
-  // Handler for creating event
-  const onCreateEvent = async (eventData: any): Promise<void> => {
-    try {
-      await handleCreateEvent(eventData);
-      setIsCreateModalOpen(false);
-      // Update hero image after creating an event
-      await updateHeroImageWithEvents(events);
-      return Promise.resolve();
-    } catch (error) {
-      console.error("Error creating event:", error);
-      toast.error("Failed to create event");
-      return Promise.reject(error);
-    }
-  };
-
-  // Handler for updating event - Updated to return a Promise
-  const onUpdateEvent = async (eventData: CalendarEvent): Promise<boolean> => {
-    try {
-      await handleUpdateEvent(eventData);
-      setIsViewModalOpen(false);
-      setSelectedEvent(null);
-      
-      // Update hero image after updating an event
-      await updateHeroImageWithEvents(events);
-      return Promise.resolve(true);
-    } catch (error) {
-      console.error("Error updating event:", error);
-      toast.error("Failed to update event");
-      return Promise.resolve(false);
-    }
-  };
-
-  // Handler for handling event clicks from UpcomingEventsList
-  const handleUpcomingEventClick = async (event: CalendarEvent): Promise<boolean> => {
+  const handleEventClick = async (event: CalendarEvent): Promise<boolean> => {
     setSelectedEvent(event);
     setIsViewModalOpen(true);
     return Promise.resolve(true);
   };
-
-  // Handler for deleting event - Updated to return a Promise
-  const onDeleteEvent = async (eventId: string): Promise<boolean> => {
-    try {
-      await handleDeleteEvent(eventId);
-      setIsViewModalOpen(false);
-      setSelectedEvent(null);
-      
-      // Update hero image after deleting an event
-      await updateHeroImageWithEvents(events.filter(e => e.id !== eventId));
-      return Promise.resolve(true);
-    } catch (error) {
-      console.error("Error deleting event:", error);
-      toast.error("Failed to delete event");
-      return Promise.resolve(false);
-    }
-  };
   
-  // New handler for resetting the calendar
-  const handleResetCalendar = async (): Promise<boolean> => {
-    if (window.confirm("Are you sure you want to reset the calendar? This will delete all events.")) {
-      try {
-        setIsLoading(true);
-        const success = await resetCalendar();
-        if (success) {
-          toast.success("Calendar has been reset successfully");
-          return true;
-        } else {
-          toast.error("Failed to reset calendar");
-          return false;
-        }
-      } catch (error) {
-        console.error("Error resetting calendar:", error);
-        toast.error("An error occurred while resetting the calendar");
-        return false;
-      } finally {
-        setIsLoading(false);
-      }
-    }
-    return false;
-  };
-
   return (
-    <div className="flex flex-col min-h-screen">
-      <main className="flex-1 bg-gray-50 dark:bg-gray-900">
-        <div className="container mx-auto p-2 sm:p-4">
-          {/* Use CalendarPageHeader on mobile, CalendarHeader on desktop */}
-          {isMobile ? (
-            <CalendarPageHeader 
-              onAddEventClick={() => userCanCreate && setIsCreateModalOpen(true)}
-              onResetCalendar={handleResetCalendar}
-            />
-          ) : (
-            <CalendarHeader 
-              onAddEvent={() => userCanCreate && setIsCreateModalOpen(true)} 
-              view={calendarView}
-              onViewChange={setCalendarView}
-              userCanCreate={userCanCreate}
-              onResetCalendar={handleResetCalendar}
-            />
-          )}
-          
-          {/* Add CalendarEditTools differently based on device */}
-          {!isMobile && (
-            <CalendarEditTools 
-              onAddEvent={() => setIsCreateModalOpen(true)}
-              selectedEventId={selectedEvent?.id}
-              onEditSelected={() => isViewModalOpen && setIsViewModalOpen(true)}
-              onDeleteSelected={() => selectedEvent && onDeleteEvent(selectedEvent?.id)}
-              onResetCalendar={handleResetCalendar}
-              className="mt-4"
-            />
-          )}
-          
-          {isLoading ? (
-            <div className="flex justify-center items-center h-96">
-              <Spinner size="lg" />
-            </div>
-          ) : (
-            <div className="flex flex-col lg:flex-row gap-4 lg:gap-6 mt-4 lg:mt-6">
-              <div className="hidden lg:block lg:w-64">
-                <CalendarSidebar />
-              </div>
-              
-              <CalendarMain 
-                events={events}
-                calendarView={calendarView}
-                currentDate={currentDate}
-                setCurrentDate={setCurrentDate}
-                userCanCreate={userCanCreate}
-                handleDateClick={handleDateClick}
-                handleEventClick={handleEventClick}
-                handleEventDrop={handleEventDrop}
-                handleEventResize={handleEventResize}
-              />
-            </div>
-          )}
-
-          {/* CalendarEditTools for mobile */}
-          {isMobile && userCanCreate && (
-            <CalendarEditTools 
-              onAddEvent={() => setIsCreateModalOpen(true)}
-              selectedEventId={selectedEvent?.id}
-              onEditSelected={() => setIsViewModalOpen(true)}
-              onDeleteSelected={() => selectedEvent && onDeleteEvent(selectedEvent?.id)}
-              onResetCalendar={handleResetCalendar}
-            />
-          )}
-
-          {/* Create Event Modal */}
-          <Dialog open={isCreateModalOpen} onOpenChange={setIsCreateModalOpen}>
-            <DialogContent className={isMobile ? "w-[95vw] max-w-md p-4" : "sm:max-w-md"}>
-              <EventModal 
-                onClose={() => setIsCreateModalOpen(false)} 
-                onSave={onCreateEvent} 
-                initialDate={selectedDate}
-              />
-            </DialogContent>
-          </Dialog>
-
-          {/* View/Edit Event Modal */}
-          {selectedEvent && (
-            <Dialog open={isViewModalOpen} onOpenChange={setIsViewModalOpen}>
-              <DialogContent className={isMobile ? "w-[95vw] max-w-md p-4" : "sm:max-w-md"}>
-                <ViewEventModal 
-                  event={selectedEvent} 
-                  onClose={() => setIsViewModalOpen(false)} 
-                  onUpdate={onUpdateEvent}
-                  onDelete={onDeleteEvent}
-                  userCanEdit={userCanCreate || (profile?.id === selectedEvent.created_by && selectedEvent.type === 'sectional')}
-                />
-              </DialogContent>
-            </Dialog>
-          )}
+    <Layout>
+      <div className="container mx-auto px-4 py-8">
+        <PageHeader 
+          title="Events Calendar" 
+          description="View and register for upcoming performances and events"
+        />
+        
+        <div className="mb-8">
+          <CalendarHeader 
+            view={view}
+            onViewChange={setView}
+          />
         </div>
-      </main>
-      <Footer />
-    </div>
+        
+        <CalendarContainer 
+          events={events}
+          view={view}
+          onEventClick={handleEventClick}
+        />
+        
+        {isViewModalOpen && selectedEvent && (
+          <ViewEventModal 
+            open={isViewModalOpen}
+            onOpenChange={setIsViewModalOpen}
+            event={selectedEvent}
+            userCanEdit={false}
+          />
+        )}
+      </div>
+    </Layout>
   );
-};
-
-export default CalendarPage;
+}

@@ -6,7 +6,7 @@ import { ArrowRight } from 'lucide-react';
 
 export function HeroSection() {
   return (
-    <div className="relative overflow-hidden bg-columbia-blue py-16 sm:py-24">
+    <div className="relative overflow-hidden bg-blue-800 py-16 sm:py-24">
       <div className="container mx-auto px-4">
         <div className="max-w-4xl">
           <h1 className="font-playfair text-4xl sm:text-5xl md:text-6xl font-bold text-white mb-6">
@@ -20,7 +20,7 @@ export function HeroSection() {
             <Button 
               asChild 
               variant="default" 
-              className="bg-white text-columbia-blue hover:bg-white/90 text-base"
+              className="bg-white text-blue-800 hover:bg-white/90 text-base"
             >
               <Link to="/about">
                 Learn More <ArrowRight className="ml-2 h-4 w-4" />

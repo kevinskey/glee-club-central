@@ -51,8 +51,14 @@ export const UpcomingEventsList: React.FC<UpcomingEventsListProps> = ({
         setLoading(true);
         const fetchedEvents = await fetchEvents();
         
+        if (!fetchedEvents) {
+          setEvents([]);
+          setLoading(false);
+          return;
+        }
+        
         // Filter by event type if specified
-        let filteredEvents = fetchedEvents || [];
+        let filteredEvents = fetchedEvents;
         if (actualType !== 'all') {
           filteredEvents = filteredEvents.filter(event => event.type === actualType);
         }
@@ -76,6 +82,7 @@ export const UpcomingEventsList: React.FC<UpcomingEventsListProps> = ({
         setEvents(limitedEvents);
       } catch (error) {
         console.error('Error loading events:', error);
+        setEvents([]);
       } finally {
         setLoading(false);
       }

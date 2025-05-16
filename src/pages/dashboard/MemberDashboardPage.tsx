@@ -21,43 +21,52 @@ export default function MemberDashboardPage() {
   const { profile } = useAuth();
   const navigate = useNavigate();
   
+  // Mock next event for countdown
+  const nextEvent = {
+    id: "next-event",
+    title: "Upcoming Performance",
+    date: new Date(new Date().getTime() + 7 * 24 * 60 * 60 * 1000), // 1 week from now
+    time: "7:00 PM",
+    location: "Sisters Chapel"
+  };
+  
   // Quick access tiles for members
   const memberTiles: QuickAccessTile[] = [
     {
       title: "Sheet Music",
       icon: "Music",
       href: "/dashboard/sheet-music",
-      color: "bg-gradient-to-br from-blue-500 to-blue-600"
+      color: "bg-gradient-to-br from-blue-600 to-blue-800"
     },
     {
       title: "Calendar",
       icon: "Calendar",
       href: "/dashboard/calendar",
-      color: "bg-gradient-to-br from-purple-500 to-purple-700"
+      color: "bg-gradient-to-br from-purple-600 to-purple-800"
     },
     {
       title: "Recordings",
       icon: "Headphones",
       href: "/dashboard/recordings",
-      color: "bg-gradient-to-br from-amber-500 to-amber-600"
+      color: "bg-gradient-to-br from-amber-600 to-amber-700"
     },
     {
       title: "Resources",
       icon: "BookOpen",
       href: "/dashboard/resources",
-      color: "bg-gradient-to-br from-green-500 to-green-600"
+      color: "bg-gradient-to-br from-green-600 to-green-700"
     },
     {
       title: "Announcements",
       icon: "Bell",
       href: "/dashboard/announcements",
-      color: "bg-gradient-to-br from-red-500 to-red-600"
+      color: "bg-gradient-to-br from-red-600 to-red-700"
     },
     {
       title: "Profile",
       icon: "User",
       href: "/dashboard/profile",
-      color: "bg-gradient-to-br from-gray-600 to-gray-700"
+      color: "bg-gradient-to-br from-gray-700 to-gray-800"
     }
   ];
   
@@ -74,13 +83,13 @@ export default function MemberDashboardPage() {
         {/* Main Content - Left 2/3 */}
         <div className="md:col-span-8 space-y-6">
           {/* Next Rehearsal Countdown */}
-          <NextEventCountdown />
+          <NextEventCountdown event={nextEvent} />
           
           <Card>
             <CardHeader className="pb-2">
               <div className="flex justify-between items-center">
                 <div className="flex items-center">
-                  <Calendar className="mr-2 h-5 w-5 text-blue-500" />
+                  <Calendar className="mr-2 h-5 w-5 text-blue-600" />
                   <CardTitle>Upcoming Events</CardTitle>
                 </div>
                 <Button 

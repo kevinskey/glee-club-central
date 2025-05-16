@@ -39,8 +39,8 @@ export const QuickAccess: React.FC<QuickAccessProps> = ({ tiles }) => {
             IconComponent = Music;
         }
         
-        // Use Columbia blue as default if no color specified
-        const color = tile.color || 'bg-columbia-blue hover:bg-columbia-blue/90';
+        // Use blue as default if no color specified
+        const color = tile.color || 'bg-blue-800 hover:bg-blue-700';
         
         return (
           <a 
@@ -57,4 +57,4 @@ export const QuickAccess: React.FC<QuickAccessProps> = ({ tiles }) => {
       })}
     </div>
   );
-};
+}

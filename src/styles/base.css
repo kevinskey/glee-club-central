@@ -12,8 +12,8 @@
     --popover: 0 0% 100%;
     --popover-foreground: 240 10% 3.9%;
 
-    --primary: 199 100% 80%;  /* Columbia blue */
-    --primary-foreground: 240 10% 3.9%;
+    --primary: 210 100% 30%;  /* Darker Spelman blue */
+    --primary-foreground: 0 0% 98%;
 
     --secondary: 240 4.8% 95.9%;
     --secondary-foreground: 240 5.9% 10%;
@@ -29,13 +29,13 @@
 
     --border: 240 5.9% 90%;
     --input: 240 5.9% 90%;
-    --ring: 199 100% 80%;  /* Columbia blue for focus rings */
+    --ring: 210 100% 30%;  /* Darker Spelman blue for focus rings */
 
     --radius: 0.5rem;
     
     --glee-purple: 258 74% 74%;
     --glee-spelman: 22 100% 50%;
-    --glee-columbia: 199 100% 80%;  /* Columbia blue */
+    --glee-columbia: 210 100% 30%;  /* Darker Spelman blue */
   }
 
   .dark {
@@ -48,8 +48,8 @@
     --popover: 240 10% 3.9%;
     --popover-foreground: 0 0% 98%;
 
-    --primary: 199 100% 80%;  /* Columbia blue */
-    --primary-foreground: 240 5.9% 10%;
+    --primary: 210 100% 40%;  /* Slightly lighter for dark mode */
+    --primary-foreground: 0 0% 98%;
 
     --secondary: 240 3.7% 15.9%;
     --secondary-foreground: 0 0% 98%;
@@ -65,7 +65,7 @@
 
     --border: 240 3.7% 15.9%;
     --input: 240 3.7% 15.9%;
-    --ring: 199 100% 70%;  /* Slightly darker Columbia blue for dark mode */
+    --ring: 210 100% 40%;  /* Slightly lighter for dark mode */
   }
 
   * {
