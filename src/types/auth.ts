@@ -17,6 +17,8 @@ export interface AuthUser {
   created_at?: string;
 }
 
+export type UserType = 'member' | 'admin' | 'fan';
+
 export interface Profile {
   id: string;
   user_id?: string;
@@ -38,6 +40,7 @@ export interface Profile {
   notes?: string;
   dues_paid?: boolean;
   is_super_admin?: boolean;
+  user_type?: UserType;
   // Add backward compatibility fields 
   role?: string; // Add for backward compatibility
   title?: string; // Add for backward compatibility
@@ -50,12 +53,15 @@ export interface AuthContextType {
   isAuthenticated: boolean;
   isLoading: boolean;
   isAdmin: () => boolean;
+  isMember: () => boolean;
+  isFan: () => boolean;
+  getUserType: () => UserType | null;
   login: (email: string, password: string) => Promise<{ error: any } | void>;
   logout: () => Promise<{ error: any } | void>;
   resetPassword: (email: string) => Promise<{ error: any } | void>;
   signOut?: () => Promise<{ error: any } | void>;
   signIn?: (email: string, password: string) => Promise<any>;
-  signUp?: (email: string, password: string, firstName: string, lastName: string) => Promise<any>;
+  signUp?: (email: string, password: string, firstName: string, lastName: string, userType?: UserType) => Promise<any>;
   updatePassword?: (newPassword: string) => Promise<{ error: any } | null>;
   session: any;
   // Add backward compatibility methods

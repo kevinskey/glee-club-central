@@ -1,197 +1,149 @@
 
-import React, { useRef, useEffect, useState } from "react";
-import FullCalendar from "@fullcalendar/react";
-import dayGridPlugin from "@fullcalendar/daygrid";
-import timeGridPlugin from "@fullcalendar/timegrid";
-import interactionPlugin from "@fullcalendar/interaction";
-import listPlugin from "@fullcalendar/list";
-import { EventContent } from "./EventContent";
-import { CalendarToolbar } from "./CalendarToolbar";
-import { CalendarEvent } from "@/types/calendar";
-import { useCalendarNavigation } from "@/hooks/useCalendarNavigation";
-import { Card } from "@/components/ui/card";
-import { useIsMobile } from "@/hooks/use-mobile";
-import { getMobileCalendarSettings } from "@/utils/calendarMobileUtils";
-import { Spinner } from "@/components/ui/spinner";
+import React, { useEffect, useRef, useState } from 'react';
+import FullCalendar from '@fullcalendar/react';
+import dayGridPlugin from '@fullcalendar/daygrid';
+import timeGridPlugin from '@fullcalendar/timegrid';
+import listPlugin from '@fullcalendar/list';
+import interactionPlugin from '@fullcalendar/interaction';
+import { EventClickArg } from '@fullcalendar/core';
+import { CalendarEvent } from '@/types/calendar';
+import EventContent from './EventContent';
+import { useMobile } from '@/hooks/useMobile';
+import { MobileFitCheck } from './MobileFitCheck';
 
 interface CalendarMainProps {
   events: CalendarEvent[];
-  calendarView: 'dayGridMonth' | 'timeGridWeek' | 'timeGridDay' | 'listWeek';
-  currentDate: Date;
-  setCurrentDate: (date: Date) => void;
-  userCanCreate: boolean;
-  handleDateClick: (info: any) => void;
-  handleEventClick: (info: any) => void;
-  handleEventDrop: (info: any) => void;
-  handleEventResize: (info: any) => void;
+  view: 'dayGridMonth' | 'timeGridWeek' | 'timeGridDay' | 'listWeek';
+  onEventClick?: (event: CalendarEvent) => void;
+  onDateClick?: (date: Date) => void;
+  height?: string;
+  onViewDidMount?: (view: any) => void;
+  editable?: boolean;
+  selectable?: boolean;
+  headerToolbar?: boolean | {
+    left: string;
+    center: string;
+    right: string;
+  };
+  footerToolbar?: boolean | {
+    left: string;
+    center: string;
+    right: string;
+  };
+  onSelect?: (arg: any) => void;
+  slotMinTime?: string;
+  slotMaxTime?: string;
+  initialDate?: Date;
+  displayEventEnd?: boolean;
+  eventDisplay?: 'auto' | 'block' | 'list-item' | 'background' | 'inverse-background' | 'none';
 }
 
-export const CalendarMain = ({
+const CalendarMain: React.FC<CalendarMainProps> = ({
   events,
-  calendarView,
-  currentDate,
-  setCurrentDate,
-  userCanCreate,
-  handleDateClick,
-  handleEventClick,
-  handleEventDrop,
-  handleEventResize
-}: CalendarMainProps) => {
-  const calendarRef = useRef<FullCalendar>(null);
-  const [calendarReady, setCalendarReady] = useState(false);
-  const isMobile = useIsMobile();
-  
-  const { 
-    handlePrevClick, 
-    handleNextClick, 
-    handleTodayClick 
-  } = useCalendarNavigation(calendarRef, setCurrentDate);
-  
-  // Get best view based on screen size
-  const getBestView = () => {
-    if (isMobile) {
-      // Use list view on mobile for month view, otherwise keep the selected view
-      return calendarView === 'dayGridMonth' ? 'listWeek' : calendarView;
-    }
-    return calendarView;
-  };
-  
-  const initialView = getBestView();
-  
+  view = 'dayGridMonth',
+  onEventClick,
+  onDateClick,
+  height = 'auto',
+  onViewDidMount,
+  editable = false,
+  selectable = false,
+  headerToolbar,
+  footerToolbar,
+  onSelect,
+  slotMinTime = '07:00:00',
+  slotMaxTime = '21:00:00',
+  initialDate,
+  displayEventEnd = true,
+  eventDisplay = 'block'
+}) => {
+  const calendarRef = useRef<any>(null);
+  const { isMobile } = useMobile();
+  const [currentView, setCurrentView] = useState(view);
+  const [windowSize, setWindowSize] = useState({
+    width: window.innerWidth,
+    height: window.innerHeight,
+  });
+
+  // Update window size on resize
   useEffect(() => {
-    console.log("CalendarMain mounted, view:", calendarView);
-    console.log("Events received:", events.length);
-    
-    // Mark calendar as ready after a short delay to ensure DOM is fully rendered
-    const timer = setTimeout(() => {
-      setCalendarReady(true);
-      console.log("Calendar ready state set to true");
-    }, 500);
-    
-    return () => {
-      console.log("CalendarMain unmounting");
-      clearTimeout(timer);
+    const handleResize = () => {
+      setWindowSize({
+        width: window.innerWidth,
+        height: window.innerHeight,
+      });
     };
-  }, [calendarView, events]);
-  
-  const eventContent = (eventInfo: any) => {
-    return <EventContent eventInfo={eventInfo} view={calendarView} isMobile={isMobile} />;
+
+    window.addEventListener('resize', handleResize);
+    return () => {
+      window.removeEventListener('resize', handleResize);
+    };
+  }, []);
+
+  // Handle event click
+  const handleEventClick = (clickInfo: EventClickArg) => {
+    const eventId = clickInfo.event.id;
+    const selectedEvent = events.find(e => e.id === eventId);
+    
+    if (selectedEvent && onEventClick) {
+      onEventClick(selectedEvent);
+    }
   };
 
-  // Add a sample event if events array is empty (for testing purposes)
-  const displayEvents = events.length > 0 ? events : [
-    {
-      id: "test-event",
-      title: "Sample Test Event",
-      start: new Date().toISOString(),
-      end: new Date(Date.now() + 3600000).toISOString(),
-      type: "special" as const,
-      location: "Test Location",
-      description: "This is a test event to verify calendar rendering"
+  // Handle date click
+  const handleDateClick = (arg: any) => {
+    if (onDateClick) {
+      onDateClick(arg.date);
     }
-  ];
+  };
 
-  // Use the getMobileCalendarSettings function in your component
-  const mobileSettings = getMobileCalendarSettings();
+  // Handle view did mount
+  const handleViewDidMount = (view: any) => {
+    if (onViewDidMount) {
+      onViewDidMount(view);
+    }
+  };
 
   return (
-    <Card className="flex-1 bg-white dark:bg-gray-800 rounded-lg shadow-sm p-2 sm:p-4 overflow-visible">
-      <CalendarToolbar 
-        onPrevClick={handlePrevClick}
-        onNextClick={handleNextClick}
-        onTodayClick={handleTodayClick}
-        currentDate={currentDate}
-        calendarView={calendarView}
-        eventsCount={events.length}
+    <div className="calendar-container">
+      <MobileFitCheck />
+      <FullCalendar
+        ref={calendarRef}
+        plugins={[dayGridPlugin, timeGridPlugin, listPlugin, interactionPlugin]}
+        initialView={view}
+        events={events.map(event => ({
+          id: event.id,
+          title: event.title,
+          start: event.date,
+          end: event.date,
+          extendedProps: event
+        }))}
+        eventContent={(arg) => <EventContent arg={arg} />}
+        height={height}
+        eventClick={handleEventClick}
+        dateClick={handleDateClick}
+        viewDidMount={handleViewDidMount}
+        editable={editable}
+        selectable={selectable}
+        headerToolbar={headerToolbar || {
+          left: 'prev,next today',
+          center: 'title',
+          right: 'dayGridMonth,timeGridWeek,timeGridDay,listWeek'
+        }}
+        titleFormat={{
+          year: 'numeric',
+          month: 'short',
+          day: 'numeric'
+        }}
+        footerToolbar={footerToolbar}
+        onSelect={onSelect}
+        slotMinTime={slotMinTime}
+        slotMaxTime={slotMaxTime}
+        initialDate={initialDate}
+        displayEventEnd={displayEventEnd}
+        eventDisplay={eventDisplay}
       />
-
-      <div 
-        style={{ 
-          minHeight: isMobile ? "450px" : "600px", 
-          height: isMobile ? "60vh" : "70vh", 
-          marginTop: "1rem" 
-        }} 
-        className="calendar-container"
-      >
-        {!calendarReady && (
-          <div className="h-full flex items-center justify-center">
-            <Spinner size="lg" />
-          </div>
-        )}
-        
-        {calendarReady && (
-          <FullCalendar
-            ref={calendarRef}
-            plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin, listPlugin]}
-            initialView={initialView}
-            headerToolbar={false}
-            events={displayEvents.map(event => ({
-              id: event.id,
-              title: event.title,
-              start: event.start,
-              end: event.end,
-              extendedProps: {
-                type: event.type,
-                location: event.location || "",
-                description: event.description || "",
-                created_by: event.created_by
-              }
-            }))}
-            dateClick={userCanCreate ? handleDateClick : undefined}
-            eventClick={handleEventClick}
-            editable={userCanCreate && !isMobile} // Disable drag/drop on mobile
-            eventDrop={handleEventDrop}
-            eventResize={handleEventResize}
-            eventContent={eventContent}
-            height="100%"
-            firstDay={0} // Start week on Sunday
-            nowIndicator={true}
-            dayMaxEvents={isMobile ? 2 : true} // Limit visible events on mobile
-            slotMinTime="07:00:00"
-            slotMaxTime="22:00:00"
-            allDaySlot={true}
-            allDayText="All day"
-            slotLabelFormat={{
-              hour: 'numeric',
-              minute: '2-digit',
-              meridiem: 'short',
-              omitZeroMinute: true
-            }}
-            datesSet={(dateInfo) => {
-              console.log("Calendar datesSet:", dateInfo.view.title);
-              setCurrentDate(dateInfo.view.currentStart);
-            }}
-            eventTimeFormat={{
-              hour: 'numeric',
-              minute: '2-digit',
-              meridiem: 'short',
-              omitZeroMinute: true
-            }}
-            views={{
-              dayGridMonth: {
-                dayMaxEventRows: isMobile ? 2 : 3,
-                titleFormat: { month: 'long', year: 'numeric' }
-              },
-              timeGridWeek: {
-                titleFormat: { month: 'long', year: 'numeric' },
-                slotDuration: '00:30:00',
-                slotLabelInterval: '01:00'
-              },
-              timeGridDay: {
-                titleFormat: { month: 'long', day: 'numeric', year: 'numeric' },
-                slotDuration: '00:30:00',
-                slotLabelInterval: '01:00'
-              },
-              listWeek: {
-                titleFormat: { month: 'long', year: 'numeric' },
-                listDayFormat: { weekday: 'short', month: 'short', day: 'numeric' },
-                listDaySideFormat: false
-              }
-            }}
-            {...mobileSettings}
-          />
-        )}
-      </div>
-    </Card>
+    </div>
   );
 };
+
+export default CalendarMain;

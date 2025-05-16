@@ -2,10 +2,10 @@
 import { useAuth } from "@/contexts/AuthContext";
 
 /**
- * A hook for checking user permissions based on roles and admin status
+ * A hook for checking user permissions based on user type and admin status
  */
 export const usePermissions = () => {
-  const { isAdmin, profile, user } = useAuth();
+  const { isAdmin, isMember, isFan, getUserType, profile, user } = useAuth();
 
   // Check if user is super admin
   const isSuperAdmin = profile?.is_super_admin || false;
@@ -13,7 +13,7 @@ export const usePermissions = () => {
   // Check if user has admin role
   const isAdminRole = isAdmin ? isAdmin() : false;
 
-  // Permission check function that allows any authenticated user for basic actions
+  // Permission check function
   const hasPermission = (permission: string): boolean => {
     // If no user is logged in, they have no permissions
     if (!user) return false;
@@ -24,13 +24,31 @@ export const usePermissions = () => {
     // Admin users have all permissions
     if (isAdminRole) return true;
     
-    // Special case permissions for regular users
-    if (permission === 'can_upload_media') {
-      // Allow any authenticated user to upload media
-      return true;
+    // Check user type specific permissions
+    const userType = getUserType();
+    
+    if (userType === 'member') {
+      // Members have access to these permissions
+      if ([
+        'view_sheet_music',
+        'view_calendar',
+        'view_announcements',
+        'can_upload_media',
+        'can_view_sheet_music',
+      ].includes(permission)) {
+        return true;
+      }
+    } else if (userType === 'fan') {
+      // Fans have limited access
+      if ([
+        'view_calendar',
+        'view_announcements',
+      ].includes(permission)) {
+        return true;
+      }
     }
     
-    // For other permissions, default to false for regular users
+    // For other permissions, default to false
     return false;
   };
 
@@ -38,6 +56,9 @@ export const usePermissions = () => {
     hasPermission,
     isSuperAdmin,
     isAdminRole,
+    isMember: isMember ? isMember() : false,
+    isFan: isFan ? isFan() : false,
+    userType: getUserType(),
     isLoggedIn: !!user
   };
 };

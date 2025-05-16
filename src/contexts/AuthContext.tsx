@@ -1,6 +1,6 @@
 
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
-import { AuthUser, AuthContextType, Profile } from '@/types/auth';
+import { AuthUser, AuthContextType, Profile, UserType } from '@/types/auth';
 import { supabase } from '@/integrations/supabase/client';
 import { User } from '@supabase/supabase-js';
 
@@ -43,6 +43,19 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       }
       
       if (data) {
+        // If user_type is not set, infer it from is_super_admin or role
+        if (!data.user_type) {
+          if (data.is_super_admin) {
+            data.user_type = 'admin';
+          } else if (data.role === 'admin') {
+            data.user_type = 'admin';
+          } else if (data.role === 'member') {
+            data.user_type = 'member';
+          } else {
+            data.user_type = 'fan';
+          }
+        }
+        
         setProfile(data);
         return data;
       }
@@ -169,7 +182,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     return logout();
   };
 
-  const signUp = async (email: string, password: string, firstName: string, lastName: string) => {
+  const signUp = async (email: string, password: string, firstName: string, lastName: string, userType: UserType = 'fan') => {
     setIsLoading(true);
     try {
       const { data, error } = await supabase.auth.signUp({
@@ -179,7 +192,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
           data: {
             full_name: `${firstName} ${lastName}`,
             first_name: firstName,
-            last_name: lastName
+            last_name: lastName,
+            user_type: userType
           }
         }
       });
@@ -195,7 +209,19 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   };
 
   const isAdmin = () => {
-    return profile?.is_super_admin === true;
+    return profile?.is_super_admin === true || profile?.user_type === 'admin';
+  };
+
+  const isMember = () => {
+    return profile?.user_type === 'member';
+  };
+
+  const isFan = () => {
+    return profile?.user_type === 'fan';
+  };
+
+  const getUserType = (): UserType | null => {
+    return profile?.user_type || null;
   };
 
   const updatePassword = async (newPassword: string) => {
@@ -235,6 +261,9 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     signOut,
     signUp,
     isAdmin,
+    isMember,
+    isFan,
+    getUserType,
     updatePassword,
     resetPassword,
     refreshPermissions,

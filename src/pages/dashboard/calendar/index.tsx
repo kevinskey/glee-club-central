@@ -1,64 +1,127 @@
 
-import React from 'react';
-import { toast } from 'sonner';
-import { v4 as uuidv4 } from 'uuid';
+import React, { useState, useEffect, useCallback } from 'react';
 import { CalendarEvent, EventType } from '@/types/calendar';
+import { CalendarHeader } from '@/components/calendar/CalendarHeader';
+import { CalendarContainer } from '@/components/calendar/CalendarContainer';
+import { useCalendarStore } from '@/store/useCalendarStore';
+import { ViewEventModal } from '@/components/calendar/ViewEventModal';
+import EventModal from '@/components/calendar/EventModal';
+import { toast } from 'sonner';
+import { handleAddEvent, handleUpdateEvent, handleDeleteEvent } from '@/pages/dashboard/calendar';
 
-// Handler for adding event - Fixed to correctly handle asynchronous operations
-const handleAddEvent = async (eventData: any, addEvent: Function, setIsCreateModalOpen: Function): Promise<void> => {
-  try {
-    // Format the data to match what the store expects and ensure id is present
-    const newEvent: CalendarEvent = {
-      id: eventData.id || uuidv4(),
-      title: eventData.title,
-      description: eventData.description,
-      date: eventData.date,
-      time: eventData.time,
-      location: eventData.location,
-      type: eventData.type as EventType,
-      start: new Date(eventData.date),
-      end: new Date(eventData.date),
-      image_url: eventData.image_url || null
+function CalendarPage() {
+  // State
+  const [events, setEvents] = useState<CalendarEvent[]>([]);
+  const [view, setView] = useState<'dayGridMonth' | 'timeGridWeek' | 'timeGridDay' | 'listWeek'>('dayGridMonth');
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [isViewModalOpen, setIsViewModalOpen] = useState(false);
+  const [selectedEvent, setSelectedEvent] = useState<CalendarEvent | null>(null);
+
+  // Access store
+  const { 
+    fetchEvents, 
+    addEvent: storeAddEvent,
+    updateEvent: storeUpdateEvent,
+    deleteEvent: storeDeleteEvent,
+    resetCalendar: storeResetCalendar
+  } = useCalendarStore();
+
+  // Load events
+  useEffect(() => {
+    const loadEvents = async () => {
+      try {
+        const calendarEvents = await fetchEvents();
+        setEvents(calendarEvents);
+      } catch (error) {
+        console.error('Error loading events:', error);
+        toast.error('Failed to load calendar events');
+      }
     };
-    
-    await addEvent(newEvent);
-    toast.success("Event created successfully");
-    setIsCreateModalOpen(false);
-    return Promise.resolve();
-  } catch (error) {
-    console.error("Error adding event:", error);
-    toast.error("Failed to create event");
-    return Promise.reject(error);
-  }
-};
 
-// Handle updating event - Fixed to correctly handle asynchronous operations
-const handleUpdateEvent = async (eventData: CalendarEvent, updateEvent: Function, setIsViewModalOpen: Function): Promise<boolean> => {
-  try {
-    await updateEvent(eventData);
-    toast.success("Event updated successfully");
-    setIsViewModalOpen(false);
-    return true;
-  } catch (error) {
-    console.error("Error updating event:", error);
-    toast.error("Failed to update event");
-    return false;
-  }
-};
+    loadEvents();
+  }, [fetchEvents]);
 
-// Handle deleting event - Fixed to correctly handle asynchronous operations
-const handleDeleteEvent = async (eventId: string, deleteEvent: Function, setIsViewModalOpen: Function, setSelectedEvent: Function): Promise<boolean> => {
-  try {
-    await deleteEvent(eventId);
-    toast.success("Event deleted successfully");
-    setIsViewModalOpen(false);
-    setSelectedEvent(null);
-    return true;
-  } catch (error) {
-    console.error("Error deleting event:", error);
-    toast.error("Failed to delete event");
-    return false;
-  }
-};
+  // Handle event click
+  const handleEventClick = (event: CalendarEvent) => {
+    setSelectedEvent(event);
+    setIsViewModalOpen(true);
+  };
 
-export { handleAddEvent, handleUpdateEvent, handleDeleteEvent };
+  // Add event wrapper
+  const addEvent = async (eventData: any): Promise<boolean> => {
+    return handleAddEvent(eventData, storeAddEvent, setIsCreateModalOpen)
+      .then(() => {
+        // Refresh events after adding
+        return fetchEvents().then((updatedEvents) => {
+          setEvents(updatedEvents);
+          return true;
+        });
+      })
+      .catch(() => false);
+  };
+
+  // Update event wrapper
+  const updateEvent = async (eventData: CalendarEvent): Promise<boolean> => {
+    return handleUpdateEvent(eventData, storeUpdateEvent, setIsViewModalOpen);
+  };
+
+  // Delete event wrapper
+  const deleteEvent = async (eventId: string): Promise<boolean> => {
+    return handleDeleteEvent(eventId, storeDeleteEvent, setIsViewModalOpen, setSelectedEvent);
+  };
+
+  // Reset calendar
+  const resetCalendar = useCallback(async (): Promise<boolean> => {
+    try {
+      await storeResetCalendar();
+      toast.success("Calendar has been reset to defaults");
+      
+      // Refresh events after resetting
+      const updatedEvents = await fetchEvents();
+      setEvents(updatedEvents);
+      
+      return true;
+    } catch (error) {
+      console.error("Error resetting calendar:", error);
+      toast.error("Failed to reset calendar");
+      return false;
+    }
+  }, [fetchEvents, storeResetCalendar]);
+
+  return (
+    <div className="container mx-auto px-4 py-8">
+      <CalendarHeader 
+        onAddEventClick={() => setIsCreateModalOpen(true)}
+        view={view}
+        onViewChange={setView}
+        onResetCalendar={resetCalendar}
+      />
+
+      <CalendarContainer 
+        events={events} 
+        view={view}
+        onEventClick={handleEventClick}
+      />
+
+      {isCreateModalOpen && (
+        <EventModal 
+          isOpen={isCreateModalOpen}
+          onClose={() => setIsCreateModalOpen(false)}
+          onSave={addEvent}
+        />
+      )}
+
+      {isViewModalOpen && selectedEvent && (
+        <ViewEventModal
+          isOpen={isViewModalOpen}
+          onClose={() => setIsViewModalOpen(false)}
+          event={selectedEvent}
+          onUpdate={updateEvent}
+          onDelete={deleteEvent}
+        />
+      )}
+    </div>
+  );
+}
+
+export default CalendarPage;

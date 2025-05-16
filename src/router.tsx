@@ -32,6 +32,7 @@ import LandingPageSettingsPage from './pages/admin/LandingPageSettingsPage';
 
 // Import auth related pages
 import LoginPage from './pages/auth/LoginPage';
+import SignupPage from './pages/auth/SignupPage';
 import ResetPasswordPage from './pages/auth/ResetPasswordPage';
 import ForgotPasswordPage from './pages/auth/ForgotPasswordPage';
 import UpdatePasswordPage from './pages/UpdatePasswordPage';
@@ -39,9 +40,10 @@ import AdminRegistrationPage from './pages/admin/AdminRegistrationPage';
 
 // Import admin pages
 import { AdminRoute } from './components/auth/AdminRoute';
+import RequireAuth from './components/auth/RequireAuth';
 
 // Import dashboard calendar page
-import CalendarPage from './pages/dashboard/calendar/index';
+import CalendarPage from './pages/dashboard/calendar';
 
 // Import the correct DashboardPage directly without lazy loading
 import DashboardPage from './pages/dashboard/DashboardPage';
@@ -91,7 +93,7 @@ export const router = createBrowserRouter([
   },
   {
     path: '/dashboard',
-    element: <DashboardLayout />,
+    element: <RequireAuth><DashboardLayout /></RequireAuth>,
     children: [
       {
         index: true,
@@ -103,23 +105,23 @@ export const router = createBrowserRouter([
       },
       {
         path: 'media-library',
-        element: <MediaLibraryPage />,
+        element: <RequireAuth allowedUserTypes={['admin', 'member']}><MediaLibraryPage /></RequireAuth>,
       },
       {
         path: 'sheet-music',
-        element: <SheetMusicPage />,
+        element: <RequireAuth allowedUserTypes={['admin', 'member']}><SheetMusicPage /></RequireAuth>,
       },
       {
         path: 'sheet-music/:id',
-        element: <PDFViewerPage />,
+        element: <RequireAuth allowedUserTypes={['admin', 'member']}><PDFViewerPage /></RequireAuth>,
       },
       {
         path: 'media/pdf/:id',
-        element: <PDFViewerPage />,
+        element: <RequireAuth allowedUserTypes={['admin', 'member']}><PDFViewerPage /></RequireAuth>,
       },
       {
         path: 'recordings',
-        element: <RecordingsPage />,
+        element: <RequireAuth allowedUserTypes={['admin', 'member']}><RecordingsPage /></RequireAuth>,
       },
       {
         path: 'calendar',
@@ -130,6 +132,10 @@ export const router = createBrowserRouter([
   {
     path: '/login',
     element: <LoginPage />,
+  },
+  {
+    path: '/signup',
+    element: <SignupPage />,
   },
   {
     path: '/register',
@@ -150,9 +156,9 @@ export const router = createBrowserRouter([
   {
     path: '/admin',
     element: (
-      <AdminRoute>
+      <RequireAuth requireAdmin={true}>
         <AdminLayout />
-      </AdminRoute>
+      </RequireAuth>
     ),
     children: [
       {
