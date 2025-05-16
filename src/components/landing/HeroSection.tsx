@@ -1,71 +1,43 @@
 
-import React, { useState, useEffect } from "react";
-import { BackgroundSlideshow } from "./BackgroundSlideshow";
-import { HeroContent } from "./hero/HeroContent";
-import { HeroSeal } from "./hero/HeroSeal";
-import { supabase } from "@/integrations/supabase/client";
+import React from 'react';
+import { Link } from 'react-router-dom';
+import { Button } from '@/components/ui/button';
+import { ArrowRight } from 'lucide-react';
 
 export function HeroSection() {
-  // Initialize state for dynamic background images
-  const [backgroundImages, setBackgroundImages] = useState<string[]>([
-    "/lovable-uploads/a2e734d0-cb83-4b32-be93-9f3f0da03fc4.png",
-    "/lovable-uploads/e06ff100-0add-4adc-834f-50ef81098d35.png",
-    "/lovable-uploads/8aa13e63-fb9a-4c52-95cf-86b458c58f1c.png",
-    "/lovable-uploads/10bab1e7-0f4e-402f-ab65-feb4710b5eaf.png",
-    "/lovable-uploads/642b93d7-fc15-4c2c-a7df-fe81aadb2f3b.png",
-    "/lovable-uploads/4df78d4e-3a15-4e50-9326-6f47a48e2bab.png"
-  ]);
-  
-  // Fetch hero images from the database
-  useEffect(() => {
-    const fetchHeroImages = async () => {
-      try {
-        const { data, error } = await supabase
-          .from('site_images')
-          .select('file_url')
-          .eq('category', 'hero')
-          .order('position', { ascending: true });
-        
-        if (error) {
-          console.error("Error fetching hero images:", error);
-          return;
-        }
-        
-        if (data && data.length > 0) {
-          // Extract file URLs
-          const heroImageUrls = data
-            .map(item => item.file_url)
-            .filter(url => url); // Filter out any null values
-            
-          // If we have hero images from the database, use them
-          if (heroImageUrls.length > 0) {
-            setBackgroundImages(heroImageUrls);
-          }
-        }
-      } catch (error) {
-        console.error("Error in fetchHeroImages:", error);
-      }
-    };
-    
-    fetchHeroImages();
-  }, []);
-  
   return (
-    <section className="relative bg-glee-dark py-4 sm:py-5 md:py-8 lg:py-12 xl:py-20 min-h-[320px] sm:min-h-[360px] md:min-h-[440px] lg:min-h-[520px] xl:min-h-[600px] w-full overflow-hidden flex items-center justify-start">
-      <div className="absolute inset-0 z-[1]">
-        <BackgroundSlideshow 
-          images={backgroundImages} 
-          duration={10000} 
-          transition={2000}
-          overlayOpacity={0.5}
-        />
+    <div className="relative overflow-hidden bg-glee-spelman py-16 sm:py-24">
+      <div className="container mx-auto px-4">
+        <div className="max-w-4xl">
+          <h1 className="font-playfair text-4xl sm:text-5xl md:text-6xl font-bold text-white mb-6">
+            Spelman College Glee Club
+          </h1>
+          <p className="text-xl md:text-2xl text-white/90 mb-8 max-w-2xl">
+            A distinguished choral ensemble with a tradition of musical 
+            excellence spanning nearly a century
+          </p>
+          <div className="flex flex-wrap gap-4">
+            <Button 
+              asChild 
+              variant="default" 
+              className="bg-white text-glee-spelman hover:bg-white/90 text-base"
+            >
+              <Link to="/about">
+                Learn More <ArrowRight className="ml-2 h-4 w-4" />
+              </Link>
+            </Button>
+            <Button 
+              asChild 
+              variant="outline" 
+              className="bg-transparent text-white border-white hover:bg-white/10 text-base"
+            >
+              <Link to="/fan">
+                Fan Portal
+              </Link>
+            </Button>
+          </div>
+        </div>
       </div>
-      
-      <div className="relative z-10 mx-auto px-4 sm:px-6 md:px-8 w-full flex items-center justify-start">
-        <HeroContent />
-      </div>
-
-      <HeroSeal />
-    </section>
+    </div>
   );
 }

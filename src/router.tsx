@@ -19,6 +19,7 @@ import TermsOfServicePage from './pages/TermsOfServicePage';
 import SocialPage from './pages/SocialPage';
 import PDFViewerPage from './pages/PDFViewerPage';
 import ViewSheetMusicPage from './pages/sheet-music/ViewSheetMusicPage';
+import FanPage from './pages/FanPage';
 
 // Admin components
 import AdminLayout from './layouts/AdminLayout';
@@ -45,8 +46,13 @@ import RequireAuth from './components/auth/RequireAuth';
 // Import dashboard calendar page
 import CalendarPage from './pages/dashboard/calendar';
 
-// Import the correct DashboardPage directly without lazy loading
-import DashboardPage from './pages/dashboard/DashboardPage';
+// Import dashboard pages for different user types
+import MemberDashboardPage from './pages/dashboard/MemberDashboardPage';
+import FanDashboardPage from './pages/dashboard/FanDashboardPage';
+import AdminDashboardPage from './pages/admin/AdminDashboardPage';
+
+// Add the RoleDashboard component to route users based on their role
+import RoleDashboard from './components/auth/RoleDashboard';
 
 export const router = createBrowserRouter([
   {
@@ -84,6 +90,10 @@ export const router = createBrowserRouter([
       {
         path: 'social',
         element: <SocialPage />,
+      },
+      {
+        path: 'fan',
+        element: <FanPage />,
       },
       {
         path: '*',
