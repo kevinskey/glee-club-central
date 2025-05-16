@@ -1,9 +1,10 @@
+
 import React, { useState, useEffect } from 'react';
 import { PageHeader } from "@/components/ui/page-header";
 import { Calendar, CalendarPlus, Cloud, RefreshCcw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useCalendarStore } from "@/hooks/useCalendarStore";
-import { CalendarMain } from "@/components/calendar/CalendarMain";
+import CalendarMain from "@/components/calendar/CalendarMain"; // Fixed import
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { EventModal } from "@/components/calendar/EventModal";
 import { ViewEventModal } from "@/components/calendar/ViewEventModal";

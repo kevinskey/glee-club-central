@@ -2,51 +2,63 @@
 import React, { useState, useEffect } from 'react';
 import { useCalendarStore } from '@/hooks/useCalendarStore';
 import { CalendarEvent } from '@/types/calendar';
-import { format } from 'date-fns';
+import { formatDate } from '@/utils/calendarUtils';
 import { Card, CardContent } from '@/components/ui/card';
 import { Calendar, MapPin, Clock } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useNavigate } from 'react-router-dom';
 
-// Helper function to format dates
-const formatDate = (date: string | Date): string => {
-  try {
-    const dateObj = typeof date === 'string' ? new Date(date) : date;
-    return format(dateObj, 'MMM d, yyyy');
-  } catch (error) {
-    console.error('Error formatting date:', error);
-    return String(date);
-  }
-};
-
-export interface UpcomingEventsListProps {
+interface UpcomingEventsListProps {
   type?: string;
   limit?: number;
+  maxItems?: number;  // Added for backwards compatibility
+  showType?: string;  // Added for backwards compatibility
+  events?: CalendarEvent[]; // Allow directly passing events
+  onEventClick?: (event: CalendarEvent) => Promise<boolean>;
+  className?: string;
+  maxHeight?: string;
 }
 
 export const UpcomingEventsList: React.FC<UpcomingEventsListProps> = ({ 
   type = 'all',
-  limit = 3 
+  limit = 3,
+  maxItems, // Legacy prop support
+  showType, // Legacy prop support
+  events: propEvents,
+  onEventClick,
+  className = '',
+  maxHeight
 }) => {
+  // Use whichever provided - for backward compatibility
+  const actualLimit = maxItems || limit;
+  const actualType = showType || type;
+  
   const [events, setEvents] = useState<CalendarEvent[]>([]);
   const [loading, setLoading] = useState(true);
-  const { events: storeEvents, fetchEvents } = useCalendarStore();
+  const { fetchEvents } = useCalendarStore();
   const navigate = useNavigate();
   
   useEffect(() => {
+    if (propEvents) {
+      // Use provided events if available
+      setEvents(propEvents);
+      setLoading(false);
+      return;
+    }
+    
     const loadEvents = async () => {
       try {
         setLoading(true);
-        await fetchEvents();
+        const fetchedEvents = await fetchEvents();
         
         // Filter by event type if specified
-        let filteredEvents = storeEvents;
-        if (type !== 'all') {
-          filteredEvents = storeEvents.filter(event => event.type === type);
+        let filteredEvents = fetchedEvents || [];
+        if (actualType !== 'all') {
+          filteredEvents = filteredEvents.filter(event => event.type === actualType);
         }
         
         // Sort by date (closest first)
-        const sortedEvents = [...filteredEvents].sort((a, b) => {
+        const sortedEvents = filteredEvents.sort((a, b) => {
           return new Date(a.start).getTime() - new Date(b.start).getTime();
         });
         
@@ -59,7 +71,7 @@ export const UpcomingEventsList: React.FC<UpcomingEventsListProps> = ({
         );
         
         // Limit to specified number
-        const limitedEvents = upcomingEvents.slice(0, limit);
+        const limitedEvents = upcomingEvents.slice(0, actualLimit);
         
         setEvents(limitedEvents);
       } catch (error) {
@@ -70,15 +82,21 @@ export const UpcomingEventsList: React.FC<UpcomingEventsListProps> = ({
     };
     
     loadEvents();
-  }, [fetchEvents, limit, type, storeEvents]);
+  }, [fetchEvents, actualLimit, actualType, propEvents]);
   
-  const viewEvent = (event: CalendarEvent) => {
+  const viewEvent = async (event: CalendarEvent) => {
+    if (onEventClick) {
+      return onEventClick(event);
+    }
     navigate(`/dashboard/calendar?event=${event.id}`);
+    return Promise.resolve(true);
   };
+  
+  const containerStyle = maxHeight ? { maxHeight, overflowY: 'auto' as const } : {};
   
   if (loading) {
     return (
-      <div className="space-y-4">
+      <div className={`space-y-4 ${className}`}>
         {[...Array(3)].map((_, i) => (
           <Card key={i} className="animate-pulse bg-gray-100 dark:bg-gray-800">
             <CardContent className="p-4 h-20"></CardContent>
@@ -90,7 +108,7 @@ export const UpcomingEventsList: React.FC<UpcomingEventsListProps> = ({
   
   if (events.length === 0) {
     return (
-      <div className="text-center py-8 text-gray-500">
+      <div className={`text-center py-8 text-gray-500 ${className}`}>
         <Calendar className="mx-auto h-12 w-12 opacity-20 mb-2" />
         <p>No upcoming events scheduled</p>
       </div>
@@ -98,9 +116,13 @@ export const UpcomingEventsList: React.FC<UpcomingEventsListProps> = ({
   }
   
   return (
-    <div className="space-y-4">
+    <div className={`space-y-4 ${className}`} style={containerStyle}>
       {events.map((event) => (
-        <Card key={event.id} className="hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors cursor-pointer" onClick={() => viewEvent(event)}>
+        <Card 
+          key={event.id} 
+          className="hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors cursor-pointer" 
+          onClick={() => viewEvent(event)}
+        >
           <CardContent className="p-4">
             <div className="flex justify-between">
               <div>
@@ -116,12 +138,18 @@ export const UpcomingEventsList: React.FC<UpcomingEventsListProps> = ({
                   </div>
                 )}
               </div>
+              {event.time && (
+                <div className="flex items-center text-sm text-muted-foreground">
+                  <Clock className="h-3.5 w-3.5 mr-1" />
+                  <span>{event.time}</span>
+                </div>
+              )}
             </div>
           </CardContent>
         </Card>
       ))}
       
-      {events.length > 0 && (
+      {events.length > 0 && !onEventClick && (
         <div className="flex justify-center mt-2">
           <Button 
             variant="ghost" 

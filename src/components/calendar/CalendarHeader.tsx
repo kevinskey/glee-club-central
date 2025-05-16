@@ -14,6 +14,7 @@ export interface CalendarHeaderProps {
   onPrevious?: () => void;
   onNext?: () => void;
   onToday?: () => void;
+  userCanCreate?: boolean; // Add this prop
 }
 
 export const CalendarHeader: React.FC<CalendarHeaderProps> = ({
@@ -23,7 +24,8 @@ export const CalendarHeader: React.FC<CalendarHeaderProps> = ({
   onResetCalendar,
   onPrevious,
   onNext,
-  onToday
+  onToday,
+  userCanCreate = true
 }) => {
   const isMobile = window.innerWidth < 768; // Simple mobile detection
 

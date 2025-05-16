@@ -64,8 +64,8 @@ export default function FanDashboardPage() {
             </CardHeader>
             <CardContent>
               <UpcomingEventsList 
-                maxItems={3} 
-                showType="performance" 
+                limit={3} 
+                type="performance"
               />
             </CardContent>
           </Card>

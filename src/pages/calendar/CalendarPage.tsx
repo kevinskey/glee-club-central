@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { Footer } from "@/components/landing/Footer";
 import { CalendarHeader } from "@/components/calendar/CalendarHeader";
@@ -9,7 +8,7 @@ import { useCalendarStore } from "@/hooks/useCalendarStore";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { useAuth } from "@/contexts/AuthContext";
 import { Spinner } from "@/components/ui/spinner";
-import { CalendarMain } from "@/components/calendar/CalendarMain";
+import CalendarMain from "@/components/calendar/CalendarMain";
 import { useCalendarEventHandlers } from "@/hooks/useCalendarEventHandlers";
 import { toast } from "sonner";
 import { CalendarPageHeader } from "@/components/calendar/CalendarPageHeader";
@@ -59,7 +58,7 @@ const CalendarPage = () => {
   // Use our custom hook for event handling
   const {
     handleDateClick,
-    handleEventClick,
+    handleEventClick: hookEventClick,
     handleEventDrop,
     handleEventResize,
     handleCreateEvent,
@@ -75,6 +74,12 @@ const CalendarPage = () => {
     setSelectedDate,
     setIsCreateModalOpen
   );
+  
+  // Create Promise-returning event click handler to satisfy type requirements
+  const handleEventClick = (event: CalendarEvent): Promise<boolean> => {
+    hookEventClick(event);
+    return Promise.resolve(true);
+  };
 
   // Handler for creating event
   const onCreateEvent = async (eventData: any): Promise<void> => {

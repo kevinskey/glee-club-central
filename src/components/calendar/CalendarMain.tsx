@@ -29,6 +29,7 @@ const MobileFitCheck: React.FC<{ title: string }> = ({ title }) => {
   );
 };
 
+// Export as both default and named export
 const CalendarMain: React.FC<CalendarMainProps> = ({
   events,
   calendarView = 'dayGridMonth',
@@ -106,4 +107,6 @@ const CalendarMain: React.FC<CalendarMainProps> = ({
   );
 };
 
+// Export both as named and default export
+export { CalendarMain };
 export default CalendarMain;
