@@ -107,7 +107,7 @@ export const UpcomingEventsList: React.FC<UpcomingEventsListProps> = ({
       return await onEventClick(event);
     }
     navigate(`/dashboard/calendar?event=${event.id}`);
-    return Promise.resolve(true);
+    return true;
   };
   
   const containerStyle = maxHeight ? { maxHeight, overflowY: 'auto' as const } : {};

@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { CalendarIcon, Clock, MapPin, User, Trash2, Edit, FileText } from "lucide-react";
+import { CalendarIcon, Clock, MapPin, User, Trash2, Edit } from "lucide-react";
 import { CalendarEvent } from '@/types/calendar';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { AspectRatio } from "@/components/ui/aspect-ratio";
@@ -10,15 +10,15 @@ import { EventModal } from "./EventModal";
 
 interface ViewEventModalProps {
   event: CalendarEvent;
-  onClose: () => void;
-  onUpdate: (event: CalendarEvent) => Promise<boolean | void>;
-  onDelete: (eventId: string) => Promise<boolean | void>;
+  onOpenChange: (open: boolean) => void;
+  onUpdate?: (event: CalendarEvent) => Promise<boolean | void>;
+  onDelete?: (eventId: string) => Promise<boolean | void>;
   userCanEdit: boolean;
 }
 
 export function ViewEventModal({ 
   event, 
-  onClose, 
+  onOpenChange, 
   onUpdate, 
   onDelete, 
   userCanEdit 
@@ -27,10 +27,12 @@ export function ViewEventModal({
   const [isEditing, setIsEditing] = useState(false);
 
   const handleDelete = async () => {
-    if (window.confirm("Are you sure you want to delete this event?")) {
+    if (window.confirm("Are you sure you want to delete this event?") && onDelete) {
       await onDelete(event.id);
     }
   };
+
+  const onClose = () => onOpenChange(false);
 
   // If in edit mode, show the EventModal component instead
   if (isEditing) {
@@ -38,11 +40,14 @@ export function ViewEventModal({
       <EventModal
         onClose={() => setIsEditing(false)}
         onSave={async (updatedEvent) => {
-          const success = await onUpdate({ ...event, ...updatedEvent });
-          if (success) {
-            setIsEditing(false);
+          if (onUpdate) {
+            const success = await onUpdate({ ...event, ...updatedEvent });
+            if (success) {
+              setIsEditing(false);
+            }
+            return !!success;
           }
-          return success;
+          return false;
         }}
         initialData={event}
       />
@@ -134,6 +139,7 @@ const formatDate = (date: string | Date): string => {
       day: 'numeric' 
     });
   } catch (e) {
+    console.error('Error formatting date:', e);
     return String(date);
   }
 };
@@ -146,6 +152,7 @@ const formatTime = (time: string): string => {
     date.setMinutes(parseInt(minutes, 10));
     return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
   } catch (e) {
+    console.error('Error formatting time:', e);
     return time;
   }
 };

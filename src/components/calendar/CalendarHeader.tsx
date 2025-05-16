@@ -7,14 +7,14 @@ import { CalendarPlus, ChevronLeft, ChevronRight, RefreshCw,
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 export interface CalendarHeaderProps {
-  onAddEvent: () => void;
   view: 'dayGridMonth' | 'timeGridWeek' | 'timeGridDay' | 'listWeek';
   onViewChange: (view: 'dayGridMonth' | 'timeGridWeek' | 'timeGridDay' | 'listWeek') => void;
+  onAddEvent: () => void;
   onResetCalendar?: () => Promise<boolean>;
   onPrevious?: () => void;
   onNext?: () => void;
   onToday?: () => void;
-  userCanCreate?: boolean; // Add this prop
+  userCanCreate?: boolean;
 }
 
 export const CalendarHeader: React.FC<CalendarHeaderProps> = ({

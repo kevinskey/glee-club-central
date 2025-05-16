@@ -12,7 +12,7 @@ import { Button } from '@/components/ui/button';
 
 export default function CalendarPage() {
   const [events, setEvents] = useState<CalendarEvent[]>([]);
-  const [view, setView] = useState('dayGridMonth');
+  const [view, setView] = useState<'dayGridMonth' | 'timeGridWeek' | 'timeGridDay' | 'listWeek'>('dayGridMonth');
   const [loading, setLoading] = useState(true);
   const [selectedEvent, setSelectedEvent] = useState<CalendarEvent | null>(null);
   const [isViewModalOpen, setIsViewModalOpen] = useState(false);
@@ -36,10 +36,10 @@ export default function CalendarPage() {
     loadEvents();
   }, [fetchEvents]);
   
-  const handleEventClick = async (event: CalendarEvent): Promise<boolean> => {
+  const handleEventClick = async (event: CalendarEvent) => {
     setSelectedEvent(event);
     setIsViewModalOpen(true);
-    return Promise.resolve(true);
+    return true;
   };
   
   return (
@@ -54,6 +54,7 @@ export default function CalendarPage() {
           <CalendarHeader 
             view={view}
             onViewChange={setView}
+            onAddEvent={() => {}}
           />
         </div>
         
@@ -65,7 +66,6 @@ export default function CalendarPage() {
         
         {isViewModalOpen && selectedEvent && (
           <ViewEventModal 
-            open={isViewModalOpen}
             onOpenChange={setIsViewModalOpen}
             event={selectedEvent}
             userCanEdit={false}
