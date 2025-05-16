@@ -66,9 +66,11 @@ const EventCalendar: React.FC = () => {
       // Update hero images with current events after creating a new one
       const updatedEvents = [...events, eventData];
       await updateHeroImageWithEvents(updatedEvents);
+      return true;
     } catch (error) {
       console.error("Error creating event:", error);
       toast.error("Failed to create event");
+      return false;
     }
   };
   
@@ -84,9 +86,11 @@ const EventCalendar: React.FC = () => {
         event.id === eventData.id ? eventData : event
       );
       await updateHeroImageWithEvents(updatedEvents);
+      return true;
     } catch (error) {
       console.error("Error updating event:", error);
       toast.error("Failed to update event");
+      return false;
     }
   };
   
@@ -100,9 +104,11 @@ const EventCalendar: React.FC = () => {
       // Update hero images after deleting an event
       const remainingEvents = events.filter(event => event.id !== eventId);
       await updateHeroImageWithEvents(remainingEvents);
+      return true;
     } catch (error) {
       console.error("Error deleting event:", error);
       toast.error("Failed to delete event");
+      return false;
     }
   };
   
@@ -253,7 +259,7 @@ const EventCalendar: React.FC = () => {
           <DialogContent className="sm:max-w-md">
             <ViewEventModal 
               event={selectedEvent} 
-              onClose={() => setIsViewModalOpen(false)} 
+              onOpenChange={setIsViewModalOpen}
               onUpdate={handleUpdateEvent}
               onDelete={handleDeleteEvent}
               userCanEdit={true}

@@ -58,7 +58,7 @@ export const UpcomingEventsList: React.FC<UpcomingEventsListProps> = ({
         }
         
         // Filter by event type if specified
-        let filteredEvents = fetchedEvents;
+        let filteredEvents = [...fetchedEvents]; // Make a copy to avoid type errors
         if (actualType !== 'all') {
           filteredEvents = filteredEvents.filter(event => event.type === actualType);
         }
@@ -104,7 +104,8 @@ export const UpcomingEventsList: React.FC<UpcomingEventsListProps> = ({
   
   const viewEvent = async (event: CalendarEvent) => {
     if (onEventClick) {
-      return await onEventClick(event);
+      const result = await onEventClick(event);
+      return result;
     }
     navigate(`/dashboard/calendar?event=${event.id}`);
     return true;

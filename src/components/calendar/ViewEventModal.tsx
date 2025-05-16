@@ -11,6 +11,7 @@ import { EventModal } from "./EventModal";
 interface ViewEventModalProps {
   event: CalendarEvent;
   onOpenChange: (open: boolean) => void;
+  onClose?: () => void; // Added this prop for backward compatibility
   onUpdate?: (event: CalendarEvent) => Promise<boolean | void>;
   onDelete?: (eventId: string) => Promise<boolean | void>;
   userCanEdit: boolean;
@@ -19,6 +20,7 @@ interface ViewEventModalProps {
 export function ViewEventModal({ 
   event, 
   onOpenChange, 
+  onClose, 
   onUpdate, 
   onDelete, 
   userCanEdit 
@@ -32,7 +34,13 @@ export function ViewEventModal({
     }
   };
 
-  const onClose = () => onOpenChange(false);
+  const handleClose = () => {
+    // Support both onClose and onOpenChange for backward compatibility
+    if (onClose) {
+      onClose();
+    }
+    onOpenChange(false);
+  };
 
   // If in edit mode, show the EventModal component instead
   if (isEditing) {
@@ -120,7 +128,7 @@ export function ViewEventModal({
             </Button>
           </>
         )}
-        <Button variant="outline" onClick={onClose}>
+        <Button variant="outline" onClick={handleClose}>
           Close
         </Button>
       </DialogFooter>

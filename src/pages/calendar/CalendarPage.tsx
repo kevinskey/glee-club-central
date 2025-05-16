@@ -24,9 +24,12 @@ export default function CalendarPage() {
         const calendarEvents = await fetchEvents();
         if (calendarEvents) {
           setEvents(calendarEvents);
+        } else {
+          setEvents([]);
         }
       } catch (error) {
         console.error('Error loading events:', error);
+        setEvents([]);
       } finally {
         setLoading(false);
       }

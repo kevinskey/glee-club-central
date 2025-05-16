@@ -73,9 +73,11 @@ const EventCalendar: React.FC = () => {
       setIsViewModalOpen(false);
       setSelectedEvent(null);
       toast.success("Event updated successfully");
+      return true;
     } catch (error) {
       console.error("Error updating event:", error);
       toast.error("Failed to update event");
+      return false;
     }
   };
   
@@ -85,9 +87,11 @@ const EventCalendar: React.FC = () => {
       setIsViewModalOpen(false);
       setSelectedEvent(null);
       toast.success("Event deleted successfully");
+      return true;
     } catch (error) {
       console.error("Error deleting event:", error);
       toast.error("Failed to delete event");
+      return false;
     }
   };
   
@@ -227,7 +231,7 @@ const EventCalendar: React.FC = () => {
           <DialogContent className="sm:max-w-md">
             <ViewEventModal 
               event={selectedEvent} 
-              onClose={() => setIsViewModalOpen(false)} 
+              onOpenChange={setIsViewModalOpen}
               onUpdate={handleUpdateEvent}
               onDelete={handleDeleteEvent}
               userCanEdit={true}

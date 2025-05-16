@@ -43,21 +43,30 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       }
       
       if (data) {
-        // If user_type is not set, infer it from is_super_admin or role
-        if (!data.user_type) {
-          if (data.is_super_admin) {
-            data.user_type = 'admin';
-          } else if (data.role === 'admin') {
-            data.user_type = 'admin';
-          } else if (data.role === 'member') {
-            data.user_type = 'member';
-          } else {
-            data.user_type = 'fan';
-          }
-        }
+        // Process profile data before setting it
+        const processedData: Profile = {
+          ...data,
+          // Convert special_roles from string to string[] if needed
+          special_roles: data.special_roles 
+            ? (Array.isArray(data.special_roles) 
+                ? data.special_roles 
+                : [data.special_roles])
+            : [],
+          
+          // If user_type is not set, infer it from is_super_admin or role
+          user_type: data.user_type || (
+            data.is_super_admin
+              ? 'admin'
+              : data.role === 'admin'
+                ? 'admin'
+                : data.role === 'member'
+                  ? 'member'
+                  : 'fan'
+          ) as UserType
+        };
         
-        setProfile(data);
-        return data;
+        setProfile(processedData);
+        return processedData;
       }
       
       return null;
@@ -220,8 +229,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     return profile?.user_type === 'fan';
   };
 
-  const getUserType = (): UserType | null => {
-    return profile?.user_type || null;
+  const getUserType = (): UserType => {
+    return profile?.user_type || '';
   };
 
   const updatePassword = async (newPassword: string) => {
