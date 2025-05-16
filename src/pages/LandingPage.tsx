@@ -1,25 +1,25 @@
 
 import React from 'react';
 import { HeroSection } from '@/components/landing/HeroSection';
+import { FeaturesSection } from '@/components/landing/FeaturesSection';
+import { AnnouncementBanner } from '@/components/landing/AnnouncementBanner';
 import { PerformanceSection } from '@/components/landing/performance/PerformanceSection';
 import { TestimonialSection } from '@/components/landing/TestimonialSection';
 import { CTASection } from '@/components/landing/CTASection';
-import { FeaturesSection } from '@/components/landing/FeaturesSection';
 import { MemberPortalBox } from '@/components/landing/MemberPortalBox';
-import { HeroCalendarSync } from '@/components/landing/HeroCalendarSync';
 
-export default function LandingPage() {
+const LandingPage = () => {
   return (
     <>
-      {/* This component ensures hero images sync with calendar events */}
-      <HeroCalendarSync />
-      
+      <AnnouncementBanner />
       <HeroSection />
-      <PerformanceSection />
+      <MemberPortalBox />
       <FeaturesSection />
+      <PerformanceSection />
       <TestimonialSection />
       <CTASection />
-      <MemberPortalBox />
     </>
   );
-}
+};
+
+export default LandingPage;

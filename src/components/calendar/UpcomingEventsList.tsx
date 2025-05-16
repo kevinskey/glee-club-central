@@ -104,8 +104,8 @@ export const UpcomingEventsList: React.FC<UpcomingEventsListProps> = ({
   
   const viewEvent = async (event: CalendarEvent) => {
     if (onEventClick) {
-      const result = await onEventClick(event);
-      return result;
+      await onEventClick(event);
+      return true;
     }
     navigate(`/dashboard/calendar?event=${event.id}`);
     return true;

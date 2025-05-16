@@ -28,7 +28,7 @@ export function MemberPortalBox() {
           </CardContent>
           <CardFooter className="flex justify-center gap-4 pt-2 pb-6">
             <Button 
-              onClick={() => navigate('/auth/login')}
+              onClick={() => navigate('/login')}
               className="bg-white text-glee-spelman hover:bg-white/90"
             >
               <LogIn className="mr-2 h-4 w-4" /> 
@@ -36,7 +36,7 @@ export function MemberPortalBox() {
             </Button>
             <Button 
               variant="outline"
-              onClick={() => navigate('/fan-page')} 
+              onClick={() => navigate('/fan')} 
               className="border-white text-white hover:bg-white/20"
             >
               Guest Access
