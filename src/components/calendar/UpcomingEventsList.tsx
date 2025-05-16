@@ -1,146 +1,137 @@
 
-import React, { useState, useEffect, useRef } from "react";
-import { CalendarEvent } from "@/types/calendar";
-import { format, isToday, isTomorrow } from "date-fns";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { useIntersection } from "@/hooks/use-intersection";
-import { CalendarClock, Loader2 } from "lucide-react";
-import { ScrollArea } from "@/components/ui/scroll-area";
+import React, { useState, useEffect } from 'react';
+import { useCalendarStore } from '@/hooks/useCalendarStore';
+import { CalendarEvent } from '@/types/calendar';
+import { format } from 'date-fns';
+import { Card, CardContent } from '@/components/ui/card';
+import { Calendar, MapPin, Clock } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { useNavigate } from 'react-router-dom';
 
-interface UpcomingEventsListProps {
-  events: CalendarEvent[];
-  onEventClick: (event: CalendarEvent) => void;
-  className?: string;
-  initialLimit?: number;
-  increment?: number;
-  maxHeight?: string;
+// Helper function to format dates
+const formatDate = (date: string | Date): string => {
+  try {
+    const dateObj = typeof date === 'string' ? new Date(date) : date;
+    return format(dateObj, 'MMM d, yyyy');
+  } catch (error) {
+    console.error('Error formatting date:', error);
+    return String(date);
+  }
+};
+
+export interface UpcomingEventsListProps {
+  type?: string;
+  limit?: number;
 }
 
-export function UpcomingEventsList({ 
-  events, 
-  onEventClick, 
-  className = "",
-  initialLimit = 5,
-  increment = 5,
-  maxHeight = "400px"
-}: UpcomingEventsListProps) {
-  const [visibleEvents, setVisibleEvents] = useState<CalendarEvent[]>([]);
-  const [limit, setLimit] = useState(initialLimit);
-  const [isLoading, setIsLoading] = useState(false);
+export const UpcomingEventsList: React.FC<UpcomingEventsListProps> = ({ 
+  type = 'all',
+  limit = 3 
+}) => {
+  const [events, setEvents] = useState<CalendarEvent[]>([]);
+  const [loading, setLoading] = useState(true);
+  const { events: storeEvents, fetchEvents } = useCalendarStore();
+  const navigate = useNavigate();
   
-  const ref = useRef<HTMLDivElement>(null);
-  const entry = useIntersection(ref, {
-    root: null,
-    rootMargin: '0px',
-    threshold: 0.5
-  });
-  
-  // Format the event date for display
-  const formatEventDate = (date: string | Date) => {
-    const eventDate = new Date(date);
+  useEffect(() => {
+    const loadEvents = async () => {
+      try {
+        setLoading(true);
+        await fetchEvents();
+        
+        // Filter by event type if specified
+        let filteredEvents = storeEvents;
+        if (type !== 'all') {
+          filteredEvents = storeEvents.filter(event => event.type === type);
+        }
+        
+        // Sort by date (closest first)
+        const sortedEvents = [...filteredEvents].sort((a, b) => {
+          return new Date(a.start).getTime() - new Date(b.start).getTime();
+        });
+        
+        // Only get upcoming events
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        
+        const upcomingEvents = sortedEvents.filter(event => 
+          new Date(event.start) >= today
+        );
+        
+        // Limit to specified number
+        const limitedEvents = upcomingEvents.slice(0, limit);
+        
+        setEvents(limitedEvents);
+      } catch (error) {
+        console.error('Error loading events:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
     
-    if (isToday(eventDate)) {
-      return "Today";
-    } else if (isTomorrow(eventDate)) {
-      return "Tomorrow";
-    } else {
-      return format(eventDate, 'EEE, MMM d');
-    }
+    loadEvents();
+  }, [fetchEvents, limit, type, storeEvents]);
+  
+  const viewEvent = (event: CalendarEvent) => {
+    navigate(`/dashboard/calendar?event=${event.id}`);
   };
   
-  // Get event type color
-  const getEventTypeColor = (type: string): string => {
-    switch (type) {
-      case 'concert':
-        return 'bg-glee-purple text-white';
-      case 'rehearsal':
-        return 'bg-blue-500 text-white';
-      case 'sectional':
-        return 'bg-green-500 text-white';
-      case 'special':
-        return 'bg-amber-500 text-white';
-      case 'tour':
-        return 'bg-rose-500 text-white';
-      default:
-        return 'bg-gray-500 text-white';
-    }
-  };
+  if (loading) {
+    return (
+      <div className="space-y-4">
+        {[...Array(3)].map((_, i) => (
+          <Card key={i} className="animate-pulse bg-gray-100 dark:bg-gray-800">
+            <CardContent className="p-4 h-20"></CardContent>
+          </Card>
+        ))}
+      </div>
+    );
+  }
   
-  // Load more events when intersection observer triggers
-  useEffect(() => {
-    if (entry?.isIntersecting && visibleEvents.length < events.length && !isLoading) {
-      setIsLoading(true);
-      
-      // Simulate loading delay (remove in production if not needed)
-      setTimeout(() => {
-        setLimit(prevLimit => prevLimit + increment);
-        setIsLoading(false);
-      }, 300);
-    }
-  }, [entry, events.length, increment, isLoading, visibleEvents.length]);
-  
-  // Update visible events when limit changes or events change
-  useEffect(() => {
-    setVisibleEvents(events.slice(0, limit));
-  }, [events, limit]);
+  if (events.length === 0) {
+    return (
+      <div className="text-center py-8 text-gray-500">
+        <Calendar className="mx-auto h-12 w-12 opacity-20 mb-2" />
+        <p>No upcoming events scheduled</p>
+      </div>
+    );
+  }
   
   return (
-    <Card className={className}>
-      <CardHeader className="pb-2">
-        <CardTitle className="text-lg font-semibold flex items-center gap-2">
-          <CalendarClock className="h-5 w-5" />
-          Upcoming Events
-        </CardTitle>
-      </CardHeader>
-      <CardContent className="pt-0 px-2">
-        <ScrollArea className={`h-[${maxHeight}]`} style={{ height: maxHeight }}>
-          {events.length === 0 ? (
-            <p className="text-sm text-muted-foreground py-4 text-center">
-              No upcoming events scheduled
-            </p>
-          ) : (
-            <div className="space-y-3 pr-2">
-              {visibleEvents.map((event) => (
-                <div 
-                  key={event.id}
-                  className="flex items-center gap-3 p-2 rounded-md border border-border hover:bg-accent/50 cursor-pointer transition-colors"
-                  onClick={() => onEventClick(event)}
-                >
-                  <div className="flex-shrink-0 w-12 h-12 flex flex-col items-center justify-center rounded-md bg-muted">
-                    <span className="text-xs font-medium">{format(new Date(event.start), "MMM")}</span>
-                    <span className="text-lg font-bold">{format(new Date(event.start), "dd")}</span>
-                  </div>
-                  
-                  <div className="flex-1 min-w-0">
-                    <h4 className="font-medium truncate">{event.title}</h4>
-                    <p className="text-xs text-muted-foreground">
-                      {formatEventDate(event.start)}
-                      {event.time && ` • ${event.time}`}
-                      {event.location && ` • ${event.location}`}
-                    </p>
-                  </div>
-                  
-                  <Badge variant="secondary" className={getEventTypeColor(event.type)}>
-                    {event.type}
-                  </Badge>
+    <div className="space-y-4">
+      {events.map((event) => (
+        <Card key={event.id} className="hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors cursor-pointer" onClick={() => viewEvent(event)}>
+          <CardContent className="p-4">
+            <div className="flex justify-between">
+              <div>
+                <h4 className="font-medium text-base">{event.title}</h4>
+                <div className="flex items-center text-sm text-muted-foreground mt-1">
+                  <Calendar className="h-3.5 w-3.5 mr-1" />
+                  <span>{formatDate(event.start)}</span>
                 </div>
-              ))}
-              
-              {/* Loading indicator and intersection observer element */}
-              <div 
-                ref={ref} 
-                className="flex justify-center py-2"
-                style={{ display: visibleEvents.length >= events.length ? 'none' : 'flex' }}
-              >
-                {isLoading && (
-                  <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+                {event.location && (
+                  <div className="flex items-center text-sm text-muted-foreground mt-1">
+                    <MapPin className="h-3.5 w-3.5 mr-1" />
+                    <span>{event.location}</span>
+                  </div>
                 )}
               </div>
             </div>
-          )}
-        </ScrollArea>
-      </CardContent>
-    </Card>
+          </CardContent>
+        </Card>
+      ))}
+      
+      {events.length > 0 && (
+        <div className="flex justify-center mt-2">
+          <Button 
+            variant="ghost" 
+            size="sm" 
+            onClick={() => navigate('/dashboard/calendar')}
+          >
+            View All Events
+          </Button>
+        </div>
+      )}
+    </div>
   );
-}
+};

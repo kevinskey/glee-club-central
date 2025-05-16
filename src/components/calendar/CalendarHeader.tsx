@@ -1,84 +1,116 @@
 
 import React from 'react';
 import { Button } from '@/components/ui/button';
-import { PlusCircle } from 'lucide-react';
-import { CalendarResetButton } from './CalendarResetButton';
-import { usePermissions } from '@/hooks/usePermissions';
+import { Card } from '@/components/ui/card';
+import { CalendarPlus, ChevronLeft, ChevronRight, RefreshCw, 
+  CalendarDays, Calendar, List } from 'lucide-react';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
-type CalendarView = 'dayGridMonth' | 'timeGridWeek' | 'timeGridDay' | 'listWeek';
-
-interface CalendarHeaderProps {
+export interface CalendarHeaderProps {
   onAddEvent: () => void;
-  view?: CalendarView;
-  onViewChange?: (view: CalendarView) => void;
-  userCanCreate?: boolean;
+  view: 'dayGridMonth' | 'timeGridWeek' | 'timeGridDay' | 'listWeek';
+  onViewChange: (view: 'dayGridMonth' | 'timeGridWeek' | 'timeGridDay' | 'listWeek') => void;
   onResetCalendar?: () => Promise<boolean>;
+  onPrevious?: () => void;
+  onNext?: () => void;
+  onToday?: () => void;
 }
 
-export function CalendarHeader({
+export const CalendarHeader: React.FC<CalendarHeaderProps> = ({
   onAddEvent,
-  view = 'dayGridMonth',
+  view,
   onViewChange,
-  userCanCreate = true,
-  onResetCalendar
-}: CalendarHeaderProps) {
-  const { isSuperAdmin } = usePermissions();
-  
-  const handleViewChange = (newView: CalendarView) => {
-    onViewChange?.(newView);
-  };
-  
+  onResetCalendar,
+  onPrevious,
+  onNext,
+  onToday
+}) => {
+  const isMobile = window.innerWidth < 768; // Simple mobile detection
+
   return (
-    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
-      <div>
-        <h1 className="text-2xl font-bold tracking-tight">Calendar</h1>
-        <p className="text-muted-foreground">
-          Manage and view your events and rehearsals
-        </p>
-      </div>
-      
+    <Card className="p-4 mb-4 flex flex-col sm:flex-row justify-between items-center gap-4">
       <div className="flex items-center gap-2">
-        {onViewChange && (
-          <div className="bg-muted rounded-md p-1 mr-2">
-            <div className="flex items-center">
-              <Button
-                variant={view === 'dayGridMonth' ? 'default' : 'ghost'}
-                size="sm"
-                onClick={() => handleViewChange('dayGridMonth')}
-                className="rounded-l-md"
-              >
-                Month
-              </Button>
-              <Button
-                variant={view === 'timeGridWeek' ? 'default' : 'ghost'}
-                size="sm"
-                onClick={() => handleViewChange('timeGridWeek')}
-              >
-                Week
-              </Button>
-              <Button
-                variant={view === 'timeGridDay' ? 'default' : 'ghost'}
-                size="sm"
-                onClick={() => handleViewChange('timeGridDay')}
-                className="rounded-r-md"
-              >
-                Day
-              </Button>
-            </div>
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={onAddEvent}
+          className="flex items-center"
+        >
+          <CalendarPlus className="h-4 w-4 mr-2" />
+          Add Event
+        </Button>
+        
+        {onResetCalendar && (
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={onResetCalendar}
+            className="hidden sm:flex items-center"
+          >
+            <RefreshCw className="h-4 w-4 mr-2" />
+            Reset
+          </Button>
+        )}
+      </div>
+
+      <div className="flex flex-wrap items-center justify-center gap-2">
+        {onPrevious && onNext && onToday && (
+          <div className="flex items-center mr-2 border rounded-md">
+            <Button 
+              variant="ghost" 
+              size="icon" 
+              onClick={onPrevious} 
+              className="h-8 w-8 rounded-none rounded-l-md"
+            >
+              <ChevronLeft className="h-4 w-4" />
+            </Button>
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              onClick={onToday} 
+              className="h-8 rounded-none border-l border-r px-2"
+            >
+              Today
+            </Button>
+            <Button 
+              variant="ghost" 
+              size="icon" 
+              onClick={onNext} 
+              className="h-8 w-8 rounded-none rounded-r-md"
+            >
+              <ChevronRight className="h-4 w-4" />
+            </Button>
           </div>
         )}
         
-        {userCanCreate && (
-          <Button onClick={onAddEvent} className="ml-auto">
-            <PlusCircle className="h-4 w-4 mr-2" />
-            Add Event
-          </Button>
-        )}
-        
-        {isSuperAdmin && onResetCalendar && (
-          <CalendarResetButton onResetCalendar={onResetCalendar} className="ml-2" />
-        )}
+        <Select value={view} onValueChange={onViewChange}>
+          <SelectTrigger className="w-[130px]">
+            <SelectValue placeholder="View" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="dayGridMonth">
+              <div className="flex items-center">
+                <CalendarDays className="h-4 w-4 mr-2" />
+                Month
+              </div>
+            </SelectItem>
+            {!isMobile && (
+              <SelectItem value="timeGridWeek">
+                <div className="flex items-center">
+                  <Calendar className="h-4 w-4 mr-2" />
+                  Week
+                </div>
+              </SelectItem>
+            )}
+            <SelectItem value="listWeek">
+              <div className="flex items-center">
+                <List className="h-4 w-4 mr-2" />
+                List
+              </div>
+            </SelectItem>
+          </SelectContent>
+        </Select>
       </div>
-    </div>
+    </Card>
   );
-}
+};

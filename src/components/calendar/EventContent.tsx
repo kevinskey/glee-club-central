@@ -1,38 +1,33 @@
 
-import React from "react";
-import { CalendarEvent } from "@/types/calendar";
-import { getEventTypeColor } from "@/utils/calendarUtils";
+import React from 'react';
+import { EventType } from '@/types/calendar';
 
-interface EventContentProps {
-  eventInfo: any;
-  view: string;
-  isMobile: boolean;
-}
-
-export function EventContent({ eventInfo, view, isMobile }: EventContentProps) {
+export const EventContent = (eventInfo: any) => {
   const { event } = eventInfo;
-  const eventType = event.extendedProps?.type || 'special';
-  const location = event.extendedProps?.location;
+  const type: EventType = event.extendedProps.type || 'special';
   
-  const isListView = view === 'listWeek';
-  const colorClass = getEventTypeColor(eventType);
-  
+  const getEventClassByType = (type: EventType): string => {
+    switch (type) {
+      case 'concert':
+        return 'bg-glee-purple text-white';
+      case 'rehearsal':
+        return 'bg-blue-500 text-white';
+      case 'sectional':
+        return 'bg-green-500 text-white';
+      case 'tour':
+        return 'bg-amber-500 text-white';
+      case 'special':
+      default:
+        return 'bg-gray-500 text-white';
+    }
+  };
+
   return (
-    <div className={`flex flex-col h-full ${isListView ? 'py-1 px-2' : 'p-1'}`}>
-      {/* Event title with colored dot for event type */}
-      <div className="flex items-center gap-1">
-        <div className={`w-2 h-2 rounded-full flex-shrink-0 ${colorClass}`} />
-        <span className={`text-xs font-medium ${isListView ? '' : 'truncate'}`}>
-          {event.title}
-        </span>
-      </div>
-      
-      {/* Show location but not description */}
-      {location && !isMobile && (
-        <div className="mt-0.5 text-xs text-muted-foreground truncate">
-          {location}
-        </div>
+    <div className={`p-1 text-xs rounded-sm ${getEventClassByType(type)}`}>
+      <div className="font-medium">{event.title}</div>
+      {event.extendedProps.location && (
+        <div className="text-xs opacity-90">{event.extendedProps.location}</div>
       )}
     </div>
   );
-}
+};

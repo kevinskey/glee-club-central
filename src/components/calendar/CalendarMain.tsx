@@ -1,146 +1,106 @@
 
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useRef } from 'react';
 import FullCalendar from '@fullcalendar/react';
 import dayGridPlugin from '@fullcalendar/daygrid';
 import timeGridPlugin from '@fullcalendar/timegrid';
 import listPlugin from '@fullcalendar/list';
 import interactionPlugin from '@fullcalendar/interaction';
-import { EventClickArg } from '@fullcalendar/core';
 import { CalendarEvent } from '@/types/calendar';
-import EventContent from './EventContent';
-import { useMobile } from '@/hooks/useMobile';
-import { MobileFitCheck } from './MobileFitCheck';
+import { EventContent } from '@/components/calendar/EventContent';
+import { useIsMobile } from '@/hooks/use-mobile'; // Fixed import path
 
 interface CalendarMainProps {
   events: CalendarEvent[];
-  view: 'dayGridMonth' | 'timeGridWeek' | 'timeGridDay' | 'listWeek';
-  onEventClick?: (event: CalendarEvent) => void;
-  onDateClick?: (date: Date) => void;
-  height?: string;
-  onViewDidMount?: (view: any) => void;
-  editable?: boolean;
-  selectable?: boolean;
-  headerToolbar?: boolean | {
-    left: string;
-    center: string;
-    right: string;
-  };
-  footerToolbar?: boolean | {
-    left: string;
-    center: string;
-    right: string;
-  };
-  onSelect?: (arg: any) => void;
-  slotMinTime?: string;
-  slotMaxTime?: string;
-  initialDate?: Date;
-  displayEventEnd?: boolean;
-  eventDisplay?: 'auto' | 'block' | 'list-item' | 'background' | 'inverse-background' | 'none';
+  calendarView?: 'dayGridMonth' | 'timeGridWeek' | 'timeGridDay' | 'listWeek';
+  currentDate?: Date;
+  setCurrentDate?: (date: Date) => void;
+  userCanCreate?: boolean;
+  handleDateClick?: (info: any) => void;
+  handleEventClick?: (info: any) => void;
+  handleEventDrop?: (info: any) => void;
+  handleEventResize?: (info: any) => void;
 }
+
+const MobileFitCheck: React.FC<{ title: string }> = ({ title }) => {
+  return (
+    <div className="text-xs px-2 py-1 rounded bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300">
+      {title}
+    </div>
+  );
+};
 
 const CalendarMain: React.FC<CalendarMainProps> = ({
   events,
-  view = 'dayGridMonth',
-  onEventClick,
-  onDateClick,
-  height = 'auto',
-  onViewDidMount,
-  editable = false,
-  selectable = false,
-  headerToolbar,
-  footerToolbar,
-  onSelect,
-  slotMinTime = '07:00:00',
-  slotMaxTime = '21:00:00',
-  initialDate,
-  displayEventEnd = true,
-  eventDisplay = 'block'
+  calendarView = 'dayGridMonth',
+  currentDate = new Date(),
+  setCurrentDate,
+  userCanCreate = false,
+  handleDateClick,
+  handleEventClick,
+  handleEventDrop,
+  handleEventResize
 }) => {
-  const calendarRef = useRef<any>(null);
-  const { isMobile } = useMobile();
-  const [currentView, setCurrentView] = useState(view);
-  const [windowSize, setWindowSize] = useState({
-    width: window.innerWidth,
-    height: window.innerHeight,
-  });
-
-  // Update window size on resize
-  useEffect(() => {
-    const handleResize = () => {
-      setWindowSize({
-        width: window.innerWidth,
-        height: window.innerHeight,
-      });
-    };
-
-    window.addEventListener('resize', handleResize);
-    return () => {
-      window.removeEventListener('resize', handleResize);
-    };
-  }, []);
-
-  // Handle event click
-  const handleEventClick = (clickInfo: EventClickArg) => {
-    const eventId = clickInfo.event.id;
-    const selectedEvent = events.find(e => e.id === eventId);
-    
-    if (selectedEvent && onEventClick) {
-      onEventClick(selectedEvent);
+  const isMobile = useIsMobile();
+  const calendarRef = useRef<FullCalendar>(null);
+  
+  const formattedEvents = events.map(event => ({
+    id: event.id,
+    title: event.title,
+    start: new Date(event.start),
+    end: event.end ? new Date(event.end) : undefined,
+    allDay: event.allDay,
+    extendedProps: {
+      location: event.location,
+      description: event.description,
+      type: event.type,
+      image_url: event.image_url,
+      created_by: event.created_by
     }
-  };
+  }));
 
-  // Handle date click
-  const handleDateClick = (arg: any) => {
-    if (onDateClick) {
-      onDateClick(arg.date);
-    }
-  };
-
-  // Handle view did mount
-  const handleViewDidMount = (view: any) => {
-    if (onViewDidMount) {
-      onViewDidMount(view);
+  const handleEventClickWrapper = (info: any) => {
+    if (handleEventClick) {
+      const clickedEvent = events.find(e => e.id === info.event.id);
+      if (clickedEvent) {
+        handleEventClick(clickedEvent);
+      }
     }
   };
 
   return (
     <div className="calendar-container">
-      <MobileFitCheck />
+      {isMobile && <MobileFitCheck title="Scroll sideways to navigate calendar" />}
+      
       <FullCalendar
-        ref={calendarRef}
         plugins={[dayGridPlugin, timeGridPlugin, listPlugin, interactionPlugin]}
-        initialView={view}
-        events={events.map(event => ({
-          id: event.id,
-          title: event.title,
-          start: event.date,
-          end: event.date,
-          extendedProps: event
-        }))}
-        eventContent={(arg) => <EventContent arg={arg} />}
-        height={height}
-        eventClick={handleEventClick}
-        dateClick={handleDateClick}
-        viewDidMount={handleViewDidMount}
-        editable={editable}
-        selectable={selectable}
-        headerToolbar={headerToolbar || {
+        initialView={calendarView}
+        events={formattedEvents}
+        headerToolbar={!isMobile ? {
           left: 'prev,next today',
           center: 'title',
-          right: 'dayGridMonth,timeGridWeek,timeGridDay,listWeek'
+          right: 'dayGridMonth,timeGridWeek,listWeek'
+        } : false}
+        footerToolbar={isMobile ? {
+          left: 'prev,next',
+          center: '',
+          right: 'dayGridMonth,listWeek'
+        } : false}
+        height={isMobile ? 'auto' : undefined}
+        initialDate={currentDate}
+        editable={userCanCreate}
+        selectable={userCanCreate}
+        selectMirror={userCanCreate}
+        dayMaxEvents={true}
+        eventContent={EventContent}
+        dateClick={handleDateClick}
+        eventClick={handleEventClickWrapper}
+        eventDrop={handleEventDrop}
+        eventResize={handleEventResize}
+        datesSet={(dateInfo) => {
+          if (setCurrentDate) {
+            setCurrentDate(dateInfo.view.currentStart);
+          }
         }}
-        titleFormat={{
-          year: 'numeric',
-          month: 'short',
-          day: 'numeric'
-        }}
-        footerToolbar={footerToolbar}
-        onSelect={onSelect}
-        slotMinTime={slotMinTime}
-        slotMaxTime={slotMaxTime}
-        initialDate={initialDate}
-        displayEventEnd={displayEventEnd}
-        eventDisplay={eventDisplay}
       />
     </div>
   );

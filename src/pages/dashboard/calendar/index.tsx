@@ -1,13 +1,12 @@
 
 import React, { useState, useEffect, useCallback } from 'react';
-import { CalendarEvent, EventType } from '@/types/calendar';
+import { CalendarEvent } from '@/types/calendar';
 import { CalendarHeader } from '@/components/calendar/CalendarHeader';
 import { CalendarContainer } from '@/components/calendar/CalendarContainer';
-import { useCalendarStore } from '@/store/useCalendarStore';
+import { useCalendarStore } from '@/hooks/useCalendarStore'; // Fixed import path
 import { ViewEventModal } from '@/components/calendar/ViewEventModal';
-import EventModal from '@/components/calendar/EventModal';
+import { EventModal } from '@/components/calendar/EventModal'; // Using named import
 import { toast } from 'sonner';
-import { handleAddEvent, handleUpdateEvent, handleDeleteEvent } from '@/pages/dashboard/calendar';
 
 function CalendarPage() {
   // State
@@ -19,6 +18,7 @@ function CalendarPage() {
 
   // Access store
   const { 
+    events: storeEvents,
     fetchEvents, 
     addEvent: storeAddEvent,
     updateEvent: storeUpdateEvent,
@@ -30,8 +30,8 @@ function CalendarPage() {
   useEffect(() => {
     const loadEvents = async () => {
       try {
-        const calendarEvents = await fetchEvents();
-        setEvents(calendarEvents);
+        await fetchEvents();
+        setEvents(storeEvents);
       } catch (error) {
         console.error('Error loading events:', error);
         toast.error('Failed to load calendar events');
@@ -39,7 +39,7 @@ function CalendarPage() {
     };
 
     loadEvents();
-  }, [fetchEvents]);
+  }, [fetchEvents, storeEvents]);
 
   // Handle event click
   const handleEventClick = (event: CalendarEvent) => {
@@ -49,25 +49,45 @@ function CalendarPage() {
 
   // Add event wrapper
   const addEvent = async (eventData: any): Promise<boolean> => {
-    return handleAddEvent(eventData, storeAddEvent, setIsCreateModalOpen)
-      .then(() => {
-        // Refresh events after adding
-        return fetchEvents().then((updatedEvents) => {
-          setEvents(updatedEvents);
-          return true;
-        });
-      })
-      .catch(() => false);
+    try {
+      await storeAddEvent(eventData);
+      setIsCreateModalOpen(false);
+      toast.success("Event created successfully");
+      return true;
+    } catch (error) {
+      console.error("Error creating event:", error);
+      toast.error("Failed to create event");
+      return false;
+    }
   };
 
   // Update event wrapper
   const updateEvent = async (eventData: CalendarEvent): Promise<boolean> => {
-    return handleUpdateEvent(eventData, storeUpdateEvent, setIsViewModalOpen);
+    try {
+      await storeUpdateEvent(eventData);
+      setIsViewModalOpen(false);
+      toast.success("Event updated successfully");
+      return true;
+    } catch (error) {
+      console.error("Error updating event:", error);
+      toast.error("Failed to update event");
+      return false;
+    }
   };
 
   // Delete event wrapper
   const deleteEvent = async (eventId: string): Promise<boolean> => {
-    return handleDeleteEvent(eventId, storeDeleteEvent, setIsViewModalOpen, setSelectedEvent);
+    try {
+      await storeDeleteEvent(eventId);
+      setIsViewModalOpen(false);
+      setSelectedEvent(null);
+      toast.success("Event deleted successfully");
+      return true;
+    } catch (error) {
+      console.error("Error deleting event:", error);
+      toast.error("Failed to delete event");
+      return false;
+    }
   };
 
   // Reset calendar
@@ -75,49 +95,42 @@ function CalendarPage() {
     try {
       await storeResetCalendar();
       toast.success("Calendar has been reset to defaults");
-      
-      // Refresh events after resetting
-      const updatedEvents = await fetchEvents();
-      setEvents(updatedEvents);
-      
       return true;
     } catch (error) {
       console.error("Error resetting calendar:", error);
       toast.error("Failed to reset calendar");
       return false;
     }
-  }, [fetchEvents, storeResetCalendar]);
+  }, [storeResetCalendar]);
 
   return (
     <div className="container mx-auto px-4 py-8">
       <CalendarHeader 
-        onAddEventClick={() => setIsCreateModalOpen(true)}
+        onAddEvent={() => setIsCreateModalOpen(true)} // Fixed prop name
         view={view}
         onViewChange={setView}
         onResetCalendar={resetCalendar}
       />
 
       <CalendarContainer 
-        events={events} 
-        view={view}
+        events={events}
         onEventClick={handleEventClick}
       />
 
       {isCreateModalOpen && (
         <EventModal 
-          isOpen={isCreateModalOpen}
-          onClose={() => setIsCreateModalOpen(false)}
+          onClose={() => setIsCreateModalOpen(false)} 
           onSave={addEvent}
         />
       )}
 
       {isViewModalOpen && selectedEvent && (
         <ViewEventModal
-          isOpen={isViewModalOpen}
           onClose={() => setIsViewModalOpen(false)}
           event={selectedEvent}
           onUpdate={updateEvent}
           onDelete={deleteEvent}
+          userCanEdit={true}
         />
       )}
     </div>

@@ -1,4 +1,3 @@
-
 import { createBrowserRouter, Navigate } from 'react-router-dom';
 import { Suspense, lazy } from 'react';
 
@@ -107,7 +106,7 @@ export const router = createBrowserRouter([
     children: [
       {
         index: true,
-        element: <DashboardPage />,
+        element: <RoleDashboard />,
       },
       {
         path: 'profile',
@@ -136,6 +135,14 @@ export const router = createBrowserRouter([
       {
         path: 'calendar',
         element: <CalendarPage />,
+      },
+      {
+        path: 'member',
+        element: <RequireAuth allowedUserTypes={['member', 'admin']}><MemberDashboardPage /></RequireAuth>,
+      },
+      {
+        path: 'fan',
+        element: <RequireAuth allowedUserTypes={['fan', 'member', 'admin']}><FanDashboardPage /></RequireAuth>,
       },
     ],
   },
