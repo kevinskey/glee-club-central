@@ -2,11 +2,11 @@
 import React, { useState, useEffect } from 'react';
 import { useCalendarStore } from '@/hooks/useCalendarStore';
 import { CalendarEvent } from '@/types/calendar';
-import { formatDate } from '@/utils/calendarUtils';
 import { Card, CardContent } from '@/components/ui/card';
 import { Calendar, MapPin, Clock } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useNavigate } from 'react-router-dom';
+import { format } from 'date-fns';
 
 interface UpcomingEventsListProps {
   type?: string;
@@ -84,9 +84,20 @@ export const UpcomingEventsList: React.FC<UpcomingEventsListProps> = ({
     loadEvents();
   }, [fetchEvents, actualLimit, actualType, propEvents]);
   
+  // Helper to format a date consistently
+  const formatDate = (date: string | Date): string => {
+    try {
+      const dateObj = typeof date === 'string' ? new Date(date) : date;
+      return format(dateObj, 'MMM d, yyyy');
+    } catch (error) {
+      console.error('Error formatting date:', error);
+      return String(date);
+    }
+  };
+  
   const viewEvent = async (event: CalendarEvent) => {
     if (onEventClick) {
-      return onEventClick(event);
+      return await onEventClick(event);
     }
     navigate(`/dashboard/calendar?event=${event.id}`);
     return Promise.resolve(true);

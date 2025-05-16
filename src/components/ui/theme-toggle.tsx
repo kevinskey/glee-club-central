@@ -26,7 +26,7 @@ export function ThemeToggle() {
             variant="ghost" 
             size="icon" 
             onClick={toggleTheme}
-            className="rounded-full transition-colors hover:bg-accent/10 h-8 w-8"
+            className="rounded-full transition-colors hover:bg-columbia-blue/10 h-8 w-8"
             aria-label={ariaLabel}
           >
             <Icon className="h-5 w-5 text-foreground" />

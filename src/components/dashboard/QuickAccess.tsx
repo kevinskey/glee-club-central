@@ -2,14 +2,14 @@
 import React from 'react';
 import { Calendar, Music, Bell, User, BookOpen, Headphones } from 'lucide-react';
 
-interface QuickAccessTile {
+export interface QuickAccessTile {
   title: string;
   icon: string;
   href: string;
   color: string;
 }
 
-interface QuickAccessProps {
+export interface QuickAccessProps {
   tiles: QuickAccessTile[];
 }
 
@@ -39,11 +39,14 @@ export const QuickAccess: React.FC<QuickAccessProps> = ({ tiles }) => {
             IconComponent = Music;
         }
         
+        // Use Columbia blue as default if no color specified
+        const color = tile.color || 'bg-columbia-blue hover:bg-columbia-blue/90';
+        
         return (
           <a 
             key={index} 
             href={tile.href}
-            className={`${tile.color} text-white rounded-lg p-6 shadow-md hover:opacity-90 transition-opacity`}
+            className={`${color} text-white rounded-lg p-6 shadow-md hover:opacity-90 transition-opacity`}
           >
             <div className="flex items-center space-x-4">
               <IconComponent size={24} />

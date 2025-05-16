@@ -33,6 +33,11 @@ export interface Profile {
   notes?: string;
   is_super_admin?: boolean;
   user_type?: UserType;
+  personal_title?: string;
+  title?: string;
+  special_roles?: string[];
+  updated_at?: string;
+  last_sign_in_at?: string;
 }
 
 export interface AuthContextType {

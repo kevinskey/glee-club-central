@@ -1,77 +1,84 @@
 
-import { EventType } from "@/types/calendar";
+import { format } from 'date-fns';
+import { CalendarEvent } from '@/types/calendar';
 
 /**
- * Returns the appropriate Tailwind CSS color class based on event type
- * @param type The type of calendar event
- * @returns Tailwind CSS color class string
+ * Formats a date for display
  */
-export function getEventTypeColor(type: EventType | string): string {
-  switch (type) {
-    case "concert":
-      return "bg-glee-purple";
-    case "rehearsal":
-      return "bg-blue-500";
-    case "sectional":
-      return "bg-green-500";
-    case "special":
-      return "bg-amber-500";
-    case "tour":
-      return "bg-pink-500";
-    default:
-      return "bg-gray-500";
+export const formatDate = (date: string | Date): string => {
+  try {
+    const dateObj = typeof date === 'string' ? new Date(date) : date;
+    return format(dateObj, 'MMM d, yyyy');
+  } catch (error) {
+    console.error('Error formatting date:', error);
+    return String(date);
   }
-}
+};
 
 /**
- * Returns the appropriate hover variant of Tailwind CSS color class based on event type
- * @param type The type of calendar event
- * @returns Tailwind CSS hover color class string
+ * Formats a time for display
  */
-export function getEventTypeHoverColor(type: EventType | string): string {
-  switch (type) {
-    case "concert":
-      return "hover:bg-glee-purple/90";
-    case "rehearsal":
-      return "hover:bg-blue-500/90";
-    case "sectional":
-      return "hover:bg-green-500/90";
-    case "special":
-      return "hover:bg-amber-500/90";
-    case "tour":
-      return "hover:bg-pink-500/90";
-    default:
-      return "hover:bg-gray-500/90";
+export const formatTime = (time: string): string => {
+  try {
+    const [hours, minutes] = time.split(':');
+    const date = new Date();
+    date.setHours(parseInt(hours, 10));
+    date.setMinutes(parseInt(minutes, 10));
+    return format(date, 'h:mm a');
+  } catch (error) {
+    console.error('Error formatting time:', error);
+    return time;
   }
-}
+};
 
 /**
- * Returns a combined string of color and hover classes for an event type
- * @param type The type of calendar event
- * @returns Combined Tailwind CSS class string
+ * Gets badge style for event type
  */
-export function getEventTypeColorWithHover(type: EventType | string): string {
-  return `${getEventTypeColor(type)} ${getEventTypeHoverColor(type)}`;
-}
-
-/**
- * Returns the text display name for an event type
- * @param type The type of calendar event
- * @returns Human-readable event type name
- */
-export function getEventTypeName(type: EventType | string): string {
+export const getEventTypeBadgeStyle = (type: string): string => {
   switch (type) {
-    case "concert":
-      return "Concert";
-    case "rehearsal":
-      return "Rehearsal";
-    case "sectional":
-      return "Sectional";
-    case "special":
-      return "Special Event";
-    case "tour":
-      return "Tour";
-    default:
-      return "Event";
+    case 'concert': 
+      return 'bg-glee-purple/20 text-glee-purple';
+    case 'rehearsal': 
+      return 'bg-blue-500/20 text-blue-600';
+    case 'sectional': 
+      return 'bg-green-500/20 text-green-600';
+    case 'special': 
+      return 'bg-amber-500/20 text-amber-600';
+    default: 
+      return 'bg-gray-200 text-gray-700';
   }
-}
+};
+
+/**
+ * Gets background color for event type
+ */
+export const getEventTypeColor = (type: string): string => {
+  switch (type) {
+    case 'concert': return '#7c3aed';
+    case 'rehearsal': return '#3b82f6';
+    case 'sectional': return '#10b981';
+    case 'special': return '#f59e0b';
+    default: return '#6b7280';
+  }
+};
+
+/**
+ * Filters events by type
+ */
+export const filterEventsByType = (events: CalendarEvent[], type: string): CalendarEvent[] => {
+  if (type === 'all') return events;
+  return events.filter(event => event.type === type);
+};
+
+/**
+ * Gets only upcoming events
+ */
+export const getUpcomingEvents = (events: CalendarEvent[], limit = 5): CalendarEvent[] => {
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  
+  return events
+    .filter(event => new Date(event.start) >= today)
+    .sort((a, b) => new Date(a.start).getTime() - new Date(b.start).getTime())
+    .slice(0, limit);
+};

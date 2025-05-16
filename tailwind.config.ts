@@ -63,8 +63,10 @@ module.exports = {
           darkPurple: "#7E69AB",
           lightPurple: "#D6BCFA",
           gray: "#8E9196",
+          columbia: "#9BDDFF", // Columbia blue color
         },
-        'glee-spelman': "#FF6B00"
+        'glee-spelman': "#FF6B00",
+        'columbia-blue': "#9BDDFF",
       },
       borderRadius: {
         lg: "var(--radius)",

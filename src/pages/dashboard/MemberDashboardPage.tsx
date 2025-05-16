@@ -1,156 +1,140 @@
 
-import React from "react";
-import { useNavigate } from "react-router-dom";
-import { PageHeader } from "@/components/ui/page-header";
-import { useAuth } from "@/contexts/AuthContext";
-import { QuickAccess } from "@/components/dashboard/QuickAccess";
-import { NextEventCountdown } from "@/components/dashboard/NextEventCountdown";
-import { DashboardAnnouncements } from "@/components/dashboard/DashboardAnnouncements";
-import { RehearsalNotes } from "@/components/dashboard/RehearsalNotes";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { CalendarDays, Clock } from "lucide-react";
-import { Link } from "react-router-dom";
-import { DuesStatusCard } from "@/components/dashboard/DuesStatusCard";
+import React from 'react';
+import { PageHeader } from '@/components/ui/page-header';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Calendar, Music, Bell, User, BookOpen, Headphones } from 'lucide-react';
+import { useAuth } from '@/contexts/AuthContext';
+import { useNavigate } from 'react-router-dom';
+import { NextEventCountdown } from '@/components/dashboard/NextEventCountdown';
+import { UpcomingEventsList } from '@/components/calendar/UpcomingEventsList';
+import { Button } from '@/components/ui/button';
+import { QuickAccess } from '@/components/dashboard/QuickAccess';
 
-export interface Event {
-  id: string;
+interface QuickAccessTile {
   title: string;
-  date: Date;
-  time: string;
-  location: string;
+  icon: string;
+  href: string;
+  color: string;
 }
 
 export default function MemberDashboardPage() {
   const { profile } = useAuth();
   const navigate = useNavigate();
   
-  // Sample next event for the countdown
-  const nextEvent = {
-    id: "next-event",
-    title: "Weekly Rehearsal",
-    date: new Date(Date.now() + 86400000 * 2), // 2 days from now
-    time: "6:00 PM",
-    location: "Fine Arts Building"
-  };
-  
-  // Quick access tiles
-  const quickAccessTiles = [
+  // Quick access tiles for members
+  const memberTiles: QuickAccessTile[] = [
     {
       title: "Sheet Music",
       icon: "Music",
       href: "/dashboard/sheet-music",
-      color: "bg-gradient-to-br from-purple-500 to-purple-700"
+      color: "bg-gradient-to-br from-blue-500 to-blue-600"
     },
     {
       title: "Calendar",
       icon: "Calendar",
       href: "/dashboard/calendar",
-      color: "bg-gradient-to-br from-blue-500 to-blue-700"
+      color: "bg-gradient-to-br from-purple-500 to-purple-700"
     },
     {
-      title: "Practice Resources",
+      title: "Recordings",
       icon: "Headphones",
-      href: "/dashboard/practice",
-      color: "bg-gradient-to-br from-green-500 to-green-700"
+      href: "/dashboard/recordings",
+      color: "bg-gradient-to-br from-amber-500 to-amber-600"
     },
     {
-      title: "My Profile",
+      title: "Resources",
+      icon: "BookOpen",
+      href: "/dashboard/resources",
+      color: "bg-gradient-to-br from-green-500 to-green-600"
+    },
+    {
+      title: "Announcements",
+      icon: "Bell",
+      href: "/dashboard/announcements",
+      color: "bg-gradient-to-br from-red-500 to-red-600"
+    },
+    {
+      title: "Profile",
       icon: "User",
       href: "/dashboard/profile",
-      color: "bg-gradient-to-br from-amber-500 to-amber-700"
+      color: "bg-gradient-to-br from-gray-600 to-gray-700"
     }
   ];
   
-  // Sample events
-  const events = [
-    {
-      id: "event-1",
-      title: "Spring Concert",
-      date: new Date(Date.now() + 86400000 * 7), // 7 days from now
-      time: "7:00 PM",
-      location: "Sisters Chapel"
-    },
-    {
-      id: "event-2",
-      title: "Sectional Rehearsal",
-      date: new Date(Date.now() + 86400000 * 3), // 3 days from now
-      time: "4:00 PM",
-      location: "Practice Room 101"
-    },
-    {
-      id: "event-3",
-      title: "Tour Preparation Meeting",
-      date: new Date(Date.now() + 86400000 * 14), // 14 days from now
-      time: "5:30 PM",
-      location: "Conference Room"
-    }
-  ];
-
   return (
     <div className="space-y-6">
       <PageHeader
         title={`Welcome, ${profile?.first_name || 'Member'}`}
         description="Your Spelman College Glee Club member dashboard"
       />
+
+      <QuickAccess tiles={memberTiles} />
       
-      {/* Quick Access Grid */}
-      <QuickAccess />
-      
-      {/* Next Event Countdown */}
-      <div>
-        <h2 className="text-xl font-semibold mb-4">Next Performance</h2>
-        <NextEventCountdown event={nextEvent} />
-      </div>
-      
-      {/* Dashboard Content in 2 columns */}
       <div className="grid grid-cols-1 md:grid-cols-12 gap-6">
-        {/* Column 1 - Main Content */}
+        {/* Main Content - Left 2/3 */}
         <div className="md:col-span-8 space-y-6">
-          {/* Upcoming Events */}
-          <Card className="shadow-md">
-            <CardHeader className="pb-2 flex flex-row items-center justify-between">
-              <div className="flex items-center space-x-2">
-                <CalendarDays className="h-5 w-5 text-glee-spelman" />
-                <CardTitle>Upcoming Events</CardTitle>
+          {/* Next Rehearsal Countdown */}
+          <NextEventCountdown />
+          
+          <Card>
+            <CardHeader className="pb-2">
+              <div className="flex justify-between items-center">
+                <div className="flex items-center">
+                  <Calendar className="mr-2 h-5 w-5 text-blue-500" />
+                  <CardTitle>Upcoming Events</CardTitle>
+                </div>
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  onClick={() => navigate('/dashboard/calendar')}
+                >
+                  View All
+                </Button>
               </div>
-              <Link to="/dashboard/calendar" className="text-sm text-glee-spelman hover:underline">
-                View Calendar
-              </Link>
             </CardHeader>
             <CardContent>
-              <div className="space-y-3">
-                {events.map((event, index) => (
-                  <div key={index} className="flex items-start border-b last:border-0 pb-3 last:pb-0">
-                    <div className="bg-muted text-center p-2 rounded-md min-w-[60px]">
-                      <div className="text-xs font-medium text-muted-foreground">
-                        {event.date.toLocaleDateString(undefined, { month: 'short' })}
-                      </div>
-                      <div className="text-lg font-bold">{event.date.getDate()}</div>
-                    </div>
-                    <div className="ml-4">
-                      <h4 className="font-medium">{event.title}</h4>
-                      <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                        <Clock className="h-3 w-3" /> {event.time}
-                        {event.location && <span>• {event.location}</span>}
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
+              <UpcomingEventsList limit={4} />
+            </CardContent>
+          </Card>
+        </div>
+        
+        {/* Sidebar - Right 1/3 */}
+        <div className="md:col-span-4 space-y-6">
+          <Card>
+            <CardHeader>
+              <CardTitle>Recent Announcements</CardTitle>
+            </CardHeader>
+            <CardContent className="text-center p-6 text-muted-foreground">
+              <Bell className="mx-auto mb-2 h-12 w-12 opacity-20" />
+              <p>No new announcements</p>
             </CardContent>
           </Card>
           
-          {/* Rehearsal Notes */}
-          <RehearsalNotes />
-          
-          {/* Announcements */}
-          <DashboardAnnouncements />
-        </div>
-        
-        {/* Column 2 - Side Content */}
-        <div className="md:col-span-4 space-y-6">
-          {/* Dues Status Card */}
-          <DuesStatusCard />
+          <Card>
+            <CardHeader>
+              <CardTitle>Quick Links</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-2">
+              <Button variant="outline" className="w-full text-left justify-start" asChild>
+                <a href="/dashboard/sheet-music">
+                  <Music className="mr-2 h-4 w-4" />
+                  Access Sheet Music
+                </a>
+              </Button>
+              <Button variant="outline" className="w-full text-left justify-start" asChild>
+                <a href="/dashboard/recordings">
+                  <Headphones className="mr-2 h-4 w-4" />
+                  Practice Recordings
+                </a>
+              </Button>
+              <Button variant="outline" className="w-full text-left justify-start" asChild>
+                <a href="/dashboard/profile">
+                  <User className="mr-2 h-4 w-4" />
+                  Update Profile
+                </a>
+              </Button>
+            </CardContent>
+          </Card>
         </div>
       </div>
     </div>
