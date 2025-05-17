@@ -11,7 +11,10 @@ import { MemberPortalBox } from '@/components/landing/MemberPortalBox';
 const LandingPage = () => {
   return (
     <>
-      <AnnouncementBanner />
+      <AnnouncementBanner 
+        message="Welcome to the Spelman College Glee Club website" 
+        link={{ text: "Learn more", url: "/about" }}
+      />
       <HeroSection />
       <MemberPortalBox />
       <FeaturesSection />

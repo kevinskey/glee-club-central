@@ -1,80 +1,52 @@
 
 import React from 'react';
-import { Layout } from '@/components/landing/Layout';
-import { PageHeader } from '@/components/ui/page-header';
-import { CalendarContainer } from '@/components/calendar/CalendarContainer';
+import { useEffect, useState } from 'react';
+import { Calendar } from '@/components/dashboard/Calendar';
 import { useCalendarStore } from '@/hooks/useCalendarStore';
-import { useState, useEffect } from 'react';
 import { CalendarEvent } from '@/types/calendar';
-import { CalendarHeader } from '@/components/calendar/CalendarHeader';
-import { ViewEventModal } from '@/components/calendar/ViewEventModal';
-import { Button } from '@/components/ui/button';
+import { Spinner } from '@/components/ui/spinner';
 
 export default function CalendarPage() {
   const [events, setEvents] = useState<CalendarEvent[]>([]);
-  const [view, setView] = useState<'dayGridMonth' | 'timeGridWeek' | 'timeGridDay' | 'listWeek'>('dayGridMonth');
-  const [loading, setLoading] = useState(true);
-  const [selectedEvent, setSelectedEvent] = useState<CalendarEvent | null>(null);
-  const [isViewModalOpen, setIsViewModalOpen] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  
   const { fetchEvents } = useCalendarStore();
   
   useEffect(() => {
     const loadEvents = async () => {
       try {
-        setLoading(true);
-        const calendarEvents = await fetchEvents();
-        if (calendarEvents) {
-          setEvents(calendarEvents);
+        setIsLoading(true);
+        const fetchedEvents = await fetchEvents();
+        if (fetchedEvents && fetchedEvents.length > 0) {
+          setEvents(fetchedEvents);
         } else {
           setEvents([]);
         }
       } catch (error) {
-        console.error('Error loading events:', error);
+        console.error('Error loading calendar events:', error);
         setEvents([]);
       } finally {
-        setLoading(false);
+        setIsLoading(false);
       }
     };
     
     loadEvents();
   }, [fetchEvents]);
   
-  const handleEventClick = async (event: CalendarEvent) => {
-    setSelectedEvent(event);
-    setIsViewModalOpen(true);
-    return true;
-  };
+  if (isLoading) {
+    return (
+      <div className="flex justify-center items-center h-[50vh]">
+        <Spinner size="lg" />
+      </div>
+    );
+  }
   
   return (
-    <Layout>
-      <div className="container mx-auto px-4 py-8">
-        <PageHeader 
-          title="Events Calendar" 
-          description="View and register for upcoming performances and events"
-        />
-        
-        <div className="mb-8">
-          <CalendarHeader 
-            view={view}
-            onViewChange={setView}
-            onAddEvent={() => {}}
-          />
-        </div>
-        
-        <CalendarContainer 
-          events={events}
-          view={view}
-          onEventClick={handleEventClick}
-        />
-        
-        {isViewModalOpen && selectedEvent && (
-          <ViewEventModal 
-            onOpenChange={setIsViewModalOpen}
-            event={selectedEvent}
-            userCanEdit={false}
-          />
-        )}
+    <div className="container mx-auto px-4 py-8">
+      <div className="max-w-6xl mx-auto">
+        <h1 className="text-2xl font-bold mb-6">Calendar</h1>
+        <Calendar events={events} />
       </div>
-    </Layout>
+    </div>
   );
 }

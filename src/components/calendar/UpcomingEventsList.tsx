@@ -51,7 +51,7 @@ export const UpcomingEventsList: React.FC<UpcomingEventsListProps> = ({
         setLoading(true);
         const fetchedEvents = await fetchEvents();
         
-        if (!fetchedEvents) {
+        if (!fetchedEvents || fetchedEvents.length === 0) {
           setEvents([]);
           setLoading(false);
           return;

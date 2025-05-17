@@ -13,17 +13,17 @@
   
   /* Add consistent text spacing */
   p {
-    @apply leading-extra-relaxed;
-    line-height: 2.2;
+    @apply leading-relaxed;
+    line-height: 1.7;
   }
   
   /* Adjust line heights based on text size */
   .text-xs, .text-sm {
-    @apply leading-relaxed;
+    @apply leading-normal;
   }
   
   .text-base, .text-lg {
-    @apply leading-extra-relaxed;
+    @apply leading-relaxed;
   }
   
   .text-xl, .text-2xl, .text-3xl {
@@ -117,22 +117,22 @@
   }
   
   .leading-extra-relaxed {
-    line-height: 2.2; /* Updated from 2.0 to double spacing */
+    line-height: 1.7; /* Updated from 2.2 to 1.7 */
   }
   
   /* Improved paragraph spacing with bottom margin */
   .prose-spacing p {
-    margin-bottom: 1.8em; /* Increased bottom margin */
-    line-height: 2.2; /* Updated to double spacing */
+    margin-bottom: 1.5em; /* Reduced from 1.8em */
+    line-height: 1.7; /* Updated from 2.2 to 1.7 */
   }
   
   /* New utility for increased paragraph spacing */
   .paragraph-spacing {
-    line-height: 2.2; /* Updated to double spacing */
+    line-height: 1.7; /* Updated from 2.2 to 1.7 */
   }
   
   .paragraph-spacing-loose {
-    line-height: 2.4; /* Increased from 2.2 */
+    line-height: 1.9; /* Reduced from 2.4 to 1.9 */
   }
   
   /* Mobile-first responsive utilities */
