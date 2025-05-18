@@ -1,5 +1,6 @@
 
 import { supabase } from '@/integrations/supabase/client';
+import { AttendanceRecord } from './supabase/types';
 
 /**
  * Fetches payment records for a member
@@ -55,7 +56,7 @@ export const fetchUserPermissions = async (userId: string) => {
  * @param memberId UUID of the member
  * @returns Array of attendance records with event details
  */
-export const fetchAttendanceRecords = async (memberId: string) => {
+export const fetchAttendanceRecords = async (memberId: string): Promise<AttendanceRecord[]> => {
   try {
     const { data, error } = await supabase
       .from('attendance_records')
@@ -64,6 +65,8 @@ export const fetchAttendanceRecords = async (memberId: string) => {
         status,
         notes,
         created_at,
+        member_id,
+        calendar_event_id,
         calendar_events (
           id,
           title,
