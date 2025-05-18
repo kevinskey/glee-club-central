@@ -21,7 +21,7 @@
     --muted: 240 4.8% 95.9%;
     --muted-foreground: 240 3.8% 46.1%;
 
-    --accent: 22 100% 50%;
+    --accent: 210 100% 30%;  /* Changed from orange to Carolina blue */
     --accent-foreground: 0 0% 98%;
 
     --destructive: 0 84.2% 60.2%;
@@ -34,7 +34,7 @@
     --radius: 0.5rem;
     
     --glee-purple: 258 74% 74%;
-    --glee-spelman: 22 100% 50%;
+    --glee-spelman: 210 100% 30%;  /* Changed from orange to Carolina blue */
     --glee-columbia: 210 100% 30%;  /* Darker Spelman blue */
   }
 
@@ -57,7 +57,7 @@
     --muted: 240 3.7% 15.9%;
     --muted-foreground: 240 5% 64.9%;
 
-    --accent: 22 100% 50%;
+    --accent: 210 100% 40%;  /* Changed from orange to Carolina blue */
     --accent-foreground: 0 0% 98%;
 
     --destructive: 0 62.8% 30.6%;

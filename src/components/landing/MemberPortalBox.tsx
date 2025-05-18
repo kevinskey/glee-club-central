@@ -11,7 +11,7 @@ export function MemberPortalBox() {
   return (
     <div className="container mx-auto px-4 py-10">
       <div className="max-w-lg mx-auto">
-        <Card className="bg-gradient-to-br from-glee-spelman/80 to-glee-purple/60 text-white shadow-lg">
+        <Card className="bg-gradient-to-br from-glee-columbia/80 to-glee-purple/60 text-white shadow-lg">
           <CardHeader className="text-center">
             <CardTitle className="text-xl font-semibold">Glee World Member Portal</CardTitle>
             <CardDescription className="text-white/90">
@@ -29,7 +29,7 @@ export function MemberPortalBox() {
           <CardFooter className="flex justify-center gap-4 pt-2 pb-6">
             <Button 
               onClick={() => navigate('/login')}
-              className="bg-white text-glee-spelman hover:bg-white/90"
+              className="bg-white text-glee-columbia hover:bg-white/90"
             >
               <LogIn className="mr-2 h-4 w-4" /> 
               Member Login

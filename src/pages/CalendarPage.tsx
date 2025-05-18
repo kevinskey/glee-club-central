@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { useEffect, useState } from 'react';
-import { Calendar } from '@/components/dashboard/Calendar';
+import Calendar from '@/components/dashboard/Calendar';
 import { useCalendarStore } from '@/hooks/useCalendarStore';
 import { CalendarEvent } from '@/types/calendar';
 import { Spinner } from '@/components/ui/spinner';
@@ -17,7 +17,7 @@ export default function CalendarPage() {
       try {
         setIsLoading(true);
         const fetchedEvents = await fetchEvents();
-        if (fetchedEvents && fetchedEvents.length > 0) {
+        if (fetchedEvents) {
           setEvents(fetchedEvents);
         } else {
           setEvents([]);

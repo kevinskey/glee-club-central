@@ -32,7 +32,7 @@ export function AnnouncementBanner({ message, link }: AnnouncementBannerProps) {
   if (!isVisible) return null;
   
   return (
-    <div className="bg-glee-spelman text-white w-full">
+    <div className="bg-glee-columbia text-white w-full">
       <div className={`${isMobile ? 'px-3 py-2' : 'px-4 py-2'} flex items-center justify-between`}>
         <div className="flex items-center justify-center w-full">
           <p className={`text-center ${isMobile ? 'text-xs' : 'text-sm'}`}>

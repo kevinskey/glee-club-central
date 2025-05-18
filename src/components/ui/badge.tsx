@@ -21,7 +21,7 @@ const badgeVariants = cva(
         success:
           "border-transparent bg-green-600 text-white hover:bg-green-700",
         spelman: 
-          "border-transparent bg-glee-spelman text-white hover:bg-glee-spelman/90 font-medium",
+          "border-transparent bg-glee-columbia text-white hover:bg-glee-columbia/90 font-medium", /* Changed from orange to Carolina blue */
       },
     },
     defaultVariants: {

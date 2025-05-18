@@ -58,15 +58,16 @@ module.exports = {
           foreground: "hsl(var(--card-foreground))",
         },
         glee: {
-          orange: "#FF6B00",
+          orange: "#FF6B00", // Keeping old orange reference for backward compatibility
+          carolina: "#0B3C84", // Adding Carolina blue
           purple: "#9b87f5",
           darkPurple: "#7E69AB",
           lightPurple: "#D6BCFA",
           gray: "#8E9196",
           columbia: "#0B3C84", // Darker Spelman blue
         },
-        'glee-spelman': "#FF6B00",
-        'columbia-blue': "#0B3C84", // Darker Spelman blue
+        'glee-spelman': "#0B3C84", // Changed from orange to Carolina blue
+        'columbia-blue': "#0B3C84", // Keeping for consistency
         'blue': {
           800: "#0B3C84", // Darker Spelman blue
           700: "#0D47A1",

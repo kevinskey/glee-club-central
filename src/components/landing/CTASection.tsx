@@ -9,7 +9,7 @@ export function CTASection() {
   const isMobile = useIsMobile();
   
   return (
-    <section className="relative py-8 sm:py-10 md:py-14 w-full bg-glee-dark text-white overflow-hidden">
+    <section className="relative py-8 sm:py-10 md:py-14 w-full bg-glee-columbia text-white overflow-hidden">
       <div className="absolute inset-0 opacity-20">
         <div 
           className="absolute inset-0 bg-cover bg-center" 

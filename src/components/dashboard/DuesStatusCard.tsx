@@ -12,7 +12,7 @@ export const DuesStatusCard: React.FC = () => {
     <Card className="shadow-md">
       <CardHeader className="pb-2">
         <CardTitle className="flex items-center gap-2">
-          <DollarSign className="h-5 w-5 text-glee-spelman" />
+          <DollarSign className="h-5 w-5 text-glee-columbia" />
           <span>Dues Status</span>
         </CardTitle>
       </CardHeader>
@@ -34,7 +34,7 @@ export const DuesStatusCard: React.FC = () => {
           <Button 
             onClick={() => navigate("/dashboard/dues")}
             variant="outline" 
-            className="w-full mt-2 text-glee-spelman border-glee-spelman/20 hover:bg-glee-spelman/5"
+            className="w-full mt-2 text-glee-columbia border-glee-columbia/20 hover:bg-glee-columbia/5"
           >
             View Payment History
           </Button>

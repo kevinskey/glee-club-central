@@ -19,7 +19,7 @@ const buttonVariants = cva(
           "bg-secondary text-secondary-foreground font-medium hover:bg-accent hover:text-accent-foreground",
         ghost: "hover:bg-accent font-medium hover:text-accent-foreground",
         link: "text-primary font-medium underline-offset-4 hover:underline",
-        spelman: "bg-glee-spelman text-white font-medium hover:bg-glee-spelman/90",
+        spelman: "bg-glee-columbia text-white font-medium hover:bg-glee-columbia/90", /* Changed from orange to blue */
       },
       size: {
         default: "h-10 px-4 py-2",
