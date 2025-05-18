@@ -9,6 +9,8 @@ import { Spinner } from '@/components/ui/spinner';
 export default function CalendarPage() {
   const [events, setEvents] = useState<CalendarEvent[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [currentMonth, setCurrentMonth] = useState(new Date().getMonth());
+  const [currentYear, setCurrentYear] = useState(new Date().getFullYear());
   
   const { fetchEvents } = useCalendarStore();
   
@@ -17,7 +19,9 @@ export default function CalendarPage() {
       try {
         setIsLoading(true);
         const fetchedEvents = await fetchEvents();
-        if (fetchedEvents && fetchedEvents.length > 0) {
+        
+        // Properly handle the case when fetchEvents returns undefined
+        if (fetchedEvents) {
           setEvents(fetchedEvents);
         } else {
           setEvents([]);
@@ -32,6 +36,24 @@ export default function CalendarPage() {
     
     loadEvents();
   }, [fetchEvents]);
+  
+  const handlePrevMonth = () => {
+    if (currentMonth === 0) {
+      setCurrentMonth(11);
+      setCurrentYear(currentYear - 1);
+    } else {
+      setCurrentMonth(currentMonth - 1);
+    }
+  };
+  
+  const handleNextMonth = () => {
+    if (currentMonth === 11) {
+      setCurrentMonth(0);
+      setCurrentYear(currentYear + 1);
+    } else {
+      setCurrentMonth(currentMonth + 1);
+    }
+  };
   
   if (isLoading) {
     return (
@@ -54,7 +76,13 @@ export default function CalendarPage() {
     <div className="container mx-auto px-4 py-8">
       <div className="max-w-6xl mx-auto">
         <h1 className="text-2xl font-bold mb-6">Calendar</h1>
-        <Calendar events={calendarEvents} />
+        <Calendar 
+          events={calendarEvents} 
+          month={currentMonth}
+          year={currentYear}
+          onPrevMonth={handlePrevMonth}
+          onNextMonth={handleNextMonth}
+        />
       </div>
     </div>
   );

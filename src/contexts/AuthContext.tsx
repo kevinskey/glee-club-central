@@ -1,15 +1,15 @@
+
 import { createContext, useContext, useState, useEffect, useCallback } from 'react';
-import { Auth, ThemeSupa } from '@supabase/auth-ui-react';
+import { Auth } from '@supabase/auth-ui-react';
 import {
   useSession,
   useSupabaseClient,
   useUser,
 } from '@supabase/auth-helpers-react';
 import { AuthUser, AuthContextType, Profile, UserType } from '@/types/auth';
-import { useRouter } from 'next/navigation';
+import { useNavigate } from 'react-router-dom'; // Replace next/navigation with react-router-dom
 import { toast } from "sonner";
-import { getProfile } from '@/utils/supabase/profiles';
-import { getUserPermissions } from '@/utils/supabase/permissions';
+import { fetchUserPermissions } from '@/utils/supabase/permissions'; // Use correct function name
 
 const AuthContext = createContext<AuthContextType | null>(null);
 
@@ -21,12 +21,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const session = useSession();
   const supabaseClient = useSupabaseClient();
   const user = useUser();
-  const router = useRouter();
+  const navigate = useNavigate(); // Use navigate instead of router
   
   // Function to refresh user permissions
   const refreshPermissions = useCallback(async () => {
     if (profile && profile.id) {
-      const userPermissions = await getUserPermissions(profile.id);
+      const userPermissions = await fetchUserPermissions(profile.id);
       setPermissions(userPermissions);
     }
   }, [profile]);
@@ -36,22 +36,37 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setIsLoading(true);
       try {
         if (user) {
-          setAuthUser(user);
-          const fetchedProfile = await getProfile(user.id);
-          if (fetchedProfile) {
-            setProfile(fetchedProfile);
-            await refreshPermissions();
-          } else {
+          // Type-safe conversion from User to AuthUser
+          const authUserData: AuthUser = {
+            id: user.id,
+            email: user.email || '',
+            app_metadata: user.app_metadata,
+            user_metadata: user.user_metadata,
+            aud: user.aud,
+            created_at: user.created_at
+          };
+          
+          setAuthUser(authUserData);
+          
+          // Fetch profile from Supabase
+          const { data: fetchedProfile, error } = await supabaseClient
+            .from('profiles')
+            .select('*')
+            .eq('id', user.id)
+            .single();
+            
+          if (error) {
+            console.error('Error fetching profile:', error);
             // Create a default profile if one doesn't exist
             const { data: newProfile, error: profileError } = await supabaseClient
               .from('profiles')
               .insert([{
                 id: user.id,
-                first_name: user.user_metadata.first_name || user.user_metadata.full_name?.split(' ')[0] || 'New',
-                last_name: user.user_metadata.last_name || user.user_metadata.full_name?.split(' ')[1] || 'User',
+                first_name: user.user_metadata?.first_name || user.user_metadata?.full_name?.split(' ')[0] || 'New',
+                last_name: user.user_metadata?.last_name || user.user_metadata?.full_name?.split(' ')[1] || 'User',
                 email: user.email,
-                avatar_url: user.user_metadata.avatar_url || '',
-                user_type: user.user_metadata.user_type || 'fan',
+                avatar_url: user.user_metadata?.avatar_url || '',
+                user_type: user.user_metadata?.user_type || 'fan',
               }])
               .select('*')
               .single();
@@ -63,6 +78,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
               setProfile(newProfile);
               await refreshPermissions();
             }
+          } else if (fetchedProfile) {
+            setProfile(fetchedProfile);
+            await refreshPermissions();
           }
         } else {
           setAuthUser(null);
@@ -96,7 +114,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setProfile(null);
     setAuthUser(null);
     setPermissions({});
-    router.push('/');
+    navigate('/'); // Use navigate instead of router.push
     return { error };
   };
   
@@ -116,7 +134,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setProfile(null);
     setAuthUser(null);
     setPermissions({});
-    router.push('/');
+    navigate('/'); // Use navigate instead of router.push
     return { error };
   };
   
@@ -151,6 +169,24 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   
   const isFan = () => {
     return profile?.user_type === 'fan';
+  };
+  
+  // Define getUserType function here, not just in useAuth hook
+  const getUserType = (): UserType => {
+    const userType = profile?.user_type || '';
+    
+    // If user_type doesn't exist, infer from role
+    if (!userType && profile) {
+      if (profile.is_super_admin || profile.role === 'admin') {
+        return 'admin';
+      } else if (profile.role === 'member') {
+        return 'member';
+      } else {
+        return 'fan';
+      }
+    }
+    
+    return userType as UserType;
   };
   
   const updatePassword = async (newPassword: string) => {
@@ -200,28 +236,6 @@ export const useAuth = (): AuthContextType => {
   if (!context) {
     throw new Error("useAuth must be used within an AuthProvider");
   }
-
-  const getUserType = (): UserType => {
-    // Fix the user_type access
-    const userType = context.profile?.user_type || '';
-    
-    // If user_type doesn't exist, infer from role
-    if (!userType && context.profile) {
-      if (context.profile.is_super_admin || context.profile.role === 'admin') {
-        return 'admin';
-      } else if (context.profile.role === 'member') {
-        return 'member';
-      } else {
-        return 'fan';
-      }
-    }
-    
-    return userType as UserType;
-  };
-
-  // Return all the context values and our new function
-  return {
-    ...context,
-    getUserType
-  };
+  
+  return context; // We now return the complete context with getUserType function
 };

@@ -51,22 +51,24 @@ export const UpcomingEventsList: React.FC<UpcomingEventsListProps> = ({
         setLoading(true);
         const fetchedEvents = await fetchEvents();
         
-        // Check if fetchedEvents exists and has data
-        if (!fetchedEvents || fetchedEvents.length === 0) {
+        // Properly handle the case when fetchEvents returns undefined
+        if (!fetchedEvents) {
           setEvents([]);
           setLoading(false);
           return;
         }
         
         // Filter by event type if specified
-        let filteredEvents = [...fetchedEvents]; // Make a copy to avoid type errors
+        let filteredEvents = [...fetchedEvents]; 
         if (actualType !== 'all') {
           filteredEvents = filteredEvents.filter(event => event.type === actualType);
         }
         
         // Sort by date (closest first)
         const sortedEvents = filteredEvents.sort((a, b) => {
-          return new Date(a.start).getTime() - new Date(b.start).getTime();
+          const dateA = new Date(a.start).getTime();
+          const dateB = new Date(b.start).getTime();
+          return dateA - dateB;
         });
         
         // Only get upcoming events
