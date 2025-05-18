@@ -1,13 +1,12 @@
 
 import { createContext, useContext, useState, useEffect, useCallback } from 'react';
-import { Auth } from '@supabase/auth-ui-react';
 import {
   useSession,
   useSupabaseClient,
   useUser,
 } from '@supabase/auth-helpers-react';
 import { AuthUser, AuthContextType, Profile, UserType } from '@/types/auth';
-import { useNavigate } from 'react-router-dom'; // Fixed import from next/navigation
+import { useNavigate } from 'react-router-dom';
 import { toast } from "sonner";
 import { fetchUserPermissions } from '@/utils/supabase/permissions';
 import { getProfile } from '@/utils/supabase/profiles';
@@ -21,10 +20,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [isLoading, setIsLoading] = useState(true);
   const [permissions, setPermissions] = useState<{ [key: string]: boolean }>({});
   
+  // These hooks must be used inside a component that is a child of the SessionContextProvider
   const session = useSession();
   const supabaseClient = useSupabaseClient();
   const user = useUser();
-  const navigate = useNavigate(); // Use navigate from react-router-dom
+  const navigate = useNavigate();
   
   // Function to refresh user permissions
   const refreshPermissions = useCallback(async () => {
@@ -117,7 +117,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setProfile(null);
     setAuthUser(null);
     setPermissions({});
-    navigate('/'); // Use navigate instead of router.push
+    navigate('/');
     return { error };
   };
   
@@ -137,7 +137,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setProfile(null);
     setAuthUser(null);
     setPermissions({});
-    navigate('/'); // Use navigate instead of router.push
+    navigate('/');
     return { error };
   };
   

@@ -1,64 +1,39 @@
 
 import { useAuth } from "@/contexts/AuthContext";
+import { useCallback, useEffect, useState } from "react";
 
-/**
- * A hook for checking user permissions based on user type and admin status
- */
 export const usePermissions = () => {
-  const { isAdmin, isMember, isFan, getUserType, profile, user } = useAuth();
-
-  // Check if user is super admin
-  const isSuperAdmin = profile?.is_super_admin || false;
+  const { profile, refreshPermissions } = useAuth();
+  const [permissions, setPermissions] = useState<{ [key: string]: boolean }>({});
   
-  // Check if user has admin role
-  const isAdminRole = isAdmin ? isAdmin() : false;
-
-  // Permission check function
-  const hasPermission = (permission: string): boolean => {
-    // If no user is logged in, they have no permissions
-    if (!user) return false;
-    
-    // Super admins have all permissions
-    if (isSuperAdmin) return true;
-    
-    // Admin users have all permissions
-    if (isAdminRole) return true;
-    
-    // Check user type specific permissions
-    const userType = getUserType();
-    
-    if (userType === 'member') {
-      // Members have access to these permissions
-      if ([
-        'view_sheet_music',
-        'view_calendar',
-        'view_announcements',
-        'can_upload_media',
-        'can_view_sheet_music',
-      ].includes(permission)) {
-        return true;
-      }
-    } else if (userType === 'fan') {
-      // Fans have limited access
-      if ([
-        'view_calendar',
-        'view_announcements',
-      ].includes(permission)) {
-        return true;
-      }
+  // Determine if the user has admin or super admin role
+  const isAdminRole = profile?.role === 'admin';
+  const isSuperAdmin = !!profile?.is_super_admin;
+  const isUserRole = profile?.role === 'user';
+  const isMemberRole = profile?.role === 'member';
+  
+  // Check for a specific permission
+  const hasPermission = useCallback(
+    (permissionName: string): boolean => {
+      if (isSuperAdmin) return true;
+      return !!permissions[permissionName];
+    },
+    [permissions, isSuperAdmin]
+  );
+  
+  // Refresh permissions when profile changes
+  useEffect(() => {
+    if (profile && profile.id) {
+      refreshPermissions();
     }
-    
-    // For other permissions, default to false
-    return false;
-  };
-
+  }, [profile, refreshPermissions]);
+  
   return {
+    permissions,
     hasPermission,
-    isSuperAdmin,
     isAdminRole,
-    isMember: isMember ? isMember() : false,
-    isFan: isFan ? isFan() : false,
-    userType: getUserType(),
-    isLoggedIn: !!user
+    isSuperAdmin,
+    isUserRole,
+    isMemberRole,
   };
 };
