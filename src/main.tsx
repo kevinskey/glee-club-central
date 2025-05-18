@@ -34,15 +34,15 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
     <ErrorBoundary>
       <QueryClientProvider client={queryClient}>
-        <SessionContextProvider supabaseClient={supabaseClient}>
-          <BrowserRouter>
+        <BrowserRouter>
+          <SessionContextProvider supabaseClient={supabaseClient}>
             <ThemeProvider>
               <AuthProvider>
                 <App />
               </AuthProvider>
             </ThemeProvider>
-          </BrowserRouter>
-        </SessionContextProvider>
+          </SessionContextProvider>
+        </BrowserRouter>
       </QueryClientProvider>
     </ErrorBoundary>
   </React.StrictMode>

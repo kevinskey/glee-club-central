@@ -1,5 +1,5 @@
 
-import { createContext, useContext, useState, useEffect, useCallback } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import {
   useSession,
   useSupabaseClient,
@@ -10,6 +10,7 @@ import { useNavigate } from 'react-router-dom';
 import { toast } from "sonner";
 import { fetchUserPermissions } from '@/utils/supabase/permissions';
 import { getProfile } from '@/utils/supabase/profiles';
+import { supabase } from '@/integrations/supabase/client';
 
 // Create a properly initialized AuthContext with null as default
 const AuthContext = createContext<AuthContextType | null>(null);
@@ -102,7 +103,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, [user, supabaseClient, refreshPermissions]);
   
   const login = async (email: string, password: string) => {
-    const { error } = await supabaseClient.auth.signInWithPassword({ email, password });
+    const { error } = await supabase.auth.signInWithPassword({ email, password });
     if (error) {
       toast.error(error.message);
     }
@@ -110,7 +111,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
   
   const logout = async () => {
-    const { error } = await supabaseClient.auth.signOut();
+    const { error } = await supabase.auth.signOut();
     if (error) {
       toast.error(error.message);
     }
@@ -122,7 +123,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
   
   const signIn = async (email: string, password: string) => {
-    const { error } = await supabaseClient.auth.signInWithPassword({ email, password });
+    const { error } = await supabase.auth.signInWithPassword({ email, password });
     if (error) {
       toast.error(error.message);
     }
@@ -130,7 +131,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
   
   const signOut = async () => {
-    const { error } = await supabaseClient.auth.signOut();
+    const { error } = await supabase.auth.signOut();
     if (error) {
       toast.error(error.message);
     }
@@ -142,7 +143,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
   
   const signUp = async (email: string, password: string, firstName: string, lastName: string, userType: UserType = 'fan') => {
-    const { data, error } = await supabaseClient.auth.signUp({
+    const { data, error } = await supabase.auth.signUp({
       email,
       password,
       options: {
@@ -193,7 +194,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
   
   const updatePassword = async (newPassword: string) => {
-    const { data, error } = await supabaseClient.auth.updateUser({ password: newPassword });
+    const { data, error } = await supabase.auth.updateUser({ password: newPassword });
     if (error) {
       toast.error(error.message);
     }
@@ -201,7 +202,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
   
   const resetPassword = async (email: string) => {
-    const { error } = await supabaseClient.auth.resetPasswordForEmail(email, {
+    const { error } = await supabase.auth.resetPasswordForEmail(email, {
       redirectTo: `${window.location.origin}/auth/update-password`,
     });
     if (error) {
@@ -228,6 +229,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     getUserType,
     updatePassword,
     resetPassword,
+    permissions,
     refreshPermissions,
   };
   

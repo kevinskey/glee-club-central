@@ -3,8 +3,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useCallback, useEffect, useState } from "react";
 
 export const usePermissions = () => {
-  const { profile, refreshPermissions } = useAuth();
-  const [permissions, setPermissions] = useState<{ [key: string]: boolean }>({});
+  const { profile, permissions, refreshPermissions } = useAuth();
   
   // Determine if the user has admin or super admin role
   const isAdminRole = profile?.role === 'admin';
@@ -36,6 +35,6 @@ export const usePermissions = () => {
     isSuperAdmin,
     isUserRole,
     isMemberRole,
-    isLoggedIn, // Return the new property
+    isLoggedIn, // Return the isLoggedIn property
   };
 };

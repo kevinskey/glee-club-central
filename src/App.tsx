@@ -1,5 +1,4 @@
 
-import { useEffect } from "react";
 import { RouterProvider } from "react-router-dom";
 import { router } from "./router";
 import { useAuth } from "@/contexts/AuthContext";
