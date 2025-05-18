@@ -32,15 +32,15 @@ registerServiceWorker();
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
     <ErrorBoundary>
-      <QueryClientProvider client={queryClient}>
-        <SessionContextProvider supabaseClient={supabaseClient}>
-          <BrowserRouter>
+      <BrowserRouter>
+        <QueryClientProvider client={queryClient}>
+          <SessionContextProvider supabaseClient={supabaseClient}>
             <ThemeProvider>
               <App />
             </ThemeProvider>
-          </BrowserRouter>
-        </SessionContextProvider>
-      </QueryClientProvider>
+          </SessionContextProvider>
+        </QueryClientProvider>
+      </BrowserRouter>
     </ErrorBoundary>
   </React.StrictMode>
 );
