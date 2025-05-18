@@ -6,7 +6,7 @@ import {
   useUser,
 } from '@supabase/auth-helpers-react';
 import { AuthUser, AuthContextType, Profile, UserType } from '@/types/auth';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { toast } from "sonner";
 import { fetchUserPermissions } from '@/utils/supabase/permissions';
 import { getProfile } from '@/utils/supabase/profiles';
@@ -20,6 +20,7 @@ interface AuthProviderProps {
 }
 
 export function AuthProvider({ children }: AuthProviderProps) {
+  // Use React hooks for state management
   const [authUser, setAuthUser] = useState<AuthUser | null>(null);
   const [profile, setProfile] = useState<Profile | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -30,6 +31,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const supabaseClient = useSupabaseClient();
   const user = useUser();
   const navigate = useNavigate();
+  const location = useLocation();
   
   // Function to refresh user permissions
   const refreshPermissions = useCallback(async () => {
@@ -106,6 +108,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
     fetchProfile();
   }, [user, supabaseClient, refreshPermissions]);
   
+  // User role and type helper functions
   const isAdmin = () => {
     return !!(profile?.is_super_admin || profile?.role === 'admin');
   };
@@ -135,6 +138,19 @@ export function AuthProvider({ children }: AuthProviderProps) {
     
     return userType as UserType;
   };
+
+  // Auth methods that use navigate must be inside the Router context
+  const handleLogout = async () => {
+    const { error } = await supabase.auth.signOut();
+    if (error) {
+      toast.error(error.message);
+    }
+    setProfile(null);
+    setAuthUser(null);
+    setPermissions({});
+    navigate('/');
+    return { error };
+  };
   
   const value: AuthContextType = {
     user: authUser,
@@ -150,17 +166,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
       }
       return { error };
     },
-    logout: async () => {
-      const { error } = await supabase.auth.signOut();
-      if (error) {
-        toast.error(error.message);
-      }
-      setProfile(null);
-      setAuthUser(null);
-      setPermissions({});
-      navigate('/');
-      return { error };
-    },
+    logout: handleLogout,
     signIn: async (email: string, password: string) => {
       const { error } = await supabase.auth.signInWithPassword({ email, password });
       if (error) {
@@ -168,17 +174,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
       }
       return { error };
     },
-    signOut: async () => {
-      const { error } = await supabase.auth.signOut();
-      if (error) {
-        toast.error(error.message);
-      }
-      setProfile(null);
-      setAuthUser(null);
-      setPermissions({});
-      navigate('/');
-      return { error };
-    },
+    signOut: handleLogout,
     signUp: async (email: string, password: string, firstName: string, lastName: string, userType: UserType = 'fan') => {
       const { data, error } = await supabase.auth.signUp({
         email,

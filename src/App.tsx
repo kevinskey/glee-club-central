@@ -1,9 +1,8 @@
 
-import { RouterProvider } from "react-router-dom";
-import { router } from "./router";
 import { Spinner } from "@/components/ui/spinner";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { PWAInstallPrompt } from "@/components/ui/pwa-install-prompt";
+import { Outlet } from "react-router-dom";
 
 function App() {
   return (
@@ -19,7 +18,7 @@ function App() {
 
         return (
           <>
-            <RouterProvider router={router} />
+            <Outlet />
             <PWAInstallPrompt />
           </>
         );

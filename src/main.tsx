@@ -9,7 +9,11 @@ import { registerServiceWorker } from './registerServiceWorker';
 import './index.css';
 import { createClient } from '@supabase/supabase-js';
 import { SessionContextProvider } from '@supabase/auth-helpers-react';
-import { BrowserRouter } from 'react-router-dom';
+import { 
+  createBrowserRouter, 
+  RouterProvider 
+} from 'react-router-dom';
+import { router } from './router';
 
 // Create a client
 const queryClient = new QueryClient();
@@ -32,15 +36,13 @@ registerServiceWorker();
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
     <ErrorBoundary>
-      <BrowserRouter>
-        <QueryClientProvider client={queryClient}>
-          <SessionContextProvider supabaseClient={supabaseClient}>
-            <ThemeProvider>
-              <App />
-            </ThemeProvider>
-          </SessionContextProvider>
-        </QueryClientProvider>
-      </BrowserRouter>
+      <QueryClientProvider client={queryClient}>
+        <SessionContextProvider supabaseClient={supabaseClient}>
+          <ThemeProvider>
+            <RouterProvider router={router} />
+          </ThemeProvider>
+        </SessionContextProvider>
+      </QueryClientProvider>
     </ErrorBoundary>
   </React.StrictMode>
 );
