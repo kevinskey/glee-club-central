@@ -218,17 +218,82 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     supabaseClient,
     isAuthenticated: !!user,
     isLoading,
-    login,
-    logout,
-    signIn,
-    signOut,
-    signUp,
+    login: async (email: string, password: string) => {
+      const { error } = await supabase.auth.signInWithPassword({ email, password });
+      if (error) {
+        toast.error(error.message);
+      }
+      return { error };
+    },
+    logout: async () => {
+      const { error } = await supabase.auth.signOut();
+      if (error) {
+        toast.error(error.message);
+      }
+      setProfile(null);
+      setAuthUser(null);
+      setPermissions({});
+      navigate('/');
+      return { error };
+    },
+    signIn: async (email: string, password: string) => {
+      const { error } = await supabase.auth.signInWithPassword({ email, password });
+      if (error) {
+        toast.error(error.message);
+      }
+      return { error };
+    },
+    signOut: async () => {
+      const { error } = await supabase.auth.signOut();
+      if (error) {
+        toast.error(error.message);
+      }
+      setProfile(null);
+      setAuthUser(null);
+      setPermissions({});
+      navigate('/');
+      return { error };
+    },
+    signUp: async (email: string, password: string, firstName: string, lastName: string, userType: UserType = 'fan') => {
+      const { data, error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          data: {
+            first_name: firstName,
+            last_name: lastName,
+            avatar_url: '',
+            user_type: userType,
+          },
+        },
+      });
+      
+      if (error) {
+        toast.error(error.message);
+      }
+      
+      return { error, data };
+    },
     isAdmin,
     isMember,
     isFan,
     getUserType,
-    updatePassword,
-    resetPassword,
+    updatePassword: async (newPassword: string) => {
+      const { data, error } = await supabase.auth.updateUser({ password: newPassword });
+      if (error) {
+        toast.error(error.message);
+      }
+      return { error };
+    },
+    resetPassword: async (email: string) => {
+      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: `${window.location.origin}/auth/update-password`,
+      });
+      if (error) {
+        toast.error(error.message);
+      }
+      return { error };
+    },
     permissions,
     refreshPermissions,
   };

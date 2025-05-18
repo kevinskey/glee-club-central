@@ -46,6 +46,7 @@ export interface AuthContextType {
   isAuthenticated: boolean;
   isLoading: boolean;
   session: any;
+  supabaseClient: any;
   login: (email: string, password: string) => Promise<{ error: any }>;
   logout: () => Promise<{ error: any }>;
   signIn: (email: string, password: string) => Promise<{ error: any }>;
@@ -57,5 +58,6 @@ export interface AuthContextType {
   getUserType: () => UserType;
   updatePassword: (newPassword: string) => Promise<{ error: any }>;
   resetPassword: (email: string) => Promise<{ error: any }>;
+  permissions: { [key: string]: boolean };
   refreshPermissions: () => Promise<void>;
 }
