@@ -51,7 +51,8 @@ export const UpcomingEventsList: React.FC<UpcomingEventsListProps> = ({
         setLoading(true);
         const fetchedEvents = await fetchEvents();
         
-        if (!fetchedEvents) {
+        // Check if fetchedEvents exists and has data
+        if (!fetchedEvents || fetchedEvents.length === 0) {
           setEvents([]);
           setLoading(false);
           return;
@@ -104,8 +105,8 @@ export const UpcomingEventsList: React.FC<UpcomingEventsListProps> = ({
   
   const viewEvent = async (event: CalendarEvent) => {
     if (onEventClick) {
-      await onEventClick(event);
-      return true;
+      const result = await onEventClick(event);
+      return result;
     }
     navigate(`/dashboard/calendar?event=${event.id}`);
     return true;

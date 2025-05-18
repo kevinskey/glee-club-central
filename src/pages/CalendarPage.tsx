@@ -17,7 +17,7 @@ export default function CalendarPage() {
       try {
         setIsLoading(true);
         const fetchedEvents = await fetchEvents();
-        if (fetchedEvents) {
+        if (fetchedEvents && fetchedEvents.length > 0) {
           setEvents(fetchedEvents);
         } else {
           setEvents([]);
@@ -41,11 +41,20 @@ export default function CalendarPage() {
     );
   }
   
+  // Transform events to the format expected by the Calendar component
+  const calendarEvents = events.map(event => ({
+    date: new Date(event.start),
+    title: event.title,
+    color: event.type === 'concert' ? 'purple' : 
+           event.type === 'rehearsal' ? 'blue' : 
+           event.type === 'sectional' ? 'green' : 'orange'
+  }));
+  
   return (
     <div className="container mx-auto px-4 py-8">
       <div className="max-w-6xl mx-auto">
         <h1 className="text-2xl font-bold mb-6">Calendar</h1>
-        <Calendar events={events} />
+        <Calendar events={calendarEvents} />
       </div>
     </div>
   );
