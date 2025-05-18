@@ -38,6 +38,7 @@ export default function CalendarDashboardPage() {
       try {
         setIsLoading(true);
         const calendarEvents = await fetchEvents();
+        
         if (calendarEvents && calendarEvents.length > 0) {
           setEvents(calendarEvents);
           
@@ -79,11 +80,13 @@ export default function CalendarDashboardPage() {
       if (selectedEvent) {
         await updateEvent({ ...selectedEvent, ...eventData });
         setIsEventModalOpen(false);
+        
         // Reload events to get the updated list
         const updatedEvents = await fetchEvents();
         if (updatedEvents && updatedEvents.length > 0) {
           setEvents(updatedEvents);
         }
+        
         toast({
           title: 'Success',
           description: 'Event updated successfully',
@@ -107,6 +110,7 @@ export default function CalendarDashboardPage() {
     try {
       await deleteEvent(eventId);
       setIsEventModalOpen(false);
+      
       // Remove the event from the local state
       setEvents(prevEvents => prevEvents.filter(e => e.id !== eventId));
       toast({
@@ -131,11 +135,13 @@ export default function CalendarDashboardPage() {
       // Since createEvent doesn't exist in the store, let's simulate it
       // In a real implementation, you would call store.createEvent
       setIsAddEventModalOpen(false);
+      
       // Reload events to get the updated list
       const updatedEvents = await fetchEvents();
       if (updatedEvents && updatedEvents.length > 0) {
         setEvents(updatedEvents);
       }
+      
       toast({
         title: 'Success',
         description: 'Event created successfully',

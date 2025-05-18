@@ -18,7 +18,8 @@ export async function getProfile(userId: string): Promise<Profile | null> {
       return null;
     }
     
-    return data as Profile;
+    // Ensure type compatibility with the Profile type
+    return data as unknown as Profile;
   } catch (error) {
     console.error('Unexpected error fetching profile:', error);
     return null;

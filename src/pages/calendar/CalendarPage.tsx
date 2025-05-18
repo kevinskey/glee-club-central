@@ -1,6 +1,6 @@
 
 import React, { useEffect, useState } from 'react';
-import Calendar from '@/components/dashboard/Calendar'; 
+import Calendar from '@/components/dashboard/Calendar';
 import { useCalendarStore } from '@/hooks/useCalendarStore';
 import { CalendarEvent } from '@/types/calendar';
 import { Spinner } from '@/components/ui/spinner';

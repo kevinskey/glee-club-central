@@ -7,12 +7,12 @@ import { useCalendarEvents } from './useCalendarEvents';
 export interface CalendarState {
   events: CalendarEvent[];
   loading: boolean;
-  fetchEvents: () => Promise<void>;
+  fetchEvents: () => Promise<CalendarEvent[]>;
   addEvent: (event: CalendarEvent) => void;
-  updateEvent: (event: CalendarEvent) => void;
-  deleteEvent: (id: string) => void;
+  updateEvent: (event: CalendarEvent) => Promise<boolean>;
+  deleteEvent: (id: string) => Promise<boolean>;
   addEvents: (events: CalendarEvent[]) => void;
-  resetCalendar: () => Promise<boolean>; // Added this method
+  resetCalendar: () => Promise<boolean>;
 }
 
 // Create the calendar store
@@ -44,11 +44,12 @@ export const useCalendarStore = create<CalendarState>((set, get) => ({
           description: 'Annual spring concert performance'
         }
       ];
-      set({ events: mockEvents });
+      set({ events: mockEvents, loading: false });
+      return mockEvents;
     } catch (error) {
       console.error('Error fetching events:', error);
-    } finally {
       set({ loading: false });
+      return [];
     }
   },
   addEvent: (event) => {
@@ -57,17 +58,29 @@ export const useCalendarStore = create<CalendarState>((set, get) => ({
   addEvents: (newEvents) => {
     set((state) => ({ events: [...state.events, ...newEvents] }));
   },
-  updateEvent: (updatedEvent) => {
-    set((state) => ({
-      events: state.events.map((event) =>
-        event.id === updatedEvent.id ? updatedEvent : event
-      )
-    }));
+  updateEvent: async (updatedEvent) => {
+    try {
+      set((state) => ({
+        events: state.events.map((event) =>
+          event.id === updatedEvent.id ? updatedEvent : event
+        )
+      }));
+      return true;
+    } catch (error) {
+      console.error('Error updating event:', error);
+      return false;
+    }
   },
-  deleteEvent: (id) => {
-    set((state) => ({
-      events: state.events.filter((event) => event.id !== id)
-    }));
+  deleteEvent: async (id) => {
+    try {
+      set((state) => ({
+        events: state.events.filter((event) => event.id !== id)
+      }));
+      return true;
+    } catch (error) {
+      console.error('Error deleting event:', error);
+      return false;
+    }
   },
   resetCalendar: async () => {
     try {
