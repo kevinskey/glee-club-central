@@ -15,7 +15,11 @@ import { supabase } from '@/integrations/supabase/client';
 // Create a properly initialized AuthContext with null as default
 const AuthContext = createContext<AuthContextType | null>(null);
 
-export function AuthProvider({ children }: { children: React.ReactNode }) {
+interface AuthProviderProps {
+  children: React.ReactNode | ((props: { isLoading: boolean }) => React.ReactNode);
+}
+
+export function AuthProvider({ children }: AuthProviderProps) {
   const [authUser, setAuthUser] = useState<AuthUser | null>(null);
   const [profile, setProfile] = useState<Profile | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -102,67 +106,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     fetchProfile();
   }, [user, supabaseClient, refreshPermissions]);
   
-  const login = async (email: string, password: string) => {
-    const { error } = await supabase.auth.signInWithPassword({ email, password });
-    if (error) {
-      toast.error(error.message);
-    }
-    return { error };
-  };
-  
-  const logout = async () => {
-    const { error } = await supabase.auth.signOut();
-    if (error) {
-      toast.error(error.message);
-    }
-    setProfile(null);
-    setAuthUser(null);
-    setPermissions({});
-    navigate('/');
-    return { error };
-  };
-  
-  const signIn = async (email: string, password: string) => {
-    const { error } = await supabase.auth.signInWithPassword({ email, password });
-    if (error) {
-      toast.error(error.message);
-    }
-    return { error };
-  };
-  
-  const signOut = async () => {
-    const { error } = await supabase.auth.signOut();
-    if (error) {
-      toast.error(error.message);
-    }
-    setProfile(null);
-    setAuthUser(null);
-    setPermissions({});
-    navigate('/');
-    return { error };
-  };
-  
-  const signUp = async (email: string, password: string, firstName: string, lastName: string, userType: UserType = 'fan') => {
-    const { data, error } = await supabase.auth.signUp({
-      email,
-      password,
-      options: {
-        data: {
-          first_name: firstName,
-          last_name: lastName,
-          avatar_url: '',
-          user_type: userType,
-        },
-      },
-    });
-    
-    if (error) {
-      toast.error(error.message);
-    }
-    
-    return { error, data };
-  };
-  
   const isAdmin = () => {
     return !!(profile?.is_super_admin || profile?.role === 'admin');
   };
@@ -193,25 +136,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return userType as UserType;
   };
   
-  const updatePassword = async (newPassword: string) => {
-    const { data, error } = await supabase.auth.updateUser({ password: newPassword });
-    if (error) {
-      toast.error(error.message);
-    }
-    return { error };
-  };
-  
-  const resetPassword = async (email: string) => {
-    const { error } = await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: `${window.location.origin}/auth/update-password`,
-    });
-    if (error) {
-      toast.error(error.message);
-    }
-    return { error };
-  };
-  
-  const value = {
+  const value: AuthContextType = {
     user: authUser,
     profile,
     session,
@@ -298,7 +223,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     refreshPermissions,
   };
   
-  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
+  // Render children with context value
+  return (
+    <AuthContext.Provider value={value}>
+      {typeof children === 'function' ? children({ isLoading }) : children}
+    </AuthContext.Provider>
+  );
 }
 
 export const useAuth = (): AuthContextType => {
