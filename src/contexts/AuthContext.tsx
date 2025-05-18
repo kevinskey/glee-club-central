@@ -7,10 +7,12 @@ import {
   useUser,
 } from '@supabase/auth-helpers-react';
 import { AuthUser, AuthContextType, Profile, UserType } from '@/types/auth';
-import { useNavigate } from 'react-router-dom'; // Replace next/navigation with react-router-dom
+import { useNavigate } from 'react-router-dom'; // Fixed import from next/navigation
 import { toast } from "sonner";
-import { fetchUserPermissions } from '@/utils/supabase/permissions'; // Use correct function name
+import { fetchUserPermissions } from '@/utils/supabase/permissions';
+import { getProfile } from '@/utils/supabase/profiles';
 
+// Create a properly initialized AuthContext with null as default
 const AuthContext = createContext<AuthContextType | null>(null);
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
@@ -18,16 +20,21 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [profile, setProfile] = useState<Profile | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [permissions, setPermissions] = useState<{ [key: string]: boolean }>({});
+  
   const session = useSession();
   const supabaseClient = useSupabaseClient();
   const user = useUser();
-  const navigate = useNavigate(); // Use navigate instead of router
+  const navigate = useNavigate(); // Use navigate from react-router-dom
   
   // Function to refresh user permissions
   const refreshPermissions = useCallback(async () => {
     if (profile && profile.id) {
-      const userPermissions = await fetchUserPermissions(profile.id);
-      setPermissions(userPermissions);
+      try {
+        const userPermissions = await fetchUserPermissions(profile.id);
+        setPermissions(userPermissions);
+      } catch (error) {
+        console.error("Error fetching permissions:", error);
+      }
     }
   }, [profile]);
   
@@ -49,14 +56,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           setAuthUser(authUserData);
           
           // Fetch profile from Supabase
-          const { data: fetchedProfile, error } = await supabaseClient
-            .from('profiles')
-            .select('*')
-            .eq('id', user.id)
-            .single();
+          const fetchedProfile = await getProfile(user.id);
             
-          if (error) {
-            console.error('Error fetching profile:', error);
+          if (!fetchedProfile) {
+            console.log('No profile found, creating default profile');
             // Create a default profile if one doesn't exist
             const { data: newProfile, error: profileError } = await supabaseClient
               .from('profiles')
@@ -75,10 +78,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
               console.error('Error creating default profile:', profileError);
               toast.error('Error creating default profile');
             } else if (newProfile) {
-              setProfile(newProfile);
+              setProfile(newProfile as unknown as Profile);
               await refreshPermissions();
             }
-          } else if (fetchedProfile) {
+          } else {
             setProfile(fetchedProfile);
             await refreshPermissions();
           }
@@ -171,7 +174,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return profile?.user_type === 'fan';
   };
   
-  // Define getUserType function here, not just in useAuth hook
+  // getUserType function defined in the provider
   const getUserType = (): UserType => {
     const userType = profile?.user_type || '';
     
@@ -237,5 +240,5 @@ export const useAuth = (): AuthContextType => {
     throw new Error("useAuth must be used within an AuthProvider");
   }
   
-  return context; // We now return the complete context with getUserType function
+  return context;
 };
