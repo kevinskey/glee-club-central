@@ -35,13 +35,13 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
     <ErrorBoundary>
       <QueryClientProvider client={queryClient}>
         <SessionContextProvider supabaseClient={supabaseClient}>
-          <ThemeProvider>
-            <BrowserRouter>
+          <BrowserRouter>
+            <ThemeProvider>
               <AuthProvider>
                 <App />
               </AuthProvider>
-            </BrowserRouter>
-          </ThemeProvider>
+            </ThemeProvider>
+          </BrowserRouter>
         </SessionContextProvider>
       </QueryClientProvider>
     </ErrorBoundary>
