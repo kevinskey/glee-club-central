@@ -71,14 +71,24 @@ export const fetchAttendanceRecords = async (memberId: string): Promise<Attendan
           id,
           title,
           date,
-          type
+          type,
+          time
         )
       `)
       .eq('member_id', memberId)
       .order('created_at', { ascending: false });
       
     if (error) throw error;
-    return data || [];
+    
+    // Transform the data to match the AttendanceRecord type
+    // The calendar_events property is an array, but we want it as a single object
+    const formattedData: AttendanceRecord[] = data?.map(record => ({
+      ...record,
+      status: record.status as 'present' | 'absent' | 'late' | 'excused',
+      calendar_events: record.calendar_events?.[0] || null
+    })) || [];
+    
+    return formattedData;
   } catch (error) {
     console.error('Error fetching attendance records:', error);
     return [];

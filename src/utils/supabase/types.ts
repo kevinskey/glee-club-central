@@ -13,7 +13,8 @@ export interface AttendanceRecord {
     title: string;
     date: string;
     time?: string;
-  };
+    type?: string;
+  } | null;
 }
 
 export interface PaymentRecord {
