@@ -11,6 +11,7 @@ export const usePermissions = () => {
   const isSuperAdmin = !!profile?.is_super_admin;
   const isUserRole = profile?.role === 'user';
   const isMemberRole = profile?.role === 'member';
+  const isLoggedIn = !!profile; // Add this property to check if user is logged in
   
   // Check for a specific permission
   const hasPermission = useCallback(
@@ -35,5 +36,6 @@ export const usePermissions = () => {
     isSuperAdmin,
     isUserRole,
     isMemberRole,
+    isLoggedIn, // Return the new property
   };
 };
