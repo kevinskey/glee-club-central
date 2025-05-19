@@ -11,21 +11,7 @@ import { HeroImageInitializer } from '@/components/landing/HeroImageInitializer'
 import { EventsSlider } from '@/components/landing/events/EventsSlider';
 
 const LandingPage = () => {
-  // Initialize hero images if needed
-  useEffect(() => {
-    // This will run only on the client side after mount
-    const initImages = async () => {
-      try {
-        const { seedDefaultHeroImages } = await import('@/utils/siteImages');
-        await seedDefaultHeroImages();
-      } catch (error) {
-        console.error("Failed to initialize hero images", error);
-      }
-    };
-    
-    initImages();
-  }, []);
-
+  // Add the HeroImageInitializer component to ensure images are loaded
   return (
     <>
       {/* Add the initializer component to ensure images are loaded */}
