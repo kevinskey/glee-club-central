@@ -11,7 +11,7 @@ export function EnhancedHeroSection() {
   // Refresh images on mount to ensure we have the latest images
   useEffect(() => {
     refreshImages();
-  }, []);
+  }, [refreshImages]);
   
   // Default hero images if no custom ones are set
   const defaultHeroImages = [

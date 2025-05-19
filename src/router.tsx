@@ -1,6 +1,7 @@
 import { createBrowserRouter, Navigate } from 'react-router-dom';
 import { Suspense, lazy } from 'react';
 
+import App from './App';
 import MainLayout from './layouts/MainLayout';
 import DashboardLayout from './layouts/DashboardLayout';
 import ProfilePage from './pages/profile/ProfilePage';
@@ -56,156 +57,164 @@ import RoleDashboard from './components/auth/RoleDashboard';
 export const router = createBrowserRouter([
   {
     path: '/',
-    element: <MainLayout />,
+    element: <App />,
     children: [
       {
-        index: true,
-        element: <LandingPage />,
+        path: '/',
+        element: <MainLayout />,
+        children: [
+          {
+            index: true,
+            element: <LandingPage />,
+          },
+          {
+            path: 'about',
+            element: <AboutPage />,
+          },
+          {
+            path: 'contact',
+            element: <ContactPage />,
+          },
+          {
+            path: 'announcements',
+            element: <AnnouncementsPage />,
+          },
+          {
+            path: 'press-kit',
+            element: <PressKitPage />,
+          },
+          {
+            path: 'privacy',
+            element: <PrivacyPolicyPage />,
+          },
+          {
+            path: 'terms',
+            element: <TermsOfServicePage />,
+          },
+          {
+            path: 'social',
+            element: <SocialPage />,
+          },
+          {
+            path: 'fan',
+            element: <FanPage />,
+          },
+          {
+            path: '*',
+            element: <NotFoundPage />,
+          },
+        ],
       },
       {
-        path: 'about',
-        element: <AboutPage />,
+        path: '/dashboard',
+        element: <RequireAuth><DashboardLayout /></RequireAuth>,
+        children: [
+          {
+            index: true,
+            element: <RoleDashboard />,
+          },
+          {
+            path: 'profile',
+            element: <ProfilePage />,
+          },
+          {
+            path: 'media-library',
+            element: <RequireAuth allowedUserTypes={['admin', 'member']}><MediaLibraryPage /></RequireAuth>,
+          },
+          {
+            path: 'sheet-music',
+            element: <RequireAuth allowedUserTypes={['admin', 'member']}><SheetMusicPage /></RequireAuth>,
+          },
+          {
+            path: 'sheet-music/:id',
+            element: <RequireAuth allowedUserTypes={['admin', 'member']}><PDFViewerPage /></RequireAuth>,
+          },
+          {
+            path: 'media/pdf/:id',
+            element: <RequireAuth allowedUserTypes={['admin', 'member']}><PDFViewerPage /></RequireAuth>,
+          },
+          {
+            path: 'recordings',
+            element: <RequireAuth allowedUserTypes={['admin', 'member']}><RecordingsPage /></RequireAuth>,
+          },
+          {
+            path: 'calendar',
+            element: <CalendarPage />,
+          },
+          {
+            path: 'member',
+            element: <RequireAuth allowedUserTypes={['member', 'admin']}><MemberDashboardPage /></RequireAuth>,
+          },
+          {
+            path: 'fan',
+            element: <RequireAuth allowedUserTypes={['fan', 'member', 'admin']}><FanDashboardPage /></RequireAuth>,
+          },
+        ],
       },
       {
-        path: 'contact',
-        element: <ContactPage />,
+        path: '/login',
+        element: <LoginPage />,
       },
       {
-        path: 'announcements',
-        element: <AnnouncementsPage />,
+        path: '/signup',
+        element: <SignupPage />,
       },
       {
-        path: 'press-kit',
-        element: <PressKitPage />,
+        path: '/register',
+        element: <AdminRegistrationPage />,
       },
       {
-        path: 'privacy',
-        element: <PrivacyPolicyPage />,
+        path: '/forgot-password',
+        element: <ForgotPasswordPage />,
       },
       {
-        path: 'terms',
-        element: <TermsOfServicePage />,
+        path: '/reset-password',
+        element: <ResetPasswordPage />,
       },
       {
-        path: 'social',
-        element: <SocialPage />,
+        path: '/update-password',
+        element: <ResetPasswordPage />,
       },
       {
-        path: 'fan',
-        element: <FanPage />,
-      },
-      {
-        path: '*',
-        element: <NotFoundPage />,
-      },
-    ],
-  },
-  {
-    path: '/dashboard',
-    element: <RequireAuth><DashboardLayout /></RequireAuth>,
-    children: [
-      {
-        index: true,
-        element: <RoleDashboard />,
-      },
-      {
-        path: 'profile',
-        element: <ProfilePage />,
-      },
-      {
-        path: 'media-library',
-        element: <RequireAuth allowedUserTypes={['admin', 'member']}><MediaLibraryPage /></RequireAuth>,
-      },
-      {
-        path: 'sheet-music',
-        element: <RequireAuth allowedUserTypes={['admin', 'member']}><SheetMusicPage /></RequireAuth>,
-      },
-      {
-        path: 'sheet-music/:id',
-        element: <RequireAuth allowedUserTypes={['admin', 'member']}><PDFViewerPage /></RequireAuth>,
-      },
-      {
-        path: 'media/pdf/:id',
-        element: <RequireAuth allowedUserTypes={['admin', 'member']}><PDFViewerPage /></RequireAuth>,
-      },
-      {
-        path: 'recordings',
-        element: <RequireAuth allowedUserTypes={['admin', 'member']}><RecordingsPage /></RequireAuth>,
-      },
-      {
-        path: 'calendar',
-        element: <CalendarPage />,
-      },
-      {
-        path: 'member',
-        element: <RequireAuth allowedUserTypes={['member', 'admin']}><MemberDashboardPage /></RequireAuth>,
-      },
-      {
-        path: 'fan',
-        element: <RequireAuth allowedUserTypes={['fan', 'member', 'admin']}><FanDashboardPage /></RequireAuth>,
-      },
-    ],
-  },
-  {
-    path: '/login',
-    element: <LoginPage />,
-  },
-  {
-    path: '/signup',
-    element: <SignupPage />,
-  },
-  {
-    path: '/register',
-    element: <AdminRegistrationPage />,
-  },
-  {
-    path: '/forgot-password',
-    element: <ForgotPasswordPage />,
-  },
-  {
-    path: '/reset-password',
-    element: <ResetPasswordPage />,
-  },
-  {
-    path: '/update-password',
-    element: <ResetPasswordPage />,
-  },
-  {
-    path: '/admin',
-    element: (
-      <RequireAuth requireAdmin={true}>
-        <AdminLayout />
-      </RequireAuth>
-    ),
-    children: [
-      {
-        index: true,
-        element: <AdminDashboard />
-      },
-      {
-        path: 'users',
-        element: <UsersPage />
-      },
-      {
-        path: 'analytics',
-        element: <AnalyticsPage />
-      },
-      {
-        path: 'media',
-        element: <MediaLibrary />
-      },
-      {
-        path: 'settings',
-        element: <SettingsPage />
-      },
-      {
-        path: 'landing-page',
-        element: <LandingPageSettingsPage />
-      },
-      {
-        path: 'site-images',
-        element: <SiteImagesPage />
+        path: '/admin',
+        element: (
+          <RequireAuth requireAdmin={true}>
+            <AdminLayout />
+          </RequireAuth>
+        ),
+        children: [
+          {
+            index: true,
+            element: <AdminDashboard />
+          },
+          {
+            path: 'users',
+            element: <UsersPage />
+          },
+          {
+            path: 'analytics',
+            element: <AnalyticsPage />
+          },
+          {
+            path: 'media',
+            element: <MediaLibrary />
+          },
+          {
+            path: 'settings',
+            element: <SettingsPage />
+          },
+          {
+            path: 'landing-page',
+            element: <LandingPageSettingsPage />
+          },
+          {
+            path: 'site-images',
+            element: <SiteImagesPage />
+          }
+        ]
       }
-    ]
-  }
+    ],
+  },
 ]);
+
+export default router;

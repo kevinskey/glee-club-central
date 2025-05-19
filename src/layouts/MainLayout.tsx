@@ -5,6 +5,7 @@ import { ConsolidatedHeader } from "@/components/layout/ConsolidatedHeader";
 import { Footer } from "@/components/landing/Footer";
 import { useIsMobile } from '@/hooks/use-mobile';
 import { MobileBottomNav } from '@/components/layout/MobileBottomNav';
+import { Toaster } from 'sonner';
 
 export const MainLayout = () => {
   const isMobile = useIsMobile();
@@ -23,6 +24,7 @@ export const MainLayout = () => {
 
   return (
     <div className="flex flex-col min-h-screen">
+      <Toaster position={isMobile ? "bottom-center" : "top-right"} />
       <ConsolidatedHeader />
       <main className={`flex-1 ${isMobile && showBottomNav ? 'pb-16' : ''}`}>
         <div className={isMobile ? "w-full" : "mobile-container"}>
