@@ -1,5 +1,5 @@
 
-import { FileMusic, FileText, FileImage, FileVideo, File, FilePdf } from "lucide-react";
+import { FileMusic, FileText, FileImage, FileVideo, File } from "lucide-react";
 
 /**
  * Format a file size in bytes to a human-readable string
@@ -56,7 +56,7 @@ export function getFileTypeIcon(fileType: string) {
   } else if (fileType.startsWith('audio/')) {
     return FileMusic;
   } else if (fileType === 'application/pdf' || fileType.includes('pdf')) {
-    return FilePdf;
+    return FileText; // Using FileText for PDF files instead of FilePdf
   } else if (fileType.startsWith('text/')) {
     return FileText;
   } else {
