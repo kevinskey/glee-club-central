@@ -1,4 +1,3 @@
-
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from "sonner";
 
@@ -152,67 +151,75 @@ export async function deleteSiteImage(id: string) {
   }
 }
 
-// Seed default hero images if none exist
-export async function seedDefaultHeroImages() {
+/**
+ * Seeds default hero images
+ * @param defaultImages Optional array of image URLs to use
+ */
+export const seedDefaultHeroImages = async (defaultImages?: string[]) => {
   try {
-    // Check if we already have hero images
+    const defaultHeroImages = defaultImages || [
+      "/lovable-uploads/92a39fc3-43b7-4240-982b-bff85ae2fdca.png",
+      "/lovable-uploads/eaea8db1-e2e0-4022-b6ce-a5ece2f64448.png",
+      "/lovable-uploads/1536a1d1-51f6-4121-8f53-423d37672f2e.png",
+      "/lovable-uploads/daf81087-d822-4f6c-9859-43580f9a3971.png",
+      "/lovable-uploads/a1d9a510-4276-40df-bfb5-86a441d06e4f.png"
+    ];
+
+    // First check if we have any hero images
     const { data: existingImages } = await supabase
       .from('site_images')
       .select('*')
       .eq('category', 'hero');
-      
-    // If we already have images, don't seed
+
+    // If we already have images, we'll update them rather than add new ones
     if (existingImages && existingImages.length > 0) {
-      return;
-    }
-    
-    // Default images from uploads
-    const defaultImages = [
-      {
-        name: "Glee Club Group Portrait",
-        path: "/lovable-uploads/92a39fc3-43b7-4240-982b-bff85ae2fdca.png",
-        description: "The Spelman College Glee Club in formal attire on campus"
-      },
-      {
-        name: "Choir Formation",
-        path: "/lovable-uploads/eaea8db1-e2e0-4022-b6ce-a5ece2f64448.png",
-        description: "Spelman College Glee Club members in performance formation"
-      },
-      {
-        name: "Ensemble Performance",
-        path: "/lovable-uploads/1536a1d1-51f6-4121-8f53-423d37672f2e.png",
-        description: "Members performing as a small ensemble"
-      },
-      {
-        name: "Solo Performance",
-        path: "/lovable-uploads/daf81087-d822-4f6c-9859-43580f9a3971.png", 
-        description: "Soloist performing with the Glee Club"
-      },
-      {
-        name: "Holiday Concert",
-        path: "/lovable-uploads/a1d9a510-4276-40df-bfb5-86a441d06e4f.png",
-        description: "Glee Club Holiday concert performance"
+      console.log(`Found ${existingImages.length} existing hero images, updating...`);
+      
+      // Update existing images with new URLs
+      for (let i = 0; i < Math.min(existingImages.length, defaultHeroImages.length); i++) {
+        await supabase
+          .from('site_images')
+          .update({
+            file_url: defaultHeroImages[i],
+            updated_at: new Date().toISOString()
+          })
+          .eq('id', existingImages[i].id);
       }
-    ];
-    
-    // Insert default images
-    for (let i = 0; i < defaultImages.length; i++) {
-      const img = defaultImages[i];
-      await supabase
-        .from('site_images')
-        .insert({
-          name: img.name,
-          description: img.description,
-          file_path: img.path,
-          file_url: img.path, // For uploaded images, path and URL are the same
-          category: 'hero',
-          position: i
-        });
+      
+      // Add any additional images if we have more defaults than existing ones
+      if (defaultHeroImages.length > existingImages.length) {
+        for (let i = existingImages.length; i < defaultHeroImages.length; i++) {
+          await supabase
+            .from('site_images')
+            .insert({
+              name: `Hero Image ${i+1}`,
+              description: 'Default hero image',
+              file_url: defaultHeroImages[i],
+              file_path: defaultHeroImages[i].split('/').pop() || '',
+              category: 'hero'
+            });
+        }
+      }
+    } else {
+      // If no existing images, add all defaults
+      console.log('No existing hero images found, adding defaults...');
+      
+      for (let i = 0; i < defaultHeroImages.length; i++) {
+        await supabase
+          .from('site_images')
+          .insert({
+            name: `Hero Image ${i+1}`,
+            description: 'Default hero image',
+            file_url: defaultHeroImages[i],
+            file_path: defaultHeroImages[i].split('/').pop() || '',
+            category: 'hero'
+          });
+      }
     }
     
-    return true;
+    return { success: true };
   } catch (error) {
-    console.error("Error seeding default hero images:", error);
-    return false;
+    console.error('Error seeding default hero images:', error);
+    return { success: false, error };
   }
-}
+};

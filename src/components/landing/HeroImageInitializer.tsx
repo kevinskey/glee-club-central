@@ -14,15 +14,18 @@ export const HeroImageInitializer: React.FC = () => {
     // Check localStorage to prevent multiple initializations
     const heroImagesInitialized = localStorage.getItem('heroImagesInitialized');
     
-    if (heroImagesInitialized === 'true') {
-      setIsInitialized(true);
-      return;
-    }
-    
+    // Always run initialization to ensure we have the latest images
     const initializeHeroImages = async () => {
       try {
         console.log('Initializing hero images...');
-        await seedDefaultHeroImages();
+        // Add the new hero images to defaultHeroImages in seedDefaultHeroImages
+        await seedDefaultHeroImages([
+          "/lovable-uploads/c69d3562-4bdc-4e42-9415-aefdd5f573e8.png",
+          "/lovable-uploads/65c0e4fd-f960-4e32-a3cd-dc46f81be743.png",
+          "/lovable-uploads/1536a1d1-51f6-4121-8f53-423d37672f2e.png",
+          "/lovable-uploads/daf81087-d822-4f6c-9859-43580f9a3971.png",
+          "/lovable-uploads/a1d9a510-4276-40df-bfb5-86a441d06e4f.png"
+        ]);
         
         // Only update state if component is still mounted
         if (isMountedRef.current) {
@@ -32,17 +35,12 @@ export const HeroImageInitializer: React.FC = () => {
         }
       } catch (error) {
         console.error("Error initializing hero images:", error);
-        
-        // Only update state if component is still mounted
-        if (isMountedRef.current) {
-          // Silent failure, no user-facing errors
-        }
       }
     };
     
     // Initialize with a slight delay to prevent race conditions
     const timeoutId = setTimeout(() => {
-      if (isMountedRef.current && !isInitialized) {
+      if (isMountedRef.current) {
         initializeHeroImages();
       }
     }, 500);
@@ -52,7 +50,7 @@ export const HeroImageInitializer: React.FC = () => {
       isMountedRef.current = false;
       clearTimeout(timeoutId);
     };
-  }, [isInitialized]);
+  }, []);
   
   // This component doesn't render anything
   return null;

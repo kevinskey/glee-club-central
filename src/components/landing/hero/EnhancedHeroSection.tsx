@@ -11,14 +11,14 @@ export function EnhancedHeroSection() {
   
   // Default hero images that we'll always use if no custom ones are set
   const defaultHeroImages = [
-    "/lovable-uploads/92a39fc3-43b7-4240-982b-bff85ae2fdca.png",
-    "/lovable-uploads/eaea8db1-e2e0-4022-b6ce-a5ece2f64448.png",
+    "/lovable-uploads/c69d3562-4bdc-4e42-9415-aefdd5f573e8.png",
+    "/lovable-uploads/65c0e4fd-f960-4e32-a3cd-dc46f81be743.png",
     "/lovable-uploads/1536a1d1-51f6-4121-8f53-423d37672f2e.png",
     "/lovable-uploads/daf81087-d822-4f6c-9859-43580f9a3971.png",
     "/lovable-uploads/a1d9a510-4276-40df-bfb5-86a441d06e4f.png"
   ];
   
-  // Fetch any custom hero images, but don't wait for them
+  // Fetch any custom hero images, but use default ones immediately
   const { images, isLoading: imagesLoading } = useSiteImages("hero");
   
   useEffect(() => {
@@ -29,7 +29,7 @@ export function EnhancedHeroSection() {
       // Give a slight delay before hiding loading indicator to ensure smooth transition
       const timer = setTimeout(() => {
         setIsLoading(false);
-      }, 500);
+      }, 300);
       
       return () => clearTimeout(timer);
     }
@@ -44,7 +44,7 @@ export function EnhancedHeroSection() {
     <section className="relative min-h-[500px] md:min-h-[600px] lg:min-h-[700px] flex items-center justify-center overflow-hidden">
       <BackgroundSlideshow 
         images={heroImageUrls} 
-        overlayOpacity={0.5} 
+        overlayOpacity={0.45} 
         duration={8000} // 8 seconds between transitions
         transition={1500} // 1.5 seconds for the transition effect
       />
