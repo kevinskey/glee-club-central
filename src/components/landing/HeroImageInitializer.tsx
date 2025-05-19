@@ -1,7 +1,6 @@
 
 import React, { useEffect, useState, useRef } from 'react';
 import { seedDefaultHeroImages } from '@/utils/siteImages';
-import { toast } from 'sonner';
 
 // This component will run once to ensure we have hero images on first load
 export const HeroImageInitializer: React.FC = () => {
@@ -22,10 +21,12 @@ export const HeroImageInitializer: React.FC = () => {
     
     const initializeHeroImages = async () => {
       try {
+        console.log('Initializing hero images...');
         await seedDefaultHeroImages();
         
         // Only update state if component is still mounted
         if (isMountedRef.current) {
+          console.log('Hero images initialized successfully');
           setIsInitialized(true);
           localStorage.setItem('heroImagesInitialized', 'true');
         }

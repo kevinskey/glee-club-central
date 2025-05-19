@@ -1,3 +1,4 @@
+
 import { createBrowserRouter, Navigate } from 'react-router-dom';
 import { Suspense, lazy } from 'react';
 
@@ -53,6 +54,7 @@ import AdminDashboardPage from './pages/admin/AdminDashboardPage';
 
 // Add the RoleDashboard component to route users based on their role
 import RoleDashboard from './components/auth/RoleDashboard';
+import AdministrationPage from './pages/AdministrationPage';
 
 export const router = createBrowserRouter([
   {
@@ -65,7 +67,7 @@ export const router = createBrowserRouter([
         children: [
           {
             index: true,
-            element: <LandingPage />,
+            element: <LandingPage />, // Ensuring LandingPage is used for the root route
           },
           {
             path: 'about',
@@ -98,6 +100,10 @@ export const router = createBrowserRouter([
           {
             path: 'fan',
             element: <FanPage />,
+          },
+          {
+            path: 'administration',
+            element: <AdministrationPage />,
           },
           {
             path: '*',
