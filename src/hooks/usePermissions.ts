@@ -1,40 +1,79 @@
 
 import { useAuth } from "@/contexts/AuthContext";
-import { useCallback, useEffect } from "react";
+import { useRolePermissions } from "@/contexts/RolePermissionContext";
+import { supabase } from "@/integrations/supabase/client";
+import { useState, useEffect } from "react";
 
-export const usePermissions = () => {
-  const { profile, permissions, refreshPermissions } = useAuth();
+export function usePermissions() {
+  const { user, profile, isAdmin } = useAuth();
+  const { hasPermission: roleHasPermission, userRole } = useRolePermissions();
+  const [permissions, setPermissions] = useState<{[key: string]: boolean}>({});
+  const [isLoading, setIsLoading] = useState(true);
+
+  // Check if user is logged in
+  const isLoggedIn = !!user;
   
-  // Determine if the user has admin or super admin role
-  const isAdminRole = profile?.role === 'admin';
-  const isSuperAdmin = !!profile?.is_super_admin;
-  const isUserRole = profile?.role === 'user';
-  const isMemberRole = profile?.role === 'member';
-  const isLoggedIn = !!profile; 
+  // Check if user is a super admin
+  const isSuperAdmin = profile?.is_super_admin || false;
   
-  // Check for a specific permission
-  const hasPermission = useCallback(
-    (permissionName: string): boolean => {
-      if (isSuperAdmin) return true;
-      return !!permissions[permissionName];
-    },
-    [permissions, isSuperAdmin]
-  );
-  
-  // Refresh permissions when profile changes
+  // Check if user has admin role (for backward compatibility)
+  const isAdminRole = userRole === 'admin' || userRole === 'Admin';
+
   useEffect(() => {
-    if (profile && profile.id) {
-      refreshPermissions();
-    }
-  }, [profile, refreshPermissions]);
-  
-  return {
-    permissions,
-    hasPermission,
-    isAdminRole,
-    isSuperAdmin,
-    isUserRole,
-    isMemberRole,
-    isLoggedIn,
+    const loadPermissions = async () => {
+      if (!user) {
+        setPermissions({});
+        setIsLoading(false);
+        return;
+      }
+
+      try {
+        const { data, error } = await supabase.rpc('get_user_permissions', {
+          p_user_id: user.id
+        });
+
+        if (error) throw error;
+
+        // Convert array of permission objects to a map
+        const permissionsMap: {[key: string]: boolean} = {};
+        if (Array.isArray(data)) {
+          data.forEach(item => {
+            permissionsMap[item.permission] = item.granted;
+          });
+        }
+
+        setPermissions(permissionsMap);
+      } catch (err) {
+        console.error('Error loading permissions:', err);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    loadPermissions();
+  }, [user]);
+
+  // Core permission check function that combines all permission sources
+  const hasPermission = (permission: string): boolean => {
+    // Always allow super admins
+    if (isSuperAdmin) return true;
+    
+    // Check traditional admin role
+    if (isAdmin && isAdmin()) return true;
+    
+    // Check role-based permissions
+    if (roleHasPermission(permission)) return true;
+    
+    // Check direct permissions from database
+    return !!permissions[permission];
   };
-};
+
+  return {
+    isLoggedIn,
+    isSuperAdmin,
+    isAdminRole,
+    isLoading,
+    hasPermission,
+    permissions
+  };
+}

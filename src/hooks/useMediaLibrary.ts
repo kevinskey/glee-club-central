@@ -1,118 +1,99 @@
 
-import { useState, useEffect } from "react";
-import { MediaFile, MediaStats } from "@/types/media";
+import { useState, useEffect, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { MediaFile, MediaStats } from "@/types/media";
+import { MediaType, getMediaType } from "@/utils/mediaUtils";
 import { toast } from "sonner";
-import { MediaType } from "@/utils/mediaUtils";
-import { getAllMediaFiles, deleteMediaFile } from "@/utils/supabase/media";
 
 export function useMediaLibrary() {
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<Error | null>(null);
-  const [mediaFiles, setMediaFiles] = useState<MediaFile[]>([]);
+  const [allMediaFiles, setAllMediaFiles] = useState<MediaFile[]>([]);
   const [filteredMediaFiles, setFilteredMediaFiles] = useState<MediaFile[]>([]);
-  const [mediaStats, setMediaStats] = useState<MediaStats | null>(null);
-  
-  // Filter states
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedMediaType, setSelectedMediaType] = useState<MediaType | "all">("all");
-  const [selectedCategory, setSelectedCategory] = useState<string | "all">("all");
-  const [dateFilter, setDateFilter] = useState<"newest" | "oldest">("newest");
-  
-  // Derived values
-  const [mediaTypes, setMediaTypes] = useState<MediaType[]>([]);
+  const [selectedCategory, setSelectedCategory] = useState<string>("all");
+  const [dateFilter, setDateFilter] = useState<string>("newest");
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<Error | null>(null);
   const [categories, setCategories] = useState<string[]>([]);
-  
-  // Fetch all media - updated to use our utility function
-  const fetchAllMedia = async () => {
+  const [mediaTypes, setMediaTypes] = useState<string[]>([]);
+  const [mediaStats, setMediaStats] = useState<MediaStats>({
+    totalFiles: 0,
+    totalSize: 0,
+    filesByType: {}
+  });
+
+  // Fetch all media files
+  const fetchAllMedia = useCallback(async () => {
     setIsLoading(true);
     setError(null);
     
     try {
-      console.log("Fetching all media files without filtering...");
+      const { data, error } = await supabase
+        .from('media_library')
+        .select('*')
+        .order('created_at', { ascending: false });
+        
+      if (error) throw new Error(error.message);
       
-      // Use our utility function
-      const data = await getAllMediaFiles();
+      // Convert to MediaFile type
+      const mediaFiles = data as MediaFile[];
       
-      console.log(`Retrieved ${data?.length || 0} media files from database`);
-      
-      // Map data to MediaFile type
-      const mappedData = data.map((item: any) => ({
-        id: item.id,
-        title: item.title || 'Untitled',
-        description: item.description || '',
-        file_url: item.file_url,
-        file_path: item.file_path,
-        file_type: item.file_type,
-        uploaded_by: item.uploaded_by,
-        category: item.folder || 'general',
-        tags: item.tags || [],
-        created_at: item.created_at,
-        size: item.size || 0,
-      }));
-      
-      setMediaFiles(mappedData);
-      
-      // Apply initial filters based on current filter settings
-      applyFilters(mappedData);
-      
-      // Calculate stats
+      // Calculate statistics
       const stats: MediaStats = {
-        totalFiles: mappedData.length,
-        totalSize: mappedData.reduce((sum, file) => sum + (file.size || 0), 0),
+        totalFiles: mediaFiles.length,
+        totalSize: mediaFiles.reduce((sum, file) => sum + (file.size || 0), 0),
         filesByType: {}
       };
       
-      // Count files by type
-      mappedData.forEach(file => {
-        const type = file.file_type.split('/')[0];
+      // Extract unique categories and media types
+      const uniqueCategories = new Set<string>();
+      const uniqueMediaTypes = new Set<string>();
+      
+      mediaFiles.forEach(file => {
+        const mediaType = getMediaType(file.file_type);
         
-        // Initialize if first encounter
-        if (!stats.filesByType[type]) {
-          stats.filesByType[type] = 0;
+        // Add to categories
+        if (file.folder) {
+          uniqueCategories.add(file.folder);
+        } else if (file.category) {
+          uniqueCategories.add(file.category);
         }
         
-        // Increment counter
-        stats.filesByType[type]++;
+        // Add to media types
+        uniqueMediaTypes.add(mediaType);
+        
+        // Update stats
+        if (!stats.filesByType[mediaType]) {
+          stats.filesByType[mediaType] = 0;
+        }
+        stats.filesByType[mediaType]++;
       });
       
+      setAllMediaFiles(mediaFiles);
+      setFilteredMediaFiles(mediaFiles);
+      setCategories(Array.from(uniqueCategories));
+      setMediaTypes(Array.from(uniqueMediaTypes));
       setMediaStats(stats);
       
-      // Extract available media types and categories from data
-      const types = Array.from(new Set(
-        mappedData.map(file => {
-          if (file.file_type.startsWith('audio/')) return 'audio';
-          if (file.file_type.startsWith('image/')) return 'image';
-          if (file.file_type.startsWith('video/')) return 'video';
-          if (file.file_type === 'application/pdf' || 
-              file.file_type.includes('pdf') || 
-              file.file_path.endsWith('.pdf')) return 'pdf';
-          return 'other';
-        })
-      )) as MediaType[];
-      
-      setMediaTypes(types);
-      
-      const cats = Array.from(new Set(mappedData.map(file => file.category || "general")));
-      setCategories(cats);
-      
-    } catch (err: any) {
-      console.error('Error fetching media:', err);
-      setError(err);
+    } catch (err) {
+      console.error("Error fetching media files:", err);
+      setError(err instanceof Error ? err : new Error(String(err)));
     } finally {
       setIsLoading(false);
     }
-  };
-  
-  // Helper function to apply filters
-  const applyFilters = (files: MediaFile[]) => {
-    let filtered = [...files];
+  }, []);
+
+  // Apply filters whenever filter criteria change
+  useEffect(() => {
+    if (!allMediaFiles) return;
+    
+    let filtered = [...allMediaFiles];
     
     // Apply search filter
     if (searchQuery) {
       const query = searchQuery.toLowerCase();
       filtered = filtered.filter(file => 
-        file.title?.toLowerCase().includes(query) || 
+        file.title.toLowerCase().includes(query) || 
         (file.description && file.description.toLowerCase().includes(query)) ||
         (file.tags && file.tags.some(tag => tag.toLowerCase().includes(query)))
       );
@@ -120,81 +101,98 @@ export function useMediaLibrary() {
     
     // Apply media type filter
     if (selectedMediaType !== "all") {
-      filtered = filtered.filter(file => {
-        if (selectedMediaType === 'audio') return file.file_type.startsWith('audio/');
-        if (selectedMediaType === 'image') return file.file_type.startsWith('image/');
-        if (selectedMediaType === 'video') return file.file_type.startsWith('video/');
-        if (selectedMediaType === 'pdf') {
-          return file.file_type === 'application/pdf' || 
-                 file.file_type.includes('pdf') ||
-                 (file.file_path && file.file_path.toLowerCase().endsWith('.pdf')) ||
-                 (file.category === 'sheet-music') ||
-                 (file.tags && file.tags.includes('pdf'));
-        }
-        return !file.file_type.startsWith('audio/') && 
-               !file.file_type.startsWith('image/') && 
-               !file.file_type.startsWith('video/') && 
-               !file.file_type.includes('pdf') && 
-               file.file_type !== 'application/pdf';
-      });
+      filtered = filtered.filter(file => 
+        getMediaType(file.file_type) === selectedMediaType
+      );
     }
     
     // Apply category filter
     if (selectedCategory !== "all") {
-      filtered = filtered.filter(file => file.category === selectedCategory);
+      filtered = filtered.filter(file => 
+        (file.folder === selectedCategory || file.category === selectedCategory)
+      );
     }
     
-    // Apply date sort
-    filtered.sort((a, b) => {
-      const dateA = new Date(a.created_at).getTime();
-      const dateB = new Date(b.created_at).getTime();
-      
-      return dateFilter === "newest" 
-        ? dateB - dateA  // newest first
-        : dateA - dateB; // oldest first
-    });
+    // Apply date filter
+    if (dateFilter === "newest") {
+      filtered.sort((a, b) => 
+        new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+      );
+    } else if (dateFilter === "oldest") {
+      filtered.sort((a, b) => 
+        new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
+      );
+    }
     
     setFilteredMediaFiles(filtered);
-  };
-  
-  // Delete media item - updated to use our utility function
-  const deleteMediaItem = async (mediaId: string) => {
-    try {
-      await deleteMediaFile(mediaId);
-      
-      // Fix: Update the toast call to use the correct format for sonner
-      toast.success("Media deleted", {
-        description: "The media file has been successfully deleted",
-      });
-      
-      return true;
-    } catch (err: any) {
-      console.error('Error deleting media:', err);
-      // Fix: Update the toast call to use the correct format for sonner
-      toast.error("Delete failed", {
-        description: err.message || "Failed to delete media file",
-      });
-      throw err;
-    }
-  };
-  
-  // Apply filters whenever filter criteria change
-  useEffect(() => {
-    if (mediaFiles.length === 0) return;
-    applyFilters(mediaFiles);
-  }, [searchQuery, selectedMediaType, selectedCategory, dateFilter, mediaFiles]);
-  
-  // Initial fetch
+  }, [allMediaFiles, searchQuery, selectedMediaType, selectedCategory, dateFilter]);
+
+  // Load media on component mount
   useEffect(() => {
     fetchAllMedia();
-  }, []);
-  
+  }, [fetchAllMedia]);
+
+  // Delete a media item
+  const deleteMediaItem = async (mediaId: string) => {
+    try {
+      const result = await supabase
+        .from('media_library')
+        .select('file_path')
+        .eq('id', mediaId)
+        .single();
+      
+      if (result.error) throw new Error(result.error.message);
+      
+      // Delete from storage
+      const { error: storageError } = await supabase.storage
+        .from('media-library')
+        .remove([result.data.file_path]);
+        
+      if (storageError) throw new Error(storageError.message);
+      
+      // Delete from database
+      const { error: dbError } = await supabase
+        .from('media_library')
+        .delete()
+        .eq('id', mediaId);
+        
+      if (dbError) throw new Error(dbError.message);
+      
+      toast.success("Media deleted successfully");
+      
+      // Update the local state
+      setAllMediaFiles(prevFiles => prevFiles.filter(file => file.id !== mediaId));
+      setFilteredMediaFiles(prevFiles => prevFiles.filter(file => file.id !== mediaId));
+      
+      return true;
+    } catch (error) {
+      console.error("Error deleting media:", error);
+      toast.error("Error deleting media", {
+        description: error instanceof Error ? error.message : "An unknown error occurred"
+      });
+      throw error;
+    }
+  };
+
+  // Use media in a specific context (hero, press-kit, etc)
+  const useMediaInContext = async (mediaId: string, contextName: string) => {
+    try {
+      // This is where we would implement the logic to use this media in a specific context
+      // For example, add it to the hero images or press kit
+      toast.success(`Media selected for ${contextName}`);
+      return true;
+    } catch (error) {
+      console.error(`Error using media in ${contextName}:`, error);
+      toast.error(`Error using in ${contextName}`, {
+        description: error instanceof Error ? error.message : "An unknown error occurred"
+      });
+      return false;
+    }
+  };
+
   return {
-    isLoading,
-    error,
-    mediaFiles,
+    allMediaFiles,
     filteredMediaFiles,
-    mediaStats,
     searchQuery,
     setSearchQuery,
     selectedMediaType,
@@ -203,9 +201,13 @@ export function useMediaLibrary() {
     setSelectedCategory,
     dateFilter,
     setDateFilter,
-    mediaTypes,
+    isLoading,
+    error,
     categories,
+    mediaTypes,
+    mediaStats,
     fetchAllMedia,
-    deleteMediaItem
+    deleteMediaItem,
+    useMediaInContext
   };
 }

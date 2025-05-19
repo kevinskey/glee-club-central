@@ -1,34 +1,40 @@
 
 import React, { useEffect } from 'react';
-import { useCalendarStore } from '@/hooks/useCalendarStore';
 import { updateHeroImageWithEvents } from '@/utils/heroImageUtils';
+import { supabase } from '@/integrations/supabase/client';
 
-/**
- * This component handles synchronizing calendar events with hero images.
- * It's meant to be placed on the landing page to ensure hero images
- * reflect the latest calendar events.
- */
-export const HeroCalendarSync: React.FC = () => {
-  const { events, fetchEvents } = useCalendarStore();
-  
+export function HeroCalendarSync() {
   useEffect(() => {
-    const loadEventsAndUpdateHero = async () => {
+    async function syncHeroImagesWithCalendar() {
       try {
-        // First load all calendar events
-        await fetchEvents();
+        // Fetch recent/upcoming events that have images
+        const { data: events, error } = await supabase
+          .from('calendar_events')
+          .select('*')
+          .not('image_url', 'is', null)
+          .order('date', { ascending: true });
+          
+        if (error) throw error;
         
-        // Then update hero images with these events
-        if (events.length > 0) {
+        if (events && events.length > 0) {
           await updateHeroImageWithEvents(events);
         }
       } catch (error) {
-        console.error("Error syncing calendar events with hero:", error);
+        console.error("Error syncing hero images with calendar:", error);
       }
-    };
+    }
     
-    loadEventsAndUpdateHero();
+    // Run once on component mount
+    syncHeroImagesWithCalendar();
+    
+    // Set up interval to check for updates (every 12 hours)
+    const intervalId = setInterval(() => {
+      syncHeroImagesWithCalendar();
+    }, 12 * 60 * 60 * 1000);
+    
+    return () => clearInterval(intervalId);
   }, []);
   
-  // This is a utility component that doesn't render anything
+  // This component doesn't render anything, just runs the sync logic
   return null;
-};
+}

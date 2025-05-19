@@ -1,6 +1,7 @@
 
-import { FileIcon, FileTextIcon, FileArchiveIcon, ImageIcon, Music, FileVideoIcon, FileCodeIcon } from "lucide-react";
-
+/**
+ * Format a file size in bytes to a human-readable string
+ */
 export function formatFileSize(bytes: number): string {
   if (bytes === 0) return '0 Bytes';
   
@@ -11,20 +12,33 @@ export function formatFileSize(bytes: number): string {
   return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
 }
 
-export function getFileTypeIcon(mimeType: string): any {
-  if (mimeType.startsWith('image/')) {
-    return ImageIcon;
-  } else if (mimeType.startsWith('audio/')) {
-    return Music;
-  } else if (mimeType.startsWith('video/')) {
-    return FileVideoIcon;
-  } else if (mimeType === 'application/pdf') {
-    return FileTextIcon;
-  } else if (mimeType.includes('zip') || mimeType.includes('tar') || mimeType.includes('rar') || mimeType.includes('compress')) {
-    return FileArchiveIcon;
-  } else if (mimeType.includes('text/html') || mimeType.includes('text/css') || mimeType.includes('javascript')) {
-    return FileCodeIcon;
-  } else {
-    return FileIcon;
-  }
+/**
+ * Get file extension from a file name or path
+ */
+export function getFileExtension(filename: string): string {
+  return filename.slice((filename.lastIndexOf('.') - 1 >>> 0) + 2).toLowerCase();
+}
+
+/**
+ * Generate a unique filename based on original name
+ */
+export function generateUniqueFileName(originalName: string): string {
+  const ext = getFileExtension(originalName);
+  const baseName = originalName.substring(0, originalName.lastIndexOf('.'));
+  const timestamp = Date.now();
+  const randomString = Math.random().toString(36).substring(2, 10);
+  
+  return `${baseName}-${timestamp}-${randomString}.${ext}`;
+}
+
+/**
+ * Convert a File object to a data URL
+ */
+export function fileToDataUrl(file: File): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+    reader.onload = () => resolve(reader.result as string);
+    reader.onerror = error => reject(error);
+  });
 }

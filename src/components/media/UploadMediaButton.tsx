@@ -1,38 +1,26 @@
 
 import React from "react";
 import { Button } from "@/components/ui/button";
-import { FileUp } from "lucide-react";
-import { useAuth } from "@/contexts/AuthContext";
+import { Upload } from "lucide-react";
 
 interface UploadMediaButtonProps {
   onClick: () => void;
-  canUpload?: boolean;
+  canUpload: boolean;
   label?: string;
 }
 
-export function UploadMediaButton({ 
-  onClick, 
-  canUpload: canUploadProp,
-  label = "Upload Media"
-}: UploadMediaButtonProps) {
-  const { user } = useAuth();
-  
-  // If canUpload is explicitly provided, use it, otherwise allow any authenticated user
-  const canUpload = canUploadProp !== undefined ? canUploadProp : !!user;
-  
-  if (!canUpload) return null;
+export function UploadMediaButton({ onClick, canUpload, label = "Upload Media" }: UploadMediaButtonProps) {
+  if (!canUpload) {
+    return null;
+  }
   
   return (
-    <div className="flex justify-between items-center">
-      <Button 
-        onClick={onClick} 
-        className="bg-brand hover:bg-brand/90" 
-        data-testid="upload-media-button"
-        type="button"
-      >
-        <FileUp className="mr-2 h-4 w-4" />
-        {label}
-      </Button>
-    </div>
+    <Button 
+      onClick={onClick}
+      className="bg-glee-purple hover:bg-glee-purple/90 text-white"
+    >
+      <Upload className="mr-2 h-4 w-4" />
+      {label}
+    </Button>
   );
 }
