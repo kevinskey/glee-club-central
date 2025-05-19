@@ -21,14 +21,14 @@ import { supabase } from "@/integrations/supabase/client";
 
 const MediaLibraryIntegratedPage = () => {
   const navigate = useNavigate();
-  const { isLoggedIn } = useAuth();
+  const { user } = useAuth();
   const { hasPermission } = usePermissions();
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
   const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
   const [targetSection, setTargetSection] = useState<string | null>(null);
   
-  // Check permissions
-  const canUpload = isLoggedIn;
+  // Check permissions - use user instead of isLoggedIn
+  const canUpload = !!user;
   const canEdit = hasPermission('can_edit_media');
   const canDelete = hasPermission('can_delete_media');
   
@@ -178,7 +178,7 @@ const MediaLibraryIntegratedPage = () => {
         />
 
         {/* Site Integration Section */}
-        {isLoggedIn && hasPermission('can_edit_site') && (
+        {canUpload && hasPermission('can_edit_site') && (
           <Card className="p-4">
             <h2 className="text-lg font-medium mb-2">Site Integration</h2>
             <p className="text-sm text-muted-foreground mb-4">
@@ -243,14 +243,20 @@ const MediaLibraryIntegratedPage = () => {
                 mediaFiles={filteredMediaFiles}
                 canEdit={canEdit}
                 canDelete={canDelete}
-                onDelete={deleteMediaItem}
+                onDelete={(id) => {
+                  deleteMediaItem(id);
+                  return Promise.resolve();
+                }}
               />
             ) : (
               <MediaListView 
                 mediaFiles={filteredMediaFiles}
                 canEdit={canEdit}
                 canDelete={canDelete}
-                onDelete={deleteMediaItem}
+                onDelete={(id) => {
+                  deleteMediaItem(id);
+                  return Promise.resolve();
+                }}
               />
             )}
           </div>

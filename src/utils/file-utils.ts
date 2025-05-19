@@ -1,4 +1,6 @@
 
+import { FileMusic, FileText, FileImage, FileVideo, File, FilePdf } from "lucide-react";
+
 /**
  * Format a file size in bytes to a human-readable string
  */
@@ -41,4 +43,23 @@ export function fileToDataUrl(file: File): Promise<string> {
     reader.onload = () => resolve(reader.result as string);
     reader.onerror = error => reject(error);
   });
+}
+
+/**
+ * Get appropriate icon component for file type
+ */
+export function getFileTypeIcon(fileType: string) {
+  if (fileType.startsWith('image/')) {
+    return FileImage;
+  } else if (fileType.startsWith('video/')) {
+    return FileVideo;
+  } else if (fileType.startsWith('audio/')) {
+    return FileMusic;
+  } else if (fileType === 'application/pdf' || fileType.includes('pdf')) {
+    return FilePdf;
+  } else if (fileType.startsWith('text/')) {
+    return FileText;
+  } else {
+    return File;
+  }
 }
