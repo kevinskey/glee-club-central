@@ -1,5 +1,5 @@
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { seedDefaultHeroImages } from '@/utils/siteImages';
 import { toast } from 'sonner';
 
@@ -7,46 +7,50 @@ import { toast } from 'sonner';
 export const HeroImageInitializer: React.FC = () => {
   const [isInitializing, setIsInitializing] = useState(false);
   const [initialized, setInitialized] = useState(false);
+  const isMountedRef = useRef(true);
+  const attemptedRef = useRef(false);
   
   useEffect(() => {
-    // Use a ref to track component mount state
-    let isMounted = true;
+    // Track component mount state
+    isMountedRef.current = true;
     
     const initializeHeroImages = async () => {
-      if (initialized || isInitializing) return; // Prevent duplicate initialization
+      // Only try once per component lifecycle
+      if (initialized || isInitializing || attemptedRef.current) return;
       
       try {
+        attemptedRef.current = true;
         setIsInitializing(true);
+        
         const result = await seedDefaultHeroImages();
         
         // Only update state if component is still mounted
-        if (isMounted) {
+        if (isMountedRef.current) {
           setInitialized(true);
           setIsInitializing(false);
-          
-          if (!result) {
-            // Silent failure - don't show errors to users on the landing page
-            console.error("Error initializing hero images");
-          }
         }
       } catch (error) {
         console.error("Error initializing hero images:", error);
         
         // Only update state if component is still mounted
-        if (isMounted) {
+        if (isMountedRef.current) {
           setIsInitializing(false);
+          // Don't show errors to users on the landing page
         }
       }
     };
     
-    // Only run initialization if not already initialized
-    if (!initialized && !isInitializing) {
-      initializeHeroImages();
-    }
+    // Initialize with a slight delay to prevent race conditions
+    const timeoutId = setTimeout(() => {
+      if (isMountedRef.current) {
+        initializeHeroImages();
+      }
+    }, 500);
     
     return () => {
       // Mark component as unmounted to prevent state updates
-      isMounted = false;
+      isMountedRef.current = false;
+      clearTimeout(timeoutId);
     };
   }, [initialized, isInitializing]);
   

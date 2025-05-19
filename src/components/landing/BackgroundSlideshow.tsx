@@ -1,6 +1,5 @@
 
 import React, { useState, useEffect, useRef } from "react";
-import { Spinner } from "@/components/ui/spinner";
 
 interface BackgroundSlideshowProps {
   images: string[];
@@ -19,71 +18,92 @@ export function BackgroundSlideshow({
   const [nextIndex, setNextIndex] = useState(1);
   const [isTransitioning, setIsTransitioning] = useState(false);
   const [imagesLoaded, setImagesLoaded] = useState<boolean[]>([]);
-  const [allImagesLoaded, setAllImagesLoaded] = useState(false);
+  const [allImagesPreloaded, setAllImagesPreloaded] = useState(false);
   const timerRef = useRef<number | null>(null);
   const intervalRef = useRef<number | null>(null);
+  const isMountedRef = useRef(true);
 
-  // Initial load state setup
+  // Reset state when image array changes
   useEffect(() => {
     if (!images || images.length === 0) return;
     
     // Initialize the loaded state array with false for each image
     setImagesLoaded(new Array(images.length).fill(false));
+    setAllImagesPreloaded(false);
     
-    // Reset loaded state when image array changes
     return () => {
-      setAllImagesLoaded(false);
+      // Clean up any timers when unmounting
+      if (timerRef.current) window.clearTimeout(timerRef.current);
+      if (intervalRef.current) window.clearInterval(intervalRef.current);
     };
   }, [images]);
 
-  // Preload all images
+  // Preload all images immediately
   useEffect(() => {
     if (!images || images.length === 0) return;
     
     const newImagesLoaded = [...imagesLoaded];
+    let loadedCount = 0;
     
     // Preload each image
     images.forEach((src, index) => {
-      if (newImagesLoaded[index]) return; // Skip already loaded images
-      
       const img = new Image();
       img.src = src;
       
       img.onload = () => {
-        newImagesLoaded[index] = true;
-        setImagesLoaded(newImagesLoaded);
+        if (!isMountedRef.current) return;
         
-        // Check if all images are loaded
-        if (newImagesLoaded.every(loaded => loaded)) {
-          setAllImagesLoaded(true);
+        newImagesLoaded[index] = true;
+        loadedCount++;
+        
+        // Update state only when all images are loaded or after a timeout
+        if (loadedCount === images.length) {
+          setImagesLoaded(newImagesLoaded);
+          setAllImagesPreloaded(true);
         }
       };
       
       img.onerror = () => {
-        // Mark as loaded even on error to prevent endless loading state
+        if (!isMountedRef.current) return;
+        
         console.error(`Failed to load image: ${src}`);
         newImagesLoaded[index] = true;
-        setImagesLoaded(newImagesLoaded);
+        loadedCount++;
         
-        // Check if all image attempts are complete
-        if (newImagesLoaded.every(loaded => loaded)) {
-          setAllImagesLoaded(true);
+        // Update state only when all image attempts are complete
+        if (loadedCount === images.length) {
+          setImagesLoaded(newImagesLoaded);
+          setAllImagesPreloaded(true);
         }
       };
     });
-  }, [images, imagesLoaded]);
-  
-  // Set up slideshow transition when images are loaded
-  useEffect(() => {
-    // Don't start transitions until images are loaded
-    if (!allImagesLoaded) return;
     
-    // Clear any existing timers
+    // Set a timeout to proceed even if not all images have loaded
+    const timeoutId = setTimeout(() => {
+      if (!isMountedRef.current) return;
+      if (!allImagesPreloaded) {
+        console.log("Proceeding with slideshow despite not all images loaded");
+        setAllImagesPreloaded(true);
+      }
+    }, 3000); // Wait max 3 seconds before proceeding anyway
+    
+    return () => {
+      clearTimeout(timeoutId);
+      isMountedRef.current = false;
+    };
+  }, [images, imagesLoaded, allImagesPreloaded]);
+  
+  // Set up slideshow transition
+  useEffect(() => {
+    // Don't start transitions until at least the first image is available
+    if (!allImagesPreloaded || !images || images.length === 0) return;
+    
+    // Clean up any existing timers
     if (timerRef.current) window.clearTimeout(timerRef.current);
     if (intervalRef.current) window.clearInterval(intervalRef.current);
     
     // Special case: if we have only one image, don't set up transitions
-    if (!images || images.length <= 1) return;
+    if (images.length <= 1) return;
 
     // Function to handle transitions
     const handleTransition = () => {
@@ -91,6 +111,8 @@ export function BackgroundSlideshow({
       
       // After transition completes, update to next image
       timerRef.current = window.setTimeout(() => {
+        if (!isMountedRef.current) return;
+        
         const newCurrentIndex = nextIndex;
         const newNextIndex = (nextIndex + 1) % images.length;
         
@@ -108,23 +130,21 @@ export function BackgroundSlideshow({
       if (timerRef.current) window.clearTimeout(timerRef.current);
       if (intervalRef.current) window.clearInterval(intervalRef.current);
     };
-  }, [allImagesLoaded, images, duration, transition, nextIndex]);
+  }, [allImagesPreloaded, images, duration, transition, nextIndex]);
 
-  // Show loading state if no images are available
+  // Clean up on unmount
+  useEffect(() => {
+    return () => {
+      isMountedRef.current = false;
+      if (timerRef.current) window.clearTimeout(timerRef.current);
+      if (intervalRef.current) window.clearInterval(intervalRef.current);
+    };
+  }, []);
+  
+  // Handle empty image array
   if (!images || images.length === 0) {
     return (
-      <div className="absolute inset-0 bg-background/50 backdrop-blur-sm flex items-center justify-center">
-        <Spinner size="lg" />
-      </div>
-    );
-  }
-  
-  // Show loading indicator if images aren't loaded yet
-  if (!allImagesLoaded) {
-    return (
-      <div className="absolute inset-0 bg-background/50 backdrop-blur-sm flex items-center justify-center">
-        <Spinner size="lg" />
-      </div>
+      <div className="absolute inset-0 bg-background/50 backdrop-blur-sm"></div>
     );
   }
   
