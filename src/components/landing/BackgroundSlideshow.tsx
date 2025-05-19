@@ -13,45 +13,65 @@ export function BackgroundSlideshow({
   images,
   duration = 10000, // 10 seconds between transitions
   transition = 2000, // 2 seconds for the transition effect
-  overlayOpacity = 0.5, // Changed from 0.7 to 0.5 for lighter overlay
+  overlayOpacity = 0.5,
 }: BackgroundSlideshowProps) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [nextIndex, setNextIndex] = useState(1);
   const [isTransitioning, setIsTransitioning] = useState(false);
+  const [imagesLoaded, setImagesLoaded] = useState<boolean[]>([]);
   const [allImagesLoaded, setAllImagesLoaded] = useState(false);
   const timerRef = useRef<number | null>(null);
   const intervalRef = useRef<number | null>(null);
 
-  // Preload all images before starting the slideshow
+  // Initial load state setup
   useEffect(() => {
     if (!images || images.length === 0) return;
     
-    let loadedImages = 0;
-    const totalImages = images.length;
+    // Initialize the loaded state array with false for each image
+    setImagesLoaded(new Array(images.length).fill(false));
     
-    // Preload images
-    const imagePromises = images.map(src => {
-      return new Promise<void>((resolve, reject) => {
-        const img = new Image();
-        img.src = src;
-        img.onload = () => {
-          loadedImages++;
-          if (loadedImages === totalImages) {
-            setAllImagesLoaded(true);
-          }
-          resolve();
-        };
-        img.onerror = (error) => {
-          console.error(`Failed to load image: ${src}`, error);
-          resolve(); // Still count as processed even if error
-        };
-      });
-    });
-    
-    Promise.all(imagePromises).then(() => {
-      setAllImagesLoaded(true);
-    });
+    // Reset loaded state when image array changes
+    return () => {
+      setAllImagesLoaded(false);
+    };
   }, [images]);
+
+  // Preload all images
+  useEffect(() => {
+    if (!images || images.length === 0) return;
+    
+    const newImagesLoaded = [...imagesLoaded];
+    
+    // Preload each image
+    images.forEach((src, index) => {
+      if (newImagesLoaded[index]) return; // Skip already loaded images
+      
+      const img = new Image();
+      img.src = src;
+      
+      img.onload = () => {
+        newImagesLoaded[index] = true;
+        setImagesLoaded(newImagesLoaded);
+        
+        // Check if all images are loaded
+        if (newImagesLoaded.every(loaded => loaded)) {
+          setAllImagesLoaded(true);
+        }
+      };
+      
+      img.onerror = () => {
+        // Mark as loaded even on error to prevent endless loading state
+        console.error(`Failed to load image: ${src}`);
+        newImagesLoaded[index] = true;
+        setImagesLoaded(newImagesLoaded);
+        
+        // Check if all image attempts are complete
+        if (newImagesLoaded.every(loaded => loaded)) {
+          setAllImagesLoaded(true);
+        }
+      };
+    });
+  }, [images, imagesLoaded]);
   
   // Set up slideshow transition when images are loaded
   useEffect(() => {
@@ -90,19 +110,19 @@ export function BackgroundSlideshow({
     };
   }, [allImagesLoaded, images, duration, transition, nextIndex]);
 
-  // Show loading state if images aren't loaded yet
-  if (!allImagesLoaded) {
+  // Show loading state if no images are available
+  if (!images || images.length === 0) {
     return (
-      <div className="absolute inset-0 bg-background flex items-center justify-center">
+      <div className="absolute inset-0 bg-background/50 backdrop-blur-sm flex items-center justify-center">
         <Spinner size="lg" />
       </div>
     );
   }
-
-  // Show loading state if no images are available
-  if (!images || images.length === 0) {
+  
+  // Show loading indicator if images aren't loaded yet
+  if (!allImagesLoaded) {
     return (
-      <div className="absolute inset-0 bg-background flex items-center justify-center">
+      <div className="absolute inset-0 bg-background/50 backdrop-blur-sm flex items-center justify-center">
         <Spinner size="lg" />
       </div>
     );

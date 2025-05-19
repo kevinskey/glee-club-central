@@ -1,12 +1,12 @@
 
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { BackgroundSlideshow } from "@/components/landing/BackgroundSlideshow";
 import { HeroContent } from "@/components/landing/hero/HeroContent";
 import { HeroSeal } from "@/components/landing/hero/HeroSeal";
 import { useSiteImages } from "@/hooks/useSiteImages";
+import { Spinner } from "@/components/ui/spinner";
 
 export function EnhancedHeroSection() {
-  const [imagesLoaded, setImagesLoaded] = useState(false);
   const { images, isLoading } = useSiteImages("hero");
   
   // Default hero images if no custom ones are set
@@ -22,18 +22,14 @@ export function EnhancedHeroSection() {
   const heroImageUrls = (!isLoading && images && images.length > 0)
     ? images.map(img => img.file_url)
     : defaultHeroImages;
-    
-  // Set images loaded state once images are ready
-  useEffect(() => {
-    if (!isLoading) {
-      setImagesLoaded(true);
-    }
-  }, [isLoading]);
 
   return (
     <section className="relative min-h-[500px] md:min-h-[600px] lg:min-h-[700px] flex items-center justify-center overflow-hidden">
-      {/* Only render the slideshow when images are ready */}
-      {imagesLoaded && (
+      {isLoading ? (
+        <div className="absolute inset-0 flex items-center justify-center bg-background/50">
+          <Spinner size="lg" />
+        </div>
+      ) : (
         <BackgroundSlideshow 
           images={heroImageUrls} 
           overlayOpacity={0.5} 
