@@ -25,7 +25,7 @@ export function BackgroundSlideshow({
   const intervalRef = useRef<number | null>(null);
   const isMountedRef = useRef(true);
 
-  // Preload images on mount and when images array changes
+  // Preload images and track loading status
   useEffect(() => {
     if (!images || images.length === 0) return;
     

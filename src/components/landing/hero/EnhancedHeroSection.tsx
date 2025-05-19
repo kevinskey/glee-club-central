@@ -29,11 +29,27 @@ export function EnhancedHeroSection() {
       // Give a slight delay before hiding loading indicator to ensure smooth transition
       const timer = setTimeout(() => {
         setIsLoading(false);
-      }, 300);
+      }, 500);
       
       return () => clearTimeout(timer);
     }
   }, [imagesLoading]);
+  
+  // Preload images to avoid flashing
+  useEffect(() => {
+    const preloadImages = () => {
+      const imagesToPreload = defaultHeroImages.concat(
+        (images || []).map(img => img.file_url)
+      );
+      
+      imagesToPreload.forEach(src => {
+        const img = new Image();
+        img.src = src;
+      });
+    };
+    
+    preloadImages();
+  }, [images]);
   
   // Always use default images initially, then use custom ones if they exist and are loaded
   const heroImageUrls = (images && images.length > 0)

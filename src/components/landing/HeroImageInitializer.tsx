@@ -1,24 +1,25 @@
 
 import React, { useEffect, useState, useRef } from 'react';
 import { seedDefaultHeroImages } from '@/utils/siteImages';
+import { toast } from "sonner";
 
 // This component will run once to ensure we have hero images on first load
 export const HeroImageInitializer: React.FC = () => {
   const [isInitialized, setIsInitialized] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const isMountedRef = useRef(true);
   
   useEffect(() => {
     // Track component mount state
     isMountedRef.current = true;
     
-    // Check localStorage to prevent multiple initializations
-    const heroImagesInitialized = localStorage.getItem('heroImagesInitialized');
-    
-    // Always run initialization to ensure we have the latest images
+    // Initialize hero images
     const initializeHeroImages = async () => {
       try {
         console.log('Initializing hero images...');
-        // Add the new hero images to defaultHeroImages in seedDefaultHeroImages
+        setIsLoading(true);
+        
+        // Add the default hero images
         await seedDefaultHeroImages([
           "/lovable-uploads/c69d3562-4bdc-4e42-9415-aefdd5f573e8.png",
           "/lovable-uploads/65c0e4fd-f960-4e32-a3cd-dc46f81be743.png",
@@ -31,10 +32,17 @@ export const HeroImageInitializer: React.FC = () => {
         if (isMountedRef.current) {
           console.log('Hero images initialized successfully');
           setIsInitialized(true);
+          setIsLoading(false);
           localStorage.setItem('heroImagesInitialized', 'true');
         }
       } catch (error) {
         console.error("Error initializing hero images:", error);
+        if (isMountedRef.current) {
+          setIsLoading(false);
+          toast.error("Could not load hero images", { 
+            description: "Please refresh the page to try again" 
+          });
+        }
       }
     };
     
@@ -43,7 +51,7 @@ export const HeroImageInitializer: React.FC = () => {
       if (isMountedRef.current) {
         initializeHeroImages();
       }
-    }, 500);
+    }, 300);
     
     return () => {
       // Mark component as unmounted to prevent state updates
