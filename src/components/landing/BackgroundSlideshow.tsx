@@ -14,97 +14,91 @@ export function BackgroundSlideshow({
   transition = 2000, // 2 seconds for the transition effect
   overlayOpacity = 0.5,
 }: BackgroundSlideshowProps) {
+  // Initialize with first image already showing
   const [currentIndex, setCurrentIndex] = useState(0);
   const [nextIndex, setNextIndex] = useState(1);
   const [isTransitioning, setIsTransitioning] = useState(false);
-  const [imagesLoaded, setImagesLoaded] = useState<boolean[]>([]);
-  const [allImagesPreloaded, setAllImagesPreloaded] = useState(false);
+  const [loadedImages, setLoadedImages] = useState<Record<string, boolean>>({});
+  const [initialLoadComplete, setInitialLoadComplete] = useState(false);
+  
   const timerRef = useRef<number | null>(null);
   const intervalRef = useRef<number | null>(null);
   const isMountedRef = useRef(true);
 
-  // Reset state when image array changes
+  // Preload images on mount and when images array changes
   useEffect(() => {
     if (!images || images.length === 0) return;
     
-    // Initialize the loaded state array with false for each image
-    setImagesLoaded(new Array(images.length).fill(false));
-    setAllImagesPreloaded(false);
-    
-    return () => {
-      // Clean up any timers when unmounting
-      if (timerRef.current) window.clearTimeout(timerRef.current);
-      if (intervalRef.current) window.clearInterval(intervalRef.current);
-    };
-  }, [images]);
-
-  // Preload all images immediately
-  useEffect(() => {
-    if (!images || images.length === 0) return;
-    
-    const newImagesLoaded = [...imagesLoaded];
+    const newLoadedImages: Record<string, boolean> = {};
     let loadedCount = 0;
+    const totalImages = images.length;
     
-    // Preload each image
-    images.forEach((src, index) => {
+    // Mark component as mounted
+    isMountedRef.current = true;
+    
+    // Function to mark image as loaded
+    const markImageLoaded = (src: string) => {
+      if (!isMountedRef.current) return;
+      
+      newLoadedImages[src] = true;
+      loadedCount++;
+      
+      if (loadedCount >= Math.min(2, totalImages)) {
+        // Once at least first two images are loaded (or all if less than 2), start slideshow
+        setLoadedImages(prev => ({ ...prev, ...newLoadedImages }));
+        setInitialLoadComplete(true);
+      }
+      
+      if (loadedCount === totalImages) {
+        // All images loaded
+        setLoadedImages(prev => ({ ...prev, ...newLoadedImages }));
+      }
+    };
+    
+    // Preload all images
+    images.forEach((src) => {
+      // Skip if already loaded
+      if (loadedImages[src]) {
+        loadedCount++;
+        newLoadedImages[src] = true;
+        return;
+      }
+      
       const img = new Image();
       img.src = src;
       
-      img.onload = () => {
-        if (!isMountedRef.current) return;
-        
-        newImagesLoaded[index] = true;
-        loadedCount++;
-        
-        // Update state only when all images are loaded or after a timeout
-        if (loadedCount === images.length) {
-          setImagesLoaded(newImagesLoaded);
-          setAllImagesPreloaded(true);
-        }
-      };
+      img.onload = () => markImageLoaded(src);
       
       img.onerror = () => {
-        if (!isMountedRef.current) return;
-        
         console.error(`Failed to load image: ${src}`);
-        newImagesLoaded[index] = true;
-        loadedCount++;
-        
-        // Update state only when all image attempts are complete
-        if (loadedCount === images.length) {
-          setImagesLoaded(newImagesLoaded);
-          setAllImagesPreloaded(true);
-        }
+        markImageLoaded(src);
       };
     });
     
-    // Set a timeout to proceed even if not all images have loaded
-    const timeoutId = setTimeout(() => {
+    // Safety timeout to start slideshow even if not all images load
+    const safetyTimer = setTimeout(() => {
       if (!isMountedRef.current) return;
-      if (!allImagesPreloaded) {
-        console.log("Proceeding with slideshow despite not all images loaded");
-        setAllImagesPreloaded(true);
+      if (!initialLoadComplete && loadedCount > 0) {
+        setInitialLoadComplete(true);
+        setLoadedImages(prev => ({ ...prev, ...newLoadedImages }));
       }
-    }, 3000); // Wait max 3 seconds before proceeding anyway
+    }, 2000);
     
     return () => {
-      clearTimeout(timeoutId);
       isMountedRef.current = false;
+      clearTimeout(safetyTimer);
     };
-  }, [images, imagesLoaded, allImagesPreloaded]);
+  }, [images]);
   
-  // Set up slideshow transition
+  // Set up slideshow with proper timing
   useEffect(() => {
-    // Don't start transitions until at least the first image is available
-    if (!allImagesPreloaded || !images || images.length === 0) return;
+    // Don't start the slideshow until initial load is complete
+    if (!initialLoadComplete || !images || images.length <= 1) return;
     
     // Clean up any existing timers
     if (timerRef.current) window.clearTimeout(timerRef.current);
     if (intervalRef.current) window.clearInterval(intervalRef.current);
     
-    // Special case: if we have only one image, don't set up transitions
-    if (images.length <= 1) return;
-
     // Function to handle transitions
     const handleTransition = () => {
       setIsTransitioning(true);
@@ -130,7 +124,7 @@ export function BackgroundSlideshow({
       if (timerRef.current) window.clearTimeout(timerRef.current);
       if (intervalRef.current) window.clearInterval(intervalRef.current);
     };
-  }, [allImagesPreloaded, images, duration, transition, nextIndex]);
+  }, [initialLoadComplete, images, duration, transition, nextIndex]);
 
   // Clean up on unmount
   useEffect(() => {
@@ -148,7 +142,7 @@ export function BackgroundSlideshow({
     );
   }
   
-  // Special case for single image (no transitions needed)
+  // For single image (no transitions needed)
   if (images.length === 1) {
     return (
       <div className="absolute inset-0">
@@ -167,7 +161,14 @@ export function BackgroundSlideshow({
     );
   }
 
-  // For multiple images, set up the transition between images
+  // If images aren't loaded yet, show placeholder
+  if (!initialLoadComplete) {
+    return (
+      <div className="absolute inset-0 bg-background/80"></div>
+    );
+  }
+
+  // For multiple images with transitions
   return (
     <div className="absolute inset-0 overflow-hidden">
       {/* Current Image */}

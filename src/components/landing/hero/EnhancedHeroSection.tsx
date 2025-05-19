@@ -1,11 +1,14 @@
 
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { BackgroundSlideshow } from "@/components/landing/BackgroundSlideshow";
 import { HeroContent } from "@/components/landing/hero/HeroContent";
 import { HeroSeal } from "@/components/landing/hero/HeroSeal";
 import { useSiteImages } from "@/hooks/useSiteImages";
+import { Spinner } from "@/components/ui/spinner";
 
 export function EnhancedHeroSection() {
+  const [isLoading, setIsLoading] = useState(true);
+  
   // Default hero images that we'll always use if no custom ones are set
   const defaultHeroImages = [
     "/lovable-uploads/92a39fc3-43b7-4240-982b-bff85ae2fdca.png",
@@ -16,7 +19,21 @@ export function EnhancedHeroSection() {
   ];
   
   // Fetch any custom hero images, but don't wait for them
-  const { images } = useSiteImages("hero");
+  const { images, isLoading: imagesLoading } = useSiteImages("hero");
+  
+  useEffect(() => {
+    // Set loading state based on image loading
+    if (imagesLoading) {
+      setIsLoading(true);
+    } else {
+      // Give a slight delay before hiding loading indicator to ensure smooth transition
+      const timer = setTimeout(() => {
+        setIsLoading(false);
+      }, 500);
+      
+      return () => clearTimeout(timer);
+    }
+  }, [imagesLoading]);
   
   // Always use default images initially, then use custom ones if they exist and are loaded
   const heroImageUrls = (images && images.length > 0)
@@ -31,6 +48,12 @@ export function EnhancedHeroSection() {
         duration={8000} // 8 seconds between transitions
         transition={1500} // 1.5 seconds for the transition effect
       />
+      
+      {isLoading && (
+        <div className="absolute inset-0 flex items-center justify-center z-30 bg-background/50 backdrop-blur-sm">
+          <Spinner size="lg" />
+        </div>
+      )}
       
       {/* Content overlay with Spelman Glee Club branding */}
       <div className="relative z-10 container mx-auto px-4 py-12 md:py-20">

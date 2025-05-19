@@ -5,44 +5,43 @@ import { toast } from 'sonner';
 
 // This component will run once to ensure we have hero images on first load
 export const HeroImageInitializer: React.FC = () => {
-  const [isInitializing, setIsInitializing] = useState(false);
-  const [initialized, setInitialized] = useState(false);
+  const [isInitialized, setIsInitialized] = useState(false);
   const isMountedRef = useRef(true);
-  const attemptedRef = useRef(false);
   
   useEffect(() => {
     // Track component mount state
     isMountedRef.current = true;
     
+    // Check localStorage to prevent multiple initializations
+    const heroImagesInitialized = localStorage.getItem('heroImagesInitialized');
+    
+    if (heroImagesInitialized === 'true') {
+      setIsInitialized(true);
+      return;
+    }
+    
     const initializeHeroImages = async () => {
-      // Only try once per component lifecycle
-      if (initialized || isInitializing || attemptedRef.current) return;
-      
       try {
-        attemptedRef.current = true;
-        setIsInitializing(true);
-        
-        const result = await seedDefaultHeroImages();
+        await seedDefaultHeroImages();
         
         // Only update state if component is still mounted
         if (isMountedRef.current) {
-          setInitialized(true);
-          setIsInitializing(false);
+          setIsInitialized(true);
+          localStorage.setItem('heroImagesInitialized', 'true');
         }
       } catch (error) {
         console.error("Error initializing hero images:", error);
         
         // Only update state if component is still mounted
         if (isMountedRef.current) {
-          setIsInitializing(false);
-          // Don't show errors to users on the landing page
+          // Silent failure, no user-facing errors
         }
       }
     };
     
     // Initialize with a slight delay to prevent race conditions
     const timeoutId = setTimeout(() => {
-      if (isMountedRef.current) {
+      if (isMountedRef.current && !isInitialized) {
         initializeHeroImages();
       }
     }, 500);
@@ -52,7 +51,7 @@ export const HeroImageInitializer: React.FC = () => {
       isMountedRef.current = false;
       clearTimeout(timeoutId);
     };
-  }, [initialized, isInitializing]);
+  }, [isInitialized]);
   
   // This component doesn't render anything
   return null;

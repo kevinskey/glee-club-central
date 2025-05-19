@@ -7,30 +7,29 @@ export function useSiteImages(category?: string) {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
   const isMountedRef = useRef(true);
-  const fetchAttemptedRef = useRef(false);
+  const requestIdRef = useRef(0);
   
   const loadImages = useCallback(async () => {
-    // Prevent multiple fetch attempts and check if component is still mounted
-    if (fetchAttemptedRef.current || !isMountedRef.current) return;
+    // Generate a unique request ID to avoid race conditions
+    const requestId = ++requestIdRef.current;
     
-    fetchAttemptedRef.current = true;
     setIsLoading(true);
     
     try {
       const data = await listSiteImages(category);
       
-      if (isMountedRef.current) {
+      // Only update state if this is the most recent request and component is still mounted
+      if (isMountedRef.current && requestId === requestIdRef.current) {
         setImages(data);
         setError(null);
+        setIsLoading(false);
       }
     } catch (err) {
       console.error("Error loading site images:", err);
       
-      if (isMountedRef.current) {
+      // Only update state if this is the most recent request and component is still mounted
+      if (isMountedRef.current && requestId === requestIdRef.current) {
         setError(err instanceof Error ? err : new Error(String(err)));
-      }
-    } finally {
-      if (isMountedRef.current) {
         setIsLoading(false);
       }
     }
@@ -39,7 +38,6 @@ export function useSiteImages(category?: string) {
   useEffect(() => {
     // Set the mounted ref
     isMountedRef.current = true;
-    fetchAttemptedRef.current = false;
     
     // Load images on mount with a slight delay to prevent race conditions
     const timeoutId = setTimeout(() => {
@@ -56,31 +54,10 @@ export function useSiteImages(category?: string) {
   }, [loadImages]);
   
   // Refresh function that forces a new fetch
-  const refreshImages = useCallback(async () => {
+  const refreshImages = useCallback(() => {
     if (!isMountedRef.current) return;
-    
-    setIsLoading(true);
-    fetchAttemptedRef.current = false;
-    
-    try {
-      const data = await listSiteImages(category);
-      
-      if (isMountedRef.current) {
-        setImages(data);
-        setError(null);
-      }
-    } catch (err) {
-      console.error("Error refreshing site images:", err);
-      
-      if (isMountedRef.current) {
-        setError(err instanceof Error ? err : new Error(String(err)));
-      }
-    } finally {
-      if (isMountedRef.current) {
-        setIsLoading(false);
-      }
-    }
-  }, [category]);
+    loadImages();
+  }, [loadImages]);
   
   return {
     images,
