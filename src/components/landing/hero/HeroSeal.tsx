@@ -3,12 +3,14 @@ import React from "react";
 
 export function HeroSeal() {
   return (
-    <div className="hidden md:block absolute bottom-4 right-6 md:bottom-6 md:right-8 lg:bottom-8 lg:right-10 xl:right-12 z-10 w-10 sm:w-12 md:w-14 lg:w-16 xl:w-20 animate-fade-in">
-      <img 
-        src="/lovable-uploads/9a044e72-80dc-40a6-b716-2d5c2d35b878.png" 
-        alt="Spelman Glee Club 100 Crest" 
-        className="w-full h-auto drop-shadow-lg"
-      />
+    <div className="absolute bottom-6 right-6 md:bottom-10 md:right-10 z-10 hidden md:block">
+      <div className="w-24 h-24 md:w-32 md:h-32 bg-white rounded-full flex items-center justify-center shadow-lg opacity-80 hover:opacity-100 transition-opacity">
+        <img 
+          src="/lovable-uploads/8fa96710-a03a-4033-9ee0-032306d74daa.png" 
+          alt="Spelman College Seal" 
+          className="w-20 h-20 md:w-28 md:h-28 object-contain"
+        />
+      </div>
     </div>
   );
 }

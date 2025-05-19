@@ -1,12 +1,17 @@
 
-import React from "react";
+import React, { useEffect } from "react";
 import { BackgroundSlideshow } from "@/components/landing/BackgroundSlideshow";
 import { HeroContent } from "@/components/landing/hero/HeroContent";
 import { HeroSeal } from "@/components/landing/hero/HeroSeal";
 import { useSiteImages } from "@/hooks/useSiteImages";
 
 export function EnhancedHeroSection() {
-  const { images, isLoading } = useSiteImages("hero");
+  const { images, isLoading, refreshImages } = useSiteImages("hero");
+  
+  // Refresh images on mount to ensure we have the latest images
+  useEffect(() => {
+    refreshImages();
+  }, []);
   
   // Default hero images if no custom ones are set
   const defaultHeroImages = [
@@ -28,9 +33,11 @@ export function EnhancedHeroSection() {
       <BackgroundSlideshow 
         images={heroImageUrls} 
         overlayOpacity={0.5} 
+        duration={8000} // 8 seconds between transitions
+        transition={1500} // 1.5 seconds for the transition effect
       />
       
-      {/* Content overlay */}
+      {/* Content overlay with Spelman Glee Club branding */}
       <div className="relative z-10 container mx-auto px-4 py-12 md:py-20">
         <HeroContent />
       </div>
