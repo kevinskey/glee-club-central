@@ -28,6 +28,8 @@ const LandingPage = () => {
 
   return (
     <>
+      {/* Add the initializer component to ensure images are loaded */}
+      <HeroImageInitializer />
       <AnnouncementBanner 
         message="Welcome to the Spelman College Glee Club website" 
         link={{ text: "Learn more", url: "/about" }}

@@ -1,4 +1,3 @@
-
 import { createBrowserRouter, Navigate } from 'react-router-dom';
 import { Suspense, lazy } from 'react';
 
@@ -67,7 +66,7 @@ export const router = createBrowserRouter([
         children: [
           {
             index: true,
-            element: <LandingPage />, // Ensuring LandingPage is used for the root route
+            element: <LandingPage />, // Ensuring consistent use of LandingPage
           },
           {
             path: 'about',
