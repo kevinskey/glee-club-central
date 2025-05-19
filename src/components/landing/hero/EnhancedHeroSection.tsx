@@ -1,17 +1,13 @@
 
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { BackgroundSlideshow } from "@/components/landing/BackgroundSlideshow";
 import { HeroContent } from "@/components/landing/hero/HeroContent";
 import { HeroSeal } from "@/components/landing/hero/HeroSeal";
 import { useSiteImages } from "@/hooks/useSiteImages";
 
 export function EnhancedHeroSection() {
-  const { images, isLoading, refreshImages } = useSiteImages("hero");
-  
-  // Refresh images on mount to ensure we have the latest images
-  useEffect(() => {
-    refreshImages();
-  }, [refreshImages]);
+  const [imagesLoaded, setImagesLoaded] = useState(false);
+  const { images, isLoading } = useSiteImages("hero");
   
   // Default hero images if no custom ones are set
   const defaultHeroImages = [
@@ -23,19 +19,28 @@ export function EnhancedHeroSection() {
   ];
   
   // Use any hero images from the database, otherwise use the defaults
-  const heroImageUrls = images && images.length > 0
+  const heroImageUrls = (!isLoading && images && images.length > 0)
     ? images.map(img => img.file_url)
     : defaultHeroImages;
+    
+  // Set images loaded state once images are ready
+  useEffect(() => {
+    if (!isLoading) {
+      setImagesLoaded(true);
+    }
+  }, [isLoading]);
 
   return (
     <section className="relative min-h-[500px] md:min-h-[600px] lg:min-h-[700px] flex items-center justify-center overflow-hidden">
-      {/* Background slideshow with the glee club images */}
-      <BackgroundSlideshow 
-        images={heroImageUrls} 
-        overlayOpacity={0.5} 
-        duration={8000} // 8 seconds between transitions
-        transition={1500} // 1.5 seconds for the transition effect
-      />
+      {/* Only render the slideshow when images are ready */}
+      {imagesLoaded && (
+        <BackgroundSlideshow 
+          images={heroImageUrls} 
+          overlayOpacity={0.5} 
+          duration={8000} // 8 seconds between transitions
+          transition={1500} // 1.5 seconds for the transition effect
+        />
+      )}
       
       {/* Content overlay with Spelman Glee Club branding */}
       <div className="relative z-10 container mx-auto px-4 py-12 md:py-20">

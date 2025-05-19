@@ -18,46 +18,51 @@ export function BackgroundSlideshow({
   const [currentIndex, setCurrentIndex] = useState(0);
   const [nextIndex, setNextIndex] = useState(1);
   const [isTransitioning, setIsTransitioning] = useState(false);
-  const [imagesLoaded, setImagesLoaded] = useState<boolean[]>([]);
+  const [allImagesLoaded, setAllImagesLoaded] = useState(false);
   const timerRef = useRef<number | null>(null);
   const intervalRef = useRef<number | null>(null);
 
-  // Track image loading status
+  // Preload all images before starting the slideshow
   useEffect(() => {
     if (!images || images.length === 0) return;
     
-    // Initialize image loading status array
-    setImagesLoaded(Array(images.length).fill(false));
+    let loadedImages = 0;
+    const totalImages = images.length;
     
     // Preload images
-    images.forEach((src, index) => {
-      const img = new Image();
-      img.src = src;
-      img.onload = () => {
-        setImagesLoaded(prev => {
-          const newStatus = [...prev];
-          newStatus[index] = true;
-          return newStatus;
-        });
-      };
-      img.onerror = () => {
-        console.error(`Failed to load image: ${src}`);
-      };
+    const imagePromises = images.map(src => {
+      return new Promise<void>((resolve, reject) => {
+        const img = new Image();
+        img.src = src;
+        img.onload = () => {
+          loadedImages++;
+          if (loadedImages === totalImages) {
+            setAllImagesLoaded(true);
+          }
+          resolve();
+        };
+        img.onerror = (error) => {
+          console.error(`Failed to load image: ${src}`, error);
+          resolve(); // Still count as processed even if error
+        };
+      });
+    });
+    
+    Promise.all(imagePromises).then(() => {
+      setAllImagesLoaded(true);
     });
   }, [images]);
   
-  // Reset component when images change
+  // Set up slideshow transition when images are loaded
   useEffect(() => {
+    // Don't start transitions until images are loaded
+    if (!allImagesLoaded) return;
+    
     // Clear any existing timers
     if (timerRef.current) window.clearTimeout(timerRef.current);
     if (intervalRef.current) window.clearInterval(intervalRef.current);
     
-    // Reset state with the first image
-    setCurrentIndex(0);
-    setNextIndex(images && images.length > 1 ? 1 : 0);
-    setIsTransitioning(false);
-    
-    // Don't set up transitions if we don't have enough images
+    // Special case: if we have only one image, don't set up transitions
     if (!images || images.length <= 1) return;
 
     // Function to handle transitions
@@ -83,7 +88,16 @@ export function BackgroundSlideshow({
       if (timerRef.current) window.clearTimeout(timerRef.current);
       if (intervalRef.current) window.clearInterval(intervalRef.current);
     };
-  }, [images, duration, transition]);
+  }, [allImagesLoaded, images, duration, transition, nextIndex]);
+
+  // Show loading state if images aren't loaded yet
+  if (!allImagesLoaded) {
+    return (
+      <div className="absolute inset-0 bg-background flex items-center justify-center">
+        <Spinner size="lg" />
+      </div>
+    );
+  }
 
   // Show loading state if no images are available
   if (!images || images.length === 0) {
