@@ -2,6 +2,7 @@
 import React, { useEffect } from "react";
 import { Outlet, Navigate, useLocation } from "react-router-dom";
 import { Sidebar } from "@/components/layout/Sidebar";
+import { ConsolidatedHeader } from "@/components/layout/ConsolidatedHeader";
 import { useAuth } from "@/contexts/AuthContext";
 import { Spinner } from "@/components/ui/spinner";
 import { SidebarProvider } from "@/components/ui/sidebar";
@@ -37,6 +38,7 @@ const DashboardLayout: React.FC = () => {
   return (
     <SidebarProvider>
       <div className="min-h-screen flex flex-col bg-background w-full">
+        <ConsolidatedHeader />
         <div className="flex-1 flex flex-col md:flex-row">
           {/* Only show sidebar on desktop */}
           <div className="hidden md:block">

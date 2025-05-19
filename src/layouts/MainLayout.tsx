@@ -1,7 +1,7 @@
 
 import React, { useEffect } from 'react';
 import { Outlet, useLocation } from 'react-router-dom';
-import { Header } from "@/components/landing/Header";
+import { ConsolidatedHeader } from "@/components/layout/ConsolidatedHeader";
 import { Footer } from "@/components/landing/Footer";
 import { useIsMobile } from '@/hooks/use-mobile';
 import { MobileBottomNav } from '@/components/layout/MobileBottomNav';
@@ -23,7 +23,7 @@ export const MainLayout = () => {
 
   return (
     <div className="flex flex-col min-h-screen">
-      <Header initialShowNewsFeed={false} />
+      <ConsolidatedHeader />
       <main className={`flex-1 ${isMobile && showBottomNav ? 'pb-16' : ''}`}>
         <div className={isMobile ? "w-full" : "mobile-container"}>
           <Outlet />

@@ -1,6 +1,6 @@
 
 import React from "react";
-import { Header } from "@/components/landing/Header";
+import { ConsolidatedHeader } from "@/components/layout/ConsolidatedHeader";
 import { Footer } from "@/components/landing/Footer";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -16,7 +16,7 @@ export default function FanPage() {
   
   return (
     <div className="flex min-h-screen flex-col">
-      <Header initialShowNewsFeed={false} />
+      <ConsolidatedHeader />
       <main className="flex-1 bg-white dark:bg-gray-950">
         <div className="container mx-auto px-4 py-12">
           <div className="max-w-4xl mx-auto">
