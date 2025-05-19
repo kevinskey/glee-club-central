@@ -3,16 +3,12 @@ import React from 'react';
 import ReactDOM from 'react-dom/client';
 import { ThemeProvider } from "@/providers/ThemeProvider";
 import ErrorBoundary from "./components/ErrorBoundary";
-import App from './App';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { registerServiceWorker } from './registerServiceWorker';
 import './index.css';
 import { createClient } from '@supabase/supabase-js';
 import { SessionContextProvider } from '@supabase/auth-helpers-react';
-import { 
-  createBrowserRouter, 
-  RouterProvider 
-} from 'react-router-dom';
+import { RouterProvider } from 'react-router-dom';
 import { router } from './router';
 
 // Create a client
