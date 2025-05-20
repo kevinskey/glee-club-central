@@ -1,5 +1,5 @@
 
-import * as React from 'react';
+import React from 'react';
 import ReactDOM from 'react-dom/client';
 import { ThemeProvider } from "@/providers/ThemeProvider";
 import ErrorBoundary from "./components/ErrorBoundary";
@@ -9,7 +9,7 @@ import './index.css';
 import { createClient } from '@supabase/supabase-js';
 import { SessionContextProvider } from '@supabase/auth-helpers-react';
 import { RouterProvider } from 'react-router-dom';
-import { router } from './router'; // Import directly from router.tsx
+import { router } from './router'; // Direct import from router.tsx
 
 // Create a client
 const queryClient = new QueryClient();
