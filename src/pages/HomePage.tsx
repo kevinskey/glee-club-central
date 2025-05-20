@@ -1,7 +1,7 @@
 
 import React from 'react';
-import LandingPage from './LandingPage';
+import StaticLandingPage from './StaticLandingPage';
 
 export default function HomePage() {
-  return <LandingPage />;
+  return <StaticLandingPage />;
 }

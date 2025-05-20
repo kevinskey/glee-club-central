@@ -1,37 +1,9 @@
 
-import { Spinner } from "@/components/ui/spinner";
-import { AuthProvider } from "@/contexts/AuthContext";
-import { PWAInstallPrompt } from "@/components/ui/pwa-install-prompt";
+import React from "react";
 import { Outlet } from "react-router-dom";
-import React, { Suspense } from "react";
 
 function App() {
-  return (
-    <AuthProvider>
-      {({ isLoading }) => {
-        if (isLoading) {
-          return (
-            <div className="flex justify-center items-center h-screen">
-              <Spinner size="lg" />
-            </div>
-          );
-        }
-
-        return (
-          <>
-            <Suspense fallback={
-              <div className="flex justify-center items-center h-screen">
-                <Spinner size="lg" />
-              </div>
-            }>
-              <Outlet />
-            </Suspense>
-            <PWAInstallPrompt />
-          </>
-        );
-      }}
-    </AuthProvider>
-  );
+  return <Outlet />;
 }
 
 export default App;

@@ -1,18 +1,14 @@
 
 import * as React from 'react';
 import { createBrowserRouter } from 'react-router-dom';
-import App from './App';
-import { mainRoutes } from './routes/mainRoutes';
-import { dashboardRoutes } from './routes/dashboardRoutes';
-import { authRoutes } from './routes/authRoutes';
-import { adminRoutes } from './routes/adminRoutes';
 import ErrorBoundary from "./components/ErrorBoundary";
+import StaticLandingPage from './pages/StaticLandingPage';
 
-// Creating a router with properly configured error boundaries
+// Creating a simplified router with no auth checks or complex layouts
 export const router = createBrowserRouter([
   {
     path: '/',
-    element: <App />,
+    element: <StaticLandingPage />,
     errorElement: (
       <ErrorBoundary>
         <div className="flex items-center justify-center min-h-screen p-4">
@@ -31,11 +27,5 @@ export const router = createBrowserRouter([
         </div>
       </ErrorBoundary>
     ),
-    children: [
-      mainRoutes,
-      dashboardRoutes,
-      ...authRoutes,
-      adminRoutes
-    ],
   },
 ]);
