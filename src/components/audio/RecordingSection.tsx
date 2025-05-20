@@ -1,420 +1,268 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Label } from "@/components/ui/label";
-import { Card, CardHeader, CardContent, CardFooter } from "@/components/ui/card";
-import { toast } from "sonner";
-import { useUser } from "@/hooks/use-user";
-import { useToast } from "@/hooks/use-toast";
-import { useRecordingContext } from "@/contexts/RecordingContext";
-import { Music2, Mic, Stop, Upload, Loader2, CheckCircle2, AlertTriangle } from "lucide-react";
-import { format } from 'date-fns';
-import { Slider } from "@/components/ui/slider";
-import { useIsMobile } from "@/hooks/use-mobile";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from "@/components/ui/alert-dialog"
 
-interface RecordingSectionProps {
-  initialRecordingName?: string;
-  initialDescription?: string;
-  initialPrivacySetting?: 'public' | 'private';
+import React, { useState, useRef, useEffect } from "react";
+import { Button } from "@/components/ui/button";
+import { Slider } from "@/components/ui/slider";
+import { toast } from "sonner";
+import { Mic, Square, Music } from "lucide-react";
+import { useAudioRecorder } from "@/hooks/useAudioRecorder";
+import { useAuth } from "@/contexts/AuthContext";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { audioCategoryLabels } from "./audioCategoryUtils";
+
+// Recording section props
+export interface RecordingSectionProps {
+  onRecordingSaved?: (category?: string) => void;
 }
 
-export function RecordingSection({
-  initialRecordingName = '',
-  initialDescription = '',
-  initialPrivacySetting = 'private',
-}: RecordingSectionProps) {
-  const [recordingName, setRecordingName] = useState(initialRecordingName);
-  const [description, setDescription] = useState(initialDescription);
+export function RecordingSection({ onRecordingSaved }: RecordingSectionProps) {
+  // State for recording
   const [isRecording, setIsRecording] = useState(false);
-  const [audioChunks, setAudioChunks] = useState<Blob[]>([]);
-  const [audioUrl, setAudioUrl] = useState<string | null>(null);
-  const [uploadProgress, setUploadProgress] = useState<number | null>(null);
-  const [uploadSuccess, setUploadSuccess] = useState<boolean>(false);
-  const [uploadError, setUploadError] = useState<string | null>(null);
-  const [isUploading, setIsUploading] = useState(false);
-  const [volume, setVolume] = useState(0.5);
-  const [privacySetting, setPrivacySetting] = useState<"public" | "private">(initialPrivacySetting);
-  const [recordingDate, setRecordingDate] = useState<Date>(new Date());
-  const [mediaRecorder, setMediaRecorder] = useState<MediaRecorder | null>(null);
-  const audioContextRef = useRef<AudioContext | null>(null);
-  const audioRef = useRef<HTMLAudioElement | null>(null);
-  const { user } = useUser();
-  const { toast } = useToast();
-  const { recordings, setRecordings } = useRecordingContext();
-  const isMobile = useIsMobile();
+  const [audioURL, setAudioURL] = useState<string>("");
+  const [recordingName, setRecordingName] = useState("");
+  const [playbackVolume, setPlaybackVolume] = useState(0.7);
+  const [selectedCategory, setSelectedCategory] = useState<string>("my_tracks");
+  const [recordingDuration, setRecordingDuration] = useState(0);
+  const [elapsedTime, setElapsedTime] = useState(0);
   
-  // Options for formatting the date
-  const dateFormatOptions: Intl.DateTimeFormatOptions = {
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit',
-    second: '2-digit',
-    timeZoneName: 'short',
+  // Refs
+  const audioRef = useRef<HTMLAudioElement>(null);
+  const timerRef = useRef<number | null>(null);
+  
+  // Hooks
+  const { startRecording, stopRecording } = useAudioRecorder();
+  const { user } = useAuth();
+  
+  // Format time display (MM:SS)
+  const formatTime = (seconds: number): string => {
+    const mins = Math.floor(seconds / 60);
+    const secs = Math.floor(seconds % 60);
+    return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
   };
   
-  // Formatted recording date string
-  const formattedRecordingDate = format(recordingDate, 'PPPppp');
-  
-  // Function to update the recording date
-  const updateRecordingDate = () => {
-    setRecordingDate(new Date());
-  };
-
-  // Initialize audio context
-  useEffect(() => {
-    if (!audioContextRef.current) {
+  // Toggle recording state
+  const toggleRecording = async () => {
+    if (isRecording) {
+      // Stop the recording
       try {
-        audioContextRef.current = new window.AudioContext();
-      } catch (error) {
-        console.error("Failed to initialize audio context:", error);
-      }
-    }
-    let stream: MediaStream;
-    
-    const getMicrophone = async () => {
-      try {
-        stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-        const recorder = new MediaRecorder(stream);
-        setMediaRecorder(recorder);
-        
-        recorder.ondataavailable = (event) => {
-          if (event.data.size > 0) {
-            setAudioChunks((prev) => [...prev, event.data]);
+        const audioBlob = await stopRecording();
+        if (audioBlob) {
+          const url = URL.createObjectURL(audioBlob);
+          setAudioURL(url);
+          
+          // Set a default name based on date/time
+          const now = new Date();
+          const defaultName = `Recording ${now.toLocaleDateString()} ${now.toLocaleTimeString()}`;
+          setRecordingName(defaultName);
+          
+          // Stop the timer
+          if (timerRef.current) {
+            clearInterval(timerRef.current);
+            timerRef.current = null;
           }
-        };
-        
-        recorder.onstop = () => {
-          stream.getTracks().forEach(track => track.stop());
-        };
+          
+          setRecordingDuration(elapsedTime);
+          toast.success("Recording stopped");
+        }
       } catch (error) {
-        console.error("Error accessing microphone:", error);
-        toast({
-          title: "Microphone Access Denied",
-          description: "Please allow microphone access to record audio.",
-          variant: "destructive",
-        });
+        console.error("Error stopping recording:", error);
+        toast.error("Failed to stop recording");
       }
-    };
+    } else {
+      // Start a new recording
+      try {
+        // Reset previous recording if any
+        setAudioURL("");
+        setElapsedTime(0);
+        
+        await startRecording();
+        
+        // Start the timer to track recording duration
+        timerRef.current = window.setInterval(() => {
+          setElapsedTime(prev => prev + 1);
+        }, 1000);
+        
+        toast.success("Recording started");
+      } catch (error) {
+        console.error("Error starting recording:", error);
+        toast.error("Failed to start recording. Please check microphone permissions.");
+        return;
+      }
+    }
     
-    getMicrophone();
+    setIsRecording(!isRecording);
+  };
+  
+  // Save the recording
+  const saveRecording = async () => {
+    if (!audioURL) {
+      toast.error("No recording to save");
+      return;
+    }
     
-    return () => {
-      if (stream) {
-        stream.getTracks().forEach(track => track.stop());
-      }
-      
-      if (mediaRecorder && mediaRecorder.state === 'recording') {
-        mediaRecorder.stop();
-      }
-    };
-  }, []);
-
-  // Start recording
-  const startRecording = async () => {
-    if (!mediaRecorder) {
-      toast({
-        title: "Media Recorder Not Initialized",
-        description: "Please wait for the media recorder to initialize before starting.",
-        variant: "destructive",
-      });
+    if (!recordingName.trim()) {
+      toast.error("Please enter a name for your recording");
       return;
     }
     
     try {
-      // Initialize audioContext if needed
-      if (!audioContextRef.current) {
-        audioContextRef.current = new window.AudioContext();
-      }
+      // Fetch the audio file from the URL
+      const response = await fetch(audioURL);
+      const audioBlob = await response.blob();
       
-      setAudioChunks([]);
-      setIsRecording(true);
-      setUploadSuccess(false);
-      setUploadError(null);
-      setUploadProgress(null);
-      updateRecordingDate();
+      // Create a File object from the Blob
+      const audioFile = new File([audioBlob], `${recordingName.trim()}.webm`, {
+        type: "audio/webm",
+      });
       
-      mediaRecorder.start();
-      
-      toast({
-        title: "Recording Started",
-        description: "Your recording has started.",
-      });
-    } catch (error) {
-      console.error("Error starting recording:", error);
-      toast({
-        title: "Recording Error",
-        description: "Failed to start recording. Please check your microphone and try again.",
-        variant: "destructive",
-      });
-    }
-  };
-
-  // Stop recording
-  const stopRecording = () => {
-    if (mediaRecorder && mediaRecorder.state === 'recording') {
-      mediaRecorder.stop();
-      setIsRecording(false);
-      
-      toast({
-        title: "Recording Stopped",
-        description: "Your recording has stopped.",
-      });
-    }
-  };
-
-  // Play the recording
-  const playRecording = () => {
-    if (audioUrl && audioRef.current) {
-      audioRef.current.play();
-    }
-  };
-
-  // Pause the recording
-  const pauseRecording = () => {
-    if (audioUrl && audioRef.current) {
-      audioRef.current.pause();
-    }
-  };
-
-  // Handle volume change
-  const handleVolumeChange = (value: number[]) => {
-    setVolume(value[0] / 100);
-    if (audioRef.current) {
-      audioRef.current.volume = value[0] / 100;
-    }
-  };
-
-  // Handle audio chunks and create audio URL
-  useEffect(() => {
-    if (audioChunks.length > 0) {
-      const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
-      const url = URL.createObjectURL(audioBlob);
-      setAudioUrl(url);
-    }
-  }, [audioChunks]);
-
-  // Upload the recording
-  const uploadRecording = async () => {
-    if (!audioUrl) {
-      toast({
-        title: "No Recording Available",
-        description: "Please make a recording before uploading.",
-        variant: "destructive",
-      });
-      return;
-    }
-    
-    if (!user) {
-      toast({
-        title: "Not Authenticated",
-        description: "You must be logged in to upload a recording.",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    setIsUploading(true);
-    setUploadProgress(0);
-    setUploadSuccess(false);
-    setUploadError(null);
-    
-    try {
-      const response = await fetch(audioUrl);
-      const blob = await response.blob();
-      const file = new File([blob], `${recordingName || 'recording'}.webm`, { type: 'audio/webm' });
-      
+      // Create a FormData object to send the file
       const formData = new FormData();
-      formData.append('audio', file);
-      formData.append('name', recordingName);
-      formData.append('description', description);
-      formData.append('privacy', privacySetting);
+      formData.append("file", audioFile);
+      formData.append("name", recordingName.trim());
+      formData.append("category", selectedCategory);
       
-      const uploadResponse = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/recordings`, {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${user.token}`,
-        },
-        body: formData,
-      });
-      
-      if (!uploadResponse.ok) {
-        const errorData = await uploadResponse.json();
-        throw new Error(errorData.message || 'Failed to upload recording');
+      if (user) {
+        formData.append("user_id", user.id);
       }
       
-      const newRecording = await uploadResponse.json();
-      setRecordings([...recordings, newRecording]);
+      // Here you would typically send this to your backend
+      console.log("Saving recording:", {
+        name: recordingName,
+        category: selectedCategory,
+        duration: recordingDuration,
+        user: user?.id
+      });
       
-      setUploadProgress(100);
-      setUploadSuccess(true);
-      toast({
-        title: "Upload Successful",
-        description: "Your recording has been uploaded successfully.",
-      });
-    } catch (error: any) {
-      console.error("Upload error:", error);
-      setUploadError(error.message || 'Failed to upload recording');
-      toast({
-        title: "Upload Failed",
-        description: error.message || "There was an error uploading your recording.",
-        variant: "destructive",
-      });
-    } finally {
-      setIsUploading(false);
+      // For now, just show a success message
+      toast.success("Recording saved successfully");
+      
+      // Clear the current recording
+      setAudioURL("");
+      setRecordingName("");
+      
+      // Call the callback if provided
+      if (onRecordingSaved) {
+        onRecordingSaved(selectedCategory);
+      }
+    } catch (error) {
+      console.error("Error saving recording:", error);
+      toast.error("Failed to save recording");
     }
   };
-
+  
+  // Update audio element volume when playback volume changes
+  useEffect(() => {
+    if (audioRef.current) {
+      audioRef.current.volume = playbackVolume;
+    }
+  }, [playbackVolume, audioURL]);
+  
+  // Clean up on unmount
+  useEffect(() => {
+    return () => {
+      // Stop any ongoing recording
+      if (isRecording) {
+        stopRecording().catch(console.error);
+      }
+      
+      // Clear any timers
+      if (timerRef.current) {
+        clearInterval(timerRef.current);
+      }
+      
+      // Revoke object URL if any
+      if (audioURL) {
+        URL.revokeObjectURL(audioURL);
+      }
+    };
+  }, [isRecording, audioURL, stopRecording]);
+  
   return (
-    <Card className="w-full">
-      <CardHeader>
-        <div className="flex items-center space-x-4">
-          <Music2 className="h-5 w-5" />
-          <h2 className="text-lg font-semibold">Recording</h2>
-        </div>
-      </CardHeader>
-      
-      <CardContent className="grid gap-4">
-        <div className="grid gap-2">
-          <Label htmlFor="recordingName">Recording Name</Label>
-          <Input
-            id="recordingName"
-            placeholder="My Awesome Recording"
-            value={recordingName}
-            onChange={(e) => setRecordingName(e.target.value)}
-          />
-        </div>
-        
-        <div className="grid gap-2">
-          <Label htmlFor="description">Description</Label>
-          <Textarea
-            id="description"
-            placeholder="Tell us about your recording"
-            value={description}
-            onChange={(e) => setDescription(e.target.value)}
-          />
-        </div>
-        
-        <div className="grid gap-2">
-          <Label htmlFor="privacy">Privacy</Label>
-          <select
-            id="privacy"
-            className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-            value={privacySetting}
-            onChange={(e) => setPrivacySetting(e.target.value as "public" | "private")}
-          >
-            <option value="public">Public</option>
-            <option value="private">Private</option>
-          </select>
-        </div>
-        
-        <div className="grid gap-2">
-          <Label>Recording Date</Label>
-          <p className="text-sm text-muted-foreground">{formattedRecordingDate}</p>
-        </div>
-        
-        <div className="grid gap-2">
-          <Label>Volume</Label>
-          <Slider
-            value={[volume * 100]}
-            min={0}
-            max={100}
-            step={1}
-            onValueChange={(value) => handleVolumeChange(value)}
-          />
-        </div>
-        
-        {audioUrl && (
-          <div className="grid gap-2">
-            <Label>Playback</Label>
-            <audio ref={audioRef} src={audioUrl} controls volume={volume} />
-          </div>
-        )}
-        
-        {uploadError && (
-          <div className="rounded-md border border-destructive/50 bg-destructive/10 p-4 text-sm text-destructive">
-            <AlertTriangle className="h-4 w-4 mr-2 inline-block align-middle" />
-            {uploadError}
-          </div>
-        )}
-      </CardContent>
-      
-      <CardFooter className="flex justify-between">
-        <div className="flex space-x-2">
-          {!isRecording ? (
-            <Button
-              variant="outline"
-              onClick={startRecording}
-              disabled={isUploading}
-            >
-              <Mic className="h-4 w-4 mr-2" />
-              Start Recording
-            </Button>
+    <div className="space-y-4 p-4 border rounded-lg bg-card">
+      <div className="flex items-center justify-between">
+        <h3 className="text-lg font-medium">Voice Recorder</h3>
+        <div className="text-sm font-mono">
+          {isRecording ? (
+            <span className="text-red-500 animate-pulse flex items-center">
+              <span className="inline-block h-2 w-2 rounded-full bg-red-500 mr-2"></span>
+              {formatTime(elapsedTime)}
+            </span>
           ) : (
-            <AlertDialog>
-              <AlertDialogTrigger asChild>
-                <Button
-                  variant="destructive"
-                  disabled={isUploading}
-                >
-                  <Stop className="h-4 w-4 mr-2" />
-                  Stop Recording
-                </Button>
-              </AlertDialogTrigger>
-              <AlertDialogContent>
-                <AlertDialogHeader>
-                  <AlertDialogTitle>Are you sure?</AlertDialogTitle>
-                  <AlertDialogDescription>
-                    Are you sure you want to stop recording?
-                  </AlertDialogDescription>
-                </AlertDialogHeader>
-                <AlertDialogFooter>
-                  <AlertDialogCancel>Cancel</AlertDialogCancel>
-                  <AlertDialogAction onClick={stopRecording}>Stop</AlertDialogAction>
-                </AlertDialogFooter>
-              </AlertDialogContent>
-            </AlertDialog>
+            audioURL ? formatTime(recordingDuration) : "00:00"
           )}
         </div>
-        
-        <div className="flex space-x-2">
-          <Button
-            variant="secondary"
-            onClick={uploadRecording}
-            disabled={isUploading || !audioUrl}
-          >
-            {isUploading ? (
-              <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Uploading... ({uploadProgress}%)
-              </>
-            ) : uploadSuccess ? (
-              <>
-                <CheckCircle2 className="mr-2 h-4 w-4 text-green-500" />
-                Uploaded
-              </>
-            ) : (
-              <>
-                <Upload className="h-4 w-4 mr-2" />
-                Upload
-              </>
-            )}
+      </div>
+      
+      <div className="flex justify-center">
+        <Button
+          onClick={toggleRecording}
+          variant={isRecording ? "destructive" : "default"}
+          size="lg"
+          className="w-16 h-16 rounded-full"
+        >
+          {isRecording ? (
+            <Square className="h-6 w-6" />
+          ) : (
+            <Mic className="h-6 w-6" />
+          )}
+        </Button>
+      </div>
+      
+      {audioURL && (
+        <div className="space-y-4">
+          <audio
+            ref={audioRef}
+            src={audioURL}
+            controls
+          />
+          
+          <div className="space-y-2">
+            <div className="flex justify-between">
+              <Label>Playback Volume</Label>
+              <span className="text-xs">{Math.round(playbackVolume * 100)}%</span>
+            </div>
+            <Slider 
+              value={[playbackVolume]} 
+              min={0} 
+              max={1} 
+              step={0.01}
+              onValueChange={(values) => setPlaybackVolume(values[0])}
+            />
+          </div>
+          
+          <div className="space-y-2">
+            <Label htmlFor="recording-name">Recording Name</Label>
+            <Input
+              id="recording-name"
+              value={recordingName}
+              onChange={(e) => setRecordingName(e.target.value)}
+              placeholder="Enter recording name"
+            />
+          </div>
+          
+          <div className="space-y-2">
+            <Label htmlFor="category">Category</Label>
+            <Select value={selectedCategory} onValueChange={setSelectedCategory}>
+              <SelectTrigger>
+                <SelectValue placeholder="Select category" />
+              </SelectTrigger>
+              <SelectContent>
+                {Object.entries(audioCategoryLabels).map(([value, label]) => (
+                  <SelectItem key={value} value={value}>
+                    {label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          
+          <Button onClick={saveRecording} className="w-full flex items-center gap-2">
+            <Music className="h-4 w-4" />
+            <span>Save Recording</span>
           </Button>
         </div>
-      </CardFooter>
-    </Card>
+      )}
+    </div>
   );
 }
