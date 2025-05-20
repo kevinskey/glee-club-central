@@ -1,54 +1,31 @@
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { PageHeader } from "@/components/ui/page-header";
-import { Mic, Upload } from "lucide-react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Mic, FileAudio, Play, Upload, Volume2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import { useToast } from "@/hooks/use-toast";
+import { useAudioFiles } from "@/hooks/useAudioFiles";
+import { RecordingLibrary } from "@/components/recordings/RecordingLibrary";
+import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { useToast } from "@/components/ui/use-toast";
-
-interface Recording {
-  id: string;
-  name: string;
-  date: string;
-  voicePart: string;
-  assignmentTitle: string;
-  fileType: string;
-}
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { useAuth } from "@/contexts/AuthContext";
 
 export default function RecordingsPage() {
   const { toast } = useToast();
-  const [recordings, setRecordings] = useState<Recording[]>([
-    {
-      id: "1",
-      name: "Sarah Parker",
-      date: "2023-10-15",
-      voicePart: "Soprano 1",
-      assignmentTitle: "Ave Maria - Solo Part",
-      fileType: "audio/mp3",
-    },
-  ]);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [voicePart, setVoicePart] = useState("");
   const [assignmentTitle, setAssignmentTitle] = useState("");
   const [file, setFile] = useState<File | null>(null);
+  const { loading, audioFiles, fetchAudioFiles } = useAudioFiles();
+  const { user } = useAuth();
+
+  // Fetch audio files when component loads
+  useEffect(() => {
+    fetchAudioFiles();
+  }, [fetchAudioFiles]);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
@@ -68,44 +45,37 @@ export default function RecordingsPage() {
       return;
     }
     
-    // In a real app, this would upload the file to storage
-    const newRecording: Recording = {
-      id: `${recordings.length + 1}`,
-      name: "Your Name", // Would come from the auth context in a real app
-      date: new Date().toISOString().split("T")[0],
-      voicePart,
-      assignmentTitle,
-      fileType: file.type,
-    };
+    // In a real implementation, this would upload the file to Supabase
+    toast({
+      title: "Recording submitted!",
+      description: "Your recording has been successfully uploaded.",
+    });
     
-    setRecordings([...recordings, newRecording]);
     setIsDialogOpen(false);
     setVoicePart("");
     setAssignmentTitle("");
     setFile(null);
     
-    toast({
-      title: "Recording submitted!",
-      description: "Your recording has been successfully uploaded.",
-    });
+    // Refresh the audio files list
+    fetchAudioFiles();
   };
 
   return (
     <div>
       <PageHeader
-        title="Recording Submissions"
-        description="Upload your vocal recordings for review"
-        icon={<Mic className="h-6 w-6" />}
+        title="Recording Library"
+        description="Browse and manage vocal recordings for the Glee Club"
+        icon={<FileAudio className="h-6 w-6" />}
       />
 
       <Card className="mb-8">
-        <CardHeader>
-          <CardTitle>Submit a New Recording</CardTitle>
-          <CardDescription>
-            Record your part and upload it for review
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
+        <CardHeader className="flex flex-row items-center justify-between">
+          <div>
+            <CardTitle>Submit a New Recording</CardTitle>
+            <CardDescription>
+              Record your part or upload an existing recording
+            </CardDescription>
+          </div>
           <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
             <DialogTrigger asChild>
               <Button className="flex items-center gap-2">
@@ -116,9 +86,6 @@ export default function RecordingsPage() {
             <DialogContent className="sm:max-w-md">
               <DialogHeader>
                 <DialogTitle>Submit a recording</DialogTitle>
-                <DialogDescription>
-                  Upload your vocal recording for review by Dr. Johnson
-                </DialogDescription>
               </DialogHeader>
               <form onSubmit={handleSubmit}>
                 <div className="grid gap-4 py-4">
@@ -177,43 +144,22 @@ export default function RecordingsPage() {
               </form>
             </DialogContent>
           </Dialog>
-        </CardContent>
+        </CardHeader>
       </Card>
 
+      {/* Audio Library Section */}
       <Card>
         <CardHeader>
-          <CardTitle>Your Recording History</CardTitle>
+          <CardTitle className="flex items-center gap-2">
+            <Volume2 className="h-5 w-5" /> 
+            Recording Library
+          </CardTitle>
           <CardDescription>
-            View your previous recording submissions
+            Browse and play all available vocal recordings
           </CardDescription>
         </CardHeader>
         <CardContent>
-          {recordings.length > 0 ? (
-            <div className="space-y-4">
-              {recordings.map((recording) => (
-                <div
-                  key={recording.id}
-                  className="flex items-center justify-between rounded-lg border p-4"
-                >
-                  <div>
-                    <h3 className="text-lg font-medium">{recording.assignmentTitle}</h3>
-                    <p className="text-sm text-muted-foreground">
-                      {recording.voicePart} • Submitted on {recording.date}
-                    </p>
-                  </div>
-                  <Button variant="outline">Play</Button>
-                </div>
-              ))}
-            </div>
-          ) : (
-            <div className="flex flex-col items-center justify-center rounded-lg border border-dashed p-8 text-center">
-              <Mic className="mb-4 h-12 w-12 text-muted-foreground" />
-              <h3 className="mb-2 text-lg font-medium">No recordings yet</h3>
-              <p className="mb-4 text-sm text-muted-foreground">
-                You haven't submitted any recordings yet. Use the button above to upload your first recording.
-              </p>
-            </div>
-          )}
+          <RecordingLibrary />
         </CardContent>
       </Card>
     </div>
