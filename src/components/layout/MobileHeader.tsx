@@ -1,17 +1,14 @@
-
-import React, { useState, useRef } from "react";
+import React, { useState } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { Icons } from "@/components/Icons";
 import { Button } from "@/components/ui/button";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useAuth } from "@/contexts/AuthContext";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription } from "@/components/ui/dialog";
-import { EnhancedMetronome } from "@/components/ui/enhanced-metronome";
-import { PitchPipeDialog } from "@/components/ui/pitch-pipe-dialog";
-import { Clock, Menu, X, LogIn } from "lucide-react";
+import { Menu, X, LogIn } from "lucide-react";
 import { MobileMenu } from "@/components/landing/header/MobileMenu";
 import { useSidebar } from "@/components/ui/sidebar";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
+import { GleeTools } from "@/components/glee-tools/GleeTools";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -20,7 +17,6 @@ import {
   DropdownMenuSeparator,
   DropdownMenuProvider
 } from "@/components/ui/dropdown-menu";
-import { registerKeyboardShortcut } from "@/utils/audioUtils";
 
 export function MobileHeader() {
   const { isAuthenticated, signOut } = useAuth();
@@ -29,42 +25,9 @@ export function MobileHeader() {
   const location = useLocation();
   const { setOpenMobile, openMobile } = useSidebar();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [metronomeOpen, setMetronomeOpen] = useState(false);
-  const audioContextRef = useRef<AudioContext | null>(null);
   
   const isDashboardPath = location.pathname.startsWith("/dashboard");
   
-  // Initialize audio context on first interaction
-  const handleOpenMetronome = () => {
-    // Create AudioContext on first click if it doesn't exist
-    if (!audioContextRef.current) {
-      try {
-        audioContextRef.current = new AudioContext();
-      } catch (e) {
-        console.error("Failed to create AudioContext:", e);
-      }
-    }
-    
-    // Resume audio context if needed (for mobile browsers)
-    if (audioContextRef.current && audioContextRef.current.state === 'suspended') {
-      audioContextRef.current.resume().catch(console.error);
-    }
-    
-    setMetronomeOpen(true);
-  };
-  
-  // Register keyboard shortcuts
-  React.useEffect(() => {
-    // M key for metronome
-    const cleanupMetronome = registerKeyboardShortcut('m', () => {
-      setMetronomeOpen(prev => !prev);
-    });
-    
-    return () => {
-      cleanupMetronome();
-    };
-  }, []);
-
   const toggleMobileMenu = () => {
     setMobileMenuOpen(!mobileMenuOpen);
   };
@@ -104,30 +67,10 @@ export function MobileHeader() {
             </Link>
           </div>
           
-          {/* Right side: Login, Pitch Pipe, Metronome, theme toggle, and menu button */}
+          {/* Right side: GleeTools, theme toggle, and menu button */}
           <div className="flex items-center gap-0.5">
-            {/* Pitch Pipe */}
-            <PitchPipeDialog triggerClassName="flex items-center px-1.5 h-10 w-10" />
-            
-            {/* Metronome */}
-            <Dialog open={metronomeOpen} onOpenChange={setMetronomeOpen}>
-              <DialogTrigger asChild>
-                <Button 
-                  variant="ghost" 
-                  size="sm" 
-                  className="flex items-center px-1.5 h-10 w-10"
-                  onClick={handleOpenMetronome}
-                >
-                  <Clock className="h-5 w-5 text-foreground" />
-                </Button>
-              </DialogTrigger>
-              <DialogContent className="sm:max-w-md">
-                <DialogHeader>
-                  <DialogTitle>Metronome</DialogTitle>
-                </DialogHeader>
-                <EnhancedMetronome showControls={true} size="md" audioContextRef={audioContextRef} />
-              </DialogContent>
-            </Dialog>
+            {/* GleeTools - replaces separate pitch pipe and metronome components */}
+            <GleeTools variant="minimal" />
             
             <ThemeToggle />
             
