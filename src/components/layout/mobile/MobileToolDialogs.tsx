@@ -9,23 +9,28 @@ import {
 import { PitchPipe } from "@/components/glee-tools/PitchPipe";
 import { Metronome } from "@/components/glee-tools/Metronome";
 import { AudioRecorder } from "@/components/glee-tools/AudioRecorder";
+import { PianoKeyboard } from "@/components/glee-tools/PianoKeyboard";
 
 interface MobileToolDialogsProps {
   pitchPipeOpen: boolean;
   metronomeOpen: boolean;
   audioRecorderOpen: boolean;
+  pianoKeyboardOpen: boolean;
   setPitchPipeOpen: (open: boolean) => void;
   setMetronomeOpen: (open: boolean) => void;
   setAudioRecorderOpen: (open: boolean) => void;
+  setPianoKeyboardOpen: (open: boolean) => void;
 }
 
 export function MobileToolDialogs({
   pitchPipeOpen,
   metronomeOpen,
   audioRecorderOpen,
+  pianoKeyboardOpen,
   setPitchPipeOpen,
   setMetronomeOpen,
-  setAudioRecorderOpen
+  setAudioRecorderOpen,
+  setPianoKeyboardOpen
 }: MobileToolDialogsProps) {
   return (
     <>
@@ -49,11 +54,21 @@ export function MobileToolDialogs({
         </DialogContent>
       </Dialog>
       
+      {/* Piano Keyboard Dialog */}
+      <Dialog open={pianoKeyboardOpen} onOpenChange={setPianoKeyboardOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Piano Keyboard</DialogTitle>
+          </DialogHeader>
+          <PianoKeyboard onClose={() => setPianoKeyboardOpen(false)} />
+        </DialogContent>
+      </Dialog>
+      
       {/* Audio Recorder Dialog */}
       <Dialog open={audioRecorderOpen} onOpenChange={setAudioRecorderOpen}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle>Piano & Recording Studio</DialogTitle>
+            <DialogTitle>Recording Studio</DialogTitle>
           </DialogHeader>
           <AudioRecorder onClose={() => setAudioRecorderOpen(false)} />
         </DialogContent>

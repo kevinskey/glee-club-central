@@ -18,6 +18,7 @@ export function MobileHeader() {
   const [pitchPipeOpen, setPitchPipeOpen] = useState(false);
   const [metronomeOpen, setMetronomeOpen] = useState(false);
   const [audioRecorderOpen, setAudioRecorderOpen] = useState(false);
+  const [pianoKeyboardOpen, setPianoKeyboardOpen] = useState(false);
   
   const isDashboardPath = location.pathname.startsWith("/dashboard") || location.pathname.startsWith("/admin");
   
@@ -54,6 +55,7 @@ export function MobileHeader() {
               onOpenPitchPipe={() => setPitchPipeOpen(true)}
               onOpenMetronome={() => setMetronomeOpen(true)}
               onOpenAudioRecorder={() => setAudioRecorderOpen(true)}
+              onOpenPianoKeyboard={() => setPianoKeyboardOpen(true)}
             />
           </div>
         </div>
@@ -67,9 +69,11 @@ export function MobileHeader() {
         pitchPipeOpen={pitchPipeOpen}
         metronomeOpen={metronomeOpen}
         audioRecorderOpen={audioRecorderOpen}
+        pianoKeyboardOpen={pianoKeyboardOpen}
         setPitchPipeOpen={setPitchPipeOpen}
         setMetronomeOpen={setMetronomeOpen}
         setAudioRecorderOpen={setAudioRecorderOpen}
+        setPianoKeyboardOpen={setPianoKeyboardOpen}
       />
     </>
   );

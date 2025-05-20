@@ -21,6 +21,7 @@ import {
 import { PitchPipe } from "./PitchPipe";
 import { Metronome } from "./Metronome";
 import { AudioRecorder } from "./AudioRecorder";
+import { PianoKeyboard } from "./PianoKeyboard";
 
 export function GleeToolsDropdown() {
   const [isOpen, setIsOpen] = useState(false);
@@ -29,6 +30,7 @@ export function GleeToolsDropdown() {
   const [pitchPipeOpen, setPitchPipeOpen] = useState(false);
   const [metronomeOpen, setMetronomeOpen] = useState(false);
   const [audioRecorderOpen, setAudioRecorderOpen] = useState(false);
+  const [pianoKeyboardOpen, setPianoKeyboardOpen] = useState(false);
 
   // Initialize audio context on first interaction
   const initAudioContext = () => {
@@ -82,9 +84,14 @@ export function GleeToolsDropdown() {
             Metronome
           </DropdownMenuItem>
           
-          <DropdownMenuItem onClick={() => setAudioRecorderOpen(true)}>
+          <DropdownMenuItem onClick={() => setPianoKeyboardOpen(true)}>
             <Piano className="h-4 w-4 mr-2" />
-            Piano & Recording
+            Piano Keyboard
+          </DropdownMenuItem>
+          
+          <DropdownMenuItem onClick={() => setAudioRecorderOpen(true)}>
+            <Mic className="h-4 w-4 mr-2" />
+            Recording Studio
           </DropdownMenuItem>
           
           <DropdownMenuSeparator />
@@ -121,11 +128,23 @@ export function GleeToolsDropdown() {
         </DialogContent>
       </Dialog>
       
+      {/* Piano Keyboard Dialog */}
+      <Dialog open={pianoKeyboardOpen} onOpenChange={setPianoKeyboardOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Piano Keyboard</DialogTitle>
+          </DialogHeader>
+          <div className="mt-2">
+            <PianoKeyboard onClose={() => setPianoKeyboardOpen(false)} />
+          </div>
+        </DialogContent>
+      </Dialog>
+      
       {/* Audio Recorder Dialog */}
       <Dialog open={audioRecorderOpen} onOpenChange={setAudioRecorderOpen}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle>Piano & Recording Studio</DialogTitle>
+            <DialogTitle>Recording Studio</DialogTitle>
           </DialogHeader>
           <div className="mt-2">
             <AudioRecorder onClose={() => setAudioRecorderOpen(false)} />

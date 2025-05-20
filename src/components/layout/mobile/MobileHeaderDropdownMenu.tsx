@@ -1,7 +1,7 @@
 
 import React from "react";
 import { useNavigate } from "react-router-dom";
-import { LogIn, Music, Clock, Piano, Menu } from "lucide-react";
+import { LogIn, Music, Clock, Piano, Mic, Menu } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useSidebar } from "@/components/ui/sidebar";
 import {
@@ -21,6 +21,7 @@ interface MobileHeaderDropdownMenuProps {
   onOpenPitchPipe: () => void;
   onOpenMetronome: () => void;
   onOpenAudioRecorder: () => void;
+  onOpenPianoKeyboard: () => void;
 }
 
 export function MobileHeaderDropdownMenu({
@@ -28,7 +29,8 @@ export function MobileHeaderDropdownMenu({
   isDashboardPath,
   onOpenPitchPipe,
   onOpenMetronome,
-  onOpenAudioRecorder
+  onOpenAudioRecorder,
+  onOpenPianoKeyboard
 }: MobileHeaderDropdownMenuProps) {
   const navigate = useNavigate();
   const { signOut } = useAuth();
@@ -86,12 +88,17 @@ export function MobileHeaderDropdownMenu({
             <span>Metronome</span>
           </DropdownMenuItem>
           
-          <DropdownMenuSeparator />
+          <DropdownMenuItem onClick={onOpenPianoKeyboard}>
+            <Piano className="h-4 w-4 mr-2" />
+            <span>Piano Keyboard</span>
+          </DropdownMenuItem>
           
           <DropdownMenuItem onClick={onOpenAudioRecorder}>
-            <Piano className="h-4 w-4 mr-2" />
-            <span>Piano & Recording Studio</span>
+            <Mic className="h-4 w-4 mr-2" />
+            <span>Recording Studio</span>
           </DropdownMenuItem>
+          
+          <DropdownMenuSeparator />
           
           {isAuthenticated && (
             <DropdownMenuItem onClick={() => navigate("/dashboard")}>
