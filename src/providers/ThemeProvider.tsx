@@ -1,5 +1,5 @@
 
-import * as React from "react";
+import React from "react";
 import { Toaster } from "@/components/ui/sonner";
 import { toast } from "sonner";
 
@@ -15,11 +15,10 @@ interface ThemeContextType {
 const ThemeContext = React.createContext<ThemeContextType | undefined>(undefined);
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
-  // Explicitly use React.useState
   const [theme, setTheme] = React.useState<Theme>("light");
   const [mounted, setMounted] = React.useState(false);
 
-  // Explicitly use React.useEffect
+  // Effect for initial setup
   React.useEffect(() => {
     // Mark component as mounted
     setMounted(true);
@@ -35,6 +34,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     }
   }, []);
 
+  // Effect for updating DOM
   React.useEffect(() => {
     // Only update DOM after component is mounted to prevent hydration mismatch
     if (!mounted) return;
@@ -69,7 +69,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     localStorage.setItem("theme", theme);
   }, [theme, mounted]);
 
-  // Explicitly use React.useCallback
+  // Toggle theme function
   const toggleTheme = React.useCallback(() => {
     setTheme(prevTheme => {
       const newTheme = prevTheme === "light" ? "dark" : "light";
