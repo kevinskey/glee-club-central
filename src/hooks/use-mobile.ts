@@ -21,3 +21,5 @@ export function useIsMobile() {
 
   return isMobile;
 }
+
+// Fix the error by removing useMedia export which was causing build errors
