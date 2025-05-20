@@ -12,7 +12,7 @@ export const router = createBrowserRouter([
   {
     path: '/',
     element: <App />,
-    errorElement: <ErrorBoundary />,
+    errorElement: <ErrorBoundary>{/* This will be replaced by the error UI */}</ErrorBoundary>,
     children: [
       mainRoutes,
       dashboardRoutes,
