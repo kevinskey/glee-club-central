@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import {
   useSession,
@@ -30,6 +29,9 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const session = useSession();
   const supabaseClient = useSupabaseClient();
   const user = useUser();
+  
+  // Get router hooks - IMPORTANT: Now we're safely using these hooks inside a component 
+  // that's properly wrapped by RouterProvider
   const navigate = useNavigate();
   const location = useLocation();
   

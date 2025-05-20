@@ -1,6 +1,6 @@
 
 import * as React from 'react';
-import { createBrowserRouter, Navigate } from 'react-router-dom';
+import { createBrowserRouter, Navigate, Outlet } from 'react-router-dom';
 import ErrorBoundary from "./components/ErrorBoundary";
 import StaticLandingPage from './pages/StaticLandingPage';
 import HomeTemp from './pages/HomeTemp';
@@ -9,13 +9,25 @@ import { dashboardRoutes } from './routes/dashboardRoutes';
 import { authRoutes } from './routes/authRoutes';
 import MainLayout from './layouts/MainLayout';
 import HomePage from './pages/HomePage';
+import { AuthProvider } from './contexts/AuthContext';
+
+// Wrapper component to provide auth context
+const AuthProviderWrapper = ({ children }: { children: React.ReactNode }) => (
+  <AuthProvider>
+    {children}
+  </AuthProvider>
+);
 
 // Create a properly structured router with all routes
 export const router = createBrowserRouter([
   // Public routes with MainLayout
   {
     path: '/',
-    element: <MainLayout />,
+    element: (
+      <AuthProviderWrapper>
+        <MainLayout />
+      </AuthProviderWrapper>
+    ),
     children: [
       {
         index: true,
@@ -34,7 +46,11 @@ export const router = createBrowserRouter([
   // Dashboard routes
   {
     path: '/dashboard',
-    element: <App />,
+    element: (
+      <AuthProviderWrapper>
+        <App />
+      </AuthProviderWrapper>
+    ),
     errorElement: (
       <ErrorBoundary>
         <div className="flex items-center justify-center min-h-screen p-4">
@@ -55,8 +71,11 @@ export const router = createBrowserRouter([
     ),
     children: dashboardRoutes.children,
   },
-  // Auth routes 
-  ...authRoutes,
+  // Auth routes - also need AuthProvider wrapper
+  {
+    element: <AuthProviderWrapper><Outlet /></AuthProviderWrapper>,
+    children: authRoutes,
+  },
 ]);
 
 export default router;
