@@ -71,12 +71,12 @@ export function EnhancedHeroSection() {
     : defaultHeroImages;
 
   return (
-    <section className="relative min-h-[600px] md:min-h-[700px] lg:min-h-[800px] flex items-center justify-center overflow-hidden">
+    <section className="relative min-h-[85vh] md:min-h-[90vh] flex flex-col justify-end pb-16 md:pb-24 overflow-hidden">
       <BackgroundSlideshow 
         images={heroImageUrls} 
-        overlayOpacity={0.5} 
+        overlayOpacity={0.4} 
         duration={8000} // 8 seconds between transitions
-        transition={1200} // 1.2 seconds for the transition effect (reduced for smoother experience)
+        transition={1200} // 1.2 seconds for transition effect
       />
       
       {isLoading && (
@@ -86,7 +86,7 @@ export function EnhancedHeroSection() {
       )}
       
       {/* Content overlay with Spelman Glee Club branding */}
-      <div className={`relative z-10 container mx-auto px-4 py-12 md:py-20 transition-opacity duration-300 ${imagesReady ? 'opacity-100' : 'opacity-0'}`}>
+      <div className={`relative z-10 container mx-auto transition-opacity duration-300 mt-auto ${imagesReady ? 'opacity-100' : 'opacity-0'}`}>
         <HeroContent />
       </div>
       

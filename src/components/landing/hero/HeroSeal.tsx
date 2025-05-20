@@ -3,13 +3,10 @@ import React from "react";
 
 export function HeroSeal() {
   return (
-    <div className="absolute bottom-6 right-6 md:bottom-10 md:right-10 z-10 hidden md:block">
-      <div className="w-24 h-24 md:w-32 md:h-32 bg-white rounded-full flex items-center justify-center shadow-lg opacity-80 hover:opacity-100 transition-opacity">
-        <img 
-          src="/lovable-uploads/8fa96710-a03a-4033-9ee0-032306d74daa.png" 
-          alt="Spelman College Seal" 
-          className="w-20 h-20 md:w-28 md:h-28 object-contain"
-        />
+    <div className="absolute top-4 right-4 md:top-6 md:right-6 w-16 h-16 md:w-24 md:h-24 z-20 opacity-70 pointer-events-none">
+      {/* Seal/Logo image would go here */}
+      <div className="w-full h-full rounded-full border-2 border-white/50 bg-black/20 backdrop-blur-sm flex items-center justify-center">
+        <span className="sr-only">Spelman College Seal</span>
       </div>
     </div>
   );
