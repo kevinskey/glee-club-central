@@ -3,7 +3,7 @@ import { Spinner } from "@/components/ui/spinner";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { PWAInstallPrompt } from "@/components/ui/pwa-install-prompt";
 import { Outlet } from "react-router-dom";
-import React from "react";
+import React, { Suspense } from "react";
 
 function App() {
   return (
@@ -19,7 +19,13 @@ function App() {
 
         return (
           <>
-            <Outlet />
+            <Suspense fallback={
+              <div className="flex justify-center items-center h-screen">
+                <Spinner size="lg" />
+              </div>
+            }>
+              <Outlet />
+            </Suspense>
             <PWAInstallPrompt />
           </>
         );

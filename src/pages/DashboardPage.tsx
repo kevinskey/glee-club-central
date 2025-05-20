@@ -1,10 +1,13 @@
 
 import React from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom"; // Using useNavigate instead of Link
 import { Music, Calendar, Users, FileText } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 const DashboardPage: React.FC = () => {
+  const navigate = useNavigate();
+  
   return (
     <div className="container mx-auto px-4 py-8">
       <h1 className="text-3xl font-bold mb-6">Dashboard</h1>
@@ -29,27 +32,43 @@ const DashboardPage: React.FC = () => {
             <ul className="space-y-2">
               <li className="flex items-center">
                 <FileText className="h-4 w-4 mr-2 text-glee-purple" />
-                <Link to="/dashboard/sheet-music" className="text-primary hover:underline">
+                <Button 
+                  variant="link" 
+                  className="p-0 h-auto text-primary hover:underline"
+                  onClick={() => navigate("/dashboard/sheet-music")}
+                >
                   Sheet Music Library
-                </Link>
+                </Button>
               </li>
               <li className="flex items-center">
                 <Music className="h-4 w-4 mr-2 text-glee-purple" />
-                <Link to="/dashboard/music" className="text-primary hover:underline">
+                <Button 
+                  variant="link" 
+                  className="p-0 h-auto text-primary hover:underline"
+                  onClick={() => navigate("/dashboard/music")}
+                >
                   Music Portal
-                </Link>
+                </Button>
               </li>
               <li className="flex items-center">
                 <Calendar className="h-4 w-4 mr-2 text-glee-purple" />
-                <Link to="/dashboard/calendar" className="text-primary hover:underline">
+                <Button 
+                  variant="link" 
+                  className="p-0 h-auto text-primary hover:underline"
+                  onClick={() => navigate("/dashboard/calendar")}
+                >
                   Calendar
-                </Link>
+                </Button>
               </li>
               <li className="flex items-center">
                 <Users className="h-4 w-4 mr-2 text-glee-purple" />
-                <Link to="/dashboard/members" className="text-primary hover:underline">
+                <Button 
+                  variant="link" 
+                  className="p-0 h-auto text-primary hover:underline"
+                  onClick={() => navigate("/dashboard/members")}
+                >
                   Members Directory
-                </Link>
+                </Button>
               </li>
             </ul>
           </CardContent>
