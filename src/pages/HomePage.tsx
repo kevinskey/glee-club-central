@@ -1,7 +1,6 @@
 
 import React from 'react';
 import { Layout } from "@/components/landing/Layout";
-import { Header } from "@/components/landing/Header";
 import { HeroSection } from "@/components/landing/HeroSection";
 
 const HomePage = () => {

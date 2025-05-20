@@ -21,7 +21,7 @@ export function HeaderUtils() {
           variant="outline" 
           size="sm"
           onClick={() => navigate("/login")}
-          className="ml-2"
+          className="ml-2 text-base px-4 py-2 h-auto"
         >
           Login
         </Button>
