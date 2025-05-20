@@ -76,6 +76,7 @@ export function RecordingStudio() {
       
       const stream = await startRecording();
       
+      // Fixed: Check if stream exists before proceeding
       if (stream && canvasRef.current && audioContextRef.current) {
         analyserRef.current = audioContextRef.current.createAnalyser();
         analyserRef.current.fftSize = 2048;

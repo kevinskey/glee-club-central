@@ -35,7 +35,7 @@ export function useAudioRecorder() {
   }, []);
   
   // Start recording
-  const startRecording = useCallback(async () => {
+  const startRecording = useCallback(async (): Promise<MediaStream | null> => {
     try {
       // Request microphone access
       const stream = await requestMicrophoneAccess();
@@ -62,6 +62,7 @@ export function useAudioRecorder() {
       setIsRecording(true);
       audioLogger.log('Recording started');
       
+      return stream;
     } catch (error) {
       audioLogger.error('Error starting recording:', error);
       throw error;
