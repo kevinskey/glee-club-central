@@ -109,20 +109,20 @@ export function AuthProvider({ children }: AuthProviderProps) {
   }, [user, supabaseClient, refreshPermissions]);
   
   // User role and type helper functions
-  const isAdmin = () => {
+  const isAdmin = useCallback(() => {
     return !!(profile?.is_super_admin || profile?.role === 'admin');
-  };
+  }, [profile]);
   
-  const isMember = () => {
+  const isMember = useCallback(() => {
     return profile?.role === 'member';
-  };
+  }, [profile]);
   
-  const isFan = () => {
+  const isFan = useCallback(() => {
     return profile?.user_type === 'fan';
-  };
+  }, [profile]);
   
   // getUserType function defined in the provider
-  const getUserType = (): UserType => {
+  const getUserType = useCallback((): UserType => {
     const userType = profile?.user_type || '';
     
     // If user_type doesn't exist, infer from role
@@ -137,7 +137,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
     }
     
     return userType as UserType;
-  };
+  }, [profile]);
 
   // Auth methods that use navigate must be inside the Router context
   const handleLogout = async () => {

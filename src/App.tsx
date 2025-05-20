@@ -3,6 +3,7 @@ import { Spinner } from "@/components/ui/spinner";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { PWAInstallPrompt } from "@/components/ui/pwa-install-prompt";
 import { Outlet } from "react-router-dom";
+import React from "react";
 
 function App() {
   return (
