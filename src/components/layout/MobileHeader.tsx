@@ -19,7 +19,12 @@ import {
   DropdownMenuProvider,
   DropdownMenuLabel
 } from "@/components/ui/dropdown-menu";
-import { Dialog } from "@/components/ui/dialog";
+import { 
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle
+} from "@/components/ui/dialog";
 import { PitchPipe } from "@/components/glee-tools/PitchPipe";
 import { Metronome } from "@/components/glee-tools/Metronome";
 
@@ -186,22 +191,22 @@ export function MobileHeader() {
       
       {/* Pitch Pipe Dialog */}
       <Dialog open={pitchPipeOpen} onOpenChange={setPitchPipeOpen}>
-        <Dialog.Content className="sm:max-w-md">
-          <Dialog.Header>
-            <Dialog.Title>Pitch Pipe</Dialog.Title>
-          </Dialog.Header>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Pitch Pipe</DialogTitle>
+          </DialogHeader>
           <PitchPipe onClose={() => setPitchPipeOpen(false)} />
-        </Dialog.Content>
+        </DialogContent>
       </Dialog>
       
       {/* Metronome Dialog */}
       <Dialog open={metronomeOpen} onOpenChange={setMetronomeOpen}>
-        <Dialog.Content className="sm:max-w-md">
-          <Dialog.Header>
-            <Dialog.Title>Metronome</Dialog.Title>
-          </Dialog.Header>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Metronome</DialogTitle>
+          </DialogHeader>
           <Metronome onClose={() => setMetronomeOpen(false)} />
-        </Dialog.Content>
+        </DialogContent>
       </Dialog>
     </>
   );
