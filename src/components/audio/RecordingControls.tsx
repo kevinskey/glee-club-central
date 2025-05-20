@@ -9,6 +9,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { toast } from 'sonner';
+import { resetAudioSystem } from '@/utils/audioUtils';
 
 interface RecordingControlsProps {
   microphoneActive: boolean;
@@ -29,6 +30,11 @@ export function RecordingControls({
   stopRecording,
   formatTime,
 }: RecordingControlsProps) {
+  const handleReset = async () => {
+    await resetAudioSystem();
+    toast.success("Audio system reset complete");
+  };
+
   return (
     <div className="flex flex-col gap-4">
       {/* Status bar */}
@@ -63,9 +69,7 @@ export function RecordingControls({
                 variant="ghost"
                 size="icon"
                 className="h-6 w-6"
-                onClick={async () => {
-                  toast.success("Audio system reset complete");
-                }}
+                onClick={handleReset}
               >
                 <RefreshCw className="h-3.5 w-3.5" />
               </Button>

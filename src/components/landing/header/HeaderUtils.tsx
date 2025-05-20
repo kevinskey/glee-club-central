@@ -1,7 +1,7 @@
 
 import React, { useRef, useState } from "react";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
-import { Clock } from "lucide-react";
+import { Clock, Music } from "lucide-react";
 import {
   Tooltip,
   TooltipContent,
@@ -13,16 +13,16 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { EnhancedMetronome } from "@/components/ui/enhanced-metronome";
 import { PitchPipeDialog } from "@/components/ui/pitch-pipe-dialog";
 import { Button } from "@/components/ui/button";
-import { resumeAudioContext, audioLogger } from "@/utils/audioUtils";
+import { resumeAudioContext, audioLogger, registerKeyboardShortcut } from "@/utils/audioUtils";
 
 export function HeaderUtils() {
   const isMobile = useIsMobile();
   const [metronomeOpen, setMetronomeOpen] = useState(false);
+  const [pitchPipeOpen, setPitchPipeOpen] = useState(false);
   const audioContextRef = useRef<AudioContext | null>(null);
   
   // Initialize audio context on first interaction
-  const handleOpenMetronome = () => {
-    // Create AudioContext on first click if it doesn't exist
+  const initAudioContext = () => {
     if (!audioContextRef.current) {
       try {
         audioContextRef.current = new AudioContext();
@@ -36,36 +36,144 @@ export function HeaderUtils() {
     if (audioContextRef.current && audioContextRef.current.state === 'suspended') {
       resumeAudioContext(audioContextRef.current);
     }
-    
+  };
+  
+  // Handle opening the metronome
+  const handleOpenMetronome = () => {
+    initAudioContext();
     setMetronomeOpen(true);
   };
   
+  // Handle opening the pitch pipe
+  const handleOpenPitchPipe = () => {
+    initAudioContext();
+    setPitchPipeOpen(true);
+  };
+  
+  // Register keyboard shortcuts
+  React.useEffect(() => {
+    const cleanupP = registerKeyboardShortcut('p', () => {
+      setPitchPipeOpen(prev => !prev);
+      if (!pitchPipeOpen) initAudioContext();
+    });
+    
+    const cleanupM = registerKeyboardShortcut('m', () => {
+      setMetronomeOpen(prev => !prev);
+      if (!metronomeOpen) initAudioContext();
+    });
+    
+    const cleanupEsc = registerKeyboardShortcut('Escape', () => {
+      setPitchPipeOpen(false);
+      setMetronomeOpen(false);
+    });
+    
+    return () => {
+      cleanupP();
+      cleanupM();
+      cleanupEsc();
+    };
+  }, [pitchPipeOpen, metronomeOpen]);
+  
   return (
     <>
-      {/* Pitch Pipe */}
-      <PitchPipeDialog />
-      
-      <Dialog open={metronomeOpen} onOpenChange={setMetronomeOpen}>
-        <DialogTrigger asChild>
+      {/* Glee Tools label and button */}
+      <div className="flex items-center gap-2">
+        {!isMobile && (
           <TooltipProvider>
             <Tooltip>
               <TooltipTrigger asChild>
                 <Button 
-                  variant="ghost" 
-                  size={isMobile ? "sm" : "icon"}
-                  className="flex items-center gap-1"
-                  onClick={handleOpenMetronome}
+                  variant="outline" 
+                  size="sm" 
+                  className="gap-1" 
+                  onClick={handleOpenPitchPipe}
                 >
-                  <Clock className="h-4 w-4 text-glee-purple" />
-                  {!isMobile && <span className="sr-only">Metronome</span>}
+                  <Music className="h-4 w-4" />
+                  <span>Pitch Pipe</span>
                 </Button>
               </TooltipTrigger>
               <TooltipContent>
-                <p>Open metronome</p>
+                <p>Open pitch pipe (P)</p>
               </TooltipContent>
             </Tooltip>
           </TooltipProvider>
-        </DialogTrigger>
+        )}
+        
+        {!isMobile && (
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  className="gap-1" 
+                  onClick={handleOpenMetronome}
+                >
+                  <Clock className="h-4 w-4" />
+                  <span>Metronome</span>
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>Open metronome (M)</p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+        )}
+        
+        {/* Mobile view buttons */}
+        {isMobile && (
+          <div className="flex items-center gap-1">
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button 
+                    variant="ghost" 
+                    size="icon" 
+                    onClick={handleOpenPitchPipe}
+                    className="h-8 w-8"
+                  >
+                    <Music className="h-4 w-4" />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>Open pitch pipe (P)</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+            
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button 
+                    variant="ghost" 
+                    size="icon" 
+                    onClick={handleOpenMetronome}
+                    className="h-8 w-8"
+                  >
+                    <Clock className="h-4 w-4" />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>Open metronome (M)</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+          </div>
+        )}
+      </div>
+      
+      {/* Pitch Pipe Dialog */}
+      <Dialog open={pitchPipeOpen} onOpenChange={setPitchPipeOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Pitch Pipe</DialogTitle>
+          </DialogHeader>
+          <PitchPipeDialog audioContextRef={audioContextRef} />
+        </DialogContent>
+      </Dialog>
+      
+      {/* Metronome Dialog */}
+      <Dialog open={metronomeOpen} onOpenChange={setMetronomeOpen}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
             <DialogTitle>Metronome</DialogTitle>

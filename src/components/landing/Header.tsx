@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Dialog } from "@/components/ui/dialog";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { NavigationLinks } from "@/components/landing/header/NavigationLinks";
+import { HeaderUtils } from "@/components/landing/header/HeaderUtils";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -16,7 +17,6 @@ import {
   DropdownMenuProvider
 } from "@/components/ui/dropdown-menu";
 import { useNavigate } from "react-router-dom";
-import { GleeTools } from "@/components/glee-tools/GleeTools";
 
 interface HeaderProps {
   initialShowNewsFeed?: boolean;
@@ -58,12 +58,10 @@ export function Header({ initialShowNewsFeed = true }: HeaderProps) {
           {!isMobile && <NavigationLinks className="ml-6" />}
         </div>
         
-        {/* Right side: Glee Tools, theme toggle, and navigation dropdown */}
+        {/* Right side: Header utilities including Glee Tools, theme toggle, and navigation dropdown */}
         <div className="flex items-center gap-3">
-          {/* GleeTools */}
-          {!isMobile ? <GleeTools /> : null}
-          
-          <ThemeToggle />
+          {/* Header Utils - includes Glee Tools */}
+          <HeaderUtils />
           
           {/* Only show dropdown menu on mobile */}
           {isMobile && (
@@ -82,37 +80,27 @@ export function Header({ initialShowNewsFeed = true }: HeaderProps) {
                 <DropdownMenuContent align="end" className="w-56 bg-popover">
                   <DropdownMenuSeparator />
                   
-                  {/* GleeTools on mobile */}
-                  <DropdownMenuItem className="py-2 px-4 flex gap-2" asChild>
-                    <div>
-                      <GleeTools variant="minimal" />
-                      <span className="ml-2">Glee Tools</span>
-                    </div>
-                  </DropdownMenuItem>
-                  
-                  <DropdownMenuSeparator />
-                  
-                  <DropdownMenuItem onClick={() => navigate("/")} className="py-2">
+                  <DropdownMenuItem onClick={() => navigate("/")}>
                     Home
                   </DropdownMenuItem>
                   
-                  <DropdownMenuItem onClick={() => navigate("/about")} className="py-2">
+                  <DropdownMenuItem onClick={() => navigate("/about")}>
                     About
                   </DropdownMenuItem>
                   
-                  <DropdownMenuItem onClick={() => navigate("/social")} className="py-2">
+                  <DropdownMenuItem onClick={() => navigate("/social")}>
                     Social
                   </DropdownMenuItem>
                   
-                  <DropdownMenuItem onClick={() => navigate("/contact")} className="py-2">
+                  <DropdownMenuItem onClick={() => navigate("/contact")}>
                     Contact
                   </DropdownMenuItem>
                   
-                  <DropdownMenuItem onClick={() => navigate("/press-kit")} className="py-2">
+                  <DropdownMenuItem onClick={() => navigate("/press-kit")}>
                     Press Kit
                   </DropdownMenuItem>
                   
-                  <DropdownMenuItem onClick={() => navigate("/login")} className="py-2">
+                  <DropdownMenuItem onClick={() => navigate("/login")}>
                     Login
                   </DropdownMenuItem>
                 </DropdownMenuContent>

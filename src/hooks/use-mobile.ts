@@ -1,25 +1,48 @@
 
 import { useState, useEffect } from 'react';
 
-export function useIsMobile() {
-  const [isMobile, setIsMobile] = useState(false);
+// Define the standard mobile breakpoint
+const MOBILE_BREAKPOINT = 768;
+
+export function useIsMobile(): boolean {
+  // Initialize with undefined and update in useEffect
+  const [isMobile, setIsMobile] = useState<boolean>(() => 
+    typeof window !== 'undefined' ? window.innerWidth < MOBILE_BREAKPOINT : false
+  );
 
   useEffect(() => {
-    const checkIsMobile = () => {
-      setIsMobile(window.innerWidth < 768); // 768px is the standard breakpoint for md: in Tailwind
+    // Create a media query for mobile devices
+    const mql = window.matchMedia(`(max-width: ${MOBILE_BREAKPOINT - 1}px)`);
+    
+    // Update function to set the state
+    const updateMobileState = () => {
+      setIsMobile(window.innerWidth < MOBILE_BREAKPOINT);
     };
-
-    // Run once on initial render
-    checkIsMobile();
-
-    // Set up event listener for window resize
-    window.addEventListener('resize', checkIsMobile);
-
-    // Clean up event listener
-    return () => window.removeEventListener('resize', checkIsMobile);
+    
+    // Add event listener
+    mql.addEventListener('change', updateMobileState);
+    
+    // Clean up
+    return () => mql.removeEventListener('change', updateMobileState);
   }, []);
 
   return isMobile;
 }
 
-// Fix the error by removing useMedia export which was causing build errors
+export function useMedia(query: string): boolean {
+  const [matches, setMatches] = useState(() => 
+    typeof window !== 'undefined' ? window.matchMedia(query).matches : false
+  );
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    
+    const mediaQuery = window.matchMedia(query);
+    const updateMatches = () => setMatches(mediaQuery.matches);
+    
+    mediaQuery.addEventListener('change', updateMatches);
+    return () => mediaQuery.removeEventListener('change', updateMatches);
+  }, [query]);
+
+  return matches;
+}
