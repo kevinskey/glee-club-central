@@ -15,7 +15,7 @@ interface ThemeContextType {
 const ThemeContext = React.createContext<ThemeContextType | undefined>(undefined);
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
-  // Use React.useState to explicitly reference React's useState
+  // Explicitly use React.useState to prevent any null reference issues
   const [theme, setTheme] = React.useState<Theme>("light");
   const [mounted, setMounted] = React.useState(false);
 
