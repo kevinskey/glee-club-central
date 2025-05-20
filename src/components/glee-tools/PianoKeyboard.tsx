@@ -2,6 +2,8 @@ import React, { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
 import { Label } from "@/components/ui/label";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { useIsMobile, useIsSmallMobile } from "@/hooks/use-mobile";
 import { createAudioContext, resumeAudioContext } from "@/utils/audioUtils";
 
 const PIANO_KEYS = [
@@ -24,7 +26,7 @@ const calculateFrequencies = () => {
   const freqMap: Record<string, number[]> = {};
   for (const key of PIANO_KEYS) {
     freqMap[key.note] = [];
-    for (let oct = 2; oct <= 6; oct++) {
+    for (let oct = 1; oct <= 7; oct++) {
       // Calculate frequency: C4 (middle C) = 261.63 Hz
       const baseFreq = {
         'C': 261.63, 'C#': 277.18, 'D': 293.66, 'D#': 311.13,
@@ -40,14 +42,19 @@ const calculateFrequencies = () => {
 
 const NOTE_FREQUENCIES = calculateFrequencies();
 
+type KeySizeOption = 'small' | 'medium' | 'large';
+
 interface PianoKeyboardProps {
   onClose?: () => void;
   audioContextRef?: React.RefObject<AudioContext | null>;
 }
 
 export function PianoKeyboard({ onClose, audioContextRef }: PianoKeyboardProps) {
-  const [octave, setOctave] = useState(4);
+  const [startOctave, setStartOctave] = useState(3);
+  const [keySize, setKeySize] = useState<KeySizeOption>('medium');
   const [volume, setVolume] = useState(0.7);
+  const isMobile = useIsMobile();
+  const isSmallMobile = useIsSmallMobile();
   const localAudioContextRef = useRef<AudioContext | null>(null);
   const oscillatorsRef = useRef<Map<string, { oscillator: OscillatorNode, gain: GainNode }>>(new Map());
   
@@ -64,6 +71,109 @@ export function PianoKeyboard({ onClose, audioContextRef }: PianoKeyboardProps) 
     }
     
     return localAudioContextRef.current;
+  };
+  
+  // Determine key size dimensions based on selected size and screen size
+  const getKeySizes = () => {
+    // Base sizes that will be modified by the keySize setting
+    let whiteKeyHeight = 120;
+    let blackKeyHeight = 72;
+    
+    // Adjust base on device size
+    if (isSmallMobile) {
+      whiteKeyHeight = 100;
+      blackKeyHeight = 60;
+    } else if (isMobile) {
+      whiteKeyHeight = 110;
+      blackKeyHeight = 66;
+    }
+    
+    // Apply size modifier
+    const sizeModifiers = {
+      small: 0.75,
+      medium: 1,
+      large: 1.25
+    };
+    
+    const modifier = sizeModifiers[keySize];
+    
+    return {
+      whiteKeyHeight: Math.round(whiteKeyHeight * modifier),
+      blackKeyHeight: Math.round(blackKeyHeight * modifier)
+    };
+  };
+  
+  const { whiteKeyHeight, blackKeyHeight } = getKeySizes();
+  
+  // Function to render 3 octaves of piano keys
+  const renderPianoKeys = () => {
+    const octaves = [startOctave, startOctave + 1, startOctave + 2];
+    const whiteKeys: React.ReactNode[] = [];
+    const blackKeys: React.ReactNode[] = [];
+    
+    // Calculate base widths
+    const totalWhiteKeys = octaves.length * 7; // 7 white keys per octave (C, D, E, F, G, A, B)
+    const whiteKeyWidth = `${100 / totalWhiteKeys}%`;
+    
+    // Render 3 octaves
+    octaves.forEach(octave => {
+      // Keep track of white key position for black key positioning
+      let whiteKeyCount = 0;
+      
+      PIANO_KEYS.forEach((key, idx) => {
+        const noteId = `${key.note}-${octave}`;
+        
+        if (!key.isSharp) {
+          // White key
+          whiteKeys.push(
+            <button
+              key={noteId}
+              className="bg-white border border-gray-300 rounded-b hover:bg-gray-100 active:bg-gray-200 relative flex flex-col-reverse"
+              style={{ width: whiteKeyWidth }}
+              onMouseDown={() => playNote(key.note, octave)}
+              onTouchStart={() => playNote(key.note, octave)}
+              onMouseUp={() => stopNote(`${key.note}-${octave}`)}
+              onTouchEnd={() => stopNote(`${key.note}-${octave}`)}
+              onMouseLeave={() => stopNote(`${key.note}-${octave}`)}
+            >
+              <span className="text-xs sm:text-sm font-medium text-gray-700 mb-2">
+                {key.note}{octave}
+              </span>
+            </button>
+          );
+          whiteKeyCount++;
+        } else {
+          // Black key
+          // The position needs to be calculated based on the previous white key
+          const position = (whiteKeyCount - 1) * (100 / totalWhiteKeys);
+          blackKeys.push(
+            <button
+              key={noteId}
+              className="absolute top-0 bg-gray-800 hover:bg-gray-700 active:bg-gray-600 z-10 rounded-b"
+              style={{ 
+                left: `calc(${position}% + ${whiteKeyWidth} * 0.7)`,
+                width: `calc(${whiteKeyWidth} * 0.6)`,
+                height: blackKeyHeight
+              }}
+              onMouseDown={() => playNote(key.note, octave)}
+              onTouchStart={() => playNote(key.note, octave)}
+              onMouseUp={() => stopNote(`${key.note}-${octave}`)}
+              onTouchEnd={() => stopNote(`${key.note}-${octave}`)}
+              onMouseLeave={() => stopNote(`${key.note}-${octave}`)}
+            />
+          );
+        }
+      });
+    });
+    
+    return (
+      <div className="relative" style={{ height: whiteKeyHeight }}>
+        <div className="flex h-full">
+          {whiteKeys}
+        </div>
+        {blackKeys}
+      </div>
+    );
   };
   
   // Initialize audio context with low latency options
@@ -98,7 +208,7 @@ export function PianoKeyboard({ onClose, audioContextRef }: PianoKeyboardProps) 
   }, [audioContextRef]);
   
   // Play piano note with optimized handling
-  const playNote = (note: string) => {
+  const playNote = (note: string, octave: number) => {
     const ctx = getAudioContext();
     
     // Resume context if suspended (needed for mobile)
@@ -131,11 +241,6 @@ export function PianoKeyboard({ onClose, audioContextRef }: PianoKeyboardProps) 
     
     // Store references for cleanup
     oscillatorsRef.current.set(noteKey, { oscillator: osc, gain });
-    
-    // Schedule release in 1 second
-    setTimeout(() => {
-      stopNote(noteKey);
-    }, 1000);
   };
   
   // Stop a specific note
@@ -175,60 +280,29 @@ export function PianoKeyboard({ onClose, audioContextRef }: PianoKeyboardProps) 
       </div>
       
       {/* Piano Keyboard */}
-      <div className="relative h-32 sm:h-40 overflow-hidden flex">
-        {PIANO_KEYS.map((key, idx) => {
-          if (!key.isSharp) {
-            return (
-              <button
-                key={`${key.note}-${octave}`}
-                className="flex-1 bg-white border border-gray-300 rounded-b hover:bg-gray-100 active:bg-gray-200 relative flex flex-col-reverse"
-                onMouseDown={() => playNote(key.note)}
-                onTouchStart={() => playNote(key.note)}
-              >
-                <span className="text-xs sm:text-sm font-medium text-gray-700 mb-2">
-                  {key.note}
-                </span>
-              </button>
-            );
-          }
-          return null;
-        })}
-        
-        {/* Black keys */}
-        <div className="absolute top-0 left-0 w-full h-3/5 flex">
-          <div className="w-1/12 flex-shrink-0"></div> {/* C */}
-          <button
-            className="w-2/3 mx-auto h-full bg-gray-800 hover:bg-gray-700 active:bg-gray-600 z-10 rounded-b"
-            onMouseDown={() => playNote('C#')}
-            onTouchStart={() => playNote('C#')}
-          />
-          <div className="w-1/12 flex-shrink-0"></div> {/* D */}
-          <button
-            className="w-2/3 mx-auto h-full bg-gray-800 hover:bg-gray-700 active:bg-gray-600 z-10 rounded-b"
-            onMouseDown={() => playNote('D#')}
-            onTouchStart={() => playNote('D#')}
-          />
-          <div className="w-1/12 flex-shrink-0"></div>
-          <div className="w-1/12 flex-shrink-0"></div> {/* Skip E to F */}
-          <button
-            className="w-2/3 mx-auto h-full bg-gray-800 hover:bg-gray-700 active:bg-gray-600 z-10 rounded-b"
-            onMouseDown={() => playNote('F#')}
-            onTouchStart={() => playNote('F#')}
-          />
-          <div className="w-1/12 flex-shrink-0"></div> {/* G */}
-          <button
-            className="w-2/3 mx-auto h-full bg-gray-800 hover:bg-gray-700 active:bg-gray-600 z-10 rounded-b"
-            onMouseDown={() => playNote('G#')}
-            onTouchStart={() => playNote('G#')}
-          />
-          <div className="w-1/12 flex-shrink-0"></div> {/* A */}
-          <button
-            className="w-2/3 mx-auto h-full bg-gray-800 hover:bg-gray-700 active:bg-gray-600 z-10 rounded-b"
-            onMouseDown={() => playNote('A#')}
-            onTouchStart={() => playNote('A#')}
-          />
-          <div className="w-1/12 flex-shrink-0"></div> {/* B */}
-        </div>
+      {renderPianoKeys()}
+      
+      {/* Key Size Options */}
+      <div className="mt-4">
+        <Label className="mb-2 block">Key Size</Label>
+        <RadioGroup 
+          value={keySize} 
+          onValueChange={(value) => setKeySize(value as KeySizeOption)}
+          className="flex space-x-2"
+        >
+          <div className="flex items-center space-x-1">
+            <RadioGroupItem value="small" id="small" />
+            <Label htmlFor="small">Small</Label>
+          </div>
+          <div className="flex items-center space-x-1">
+            <RadioGroupItem value="medium" id="medium" />
+            <Label htmlFor="medium">Medium</Label>
+          </div>
+          <div className="flex items-center space-x-1">
+            <RadioGroupItem value="large" id="large" />
+            <Label htmlFor="large">Large</Label>
+          </div>
+        </RadioGroup>
       </div>
       
       {/* Octave control */}
@@ -236,17 +310,17 @@ export function PianoKeyboard({ onClose, audioContextRef }: PianoKeyboardProps) 
         <Button 
           variant="outline" 
           size="sm"
-          onClick={() => setOctave(Math.max(2, octave - 1))}
-          disabled={octave <= 2}
+          onClick={() => setStartOctave(Math.max(1, startOctave - 1))}
+          disabled={startOctave <= 1}
         >
           -
         </Button>
-        <span className="min-w-8 text-center">Octave: {octave}</span>
+        <span className="min-w-20 text-center">Start Octave: {startOctave}</span>
         <Button 
           variant="outline" 
           size="sm"
-          onClick={() => setOctave(Math.min(6, octave + 1))}
-          disabled={octave >= 6}
+          onClick={() => setStartOctave(Math.min(5, startOctave + 1))}
+          disabled={startOctave >= 5}
         >
           +
         </Button>

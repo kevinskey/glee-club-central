@@ -86,7 +86,7 @@ export function GleeToolsDropdown() {
           
           <DropdownMenuItem onClick={() => setPianoKeyboardOpen(true)}>
             <Piano className="h-4 w-4 mr-2" />
-            Piano Keyboard
+            Piano Keyboard (3 Octaves)
           </DropdownMenuItem>
           
           <DropdownMenuItem onClick={() => setAudioRecorderOpen(true)}>
@@ -96,7 +96,7 @@ export function GleeToolsDropdown() {
           
           <DropdownMenuSeparator />
           <DropdownMenuItem
-            onClick={() => toast.info("Glee Tools v1.0 - Music Practice Suite")}
+            onClick={() => toast.info("Glee Tools v1.1 - Music Practice Suite")}
             className="cursor-pointer"
           >
             About Glee Tools
@@ -130,7 +130,7 @@ export function GleeToolsDropdown() {
       
       {/* Piano Keyboard Dialog */}
       <Dialog open={pianoKeyboardOpen} onOpenChange={setPianoKeyboardOpen}>
-        <DialogContent className="sm:max-w-md">
+        <DialogContent className="sm:max-w-lg w-full">
           <DialogHeader>
             <DialogTitle>Piano Keyboard</DialogTitle>
           </DialogHeader>

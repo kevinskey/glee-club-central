@@ -106,7 +106,7 @@ export function MobileToolDialogs({
           setPianoKeyboardOpen(open);
         }}
       >
-        <DialogContent className="sm:max-w-md" onPointerDown={() => getSharedAudioContext()?.resume()}>
+        <DialogContent className="sm:max-w-lg w-full max-h-[90vh] overflow-auto" onPointerDown={() => getSharedAudioContext()?.resume()}>
           <DialogHeader>
             <DialogTitle>Piano Keyboard</DialogTitle>
           </DialogHeader>
