@@ -1,4 +1,3 @@
-
 import React, { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
@@ -43,21 +42,40 @@ const NOTE_FREQUENCIES = calculateFrequencies();
 
 interface PianoKeyboardProps {
   onClose?: () => void;
+  audioContextRef?: React.RefObject<AudioContext | null>;
 }
 
-export function PianoKeyboard({ onClose }: PianoKeyboardProps) {
+export function PianoKeyboard({ onClose, audioContextRef }: PianoKeyboardProps) {
   const [octave, setOctave] = useState(4);
   const [volume, setVolume] = useState(0.7);
-  const audioContextRef = useRef<AudioContext | null>(null);
+  const localAudioContextRef = useRef<AudioContext | null>(null);
   const oscillatorsRef = useRef<Map<string, { oscillator: OscillatorNode, gain: GainNode }>>(new Map());
+  
+  // Get or create audio context
+  const getAudioContext = (): AudioContext => {
+    // Use the provided audio context if available
+    if (audioContextRef?.current) {
+      return audioContextRef.current;
+    }
+    
+    // Otherwise create or use our local audio context
+    if (!localAudioContextRef.current) {
+      localAudioContextRef.current = createAudioContext();
+    }
+    
+    return localAudioContextRef.current;
+  };
   
   // Initialize audio context with low latency options
   useEffect(() => {
-    audioContextRef.current = createAudioContext();
-    
-    // Optimize audio context for low latency
-    if (audioContextRef.current && 'audioWorklet' in audioContextRef.current) {
-      audioContextRef.current.resume().catch(console.error);
+    // Initialize only if we're using the local context
+    if (!audioContextRef?.current) {
+      localAudioContextRef.current = createAudioContext();
+      
+      // Optimize audio context for low latency
+      if (localAudioContextRef.current && 'audioWorklet' in localAudioContextRef.current) {
+        localAudioContextRef.current.resume().catch(console.error);
+      }
     }
     
     return () => {
@@ -72,17 +90,16 @@ export function PianoKeyboard({ onClose }: PianoKeyboardProps) {
         }
       });
       
-      // Close audio context
-      if (audioContextRef.current && audioContextRef.current.state !== 'closed') {
-        audioContextRef.current.close().catch(console.error);
+      // Close audio context only if it's our local one
+      if (!audioContextRef && localAudioContextRef.current && localAudioContextRef.current.state !== 'closed') {
+        localAudioContextRef.current.close().catch(console.error);
       }
     };
-  }, []);
+  }, [audioContextRef]);
   
   // Play piano note with optimized handling
   const playNote = (note: string) => {
-    const ctx = audioContextRef.current;
-    if (!ctx) return;
+    const ctx = getAudioContext();
     
     // Resume context if suspended (needed for mobile)
     if (ctx.state === 'suspended') {
@@ -129,22 +146,20 @@ export function PianoKeyboard({ onClose }: PianoKeyboardProps) {
         const { oscillator, gain } = nodes;
         
         // Quick fade out to avoid clicks
-        const ctx = audioContextRef.current;
-        if (ctx) {
-          gain.gain.setValueAtTime(gain.gain.value, ctx.currentTime);
-          gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 0.03);
-          
-          // Stop after fade out
-          setTimeout(() => {
-            try {
-              oscillator.stop();
-              oscillator.disconnect();
-              gain.disconnect();
-            } catch (e) {
-              // Ignore stop errors
-            }
-          }, 35);
-        }
+        const ctx = getAudioContext();
+        gain.gain.setValueAtTime(gain.gain.value, ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 0.03);
+        
+        // Stop after fade out
+        setTimeout(() => {
+          try {
+            oscillator.stop();
+            oscillator.disconnect();
+            gain.disconnect();
+          } catch (e) {
+            // Ignore stop errors
+          }
+        }, 35);
         
         oscillatorsRef.current.delete(noteKey);
       } catch (e) {

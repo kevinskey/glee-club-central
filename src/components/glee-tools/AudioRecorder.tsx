@@ -1,4 +1,3 @@
-
 import React, { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
@@ -22,9 +21,10 @@ import { Label } from "@/components/ui/label";
 
 interface AudioRecorderProps {
   onClose?: () => void;
+  audioContextRef?: React.RefObject<AudioContext | null>;
 }
 
-export function AudioRecorder({ onClose }: AudioRecorderProps) {
+export function AudioRecorder({ onClose, audioContextRef }: AudioRecorderProps) {
   // Recording and audio state
   const [recordingTime, setRecordingTime] = useState(0);
   const [audioURL, setAudioURL] = useState<string | null>(null);
@@ -33,7 +33,7 @@ export function AudioRecorder({ onClose }: AudioRecorderProps) {
   // Refs for audio elements and timers
   const audioRef = useRef<HTMLAudioElement>(null);
   const timerRef = useRef<number | null>(null);
-  const audioContextRef = useRef<AudioContext | null>(null);
+  const localAudioContextRef = useRef<AudioContext | null>(null);
   
   // Custom hooks
   const { isRecording, startRecording, stopRecording } = useAudioRecorder();
@@ -60,15 +60,21 @@ export function AudioRecorder({ onClose }: AudioRecorderProps) {
   
   // Initialize audio context
   const getAudioContext = () => {
-    if (!audioContextRef.current) {
+    // Use the provided audio context if available
+    if (audioContextRef?.current) {
+      return audioContextRef.current;
+    }
+    
+    // Otherwise create or use our local audio context
+    if (!localAudioContextRef.current) {
       try {
-        audioContextRef.current = new (window.AudioContext || (window as any).webkitAudioContext)();
+        localAudioContextRef.current = new (window.AudioContext || (window as any).webkitAudioContext)();
       } catch (error) {
         console.error("Failed to create audio context:", error);
         toast.error("Your browser doesn't support Web Audio API");
       }
     }
-    return audioContextRef.current;
+    return localAudioContextRef.current;
   };
   
   // Handle recording
@@ -137,11 +143,12 @@ export function AudioRecorder({ onClose }: AudioRecorderProps) {
         URL.revokeObjectURL(audioURL);
       }
       
-      if (audioContextRef.current && audioContextRef.current.state !== 'closed') {
-        audioContextRef.current.close().catch(console.error);
+      // Only close the local audio context if we created it
+      if (!audioContextRef && localAudioContextRef.current && localAudioContextRef.current.state !== 'closed') {
+        localAudioContextRef.current.close().catch(console.error);
       }
     };
-  }, [audioURL]);
+  }, [audioURL, audioContextRef]);
   
   // Update audio element volume when slider changes
   useEffect(() => {
