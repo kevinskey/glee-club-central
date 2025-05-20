@@ -246,6 +246,13 @@ export function useMediaLibrary() {
     fetchMediaFiles();
   }, []);
 
+  // Fix the date filter typing issue by creating a properly typed setter function
+  const setDateFilterSafe = (filter: string) => {
+    if (filter === "newest" || filter === "oldest") {
+      setDateFilter(filter);
+    }
+  };
+
   return {
     allMediaFiles,
     filteredMediaFiles,
@@ -271,7 +278,7 @@ export function useMediaLibrary() {
     selectedCategory,
     setSelectedCategory,
     dateFilter,
-    setDateFilter,
+    setDateFilter: setDateFilterSafe, // Use the type-safe wrapper function
     isLoading: loading,
     error,
     mediaTypes,

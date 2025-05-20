@@ -1,4 +1,3 @@
-
 import React, { useState, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -242,11 +241,11 @@ export function FileUploader() {
                 />
               </div>
               
-              <div>
-                <Label>Category</Label>
+              <div className="space-y-1">
+                <Label htmlFor="category">Category</Label>
                 <AudioCategorySelector 
+                  onChange={(value) => setCategory(value)}
                   value={category} 
-                  onChange={setCategory} 
                   disabled={isUploading}
                 />
               </div>

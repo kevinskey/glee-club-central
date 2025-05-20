@@ -74,9 +74,10 @@ export function RecordingStudio() {
         audioContextRef.current = new (window.AudioContext || (window as any).webkitAudioContext)();
       }
       
+      // Make sure we await the stream and check it's available before using it
       const stream = await startRecording();
       
-      // Fixed: Check if stream exists before proceeding
+      // Only proceed if we have a valid stream
       if (stream && canvasRef.current && audioContextRef.current) {
         analyserRef.current = audioContextRef.current.createAnalyser();
         analyserRef.current.fftSize = 2048;
@@ -98,6 +99,56 @@ export function RecordingStudio() {
       console.error("Failed to start recording:", error);
       toast.error("Could not start recording. Please check microphone permissions.");
     }
+  };
+  
+  // Audio visualization function
+  const visualize = () => {
+    if (!canvasRef.current || !analyserRef.current) return;
+    
+    const canvas = canvasRef.current;
+    const canvasContext = canvas.getContext('2d');
+    if (!canvasContext) return;
+    
+    const width = canvas.width;
+    const height = canvas.height;
+    const bufferLength = analyserRef.current.frequencyBinCount;
+    const dataArray = new Uint8Array(bufferLength);
+    
+    canvasContext.clearRect(0, 0, width, height);
+    
+    const draw = () => {
+      if (!analyserRef.current) return;
+      
+      animationRef.current = requestAnimationFrame(draw);
+      analyserRef.current.getByteTimeDomainData(dataArray);
+      
+      canvasContext.fillStyle = 'rgb(245, 245, 245)';
+      canvasContext.fillRect(0, 0, width, height);
+      canvasContext.lineWidth = 2;
+      canvasContext.strokeStyle = 'rgb(234, 88, 12)';
+      canvasContext.beginPath();
+      
+      const sliceWidth = width / bufferLength;
+      let x = 0;
+      
+      for (let i = 0; i < bufferLength; i++) {
+        const v = dataArray[i] / 128.0;
+        const y = v * height / 2;
+        
+        if (i === 0) {
+          canvasContext.moveTo(x, y);
+        } else {
+          canvasContext.lineTo(x, y);
+        }
+        
+        x += sliceWidth;
+      }
+      
+      canvasContext.lineTo(width, height / 2);
+      canvasContext.stroke();
+    };
+    
+    draw();
   };
   
   // Handle recording stop
@@ -197,56 +248,6 @@ export function RecordingStudio() {
       console.error("Export error:", error);
       toast.error(`Failed to export as ${format.toUpperCase()}`);
     }
-  };
-  
-  // Audio visualization function
-  const visualize = () => {
-    if (!canvasRef.current || !analyserRef.current) return;
-    
-    const canvas = canvasRef.current;
-    const canvasContext = canvas.getContext('2d');
-    if (!canvasContext) return;
-    
-    const width = canvas.width;
-    const height = canvas.height;
-    const bufferLength = analyserRef.current.frequencyBinCount;
-    const dataArray = new Uint8Array(bufferLength);
-    
-    canvasContext.clearRect(0, 0, width, height);
-    
-    const draw = () => {
-      if (!analyserRef.current) return;
-      
-      animationRef.current = requestAnimationFrame(draw);
-      analyserRef.current.getByteTimeDomainData(dataArray);
-      
-      canvasContext.fillStyle = 'rgb(245, 245, 245)';
-      canvasContext.fillRect(0, 0, width, height);
-      canvasContext.lineWidth = 2;
-      canvasContext.strokeStyle = 'rgb(234, 88, 12)';
-      canvasContext.beginPath();
-      
-      const sliceWidth = width / bufferLength;
-      let x = 0;
-      
-      for (let i = 0; i < bufferLength; i++) {
-        const v = dataArray[i] / 128.0;
-        const y = v * height / 2;
-        
-        if (i === 0) {
-          canvasContext.moveTo(x, y);
-        } else {
-          canvasContext.lineTo(x, y);
-        }
-        
-        x += sliceWidth;
-      }
-      
-      canvasContext.lineTo(width, height / 2);
-      canvasContext.stroke();
-    };
-    
-    draw();
   };
   
   // Clean up on unmount
@@ -378,8 +379,8 @@ export function RecordingStudio() {
               <div className="space-y-1">
                 <Label htmlFor="category">Category</Label>
                 <AudioCategorySelector 
-                  value={category} 
-                  onChange={setCategory} 
+                  value={category}
+                  onChange={(value) => setCategory(value)}
                 />
               </div>
               

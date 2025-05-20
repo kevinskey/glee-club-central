@@ -34,8 +34,8 @@ export function useAudioRecorder() {
     };
   }, []);
   
-  // Start recording
-  const startRecording = useCallback(async (): Promise<MediaStream | null> => {
+  // Start recording - Fix return type to ensure proper type checking
+  const startRecording = useCallback(async (): Promise<MediaStream> => {
     try {
       // Request microphone access
       const stream = await requestMicrophoneAccess();
