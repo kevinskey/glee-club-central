@@ -1,7 +1,7 @@
 
 import React from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { useNavigate } from "react-router-dom"; // Using useNavigate instead of Link
+import { useNavigate } from "react-router-dom";
 import { Music, Calendar, Users, FileText } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
@@ -45,9 +45,9 @@ const DashboardPage: React.FC = () => {
                 <Button 
                   variant="link" 
                   className="p-0 h-auto text-primary hover:underline"
-                  onClick={() => navigate("/dashboard/music")}
+                  onClick={() => navigate("/dashboard/recordings")}
                 >
-                  Music Portal
+                  Recordings
                 </Button>
               </li>
               <li className="flex items-center">
@@ -65,9 +65,9 @@ const DashboardPage: React.FC = () => {
                 <Button 
                   variant="link" 
                   className="p-0 h-auto text-primary hover:underline"
-                  onClick={() => navigate("/dashboard/members")}
+                  onClick={() => navigate("/dashboard/profile")}
                 >
-                  Members Directory
+                  My Profile
                 </Button>
               </li>
             </ul>
