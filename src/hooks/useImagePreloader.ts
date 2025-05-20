@@ -19,8 +19,8 @@ interface UseImagePreloaderResult {
  */
 export function useImagePreloader({
   images,
-  minImagesToLoad = 2,
-  timeout = 1500
+  minImagesToLoad = 1,
+  timeout = 1000
 }: UseImagePreloaderProps): UseImagePreloaderResult {
   const [loadedImages, setLoadedImages] = useState<Record<string, boolean>>({});
   const [initialLoadComplete, setInitialLoadComplete] = useState(false);
@@ -41,23 +41,29 @@ export function useImagePreloader({
     
     loadedCountRef.current++;
     
-    if (loadedCountRef.current >= Math.min(minImagesToLoad, images.length)) {
+    if (loadedCountRef.current >= Math.min(minImagesToLoad, images.length || 1)) {
       // Once at least minimum images are loaded (or all if less than min), start slideshow
       setLoadedImages(prev => ({ ...prev, [src]: true }));
       setInitialLoadComplete(true);
       setIsLoading(false);
     }
     
-    if (loadedCountRef.current === images.length) {
+    if (images && loadedCountRef.current === images.length) {
       // All images loaded
       setLoadedImages(prev => ({ ...prev, [src]: true }));
     }
-  }, [images.length, minImagesToLoad]);
+  }, [images, minImagesToLoad]);
   
   useEffect(() => {
-    if (!images || images.length === 0) {
+    // Reset state if image array changes
+    if (images !== undefined && images.length === 0) {
       setInitialLoadComplete(true);
       setIsLoading(false);
+      return;
+    }
+
+    // Guard against undefined or empty images
+    if (!images || images.length === 0) {
       return;
     }
     
@@ -74,7 +80,9 @@ export function useImagePreloader({
     processedImages.current = {};
     
     // Preload all images
-    images.forEach((src) => {
+    const validImages = images.filter(src => src);
+    
+    validImages.forEach((src) => {
       // Skip if already loaded
       if (loadedImages[src]) {
         loadedCountRef.current++;
@@ -83,7 +91,6 @@ export function useImagePreloader({
       }
       
       const img = new Image();
-      img.src = src;
       
       img.onload = () => markImageLoaded(src);
       
@@ -91,12 +98,15 @@ export function useImagePreloader({
         console.error(`Failed to load image: ${src}`);
         markImageLoaded(src);
       };
+      
+      img.src = src;
     });
     
     // Safety timeout to start slideshow even if not all images load
     timerRef.current = window.setTimeout(() => {
       if (!isMountedRef.current) return;
       if (!initialLoadComplete && loadedCountRef.current > 0) {
+        console.log("Safety timeout fired, images partially loaded");
         setInitialLoadComplete(true);
         setIsLoading(false);
       }

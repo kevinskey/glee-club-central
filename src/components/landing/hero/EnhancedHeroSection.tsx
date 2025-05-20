@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from "react";
-import { BackgroundSlideshow } from "@/components/landing/BackgroundSlideshow";
+import { BackgroundSlideshow } from "@/components/landing/slideshow/BackgroundSlideshow";
 import { HeroContent } from "@/components/landing/hero/HeroContent";
 import { HeroSeal } from "@/components/landing/hero/HeroSeal";
 import { useSiteImages } from "@/hooks/useSiteImages";
@@ -20,55 +20,72 @@ export function EnhancedHeroSection() {
   ];
   
   // Fetch any custom hero images, but use default ones immediately
-  const { images, isLoading: imagesLoading } = useSiteImages("hero");
+  const { images: customImages, isLoading: imagesLoading } = useSiteImages("hero");
+  const [heroImageUrls, setHeroImageUrls] = useState<string[]>(defaultHeroImages);
+  
+  // Update hero images when custom ones are loaded
+  useEffect(() => {
+    if (customImages && customImages.length > 0) {
+      const validImages = customImages
+        .filter(img => img && img.file_url)
+        .map(img => img.file_url);
+      
+      if (validImages.length > 0) {
+        setHeroImageUrls(validImages);
+      }
+    }
+  }, [customImages]);
   
   // Preload images to avoid flashing
   useEffect(() => {
+    let mounted = true;
+    
     const preloadImages = () => {
-      const imagesToPreload = defaultHeroImages.concat(
-        (images || []).map(img => img.file_url)
-      );
-      
       let loadedCount = 0;
-      const totalImages = imagesToPreload.length;
+      const totalImages = Math.min(2, heroImageUrls.length);
       
       // Fast-track loading if images are already cached
       const preloadedTimer = setTimeout(() => {
-        if (!imagesReady) {
+        if (!imagesReady && mounted) {
           setImagesReady(true);
           setIsLoading(false);
         }
       }, 800);
       
-      imagesToPreload.forEach(src => {
+      heroImageUrls.slice(0, 2).forEach(src => {
         const img = new Image();
         img.onload = () => {
           loadedCount++;
-          if (loadedCount >= Math.min(2, totalImages)) {
+          if (loadedCount >= totalImages && mounted) {
             setImagesReady(true);
             
             // Give a slight delay before hiding loading indicator for smooth transition
-            const timer = setTimeout(() => {
-              setIsLoading(false);
+            setTimeout(() => {
+              if (mounted) {
+                setIsLoading(false);
+              }
               clearTimeout(preloadedTimer);
             }, 100);
-            
-            return () => clearTimeout(timer);
+          }
+        };
+        img.onerror = () => {
+          console.error("Failed to load hero image:", src);
+          loadedCount++;
+          if (loadedCount >= totalImages && mounted) {
+            setImagesReady(true);
+            setIsLoading(false);
           }
         };
         img.src = src;
       });
-      
-      return () => clearTimeout(preloadedTimer);
     };
     
     preloadImages();
-  }, [images]);
-  
-  // Always use default images initially, then use custom ones if they exist and are loaded
-  const heroImageUrls = (images && images.length > 0)
-    ? images.map(img => img.file_url)
-    : defaultHeroImages;
+    
+    return () => {
+      mounted = false;
+    };
+  }, [heroImageUrls]);
 
   return (
     <section className="relative h-[75vh] md:h-[85vh] flex flex-col justify-end pb-8 md:pb-24 overflow-hidden">

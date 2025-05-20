@@ -1,5 +1,5 @@
 
-import React, { memo } from "react";
+import React, { memo, useState, useEffect } from "react";
 import { useImagePreloader } from "@/hooks/useImagePreloader";
 import { SlideshowProvider, useSlideshowContext } from "./SlideshowContext";
 import { SlideshowImage } from "./SlideshowImage";
@@ -48,6 +48,8 @@ const SlideshowContent = memo(({
   );
 });
 
+SlideshowContent.displayName = 'SlideshowContent';
+
 // Memoized single image component
 const SingleImageBackground = memo(({ image, overlayOpacity }: { image: string; overlayOpacity: number }) => {
   return (
@@ -65,42 +67,56 @@ const SingleImageBackground = memo(({ image, overlayOpacity }: { image: string; 
   );
 });
 
+SingleImageBackground.displayName = 'SingleImageBackground';
+
 export function BackgroundSlideshow({
   images,
   duration = 10000, // 10 seconds between transitions
   transition = 2000, // 2 seconds for the transition effect
   overlayOpacity = 0.5,
 }: BackgroundSlideshowProps) {
+  const [renderedImages, setRenderedImages] = useState<string[]>([]);
   const { initialLoadComplete, isLoading } = useImagePreloader({ 
     images,
-    minImagesToLoad: 2,
-    timeout: 1500
+    minImagesToLoad: 1,
+    timeout: 1000
   });
 
+  // Set the rendered images once we have valid data
+  useEffect(() => {
+    if (images && images.length > 0 && images[0]) {
+      setRenderedImages(images);
+    }
+  }, [images]);
+
   // Handle empty image array
-  if (!images || images.length === 0) {
+  if (!renderedImages || renderedImages.length === 0) {
     return <div className="absolute inset-0 bg-background/50 backdrop-blur-sm"></div>;
   }
   
   // For single image (no transitions needed)
-  if (images.length === 1) {
-    return <SingleImageBackground image={images[0]} overlayOpacity={overlayOpacity} />;
+  if (renderedImages.length === 1) {
+    return <SingleImageBackground image={renderedImages[0]} overlayOpacity={overlayOpacity} />;
   }
 
   // If images aren't loaded yet, show placeholder with smooth transition
   if (!initialLoadComplete || isLoading) {
-    return <div className="absolute inset-0 bg-background/80 transition-opacity duration-500"></div>;
+    return (
+      <div className="absolute inset-0 bg-background/80 transition-opacity duration-500 flex items-center justify-center">
+        <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent"></div>
+      </div>
+    );
   }
 
   return (
     <SlideshowProvider 
-      images={images}
+      images={renderedImages}
       duration={duration}
       transition={transition}
       initialLoadComplete={initialLoadComplete}
     >
       <SlideshowContent 
-        images={images} 
+        images={renderedImages} 
         transition={transition} 
         overlayOpacity={overlayOpacity} 
       />

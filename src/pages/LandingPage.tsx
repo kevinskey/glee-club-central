@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from 'react';
 import { HeroSection } from '@/components/landing/HeroSection';
 import { FeaturesSection } from '@/components/landing/FeaturesSection';
@@ -12,32 +13,56 @@ import { Spinner } from "@/components/ui/spinner";
 
 const LandingPage = () => {
   const [isLoading, setIsLoading] = useState(true);
+  const [imagesInitialized, setImagesInitialized] = useState(false);
   
+  // Set up initialization tracking
   useEffect(() => {
-    // Set up loading state
-    const readyState = document.readyState;
+    // Check if images were already initialized
+    const alreadyInitialized = localStorage.getItem('heroImagesInitialized') === 'true';
     
-    if (readyState === 'complete') {
-      // If document is already loaded, wait a short time to ensure hero images initialize
-      setTimeout(() => setIsLoading(false), 300);
-    } else {
-      // Otherwise wait for window load plus a short delay for hero images
-      const handleLoad = () => {
-        setTimeout(() => setIsLoading(false), 300);
-      };
+    if (alreadyInitialized) {
+      setImagesInitialized(true);
       
-      window.addEventListener('load', handleLoad);
-      return () => window.removeEventListener('load', handleLoad);
+      // Short delay to ensure smooth transition
+      const timer = setTimeout(() => {
+        setIsLoading(false);
+      }, 200);
+      
+      return () => clearTimeout(timer);
     }
+    
+    // Set up listener for image initialization complete
+    const checkInitialization = setInterval(() => {
+      if (localStorage.getItem('heroImagesInitialized') === 'true') {
+        setImagesInitialized(true);
+        clearInterval(checkInitialization);
+        
+        // Short delay to ensure smooth transition
+        setTimeout(() => {
+          setIsLoading(false);
+        }, 300);
+      }
+    }, 100);
+    
+    // Safety timeout - if images aren't initialized after 3 seconds, show the page anyway
+    const safetyTimeout = setTimeout(() => {
+      setIsLoading(false);
+      clearInterval(checkInitialization);
+    }, 3000);
+    
+    return () => {
+      clearInterval(checkInitialization);
+      clearTimeout(safetyTimeout);
+    };
   }, []);
   
   return (
     <>
-      {/* Initialize hero images */}
-      <HeroImageInitializer />
+      {/* Initialize hero images in the background */}
+      <HeroImageInitializer onInitialized={() => setImagesInitialized(true)} />
       
       {isLoading ? (
-        <div className="flex items-center justify-center min-h-[600px]">
+        <div className="flex items-center justify-center min-h-[600px] w-full">
           <Spinner size="lg" />
         </div>
       ) : (

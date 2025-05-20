@@ -41,7 +41,9 @@ export function SlideshowProvider({
   useEffect(() => {
     if (isInitialRender && initialLoadComplete) {
       const timer = setTimeout(() => {
-        setIsInitialRender(false);
+        if (isMountedRef.current) {
+          setIsInitialRender(false);
+        }
       }, 200);
       return () => clearTimeout(timer);
     }
@@ -59,7 +61,7 @@ export function SlideshowProvider({
     // Function to handle transitions
     const handleTransition = () => {
       // Prevent multiple transitions from happening simultaneously
-      if (isChangingRef.current) return;
+      if (isChangingRef.current || !isMountedRef.current) return;
       isChangingRef.current = true;
       
       setIsTransitioning(true);
@@ -97,17 +99,17 @@ export function SlideshowProvider({
     };
   }, []);
 
+  const value = {
+    currentIndex,
+    nextIndex,
+    isTransitioning,
+    isInitialRender,
+    setIsInitialRender,
+    initialLoadComplete,
+  };
+
   return (
-    <SlideshowContext.Provider
-      value={{
-        currentIndex,
-        nextIndex,
-        isTransitioning,
-        isInitialRender,
-        setIsInitialRender,
-        initialLoadComplete,
-      }}
-    >
+    <SlideshowContext.Provider value={value}>
       {children}
     </SlideshowContext.Provider>
   );

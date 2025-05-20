@@ -3,8 +3,12 @@ import React, { useEffect, useState, useRef } from 'react';
 import { seedDefaultHeroImages } from '@/utils/siteImages';
 import { toast } from "sonner";
 
+interface HeroImageInitializerProps {
+  onInitialized?: () => void;
+}
+
 // This component will run once to ensure we have hero images on first load
-export const HeroImageInitializer: React.FC = () => {
+export const HeroImageInitializer: React.FC<HeroImageInitializerProps> = ({ onInitialized }) => {
   const [isInitialized, setIsInitialized] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const isMountedRef = useRef(true);
@@ -19,6 +23,11 @@ export const HeroImageInitializer: React.FC = () => {
       if (isMountedRef.current) {
         setIsInitialized(true);
         setIsLoading(false);
+        
+        // Call the callback if provided
+        if (onInitialized) {
+          onInitialized();
+        }
       }
       return;
     }
@@ -42,6 +51,11 @@ export const HeroImageInitializer: React.FC = () => {
           setIsInitialized(true);
           setIsLoading(false);
           localStorage.setItem('heroImagesInitialized', 'true');
+          
+          // Call the callback if provided
+          if (onInitialized) {
+            onInitialized();
+          }
         }
       } catch (error) {
         console.error("Error initializing hero images:", error);
@@ -66,7 +80,7 @@ export const HeroImageInitializer: React.FC = () => {
       isMountedRef.current = false;
       clearTimeout(timeoutId);
     };
-  }, []);
+  }, [onInitialized]);
   
   // This component doesn't render anything
   return null;
