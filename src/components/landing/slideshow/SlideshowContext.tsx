@@ -30,14 +30,13 @@ export function SlideshowProvider({
   const [currentIndex, setCurrentIndex] = useState(0);
   const [nextIndex, setNextIndex] = useState(1);
   const [isTransitioning, setIsTransitioning] = useState(false);
-  const [isInitialRender, setIsInitialRender] = useState(false); // Start with false to prevent flashing
+  const [isInitialRender, setIsInitialRender] = useState(false);
 
   const timerRef = useRef<number | null>(null);
   const intervalRef = useRef<number | null>(null);
   const isMountedRef = useRef(true);
-  const isChangingRef = useRef(false);
-
-  // Set up slideshow with proper timing - simplified to avoid loops
+  
+  // Set up slideshow with proper timing
   useEffect(() => {
     // Mark component as mounted
     isMountedRef.current = true;
@@ -49,50 +48,48 @@ export function SlideshowProvider({
     if (timerRef.current) window.clearTimeout(timerRef.current);
     if (intervalRef.current) window.clearInterval(intervalRef.current);
     
-    // Function to handle transitions
-    const handleTransition = () => {
-      // Prevent multiple transitions from happening simultaneously
-      if (isChangingRef.current || !isMountedRef.current) return;
-      isChangingRef.current = true;
+    // Set up a simple interval for transitions
+    const interval = window.setInterval(() => {
+      if (!isMountedRef.current) return;
       
       setIsTransitioning(true);
       
-      // After transition completes, update to next image
+      // After transition completes, update indices
       timerRef.current = window.setTimeout(() => {
         if (!isMountedRef.current) return;
         
-        const newCurrentIndex = nextIndex;
-        const newNextIndex = (nextIndex + 1) % images.length;
+        setCurrentIndex(prevIndex => {
+          const newIndex = (prevIndex + 1) % images.length;
+          setNextIndex((newIndex + 1) % images.length);
+          return newIndex;
+        });
         
-        setCurrentIndex(newCurrentIndex);
-        setNextIndex(newNextIndex);
         setIsTransitioning(false);
-        isChangingRef.current = false;
       }, transition);
-    };
-
-    // Set up interval for consistent timing between transitions
-    intervalRef.current = window.setInterval(handleTransition, duration);
+      
+    }, duration);
+    
+    intervalRef.current = interval;
     
     return () => {
       // Clean up timers
+      isMountedRef.current = false;
       if (timerRef.current) window.clearTimeout(timerRef.current);
       if (intervalRef.current) window.clearInterval(intervalRef.current);
-      isMountedRef.current = false;
     };
-  }, [images, duration, transition, nextIndex]);
-
-  const value = {
-    currentIndex,
-    nextIndex,
-    isTransitioning,
-    isInitialRender,
-    setIsInitialRender,
-    initialLoadComplete,
-  };
+  }, [images, duration, transition]);
 
   return (
-    <SlideshowContext.Provider value={value}>
+    <SlideshowContext.Provider 
+      value={{
+        currentIndex,
+        nextIndex,
+        isTransitioning,
+        isInitialRender,
+        setIsInitialRender,
+        initialLoadComplete,
+      }}
+    >
       {children}
     </SlideshowContext.Provider>
   );

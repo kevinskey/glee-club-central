@@ -1,6 +1,5 @@
 
 import React, { memo, useState, useEffect } from "react";
-import { useImagePreloader } from "@/hooks/useImagePreloader";
 import { SlideshowProvider, useSlideshowContext } from "./SlideshowContext";
 import { SlideshowImage } from "./SlideshowImage";
 
@@ -23,18 +22,24 @@ const SlideshowContent = memo(({
 }) => {
   const { currentIndex, nextIndex, isTransitioning } = useSlideshowContext();
   
+  // Use the first image if available
+  const currentImage = images[currentIndex] || images[0];
+  
+  // Use a different image for next if available, otherwise use the first image
+  const nextImage = images[nextIndex] || (images.length > 1 ? images[1] : images[0]);
+  
   return (
     <div className="absolute inset-0 overflow-hidden">
       {/* Current Image */}
       <SlideshowImage 
-        src={images[currentIndex]} 
+        src={currentImage} 
         isActive={!isTransitioning}
         transitionDuration={transition}
       />
       
       {/* Next Image */}
       <SlideshowImage 
-        src={images[nextIndex]} 
+        src={nextImage} 
         isActive={isTransitioning}
         transitionDuration={transition}
       />
@@ -71,38 +76,38 @@ SingleImageBackground.displayName = 'SingleImageBackground';
 
 export function BackgroundSlideshow({
   images,
-  duration = 10000, // 10 seconds between transitions
-  transition = 2000, // 2 seconds for the transition effect
+  duration = 10000,
+  transition = 2000,
   overlayOpacity = 0.5,
 }: BackgroundSlideshowProps) {
-  const [renderedImages, setRenderedImages] = useState<string[]>([]);
+  const [validImages, setValidImages] = useState<string[]>([]);
   
-  // Simplified image preloading
+  // Filter out any invalid images
   useEffect(() => {
-    if (images && images.length > 0 && images[0]) {
-      setRenderedImages(images);
+    if (images && images.length > 0) {
+      setValidImages(images.filter(img => img));
     }
   }, [images]);
-
+  
   // Handle empty image array
-  if (!renderedImages || renderedImages.length === 0) {
-    return <div className="absolute inset-0 bg-background/50 backdrop-blur-sm"></div>;
+  if (!validImages || validImages.length === 0) {
+    return <div className="absolute inset-0 bg-background/50"></div>;
   }
   
   // For single image (no transitions needed)
-  if (renderedImages.length === 1) {
-    return <SingleImageBackground image={renderedImages[0]} overlayOpacity={overlayOpacity} />;
+  if (validImages.length === 1) {
+    return <SingleImageBackground image={validImages[0]} overlayOpacity={overlayOpacity} />;
   }
 
   return (
     <SlideshowProvider 
-      images={renderedImages}
+      images={validImages}
       duration={duration}
       transition={transition}
-      initialLoadComplete={true} // Always consider initial load complete to avoid flashing
+      initialLoadComplete={true}
     >
       <SlideshowContent 
-        images={renderedImages} 
+        images={validImages} 
         transition={transition} 
         overlayOpacity={overlayOpacity} 
       />

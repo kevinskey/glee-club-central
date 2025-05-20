@@ -1,7 +1,6 @@
 
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { seedDefaultHeroImages } from '@/utils/siteImages';
-import { toast } from "sonner";
 
 interface HeroImageInitializerProps {
   onInitialized?: () => void;
@@ -9,26 +8,23 @@ interface HeroImageInitializerProps {
 
 // This component will run once to ensure we have hero images on first load
 export const HeroImageInitializer: React.FC<HeroImageInitializerProps> = ({ onInitialized }) => {
-  const [isInitialized, setIsInitialized] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
-  const isMountedRef = useRef(true);
+  const initialized = useRef(false);
   
   useEffect(() => {
-    // Track component mount state
-    isMountedRef.current = true;
+    // Only run once
+    if (initialized.current) {
+      return;
+    }
+    
+    initialized.current = true;
     
     // Check if already initialized to avoid multiple initializations
     const alreadyInitialized = localStorage.getItem('heroImagesInitialized') === 'true';
     
     if (alreadyInitialized) {
-      if (isMountedRef.current) {
-        setIsInitialized(true);
-        setIsLoading(false);
-        
-        // Call the callback if provided
-        if (onInitialized) {
-          onInitialized();
-        }
+      // Call the callback if provided
+      if (onInitialized) {
+        onInitialized();
       }
       return;
     }
@@ -36,8 +32,6 @@ export const HeroImageInitializer: React.FC<HeroImageInitializerProps> = ({ onIn
     // Initialize hero images
     const initializeHeroImages = async () => {
       try {
-        setIsLoading(true);
-        
         // Add the default hero images
         await seedDefaultHeroImages([
           "/lovable-uploads/c69d3562-4bdc-4e42-9415-aefdd5f573e8.png",
@@ -47,35 +41,24 @@ export const HeroImageInitializer: React.FC<HeroImageInitializerProps> = ({ onIn
           "/lovable-uploads/a1d9a510-4276-40df-bfb5-86a441d06e4f.png"
         ]);
         
-        // Only update state if component is still mounted
-        if (isMountedRef.current) {
-          localStorage.setItem('heroImagesInitialized', 'true');
-          setIsInitialized(true);
-          setIsLoading(false);
-          
-          // Call the callback if provided
-          if (onInitialized) {
-            onInitialized();
-          }
+        localStorage.setItem('heroImagesInitialized', 'true');
+        
+        // Call the callback if provided
+        if (onInitialized) {
+          onInitialized();
         }
       } catch (error) {
         console.error("Error initializing hero images:", error);
-        if (isMountedRef.current) {
-          setIsLoading(false);
-          toast.error("Could not load hero images", { 
-            description: "Please refresh the page to try again" 
-          });
+        
+        // Call the callback anyway to prevent blocking the UI
+        if (onInitialized) {
+          onInitialized();
         }
       }
     };
     
-    // Initialize immediately without delay
+    // Initialize immediately
     initializeHeroImages();
-    
-    return () => {
-      // Mark component as unmounted to prevent state updates
-      isMountedRef.current = false;
-    };
   }, [onInitialized]);
   
   // This component doesn't render anything
