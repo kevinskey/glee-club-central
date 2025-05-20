@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { HeroSection } from '@/components/landing/HeroSection';
 import { FeaturesSection } from '@/components/landing/FeaturesSection';
@@ -15,12 +14,21 @@ const LandingPage = () => {
   const [isLoading, setIsLoading] = useState(true);
   
   useEffect(() => {
-    // Add a small delay to ensure hero images are loaded
-    const timer = setTimeout(() => {
-      setIsLoading(false);
-    }, 800);
+    // Set up loading state
+    const readyState = document.readyState;
     
-    return () => clearTimeout(timer);
+    if (readyState === 'complete') {
+      // If document is already loaded, wait a short time to ensure hero images initialize
+      setTimeout(() => setIsLoading(false), 300);
+    } else {
+      // Otherwise wait for window load plus a short delay for hero images
+      const handleLoad = () => {
+        setTimeout(() => setIsLoading(false), 300);
+      };
+      
+      window.addEventListener('load', handleLoad);
+      return () => window.removeEventListener('load', handleLoad);
+    }
   }, []);
   
   return (

@@ -13,10 +13,19 @@ export const HeroImageInitializer: React.FC = () => {
     // Track component mount state
     isMountedRef.current = true;
     
+    // Check if already initialized to avoid multiple initializations
+    const alreadyInitialized = localStorage.getItem('heroImagesInitialized') === 'true';
+    if (alreadyInitialized) {
+      if (isMountedRef.current) {
+        setIsInitialized(true);
+        setIsLoading(false);
+      }
+      return;
+    }
+    
     // Initialize hero images
     const initializeHeroImages = async () => {
       try {
-        console.log('Initializing hero images...');
         setIsLoading(true);
         
         // Add the default hero images
@@ -30,7 +39,6 @@ export const HeroImageInitializer: React.FC = () => {
         
         // Only update state if component is still mounted
         if (isMountedRef.current) {
-          console.log('Hero images initialized successfully');
           setIsInitialized(true);
           setIsLoading(false);
           localStorage.setItem('heroImagesInitialized', 'true');
@@ -51,7 +59,7 @@ export const HeroImageInitializer: React.FC = () => {
       if (isMountedRef.current) {
         initializeHeroImages();
       }
-    }, 300);
+    }, 100); // Reduced from 300ms to 100ms for faster loading
     
     return () => {
       // Mark component as unmounted to prevent state updates

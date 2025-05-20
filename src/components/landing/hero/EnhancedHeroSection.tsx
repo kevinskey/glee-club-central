@@ -8,6 +8,7 @@ import { Spinner } from "@/components/ui/spinner";
 
 export function EnhancedHeroSection() {
   const [isLoading, setIsLoading] = useState(true);
+  const [imagesReady, setImagesReady] = useState(false);
   
   // Default hero images that we'll always use if no custom ones are set
   const defaultHeroImages = [
@@ -21,20 +22,6 @@ export function EnhancedHeroSection() {
   // Fetch any custom hero images, but use default ones immediately
   const { images, isLoading: imagesLoading } = useSiteImages("hero");
   
-  useEffect(() => {
-    // Set loading state based on image loading
-    if (imagesLoading) {
-      setIsLoading(true);
-    } else {
-      // Give a slight delay before hiding loading indicator to ensure smooth transition
-      const timer = setTimeout(() => {
-        setIsLoading(false);
-      }, 500);
-      
-      return () => clearTimeout(timer);
-    }
-  }, [imagesLoading]);
-  
   // Preload images to avoid flashing
   useEffect(() => {
     const preloadImages = () => {
@@ -42,10 +29,37 @@ export function EnhancedHeroSection() {
         (images || []).map(img => img.file_url)
       );
       
+      let loadedCount = 0;
+      const totalImages = imagesToPreload.length;
+      
+      // Fast-track loading if images are already cached
+      const preloadedTimer = setTimeout(() => {
+        if (!imagesReady) {
+          setImagesReady(true);
+          setIsLoading(false);
+        }
+      }, 800);
+      
       imagesToPreload.forEach(src => {
         const img = new Image();
+        img.onload = () => {
+          loadedCount++;
+          if (loadedCount >= Math.min(2, totalImages)) {
+            setImagesReady(true);
+            
+            // Give a slight delay before hiding loading indicator for smooth transition
+            const timer = setTimeout(() => {
+              setIsLoading(false);
+              clearTimeout(preloadedTimer);
+            }, 100);
+            
+            return () => clearTimeout(timer);
+          }
+        };
         img.src = src;
       });
+      
+      return () => clearTimeout(preloadedTimer);
     };
     
     preloadImages();
@@ -62,17 +76,17 @@ export function EnhancedHeroSection() {
         images={heroImageUrls} 
         overlayOpacity={0.5} 
         duration={8000} // 8 seconds between transitions
-        transition={1500} // 1.5 seconds for the transition effect
+        transition={1200} // 1.2 seconds for the transition effect (reduced for smoother experience)
       />
       
       {isLoading && (
-        <div className="absolute inset-0 flex items-center justify-center z-30 bg-background/50 backdrop-blur-sm">
+        <div className="absolute inset-0 flex items-center justify-center z-30 bg-background/50 backdrop-blur-sm transition-opacity duration-300">
           <Spinner size="lg" />
         </div>
       )}
       
       {/* Content overlay with Spelman Glee Club branding */}
-      <div className="relative z-10 container mx-auto px-4 py-12 md:py-20">
+      <div className={`relative z-10 container mx-auto px-4 py-12 md:py-20 transition-opacity duration-300 ${imagesReady ? 'opacity-100' : 'opacity-0'}`}>
         <HeroContent />
       </div>
       

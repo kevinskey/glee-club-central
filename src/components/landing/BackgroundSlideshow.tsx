@@ -18,6 +18,7 @@ export function BackgroundSlideshow({
   const [currentIndex, setCurrentIndex] = useState(0);
   const [nextIndex, setNextIndex] = useState(1);
   const [isTransitioning, setIsTransitioning] = useState(false);
+  const [isInitialRender, setIsInitialRender] = useState(true);
   const [loadedImages, setLoadedImages] = useState<Record<string, boolean>>({});
   const [initialLoadComplete, setInitialLoadComplete] = useState(false);
   
@@ -80,15 +81,26 @@ export function BackgroundSlideshow({
       if (!isMountedRef.current) return;
       if (!initialLoadComplete && loadedCount > 0) {
         setInitialLoadComplete(true);
+        setInitialRender(false);
         setLoadedImages(prev => ({ ...prev, ...newLoadedImages }));
       }
-    }, 2000);
+    }, 1500); // Reduced from 2000ms to 1500ms for faster initial render
     
     return () => {
       isMountedRef.current = false;
       clearTimeout(safetyTimer);
     };
   }, [images]);
+
+  // After initial render, mark it as complete to prevent extra flashing
+  useEffect(() => {
+    if (isInitialRender && initialLoadComplete) {
+      const timer = setTimeout(() => {
+        setIsInitialRender(false);
+      }, 200);
+      return () => clearTimeout(timer);
+    }
+  }, [isInitialRender, initialLoadComplete]);
   
   // Set up slideshow with proper timing
   useEffect(() => {
@@ -161,10 +173,10 @@ export function BackgroundSlideshow({
     );
   }
 
-  // If images aren't loaded yet, show placeholder
+  // If images aren't loaded yet, show placeholder with smooth transition
   if (!initialLoadComplete) {
     return (
-      <div className="absolute inset-0 bg-background/80"></div>
+      <div className="absolute inset-0 bg-background/80 transition-opacity duration-500"></div>
     );
   }
 
