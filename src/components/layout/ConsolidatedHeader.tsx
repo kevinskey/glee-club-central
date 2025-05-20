@@ -22,6 +22,7 @@ import {
 import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { Icons } from "@/components/Icons";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { GleeToolsDropdown } from "@/components/glee-tools/GleeToolsDropdown";
 
 export function ConsolidatedHeader() {
   const { profile, signOut, isAuthenticated } = useAuth();
@@ -67,8 +68,9 @@ export function ConsolidatedHeader() {
           </Link>
         </div>
           
-        {/* Right side: theme toggle and menu dropdown */}
+        {/* Right side: glee tools, theme toggle and menu dropdown */}
         <div className="flex items-center gap-2">
+          <GleeToolsDropdown />
           <ThemeToggle />
           
           <DropdownMenuProvider>
@@ -183,7 +185,7 @@ export function ConsolidatedHeader() {
       </div>
       
       <div className="text-center text-xs text-muted-foreground border-t py-1">
-        Glee World v1.0
+        Glee Tools v1.0
       </div>
     </header>
   );
