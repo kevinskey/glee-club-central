@@ -1,6 +1,6 @@
 
 import React, { useState, useRef } from "react";
-import { Headphones, Piano, Mic, Clock } from "lucide-react";
+import { Headphones, Piano, Mic, Clock, Music } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { 
   DropdownMenu,
