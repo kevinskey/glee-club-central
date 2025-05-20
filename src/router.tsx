@@ -7,11 +7,33 @@ import HomeTemp from './pages/HomeTemp';
 import App from './App';
 import { dashboardRoutes } from './routes/dashboardRoutes';
 import { authRoutes } from './routes/authRoutes';
+import MainLayout from './layouts/MainLayout';
+import HomePage from './pages/HomePage';
 
 // Create a properly structured router with all routes
 export const router = createBrowserRouter([
+  // Public routes with MainLayout
   {
     path: '/',
+    element: <MainLayout />,
+    children: [
+      {
+        index: true,
+        element: <HomePage />,
+      },
+      {
+        path: 'home-temp',
+        element: <HomeTemp />,
+      },
+      {
+        path: 'under-construction',
+        element: <StaticLandingPage />,
+      },
+    ],
+  },
+  // Dashboard routes
+  {
+    path: '/dashboard',
     element: <App />,
     errorElement: (
       <ErrorBoundary>
@@ -31,25 +53,10 @@ export const router = createBrowserRouter([
         </div>
       </ErrorBoundary>
     ),
-    children: [
-      {
-        index: true,
-        element: <Navigate to="/home-temp" replace />,
-      },
-      {
-        path: 'home-temp',
-        element: <HomeTemp />,
-      },
-      {
-        path: 'under-construction',
-        element: <StaticLandingPage />,
-      },
-      // Add dashboard routes directly as children of App
-      ...dashboardRoutes.children,
-      // Include auth routes
-      ...authRoutes,
-    ],
+    children: dashboardRoutes.children,
   },
+  // Auth routes 
+  ...authRoutes,
 ]);
 
 export default router;
