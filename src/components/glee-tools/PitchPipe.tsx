@@ -1,533 +1,436 @@
 
-import React, { useState, useEffect, useRef, MutableRefObject } from "react";
-import { Slider } from "@/components/ui/slider";
+import React, { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select";
+import { Slider } from "@/components/ui/slider";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Mic, MicOff, Play, Square, Save } from "lucide-react";
-import { useAuth } from "@/contexts/AuthContext";
-import { useToast } from "@/hooks/use-toast";
-import { NOTE_FREQUENCIES, resumeAudioContext } from "@/utils/audioUtils";
+import { toast } from "sonner";
+import { playTone, getNoteFrequency, NoteEvent, RecordingData } from "@/utils/audioUtils";
+import { Square, Triangle, Disc, Play, Record } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/contexts/AuthContext";
 
-// Piano key type
-type PianoKey = {
-  note: string;
-  frequency: number;
-  isSharp: boolean;
-  label: string;
-};
-
-// Type for the waveform options
-type WaveformType = "sine" | "triangle" | "square" | "sawtooth";
-
-// Type for recorded note
-type RecordedNote = {
-  note: string;
-  frequency: number;
-  timestamp: number;
-  duration: number;
-};
+// Piano key data
+const PIANO_KEYS = [
+  { note: 'C', isSharp: false },
+  { note: 'C#', isSharp: true },
+  { note: 'D', isSharp: false },
+  { note: 'D#', isSharp: true },
+  { note: 'E', isSharp: false },
+  { note: 'F', isSharp: false },
+  { note: 'F#', isSharp: true },
+  { note: 'G', isSharp: false },
+  { note: 'G#', isSharp: true },
+  { note: 'A', isSharp: false },
+  { note: 'A#', isSharp: true },
+  { note: 'B', isSharp: false }
+];
 
 interface PitchPipeProps {
-  audioContextRef: MutableRefObject<AudioContext | null>;
+  onClose?: () => void;
 }
 
-export function PitchPipe({ audioContextRef }: PitchPipeProps) {
-  // State
-  const [octaveOffset, setOctaveOffset] = useState(0);
-  const [volume, setVolume] = useState(0.7);
-  const [waveform, setWaveform] = useState<WaveformType>("sine");
-  const [isPlaying, setIsPlaying] = useState(false);
-  const [currentNote, setCurrentNote] = useState<string | null>(null);
+export function PitchPipe({ onClose }: PitchPipeProps) {
+  // Audio state
+  const [octave, setOctave] = useState<number>(4);
+  const [waveform, setWaveform] = useState<OscillatorType>('sine');
+  const [volume, setVolume] = useState<number>(0.5);
+  const audioContextRef = useRef<AudioContext | null>(null);
+  
+  // Recording state
   const [isRecording, setIsRecording] = useState(false);
-  const [recordingName, setRecordingName] = useState("");
-  const [recordedNotes, setRecordedNotes] = useState<RecordedNote[]>([]);
-  const [isPlayingRecording, setIsPlayingRecording] = useState(false);
+  const [recordingName, setRecordingName] = useState('');
+  const [recordings, setRecordings] = useState<{id: string, name: string, data: RecordingData}[]>([]);
+  const [events, setEvents] = useState<NoteEvent[]>([]);
+  const recordStartTimeRef = useRef<number | null>(null);
   
-  // References
-  const activeOscillator = useRef<OscillatorNode | null>(null);
-  const gainNode = useRef<GainNode | null>(null);
-  const recordingStartTime = useRef<number>(0);
-  const playbackTimer = useRef<number | null>(null);
+  // Auth
+  const { isAuthenticated } = useAuth();
   
-  // Hooks
-  const { toast } = useToast();
-  const { user } = useAuth();
-  
-  // Generate piano keys based on octave offset
-  const getPianoKeys = (): PianoKey[] => {
-    const noteNames = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"];
-    const octave = 4 + octaveOffset;
+  // Initialize audio context
+  useEffect(() => {
+    if (!audioContextRef.current) {
+      try {
+        audioContextRef.current = new (window.AudioContext || (window as any).webkitAudioContext)();
+      } catch (error) {
+        toast.error("WebAudio API is not supported in this browser");
+      }
+    }
     
-    return noteNames.map(noteName => {
-      const note = `${noteName}${octave}`;
-      const isSharp = noteName.includes("#");
-      return {
-        note,
-        frequency: NOTE_FREQUENCIES[note] || 0,
-        isSharp,
-        label: noteName
-      };
-    });
-  };
+    return () => {
+      // Clean up if needed
+    };
+  }, []);
   
-  // Safe initialization of audio nodes
-  const initAudioNodes = () => {
-    if (!audioContextRef.current) return false;
+  // Load user's recordings
+  useEffect(() => {
+    if (isAuthenticated) {
+      fetchRecordings();
+    }
+  }, [isAuthenticated]);
+  
+  const fetchRecordings = async () => {
+    if (!isAuthenticated) return;
     
     try {
-      // Resume audio context if needed
-      if (audioContextRef.current.state === 'suspended') {
-        audioContextRef.current.resume().catch(console.error);
-      }
+      const { data, error } = await supabase
+        .from('pitch_recordings')
+        .select('id, name, data')
+        .order('created_at', { ascending: false });
       
-      // Create gain node if it doesn't exist
-      if (!gainNode.current) {
-        gainNode.current = audioContextRef.current.createGain();
-        gainNode.current.connect(audioContextRef.current.destination);
-      }
+      if (error) throw error;
       
-      // Set volume
-      gainNode.current.gain.value = volume;
-      return true;
+      setRecordings(data || []);
     } catch (error) {
-      console.error("Failed to initialize audio nodes:", error);
-      return false;
+      console.error('Error fetching recordings:', error);
     }
   };
   
-  // Play a note with optional duration
-  const playNote = (frequency: number, duration?: number) => {
-    if (!initAudioNodes() || !audioContextRef.current || !gainNode.current) {
-      toast({ title: "Audio Error", description: "Could not initialize audio system" });
-      return;
-    }
+  // Handle playing notes
+  const playNote = (note: string) => {
+    if (!audioContextRef.current) return;
     
-    try {
-      // Stop any currently playing note
-      if (activeOscillator.current) {
-        activeOscillator.current.stop();
-        activeOscillator.current.disconnect();
-        activeOscillator.current = null;
-      }
-      
-      // Create and configure oscillator
-      const osc = audioContextRef.current.createOscillator();
-      osc.type = waveform;
-      osc.frequency.value = frequency;
-      osc.connect(gainNode.current);
-      
-      // Start the oscillator
-      osc.start();
-      activeOscillator.current = osc;
-      setIsPlaying(true);
-      
-      // If duration is specified, stop after that duration
-      if (duration) {
-        setTimeout(() => {
-          if (osc === activeOscillator.current) {
-            osc.stop();
-            osc.disconnect();
-            activeOscillator.current = null;
-            setIsPlaying(false);
-          }
-        }, duration * 1000);
-      }
-    } catch (error) {
-      console.error("Error playing note:", error);
-      toast({ title: "Audio Error", description: "Failed to play note" });
-    }
-  };
-  
-  // Stop the currently playing note
-  const stopNote = () => {
-    if (activeOscillator.current) {
-      activeOscillator.current.stop();
-      activeOscillator.current.disconnect();
-      activeOscillator.current = null;
-    }
-    setIsPlaying(false);
-    setCurrentNote(null);
-  };
-  
-  // Handle clicking a piano key
-  const handlePianoKeyClick = (key: PianoKey) => {
-    // Start recording if in recording mode
+    const noteName = `${note}${octave}`;
+    const frequency = getNoteFrequency(note, octave);
+    
+    playTone(audioContextRef.current, frequency, waveform, 1, volume);
+    
+    // If recording, save this event
     if (isRecording) {
       const now = Date.now();
-      const timestamp = now - recordingStartTime.current;
+      const relativeTime = recordStartTimeRef.current ? now - recordStartTimeRef.current : 0;
       
-      setRecordedNotes(prev => [
-        ...prev,
-        {
-          note: key.note,
-          frequency: key.frequency,
-          timestamp,
-          duration: 1.0 // Default 1 second duration
-        }
-      ]);
+      const noteEvent: NoteEvent = {
+        note: noteName,
+        frequency,
+        waveform,
+        timestamp: relativeTime,
+        duration: 1,
+        volume
+      };
+      
+      setEvents(prev => [...prev, noteEvent]);
     }
-    
-    // Play the note for 1 second
-    playNote(key.frequency, 1.0);
-    setCurrentNote(key.note);
   };
   
-  // Start recording notes
-  const handleStartRecording = () => {
-    setRecordedNotes([]);
-    recordingStartTime.current = Date.now();
+  // Handle recording
+  const toggleRecording = () => {
+    if (isRecording) {
+      stopRecording();
+    } else {
+      startRecording();
+    }
+  };
+  
+  const startRecording = () => {
     setIsRecording(true);
-    toast({ title: "Recording started", description: "Play notes to record them" });
+    setEvents([]);
+    recordStartTimeRef.current = Date.now();
+    toast.info("Recording started. Play notes to record them.");
   };
   
-  // Stop recording notes
-  const handleStopRecording = () => {
+  const stopRecording = () => {
     setIsRecording(false);
-    toast({ title: "Recording stopped", description: `${recordedNotes.length} notes recorded` });
+    toast.success("Recording stopped");
   };
   
-  // Play back the recorded notes
-  const playRecording = () => {
-    if (recordedNotes.length === 0) {
-      toast({ title: "No Notes", description: "There are no recorded notes to play" });
+  const saveRecording = async () => {
+    if (!isAuthenticated) {
+      toast.error("You must be logged in to save recordings");
       return;
     }
     
-    setIsPlayingRecording(true);
-    
-    // Sort notes by timestamp
-    const sortedNotes = [...recordedNotes].sort((a, b) => a.timestamp - b.timestamp);
-    let lastTimerID: number | null = null;
-    
-    // Play each note at the appropriate time
-    sortedNotes.forEach(note => {
-      const timerId = window.setTimeout(() => {
-        playNote(note.frequency, note.duration);
-      }, note.timestamp);
-      
-      lastTimerID = timerId;
-    });
-    
-    // Set a timer to mark recording as done playing
-    const finalTimerId = window.setTimeout(() => {
-      setIsPlayingRecording(false);
-    }, sortedNotes[sortedNotes.length - 1].timestamp + 1000);
-    
-    // Store the ID of the last timer for cleanup
-    playbackTimer.current = finalTimerId;
-  };
-  
-  // Stop the recording playback
-  const stopPlayback = () => {
-    if (playbackTimer.current) {
-      clearTimeout(playbackTimer.current);
-      playbackTimer.current = null;
-    }
-    
-    stopNote();
-    setIsPlayingRecording(false);
-  };
-  
-  // Save the recording to Supabase
-  const saveRecording = async () => {
-    if (!user || !recordedNotes.length) {
-      toast({
-        title: "Cannot Save",
-        description: !user ? "You must be logged in to save recordings" : "No notes to save",
-        variant: "destructive"
-      });
+    if (events.length === 0) {
+      toast.error("No notes recorded");
       return;
     }
     
     if (!recordingName.trim()) {
-      toast({
-        title: "Name Required",
-        description: "Please enter a name for your recording",
-        variant: "destructive"
-      });
+      toast.error("Please enter a name for this recording");
       return;
     }
     
+    const recordingData: RecordingData = {
+      events,
+      totalDuration: events.length > 0 ? 
+        Math.max(...events.map(e => e.timestamp)) / 1000 : 0,
+      createdAt: new Date().toISOString()
+    };
+    
     try {
-      const { data, error } = await supabase.from("pitch_recordings").insert({
-        user_id: user.id,
-        name: recordingName,
-        data: {
-          notes: recordedNotes,
-          waveform,
-          created_at: new Date().toISOString()
-        }
-      });
+      const { error } = await supabase
+        .from('pitch_recordings')
+        .insert({
+          name: recordingName,
+          data: recordingData
+        });
       
       if (error) throw error;
       
-      toast({
-        title: "Recording Saved",
-        description: "Your recording has been saved successfully"
-      });
-      
-      setRecordingName("");
+      toast.success("Recording saved");
+      setRecordingName('');
+      setEvents([]);
+      fetchRecordings();
     } catch (error) {
-      console.error("Error saving recording:", error);
-      toast({
-        title: "Save Failed",
-        description: "Could not save your recording",
-        variant: "destructive"
-      });
+      console.error('Error saving recording:', error);
+      toast.error("Failed to save recording");
     }
   };
   
-  // Clean up on unmount
+  const playRecording = async (recordingData: RecordingData) => {
+    if (!audioContextRef.current) return;
+    
+    const ctx = audioContextRef.current;
+    const startTime = ctx.currentTime;
+    
+    recordingData.events.forEach(event => {
+      setTimeout(() => {
+        playTone(
+          ctx, 
+          event.frequency,
+          event.waveform,
+          event.duration,
+          event.volume
+        );
+      }, event.timestamp);
+    });
+    
+    toast.info("Playing recording");
+  };
+  
+  const deleteRecording = async (id: string) => {
+    try {
+      const { error } = await supabase
+        .from('pitch_recordings')
+        .delete()
+        .eq('id', id);
+      
+      if (error) throw error;
+      
+      toast.success("Recording deleted");
+      fetchRecordings();
+    } catch (error) {
+      console.error('Error deleting recording:', error);
+      toast.error("Failed to delete recording");
+    }
+  };
+  
+  // Keyboard navigation
   useEffect(() => {
-    return () => {
-      stopNote();
-      if (playbackTimer.current) {
-        clearTimeout(playbackTimer.current);
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape" && onClose) {
+        onClose();
       }
     };
-  }, []);
-  
-  // Update gain node when volume changes
-  useEffect(() => {
-    if (gainNode.current) {
-      gainNode.current.gain.value = volume;
-    }
-  }, [volume]);
-  
-  // Render the piano keys
-  const renderPianoKeys = () => {
-    const keys = getPianoKeys();
     
-    return (
-      <div className="relative flex h-32 w-full">
-        {/* White keys */}
-        <div className="flex w-full h-full">
-          {keys.filter(key => !key.isSharp).map((key) => (
-            <button
-              key={key.note}
-              className={`flex-1 border border-gray-300 rounded-b-sm ${
-                currentNote === key.note ? "bg-primary" : "bg-white"
-              } hover:bg-primary/20 active:bg-primary flex flex-col items-center justify-end pb-2`}
-              onClick={() => handlePianoKeyClick(key)}
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [onClose]);
+  
+  return (
+    <div className="w-full p-2 space-y-4">
+      {/* Controls */}
+      <div className="flex flex-col sm:flex-row gap-4 items-center justify-between">
+        <div className="grid grid-cols-2 sm:flex gap-2 w-full sm:w-auto">
+          <Select value={waveform} onValueChange={(val) => setWaveform(val as OscillatorType)}>
+            <SelectTrigger className="w-[110px]">
+              <SelectValue placeholder="Waveform" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="sine">
+                <div className="flex items-center gap-2">
+                  <Disc className="w-4 h-4" />
+                  <span>Sine</span>
+                </div>
+              </SelectItem>
+              <SelectItem value="square">
+                <div className="flex items-center gap-2">
+                  <Square className="w-4 h-4" />
+                  <span>Square</span>
+                </div>
+              </SelectItem>
+              <SelectItem value="triangle">
+                <div className="flex items-center gap-2">
+                  <Triangle className="w-4 h-4" />
+                  <span>Triangle</span>
+                </div>
+              </SelectItem>
+              <SelectItem value="sawtooth">
+                <div className="flex items-center gap-2">
+                  <svg viewBox="0 0 24 24" className="w-4 h-4" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M3 20L21 4V20" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                  </svg>
+                  <span>Sawtooth</span>
+                </div>
+              </SelectItem>
+            </SelectContent>
+          </Select>
+          
+          <div className="flex items-center gap-1">
+            <button 
+              className="w-8 h-8 flex items-center justify-center border rounded-md"
+              onClick={() => setOctave(prev => Math.max(2, prev - 1))}
+              disabled={octave <= 2}
             >
-              <span className="text-xs font-medium text-black">{key.label}</span>
+              -
             </button>
-          ))}
+            <span className="w-8 text-center">
+              {octave}
+            </span>
+            <button 
+              className="w-8 h-8 flex items-center justify-center border rounded-md"
+              onClick={() => setOctave(prev => Math.min(6, prev + 1))}
+              disabled={octave >= 6}
+            >
+              +
+            </button>
+          </div>
         </div>
+        
+        <div className="flex items-center gap-2 w-full sm:w-auto">
+          <span className="text-sm">Volume:</span>
+          <Slider 
+            value={[volume]} 
+            max={1} 
+            step={0.01}
+            onValueChange={([val]) => setVolume(val)} 
+            className="w-[120px]" 
+          />
+        </div>
+        
+        <div className="flex gap-2 w-full sm:w-auto">
+          <Button 
+            variant={isRecording ? "destructive" : "outline"}
+            size="sm"
+            onClick={toggleRecording}
+          >
+            <Record className="h-4 w-4 mr-1" />
+            {isRecording ? "Stop" : "Record"}
+          </Button>
+          
+          {events.length > 0 && (
+            <Button 
+              variant="outline" 
+              size="sm"
+              onClick={() => {
+                if (events.length > 0) {
+                  playRecording({
+                    events,
+                    totalDuration: events.length > 0 ? 
+                      Math.max(...events.map(e => e.timestamp)) / 1000 : 0,
+                    createdAt: new Date().toISOString()
+                  });
+                }
+              }}
+            >
+              <Play className="h-4 w-4 mr-1" />
+              Playback
+            </Button>
+          )}
+        </div>
+      </div>
+      
+      {/* Piano keyboard */}
+      <div className="relative h-36 sm:h-48 overflow-hidden flex">
+        {PIANO_KEYS.map((key, idx) => {
+          if (!key.isSharp) {
+            return (
+              <button
+                key={`${key.note}-${octave}`}
+                className="flex-1 bg-white border border-gray-300 rounded-b hover:bg-gray-100 active:bg-gray-200 relative flex flex-col-reverse"
+                onClick={() => playNote(key.note)}
+              >
+                <span className="text-xs sm:text-sm font-medium text-gray-700 mb-2">
+                  {key.note}{octave}
+                </span>
+              </button>
+            );
+          }
+          return null;
+        })}
         
         {/* Black keys */}
-        <div className="absolute top-0 flex w-full h-1/2 px-[1.5%]">
-          {/* Spacing for C# */}
-          <div className="flex-[7]" />
+        <div className="absolute top-0 left-0 w-full h-3/5 flex">
+          <div className="w-1/7 flex-shrink-0"></div> {/* C */}
           <button
-            className={`flex-[2] mx-[0.5%] ${
-              currentNote === keys[1].note ? "bg-primary" : "bg-gray-800"
-            } rounded hover:bg-gray-700 active:bg-primary`}
-            onClick={() => handlePianoKeyClick(keys[1])}
+            className="w-2/3 mx-auto h-full bg-gray-800 hover:bg-gray-700 active:bg-gray-600 z-10 rounded-b"
+            onClick={() => playNote('C#')}
           />
-          {/* Spacing for D# */}
-          <div className="flex-[3]" />
+          <div className="w-1/7 flex-shrink-0"></div> {/* D */}
           <button
-            className={`flex-[2] mx-[0.5%] ${
-              currentNote === keys[3].note ? "bg-primary" : "bg-gray-800"
-            } rounded hover:bg-gray-700 active:bg-primary`}
-            onClick={() => handlePianoKeyClick(keys[3])}
+            className="w-2/3 mx-auto h-full bg-gray-800 hover:bg-gray-700 active:bg-gray-600 z-10 rounded-b"
+            onClick={() => playNote('D#')}
           />
-          {/* Spacing after D# */}
-          <div className="flex-[7]" />
-          {/* Spacing for F# */}
-          <div className="flex-[7]" />
+          <div className="w-1/7 flex-shrink-0"></div>
+          <div className="w-1/7 flex-shrink-0"></div> {/* Skip E to F */}
           <button
-            className={`flex-[2] mx-[0.5%] ${
-              currentNote === keys[6].note ? "bg-primary" : "bg-gray-800"
-            } rounded hover:bg-gray-700 active:bg-primary`}
-            onClick={() => handlePianoKeyClick(keys[6])}
+            className="w-2/3 mx-auto h-full bg-gray-800 hover:bg-gray-700 active:bg-gray-600 z-10 rounded-b"
+            onClick={() => playNote('F#')}
           />
-          {/* Spacing for G# */}
-          <div className="flex-[3]" />
+          <div className="w-1/7 flex-shrink-0"></div> {/* G */}
           <button
-            className={`flex-[2] mx-[0.5%] ${
-              currentNote === keys[8].note ? "bg-primary" : "bg-gray-800"
-            } rounded hover:bg-gray-700 active:bg-primary`}
-            onClick={() => handlePianoKeyClick(keys[8])}
+            className="w-2/3 mx-auto h-full bg-gray-800 hover:bg-gray-700 active:bg-gray-600 z-10 rounded-b"
+            onClick={() => playNote('G#')}
           />
-          {/* Spacing for A# */}
-          <div className="flex-[3]" />
+          <div className="w-1/7 flex-shrink-0"></div> {/* A */}
           <button
-            className={`flex-[2] mx-[0.5%] ${
-              currentNote === keys[10].note ? "bg-primary" : "bg-gray-800"
-            } rounded hover:bg-gray-700 active:bg-primary`}
-            onClick={() => handlePianoKeyClick(keys[10])}
+            className="w-2/3 mx-auto h-full bg-gray-800 hover:bg-gray-700 active:bg-gray-600 z-10 rounded-b"
+            onClick={() => playNote('A#')}
           />
-          {/* Spacing after A# */}
-          <div className="flex-[7]" />
+          <div className="w-1/7 flex-shrink-0"></div> {/* B */}
         </div>
       </div>
-    );
-  };
-
-  return (
-    <div className="space-y-4 p-2">
-      {/* Piano Keyboard */}
-      {renderPianoKeys()}
       
-      {/* Controls */}
-      <div className="grid grid-cols-2 gap-4">
-        {/* Left Column */}
-        <div className="space-y-4">
-          {/* Octave Transpose */}
-          <div className="space-y-2">
-            <Label>Transpose</Label>
-            <div className="flex items-center">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setOctaveOffset(Math.max(-2, octaveOffset - 1))}
-                disabled={octaveOffset <= -2}
-              >
-                -
-              </Button>
-              <div className="flex-1 text-center font-medium">
-                {octaveOffset > 0 ? `+${octaveOffset}` : octaveOffset} Octave
+      {/* Save recording control */}
+      {isAuthenticated && events.length > 0 && (
+        <div className="flex gap-2 items-center mt-4">
+          <Input 
+            placeholder="Recording name"
+            value={recordingName}
+            onChange={(e) => setRecordingName(e.target.value)}
+            className="flex-1"
+          />
+          <Button onClick={saveRecording} disabled={!recordingName.trim()}>
+            Save
+          </Button>
+        </div>
+      )}
+      
+      {/* Saved recordings */}
+      {isAuthenticated && recordings.length > 0 && (
+        <div className="mt-4">
+          <h3 className="text-sm font-medium mb-2">Saved Recordings</h3>
+          <div className="max-h-40 overflow-y-auto space-y-2">
+            {recordings.map((rec) => (
+              <div key={rec.id} className="flex items-center justify-between gap-2 border p-2 rounded-md">
+                <span className="text-sm truncate flex-1">{rec.name}</span>
+                <div className="flex gap-1">
+                  <Button 
+                    variant="ghost" 
+                    size="icon"
+                    onClick={() => playRecording(rec.data)}
+                  >
+                    <Play className="h-4 w-4" />
+                  </Button>
+                  <Button 
+                    variant="ghost" 
+                    size="icon"
+                    onClick={() => deleteRecording(rec.id)}
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-trash-2">
+                      <path d="M3 6h18"></path>
+                      <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path>
+                      <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path>
+                      <line x1="10" y1="11" x2="10" y2="17"></line>
+                      <line x1="14" y1="11" x2="14" y2="17"></line>
+                    </svg>
+                  </Button>
+                </div>
               </div>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setOctaveOffset(Math.min(2, octaveOffset + 1))}
-                disabled={octaveOffset >= 2}
-              >
-                +
-              </Button>
-            </div>
-          </div>
-          
-          {/* Waveform Selector */}
-          <div className="space-y-2">
-            <Label>Waveform</Label>
-            <Select value={waveform} onValueChange={value => setWaveform(value as WaveformType)}>
-              <SelectTrigger>
-                <SelectValue placeholder="Sine" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="sine">Sine</SelectItem>
-                <SelectItem value="triangle">Triangle</SelectItem>
-                <SelectItem value="square">Square</SelectItem>
-                <SelectItem value="sawtooth">Sawtooth</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-          
-          {/* Volume Control */}
-          <div className="space-y-2">
-            <div className="flex justify-between">
-              <Label>Volume</Label>
-              <span className="text-xs text-muted-foreground">
-                {Math.round(volume * 100)}%
-              </span>
-            </div>
-            <Slider
-              value={[volume]}
-              min={0}
-              max={1}
-              step={0.01}
-              onValueChange={values => setVolume(values[0])}
-            />
+            ))}
           </div>
         </div>
-        
-        {/* Right Column */}
-        <div className="space-y-4">
-          {/* Recording Controls */}
-          <div className="space-y-2">
-            <Label>Recording</Label>
-            <div className="flex items-center gap-2">
-              {!isRecording ? (
-                <Button 
-                  variant="outline" 
-                  size="sm"
-                  onClick={handleStartRecording}
-                  className="flex items-center gap-1"
-                  disabled={isPlayingRecording}
-                >
-                  <Mic className="h-4 w-4" /> Record
-                </Button>
-              ) : (
-                <Button 
-                  variant="destructive" 
-                  size="sm"
-                  onClick={handleStopRecording}
-                  className="flex items-center gap-1"
-                >
-                  <MicOff className="h-4 w-4" /> Stop
-                </Button>
-              )}
-              
-              {!isPlayingRecording ? (
-                <Button 
-                  variant="outline" 
-                  size="sm"
-                  onClick={playRecording}
-                  disabled={recordedNotes.length === 0 || isRecording}
-                  className="flex items-center gap-1"
-                >
-                  <Play className="h-4 w-4" /> Play
-                </Button>
-              ) : (
-                <Button 
-                  variant="destructive" 
-                  size="sm"
-                  onClick={stopPlayback}
-                  className="flex items-center gap-1"
-                >
-                  <Square className="h-4 w-4" /> Stop
-                </Button>
-              )}
-            </div>
-          </div>
-          
-          {/* Save Recording (Only show when there are notes) */}
-          {recordedNotes.length > 0 && (
-            <div className="space-y-2">
-              <Label>Save Recording</Label>
-              <div className="flex items-center gap-2">
-                <Input
-                  placeholder="Recording name"
-                  value={recordingName}
-                  onChange={(e) => setRecordingName(e.target.value)}
-                  size={20}
-                />
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={saveRecording}
-                  disabled={!recordingName.trim() || !user}
-                  className="flex items-center gap-1"
-                >
-                  <Save className="h-4 w-4" /> Save
-                </Button>
-              </div>
-            </div>
-          )}
-          
-          {/* Recording Status */}
-          <div className="text-sm">
-            {isRecording ? (
-              <p className="text-destructive flex items-center gap-1">
-                <span className="h-2 w-2 bg-destructive rounded-full animate-pulse"></span> Recording...
-              </p>
-            ) : recordedNotes.length > 0 ? (
-              <p className="text-muted-foreground">
-                {recordedNotes.length} notes recorded
-              </p>
-            ) : (
-              <p className="text-muted-foreground">No recorded notes</p>
-            )}
-          </div>
-        </div>
-      </div>
+      )}
     </div>
   );
 }

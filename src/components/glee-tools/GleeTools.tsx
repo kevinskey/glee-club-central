@@ -3,13 +3,13 @@ import React, { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { toast } from "sonner";
-import { Music, Clock } from "lucide-react";
+import { Music, Clock, Headphones } from "lucide-react";
 import { registerKeyboardShortcut } from "@/utils/audioUtils";
 import { useIsMobile } from "@/hooks/use-mobile";
 
-// Import the newer UI components
-import { PitchPipe as UIPitchPipe } from "@/components/ui/pitch-pipe";
-import { Metronome as UIMetronome } from "@/components/ui/metronome";
+// Import our custom implementations
+import { PitchPipe } from "./PitchPipe";
+import { Metronome } from "./Metronome";
 
 export interface GleeToolsProps {
   variant?: "default" | "minimal";
@@ -51,9 +51,15 @@ export function GleeTools({ variant = "default", className = "" }: GleeToolsProp
       if (!metronomeOpen) initAudioContext();
     });
     
+    const cleanupEsc = registerKeyboardShortcut('Escape', () => {
+      setPitchPipeOpen(false);
+      setMetronomeOpen(false);
+    });
+    
     return () => {
       cleanupP();
       cleanupM();
+      cleanupEsc();
     };
   }, [pitchPipeOpen, metronomeOpen]);
   
@@ -99,7 +105,7 @@ export function GleeTools({ variant = "default", className = "" }: GleeToolsProp
             <DialogHeader>
               <DialogTitle>Pitch Pipe</DialogTitle>
             </DialogHeader>
-            <UIPitchPipe />
+            <PitchPipe onClose={() => setPitchPipeOpen(false)} />
           </DialogContent>
         </Dialog>
         
@@ -109,7 +115,7 @@ export function GleeTools({ variant = "default", className = "" }: GleeToolsProp
             <DialogHeader>
               <DialogTitle>Metronome</DialogTitle>
             </DialogHeader>
-            <UIMetronome />
+            <Metronome onClose={() => setMetronomeOpen(false)} />
           </DialogContent>
         </Dialog>
       </div>
@@ -144,7 +150,7 @@ export function GleeTools({ variant = "default", className = "" }: GleeToolsProp
           <DialogHeader>
             <DialogTitle>Pitch Pipe</DialogTitle>
           </DialogHeader>
-          <UIPitchPipe />
+          <PitchPipe onClose={() => setPitchPipeOpen(false)} />
         </DialogContent>
       </Dialog>
       
@@ -154,7 +160,7 @@ export function GleeTools({ variant = "default", className = "" }: GleeToolsProp
           <DialogHeader>
             <DialogTitle>Metronome</DialogTitle>
           </DialogHeader>
-          <UIMetronome />
+          <Metronome onClose={() => setMetronomeOpen(false)} />
         </DialogContent>
       </Dialog>
     </div>
