@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { PageHeader } from "@/components/ui/page-header";
 import { Headphones, Upload } from "lucide-react";
@@ -22,7 +21,7 @@ export default function AudioManagementPage() {
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [activeCategory, setActiveCategory] = useState<AudioPageCategory>("all");
-  const [uploadCategory, setUploadCategory] = useState<Exclude<AudioPageCategory, "all">>("recordings");
+  const [uploadCategory, setUploadCategory] = useState<string>("recordings");
   
   // Filter audio files based on search and category
   React.useEffect(() => {

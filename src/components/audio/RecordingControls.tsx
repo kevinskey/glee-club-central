@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Square, Mic, MicOff, RefreshCw, AlertCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -11,8 +12,7 @@ import { toast } from 'sonner';
 import { resetAudioSystem } from '@/utils/audioUtils';
 import { AudioCategory } from "./audioCategoryUtils";
 
-// Add a dummy function to fix compilation errors until we see the full file
-// This would need to be properly implemented based on the full file contents
+// Helper function to convert string to AudioCategory type
 export const getAudioCategoryFromString = (category: string): AudioCategory => {
   return category as AudioCategory;
 };

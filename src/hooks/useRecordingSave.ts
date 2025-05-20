@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { format } from 'date-fns';
 import { v4 as uuidv4 } from 'uuid';
@@ -15,7 +16,7 @@ export function useRecordingSave({
   const { user } = useAuth();
   const { toast } = useToast();
   const [recordingName, setRecordingName] = useState(`Recording ${format(new Date(), "yyyy-MM-dd-HH-mm-ss")}`);
-  const [recordingCategory, setRecordingCategory] = useState<Exclude<AudioPageCategory, "all">>("my_tracks");
+  const [recordingCategory, setRecordingCategory] = useState<string>("my_tracks");
   const [isSaving, setIsSaving] = useState(false);
 
   // Save recording

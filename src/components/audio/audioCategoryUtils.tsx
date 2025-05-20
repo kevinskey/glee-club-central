@@ -1,28 +1,44 @@
 
 // Audio category definitions and helper functions
 
-// Define possible audio categories
-export enum AudioCategory {
-  MY_TRACKS = "my_tracks",
-  PRACTICE_RECORDINGS = "practice_recordings",
-  PERFORMANCES = "performances",
-  VOICE_MEMOS = "voice_memos",
-  REHEARSALS = "rehearsals",
-  TRAINING = "training",
-  RECORDINGS = "recordings",
-  PART_TRACKS = "part_tracks"
-}
+// Define possible audio categories as string literals for consistent usage
+export type AudioCategory = "my_tracks" | "practice_recordings" | "performances" | 
+                         "voice_memos" | "rehearsals" | "training" | "recordings" | "part_tracks";
 
 // Labels for audio categories (for display purposes)
 export const audioCategoryLabels: Record<string, string> = {
-  [AudioCategory.MY_TRACKS]: "My Tracks",
-  [AudioCategory.PRACTICE_RECORDINGS]: "Practice Recordings",
-  [AudioCategory.PERFORMANCES]: "Performances",
-  [AudioCategory.VOICE_MEMOS]: "Voice Memos",
-  [AudioCategory.REHEARSALS]: "Rehearsals",
-  [AudioCategory.TRAINING]: "Training Materials",
-  [AudioCategory.RECORDINGS]: "Recordings",
-  [AudioCategory.PART_TRACKS]: "Part Tracks"
+  "my_tracks": "My Tracks",
+  "practice_recordings": "Practice Recordings",
+  "performances": "Performances",
+  "voice_memos": "Voice Memos",
+  "rehearsals": "Rehearsals",
+  "training": "Training Materials",
+  "recordings": "Recordings",
+  "part_tracks": "Part Tracks"
+};
+
+// Category descriptions for UI display
+export const audioCategoryDescriptions: Record<string, string> = {
+  "my_tracks": "Your personal recordings",
+  "practice_recordings": "Recordings for practice sessions",
+  "performances": "Live performance recordings",
+  "voice_memos": "Quick voice memos",
+  "rehearsals": "Rehearsal recordings",
+  "training": "Training and learning materials",
+  "recordings": "General recordings",
+  "part_tracks": "Individual part recordings"
+};
+
+// Category icons (placeholders - to be used with Lucide icons)
+export const audioCategoryIcons: Record<string, React.ReactNode> = {
+  "my_tracks": null,
+  "practice_recordings": null, 
+  "performances": null,
+  "voice_memos": null,
+  "rehearsals": null,
+  "training": null,
+  "recordings": null,
+  "part_tracks": null
 };
 
 // Get category label from category value
@@ -45,6 +61,8 @@ export const getCategoryOptions = () => {
 export const getCategoriesInfo = () => {
   return Object.entries(audioCategoryLabels).map(([value, label]) => ({
     id: value,
-    name: label
+    name: label,
+    description: audioCategoryDescriptions[value] || "",
+    icon: audioCategoryIcons[value]
   }));
 };

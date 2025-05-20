@@ -19,7 +19,7 @@ interface UploadAudioModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onUploadComplete: () => void;
-  defaultCategory?: AudioCategory;
+  defaultCategory?: string;
 }
 
 export function UploadAudioModal({

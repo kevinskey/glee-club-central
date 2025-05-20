@@ -4,7 +4,7 @@ import * as z from "zod";
 export const audioUploadSchema = z.object({
   title: z.string().min(2, { message: "Title must be at least 2 characters." }),
   description: z.string().optional(),
-  category: z.enum(['part_tracks', 'recordings', 'my_tracks']),
+  category: z.string(),
   audioFile: z
     .instanceof(File, { message: "Audio file is required." })
     .refine((file) => file.size <= 20000000, {
