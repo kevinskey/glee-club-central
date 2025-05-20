@@ -1,19 +1,42 @@
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
+import { seedDefaultHeroImages } from '@/utils/siteImages';
+import { toast } from 'sonner';
 
 interface HeroImageInitializerProps {
   onInitialized?: () => void;
 }
 
-// This component is simplified to prevent initialization loops
 export const HeroImageInitializer: React.FC<HeroImageInitializerProps> = ({ onInitialized }) => {
-  // Simply call onInitialized immediately if provided
-  React.useEffect(() => {
-    if (onInitialized) {
-      onInitialized();
-    }
-  }, [onInitialized]);
+  const [isInitializing, setIsInitializing] = useState(false);
   
-  // This component doesn't render anything
+  useEffect(() => {
+    async function initializeHeroImages() {
+      if (isInitializing) return;
+      
+      setIsInitializing(true);
+      try {
+        const result = await seedDefaultHeroImages();
+        
+        if (result.success) {
+          console.log("Hero images initialized successfully");
+          if (onInitialized) {
+            onInitialized();
+          }
+        } else {
+          console.error("Failed to initialize hero images:", result.error);
+          toast.error("Could not load hero images");
+        }
+      } catch (error) {
+        console.error("Error initializing hero images:", error);
+      } finally {
+        setIsInitializing(false);
+      }
+    }
+    
+    initializeHeroImages();
+  }, [onInitialized, isInitializing]);
+  
+  // This component doesn't render anything visible
   return null;
 };
