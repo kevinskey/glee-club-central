@@ -7,6 +7,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { Spinner } from "@/components/ui/spinner";
 import { SidebarProvider } from "@/components/ui/sidebar";
 import { useMedia } from "@/hooks/use-mobile";
+import { toast } from "sonner";
 
 const DashboardLayout: React.FC = () => {
   const { isAuthenticated, isLoading } = useAuth();
@@ -21,6 +22,7 @@ const DashboardLayout: React.FC = () => {
     }
   }, [isMobile]);
 
+  // Show loading state while checking authentication
   if (isLoading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
@@ -29,8 +31,10 @@ const DashboardLayout: React.FC = () => {
     );
   }
   
+  // Redirect to login if not authenticated
   if (!isAuthenticated) {
     console.log("DashboardLayout - User not authenticated, redirecting to login");
+    toast.error("Please log in to access the dashboard");
     const returnTo = encodeURIComponent(location.pathname + location.search);
     return <Navigate to={`/login?returnTo=${returnTo}`} />;
   }

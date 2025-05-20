@@ -10,10 +10,11 @@ import PDFViewerPage from '../pages/PDFViewerPage';
 import RecordingsPage from '../pages/recordings/RecordingsPage';
 import CalendarPage from '../pages/dashboard/calendar';
 import MemberDashboardPage from '../pages/dashboard/MemberDashboardPage';
-import FanDashboardPage from '../pages/dashboard/FanDashboardPage';
+import FanDashboardPage from '../pages/FanDashboardPage';
 
 export const dashboardRoutes = {
   path: '/dashboard',
+  // Ensure entire dashboard layout requires authentication
   element: <RequireAuth><DashboardLayout /></RequireAuth>,
   children: [
     {
@@ -46,7 +47,8 @@ export const dashboardRoutes = {
     },
     {
       path: 'calendar',
-      element: <CalendarPage />,
+      // Add RequireAuth to calendar
+      element: <RequireAuth><CalendarPage /></RequireAuth>,
     },
     {
       path: 'member',

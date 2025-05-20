@@ -1,12 +1,15 @@
 
 import React, { useEffect } from 'react';
-import { Navigate } from 'react-router-dom';
+import { Navigate, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { Spinner } from '@/components/ui/spinner';
+import { toast } from 'sonner';
 
 const RoleDashboard = () => {
   const { isAuthenticated, isLoading, getUserType } = useAuth();
+  const navigate = useNavigate();
   
+  // Show loading spinner while checking auth
   if (isLoading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
@@ -15,7 +18,9 @@ const RoleDashboard = () => {
     );
   }
   
+  // Redirect to login if not authenticated
   if (!isAuthenticated) {
+    toast.error("Please log in to access the dashboard");
     return <Navigate to="/login" replace />;
   }
   
@@ -30,8 +35,9 @@ const RoleDashboard = () => {
     case 'fan':
       return <Navigate to="/dashboard/fan" replace />;
     default:
-      // If user type is not set, default to fan access level
-      return <Navigate to="/dashboard/fan" replace />;
+      // If user type is not set, show an error and redirect to login
+      toast.error("User role not recognized. Please contact support.");
+      return <Navigate to="/login" replace />;
   }
 };
 
