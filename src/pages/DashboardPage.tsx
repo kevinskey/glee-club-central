@@ -1,13 +1,11 @@
 
 import React from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom"; // Using Link instead of useNavigate directly
 import { Music, Calendar, Users, FileText } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 const DashboardPage: React.FC = () => {
-  const navigate = useNavigate();
-  
   return (
     <div className="container mx-auto px-4 py-8">
       <h1 className="text-3xl font-bold mb-6">Dashboard</h1>
@@ -35,9 +33,9 @@ const DashboardPage: React.FC = () => {
                 <Button 
                   variant="link" 
                   className="p-0 h-auto text-primary hover:underline"
-                  onClick={() => navigate("/dashboard/sheet-music")}
+                  asChild
                 >
-                  Sheet Music Library
+                  <Link to="/dashboard/sheet-music">Sheet Music Library</Link>
                 </Button>
               </li>
               <li className="flex items-center">
@@ -45,9 +43,9 @@ const DashboardPage: React.FC = () => {
                 <Button 
                   variant="link" 
                   className="p-0 h-auto text-primary hover:underline"
-                  onClick={() => navigate("/dashboard/recordings")}
+                  asChild
                 >
-                  Recordings
+                  <Link to="/dashboard/recordings">Recordings</Link>
                 </Button>
               </li>
               <li className="flex items-center">
@@ -55,9 +53,9 @@ const DashboardPage: React.FC = () => {
                 <Button 
                   variant="link" 
                   className="p-0 h-auto text-primary hover:underline"
-                  onClick={() => navigate("/dashboard/calendar")}
+                  asChild
                 >
-                  Calendar
+                  <Link to="/dashboard/calendar">Calendar</Link>
                 </Button>
               </li>
               <li className="flex items-center">
@@ -65,9 +63,9 @@ const DashboardPage: React.FC = () => {
                 <Button 
                   variant="link" 
                   className="p-0 h-auto text-primary hover:underline"
-                  onClick={() => navigate("/dashboard/profile")}
+                  asChild
                 >
-                  My Profile
+                  <Link to="/dashboard/profile">My Profile</Link>
                 </Button>
               </li>
             </ul>

@@ -7,7 +7,7 @@ import { authRoutes } from './routes/authRoutes';
 import { adminRoutes } from './routes/adminRoutes';
 import ErrorBoundary from "./components/ErrorBoundary";
 
-// Creating a more robust router with properly configured error boundaries
+// Creating a router with properly configured error boundaries
 export const router = createBrowserRouter([
   {
     path: '/',
