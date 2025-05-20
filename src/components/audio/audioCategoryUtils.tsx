@@ -1,72 +1,36 @@
 
-import { FileAudio, ListMusic, AudioLines } from "lucide-react";
-import { ReactNode } from "react";
+// Audio category definitions and helper functions
 
-export type AudioCategory = "part_tracks" | "recordings" | "my_tracks";
-
-export interface CategoryInfo {
-  id: AudioCategory;
-  name: string;
-  description: string;
-  icon: ReactNode;
+// Define possible audio categories
+export enum AudioCategory {
+  MY_TRACKS = "my_tracks",
+  PRACTICE_RECORDINGS = "practice_recordings",
+  PERFORMANCES = "performances",
+  VOICE_MEMOS = "voice_memos",
+  REHEARSALS = "rehearsals",
+  TRAINING = "training"
 }
 
-// Get display name for category
-export const getCategoryName = (category: AudioCategory): string => {
-  switch (category) {
-    case "part_tracks":
-      return "Part Tracks";
-    case "recordings":
-      return "Recordings";
-    case "my_tracks":
-      return "My Tracks";
-  }
+// Labels for audio categories (for display purposes)
+export const audioCategoryLabels: Record<string, string> = {
+  [AudioCategory.MY_TRACKS]: "My Tracks",
+  [AudioCategory.PRACTICE_RECORDINGS]: "Practice Recordings",
+  [AudioCategory.PERFORMANCES]: "Performances",
+  [AudioCategory.VOICE_MEMOS]: "Voice Memos",
+  [AudioCategory.REHEARSALS]: "Rehearsals",
+  [AudioCategory.TRAINING]: "Training Materials"
 };
 
-// Get description for category
-export const getCategoryDescription = (category: AudioCategory): string => {
-  switch (category) {
-    case "part_tracks":
-      return "Individual vocal parts for practice";
-    case "recordings":
-      return "Full choir recordings and performances";
-    case "my_tracks":
-      return "Personal recordings and practice files";
-  }
+// Get category label from category value
+export const getCategoryLabel = (category: string): string => {
+  return audioCategoryLabels[category] || "Uncategorized";
 };
 
-// Get icon for category
-export const getCategoryIcon = (category: AudioCategory) => {
-  switch (category) {
-    case "part_tracks":
-      return <ListMusic className="h-4 w-4" />;
-    case "recordings":
-      return <AudioLines className="h-4 w-4" />;
-    case "my_tracks":
-      return <FileAudio className="h-4 w-4" />;
-  }
+// Get all available categories as options for select inputs
+export const getCategoryOptions = () => {
+  return Object.entries(audioCategoryLabels).map(([value, label]) => ({
+    value,
+    label
+  }));
 };
 
-// Get all categories with their info
-export const getCategoriesInfo = (): CategoryInfo[] => {
-  return [
-    {
-      id: "part_tracks",
-      name: getCategoryName("part_tracks"),
-      description: getCategoryDescription("part_tracks"),
-      icon: getCategoryIcon("part_tracks"),
-    },
-    {
-      id: "recordings",
-      name: getCategoryName("recordings"),
-      description: getCategoryDescription("recordings"),
-      icon: getCategoryIcon("recordings"),
-    },
-    {
-      id: "my_tracks",
-      name: getCategoryName("my_tracks"),
-      description: getCategoryDescription("my_tracks"),
-      icon: getCategoryIcon("my_tracks"),
-    },
-  ];
-};

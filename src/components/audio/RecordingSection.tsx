@@ -76,7 +76,7 @@ export function RecordingSection({ onRecordingSaved }: RecordingSectionProps) {
         setAudioURL("");
         setElapsedTime(0);
         
-        await startRecording();
+        const startResult = await startRecording();
         
         // Start the timer to track recording duration
         timerRef.current = window.setInterval(() => {
