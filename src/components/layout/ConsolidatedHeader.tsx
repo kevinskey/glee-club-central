@@ -1,4 +1,3 @@
-
 import React, { useState, useRef } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
@@ -26,6 +25,7 @@ import { useIsMobile } from "@/hooks/use-mobile";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { EnhancedMetronome } from "@/components/ui/enhanced-metronome";
 import { PitchPipeDialog } from "@/components/ui/pitch-pipe-dialog";
+import { GleeTools } from "@/components/glee-tools/GleeTools";
 
 export function ConsolidatedHeader() {
   const { profile, signOut, isAuthenticated } = useAuth();
@@ -62,25 +62,6 @@ export function ConsolidatedHeader() {
     }
   };
 
-  // Initialize audio context on first interaction
-  const handleOpenMetronome = () => {
-    // Create AudioContext on first click if it doesn't exist
-    if (!audioContextRef.current) {
-      try {
-        audioContextRef.current = new AudioContext();
-      } catch (e) {
-        console.error("Failed to create AudioContext:", e);
-      }
-    }
-    
-    // Resume audio context if needed (for mobile browsers)
-    if (audioContextRef.current && audioContextRef.current.state === 'suspended') {
-      audioContextRef.current.resume().catch(console.error);
-    }
-    
-    setMetronomeOpen(true);
-  };
-
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="max-w-screen-2xl mx-auto px-4 flex h-16 items-center justify-between">
@@ -92,31 +73,10 @@ export function ConsolidatedHeader() {
           </Link>
         </div>
           
-        {/* Right side: Login, Pitch Pipe, Metronome, theme toggle, and menu dropdown */}
+        {/* Right side: GleeTools, theme toggle, and menu dropdown */}
         <div className="flex items-center gap-2">
-          {/* Pitch Pipe */}
-          <PitchPipeDialog triggerClassName={`${isMobile ? 'h-8 w-8' : 'h-9 w-9'}`} />
-          
-          {/* Metronome Icon */}
-          <Dialog open={metronomeOpen} onOpenChange={setMetronomeOpen}>
-            <DialogTrigger asChild>
-              <Button 
-                variant="ghost" 
-                size="icon" 
-                className={`${isMobile ? 'h-8 w-8' : 'h-9 w-9'}`}
-                onClick={handleOpenMetronome}
-              >
-                <Clock className={`${isMobile ? 'h-4 w-4' : 'h-5 w-5'} text-foreground`} />
-                <span className="sr-only">Open metronome</span>
-              </Button>
-            </DialogTrigger>
-            <DialogContent className="sm:max-w-md">
-              <DialogHeader>
-                <DialogTitle>Metronome</DialogTitle>
-              </DialogHeader>
-              <EnhancedMetronome showControls={true} size="md" audioContextRef={audioContextRef} />
-            </DialogContent>
-          </Dialog>
+          {/* GleeTools component that handles both pitch pipe and metronome */}
+          <GleeTools variant={isMobile ? "minimal" : "default"} />
           
           <ThemeToggle />
           
@@ -229,6 +189,10 @@ export function ConsolidatedHeader() {
             </DropdownMenu>
           </DropdownMenuProvider>
         </div>
+      </div>
+      
+      <div className="text-center text-xs text-muted-foreground border-t py-1">
+        Glee Tools v1.0 – Production Ready
       </div>
     </header>
   );

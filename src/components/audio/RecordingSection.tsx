@@ -150,7 +150,7 @@ export function RecordingSection({ onRecordingSaved }: RecordingSectionProps) {
                 <Button 
                   variant="outline" 
                   size="sm"
-                  onClick={testAudioOutput}
+                  onClick={() => testAudioOutput()}
                 >
                   <Volume2 className="h-3 w-3 mr-1" /> Test Audio Output
                 </Button>
@@ -202,7 +202,7 @@ export function RecordingSection({ onRecordingSaved }: RecordingSectionProps) {
                       <Button 
                         variant="outline" 
                         size="icon" 
-                        onClick={togglePlayback}
+                        onClick={() => togglePlayback()}
                         className="h-8 w-8"
                       >
                         {isPlaying ? (

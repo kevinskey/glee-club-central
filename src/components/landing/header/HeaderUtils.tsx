@@ -10,7 +10,7 @@ export function HeaderUtils() {
   return (
     <>
       {/* GleeTools component that handles both pitch pipe and metronome */}
-      <GleeTools />
+      <GleeTools variant={isMobile ? "minimal" : "default"} />
       
       <ThemeToggle />
     </>
