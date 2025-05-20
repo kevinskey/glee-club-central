@@ -3,6 +3,7 @@ import * as React from 'react';
 import { createBrowserRouter } from 'react-router-dom';
 import ErrorBoundary from "./components/ErrorBoundary";
 import StaticLandingPage from './pages/StaticLandingPage';
+import HomeTemp from './pages/HomeTemp';
 
 // Creating a simplified router with no auth checks or complex layouts
 export const router = createBrowserRouter([
@@ -27,5 +28,9 @@ export const router = createBrowserRouter([
         </div>
       </ErrorBoundary>
     ),
+  },
+  {
+    path: '/home-temp',
+    element: <HomeTemp />,
   },
 ]);
