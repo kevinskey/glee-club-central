@@ -2,6 +2,7 @@
 import { LucideIcon } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { cn } from '@/lib/utils';
+import { Spinner } from '@/components/ui/spinner';
 
 interface AnalyticsCardProps {
   title: string;
@@ -10,6 +11,7 @@ interface AnalyticsCardProps {
   change?: number;
   icon?: React.ReactNode;
   className?: string;
+  isLoading?: boolean;
 }
 
 export function AnalyticsCard({
@@ -19,6 +21,7 @@ export function AnalyticsCard({
   change,
   icon,
   className,
+  isLoading = false,
 }: AnalyticsCardProps) {
   return (
     <Card className={cn('overflow-hidden', className)}>
@@ -27,7 +30,11 @@ export function AnalyticsCard({
           <div>
             <p className="text-sm font-medium text-muted-foreground">{title}</p>
             <div className="flex items-baseline gap-2">
-              <h3 className="text-2xl font-bold">{value}</h3>
+              {isLoading ? (
+                <Spinner size="sm" className="mr-2" />
+              ) : (
+                <h3 className="text-2xl font-bold">{value}</h3>
+              )}
               {change !== undefined && (
                 <div className={cn(
                   "text-xs font-medium",

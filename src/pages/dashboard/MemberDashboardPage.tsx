@@ -1,8 +1,7 @@
-
 import React, { useState } from 'react';
 import { PageHeader } from '@/components/ui/page-header';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { Calendar, Music, Bell, User, BookOpen, Headphones, Shirt, FileCheck, SchoolIcon, FileText, Award, Upload } from 'lucide-react';
+import { Calendar, Music, Bell, User, BookOpen, Headphones, Shirt, FileCheck, Edit, Download } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { NextEventCountdown } from '@/components/dashboard/NextEventCountdown';
@@ -191,7 +190,7 @@ export default function MemberDashboardPage() {
                   </Button>
                   <Button variant="outline" className="w-full text-left justify-start" asChild>
                     <a href="https://drive.google.com/drive" target="_blank" rel="noopener noreferrer">
-                      <FileText className="mr-2 h-4 w-4" />
+                      <FileCheck className="mr-2 h-4 w-4" />
                       Google Drive
                     </a>
                   </Button>

@@ -1,15 +1,15 @@
-
 import React, { useState } from "react";
 import { PageHeader } from "@/components/ui/page-header";
 import { useAuth } from "@/contexts/AuthContext";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
 import { UpcomingEventsList } from "@/components/calendar/UpcomingEventsList";
-import { Calendar, Music, Bell, User, Video, Heart, Download, ShoppingBag, Mail, Star } from "lucide-react";
+import { Calendar, Music, Bell, User, Video, Heart, Download, ShoppingBag, Mail, Star, FileText, Image as ImageIcon } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Switch } from "@/components/ui/switch";
 
 export default function FanDashboardPage() {
   const { profile } = useAuth();
@@ -308,7 +308,7 @@ export default function FanDashboardPage() {
                 
                 <div className="flex items-center justify-between p-3 border rounded-md hover:bg-muted/50 cursor-pointer">
                   <div className="flex items-center space-x-3">
-                    <Image className="h-5 w-5 text-blue-600" />
+                    <ImageIcon className="h-5 w-5 text-blue-600" />
                     <div>
                       <h4 className="text-sm font-medium">Tour Poster</h4>
                       <p className="text-xs text-muted-foreground">JPEG, 1.8MB</p>
