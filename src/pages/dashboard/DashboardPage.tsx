@@ -119,7 +119,7 @@ const DashboardPageContent = () => {
               <h1 className="text-2xl md:text-3xl font-bold">{getTimeOfDay()}, {profile?.first_name || 'Member'}</h1>
               <p className="text-white/80">Welcome to your Spelman College Glee Club dashboard</p>
             </div>
-            <div className="mt-4 md:mt-0">
+            <div className="mt-4 md:mt-0 flex gap-3">
               <Button 
                 size="lg"
                 variant="secondary" 
@@ -128,9 +128,51 @@ const DashboardPageContent = () => {
               >
                 <Link to="/dashboard/profile">View Profile <ChevronRight className="ml-2 h-4 w-4" /></Link>
               </Button>
+              
+              {/* Added direct link to Member Dashboard */}
+              <Button 
+                size="lg"
+                variant="outline" 
+                className="bg-white/20 text-white hover:bg-white/30 border-white/40"
+                asChild
+              >
+                <Link to="/dashboard/member">
+                  Member Dashboard <ChevronRight className="ml-2 h-4 w-4" />
+                </Link>
+              </Button>
             </div>
           </div>
         </div>
+        
+        {/* Add a prominent Member Access section at the top */}
+        <Card className="shadow-md border-l-4 border-l-glee-spelman">
+          <CardContent className="p-6">
+            <div className="flex flex-col md:flex-row md:items-center justify-between">
+              <div className="mb-4 md:mb-0">
+                <h2 className="text-xl font-semibold flex items-center">
+                  <Mic className="h-5 w-5 mr-2 text-glee-spelman" />
+                  Member Resources
+                </h2>
+                <p className="text-muted-foreground mt-1">
+                  Access specialized tools for Glee Club members
+                </p>
+              </div>
+              <div className="flex flex-col sm:flex-row gap-3">
+                <Button asChild className="bg-glee-spelman hover:bg-glee-spelman/90">
+                  <Link to="/dashboard/member">
+                    Member Dashboard
+                  </Link>
+                </Button>
+                <Button asChild variant="outline">
+                  <Link to="/dashboard/recording-studio">
+                    <Mic className="h-4 w-4 mr-2" />
+                    Recording Studio
+                  </Link>
+                </Button>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
         
         {/* Quick Access Grid */}
         <QuickAccess />

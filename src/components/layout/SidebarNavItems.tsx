@@ -43,10 +43,18 @@ export function SidebarNavItems() {
         </a>
         
         {showMemberItems && (
-          <a href="/dashboard/member" className={`flex items-center gap-3 rounded-md px-3 py-2 text-sm transition-colors ${isActive('/dashboard/member') ? 'bg-accent text-accent-foreground' : 'hover:bg-accent hover:text-accent-foreground'}`}>
-            <Home className="h-4 w-4" />
-            Member Dashboard
-          </a>
+          <>
+            <a href="/dashboard/member" className={`flex items-center gap-3 rounded-md px-3 py-2 text-sm transition-colors ${isActive('/dashboard/member') ? 'bg-accent text-accent-foreground' : 'hover:bg-accent hover:text-accent-foreground'}`}>
+              <Home className="h-4 w-4" />
+              Member Dashboard
+            </a>
+            
+            {/* Highlight Recording Studio with a special style */}
+            <a href="/dashboard/recording-studio" className={`flex items-center gap-3 rounded-md px-3 py-2 text-sm transition-colors mt-2 ${isActive('/dashboard/recording-studio') ? 'bg-glee-spelman text-white' : 'bg-glee-spelman/10 text-glee-spelman hover:bg-glee-spelman/20'}`}>
+              <Mic className="h-4 w-4" />
+              Recording Studio
+            </a>
+          </>
         )}
       </div>
       
@@ -66,10 +74,6 @@ export function SidebarNavItems() {
             <a href="/dashboard/recordings" className={`flex items-center gap-3 rounded-md px-3 py-2 text-sm transition-colors ${isActive('/dashboard/recordings') ? 'bg-accent text-accent-foreground' : 'hover:bg-accent hover:text-accent-foreground'}`}>
               <FileAudio className="h-4 w-4" />
               Recordings
-            </a>
-            <a href="/dashboard/recording-studio" className={`flex items-center gap-3 rounded-md px-3 py-2 text-sm transition-colors ${isActive('/dashboard/recording-studio') ? 'bg-accent text-accent-foreground' : 'hover:bg-accent hover:text-accent-foreground'}`}>
-              <Mic className="h-4 w-4" />
-              Recording Studio
             </a>
           </>
         )}
