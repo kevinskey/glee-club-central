@@ -1,5 +1,5 @@
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 
 interface UseImagePreloaderProps {
   images: string[];
@@ -15,13 +15,12 @@ interface UseImagePreloaderResult {
 
 /**
  * Hook to preload images and track their loading status
+ * Simplified to prevent race conditions and rendering loops
  */
 export function useImagePreloader({
-  images,
-  minImagesToLoad = 1,
-  timeout = 1000
+  images
 }: UseImagePreloaderProps): UseImagePreloaderResult {
-  const [loadedImages, setLoadedImages] = useState<Record<string, boolean>>({});
+  const [loadedImages] = useState<Record<string, boolean>>({});
   
   // Skip loading states completely to avoid unnecessary renders
   return { 
