@@ -22,7 +22,6 @@ import { useSidebar } from "@/components/ui/sidebar";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { Icons } from "@/components/Icons";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { GleeTools } from "@/components/glee-tools/GleeTools";
 
 export function Header() {
   const { profile, signOut } = useAuth();
@@ -48,11 +47,8 @@ export function Header() {
           </Link>
         </div>
           
-        {/* Right side: Glee Tools, theme toggle, and user dropdown */}
+        {/* Right side: theme toggle and user dropdown */}
         <div className="flex items-center gap-3">
-          {/* GleeTools */}
-          <GleeTools />
-          
           <ThemeToggle />
           
           <DropdownMenuProvider>
@@ -108,7 +104,7 @@ export function Header() {
       </div>
       
       <div className="text-center text-xs text-muted-foreground border-t py-1">
-        Glee Tools v1.0 – Production Ready
+        Glee World v1.0
       </div>
     </header>
   );

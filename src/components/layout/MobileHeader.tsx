@@ -9,7 +9,6 @@ import { Menu, X, LogIn } from "lucide-react";
 import { MobileMenu } from "@/components/landing/header/MobileMenu";
 import { useSidebar } from "@/components/ui/sidebar";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
-import { GleeTools } from "@/components/glee-tools/GleeTools";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -68,11 +67,8 @@ export function MobileHeader() {
             </Link>
           </div>
           
-          {/* Right side: GleeTools, theme toggle, and menu button */}
+          {/* Right side: theme toggle and menu button */}
           <div className="flex items-center gap-0.5">
-            {/* GleeTools - replaces separate pitch pipe and metronome components */}
-            <GleeTools variant="minimal" />
-            
             <ThemeToggle />
             
             <DropdownMenuProvider>
@@ -162,7 +158,7 @@ export function MobileHeader() {
         </div>
         
         <div className="text-center text-xs text-muted-foreground border-t py-0.5">
-          Glee Tools v1.0
+          Glee World v1.0
         </div>
       </header>
 

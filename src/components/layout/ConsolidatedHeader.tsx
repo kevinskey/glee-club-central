@@ -22,7 +22,6 @@ import {
 import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { Icons } from "@/components/Icons";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { GleeTools } from "@/components/glee-tools/GleeTools";
 
 export function ConsolidatedHeader() {
   const { profile, signOut, isAuthenticated } = useAuth();
@@ -68,11 +67,8 @@ export function ConsolidatedHeader() {
           </Link>
         </div>
           
-        {/* Right side: GleeTools, theme toggle, and menu dropdown */}
+        {/* Right side: theme toggle and menu dropdown */}
         <div className="flex items-center gap-2">
-          {/* GleeTools component that handles both pitch pipe and metronome */}
-          <GleeTools variant={isMobile ? "minimal" : "default"} />
-          
           <ThemeToggle />
           
           <DropdownMenuProvider>
@@ -187,7 +183,7 @@ export function ConsolidatedHeader() {
       </div>
       
       <div className="text-center text-xs text-muted-foreground border-t py-1">
-        Glee Tools v1.0 – Production Ready
+        Glee World v1.0
       </div>
     </header>
   );

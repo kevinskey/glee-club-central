@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { format } from 'date-fns';
 import { v4 as uuidv4 } from 'uuid';
@@ -6,7 +5,7 @@ import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { AudioPageCategory } from '@/types/audio';
 import { useAuth } from '@/contexts/AuthContext';
-import { getCategoryName } from '@/components/audio/audioCategoryUtils';
+import { getCategoryLabel } from '@/components/audio/audioCategoryUtils';
 
 export function useRecordingSave({ 
   onSaveComplete 
@@ -72,7 +71,7 @@ export function useRecordingSave({
       // Success
       toast({
         title: "Recording saved",
-        description: `Your recording has been saved to ${getCategoryName(recordingCategory)}.`,
+        description: `Your recording has been saved to ${getCategoryLabel(recordingCategory)}.`,
       });
       
       // Reset state and call completion handler
