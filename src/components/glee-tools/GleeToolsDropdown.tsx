@@ -10,7 +10,6 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger
 } from "@/components/ui/dropdown-menu";
-import { GleeTools } from "./GleeTools";
 import { toast } from "sonner";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { 
@@ -95,7 +94,9 @@ export function GleeToolsDropdown() {
           <DialogHeader>
             <DialogTitle>Pitch Pipe</DialogTitle>
           </DialogHeader>
-          <PitchPipe onClose={() => setPitchPipeOpen(false)} />
+          <div className="mt-2">
+            <PitchPipe onClose={() => setPitchPipeOpen(false)} />
+          </div>
         </DialogContent>
       </Dialog>
       
@@ -105,7 +106,9 @@ export function GleeToolsDropdown() {
           <DialogHeader>
             <DialogTitle>Metronome</DialogTitle>
           </DialogHeader>
-          <Metronome onClose={() => setMetronomeOpen(false)} />
+          <div className="mt-2">
+            <Metronome onClose={() => setMetronomeOpen(false)} />
+          </div>
         </DialogContent>
       </Dialog>
     </>

@@ -8,8 +8,7 @@ import {
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuSeparator,
-  DropdownMenuTrigger,
-  DropdownMenuProvider
+  DropdownMenuTrigger
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
 import {
@@ -138,7 +137,9 @@ export function Header() {
           <DialogHeader>
             <DialogTitle>Pitch Pipe</DialogTitle>
           </DialogHeader>
-          <PitchPipe onClose={() => setPitchPipeOpen(false)} />
+          <div className="mt-2">
+            <PitchPipe onClose={() => setPitchPipeOpen(false)} />
+          </div>
         </DialogContent>
       </Dialog>
       
@@ -148,7 +149,9 @@ export function Header() {
           <DialogHeader>
             <DialogTitle>Metronome</DialogTitle>
           </DialogHeader>
-          <Metronome onClose={() => setMetronomeOpen(false)} />
+          <div className="mt-2">
+            <Metronome onClose={() => setMetronomeOpen(false)} />
+          </div>
         </DialogContent>
       </Dialog>
     </header>

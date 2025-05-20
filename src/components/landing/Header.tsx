@@ -23,7 +23,6 @@ import {
 import { useNavigate } from "react-router-dom";
 import { PitchPipe } from "@/components/glee-tools/PitchPipe";
 import { Metronome } from "@/components/glee-tools/Metronome";
-import { GleeToolsDropdown } from "@/components/glee-tools/GleeToolsDropdown";
 
 interface HeaderProps {
   initialShowNewsFeed?: boolean;
@@ -139,7 +138,9 @@ export function Header({ initialShowNewsFeed = true }: HeaderProps) {
           <DialogHeader>
             <DialogTitle>Pitch Pipe</DialogTitle>
           </DialogHeader>
-          <PitchPipe onClose={() => setPitchPipeOpen(false)} />
+          <div className="mt-2">
+            <PitchPipe onClose={() => setPitchPipeOpen(false)} />
+          </div>
         </DialogContent>
       </Dialog>
       
@@ -149,7 +150,9 @@ export function Header({ initialShowNewsFeed = true }: HeaderProps) {
           <DialogHeader>
             <DialogTitle>Metronome</DialogTitle>
           </DialogHeader>
-          <Metronome onClose={() => setMetronomeOpen(false)} />
+          <div className="mt-2">
+            <Metronome onClose={() => setMetronomeOpen(false)} />
+          </div>
         </DialogContent>
       </Dialog>
     </header>

@@ -1,4 +1,3 @@
-
 import React, { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -29,8 +28,15 @@ export function Metronome({ onClose }: MetronomeProps) {
   const timerRef = useRef<number | null>(null);
   const lastTickTimeRef = useRef<number | null>(null);
   
-  // Auth
-  const { isAuthenticated } = useAuth();
+  // Auth - Try to use auth context, fallback to false if not available
+  let isAuthenticated = false;
+  try {
+    const auth = useAuth();
+    isAuthenticated = auth.isAuthenticated;
+  } catch (error) {
+    // Auth context is not available, continue with isAuthenticated = false
+    console.log("Auth context not available, operating in guest mode");
+  }
   
   // Initialize audio context
   useEffect(() => {
@@ -282,7 +288,7 @@ export function Metronome({ onClose }: MetronomeProps) {
         ))}
       </div>
       
-      {/* Save preset */}
+      {/* Save preset - only show when authenticated */}
       {isAuthenticated && (
         <div className="flex gap-2">
           <Input 
@@ -302,7 +308,7 @@ export function Metronome({ onClose }: MetronomeProps) {
         </div>
       )}
       
-      {/* Saved presets */}
+      {/* Saved presets - only show when authenticated */}
       {isAuthenticated && presets.length > 0 && (
         <div className="space-y-2">
           <h3 className="text-sm font-medium">Saved Presets</h3>

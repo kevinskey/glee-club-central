@@ -44,8 +44,15 @@ export function PitchPipe({ onClose, audioContextRef }: PitchPipeProps) {
   const [events, setEvents] = useState<NoteEvent[]>([]);
   const recordStartTimeRef = useRef<number | null>(null);
   
-  // Auth
-  const { isAuthenticated } = useAuth();
+  // Auth - Try to use auth context, fallback to false if not available
+  let isAuthenticated = false;
+  try {
+    const auth = useAuth();
+    isAuthenticated = auth.isAuthenticated;
+  } catch (error) {
+    // Auth context is not available, continue with isAuthenticated = false
+    console.log("Auth context not available, operating in guest mode");
+  }
   
   // Get or create audio context
   const getAudioContext = (): AudioContext => {
