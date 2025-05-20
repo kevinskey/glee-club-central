@@ -14,7 +14,7 @@ import FanDashboardPage from '../pages/FanDashboardPage';
 import AnnouncementsPage from '../pages/dashboard/AnnouncementsPage';
 import ArchivesPage from '../pages/dashboard/ArchivesPage';
 import AttendancePage from '../pages/dashboard/AttendancePage';
-import DashboardPage from '../pages/dashboard/DashboardPage'; // Add correct import for main dashboard page
+import DashboardPage from '../pages/dashboard/DashboardPage'; // Correct import for main dashboard page
 
 export const dashboardRoutes = {
   path: '/dashboard',
