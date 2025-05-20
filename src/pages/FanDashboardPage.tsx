@@ -4,7 +4,7 @@ import { PageHeader } from "@/components/ui/page-header";
 import { useAuth } from "@/contexts/AuthContext";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { UpcomingEventsList } from "@/components/calendar/UpcomingEventsList";
-import { Calendar, Music, Bell } from "lucide-react";
+import { Calendar, Music, Bell, User } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { QuickAccess } from "@/components/dashboard/QuickAccess";
@@ -17,19 +17,19 @@ export default function FanDashboardPage() {
   const fanTiles = [
     {
       title: "Calendar",
-      icon: "Calendar",
+      icon: <Calendar className="h-5 w-5 text-white" />,
       href: "/dashboard/calendar",
       color: "bg-gradient-to-br from-blue-500 to-blue-700"
     },
     {
       title: "Announcements",
-      icon: "Bell",
+      icon: <Bell className="h-5 w-5 text-white" />,
       href: "/dashboard/announcements",
       color: "bg-gradient-to-br from-amber-500 to-amber-700"
     },
     {
       title: "My Profile",
-      icon: "User",
+      icon: <User className="h-5 w-5 text-white" />,
       href: "/dashboard/profile",
       color: "bg-gradient-to-br from-purple-500 to-purple-700"
     },

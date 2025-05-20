@@ -3,11 +3,22 @@ import React from "react";
 import { useNavigate } from "react-router-dom";
 import { Music, Calendar, Headphones, User, Bell, Mic } from "lucide-react";
 
-export function QuickAccess() {
+export interface QuickAccessTile {
+  title: string;
+  icon: React.ReactNode;
+  href: string;
+  color: string;
+}
+
+interface QuickAccessProps {
+  tiles?: QuickAccessTile[];
+}
+
+export function QuickAccess({ tiles }: QuickAccessProps) {
   const navigate = useNavigate();
   
-  // Quick access tiles
-  const quickAccessTiles = [
+  // Default quick access tiles
+  const defaultTiles = [
     {
       title: "Sheet Music",
       icon: <Music className="h-5 w-5 text-white" />,
@@ -45,6 +56,9 @@ export function QuickAccess() {
       color: "bg-gradient-to-br from-pink-500 to-pink-700"
     },
   ];
+  
+  // Use provided tiles or fall back to default tiles
+  const quickAccessTiles = tiles || defaultTiles;
   
   return (
     <div>

@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { PageHeader } from '@/components/ui/page-header';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -8,14 +7,7 @@ import { useNavigate } from 'react-router-dom';
 import { NextEventCountdown } from '@/components/dashboard/NextEventCountdown';
 import { UpcomingEventsList } from '@/components/calendar/UpcomingEventsList';
 import { Button } from '@/components/ui/button';
-import { QuickAccess } from '@/components/dashboard/QuickAccess';
-
-interface QuickAccessTile {
-  title: string;
-  icon: string;
-  href: string;
-  color: string;
-}
+import { QuickAccess, QuickAccessTile } from '@/components/dashboard/QuickAccess';
 
 export default function MemberDashboardPage() {
   const { profile } = useAuth();
@@ -34,37 +26,37 @@ export default function MemberDashboardPage() {
   const memberTiles: QuickAccessTile[] = [
     {
       title: "Sheet Music",
-      icon: "Music",
+      icon: <Music className="h-5 w-5 text-white" />,
       href: "/dashboard/sheet-music",
       color: "bg-gradient-to-br from-blue-600 to-blue-800"
     },
     {
       title: "Calendar",
-      icon: "Calendar",
+      icon: <Calendar className="h-5 w-5 text-white" />,
       href: "/dashboard/calendar",
       color: "bg-gradient-to-br from-purple-600 to-purple-800"
     },
     {
       title: "Recordings",
-      icon: "Headphones",
+      icon: <Headphones className="h-5 w-5 text-white" />,
       href: "/dashboard/recordings",
       color: "bg-gradient-to-br from-amber-600 to-amber-700"
     },
     {
       title: "Resources",
-      icon: "BookOpen",
+      icon: <BookOpen className="h-5 w-5 text-white" />,
       href: "/dashboard/resources",
       color: "bg-gradient-to-br from-green-600 to-green-700"
     },
     {
       title: "Announcements",
-      icon: "Bell",
+      icon: <Bell className="h-5 w-5 text-white" />,
       href: "/dashboard/announcements",
       color: "bg-gradient-to-br from-red-600 to-red-700"
     },
     {
       title: "Profile",
-      icon: "User",
+      icon: <User className="h-5 w-5 text-white" />,
       href: "/dashboard/profile",
       color: "bg-gradient-to-br from-gray-700 to-gray-800"
     }
