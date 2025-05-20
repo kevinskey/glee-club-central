@@ -22,11 +22,11 @@ const buttonVariants = cva(
         spelman: "bg-glee-columbia text-white font-medium hover:bg-glee-columbia/90", /* Changed from orange to blue */
       },
       size: {
-        default: "h-10 px-4 py-2",
-        sm: "h-8 rounded-md px-3 text-xs",
+        default: "h-10 px-4 py-2 min-h-[44px]", /* Increased minimum height for mobile */
+        sm: "h-9 rounded-md px-3 text-xs min-h-[44px]", /* Increased minimum height for mobile */
         lg: "h-12 rounded-md px-8 text-base",
         xl: "h-14 rounded-md px-10 text-lg",
-        icon: "h-10 w-10",
+        icon: "h-10 w-10 min-h-[44px] min-w-[44px]", /* Increased minimum dimensions for mobile */
       },
     },
     defaultVariants: {

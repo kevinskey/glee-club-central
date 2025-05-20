@@ -1,5 +1,5 @@
 
-import React from "react";
+import React, { useEffect } from "react";
 import { Outlet, useLocation } from "react-router-dom";
 import { Toaster } from "sonner";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -17,6 +17,21 @@ const HomeLayout: React.FC<HomeLayoutProps> = ({ hideHeader = false, children })
   
   // Routes where we want to show the bottom navigation
   const showMobileBottomNav = ["/", "/about", "/videos", "/contact", "/press-kit", "/privacy", "/social", "/recordings", "/recordings/submit"].includes(location.pathname);
+  
+  // Set viewport height for mobile
+  useEffect(() => {
+    if (isMobile) {
+      // Fix the iOS 100vh issue
+      const setVh = () => {
+        const vh = window.innerHeight * 0.01;
+        document.documentElement.style.setProperty('--vh', `${vh}px`);
+      };
+      
+      setVh();
+      window.addEventListener('resize', setVh);
+      return () => window.removeEventListener('resize', setVh);
+    }
+  }, [isMobile]);
   
   return (
     <>

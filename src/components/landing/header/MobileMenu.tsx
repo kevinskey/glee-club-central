@@ -30,7 +30,7 @@ export function MobileMenu({ onClose }: MobileMenuProps) {
           <Link to={item.path} key={item.path} onClick={onClose}>
             <Button 
               variant="ghost" 
-              className="w-full justify-start text-left my-1 py-2"
+              className="w-full justify-start text-left my-1 py-3 min-h-[44px]"
             >
               {item.label}
             </Button>

@@ -8,18 +8,20 @@ interface NavigationLinksProps {
 
 export function NavigationLinks({ className = "" }: NavigationLinksProps) {
   const navigationItems = [
-    { label: "Dashboard", path: "/dashboard" },
-    { label: "Music", path: "/music" },
+    { label: "About", path: "/about" },
     { label: "Calendar", path: "/calendar" },
+    { label: "Music", path: "/music" },
+    { label: "Social", path: "/social" },
+    { label: "Contact", path: "/contact" },
   ];
   
   return (
-    <nav className={`hidden md:flex items-center gap-6 ${className}`}>
+    <nav className={`hidden md:flex items-center gap-4 lg:gap-6 ${className}`}>
       {navigationItems.map((item) => (
         <Link 
           key={item.path}
           to={item.path}
-          className="text-foreground hover:text-primary transition-colors"
+          className="text-foreground hover:text-primary transition-colors text-base lg:text-lg"
         >
           {item.label}
         </Link>
