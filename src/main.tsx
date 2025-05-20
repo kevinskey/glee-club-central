@@ -1,6 +1,6 @@
 
-import React from 'react';
-import ReactDOM from 'react-dom/client';
+import * as React from 'react';
+import * as ReactDOM from 'react-dom/client';
 import { ThemeProvider } from "@/providers/ThemeProvider";
 import ErrorBoundary from "./components/ErrorBoundary";
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
