@@ -1,7 +1,7 @@
 
 import React from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Link } from "react-router-dom"; // Using Link instead of useNavigate directly
+import { Link } from "react-router-dom";
 import { Music, Calendar, Users, FileText } from "lucide-react";
 import { Button } from "@/components/ui/button";
 

@@ -44,11 +44,8 @@ export const router = createBrowserRouter([
         path: 'under-construction',
         element: <StaticLandingPage />,
       },
-      // Include the dashboard routes as children of the App component
-      ...dashboardRoutes.children.map(route => ({
-        path: `dashboard${route.path ? `/${route.path}` : ''}`,
-        element: route.element,
-      })),
+      // Add dashboard routes directly as children of App
+      ...dashboardRoutes.children,
       // Include auth routes
       ...authRoutes,
     ],

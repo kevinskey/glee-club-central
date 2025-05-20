@@ -1,30 +1,27 @@
 
 import React from 'react';
 import RequireAuth from '../components/auth/RequireAuth';
-import DashboardLayout from '../layouts/DashboardLayout';
-import RoleDashboard from '../components/auth/RoleDashboard';
+import DashboardPage from '../pages/dashboard/DashboardPage';
 import ProfilePage from '../pages/profile/ProfilePage';
 import MediaLibraryPage from '../pages/MediaLibraryPage';
 import SheetMusicPage from '../pages/SheetMusicPage';
 import PDFViewerPage from '../pages/PDFViewerPage';
 import RecordingsPage from '../pages/recordings/RecordingsPage';
-import RecordingStudioPage from '../pages/recordings/RecordingStudioPage'; // Add this import
+import RecordingStudioPage from '../pages/recordings/RecordingStudioPage';
 import CalendarPage from '../pages/dashboard/calendar';
 import MemberDashboardPage from '../pages/dashboard/MemberDashboardPage';
 import FanDashboardPage from '../pages/FanDashboardPage';
 import AnnouncementsPage from '../pages/dashboard/AnnouncementsPage';
 import ArchivesPage from '../pages/dashboard/ArchivesPage';
 import AttendancePage from '../pages/dashboard/AttendancePage';
-import DashboardPage from '../pages/dashboard/DashboardPage';
 
 export const dashboardRoutes = {
-  path: '/dashboard',
-  // Ensure entire dashboard layout requires authentication
-  element: <RequireAuth><DashboardLayout /></RequireAuth>,
+  path: 'dashboard',
+  element: <RequireAuth><DashboardPage /></RequireAuth>,
   children: [
     {
-      index: true,
-      element: <DashboardPage />,
+      path: '',
+      element: <RequireAuth><DashboardPage /></RequireAuth>,
     },
     {
       path: 'member',
@@ -36,7 +33,7 @@ export const dashboardRoutes = {
     },
     {
       path: 'profile',
-      element: <ProfilePage />,
+      element: <RequireAuth><ProfilePage /></RequireAuth>,
     },
     {
       path: 'media-library',
@@ -59,7 +56,7 @@ export const dashboardRoutes = {
       element: <RequireAuth allowedUserTypes={['admin', 'member']}><RecordingsPage /></RequireAuth>,
     },
     {
-      path: 'recording-studio', // Add new route for recording studio
+      path: 'recording-studio',
       element: <RequireAuth allowedUserTypes={['admin', 'member']}><RecordingStudioPage /></RequireAuth>,
     },
     {

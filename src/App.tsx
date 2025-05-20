@@ -1,11 +1,12 @@
 
 import React from "react";
-import { Outlet } from "react-router-dom";
+import { Outlet, useLocation } from "react-router-dom";
 import DashboardLayout from "./layouts/DashboardLayout";
 
 function App() {
-  // The path will determine which layout to use
-  const path = window.location.pathname;
+  // Get location through React Router's hook instead of window.location
+  const location = useLocation();
+  const path = location.pathname;
   
   // If the path starts with /dashboard, use the DashboardLayout
   if (path.startsWith("/dashboard")) {
