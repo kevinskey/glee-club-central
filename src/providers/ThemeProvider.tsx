@@ -1,5 +1,5 @@
 
-import * as React from "react";
+import React from "react";
 import { Toaster } from "@/components/ui/sonner";
 import { toast } from "sonner";
 
@@ -11,9 +11,11 @@ interface ThemeContextType {
   toggleTheme: () => void;
 }
 
+// Create context with a default value
 const ThemeContext = React.createContext<ThemeContextType | undefined>(undefined);
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
+  // Explicitly import React hooks
   const [theme, setTheme] = React.useState<Theme>("light");
   const [mounted, setMounted] = React.useState(false);
 
