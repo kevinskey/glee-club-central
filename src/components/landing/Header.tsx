@@ -2,7 +2,7 @@
 import React, { useState } from "react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Logo } from "@/components/landing/header/Logo";
-import { Menu } from "lucide-react";
+import { Menu, Music, Clock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Dialog } from "@/components/ui/dialog";
 import { NavigationLinks } from "@/components/landing/header/NavigationLinks";
@@ -13,9 +13,12 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
   DropdownMenuSeparator,
+  DropdownMenuLabel,
   DropdownMenuProvider
 } from "@/components/ui/dropdown-menu";
 import { useNavigate } from "react-router-dom";
+import { PitchPipe } from "@/components/glee-tools/PitchPipe";
+import { Metronome } from "@/components/glee-tools/Metronome";
 
 interface HeaderProps {
   initialShowNewsFeed?: boolean;
@@ -25,6 +28,8 @@ export function Header({ initialShowNewsFeed = true }: HeaderProps) {
   const isMobile = useIsMobile();
   const [showNewsFeed, setShowNewsFeed] = useState(false);
   const navigate = useNavigate();
+  const [pitchPipeOpen, setPitchPipeOpen] = useState(false);
+  const [metronomeOpen, setMetronomeOpen] = useState(false);
   
   // Set the news feed state after component mounts with a slight delay
   React.useEffect(() => {
@@ -99,6 +104,23 @@ export function Header({ initialShowNewsFeed = true }: HeaderProps) {
                     Press Kit
                   </DropdownMenuItem>
                   
+                  <DropdownMenuSeparator />
+                  
+                  {/* Glee Tools Section */}
+                  <DropdownMenuLabel>Glee Tools</DropdownMenuLabel>
+                  
+                  <DropdownMenuItem onClick={() => setPitchPipeOpen(true)}>
+                    <Music className="h-4 w-4 mr-2" />
+                    <span>Pitch Pipe</span>
+                  </DropdownMenuItem>
+                  
+                  <DropdownMenuItem onClick={() => setMetronomeOpen(true)}>
+                    <Clock className="h-4 w-4 mr-2" />
+                    <span>Metronome</span>
+                  </DropdownMenuItem>
+                  
+                  <DropdownMenuSeparator />
+                  
                   <DropdownMenuItem onClick={() => navigate("/login")}>
                     Login
                   </DropdownMenuItem>
@@ -108,6 +130,26 @@ export function Header({ initialShowNewsFeed = true }: HeaderProps) {
           )}
         </div>
       </div>
+      
+      {/* Pitch Pipe Dialog */}
+      <Dialog open={pitchPipeOpen} onOpenChange={setPitchPipeOpen}>
+        <Dialog.Content className="sm:max-w-md">
+          <Dialog.Header>
+            <Dialog.Title>Pitch Pipe</Dialog.Title>
+          </Dialog.Header>
+          <PitchPipe onClose={() => setPitchPipeOpen(false)} />
+        </Dialog.Content>
+      </Dialog>
+      
+      {/* Metronome Dialog */}
+      <Dialog open={metronomeOpen} onOpenChange={setMetronomeOpen}>
+        <Dialog.Content className="sm:max-w-md">
+          <Dialog.Header>
+            <Dialog.Title>Metronome</Dialog.Title>
+          </Dialog.Header>
+          <Metronome onClose={() => setMetronomeOpen(false)} />
+        </Dialog.Content>
+      </Dialog>
     </header>
   );
 }

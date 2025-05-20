@@ -17,17 +17,25 @@ import {
   User,
   Settings,
   LogOut,
+  Music,
+  Clock,
 } from "lucide-react";
 import { useSidebar } from "@/components/ui/sidebar";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { Icons } from "@/components/Icons";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { Dialog } from "@/components/ui/dialog";
+import { useState } from "react";
+import { PitchPipe } from "@/components/glee-tools/PitchPipe";
+import { Metronome } from "@/components/glee-tools/Metronome";
 
 export function Header() {
   const { profile, signOut } = useAuth();
   const { toggleSidebar, open } = useSidebar();
   const navigate = useNavigate();
   const isMobile = useIsMobile();
+  const [pitchPipeOpen, setPitchPipeOpen] = useState(false);
+  const [metronomeOpen, setMetronomeOpen] = useState(false);
   
   const handleSignOut = async () => {
     if (signOut) {
@@ -90,6 +98,22 @@ export function Header() {
                 </DropdownMenuItem>
                 
                 <DropdownMenuSeparator />
+                
+                {/* Glee Tools Section */}
+                <DropdownMenuLabel>Glee Tools</DropdownMenuLabel>
+                
+                <DropdownMenuItem onClick={() => setPitchPipeOpen(true)}>
+                  <Music className="h-4 w-4 mr-2" />
+                  <span>Pitch Pipe</span>
+                </DropdownMenuItem>
+                
+                <DropdownMenuItem onClick={() => setMetronomeOpen(true)}>
+                  <Clock className="h-4 w-4 mr-2" />
+                  <span>Metronome</span>
+                </DropdownMenuItem>
+                
+                <DropdownMenuSeparator />
+                
                 <DropdownMenuItem 
                   onClick={handleSignOut}
                   className="flex items-center gap-2 cursor-pointer text-destructive"
@@ -102,6 +126,26 @@ export function Header() {
           </DropdownMenuProvider>
         </div>
       </div>
+      
+      {/* Pitch Pipe Dialog */}
+      <Dialog open={pitchPipeOpen} onOpenChange={setPitchPipeOpen}>
+        <Dialog.Content className="sm:max-w-md">
+          <Dialog.Header>
+            <Dialog.Title>Pitch Pipe</Dialog.Title>
+          </Dialog.Header>
+          <PitchPipe onClose={() => setPitchPipeOpen(false)} />
+        </Dialog.Content>
+      </Dialog>
+      
+      {/* Metronome Dialog */}
+      <Dialog open={metronomeOpen} onOpenChange={setMetronomeOpen}>
+        <Dialog.Content className="sm:max-w-md">
+          <Dialog.Header>
+            <Dialog.Title>Metronome</Dialog.Title>
+          </Dialog.Header>
+          <Metronome onClose={() => setMetronomeOpen(false)} />
+        </Dialog.Content>
+      </Dialog>
     </header>
   );
 }

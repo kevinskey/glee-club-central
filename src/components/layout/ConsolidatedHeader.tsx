@@ -1,5 +1,5 @@
 
-import React from "react";
+import React, { useState } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import {
@@ -17,18 +17,25 @@ import {
   User,
   Settings,
   LogOut,
-  LogIn
+  LogIn,
+  Music,
+  Clock
 } from "lucide-react";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { Icons } from "@/components/Icons";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { GleeToolsDropdown } from "@/components/glee-tools/GleeToolsDropdown";
+import { Dialog } from "@/components/ui/dialog";
+import { PitchPipe } from "@/components/glee-tools/PitchPipe";
+import { Metronome } from "@/components/glee-tools/Metronome";
 
 export function ConsolidatedHeader() {
   const { profile, signOut, isAuthenticated } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   const isMobile = useIsMobile();
+  const [pitchPipeOpen, setPitchPipeOpen] = useState(false);
+  const [metronomeOpen, setMetronomeOpen] = useState(false);
   
   const isDashboardPath = location.pathname.startsWith("/dashboard") || location.pathname.startsWith("/admin");
   
@@ -126,6 +133,22 @@ export function ConsolidatedHeader() {
                     )}
                     
                     <DropdownMenuSeparator />
+                    
+                    {/* Glee Tools Section */}
+                    <DropdownMenuLabel>Glee Tools</DropdownMenuLabel>
+                    
+                    <DropdownMenuItem onClick={() => setPitchPipeOpen(true)}>
+                      <Music className="h-4 w-4 mr-2" />
+                      <span>Pitch Pipe</span>
+                    </DropdownMenuItem>
+                    
+                    <DropdownMenuItem onClick={() => setMetronomeOpen(true)}>
+                      <Clock className="h-4 w-4 mr-2" />
+                      <span>Metronome</span>
+                    </DropdownMenuItem>
+                    
+                    <DropdownMenuSeparator />
+                    
                     <DropdownMenuItem 
                       onClick={handleSignOut}
                       className="flex items-center gap-2 cursor-pointer text-destructive"
@@ -160,6 +183,21 @@ export function ConsolidatedHeader() {
                     
                     <DropdownMenuSeparator />
                     
+                    {/* Glee Tools Section */}
+                    <DropdownMenuLabel>Glee Tools</DropdownMenuLabel>
+                    
+                    <DropdownMenuItem onClick={() => setPitchPipeOpen(true)}>
+                      <Music className="h-4 w-4 mr-2" />
+                      <span>Pitch Pipe</span>
+                    </DropdownMenuItem>
+                    
+                    <DropdownMenuItem onClick={() => setMetronomeOpen(true)}>
+                      <Clock className="h-4 w-4 mr-2" />
+                      <span>Metronome</span>
+                    </DropdownMenuItem>
+                    
+                    <DropdownMenuSeparator />
+                    
                     <DropdownMenuItem onClick={() => navigate("/login")}>
                       <LogIn className="h-4 w-4 mr-2" />
                       <span>Login</span>
@@ -183,6 +221,26 @@ export function ConsolidatedHeader() {
           </DropdownMenuProvider>
         </div>
       </div>
+      
+      {/* Pitch Pipe Dialog */}
+      <Dialog open={pitchPipeOpen} onOpenChange={setPitchPipeOpen}>
+        <Dialog.Content className="sm:max-w-md">
+          <Dialog.Header>
+            <Dialog.Title>Pitch Pipe</Dialog.Title>
+          </Dialog.Header>
+          <PitchPipe onClose={() => setPitchPipeOpen(false)} />
+        </Dialog.Content>
+      </Dialog>
+      
+      {/* Metronome Dialog */}
+      <Dialog open={metronomeOpen} onOpenChange={setMetronomeOpen}>
+        <Dialog.Content className="sm:max-w-md">
+          <Dialog.Header>
+            <Dialog.Title>Metronome</Dialog.Title>
+          </Dialog.Header>
+          <Metronome onClose={() => setMetronomeOpen(false)} />
+        </Dialog.Content>
+      </Dialog>
     </header>
   );
 }

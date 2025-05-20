@@ -5,7 +5,7 @@ import { Icons } from "@/components/Icons";
 import { Button } from "@/components/ui/button";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useAuth } from "@/contexts/AuthContext";
-import { Menu, X, LogIn } from "lucide-react";
+import { Menu, X, LogIn, Music, Clock } from "lucide-react";
 import { MobileMenu } from "@/components/landing/header/MobileMenu";
 import { useSidebar } from "@/components/ui/sidebar";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
@@ -16,8 +16,12 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
   DropdownMenuSeparator,
-  DropdownMenuProvider
+  DropdownMenuProvider,
+  DropdownMenuLabel
 } from "@/components/ui/dropdown-menu";
+import { Dialog } from "@/components/ui/dialog";
+import { PitchPipe } from "@/components/glee-tools/PitchPipe";
+import { Metronome } from "@/components/glee-tools/Metronome";
 
 export function MobileHeader() {
   const { isAuthenticated, signOut } = useAuth();
@@ -26,6 +30,8 @@ export function MobileHeader() {
   const location = useLocation();
   const { setOpenMobile, openMobile } = useSidebar();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [pitchPipeOpen, setPitchPipeOpen] = useState(false);
+  const [metronomeOpen, setMetronomeOpen] = useState(false);
   
   const isDashboardPath = location.pathname.startsWith("/dashboard") || location.pathname.startsWith("/admin");
   
@@ -104,6 +110,21 @@ export function MobileHeader() {
                   
                   <DropdownMenuSeparator />
                   
+                  {/* Glee Tools Section */}
+                  <DropdownMenuLabel>Glee Tools</DropdownMenuLabel>
+                  
+                  <DropdownMenuItem onClick={() => setPitchPipeOpen(true)}>
+                    <Music className="h-4 w-4 mr-2" />
+                    <span>Pitch Pipe</span>
+                  </DropdownMenuItem>
+                  
+                  <DropdownMenuItem onClick={() => setMetronomeOpen(true)}>
+                    <Clock className="h-4 w-4 mr-2" />
+                    <span>Metronome</span>
+                  </DropdownMenuItem>
+                  
+                  <DropdownMenuSeparator />
+                  
                   {isAuthenticated && (
                     <DropdownMenuItem onClick={() => navigate("/dashboard")}>
                       Dashboard
@@ -162,6 +183,26 @@ export function MobileHeader() {
 
       {/* Mobile menu for public pages */}
       {mobileMenuOpen && !isDashboardPath && <MobileMenu onClose={() => setMobileMenuOpen(false)} />}
+      
+      {/* Pitch Pipe Dialog */}
+      <Dialog open={pitchPipeOpen} onOpenChange={setPitchPipeOpen}>
+        <Dialog.Content className="sm:max-w-md">
+          <Dialog.Header>
+            <Dialog.Title>Pitch Pipe</Dialog.Title>
+          </Dialog.Header>
+          <PitchPipe onClose={() => setPitchPipeOpen(false)} />
+        </Dialog.Content>
+      </Dialog>
+      
+      {/* Metronome Dialog */}
+      <Dialog open={metronomeOpen} onOpenChange={setMetronomeOpen}>
+        <Dialog.Content className="sm:max-w-md">
+          <Dialog.Header>
+            <Dialog.Title>Metronome</Dialog.Title>
+          </Dialog.Header>
+          <Metronome onClose={() => setMetronomeOpen(false)} />
+        </Dialog.Content>
+      </Dialog>
     </>
   );
 }
