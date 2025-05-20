@@ -93,7 +93,8 @@ export function RecordingSection({ onRecordingSaved }: RecordingSectionProps) {
     if (audioURL) {
       URL.revokeObjectURL(audioURL);
       toast.success("Recording discarded");
-      onRecordingSaved();
+      // Pass undefined to reset the view
+      onRecordingSaved(undefined);
     }
     
     // Release microphone if needed

@@ -11,7 +11,7 @@ import {
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { EnhancedMetronome } from "@/components/ui/enhanced-metronome";
-import { PitchPipeDialog } from "@/components/ui/pitch-pipe-dialog";
+import { PitchPipe } from '@/components/ui/pitch-pipe';
 import { Button } from "@/components/ui/button";
 import { resumeAudioContext, audioLogger, registerKeyboardShortcut } from "@/utils/audioUtils";
 
@@ -168,7 +168,7 @@ export function HeaderUtils() {
           <DialogHeader>
             <DialogTitle>Pitch Pipe</DialogTitle>
           </DialogHeader>
-          <PitchPipeDialog audioContextRef={audioContextRef} />
+          <PitchPipe size="md" audioContextRef={audioContextRef} />
         </DialogContent>
       </Dialog>
       

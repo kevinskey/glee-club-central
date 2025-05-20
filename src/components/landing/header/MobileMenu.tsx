@@ -10,9 +10,12 @@ interface MobileMenuProps {
 
 export function MobileMenu({ onClose }: MobileMenuProps) {
   const menuItems = [
-    { label: "Dashboard", path: "/dashboard" },
-    { label: "Music", path: "/music" },
-    { label: "Calendar", path: "/calendar" },
+    { label: "Home", path: "/" },
+    { label: "About", path: "/about" },
+    { label: "Social", path: "/social" },
+    { label: "Contact", path: "/contact" },
+    { label: "Press Kit", path: "/press-kit" },
+    { label: "Login", path: "/login" },
   ];
   
   return (

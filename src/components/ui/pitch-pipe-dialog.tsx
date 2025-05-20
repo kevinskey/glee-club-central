@@ -7,10 +7,13 @@ import { Music2 } from 'lucide-react';
 
 interface PitchPipeDialogProps {
   triggerClassName?: string;
+  audioContextRef?: React.MutableRefObject<AudioContext | null>;
 }
 
-export function PitchPipeDialog({ triggerClassName }: PitchPipeDialogProps) {
-  const audioContextRef = useRef<AudioContext | null>(null);
+export function PitchPipeDialog({ triggerClassName, audioContextRef: externalAudioContextRef }: PitchPipeDialogProps) {
+  // Use provided audio context ref or create our own
+  const internalAudioContextRef = useRef<AudioContext | null>(null);
+  const audioContextRef = externalAudioContextRef || internalAudioContextRef;
   const [isOpen, setIsOpen] = React.useState(false);
 
   const handleOpen = () => {
