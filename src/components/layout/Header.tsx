@@ -1,5 +1,5 @@
 
-import React, { useState, useRef } from "react";
+import React from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import {
@@ -17,24 +17,18 @@ import {
   User,
   Settings,
   LogOut,
-  Clock
 } from "lucide-react";
 import { useSidebar } from "@/components/ui/sidebar";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { Icons } from "@/components/Icons";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription } from "@/components/ui/dialog";
-import { EnhancedMetronome } from "@/components/ui/enhanced-metronome";
-import { PitchPipeDialog } from "@/components/ui/pitch-pipe-dialog";
-import { registerKeyboardShortcut } from "@/utils/audioUtils";
+import { GleeTools } from "@/components/glee-tools/GleeTools";
 
 export function Header() {
   const { profile, signOut } = useAuth();
   const { toggleSidebar, open } = useSidebar();
   const navigate = useNavigate();
-  const [metronomeOpen, setMetronomeOpen] = useState(false);
   const isMobile = useIsMobile();
-  const audioContextRef = useRef<AudioContext | null>(null);
   
   const handleSignOut = async () => {
     if (signOut) {
@@ -42,39 +36,6 @@ export function Header() {
       navigate("/login");
     }
   };
-
-  // Initialize audio context on first interaction
-  const handleOpenMetronome = () => {
-    // Create AudioContext on first click if it doesn't exist
-    if (!audioContextRef.current) {
-      try {
-        audioContextRef.current = new AudioContext();
-      } catch (e) {
-        console.error("Failed to create AudioContext:", e);
-      }
-    }
-    
-    // Resume audio context if needed (for mobile browsers)
-    if (audioContextRef.current && audioContextRef.current.state === 'suspended') {
-      audioContextRef.current.resume().catch(console.error);
-    }
-    
-    setMetronomeOpen(true);
-  };
-  
-  // Register keyboard shortcuts
-  React.useEffect(() => {
-    // M key for metronome
-    const cleanupMetronome = registerKeyboardShortcut('m', () => {
-      setMetronomeOpen(prev => !prev);
-    });
-    
-    // ESC key to close dialogs (handled by Dialog component)
-    
-    return () => {
-      cleanupMetronome();
-    };
-  }, []);
 
   return (
     <header className="bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 sticky top-0 z-50 w-full border-b hidden md:block">
@@ -87,26 +48,10 @@ export function Header() {
           </Link>
         </div>
           
-        {/* Right side: Pitch Pipe, Metronome, theme toggle, and user dropdown */}
+        {/* Right side: Glee Tools, theme toggle, and user dropdown */}
         <div className="flex items-center gap-3">
-          {/* Pitch Pipe */}
-          <PitchPipeDialog triggerClassName="h-9 w-9" />
-          
-          {/* Metronome Icon */}
-          <Dialog open={metronomeOpen} onOpenChange={setMetronomeOpen}>
-            <DialogTrigger asChild>
-              <Button variant="ghost" size="icon" className="h-9 w-9" onClick={handleOpenMetronome}>
-                <Clock className="h-5 w-5 text-foreground" />
-                <span className="sr-only">Open metronome</span>
-              </Button>
-            </DialogTrigger>
-            <DialogContent className="sm:max-w-md">
-              <DialogHeader>
-                <DialogTitle>Metronome</DialogTitle>
-              </DialogHeader>
-              <EnhancedMetronome showControls={true} size="md" audioContextRef={audioContextRef} />
-            </DialogContent>
-          </Dialog>
+          {/* GleeTools */}
+          <GleeTools />
           
           <ThemeToggle />
           
@@ -160,6 +105,10 @@ export function Header() {
             </DropdownMenu>
           </DropdownMenuProvider>
         </div>
+      </div>
+      
+      <div className="text-center text-xs text-muted-foreground border-t py-1">
+        Glee Tools v1.0 – Production Ready
       </div>
     </header>
   );

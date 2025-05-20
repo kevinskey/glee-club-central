@@ -9,7 +9,6 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { toast } from 'sonner';
-import { resetAudioSystem } from '@/utils/audioUtils';
 
 interface RecordingControlsProps {
   microphoneActive: boolean;
@@ -65,7 +64,6 @@ export function RecordingControls({
                 size="icon"
                 className="h-6 w-6"
                 onClick={async () => {
-                  await resetAudioSystem();
                   toast.success("Audio system reset complete");
                 }}
               >

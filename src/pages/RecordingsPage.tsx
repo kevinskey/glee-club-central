@@ -1,27 +1,11 @@
-
-import React, { useEffect } from "react";
+import React from "react";
 import { PageHeader } from "@/components/ui/page-header";
 import { Mic } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
-import { initializeAudioSystem, audioLogger } from "@/utils/audioUtils";
 
 export default function RecordingsPage() {
   const navigate = useNavigate();
-
-  // Initialize audio system when the page loads
-  useEffect(() => {
-    const initAudio = async () => {
-      try {
-        await initializeAudioSystem();
-        audioLogger.log("RecordingsPage: Audio system initialized");
-      } catch (error) {
-        audioLogger.error("RecordingsPage: Failed to initialize audio system", error);
-      }
-    };
-    
-    initAudio();
-  }, []);
 
   return (
     <div className="space-y-6">

@@ -1,12 +1,10 @@
 
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState } from "react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Logo } from "@/components/landing/header/Logo";
-import { Clock, Menu, X, Music2 } from "lucide-react";
+import { Menu } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { EnhancedMetronome } from "@/components/ui/enhanced-metronome";
-import { PitchPipeDialog } from "@/components/ui/pitch-pipe-dialog";
+import { Dialog } from "@/components/ui/dialog";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { NavigationLinks } from "@/components/landing/header/NavigationLinks";
 import {
@@ -15,11 +13,10 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
   DropdownMenuSeparator,
-  DropdownMenuLabel,
   DropdownMenuProvider
 } from "@/components/ui/dropdown-menu";
 import { useNavigate } from "react-router-dom";
-import { registerKeyboardShortcut } from "@/utils/audioUtils";
+import { GleeTools } from "@/components/glee-tools/GleeTools";
 
 interface HeaderProps {
   initialShowNewsFeed?: boolean;
@@ -28,12 +25,10 @@ interface HeaderProps {
 export function Header({ initialShowNewsFeed = true }: HeaderProps) {
   const isMobile = useIsMobile();
   const [showNewsFeed, setShowNewsFeed] = useState(false);
-  const [metronomeOpen, setMetronomeOpen] = useState(false);
-  const audioContextRef = useRef<AudioContext | null>(null);
   const navigate = useNavigate();
   
   // Set the news feed state after component mounts with a slight delay
-  useEffect(() => {
+  React.useEffect(() => {
     const timer = setTimeout(() => {
       setShowNewsFeed(initialShowNewsFeed);
     }, 200);
@@ -42,7 +37,7 @@ export function Header({ initialShowNewsFeed = true }: HeaderProps) {
   }, [initialShowNewsFeed]);
 
   // Auto-hide the news feed after a shorter duration
-  useEffect(() => {
+  React.useEffect(() => {
     if (showNewsFeed) {
       const timer = setTimeout(() => {
         setShowNewsFeed(false);
@@ -51,39 +46,6 @@ export function Header({ initialShowNewsFeed = true }: HeaderProps) {
       return () => clearTimeout(timer);
     }
   }, [showNewsFeed]);
-
-  // Initialize audio context on first interaction
-  const handleOpenMetronome = () => {
-    // Create AudioContext on first click if it doesn't exist
-    if (!audioContextRef.current) {
-      try {
-        audioContextRef.current = new AudioContext();
-      } catch (e) {
-        console.error("Failed to create AudioContext:", e);
-      }
-    }
-    
-    // Resume audio context if needed (for mobile browsers)
-    if (audioContextRef.current && audioContextRef.current.state === 'suspended') {
-      audioContextRef.current.resume().catch(console.error);
-    }
-    
-    setMetronomeOpen(true);
-  };
-  
-  // Register keyboard shortcuts
-  useEffect(() => {
-    // M key for metronome
-    const cleanupMetronome = registerKeyboardShortcut('m', () => {
-      setMetronomeOpen(prev => !prev);
-    });
-    
-    // ESC key to close dialogs (handled by Dialog component)
-    
-    return () => {
-      cleanupMetronome();
-    };
-  }, []);
 
   return (
     <header className="sticky top-0 z-50 border-b bg-background/95 backdrop-blur-md supports-[backdrop-filter]:bg-background/60">
@@ -96,31 +58,10 @@ export function Header({ initialShowNewsFeed = true }: HeaderProps) {
           {!isMobile && <NavigationLinks className="ml-6" />}
         </div>
         
-        {/* Right side: Glee Tools - Pitch Pipe, Metronome, theme toggle, and navigation dropdown */}
+        {/* Right side: Glee Tools, theme toggle, and navigation dropdown */}
         <div className="flex items-center gap-3">
-          {/* Pitch Pipe Icon */}
-          <PitchPipeDialog triggerClassName="h-10 w-10 rounded-full" />
-          
-          {/* Metronome Icon */}
-          <Dialog open={metronomeOpen} onOpenChange={setMetronomeOpen}>
-            <DialogTrigger asChild>
-              <Button 
-                variant="ghost" 
-                size="icon" 
-                className="h-10 w-10 rounded-full" 
-                onClick={handleOpenMetronome}
-              >
-                <Clock className="h-5 w-5 text-foreground" />
-                <span className="sr-only">Open metronome</span>
-              </Button>
-            </DialogTrigger>
-            <DialogContent className="sm:max-w-md">
-              <DialogHeader>
-                <DialogTitle>Metronome</DialogTitle>
-              </DialogHeader>
-              <EnhancedMetronome showControls={true} size="md" audioContextRef={audioContextRef} />
-            </DialogContent>
-          </Dialog>
+          {/* GleeTools */}
+          {!isMobile ? <GleeTools /> : null}
           
           <ThemeToggle />
           
@@ -139,6 +80,16 @@ export function Header({ initialShowNewsFeed = true }: HeaderProps) {
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="w-56 bg-popover">
+                  <DropdownMenuSeparator />
+                  
+                  {/* GleeTools on mobile */}
+                  <DropdownMenuItem className="py-2 px-4 flex gap-2" asChild>
+                    <div>
+                      <GleeTools variant="minimal" />
+                      <span className="ml-2">Glee Tools</span>
+                    </div>
+                  </DropdownMenuItem>
+                  
                   <DropdownMenuSeparator />
                   
                   <DropdownMenuItem onClick={() => navigate("/")} className="py-2">

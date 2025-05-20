@@ -10,6 +10,14 @@ export const audioLogger = {
   },
   error: (...args: any[]) => {
     console.error('🔊 ERROR:', ...args);
+  },
+  debug: (...args: any[]) => {
+    if (process.env.NODE_ENV === 'development') {
+      console.log('🔊 DEBUG:', ...args);
+    }
+  },
+  warn: (...args: any[]) => {
+    console.warn('🔊 WARNING:', ...args);
   }
 };
 
@@ -137,4 +145,69 @@ export const registerKeyboardShortcut = (
   return () => {
     window.removeEventListener('keydown', handleKeyDown);
   };
+};
+
+// Function to reset the audio system
+export const resetAudioSystem = async (): Promise<void> => {
+  audioLogger.log('Resetting audio system...');
+  
+  try {
+    // This is a placeholder implementation 
+    // In a full implementation, this would close existing audio contexts,
+    // release any media streams, and reset audio state
+    
+    return Promise.resolve();
+  } catch (error) {
+    audioLogger.error('Error resetting audio system:', error);
+    return Promise.reject(error);
+  }
+};
+
+// Initialize audio system and check permissions
+export const initializeAudioSystem = (): { initialized: boolean; microphonePermission: 'granted' | 'denied' | 'prompt' | 'unsupported' } => {
+  // Check if browser supports audio API
+  const hasAudioAPI = typeof AudioContext !== 'undefined' || typeof (window as any).webkitAudioContext !== 'undefined';
+  
+  // Check if browser supports getUserMedia
+  const hasGetUserMedia = navigator.mediaDevices && navigator.mediaDevices.getUserMedia;
+  
+  if (!hasAudioAPI) {
+    audioLogger.warn('Web Audio API not supported in this browser');
+    return { initialized: false, microphonePermission: 'unsupported' };
+  }
+  
+  if (!hasGetUserMedia) {
+    audioLogger.warn('getUserMedia not supported in this browser');
+    return { initialized: false, microphonePermission: 'unsupported' };
+  }
+  
+  // Return basic initialized state, actual permission will need to be requested later
+  return { initialized: true, microphonePermission: 'prompt' };
+};
+
+// Request microphone access
+export const requestMicrophoneAccess = async (constraints: MediaStreamConstraints = { audio: true }): Promise<MediaStream | null> => {
+  try {
+    const stream = await navigator.mediaDevices.getUserMedia(constraints);
+    audioLogger.log('Microphone access granted');
+    return stream;
+  } catch (error) {
+    if ((error as Error).name === 'NotAllowedError') {
+      audioLogger.warn('Microphone access denied by user');
+    } else {
+      audioLogger.error('Error accessing microphone:', error);
+    }
+    return null;
+  }
+};
+
+// Release microphone
+export const releaseMicrophone = (stream: MediaStream | null): void => {
+  if (stream) {
+    const tracks = stream.getTracks();
+    tracks.forEach(track => {
+      track.stop();
+    });
+    audioLogger.log('Microphone released');
+  }
 };
