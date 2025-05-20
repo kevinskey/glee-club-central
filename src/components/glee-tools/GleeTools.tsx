@@ -1,12 +1,15 @@
+
 import React, { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { toast } from "sonner";
 import { Music, Clock } from "lucide-react";
-import { PitchPipe } from "./PitchPipe";
-import { Metronome } from "./Metronome";
 import { registerKeyboardShortcut } from "@/utils/audioUtils";
 import { useIsMobile } from "@/hooks/use-mobile";
+
+// Import the newer UI components
+import { PitchPipe as UIPitchPipe } from "@/components/ui/pitch-pipe";
+import { Metronome as UIMetronome } from "@/components/ui/metronome";
 
 export interface GleeToolsProps {
   variant?: "default" | "minimal";
@@ -96,7 +99,7 @@ export function GleeTools({ variant = "default", className = "" }: GleeToolsProp
             <DialogHeader>
               <DialogTitle>Pitch Pipe</DialogTitle>
             </DialogHeader>
-            <PitchPipe audioContextRef={audioContextRef} />
+            <UIPitchPipe />
           </DialogContent>
         </Dialog>
         
@@ -106,7 +109,7 @@ export function GleeTools({ variant = "default", className = "" }: GleeToolsProp
             <DialogHeader>
               <DialogTitle>Metronome</DialogTitle>
             </DialogHeader>
-            <Metronome audioContextRef={audioContextRef} />
+            <UIMetronome />
           </DialogContent>
         </Dialog>
       </div>
@@ -141,7 +144,7 @@ export function GleeTools({ variant = "default", className = "" }: GleeToolsProp
           <DialogHeader>
             <DialogTitle>Pitch Pipe</DialogTitle>
           </DialogHeader>
-          <PitchPipe audioContextRef={audioContextRef} />
+          <UIPitchPipe />
         </DialogContent>
       </Dialog>
       
@@ -151,7 +154,7 @@ export function GleeTools({ variant = "default", className = "" }: GleeToolsProp
           <DialogHeader>
             <DialogTitle>Metronome</DialogTitle>
           </DialogHeader>
-          <Metronome audioContextRef={audioContextRef} />
+          <UIMetronome />
         </DialogContent>
       </Dialog>
     </div>
