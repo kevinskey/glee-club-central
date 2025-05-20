@@ -3,6 +3,7 @@ import React, { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
 import { Label } from "@/components/ui/label";
+import { createAudioContext, resumeAudioContext } from "@/utils/audioUtils";
 
 const PIANO_KEYS = [
   { note: 'C', isSharp: false },
@@ -19,6 +20,27 @@ const PIANO_KEYS = [
   { note: 'B', isSharp: false }
 ];
 
+// Pre-calculate frequencies for quick access
+const calculateFrequencies = () => {
+  const freqMap: Record<string, number[]> = {};
+  for (const key of PIANO_KEYS) {
+    freqMap[key.note] = [];
+    for (let oct = 2; oct <= 6; oct++) {
+      // Calculate frequency: C4 (middle C) = 261.63 Hz
+      const baseFreq = {
+        'C': 261.63, 'C#': 277.18, 'D': 293.66, 'D#': 311.13,
+        'E': 329.63, 'F': 349.23, 'F#': 369.99, 'G': 392.00,
+        'G#': 415.30, 'A': 440.00, 'A#': 466.16, 'B': 493.88
+      }[key.note];
+      
+      freqMap[key.note][oct] = baseFreq * Math.pow(2, oct - 4);
+    }
+  }
+  return freqMap;
+};
+
+const NOTE_FREQUENCIES = calculateFrequencies();
+
 interface PianoKeyboardProps {
   onClose?: () => void;
 }
@@ -27,73 +49,109 @@ export function PianoKeyboard({ onClose }: PianoKeyboardProps) {
   const [octave, setOctave] = useState(4);
   const [volume, setVolume] = useState(0.7);
   const audioContextRef = useRef<AudioContext | null>(null);
-
-  // Initialize audio context
-  const getAudioContext = () => {
-    if (!audioContextRef.current) {
-      try {
-        audioContextRef.current = new (window.AudioContext || (window as any).webkitAudioContext)();
-      } catch (error) {
-        console.error("Failed to create audio context:", error);
-      }
-    }
-    return audioContextRef.current;
-  };
+  const oscillatorsRef = useRef<Map<string, { oscillator: OscillatorNode, gain: GainNode }>>(new Map());
   
-  // Play piano note
-  const playNote = (note: string) => {
-    const ctx = getAudioContext();
-    if (!ctx) return;
+  // Initialize audio context with low latency options
+  useEffect(() => {
+    audioContextRef.current = createAudioContext();
     
-    // Resume context if suspended
-    if (ctx.state === 'suspended') {
-      ctx.resume().catch(console.error);
+    // Optimize audio context for low latency
+    if (audioContextRef.current && 'audioWorklet' in audioContextRef.current) {
+      audioContextRef.current.resume().catch(console.error);
     }
     
-    // Create oscillator
-    const osc = ctx.createOscillator();
-    const gain = ctx.createGain();
-    
-    // Set note frequency based on note name and octave
-    const frequencies: Record<string, number> = {
-      'C': 261.63 * Math.pow(2, octave - 4),
-      'C#': 277.18 * Math.pow(2, octave - 4),
-      'D': 293.66 * Math.pow(2, octave - 4),
-      'D#': 311.13 * Math.pow(2, octave - 4),
-      'E': 329.63 * Math.pow(2, octave - 4),
-      'F': 349.23 * Math.pow(2, octave - 4),
-      'F#': 369.99 * Math.pow(2, octave - 4),
-      'G': 392.00 * Math.pow(2, octave - 4),
-      'G#': 415.30 * Math.pow(2, octave - 4),
-      'A': 440.00 * Math.pow(2, octave - 4),
-      'A#': 466.16 * Math.pow(2, octave - 4),
-      'B': 493.88 * Math.pow(2, octave - 4)
-    };
-    
-    osc.frequency.value = frequencies[note];
-    osc.type = 'sine';
-    
-    // Configure envelope
-    gain.gain.value = 0;
-    gain.gain.setValueAtTime(0, ctx.currentTime);
-    gain.gain.linearRampToValueAtTime(volume, ctx.currentTime + 0.01);
-    gain.gain.linearRampToValueAtTime(0, ctx.currentTime + 1);
-    
-    // Connect nodes and play
-    osc.connect(gain);
-    gain.connect(ctx.destination);
-    osc.start();
-    osc.stop(ctx.currentTime + 1);
-  };
-
-  // Clean up resources when component unmounts
-  useEffect(() => {
     return () => {
+      // Clean up oscillators
+      oscillatorsRef.current.forEach((nodes) => {
+        try {
+          nodes.oscillator.stop();
+          nodes.oscillator.disconnect();
+          nodes.gain.disconnect();
+        } catch (e) {
+          // Ignore errors during cleanup
+        }
+      });
+      
+      // Close audio context
       if (audioContextRef.current && audioContextRef.current.state !== 'closed') {
         audioContextRef.current.close().catch(console.error);
       }
     };
   }, []);
+  
+  // Play piano note with optimized handling
+  const playNote = (note: string) => {
+    const ctx = audioContextRef.current;
+    if (!ctx) return;
+    
+    // Resume context if suspended (needed for mobile)
+    if (ctx.state === 'suspended') {
+      resumeAudioContext(ctx).catch(console.error);
+    }
+    
+    const noteKey = `${note}-${octave}`;
+    
+    // Stop any existing note
+    stopNote(noteKey);
+    
+    // Create optimized oscillator
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    
+    // Set note frequency directly from pre-calculated table
+    osc.frequency.value = NOTE_FREQUENCIES[note][octave];
+    osc.type = 'sine';
+    
+    // Use more immediate envelope for faster response
+    gain.gain.value = volume;
+    
+    // Connect nodes and play immediately
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    
+    // Start immediately
+    osc.start();
+    
+    // Store references for cleanup
+    oscillatorsRef.current.set(noteKey, { oscillator: osc, gain });
+    
+    // Schedule release in 1 second
+    setTimeout(() => {
+      stopNote(noteKey);
+    }, 1000);
+  };
+  
+  // Stop a specific note
+  const stopNote = (noteKey: string) => {
+    const nodes = oscillatorsRef.current.get(noteKey);
+    if (nodes) {
+      try {
+        const { oscillator, gain } = nodes;
+        
+        // Quick fade out to avoid clicks
+        const ctx = audioContextRef.current;
+        if (ctx) {
+          gain.gain.setValueAtTime(gain.gain.value, ctx.currentTime);
+          gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 0.03);
+          
+          // Stop after fade out
+          setTimeout(() => {
+            try {
+              oscillator.stop();
+              oscillator.disconnect();
+              gain.disconnect();
+            } catch (e) {
+              // Ignore stop errors
+            }
+          }, 35);
+        }
+        
+        oscillatorsRef.current.delete(noteKey);
+      } catch (e) {
+        console.error('Error stopping note:', e);
+      }
+    }
+  };
 
   return (
     <div className="w-full space-y-4 p-4">
@@ -109,7 +167,8 @@ export function PianoKeyboard({ onClose }: PianoKeyboardProps) {
               <button
                 key={`${key.note}-${octave}`}
                 className="flex-1 bg-white border border-gray-300 rounded-b hover:bg-gray-100 active:bg-gray-200 relative flex flex-col-reverse"
-                onClick={() => playNote(key.note)}
+                onMouseDown={() => playNote(key.note)}
+                onTouchStart={() => playNote(key.note)}
               >
                 <span className="text-xs sm:text-sm font-medium text-gray-700 mb-2">
                   {key.note}
@@ -125,28 +184,33 @@ export function PianoKeyboard({ onClose }: PianoKeyboardProps) {
           <div className="w-1/12 flex-shrink-0"></div> {/* C */}
           <button
             className="w-2/3 mx-auto h-full bg-gray-800 hover:bg-gray-700 active:bg-gray-600 z-10 rounded-b"
-            onClick={() => playNote('C#')}
+            onMouseDown={() => playNote('C#')}
+            onTouchStart={() => playNote('C#')}
           />
           <div className="w-1/12 flex-shrink-0"></div> {/* D */}
           <button
             className="w-2/3 mx-auto h-full bg-gray-800 hover:bg-gray-700 active:bg-gray-600 z-10 rounded-b"
-            onClick={() => playNote('D#')}
+            onMouseDown={() => playNote('D#')}
+            onTouchStart={() => playNote('D#')}
           />
           <div className="w-1/12 flex-shrink-0"></div>
           <div className="w-1/12 flex-shrink-0"></div> {/* Skip E to F */}
           <button
             className="w-2/3 mx-auto h-full bg-gray-800 hover:bg-gray-700 active:bg-gray-600 z-10 rounded-b"
-            onClick={() => playNote('F#')}
+            onMouseDown={() => playNote('F#')}
+            onTouchStart={() => playNote('F#')}
           />
           <div className="w-1/12 flex-shrink-0"></div> {/* G */}
           <button
             className="w-2/3 mx-auto h-full bg-gray-800 hover:bg-gray-700 active:bg-gray-600 z-10 rounded-b"
-            onClick={() => playNote('G#')}
+            onMouseDown={() => playNote('G#')}
+            onTouchStart={() => playNote('G#')}
           />
           <div className="w-1/12 flex-shrink-0"></div> {/* A */}
           <button
             className="w-2/3 mx-auto h-full bg-gray-800 hover:bg-gray-700 active:bg-gray-600 z-10 rounded-b"
-            onClick={() => playNote('A#')}
+            onMouseDown={() => playNote('A#')}
+            onTouchStart={() => playNote('A#')}
           />
           <div className="w-1/12 flex-shrink-0"></div> {/* B */}
         </div>
