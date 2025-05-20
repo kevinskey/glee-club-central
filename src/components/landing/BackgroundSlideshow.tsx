@@ -81,7 +81,7 @@ export function BackgroundSlideshow({
       if (!isMountedRef.current) return;
       if (!initialLoadComplete && loadedCount > 0) {
         setInitialLoadComplete(true);
-        setIsInitialRender(false); // Fixed: Changed from setInitialRender to setIsInitialRender
+        setIsInitialRender(false); 
         setLoadedImages(prev => ({ ...prev, ...newLoadedImages }));
       }
     }, 1500); // Reduced from 2000ms to 1500ms for faster initial render

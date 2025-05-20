@@ -7,7 +7,7 @@ import { ResponsiveText } from "@/components/ui/responsive-text";
 
 export function HeroContent() {
   return (
-    <div className="max-w-4xl text-center mx-auto px-4">
+    <div className="max-w-4xl text-center mx-auto px-4 mb-6 md:mb-8">
       <div className="mb-4 sm:mb-6 relative">
         <h1 className="hidden sm:block text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-bold text-white drop-shadow-xl">
           <span className="whitespace-nowrap">Spelman College Glee Club</span>

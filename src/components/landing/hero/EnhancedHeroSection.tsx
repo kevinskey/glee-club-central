@@ -71,10 +71,10 @@ export function EnhancedHeroSection() {
     : defaultHeroImages;
 
   return (
-    <section className="relative min-h-[85vh] md:min-h-[90vh] flex flex-col justify-end pb-16 md:pb-24 overflow-hidden">
+    <section className="relative h-[75vh] md:h-[85vh] flex flex-col justify-end pb-8 md:pb-24 overflow-hidden">
       <BackgroundSlideshow 
         images={heroImageUrls} 
-        overlayOpacity={0.4} 
+        overlayOpacity={0.55} 
         duration={8000} // 8 seconds between transitions
         transition={1200} // 1.2 seconds for transition effect
       />
