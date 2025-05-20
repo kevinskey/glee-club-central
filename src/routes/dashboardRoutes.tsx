@@ -11,6 +11,10 @@ import RecordingsPage from '../pages/recordings/RecordingsPage';
 import CalendarPage from '../pages/dashboard/calendar';
 import MemberDashboardPage from '../pages/dashboard/MemberDashboardPage';
 import FanDashboardPage from '../pages/FanDashboardPage';
+import AnnouncementsPage from '../pages/dashboard/AnnouncementsPage';
+import ArchivesPage from '../pages/dashboard/ArchivesPage';
+import AttendancePage from '../pages/dashboard/AttendancePage';
+import DashboardPage from '../pages/dashboard/DashboardPage'; // Add correct import for main dashboard page
 
 export const dashboardRoutes = {
   path: '/dashboard',
@@ -19,7 +23,15 @@ export const dashboardRoutes = {
   children: [
     {
       index: true,
-      element: <RoleDashboard />,
+      element: <DashboardPage />, // Use the DashboardPage component directly for the index route
+    },
+    {
+      path: 'member',
+      element: <RequireAuth allowedUserTypes={['member', 'admin']}><MemberDashboardPage /></RequireAuth>,
+    },
+    {
+      path: 'fan',
+      element: <RequireAuth allowedUserTypes={['fan', 'member', 'admin']}><FanDashboardPage /></RequireAuth>,
     },
     {
       path: 'profile',
@@ -51,12 +63,16 @@ export const dashboardRoutes = {
       element: <RequireAuth><CalendarPage /></RequireAuth>,
     },
     {
-      path: 'member',
-      element: <RequireAuth allowedUserTypes={['member', 'admin']}><MemberDashboardPage /></RequireAuth>,
+      path: 'announcements',
+      element: <RequireAuth><AnnouncementsPage /></RequireAuth>,
     },
     {
-      path: 'fan',
-      element: <RequireAuth allowedUserTypes={['fan', 'member', 'admin']}><FanDashboardPage /></RequireAuth>,
+      path: 'archives',
+      element: <RequireAuth><ArchivesPage /></RequireAuth>,
+    },
+    {
+      path: 'attendance',
+      element: <RequireAuth><AttendancePage /></RequireAuth>,
     },
   ],
 };
