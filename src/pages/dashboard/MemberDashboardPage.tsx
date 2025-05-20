@@ -1,7 +1,8 @@
+
 import React, { useState } from 'react';
 import { PageHeader } from '@/components/ui/page-header';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { Calendar, Music, Bell, User, BookOpen, Headphones, Shirt, FileCheck, Edit, Download } from 'lucide-react';
+import { Calendar, Music, Bell, User, BookOpen, Headphones, Shirt, FileCheck, Edit, Download, FileText, Upload, Award } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { NextEventCountdown } from '@/components/dashboard/NextEventCountdown';
