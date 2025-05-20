@@ -1,5 +1,5 @@
 
-import React from 'react';
+import * as React from 'react';
 import ReactDOM from 'react-dom/client';
 import { ThemeProvider } from "@/providers/ThemeProvider";
 import ErrorBoundary from "./components/ErrorBoundary";
