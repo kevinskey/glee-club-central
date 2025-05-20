@@ -1,6 +1,6 @@
 
 import { useState, useRef, useCallback, useEffect } from 'react';
-import { audioLogger, initializeAudioSystem, requestMicrophoneAccess, releaseMicrophone } from '@/utils/audioUtils';
+import { audioLogger, requestMicrophoneAccess, releaseMicrophone } from '@/utils/audioUtils';
 
 export function useAudioRecorder() {
   // State
@@ -14,8 +14,13 @@ export function useAudioRecorder() {
   
   // Initialize audio system on mount
   useEffect(() => {
-    const { audioContext } = initializeAudioSystem();
-    audioContextRef.current = audioContext;
+    // Create the audio context directly
+    try {
+      audioContextRef.current = new AudioContext();
+      audioLogger.log('Audio recorder: Audio context created');
+    } catch (error) {
+      audioLogger.error('Audio recorder: Failed to create audio context', error);
+    }
     
     // Clean up on unmount
     return () => {
