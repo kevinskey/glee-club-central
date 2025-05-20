@@ -8,13 +8,14 @@ import MediaLibraryPage from '../pages/MediaLibraryPage';
 import SheetMusicPage from '../pages/SheetMusicPage';
 import PDFViewerPage from '../pages/PDFViewerPage';
 import RecordingsPage from '../pages/recordings/RecordingsPage';
+import RecordingStudioPage from '../pages/recordings/RecordingStudioPage'; // Add this import
 import CalendarPage from '../pages/dashboard/calendar';
 import MemberDashboardPage from '../pages/dashboard/MemberDashboardPage';
 import FanDashboardPage from '../pages/FanDashboardPage';
 import AnnouncementsPage from '../pages/dashboard/AnnouncementsPage';
 import ArchivesPage from '../pages/dashboard/ArchivesPage';
 import AttendancePage from '../pages/dashboard/AttendancePage';
-import DashboardPage from '../pages/dashboard/DashboardPage'; // Using the dashboard page from the correct location
+import DashboardPage from '../pages/dashboard/DashboardPage';
 
 export const dashboardRoutes = {
   path: '/dashboard',
@@ -23,7 +24,7 @@ export const dashboardRoutes = {
   children: [
     {
       index: true,
-      element: <DashboardPage />, // Use the correct DashboardPage component
+      element: <DashboardPage />,
     },
     {
       path: 'member',
@@ -56,6 +57,10 @@ export const dashboardRoutes = {
     {
       path: 'recordings',
       element: <RequireAuth allowedUserTypes={['admin', 'member']}><RecordingsPage /></RequireAuth>,
+    },
+    {
+      path: 'recording-studio', // Add new route for recording studio
+      element: <RequireAuth allowedUserTypes={['admin', 'member']}><RecordingStudioPage /></RequireAuth>,
     },
     {
       path: 'calendar',
