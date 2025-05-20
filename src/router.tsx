@@ -9,7 +9,7 @@ import HomeTemp from './pages/HomeTemp';
 export const router = createBrowserRouter([
   {
     path: '/',
-    element: <StaticLandingPage />,
+    element: <HomeTemp />,
     errorElement: (
       <ErrorBoundary>
         <div className="flex items-center justify-center min-h-screen p-4">
@@ -28,6 +28,10 @@ export const router = createBrowserRouter([
         </div>
       </ErrorBoundary>
     ),
+  },
+  {
+    path: '/under-construction',
+    element: <StaticLandingPage />,
   },
   {
     path: '/home-temp',

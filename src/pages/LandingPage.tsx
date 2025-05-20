@@ -1,9 +1,9 @@
 
 import React from 'react';
-import StaticLandingPage from './StaticLandingPage';
+import HomeTemp from './HomeTemp';
 
 const LandingPage = () => {
-  return <StaticLandingPage />;
+  return <HomeTemp />;
 };
 
 export default LandingPage;
