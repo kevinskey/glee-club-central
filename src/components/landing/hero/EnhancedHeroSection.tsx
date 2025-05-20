@@ -10,18 +10,18 @@ export function EnhancedHeroSection() {
   const isMobile = useIsMobile();
 
   return (
-    <section className="relative h-[60vh] md:h-[70vh] flex flex-col justify-end pb-8 md:pb-16 overflow-hidden">
+    <section className="relative h-[50vh] md:h-[60vh] flex flex-col justify-end pb-6 md:pb-12 overflow-hidden">
       {/* Fixed background with improved sizing */}
       <div 
         className="absolute inset-0 bg-cover bg-center bg-no-repeat"
         style={{ 
           backgroundImage: `url('${heroImage}')`,
-          backgroundPosition: 'center 30%'  // Position to focus on the important part of image
+          backgroundPosition: 'center 25%'  // Position to focus on the important part of image
         }}
       />
       
       {/* Dark overlay */}
-      <div className="absolute inset-0 bg-black opacity-60" />
+      <div className="absolute inset-0 bg-black opacity-70" />
       
       {/* Content overlay with Spelman Glee Club branding */}
       <div className="relative z-10 container mx-auto transition-opacity duration-300 mt-auto px-4 md:px-6">
