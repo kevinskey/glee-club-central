@@ -20,6 +20,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuProvider
 } from "@/components/ui/dropdown-menu";
+import { registerKeyboardShortcut } from "@/utils/audioUtils";
 
 export function MobileHeader() {
   const { isAuthenticated, signOut } = useAuth();
@@ -51,6 +52,18 @@ export function MobileHeader() {
     
     setMetronomeOpen(true);
   };
+  
+  // Register keyboard shortcuts
+  React.useEffect(() => {
+    // M key for metronome
+    const cleanupMetronome = registerKeyboardShortcut('m', () => {
+      setMetronomeOpen(prev => !prev);
+    });
+    
+    return () => {
+      cleanupMetronome();
+    };
+  }, []);
 
   const toggleMobileMenu = () => {
     setMobileMenuOpen(!mobileMenuOpen);
@@ -202,6 +215,10 @@ export function MobileHeader() {
               </DropdownMenu>
             </DropdownMenuProvider>
           </div>
+        </div>
+        
+        <div className="text-center text-xs text-muted-foreground border-t py-0.5">
+          Glee Tools v1.0
         </div>
       </header>
 

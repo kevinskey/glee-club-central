@@ -1,136 +1,140 @@
 
-// Audio utilities for the application
+// Audio utility functions for Glee Tools
 
-// Extended logger for audio-related operations
+// Logger for audio debugging
 export const audioLogger = {
   log: (...args: any[]) => {
-    if (process.env.NODE_ENV !== 'production') {
+    if (process.env.NODE_ENV === 'development') {
       console.log('🔊', ...args);
     }
   },
   error: (...args: any[]) => {
     console.error('🔊 ERROR:', ...args);
-  },
-  debug: (...args: any[]) => {
-    if (process.env.NODE_ENV !== 'production') {
-      console.debug('🔊 DEBUG:', ...args);
-    }
-  },
-  warn: (...args: any[]) => {
-    console.warn('🔊 WARNING:', ...args);
   }
 };
 
-// Function to check and resume AudioContext (needed for iOS Safari)
-export const resumeAudioContext = async (audioContext: AudioContext): Promise<boolean> => {
-  if (!audioContext) return false;
+// Notes with their frequencies in Hz (C4 to B5)
+export const NOTE_FREQUENCIES: Record<string, number> = {
+  'C4': 261.63,
+  'C#4': 277.18,
+  'D4': 293.66,
+  'D#4': 311.13,
+  'E4': 329.63,
+  'F4': 349.23,
+  'F#4': 369.99,
+  'G4': 392.00,
+  'G#4': 415.30,
+  'A4': 440.00, // A440 standard concert pitch
+  'A#4': 466.16,
+  'B4': 493.88,
+  'C5': 523.25,
+  'C#5': 554.37,
+  'D5': 587.33,
+  'D#5': 622.25,
+  'E5': 659.26,
+  'F5': 698.46,
+  'F#5': 739.99,
+  'G5': 783.99,
+  'G#5': 830.61,
+  'A5': 880.00,
+  'A#5': 932.33,
+  'B5': 987.77
+};
+
+// Get the note frequency with transposition
+export const getTransposedFrequency = (note: string, octaveShift: number = 0): number => {
+  const [noteName, octaveStr] = note.split('');
+  const octave = parseInt(octaveStr, 10);
+  const newOctave = octave + octaveShift;
+  const newNote = `${noteName}${newOctave}`;
   
+  return NOTE_FREQUENCIES[newNote] || NOTE_FREQUENCIES[note];
+};
+
+// Safe way to resume AudioContext (needed for mobile browsers)
+export const resumeAudioContext = async (audioContext: AudioContext): Promise<void> => {
   if (audioContext.state === 'suspended') {
     try {
       await audioContext.resume();
-      audioLogger.log('Audio context resumed successfully');
-      return true;
+      audioLogger.log('AudioContext resumed successfully');
     } catch (error) {
-      audioLogger.error('Failed to resume audio context:', error);
-      return false;
+      audioLogger.error('Failed to resume AudioContext:', error);
+      throw error;
+    }
+  }
+};
+
+// Create a metronome click sound buffer
+export const createClickBuffer = (audioContext: AudioContext): AudioBuffer => {
+  // Create a short click sound (100ms)
+  const sampleRate = audioContext.sampleRate;
+  const bufferSize = sampleRate * 0.1; // 100ms buffer
+  const buffer = audioContext.createBuffer(1, bufferSize, sampleRate);
+  const data = buffer.getChannelData(0);
+  
+  // Create a quick attack, quick decay envelope
+  for (let i = 0; i < bufferSize; i++) {
+    const t = i / sampleRate;
+    if (t < 0.001) {
+      // Quick attack (first 1ms)
+      data[i] = (i / (0.001 * sampleRate));
+    } else {
+      // Exponential decay
+      data[i] = Math.exp(-10 * t);
     }
   }
   
-  return audioContext.state === 'running';
+  return buffer;
 };
 
-// Initialize audio system with proper browser checks
-export const initializeAudioSystem = (): { 
-  audioContext: AudioContext | null; 
-  initialized: boolean;
-  microphonePermission: 'granted' | 'denied' | 'prompt' | 'unsupported';
-} => {
-  if (typeof window === 'undefined') {
-    return { 
-      audioContext: null, 
-      initialized: false,
-      microphonePermission: 'unsupported'
-    };
+// Create a stronger accent click for first beat
+export const createAccentClickBuffer = (audioContext: AudioContext): AudioBuffer => {
+  const sampleRate = audioContext.sampleRate;
+  const bufferSize = sampleRate * 0.1; // 100ms buffer
+  const buffer = audioContext.createBuffer(1, bufferSize, sampleRate);
+  const data = buffer.getChannelData(0);
+  
+  // Create a stronger, slightly longer click
+  for (let i = 0; i < bufferSize; i++) {
+    const t = i / sampleRate;
+    if (t < 0.002) {
+      // Slightly longer attack (2ms)
+      data[i] = (i / (0.002 * sampleRate));
+    } else {
+      // Slower decay for accent note
+      data[i] = Math.exp(-8 * t);
+    }
   }
   
-  try {
-    window.AudioContext = window.AudioContext || (window as any).webkitAudioContext;
-    const audioContext = new AudioContext();
-    audioLogger.log('Audio system initialized');
-    
-    // Check microphone permission status
-    let permissionStatus: 'granted' | 'denied' | 'prompt' | 'unsupported' = 'prompt';
-    
-    if (navigator.permissions && navigator.permissions.query) {
-      navigator.permissions.query({ name: 'microphone' as PermissionName })
-        .then((result) => {
-          permissionStatus = result.state as 'granted' | 'denied' | 'prompt';
-        })
-        .catch(() => {
-          permissionStatus = 'unsupported';
-        });
+  return buffer;
+};
+
+// Function to format a keyboard shortcut for display
+export const formatKeyboardShortcut = (key: string): string => {
+  return key.length === 1 ? key.toUpperCase() : key;
+};
+
+// Function to register a keyboard shortcut
+export const registerKeyboardShortcut = (
+  key: string,
+  handler: () => void,
+  active: boolean = true
+): () => void => {
+  const handleKeyDown = (event: KeyboardEvent) => {
+    if (!active) return;
+    if (event.key.toLowerCase() === key.toLowerCase() && 
+        !event.ctrlKey && 
+        !event.altKey && 
+        !event.metaKey) {
+      event.preventDefault();
+      handler();
     }
-    
-    return { 
-      audioContext,
-      initialized: true,
-      microphonePermission: permissionStatus
-    };
-  } catch (error) {
-    audioLogger.error('Failed to initialize audio system:', error);
-    return { 
-      audioContext: null,
-      initialized: false,
-      microphonePermission: 'unsupported'
-    };
-  }
-};
-
-// Request access to the microphone
-export const requestMicrophoneAccess = async (constraints: MediaStreamConstraints = { audio: true }): Promise<MediaStream | null> => {
-  try {
-    const stream = await navigator.mediaDevices.getUserMedia(constraints);
-    audioLogger.log('Microphone access granted');
-    return stream;
-  } catch (error) {
-    audioLogger.error('Microphone access denied:', error);
-    return null;
-  }
-};
-
-// Release microphone resources
-export const releaseMicrophone = (stream: MediaStream | null = null): void => {
-  if (!stream) return;
+  };
   
-  try {
-    const tracks = stream.getTracks();
-    tracks.forEach(track => {
-      track.stop();
-      stream.removeTrack(track);
-    });
-    audioLogger.log('Microphone released');
-  } catch (error) {
-    audioLogger.error('Error releasing microphone:', error);
-  }
-};
-
-// Reset audio system
-export const resetAudioSystem = async (): Promise<boolean> => {
-  try {
-    // Create and immediately close a new AudioContext to reset any stuck contexts
-    const tempContext = new AudioContext();
-    await tempContext.close();
-    
-    // Reset microphone if needed
-    if (navigator.mediaDevices) {
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      releaseMicrophone(stream);
-    }
-    
-    audioLogger.log('Audio system reset complete');
-    return true;
-  } catch (error) {
-    audioLogger.error('Failed to reset audio system:', error);
-    return false;
-  }
+  window.addEventListener('keydown', handleKeyDown);
+  
+  // Return cleanup function
+  return () => {
+    window.removeEventListener('keydown', handleKeyDown);
+  };
 };

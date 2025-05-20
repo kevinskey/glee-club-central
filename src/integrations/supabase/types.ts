@@ -266,6 +266,30 @@ export type Database = {
           },
         ]
       }
+      metronome_presets: {
+        Row: {
+          bpm: number
+          created_at: string
+          id: string
+          label: string
+          user_id: string
+        }
+        Insert: {
+          bpm: number
+          created_at?: string
+          id?: string
+          label: string
+          user_id: string
+        }
+        Update: {
+          bpm?: number
+          created_at?: string
+          id?: string
+          label?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       payment_records: {
         Row: {
           amount: number
@@ -360,6 +384,30 @@ export type Database = {
           description?: string | null
           id?: string
           name?: string
+        }
+        Relationships: []
+      }
+      pitch_recordings: {
+        Row: {
+          created_at: string
+          data: Json
+          id: string
+          name: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          data: Json
+          id?: string
+          name: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          data?: Json
+          id?: string
+          name?: string
+          user_id?: string
         }
         Relationships: []
       }

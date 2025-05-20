@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useRef } from "react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Logo } from "@/components/landing/header/Logo";
@@ -18,6 +19,7 @@ import {
   DropdownMenuProvider
 } from "@/components/ui/dropdown-menu";
 import { useNavigate } from "react-router-dom";
+import { registerKeyboardShortcut } from "@/utils/audioUtils";
 
 interface HeaderProps {
   initialShowNewsFeed?: boolean;
@@ -68,6 +70,20 @@ export function Header({ initialShowNewsFeed = true }: HeaderProps) {
     
     setMetronomeOpen(true);
   };
+  
+  // Register keyboard shortcuts
+  useEffect(() => {
+    // M key for metronome
+    const cleanupMetronome = registerKeyboardShortcut('m', () => {
+      setMetronomeOpen(prev => !prev);
+    });
+    
+    // ESC key to close dialogs (handled by Dialog component)
+    
+    return () => {
+      cleanupMetronome();
+    };
+  }, []);
 
   return (
     <header className="sticky top-0 z-50 border-b bg-background/95 backdrop-blur-md supports-[backdrop-filter]:bg-background/60">
@@ -80,7 +96,7 @@ export function Header({ initialShowNewsFeed = true }: HeaderProps) {
           {!isMobile && <NavigationLinks className="ml-6" />}
         </div>
         
-        {/* Right side: Pitch Pipe, Metronome, theme toggle, and navigation dropdown */}
+        {/* Right side: Glee Tools - Pitch Pipe, Metronome, theme toggle, and navigation dropdown */}
         <div className="flex items-center gap-3">
           {/* Pitch Pipe Icon */}
           <PitchPipeDialog triggerClassName="h-10 w-10 rounded-full" />
@@ -153,6 +169,10 @@ export function Header({ initialShowNewsFeed = true }: HeaderProps) {
             </DropdownMenuProvider>
           )}
         </div>
+      </div>
+      
+      <div className="text-center text-xs text-muted-foreground border-t py-1">
+        Glee Tools v1.0 – Production Ready
       </div>
     </header>
   );

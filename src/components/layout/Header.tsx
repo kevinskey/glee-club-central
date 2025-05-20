@@ -26,6 +26,7 @@ import { useIsMobile } from "@/hooks/use-mobile";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription } from "@/components/ui/dialog";
 import { EnhancedMetronome } from "@/components/ui/enhanced-metronome";
 import { PitchPipeDialog } from "@/components/ui/pitch-pipe-dialog";
+import { registerKeyboardShortcut } from "@/utils/audioUtils";
 
 export function Header() {
   const { profile, signOut } = useAuth();
@@ -60,6 +61,20 @@ export function Header() {
     
     setMetronomeOpen(true);
   };
+  
+  // Register keyboard shortcuts
+  React.useEffect(() => {
+    // M key for metronome
+    const cleanupMetronome = registerKeyboardShortcut('m', () => {
+      setMetronomeOpen(prev => !prev);
+    });
+    
+    // ESC key to close dialogs (handled by Dialog component)
+    
+    return () => {
+      cleanupMetronome();
+    };
+  }, []);
 
   return (
     <header className="bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 sticky top-0 z-50 w-full border-b hidden md:block">
