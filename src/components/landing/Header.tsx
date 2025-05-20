@@ -72,7 +72,7 @@ export function Header({ initialShowNewsFeed = true }: HeaderProps) {
 
   return (
     <header className="sticky top-0 z-50 border-b bg-background/95 backdrop-blur-md supports-[backdrop-filter]:bg-background/60">
-      <div className="container px-4 flex h-16 items-center justify-between">
+      <div className="max-w-screen-2xl mx-auto px-4 flex h-16 items-center justify-between">
         {/* Left side: Logo and site name */}
         <div className="flex items-center gap-4">
           <Logo />
