@@ -4,6 +4,7 @@ import ReactDOM from 'react-dom/client';
 import ErrorBoundary from "./components/ErrorBoundary";
 import { RouterProvider } from 'react-router-dom';
 import { router } from './router';
+import { ThemeProvider } from './providers/ThemeProvider';
 import './index.css';
 
 // Create the root once
@@ -19,7 +20,9 @@ const root = ReactDOM.createRoot(rootElement);
 root.render(
   <React.StrictMode>
     <ErrorBoundary>
-      <RouterProvider router={router} />
+      <ThemeProvider>
+        <RouterProvider router={router} />
+      </ThemeProvider>
     </ErrorBoundary>
   </React.StrictMode>
 );

@@ -2,25 +2,19 @@
 import React from 'react';
 import { Layout } from "@/components/landing/Layout";
 import { Header } from "@/components/landing/Header";
-import { HeroSection } from "@/components/landing/HeroSection";
-import { TestimonialSection } from "@/components/landing/TestimonialSection";
-import { FeaturesSection } from "@/components/landing/FeaturesSection";
-import { CTASection } from "@/components/landing/CTASection";
-import { MemberPortalBox } from "@/components/landing/MemberPortalBox";
-import { Footer } from "@/components/landing/Footer";
 
 const HomeTemp = () => {
   return (
     <div className="min-h-screen flex flex-col bg-background">
-      <Header initialShowNewsFeed={false} />
-      <main className="flex-1">
-        <HeroSection />
-        <TestimonialSection />
-        <FeaturesSection />
-        <CTASection />
-        <MemberPortalBox />
+      <Header />
+      <main className="flex-1 p-6">
+        <Layout>
+          <h1 className="text-3xl font-bold text-center my-8">Welcome to GleeWorld</h1>
+          <p className="text-center text-lg mb-6">
+            The central hub for Spelman College Glee Club
+          </p>
+        </Layout>
       </main>
-      <Footer />
     </div>
   );
 };

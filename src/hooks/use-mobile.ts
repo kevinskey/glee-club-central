@@ -1,29 +1,23 @@
 
-import { useState, useEffect } from "react";
+import { useState, useEffect } from 'react';
 
-// Custom hook to check if the device is mobile based on a media query
-export function useMedia(query: string): boolean {
-  const [matches, setMatches] = useState<boolean>(false);
+export function useIsMobile() {
+  const [isMobile, setIsMobile] = useState(false);
 
   useEffect(() => {
-    const mediaQuery = window.matchMedia(query);
-    setMatches(mediaQuery.matches);
-
-    // Add listener to update state on change
-    const handler = (e: MediaQueryListEvent) => {
-      setMatches(e.matches);
+    const checkIsMobile = () => {
+      setIsMobile(window.innerWidth < 768); // 768px is the standard breakpoint for md: in Tailwind
     };
 
-    mediaQuery.addEventListener("change", handler);
-    return () => {
-      mediaQuery.removeEventListener("change", handler);
-    };
-  }, [query]);
+    // Run once on initial render
+    checkIsMobile();
 
-  return matches;
-}
+    // Set up event listener for window resize
+    window.addEventListener('resize', checkIsMobile);
 
-// Convenience hook specifically for mobile detection
-export function useIsMobile(): boolean {
-  return useMedia("(max-width: 640px)");
+    // Clean up event listener
+    return () => window.removeEventListener('resize', checkIsMobile);
+  }, []);
+
+  return isMobile;
 }
