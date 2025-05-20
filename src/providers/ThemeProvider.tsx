@@ -1,5 +1,5 @@
 
-import React from "react";
+import React, { createContext, useContext, useState, useEffect, useMemo, useCallback } from "react";
 import { Toaster } from "@/components/ui/sonner";
 import { toast } from "sonner";
 
@@ -12,15 +12,15 @@ interface ThemeContextType {
 }
 
 // Create context with a default value
-const ThemeContext = React.createContext<ThemeContextType | undefined>(undefined);
+const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
-  // Explicitly use React.useState to prevent any null reference issues
-  const [theme, setTheme] = React.useState<Theme>("light");
-  const [mounted, setMounted] = React.useState(false);
+  // Use explicit React.useState to prevent any null reference issues
+  const [theme, setTheme] = useState<Theme>("light");
+  const [mounted, setMounted] = useState(false);
 
   // Effect for initial setup
-  React.useEffect(() => {
+  useEffect(() => {
     // Mark component as mounted
     setMounted(true);
     
@@ -36,7 +36,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   // Effect for updating DOM
-  React.useEffect(() => {
+  useEffect(() => {
     // Only update DOM after component is mounted to prevent hydration mismatch
     if (!mounted) return;
     
@@ -71,7 +71,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   }, [theme, mounted]);
 
   // Toggle theme function
-  const toggleTheme = React.useCallback(() => {
+  const toggleTheme = useCallback(() => {
     setTheme(prevTheme => {
       const newTheme = prevTheme === "light" ? "dark" : "light";
       
@@ -85,7 +85,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     });
   }, []);
 
-  const contextValue = React.useMemo(() => ({
+  const contextValue = useMemo(() => ({
     theme,
     setTheme,
     toggleTheme
@@ -100,7 +100,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
 }
 
 export function useTheme() {
-  const context = React.useContext(ThemeContext);
+  const context = useContext(ThemeContext);
   if (context === undefined) {
     throw new Error("useTheme must be used within a ThemeProvider");
   }

@@ -7,7 +7,7 @@ import { useSiteImages } from "@/hooks/useSiteImages";
 import { Spinner } from "@/components/ui/spinner";
 
 export function EnhancedHeroSection() {
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(false); // Start with false to avoid double loading indicators
   const [imagesReady, setImagesReady] = useState(false);
   
   // Default hero images that we'll always use if no custom ones are set
@@ -36,51 +36,19 @@ export function EnhancedHeroSection() {
     }
   }, [customImages]);
   
-  // Preload images to avoid flashing
+  // Simplified image preloading to avoid excessive state changes
   useEffect(() => {
     let mounted = true;
     
-    const preloadImages = () => {
-      let loadedCount = 0;
-      const totalImages = Math.min(2, heroImageUrls.length);
-      
-      // Fast-track loading if images are already cached
-      const preloadedTimer = setTimeout(() => {
-        if (!imagesReady && mounted) {
-          setImagesReady(true);
-          setIsLoading(false);
-        }
-      }, 800);
-      
-      heroImageUrls.slice(0, 2).forEach(src => {
-        const img = new Image();
-        img.onload = () => {
-          loadedCount++;
-          if (loadedCount >= totalImages && mounted) {
-            setImagesReady(true);
-            
-            // Give a slight delay before hiding loading indicator for smooth transition
-            setTimeout(() => {
-              if (mounted) {
-                setIsLoading(false);
-              }
-              clearTimeout(preloadedTimer);
-            }, 100);
-          }
-        };
-        img.onerror = () => {
-          console.error("Failed to load hero image:", src);
-          loadedCount++;
-          if (loadedCount >= totalImages && mounted) {
-            setImagesReady(true);
-            setIsLoading(false);
-          }
-        };
-        img.src = src;
-      });
-    };
+    // Mark images as ready immediately if we have the default images
+    setImagesReady(true);
     
-    preloadImages();
+    // Short timeout to hide the loading indicator
+    setTimeout(() => {
+      if (mounted) {
+        setIsLoading(false);
+      }
+    }, 100);
     
     return () => {
       mounted = false;
@@ -91,7 +59,7 @@ export function EnhancedHeroSection() {
     <section className="relative h-[75vh] md:h-[85vh] flex flex-col justify-end pb-8 md:pb-24 overflow-hidden">
       <BackgroundSlideshow 
         images={heroImageUrls} 
-        overlayOpacity={0.55} 
+        overlayOpacity={0.55}
         duration={8000} // 8 seconds between transitions
         transition={1200} // 1.2 seconds for transition effect
       />
@@ -103,7 +71,7 @@ export function EnhancedHeroSection() {
       )}
       
       {/* Content overlay with Spelman Glee Club branding */}
-      <div className={`relative z-10 container mx-auto transition-opacity duration-300 mt-auto ${imagesReady ? 'opacity-100' : 'opacity-0'}`}>
+      <div className={`relative z-10 container mx-auto transition-opacity duration-300 mt-auto opacity-100`}>
         <HeroContent />
       </div>
       

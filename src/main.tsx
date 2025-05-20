@@ -12,7 +12,15 @@ import { RouterProvider } from 'react-router-dom';
 import { router } from './router'; // Direct import from router.tsx
 
 // Create a client
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      retry: 1,
+      staleTime: 5 * 60 * 1000, // 5 minutes
+      refetchOnWindowFocus: false,
+    },
+  },
+});
 
 // Initialize Supabase client for auth helpers
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || 'https://dzzptovqfqausipsgabw.supabase.co';
@@ -29,7 +37,17 @@ const supabaseClient = createClient(supabaseUrl, supabaseAnonKey, {
 // Register service worker for PWA capability
 registerServiceWorker();
 
-ReactDOM.createRoot(document.getElementById('root')!).render(
+// Create the root once
+const rootElement = document.getElementById('root');
+
+if (!rootElement) {
+  throw new Error("Root element not found in the document");
+}
+
+const root = ReactDOM.createRoot(rootElement);
+
+// Render the app
+root.render(
   <React.StrictMode>
     <ErrorBoundary>
       <QueryClientProvider client={queryClient}>

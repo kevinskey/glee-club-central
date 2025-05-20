@@ -30,29 +30,20 @@ export function SlideshowProvider({
   const [currentIndex, setCurrentIndex] = useState(0);
   const [nextIndex, setNextIndex] = useState(1);
   const [isTransitioning, setIsTransitioning] = useState(false);
-  const [isInitialRender, setIsInitialRender] = useState(true);
+  const [isInitialRender, setIsInitialRender] = useState(false); // Start with false to prevent flashing
 
   const timerRef = useRef<number | null>(null);
   const intervalRef = useRef<number | null>(null);
   const isMountedRef = useRef(true);
   const isChangingRef = useRef(false);
-  
-  // After initial render, mark it as complete to prevent extra flashing
-  useEffect(() => {
-    if (isInitialRender && initialLoadComplete) {
-      const timer = setTimeout(() => {
-        if (isMountedRef.current) {
-          setIsInitialRender(false);
-        }
-      }, 200);
-      return () => clearTimeout(timer);
-    }
-  }, [isInitialRender, initialLoadComplete]);
 
-  // Set up slideshow with proper timing
+  // Set up slideshow with proper timing - simplified to avoid loops
   useEffect(() => {
-    // Don't start the slideshow until initial load is complete
-    if (!initialLoadComplete || !images || images.length <= 1) return;
+    // Mark component as mounted
+    isMountedRef.current = true;
+    
+    // Don't start the slideshow if we don't have enough images
+    if (!images || images.length <= 1) return;
     
     // Clean up any existing timers
     if (timerRef.current) window.clearTimeout(timerRef.current);
@@ -87,17 +78,9 @@ export function SlideshowProvider({
       // Clean up timers
       if (timerRef.current) window.clearTimeout(timerRef.current);
       if (intervalRef.current) window.clearInterval(intervalRef.current);
-    };
-  }, [initialLoadComplete, images, duration, transition, nextIndex]);
-
-  // Clean up on unmount
-  useEffect(() => {
-    return () => {
       isMountedRef.current = false;
-      if (timerRef.current) window.clearTimeout(timerRef.current);
-      if (intervalRef.current) window.clearInterval(intervalRef.current);
     };
-  }, []);
+  }, [images, duration, transition, nextIndex]);
 
   const value = {
     currentIndex,

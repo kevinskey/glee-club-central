@@ -13,53 +13,43 @@ import { Spinner } from "@/components/ui/spinner";
 
 const LandingPage = () => {
   const [isLoading, setIsLoading] = useState(true);
-  const [imagesInitialized, setImagesInitialized] = useState(false);
   
-  // Set up initialization tracking
+  // Set up initialization tracking - simplified approach
   useEffect(() => {
     // Check if images were already initialized
     const alreadyInitialized = localStorage.getItem('heroImagesInitialized') === 'true';
     
     if (alreadyInitialized) {
-      setImagesInitialized(true);
-      
       // Short delay to ensure smooth transition
       const timer = setTimeout(() => {
         setIsLoading(false);
-      }, 200);
+      }, 10);
       
       return () => clearTimeout(timer);
     }
     
-    // Set up listener for image initialization complete
-    const checkInitialization = setInterval(() => {
-      if (localStorage.getItem('heroImagesInitialized') === 'true') {
-        setImagesInitialized(true);
-        clearInterval(checkInitialization);
-        
-        // Short delay to ensure smooth transition
-        setTimeout(() => {
-          setIsLoading(false);
-        }, 300);
-      }
-    }, 100);
-    
-    // Safety timeout - if images aren't initialized after 3 seconds, show the page anyway
+    // Safety timeout - if images aren't initialized after 2 seconds, show the page anyway
     const safetyTimeout = setTimeout(() => {
       setIsLoading(false);
-      clearInterval(checkInitialization);
-    }, 3000);
+    }, 2000);
     
     return () => {
-      clearInterval(checkInitialization);
       clearTimeout(safetyTimeout);
     };
   }, []);
   
+  // Handle image initialization completion
+  const handleImagesInitialized = () => {
+    // Short delay to ensure smooth transition
+    setTimeout(() => {
+      setIsLoading(false);
+    }, 10);
+  };
+  
   return (
     <>
       {/* Initialize hero images in the background */}
-      <HeroImageInitializer onInitialized={() => setImagesInitialized(true)} />
+      <HeroImageInitializer onInitialized={handleImagesInitialized} />
       
       {isLoading ? (
         <div className="flex items-center justify-center min-h-[600px] w-full">

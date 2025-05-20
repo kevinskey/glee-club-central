@@ -76,13 +76,8 @@ export function BackgroundSlideshow({
   overlayOpacity = 0.5,
 }: BackgroundSlideshowProps) {
   const [renderedImages, setRenderedImages] = useState<string[]>([]);
-  const { initialLoadComplete, isLoading } = useImagePreloader({ 
-    images,
-    minImagesToLoad: 1,
-    timeout: 1000
-  });
-
-  // Set the rendered images once we have valid data
+  
+  // Simplified image preloading
   useEffect(() => {
     if (images && images.length > 0 && images[0]) {
       setRenderedImages(images);
@@ -99,21 +94,12 @@ export function BackgroundSlideshow({
     return <SingleImageBackground image={renderedImages[0]} overlayOpacity={overlayOpacity} />;
   }
 
-  // If images aren't loaded yet, show placeholder with smooth transition
-  if (!initialLoadComplete || isLoading) {
-    return (
-      <div className="absolute inset-0 bg-background/80 transition-opacity duration-500 flex items-center justify-center">
-        <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent"></div>
-      </div>
-    );
-  }
-
   return (
     <SlideshowProvider 
       images={renderedImages}
       duration={duration}
       transition={transition}
-      initialLoadComplete={initialLoadComplete}
+      initialLoadComplete={true} // Always consider initial load complete to avoid flashing
     >
       <SlideshowContent 
         images={renderedImages} 

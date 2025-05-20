@@ -19,6 +19,7 @@ export const HeroImageInitializer: React.FC<HeroImageInitializerProps> = ({ onIn
     
     // Check if already initialized to avoid multiple initializations
     const alreadyInitialized = localStorage.getItem('heroImagesInitialized') === 'true';
+    
     if (alreadyInitialized) {
       if (isMountedRef.current) {
         setIsInitialized(true);
@@ -48,9 +49,9 @@ export const HeroImageInitializer: React.FC<HeroImageInitializerProps> = ({ onIn
         
         // Only update state if component is still mounted
         if (isMountedRef.current) {
+          localStorage.setItem('heroImagesInitialized', 'true');
           setIsInitialized(true);
           setIsLoading(false);
-          localStorage.setItem('heroImagesInitialized', 'true');
           
           // Call the callback if provided
           if (onInitialized) {
@@ -68,17 +69,12 @@ export const HeroImageInitializer: React.FC<HeroImageInitializerProps> = ({ onIn
       }
     };
     
-    // Initialize with a slight delay to prevent race conditions
-    const timeoutId = setTimeout(() => {
-      if (isMountedRef.current) {
-        initializeHeroImages();
-      }
-    }, 100); // Reduced from 300ms to 100ms for faster loading
+    // Initialize immediately without delay
+    initializeHeroImages();
     
     return () => {
       // Mark component as unmounted to prevent state updates
       isMountedRef.current = false;
-      clearTimeout(timeoutId);
     };
   }, [onInitialized]);
   
