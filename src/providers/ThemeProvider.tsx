@@ -19,6 +19,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   const [theme, setTheme] = React.useState<Theme>("light");
   const [mounted, setMounted] = React.useState(false);
 
+  // Use React.useEffect to ensure we're using React's useEffect hook
   React.useEffect(() => {
     // Mark component as mounted
     setMounted(true);
@@ -68,7 +69,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     localStorage.setItem("theme", theme);
   }, [theme, mounted]);
 
-  const toggleTheme = () => {
+  const toggleTheme = React.useCallback(() => {
     setTheme(prevTheme => {
       const newTheme = prevTheme === "light" ? "dark" : "light";
       
@@ -80,10 +81,16 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
       
       return newTheme;
     });
-  };
+  }, []);
+
+  const contextValue = React.useMemo(() => ({
+    theme,
+    setTheme,
+    toggleTheme
+  }), [theme, toggleTheme]);
 
   return (
-    <ThemeContext.Provider value={{ theme, setTheme, toggleTheme }}>
+    <ThemeContext.Provider value={contextValue}>
       {children}
       <Toaster />
     </ThemeContext.Provider>
