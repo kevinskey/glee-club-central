@@ -1,5 +1,5 @@
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 
 interface UseImagePreloaderProps {
   images: string[];
@@ -15,6 +15,7 @@ interface UseImagePreloaderResult {
 
 /**
  * Hook to preload images and track their loading status
+ * Optimized to prevent unnecessary re-renders
  */
 export function useImagePreloader({
   images,
@@ -26,6 +27,32 @@ export function useImagePreloader({
   const [isLoading, setIsLoading] = useState(true);
   
   const isMountedRef = useRef(true);
+  const loadedCountRef = useRef(0);
+  const timerRef = useRef<number | null>(null);
+  const processedImages = useRef<Record<string, boolean>>({});
+  
+  // Memoize the markImageLoaded function to prevent recreating it on each render
+  const markImageLoaded = useCallback((src: string) => {
+    if (!isMountedRef.current) return;
+    
+    // Skip if already processed
+    if (processedImages.current[src]) return;
+    processedImages.current[src] = true;
+    
+    loadedCountRef.current++;
+    
+    if (loadedCountRef.current >= Math.min(minImagesToLoad, images.length)) {
+      // Once at least minimum images are loaded (or all if less than min), start slideshow
+      setLoadedImages(prev => ({ ...prev, [src]: true }));
+      setInitialLoadComplete(true);
+      setIsLoading(false);
+    }
+    
+    if (loadedCountRef.current === images.length) {
+      // All images loaded
+      setLoadedImages(prev => ({ ...prev, [src]: true }));
+    }
+  }, [images.length, minImagesToLoad]);
   
   useEffect(() => {
     if (!images || images.length === 0) {
@@ -34,39 +61,24 @@ export function useImagePreloader({
       return;
     }
     
-    const newLoadedImages: Record<string, boolean> = {};
-    let loadedCount = 0;
-    const totalImages = images.length;
-    
     // Mark component as mounted
     isMountedRef.current = true;
     
-    // Function to mark image as loaded
-    const markImageLoaded = (src: string) => {
-      if (!isMountedRef.current) return;
-      
-      newLoadedImages[src] = true;
-      loadedCount++;
-      
-      if (loadedCount >= Math.min(minImagesToLoad, totalImages)) {
-        // Once at least minimum images are loaded (or all if less than min), start slideshow
-        setLoadedImages(prev => ({ ...prev, ...newLoadedImages }));
-        setInitialLoadComplete(true);
-        setIsLoading(false);
-      }
-      
-      if (loadedCount === totalImages) {
-        // All images loaded
-        setLoadedImages(prev => ({ ...prev, ...newLoadedImages }));
-      }
-    };
+    // Clear any existing timer
+    if (timerRef.current) {
+      clearTimeout(timerRef.current);
+    }
+    
+    // Reset loaded count if images change
+    loadedCountRef.current = 0;
+    processedImages.current = {};
     
     // Preload all images
     images.forEach((src) => {
       // Skip if already loaded
       if (loadedImages[src]) {
-        loadedCount++;
-        newLoadedImages[src] = true;
+        loadedCountRef.current++;
+        processedImages.current[src] = true;
         return;
       }
       
@@ -82,20 +94,21 @@ export function useImagePreloader({
     });
     
     // Safety timeout to start slideshow even if not all images load
-    const safetyTimer = setTimeout(() => {
+    timerRef.current = window.setTimeout(() => {
       if (!isMountedRef.current) return;
-      if (!initialLoadComplete && loadedCount > 0) {
+      if (!initialLoadComplete && loadedCountRef.current > 0) {
         setInitialLoadComplete(true);
-        setLoadedImages(prev => ({ ...prev, ...newLoadedImages }));
         setIsLoading(false);
       }
     }, timeout);
     
     return () => {
       isMountedRef.current = false;
-      clearTimeout(safetyTimer);
+      if (timerRef.current) {
+        clearTimeout(timerRef.current);
+      }
     };
-  }, [images, minImagesToLoad, timeout, loadedImages]);
+  }, [images, minImagesToLoad, timeout, loadedImages, markImageLoaded, initialLoadComplete]);
   
   return { loadedImages, initialLoadComplete, isLoading };
 }

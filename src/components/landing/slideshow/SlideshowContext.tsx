@@ -35,6 +35,7 @@ export function SlideshowProvider({
   const timerRef = useRef<number | null>(null);
   const intervalRef = useRef<number | null>(null);
   const isMountedRef = useRef(true);
+  const isChangingRef = useRef(false);
   
   // After initial render, mark it as complete to prevent extra flashing
   useEffect(() => {
@@ -57,6 +58,10 @@ export function SlideshowProvider({
     
     // Function to handle transitions
     const handleTransition = () => {
+      // Prevent multiple transitions from happening simultaneously
+      if (isChangingRef.current) return;
+      isChangingRef.current = true;
+      
       setIsTransitioning(true);
       
       // After transition completes, update to next image
@@ -69,6 +74,7 @@ export function SlideshowProvider({
         setCurrentIndex(newCurrentIndex);
         setNextIndex(newNextIndex);
         setIsTransitioning(false);
+        isChangingRef.current = false;
       }, transition);
     };
 

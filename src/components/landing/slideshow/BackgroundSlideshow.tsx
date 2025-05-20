@@ -1,5 +1,5 @@
 
-import React from "react";
+import React, { memo } from "react";
 import { useImagePreloader } from "@/hooks/useImagePreloader";
 import { SlideshowProvider, useSlideshowContext } from "./SlideshowContext";
 import { SlideshowImage } from "./SlideshowImage";
@@ -10,6 +10,60 @@ interface BackgroundSlideshowProps {
   transition?: number;
   overlayOpacity?: number;
 }
+
+// Memoized content component to prevent unnecessary re-renders
+const SlideshowContent = memo(({ 
+  images, 
+  transition, 
+  overlayOpacity 
+}: { 
+  images: string[]; 
+  transition: number;
+  overlayOpacity: number;
+}) => {
+  const { currentIndex, nextIndex, isTransitioning } = useSlideshowContext();
+  
+  return (
+    <div className="absolute inset-0 overflow-hidden">
+      {/* Current Image */}
+      <SlideshowImage 
+        src={images[currentIndex]} 
+        isActive={!isTransitioning}
+        transitionDuration={transition}
+      />
+      
+      {/* Next Image */}
+      <SlideshowImage 
+        src={images[nextIndex]} 
+        isActive={isTransitioning}
+        transitionDuration={transition}
+      />
+
+      {/* Black overlay with configurable opacity */}
+      <div 
+        className="absolute inset-0 bg-black" 
+        style={{ opacity: overlayOpacity }}
+      />
+    </div>
+  );
+});
+
+// Memoized single image component
+const SingleImageBackground = memo(({ image, overlayOpacity }: { image: string; overlayOpacity: number }) => {
+  return (
+    <div className="absolute inset-0">
+      <div 
+        className="absolute inset-0 bg-cover bg-center bg-no-repeat"
+        style={{ backgroundImage: `url('${image}')` }}
+      />
+      {/* Black overlay with configurable opacity */}
+      <div 
+        className="absolute inset-0 bg-black" 
+        style={{ opacity: overlayOpacity }}
+      />
+    </div>
+  );
+});
 
 export function BackgroundSlideshow({
   images,
@@ -51,57 +105,5 @@ export function BackgroundSlideshow({
         overlayOpacity={overlayOpacity} 
       />
     </SlideshowProvider>
-  );
-}
-
-function SingleImageBackground({ image, overlayOpacity }: { image: string; overlayOpacity: number }) {
-  return (
-    <div className="absolute inset-0">
-      <div 
-        className="absolute inset-0 bg-cover bg-center bg-no-repeat"
-        style={{ backgroundImage: `url('${image}')` }}
-      />
-      {/* Black overlay with configurable opacity */}
-      <div 
-        className="absolute inset-0 bg-black" 
-        style={{ opacity: overlayOpacity }}
-      />
-    </div>
-  );
-}
-
-function SlideshowContent({ 
-  images, 
-  transition, 
-  overlayOpacity 
-}: { 
-  images: string[]; 
-  transition: number;
-  overlayOpacity: number;
-}) {
-  const { currentIndex, nextIndex, isTransitioning } = useSlideshowContext();
-  
-  return (
-    <div className="absolute inset-0 overflow-hidden">
-      {/* Current Image */}
-      <SlideshowImage 
-        src={images[currentIndex]} 
-        isActive={!isTransitioning}
-        transitionDuration={transition}
-      />
-      
-      {/* Next Image */}
-      <SlideshowImage 
-        src={images[nextIndex]} 
-        isActive={isTransitioning}
-        transitionDuration={transition}
-      />
-
-      {/* Black overlay with configurable opacity */}
-      <div 
-        className="absolute inset-0 bg-black" 
-        style={{ opacity: overlayOpacity }}
-      />
-    </div>
   );
 }
