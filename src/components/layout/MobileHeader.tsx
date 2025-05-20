@@ -1,11 +1,10 @@
-
 import React, { useState } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { Icons } from "@/components/Icons";
 import { Button } from "@/components/ui/button";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useAuth } from "@/contexts/AuthContext";
-import { Menu, X, LogIn, Music, Clock } from "lucide-react";
+import { Menu, X, LogIn, Music, Clock, Piano } from "lucide-react";
 import { MobileMenu } from "@/components/landing/header/MobileMenu";
 import { useSidebar } from "@/components/ui/sidebar";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
@@ -27,6 +26,7 @@ import {
 } from "@/components/ui/dialog";
 import { PitchPipe } from "@/components/glee-tools/PitchPipe";
 import { Metronome } from "@/components/glee-tools/Metronome";
+import { AudioRecorder } from "@/components/glee-tools/AudioRecorder";
 
 export function MobileHeader() {
   const { isAuthenticated, signOut } = useAuth();
@@ -37,6 +37,7 @@ export function MobileHeader() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [pitchPipeOpen, setPitchPipeOpen] = useState(false);
   const [metronomeOpen, setMetronomeOpen] = useState(false);
+  const [audioRecorderOpen, setAudioRecorderOpen] = useState(false);
   
   const isDashboardPath = location.pathname.startsWith("/dashboard") || location.pathname.startsWith("/admin");
   
@@ -130,6 +131,11 @@ export function MobileHeader() {
                   
                   <DropdownMenuSeparator />
                   
+                  <DropdownMenuItem onClick={() => setAudioRecorderOpen(true)}>
+                    <Piano className="h-4 w-4 mr-2" />
+                    <span>Piano & Recording Studio</span>
+                  </DropdownMenuItem>
+                  
                   {isAuthenticated && (
                     <DropdownMenuItem onClick={() => navigate("/dashboard")}>
                       Dashboard
@@ -206,6 +212,16 @@ export function MobileHeader() {
             <DialogTitle>Metronome</DialogTitle>
           </DialogHeader>
           <Metronome onClose={() => setMetronomeOpen(false)} />
+        </DialogContent>
+      </Dialog>
+      
+      {/* Audio Recorder Dialog */}
+      <Dialog open={audioRecorderOpen} onOpenChange={setAudioRecorderOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Piano & Recording Studio</DialogTitle>
+          </DialogHeader>
+          <AudioRecorder onClose={() => setAudioRecorderOpen(false)} />
         </DialogContent>
       </Dialog>
     </>

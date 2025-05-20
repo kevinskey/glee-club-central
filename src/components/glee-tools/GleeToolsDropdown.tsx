@@ -73,14 +73,17 @@ export function GleeToolsDropdown() {
           <DropdownMenuSeparator />
           
           <DropdownMenuItem onClick={() => setPitchPipeOpen(true)}>
+            <Music className="h-4 w-4 mr-2" />
             Pitch Pipe
           </DropdownMenuItem>
           
           <DropdownMenuItem onClick={() => setMetronomeOpen(true)}>
+            <Clock className="h-4 w-4 mr-2" />
             Metronome
           </DropdownMenuItem>
           
           <DropdownMenuItem onClick={() => setAudioRecorderOpen(true)}>
+            <Piano className="h-4 w-4 mr-2" />
             Piano & Recording
           </DropdownMenuItem>
           
