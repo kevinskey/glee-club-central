@@ -1,6 +1,6 @@
 
 import React, { useEffect, useState } from 'react';
-import { HeroSection } from "@/components/landing/HeroSection";
+import { EnhancedHeroSection } from "@/components/landing/hero/EnhancedHeroSection";
 import { ResponsiveSection } from "@/components/ui/responsive-section";
 import { FeaturesSection } from "@/components/landing/FeaturesSection";
 import { TestimonialSection } from "@/components/landing/TestimonialSection";
@@ -21,7 +21,7 @@ const HomePage = () => {
       <HeroImageInitializer onInitialized={handleImagesInitialized} />
       
       <main className="flex-1">
-        <HeroSection />
+        <EnhancedHeroSection />
         
         <ResponsiveSection className="py-12 px-4 sm:px-6 lg:px-8">
           <h1 className="text-3xl font-bold text-center mb-6">Welcome to GleeWorld</h1>

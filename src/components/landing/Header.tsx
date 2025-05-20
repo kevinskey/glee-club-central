@@ -2,14 +2,6 @@
 import React, { useState } from "react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Logo } from "@/components/landing/header/Logo";
-import { Music, Clock, Piano, Mic } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { 
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle
-} from "@/components/ui/dialog";
 import { NavigationLinks } from "@/components/landing/header/NavigationLinks";
 import { HeaderUtils } from "@/components/landing/header/HeaderUtils";
 import {
@@ -20,10 +12,9 @@ import {
   DropdownMenuSeparator,
   DropdownMenuLabel
 } from "@/components/ui/dropdown-menu";
+import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
-import { PitchPipe } from "@/components/glee-tools/PitchPipe";
-import { Metronome } from "@/components/glee-tools/Metronome";
-import { AudioRecorder } from "@/components/glee-tools/AudioRecorder";
+import { GleeToolsDropdown } from "@/components/glee-tools/GleeToolsDropdown";
 
 interface HeaderProps {
   initialShowNewsFeed?: boolean;
@@ -33,9 +24,6 @@ export function Header({ initialShowNewsFeed = true }: HeaderProps) {
   const isMobile = useIsMobile();
   const [showNewsFeed, setShowNewsFeed] = useState(false);
   const navigate = useNavigate();
-  const [pitchPipeOpen, setPitchPipeOpen] = useState(false);
-  const [metronomeOpen, setMetronomeOpen] = useState(false);
-  const [audioRecorderOpen, setAudioRecorderOpen] = useState(false);
   
   // Set the news feed state after component mounts with a slight delay
   React.useEffect(() => {
@@ -59,7 +47,7 @@ export function Header({ initialShowNewsFeed = true }: HeaderProps) {
 
   return (
     <header className="sticky top-0 z-50 border-b bg-background/95 backdrop-blur-md supports-[backdrop-filter]:bg-background/60 w-full">
-      <div className="container mx-auto px-4 md:px-6 flex h-16 md:h-32 items-center justify-between">
+      <div className="container mx-auto px-4 md:px-6 flex h-16 md:h-24 items-center justify-between">
         {/* Left side: Logo and site name */}
         <div className="flex items-center gap-4">
           <Logo />
@@ -110,26 +98,6 @@ export function Header({ initialShowNewsFeed = true }: HeaderProps) {
                 
                 <DropdownMenuSeparator />
                 
-                {/* Glee Tools Section */}
-                <DropdownMenuLabel>Glee Tools</DropdownMenuLabel>
-                
-                <DropdownMenuItem onClick={() => setPitchPipeOpen(true)}>
-                  <Music className="h-4 w-4 mr-2" />
-                  <span>Pitch Pipe</span>
-                </DropdownMenuItem>
-                
-                <DropdownMenuItem onClick={() => setMetronomeOpen(true)}>
-                  <Clock className="h-4 w-4 mr-2" />
-                  <span>Metronome</span>
-                </DropdownMenuItem>
-                
-                <DropdownMenuItem onClick={() => setAudioRecorderOpen(true)}>
-                  <Piano className="h-4 w-4 mr-2" />
-                  <span>Piano & Recording</span>
-                </DropdownMenuItem>
-                
-                <DropdownMenuSeparator />
-                
                 <DropdownMenuItem onClick={() => navigate("/login")}>
                   Login
                 </DropdownMenuItem>
@@ -138,42 +106,6 @@ export function Header({ initialShowNewsFeed = true }: HeaderProps) {
           )}
         </div>
       </div>
-      
-      {/* Pitch Pipe Dialog */}
-      <Dialog open={pitchPipeOpen} onOpenChange={setPitchPipeOpen}>
-        <DialogContent className="sm:max-w-md mx-4 sm:mx-auto w-[calc(100%-2rem)] sm:w-full max-h-[95vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle>Pitch Pipe</DialogTitle>
-          </DialogHeader>
-          <div className="mt-2">
-            <PitchPipe onClose={() => setPitchPipeOpen(false)} />
-          </div>
-        </DialogContent>
-      </Dialog>
-      
-      {/* Metronome Dialog */}
-      <Dialog open={metronomeOpen} onOpenChange={setMetronomeOpen}>
-        <DialogContent className="sm:max-w-md mx-4 sm:mx-auto w-[calc(100%-2rem)] sm:w-full max-h-[95vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle>Metronome</DialogTitle>
-          </DialogHeader>
-          <div className="mt-2">
-            <Metronome onClose={() => setMetronomeOpen(false)} />
-          </div>
-        </DialogContent>
-      </Dialog>
-      
-      {/* Audio Recorder Dialog */}
-      <Dialog open={audioRecorderOpen} onOpenChange={setAudioRecorderOpen}>
-        <DialogContent className="sm:max-w-md mx-4 sm:mx-auto w-[calc(100%-2rem)] sm:w-full max-h-[95vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle>Piano & Recording Studio</DialogTitle>
-          </DialogHeader>
-          <div className="mt-2">
-            <AudioRecorder onClose={() => setAudioRecorderOpen(false)} />
-          </div>
-        </DialogContent>
-      </Dialog>
     </header>
   );
 }
