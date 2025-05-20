@@ -8,7 +8,7 @@ export function EnhancedHeroSection() {
   const heroImage = "/lovable-uploads/c69d3562-4bdc-4e42-9415-aefdd5f573e8.png";
 
   return (
-    <section className="relative h-[75vh] md:h-[90vh] flex flex-col justify-end pb-8 md:pb-24 overflow-hidden">
+    <section className="relative h-[75vh] md:h-[92vh] flex flex-col justify-end pb-8 md:pb-24 overflow-hidden">
       {/* Fixed background instead of slideshow */}
       <div 
         className="absolute inset-0 bg-cover bg-center bg-no-repeat"

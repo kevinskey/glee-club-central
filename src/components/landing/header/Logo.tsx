@@ -9,8 +9,8 @@ export function Logo() {
   
   return (
     <Link to="/" className="flex items-center gap-2">
-      <Icons.logo className={isMobile ? "h-7" : "h-8"} />
-      <span className={`font-semibold ${isMobile ? "text-xl" : "text-2xl"}`}>
+      <Icons.logo className={isMobile ? "h-7" : "h-10"} />
+      <span className={`font-semibold ${isMobile ? "text-xl" : "text-3xl"}`}>
         GleeWorld
       </span>
     </Link>

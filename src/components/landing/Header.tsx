@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Logo } from "@/components/landing/header/Logo";
@@ -58,8 +57,8 @@ export function Header({ initialShowNewsFeed = true }: HeaderProps) {
   }, [showNewsFeed]);
 
   return (
-    <header className="sticky top-0 z-50 border-b bg-background/95 backdrop-blur-md supports-[backdrop-filter]:bg-background/60">
-      <div className="max-w-screen-2xl mx-auto px-4 flex h-16 md:h-20 items-center justify-between">
+    <header className="sticky top-0 z-50 border-b bg-background/95 backdrop-blur-md supports-[backdrop-filter]:bg-background/60 w-full">
+      <div className="container mx-auto px-4 flex h-16 md:h-24 items-center justify-between">
         {/* Left side: Logo and site name */}
         <div className="flex items-center gap-4">
           <Logo />
