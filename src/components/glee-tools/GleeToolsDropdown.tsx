@@ -1,6 +1,6 @@
 
 import React, { useState, useRef } from "react";
-import { Headphones } from "lucide-react";
+import { Headphones, Piano, Mic, Clock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { 
   DropdownMenu,
@@ -20,6 +20,7 @@ import {
 } from "@/components/ui/dialog";
 import { PitchPipe } from "./PitchPipe";
 import { Metronome } from "./Metronome";
+import { AudioRecorder } from "./AudioRecorder";
 
 export function GleeToolsDropdown() {
   const [isOpen, setIsOpen] = useState(false);
@@ -27,6 +28,7 @@ export function GleeToolsDropdown() {
   const audioContextRef = useRef<AudioContext | null>(null);
   const [pitchPipeOpen, setPitchPipeOpen] = useState(false);
   const [metronomeOpen, setMetronomeOpen] = useState(false);
+  const [audioRecorderOpen, setAudioRecorderOpen] = useState(false);
 
   // Initialize audio context on first interaction
   const initAudioContext = () => {
@@ -78,6 +80,10 @@ export function GleeToolsDropdown() {
             Metronome
           </DropdownMenuItem>
           
+          <DropdownMenuItem onClick={() => setAudioRecorderOpen(true)}>
+            Piano & Recording
+          </DropdownMenuItem>
+          
           <DropdownMenuSeparator />
           <DropdownMenuItem
             onClick={() => toast.info("Glee Tools v1.0 - Music Practice Suite")}
@@ -108,6 +114,18 @@ export function GleeToolsDropdown() {
           </DialogHeader>
           <div className="mt-2">
             <Metronome onClose={() => setMetronomeOpen(false)} />
+          </div>
+        </DialogContent>
+      </Dialog>
+      
+      {/* Audio Recorder Dialog */}
+      <Dialog open={audioRecorderOpen} onOpenChange={setAudioRecorderOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Piano & Recording Studio</DialogTitle>
+          </DialogHeader>
+          <div className="mt-2">
+            <AudioRecorder onClose={() => setAudioRecorderOpen(false)} />
           </div>
         </DialogContent>
       </Dialog>

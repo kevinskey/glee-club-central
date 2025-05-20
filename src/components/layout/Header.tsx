@@ -18,6 +18,8 @@ import {
   LogOut,
   Music,
   Clock,
+  Piano,
+  Mic,
 } from "lucide-react";
 import { useSidebar } from "@/components/ui/sidebar";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
@@ -32,6 +34,7 @@ import {
 import { useState } from "react";
 import { PitchPipe } from "@/components/glee-tools/PitchPipe";
 import { Metronome } from "@/components/glee-tools/Metronome";
+import { AudioRecorder } from "@/components/glee-tools/AudioRecorder";
 import { GleeToolsDropdown } from "@/components/glee-tools/GleeToolsDropdown";
 
 export function Header() {
@@ -41,6 +44,7 @@ export function Header() {
   const isMobile = useIsMobile();
   const [pitchPipeOpen, setPitchPipeOpen] = useState(false);
   const [metronomeOpen, setMetronomeOpen] = useState(false);
+  const [audioRecorderOpen, setAudioRecorderOpen] = useState(false);
   
   const handleSignOut = async () => {
     if (signOut) {
@@ -117,6 +121,11 @@ export function Header() {
                 <span>Metronome</span>
               </DropdownMenuItem>
               
+              <DropdownMenuItem onClick={() => setAudioRecorderOpen(true)}>
+                <Piano className="h-4 w-4 mr-2" />
+                <span>Piano & Recording</span>
+              </DropdownMenuItem>
+              
               <DropdownMenuSeparator />
               
               <DropdownMenuItem 
@@ -151,6 +160,18 @@ export function Header() {
           </DialogHeader>
           <div className="mt-2">
             <Metronome onClose={() => setMetronomeOpen(false)} />
+          </div>
+        </DialogContent>
+      </Dialog>
+      
+      {/* Audio Recorder Dialog */}
+      <Dialog open={audioRecorderOpen} onOpenChange={setAudioRecorderOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Piano & Recording Studio</DialogTitle>
+          </DialogHeader>
+          <div className="mt-2">
+            <AudioRecorder onClose={() => setAudioRecorderOpen(false)} />
           </div>
         </DialogContent>
       </Dialog>

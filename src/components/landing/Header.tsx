@@ -2,7 +2,7 @@
 import React, { useState } from "react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Logo } from "@/components/landing/header/Logo";
-import { Music, Clock } from "lucide-react";
+import { Music, Clock, Piano, Mic } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { 
   Dialog,
@@ -23,6 +23,7 @@ import {
 import { useNavigate } from "react-router-dom";
 import { PitchPipe } from "@/components/glee-tools/PitchPipe";
 import { Metronome } from "@/components/glee-tools/Metronome";
+import { AudioRecorder } from "@/components/glee-tools/AudioRecorder";
 
 interface HeaderProps {
   initialShowNewsFeed?: boolean;
@@ -34,6 +35,7 @@ export function Header({ initialShowNewsFeed = true }: HeaderProps) {
   const navigate = useNavigate();
   const [pitchPipeOpen, setPitchPipeOpen] = useState(false);
   const [metronomeOpen, setMetronomeOpen] = useState(false);
+  const [audioRecorderOpen, setAudioRecorderOpen] = useState(false);
   
   // Set the news feed state after component mounts with a slight delay
   React.useEffect(() => {
@@ -121,6 +123,11 @@ export function Header({ initialShowNewsFeed = true }: HeaderProps) {
                   <span>Metronome</span>
                 </DropdownMenuItem>
                 
+                <DropdownMenuItem onClick={() => setAudioRecorderOpen(true)}>
+                  <Piano className="h-4 w-4 mr-2" />
+                  <span>Piano & Recording</span>
+                </DropdownMenuItem>
+                
                 <DropdownMenuSeparator />
                 
                 <DropdownMenuItem onClick={() => navigate("/login")}>
@@ -152,6 +159,18 @@ export function Header({ initialShowNewsFeed = true }: HeaderProps) {
           </DialogHeader>
           <div className="mt-2">
             <Metronome onClose={() => setMetronomeOpen(false)} />
+          </div>
+        </DialogContent>
+      </Dialog>
+      
+      {/* Audio Recorder Dialog */}
+      <Dialog open={audioRecorderOpen} onOpenChange={setAudioRecorderOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Piano & Recording Studio</DialogTitle>
+          </DialogHeader>
+          <div className="mt-2">
+            <AudioRecorder onClose={() => setAudioRecorderOpen(false)} />
           </div>
         </DialogContent>
       </Dialog>
