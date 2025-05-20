@@ -1,4 +1,3 @@
-
 import React, { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
@@ -6,7 +5,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 import { playTone, getNoteFrequency, NoteEvent, RecordingData } from "@/utils/audioUtils";
-import { Square, Triangle, Disc, Play, Record } from "lucide-react";
+import { Square, Triangle, Disc, Play } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 
@@ -28,14 +27,15 @@ const PIANO_KEYS = [
 
 interface PitchPipeProps {
   onClose?: () => void;
+  audioContextRef?: React.RefObject<AudioContext | null>;
 }
 
-export function PitchPipe({ onClose }: PitchPipeProps) {
+export function PitchPipe({ onClose, audioContextRef }: PitchPipeProps) {
   // Audio state
   const [octave, setOctave] = useState<number>(4);
   const [waveform, setWaveform] = useState<OscillatorType>('sine');
   const [volume, setVolume] = useState<number>(0.5);
-  const audioContextRef = useRef<AudioContext | null>(null);
+  const localAudioContextRef = useRef<AudioContext | null>(null);
   
   // Recording state
   const [isRecording, setIsRecording] = useState(false);
@@ -47,20 +47,35 @@ export function PitchPipe({ onClose }: PitchPipeProps) {
   // Auth
   const { isAuthenticated } = useAuth();
   
-  // Initialize audio context
-  useEffect(() => {
-    if (!audioContextRef.current) {
+  // Get or create audio context
+  const getAudioContext = (): AudioContext => {
+    // Use the provided audio context if available
+    if (audioContextRef?.current) {
+      return audioContextRef.current;
+    }
+    
+    // Otherwise create or use our local audio context
+    if (!localAudioContextRef.current) {
       try {
-        audioContextRef.current = new (window.AudioContext || (window as any).webkitAudioContext)();
+        localAudioContextRef.current = new (window.AudioContext || (window as any).webkitAudioContext)();
       } catch (error) {
         toast.error("WebAudio API is not supported in this browser");
+        throw error;
       }
     }
     
+    return localAudioContextRef.current;
+  };
+  
+  // Clean up resources when component unmounts
+  useEffect(() => {
     return () => {
-      // Clean up if needed
+      // Close the local audio context if we created one
+      if (localAudioContextRef.current && !audioContextRef) {
+        localAudioContextRef.current.close().catch(console.error);
+      }
     };
-  }, []);
+  }, [audioContextRef]);
   
   // Load user's recordings
   useEffect(() => {
@@ -88,28 +103,38 @@ export function PitchPipe({ onClose }: PitchPipeProps) {
   
   // Handle playing notes
   const playNote = (note: string) => {
-    if (!audioContextRef.current) return;
-    
-    const noteName = `${note}${octave}`;
-    const frequency = getNoteFrequency(note, octave);
-    
-    playTone(audioContextRef.current, frequency, waveform, 1, volume);
-    
-    // If recording, save this event
-    if (isRecording) {
-      const now = Date.now();
-      const relativeTime = recordStartTimeRef.current ? now - recordStartTimeRef.current : 0;
+    try {
+      const audioContext = getAudioContext();
       
-      const noteEvent: NoteEvent = {
-        note: noteName,
-        frequency,
-        waveform,
-        timestamp: relativeTime,
-        duration: 1,
-        volume
-      };
+      // Resume the audio context if it's suspended
+      if (audioContext.state === 'suspended') {
+        audioContext.resume().catch(console.error);
+      }
       
-      setEvents(prev => [...prev, noteEvent]);
+      const noteName = `${note}${octave}`;
+      const frequency = getNoteFrequency(note, octave);
+      
+      playTone(audioContext, frequency, waveform, 1, volume);
+      
+      // If recording, save this event
+      if (isRecording) {
+        const now = Date.now();
+        const relativeTime = recordStartTimeRef.current ? now - recordStartTimeRef.current : 0;
+        
+        const noteEvent: NoteEvent = {
+          note: noteName,
+          frequency,
+          waveform,
+          timestamp: relativeTime,
+          duration: 1,
+          volume
+        };
+        
+        setEvents(prev => [...prev, noteEvent]);
+      }
+    } catch (error) {
+      console.error('Error playing note:', error);
+      toast.error("Error playing note");
     }
   };
   
@@ -178,24 +203,33 @@ export function PitchPipe({ onClose }: PitchPipeProps) {
   };
   
   const playRecording = async (recordingData: RecordingData) => {
-    if (!audioContextRef.current) return;
-    
-    const ctx = audioContextRef.current;
-    const startTime = ctx.currentTime;
-    
-    recordingData.events.forEach(event => {
-      setTimeout(() => {
-        playTone(
-          ctx, 
-          event.frequency,
-          event.waveform,
-          event.duration,
-          event.volume
-        );
-      }, event.timestamp);
-    });
-    
-    toast.info("Playing recording");
+    try {
+      const audioContext = getAudioContext();
+      
+      // Resume the audio context if it's suspended
+      if (audioContext.state === 'suspended') {
+        audioContext.resume().catch(console.error);
+      }
+      
+      const startTime = audioContext.currentTime;
+      
+      recordingData.events.forEach(event => {
+        setTimeout(() => {
+          playTone(
+            audioContext, 
+            event.frequency,
+            event.waveform,
+            event.duration,
+            event.volume
+          );
+        }, event.timestamp);
+      });
+      
+      toast.info("Playing recording");
+    } catch (error) {
+      console.error('Error playing recording:', error);
+      toast.error("Error playing recording");
+    }
   };
   
   const deleteRecording = async (id: string) => {
@@ -304,8 +338,17 @@ export function PitchPipe({ onClose }: PitchPipeProps) {
             size="sm"
             onClick={toggleRecording}
           >
-            <Record className="h-4 w-4 mr-1" />
-            {isRecording ? "Stop" : "Record"}
+            {isRecording ? (
+              <>
+                <span className="h-4 w-4 rounded-full animate-pulse bg-red-500 mr-1"></span>
+                Stop
+              </>
+            ) : (
+              <>
+                <span className="h-4 w-4 rounded-full bg-red-500 mr-1"></span>
+                Record
+              </>
+            )}
           </Button>
           
           {events.length > 0 && (

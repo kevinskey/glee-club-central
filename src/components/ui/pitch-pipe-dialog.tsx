@@ -43,7 +43,7 @@ export function PitchPipeDialog({ triggerClassName }: PitchPipeDialogProps) {
         <DialogHeader>
           <DialogTitle>Pitch Pipe</DialogTitle>
         </DialogHeader>
-        <PitchPipe audioContextRef={audioContextRef} />
+        <PitchPipe onClose={() => setOpen(false)} audioContextRef={audioContextRef} />
       </DialogContent>
     </Dialog>
   );

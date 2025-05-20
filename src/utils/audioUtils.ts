@@ -25,6 +25,22 @@ export const createAudioContext = (): AudioContext => {
 };
 
 /**
+ * Resume audio context (for browsers that suspend it)
+ */
+export const resumeAudioContext = async (audioContext: AudioContext): Promise<boolean> => {
+  if (audioContext.state === 'suspended') {
+    try {
+      await audioContext.resume();
+      return true;
+    } catch (err) {
+      console.error('Failed to resume audio context:', err);
+      return false;
+    }
+  }
+  return audioContext.state === 'running';
+};
+
+/**
  * Play a note with the given frequency
  */
 export const playTone = (
@@ -143,3 +159,80 @@ export interface RecordingData {
   totalDuration: number;
   createdAt: string;
 }
+
+// Create an AudioBuffer for a click sound
+export const createClickBuffer = (audioContext: AudioContext): AudioBuffer => {
+  const sampleRate = audioContext.sampleRate;
+  const buffer = audioContext.createBuffer(1, sampleRate * 0.1, sampleRate);
+  const channelData = buffer.getChannelData(0);
+  
+  // Create a simple click sound
+  for (let i = 0; i < buffer.length; i++) {
+    const t = i / sampleRate;
+    // Exponential decay
+    channelData[i] = Math.sin(2 * Math.PI * 800 * t) * Math.exp(-10 * t);
+  }
+  
+  return buffer;
+};
+
+// Create an AudioBuffer for an accented click sound
+export const createAccentClickBuffer = (audioContext: AudioContext): AudioBuffer => {
+  const sampleRate = audioContext.sampleRate;
+  const buffer = audioContext.createBuffer(1, sampleRate * 0.1, sampleRate);
+  const channelData = buffer.getChannelData(0);
+  
+  // Create a simple accented click sound (higher frequency)
+  for (let i = 0; i < buffer.length; i++) {
+    const t = i / sampleRate;
+    // Exponential decay with higher frequency
+    channelData[i] = Math.sin(2 * Math.PI * 1200 * t) * Math.exp(-8 * t);
+  }
+  
+  return buffer;
+};
+
+// Simple logging utility for audio operations
+export const audioLogger = {
+  log: (message: string, ...args: any[]) => {
+    console.log(`[AudioSystem] ${message}`, ...args);
+  },
+  error: (message: string, ...args: any[]) => {
+    console.error(`[AudioSystem Error] ${message}`, ...args);
+  }
+};
+
+// Microphone access functions
+export const requestMicrophoneAccess = async (): Promise<MediaStream> => {
+  try {
+    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    audioLogger.log('Microphone access granted');
+    return stream;
+  } catch (error) {
+    audioLogger.error('Error accessing microphone:', error);
+    throw error;
+  }
+};
+
+export const releaseMicrophone = (stream: MediaStream): void => {
+  if (stream) {
+    stream.getTracks().forEach(track => {
+      track.stop();
+    });
+    audioLogger.log('Microphone released');
+  }
+};
+
+// Initialize and reset audio system
+export const initializeAudioSystem = (): AudioContext => {
+  const ctx = createAudioContext();
+  audioLogger.log('Audio system initialized');
+  return ctx;
+};
+
+export const resetAudioSystem = (audioContext: AudioContext): void => {
+  if (audioContext && audioContext.state !== 'closed') {
+    audioContext.close().catch(console.error);
+    audioLogger.log('Audio system reset');
+  }
+};
