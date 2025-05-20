@@ -2,7 +2,7 @@
 import React, { useState } from "react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Logo } from "@/components/landing/header/Logo";
-import { Menu, Music, Clock } from "lucide-react";
+import { Music, Clock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { 
   Dialog,
@@ -18,12 +18,12 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
   DropdownMenuSeparator,
-  DropdownMenuLabel,
-  DropdownMenuProvider
+  DropdownMenuLabel
 } from "@/components/ui/dropdown-menu";
 import { useNavigate } from "react-router-dom";
 import { PitchPipe } from "@/components/glee-tools/PitchPipe";
 import { Metronome } from "@/components/glee-tools/Metronome";
+import { GleeToolsDropdown } from "@/components/glee-tools/GleeToolsDropdown";
 
 interface HeaderProps {
   initialShowNewsFeed?: boolean;
@@ -74,64 +74,61 @@ export function Header({ initialShowNewsFeed = true }: HeaderProps) {
           
           {/* Only show dropdown menu on mobile */}
           {isMobile && (
-            <DropdownMenuProvider>
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button 
-                    variant="ghost" 
-                    size="icon" 
-                    className="h-10 w-10 rounded-full"
-                  >
-                    <Menu className="h-5 w-5 text-foreground" />
-                    <span className="sr-only">Menu</span>
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-56 bg-popover">
-                  <DropdownMenuSeparator />
-                  
-                  <DropdownMenuItem onClick={() => navigate("/")}>
-                    Home
-                  </DropdownMenuItem>
-                  
-                  <DropdownMenuItem onClick={() => navigate("/about")}>
-                    About
-                  </DropdownMenuItem>
-                  
-                  <DropdownMenuItem onClick={() => navigate("/social")}>
-                    Social
-                  </DropdownMenuItem>
-                  
-                  <DropdownMenuItem onClick={() => navigate("/contact")}>
-                    Contact
-                  </DropdownMenuItem>
-                  
-                  <DropdownMenuItem onClick={() => navigate("/press-kit")}>
-                    Press Kit
-                  </DropdownMenuItem>
-                  
-                  <DropdownMenuSeparator />
-                  
-                  {/* Glee Tools Section */}
-                  <DropdownMenuLabel>Glee Tools</DropdownMenuLabel>
-                  
-                  <DropdownMenuItem onClick={() => setPitchPipeOpen(true)}>
-                    <Music className="h-4 w-4 mr-2" />
-                    <span>Pitch Pipe</span>
-                  </DropdownMenuItem>
-                  
-                  <DropdownMenuItem onClick={() => setMetronomeOpen(true)}>
-                    <Clock className="h-4 w-4 mr-2" />
-                    <span>Metronome</span>
-                  </DropdownMenuItem>
-                  
-                  <DropdownMenuSeparator />
-                  
-                  <DropdownMenuItem onClick={() => navigate("/login")}>
-                    Login
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-            </DropdownMenuProvider>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button 
+                  variant="ghost" 
+                  size="icon" 
+                  className="h-10 w-10 rounded-full"
+                >
+                  <span className="sr-only">Menu</span>
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-56 bg-popover">
+                <DropdownMenuSeparator />
+                
+                <DropdownMenuItem onClick={() => navigate("/")}>
+                  Home
+                </DropdownMenuItem>
+                
+                <DropdownMenuItem onClick={() => navigate("/about")}>
+                  About
+                </DropdownMenuItem>
+                
+                <DropdownMenuItem onClick={() => navigate("/social")}>
+                  Social
+                </DropdownMenuItem>
+                
+                <DropdownMenuItem onClick={() => navigate("/contact")}>
+                  Contact
+                </DropdownMenuItem>
+                
+                <DropdownMenuItem onClick={() => navigate("/press-kit")}>
+                  Press Kit
+                </DropdownMenuItem>
+                
+                <DropdownMenuSeparator />
+                
+                {/* Glee Tools Section */}
+                <DropdownMenuLabel>Glee Tools</DropdownMenuLabel>
+                
+                <DropdownMenuItem onClick={() => setPitchPipeOpen(true)}>
+                  <Music className="h-4 w-4 mr-2" />
+                  <span>Pitch Pipe</span>
+                </DropdownMenuItem>
+                
+                <DropdownMenuItem onClick={() => setMetronomeOpen(true)}>
+                  <Clock className="h-4 w-4 mr-2" />
+                  <span>Metronome</span>
+                </DropdownMenuItem>
+                
+                <DropdownMenuSeparator />
+                
+                <DropdownMenuItem onClick={() => navigate("/login")}>
+                  Login
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           )}
         </div>
       </div>

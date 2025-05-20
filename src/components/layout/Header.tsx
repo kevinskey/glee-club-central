@@ -33,6 +33,7 @@ import {
 import { useState } from "react";
 import { PitchPipe } from "@/components/glee-tools/PitchPipe";
 import { Metronome } from "@/components/glee-tools/Metronome";
+import { GleeToolsDropdown } from "@/components/glee-tools/GleeToolsDropdown";
 
 export function Header() {
   const { profile, signOut } = useAuth();
@@ -62,73 +63,72 @@ export function Header() {
           
         {/* Right side: theme toggle and user dropdown */}
         <div className="flex items-center gap-3">
+          <GleeToolsDropdown />
           <ThemeToggle />
           
-          <DropdownMenuProvider>
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="icon" className="h-11 w-11">
-                  <Menu className="h-7 w-7 text-foreground" />
-                  <span className="sr-only">User Menu</span>
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-56 bg-popover">
-                <DropdownMenuLabel>
-                  {profile?.first_name} {profile?.last_name}
-                </DropdownMenuLabel>
-                <DropdownMenuSeparator />
-                
-                <DropdownMenuItem onClick={() => navigate("/dashboard")}>
-                  Dashboard
-                </DropdownMenuItem>
-                
-                <DropdownMenuItem onClick={() => navigate("/dashboard/profile")}>
-                  <User className="h-4 w-4 mr-2" />
-                  <span>My Profile</span>
-                </DropdownMenuItem>
-                
-                <DropdownMenuItem onClick={() => navigate("/update-password")}>
-                  <Settings className="h-4 w-4 mr-2" />
-                  <span>Change Password</span>
-                </DropdownMenuItem>
-                
-                <DropdownMenuItem onClick={() => navigate("/")}>
-                  <Icons.logo className="h-4 w-auto mr-2" />
-                  <span>Home Page</span>
-                </DropdownMenuItem>
-                
-                <DropdownMenuItem onClick={toggleSidebar}>
-                  <Menu className="h-4 w-4 mr-2" />
-                  <span>Toggle Sidebar</span>
-                </DropdownMenuItem>
-                
-                <DropdownMenuSeparator />
-                
-                {/* Glee Tools Section */}
-                <DropdownMenuLabel>Glee Tools</DropdownMenuLabel>
-                
-                <DropdownMenuItem onClick={() => setPitchPipeOpen(true)}>
-                  <Music className="h-4 w-4 mr-2" />
-                  <span>Pitch Pipe</span>
-                </DropdownMenuItem>
-                
-                <DropdownMenuItem onClick={() => setMetronomeOpen(true)}>
-                  <Clock className="h-4 w-4 mr-2" />
-                  <span>Metronome</span>
-                </DropdownMenuItem>
-                
-                <DropdownMenuSeparator />
-                
-                <DropdownMenuItem 
-                  onClick={handleSignOut}
-                  className="flex items-center gap-2 cursor-pointer text-destructive"
-                >
-                  <LogOut className="h-4 w-4" />
-                  <span>Sign Out</span>
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          </DropdownMenuProvider>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" size="icon" className="h-11 w-11">
+                <Menu className="h-7 w-7 text-foreground" />
+                <span className="sr-only">User Menu</span>
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-56 bg-popover">
+              <DropdownMenuLabel>
+                {profile?.first_name} {profile?.last_name}
+              </DropdownMenuLabel>
+              <DropdownMenuSeparator />
+              
+              <DropdownMenuItem onClick={() => navigate("/dashboard")}>
+                Dashboard
+              </DropdownMenuItem>
+              
+              <DropdownMenuItem onClick={() => navigate("/dashboard/profile")}>
+                <User className="h-4 w-4 mr-2" />
+                <span>My Profile</span>
+              </DropdownMenuItem>
+              
+              <DropdownMenuItem onClick={() => navigate("/update-password")}>
+                <Settings className="h-4 w-4 mr-2" />
+                <span>Change Password</span>
+              </DropdownMenuItem>
+              
+              <DropdownMenuItem onClick={() => navigate("/")}>
+                <Icons.logo className="h-4 w-auto mr-2" />
+                <span>Home Page</span>
+              </DropdownMenuItem>
+              
+              <DropdownMenuItem onClick={toggleSidebar}>
+                <Menu className="h-4 w-4 mr-2" />
+                <span>Toggle Sidebar</span>
+              </DropdownMenuItem>
+              
+              <DropdownMenuSeparator />
+              
+              {/* Glee Tools Section */}
+              <DropdownMenuLabel>Glee Tools</DropdownMenuLabel>
+              
+              <DropdownMenuItem onClick={() => setPitchPipeOpen(true)}>
+                <Music className="h-4 w-4 mr-2" />
+                <span>Pitch Pipe</span>
+              </DropdownMenuItem>
+              
+              <DropdownMenuItem onClick={() => setMetronomeOpen(true)}>
+                <Clock className="h-4 w-4 mr-2" />
+                <span>Metronome</span>
+              </DropdownMenuItem>
+              
+              <DropdownMenuSeparator />
+              
+              <DropdownMenuItem 
+                onClick={handleSignOut}
+                className="flex items-center gap-2 cursor-pointer text-destructive"
+              >
+                <LogOut className="h-4 w-4" />
+                <span>Sign Out</span>
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
       </div>
       

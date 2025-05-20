@@ -8,17 +8,26 @@ import {
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuSeparator,
-  DropdownMenuTrigger,
-  DropdownMenuProvider
+  DropdownMenuTrigger
 } from "@/components/ui/dropdown-menu";
 import { GleeTools } from "./GleeTools";
 import { toast } from "sonner";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { 
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle
+} from "@/components/ui/dialog";
+import { PitchPipe } from "./PitchPipe";
+import { Metronome } from "./Metronome";
 
 export function GleeToolsDropdown() {
   const [isOpen, setIsOpen] = useState(false);
   const isMobile = useIsMobile();
   const audioContextRef = useRef<AudioContext | null>(null);
+  const [pitchPipeOpen, setPitchPipeOpen] = useState(false);
+  const [metronomeOpen, setMetronomeOpen] = useState(false);
 
   // Initialize audio context on first interaction
   const initAudioContext = () => {
@@ -41,7 +50,7 @@ export function GleeToolsDropdown() {
   };
 
   return (
-    <DropdownMenuProvider>
+    <>
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <Button
@@ -61,9 +70,15 @@ export function GleeToolsDropdown() {
         <DropdownMenuContent align="end" className="w-56">
           <DropdownMenuLabel>Glee Tools</DropdownMenuLabel>
           <DropdownMenuSeparator />
-          <div className="p-2">
-            <GleeTools variant="minimal" />
-          </div>
+          
+          <DropdownMenuItem onClick={() => setPitchPipeOpen(true)}>
+            Pitch Pipe
+          </DropdownMenuItem>
+          
+          <DropdownMenuItem onClick={() => setMetronomeOpen(true)}>
+            Metronome
+          </DropdownMenuItem>
+          
           <DropdownMenuSeparator />
           <DropdownMenuItem
             onClick={() => toast.info("Glee Tools v1.0 - Music Practice Suite")}
@@ -73,6 +88,26 @@ export function GleeToolsDropdown() {
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
-    </DropdownMenuProvider>
+      
+      {/* Pitch Pipe Dialog */}
+      <Dialog open={pitchPipeOpen} onOpenChange={setPitchPipeOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Pitch Pipe</DialogTitle>
+          </DialogHeader>
+          <PitchPipe onClose={() => setPitchPipeOpen(false)} />
+        </DialogContent>
+      </Dialog>
+      
+      {/* Metronome Dialog */}
+      <Dialog open={metronomeOpen} onOpenChange={setMetronomeOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Metronome</DialogTitle>
+          </DialogHeader>
+          <Metronome onClose={() => setMetronomeOpen(false)} />
+        </DialogContent>
+      </Dialog>
+    </>
   );
 }
