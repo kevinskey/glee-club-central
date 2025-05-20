@@ -1,15 +1,18 @@
 
 import * as React from 'react';
-import { createBrowserRouter } from 'react-router-dom';
+import { createBrowserRouter, Navigate } from 'react-router-dom';
 import ErrorBoundary from "./components/ErrorBoundary";
 import StaticLandingPage from './pages/StaticLandingPage';
 import HomeTemp from './pages/HomeTemp';
+import App from './App';
+import { dashboardRoutes } from './routes/dashboardRoutes';
+import { authRoutes } from './routes/authRoutes';
 
-// Creating a simplified router with no auth checks or complex layouts
+// Create a properly structured router with all routes
 export const router = createBrowserRouter([
   {
     path: '/',
-    element: <HomeTemp />,
+    element: <App />,
     errorElement: (
       <ErrorBoundary>
         <div className="flex items-center justify-center min-h-screen p-4">
@@ -28,13 +31,28 @@ export const router = createBrowserRouter([
         </div>
       </ErrorBoundary>
     ),
-  },
-  {
-    path: '/under-construction',
-    element: <StaticLandingPage />,
-  },
-  {
-    path: '/home-temp',
-    element: <HomeTemp />,
+    children: [
+      {
+        index: true,
+        element: <Navigate to="/home-temp" replace />,
+      },
+      {
+        path: 'home-temp',
+        element: <HomeTemp />,
+      },
+      {
+        path: 'under-construction',
+        element: <StaticLandingPage />,
+      },
+      // Include the dashboard routes as children of the App component
+      ...dashboardRoutes.children.map(route => ({
+        path: `dashboard${route.path ? `/${route.path}` : ''}`,
+        element: route.element,
+      })),
+      // Include auth routes
+      ...authRoutes,
+    ],
   },
 ]);
+
+export default router;

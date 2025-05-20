@@ -1,28 +1,37 @@
 
-import React from 'react';
-import ReactDOM from 'react-dom/client';
-import ErrorBoundary from "./components/ErrorBoundary";
-import { RouterProvider } from 'react-router-dom';
-import { router } from './router';
-import { ThemeProvider } from './providers/ThemeProvider';
-import './index.css';
+import React from "react";
+import ReactDOM from "react-dom/client";
+import { RouterProvider } from "react-router-dom";
+import { router } from "./router";
+import { AuthProvider } from "./contexts/AuthContext";
+import { ThemeProvider } from "./providers/ThemeProvider";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { Toaster } from "@/components/ui/toaster";
+import "./index.css";
 
-// Create the root once
-const rootElement = document.getElementById('root');
+// Create a client for React Query
+const queryClient = new QueryClient();
+
+// Get the root element
+const rootElement = document.getElementById("root");
 
 if (!rootElement) {
-  throw new Error("Root element not found in the document");
+  throw new Error("Root element not found");
 }
 
+// Create a root
 const root = ReactDOM.createRoot(rootElement);
 
-// Render the app with minimal providers
+// Render the app with proper providers order
 root.render(
   <React.StrictMode>
-    <ErrorBoundary>
+    <QueryClientProvider client={queryClient}>
       <ThemeProvider>
-        <RouterProvider router={router} />
+        <AuthProvider>
+          <RouterProvider router={router} />
+          <Toaster />
+        </AuthProvider>
       </ThemeProvider>
-    </ErrorBoundary>
+    </QueryClientProvider>
   </React.StrictMode>
 );
