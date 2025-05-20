@@ -183,10 +183,6 @@ export function ConsolidatedHeader() {
           </DropdownMenuProvider>
         </div>
       </div>
-      
-      <div className="text-center text-xs text-muted-foreground border-t py-1">
-        Glee Tools v1.0
-      </div>
     </header>
   );
 }

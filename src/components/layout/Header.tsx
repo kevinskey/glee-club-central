@@ -102,10 +102,6 @@ export function Header() {
           </DropdownMenuProvider>
         </div>
       </div>
-      
-      <div className="text-center text-xs text-muted-foreground border-t py-1">
-        Glee World v1.0
-      </div>
     </header>
   );
 }

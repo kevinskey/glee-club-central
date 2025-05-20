@@ -27,7 +27,7 @@ export function MobileHeader() {
   const { setOpenMobile, openMobile } = useSidebar();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   
-  const isDashboardPath = location.pathname.startsWith("/dashboard");
+  const isDashboardPath = location.pathname.startsWith("/dashboard") || location.pathname.startsWith("/admin");
   
   const toggleMobileMenu = () => {
     setMobileMenuOpen(!mobileMenuOpen);
@@ -157,10 +157,6 @@ export function MobileHeader() {
               </DropdownMenu>
             </DropdownMenuProvider>
           </div>
-        </div>
-        
-        <div className="text-center text-xs text-muted-foreground border-t py-0.5">
-          Glee Tools v1.0
         </div>
       </header>
 

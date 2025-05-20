@@ -108,10 +108,6 @@ export function Header({ initialShowNewsFeed = true }: HeaderProps) {
           )}
         </div>
       </div>
-      
-      <div className="text-center text-xs text-muted-foreground border-t py-1">
-        Glee Tools v1.0 – Production Ready
-      </div>
     </header>
   );
 }
