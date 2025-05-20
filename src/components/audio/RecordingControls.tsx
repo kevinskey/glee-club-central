@@ -37,7 +37,9 @@ export function RecordingControls({
   formatTime,
 }: RecordingControlsProps) {
   const handleReset = async () => {
-    await resetAudioSystem();
+    // Fix: The resetAudioSystem function requires an AudioContext argument
+    // We need to pass null when we don't have a specific AudioContext to reset
+    await resetAudioSystem(null);
     toast.success("Audio system reset complete");
   };
 
