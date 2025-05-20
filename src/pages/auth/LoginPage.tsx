@@ -224,6 +224,10 @@ export default function LoginPage() {
     }
   ];
 
+  if (isAuthenticated) {
+    return null; // Will be redirected by useEffect
+  }
+
   return (
     <div className="container relative min-h-[800px] flex items-center justify-center py-12 md:grid lg:max-w-none lg:grid-cols-2 lg:px-0">
       <Link

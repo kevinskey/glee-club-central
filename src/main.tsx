@@ -9,7 +9,7 @@ import './index.css';
 import { createClient } from '@supabase/supabase-js';
 import { SessionContextProvider } from '@supabase/auth-helpers-react';
 import { RouterProvider } from 'react-router-dom';
-import { router } from './router'; // Import directly from router
+import router from './routerConfig'; // Import from routerConfig for consistency
 
 // Create a client
 const queryClient = new QueryClient();

@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from "react";
 import { PageHeader } from "@/components/ui/page-header";
 import { useAuth } from "@/contexts/AuthContext";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { 
   Home, 
   Calendar, 
@@ -124,9 +124,9 @@ const DashboardPageContent = () => {
                 size="lg"
                 variant="secondary" 
                 className="bg-white hover:bg-white/90 text-glee-spelman"
-                onClick={() => navigate("/dashboard/profile")}
+                asChild
               >
-                View Profile <ChevronRight className="ml-2 h-4 w-4" />
+                <Link to="/dashboard/profile">View Profile <ChevronRight className="ml-2 h-4 w-4" /></Link>
               </Button>
             </div>
           </div>
@@ -157,9 +157,9 @@ const DashboardPageContent = () => {
                 <Button 
                   variant="link" 
                   className="text-sm text-glee-spelman hover:underline p-0"
-                  onClick={() => navigate("/dashboard/calendar")}
+                  asChild
                 >
-                  View Calendar
+                  <Link to="/dashboard/calendar">View Calendar</Link>
                 </Button>
               </CardHeader>
               <CardContent>
@@ -224,9 +224,9 @@ const DashboardPageContent = () => {
                   <Button 
                     variant="link"
                     className="flex items-center justify-center w-full text-sm text-glee-spelman hover:underline"
-                    onClick={() => navigate("/dashboard/sheet-music")}
+                    asChild
                   >
-                    View all resources <ArrowRight className="ml-1 h-3 w-3" />
+                    <Link to="/dashboard/sheet-music">View all resources <ArrowRight className="ml-1 h-3 w-3" /></Link>
                   </Button>
                 </div>
               </CardContent>

@@ -14,7 +14,7 @@ import FanDashboardPage from '../pages/FanDashboardPage';
 import AnnouncementsPage from '../pages/dashboard/AnnouncementsPage';
 import ArchivesPage from '../pages/dashboard/ArchivesPage';
 import AttendancePage from '../pages/dashboard/AttendancePage';
-import DashboardPage from '../pages/dashboard/DashboardPage'; // Correct import for main dashboard page
+import DashboardPage from '../pages/dashboard/DashboardPage'; // Using the dashboard page from the correct location
 
 export const dashboardRoutes = {
   path: '/dashboard',
@@ -23,7 +23,7 @@ export const dashboardRoutes = {
   children: [
     {
       index: true,
-      element: <DashboardPage />, // Use the DashboardPage component directly for the index route
+      element: <DashboardPage />, // Use the correct DashboardPage component
     },
     {
       path: 'member',
@@ -59,7 +59,6 @@ export const dashboardRoutes = {
     },
     {
       path: 'calendar',
-      // Add RequireAuth to calendar
       element: <RequireAuth><CalendarPage /></RequireAuth>,
     },
     {
