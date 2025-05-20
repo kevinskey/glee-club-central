@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from "react";
 import { PageHeader } from "@/components/ui/page-header";
 import { useAuth } from "@/contexts/AuthContext";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { 
   Home, 
   Calendar, 
@@ -100,46 +100,6 @@ const DashboardPageContent = () => {
     navigate("/dashboard/admin");
   };
   
-  // Quick access tiles
-  const quickAccessTiles = [
-    {
-      title: "Sheet Music",
-      icon: <Music className="h-5 w-5 text-white" />,
-      href: "/dashboard/sheet-music",
-      color: "bg-gradient-to-br from-purple-500 to-purple-700"
-    },
-    {
-      title: "Calendar",
-      icon: <Calendar className="h-5 w-5 text-white" />,
-      href: "/dashboard/calendar",
-      color: "bg-gradient-to-br from-blue-500 to-blue-700"
-    },
-    {
-      title: "Practice Resources",
-      icon: <Headphones className="h-5 w-5 text-white" />,
-      href: "/dashboard/practice",
-      color: "bg-gradient-to-br from-green-500 to-green-700"
-    },
-    {
-      title: "My Recordings",
-      icon: <Mic className="h-5 w-5 text-white" />,
-      href: "/dashboard/recordings",
-      color: "bg-gradient-to-br from-red-500 to-red-700"
-    },
-    {
-      title: "My Profile",
-      icon: <User className="h-5 w-5 text-white" />,
-      href: "/dashboard/profile",
-      color: "bg-gradient-to-br from-amber-500 to-amber-700"
-    },
-    {
-      title: "Announcements",
-      icon: <Bell className="h-5 w-5 text-white" />,
-      href: "/dashboard/announcements",
-      color: "bg-gradient-to-br from-pink-500 to-pink-700"
-    },
-  ];
-  
   // Use conditional rendering instead of early returns
   const renderContent = () => {
     if (loading || authLoading) {
@@ -173,23 +133,7 @@ const DashboardPageContent = () => {
         </div>
         
         {/* Quick Access Grid */}
-        <div>
-          <h2 className="text-xl font-semibold mb-4">Quick Access</h2>
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
-            {quickAccessTiles.map((tile, index) => (
-              <Link key={index} to={tile.href} className="no-underline">
-                <div className={`${tile.color} rounded-xl p-4 h-full shadow-md hover:shadow-lg transition-all text-white flex flex-col justify-between min-h-[120px]`}>
-                  <div className="p-2 bg-white/20 rounded-lg w-fit">
-                    {tile.icon}
-                  </div>
-                  <div className="mt-auto">
-                    <h3 className="font-medium">{tile.title}</h3>
-                  </div>
-                </div>
-              </Link>
-            ))}
-          </div>
-        </div>
+        <QuickAccess />
         
         {/* Next Event Countdown */}
         {nextEvent && (
@@ -210,9 +154,13 @@ const DashboardPageContent = () => {
                   <CalendarDays className="h-5 w-5 text-glee-spelman" />
                   <CardTitle>Upcoming Events</CardTitle>
                 </div>
-                <Link to="/dashboard/calendar" className="text-sm text-glee-spelman hover:underline">
+                <Button 
+                  variant="link" 
+                  className="text-sm text-glee-spelman hover:underline p-0"
+                  onClick={() => navigate("/dashboard/calendar")}
+                >
                   View Calendar
-                </Link>
+                </Button>
               </CardHeader>
               <CardContent>
                 {events.length > 0 ? (
@@ -273,12 +221,13 @@ const DashboardPageContent = () => {
                     </div>
                   </div>
                   
-                  <Link 
-                    to="/dashboard/sheet-music" 
-                    className="flex items-center justify-center text-sm text-glee-spelman hover:underline"
+                  <Button 
+                    variant="link"
+                    className="flex items-center justify-center w-full text-sm text-glee-spelman hover:underline"
+                    onClick={() => navigate("/dashboard/sheet-music")}
                   >
                     View all resources <ArrowRight className="ml-1 h-3 w-3" />
-                  </Link>
+                  </Button>
                 </div>
               </CardContent>
             </Card>

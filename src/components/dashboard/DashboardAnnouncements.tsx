@@ -1,47 +1,56 @@
 
-import React, { useState } from "react";
-import { Link } from "react-router-dom";
+import React from "react";
+import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import { Bell } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { useNavigate } from "react-router-dom";
 
 export function DashboardAnnouncements() {
-  // Sample announcements data
-  const [announcements] = useState([
+  const navigate = useNavigate();
+  
+  const announcements = [
     {
-      id: 1,
-      title: "End of Semester Performance",
-      message: "Our final performance will be held on May 15th at Sisters Chapel. All members must attend dress rehearsal."
+      id: "1",
+      title: "Concert Attire Reminder",
+      date: "May 10, 2025",
+      content: "Please remember to bring your formal attire for the Spring Concert next week. Black attire with purple accessories."
     },
     {
-      id: 2,
-      title: "Dues Reminder",
-      message: "Spring semester dues are due by April 30th. Please make your payments online through the dashboard."
-    },
-    {
-      id: 3,
-      title: "New Sheet Music Available",
-      message: "New arrangements for the Spring concert have been uploaded. Please review before next rehearsal."
+      id: "2",
+      title: "Rehearsal Time Change",
+      date: "May 6, 2025",
+      content: "This week's Thursday rehearsal will start at 6:30 PM instead of 7:00 PM due to venue availability."
     }
-  ]);
+  ];
 
   return (
-    <div className="space-y-3 md:space-y-4">
-      {announcements && announcements.length > 0 ? (
-        announcements.map(announcement => (
-          <div key={announcement.id} className="pb-3 border-b last:border-0">
-            <h3 className="font-medium text-sm md:text-base">{announcement.title}</h3>
-            <p className="text-xs md:text-sm text-muted-foreground mt-1 line-clamp-2 md:line-clamp-none">{announcement.message}</p>
-          </div>
-        ))
-      ) : (
-        <div className="text-muted-foreground text-xs md:text-sm">No announcements</div>
-      )}
-      <div className="mt-3 md:mt-4">
-        <Link 
-          to="/dashboard/announcements" 
-          className="text-xs md:text-sm text-primary hover:underline inline-flex items-center"
+    <Card className="shadow-md">
+      <CardHeader className="pb-2 flex flex-row justify-between items-center">
+        <CardTitle className="flex items-center gap-2">
+          <Bell className="h-5 w-5 text-glee-spelman" />
+          <span>Announcements</span>
+        </CardTitle>
+        <Button
+          variant="link"
+          className="text-sm text-glee-spelman hover:underline p-0"
+          onClick={() => navigate("/dashboard/announcements")}
         >
-          View all announcements
-        </Link>
-      </div>
-    </div>
+          View all
+        </Button>
+      </CardHeader>
+      <CardContent>
+        <div className="space-y-4">
+          {announcements.map((announcement) => (
+            <div key={announcement.id} className="border-b pb-3 last:border-0 last:pb-0">
+              <div className="flex justify-between items-center">
+                <h4 className="font-medium">{announcement.title}</h4>
+                <span className="text-xs text-muted-foreground">{announcement.date}</span>
+              </div>
+              <p className="text-sm mt-1">{announcement.content}</p>
+            </div>
+          ))}
+        </div>
+      </CardContent>
+    </Card>
   );
 }
