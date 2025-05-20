@@ -1,9 +1,10 @@
+
 import React, { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Slider } from "@/components/ui/slider";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { playClick } from "@/utils/audioUtils";
+import { createAudioContext, resumeAudioContext, playClick } from "@/utils/audioUtils";
 import { Play, Pause, Save, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
@@ -27,6 +28,7 @@ export function Metronome({ onClose }: MetronomeProps) {
   const audioContextRef = useRef<AudioContext | null>(null);
   const timerRef = useRef<number | null>(null);
   const lastTickTimeRef = useRef<number | null>(null);
+  const isInitializedRef = useRef<boolean>(false);
   
   // Auth - Try to use auth context, fallback to false if not available
   let isAuthenticated = false;
@@ -42,14 +44,50 @@ export function Metronome({ onClose }: MetronomeProps) {
   useEffect(() => {
     if (!audioContextRef.current) {
       try {
-        audioContextRef.current = new (window.AudioContext || (window as any).webkitAudioContext)();
+        audioContextRef.current = createAudioContext();
+        console.log('Metronome: Audio context created with state:', audioContextRef.current.state);
       } catch (error) {
         toast.error("WebAudio API is not supported in this browser");
+        console.error("Error creating audio context:", error);
       }
     }
     
+    // Initialize with a silent sound to unlock audio on iOS
+    const unlockAudio = () => {
+      if (audioContextRef.current && !isInitializedRef.current) {
+        // Resume context if suspended
+        if (audioContextRef.current.state === 'suspended') {
+          audioContextRef.current.resume().then(() => {
+            console.log('Audio context resumed');
+            isInitializedRef.current = true;
+          }).catch(e => console.error('Failed to resume audio context:', e));
+        }
+        
+        // Play silent sound
+        try {
+          const oscillator = audioContextRef.current.createOscillator();
+          const gainNode = audioContextRef.current.createGain();
+          gainNode.gain.value = 0.00001; // Nearly silent
+          oscillator.connect(gainNode);
+          gainNode.connect(audioContextRef.current.destination);
+          oscillator.start(0);
+          oscillator.stop(audioContextRef.current.currentTime + 0.001);
+          isInitializedRef.current = true;
+        } catch (e) {
+          console.error('Error during audio initialization:', e);
+        }
+      }
+    };
+    
+    // Initialize immediately and attach to document
+    unlockAudio();
+    document.addEventListener('click', unlockAudio);
+    document.addEventListener('touchstart', unlockAudio);
+    
     return () => {
       stopMetronome();
+      document.removeEventListener('click', unlockAudio);
+      document.removeEventListener('touchstart', unlockAudio);
     };
   }, []);
   
@@ -64,6 +102,14 @@ export function Metronome({ onClose }: MetronomeProps) {
   useEffect(() => {
     return () => {
       stopMetronome();
+      
+      if (audioContextRef.current && audioContextRef.current.state !== 'closed') {
+        try {
+          audioContextRef.current.close().catch(console.error);
+        } catch (e) {
+          // Ignore closing errors
+        }
+      }
     };
   }, []);
   
@@ -97,16 +143,42 @@ export function Metronome({ onClose }: MetronomeProps) {
   };
   
   const startMetronome = () => {
-    if (!audioContextRef.current) return;
+    if (!audioContextRef.current) {
+      console.error('Audio context not available');
+      toast.error("Audio system not ready. Please try again.");
+      return;
+    }
     
     // Resume audio context if suspended (needed for some browsers)
     if (audioContextRef.current.state === 'suspended') {
-      audioContextRef.current.resume();
+      resumeAudioContext(audioContextRef.current)
+        .then(resumed => {
+          if (resumed) {
+            console.log('Audio context resumed successfully');
+            beginMetronome();
+          } else {
+            console.error('Failed to resume audio context');
+            toast.error("Please tap anywhere on the screen to enable audio");
+          }
+        })
+        .catch(err => {
+          console.error('Error resuming audio context:', err);
+          toast.error("Audio error. Please reload the page.");
+        });
+    } else {
+      beginMetronome();
     }
-    
+  };
+  
+  const beginMetronome = () => {
     setIsPlaying(true);
     lastTickTimeRef.current = Date.now();
     setCurrentBeat(0);
+    
+    // Play an initial click immediately
+    if (audioContextRef.current) {
+      playClick(audioContextRef.current, true, volume);
+    }
     
     // Start the tick loop
     scheduleTick();
@@ -156,6 +228,24 @@ export function Metronome({ onClose }: MetronomeProps) {
   };
   
   const togglePlayback = () => {
+    // Check audio context and try to initialize if needed
+    if (!audioContextRef.current) {
+      try {
+        audioContextRef.current = createAudioContext();
+      } catch (error) {
+        console.error("Failed to create audio context:", error);
+        toast.error("Audio system not available");
+        return;
+      }
+    }
+    
+    // Unlock audio on iOS/Safari with user gesture
+    if (audioContextRef.current && audioContextRef.current.state === 'suspended') {
+      audioContextRef.current.resume().catch(err => {
+        console.error("Failed to resume audio context:", err);
+      });
+    }
+    
     if (isPlaying) {
       stopMetronome();
     } else {
@@ -224,7 +314,7 @@ export function Metronome({ onClose }: MetronomeProps) {
       setTimeout(() => startMetronome(), 10);
     }
   };
-  
+
   return (
     <div className="w-full p-2 space-y-4">
       {/* BPM control */}
