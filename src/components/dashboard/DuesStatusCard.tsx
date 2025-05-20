@@ -1,45 +1,59 @@
 
 import React from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { useNavigate } from "react-router-dom";
-import { DollarSign } from "lucide-react";
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { useAuth } from '@/contexts/AuthContext';
+import { CreditCard, Calendar } from 'lucide-react';
 
-export const DuesStatusCard: React.FC = () => {
-  const navigate = useNavigate();
+export function DuesStatusCard() {
+  const { profile } = useAuth();
+  const duesPaid = profile?.dues_paid || false;
   
   return (
-    <Card className="shadow-md">
+    <Card>
       <CardHeader className="pb-2">
-        <CardTitle className="flex items-center gap-2">
-          <DollarSign className="h-5 w-5 text-glee-columbia" />
-          <span>Dues Status</span>
-        </CardTitle>
+        <div className="flex justify-between items-center">
+          <CardTitle className="flex items-center">
+            <CreditCard className="mr-2 h-5 w-5 text-glee-spelman" />
+            Dues Status
+          </CardTitle>
+          <Badge variant={duesPaid ? "success" : "destructive"}>
+            {duesPaid ? "Paid" : "Unpaid"}
+          </Badge>
+        </div>
       </CardHeader>
       <CardContent>
-        <div className="flex flex-col gap-3">
-          <div className="flex justify-between items-center">
-            <span className="text-sm font-medium">Academic Year 2025</span>
-            <div className="bg-green-100 text-green-700 px-2 py-0.5 rounded-full text-xs font-medium">
-              Paid
+        <div className="space-y-4">
+          <div className="flex justify-between text-sm">
+            <span>Semester:</span>
+            <span className="font-medium">Spring 2025</span>
+          </div>
+          <div className="flex justify-between text-sm">
+            <span>Amount:</span>
+            <span className="font-medium">$50.00</span>
+          </div>
+          <div className="flex justify-between text-sm">
+            <span>Due Date:</span>
+            <div className="flex items-center">
+              <Calendar className="mr-1 h-3 w-3" />
+              <span className="font-medium">January 15, 2025</span>
             </div>
           </div>
-          <div className="h-2 w-full bg-gray-100 rounded-full overflow-hidden">
-            <div className="h-full bg-green-500 rounded-full" style={{ width: "100%" }}></div>
-          </div>
-          <div className="flex justify-between text-xs text-muted-foreground">
-            <span>Amount: $100.00</span>
-            <span>Paid on: April 15, 2025</span>
-          </div>
-          <Button 
-            onClick={() => navigate("/dashboard/dues")}
-            variant="outline" 
-            className="w-full mt-2 text-glee-columbia border-glee-columbia/20 hover:bg-glee-columbia/5"
-          >
-            View Payment History
-          </Button>
+          
+          {!duesPaid && (
+            <div className="pt-2">
+              <Button variant="secondary" className="w-full">
+                <CreditCard className="mr-2 h-4 w-4" />
+                Pay Dues Now
+              </Button>
+              <p className="text-xs text-muted-foreground mt-2 text-center">
+                Pay online or see the Treasurer for cash or check payments.
+              </p>
+            </div>
+          )}
         </div>
       </CardContent>
     </Card>
   );
-};
+}

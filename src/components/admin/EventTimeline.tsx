@@ -1,7 +1,7 @@
 
-import React from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Calendar, Music, Users } from "lucide-react";
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Calendar, Music, Users } from 'lucide-react';
 
 interface Event {
   id: string;
@@ -11,44 +11,50 @@ interface Event {
   description?: string;
 }
 
-export interface EventTimelineProps {
+interface EventTimelineProps {
   events: Event[];
 }
 
-export function EventTimeline({ events = [] }: EventTimelineProps) {
+export function EventTimeline({ events }: EventTimelineProps) {
   const getEventIcon = (type: string) => {
-    switch (type) {
+    switch(type) {
       case 'performance':
-        return <Music className="h-4 w-4 text-primary" />;
+        return <Music className="h-5 w-5 text-purple-500" />;
       case 'rehearsal':
-        return <Users className="h-4 w-4 text-amber-500" />;
+        return <Calendar className="h-5 w-5 text-blue-500" />;
       default:
-        return <Calendar className="h-4 w-4 text-sky-500" />;
+        return <Users className="h-5 w-5 text-amber-500" />;
     }
   };
-  
+
   return (
     <Card>
-      <CardHeader>
+      <CardHeader className="pb-2">
         <CardTitle>Upcoming Events</CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="space-y-4">
-          {events.length > 0 ? (
-            events.map((event) => (
-              <div key={event.id} className="flex gap-3">
-                <div className="mt-0.5 bg-muted/50 p-1.5 rounded-md">
+        <div className="relative ml-3 space-y-4">
+          {/* Timeline line */}
+          <div className="absolute inset-y-0 left-0 ml-[7px] w-[1px] bg-border" />
+          
+          {events.map((event, i) => (
+            <div key={event.id} className="relative pl-8">
+              {/* Timeline dot */}
+              <span className="absolute left-0 flex h-4 w-4 items-center justify-center rounded-full border bg-background">
+                <span className="h-2 w-2 rounded-full bg-primary" />
+              </span>
+              <div className="space-y-1">
+                <div className="flex items-center gap-2">
                   {getEventIcon(event.type)}
+                  <h4 className="font-medium">{event.title}</h4>
                 </div>
-                <div>
-                  <p className="font-medium text-sm">{event.title}</p>
-                  <p className="text-xs text-muted-foreground">{event.date}</p>
-                </div>
+                <p className="text-sm text-muted-foreground">{event.date}</p>
+                {event.description && (
+                  <p className="text-sm">{event.description}</p>
+                )}
               </div>
-            ))
-          ) : (
-            <p className="text-muted-foreground">No upcoming events</p>
-          )}
+            </div>
+          ))}
         </div>
       </CardContent>
     </Card>

@@ -1,75 +1,50 @@
 
-import React from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Bar, BarChart, ResponsiveContainer } from "recharts";
-import { LucideIcon } from "lucide-react";
-import { Spinner } from "@/components/ui/spinner";
+import { LucideIcon } from 'lucide-react';
+import { Card, CardContent } from '@/components/ui/card';
+import { cn } from '@/lib/utils';
 
 interface AnalyticsCardProps {
   title: string;
   value: number | string;
   description?: string;
-  icon?: React.ReactNode;
-  chart?: boolean;
   change?: number;
-  isLoading?: boolean;
+  icon?: React.ReactNode;
+  className?: string;
 }
 
-export function AnalyticsCard({ 
-  title, 
-  value, 
-  description, 
-  icon, 
-  chart, 
+export function AnalyticsCard({
+  title,
+  value,
+  description,
   change,
-  isLoading = false
+  icon,
+  className,
 }: AnalyticsCardProps) {
-  const chartData = [
-    { name: "Jan", total: Math.floor(Math.random() * 5000) },
-    { name: "Feb", total: Math.floor(Math.random() * 5000) },
-    { name: "Mar", total: Math.floor(Math.random() * 5000) },
-    { name: "Apr", total: Math.floor(Math.random() * 5000) },
-    { name: "May", total: Math.floor(Math.random() * 5000) },
-    { name: "Jun", total: Math.floor(Math.random() * 5000) },
-  ];
-  
   return (
-    <Card>
-      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-        <CardTitle className="text-sm font-medium">
-          {title}
-        </CardTitle>
-        {icon && <div>{icon}</div>}
-      </CardHeader>
-      <CardContent>
-        {isLoading ? (
-          <div className="flex items-center justify-center h-10">
-            <Spinner size="sm" />
+    <Card className={cn('overflow-hidden', className)}>
+      <CardContent className="p-6">
+        <div className="flex items-center justify-between">
+          <div>
+            <p className="text-sm font-medium text-muted-foreground">{title}</p>
+            <div className="flex items-baseline gap-2">
+              <h3 className="text-2xl font-bold">{value}</h3>
+              {change !== undefined && (
+                <div className={cn(
+                  "text-xs font-medium",
+                  change > 0 ? "text-green-500" : "text-red-500"
+                )}>
+                  {change > 0 ? "+" : ""}{change}%
+                </div>
+              )}
+            </div>
+            {description && <p className="text-xs text-muted-foreground mt-1">{description}</p>}
           </div>
-        ) : (
-          <div className="space-y-1">
-            <div className="text-2xl font-bold">{value}</div>
-            {description && (
-              <p className="text-xs text-muted-foreground">
-                {description}
-                {change !== undefined && (
-                  <span className={`ml-1 ${change >= 0 ? 'text-emerald-500' : 'text-rose-500'}`}>
-                    {change >= 0 ? '+' : ''}{change}%
-                  </span>
-                )}
-              </p>
-            )}
-            {chart && (
-              <div className="h-[80px] mt-4">
-                <ResponsiveContainer width="100%" height="100%">
-                  <BarChart data={chartData}>
-                    <Bar dataKey="total" className="fill-primary" radius={[4, 4, 0, 0]} />
-                  </BarChart>
-                </ResponsiveContainer>
-              </div>
-            )}
-          </div>
-        )}
+          {icon && (
+            <div className="rounded-full bg-primary/10 p-2.5">
+              {icon}
+            </div>
+          )}
+        </div>
       </CardContent>
     </Card>
   );

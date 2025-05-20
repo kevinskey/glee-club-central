@@ -1,73 +1,102 @@
 
-import React from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Clock, Calendar as CalendarIcon } from "lucide-react";
-import { useNavigate } from "react-router-dom";
-import { Event } from "@/pages/dashboard/DashboardPage";
+import React, { useState, useEffect } from 'react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Calendar, Clock } from 'lucide-react';
+
+interface Event {
+  id: string;
+  title: string;
+  date: Date;
+  time: string;
+  location: string;
+}
 
 interface NextEventCountdownProps {
   event: Event;
 }
 
-export const NextEventCountdown: React.FC<NextEventCountdownProps> = ({ event }) => {
-  const navigate = useNavigate();
+export function NextEventCountdown({ event }: NextEventCountdownProps) {
+  const [countdown, setCountdown] = useState({
+    days: 0,
+    hours: 0,
+    minutes: 0,
+    seconds: 0
+  });
   
-  // Calculate days until next event
-  const getDaysUntilNextEvent = () => {
-    const today = new Date();
-    const eventDate = new Date(event.date);
-    const diffTime = Math.abs(eventDate.getTime() - today.getTime());
-    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+  useEffect(() => {
+    const calculateTimeLeft = () => {
+      const difference = event.date.getTime() - new Date().getTime();
+      
+      if (difference > 0) {
+        setCountdown({
+          days: Math.floor(difference / (1000 * 60 * 60 * 24)),
+          hours: Math.floor((difference / (1000 * 60 * 60)) % 24),
+          minutes: Math.floor((difference / 1000 / 60) % 60),
+          seconds: Math.floor((difference / 1000) % 60)
+        });
+      }
+    };
     
-    return diffDays;
-  };
-  
-  const daysUntilNextEvent = getDaysUntilNextEvent();
+    const timer = setInterval(calculateTimeLeft, 1000);
+    calculateTimeLeft();
+    
+    return () => clearInterval(timer);
+  }, [event.date]);
   
   return (
-    <Card className="overflow-hidden border-none shadow-md bg-gradient-to-br from-glee-spelman to-glee-spelman/90 text-white">
-      <CardHeader className="pb-2">
-        <CardTitle className="flex justify-between items-center">
-          <div className="flex items-center gap-2">
-            <Clock className="h-5 w-5" />
-            <span>Next Performance Countdown</span>
-          </div>
-          <span className="text-2xl font-bold">
-            {daysUntilNextEvent} {daysUntilNextEvent === 1 ? 'day' : 'days'}
-          </span>
+    <Card className="overflow-hidden">
+      <CardHeader className="bg-primary text-primary-foreground">
+        <CardTitle className="flex items-center gap-2">
+          <Calendar className="h-5 w-5" />
+          <span>Next Event: {event.title}</span>
         </CardTitle>
       </CardHeader>
-      <CardContent>
-        <div className="space-y-3">
-          <h3 className="text-xl font-semibold">{event.title}</h3>
-          <div className="flex justify-between text-sm text-white/90">
-            <div className="flex items-center gap-2">
-              <CalendarIcon className="h-4 w-4" />
-              <span>{event.date.toLocaleDateString()}</span>
+      <CardContent className="p-6">
+        <div className="flex flex-col md:flex-row justify-between items-center gap-4">
+          <div>
+            <p className="font-semibold text-lg">{event.title}</p>
+            <div className="flex items-center text-muted-foreground text-sm mt-1">
+              <Calendar className="mr-1 h-4 w-4" />
+              <span>
+                {event.date.toLocaleDateString(undefined, { 
+                  weekday: 'long', 
+                  year: 'numeric', 
+                  month: 'long', 
+                  day: 'numeric' 
+                })}
+              </span>
             </div>
-            <div className="flex items-center gap-2">
-              <Clock className="h-4 w-4" />
-              <span>{event.time}</span>
+            <div className="flex items-center text-muted-foreground text-sm mt-1">
+              <Clock className="mr-1 h-4 w-4" />
+              <span>{event.time} • {event.location}</span>
             </div>
           </div>
-          {event.location && (
-            <div className="text-sm flex items-center gap-2 mt-2">
-              <span className="font-medium">Location:</span> 
-              <span>{event.location}</span>
+          
+          <div className="grid grid-cols-4 gap-2 text-center">
+            <div className="bg-muted p-2 rounded-md">
+              <div className="text-2xl font-bold">{countdown.days}</div>
+              <div className="text-xs uppercase text-muted-foreground">Days</div>
             </div>
-          )}
-          <div className="mt-4">
-            <Button 
-              variant="secondary" 
-              onClick={() => navigate("/dashboard/calendar")} 
-              className="bg-white text-glee-spelman hover:bg-white/90"
-            >
-              View Details
-            </Button>
+            <div className="bg-muted p-2 rounded-md">
+              <div className="text-2xl font-bold">{countdown.hours}</div>
+              <div className="text-xs uppercase text-muted-foreground">Hours</div>
+            </div>
+            <div className="bg-muted p-2 rounded-md">
+              <div className="text-2xl font-bold">{countdown.minutes}</div>
+              <div className="text-xs uppercase text-muted-foreground">Mins</div>
+            </div>
+            <div className="bg-muted p-2 rounded-md">
+              <div className="text-2xl font-bold">{countdown.seconds}</div>
+              <div className="text-xs uppercase text-muted-foreground">Secs</div>
+            </div>
           </div>
+          
+          <Button variant="outline" className="flex-shrink-0">
+            Add to Calendar
+          </Button>
         </div>
       </CardContent>
     </Card>
   );
-};
+}
