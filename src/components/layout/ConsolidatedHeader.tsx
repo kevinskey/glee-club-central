@@ -1,4 +1,5 @@
-import React, { useState, useRef } from "react";
+
+import React from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import {
@@ -16,24 +17,18 @@ import {
   User,
   Settings,
   LogOut,
-  Clock,
   LogIn
 } from "lucide-react";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { Icons } from "@/components/Icons";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { EnhancedMetronome } from "@/components/ui/enhanced-metronome";
-import { PitchPipeDialog } from "@/components/ui/pitch-pipe-dialog";
 import { GleeTools } from "@/components/glee-tools/GleeTools";
 
 export function ConsolidatedHeader() {
   const { profile, signOut, isAuthenticated } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
-  const [metronomeOpen, setMetronomeOpen] = useState(false);
   const isMobile = useIsMobile();
-  const audioContextRef = useRef<AudioContext | null>(null);
   
   const isDashboardPath = location.pathname.startsWith("/dashboard") || location.pathname.startsWith("/admin");
   

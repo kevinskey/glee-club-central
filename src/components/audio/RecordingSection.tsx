@@ -1,300 +1,420 @@
-import React, { useState, useEffect } from 'react';
-import { Mic, MicOff, Download, Share2, Play, Pause, VolumeX, Volume2 } from 'lucide-react';
-import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
-import { Separator } from '@/components/ui/separator';
-import { Button } from '@/components/ui/button';
-import { AudioPageCategory } from '@/types/audio';
-import { useAudioRecorder } from '@/hooks/useAudioRecorder';
-import { useRecordingSave } from '@/hooks/useRecordingSave';
-import { RecordingControls } from './RecordingControls';
-import { AudioSaveControls } from './AudioSaveControls';
-import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/popover';
-import { SocialShareButtons } from '../recordings/SocialShareButtons';
-import { toast } from 'sonner';
-import { audioLogger } from '@/utils/audioUtils';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
+import { Card, CardHeader, CardContent, CardFooter } from "@/components/ui/card";
+import { toast } from "sonner";
+import { useUser } from "@/hooks/use-user";
+import { useToast } from "@/hooks/use-toast";
+import { useRecordingContext } from "@/contexts/RecordingContext";
+import { Music2, Mic, Stop, Upload, Loader2, CheckCircle2, AlertTriangle } from "lucide-react";
+import { format } from 'date-fns';
+import { Slider } from "@/components/ui/slider";
+import { useIsMobile } from "@/hooks/use-mobile";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog"
 
 interface RecordingSectionProps {
-  onRecordingSaved: (category?: Exclude<AudioPageCategory, "all">) => void;
+  initialRecordingName?: string;
+  initialDescription?: string;
+  initialPrivacySetting?: 'public' | 'private';
 }
 
-export function RecordingSection({ onRecordingSaved }: RecordingSectionProps) {
-  const [audioSystemReady, setAudioSystemReady] = useState(false);
-  const [showTestControls, setShowTestControls] = useState(false);
+export function RecordingSection({
+  initialRecordingName = '',
+  initialDescription = '',
+  initialPrivacySetting = 'private',
+}: RecordingSectionProps) {
+  const [recordingName, setRecordingName] = useState(initialRecordingName);
+  const [description, setDescription] = useState(initialDescription);
+  const [isRecording, setIsRecording] = useState(false);
+  const [audioChunks, setAudioChunks] = useState<Blob[]>([]);
+  const [audioUrl, setAudioUrl] = useState<string | null>(null);
+  const [uploadProgress, setUploadProgress] = useState<number | null>(null);
+  const [uploadSuccess, setUploadSuccess] = useState<boolean>(false);
+  const [uploadError, setUploadError] = useState<string | null>(null);
+  const [isUploading, setIsUploading] = useState(false);
+  const [volume, setVolume] = useState(0.5);
+  const [privacySetting, setPrivacySetting] = useState<"public" | "private">(initialPrivacySetting);
+  const [recordingDate, setRecordingDate] = useState<Date>(new Date());
+  const [mediaRecorder, setMediaRecorder] = useState<MediaRecorder | null>(null);
+  const audioContextRef = useRef<AudioContext | null>(null);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+  const { user } = useUser();
+  const { toast } = useToast();
+  const { recordings, setRecordings } = useRecordingContext();
+  const isMobile = useIsMobile();
   
-  const {
-    isRecording,
-    microphoneActive,
-    recordingTime,
-    audioURL,
-    isPlaying,
-    permissionState,
-    isInitialized,
-    setIsPlaying,
-    audioRef,
-    initializeMicrophone,
-    startRecording,
-    stopRecording,
-    releaseMicrophone,
-    togglePlayback,
-    formatTime,
-    testAudioOutput
-  } = useAudioRecorder();
+  // Options for formatting the date
+  const dateFormatOptions: Intl.DateTimeFormatOptions = {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit',
+    timeZoneName: 'short',
+  };
+  
+  // Formatted recording date string
+  const formattedRecordingDate = format(recordingDate, 'PPPppp');
+  
+  // Function to update the recording date
+  const updateRecordingDate = () => {
+    setRecordingDate(new Date());
+  };
 
-  const {
-    recordingName,
-    setRecordingName,
-    recordingCategory,
-    setRecordingCategory,
-    isSaving,
-    saveRecording
-  } = useRecordingSave({
-    onSaveComplete: () => {
-      if (audioURL) {
-        URL.revokeObjectURL(audioURL);
-      }
-      const savedCategory = recordingCategory;
-      onRecordingSaved(savedCategory);
-    }
-  });
-
-  // Check audio system status on load
+  // Initialize audio context
   useEffect(() => {
-    setAudioSystemReady(isInitialized);
-    audioLogger.log('Recording section - Audio system initialized:', isInitialized);
-    audioLogger.log('Recording section - Permission state:', permissionState);
-  }, [isInitialized, permissionState]);
-
-  // Download recording
-  const handleDownloadRecording = () => {
-    if (audioURL) {
-      const downloadLink = document.createElement('a');
-      downloadLink.href = audioURL;
-      downloadLink.download = `${recordingName || 'recording'}.wav`;
-      document.body.appendChild(downloadLink);
-      downloadLink.click();
-      document.body.removeChild(downloadLink);
+    if (!audioContextRef.current) {
+      try {
+        audioContextRef.current = new window.AudioContext();
+      } catch (error) {
+        console.error("Failed to initialize audio context:", error);
+      }
+    }
+    let stream: MediaStream;
+    
+    const getMicrophone = async () => {
+      try {
+        stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        const recorder = new MediaRecorder(stream);
+        setMediaRecorder(recorder);
+        
+        recorder.ondataavailable = (event) => {
+          if (event.data.size > 0) {
+            setAudioChunks((prev) => [...prev, event.data]);
+          }
+        };
+        
+        recorder.onstop = () => {
+          stream.getTracks().forEach(track => track.stop());
+        };
+      } catch (error) {
+        console.error("Error accessing microphone:", error);
+        toast({
+          title: "Microphone Access Denied",
+          description: "Please allow microphone access to record audio.",
+          variant: "destructive",
+        });
+      }
+    };
+    
+    getMicrophone();
+    
+    return () => {
+      if (stream) {
+        stream.getTracks().forEach(track => track.stop());
+      }
       
-      toast.success("Recording downloaded");
-    }
-  };
+      if (mediaRecorder && mediaRecorder.state === 'recording') {
+        mediaRecorder.stop();
+      }
+    };
+  }, []);
 
-  // Handle save recording
-  const handleSaveRecording = async () => {
-    if (!audioURL) return;
-    const savedCategory = await saveRecording(audioURL);
-    if (savedCategory) {
-      onRecordingSaved(savedCategory);
-    }
-  };
-
-  // Discard recording
-  const discardRecording = () => {
-    if (audioURL) {
-      URL.revokeObjectURL(audioURL);
-      toast.success("Recording discarded");
-      // Pass undefined to reset the view
-      onRecordingSaved(undefined);
+  // Start recording
+  const startRecording = async () => {
+    if (!mediaRecorder) {
+      toast({
+        title: "Media Recorder Not Initialized",
+        description: "Please wait for the media recorder to initialize before starting.",
+        variant: "destructive",
+      });
+      return;
     }
     
-    // Release microphone if needed
-    if (microphoneActive) {
-      releaseMicrophone();
+    try {
+      // Initialize audioContext if needed
+      if (!audioContextRef.current) {
+        audioContextRef.current = new window.AudioContext();
+      }
+      
+      setAudioChunks([]);
+      setIsRecording(true);
+      setUploadSuccess(false);
+      setUploadError(null);
+      setUploadProgress(null);
+      updateRecordingDate();
+      
+      mediaRecorder.start();
+      
+      toast({
+        title: "Recording Started",
+        description: "Your recording has started.",
+      });
+    } catch (error) {
+      console.error("Error starting recording:", error);
+      toast({
+        title: "Recording Error",
+        description: "Failed to start recording. Please check your microphone and try again.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  // Stop recording
+  const stopRecording = () => {
+    if (mediaRecorder && mediaRecorder.state === 'recording') {
+      mediaRecorder.stop();
+      setIsRecording(false);
+      
+      toast({
+        title: "Recording Stopped",
+        description: "Your recording has stopped.",
+      });
+    }
+  };
+
+  // Play the recording
+  const playRecording = () => {
+    if (audioUrl && audioRef.current) {
+      audioRef.current.play();
+    }
+  };
+
+  // Pause the recording
+  const pauseRecording = () => {
+    if (audioUrl && audioRef.current) {
+      audioRef.current.pause();
+    }
+  };
+
+  // Handle volume change
+  const handleVolumeChange = (value: number[]) => {
+    setVolume(value[0] / 100);
+    if (audioRef.current) {
+      audioRef.current.volume = value[0] / 100;
+    }
+  };
+
+  // Handle audio chunks and create audio URL
+  useEffect(() => {
+    if (audioChunks.length > 0) {
+      const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
+      const url = URL.createObjectURL(audioBlob);
+      setAudioUrl(url);
+    }
+  }, [audioChunks]);
+
+  // Upload the recording
+  const uploadRecording = async () => {
+    if (!audioUrl) {
+      toast({
+        title: "No Recording Available",
+        description: "Please make a recording before uploading.",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    if (!user) {
+      toast({
+        title: "Not Authenticated",
+        description: "You must be logged in to upload a recording.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsUploading(true);
+    setUploadProgress(0);
+    setUploadSuccess(false);
+    setUploadError(null);
+    
+    try {
+      const response = await fetch(audioUrl);
+      const blob = await response.blob();
+      const file = new File([blob], `${recordingName || 'recording'}.webm`, { type: 'audio/webm' });
+      
+      const formData = new FormData();
+      formData.append('audio', file);
+      formData.append('name', recordingName);
+      formData.append('description', description);
+      formData.append('privacy', privacySetting);
+      
+      const uploadResponse = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/recordings`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${user.token}`,
+        },
+        body: formData,
+      });
+      
+      if (!uploadResponse.ok) {
+        const errorData = await uploadResponse.json();
+        throw new Error(errorData.message || 'Failed to upload recording');
+      }
+      
+      const newRecording = await uploadResponse.json();
+      setRecordings([...recordings, newRecording]);
+      
+      setUploadProgress(100);
+      setUploadSuccess(true);
+      toast({
+        title: "Upload Successful",
+        description: "Your recording has been uploaded successfully.",
+      });
+    } catch (error: any) {
+      console.error("Upload error:", error);
+      setUploadError(error.message || 'Failed to upload recording');
+      toast({
+        title: "Upload Failed",
+        description: error.message || "There was an error uploading your recording.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsUploading(false);
     }
   };
 
   return (
-    <Card className="border-2 border-primary/20">
-      <CardHeader className="bg-primary/5">
-        <CardTitle className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            {microphoneActive ? (
-              <Mic className="h-5 w-5 text-green-500" />
-            ) : (
-              <MicOff className="h-5 w-5 text-gray-500" />
-            )} 
-            Record New Audio
-          </div>
-          
-          <Button 
-            variant="ghost" 
-            size="sm" 
-            onClick={() => setShowTestControls(!showTestControls)}
-          >
-            {showTestControls ? "Hide Test Controls" : "Show Test Controls"}
-          </Button>
-        </CardTitle>
+    <Card className="w-full">
+      <CardHeader>
+        <div className="flex items-center space-x-4">
+          <Music2 className="h-5 w-5" />
+          <h2 className="text-lg font-semibold">Recording</h2>
+        </div>
       </CardHeader>
-      <CardContent className="p-6">
-        <div className="space-y-6">
-          {/* System status indicator */}
-          {showTestControls && (
-            <div className="bg-secondary/20 p-3 rounded-md mb-4 space-y-2">
-              <h4 className="text-sm font-medium">Audio System Status</h4>
-              <div className="grid grid-cols-2 gap-2 text-xs">
-                <div>
-                  <span className="font-medium">System Initialized:</span>{" "}
-                  <span className={isInitialized ? "text-green-500" : "text-red-500"}>
-                    {isInitialized ? "Yes" : "No"}
-                  </span>
-                </div>
-                <div>
-                  <span className="font-medium">Mic Permission:</span>{" "}
-                  <span className={permissionState === "granted" ? "text-green-500" : 
-                                  permissionState === "denied" ? "text-red-500" : "text-yellow-500"}>
-                    {permissionState}
-                  </span>
-                </div>
-              </div>
-              
-              <div className="flex gap-2 mt-2">
-                <Button 
-                  variant="outline" 
-                  size="sm"
-                  onClick={() => testAudioOutput()}
-                >
-                  <Volume2 className="h-3 w-3 mr-1" /> Test Audio Output
-                </Button>
-                <Button 
-                  variant="outline" 
-                  size="sm"
-                  onClick={() => {
-                    if (microphoneActive) {
-                      releaseMicrophone();
-                      toast.success("Microphone released");
-                    } else {
-                      initializeMicrophone();
-                    }
-                  }}
-                >
-                  {microphoneActive ? (
-                    <>
-                      <VolumeX className="h-3 w-3 mr-1" /> Release Microphone
-                    </>
-                  ) : (
-                    <>
-                      <Mic className="h-3 w-3 mr-1" /> Initialize Microphone
-                    </>
-                  )}
-                </Button>
-              </div>
-            </div>
-          )}
-          
-          {/* Recording controls */}
-          <RecordingControls 
-            microphoneActive={microphoneActive}
-            isRecording={isRecording}
-            recordingTime={recordingTime}
-            initializeMicrophone={initializeMicrophone}
-            startRecording={startRecording}
-            stopRecording={stopRecording}
-            formatTime={formatTime}
+      
+      <CardContent className="grid gap-4">
+        <div className="grid gap-2">
+          <Label htmlFor="recordingName">Recording Name</Label>
+          <Input
+            id="recordingName"
+            placeholder="My Awesome Recording"
+            value={recordingName}
+            onChange={(e) => setRecordingName(e.target.value)}
           />
-          
-          {audioURL && (
-            <div className="space-y-4">
-              <Separator />
-              <div className="flex flex-col space-y-4">
-                {/* Audio player */}
-                <div className="flex flex-col space-y-2">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <Button 
-                        variant="outline" 
-                        size="icon" 
-                        onClick={() => togglePlayback()}
-                        className="h-8 w-8"
-                      >
-                        {isPlaying ? (
-                          <Pause className="h-4 w-4" />
-                        ) : (
-                          <Play className="h-4 w-4" />
-                        )}
-                      </Button>
-                      <span className="text-sm font-medium">
-                        {recordingName || "New Recording"}
-                      </span>
-                    </div>
-                    <audio 
-                      ref={audioRef} 
-                      className="hidden" 
-                      onEnded={() => setIsPlaying(false)}
-                      onError={(e) => {
-                        audioLogger.error('Audio player error:', e);
-                        toast.error("Error playing the audio");
-                      }}
-                    />
-                  </div>
-                </div>
-
-                {/* Audio save controls */}
-                <AudioSaveControls 
-                  audioRef={audioRef}
-                  isPlaying={isPlaying}
-                  setIsPlaying={setIsPlaying}
-                  togglePlayback={togglePlayback}
-                  recordingName={recordingName}
-                  setRecordingName={setRecordingName}
-                  recordingCategory={recordingCategory}
-                  setRecordingCategory={setRecordingCategory}
-                  isSaving={isSaving}
-                  handleSaveRecording={handleSaveRecording}
-                  discardRecording={discardRecording}
-                />
-                
-                {/* Action buttons */}
-                <div className="flex justify-end gap-2 mt-4">
-                  {/* Download button */}
-                  <Popover>
-                    <PopoverTrigger asChild>
-                      <Button variant="outline" className="gap-2">
-                        <Download className="h-4 w-4" /> Download
-                      </Button>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-80 p-4">
-                      <div className="space-y-2">
-                        <h4 className="font-medium">Download Recording</h4>
-                        <p className="text-sm text-muted-foreground">
-                          This will download the recording to your device as a WAV file.
-                        </p>
-                        <Button 
-                          onClick={handleDownloadRecording}
-                          className="w-full gap-2 mt-2"
-                        >
-                          <Download className="h-4 w-4" /> Download
-                        </Button>
-                      </div>
-                    </PopoverContent>
-                  </Popover>
-
-                  {/* Share button */}
-                  <Popover>
-                    <PopoverTrigger asChild>
-                      <Button variant="outline" className="gap-2">
-                        <Share2 className="h-4 w-4" /> Share
-                      </Button>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-80 p-4">
-                      <div className="space-y-2">
-                        <h4 className="font-medium">Share Recording</h4>
-                        <p className="text-sm text-muted-foreground">
-                          Share this recording with others or on social media.
-                        </p>
-                        {audioURL && (
-                          <SocialShareButtons 
-                            url={audioURL} 
-                            title={recordingName || "My Recording"}
-                          />
-                        )}
-                      </div>
-                    </PopoverContent>
-                  </Popover>
-                </div>
-              </div>
-            </div>
+        </div>
+        
+        <div className="grid gap-2">
+          <Label htmlFor="description">Description</Label>
+          <Textarea
+            id="description"
+            placeholder="Tell us about your recording"
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
+          />
+        </div>
+        
+        <div className="grid gap-2">
+          <Label htmlFor="privacy">Privacy</Label>
+          <select
+            id="privacy"
+            className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+            value={privacySetting}
+            onChange={(e) => setPrivacySetting(e.target.value as "public" | "private")}
+          >
+            <option value="public">Public</option>
+            <option value="private">Private</option>
+          </select>
+        </div>
+        
+        <div className="grid gap-2">
+          <Label>Recording Date</Label>
+          <p className="text-sm text-muted-foreground">{formattedRecordingDate}</p>
+        </div>
+        
+        <div className="grid gap-2">
+          <Label>Volume</Label>
+          <Slider
+            value={[volume * 100]}
+            min={0}
+            max={100}
+            step={1}
+            onValueChange={(value) => handleVolumeChange(value)}
+          />
+        </div>
+        
+        {audioUrl && (
+          <div className="grid gap-2">
+            <Label>Playback</Label>
+            <audio ref={audioRef} src={audioUrl} controls volume={volume} />
+          </div>
+        )}
+        
+        {uploadError && (
+          <div className="rounded-md border border-destructive/50 bg-destructive/10 p-4 text-sm text-destructive">
+            <AlertTriangle className="h-4 w-4 mr-2 inline-block align-middle" />
+            {uploadError}
+          </div>
+        )}
+      </CardContent>
+      
+      <CardFooter className="flex justify-between">
+        <div className="flex space-x-2">
+          {!isRecording ? (
+            <Button
+              variant="outline"
+              onClick={startRecording}
+              disabled={isUploading}
+            >
+              <Mic className="h-4 w-4 mr-2" />
+              Start Recording
+            </Button>
+          ) : (
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <Button
+                  variant="destructive"
+                  disabled={isUploading}
+                >
+                  <Stop className="h-4 w-4 mr-2" />
+                  Stop Recording
+                </Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    Are you sure you want to stop recording?
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>Cancel</AlertDialogCancel>
+                  <AlertDialogAction onClick={stopRecording}>Stop</AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
           )}
         </div>
-      </CardContent>
+        
+        <div className="flex space-x-2">
+          <Button
+            variant="secondary"
+            onClick={uploadRecording}
+            disabled={isUploading || !audioUrl}
+          >
+            {isUploading ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                Uploading... ({uploadProgress}%)
+              </>
+            ) : uploadSuccess ? (
+              <>
+                <CheckCircle2 className="mr-2 h-4 w-4 text-green-500" />
+                Uploaded
+              </>
+            ) : (
+              <>
+                <Upload className="h-4 w-4 mr-2" />
+                Upload
+              </>
+            )}
+          </Button>
+        </div>
+      </CardFooter>
     </Card>
   );
 }

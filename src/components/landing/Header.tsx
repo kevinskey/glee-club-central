@@ -5,7 +5,6 @@ import { Logo } from "@/components/landing/header/Logo";
 import { Menu } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Dialog } from "@/components/ui/dialog";
-import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { NavigationLinks } from "@/components/landing/header/NavigationLinks";
 import { HeaderUtils } from "@/components/landing/header/HeaderUtils";
 import {
