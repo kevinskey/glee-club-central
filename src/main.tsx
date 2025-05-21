@@ -25,6 +25,7 @@ const root = ReactDOM.createRoot(rootElement);
 
 // Wrap the entire app with necessary providers
 // The order matters: QueryClient -> SessionContext -> ThemeProvider -> Router
+// AuthProvider is already integrated in the router.tsx
 root.render(
   <React.StrictMode>
     <QueryClientProvider client={queryClient}>

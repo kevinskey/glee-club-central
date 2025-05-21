@@ -75,7 +75,7 @@ export default function LoginPage() {
     }
 
     try {
-      // Clean up any existing auth state first
+      // Clean up existing auth state first
       cleanupAuthState();
       
       const { error } = await signUp(email, password, firstName, lastName);
