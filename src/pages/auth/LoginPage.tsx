@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { useNavigate, Link, useLocation } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
@@ -6,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { useToast } from "@/components/ui/use-toast";
+import { toast } from "sonner";
 import { UserIcon, LockIcon, LogIn, UserPlus } from "lucide-react";
 import { cleanupAuthState } from "@/integrations/supabase/client";
 
@@ -18,7 +19,6 @@ export default function LoginPage() {
   const [lastName, setLastName] = useState("");
   const navigate = useNavigate();
   const location = useLocation();
-  const { toast } = useToast();
 
   // Extract return URL and intent from query params if available
   const searchParams = new URLSearchParams(location.search);
@@ -31,24 +31,17 @@ export default function LoginPage() {
       // If the intent is recording, redirect to recording studio
       if (intent === "recording") {
         navigate("/dashboard/recording-studio");
-        toast({
-          title: "Success",
-          description: "You're now signed in. Welcome to the Recording Studio!",
-        });
+        toast("Success! You're now signed in. Welcome to the Recording Studio!");
       } else {
         navigate(returnTo);
       }
     }
-  }, [isAuthenticated, navigate, returnTo, intent, toast]);
+  }, [isAuthenticated, navigate, returnTo, intent]);
 
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!email || !password) {
-      toast({
-        title: "Error",
-        description: "Please enter both email and password.",
-        variant: "destructive",
-      });
+      toast("Please enter both email and password.");
       return;
     }
 
@@ -58,35 +51,20 @@ export default function LoginPage() {
       
       const { error } = await signIn(email, password);
       if (error) {
-        toast({
-          title: "Sign In Failed",
-          description: error.message,
-          variant: "destructive",
-        });
+        toast(error.message);
       } else {
-        toast({
-          title: "Success",
-          description: "Signed in successfully!",
-        });
+        toast("Signed in successfully!");
         // Let the useEffect handle navigation
       }
     } catch (error: any) {
-      toast({
-        title: "Error",
-        description: error.message || "An unexpected error occurred.",
-        variant: "destructive",
-      });
+      toast(error.message || "An unexpected error occurred.");
     }
   };
 
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!firstName || !lastName || !email || !password) {
-      toast({
-        title: "Error",
-        description: "Please fill in all fields.",
-        variant: "destructive",
-      });
+      toast("Please fill in all fields.");
       return;
     }
 
@@ -96,24 +74,13 @@ export default function LoginPage() {
       
       const { error } = await signUp(email, password, firstName, lastName);
       if (error) {
-        toast({
-          title: "Sign Up Failed",
-          description: error.message,
-          variant: "destructive",
-        });
+        toast(error.message);
       } else {
-        toast({
-          title: "Success",
-          description: "Signed up successfully! Please check your email to verify your account.",
-        });
+        toast("Signed up successfully! Please check your email to verify your account.");
         // Let the useEffect handle navigation after successful sign-up
       }
     } catch (error: any) {
-      toast({
-        title: "Error",
-        description: error.message || "An unexpected error occurred.",
-        variant: "destructive",
-      });
+      toast(error.message || "An unexpected error occurred.");
     }
   };
 
