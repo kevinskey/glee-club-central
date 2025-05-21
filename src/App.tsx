@@ -4,8 +4,11 @@ import { Outlet } from "react-router-dom";
 import DashboardLayout from "./layouts/DashboardLayout";
 
 function App() {
-  // For dashboard routes, we'll use DashboardLayout directly
-  return <DashboardLayout />;
+  return (
+    <DashboardLayout>
+      <Outlet />
+    </DashboardLayout>
+  );
 }
 
 export default App;

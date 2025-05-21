@@ -33,9 +33,9 @@ const DashboardPage: React.FC = () => {
                 <Button 
                   variant="link" 
                   className="p-0 h-auto text-primary hover:underline"
-                  asChild
+                  onClick={() => window.location.href = "/dashboard/sheet-music"}
                 >
-                  <Link to="/dashboard/sheet-music">Sheet Music Library</Link>
+                  Sheet Music Library
                 </Button>
               </li>
               <li className="flex items-center">
@@ -43,9 +43,9 @@ const DashboardPage: React.FC = () => {
                 <Button 
                   variant="link" 
                   className="p-0 h-auto text-primary hover:underline"
-                  asChild
+                  onClick={() => window.location.href = "/dashboard/recordings"}
                 >
-                  <Link to="/dashboard/recordings">Recordings</Link>
+                  Recordings
                 </Button>
               </li>
               <li className="flex items-center">
@@ -53,9 +53,9 @@ const DashboardPage: React.FC = () => {
                 <Button 
                   variant="link" 
                   className="p-0 h-auto text-primary hover:underline"
-                  asChild
+                  onClick={() => window.location.href = "/dashboard/calendar"}
                 >
-                  <Link to="/dashboard/calendar">Calendar</Link>
+                  Calendar
                 </Button>
               </li>
               <li className="flex items-center">
@@ -63,9 +63,9 @@ const DashboardPage: React.FC = () => {
                 <Button 
                   variant="link" 
                   className="p-0 h-auto text-primary hover:underline"
-                  asChild
+                  onClick={() => window.location.href = "/dashboard/profile"}
                 >
-                  <Link to="/dashboard/profile">My Profile</Link>
+                  My Profile
                 </Button>
               </li>
             </ul>

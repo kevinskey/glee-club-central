@@ -1,6 +1,6 @@
 
 import React, { useEffect, memo } from "react";
-import { Outlet, Navigate, useLocation } from "react-router-dom";
+import { Outlet, useNavigate, useLocation } from "react-router-dom";
 import { Sidebar } from "@/components/layout/Sidebar";
 import { ConsolidatedHeader } from "@/components/layout/ConsolidatedHeader";
 import { useAuth } from "@/contexts/AuthContext";
@@ -13,9 +13,14 @@ import { toast } from "sonner";
 const MemoizedHeader = memo(ConsolidatedHeader);
 const MemoizedSidebar = memo(Sidebar);
 
-const DashboardLayout: React.FC = () => {
+interface DashboardLayoutProps {
+  children?: React.ReactNode;
+}
+
+const DashboardLayout = ({ children }: DashboardLayoutProps) => {
   const { isAuthenticated, isLoading } = useAuth();
   const location = useLocation();
+  const navigate = useNavigate();
   const isMobile = useMedia("(max-width: 768px)");
   
   useEffect(() => {
@@ -40,7 +45,8 @@ const DashboardLayout: React.FC = () => {
     console.log("DashboardLayout - User not authenticated, redirecting to login");
     toast.error("Please log in to access the dashboard");
     const returnTo = encodeURIComponent(location.pathname + location.search);
-    return <Navigate to={`/login?returnTo=${returnTo}`} />;
+    navigate(`/login?returnTo=${returnTo}`);
+    return null;
   }
 
   return (
@@ -55,7 +61,7 @@ const DashboardLayout: React.FC = () => {
           
           <main className="flex-1 p-3 sm:p-4 md:p-5 lg:p-6 md:ml-64 pb-20 md:pb-6 overflow-x-hidden">
             <div className="mobile-container">
-              <Outlet />
+              {children || <Outlet />}
             </div>
           </main>
         </div>
