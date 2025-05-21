@@ -53,6 +53,11 @@ export const useUserUpdate = (refreshUsers?: () => Promise<any>): UseUserUpdateR
         return false;
       }
 
+      // Refresh users list if provided
+      if (refreshUsers) {
+        await refreshUsers();
+      }
+
       console.log('User updated successfully');
       return true;
     } catch (err) {
@@ -60,7 +65,7 @@ export const useUserUpdate = (refreshUsers?: () => Promise<any>): UseUserUpdateR
       toast.error('An unexpected error occurred while updating the user');
       return false;
     }
-  }, []);
+  }, [refreshUsers]);
 
   const updateUserStatus = useCallback(async (userId: string, status: string) => {
     try {

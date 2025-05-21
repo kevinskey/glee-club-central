@@ -56,20 +56,22 @@ export const ProfileOverviewTab: React.FC<ProfileOverviewTabProps> = ({
   
   // Update form data when profile or isEditable changes
   useEffect(() => {
-    setFormData({
-      personal_title: profile.personal_title || '',
-      first_name: profile.first_name || '',
-      last_name: profile.last_name || '',
-      phone: profile.phone || '',
-      voice_part: profile.voice_part || '',
-      class_year: profile.class_year || '',
-      email: profile.email || '',
-      status: profile.status || '',
-      role: profile.role || '',
-      join_date: profile.join_date || '',
-      notes: profile.notes || '',
-      dues_paid: profile.dues_paid || false
-    });
+    if (profile) {
+      setFormData({
+        personal_title: profile.personal_title || '',
+        first_name: profile.first_name || '',
+        last_name: profile.last_name || '',
+        phone: profile.phone || '',
+        voice_part: profile.voice_part || '',
+        class_year: profile.class_year || '',
+        email: profile.email || '',
+        status: profile.status || '',
+        role: profile.role || '',
+        join_date: profile.join_date || '',
+        notes: profile.notes || '',
+        dues_paid: profile.dues_paid || false
+      });
+    }
   }, [profile, isEditable]);
   
   // Auto sync profile data when component mounts or profile changes
@@ -126,6 +128,11 @@ export const ProfileOverviewTab: React.FC<ProfileOverviewTabProps> = ({
       console.log("Saving profile data:", formData);
       await onSave(formData);
       toast.success("Profile updated successfully");
+      
+      // Refresh profile data after saving
+      if (refreshPermissions) {
+        refreshPermissions();
+      }
     } catch (error) {
       console.error("Error updating profile:", error);
       toast.error("Failed to update profile");
