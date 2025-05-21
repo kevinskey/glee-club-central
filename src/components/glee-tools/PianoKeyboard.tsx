@@ -57,6 +57,7 @@ export function PianoKeyboard({ onClose, audioContextRef }: PianoKeyboardProps) 
   const isSmallMobile = useIsSmallMobile();
   const localAudioContextRef = useRef<AudioContext | null>(null);
   const oscillatorsRef = useRef<Map<string, { oscillator: OscillatorNode, gain: GainNode }>>(new Map());
+  const keyboardRef = useRef<HTMLDivElement>(null);
   
   // Get or create audio context
   const getAudioContext = (): AudioContext => {
@@ -105,22 +106,25 @@ export function PianoKeyboard({ onClose, audioContextRef }: PianoKeyboardProps) 
   
   const { whiteKeyHeight, blackKeyHeight } = getKeySizes();
   
-  // Function to render 3 octaves of piano keys
+  // Function to render piano keys - now with fixed width for proper scrolling
   const renderPianoKeys = () => {
-    const octaves = [startOctave, startOctave + 1, startOctave + 2];
+    // Render more octaves to allow horizontal scrolling
+    const octaves = [startOctave, startOctave + 1, startOctave + 2, startOctave + 3, startOctave + 4];
     const whiteKeys: React.ReactNode[] = [];
     const blackKeys: React.ReactNode[] = [];
     
-    // Calculate base widths
-    const totalWhiteKeys = octaves.length * 7; // 7 white keys per octave (C, D, E, F, G, A, B)
-    const whiteKeyWidth = `${100 / totalWhiteKeys}%`;
+    // Use fixed width for keys to enable proper scrolling
+    const whiteKeyWidth = 40; // Fixed width in pixels
     
-    // Render 3 octaves
+    // Keep track of total position for black keys
+    let totalPosition = 0;
+    
+    // Render all octaves
     octaves.forEach(octave => {
       // Keep track of white key position for black key positioning
       let whiteKeyCount = 0;
       
-      PIANO_KEYS.forEach((key, idx) => {
+      PIANO_KEYS.forEach((key) => {
         const noteId = `${key.note}-${octave}`;
         
         if (!key.isSharp) {
@@ -129,7 +133,10 @@ export function PianoKeyboard({ onClose, audioContextRef }: PianoKeyboardProps) 
             <button
               key={noteId}
               className="bg-white border border-gray-300 rounded-b hover:bg-gray-100 active:bg-gray-200 relative flex flex-col-reverse"
-              style={{ width: whiteKeyWidth }}
+              style={{ 
+                width: `${whiteKeyWidth}px`,
+                height: '100%'
+              }}
               onMouseDown={() => playNote(key.note, octave)}
               onTouchStart={() => playNote(key.note, octave)}
               onMouseUp={() => stopNote(`${key.note}-${octave}`)}
@@ -142,17 +149,18 @@ export function PianoKeyboard({ onClose, audioContextRef }: PianoKeyboardProps) 
             </button>
           );
           whiteKeyCount++;
+          totalPosition += whiteKeyWidth;
         } else {
           // Black key
-          // The position needs to be calculated based on the previous white key
-          const position = (whiteKeyCount - 1) * (100 / totalWhiteKeys);
+          // Position black key relative to the previous white key
+          const position = totalPosition - (whiteKeyWidth / 2) - 10;
           blackKeys.push(
             <button
               key={noteId}
               className="absolute top-0 bg-gray-800 hover:bg-gray-700 active:bg-gray-600 z-10 rounded-b"
               style={{ 
-                left: `calc(${position}% + ${whiteKeyWidth} * 0.7)`,
-                width: `calc(${whiteKeyWidth} * 0.6)`,
+                left: `${position}px`,
+                width: `${whiteKeyWidth * 0.6}px`,
                 height: blackKeyHeight
               }}
               onMouseDown={() => playNote(key.note, octave)}
@@ -167,11 +175,13 @@ export function PianoKeyboard({ onClose, audioContextRef }: PianoKeyboardProps) 
     });
     
     return (
-      <div className="relative" style={{ height: whiteKeyHeight }}>
-        <div className="flex h-full">
+      <div className="relative" style={{ height: whiteKeyHeight, width: '100%', overflowX: 'auto' }} ref={keyboardRef}>
+        <div className="flex h-full" style={{ width: 'max-content' }}>
           {whiteKeys}
         </div>
-        {blackKeys}
+        <div style={{ position: 'absolute', top: 0, left: 0, width: 'max-content' }}>
+          {blackKeys}
+        </div>
       </div>
     );
   };
@@ -206,6 +216,15 @@ export function PianoKeyboard({ onClose, audioContextRef }: PianoKeyboardProps) 
       }
     };
   }, [audioContextRef]);
+  
+  // Scroll to middle C on load
+  useEffect(() => {
+    if (keyboardRef.current) {
+      // Scroll to a reasonable starting position (about 1/3 of the way)
+      const scrollPosition = keyboardRef.current.scrollWidth / 3;
+      keyboardRef.current.scrollLeft = scrollPosition;
+    }
+  }, [keySize]);
   
   // Play piano note with optimized handling
   const playNote = (note: string, octave: number) => {
@@ -277,10 +296,13 @@ export function PianoKeyboard({ onClose, audioContextRef }: PianoKeyboardProps) 
     <div className="w-full space-y-4 p-4">
       <div className="flex items-center justify-between">
         <h3 className="text-lg font-medium">Piano Keyboard</h3>
+        <p className="text-xs text-muted-foreground">Scroll horizontally to see more notes</p>
       </div>
       
-      {/* Piano Keyboard */}
-      {renderPianoKeys()}
+      {/* Full-width Piano Keyboard with horizontal scrolling */}
+      <div className="w-full overflow-hidden">
+        {renderPianoKeys()}
+      </div>
       
       {/* Key Size Options */}
       <div className="mt-4">
