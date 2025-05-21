@@ -2,7 +2,6 @@
 import React, { memo } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Home, Calendar, Music, Bell, Headphones, FileText, User } from "lucide-react";
-import { Button } from "@/components/ui/button";
 
 export interface QuickAccessItem {
   title: string;
@@ -11,7 +10,7 @@ export interface QuickAccessItem {
   link: string;
 }
 
-const quickAccessItems: QuickAccessItem[] = [
+const defaultQuickAccessItems: QuickAccessItem[] = [
   {
     title: "Dashboard",
     description: "Return to the main dashboard",
@@ -55,7 +54,7 @@ export interface QuickAccessProps {
 }
 
 // Memoize the component to prevent unnecessary re-renders
-export const QuickAccess = memo(function QuickAccess({ items = quickAccessItems }: QuickAccessProps) {
+export const QuickAccess = memo(function QuickAccess({ items = defaultQuickAccessItems }: QuickAccessProps) {
   return (
     <Card className="shadow-md">
       <CardHeader className="pb-2">
@@ -79,3 +78,6 @@ export const QuickAccess = memo(function QuickAccess({ items = quickAccessItems 
     </Card>
   );
 });
+
+// Export QuickAccessItem type as QuickAccessTile for backward compatibility
+export type QuickAccessTile = QuickAccessItem;

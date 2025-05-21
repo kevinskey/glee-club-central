@@ -1,7 +1,10 @@
 import React, { useState } from 'react';
 import { PageHeader } from '@/components/ui/page-header';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { Calendar, Music, Bell, User, BookOpen, Headphones, Shirt, FileCheck, Edit, Download, FileText, Upload, Award } from 'lucide-react';
+import { 
+  Calendar, Music, Bell, User, BookOpen, Headphones, Shirt, FileCheck, 
+  Edit, Download, FileText, Upload, Award 
+} from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { NextEventCountdown } from '@/components/dashboard/NextEventCountdown';
@@ -170,29 +173,21 @@ export default function MemberDashboardPage() {
                   <CardTitle>Quick Links</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-2">
-                  <Button variant="outline" className="w-full text-left justify-start" asChild>
-                    <a href="/dashboard/sheet-music">
-                      <Music className="mr-2 h-4 w-4" />
-                      Access Sheet Music
-                    </a>
+                  <Button variant="outline" className="w-full text-left justify-start" onClick={() => window.location.href = "/dashboard/sheet-music"}>
+                    <Music className="mr-2 h-4 w-4" />
+                    Access Sheet Music
                   </Button>
-                  <Button variant="outline" className="w-full text-left justify-start" asChild>
-                    <a href="/dashboard/recordings">
-                      <Headphones className="mr-2 h-4 w-4" />
-                      Practice Recordings
-                    </a>
+                  <Button variant="outline" className="w-full text-left justify-start" onClick={() => window.location.href = "/dashboard/recordings"}>
+                    <Headphones className="mr-2 h-4 w-4" />
+                    Practice Recordings
                   </Button>
-                  <Button variant="outline" className="w-full text-left justify-start" asChild>
-                    <a href="/dashboard/wardrobe">
-                      <Shirt className="mr-2 h-4 w-4" />
-                      Uniform Information
-                    </a>
+                  <Button variant="outline" className="w-full text-left justify-start" onClick={() => window.location.href = "/dashboard/wardrobe"}>
+                    <Shirt className="mr-2 h-4 w-4" />
+                    Uniform Information
                   </Button>
-                  <Button variant="outline" className="w-full text-left justify-start" asChild>
-                    <a href="https://drive.google.com/drive" target="_blank" rel="noopener noreferrer">
-                      <FileCheck className="mr-2 h-4 w-4" />
-                      Google Drive
-                    </a>
+                  <Button variant="outline" className="w-full text-left justify-start" onClick={() => window.open("https://drive.google.com/drive", "_blank", "noopener,noreferrer")}>
+                    <FileCheck className="mr-2 h-4 w-4" />
+                    Google Drive
                   </Button>
                 </CardContent>
               </Card>
