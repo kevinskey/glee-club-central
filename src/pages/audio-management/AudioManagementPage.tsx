@@ -1,96 +1,165 @@
-import React, { useState } from "react";
-import { PageHeader } from "@/components/ui/page-header";
-import { Headphones, Upload } from "lucide-react";
-import { Button } from "@/components/ui/button";
+
+import React, { useState, useEffect } from "react";
 import { useAuth } from "@/contexts/AuthContext";
-import { UploadAudioModal } from "@/components/UploadAudioModal";
-import { Tabs, TabsContent } from "@/components/ui/tabs";
-import { useAudioFiles } from "@/hooks/useAudioFiles";
-import { AudioPageCategory } from "@/types/audio";
-import { AudioSearchAndFilter } from "@/components/audio/AudioSearchAndFilter";
+import { AudioCategorySelector } from "@/components/audio/AudioCategorySelector";
 import { AudioFilesList } from "@/components/audio/AudioFilesList";
-import { DeleteAudioDialog } from "@/components/audio/DeleteAudioDialog";
-import { RecordingSection } from "@/components/audio/RecordingSection";
+import { AudioSearchAndFilter } from "@/components/audio/AudioSearchAndFilter";
+import { Button } from "@/components/ui/button";
+import { UploadCloud, Music } from "lucide-react";
 import { MusicAppHeader } from "@/components/layout/MusicAppHeader";
+import { PageHeader } from "@/components/ui/page-header";
+import { Card, CardContent } from "@/components/ui/card";
+import { AudioFile, AudioPageCategory } from "@/types/audio";
+import { toast } from "sonner";
+import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { useAudioFiles } from "@/hooks/useAudioFiles";
+import { useBackingTracks } from "@/hooks/useBackingTracks";
+import { 
+  DropdownMenu, 
+  DropdownMenuContent, 
+  DropdownMenuItem, 
+  DropdownMenuLabel, 
+  DropdownMenuSeparator, 
+  DropdownMenuTrigger 
+} from "@/components/ui/dropdown-menu";
+import { Switch } from "@/components/ui/switch";
 
 export default function AudioManagementPage() {
-  const { user } = useAuth();
-  const { loading, audioFiles, fetchAudioFiles, deleteAudioFile } = useAudioFiles();
-  const [filteredFiles, setFilteredFiles] = useState(audioFiles);
+  const { user, isAuthenticated } = useAuth();
+  const [category, setCategory] = useState<AudioPageCategory>("all");
   const [searchQuery, setSearchQuery] = useState("");
-  const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
-  const [deleteId, setDeleteId] = useState<string | null>(null);
-  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
-  const [activeCategory, setActiveCategory] = useState<AudioPageCategory>("all");
-  const [uploadCategory, setUploadCategory] = useState<string>("recordings");
+  const [isUploadDialogOpen, setIsUploadDialogOpen] = useState(false);
+  const [title, setTitle] = useState("");
+  const [description, setDescription] = useState("");
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [isBackingTrack, setIsBackingTrack] = useState(false);
   
-  // Filter audio files based on search and category
-  React.useEffect(() => {
-    let results = audioFiles;
+  const { 
+    loading, 
+    audioFiles, 
+    fetchAudioFiles, 
+    deleteAudioFile 
+  } = useAudioFiles();
+
+  const { markAsBackingTrack } = useBackingTracks();
+
+  // Filter audio files based on category and search query
+  const getFilteredAudioFiles = () => {
+    if (!audioFiles) return [];
     
-    // Apply category filter
-    if (activeCategory !== "all") {
-      results = audioFiles.filter(file => file.category === activeCategory);
+    let filtered = [...audioFiles];
+    
+    // Filter by category if not "all"
+    if (category !== "all") {
+      if (category === "backing_tracks") {
+        filtered = filtered.filter(file => file.is_backing_track);
+      } else {
+        filtered = filtered.filter(file => file.category === category);
+      }
     }
     
-    // Apply search filter if there's a query
+    // Filter by search query
     if (searchQuery) {
-      const lowercaseQuery = searchQuery.toLowerCase();
-      results = results.filter(
-        file => 
-          file.title.toLowerCase().includes(lowercaseQuery) || 
-          (file.description && file.description.toLowerCase().includes(lowercaseQuery)) ||
-          file.created_at.toLowerCase().includes(lowercaseQuery)
+      const query = searchQuery.toLowerCase();
+      filtered = filtered.filter(file => 
+        file.title.toLowerCase().includes(query) ||
+        (file.description && file.description.toLowerCase().includes(query))
       );
     }
     
-    setFilteredFiles(results);
-  }, [searchQuery, activeCategory, audioFiles]);
-
-  // Open delete confirmation dialog
-  const confirmDelete = (id: string) => {
-    setDeleteId(id);
-    setIsDeleteDialogOpen(true);
+    return filtered;
   };
 
-  // Delete audio file
-  const handleDeleteAudioFile = async () => {
-    if (!deleteId) return;
-    
-    const success = await deleteAudioFile(deleteId);
-    if (success) {
-      setDeleteId(null);
-      setIsDeleteDialogOpen(false);
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      setSelectedFile(e.target.files[0]);
     }
   };
 
-  // Check if user can delete a file (if they uploaded it)
   const canDeleteFile = (uploadedBy: string) => {
-    return user?.id === uploadedBy;
-  };
-  
-  // Handle opening the upload modal
-  const handleOpenUploadModal = (category?: Exclude<AudioPageCategory, "all">) => {
-    if (category) {
-      setUploadCategory(category);
-    }
-    setIsUploadModalOpen(true);
+    if (!user) return false;
+    return user.id === uploadedBy;
   };
 
-  // Get files for the current category tab
-  const getDisplayFilesForCategory = (category: AudioPageCategory) => {
-    return category === "all" 
-      ? filteredFiles 
-      : filteredFiles.filter(file => file.category === category);
-  };
-  
-  // Handle recording saved
-  const handleRecordingSaved = (category?: Exclude<AudioPageCategory, "all">) => {
-    fetchAudioFiles();
-    if (category) {
-      setActiveCategory(category);
+  const confirmDelete = async (id: string) => {
+    const confirm = window.confirm("Are you sure you want to delete this audio file?");
+    if (confirm) {
+      await deleteAudioFile(id);
     }
   };
+
+  const handleUpload = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!selectedFile || !title || !user) {
+      toast.error("Please fill all required fields");
+      return;
+    }
+    
+    // Create FormData to send file
+    const formData = new FormData();
+    formData.append("file", selectedFile);
+    formData.append("title", title);
+    formData.append("description", description);
+    formData.append("userId", user.id);
+    formData.append("category", category === "all" ? "recordings" : category);
+    formData.append("isBackingTrack", isBackingTrack ? "true" : "false");
+    
+    try {
+      toast.loading("Uploading audio file...");
+      
+      // Call your upload API endpoint
+      const response = await fetch("/api/upload-audio", {
+        method: "POST",
+        body: formData,
+      });
+      
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || "Upload failed");
+      }
+      
+      toast.dismiss();
+      toast.success("Audio file uploaded successfully");
+      
+      // Reset form
+      setTitle("");
+      setDescription("");
+      setSelectedFile(null);
+      setIsBackingTrack(false);
+      setIsUploadDialogOpen(false);
+      
+      // Refresh files list
+      fetchAudioFiles();
+      
+    } catch (error: any) {
+      toast.dismiss();
+      toast.error(`Upload failed: ${error.message}`);
+    }
+  };
+
+  const toggleBackingTrackStatus = async (file: AudioFile) => {
+    const newStatus = !file.is_backing_track;
+    const success = await markAsBackingTrack(file.id, newStatus);
+    
+    if (success) {
+      // Update local state
+      fetchAudioFiles();
+      toast.success(`File marked as ${newStatus ? 'backing track' : 'regular audio'}`);
+    }
+  };
+
+  // Fetch audio files on mount
+  useEffect(() => {
+    if (isAuthenticated) {
+      fetchAudioFiles();
+    }
+  }, [isAuthenticated]);
+
+  const displayFiles = getFilteredAudioFiles();
 
   return (
     <>
@@ -98,94 +167,124 @@ export default function AudioManagementPage() {
       <div className="container py-6">
         <PageHeader
           title="Audio Management"
-          description="Upload, record, and manage audio files for the choir"
-          icon={<Headphones className="h-6 w-6" />}
-          actions={
-            <Button 
-              onClick={() => handleOpenUploadModal()}
-              className="gap-2 bg-glee-purple hover:bg-glee-purple/90"
-            >
-              <Upload className="h-4 w-4" /> Upload Audio
-            </Button>
-          }
+          description="Upload and manage audio files for practice and recordings"
+          icon={<Music className="h-6 w-6" />}
         />
 
-        {/* Recording Section */}
-        <RecordingSection onRecordingSaved={handleRecordingSaved} />
+        <Card>
+          <CardContent className="pt-6">
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
+              <AudioCategorySelector
+                value={category}
+                onChange={(value) => setCategory(value as AudioPageCategory)}
+                includeBackingTracks
+              />
 
-        {/* Search and Filter with Tabs Container */}
-        <Tabs defaultValue={activeCategory} value={activeCategory} onValueChange={(val) => setActiveCategory(val as AudioPageCategory)}>
-          <AudioSearchAndFilter 
-            searchQuery={searchQuery}
-            setSearchQuery={setSearchQuery}
-            activeCategory={activeCategory}
-            setActiveCategory={setActiveCategory}
-          />
+              <div className="flex items-center gap-2">
+                <AudioSearchAndFilter 
+                  searchQuery={searchQuery} 
+                  setSearchQuery={setSearchQuery} 
+                />
+                
+                <Dialog open={isUploadDialogOpen} onOpenChange={setIsUploadDialogOpen}>
+                  <DialogTrigger asChild>
+                    <Button className="gap-2">
+                      <UploadCloud className="h-4 w-4" />
+                      <span className="hidden sm:inline">Upload</span>
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent>
+                    <DialogHeader>
+                      <DialogTitle>Upload Audio File</DialogTitle>
+                    </DialogHeader>
+                    <form onSubmit={handleUpload} className="space-y-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="title">Title *</Label>
+                        <Input
+                          id="title"
+                          value={title}
+                          onChange={(e) => setTitle(e.target.value)}
+                          placeholder="Enter file title"
+                          required
+                        />
+                      </div>
+                      
+                      <div className="space-y-2">
+                        <Label htmlFor="description">Description</Label>
+                        <Textarea
+                          id="description"
+                          value={description}
+                          onChange={(e) => setDescription(e.target.value)}
+                          placeholder="Optional description"
+                          rows={3}
+                        />
+                      </div>
+                      
+                      <div className="space-y-2">
+                        <Label htmlFor="category">Category</Label>
+                        <AudioCategorySelector
+                          value={category === "all" ? "recordings" : category}
+                          onChange={(value) => setCategory(value as AudioPageCategory)}
+                          includeBackingTracks
+                        />
+                      </div>
+                      
+                      <div className="flex items-center space-x-2">
+                        <Switch
+                          id="backing-track"
+                          checked={isBackingTrack}
+                          onCheckedChange={setIsBackingTrack}
+                        />
+                        <Label htmlFor="backing-track">Mark as backing track for karaoke</Label>
+                      </div>
+                      
+                      <div className="space-y-2">
+                        <Label htmlFor="audio-file">Audio File *</Label>
+                        <Input
+                          id="audio-file"
+                          type="file"
+                          accept="audio/*"
+                          onChange={handleFileChange}
+                          required
+                        />
+                        <p className="text-xs text-muted-foreground">
+                          Accepted formats: MP3, WAV, OGG, WEBM (max 10MB)
+                        </p>
+                      </div>
+                      
+                      <DialogFooter>
+                        <Button type="submit">Upload Audio</Button>
+                      </DialogFooter>
+                    </form>
+                  </DialogContent>
+                </Dialog>
+              </div>
+            </div>
 
-          {/* Audio Files List/Table for each tab */}
-          <TabsContent value="all" className="mt-4">
             <AudioFilesList
               loading={loading}
-              displayFiles={getDisplayFilesForCategory("all")}
-              category="all"
+              displayFiles={displayFiles}
+              category={category}
               searchQuery={searchQuery}
               canDeleteFile={canDeleteFile}
               confirmDelete={confirmDelete}
-              onUploadClick={handleOpenUploadModal}
+              onUploadClick={(cat) => {
+                if (cat) setCategory(cat);
+                setIsUploadDialogOpen(true);
+              }}
+              renderAdditionalActions={(file) => (
+                <DropdownMenuItem onSelect={(e) => {
+                  e.preventDefault();
+                  toggleBackingTrackStatus(file);
+                }}>
+                  {file.is_backing_track 
+                    ? "Unmark as backing track" 
+                    : "Mark as backing track"}
+                </DropdownMenuItem>
+              )}
             />
-          </TabsContent>
-          
-          <TabsContent value="part_tracks" className="mt-4">
-            <AudioFilesList
-              loading={loading}
-              displayFiles={getDisplayFilesForCategory("part_tracks")}
-              category="part_tracks"
-              searchQuery={searchQuery}
-              canDeleteFile={canDeleteFile}
-              confirmDelete={confirmDelete}
-              onUploadClick={handleOpenUploadModal}
-            />
-          </TabsContent>
-          
-          <TabsContent value="recordings" className="mt-4">
-            <AudioFilesList
-              loading={loading}
-              displayFiles={getDisplayFilesForCategory("recordings")}
-              category="recordings"
-              searchQuery={searchQuery}
-              canDeleteFile={canDeleteFile}
-              confirmDelete={confirmDelete}
-              onUploadClick={handleOpenUploadModal}
-            />
-          </TabsContent>
-          
-          <TabsContent value="my_tracks" className="mt-4">
-            <AudioFilesList
-              loading={loading}
-              displayFiles={getDisplayFilesForCategory("my_tracks")}
-              category="my_tracks"
-              searchQuery={searchQuery}
-              canDeleteFile={canDeleteFile}
-              confirmDelete={confirmDelete}
-              onUploadClick={handleOpenUploadModal}
-            />
-          </TabsContent>
-        </Tabs>
-
-        {/* Upload Modal */}
-        <UploadAudioModal
-          open={isUploadModalOpen}
-          onOpenChange={setIsUploadModalOpen}
-          onUploadComplete={fetchAudioFiles}
-          defaultCategory={uploadCategory}
-        />
-
-        {/* Delete Confirmation Dialog */}
-        <DeleteAudioDialog 
-          isOpen={isDeleteDialogOpen}
-          onOpenChange={setIsDeleteDialogOpen}
-          onConfirmDelete={handleDeleteAudioFile}
-        />
+          </CardContent>
+        </Card>
       </div>
     </>
   );

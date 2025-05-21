@@ -1,6 +1,6 @@
 
 import React from "react";
-import { Download, Trash2, Loader2 } from "lucide-react";
+import { Download, Trash2, Loader2, MoreHorizontal } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { 
@@ -13,6 +13,14 @@ import {
 } from "@/components/ui/table";
 import { AudioFile, AudioPageCategory } from "@/types/audio";
 import { AudioCategoryIcon } from "./AudioCategoryIcon";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 interface AudioFilesListProps {
   loading: boolean;
@@ -22,6 +30,7 @@ interface AudioFilesListProps {
   canDeleteFile: (uploadedBy: string) => boolean;
   confirmDelete: (id: string) => void;
   onUploadClick: (category?: Exclude<AudioPageCategory, "all">) => void;
+  renderAdditionalActions?: (file: AudioFile) => React.ReactNode;
 }
 
 export function AudioFilesList({
@@ -31,7 +40,8 @@ export function AudioFilesList({
   searchQuery,
   canDeleteFile,
   confirmDelete,
-  onUploadClick
+  onUploadClick,
+  renderAdditionalActions
 }: AudioFilesListProps) {
   // Helper function to handle download
   const handleDownload = (file: AudioFile) => {
@@ -98,7 +108,16 @@ export function AudioFilesList({
         <TableBody>
           {displayFiles.map((file) => (
             <TableRow key={file.id}>
-              <TableCell className="font-medium">{file.title}</TableCell>
+              <TableCell className="font-medium">
+                <div className="flex items-center gap-2">
+                  {file.is_backing_track ? (
+                    <AudioCategoryIcon category="backing_tracks" />
+                  ) : (
+                    <AudioCategoryIcon category={file.category as AudioPageCategory} />
+                  )}
+                  {file.title}
+                </div>
+              </TableCell>
               <TableCell>{file.description || "-"}</TableCell>
               <TableCell>{file.created_at}</TableCell>
               <TableCell className="text-right">
@@ -111,8 +130,33 @@ export function AudioFilesList({
                     <Download className="h-4 w-4" />
                     <span className="sr-only">Download</span>
                   </Button>
+
+                  {(canDeleteFile(file.uploaded_by) || renderAdditionalActions) && (
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button variant="outline" size="sm">
+                          <MoreHorizontal className="h-4 w-4" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end">
+                        <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                        {renderAdditionalActions && renderAdditionalActions(file)}
+                        {canDeleteFile(file.uploaded_by) && (
+                          <>
+                            {renderAdditionalActions && <DropdownMenuSeparator />}
+                            <DropdownMenuItem
+                              className="text-destructive"
+                              onSelect={() => confirmDelete(file.id)}
+                            >
+                              Delete
+                            </DropdownMenuItem>
+                          </>
+                        )}
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  )}
                   
-                  {canDeleteFile(file.uploaded_by) && (
+                  {!renderAdditionalActions && canDeleteFile(file.uploaded_by) && (
                     <Button
                       variant="destructive"
                       size="sm"
@@ -140,6 +184,8 @@ function getCategoryDisplayName(category: AudioPageCategory): string {
       return "Recordings";
     case "my_tracks":
       return "My Tracks";
+    case "backing_tracks":
+      return "Backing Tracks";
     case "all":
       return "All Audio";
   }

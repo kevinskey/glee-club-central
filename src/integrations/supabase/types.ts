@@ -59,6 +59,7 @@ export type Database = {
           file_path: string
           file_url: string
           id: string
+          is_backing_track: boolean | null
           title: string
           uploaded_by: string
         }
@@ -69,6 +70,7 @@ export type Database = {
           file_path: string
           file_url: string
           id?: string
+          is_backing_track?: boolean | null
           title: string
           uploaded_by: string
         }
@@ -79,6 +81,7 @@ export type Database = {
           file_path?: string
           file_url?: string
           id?: string
+          is_backing_track?: boolean | null
           title?: string
           uploaded_by?: string
         }
@@ -289,6 +292,53 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      }
+      mixed_recordings: {
+        Row: {
+          backing_track_id: string | null
+          backing_volume: number | null
+          created_at: string
+          description: string | null
+          id: string
+          recording_file_path: string
+          recording_file_url: string
+          title: string
+          user_id: string
+          vocal_volume: number | null
+        }
+        Insert: {
+          backing_track_id?: string | null
+          backing_volume?: number | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          recording_file_path: string
+          recording_file_url: string
+          title: string
+          user_id: string
+          vocal_volume?: number | null
+        }
+        Update: {
+          backing_track_id?: string | null
+          backing_volume?: number | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          recording_file_path?: string
+          recording_file_url?: string
+          title?: string
+          user_id?: string
+          vocal_volume?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "mixed_recordings_backing_track_id_fkey"
+            columns: ["backing_track_id"]
+            isOneToOne: false
+            referencedRelation: "audio_files"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       payment_records: {
         Row: {
