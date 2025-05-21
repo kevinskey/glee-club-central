@@ -1,7 +1,6 @@
-
 import React, { useState } from "react";
 import { PageHeader } from "@/components/ui/page-header";
-import { BookMusic, Search, Filter } from "lucide-react";
+import { FileMusic, Search, Filter } from "lucide-react";
 import { MusicAppHeader } from "@/components/layout/MusicAppHeader";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -34,7 +33,7 @@ export default function SheetMusicPage() {
         <PageHeader
           title="Sheet Music Library"
           description="Access and view your sheet music collection"
-          icon={<BookMusic className="h-6 w-6" />}
+          icon={<FileMusic className="h-6 w-6" />}
         />
         
         <Card className="mb-6">
@@ -65,7 +64,7 @@ export default function SheetMusicPage() {
               onClick={() => navigate(`/sheet-music/${item.id}`)}
             >
               <div className="bg-muted h-40 flex items-center justify-center">
-                <BookMusic className="h-12 w-12 text-muted-foreground" />
+                <FileMusic className="h-12 w-12 text-muted-foreground" />
               </div>
               <CardContent className="p-4">
                 <h3 className="font-bold">{item.title}</h3>

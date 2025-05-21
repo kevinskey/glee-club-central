@@ -3,7 +3,7 @@ import React from "react";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Link } from "react-router-dom";
-import { Music, Mic, Headphones, BookMusic, Radio } from "lucide-react";
+import { Music, Mic, Headphones, FileMusic, Radio } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 
 interface MusicAppHeaderProps {
@@ -17,7 +17,7 @@ export function MusicAppHeader({ currentSection }: MusicAppHeaderProps) {
   const sections = [
     { id: "recordings", label: "Recordings", icon: <Mic className="h-4 w-4 mr-2" />, path: "/recordings" },
     { id: "practice", label: "Practice", icon: <Headphones className="h-4 w-4 mr-2" />, path: "/practice" },
-    { id: "sheet-music", label: "Sheet Music", icon: <BookMusic className="h-4 w-4 mr-2" />, path: "/sheet-music" },
+    { id: "sheet-music", label: "Sheet Music", icon: <FileMusic className="h-4 w-4 mr-2" />, path: "/sheet-music" },
     { id: "audio", label: "Audio Library", icon: <Radio className="h-4 w-4 mr-2" />, path: "/audio-management" }
   ];
   
