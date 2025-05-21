@@ -5,6 +5,8 @@ import { audioLogger, requestMicrophoneAccess, releaseMicrophone } from '@/utils
 export function useAudioRecorder() {
   // State
   const [isRecording, setIsRecording] = useState(false);
+  const [isInitialized, setIsInitialized] = useState(false);
+  const [error, setError] = useState<Error | null>(null);
   
   // Refs to hold recording resources
   const audioContextRef = useRef<AudioContext | null>(null);
@@ -14,16 +16,44 @@ export function useAudioRecorder() {
   
   // Initialize audio system on mount
   useEffect(() => {
-    // Create the audio context directly
-    try {
-      audioContextRef.current = new AudioContext();
-      audioLogger.log('Audio recorder: Audio context created');
-    } catch (error) {
-      audioLogger.error('Audio recorder: Failed to create audio context', error);
-    }
+    let mounted = true;
+    
+    const initAudioContext = async () => {
+      try {
+        // Check if the AudioContext already exists
+        if (!audioContextRef.current) {
+          const AudioContextClass = window.AudioContext || (window as any).webkitAudioContext;
+          
+          if (!AudioContextClass) {
+            throw new Error("AudioContext not supported in this browser");
+          }
+          
+          audioContextRef.current = new AudioContextClass();
+          
+          // Resume context if it's in suspended state
+          if (audioContextRef.current.state === 'suspended') {
+            await audioContextRef.current.resume();
+          }
+        }
+        
+        if (mounted) {
+          setIsInitialized(true);
+          audioLogger.log('Audio recorder: Audio context created and initialized');
+        }
+      } catch (err) {
+        audioLogger.error('Audio recorder: Failed to create audio context', err);
+        if (mounted) {
+          setError(err instanceof Error ? err : new Error(String(err)));
+        }
+      }
+    };
+    
+    initAudioContext();
     
     // Clean up on unmount
     return () => {
+      mounted = false;
+      
       if (mediaStreamRef.current) {
         releaseMicrophone(mediaStreamRef.current);
       }
@@ -31,12 +61,20 @@ export function useAudioRecorder() {
       if (mediaRecorderRef.current && mediaRecorderRef.current.state !== 'inactive') {
         mediaRecorderRef.current.stop();
       }
+      
+      if (audioContextRef.current) {
+        audioContextRef.current.close().catch(console.error);
+        audioContextRef.current = null;
+      }
     };
   }, []);
   
   // Start recording - Fix return type to ensure proper type checking
   const startRecording = useCallback(async (): Promise<MediaStream> => {
     try {
+      // Reset any previous errors
+      setError(null);
+      
       // Request microphone access
       const stream = await requestMicrophoneAccess();
       if (!stream) {
@@ -65,6 +103,7 @@ export function useAudioRecorder() {
       return stream;
     } catch (error) {
       audioLogger.error('Error starting recording:', error);
+      setError(error instanceof Error ? error : new Error(String(error)));
       throw error;
     }
   }, []);
@@ -116,11 +155,19 @@ export function useAudioRecorder() {
     }
   }, []);
   
+  // Check if the browser supports recording
+  const isBrowserSupported = useCallback(() => {
+    return !!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia);
+  }, []);
+  
   return {
     isRecording,
+    isInitialized,
+    error,
     startRecording,
     stopRecording,
     pauseRecording,
-    resumeRecording
+    resumeRecording,
+    isBrowserSupported
   };
 }

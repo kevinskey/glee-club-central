@@ -4,7 +4,6 @@ import { createBrowserRouter, Navigate, Outlet, RouterProvider } from 'react-rou
 import ErrorBoundary from "./components/ErrorBoundary";
 import StaticLandingPage from './pages/StaticLandingPage';
 import HomeTemp from './pages/HomeTemp';
-import App from './App';
 import { dashboardRoutes } from './routes/dashboardRoutes';
 import { authRoutes } from './routes/authRoutes';
 import MainLayout from './layouts/MainLayout';
@@ -58,12 +57,8 @@ export const router = createBrowserRouter([
           },
         ],
       },
-      // Dashboard routes - use route directly, not nested under App
-      // This prevents double-wrapping with DashboardLayout
-      ...dashboardRoutes.children.map(route => ({
-        ...route,
-        path: `/dashboard${route.path ? `/${route.path}` : ''}`
-      })),
+      // Include dashboard routes directly
+      dashboardRoutes,
       // Auth routes
       ...authRoutes,
     ],

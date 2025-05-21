@@ -6,7 +6,7 @@ import ProfilePage from '../pages/profile/ProfilePage';
 import MediaLibraryPage from '../pages/MediaLibraryPage';
 import SheetMusicPage from '../pages/SheetMusicPage';
 import PDFViewerPage from '../pages/PDFViewerPage';
-import RecordingsPage from '../pages/recordings/RecordingsPage';
+import RecordingsPage from '../pages/RecordingsPage';
 import RecordingStudioPage from '../pages/recordings/RecordingStudioPage';
 import CalendarPage from '../pages/dashboard/calendar';
 import MemberDashboardPage from '../pages/dashboard/MemberDashboardPage';
@@ -15,11 +15,12 @@ import AnnouncementsPage from '../pages/dashboard/AnnouncementsPage';
 import ArchivesPage from '../pages/dashboard/ArchivesPage';
 import AttendancePage from '../pages/dashboard/AttendancePage';
 import AudioManagementPage from '../pages/audio-management/AudioManagementPage';
+import DashboardLayout from '../layouts/DashboardLayout';
 
 // Define routes without duplicating wrapper components
 export const dashboardRoutes = {
   path: 'dashboard',
-  element: <RequireAuth><DashboardPage /></RequireAuth>,
+  element: <RequireAuth><DashboardLayout /></RequireAuth>,
   children: [
     {
       path: '',
@@ -27,59 +28,59 @@ export const dashboardRoutes = {
     },
     {
       path: 'member',
-      element: <RequireAuth allowedUserTypes={['member', 'admin']}><MemberDashboardPage /></RequireAuth>,
+      element: <MemberDashboardPage />,
     },
     {
       path: 'fan',
-      element: <RequireAuth allowedUserTypes={['fan', 'member', 'admin']}><FanDashboardPage /></RequireAuth>,
+      element: <FanDashboardPage />,
     },
     {
       path: 'profile',
-      element: <RequireAuth><ProfilePage /></RequireAuth>,
+      element: <ProfilePage />,
     },
     {
       path: 'media-library',
-      element: <RequireAuth allowedUserTypes={['admin', 'member']}><MediaLibraryPage /></RequireAuth>,
+      element: <MediaLibraryPage />,
     },
     {
       path: 'sheet-music',
-      element: <RequireAuth allowedUserTypes={['admin', 'member']}><SheetMusicPage /></RequireAuth>,
+      element: <SheetMusicPage />,
     },
     {
       path: 'sheet-music/:id',
-      element: <RequireAuth allowedUserTypes={['admin', 'member']}><PDFViewerPage /></RequireAuth>,
+      element: <PDFViewerPage />,
     },
     {
       path: 'media/pdf/:id',
-      element: <RequireAuth allowedUserTypes={['admin', 'member']}><PDFViewerPage /></RequireAuth>,
+      element: <PDFViewerPage />,
     },
     {
       path: 'recordings',
-      element: <RequireAuth allowedUserTypes={['admin', 'member']}><RecordingsPage /></RequireAuth>,
+      element: <RecordingsPage />,
     },
     {
       path: 'recording-studio',
-      element: <RequireAuth allowedUserTypes={['admin', 'member']}><RecordingStudioPage /></RequireAuth>,
+      element: <RecordingStudioPage />,
     },
     {
       path: 'audio-management',
-      element: <RequireAuth allowedUserTypes={['admin', 'member']}><AudioManagementPage /></RequireAuth>,
+      element: <AudioManagementPage />,
     },
     {
       path: 'calendar',
-      element: <RequireAuth><CalendarPage /></RequireAuth>,
+      element: <CalendarPage />,
     },
     {
       path: 'announcements',
-      element: <RequireAuth><AnnouncementsPage /></RequireAuth>,
+      element: <AnnouncementsPage />,
     },
     {
       path: 'archives',
-      element: <RequireAuth><ArchivesPage /></RequireAuth>,
+      element: <ArchivesPage />,
     },
     {
       path: 'attendance',
-      element: <RequireAuth><AttendancePage /></RequireAuth>,
+      element: <AttendancePage />,
     },
   ],
 };
