@@ -1,42 +1,77 @@
+import React, { memo } from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Link } from "react-router-dom";
+import { Home, Calendar, Music, Bell, Headphones, FileText, User } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
-import React from 'react';
-import { Link } from 'react-router-dom';
-import { cn } from '@/lib/utils';
-
-export interface QuickAccessTile {
+interface QuickAccessItem {
   title: string;
+  description: string;
   icon: React.ReactNode;
-  href: string;
-  color?: string;
+  link: string;
 }
 
-interface QuickAccessProps {
-  tiles?: QuickAccessTile[];
-  className?: string;
-}
+const quickAccessItems: QuickAccessItem[] = [
+  {
+    title: "Dashboard",
+    description: "Return to the main dashboard",
+    icon: <Home className="h-4 w-4 mr-2 text-muted-foreground" />,
+    link: "/dashboard",
+  },
+  {
+    title: "Calendar",
+    description: "View upcoming events and rehearsals",
+    icon: <Calendar className="h-4 w-4 mr-2 text-muted-foreground" />,
+    link: "/dashboard/calendar",
+  },
+  {
+    title: "Sheet Music",
+    description: "Access and download sheet music",
+    icon: <Music className="h-4 w-4 mr-2 text-muted-foreground" />,
+    link: "/dashboard/sheet-music",
+  },
+  {
+    title: "Recordings",
+    description: "Listen to recordings and practice tracks",
+    icon: <Headphones className="h-4 w-4 mr-2 text-muted-foreground" />,
+    link: "/dashboard/recordings",
+  },
+  {
+    title: "Announcements",
+    description: "Read the latest announcements",
+    icon: <Bell className="h-4 w-4 mr-2 text-muted-foreground" />,
+    link: "/dashboard/announcements",
+  },
+  {
+    title: "Profile",
+    description: "Manage your profile and settings",
+    icon: <User className="h-4 w-4 mr-2 text-muted-foreground" />,
+    link: "/dashboard/profile",
+  },
+];
 
-export function QuickAccess({ tiles, className }: QuickAccessProps) {
-  const defaultTiles: QuickAccessTile[] = [
-    // Default tiles if none are provided
-  ];
-  
-  const displayTiles = tiles || defaultTiles;
-  
+// Memoize the component to prevent unnecessary re-renders
+export const QuickAccess = memo(function QuickAccess() {
   return (
-    <div className={cn("grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-4", className)}>
-      {displayTiles.map((tile, index) => (
-        <Link
-          key={index}
-          to={tile.href}
-          className={cn(
-            "rounded-xl shadow-sm h-24 flex flex-col items-center justify-center text-white transition-transform hover:scale-105",
-            tile.color || "bg-gradient-to-br from-blue-600 to-blue-700"
-          )}
-        >
-          <div className="mb-2">{tile.icon}</div>
-          <span className="text-sm font-medium">{tile.title}</span>
-        </Link>
-      ))}
-    </div>
+    <Card className="shadow-md">
+      <CardHeader className="pb-2">
+        <CardTitle>Quick Access</CardTitle>
+      </CardHeader>
+      <CardContent className="grid gap-4 grid-cols-1 md:grid-cols-2">
+        {quickAccessItems.map((item) => (
+          <Link
+            key={item.title}
+            to={item.link}
+            className="flex items-center space-x-3 bg-muted/50 hover:bg-muted rounded-md p-3 transition-colors"
+          >
+            {item.icon}
+            <div>
+              <p className="text-sm font-medium leading-none">{item.title}</p>
+              <p className="text-xs text-muted-foreground">{item.description}</p>
+            </div>
+          </Link>
+        ))}
+      </CardContent>
+    </Card>
   );
-}
+});

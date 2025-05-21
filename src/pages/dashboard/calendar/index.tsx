@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { PageHeader } from '@/components/ui/page-header';
 import { Button } from '@/components/ui/button';
 import { useCalendarStore } from '@/hooks/useCalendarStore';
@@ -32,48 +32,49 @@ export default function CalendarDashboardPage() {
   const { fetchEvents, updateEvent, deleteEvent } = useCalendarStore();
   const userCanEdit = true; // Use isAdmin() in production
   
-  // Load events
-  useEffect(() => {
-    const loadEvents = async () => {
-      try {
-        setIsLoading(true);
-        const calendarEvents = await fetchEvents();
+  // Load events with useCallback to prevent recreation on every render
+  const loadEvents = useCallback(async () => {
+    try {
+      setIsLoading(true);
+      const calendarEvents = await fetchEvents();
+      
+      if (calendarEvents && calendarEvents.length > 0) {
+        setEvents(calendarEvents);
         
-        if (calendarEvents && calendarEvents.length > 0) {
-          setEvents(calendarEvents);
-          
-          // If there's an event ID in the URL, select that event
-          if (eventId) {
-            const event = calendarEvents.find(e => e.id === eventId);
-            if (event) {
-              setSelectedEvent(event);
-              setIsEventModalOpen(true);
-            }
+        // If there's an event ID in the URL, select that event
+        if (eventId) {
+          const event = calendarEvents.find(e => e.id === eventId);
+          if (event) {
+            setSelectedEvent(event);
+            setIsEventModalOpen(true);
           }
-        } else {
-          setEvents([]);
         }
-      } catch (error) {
-        console.error('Error loading events:', error);
-        toast({
-          title: 'Error',
-          description: 'Failed to load events',
-          variant: 'destructive',
-        });
-      } finally {
-        setIsLoading(false);
+      } else {
+        setEvents([]);
       }
-    };
-    
-    loadEvents();
+    } catch (error) {
+      console.error('Error loading events:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to load events',
+        variant: 'destructive',
+      });
+    } finally {
+      setIsLoading(false);
+    }
   }, [fetchEvents, eventId, toast]);
   
-  const handleEventClick = async (event: CalendarEvent) => {
+  // Load events only once when the component mounts or dependencies change
+  useEffect(() => {
+    loadEvents();
+  }, [loadEvents]);
+  
+  const handleEventClick = useCallback(async (event: CalendarEvent) => {
     setSelectedEvent(event);
     setIsEventModalOpen(true);
     setSearchParams({ event: event.id });
     return true;
-  };
+  }, [setSearchParams]);
   
   const handleUpdateEvent = async (eventData: CalendarEvent) => {
     try {
@@ -159,10 +160,10 @@ export default function CalendarDashboardPage() {
   };
   
   // Close event modal and update URL when closing
-  const handleCloseEventModal = () => {
+  const handleCloseEventModal = useCallback(() => {
     setIsEventModalOpen(false);
     setSearchParams({});
-  };
+  }, [setSearchParams]);
   
   return (
     <div className="container p-0">
