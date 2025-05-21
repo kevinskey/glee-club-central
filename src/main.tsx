@@ -5,7 +5,7 @@ import { RouterProvider } from "react-router-dom";
 import { router } from "./router";
 import { ThemeProvider } from "./providers/ThemeProvider";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { Toaster } from "@/components/ui/toaster";
+import { Toaster } from "sonner";
 import "./index.css";
 
 // Create a client for React Query
@@ -21,8 +21,7 @@ if (!rootElement) {
 // Create a root
 const root = ReactDOM.createRoot(rootElement);
 
-// IMPORTANT: We've removed AuthProvider from here as it needs to be inside 
-// RouterProvider to have access to router context
+// Render the app
 root.render(
   <React.StrictMode>
     <QueryClientProvider client={queryClient}>

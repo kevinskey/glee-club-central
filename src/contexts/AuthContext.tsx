@@ -1,3 +1,4 @@
+
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import {
   useSession,
@@ -25,15 +26,15 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const [isLoading, setIsLoading] = useState(true);
   const [permissions, setPermissions] = useState<{ [key: string]: boolean }>({});
   
-  // These hooks must be used inside a component that is a child of the SessionContextProvider
-  const session = useSession();
-  const supabaseClient = useSupabaseClient();
-  const user = useUser();
-  
   // Get router hooks - IMPORTANT: Now we're safely using these hooks inside a component 
   // that's properly wrapped by RouterProvider
   const navigate = useNavigate();
   const location = useLocation();
+  
+  // These hooks must be used inside a component that is a child of the SessionContextProvider
+  const session = useSession();
+  const supabaseClient = useSupabaseClient();
+  const user = useUser();
   
   // Function to refresh user permissions
   const refreshPermissions = useCallback(async () => {

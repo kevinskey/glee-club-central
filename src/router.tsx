@@ -9,13 +9,24 @@ import { dashboardRoutes } from './routes/dashboardRoutes';
 import { authRoutes } from './routes/authRoutes';
 import MainLayout from './layouts/MainLayout';
 import HomePage from './pages/HomePage';
+import { SessionContextProvider } from '@supabase/auth-helpers-react';
+import { supabase } from './integrations/supabase/client';
 import { AuthProvider } from './contexts/AuthContext';
+
+// Create a session provider wrapper to provide Supabase auth helpers
+const SessionProviderWrapper = ({ children }: { children: React.ReactNode }) => (
+  <SessionContextProvider supabaseClient={supabase}>
+    {children}
+  </SessionContextProvider>
+);
 
 // Wrapper component to provide auth context
 const AuthProviderWrapper = ({ children }: { children: React.ReactNode }) => (
-  <AuthProvider>
-    {children}
-  </AuthProvider>
+  <SessionProviderWrapper>
+    <AuthProvider>
+      {children}
+    </AuthProvider>
+  </SessionProviderWrapper>
 );
 
 // Create a properly structured router with all routes
