@@ -1,8 +1,7 @@
 
 import React from "react";
-import { Link } from "react-router-dom";
-import { Icons } from "@/components/Icons";
-import { GleeToolsDropdown } from "@/components/glee-tools/GleeToolsDropdown";
+import { HeaderLogo } from "./header/HeaderLogo";
+import { HeaderActions } from "./header/HeaderActions";
 
 export function ConsolidatedHeader() {
   return (
@@ -10,16 +9,11 @@ export function ConsolidatedHeader() {
       <div className="max-w-screen-2xl mx-auto px-4 flex h-16 items-center justify-between">
         {/* Left side: Logo and site name */}
         <div className="flex items-center gap-3">
-          <Link to="/" className="font-bold flex items-center hover:text-primary transition-colors">
-            <Icons.logo className="h-6 w-auto" />
-            <span className="text-base ml-2 text-foreground">Glee World</span>
-          </Link>
+          <HeaderLogo />
         </div>
           
         {/* Right side: only GleeToolsDropdown */}
-        <div className="flex items-center">
-          <GleeToolsDropdown />
-        </div>
+        <HeaderActions />
       </div>
     </header>
   );
