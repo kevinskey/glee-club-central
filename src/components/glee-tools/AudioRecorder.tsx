@@ -1,3 +1,4 @@
+
 import React, { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
@@ -14,10 +15,13 @@ import {
   Mic, 
   Square, 
   Save, 
+  LogIn 
 } from "lucide-react";
 import { useAudioRecorder } from "@/hooks/useAudioRecorder";
 import { useRecordingSave } from "@/hooks/useRecordingSave";
 import { Label } from "@/components/ui/label";
+import { useAuth } from "@/contexts/AuthContext";
+import { useNavigate } from "react-router-dom";
 
 interface AudioRecorderProps {
   onClose?: () => void;
@@ -34,6 +38,10 @@ export function AudioRecorder({ onClose, audioContextRef }: AudioRecorderProps) 
   const audioRef = useRef<HTMLAudioElement>(null);
   const timerRef = useRef<number | null>(null);
   const localAudioContextRef = useRef<AudioContext | null>(null);
+  
+  // Navigation and auth hooks
+  const navigate = useNavigate();
+  const { user, isAuthenticated } = useAuth();
   
   // Custom hooks
   const { isRecording, startRecording, stopRecording } = useAudioRecorder();
@@ -119,12 +127,24 @@ export function AudioRecorder({ onClose, audioContextRef }: AudioRecorderProps) 
   
   // Handle save
   const handleSaveRecording = async () => {
+    // Check authentication before saving
+    if (!isAuthenticated || !user) {
+      toast.error("You must be logged in to save recordings", {
+        action: {
+          label: "Login",
+          onClick: () => navigate('/login')
+        }
+      });
+      return;
+    }
+    
     if (!audioURL) {
       toast.error("No recording to save");
       return;
     }
     
     try {
+      console.log("Attempting to save recording with user:", user);
       await saveRecording(audioURL);
     } catch (error) {
       console.error("Failed to save recording:", error);
@@ -221,38 +241,56 @@ export function AudioRecorder({ onClose, audioContextRef }: AudioRecorderProps) 
             />
           </div>
           
-          <div className="space-y-1">
-            <Label htmlFor="recording-name">Recording Name</Label>
-            <Input
-              id="recording-name"
-              value={recordingName}
-              onChange={(e) => setRecordingName(e.target.value)}
-              placeholder="Enter recording name"
-            />
-          </div>
-          
-          <div className="space-y-1">
-            <Label htmlFor="category">Category</Label>
-            <Select value={recordingCategory} onValueChange={setRecordingCategory}>
-              <SelectTrigger id="category">
-                <SelectValue placeholder="Select category" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="my_tracks">My Tracks</SelectItem>
-                <SelectItem value="recordings">Recordings</SelectItem>
-                <SelectItem value="part_tracks">Part Tracks</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-          
-          <Button 
-            onClick={handleSaveRecording}
-            className="w-full flex gap-2 items-center"
-            disabled={isSaving}
-          >
-            <Save className="h-4 w-4" />
-            <span>{isSaving ? "Saving..." : "Save Recording"}</span>
-          </Button>
+          {isAuthenticated ? (
+            <>
+              <div className="space-y-1">
+                <Label htmlFor="recording-name">Recording Name</Label>
+                <Input
+                  id="recording-name"
+                  value={recordingName}
+                  onChange={(e) => setRecordingName(e.target.value)}
+                  placeholder="Enter recording name"
+                />
+              </div>
+              
+              <div className="space-y-1">
+                <Label htmlFor="category">Category</Label>
+                <Select value={recordingCategory} onValueChange={setRecordingCategory}>
+                  <SelectTrigger id="category">
+                    <SelectValue placeholder="Select category" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="my_tracks">My Tracks</SelectItem>
+                    <SelectItem value="recordings">Recordings</SelectItem>
+                    <SelectItem value="part_tracks">Part Tracks</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              
+              <Button 
+                onClick={handleSaveRecording}
+                className="w-full flex gap-2 items-center"
+                disabled={isSaving}
+              >
+                <Save className="h-4 w-4" />
+                <span>{isSaving ? "Saving..." : "Save Recording"}</span>
+              </Button>
+            </>
+          ) : (
+            <div className="space-y-3 pt-2">
+              <p className="text-sm text-muted-foreground">
+                You must be logged in to save recordings
+              </p>
+              <Button 
+                onClick={() => navigate('/login')} 
+                className="w-full"
+                variant="default"
+              >
+                <LogIn className="mr-2 h-4 w-4" />
+                Log In to Save Recording
+              </Button>
+            </div>
+          )}
         </div>
       )}
     </div>

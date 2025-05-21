@@ -21,18 +21,29 @@ export function useRecordingSave({
 
   // Save recording
   const saveRecording = async (audioURL: string | null) => {
-    if (!audioURL || !user) {
+    if (!audioURL) {
       toast({
         title: "Save failed",
-        description: "No recording to save or user not logged in.",
+        description: "No recording to save.",
         variant: "destructive"
       });
-      return;
+      return null;
+    }
+    
+    if (!user) {
+      toast({
+        title: "Save failed",
+        description: "You must be logged in to save recordings.",
+        variant: "destructive"
+      });
+      return null;
     }
     
     setIsSaving(true);
     
     try {
+      console.log("Saving recording with user ID:", user.id);
+      
       // Fetch the actual blob from the URL
       const response = await fetch(audioURL);
       const audioBlob = await response.blob();

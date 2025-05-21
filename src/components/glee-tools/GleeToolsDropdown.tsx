@@ -1,6 +1,6 @@
 
 import React, { useState, useRef } from "react";
-import { Headphones, Piano, Mic, Clock, Music } from "lucide-react";
+import { Headphones, Piano, Mic, Clock, Music, LogIn } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { 
   DropdownMenu,
@@ -18,6 +18,8 @@ import {
   DialogHeader,
   DialogTitle
 } from "@/components/ui/dialog";
+import { useAuth } from "@/contexts/AuthContext";
+import { useNavigate } from "react-router-dom";
 import { PitchPipe } from "./PitchPipe";
 import { Metronome } from "./Metronome";
 import { AudioRecorder } from "./AudioRecorder";
@@ -31,6 +33,9 @@ export function GleeToolsDropdown() {
   const [metronomeOpen, setMetronomeOpen] = useState(false);
   const [audioRecorderOpen, setAudioRecorderOpen] = useState(false);
   const [pianoKeyboardOpen, setPianoKeyboardOpen] = useState(false);
+  const [authCheckDialogOpen, setAuthCheckDialogOpen] = useState(false);
+  const { isAuthenticated, user } = useAuth();
+  const navigate = useNavigate();
 
   // Initialize audio context on first interaction
   const initAudioContext = () => {
@@ -50,6 +55,27 @@ export function GleeToolsDropdown() {
 
   const handleHeadphonesClick = () => {
     initAudioContext();
+  };
+
+  // Check authentication before opening recording studio
+  const handleOpenRecordingStudio = () => {
+    if (isAuthenticated && user) {
+      setAudioRecorderOpen(true);
+    } else {
+      setAuthCheckDialogOpen(true);
+    }
+  };
+
+  // Go to login page
+  const handleGoToLogin = () => {
+    setAuthCheckDialogOpen(false);
+    navigate('/login');
+  };
+
+  // Go to dashboard recording studio
+  const handleGoToDashboardStudio = () => {
+    setAuthCheckDialogOpen(false);
+    navigate('/dashboard/recording-studio');
   };
 
   return (
@@ -89,7 +115,7 @@ export function GleeToolsDropdown() {
             Piano Keyboard (3 Octaves)
           </DropdownMenuItem>
           
-          <DropdownMenuItem onClick={() => setAudioRecorderOpen(true)}>
+          <DropdownMenuItem onClick={handleOpenRecordingStudio}>
             <Mic className="h-4 w-4 mr-2" />
             Recording Studio
           </DropdownMenuItem>
@@ -147,7 +173,42 @@ export function GleeToolsDropdown() {
             <DialogTitle>Recording Studio</DialogTitle>
           </DialogHeader>
           <div className="mt-2">
-            <AudioRecorder onClose={() => setAudioRecorderOpen(false)} />
+            <AudioRecorder 
+              onClose={() => setAudioRecorderOpen(false)} 
+              audioContextRef={audioContextRef}
+            />
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Authentication Check Dialog */}
+      <Dialog open={authCheckDialogOpen} onOpenChange={setAuthCheckDialogOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Authentication Required</DialogTitle>
+          </DialogHeader>
+          <div className="py-4">
+            <p className="text-muted-foreground mb-4">
+              You need to be logged in to save recordings. Would you like to:
+            </p>
+            <div className="flex flex-col sm:flex-row gap-3">
+              <Button 
+                variant="default" 
+                className="flex-1" 
+                onClick={handleGoToLogin}
+              >
+                <LogIn className="mr-2 h-4 w-4" />
+                Log In
+              </Button>
+              <Button 
+                variant="secondary" 
+                className="flex-1" 
+                onClick={handleGoToDashboardStudio}
+              >
+                <Mic className="mr-2 h-4 w-4" />
+                Go to Dashboard Studio
+              </Button>
+            </div>
           </div>
         </DialogContent>
       </Dialog>
