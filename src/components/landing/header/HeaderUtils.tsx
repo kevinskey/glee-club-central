@@ -1,11 +1,7 @@
 
 import React from "react";
-import { GleeToolsDropdown } from "@/components/glee-tools/GleeToolsDropdown";
+import { HeaderActions } from "@/components/layout/header/HeaderActions";
 
 export function HeaderUtils() {
-  return (
-    <div className="flex items-center">
-      <GleeToolsDropdown />
-    </div>
-  );
+  return <HeaderActions />;
 }

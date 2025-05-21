@@ -7,6 +7,7 @@ import { CTASection } from "@/components/landing/CTASection";
 import { MemberPortalBox } from "@/components/landing/MemberPortalBox";
 import { ConcertsScroller } from "@/components/landing/concerts/ConcertsScroller";
 import { updateHeroImageWithFeaturedMedia } from "@/utils/heroImageUtils";
+import { Header } from "@/components/landing/Header";
 
 const HomePage = () => {
   // Sync hero images with featured media on initial load
@@ -18,6 +19,7 @@ const HomePage = () => {
 
   return (
     <div className="min-h-screen flex flex-col bg-background">
+      <Header />
       <main className="flex-1">
         <EnhancedHeroSection />
         <ConcertsScroller />
