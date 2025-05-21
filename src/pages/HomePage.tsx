@@ -7,7 +7,6 @@ import { CTASection } from "@/components/landing/CTASection";
 import { MemberPortalBox } from "@/components/landing/MemberPortalBox";
 import { ConcertsScroller } from "@/components/landing/concerts/ConcertsScroller";
 import { updateHeroImageWithFeaturedMedia } from "@/utils/heroImageUtils";
-import { GlobalMetronome } from "@/components/ui/global-metronome";
 
 const HomePage = () => {
   // Sync hero images with featured media on initial load
@@ -25,7 +24,6 @@ const HomePage = () => {
       <TestimonialSection />
       <CTASection />
       <MemberPortalBox />
-      <GlobalMetronome />
     </div>
   );
 };
