@@ -19,6 +19,17 @@ code {
     monospace;
 }
 
+/* Enhanced dropdown menu styling */
+[data-radix-popper-content-wrapper] {
+  z-index: 50 !important; /* Ensure dropdowns are above other content */
+}
+
+.radix-dropdown-content {
+  background-color: var(--popover);
+  border: 1px solid var(--border);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
 /* Page transition animations */
 .page-transition-enter {
   opacity: 0;

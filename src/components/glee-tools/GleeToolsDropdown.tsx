@@ -1,3 +1,4 @@
+
 import React, { useState, useRef } from "react";
 import { Headphones, Piano, Mic, Clock, Music, LogIn } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -95,8 +96,11 @@ export function GleeToolsDropdown() {
             </span>
           </Button>
         </DropdownMenuTrigger>
-        <DropdownMenuContent align="end" className="w-56">
-          <DropdownMenuLabel>Glee Tools</DropdownMenuLabel>
+        <DropdownMenuContent 
+          align="end" 
+          className="w-56 bg-popover shadow-lg border border-border"
+        >
+          <DropdownMenuLabel className="font-semibold">Glee Tools</DropdownMenuLabel>
           <DropdownMenuSeparator />
           
           <DropdownMenuItem onClick={() => setPitchPipeOpen(true)}>
