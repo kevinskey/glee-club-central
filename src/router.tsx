@@ -9,6 +9,7 @@ import { authRoutes } from './routes/authRoutes';
 import MainLayout from './layouts/MainLayout';
 import HomePage from './pages/HomePage';
 import { AuthProvider } from './contexts/AuthContext';
+import HomeLayout from './layouts/HomeLayout';
 
 // Create a properly structured router with all routes
 export const router = createBrowserRouter([
@@ -38,15 +39,22 @@ export const router = createBrowserRouter([
       </ErrorBoundary>
     ),
     children: [
-      // Public routes with MainLayout
+      // Public routes with HomeLayout for the home page
       {
         path: '/',
-        element: <MainLayout />,
+        element: <HomeLayout />,
         children: [
           {
             index: true,
             element: <HomePage />,
           },
+        ],
+      },
+      // Secondary routes with MainLayout
+      {
+        path: '/',
+        element: <MainLayout />,
+        children: [
           {
             path: 'home-temp',
             element: <HomeTemp />,

@@ -17,15 +17,13 @@ const HomePage = () => {
   }, []);
 
   return (
-    <div className="min-h-screen flex flex-col bg-background">
-      <main className="flex-1">
-        <EnhancedHeroSection />
-        <ConcertsScroller />
-        <FeaturesSection />
-        <TestimonialSection />
-        <CTASection />
-        <MemberPortalBox />
-      </main>
+    <div className="flex-1">
+      <EnhancedHeroSection />
+      <ConcertsScroller />
+      <FeaturesSection />
+      <TestimonialSection />
+      <CTASection />
+      <MemberPortalBox />
     </div>
   );
 };
