@@ -6,7 +6,6 @@ import {
   useUser,
 } from '@supabase/auth-helpers-react';
 import { AuthUser, AuthContextType, Profile, UserType } from '@/types/auth';
-import { useNavigate, useLocation } from 'react-router-dom';
 import { toast } from "sonner";
 import { fetchUserPermissions } from '@/utils/supabase/permissions';
 import { getProfile } from '@/utils/supabase/profiles';
@@ -51,21 +50,6 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const supabaseClient = useSupabaseClient();
   const user = useUser();
 
-  // Safely access router hooks - these might not be available in all contexts
-  let navigate: ((to: string, options?: any) => void) | undefined;
-  let location: { pathname: string; search: string } | undefined;
-
-  try {
-    // Try to use React Router hooks
-    navigate = useNavigate();
-    location = useLocation();
-  } catch (error) {
-    console.warn("Router hooks not available in this context. Navigation features will be limited.");
-    // Provide fallbacks for navigation
-    navigate = (path: string) => { window.location.href = path; };
-    location = { pathname: window.location.pathname, search: window.location.search };
-  }
-  
   // Function to refresh user permissions
   const refreshPermissions = useCallback(async () => {
     if (profile && profile.id) {
@@ -176,7 +160,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
     return userType as UserType;
   }, [profile]);
 
-  // Auth methods that use navigate must be inside the Router context
+  // Auth methods using window.location for navigation instead of router hooks
   const handleLogout = async () => {
     try {
       // Clean up auth state first
@@ -191,12 +175,8 @@ export function AuthProvider({ children }: AuthProviderProps) {
       setAuthUser(null);
       setPermissions({});
       
-      // Safely navigate
-      if (typeof navigate === 'function') {
-        navigate('/');
-      } else {
-        window.location.href = '/';
-      }
+      // Use window.location for navigation
+      window.location.href = '/';
       
       return { error };
     } catch (err) {

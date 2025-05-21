@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { useNavigate, Link, useLocation } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
@@ -27,12 +28,18 @@ export default function LoginPage() {
   // Redirect authenticated users
   useEffect(() => {
     if (isAuthenticated) {
-      // If the intent is recording, redirect to recording studio
-      if (intent === "recording") {
-        navigate("/dashboard/recording-studio");
-        toast("Success! You're now signed in. Welcome to the Recording Studio!");
-      } else {
-        navigate(returnTo);
+      try {
+        // If the intent is recording, redirect to recording studio
+        if (intent === "recording") {
+          navigate("/dashboard/recording-studio");
+          toast("Success! You're now signed in. Welcome to the Recording Studio!");
+        } else {
+          navigate(returnTo);
+        }
+      } catch (error) {
+        console.error("Navigation error:", error);
+        // Fallback to window.location if navigate fails
+        window.location.href = intent === "recording" ? "/dashboard/recording-studio" : returnTo;
       }
     }
   }, [isAuthenticated, navigate, returnTo, intent]);

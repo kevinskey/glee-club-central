@@ -9,7 +9,7 @@ import { Toaster } from "sonner";
 import { SessionContextProvider } from "@supabase/auth-helpers-react";
 import { supabase } from "./integrations/supabase/client";
 import "./index.css";
-import { AuthProvider } from "./contexts/AuthContext";
+// Remove AuthProvider import as we'll handle it differently
 
 // Create a client for React Query
 const queryClient = new QueryClient();
@@ -25,14 +25,13 @@ if (!rootElement) {
 const root = ReactDOM.createRoot(rootElement);
 
 // Wrap the entire app with necessary providers
+// The order matters: QueryClient -> SessionContext -> ThemeProvider -> Router
 root.render(
   <React.StrictMode>
     <QueryClientProvider client={queryClient}>
       <SessionContextProvider supabaseClient={supabase}>
         <ThemeProvider>
-          <AuthProvider>
-            <RouterProvider router={router} />
-          </AuthProvider>
+          <RouterProvider router={router} />
           <Toaster />
         </ThemeProvider>
       </SessionContextProvider>

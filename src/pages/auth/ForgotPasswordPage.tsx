@@ -5,33 +5,28 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
-import { useToast } from "@/components/ui/use-toast";
+import { toast } from "sonner";
 import { useAuth } from "@/contexts/AuthContext";
 
 export default function ForgotPasswordPage() {
   const [email, setEmail] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
-  const { resetPassword } = useAuth();
-  const { toast } = useToast();
+  const auth = useAuth();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
     if (!email.trim()) {
-      toast({
-        title: "Error",
-        description: "Please enter your email address.",
-        variant: "destructive",
-      });
+      toast("Please enter your email address.");
       return;
     }
 
     try {
       setIsLoading(true);
       
-      if (resetPassword) {
-        const result = await resetPassword(email);
+      if (auth.resetPassword) {
+        const result = await auth.resetPassword(email);
         
         // Check if result exists and has an error property
         if (result && 'error' in result && result.error) {
@@ -39,20 +34,13 @@ export default function ForgotPasswordPage() {
         }
         
         setIsSubmitted(true);
-        toast({
-          title: "Success",
-          description: "If your email is registered, you'll receive password reset instructions shortly.",
-        });
+        toast("If your email is registered, you'll receive password reset instructions shortly.");
       } else {
         throw new Error("Password reset functionality not available");
       }
     } catch (error: any) {
       console.error("Error requesting password reset:", error);
-      toast({
-        title: "Error",
-        description: error.message || "An error occurred while processing your request.",
-        variant: "destructive",
-      });
+      toast(error.message || "An error occurred while processing your request.");
     } finally {
       setIsLoading(false);
     }

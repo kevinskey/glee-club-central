@@ -13,29 +13,13 @@ import { AuthProvider } from './contexts/AuthContext';
 
 // Create a properly structured router with all routes
 export const router = createBrowserRouter([
-  // Public routes with MainLayout
+  // Wrap the entire application with AuthProvider
   {
-    path: '/',
-    element: <MainLayout />,
-    children: [
-      {
-        index: true,
-        element: <HomePage />,
-      },
-      {
-        path: 'home-temp',
-        element: <HomeTemp />,
-      },
-      {
-        path: 'under-construction',
-        element: <StaticLandingPage />,
-      },
-    ],
-  },
-  // Dashboard routes
-  {
-    path: '/dashboard',
-    element: <App />,
+    element: (
+      <AuthProvider>
+        <Outlet />
+      </AuthProvider>
+    ),
     errorElement: (
       <ErrorBoundary>
         <div className="flex items-center justify-center min-h-screen p-4">
@@ -54,12 +38,35 @@ export const router = createBrowserRouter([
         </div>
       </ErrorBoundary>
     ),
-    children: dashboardRoutes.children,
-  },
-  // Auth routes
-  {
-    element: <Outlet />,
-    children: authRoutes,
+    children: [
+      // Public routes with MainLayout
+      {
+        path: '/',
+        element: <MainLayout />,
+        children: [
+          {
+            index: true,
+            element: <HomePage />,
+          },
+          {
+            path: 'home-temp',
+            element: <HomeTemp />,
+          },
+          {
+            path: 'under-construction',
+            element: <StaticLandingPage />,
+          },
+        ],
+      },
+      // Dashboard routes
+      {
+        path: '/dashboard',
+        element: <App />,
+        children: dashboardRoutes.children,
+      },
+      // Auth routes
+      ...authRoutes,
+    ],
   },
 ]);
 
