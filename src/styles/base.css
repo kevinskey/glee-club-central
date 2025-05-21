@@ -1,4 +1,3 @@
-
 @tailwind base;
 
 @layer base {
@@ -164,7 +163,7 @@
       font-size: 0.75rem !important; /* Minimum readable text size */
     }
   }
-
+  
   /* Fix iOS safe area issues */
   @supports (padding: max(0px)) {
     .fixed-bottom {
@@ -175,5 +174,20 @@
       padding-top: env(safe-area-inset-top);
       padding-bottom: env(safe-area-inset-bottom);
     }
+  }
+  
+  /* Fix for dropdown menu text visibility in all modes */
+  .dark [data-radix-popper-content-wrapper] [role="menu"] {
+    @apply bg-background border-border;
+  }
+  
+  [data-radix-popper-content-wrapper] [role="menu"] {
+    @apply bg-background text-foreground border-border;
+  }
+  
+  /* Make dropdown items more visible on hover */
+  [data-radix-popper-content-wrapper] [role="menuitem"]:hover, 
+  [data-radix-popper-content-wrapper] [role="menuitem"]:focus {
+    @apply bg-accent/10;
   }
 }

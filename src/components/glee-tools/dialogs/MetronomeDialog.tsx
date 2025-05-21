@@ -14,8 +14,11 @@ export function MetronomeDialog({ audioContextRef }: MetronomeDialogProps) {
 
   return (
     <>
-      <DropdownMenuItem onClick={() => setOpen(true)}>
-        <Clock className="h-4 w-4 mr-2" />
+      <DropdownMenuItem 
+        onClick={() => setOpen(true)}
+        className="flex items-center gap-2 text-foreground"
+      >
+        <Clock className="h-4 w-4" />
         Metronome
       </DropdownMenuItem>
       

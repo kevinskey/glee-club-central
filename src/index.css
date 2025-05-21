@@ -1,4 +1,3 @@
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -12,6 +11,11 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   transition: background-color 0.3s ease-in-out; /* Add smooth transition for theme changes */
+}
+
+.dark body {
+  background-color: hsl(240 10% 3.9%);
+  color: hsl(0 0% 98%);
 }
 
 code {
@@ -28,6 +32,15 @@ code {
   background-color: var(--popover);
   border: 1px solid var(--border);
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+/* Ensure dropdown backgrounds are solid in all modes */
+[data-radix-popper-content-wrapper] [role="menu"] {
+  @apply bg-background border border-border shadow-md;
+}
+
+.dark [data-radix-popper-content-wrapper] [role="menu"] {
+  @apply bg-background border-border text-foreground;
 }
 
 /* Page transition animations */

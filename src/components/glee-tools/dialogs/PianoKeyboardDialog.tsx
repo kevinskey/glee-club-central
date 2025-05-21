@@ -14,8 +14,11 @@ export function PianoKeyboardDialog({ audioContextRef }: PianoKeyboardDialogProp
 
   return (
     <>
-      <DropdownMenuItem onClick={() => setOpen(true)}>
-        <Piano className="h-4 w-4 mr-2" />
+      <DropdownMenuItem 
+        onClick={() => setOpen(true)}
+        className="flex items-center gap-2 text-foreground"
+      >
+        <Piano className="h-4 w-4" />
         Piano Keyboard (3 Octaves)
       </DropdownMenuItem>
       

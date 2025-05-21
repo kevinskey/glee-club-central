@@ -17,25 +17,10 @@ import { MetronomeDialog } from "./dialogs/MetronomeDialog";
 import { PianoKeyboardDialog } from "./dialogs/PianoKeyboardDialog";
 import { RecordingStudioDialog } from "./dialogs/RecordingStudioDialog";
 import { AboutGleeToolsItem } from "./dialogs/AboutGleeToolsItem";
+import { useAudioContext } from "@/hooks/use-audio-context";
 
 export function GleeToolsDropdown() {
-  const audioContextRef = useRef<AudioContext | null>(null);
-
-  // Initialize audio context on first interaction
-  const initAudioContext = () => {
-    if (!audioContextRef.current) {
-      try {
-        audioContextRef.current = new AudioContext();
-        
-        if (audioContextRef.current.state === 'suspended') {
-          audioContextRef.current.resume().catch(console.error);
-        }
-      } catch (error) {
-        console.error("Failed to initialize audio context:", error);
-        toast.error("Could not initialize audio. Please check browser permissions.");
-      }
-    }
-  };
+  const { audioContextRef, initializeAudioContext } = useAudioContext();
 
   return (
     <DropdownMenu>
@@ -44,7 +29,7 @@ export function GleeToolsDropdown() {
           variant="ghost"
           size="icon"
           className="relative"
-          onClick={initAudioContext}
+          onClick={initializeAudioContext}
         >
           <Headphones className="h-5 w-5" />
           <span className="sr-only">Glee Tools</span>
@@ -56,7 +41,7 @@ export function GleeToolsDropdown() {
       </DropdownMenuTrigger>
       <DropdownMenuContent 
         align="end" 
-        className="w-56 bg-popover shadow-lg border border-border"
+        className="w-56 bg-background border border-border shadow-md"
       >
         <DropdownMenuLabel className="font-semibold">Glee Tools</DropdownMenuLabel>
         <DropdownMenuSeparator />
