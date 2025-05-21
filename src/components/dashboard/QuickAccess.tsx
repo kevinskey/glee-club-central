@@ -2,6 +2,7 @@
 import React, { memo } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Home, Calendar, Music, Bell, Headphones, FileText, User } from "lucide-react";
+import { Link } from "react-router-dom";
 
 export interface QuickAccessItem {
   title: string;
@@ -62,17 +63,17 @@ export const QuickAccess = memo(function QuickAccess({ items = defaultQuickAcces
       </CardHeader>
       <CardContent className="grid gap-4 grid-cols-1 md:grid-cols-2">
         {items.map((item) => (
-          <div
+          <Link
             key={item.title}
+            to={item.link}
             className="flex items-center space-x-3 bg-muted/50 hover:bg-muted rounded-md p-3 transition-colors cursor-pointer"
-            onClick={() => window.location.href = item.link}
           >
             {item.icon}
             <div>
               <p className="text-sm font-medium leading-none">{item.title}</p>
               <p className="text-xs text-muted-foreground">{item.description}</p>
             </div>
-          </div>
+          </Link>
         ))}
       </CardContent>
     </Card>

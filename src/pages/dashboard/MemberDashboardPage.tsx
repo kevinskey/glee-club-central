@@ -15,6 +15,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Link } from 'react-router-dom';
 
 export default function MemberDashboardPage() {
   const { profile } = useAuth();
@@ -173,19 +174,35 @@ export default function MemberDashboardPage() {
                   <CardTitle>Quick Links</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-2">
-                  <Button variant="outline" className="w-full text-left justify-start" onClick={() => window.location.href = "/dashboard/sheet-music"}>
+                  <Button 
+                    variant="outline" 
+                    className="w-full text-left justify-start" 
+                    onClick={() => navigate("/dashboard/sheet-music")}
+                  >
                     <Music className="mr-2 h-4 w-4" />
                     Access Sheet Music
                   </Button>
-                  <Button variant="outline" className="w-full text-left justify-start" onClick={() => window.location.href = "/dashboard/recordings"}>
+                  <Button 
+                    variant="outline" 
+                    className="w-full text-left justify-start" 
+                    onClick={() => navigate("/dashboard/recordings")}
+                  >
                     <Headphones className="mr-2 h-4 w-4" />
                     Practice Recordings
                   </Button>
-                  <Button variant="outline" className="w-full text-left justify-start" onClick={() => window.location.href = "/dashboard/wardrobe"}>
+                  <Button 
+                    variant="outline" 
+                    className="w-full text-left justify-start" 
+                    onClick={() => navigate("/dashboard/wardrobe")}
+                  >
                     <Shirt className="mr-2 h-4 w-4" />
                     Uniform Information
                   </Button>
-                  <Button variant="outline" className="w-full text-left justify-start" onClick={() => window.open("https://drive.google.com/drive", "_blank", "noopener,noreferrer")}>
+                  <Button 
+                    variant="outline" 
+                    className="w-full text-left justify-start" 
+                    onClick={() => window.open("https://drive.google.com/drive", "_blank", "noopener,noreferrer")}
+                  >
                     <FileCheck className="mr-2 h-4 w-4" />
                     Google Drive
                   </Button>

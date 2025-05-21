@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, useMemo } from "react";
 import { PageHeader } from "@/components/ui/page-header";
 import { useAuth } from "@/contexts/AuthContext";
 import { Link, useNavigate } from "react-router-dom";
@@ -92,8 +92,11 @@ const DashboardPageContent = () => {
     }
   }, [authLoading, fetchEvents]);
   
-  // Next upcoming event for countdown
-  const nextEvent = events && events.length > 0 ? events[0] : null;
+  // Next upcoming event for countdown - memoize to prevent re-renders
+  const nextEvent = useMemo(() => 
+    events && events.length > 0 ? events[0] : null, 
+    [events]
+  );
   
   const handleRegisterAsAdmin = () => {
     navigate("/dashboard/admin");
@@ -283,12 +286,12 @@ const DashboardPageContent = () => {
 };
 
 // Wrap the component with ErrorBoundary for better error handling
-const DashboardPage = () => {
+const DashboardPage = React.memo(() => {
   return (
     <ErrorBoundary>
       <DashboardPageContent />
     </ErrorBoundary>
   );
-};
+});
 
 export default DashboardPage;

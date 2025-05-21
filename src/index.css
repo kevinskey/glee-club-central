@@ -1,3 +1,6 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
 /* Import the separated CSS files */
 @import './styles/base.css';
@@ -125,4 +128,32 @@ input[type="radio"],
 select {
   min-height: 44px;
   min-width: 44px;
+}
+
+/* Add page transition animations */
+.page-transition-enter {
+  opacity: 0;
+}
+.page-transition-enter-active {
+  opacity: 1;
+  transition: opacity 200ms ease-in;
+}
+.page-transition-exit {
+  opacity: 1;
+}
+.page-transition-exit-active {
+  opacity: 0;
+  transition: opacity 200ms ease-out;
+}
+
+/* Add layout transitions */
+.layout-transition {
+  transition: opacity 200ms ease-in-out, transform 200ms ease-in-out;
+}
+
+/* Fix for blinking issues */
+.prevent-blink {
+  backface-visibility: hidden;
+  transform: translateZ(0);
+  -webkit-font-smoothing: subpixel-antialiased;
 }

@@ -16,13 +16,14 @@ import ArchivesPage from '../pages/dashboard/ArchivesPage';
 import AttendancePage from '../pages/dashboard/AttendancePage';
 import AudioManagementPage from '../pages/audio-management/AudioManagementPage';
 
+// Define routes without duplicating wrapper components
 export const dashboardRoutes = {
   path: 'dashboard',
   element: <RequireAuth><DashboardPage /></RequireAuth>,
   children: [
     {
       path: '',
-      element: <RequireAuth><DashboardPage /></RequireAuth>,
+      element: <DashboardPage />,
     },
     {
       path: 'member',
