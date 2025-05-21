@@ -12,9 +12,12 @@ import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogT
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useAuth } from "@/contexts/AuthContext";
+import { MusicAppHeader } from "@/components/layout/MusicAppHeader";
+import { useNavigate } from "react-router-dom";
 
 export default function RecordingsPage() {
   const { toast } = useToast();
+  const navigate = useNavigate();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [voicePart, setVoicePart] = useState("");
   const [assignmentTitle, setAssignmentTitle] = useState("");
@@ -61,107 +64,119 @@ export default function RecordingsPage() {
   };
 
   return (
-    <div>
-      <PageHeader
-        title="Recording Library"
-        description="Browse and manage vocal recordings for the Glee Club"
-        icon={<FileAudio className="h-6 w-6" />}
-      />
+    <>
+      <MusicAppHeader currentSection="recording" />
+      <div className="container py-6">
+        <PageHeader
+          title="Recording Library"
+          description="Browse and manage vocal recordings for the Glee Club"
+          icon={<FileAudio className="h-6 w-6" />}
+        />
 
-      <Card className="mb-8">
-        <CardHeader className="flex flex-row items-center justify-between">
-          <div>
-            <CardTitle>Submit a New Recording</CardTitle>
-            <CardDescription>
-              Record your part or upload an existing recording
-            </CardDescription>
-          </div>
-          <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-            <DialogTrigger asChild>
-              <Button className="flex items-center gap-2">
-                <Upload className="h-4 w-4" />
-                Upload Recording
+        <Card className="mb-8">
+          <CardHeader className="flex flex-row items-center justify-between">
+            <div>
+              <CardTitle>Create or Upload a Recording</CardTitle>
+              <CardDescription>
+                Record your part or upload an existing recording
+              </CardDescription>
+            </div>
+            <div className="flex space-x-2">
+              <Button 
+                onClick={() => navigate('/dashboard/recording-studio')} 
+                className="flex items-center gap-2"
+              >
+                <Mic className="h-4 w-4" />
+                Record Audio
               </Button>
-            </DialogTrigger>
-            <DialogContent className="sm:max-w-md">
-              <DialogHeader>
-                <DialogTitle>Submit a recording</DialogTitle>
-              </DialogHeader>
-              <form onSubmit={handleSubmit}>
-                <div className="grid gap-4 py-4">
-                  <div className="grid grid-cols-4 items-center gap-4">
-                    <Label htmlFor="voicePart" className="text-right">
-                      Voice Part
-                    </Label>
-                    <Select
-                      value={voicePart}
-                      onValueChange={setVoicePart}
-                      required
-                    >
-                      <SelectTrigger className="col-span-3">
-                        <SelectValue placeholder="Select voice part" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="Soprano 1">Soprano 1</SelectItem>
-                        <SelectItem value="Soprano 2">Soprano 2</SelectItem>
-                        <SelectItem value="Alto 1">Alto 1</SelectItem>
-                        <SelectItem value="Alto 2">Alto 2</SelectItem>
-                        <SelectItem value="Tenor">Tenor</SelectItem>
-                        <SelectItem value="Bass">Bass</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div className="grid grid-cols-4 items-center gap-4">
-                    <Label htmlFor="assignmentTitle" className="text-right">
-                      Assignment
-                    </Label>
-                    <Input
-                      id="assignmentTitle"
-                      placeholder="e.g., Ave Maria - Solo Part"
-                      className="col-span-3"
-                      value={assignmentTitle}
-                      onChange={(e) => setAssignmentTitle(e.target.value)}
-                      required
-                    />
-                  </div>
-                  <div className="grid grid-cols-4 items-center gap-4">
-                    <Label htmlFor="recording" className="text-right">
-                      File
-                    </Label>
-                    <Input
-                      id="recording"
-                      type="file"
-                      accept="audio/*,video/*"
-                      className="col-span-3"
-                      onChange={handleFileChange}
-                      required
-                    />
-                  </div>
-                </div>
-                <DialogFooter>
-                  <Button type="submit">Upload Recording</Button>
-                </DialogFooter>
-              </form>
-            </DialogContent>
-          </Dialog>
-        </CardHeader>
-      </Card>
+              <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+                <DialogTrigger asChild>
+                  <Button className="flex items-center gap-2" variant="outline">
+                    <Upload className="h-4 w-4" />
+                    Upload Recording
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className="sm:max-w-md">
+                  <DialogHeader>
+                    <DialogTitle>Submit a recording</DialogTitle>
+                  </DialogHeader>
+                  <form onSubmit={handleSubmit}>
+                    <div className="grid gap-4 py-4">
+                      <div className="grid grid-cols-4 items-center gap-4">
+                        <Label htmlFor="voicePart" className="text-right">
+                          Voice Part
+                        </Label>
+                        <Select
+                          value={voicePart}
+                          onValueChange={setVoicePart}
+                          required
+                        >
+                          <SelectTrigger className="col-span-3">
+                            <SelectValue placeholder="Select voice part" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="Soprano 1">Soprano 1</SelectItem>
+                            <SelectItem value="Soprano 2">Soprano 2</SelectItem>
+                            <SelectItem value="Alto 1">Alto 1</SelectItem>
+                            <SelectItem value="Alto 2">Alto 2</SelectItem>
+                            <SelectItem value="Tenor">Tenor</SelectItem>
+                            <SelectItem value="Bass">Bass</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div className="grid grid-cols-4 items-center gap-4">
+                        <Label htmlFor="assignmentTitle" className="text-right">
+                          Assignment
+                        </Label>
+                        <Input
+                          id="assignmentTitle"
+                          placeholder="e.g., Ave Maria - Solo Part"
+                          className="col-span-3"
+                          value={assignmentTitle}
+                          onChange={(e) => setAssignmentTitle(e.target.value)}
+                          required
+                        />
+                      </div>
+                      <div className="grid grid-cols-4 items-center gap-4">
+                        <Label htmlFor="recording" className="text-right">
+                          File
+                        </Label>
+                        <Input
+                          id="recording"
+                          type="file"
+                          accept="audio/*,video/*"
+                          className="col-span-3"
+                          onChange={handleFileChange}
+                          required
+                        />
+                      </div>
+                    </div>
+                    <DialogFooter>
+                      <Button type="submit">Upload Recording</Button>
+                    </DialogFooter>
+                  </form>
+                </DialogContent>
+              </Dialog>
+            </div>
+          </CardHeader>
+        </Card>
 
-      {/* Audio Library Section */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Volume2 className="h-5 w-5" /> 
-            Recording Library
-          </CardTitle>
-          <CardDescription>
-            Browse and play all available vocal recordings
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <RecordingLibrary />
-        </CardContent>
-      </Card>
-    </div>
+        {/* Audio Library Section */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Volume2 className="h-5 w-5" /> 
+              Recording Library
+            </CardTitle>
+            <CardDescription>
+              Browse and play all available vocal recordings
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <RecordingLibrary />
+          </CardContent>
+        </Card>
+      </div>
+    </>
   );
 }

@@ -14,6 +14,7 @@ import FanDashboardPage from '../pages/FanDashboardPage';
 import AnnouncementsPage from '../pages/dashboard/AnnouncementsPage';
 import ArchivesPage from '../pages/dashboard/ArchivesPage';
 import AttendancePage from '../pages/dashboard/AttendancePage';
+import AudioManagementPage from '../pages/audio-management/AudioManagementPage';
 
 export const dashboardRoutes = {
   path: 'dashboard',
@@ -58,6 +59,10 @@ export const dashboardRoutes = {
     {
       path: 'recording-studio',
       element: <RequireAuth allowedUserTypes={['admin', 'member']}><RecordingStudioPage /></RequireAuth>,
+    },
+    {
+      path: 'audio-management',
+      element: <RequireAuth allowedUserTypes={['admin', 'member']}><AudioManagementPage /></RequireAuth>,
     },
     {
       path: 'calendar',
