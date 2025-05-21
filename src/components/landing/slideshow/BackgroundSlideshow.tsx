@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 
 interface BackgroundSlideshowProps {
   images: string[];
@@ -16,6 +16,7 @@ export function BackgroundSlideshow({
 }: BackgroundSlideshowProps) {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [displayedImageIndex, setDisplayedImageIndex] = useState(0);
+  const mounted = useRef(true);
 
   // Handle empty images array
   if (!images || images.length === 0) {
@@ -40,19 +41,30 @@ export function BackgroundSlideshow({
 
   // For multiple images, set up the slideshow
   useEffect(() => {
+    mounted.current = true;
+    
     // Set a timer to change images
     const interval = setInterval(() => {
-      setCurrentImageIndex((prevIndex) => (prevIndex + 1) % images.length);
+      if (mounted.current) {
+        setCurrentImageIndex((prevIndex) => (prevIndex + 1) % images.length);
+      }
     }, duration);
 
     // Clean up timer on unmount
-    return () => clearInterval(interval);
+    return () => {
+      mounted.current = false;
+      clearInterval(interval);
+    };
   }, [images.length, duration]);
 
   // Update the displayed image with a delay to allow for transition
   useEffect(() => {
+    if (!mounted.current) return;
+    
     const timer = setTimeout(() => {
-      setDisplayedImageIndex(currentImageIndex);
+      if (mounted.current) {
+        setDisplayedImageIndex(currentImageIndex);
+      }
     }, transition);
 
     return () => clearTimeout(timer);
