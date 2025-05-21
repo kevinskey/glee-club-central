@@ -9,7 +9,6 @@ import { Toaster } from "sonner";
 import { SessionContextProvider } from "@supabase/auth-helpers-react";
 import { supabase } from "./integrations/supabase/client";
 import "./index.css";
-// Remove AuthProvider import as we'll handle it differently
 
 // Create a client for React Query
 const queryClient = new QueryClient();
