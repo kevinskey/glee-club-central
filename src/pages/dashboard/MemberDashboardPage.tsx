@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { PageHeader } from '@/components/ui/page-header';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
@@ -8,7 +7,7 @@ import { useNavigate } from 'react-router-dom';
 import { NextEventCountdown } from '@/components/dashboard/NextEventCountdown';
 import { UpcomingEventsList } from '@/components/calendar/UpcomingEventsList';
 import { Button } from '@/components/ui/button';
-import { QuickAccess, QuickAccessTile } from '@/components/dashboard/QuickAccess';
+import { QuickAccess, QuickAccessItem } from '@/components/dashboard/QuickAccess';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
@@ -28,43 +27,43 @@ export default function MemberDashboardPage() {
     location: "Sisters Chapel"
   };
   
-  // Quick access tiles for members
-  const memberTiles: QuickAccessTile[] = [
+  // Quick access items for members
+  const memberItems: QuickAccessItem[] = [
     {
       title: "Sheet Music",
-      icon: <Music className="h-5 w-5 text-white" />,
-      href: "/dashboard/sheet-music",
-      color: "bg-gradient-to-br from-blue-600 to-blue-800"
+      description: "Access sheet music by section and song",
+      icon: <Music className="h-4 w-4 mr-2 text-white" />,
+      link: "/dashboard/sheet-music",
     },
     {
       title: "Calendar",
-      icon: <Calendar className="h-5 w-5 text-white" />,
-      href: "/dashboard/calendar",
-      color: "bg-gradient-to-br from-purple-600 to-purple-800"
+      description: "View upcoming events and rehearsals",
+      icon: <Calendar className="h-4 w-4 mr-2 text-white" />,
+      link: "/dashboard/calendar",
     },
     {
       title: "Recordings",
-      icon: <Headphones className="h-5 w-5 text-white" />,
-      href: "/dashboard/recordings",
-      color: "bg-gradient-to-br from-amber-600 to-amber-700"
+      description: "Listen to and upload practice tracks",
+      icon: <Headphones className="h-4 w-4 mr-2 text-white" />,
+      link: "/dashboard/recordings",
     },
     {
       title: "Resources",
-      icon: <BookOpen className="h-5 w-5 text-white" />,
-      href: "/dashboard/resources",
-      color: "bg-gradient-to-br from-green-600 to-green-700"
+      description: "Access handbook and resources",
+      icon: <BookOpen className="h-4 w-4 mr-2 text-white" />,
+      link: "/dashboard/resources",
     },
     {
       title: "Uniform Info",
-      icon: <Shirt className="h-5 w-5 text-white" />,
-      href: "/dashboard/wardrobe",
-      color: "bg-gradient-to-br from-pink-600 to-pink-700"
+      description: "Check wardrobe requirements",
+      icon: <Shirt className="h-4 w-4 mr-2 text-white" />,
+      link: "/dashboard/wardrobe",
     },
     {
       title: "Profile",
-      icon: <User className="h-5 w-5 text-white" />,
-      href: "/dashboard/profile",
-      color: "bg-gradient-to-br from-gray-700 to-gray-800"
+      description: "Update your personal information",
+      icon: <User className="h-4 w-4 mr-2 text-white" />,
+      link: "/dashboard/profile",
     }
   ];
   
@@ -102,7 +101,7 @@ export default function MemberDashboardPage() {
         
         {/* Overview Tab */}
         <TabsContent value="overview">
-          <QuickAccess tiles={memberTiles} />
+          <QuickAccess items={memberItems} />
           
           <div className="grid grid-cols-1 md:grid-cols-12 gap-6 mt-6">
             {/* Main Content - Left 2/3 */}

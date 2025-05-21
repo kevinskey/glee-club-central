@@ -1,10 +1,11 @@
+
 import React, { memo } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Link } from "react-router-dom";
 import { Home, Calendar, Music, Bell, Headphones, FileText, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
-interface QuickAccessItem {
+export interface QuickAccessItem {
   title: string;
   description: string;
   icon: React.ReactNode;
@@ -50,15 +51,19 @@ const quickAccessItems: QuickAccessItem[] = [
   },
 ];
 
+export interface QuickAccessProps {
+  items?: QuickAccessItem[];
+}
+
 // Memoize the component to prevent unnecessary re-renders
-export const QuickAccess = memo(function QuickAccess() {
+export const QuickAccess = memo(function QuickAccess({ items = quickAccessItems }: QuickAccessProps) {
   return (
     <Card className="shadow-md">
       <CardHeader className="pb-2">
         <CardTitle>Quick Access</CardTitle>
       </CardHeader>
       <CardContent className="grid gap-4 grid-cols-1 md:grid-cols-2">
-        {quickAccessItems.map((item) => (
+        {items.map((item) => (
           <Link
             key={item.title}
             to={item.link}
