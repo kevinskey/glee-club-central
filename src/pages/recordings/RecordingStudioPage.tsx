@@ -5,9 +5,11 @@ import { Mic, Headphones, Files, UploadCloud } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { RecordingStudio } from "@/components/recordings/RecordingStudio";
 import { RecordingLibrary } from "@/components/recordings/RecordingLibrary";
+import { RecordingArchive } from "@/components/recordings/RecordingArchive";
 import { FileUploader } from "@/components/recordings/FileUploader";
 import { useAuth } from "@/contexts/AuthContext";
 import { Navigate } from "react-router-dom";
+import { MusicAppHeader } from "@/components/layout/MusicAppHeader";
 
 export default function RecordingStudioPage() {
   const { getUserType, isLoading } = useAuth();
@@ -19,41 +21,52 @@ export default function RecordingStudioPage() {
   }
   
   return (
-    <div className="space-y-6">
-      <PageHeader
-        title="Recording Studio"
-        description="Record, edit, and manage your vocal performances"
-        icon={<Headphones className="h-6 w-6" />}
-      />
-      
-      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="w-full md:w-auto grid grid-cols-3 md:inline-flex">
-          <TabsTrigger value="record" className="flex items-center gap-2">
-            <Mic className="h-4 w-4" />
-            <span className="hidden sm:inline">Record</span>
-          </TabsTrigger>
-          <TabsTrigger value="library" className="flex items-center gap-2">
-            <Files className="h-4 w-4" />
-            <span className="hidden sm:inline">Library</span>
-          </TabsTrigger>
-          <TabsTrigger value="upload" className="flex items-center gap-2">
-            <UploadCloud className="h-4 w-4" />
-            <span className="hidden sm:inline">Upload</span>
-          </TabsTrigger>
-        </TabsList>
+    <>
+      <MusicAppHeader currentSection="recordings" />
+      <div className="container py-6">
+        <PageHeader
+          title="Recording Studio"
+          description="Record, edit, and manage your vocal performances"
+          icon={<Headphones className="h-6 w-6" />}
+        />
         
-        <TabsContent value="record" className="mt-4">
-          <RecordingStudio />
-        </TabsContent>
-        
-        <TabsContent value="library" className="mt-4">
-          <RecordingLibrary />
-        </TabsContent>
-        
-        <TabsContent value="upload" className="mt-4">
-          <FileUploader />
-        </TabsContent>
-      </Tabs>
-    </div>
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+          <TabsList className="w-full md:w-auto grid grid-cols-4 md:inline-flex">
+            <TabsTrigger value="record" className="flex items-center gap-2">
+              <Mic className="h-4 w-4" />
+              <span className="hidden sm:inline">Record</span>
+            </TabsTrigger>
+            <TabsTrigger value="library" className="flex items-center gap-2">
+              <Files className="h-4 w-4" />
+              <span className="hidden sm:inline">Library</span>
+            </TabsTrigger>
+            <TabsTrigger value="archive" className="flex items-center gap-2">
+              <Files className="h-4 w-4" />
+              <span className="hidden sm:inline">My Archive</span>
+            </TabsTrigger>
+            <TabsTrigger value="upload" className="flex items-center gap-2">
+              <UploadCloud className="h-4 w-4" />
+              <span className="hidden sm:inline">Upload</span>
+            </TabsTrigger>
+          </TabsList>
+          
+          <TabsContent value="record" className="mt-4">
+            <RecordingStudio />
+          </TabsContent>
+          
+          <TabsContent value="library" className="mt-4">
+            <RecordingLibrary />
+          </TabsContent>
+          
+          <TabsContent value="archive" className="mt-4">
+            <RecordingArchive />
+          </TabsContent>
+          
+          <TabsContent value="upload" className="mt-4">
+            <FileUploader />
+          </TabsContent>
+        </Tabs>
+      </div>
+    </>
   );
 }

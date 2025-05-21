@@ -10,6 +10,7 @@ import { PracticeLogForm } from "@/components/practice/PracticeLogForm";
 import { PracticeLogsList } from "@/components/practice/PracticeLogsList";
 import { PracticeStats } from "@/components/practice/PracticeStats";
 import { usePracticeLogs } from "@/hooks/usePracticeLogs";
+import { MusicAppHeader } from "@/components/layout/MusicAppHeader";
 
 interface PracticeMedia {
   id: string;
@@ -107,145 +108,148 @@ export default function PracticePage() {
   const isAdmin = profile?.role === "admin";
   
   return (
-    <div>
-      <PageHeader
-        title="Practice on Your Own"
-        description="Access warm-ups, sectional recordings, sight reading practice, and track your progress"
-        icon={<Headphones className="h-6 w-6" />}
-      />
+    <>
+      <MusicAppHeader currentSection="practice" />
+      <div className="container py-6">
+        <PageHeader
+          title="Practice on Your Own"
+          description="Access warm-ups, sectional recordings, sight reading practice, and track your progress"
+          icon={<Headphones className="h-6 w-6" />}
+        />
 
-      <Tabs value={activeTab} onValueChange={setActiveTab} className="mb-8">
-        <TabsList className="mb-4">
-          <TabsTrigger value="warmups">Warm-ups</TabsTrigger>
-          <TabsTrigger value="sectionals">Sectionals</TabsTrigger>
-          <TabsTrigger value="full">Full Choir</TabsTrigger>
-          <TabsTrigger value="sightreading">Sight Reading</TabsTrigger>
-          <TabsTrigger value="tracker">Practice Tracker</TabsTrigger>
-        </TabsList>
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="mb-8">
+          <TabsList className="mb-4">
+            <TabsTrigger value="warmups">Warm-ups</TabsTrigger>
+            <TabsTrigger value="sectionals">Sectionals</TabsTrigger>
+            <TabsTrigger value="full">Full Choir</TabsTrigger>
+            <TabsTrigger value="sightreading">Sight Reading</TabsTrigger>
+            <TabsTrigger value="tracker">Practice Tracker</TabsTrigger>
+          </TabsList>
 
-        {Object.entries(practiceData).map(([key, mediaItems]) => (
-          <TabsContent key={key} value={key}>
-            <div>
-              <Card>
-                <CardHeader className="flex flex-row items-center justify-between">
-                  <div>
-                    <CardTitle className="flex items-center gap-2">
-                      <Music className="h-5 w-5" /> 
-                      {key === "warmups" ? "Warm-ups" : key === "sectionals" ? "Sectional Recordings" : "Full Choir Recordings"}
-                    </CardTitle>
-                    <CardDescription>
-                      {key === "warmups"
-                        ? "Exercises to prepare your voice"
-                        : key === "sectionals"
-                        ? "Practice recordings for specific voice parts"
-                        : "Complete choir recordings for reference"}
-                    </CardDescription>
-                  </div>
-                  {canUpload && (
-                    <Button size="sm">Upload New Recording</Button>
-                  )}
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
-                    {mediaItems.map((media) => (
-                      <div
-                        key={media.id}
-                        className="flex items-center justify-between rounded-lg border p-4"
-                      >
-                        <div className="flex-1">
-                          <h3 className="text-lg font-medium">{media.title}</h3>
-                          <p className="text-sm text-muted-foreground">
-                            {media.description} • {media.duration}
-                          </p>
-                          <p className="text-xs text-muted-foreground">
-                            Added {media.date}
-                          </p>
-                        </div>
-                        <Button 
-                          onClick={() => handlePlay(media)}
-                          className="ml-4 flex items-center gap-2"
-                        >
-                          <PlayCircle className="h-5 w-5" />
-                          {media.type === "audio" ? "Play Audio" : "Play Video"}
-                        </Button>
-                      </div>
-                    ))}
-
-                    {mediaItems.length === 0 && (
-                      <div className="flex flex-col items-center justify-center rounded-lg border border-dashed p-8 text-center">
-                        <Headphones className="mb-4 h-12 w-12 text-muted-foreground" />
-                        <h3 className="mb-2 text-lg font-medium">No recordings yet</h3>
-                        <p className="mb-4 text-sm text-muted-foreground">
-                          There are no practice recordings uploaded in this category yet.
-                        </p>
-                        {canUpload && (
-                          <Button>Upload Recording</Button>
-                        )}
-                      </div>
-                    )}
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
-          </TabsContent>
-        ))}
-
-        {/* Sight Reading Practice Tab */}
-        <TabsContent value="sightreading">
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between">
+          {Object.entries(practiceData).map(([key, mediaItems]) => (
+            <TabsContent key={key} value={key}>
               <div>
-                <CardTitle className="flex items-center gap-2">
-                  <Music2 className="h-5 w-5" /> 
-                  Sight Reading Practice
-                </CardTitle>
-                <CardDescription>
-                  Improve your sight reading skills with interactive exercises from SightReadingFactory.com
-                </CardDescription>
-              </div>
-            </CardHeader>
-            <CardContent>
-              <SightReadingEmbed />
-            </CardContent>
-          </Card>
-        </TabsContent>
+                <Card>
+                  <CardHeader className="flex flex-row items-center justify-between">
+                    <div>
+                      <CardTitle className="flex items-center gap-2">
+                        <Music className="h-5 w-5" /> 
+                        {key === "warmups" ? "Warm-ups" : key === "sectionals" ? "Sectional Recordings" : "Full Choir Recordings"}
+                      </CardTitle>
+                      <CardDescription>
+                        {key === "warmups"
+                          ? "Exercises to prepare your voice"
+                          : key === "sectionals"
+                          ? "Practice recordings for specific voice parts"
+                          : "Complete choir recordings for reference"}
+                      </CardDescription>
+                    </div>
+                    {canUpload && (
+                      <Button size="sm">Upload New Recording</Button>
+                    )}
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-4">
+                      {mediaItems.map((media) => (
+                        <div
+                          key={media.id}
+                          className="flex items-center justify-between rounded-lg border p-4"
+                        >
+                          <div className="flex-1">
+                            <h3 className="text-lg font-medium">{media.title}</h3>
+                            <p className="text-sm text-muted-foreground">
+                              {media.description} • {media.duration}
+                            </p>
+                            <p className="text-xs text-muted-foreground">
+                              Added {media.date}
+                            </p>
+                          </div>
+                          <Button 
+                            onClick={() => handlePlay(media)}
+                            className="ml-4 flex items-center gap-2"
+                          >
+                            <PlayCircle className="h-5 w-5" />
+                            {media.type === "audio" ? "Play Audio" : "Play Video"}
+                          </Button>
+                        </div>
+                      ))}
 
-        {/* Practice Tracker Tab */}
-        <TabsContent value="tracker">
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            <div className="lg:col-span-2">
-              <Card>
-                <CardHeader>
+                      {mediaItems.length === 0 && (
+                        <div className="flex flex-col items-center justify-center rounded-lg border border-dashed p-8 text-center">
+                          <Headphones className="mb-4 h-12 w-12 text-muted-foreground" />
+                          <h3 className="mb-2 text-lg font-medium">No recordings yet</h3>
+                          <p className="mb-4 text-sm text-muted-foreground">
+                            There are no practice recordings uploaded in this category yet.
+                          </p>
+                          {canUpload && (
+                            <Button>Upload Recording</Button>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+            </TabsContent>
+          ))}
+
+          {/* Sight Reading Practice Tab */}
+          <TabsContent value="sightreading">
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between">
+                <div>
                   <CardTitle className="flex items-center gap-2">
-                    <BookOpen className="h-5 w-5" />
-                    Log Your Practice
+                    <Music2 className="h-5 w-5" /> 
+                    Sight Reading Practice
                   </CardTitle>
                   <CardDescription>
-                    Keep track of your practice sessions to build consistency and see your progress over time
+                    Improve your sight reading skills with interactive exercises from SightReadingFactory.com
                   </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <PracticeLogForm onSubmit={addPracticeLog} />
-                </CardContent>
-              </Card>
+                </div>
+              </CardHeader>
+              <CardContent>
+                <SightReadingEmbed />
+              </CardContent>
+            </Card>
+          </TabsContent>
 
-              <div className="mt-6">
-                <h2 className="text-xl font-semibold mb-3">Practice History</h2>
-                <PracticeLogsList 
-                  logs={logs} 
-                  onDelete={removePracticeLog} 
-                  onUpdate={editPracticeLog}
-                  isLoading={isLoading}
-                />
+          {/* Practice Tracker Tab */}
+          <TabsContent value="tracker">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              <div className="lg:col-span-2">
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <BookOpen className="h-5 w-5" />
+                      Log Your Practice
+                    </CardTitle>
+                    <CardDescription>
+                      Keep track of your practice sessions to build consistency and see your progress over time
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <PracticeLogForm onSubmit={addPracticeLog} />
+                  </CardContent>
+                </Card>
+
+                <div className="mt-6">
+                  <h2 className="text-xl font-semibold mb-3">Practice History</h2>
+                  <PracticeLogsList 
+                    logs={logs} 
+                    onDelete={removePracticeLog} 
+                    onUpdate={editPracticeLog}
+                    isLoading={isLoading}
+                  />
+                </div>
+              </div>
+              
+              <div>
+                <PracticeStats stats={stats} totalMinutes={totalMinutes} />
               </div>
             </div>
-            
-            <div>
-              <PracticeStats stats={stats} totalMinutes={totalMinutes} />
-            </div>
-          </div>
-        </TabsContent>
-      </Tabs>
-    </div>
+          </TabsContent>
+        </Tabs>
+      </div>
+    </>
   );
 }

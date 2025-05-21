@@ -11,6 +11,7 @@ import { AudioSearchAndFilter } from "@/components/audio/AudioSearchAndFilter";
 import { AudioFilesList } from "@/components/audio/AudioFilesList";
 import { DeleteAudioDialog } from "@/components/audio/DeleteAudioDialog";
 import { RecordingSection } from "@/components/audio/RecordingSection";
+import { MusicAppHeader } from "@/components/layout/MusicAppHeader";
 
 export default function AudioManagementPage() {
   const { user } = useAuth();
@@ -92,97 +93,100 @@ export default function AudioManagementPage() {
   };
 
   return (
-    <div className="space-y-6">
-      <PageHeader
-        title="Audio Management"
-        description="Upload, record, and manage audio files for the choir"
-        icon={<Headphones className="h-6 w-6" />}
-        actions={
-          <Button 
-            onClick={() => handleOpenUploadModal()}
-            className="gap-2 bg-glee-purple hover:bg-glee-purple/90"
-          >
-            <Upload className="h-4 w-4" /> Upload Audio
-          </Button>
-        }
-      />
-
-      {/* Recording Section */}
-      <RecordingSection onRecordingSaved={handleRecordingSaved} />
-
-      {/* Search and Filter with Tabs Container */}
-      <Tabs defaultValue={activeCategory} value={activeCategory} onValueChange={(val) => setActiveCategory(val as AudioPageCategory)}>
-        <AudioSearchAndFilter 
-          searchQuery={searchQuery}
-          setSearchQuery={setSearchQuery}
-          activeCategory={activeCategory}
-          setActiveCategory={setActiveCategory}
+    <>
+      <MusicAppHeader currentSection="audio" />
+      <div className="container py-6">
+        <PageHeader
+          title="Audio Management"
+          description="Upload, record, and manage audio files for the choir"
+          icon={<Headphones className="h-6 w-6" />}
+          actions={
+            <Button 
+              onClick={() => handleOpenUploadModal()}
+              className="gap-2 bg-glee-purple hover:bg-glee-purple/90"
+            >
+              <Upload className="h-4 w-4" /> Upload Audio
+            </Button>
+          }
         />
 
-        {/* Audio Files List/Table for each tab */}
-        <TabsContent value="all" className="mt-4">
-          <AudioFilesList
-            loading={loading}
-            displayFiles={getDisplayFilesForCategory("all")}
-            category="all"
-            searchQuery={searchQuery}
-            canDeleteFile={canDeleteFile}
-            confirmDelete={confirmDelete}
-            onUploadClick={handleOpenUploadModal}
-          />
-        </TabsContent>
-        
-        <TabsContent value="part_tracks" className="mt-4">
-          <AudioFilesList
-            loading={loading}
-            displayFiles={getDisplayFilesForCategory("part_tracks")}
-            category="part_tracks"
-            searchQuery={searchQuery}
-            canDeleteFile={canDeleteFile}
-            confirmDelete={confirmDelete}
-            onUploadClick={handleOpenUploadModal}
-          />
-        </TabsContent>
-        
-        <TabsContent value="recordings" className="mt-4">
-          <AudioFilesList
-            loading={loading}
-            displayFiles={getDisplayFilesForCategory("recordings")}
-            category="recordings"
-            searchQuery={searchQuery}
-            canDeleteFile={canDeleteFile}
-            confirmDelete={confirmDelete}
-            onUploadClick={handleOpenUploadModal}
-          />
-        </TabsContent>
-        
-        <TabsContent value="my_tracks" className="mt-4">
-          <AudioFilesList
-            loading={loading}
-            displayFiles={getDisplayFilesForCategory("my_tracks")}
-            category="my_tracks"
-            searchQuery={searchQuery}
-            canDeleteFile={canDeleteFile}
-            confirmDelete={confirmDelete}
-            onUploadClick={handleOpenUploadModal}
-          />
-        </TabsContent>
-      </Tabs>
+        {/* Recording Section */}
+        <RecordingSection onRecordingSaved={handleRecordingSaved} />
 
-      {/* Upload Modal */}
-      <UploadAudioModal
-        open={isUploadModalOpen}
-        onOpenChange={setIsUploadModalOpen}
-        onUploadComplete={fetchAudioFiles}
-        defaultCategory={uploadCategory}
-      />
+        {/* Search and Filter with Tabs Container */}
+        <Tabs defaultValue={activeCategory} value={activeCategory} onValueChange={(val) => setActiveCategory(val as AudioPageCategory)}>
+          <AudioSearchAndFilter 
+            searchQuery={searchQuery}
+            setSearchQuery={setSearchQuery}
+            activeCategory={activeCategory}
+            setActiveCategory={setActiveCategory}
+          />
 
-      {/* Delete Confirmation Dialog */}
-      <DeleteAudioDialog 
-        isOpen={isDeleteDialogOpen}
-        onOpenChange={setIsDeleteDialogOpen}
-        onConfirmDelete={handleDeleteAudioFile}
-      />
-    </div>
+          {/* Audio Files List/Table for each tab */}
+          <TabsContent value="all" className="mt-4">
+            <AudioFilesList
+              loading={loading}
+              displayFiles={getDisplayFilesForCategory("all")}
+              category="all"
+              searchQuery={searchQuery}
+              canDeleteFile={canDeleteFile}
+              confirmDelete={confirmDelete}
+              onUploadClick={handleOpenUploadModal}
+            />
+          </TabsContent>
+          
+          <TabsContent value="part_tracks" className="mt-4">
+            <AudioFilesList
+              loading={loading}
+              displayFiles={getDisplayFilesForCategory("part_tracks")}
+              category="part_tracks"
+              searchQuery={searchQuery}
+              canDeleteFile={canDeleteFile}
+              confirmDelete={confirmDelete}
+              onUploadClick={handleOpenUploadModal}
+            />
+          </TabsContent>
+          
+          <TabsContent value="recordings" className="mt-4">
+            <AudioFilesList
+              loading={loading}
+              displayFiles={getDisplayFilesForCategory("recordings")}
+              category="recordings"
+              searchQuery={searchQuery}
+              canDeleteFile={canDeleteFile}
+              confirmDelete={confirmDelete}
+              onUploadClick={handleOpenUploadModal}
+            />
+          </TabsContent>
+          
+          <TabsContent value="my_tracks" className="mt-4">
+            <AudioFilesList
+              loading={loading}
+              displayFiles={getDisplayFilesForCategory("my_tracks")}
+              category="my_tracks"
+              searchQuery={searchQuery}
+              canDeleteFile={canDeleteFile}
+              confirmDelete={confirmDelete}
+              onUploadClick={handleOpenUploadModal}
+            />
+          </TabsContent>
+        </Tabs>
+
+        {/* Upload Modal */}
+        <UploadAudioModal
+          open={isUploadModalOpen}
+          onOpenChange={setIsUploadModalOpen}
+          onUploadComplete={fetchAudioFiles}
+          defaultCategory={uploadCategory}
+        />
+
+        {/* Delete Confirmation Dialog */}
+        <DeleteAudioDialog 
+          isOpen={isDeleteDialogOpen}
+          onOpenChange={setIsDeleteDialogOpen}
+          onConfirmDelete={handleDeleteAudioFile}
+        />
+      </div>
+    </>
   );
 }
