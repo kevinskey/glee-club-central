@@ -32,8 +32,16 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const user = useUser();
 
   // Get router hooks - only use these if we're within Router context
-  const navigate = useNavigate();
-  const location = useLocation();
+  // We need to handle the case where these might not be available
+  let navigate: ReturnType<typeof useNavigate>;
+  let location: ReturnType<typeof useLocation>;
+
+  try {
+    navigate = useNavigate();
+    location = useLocation();
+  } catch (error) {
+    console.warn("Router hooks not available in this context. Navigation features will be limited.");
+  }
   
   // Function to refresh user permissions
   const refreshPermissions = useCallback(async () => {
@@ -145,19 +153,6 @@ export function AuthProvider({ children }: AuthProviderProps) {
     return userType as UserType;
   }, [profile]);
 
-  // Auth methods that use navigate must be inside the Router context
-  const handleLogout = async () => {
-    const { error } = await supabase.auth.signOut();
-    if (error) {
-      toast.error(error.message);
-    }
-    setProfile(null);
-    setAuthUser(null);
-    setPermissions({});
-    navigate('/');
-    return { error };
-  };
-
   // Add cleanup auth state function
   const cleanupAuthState = () => {
     // Remove standard auth tokens
@@ -176,6 +171,27 @@ export function AuthProvider({ children }: AuthProviderProps) {
         sessionStorage.removeItem(key);
       }
     });
+  };
+
+  // Auth methods that use navigate must be inside the Router context
+  const handleLogout = async () => {
+    const { error } = await supabase.auth.signOut();
+    if (error) {
+      toast.error(error.message);
+    }
+    setProfile(null);
+    setAuthUser(null);
+    setPermissions({});
+    
+    // Only navigate if we have access to the navigate function
+    if (typeof navigate === 'function') {
+      navigate('/');
+    } else {
+      // Fallback for when navigate is not available
+      window.location.href = '/';
+    }
+    
+    return { error };
   };
 
   const defaultLogin = async (email: string, password: string) => {
