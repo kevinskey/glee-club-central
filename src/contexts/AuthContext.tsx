@@ -6,7 +6,7 @@ import {
   useUser,
 } from '@supabase/auth-helpers-react';
 import { AuthUser, AuthContextType, Profile, UserType } from '@/types/auth';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { toast } from "sonner";
 import { fetchUserPermissions } from '@/utils/supabase/permissions';
 import { getProfile } from '@/utils/supabase/profiles';
@@ -18,6 +18,26 @@ const AuthContext = createContext<AuthContextType | null>(null);
 interface AuthProviderProps {
   children: React.ReactNode | ((props: { isLoading: boolean }) => React.ReactNode);
 }
+
+// Add cleanup auth state function
+export const cleanupAuthState = () => {
+  // Remove standard auth tokens
+  localStorage.removeItem('supabase.auth.token');
+  
+  // Remove all Supabase auth keys from localStorage
+  Object.keys(localStorage).forEach((key) => {
+    if (key.startsWith('supabase.auth.') || key.includes('sb-')) {
+      localStorage.removeItem(key);
+    }
+  });
+  
+  // Remove from sessionStorage if in use
+  Object.keys(sessionStorage || {}).forEach((key) => {
+    if (key.startsWith('supabase.auth.') || key.includes('sb-')) {
+      sessionStorage.removeItem(key);
+    }
+  });
+};
 
 export function AuthProvider({ children }: AuthProviderProps) {
   // Use React hooks for state management
@@ -31,16 +51,19 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const supabaseClient = useSupabaseClient();
   const user = useUser();
 
-  // Get router hooks - only use these if we're within Router context
-  // We need to handle the case where these might not be available
-  let navigate: ReturnType<typeof useNavigate>;
-  let location: ReturnType<typeof useLocation>;
+  // Safely access router hooks - these might not be available in all contexts
+  let navigate: ((to: string, options?: any) => void) | undefined;
+  let location: { pathname: string; search: string } | undefined;
 
   try {
+    // Try to use React Router hooks
     navigate = useNavigate();
     location = useLocation();
   } catch (error) {
     console.warn("Router hooks not available in this context. Navigation features will be limited.");
+    // Provide fallbacks for navigation
+    navigate = (path: string) => { window.location.href = path; };
+    location = { pathname: window.location.pathname, search: window.location.search };
   }
   
   // Function to refresh user permissions
@@ -153,45 +176,34 @@ export function AuthProvider({ children }: AuthProviderProps) {
     return userType as UserType;
   }, [profile]);
 
-  // Add cleanup auth state function
-  const cleanupAuthState = () => {
-    // Remove standard auth tokens
-    localStorage.removeItem('supabase.auth.token');
-    
-    // Remove all Supabase auth keys from localStorage
-    Object.keys(localStorage).forEach((key) => {
-      if (key.startsWith('supabase.auth.') || key.includes('sb-')) {
-        localStorage.removeItem(key);
-      }
-    });
-    
-    // Remove from sessionStorage if in use
-    Object.keys(sessionStorage || {}).forEach((key) => {
-      if (key.startsWith('supabase.auth.') || key.includes('sb-')) {
-        sessionStorage.removeItem(key);
-      }
-    });
-  };
-
   // Auth methods that use navigate must be inside the Router context
   const handleLogout = async () => {
-    const { error } = await supabase.auth.signOut();
-    if (error) {
-      toast.error(error.message);
+    try {
+      // Clean up auth state first
+      cleanupAuthState();
+      
+      const { error } = await supabase.auth.signOut();
+      if (error) {
+        toast.error(error.message);
+      }
+      
+      setProfile(null);
+      setAuthUser(null);
+      setPermissions({});
+      
+      // Safely navigate
+      if (typeof navigate === 'function') {
+        navigate('/');
+      } else {
+        window.location.href = '/';
+      }
+      
+      return { error };
+    } catch (err) {
+      console.error("Error during logout:", err);
+      toast.error("An unexpected error occurred during logout");
+      return { error: err as Error };
     }
-    setProfile(null);
-    setAuthUser(null);
-    setPermissions({});
-    
-    // Only navigate if we have access to the navigate function
-    if (typeof navigate === 'function') {
-      navigate('/');
-    } else {
-      // Fallback for when navigate is not available
-      window.location.href = '/';
-    }
-    
-    return { error };
   };
 
   const defaultLogin = async (email: string, password: string) => {

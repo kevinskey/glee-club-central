@@ -11,21 +11,12 @@ import MainLayout from './layouts/MainLayout';
 import HomePage from './pages/HomePage';
 import { AuthProvider } from './contexts/AuthContext';
 
-// Wrap components with AuthProvider
-const AuthProviderWrapper = ({ children }: { children: React.ReactNode }) => (
-  <AuthProvider>
-    {children}
-  </AuthProvider>
-);
-
 // Create a properly structured router with all routes
 export const router = createBrowserRouter([
   // Public routes with MainLayout
   {
     path: '/',
-    element: (
-      <MainLayout />
-    ),
+    element: <MainLayout />,
     children: [
       {
         index: true,
@@ -44,11 +35,7 @@ export const router = createBrowserRouter([
   // Dashboard routes
   {
     path: '/dashboard',
-    element: (
-      <AuthProviderWrapper>
-        <App />
-      </AuthProviderWrapper>
-    ),
+    element: <App />,
     errorElement: (
       <ErrorBoundary>
         <div className="flex items-center justify-center min-h-screen p-4">
@@ -69,13 +56,9 @@ export const router = createBrowserRouter([
     ),
     children: dashboardRoutes.children,
   },
-  // Auth routes - need AuthProvider wrapper
+  // Auth routes
   {
-    element: (
-      <AuthProviderWrapper>
-        <Outlet />
-      </AuthProviderWrapper>
-    ),
+    element: <Outlet />,
     children: authRoutes,
   },
 ]);

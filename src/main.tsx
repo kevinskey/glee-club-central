@@ -9,6 +9,7 @@ import { Toaster } from "sonner";
 import { SessionContextProvider } from "@supabase/auth-helpers-react";
 import { supabase } from "./integrations/supabase/client";
 import "./index.css";
+import { AuthProvider } from "./contexts/AuthContext";
 
 // Create a client for React Query
 const queryClient = new QueryClient();
@@ -29,7 +30,9 @@ root.render(
     <QueryClientProvider client={queryClient}>
       <SessionContextProvider supabaseClient={supabase}>
         <ThemeProvider>
-          <RouterProvider router={router} />
+          <AuthProvider>
+            <RouterProvider router={router} />
+          </AuthProvider>
           <Toaster />
         </ThemeProvider>
       </SessionContextProvider>

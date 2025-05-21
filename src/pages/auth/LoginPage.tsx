@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { useNavigate, Link, useLocation } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
@@ -9,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
 import { UserIcon, LockIcon, LogIn, UserPlus } from "lucide-react";
-import { cleanupAuthState } from "@/integrations/supabase/client";
+import { cleanupAuthState } from "@/contexts/AuthContext";
 
 export default function LoginPage() {
   const { signIn, signUp, isLoading, isAuthenticated } = useAuth();
