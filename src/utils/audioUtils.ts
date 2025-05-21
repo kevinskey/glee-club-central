@@ -61,7 +61,7 @@ export interface RecordingData {
   createdAt: string;
 }
 
-// Get frequency for a musical note
+// Get frequency for a musical note - make sure this is exported
 export const getNoteFrequency = (note: string, octave: number): number => {
   const notes = { 'C': 0, 'C#': 1, 'D': 2, 'D#': 3, 'E': 4, 'F': 5, 'F#': 6, 'G': 7, 'G#': 8, 'A': 9, 'A#': 10, 'B': 11 };
   const baseFreq = 440; // A4 frequency
