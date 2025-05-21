@@ -1,7 +1,6 @@
 
 import React, { useState, useEffect } from "react";
 import { HeroContent } from "@/components/landing/hero/HeroContent";
-import { HeroSeal } from "@/components/landing/hero/HeroSeal";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
@@ -59,9 +58,6 @@ export function EnhancedHeroSection() {
           </div>
         </div>
       </div>
-      
-      {/* Seal/Logo */}
-      <HeroSeal />
     </section>
   );
 }
