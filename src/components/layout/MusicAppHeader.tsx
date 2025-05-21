@@ -5,6 +5,7 @@ import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Link } from "react-router-dom";
 import { Music, Mic, Headphones, FileMusic, Radio } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
+import { GleeToolsDropdown } from "@/components/glee-tools/GleeToolsDropdown";
 
 interface MusicAppHeaderProps {
   currentSection?: string;
@@ -49,7 +50,9 @@ export function MusicAppHeader({ currentSection }: MusicAppHeaderProps) {
             </Tabs>
           </div>
           
-          <div>
+          <div className="flex items-center gap-2">
+            <GleeToolsDropdown />
+            
             {isAuthenticated ? (
               <Link to="/dashboard">
                 <Button variant="outline" size="sm">Back to Dashboard</Button>
