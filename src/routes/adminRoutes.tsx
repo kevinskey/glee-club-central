@@ -1,15 +1,16 @@
+
 import { RouteObject } from "react-router-dom";
-import DashboardPage from "@/pages/admin/DashboardPage";
+import AdminDashboard from "@/pages/admin/AdminDashboard";
 import LandingPageSettingsPage from "@/pages/admin/LandingPageSettingsPage";
 import MediaLibrary from "@/pages/admin/MediaLibrary";
-import CalendarAdminPage from "@/pages/admin/CalendarAdminPage";
+import EventCalendar from "@/pages/admin/EventCalendar";
 import NewsItemsPage from "@/pages/admin/NewsItemsPage";
 
 // Define the admin routes
 export const adminRoutes: RouteObject[] = [
   {
     path: "/",
-    element: <DashboardPage />,
+    element: <AdminDashboard />,
   },
   {
     path: "landing",
@@ -21,7 +22,7 @@ export const adminRoutes: RouteObject[] = [
   },
   {
     path: "calendar",
-    element: <CalendarAdminPage />,
+    element: <EventCalendar />,
   },
   {
     path: "news",

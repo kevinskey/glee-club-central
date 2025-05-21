@@ -12,7 +12,7 @@ export default function AdministrationPage() {
 
   return (
     <div className="flex min-h-screen flex-col">
-      <Header initialShowNewsFeed={false} />
+      <Header />
       <main className="flex-1 bg-white dark:bg-gray-950">
         <div className="container mx-auto px-4 py-12">
           <div className="max-w-4xl mx-auto">

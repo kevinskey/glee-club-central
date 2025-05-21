@@ -1,4 +1,3 @@
-
 import React from "react";
 import { Header } from "@/components/landing/Header";
 import { Footer } from "@/components/landing/Footer";
@@ -14,7 +13,7 @@ export default function AboutPage() {
   
   return (
     <div className="flex min-h-screen flex-col">
-      <Header initialShowNewsFeed={false} />
+      <Header />
       <main className="flex-1 bg-white dark:bg-gray-950">
         {/* Hero Section */}
         <div className="relative overflow-hidden bg-glee-purple py-16">

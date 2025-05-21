@@ -97,7 +97,9 @@ export function ConcertsScroller() {
                     <div className="flex items-center text-sm text-muted-foreground">
                       <Calendar className="w-4 h-4 mr-2" />
                       {format(new Date(event.start), "MMMM d, yyyy")}
-                      {event.allDay ? "" : ` at ${event.start.split('T')[1].substring(0, 5)}`}
+                      {event.allDay ? "" : (typeof event.start === 'string' ? 
+                        ` at ${event.start.split('T')[1]?.substring(0, 5) || ''}` : 
+                        ` at ${format(event.start, "HH:mm")}`)}
                     </div>
                     
                     {event.location && (
