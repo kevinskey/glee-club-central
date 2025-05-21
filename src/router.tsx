@@ -11,7 +11,7 @@ import MainLayout from './layouts/MainLayout';
 import HomePage from './pages/HomePage';
 import { AuthProvider } from './contexts/AuthContext';
 
-// Since SessionContextProvider is now in main.tsx, we only need AuthProvider here
+// Wrap components with AuthProvider
 const AuthProviderWrapper = ({ children }: { children: React.ReactNode }) => (
   <AuthProvider>
     {children}
@@ -24,9 +24,7 @@ export const router = createBrowserRouter([
   {
     path: '/',
     element: (
-      <AuthProviderWrapper>
-        <MainLayout />
-      </AuthProviderWrapper>
+      <MainLayout />
     ),
     children: [
       {
@@ -71,9 +69,13 @@ export const router = createBrowserRouter([
     ),
     children: dashboardRoutes.children,
   },
-  // Auth routes - also need AuthProvider wrapper
+  // Auth routes - need AuthProvider wrapper
   {
-    element: <AuthProviderWrapper><Outlet /></AuthProviderWrapper>,
+    element: (
+      <AuthProviderWrapper>
+        <Outlet />
+      </AuthProviderWrapper>
+    ),
     children: authRoutes,
   },
 ]);

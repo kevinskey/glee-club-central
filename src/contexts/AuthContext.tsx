@@ -26,15 +26,14 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const [isLoading, setIsLoading] = useState(true);
   const [permissions, setPermissions] = useState<{ [key: string]: boolean }>({});
   
-  // Get router hooks - IMPORTANT: Now we're safely using these hooks inside a component 
-  // that's properly wrapped by RouterProvider
-  const navigate = useNavigate();
-  const location = useLocation();
-  
-  // These hooks must be used inside a component that is a child of the SessionContextProvider
+  // These hooks can only be used inside a component that is a child of the SessionContextProvider
   const session = useSession();
   const supabaseClient = useSupabaseClient();
   const user = useUser();
+
+  // Get router hooks - only use these if we're within Router context
+  const navigate = useNavigate();
+  const location = useLocation();
   
   // Function to refresh user permissions
   const refreshPermissions = useCallback(async () => {
@@ -178,15 +177,9 @@ export function AuthProvider({ children }: AuthProviderProps) {
       }
     });
   };
-  
-  const value: AuthContextType = {
-    user: authUser,
-    profile,
-    session,
-    supabaseClient,
-    isAuthenticated: !!user,
-    isLoading,
-    login: async (email: string, password: string) => {
+
+  const defaultLogin = async (email: string, password: string) => {
+    try {
       // Clean up existing auth state first
       cleanupAuthState();
       
@@ -195,18 +188,22 @@ export function AuthProvider({ children }: AuthProviderProps) {
         toast.error(error.message);
       }
       return { error };
-    },
+    } catch (err: any) {
+      toast.error(err.message || "An unexpected error occurred during login");
+      return { error: err };
+    }
+  };
+  
+  const value: AuthContextType = {
+    user: authUser,
+    profile,
+    session,
+    supabaseClient,
+    isAuthenticated: !!user,
+    isLoading,
+    login: defaultLogin,
     logout: handleLogout,
-    signIn: async (email: string, password: string) => {
-      // Clean up existing auth state first  
-      cleanupAuthState();
-      
-      const { error } = await supabase.auth.signInWithPassword({ email, password });
-      if (error) {
-        toast.error(error.message);
-      }
-      return { error };
-    },
+    signIn: defaultLogin,
     signOut: handleLogout,
     signUp: async (email: string, password: string, firstName: string, lastName: string, userType: UserType = 'fan') => {
       // Clean up existing auth state first
