@@ -1,4 +1,3 @@
-
 import React, { useState, useRef } from "react";
 import { Headphones, Piano, Mic, Clock, Music, LogIn } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -66,10 +65,10 @@ export function GleeToolsDropdown() {
     }
   };
 
-  // Go to login page
+  // Go to login page with recording intent
   const handleGoToLogin = () => {
     setAuthCheckDialogOpen(false);
-    navigate('/login');
+    navigate('/login?returnTo=/dashboard/recording-studio&intent=recording');
   };
 
   // Go to dashboard recording studio

@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { useNavigate, Link, useLocation } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
@@ -21,16 +20,26 @@ export default function LoginPage() {
   const location = useLocation();
   const { toast } = useToast();
 
-  // Extract return URL from query params if available
+  // Extract return URL and intent from query params if available
   const searchParams = new URLSearchParams(location.search);
   const returnTo = searchParams.get("returnTo") || "/dashboard";
+  const intent = searchParams.get("intent");
 
   // Redirect authenticated users
   useEffect(() => {
     if (isAuthenticated) {
-      navigate(returnTo);
+      // If the intent is recording, redirect to recording studio
+      if (intent === "recording") {
+        navigate("/dashboard/recording-studio");
+        toast({
+          title: "Success",
+          description: "You're now signed in. Welcome to the Recording Studio!",
+        });
+      } else {
+        navigate(returnTo);
+      }
     }
-  }, [isAuthenticated, navigate, returnTo]);
+  }, [isAuthenticated, navigate, returnTo, intent, toast]);
 
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -228,6 +237,11 @@ export default function LoginPage() {
     return null; // Will be redirected by useEffect
   }
 
+  // Show a special message if the intent is recording
+  const loginMessage = intent === "recording" 
+    ? "Sign in to use the Recording Studio"
+    : "Enter your details to access the member dashboard";
+
   return (
     <div className="container relative min-h-[800px] flex items-center justify-center py-12 md:grid lg:max-w-none lg:grid-cols-2 lg:px-0">
       <Link
@@ -259,7 +273,7 @@ export default function LoginPage() {
               Welcome to the Glee Club Portal
             </h1>
             <p className="text-sm text-muted-foreground">
-              Enter your details to access the member dashboard
+              {loginMessage}
             </p>
           </div>
           <Card>
