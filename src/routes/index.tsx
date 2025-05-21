@@ -7,7 +7,7 @@ import HomePage from "@/pages/HomePage";
 import AboutPage from "@/pages/AboutPage";
 import EventsPage from "@/pages/EventsPage";
 import ContactPage from "@/pages/ContactPage";
-import LoginPage from "@/pages/LoginPage";
+import LoginPage from "@/pages/auth/LoginPage";
 import RegisterPage from "@/pages/RegisterPage";
 import ResetPasswordPage from "@/pages/ResetPasswordPage";
 import ForgotPasswordPage from "@/pages/ForgotPasswordPage";
