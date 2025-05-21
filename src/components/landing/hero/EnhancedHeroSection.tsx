@@ -1,46 +1,19 @@
 
-import React, { useState, useEffect } from "react";
+import React from "react";
 import { HeroContent } from "@/components/landing/hero/HeroContent";
 import { HeroSeal } from "@/components/landing/hero/HeroSeal";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { useSiteImages } from "@/hooks/useSiteImages";
-import { BackgroundSlideshow } from "@/components/landing/slideshow/BackgroundSlideshow";
-import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import { ChevronRight } from "lucide-react";
 
 export function EnhancedHeroSection() {
-  // Get the hero images from our site images hook
-  const { images, isLoading } = useSiteImages("hero");
   const isMobile = useIsMobile();
-  const [imageUrls, setImageUrls] = useState<string[]>([]);
-
-  // Prepare image URLs for slideshow
-  useEffect(() => {
-    if (images && images.length > 0) {
-      setImageUrls(images.map(img => img.file_url));
-    } else {
-      // Fallback image if no images are available
-      setImageUrls(["/lovable-uploads/c69d3562-4bdc-4e42-9415-aefdd5f573e8.png"]);
-    }
-  }, [images]);
 
   return (
-    <section className="relative h-[70vh] md:h-[80vh] flex flex-col justify-center pb-6 md:pb-12 overflow-hidden">
-      {/* Slideshow background */}
-      {isLoading ? (
-        <div className="absolute inset-0">
-          <Skeleton className="h-full w-full" />
-        </div>
-      ) : (
-        <BackgroundSlideshow 
-          images={imageUrls} 
-          overlayOpacity={0.7}
-          duration={8000}
-          transition={1200}
-        />
-      )}
+    <section className="relative h-[70vh] md:h-[80vh] flex flex-col justify-center pb-6 md:pb-12 overflow-hidden bg-glee-purple/90">
+      {/* Solid background instead of image slideshow */}
+      <div className="absolute inset-0 bg-gradient-to-b from-glee-purple to-glee-purple/80"></div>
       
       {/* Content overlay with Spelman Glee Club branding */}
       <div className="relative z-10 container mx-auto px-4 md:px-6 flex flex-col justify-center h-full">
