@@ -1,5 +1,5 @@
 
-import React, { useEffect } from "react";
+import React, { useEffect, memo } from "react";
 import { Outlet, useLocation } from "react-router-dom";
 import { Toaster } from "sonner";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -11,7 +11,11 @@ interface HomeLayoutProps {
   children?: React.ReactNode;
 }
 
-const HomeLayout: React.FC<HomeLayoutProps> = ({ hideHeader = false, children }) => {
+// Using memo to prevent unnecessary re-renders
+const HomeLayout: React.FC<HomeLayoutProps> = memo(function HomeLayoutComponent({ 
+  hideHeader = false, 
+  children 
+}) {
   const isMobile = useIsMobile();
   const location = useLocation();
   
@@ -51,6 +55,6 @@ const HomeLayout: React.FC<HomeLayoutProps> = ({ hideHeader = false, children })
       </div>
     </>
   );
-};
+});
 
 export default HomeLayout;

@@ -1,5 +1,5 @@
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, memo } from "react";
 import { Music, Minimize2, Maximize2, X } from "lucide-react";
 import { EnhancedMetronome } from "@/components/ui/enhanced-metronome";
 import { Button } from "@/components/ui/button";
@@ -8,7 +8,8 @@ import { Toggle } from "@/components/ui/toggle";
 import { motion, AnimatePresence } from "framer-motion";
 import { audioLogger, resumeAudioContext } from "@/utils/audioUtils";
 
-export function GlobalMetronome() {
+// Memoize the GlobalMetronome component to prevent unnecessary re-renders
+export const GlobalMetronome = memo(function GlobalMetronomeComponent() {
   const [isExpanded, setIsExpanded] = useState(false);
   const [isActive, setIsActive] = useState(false);
   const [isVisible, setIsVisible] = useState(true);
@@ -140,4 +141,4 @@ export function GlobalMetronome() {
       </motion.div>
     </AnimatePresence>
   );
-}
+});

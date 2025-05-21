@@ -46,7 +46,7 @@ export const router = createBrowserRouter([
         children: [
           {
             index: true,
-            element: <HomePage />,
+            element: <React.Suspense fallback={<div>Loading...</div>}><HomePage /></React.Suspense>,
           },
         ],
       },

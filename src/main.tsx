@@ -10,8 +10,16 @@ import { SessionContextProvider } from "@supabase/auth-helpers-react";
 import { supabase } from "./integrations/supabase/client";
 import "./index.css";
 
-// Create a client for React Query
-const queryClient = new QueryClient();
+// Create a client for React Query with optimized settings
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 60000, // 1 minute
+      refetchOnWindowFocus: false, // Prevent refetches on window focus
+      retry: 1, // Limit retries to reduce UI flicker
+    },
+  },
+});
 
 // Get the root element
 const rootElement = document.getElementById("root");
