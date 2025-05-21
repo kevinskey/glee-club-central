@@ -25,8 +25,8 @@ interface AudioSearchItem extends SearchResultItem {
 interface AudioSearchAndFilterProps {
   searchQuery: string;
   setSearchQuery: (query: string) => void;
-  activeCategory: AudioPageCategory;
-  setActiveCategory: (category: AudioPageCategory) => void;
+  activeCategory?: AudioPageCategory;
+  setActiveCategory?: (category: AudioPageCategory) => void;
   audioFiles?: AudioFile[];
   onItemSelect?: (item: AudioSearchItem) => void;
 }
@@ -34,8 +34,8 @@ interface AudioSearchAndFilterProps {
 export function AudioSearchAndFilter({
   searchQuery,
   setSearchQuery,
-  activeCategory,
-  setActiveCategory,
+  activeCategory = "all",
+  setActiveCategory = () => {},
   audioFiles = [],
   onItemSelect
 }: AudioSearchAndFilterProps) {
@@ -108,6 +108,8 @@ function getCategoryDisplayName(category: AudioPageCategory): string {
       return "Recordings";
     case "my_tracks":
       return "My Tracks";
+    case "backing_tracks":
+      return "Backing Tracks";
     case "all":
       return "All Audio";
   }

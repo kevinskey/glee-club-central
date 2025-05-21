@@ -1,3 +1,4 @@
+
 import React, { useState, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -5,6 +6,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent } from "@/components/ui/card";
 import { AudioCategorySelector } from "../audio/AudioCategorySelector";
+import { AudioPageCategory } from "@/types/audio";
 import { toast } from "sonner";
 import { useAuth } from "@/contexts/AuthContext";
 import { UploadCloud, XCircle, FileAudio } from "lucide-react";
@@ -13,7 +15,7 @@ import { v4 as uuidv4 } from "uuid";
 export function FileUploader() {
   // State
   const [title, setTitle] = useState("");
-  const [category, setCategory] = useState("practice");
+  const [category, setCategory] = useState<AudioPageCategory>("recordings");
   const [notes, setNotes] = useState("");
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [isUploading, setIsUploading] = useState(false);
@@ -244,8 +246,8 @@ export function FileUploader() {
               <div className="space-y-1">
                 <Label htmlFor="category">Category</Label>
                 <AudioCategorySelector 
-                  onChange={(value) => setCategory(value)}
-                  value={category} 
+                  onChange={(value) => setCategory(value as AudioPageCategory)}
+                  value={category}
                   disabled={isUploading}
                 />
               </div>

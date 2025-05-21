@@ -183,7 +183,9 @@ export default function AudioManagementPage() {
               <div className="flex items-center gap-2">
                 <AudioSearchAndFilter 
                   searchQuery={searchQuery} 
-                  setSearchQuery={setSearchQuery} 
+                  setSearchQuery={setSearchQuery}
+                  activeCategory={category}
+                  setActiveCategory={setCategory} 
                 />
                 
                 <Dialog open={isUploadDialogOpen} onOpenChange={setIsUploadDialogOpen}>
@@ -269,7 +271,7 @@ export default function AudioManagementPage() {
               canDeleteFile={canDeleteFile}
               confirmDelete={confirmDelete}
               onUploadClick={(cat) => {
-                if (cat) setCategory(cat);
+                if (cat) setCategory(cat as AudioPageCategory);
                 setIsUploadDialogOpen(true);
               }}
               renderAdditionalActions={(file) => (

@@ -1,3 +1,4 @@
+
 import React, { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -11,12 +12,13 @@ import { AudioEditor } from "./AudioEditor";
 import { AudioCategorySelector } from "../audio/AudioCategorySelector";
 import { useAuth } from "@/contexts/AuthContext";
 import { format } from "date-fns";
+import { AudioPageCategory } from "@/types/audio";
 
 export function RecordingStudio() {
   // Recording state
   const [recordingName, setRecordingName] = useState(`Recording ${format(new Date(), "yyyy-MM-dd")}`);
   const [recordingNotes, setRecordingNotes] = useState("");
-  const [category, setCategory] = useState("practice");
+  const [category, setCategory] = useState<AudioPageCategory>("recordings");
   const [isPlaying, setIsPlaying] = useState(false);
   const [audioURL, setAudioURL] = useState<string | null>(null);
   const [recordingTime, setRecordingTime] = useState(0);
@@ -380,7 +382,7 @@ export function RecordingStudio() {
                 <Label htmlFor="category">Category</Label>
                 <AudioCategorySelector 
                   value={category}
-                  onChange={(value) => setCategory(value)}
+                  onChange={(value) => setCategory(value as AudioPageCategory)}
                 />
               </div>
               

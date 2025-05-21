@@ -8,17 +8,20 @@ interface AudioCategorySelectorProps {
   value: AudioPageCategory;
   onChange: (value: string) => void;
   includeBackingTracks?: boolean;
+  disabled?: boolean;
 }
 
 export function AudioCategorySelector({
   value,
   onChange,
-  includeBackingTracks = false
+  includeBackingTracks = false,
+  disabled = false
 }: AudioCategorySelectorProps) {
   return (
     <Select
       value={value}
       onValueChange={onChange}
+      disabled={disabled}
     >
       <SelectTrigger className="w-[180px]">
         <SelectValue placeholder="Select category" />
