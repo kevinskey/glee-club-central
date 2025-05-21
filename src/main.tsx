@@ -10,6 +10,14 @@ import { SessionContextProvider } from "@supabase/auth-helpers-react";
 import { supabase } from "./integrations/supabase/client";
 import "./index.css";
 
+// Check if dark mode is preferred and apply it immediately to prevent flickering
+const prefersDarkMode = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+const savedTheme = localStorage.getItem('theme');
+if (savedTheme === 'dark' || (!savedTheme && prefersDarkMode)) {
+  document.documentElement.classList.add('dark');
+  document.documentElement.setAttribute('data-theme', 'dark');
+}
+
 // Create a client for React Query with optimized settings
 const queryClient = new QueryClient({
   defaultOptions: {

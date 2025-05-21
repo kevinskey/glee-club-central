@@ -1,3 +1,4 @@
+
 @tailwind base;
 
 @layer base {
@@ -178,11 +179,11 @@
   
   /* Fix for dropdown menu text visibility in all modes */
   .dark [data-radix-popper-content-wrapper] [role="menu"] {
-    @apply bg-background border-border;
+    @apply bg-popover border-border text-popover-foreground;
   }
   
   [data-radix-popper-content-wrapper] [role="menu"] {
-    @apply bg-background text-foreground border-border;
+    @apply bg-popover text-popover-foreground border-border;
   }
   
   /* Make dropdown items more visible on hover */

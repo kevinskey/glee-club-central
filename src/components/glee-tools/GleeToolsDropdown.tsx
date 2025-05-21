@@ -9,7 +9,6 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger
 } from "@/components/ui/dropdown-menu";
-import { toast } from "sonner";
 
 // Import our refactored dialog components
 import { PitchPipeDialog } from "./dialogs/PitchPipeDialog";
@@ -41,7 +40,7 @@ export function GleeToolsDropdown() {
       </DropdownMenuTrigger>
       <DropdownMenuContent 
         align="end" 
-        className="w-56 bg-background border border-border shadow-md"
+        className="w-56 bg-popover border border-border shadow-md"
       >
         <DropdownMenuLabel className="font-semibold">Glee Tools</DropdownMenuLabel>
         <DropdownMenuSeparator />

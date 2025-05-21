@@ -16,7 +16,7 @@ export function PitchPipeDialog({ audioContextRef }: PitchPipeDialogProps) {
     <>
       <DropdownMenuItem 
         onClick={() => setOpen(true)}
-        className="flex items-center gap-2 text-foreground"
+        className="cursor-pointer flex items-center gap-2 text-foreground"
       >
         <Music className="h-4 w-4" />
         Pitch Pipe
