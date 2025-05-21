@@ -1,11 +1,13 @@
 
 import React from "react";
 import ReactDOM from "react-dom/client";
-import { RouterProvider } from "react-router-dom";
+import { RouterProvider, createBrowserRouter } from "react-router-dom";
 import { router } from "./router";
 import { ThemeProvider } from "./providers/ThemeProvider";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "sonner";
+import { SessionContextProvider } from "@supabase/auth-helpers-react";
+import { supabase } from "./integrations/supabase/client";
 import "./index.css";
 
 // Create a client for React Query
@@ -21,14 +23,16 @@ if (!rootElement) {
 // Create a root
 const root = ReactDOM.createRoot(rootElement);
 
-// Render the app
+// Wrap the entire app with necessary providers
 root.render(
   <React.StrictMode>
     <QueryClientProvider client={queryClient}>
-      <ThemeProvider>
-        <RouterProvider router={router} />
-        <Toaster />
-      </ThemeProvider>
+      <SessionContextProvider supabaseClient={supabase}>
+        <ThemeProvider>
+          <RouterProvider router={router} />
+          <Toaster />
+        </ThemeProvider>
+      </SessionContextProvider>
     </QueryClientProvider>
   </React.StrictMode>
 );

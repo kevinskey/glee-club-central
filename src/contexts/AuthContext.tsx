@@ -49,10 +49,13 @@ export function AuthProvider({ children }: AuthProviderProps) {
   }, [profile]);
   
   useEffect(() => {
+    console.log("AuthProvider useEffect - checking user:", user);
+    
     const fetchProfile = async () => {
       setIsLoading(true);
       try {
         if (user) {
+          console.log("User found, fetching profile:", user.id);
           // Type-safe conversion from User to AuthUser
           const authUserData: AuthUser = {
             id: user.id,
@@ -96,6 +99,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
             await refreshPermissions();
           }
         } else {
+          console.log("No user found in session");
           setAuthUser(null);
           setProfile(null);
           setPermissions({});
@@ -154,6 +158,26 @@ export function AuthProvider({ children }: AuthProviderProps) {
     navigate('/');
     return { error };
   };
+
+  // Add cleanup auth state function
+  const cleanupAuthState = () => {
+    // Remove standard auth tokens
+    localStorage.removeItem('supabase.auth.token');
+    
+    // Remove all Supabase auth keys from localStorage
+    Object.keys(localStorage).forEach((key) => {
+      if (key.startsWith('supabase.auth.') || key.includes('sb-')) {
+        localStorage.removeItem(key);
+      }
+    });
+    
+    // Remove from sessionStorage if in use
+    Object.keys(sessionStorage || {}).forEach((key) => {
+      if (key.startsWith('supabase.auth.') || key.includes('sb-')) {
+        sessionStorage.removeItem(key);
+      }
+    });
+  };
   
   const value: AuthContextType = {
     user: authUser,
@@ -163,6 +187,9 @@ export function AuthProvider({ children }: AuthProviderProps) {
     isAuthenticated: !!user,
     isLoading,
     login: async (email: string, password: string) => {
+      // Clean up existing auth state first
+      cleanupAuthState();
+      
       const { error } = await supabase.auth.signInWithPassword({ email, password });
       if (error) {
         toast.error(error.message);
@@ -171,6 +198,9 @@ export function AuthProvider({ children }: AuthProviderProps) {
     },
     logout: handleLogout,
     signIn: async (email: string, password: string) => {
+      // Clean up existing auth state first  
+      cleanupAuthState();
+      
       const { error } = await supabase.auth.signInWithPassword({ email, password });
       if (error) {
         toast.error(error.message);
@@ -179,6 +209,9 @@ export function AuthProvider({ children }: AuthProviderProps) {
     },
     signOut: handleLogout,
     signUp: async (email: string, password: string, firstName: string, lastName: string, userType: UserType = 'fan') => {
+      // Clean up existing auth state first
+      cleanupAuthState();
+      
       const { data, error } = await supabase.auth.signUp({
         email,
         password,
@@ -221,6 +254,12 @@ export function AuthProvider({ children }: AuthProviderProps) {
     permissions,
     refreshPermissions,
   };
+  
+  console.log("Rendering AuthProvider with value:", { 
+    isAuthenticated: value.isAuthenticated,
+    isLoading: value.isLoading,
+    hasUser: !!value.user
+  });
   
   // Render children with context value
   return (
