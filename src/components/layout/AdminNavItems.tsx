@@ -1,54 +1,50 @@
-
-import React from "react";
-import { NavItem } from "@/components/ui/nav-item";
 import {
-  BarChart,
-  ImageIcon,
   LayoutDashboard,
   Settings,
+  ImagePlus,
   Users,
-  Palette,
+  Calendar,
+  Megaphone,
 } from "lucide-react";
 
-export const AdminNavItems = () => {
-  return (
-    <>
-      <NavItem
-        to="/admin"
-        icon={<LayoutDashboard size={18} />}
-        label="Dashboard"
-        exact
-      />
-      <NavItem 
-        to="/admin/users" 
-        icon={<Users size={18} />} 
-        label="Users" 
-      />
-      <NavItem 
-        to="/admin/analytics" 
-        icon={<BarChart size={18} />} 
-        label="Analytics" 
-      />
-      <NavItem 
-        to="/admin/media" 
-        icon={<ImageIcon size={18} />} 
-        label="Media Library" 
-      />
-      <NavItem
-        to="/admin/site-images"
-        icon={<ImageIcon size={18} />}
-        label="Site Images"
-      />
-      <NavItem 
-        to="/admin/settings" 
-        icon={<Settings size={18} />} 
-        label="Settings" 
-      />
-      <NavItem 
-        to="/admin/landing-page" 
-        icon={<Palette size={18} />} 
-        label="Landing Page" 
-      />
-    </>
-  );
+export const adminNavItems = [
+  {
+    title: "Dashboard",
+    href: "/admin",
+    icon: "layoutDashboard",
+  },
+  {
+    title: "Users",
+    href: "/admin/users",
+    icon: "users",
+  },
+  {
+    title: "Media",
+    href: "/admin/media",
+    icon: "imagePlus",
+  },
+  {
+    title: "Calendar",
+    href: "/admin/calendar",
+    icon: "calendar",
+  },
+  {
+    title: "Landing Page",
+    href: "/admin/landing-page",
+    icon: "settings",
+  },
+  {
+    title: "News Ticker",
+    href: "/admin/news",
+    icon: "megaphone", // Or any appropriate icon
+  },
+];
+
+export const adminIcons = {
+  layoutDashboard: LayoutDashboard,
+  settings: Settings,
+  imagePlus: ImagePlus,
+  users: Users,
+  calendar: Calendar,
+  megaphone: Megaphone,
 };

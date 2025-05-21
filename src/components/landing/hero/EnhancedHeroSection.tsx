@@ -1,19 +1,40 @@
 
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { HeroContent } from "@/components/landing/hero/HeroContent";
 import { HeroSeal } from "@/components/landing/hero/HeroSeal";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import { ChevronRight } from "lucide-react";
+import { BackgroundSlideshow } from "@/components/landing/slideshow/BackgroundSlideshow";
+import { useSiteImages } from "@/hooks/useSiteImages";
 
 export function EnhancedHeroSection() {
   const isMobile = useIsMobile();
+  const { images, isLoading } = useSiteImages("hero");
+  const [slideImages, setSlideImages] = useState<string[]>([]);
+
+  useEffect(() => {
+    if (images && images.length > 0) {
+      // Extract URLs from image objects
+      const imageUrls = images.map(img => img.file_url);
+      setSlideImages(imageUrls);
+    }
+  }, [images]);
 
   return (
-    <section className="relative h-[70vh] md:h-[80vh] flex flex-col justify-center pb-6 md:pb-12 overflow-hidden bg-glee-purple/90">
-      {/* Solid background instead of image slideshow */}
-      <div className="absolute inset-0 bg-gradient-to-b from-glee-purple to-glee-purple/80"></div>
+    <section className="relative h-[70vh] md:h-[80vh] flex flex-col justify-center pb-6 md:pb-12 overflow-hidden">
+      {/* Image Slideshow */}
+      {slideImages.length > 0 ? (
+        <BackgroundSlideshow 
+          images={slideImages} 
+          duration={7000} 
+          transition={1500} 
+          overlayOpacity={0.6} 
+        />
+      ) : (
+        <div className="absolute inset-0 bg-gradient-to-b from-glee-purple to-glee-purple/80"></div>
+      )}
       
       {/* Content overlay with Spelman Glee Club branding */}
       <div className="relative z-10 container mx-auto px-4 md:px-6 flex flex-col justify-center h-full">
@@ -31,8 +52,8 @@ export function EnhancedHeroSection() {
               </Link>
             </Button>
             <Button size="lg" variant="outline" asChild className="bg-background/20 backdrop-blur border-white/40 text-white hover:bg-background/30">
-              <Link to="/about">
-                Our Story
+              <Link to="/press-kit">
+                Press Kit
               </Link>
             </Button>
           </div>

@@ -1,75 +1,114 @@
 
 import React from "react";
-import { useNavigate } from "react-router-dom";
-import { Music, Instagram, Facebook, Youtube } from "lucide-react";
+import { useNavigate, Link } from "react-router-dom";
+import { Instagram, Facebook, Youtube, Twitter } from "lucide-react";
 import { Icons } from "@/components/Icons";
+import { Button } from "@/components/ui/button";
 
 export function Footer() {
   const navigate = useNavigate();
   const currentYear = new Date().getFullYear();
   
+  const quickLinks = [
+    { label: "Press Kit", href: "/press-kit" },
+    { label: "Privacy Policy", href: "/privacy" },
+    { label: "Terms of Service", href: "/terms" },
+    { label: "About", href: "/about" },
+    { label: "Contact", href: "/contact" }
+  ];
+  
+  const socialLinks = [
+    { 
+      icon: <Instagram className="h-5 w-5 sm:h-6 sm:w-6" />, 
+      href: "https://www.instagram.com/spelmanglee/", 
+      label: "Instagram" 
+    },
+    { 
+      icon: <Facebook className="h-5 w-5 sm:h-6 sm:w-6" />, 
+      href: "https://www.facebook.com/SpelmanGlee/", 
+      label: "Facebook" 
+    },
+    { 
+      icon: <Icons.tiktok className="h-5 w-5 sm:h-6 sm:w-6" />, 
+      href: "https://www.tiktok.com/@spelmanglee", 
+      label: "TikTok" 
+    },
+    { 
+      icon: <Youtube className="h-5 w-5 sm:h-6 sm:w-6" />, 
+      href: "https://www.youtube.com/@SpelmanCollegeGleeClub", 
+      label: "YouTube" 
+    },
+    { 
+      icon: <Twitter className="h-5 w-5 sm:h-6 sm:w-6" />, 
+      href: "https://twitter.com/spelmangleeclub", 
+      label: "Twitter" 
+    }
+  ];
+  
   return (
-    <footer className="border-t py-8 sm:py-10 md:py-12 bg-white dark:bg-white">
+    <footer className="border-t py-10 sm:py-12 md:py-14 bg-white dark:bg-gray-950">
       <div className="container px-4 sm:px-6 md:px-8 max-w-7xl mx-auto">
-        <div className="flex flex-col md:flex-row justify-between items-center gap-6 md:gap-0">
+        {/* Footer Top - Main Links & Images */}
+        <div className="flex flex-col md:flex-row justify-between items-center gap-8 md:gap-0 mb-8">
           <div className="flex items-center">
-            <Music className="h-5 w-5 sm:h-6 sm:w-6 text-glee-spelman mr-3" />
-            <span className="font-playfair text-lg sm:text-xl font-semibold text-glee-spelman">
-              Glee World
-            </span>
+            <img 
+              src="/lovable-uploads/8aa13e63-fb9a-4c52-95cf-86b458c58f1c.png" 
+              alt="Spelman College Glee Club" 
+              className="h-16 mr-4"
+            />
+            <div>
+              <h3 className="font-playfair text-xl sm:text-2xl font-semibold text-glee-spelman mb-1">
+                Glee World
+              </h3>
+              <p className="text-sm text-gray-600 dark:text-gray-400">
+                Spelman College Glee Club Official Site
+              </p>
+            </div>
           </div>
           
-          <div className="flex flex-col sm:flex-row items-center gap-4 sm:gap-6 md:gap-8">
-            <a href="/press-kit" className="text-sm text-gray-600 hover:text-glee-spelman transition-colors">Press Kit</a>
-            <a href="/privacy" className="text-sm text-gray-600 hover:text-glee-spelman transition-colors">Privacy Policy</a>
-            <a href="/terms" className="text-sm text-gray-600 hover:text-glee-spelman transition-colors">Terms of Service</a>
-            <a href="/about" className="text-sm text-gray-600 hover:text-glee-spelman transition-colors">About</a>
-            <a href="/contact" className="text-sm text-gray-600 hover:text-glee-spelman transition-colors">Contact</a>
+          <div className="flex flex-wrap justify-center gap-3">
+            {quickLinks.map((link) => (
+              <Button
+                key={link.href}
+                variant="outline"
+                size="sm"
+                asChild
+                className="border-gray-200 dark:border-gray-800"
+              >
+                <Link to={link.href}>{link.label}</Link>
+              </Button>
+            ))}
+            <Button
+              variant="default"
+              size="sm"
+              asChild
+              className="bg-glee-purple hover:bg-glee-purple/90"
+            >
+              <Link to="/login">Member Login</Link>
+            </Button>
           </div>
         </div>
         
         {/* Social media links */}
-        <div className="mt-8 flex justify-center gap-6">
-          <a 
-            href="https://www.instagram.com/spelmanglee/" 
-            target="_blank" 
-            rel="noopener noreferrer" 
-            className="text-gray-600 hover:text-glee-spelman transition-colors"
-            aria-label="Instagram"
-          >
-            <Instagram className="h-5 w-5 sm:h-6 sm:w-6" />
-          </a>
-          <a 
-            href="https://www.facebook.com/SpelmanGlee/" 
-            target="_blank" 
-            rel="noopener noreferrer" 
-            className="text-gray-600 hover:text-glee-spelman transition-colors"
-            aria-label="Facebook"
-          >
-            <Facebook className="h-5 w-5 sm:h-6 sm:w-6" />
-          </a>
-          <a 
-            href="https://www.tiktok.com/@spelmanglee" 
-            target="_blank" 
-            rel="noopener noreferrer" 
-            className="text-gray-600 hover:text-glee-spelman transition-colors"
-            aria-label="TikTok"
-          >
-            <Icons.tiktok className="h-5 w-5 sm:h-6 sm:w-6" />
-          </a>
-          <a 
-            href="https://www.youtube.com/@SpelmanCollegeGleeClub" 
-            target="_blank" 
-            rel="noopener noreferrer" 
-            className="text-gray-600 hover:text-glee-spelman transition-colors"
-            aria-label="YouTube"
-          >
-            <Youtube className="h-5 w-5 sm:h-6 sm:w-6" />
-          </a>
+        <div className="border-t border-b border-gray-200 dark:border-gray-800 py-6 my-6">
+          <div className="flex justify-center gap-6">
+            {socialLinks.map((social) => (
+              <a 
+                key={social.label}
+                href={social.href} 
+                target="_blank" 
+                rel="noopener noreferrer" 
+                className="text-gray-600 hover:text-glee-spelman transition-colors"
+                aria-label={social.label}
+              >
+                {social.icon}
+              </a>
+            ))}
+          </div>
         </div>
         
-        <div className="mt-8 pt-6 border-t border-gray-200 text-center">
-          <p className="text-gray-500 text-sm">
+        <div className="text-center">
+          <p className="text-gray-500 dark:text-gray-400 text-sm">
             © {currentYear} Spelman College Glee Club. All rights reserved.
           </p>
         </div>
