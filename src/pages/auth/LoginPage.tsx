@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { useNavigate, Link, useLocation } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
@@ -15,6 +16,7 @@ export default function LoginPage() {
   const [password, setPassword] = useState("");
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
+  const [loginInProgress, setLoginInProgress] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -71,17 +73,21 @@ export default function LoginPage() {
 
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
+    console.log("Sign in form submitted");
+    
     if (!email || !password) {
       toast.error("Please enter both email and password.");
       return;
     }
 
     try {
+      setLoginInProgress(true); // Indicate login is in progress
       console.log("Attempting to sign in...");
+      
       const { error } = await signIn(email, password);
       if (error) {
-        toast.error(error.message);
         console.error("Sign in error:", error);
+        toast.error(error.message || "Login failed. Please check your credentials.");
       } else {
         console.log("Sign in successful");
         // Redirect will be handled by the useEffect above
@@ -89,21 +95,27 @@ export default function LoginPage() {
     } catch (error: any) {
       console.error("Unexpected error during sign in:", error);
       toast.error(error.message || "An unexpected error occurred.");
+    } finally {
+      setLoginInProgress(false); // Reset login progress state
     }
   };
 
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
+    console.log("Sign up form submitted");
+    
     if (!firstName || !lastName || !email || !password) {
       toast.error("Please fill in all fields.");
       return;
     }
 
     try {
+      setLoginInProgress(true); // Indicate signup is in progress
       console.log("Attempting to sign up...");
+      
       const { error } = await signUp(email, password, firstName, lastName);
       if (error) {
-        toast.error(error.message);
+        toast.error(error.message || "Signup failed");
         console.error("Sign up error:", error);
       } else {
         toast.success("Signed up successfully! Please check your email to verify your account.");
@@ -113,125 +125,13 @@ export default function LoginPage() {
     } catch (error: any) {
       console.error("Unexpected error during sign up:", error);
       toast.error(error.message || "An unexpected error occurred.");
+    } finally {
+      setLoginInProgress(false); // Reset login progress state
     }
   };
 
-  const tabs = [
-    {
-      value: "signin",
-      label: "Sign In",
-      icon: <LogIn className="h-4 w-4 mr-2" />,
-      content: (
-        <form onSubmit={handleSignIn} className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="signin-email">Email</Label>
-            <Input
-              id="signin-email"
-              placeholder="m@example.com"
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className="bg-background"
-            />
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="signin-password">Password</Label>
-            <Input
-              id="signin-password"
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="bg-background"
-            />
-            <div className="text-right">
-              <Link to="/forgot-password" className="text-sm text-primary hover:underline">
-                Forgot password?
-              </Link>
-            </div>
-          </div>
-          <Button 
-            type="submit" 
-            className="w-full" 
-            variant="spelman" 
-            disabled={isLoading}
-          >
-            {isLoading ? (
-              <span className="mr-2 h-4 w-4 animate-spin">⌛</span>
-            ) : (
-              <LogIn className="mr-2 h-4 w-4" />
-            )}
-            Sign In
-          </Button>
-        </form>
-      )
-    },
-    {
-      value: "signup",
-      label: "Sign Up",
-      icon: <UserPlus className="h-4 w-4 mr-2" />,
-      content: (
-        <form onSubmit={handleSignUp} className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="signup-firstName">First Name</Label>
-              <Input
-                id="signup-firstName"
-                placeholder="First Name"
-                value={firstName}
-                onChange={(e) => setFirstName(e.target.value)}
-                className="bg-background"
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="signup-lastName">Last Name</Label>
-              <Input
-                id="signup-lastName"
-                placeholder="Last Name"
-                value={lastName}
-                onChange={(e) => setLastName(e.target.value)}
-                className="bg-background"
-              />
-            </div>
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="signup-email">Email</Label>
-            <Input
-              id="signup-email"
-              placeholder="m@example.com"
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className="bg-background"
-            />
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="signup-password">Password</Label>
-            <Input
-              id="signup-password"
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="bg-background"
-            />
-          </div>
-          <Button 
-            type="submit" 
-            className="w-full" 
-            variant="spelman" 
-            disabled={isLoading}
-          >
-            {isLoading ? (
-              <span className="mr-2 h-4 w-4 animate-spin">⌛</span>
-            ) : (
-              <UserPlus className="mr-2 h-4 w-4" />
-            )}
-            Sign Up
-          </Button>
-        </form>
-      )
-    }
-  ];
-
+  // We don't need the tabs array anymore since we're simplifying the structure
+  
   if (isAuthenticated) {
     return <div className="flex justify-center items-center min-h-screen">
       <div className="text-center">
@@ -245,6 +145,12 @@ export default function LoginPage() {
   const loginMessage = intent === "recording" 
     ? "Sign in to use the Recording Studio"
     : "Enter your details to access the member dashboard";
+
+  // Check if login is in progress or general loading state is active
+  const isButtonDisabled = isLoading || loginInProgress;
+  const buttonLoadingIcon = isButtonDisabled ? (
+    <span className="mr-2 h-4 w-4 animate-spin">⌛</span>
+  ) : null;
 
   return (
     <div className="container relative min-h-[800px] flex items-center justify-center py-12 md:grid lg:max-w-none lg:grid-cols-2 lg:px-0">
@@ -284,12 +190,14 @@ export default function LoginPage() {
             <CardContent className="pt-6">
               <Tabs defaultValue="signin" className="w-full">
                 <TabsList className="grid w-full grid-cols-2">
-                  {tabs.map((tab) => (
-                    <TabsTrigger key={tab.value} value={tab.value} className="flex items-center">
-                      {tab.icon}
-                      {tab.label}
-                    </TabsTrigger>
-                  ))}
+                  <TabsTrigger value="signin" className="flex items-center">
+                    <LogIn className="h-4 w-4 mr-2" />
+                    Sign In
+                  </TabsTrigger>
+                  <TabsTrigger value="signup" className="flex items-center">
+                    <UserPlus className="h-4 w-4 mr-2" />
+                    Sign Up
+                  </TabsTrigger>
                 </TabsList>
                 <TabsContent value="signin" className="mt-6">
                   <form onSubmit={handleSignIn} className="space-y-4">
@@ -302,6 +210,7 @@ export default function LoginPage() {
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
                         className="bg-background"
+                        disabled={isButtonDisabled}
                       />
                     </div>
                     <div className="space-y-2">
@@ -312,6 +221,7 @@ export default function LoginPage() {
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
                         className="bg-background"
+                        disabled={isButtonDisabled}
                       />
                       <div className="text-right">
                         <Link to="/forgot-password" className="text-sm text-primary hover:underline">
@@ -323,13 +233,9 @@ export default function LoginPage() {
                       type="submit" 
                       className="w-full" 
                       variant="spelman" 
-                      disabled={isLoading}
+                      disabled={isButtonDisabled}
                     >
-                      {isLoading ? (
-                        <span className="mr-2 h-4 w-4 animate-spin">⌛</span>
-                      ) : (
-                        <LogIn className="mr-2 h-4 w-4" />
-                      )}
+                      {buttonLoadingIcon || <LogIn className="mr-2 h-4 w-4" />}
                       Sign In
                     </Button>
                   </form>
@@ -345,6 +251,7 @@ export default function LoginPage() {
                           value={firstName}
                           onChange={(e) => setFirstName(e.target.value)}
                           className="bg-background"
+                          disabled={isButtonDisabled}
                         />
                       </div>
                       <div className="space-y-2">
@@ -355,6 +262,7 @@ export default function LoginPage() {
                           value={lastName}
                           onChange={(e) => setLastName(e.target.value)}
                           className="bg-background"
+                          disabled={isButtonDisabled}
                         />
                       </div>
                     </div>
@@ -367,6 +275,7 @@ export default function LoginPage() {
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
                         className="bg-background"
+                        disabled={isButtonDisabled}
                       />
                     </div>
                     <div className="space-y-2">
@@ -377,19 +286,16 @@ export default function LoginPage() {
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
                         className="bg-background"
+                        disabled={isButtonDisabled}
                       />
                     </div>
                     <Button 
                       type="submit" 
                       className="w-full" 
                       variant="spelman" 
-                      disabled={isLoading}
+                      disabled={isButtonDisabled}
                     >
-                      {isLoading ? (
-                        <span className="mr-2 h-4 w-4 animate-spin">⌛</span>
-                      ) : (
-                        <UserPlus className="mr-2 h-4 w-4" />
-                      )}
+                      {buttonLoadingIcon || <UserPlus className="mr-2 h-4 w-4" />}
                       Sign Up
                     </Button>
                   </form>

@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { AudioRecorder } from "../AudioRecorder";
 import { useAuth } from "@/contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
+import { toast } from "sonner";
 
 interface RecordingStudioDialogProps {
   audioContextRef: React.RefObject<AudioContext | null>;
@@ -42,6 +43,12 @@ export function RecordingStudioDialog({ audioContextRef }: RecordingStudioDialog
     searchParams.set('intent', 'recording');
     
     console.log("Navigating to login with recording intent");
+    sessionStorage.setItem('authRedirectPath', '/dashboard/recording-studio');
+    sessionStorage.setItem('authRedirectIntent', 'recording');
+    
+    // Show a toast to inform the user
+    toast.info("Please log in to use the Recording Studio");
+    
     navigate(`/login?${searchParams.toString()}`);
   };
 

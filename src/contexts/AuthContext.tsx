@@ -221,16 +221,42 @@ export function AuthProvider({ children }: AuthProviderProps) {
     }
   };
 
+  // Enhanced login function with better logging and error handling
   const defaultLogin = async (email: string, password: string) => {
+    console.log("Login attempt with email:", email);
+    
     try {
-      // Don't clean up auth state before login - could be redirection
+      const { data, error } = await supabase.auth.signInWithPassword({ 
+        email, 
+        password 
+      });
       
-      const { error } = await supabase.auth.signInWithPassword({ email, password });
+      console.log("Login response:", { hasData: !!data, hasUser: !!data?.user, hasError: !!error });
+      
       if (error) {
-        toast.error(error.message);
+        console.error("Login error:", error.message);
+        toast.error(error.message || "Login failed");
+        return { error };
       }
-      return { error };
+      
+      if (data && data.user) {
+        console.log("Login successful for user:", data.user.id);
+        toast.success("Login successful!");
+        
+        // Try to load return URL from storage
+        const returnTo = sessionStorage.getItem('authRedirectPath') || '/dashboard';
+        const intent = sessionStorage.getItem('authRedirectIntent');
+        
+        console.log("Will redirect to:", { returnTo, intent });
+        
+        return { data, error: null, returnTo, intent };
+      } else {
+        console.error("Login returned no user data");
+        toast.error("Login failed - no user data returned");
+        return { error: new Error("No user data returned") };
+      }
     } catch (err: any) {
+      console.error("Unexpected error during login:", err);
       toast.error(err.message || "An unexpected error occurred during login");
       return { error: err };
     }
@@ -248,26 +274,38 @@ export function AuthProvider({ children }: AuthProviderProps) {
     signIn: defaultLogin,
     signOut: handleLogout,
     signUp: async (email: string, password: string, firstName: string, lastName: string, userType: UserType = 'fan') => {
-      // Don't clean up auth state before signup - allow logins to persist
+      console.log("Signup attempt for:", email);
       
-      const { data, error } = await supabase.auth.signUp({
-        email,
-        password,
-        options: {
-          data: {
-            first_name: firstName,
-            last_name: lastName,
-            avatar_url: '',
-            user_type: userType,
+      try {
+        const { data, error } = await supabase.auth.signUp({
+          email,
+          password,
+          options: {
+            data: {
+              first_name: firstName,
+              last_name: lastName,
+              avatar_url: '',
+              user_type: userType,
+            },
           },
-        },
-      });
-      
-      if (error) {
-        toast.error(error.message);
+        });
+        
+        console.log("Signup response:", { hasData: !!data, hasUser: !!data?.user, hasError: !!error });
+        
+        if (error) {
+          console.error("Signup error:", error.message);
+          toast.error(error.message || "Signup failed");
+        } else if (data && data.user) {
+          console.log("Signup successful for user:", data.user.id);
+          toast.success("Signup successful!");
+        }
+        
+        return { error, data };
+      } catch (err: any) {
+        console.error("Unexpected error during signup:", err);
+        toast.error(err.message || "An unexpected error occurred during signup");
+        return { error: err, data: null };
       }
-      
-      return { error, data };
     },
     isAdmin,
     isMember,

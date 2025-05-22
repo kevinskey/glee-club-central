@@ -20,11 +20,11 @@ const RequireAuth = ({ children, requireAdmin, allowedUserTypes }: RequireAuthPr
   console.log(`RequireAuth check: isAuthenticated=${isAuthenticated}, isLoading=${isLoading}, path=${location.pathname}`);
   
   useEffect(() => {
-    // Only show error toast if authentication check has completed
-    if (!isLoading && !isAuthenticated) {
+    // Only show error toast if authentication check has completed and user is not on login page
+    if (!isLoading && !isAuthenticated && !location.pathname.includes('login')) {
       toast.error("Please log in to access this page");
     }
-  }, [isLoading, isAuthenticated]);
+  }, [isLoading, isAuthenticated, location.pathname]);
   
   if (isLoading) {
     return (
