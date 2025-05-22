@@ -40,7 +40,7 @@ if (!rootElement) {
 const root = ReactDOM.createRoot(rootElement);
 
 // Wrap the entire app with necessary providers
-// The order matters: QueryClient -> SessionContext -> ThemeProvider -> Router
+// Critical: The order is QueryClient -> SessionContext -> ThemeProvider -> Router
 root.render(
   <React.StrictMode>
     <QueryClientProvider client={queryClient}>
