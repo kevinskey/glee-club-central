@@ -1,6 +1,5 @@
 
 import * as React from 'react';
-import { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import {
   useSession,
   useSupabaseClient,
@@ -13,7 +12,7 @@ import { getProfile } from '@/utils/supabase/profiles';
 import { supabase } from '@/integrations/supabase/client';
 
 // Create a properly initialized AuthContext with null as default
-const AuthContext = createContext<AuthContextType | null>(null);
+const AuthContext = React.createContext<AuthContextType | null>(null);
 
 interface AuthProviderProps {
   children: React.ReactNode | ((props: { isLoading: boolean }) => React.ReactNode);
@@ -52,7 +51,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const user = useUser();
 
   // Function to refresh user permissions
-  const refreshPermissions = useCallback(async () => {
+  const refreshPermissions = React.useCallback(async () => {
     if (profile && profile.id) {
       try {
         const userPermissions = await fetchUserPermissions(profile.id);
@@ -64,7 +63,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
   }, [profile]);
   
   // Add a pre-check to detect if we have a session before even loading
-  useEffect(() => {
+  React.useEffect(() => {
     const checkExistingSession = async () => {
       try {
         const { data } = await supabase.auth.getSession();
@@ -81,7 +80,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
     checkExistingSession();
   }, []);
   
-  useEffect(() => {
+  React.useEffect(() => {
     console.log("AuthProvider useEffect - checking user:", user);
     
     const fetchProfile = async () => {
@@ -166,20 +165,20 @@ export function AuthProvider({ children }: AuthProviderProps) {
   }, [user, supabaseClient, refreshPermissions]);
   
   // User role and type helper functions
-  const isAdmin = useCallback(() => {
+  const isAdmin = React.useCallback(() => {
     return !!(profile?.is_super_admin || profile?.role === 'admin');
   }, [profile]);
   
-  const isMember = useCallback(() => {
+  const isMember = React.useCallback(() => {
     return profile?.role === 'member';
   }, [profile]);
   
-  const isFan = useCallback(() => {
+  const isFan = React.useCallback(() => {
     return profile?.user_type === 'fan';
   }, [profile]);
   
   // getUserType function defined in the provider
-  const getUserType = useCallback((): UserType => {
+  const getUserType = React.useCallback((): UserType => {
     const userType = profile?.user_type || '';
     
     // If user_type doesn't exist, infer from role
@@ -347,7 +346,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
 }
 
 export const useAuth = (): AuthContextType => {
-  const context = useContext(AuthContext);
+  const context = React.useContext(AuthContext);
   if (!context) {
     throw new Error("useAuth must be used within an AuthProvider");
   }

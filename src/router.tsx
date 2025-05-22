@@ -8,7 +8,6 @@ import { dashboardRoutes } from './routes/dashboardRoutes';
 import { authRoutes } from './routes/authRoutes';
 import MainLayout from './layouts/MainLayout';
 import HomePage from './pages/HomePage';
-import { AuthProvider } from './contexts/AuthContext';
 import HomeLayout from './layouts/HomeLayout';
 import RequireAuth from './components/auth/RequireAuth';
 import RoleDashboard from './components/auth/RoleDashboard';
@@ -16,7 +15,7 @@ import RoleDashboard from './components/auth/RoleDashboard';
 // Create a properly structured router with all routes
 export const router = createBrowserRouter([
   {
-    // Root element that wraps the outlet component with AuthProvider
+    // Root element that wraps the outlet component
     element: <Outlet />,
     errorElement: (
       <ErrorBoundary>
