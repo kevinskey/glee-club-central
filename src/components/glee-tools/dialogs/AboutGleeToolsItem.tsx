@@ -8,7 +8,7 @@ export function AboutGleeToolsItem() {
   return (
     <DropdownMenuItem
       onClick={() => toast.info("Glee Tools v1.1 - Music Practice Suite")}
-      className="cursor-pointer flex items-center gap-2 text-foreground"
+      className="cursor-pointer flex items-center gap-2 text-popover-foreground"
     >
       <Info className="h-4 w-4" />
       About Glee Tools

@@ -1,3 +1,4 @@
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -36,11 +37,14 @@ code {
 
 /* Ensure dropdown backgrounds are solid in all modes */
 [data-radix-popper-content-wrapper] [role="menu"] {
-  @apply bg-background border border-border shadow-md;
+  @apply bg-popover !important;
+  @apply border-border shadow-md;
+  @apply text-popover-foreground;
 }
 
 .dark [data-radix-popper-content-wrapper] [role="menu"] {
-  @apply bg-background border-border text-foreground;
+  @apply bg-popover !important;
+  @apply border-border text-popover-foreground;
 }
 
 /* Page transition animations */

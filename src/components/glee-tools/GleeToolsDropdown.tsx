@@ -40,9 +40,10 @@ export function GleeToolsDropdown() {
       </DropdownMenuTrigger>
       <DropdownMenuContent 
         align="end" 
-        className="w-56 bg-popover border border-border shadow-md"
+        className="w-56 !bg-popover !text-popover-foreground border border-border shadow-md"
+        style={{ backgroundColor: 'var(--popover)', color: 'var(--popover-foreground)' }}
       >
-        <DropdownMenuLabel className="font-semibold">Glee Tools</DropdownMenuLabel>
+        <DropdownMenuLabel className="font-semibold text-popover-foreground">Glee Tools</DropdownMenuLabel>
         <DropdownMenuSeparator />
         
         {/* Import our dialog components */}

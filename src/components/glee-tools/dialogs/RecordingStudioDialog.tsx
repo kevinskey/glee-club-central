@@ -1,6 +1,6 @@
 
 import React from "react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Mic, LogIn } from "lucide-react";
 import { DropdownMenuItem } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
@@ -41,14 +41,14 @@ export function RecordingStudioDialog({ audioContextRef }: RecordingStudioDialog
 
   return (
     <>
-      <DropdownMenuItem onClick={handleOpenRecordingStudio}>
+      <DropdownMenuItem onClick={handleOpenRecordingStudio} className="cursor-pointer flex items-center gap-2 text-popover-foreground">
         <Mic className="h-4 w-4 mr-2" />
         Recording Studio
       </DropdownMenuItem>
       
       {/* Audio Recorder Dialog */}
       <Dialog open={isOpen} onOpenChange={setIsOpen}>
-        <DialogContent className="sm:max-w-md">
+        <DialogContent className="sm:max-w-md bg-background text-foreground">
           <DialogHeader>
             <DialogTitle>Recording Studio</DialogTitle>
           </DialogHeader>
@@ -63,7 +63,7 @@ export function RecordingStudioDialog({ audioContextRef }: RecordingStudioDialog
 
       {/* Authentication Check Dialog */}
       <Dialog open={authCheckDialogOpen} onOpenChange={setAuthCheckDialogOpen}>
-        <DialogContent className="sm:max-w-md">
+        <DialogContent className="sm:max-w-md bg-background text-foreground">
           <DialogHeader>
             <DialogTitle>Authentication Required</DialogTitle>
           </DialogHeader>

@@ -16,14 +16,14 @@ export function MetronomeDialog({ audioContextRef }: MetronomeDialogProps) {
     <>
       <DropdownMenuItem 
         onClick={() => setOpen(true)}
-        className="cursor-pointer flex items-center gap-2 text-foreground"
+        className="cursor-pointer flex items-center gap-2 text-popover-foreground"
       >
         <Clock className="h-4 w-4" />
         Metronome
       </DropdownMenuItem>
       
       <Dialog open={open} onOpenChange={setOpen}>
-        <DialogContent className="sm:max-w-md">
+        <DialogContent className="sm:max-w-md bg-background text-foreground">
           <DialogHeader>
             <DialogTitle>Metronome</DialogTitle>
           </DialogHeader>

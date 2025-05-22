@@ -16,14 +16,14 @@ export function PianoKeyboardDialog({ audioContextRef }: PianoKeyboardDialogProp
     <>
       <DropdownMenuItem 
         onClick={() => setOpen(true)}
-        className="cursor-pointer flex items-center gap-2 text-foreground"
+        className="cursor-pointer flex items-center gap-2 text-popover-foreground"
       >
         <Piano className="h-4 w-4" />
         Piano Keyboard (3 Octaves)
       </DropdownMenuItem>
       
       <Dialog open={open} onOpenChange={setOpen}>
-        <DialogContent className="sm:max-w-lg w-full">
+        <DialogContent className="sm:max-w-lg w-full bg-background text-foreground">
           <DialogHeader>
             <DialogTitle>Piano Keyboard</DialogTitle>
           </DialogHeader>
