@@ -39,7 +39,7 @@ export const cleanupAuthState = () => {
 };
 
 export function AuthProvider({ children }: AuthProviderProps) {
-  // Use React hooks for state management - explicitly use React useState for clarity
+  // Use React hooks for state management - explicitly use React.useState for clarity
   const [authUser, setAuthUser] = React.useState<AuthUser | null>(null);
   const [profile, setProfile] = React.useState<Profile | null>(null);
   const [isLoading, setIsLoading] = React.useState(true);

@@ -1,5 +1,5 @@
 
-import React, { useEffect } from 'react';
+import * as React from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { Spinner } from '@/components/ui/spinner';
@@ -19,7 +19,7 @@ const RequireAuth = ({ children, requireAdmin, allowedUserTypes }: RequireAuthPr
   // Add debug logging
   console.log(`RequireAuth check: isAuthenticated=${isAuthenticated}, isLoading=${isLoading}, path=${location.pathname}`);
   
-  useEffect(() => {
+  React.useEffect(() => {
     // Only show error toast if authentication check has completed and user is not on login page
     if (!isLoading && !isAuthenticated && !location.pathname.includes('login')) {
       toast.error("Please log in to access this page");
