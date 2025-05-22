@@ -15,8 +15,8 @@ import RoleDashboard from './components/auth/RoleDashboard';
 
 // Create a properly structured router with all routes
 export const router = createBrowserRouter([
-  // Wrap the entire application with AuthProvider
   {
+    // Root element that wraps auth provider around all routes
     element: (
       <AuthProvider>
         <Outlet />
