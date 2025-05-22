@@ -1,3 +1,4 @@
+
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import {
   useSession,
@@ -39,10 +40,10 @@ export const cleanupAuthState = () => {
 
 export function AuthProvider({ children }: AuthProviderProps) {
   // Use React hooks for state management - explicitly use React useState for clarity
-  const [authUser, setAuthUser] = useState<AuthUser | null>(null);
-  const [profile, setProfile] = useState<Profile | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [permissions, setPermissions] = useState<{ [key: string]: boolean }>({});
+  const [authUser, setAuthUser] = React.useState<AuthUser | null>(null);
+  const [profile, setProfile] = React.useState<Profile | null>(null);
+  const [isLoading, setIsLoading] = React.useState(true);
+  const [permissions, setPermissions] = React.useState<{ [key: string]: boolean }>({});
   
   // These hooks can only be used inside a component that is a child of the SessionContextProvider
   const session = useSession();
@@ -195,6 +196,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
   }, [profile]);
 
   // Auth methods using window.location for navigation instead of router hooks
+  // Fixed: Added empty object as second argument to return from handleLogout
   const handleLogout = useCallback(async () => {
     try {
       // Only clean up auth state during explicit logout
@@ -212,13 +214,13 @@ export function AuthProvider({ children }: AuthProviderProps) {
       // Use window.location for navigation
       window.location.href = '/';
       
-      return { error };
+      return { error: error as Error, data: {} }; // Fixed: Added second argument (data)
     } catch (err) {
       console.error("Error during logout:", err);
       toast.error("An unexpected error occurred during logout");
-      return { error: err as Error };
+      return { error: err as Error, data: {} }; // Fixed: Added second argument (data)
     }
-  });
+  }, []);
 
   // Enhanced login function with better logging and error handling
   const defaultLogin = useCallback(async (email: string, password: string) => {
@@ -235,7 +237,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
       if (error) {
         console.error("Login error:", error.message);
         toast.error(error.message || "Login failed");
-        return { error };
+        return { error, data: null }; // Fixed: Added second argument (data as null)
       }
       
       if (data && data.user) {
@@ -248,18 +250,18 @@ export function AuthProvider({ children }: AuthProviderProps) {
         
         console.log("Will redirect to:", { returnTo, intent });
         
-        return { data, error: null, returnTo, intent };
+        return { error: null, data, returnTo, intent };
       } else {
         console.error("Login returned no user data");
         toast.error("Login failed - no user data returned");
-        return { error: new Error("No user data returned") };
+        return { error: new Error("No user data returned"), data: null };
       }
     } catch (err: any) {
       console.error("Unexpected error during login:", err);
       toast.error(err.message || "An unexpected error occurred during login");
-      return { error: err };
+      return { error: err, data: null };
     }
-  });
+  }, []);
   
   const value: AuthContextType = {
     user: authUser,
