@@ -41,6 +41,7 @@ if (!rootElement) {
 const root = ReactDOM.createRoot(rootElement);
 
 // Initialize app with proper provider nesting order
+// Important: SessionContextProvider must be before AuthProvider
 root.render(
   <React.StrictMode>
     <QueryClientProvider client={queryClient}>

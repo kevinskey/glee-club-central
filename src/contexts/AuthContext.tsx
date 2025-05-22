@@ -1,6 +1,6 @@
 
 import * as React from 'react';
-import { createContext, useCallback, useContext, useEffect, useState } from 'react';
+import { createContext, useCallback, useContext, useEffect } from 'react';
 import {
   useSession,
   useSupabaseClient,
@@ -40,11 +40,11 @@ export const cleanupAuthState = () => {
 };
 
 export function AuthProvider({ children }: AuthProviderProps) {
-  // Use React hooks for state management
-  const [authUser, setAuthUser] = useState<AuthUser | null>(null);
-  const [profile, setProfile] = useState<Profile | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [permissions, setPermissions] = useState<{ [key: string]: boolean }>({});
+  // Use React hooks for state management - explicitly use React.useState for clarity
+  const [authUser, setAuthUser] = React.useState<AuthUser | null>(null);
+  const [profile, setProfile] = React.useState<Profile | null>(null);
+  const [isLoading, setIsLoading] = React.useState(true);
+  const [permissions, setPermissions] = React.useState<{ [key: string]: boolean }>({});
   
   // These hooks can only be used inside a component that is a child of the SessionContextProvider
   const session = useSession();
