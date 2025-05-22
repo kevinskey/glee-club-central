@@ -13,7 +13,7 @@ import { getProfile } from '@/utils/supabase/profiles';
 import { supabase } from '@/integrations/supabase/client';
 
 // Create a properly initialized AuthContext with null as default
-const AuthContext = createContext<AuthContextType | null>(null);
+const AuthContext = React.createContext<AuthContextType | null>(null);
 
 interface AuthProviderProps {
   children: React.ReactNode | ((props: { isLoading: boolean }) => React.ReactNode);
