@@ -87,30 +87,31 @@ const LoginPage = () => {
   }
   
   return (
-    <div className="flex items-center justify-center min-h-[80vh] px-4">
-      <Card className="w-full max-w-md">
+    <div className="flex items-center justify-center min-h-[80vh] px-4 bg-background">
+      <Card className="w-full max-w-md border-border bg-card">
         <CardHeader className="space-y-1 text-center">
-          <CardTitle className="text-2xl font-bold">Welcome Back</CardTitle>
-          <CardDescription>
+          <CardTitle className="text-2xl font-bold text-card-foreground">Welcome Back</CardTitle>
+          <CardDescription className="text-muted-foreground">
             Enter your credentials to sign in to your account
           </CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleLogin} className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
+              <Label htmlFor="email" className="text-foreground">Email</Label>
               <Input
                 id="email"
                 type="email"
                 placeholder="your.email@example.com"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
+                className="bg-background text-foreground border-input"
                 required
               />
             </div>
             <div className="space-y-2">
               <div className="flex justify-between">
-                <Label htmlFor="password">Password</Label>
+                <Label htmlFor="password" className="text-foreground">Password</Label>
                 <Link to="/forgot-password" className="text-sm text-glee-purple hover:underline">
                   Forgot password?
                 </Link>
@@ -121,12 +122,13 @@ const LoginPage = () => {
                 placeholder="••••••••"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
+                className="bg-background text-foreground border-input"
                 required
               />
             </div>
             <Button 
               type="submit" 
-              className="w-full bg-glee-spelman hover:bg-glee-spelman/90" 
+              className="w-full bg-glee-spelman hover:bg-glee-spelman/90 text-white" 
               disabled={isSubmitting}
             >
               {isSubmitting ? (
@@ -148,7 +150,7 @@ const LoginPage = () => {
         <CardFooter className="flex flex-col space-y-4">
           <div className="relative">
             <div className="absolute inset-0 flex items-center">
-              <span className="w-full border-t" />
+              <span className="w-full border-t border-border" />
             </div>
             <div className="relative flex justify-center text-xs uppercase">
               <span className="bg-card px-2 text-muted-foreground">Or</span>
@@ -156,11 +158,11 @@ const LoginPage = () => {
           </div>
           
           <div className="grid grid-cols-1 gap-2">
-            <Button variant="outline" className="w-full">
+            <Button variant="outline" className="w-full border-input text-foreground hover:bg-accent/10">
               <UserPlus className="w-4 h-4 mr-2" />
               Request Member Access
             </Button>
-            <Button variant="outline" className="w-full">
+            <Button variant="outline" className="w-full border-input text-foreground hover:bg-accent/10">
               <Mail className="w-4 h-4 mr-2" />
               Contact Administrator
             </Button>
