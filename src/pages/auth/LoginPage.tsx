@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from 'react';
+import * as React from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useNavigate, useLocation, Link } from 'react-router-dom';
 import { toast } from 'sonner';
@@ -16,9 +16,9 @@ const LoginPage = () => {
   const location = useLocation();
   
   // Form state
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [email, setEmail] = React.useState('');
+  const [password, setPassword] = React.useState('');
+  const [isSubmitting, setIsSubmitting] = React.useState(false);
   
   // Get returnTo from query params
   const searchParams = new URLSearchParams(location.search);
@@ -28,7 +28,7 @@ const LoginPage = () => {
   console.log("Login page loaded with params:", { returnTo, intent });
   
   // Store returnTo in sessionStorage for use after login
-  useEffect(() => {
+  React.useEffect(() => {
     if (returnTo) {
       sessionStorage.setItem('authRedirectPath', returnTo);
     }
@@ -38,7 +38,7 @@ const LoginPage = () => {
   }, [returnTo, intent]);
   
   // Redirect if already authenticated
-  useEffect(() => {
+  React.useEffect(() => {
     if (isAuthenticated && !isLoading) {
       console.log("User already authenticated, redirecting to:", returnTo);
       navigate(returnTo);
