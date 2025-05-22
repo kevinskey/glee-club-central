@@ -17,11 +17,7 @@ import RoleDashboard from './components/auth/RoleDashboard';
 export const router = createBrowserRouter([
   {
     // Root element that wraps the outlet component with AuthProvider
-    element: (
-      <AuthProvider>
-        <Outlet />
-      </AuthProvider>
-    ),
+    element: <Outlet />,
     errorElement: (
       <ErrorBoundary>
         <div className="flex items-center justify-center min-h-screen p-4">

@@ -8,6 +8,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "sonner";
 import { SessionContextProvider } from "@supabase/auth-helpers-react";
 import { supabase } from "./integrations/supabase/client";
+import { AuthProvider } from "./contexts/AuthContext";
 import "./index.css";
 
 // Check if dark mode is preferred and apply it immediately to prevent flickering
@@ -40,13 +41,15 @@ if (!rootElement) {
 const root = ReactDOM.createRoot(rootElement);
 
 // Initialize app with proper provider nesting order:
-// QueryClient -> SessionContext -> ThemeProvider -> Router
+// QueryClient -> SessionContext -> ThemeProvider -> Router with AuthProvider
 root.render(
   <React.StrictMode>
     <QueryClientProvider client={queryClient}>
       <SessionContextProvider supabaseClient={supabase}>
         <ThemeProvider>
-          <RouterProvider router={router} />
+          <AuthProvider>
+            <RouterProvider router={router} />
+          </AuthProvider>
           <Toaster />
         </ThemeProvider>
       </SessionContextProvider>
