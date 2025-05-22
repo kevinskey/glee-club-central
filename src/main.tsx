@@ -39,8 +39,8 @@ if (!rootElement) {
 // Create a root
 const root = ReactDOM.createRoot(rootElement);
 
-// Wrap the entire app with necessary providers
-// Critical order: QueryClient -> SessionContext -> ThemeProvider -> Router
+// Initialize app with optimized provider order
+// Prioritize required providers only
 root.render(
   <React.StrictMode>
     <QueryClientProvider client={queryClient}>
