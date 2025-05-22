@@ -1,13 +1,21 @@
 
 import React from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { NewsTicker } from "@/components/landing/news/NewsTicker";
 import { HeaderLogo } from "@/components/layout/header/HeaderLogo";
 import { HeaderActions } from "@/components/layout/header/HeaderActions";
+import { Button } from "@/components/ui/button";
+import { useAuth } from "@/contexts/AuthContext";
+import { LogIn, User } from "lucide-react";
 
 export function Header() {
   const navigate = useNavigate();
   const [showNewsTicker, setShowNewsTicker] = React.useState(true);
+  const { isAuthenticated, profile } = useAuth();
+  
+  const handleDashboardClick = () => {
+    navigate("/role-dashboard");
+  };
   
   return (
     <>
@@ -20,8 +28,45 @@ export function Header() {
             <HeaderLogo />
           </div>
           
-          {/* Right side: GleeToolsDropdown */}
-          <HeaderActions />
+          {/* Middle: Navigation Links */}
+          <nav className="hidden md:flex items-center space-x-6">
+            <Link to="/" className="font-medium hover:text-glee-spelman transition-colors">
+              Home
+            </Link>
+            <Link to="/about" className="font-medium hover:text-glee-spelman transition-colors">
+              About
+            </Link>
+            <Link to="/events" className="font-medium hover:text-glee-spelman transition-colors">
+              Events
+            </Link>
+            <Link to="/contact" className="font-medium hover:text-glee-spelman transition-colors">
+              Contact
+            </Link>
+          </nav>
+          
+          {/* Right side: Actions and Auth */}
+          <div className="flex items-center gap-4">
+            {isAuthenticated ? (
+              <Button 
+                variant="default"
+                onClick={handleDashboardClick}
+                className="hidden md:flex items-center bg-glee-spelman hover:bg-glee-spelman/90"
+              >
+                <User className="w-4 h-4 mr-2" />
+                {profile?.first_name ? `${profile.first_name}'s Dashboard` : 'My Dashboard'}
+              </Button>
+            ) : (
+              <Button 
+                variant="default"
+                onClick={() => navigate("/login")}
+                className="hidden md:flex items-center bg-glee-spelman hover:bg-glee-spelman/90"
+              >
+                <LogIn className="w-4 h-4 mr-2" />
+                Member Login
+              </Button>
+            )}
+            <HeaderActions />
+          </div>
         </div>
       </header>
     </>

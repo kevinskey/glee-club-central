@@ -1,327 +1,171 @@
 
-import React, { useState, useEffect } from "react";
-import { useNavigate, Link, useLocation } from "react-router-dom";
-import { useAuth } from "@/contexts/AuthContext";
-import { Card, CardContent } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Button } from "@/components/ui/button";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { toast } from "sonner";
-import { UserIcon, LockIcon, LogIn, UserPlus } from "lucide-react";
+import React, { useState, useEffect } from 'react';
+import { useAuth } from '@/contexts/AuthContext';
+import { useNavigate, useLocation, Link } from 'react-router-dom';
+import { toast } from 'sonner';
+import { Spinner } from '@/components/ui/spinner';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
+import { Label } from '@/components/ui/label';
+import { LogIn, UserPlus, Mail } from 'lucide-react';
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 
-export default function LoginPage() {
-  const { signIn, signUp, isLoading, isAuthenticated } = useAuth();
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [firstName, setFirstName] = useState("");
-  const [lastName, setLastName] = useState("");
-  const [loginInProgress, setLoginInProgress] = useState(false);
+const LoginPage = () => {
+  const { login, isAuthenticated, isLoading } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
-
-  // Extract return URL and intent from query params if available
+  
+  // Form state
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  
+  // Get returnTo from query params
   const searchParams = new URLSearchParams(location.search);
-  const returnTo = searchParams.get("returnTo") || "/dashboard";
-  const intent = searchParams.get("intent");
-
-  console.log("Login page render. ReturnTo:", returnTo, "Intent:", intent, "isAuthenticated:", isAuthenticated);
-
-  // Store return path in sessionStorage to preserve it across page reloads
+  const returnTo = searchParams.get('returnTo') || '/role-dashboard';
+  const intent = searchParams.get('intent');
+  
+  console.log("Login page loaded with params:", { returnTo, intent });
+  
+  // Store returnTo in sessionStorage for use after login
   useEffect(() => {
     if (returnTo) {
       sessionStorage.setItem('authRedirectPath', returnTo);
-      console.log("Stored redirect path:", returnTo);
     }
-    
     if (intent) {
       sessionStorage.setItem('authRedirectIntent', intent);
-      console.log("Stored redirect intent:", intent);
     }
   }, [returnTo, intent]);
-
-  // Redirect authenticated users
+  
+  // Redirect if already authenticated
   useEffect(() => {
-    if (isAuthenticated) {
-      try {
-        // Get stored redirect path or use default
-        const storedPath = sessionStorage.getItem('authRedirectPath') || '/dashboard';
-        const storedIntent = sessionStorage.getItem('authRedirectIntent');
-        
-        console.log("User is authenticated. Redirecting to:", storedPath);
-        
-        // If the intent is recording, redirect to recording studio
-        if (storedIntent === "recording") {
-          navigate("/dashboard/recording-studio");
-          toast.success("Success! You're now signed in. Welcome to the Recording Studio!");
-        } else {
-          navigate(storedPath);
-          toast.success("Successfully signed in!");
-        }
-        
-        // Clean up stored redirect data after use
-        sessionStorage.removeItem('authRedirectPath');
-        sessionStorage.removeItem('authRedirectIntent');
-      } catch (error) {
-        console.error("Navigation error:", error);
-        // Fallback to window.location if navigate fails
-        const storedPath = sessionStorage.getItem('authRedirectPath') || '/dashboard';
-        window.location.href = storedPath;
-      }
+    if (isAuthenticated && !isLoading) {
+      console.log("User already authenticated, redirecting to:", returnTo);
+      navigate(returnTo);
     }
-  }, [isAuthenticated, navigate]);
-
-  const handleSignIn = async (e: React.FormEvent) => {
+  }, [isAuthenticated, isLoading, navigate, returnTo]);
+  
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log("Sign in form submitted");
     
     if (!email || !password) {
-      toast.error("Please enter both email and password.");
+      toast.error("Please enter both email and password");
       return;
     }
-
-    try {
-      setLoginInProgress(true); // Indicate login is in progress
-      console.log("Attempting to sign in...");
-      
-      const { error } = await signIn(email, password);
-      if (error) {
-        console.error("Sign in error:", error);
-        toast.error(error.message || "Login failed. Please check your credentials.");
-      } else {
-        console.log("Sign in successful");
-        // Redirect will be handled by the useEffect above
-      }
-    } catch (error: any) {
-      console.error("Unexpected error during sign in:", error);
-      toast.error(error.message || "An unexpected error occurred.");
-    } finally {
-      setLoginInProgress(false); // Reset login progress state
-    }
-  };
-
-  const handleSignUp = async (e: React.FormEvent) => {
-    e.preventDefault();
-    console.log("Sign up form submitted");
     
-    if (!firstName || !lastName || !email || !password) {
-      toast.error("Please fill in all fields.");
-      return;
-    }
-
+    console.log("Attempting login with:", { email });
+    setIsSubmitting(true);
+    
     try {
-      setLoginInProgress(true); // Indicate signup is in progress
-      console.log("Attempting to sign up...");
+      const { error, returnTo: redirectPath } = await login(email, password);
       
-      const { error } = await signUp(email, password, firstName, lastName);
       if (error) {
-        toast.error(error.message || "Signup failed");
-        console.error("Sign up error:", error);
+        console.error("Login error:", error);
+        toast.error(error.message || "Login failed");
       } else {
-        toast.success("Signed up successfully! Please check your email to verify your account.");
-        console.log("Sign up successful");
-        // Redirect will be handled by the useEffect above
+        console.log("Login successful, redirecting to:", redirectPath || returnTo);
+        navigate(redirectPath || returnTo);
       }
-    } catch (error: any) {
-      console.error("Unexpected error during sign up:", error);
-      toast.error(error.message || "An unexpected error occurred.");
+    } catch (err) {
+      console.error("Unexpected login error:", err);
+      toast.error("An unexpected error occurred");
     } finally {
-      setLoginInProgress(false); // Reset login progress state
+      setIsSubmitting(false);
     }
   };
-
-  // We don't need the tabs array anymore since we're simplifying the structure
   
-  if (isAuthenticated) {
-    return <div className="flex justify-center items-center min-h-screen">
-      <div className="text-center">
-        <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-primary mb-4"></div>
-        <p>You're already signed in. Redirecting...</p>
+  // Show loading state while checking auth
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <Spinner size="lg" />
       </div>
-    </div>;
+    );
   }
-
-  // Show a special message if the intent is recording
-  const loginMessage = intent === "recording" 
-    ? "Sign in to use the Recording Studio"
-    : "Enter your details to access the member dashboard";
-
-  // Check if login is in progress or general loading state is active
-  const isButtonDisabled = isLoading || loginInProgress;
-  const buttonLoadingIcon = isButtonDisabled ? (
-    <span className="mr-2 h-4 w-4 animate-spin">⌛</span>
-  ) : null;
-
+  
   return (
-    <div className="container relative min-h-[800px] flex items-center justify-center py-12 md:grid lg:max-w-none lg:grid-cols-2 lg:px-0">
-      <Link
-        to="/"
-        className="absolute right-4 top-4 md:right-8 md:top-8 text-foreground hover:text-primary transition-colors"
-      >
-        Back to Home
-      </Link>
-      <div className="relative hidden h-full flex-col bg-muted p-10 text-white dark:border-r lg:flex">
-        <div className="absolute inset-0 bg-glee-spelman" />
-        <div className="relative z-20 flex items-center text-lg font-medium">
-          <UserIcon className="mr-2 h-6 w-6" /> Glee Club Portal
-        </div>
-        <div className="relative z-20 mt-auto">
-          <blockquote className="space-y-2">
-            <p className="text-lg">
-              &ldquo;This portal has transformed our Glee Club's organization.
-              It's now easier than ever to manage members, music, and events.&rdquo;
-            </p>
-            <footer className="text-sm">Spelman Glee Club</footer>
-          </blockquote>
-        </div>
-      </div>
-      <div className="lg:p-8">
-        <div className="mx-auto flex w-full flex-col justify-center space-y-6 sm:w-[380px]">
-          <div className="flex flex-col space-y-2 text-center">
-            <UserIcon className="mx-auto h-6 w-6 text-glee-spelman" />
-            <h1 className="text-2xl font-semibold tracking-tight">
-              Welcome to the Glee Club Portal
-            </h1>
-            <p className="text-sm text-muted-foreground">
-              {loginMessage}
-            </p>
-          </div>
-          <Card>
-            <CardContent className="pt-6">
-              <Tabs defaultValue="signin" className="w-full">
-                <TabsList className="grid w-full grid-cols-2">
-                  <TabsTrigger value="signin" className="flex items-center">
-                    <LogIn className="h-4 w-4 mr-2" />
-                    Sign In
-                  </TabsTrigger>
-                  <TabsTrigger value="signup" className="flex items-center">
-                    <UserPlus className="h-4 w-4 mr-2" />
-                    Sign Up
-                  </TabsTrigger>
-                </TabsList>
-                <TabsContent value="signin" className="mt-6">
-                  <form onSubmit={handleSignIn} className="space-y-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="signin-email">Email</Label>
-                      <Input
-                        id="signin-email"
-                        placeholder="m@example.com"
-                        type="email"
-                        value={email}
-                        onChange={(e) => setEmail(e.target.value)}
-                        className="bg-background"
-                        disabled={isButtonDisabled}
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="signin-password">Password</Label>
-                      <Input
-                        id="signin-password"
-                        type="password"
-                        value={password}
-                        onChange={(e) => setPassword(e.target.value)}
-                        className="bg-background"
-                        disabled={isButtonDisabled}
-                      />
-                      <div className="text-right">
-                        <Link to="/forgot-password" className="text-sm text-primary hover:underline">
-                          Forgot password?
-                        </Link>
-                      </div>
-                    </div>
-                    <Button 
-                      type="submit" 
-                      className="w-full" 
-                      variant="spelman" 
-                      disabled={isButtonDisabled}
-                    >
-                      {buttonLoadingIcon || <LogIn className="mr-2 h-4 w-4" />}
-                      Sign In
-                    </Button>
-                  </form>
-                </TabsContent>
-                <TabsContent value="signup" className="mt-6">
-                  <form onSubmit={handleSignUp} className="space-y-4">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <div className="space-y-2">
-                        <Label htmlFor="signup-firstName">First Name</Label>
-                        <Input
-                          id="signup-firstName"
-                          placeholder="First Name"
-                          value={firstName}
-                          onChange={(e) => setFirstName(e.target.value)}
-                          className="bg-background"
-                          disabled={isButtonDisabled}
-                        />
-                      </div>
-                      <div className="space-y-2">
-                        <Label htmlFor="signup-lastName">Last Name</Label>
-                        <Input
-                          id="signup-lastName"
-                          placeholder="Last Name"
-                          value={lastName}
-                          onChange={(e) => setLastName(e.target.value)}
-                          className="bg-background"
-                          disabled={isButtonDisabled}
-                        />
-                      </div>
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="signup-email">Email</Label>
-                      <Input
-                        id="signup-email"
-                        placeholder="m@example.com"
-                        type="email"
-                        value={email}
-                        onChange={(e) => setEmail(e.target.value)}
-                        className="bg-background"
-                        disabled={isButtonDisabled}
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="signup-password">Password</Label>
-                      <Input
-                        id="signup-password"
-                        type="password"
-                        value={password}
-                        onChange={(e) => setPassword(e.target.value)}
-                        className="bg-background"
-                        disabled={isButtonDisabled}
-                      />
-                    </div>
-                    <Button 
-                      type="submit" 
-                      className="w-full" 
-                      variant="spelman" 
-                      disabled={isButtonDisabled}
-                    >
-                      {buttonLoadingIcon || <UserPlus className="mr-2 h-4 w-4" />}
-                      Sign Up
-                    </Button>
-                  </form>
-                </TabsContent>
-              </Tabs>
-            </CardContent>
-          </Card>
-          <p className="px-8 text-center text-sm text-muted-foreground">
-            By continuing, you agree to our{" "}
-            <Link
-              to="/terms"
-              className="hover:text-foreground underline underline-offset-4"
+    <div className="flex items-center justify-center min-h-[80vh] px-4">
+      <Card className="w-full max-w-md">
+        <CardHeader className="space-y-1 text-center">
+          <CardTitle className="text-2xl font-bold">Welcome Back</CardTitle>
+          <CardDescription>
+            Enter your credentials to sign in to your account
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <form onSubmit={handleLogin} className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="email">Email</Label>
+              <Input
+                id="email"
+                type="email"
+                placeholder="your.email@example.com"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+              />
+            </div>
+            <div className="space-y-2">
+              <div className="flex justify-between">
+                <Label htmlFor="password">Password</Label>
+                <Link to="/forgot-password" className="text-sm text-glee-purple hover:underline">
+                  Forgot password?
+                </Link>
+              </div>
+              <Input
+                id="password"
+                type="password"
+                placeholder="••••••••"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+              />
+            </div>
+            <Button 
+              type="submit" 
+              className="w-full bg-glee-spelman hover:bg-glee-spelman/90" 
+              disabled={isSubmitting}
             >
-              Terms of Service
-            </Link>{" "}
-            and{" "}
-            <Link
-              to="/privacy"
-              className="hover:text-foreground underline underline-offset-4"
-            >
-              Privacy Policy
+              {isSubmitting ? (
+                <Spinner size="sm" className="mr-2" />
+              ) : (
+                <LogIn className="w-4 h-4 mr-2" />
+              )}
+              Sign In
+            </Button>
+          </form>
+          
+          <div className="mt-4 text-center text-sm">
+            <span className="text-muted-foreground">Don't have an account? </span>
+            <Link to="/signup" className="text-glee-purple hover:underline">
+              Sign up
             </Link>
-            .
-          </p>
-        </div>
-      </div>
+          </div>
+        </CardContent>
+        <CardFooter className="flex flex-col space-y-4">
+          <div className="relative">
+            <div className="absolute inset-0 flex items-center">
+              <span className="w-full border-t" />
+            </div>
+            <div className="relative flex justify-center text-xs uppercase">
+              <span className="bg-card px-2 text-muted-foreground">Or</span>
+            </div>
+          </div>
+          
+          <div className="grid grid-cols-1 gap-2">
+            <Button variant="outline" className="w-full">
+              <UserPlus className="w-4 h-4 mr-2" />
+              Request Member Access
+            </Button>
+            <Button variant="outline" className="w-full">
+              <Mail className="w-4 h-4 mr-2" />
+              Contact Administrator
+            </Button>
+          </div>
+        </CardFooter>
+      </Card>
     </div>
   );
-}
+};
+
+export default LoginPage;

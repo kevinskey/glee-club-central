@@ -10,6 +10,8 @@ import MainLayout from './layouts/MainLayout';
 import HomePage from './pages/HomePage';
 import { AuthProvider } from './contexts/AuthContext';
 import HomeLayout from './layouts/HomeLayout';
+import RequireAuth from './components/auth/RequireAuth';
+import RoleDashboard from './components/auth/RoleDashboard';
 
 // Create a properly structured router with all routes
 export const router = createBrowserRouter([
@@ -46,9 +48,18 @@ export const router = createBrowserRouter([
         children: [
           {
             index: true,
-            element: <React.Suspense fallback={<div>Loading...</div>}><HomePage /></React.Suspense>,
+            element: (
+              <React.Suspense fallback={<div>Loading...</div>}>
+                <HomePage />
+              </React.Suspense>
+            ),
           },
         ],
+      },
+      // Role-based dashboard redirection for authenticated users
+      {
+        path: '/role-dashboard',
+        element: <RequireAuth><RoleDashboard /></RequireAuth>,
       },
       // Secondary routes with MainLayout
       {

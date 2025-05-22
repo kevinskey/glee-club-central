@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import {
   useSession,
@@ -244,7 +243,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
         toast.success("Login successful!");
         
         // Try to load return URL from storage
-        const returnTo = sessionStorage.getItem('authRedirectPath') || '/dashboard';
+        const returnTo = sessionStorage.getItem('authRedirectPath') || '/role-dashboard';
         const intent = sessionStorage.getItem('authRedirectIntent');
         
         console.log("Will redirect to:", { returnTo, intent });
