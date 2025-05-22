@@ -1,5 +1,4 @@
-
-import * as React from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import {
   useSession,
   useSupabaseClient,
@@ -12,7 +11,7 @@ import { getProfile } from '@/utils/supabase/profiles';
 import { supabase } from '@/integrations/supabase/client';
 
 // Create a properly initialized AuthContext with null as default
-const AuthContext = React.createContext<AuthContextType | null>(null);
+const AuthContext = createContext<AuthContextType | null>(null);
 
 interface AuthProviderProps {
   children: React.ReactNode | ((props: { isLoading: boolean }) => React.ReactNode);
@@ -39,11 +38,11 @@ export const cleanupAuthState = () => {
 };
 
 export function AuthProvider({ children }: AuthProviderProps) {
-  // Use React hooks for state management - explicitly use React.useState for clarity
-  const [authUser, setAuthUser] = React.useState<AuthUser | null>(null);
-  const [profile, setProfile] = React.useState<Profile | null>(null);
-  const [isLoading, setIsLoading] = React.useState(true);
-  const [permissions, setPermissions] = React.useState<{ [key: string]: boolean }>({});
+  // Use React hooks for state management - explicitly use React useState for clarity
+  const [authUser, setAuthUser] = useState<AuthUser | null>(null);
+  const [profile, setProfile] = useState<Profile | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [permissions, setPermissions] = useState<{ [key: string]: boolean }>({});
   
   // These hooks can only be used inside a component that is a child of the SessionContextProvider
   const session = useSession();
@@ -51,7 +50,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const user = useUser();
 
   // Function to refresh user permissions
-  const refreshPermissions = React.useCallback(async () => {
+  const refreshPermissions = useCallback(async () => {
     if (profile && profile.id) {
       try {
         const userPermissions = await fetchUserPermissions(profile.id);
@@ -63,7 +62,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
   }, [profile]);
   
   // Add a pre-check to detect if we have a session before even loading
-  React.useEffect(() => {
+  useEffect(() => {
     const checkExistingSession = async () => {
       try {
         const { data } = await supabase.auth.getSession();
@@ -165,20 +164,20 @@ export function AuthProvider({ children }: AuthProviderProps) {
   }, [user, supabaseClient, refreshPermissions]);
   
   // User role and type helper functions
-  const isAdmin = React.useCallback(() => {
+  const isAdmin = useCallback(() => {
     return !!(profile?.is_super_admin || profile?.role === 'admin');
   }, [profile]);
   
-  const isMember = React.useCallback(() => {
+  const isMember = useCallback(() => {
     return profile?.role === 'member';
   }, [profile]);
   
-  const isFan = React.useCallback(() => {
+  const isFan = useCallback(() => {
     return profile?.user_type === 'fan';
   }, [profile]);
   
   // getUserType function defined in the provider
-  const getUserType = React.useCallback((): UserType => {
+  const getUserType = useCallback((): UserType => {
     const userType = profile?.user_type || '';
     
     // If user_type doesn't exist, infer from role
@@ -196,7 +195,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
   }, [profile]);
 
   // Auth methods using window.location for navigation instead of router hooks
-  const handleLogout = async () => {
+  const handleLogout = useCallback(async () => {
     try {
       // Only clean up auth state during explicit logout
       cleanupAuthState();
@@ -219,10 +218,10 @@ export function AuthProvider({ children }: AuthProviderProps) {
       toast.error("An unexpected error occurred during logout");
       return { error: err as Error };
     }
-  };
+  });
 
   // Enhanced login function with better logging and error handling
-  const defaultLogin = async (email: string, password: string) => {
+  const defaultLogin = useCallback(async (email: string, password: string) => {
     console.log("Login attempt with email:", email);
     
     try {
@@ -260,7 +259,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
       toast.error(err.message || "An unexpected error occurred during login");
       return { error: err };
     }
-  };
+  });
   
   const value: AuthContextType = {
     user: authUser,
@@ -346,7 +345,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
 }
 
 export const useAuth = (): AuthContextType => {
-  const context = React.useContext(AuthContext);
+  const context = useContext(AuthContext);
   if (!context) {
     throw new Error("useAuth must be used within an AuthProvider");
   }
