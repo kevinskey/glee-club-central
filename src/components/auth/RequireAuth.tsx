@@ -16,7 +16,11 @@ const RequireAuth = ({ children, requireAdmin, allowedUserTypes }: RequireAuthPr
   const { isAuthenticated, isLoading, isAdmin, getUserType } = useAuth();
   const location = useLocation();
   
+  // Add debug logging
+  console.log(`RequireAuth check: isAuthenticated=${isAuthenticated}, isLoading=${isLoading}, path=${location.pathname}`);
+  
   useEffect(() => {
+    // Only show error toast if authentication check has completed
     if (!isLoading && !isAuthenticated) {
       toast.error("Please log in to access this page");
     }
@@ -31,12 +35,24 @@ const RequireAuth = ({ children, requireAdmin, allowedUserTypes }: RequireAuthPr
   }
   
   if (!isAuthenticated) {
+    console.log("Not authenticated, redirecting to login with returnTo:", location.pathname);
+    
     // Store the current URL to redirect back after login
-    return <Navigate to="/login" state={{ from: location }} replace />;
+    const searchParams = new URLSearchParams();
+    searchParams.set('returnTo', location.pathname);
+    
+    // For recording-specific paths, set an intent parameter
+    if (location.pathname.includes('recording')) {
+      searchParams.set('intent', 'recording');
+      console.log("Setting recording intent for redirect");
+    }
+    
+    return <Navigate to={`/login?${searchParams.toString()}`} replace />;
   }
   
   // Check if admin access is required
   if (requireAdmin && !isAdmin()) {
+    console.log("Admin access required but user is not admin");
     toast.error("You don't have admin privileges to access this page");
     return <Navigate to="/dashboard" replace />;
   }
@@ -44,12 +60,15 @@ const RequireAuth = ({ children, requireAdmin, allowedUserTypes }: RequireAuthPr
   // Check if user type is in allowed types
   if (allowedUserTypes && allowedUserTypes.length > 0) {
     const userType = getUserType();
+    console.log("Checking allowed user types:", allowedUserTypes, "Current user type:", userType);
+    
     if (!userType || !allowedUserTypes.includes(userType)) {
       toast.error("You don't have permission to access this page");
       return <Navigate to="/dashboard" replace />;
     }
   }
   
+  console.log("Auth check passed, rendering children");
   return <>{children}</>;
 };
 

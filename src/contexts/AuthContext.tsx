@@ -18,7 +18,7 @@ interface AuthProviderProps {
   children: React.ReactNode | ((props: { isLoading: boolean }) => React.ReactNode);
 }
 
-// Add cleanup auth state function
+// Add cleanup auth state function - but only use when explicitly logging out
 export const cleanupAuthState = () => {
   // Remove standard auth tokens
   localStorage.removeItem('supabase.auth.token');
@@ -61,6 +61,24 @@ export function AuthProvider({ children }: AuthProviderProps) {
       }
     }
   }, [profile]);
+  
+  // Add a pre-check to detect if we have a session before even loading
+  useEffect(() => {
+    const checkExistingSession = async () => {
+      try {
+        const { data } = await supabase.auth.getSession();
+        if (data.session) {
+          console.log("Pre-check found existing session:", data.session.user.id);
+        } else {
+          console.log("No existing session found in pre-check");
+        }
+      } catch (err) {
+        console.error("Error checking existing session:", err);
+      }
+    };
+
+    checkExistingSession();
+  }, []);
   
   useEffect(() => {
     console.log("AuthProvider useEffect - checking user:", user);
@@ -126,7 +144,24 @@ export function AuthProvider({ children }: AuthProviderProps) {
       }
     };
     
+    // Set up an auth state change listener that runs before fetchProfile
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      (event, session) => {
+        console.log("Auth state changed:", event, session?.user?.id);
+        
+        // Only update immediately for sign in/out events
+        if (event === 'SIGNED_IN' || event === 'SIGNED_OUT' || event === 'TOKEN_REFRESHED') {
+          fetchProfile();
+        }
+      }
+    );
+    
+    // Initial fetch to handle page loads
     fetchProfile();
+    
+    return () => {
+      subscription.unsubscribe();
+    };
   }, [user, supabaseClient, refreshPermissions]);
   
   // User role and type helper functions
@@ -163,7 +198,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
   // Auth methods using window.location for navigation instead of router hooks
   const handleLogout = async () => {
     try {
-      // Clean up auth state first
+      // Only clean up auth state during explicit logout
       cleanupAuthState();
       
       const { error } = await supabase.auth.signOut();
@@ -188,8 +223,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
   const defaultLogin = async (email: string, password: string) => {
     try {
-      // Clean up existing auth state first
-      cleanupAuthState();
+      // Don't clean up auth state before login - could be redirection
       
       const { error } = await supabase.auth.signInWithPassword({ email, password });
       if (error) {
@@ -214,8 +248,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
     signIn: defaultLogin,
     signOut: handleLogout,
     signUp: async (email: string, password: string, firstName: string, lastName: string, userType: UserType = 'fan') => {
-      // Clean up existing auth state first
-      cleanupAuthState();
+      // Don't clean up auth state before signup - allow logins to persist
       
       const { data, error } = await supabase.auth.signUp({
         email,

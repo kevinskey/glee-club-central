@@ -18,11 +18,17 @@ export function RecordingStudioDialog({ audioContextRef }: RecordingStudioDialog
   const { isAuthenticated, user } = useAuth();
   const navigate = useNavigate();
 
+  // More comprehensive authentication checking
+  const userAuthenticated = isAuthenticated && !!user;
+  console.log("RecordingStudioDialog - Auth status:", { isAuthenticated, hasUser: !!user });
+
   // Check authentication before opening recording studio
   const handleOpenRecordingStudio = () => {
-    if (isAuthenticated && user) {
+    if (userAuthenticated) {
+      console.log("User is authenticated, opening recording studio");
       setIsOpen(true);
     } else {
+      console.log("User is not authenticated, showing auth check dialog");
       setAuthCheckDialogOpen(true);
     }
   };
@@ -30,12 +36,19 @@ export function RecordingStudioDialog({ audioContextRef }: RecordingStudioDialog
   // Go to login page with recording intent
   const handleGoToLogin = () => {
     setAuthCheckDialogOpen(false);
-    navigate('/login?returnTo=/dashboard/recording-studio&intent=recording');
+    // Use search params to indicate recording intent and return URL
+    const searchParams = new URLSearchParams();
+    searchParams.set('returnTo', '/dashboard/recording-studio');
+    searchParams.set('intent', 'recording');
+    
+    console.log("Navigating to login with recording intent");
+    navigate(`/login?${searchParams.toString()}`);
   };
 
   // Go to dashboard recording studio
   const handleGoToDashboardStudio = () => {
     setAuthCheckDialogOpen(false);
+    console.log("Navigating to dashboard recording studio");
     navigate('/dashboard/recording-studio');
   };
 
