@@ -1,5 +1,5 @@
 
-import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
+import * as React from 'react';
 import {
   useSession,
   useSupabaseClient,
@@ -12,7 +12,7 @@ import { getProfile } from '@/utils/supabase/profiles';
 import { supabase } from '@/integrations/supabase/client';
 
 // Create a properly initialized AuthContext with null as default
-const AuthContext = createContext<AuthContextType | null>(null);
+const AuthContext = React.createContext<AuthContextType | null>(null);
 
 interface AuthProviderProps {
   children: React.ReactNode | ((props: { isLoading: boolean }) => React.ReactNode);
@@ -51,7 +51,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const user = useUser();
 
   // Function to refresh user permissions
-  const refreshPermissions = useCallback(async () => {
+  const refreshPermissions = React.useCallback(async () => {
     if (profile && profile.id) {
       try {
         const userPermissions = await fetchUserPermissions(profile.id);
@@ -63,7 +63,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
   }, [profile]);
   
   // Add a pre-check to detect if we have a session before even loading
-  useEffect(() => {
+  React.useEffect(() => {
     const checkExistingSession = async () => {
       try {
         const { data } = await supabase.auth.getSession();
@@ -165,20 +165,20 @@ export function AuthProvider({ children }: AuthProviderProps) {
   }, [user, supabaseClient, refreshPermissions]);
   
   // User role and type helper functions
-  const isAdmin = useCallback(() => {
+  const isAdmin = React.useCallback(() => {
     return !!(profile?.is_super_admin || profile?.role === 'admin');
   }, [profile]);
   
-  const isMember = useCallback(() => {
+  const isMember = React.useCallback(() => {
     return profile?.role === 'member';
   }, [profile]);
   
-  const isFan = useCallback(() => {
+  const isFan = React.useCallback(() => {
     return profile?.user_type === 'fan';
   }, [profile]);
   
   // getUserType function defined in the provider
-  const getUserType = useCallback((): UserType => {
+  const getUserType = React.useCallback((): UserType => {
     const userType = profile?.user_type || '';
     
     // If user_type doesn't exist, infer from role
@@ -196,8 +196,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
   }, [profile]);
 
   // Auth methods using window.location for navigation instead of router hooks
-  // Fixed: Added empty object as second argument to return from handleLogout
-  const handleLogout = useCallback(async () => {
+  const handleLogout = React.useCallback(async () => {
     try {
       // Only clean up auth state during explicit logout
       cleanupAuthState();
@@ -214,16 +213,16 @@ export function AuthProvider({ children }: AuthProviderProps) {
       // Use window.location for navigation
       window.location.href = '/';
       
-      return { error: error as Error, data: {} }; // Fixed: Added second argument (data)
+      return { error: error as Error, data: {} };
     } catch (err) {
       console.error("Error during logout:", err);
       toast.error("An unexpected error occurred during logout");
-      return { error: err as Error, data: {} }; // Fixed: Added second argument (data)
+      return { error: err as Error, data: {} };
     }
   }, []);
 
   // Enhanced login function with better logging and error handling
-  const defaultLogin = useCallback(async (email: string, password: string) => {
+  const defaultLogin = React.useCallback(async (email: string, password: string) => {
     console.log("Login attempt with email:", email);
     
     try {
@@ -237,7 +236,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
       if (error) {
         console.error("Login error:", error.message);
         toast.error(error.message || "Login failed");
-        return { error, data: null }; // Fixed: Added second argument (data as null)
+        return { error, data: null };
       }
       
       if (data && data.user) {
@@ -347,7 +346,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
 }
 
 export const useAuth = (): AuthContextType => {
-  const context = useContext(AuthContext);
+  const context = React.useContext(AuthContext);
   if (!context) {
     throw new Error("useAuth must be used within an AuthProvider");
   }
