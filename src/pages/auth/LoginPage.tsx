@@ -57,12 +57,15 @@ const LoginPage = () => {
     setIsSubmitting(true);
     
     try {
-      const { error, returnTo: redirectPath } = await login(email, password);
+      const result = await login(email, password);
       
-      if (error) {
-        console.error("Login error:", error);
-        toast.error(error.message || "Login failed");
+      if (result.error) {
+        console.error("Login error:", result.error);
+        toast.error(result.error.message || "Login failed");
       } else {
+        // Get redirectPath from result if it exists, otherwise use returnTo
+        // TypeScript fix: Check if result has returnTo property before accessing it
+        const redirectPath = 'returnTo' in result ? result.returnTo : returnTo;
         console.log("Login successful, redirecting to:", redirectPath || returnTo);
         navigate(redirectPath || returnTo);
       }
