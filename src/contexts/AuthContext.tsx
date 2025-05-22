@@ -1,4 +1,5 @@
-import * as React from 'react';
+
+import React, { createContext, useCallback, useContext, useEffect, useState } from 'react';
 import {
   useSession,
   useSupabaseClient,
@@ -11,7 +12,7 @@ import { getProfile } from '@/utils/supabase/profiles';
 import { supabase } from '@/integrations/supabase/client';
 
 // Create a properly initialized AuthContext with null as default
-const AuthContext = React.createContext<AuthContextType | null>(null);
+const AuthContext = createContext<AuthContextType | null>(null);
 
 interface AuthProviderProps {
   children: React.ReactNode | ((props: { isLoading: boolean }) => React.ReactNode);
@@ -39,10 +40,10 @@ export const cleanupAuthState = () => {
 
 export function AuthProvider({ children }: AuthProviderProps) {
   // Use React hooks for state management
-  const [authUser, setAuthUser] = React.useState<AuthUser | null>(null);
-  const [profile, setProfile] = React.useState<Profile | null>(null);
-  const [isLoading, setIsLoading] = React.useState(true);
-  const [permissions, setPermissions] = React.useState<{ [key: string]: boolean }>({});
+  const [authUser, setAuthUser] = useState<AuthUser | null>(null);
+  const [profile, setProfile] = useState<Profile | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [permissions, setPermissions] = useState<{ [key: string]: boolean }>({});
   
   // These hooks can only be used inside a component that is a child of the SessionContextProvider
   const session = useSession();
@@ -50,7 +51,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const user = useUser();
 
   // Function to refresh user permissions
-  const refreshPermissions = React.useCallback(async () => {
+  const refreshPermissions = useCallback(async () => {
     if (profile && profile.id) {
       try {
         const userPermissions = await fetchUserPermissions(profile.id);
@@ -62,7 +63,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
   }, [profile]);
   
   // Add a pre-check to detect if we have a session before even loading
-  React.useEffect(() => {
+  useEffect(() => {
     const checkExistingSession = async () => {
       try {
         const { data } = await supabase.auth.getSession();
@@ -79,7 +80,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
     checkExistingSession();
   }, []);
   
-  React.useEffect(() => {
+  useEffect(() => {
     console.log("AuthProvider useEffect - checking user:", user);
     
     const fetchProfile = async () => {
@@ -164,20 +165,20 @@ export function AuthProvider({ children }: AuthProviderProps) {
   }, [user, supabaseClient, refreshPermissions]);
   
   // User role and type helper functions
-  const isAdmin = React.useCallback(() => {
+  const isAdmin = useCallback(() => {
     return !!(profile?.is_super_admin || profile?.role === 'admin');
   }, [profile]);
   
-  const isMember = React.useCallback(() => {
+  const isMember = useCallback(() => {
     return profile?.role === 'member';
   }, [profile]);
   
-  const isFan = React.useCallback(() => {
+  const isFan = useCallback(() => {
     return profile?.user_type === 'fan';
   }, [profile]);
   
   // getUserType function defined in the provider
-  const getUserType = React.useCallback((): UserType => {
+  const getUserType = useCallback((): UserType => {
     const userType = profile?.user_type || '';
     
     // If user_type doesn't exist, infer from role
@@ -345,7 +346,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
 }
 
 export const useAuth = (): AuthContextType => {
-  const context = React.useContext(AuthContext);
+  const context = useContext(AuthContext);
   if (!context) {
     throw new Error("useAuth must be used within an AuthProvider");
   }
