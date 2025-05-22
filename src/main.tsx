@@ -41,7 +41,7 @@ if (!rootElement) {
 const root = ReactDOM.createRoot(rootElement);
 
 // Initialize app with proper provider nesting order:
-// First React.StrictMode to ensure React is fully initialized
+// React.StrictMode -> QueryClientProvider -> SessionContextProvider -> ThemeProvider -> AuthProvider -> Router
 root.render(
   <React.StrictMode>
     <QueryClientProvider client={queryClient}>
