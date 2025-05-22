@@ -40,7 +40,7 @@ if (!rootElement) {
 // Create a root
 const root = ReactDOM.createRoot(rootElement);
 
-// Initialize app with proper provider nesting order - explicitly use React to avoid any potential issues
+// Initialize app with proper provider nesting order
 root.render(
   <React.StrictMode>
     <QueryClientProvider client={queryClient}>
