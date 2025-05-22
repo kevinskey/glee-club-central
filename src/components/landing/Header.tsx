@@ -30,16 +30,16 @@ export function Header() {
           
           {/* Middle: Navigation Links */}
           <nav className="hidden md:flex items-center space-x-6">
-            <Link to="/" className="font-medium hover:text-glee-spelman transition-colors">
+            <Link to="/" className="font-medium text-foreground hover:text-glee-spelman transition-colors">
               Home
             </Link>
-            <Link to="/about" className="font-medium hover:text-glee-spelman transition-colors">
+            <Link to="/about" className="font-medium text-foreground hover:text-glee-spelman transition-colors">
               About
             </Link>
-            <Link to="/events" className="font-medium hover:text-glee-spelman transition-colors">
+            <Link to="/events" className="font-medium text-foreground hover:text-glee-spelman transition-colors">
               Events
             </Link>
-            <Link to="/contact" className="font-medium hover:text-glee-spelman transition-colors">
+            <Link to="/contact" className="font-medium text-foreground hover:text-glee-spelman transition-colors">
               Contact
             </Link>
           </nav>

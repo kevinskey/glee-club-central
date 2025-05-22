@@ -32,7 +32,7 @@ export function EnhancedHeroSection() {
           overlayOpacity={0.6} 
         />
       ) : (
-        <div className="absolute inset-0 bg-gradient-to-b from-glee-purple to-glee-purple/80"></div>
+        <div className="absolute inset-0 bg-black/60"></div>
       )}
       
       {/* Content overlay with Spelman Glee Club branding */}

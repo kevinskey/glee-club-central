@@ -20,7 +20,7 @@ export function BackgroundSlideshow({
 
   // Handle empty images array
   if (!images || images.length === 0) {
-    return <div className="absolute inset-0 bg-background/50"></div>;
+    return <div className="absolute inset-0 bg-black/50"></div>;
   }
 
   // For single image, just display it without animation
@@ -87,7 +87,7 @@ export function BackgroundSlideshow({
         />
       ))}
       
-      {/* Overlay with configurable opacity */}
+      {/* Using a consistent black overlay in all modes */}
       <div 
         className="absolute inset-0 bg-black" 
         style={{ opacity: overlayOpacity }}
