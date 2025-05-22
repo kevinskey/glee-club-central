@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { createBrowserRouter, Navigate, Outlet, RouterProvider } from 'react-router-dom';
+import { createBrowserRouter, Navigate, Outlet } from 'react-router-dom';
 import ErrorBoundary from "./components/ErrorBoundary";
 import StaticLandingPage from './pages/StaticLandingPage';
 import HomeTemp from './pages/HomeTemp';
@@ -83,10 +83,5 @@ export const router = createBrowserRouter([
     ],
   },
 ]);
-
-// Export RouterProvider component for index.js to use
-export const AppRouter = () => (
-  <RouterProvider router={router} />
-);
 
 export default router;
