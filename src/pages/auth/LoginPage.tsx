@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useNavigate, useLocation, Link } from 'react-router-dom';
@@ -20,12 +19,10 @@ const LoginPage = () => {
   const [password, setPassword] = React.useState('');
   const [isSubmitting, setIsSubmitting] = React.useState(false);
   
-  // Get returnTo from query params
+  // Get returnTo from query params, with a default that won't cause issues
   const searchParams = new URLSearchParams(location.search);
   const returnTo = searchParams.get('returnTo') || '/role-dashboard';
   const intent = searchParams.get('intent');
-  
-  console.log("Login page loaded with params:", { returnTo, intent });
   
   // Store returnTo in sessionStorage for use after login
   React.useEffect(() => {
@@ -37,13 +34,18 @@ const LoginPage = () => {
     }
   }, [returnTo, intent]);
   
-  // Redirect if already authenticated
+  // Redirect if already authenticated - using useEffect for controlled navigation
   React.useEffect(() => {
-    if (isAuthenticated && !isLoading) {
-      console.log("User already authenticated, redirecting to:", returnTo);
-      navigate(returnTo);
+    // Only redirect if auth check is complete
+    if (isAuthenticated && !isLoading && !isSubmitting) {
+      // Small delay to prevent flashing UI
+      const timer = setTimeout(() => {
+        navigate(returnTo);
+      }, 100);
+      
+      return () => clearTimeout(timer);
     }
-  }, [isAuthenticated, isLoading, navigate, returnTo]);
+  }, [isAuthenticated, isLoading, navigate, returnTo, isSubmitting]);
   
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -53,7 +55,6 @@ const LoginPage = () => {
       return;
     }
     
-    console.log("Attempting login with:", { email });
     setIsSubmitting(true);
     
     try {
@@ -63,10 +64,11 @@ const LoginPage = () => {
         console.error("Login error:", result.error);
         toast.error(result.error.message || "Login failed");
       } else {
-        // Get redirectPath from result if it exists, otherwise use returnTo
-        // TypeScript fix: Check if result has returnTo property before accessing it
+        // Get redirectPath from result if it exists
         const redirectPath = 'returnTo' in result ? result.returnTo : returnTo;
-        console.log("Login successful, redirecting to:", redirectPath || returnTo);
+        toast.success("Login successful!");
+        
+        // Use navigate instead of direct location change
         navigate(redirectPath || returnTo);
       }
     } catch (err) {
@@ -77,11 +79,21 @@ const LoginPage = () => {
     }
   };
   
-  // Show loading state while checking auth
+  // Show minimal loading state while checking auth to prevent flashing
   if (isLoading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <Spinner size="lg" />
+      </div>
+    );
+  }
+  
+  // Don't render login form if already authenticated and about to redirect
+  if (isAuthenticated && !isSubmitting) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <Spinner size="lg" />
+        <p className="ml-2 text-muted-foreground">Redirecting...</p>
       </div>
     );
   }

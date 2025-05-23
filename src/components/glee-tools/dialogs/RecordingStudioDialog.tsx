@@ -19,45 +19,37 @@ export function RecordingStudioDialog({ audioContextRef }: RecordingStudioDialog
   const { isAuthenticated, user } = useAuth();
   const navigate = useNavigate();
 
-  // More comprehensive authentication checking
-  const userAuthenticated = isAuthenticated && !!user;
-  console.log("RecordingStudioDialog - Auth status:", { isAuthenticated, hasUser: !!user });
+  // Check authentication status without causing re-renders
+  const userAuthenticated = React.useMemo(() => 
+    isAuthenticated && !!user, [isAuthenticated, user]
+  );
 
-  // Check authentication before opening recording studio
-  const handleOpenRecordingStudio = () => {
+  // Handle opening recording studio with authentication check
+  const handleOpenRecordingStudio = React.useCallback(() => {
     if (userAuthenticated) {
-      console.log("User is authenticated, opening recording studio");
       setIsOpen(true);
     } else {
-      console.log("User is not authenticated, showing auth check dialog");
       setAuthCheckDialogOpen(true);
     }
-  };
+  }, [userAuthenticated]);
 
-  // Go to login page with recording intent
-  const handleGoToLogin = () => {
+  // Handle login navigation with proper state management
+  const handleGoToLogin = React.useCallback(() => {
     setAuthCheckDialogOpen(false);
-    // Use search params to indicate recording intent and return URL
-    const searchParams = new URLSearchParams();
-    searchParams.set('returnTo', '/dashboard/recording-studio');
-    searchParams.set('intent', 'recording');
     
-    console.log("Navigating to login with recording intent");
+    // Store intent in sessionStorage instead of URL params to reduce route changes
     sessionStorage.setItem('authRedirectPath', '/dashboard/recording-studio');
     sessionStorage.setItem('authRedirectIntent', 'recording');
     
-    // Show a toast to inform the user
     toast.info("Please log in to use the Recording Studio");
-    
-    navigate(`/login?${searchParams.toString()}`);
-  };
+    navigate('/login');
+  }, [navigate]);
 
-  // Go to dashboard recording studio
-  const handleGoToDashboardStudio = () => {
+  // Navigate to dashboard studio
+  const handleGoToDashboardStudio = React.useCallback(() => {
     setAuthCheckDialogOpen(false);
-    console.log("Navigating to dashboard recording studio");
     navigate('/dashboard/recording-studio');
-  };
+  }, [navigate]);
 
   return (
     <>

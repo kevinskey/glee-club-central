@@ -16,16 +16,17 @@ const RequireAuth = ({ children, requireAdmin, allowedUserTypes }: RequireAuthPr
   const { isAuthenticated, isLoading, isAdmin, getUserType } = useAuth();
   const location = useLocation();
   
-  // Add debug logging
-  console.log(`RequireAuth check: isAuthenticated=${isAuthenticated}, isLoading=${isLoading}, path=${location.pathname}`);
+  // Track redirect state to prevent multiple redirects
+  const [isRedirecting, setIsRedirecting] = React.useState(false);
   
+  // Show toast only once per session and only when not loading
   React.useEffect(() => {
-    // Only show error toast if authentication check has completed and user is not on login page
-    if (!isLoading && !isAuthenticated && !location.pathname.includes('login')) {
+    if (!isLoading && !isAuthenticated && !location.pathname.includes('login') && !isRedirecting) {
       toast.error("Please log in to access this page");
     }
-  }, [isLoading, isAuthenticated, location.pathname]);
+  }, [isLoading, isAuthenticated, location.pathname, isRedirecting]);
   
+  // Show loading state while authentication is being checked
   if (isLoading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
@@ -34,8 +35,10 @@ const RequireAuth = ({ children, requireAdmin, allowedUserTypes }: RequireAuthPr
     );
   }
   
-  if (!isAuthenticated) {
-    console.log("Not authenticated, redirecting to login with returnTo:", location.pathname);
+  // Only redirect once and avoid multiple redirects
+  if (!isAuthenticated && !isRedirecting) {
+    // Prevent multiple redirects by setting state
+    setIsRedirecting(true);
     
     // Store the current URL to redirect back after login
     const searchParams = new URLSearchParams();
@@ -44,7 +47,6 @@ const RequireAuth = ({ children, requireAdmin, allowedUserTypes }: RequireAuthPr
     // For recording-specific paths, set an intent parameter
     if (location.pathname.includes('recording')) {
       searchParams.set('intent', 'recording');
-      console.log("Setting recording intent for redirect");
     }
     
     return <Navigate to={`/login?${searchParams.toString()}`} replace />;
@@ -52,7 +54,6 @@ const RequireAuth = ({ children, requireAdmin, allowedUserTypes }: RequireAuthPr
   
   // Check if admin access is required
   if (requireAdmin && !isAdmin()) {
-    console.log("Admin access required but user is not admin");
     toast.error("You don't have admin privileges to access this page");
     return <Navigate to="/dashboard" replace />;
   }
@@ -60,7 +61,6 @@ const RequireAuth = ({ children, requireAdmin, allowedUserTypes }: RequireAuthPr
   // Check if user type is in allowed types
   if (allowedUserTypes && allowedUserTypes.length > 0) {
     const userType = getUserType();
-    console.log("Checking allowed user types:", allowedUserTypes, "Current user type:", userType);
     
     if (!userType || !allowedUserTypes.includes(userType)) {
       toast.error("You don't have permission to access this page");
@@ -68,7 +68,7 @@ const RequireAuth = ({ children, requireAdmin, allowedUserTypes }: RequireAuthPr
     }
   }
   
-  console.log("Auth check passed, rendering children");
+  // Authentication passed, render children
   return <>{children}</>;
 };
 
