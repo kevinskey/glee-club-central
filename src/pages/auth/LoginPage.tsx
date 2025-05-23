@@ -1,3 +1,4 @@
+
 import * as React from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useNavigate, useLocation, Link } from 'react-router-dom';
@@ -120,7 +121,7 @@ const LoginPage = () => {
     pageInitialized ? 'opacity-100' : 'opacity-0'
   }`;
   
-  // Show minimal loading state while checking auth to prevent flashing
+  // Show minimal loading state - improved loading indicator
   if (isLoading && !pageInitialized) {
     return (
       <div className="flex items-center justify-center min-h-screen">
@@ -129,7 +130,7 @@ const LoginPage = () => {
     );
   }
   
-  // Don't render login form if already authenticated and about to redirect
+  // Improved loading state when authenticated and redirecting
   if (isAuthenticated && !isSubmitting && pageInitialized) {
     return (
       <div className="flex items-center justify-center min-h-screen">
@@ -140,14 +141,26 @@ const LoginPage = () => {
       </div>
     );
   }
-  
+
+  // Main render with background image
   return (
-    <div className={containerClasses}>
-      {/* Left column with login form */}
-      <div className="w-full md:w-1/2 px-4 flex justify-center">
-        <Card className="w-full max-w-md border-border bg-card">
+    <div className="relative min-h-screen flex items-center justify-center">
+      {/* Full-page background image with overlay */}
+      <div className="absolute inset-0 z-0">
+        <SiteImage 
+          src="/lovable-uploads/6855d8e0-d27d-4722-af13-73921e99ab52.png"
+          alt="Glee Club Background"
+          className="w-full h-full object-cover"
+          objectFit="cover"
+        />
+        <div className="absolute inset-0 bg-black/50"></div>
+      </div>
+      
+      {/* Login form container */}
+      <div className={`relative z-10 w-full max-w-md px-4 ${containerClasses}`}>
+        <Card className="w-full border-border bg-card/90 backdrop-blur-md shadow-xl">
           <CardHeader className="space-y-1 text-center">
-            <CardTitle className="text-2xl font-bold text-card-foreground">Welcome Back</CardTitle>
+            <CardTitle className="text-2xl font-bold text-card-foreground">Spelman Glee Club Portal</CardTitle>
             <CardDescription className="text-muted-foreground">
               Enter your credentials to sign in to your account
             </CardDescription>
@@ -162,7 +175,7 @@ const LoginPage = () => {
                   placeholder="your.email@example.com"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="bg-background text-foreground border-input"
+                  className="bg-background/70 text-foreground border-input"
                   required
                 />
               </div>
@@ -179,7 +192,7 @@ const LoginPage = () => {
                   placeholder="••••••••"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="bg-background text-foreground border-input"
+                  className="bg-background/70 text-foreground border-input"
                   required
                 />
               </div>
@@ -215,9 +228,11 @@ const LoginPage = () => {
             </div>
             
             <div className="grid grid-cols-1 gap-2">
-              <Button variant="outline" className="w-full border-input text-foreground hover:bg-accent/10">
-                <UserPlus className="w-4 h-4 mr-2" />
-                Request Member Access
+              <Button variant="outline" className="w-full border-input text-foreground hover:bg-accent/10" asChild>
+                <Link to="/signup">
+                  <UserPlus className="w-4 h-4 mr-2" />
+                  Request Member Access
+                </Link>
               </Button>
               <Button variant="outline" className="w-full border-input text-foreground hover:bg-accent/10">
                 <Mail className="w-4 h-4 mr-2" />
@@ -235,22 +250,6 @@ const LoginPage = () => {
             </div>
           </CardFooter>
         </Card>
-      </div>
-      
-      {/* Right column with image */}
-      <div className="hidden md:block md:w-1/2 h-full">
-        <div className="relative h-full">
-          <SiteImage 
-            src="/lovable-uploads/6855d8e0-d27d-4722-af13-73921e99ab52.png"
-            alt="Glee Club Heritage Illustration"
-            className="w-full h-full object-cover"
-            objectFit="cover"
-          />
-          <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-6 text-white">
-            <h3 className="text-xl font-bold">Celebrating Musical Heritage</h3>
-            <p className="text-sm">Spelman College Glee Club - Voices of Tradition and Excellence</p>
-          </div>
-        </div>
       </div>
     </div>
   );
