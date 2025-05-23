@@ -7,31 +7,34 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { useAudioFiles } from "@/hooks/useAudioFiles";
 import { useAuth } from "@/contexts/AuthContext";
 import { formatDistanceToNow } from "date-fns";
-import { Download, Play, Pause, Search, Music, Trash2, AlertTriangle } from "lucide-react";
+import { Download, Play, Pause, Search, Music, Trash2, AlertTriangle, RefreshCcw } from "lucide-react";
 import { toast } from "sonner";
 import { Spinner } from "@/components/ui/spinner";
 
 export function RecordingArchive() {
   const { user } = useAuth();
-  const { audioFiles, loading, deleteAudioFile } = useAudioFiles();
+  const { audioFiles, loading, error: audioFilesError, fetchAudioFiles, deleteAudioFile } = useAudioFiles();
   const [searchQuery, setSearchQuery] = useState("");
   const [playingId, setPlayingId] = useState<string | null>(null);
   const [currentAudio, setCurrentAudio] = useState<HTMLAudioElement | null>(null);
   const [loadingError, setLoadingError] = useState<string | null>(null);
   const [isComponentMounted, setIsComponentMounted] = useState(false);
+  const [isInitialLoad, setIsInitialLoad] = useState(true);
 
   // Filter only user's recordings when user is available
   const userRecordings = React.useMemo(() => {
     if (!user || !audioFiles || !Array.isArray(audioFiles)) {
+      console.log("No user or audio files available", { user: !!user, audioFiles: Array.isArray(audioFiles) });
       return [];
     }
     
     try {
-      return audioFiles.filter(
-        file => file.uploaded_by === user.id
-      );
+      const filtered = audioFiles.filter(file => file.uploaded_by === user.id);
+      console.log(`Filtered ${filtered.length} recordings for user ${user.id}`);
+      return filtered;
     } catch (err) {
       console.error("Error filtering recordings:", err);
+      setLoadingError("Error filtering your recordings");
       return [];
     }
   }, [audioFiles, user]);
@@ -48,9 +51,33 @@ export function RecordingArchive() {
 
   // Component mount tracking
   useEffect(() => {
+    console.log("RecordingArchive mounted");
     setIsComponentMounted(true);
-    return () => setIsComponentMounted(false);
+    
+    // Fetch audio files on mount with a short delay to ensure auth is ready
+    const timer = setTimeout(() => {
+      fetchAudioFiles(false);
+      setIsInitialLoad(false);
+    }, 500);
+    
+    return () => {
+      console.log("RecordingArchive unmounted");
+      setIsComponentMounted(false);
+      clearTimeout(timer);
+      
+      // Clean up any playing audio
+      if (currentAudio) {
+        currentAudio.pause();
+      }
+    };
   }, []);
+
+  // Handle audio files error from hook
+  useEffect(() => {
+    if (audioFilesError) {
+      setLoadingError(audioFilesError.message || "Error loading recordings");
+    }
+  }, [audioFilesError]);
 
   // Handle play/pause with error handling
   const handlePlayPause = (recordingId: string, audioUrl: string) => {
@@ -137,17 +164,14 @@ export function RecordingArchive() {
     }
   };
 
-  // Cleanup audio on unmount
-  useEffect(() => {
-    return () => {
-      if (currentAudio) {
-        currentAudio.pause();
-      }
-    };
-  }, []);
+  // Handle manual refresh
+  const handleRefresh = () => {
+    fetchAudioFiles(true);
+    toast.success("Refreshing recordings...");
+  };
 
   // Loading state with better error handling
-  if (loading) {
+  if (loading && isInitialLoad) {
     return (
       <Card>
         <CardContent className="flex justify-center items-center py-12">
@@ -169,7 +193,10 @@ export function RecordingArchive() {
             <AlertTriangle className="h-10 w-10 text-destructive mb-4" />
             <h3 className="text-lg font-medium mb-2">Failed to load recordings</h3>
             <p className="text-muted-foreground mb-4">{loadingError}</p>
-            <Button variant="outline" onClick={() => window.location.reload()}>
+            <Button variant="outline" onClick={() => {
+              setLoadingError(null);
+              fetchAudioFiles(true);
+            }}>
               Retry
             </Button>
           </div>
@@ -181,10 +208,22 @@ export function RecordingArchive() {
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <Music className="h-5 w-5" /> 
-          Your Recording Archive
-        </CardTitle>
+        <div className="flex items-center justify-between">
+          <CardTitle className="flex items-center gap-2">
+            <Music className="h-5 w-5" /> 
+            Your Recording Archive
+          </CardTitle>
+          <Button 
+            size="sm" 
+            variant="outline" 
+            onClick={handleRefresh}
+            disabled={loading}
+            className="flex items-center gap-1"
+          >
+            {loading ? <Spinner size="sm" className="mr-1" /> : <RefreshCcw className="h-4 w-4" />}
+            Refresh
+          </Button>
+        </div>
       </CardHeader>
       <CardContent>
         <div className="mb-4">

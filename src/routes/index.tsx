@@ -15,7 +15,7 @@ import DashboardPage from "@/pages/dashboard/DashboardPage";
 import AdministrationPage from "@/pages/AdministrationPage";
 import NotFoundPage from "@/pages/NotFoundPage";
 import { adminRoutes } from "@/routes/adminRoutes";
-import RecordingsPage from "@/pages/RecordingsPage";
+import RecordingsPage from "@/pages/recordings/RecordingsPage"; // Use recordings folder path
 import RecordingStudioPage from "@/pages/recordings/RecordingStudioPage";
 import AudioManagementPage from "@/pages/audio-management/AudioManagementPage";
 import PracticePage from "@/pages/practice/PracticePage";
@@ -66,7 +66,7 @@ const routes: RouteObject[] = [
       },
       {
         path: "/recordings",
-        element: <RecordingStudioPage />,
+        element: <RecordingsPage />,
       },
       {
         path: "/audio-management",

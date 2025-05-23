@@ -11,7 +11,7 @@ import HomePage from './pages/HomePage';
 import HomeLayout from './layouts/HomeLayout';
 import RequireAuth from './components/auth/RequireAuth';
 import RoleDashboard from './components/auth/RoleDashboard';
-import RecordingsPage from './pages/RecordingsPage'; // Import the main recordings page
+import RecordingsPage from './pages/recordings/RecordingsPage'; // Use consistent import from recordings folder
 
 // Create a properly structured router with all routes
 export const router = createBrowserRouter([

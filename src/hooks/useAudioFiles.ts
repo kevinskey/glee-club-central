@@ -15,6 +15,7 @@ export function useAudioFiles() {
     // Don't fetch again if we fetched in the last 10 seconds (prevents duplicate fetches)
     const now = Date.now();
     if (now - lastFetched < 10000 && audioFiles.length > 0) {
+      console.log("Skipping duplicate fetch, last fetch was", (now - lastFetched) / 1000, "seconds ago");
       return;
     }
     
@@ -30,6 +31,7 @@ export function useAudioFiles() {
 
       if (error) {
         console.error("Supabase error fetching audio files:", error);
+        setError(new Error(error.message || "Failed to fetch audio files"));
         throw new Error(error.message || "Failed to fetch audio files");
       }
 
@@ -52,16 +54,22 @@ export function useAudioFiles() {
             description: `${formattedData.length} files loaded`,
           });
         }
+      } else {
+        console.log("No audio files returned from Supabase");
+        setAudioFiles([]);
       }
     } catch (error: any) {
       console.error("Error fetching audio files:", error);
       setError(error);
       
-      toast({
-        title: "Error loading audio files",
-        description: error.message || "An unexpected error occurred",
-        variant: "destructive",
-      });
+      // Only show toast if explicitly requested to avoid repeated errors
+      if (showToast) {
+        toast({
+          title: "Error loading audio files",
+          description: error.message || "An unexpected error occurred",
+          variant: "destructive",
+        });
+      }
     } finally {
       setLoading(false);
     }
@@ -127,8 +135,13 @@ export function useAudioFiles() {
 
   // Initial fetch on mount
   useEffect(() => {
-    fetchAudioFiles();
-  }, [fetchAudioFiles]);
+    // Add a small delay to ensure auth is initialized
+    const timer = setTimeout(() => {
+      fetchAudioFiles();
+    }, 500);
+    
+    return () => clearTimeout(timer);
+  }, []);
 
   return {
     loading,

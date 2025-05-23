@@ -27,6 +27,17 @@ const RequireAuth = ({ children, requireAdmin, allowedUserTypes }: RequireAuthPr
     }
   }, [isLoading, isAuthenticated, location.pathname, isRedirecting]);
   
+  // Debug logging
+  React.useEffect(() => {
+    console.log("RequireAuth state:", { 
+      isAuthenticated, 
+      isLoading, 
+      path: location.pathname,
+      isRedirecting,
+      redirectAttempted: redirectAttemptedRef.current
+    });
+  }, [isAuthenticated, isLoading, location.pathname, isRedirecting]);
+  
   // Show loading state while authentication is being checked
   if (isLoading) {
     return (
@@ -54,6 +65,7 @@ const RequireAuth = ({ children, requireAdmin, allowedUserTypes }: RequireAuthPr
     // Add a timestamp to prevent stale redirects
     sessionStorage.setItem('authRedirectTimestamp', Date.now().toString());
     
+    console.log("Redirecting to login from:", currentPath);
     return <Navigate to="/login" replace />;
   }
   
