@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect, useCallback, useContext } from 'react';
+import * as React from 'react';
 import {
   useSession,
   useSupabaseClient,
@@ -79,10 +79,10 @@ interface AuthProviderProps {
 }
 
 export function AuthProvider({ children }: AuthProviderProps) {
-  const [authUser, setAuthUser] = useState<AuthUser | null>(null);
-  const [profile, setProfile] = useState<Profile | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [permissions, setPermissions] = useState<{ [key: string]: boolean }>({});
+  const [authUser, setAuthUser] = React.useState<AuthUser | null>(null);
+  const [profile, setProfile] = React.useState<Profile | null>(null);
+  const [isLoading, setIsLoading] = React.useState(true);
+  const [permissions, setPermissions] = React.useState<{ [key: string]: boolean }>({});
   
   // These hooks can only be used inside a component that is a child of the SessionContextProvider
   const session = useSession();
@@ -90,7 +90,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const user = useUser();
 
   // Function to refresh user permissions
-  const refreshPermissions = useCallback(async () => {
+  const refreshPermissions = React.useCallback(async () => {
     if (profile && profile.id) {
       try {
         const userPermissions = await fetchUserPermissions(profile.id);
@@ -102,7 +102,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
   }, [profile]);
   
   // Add a pre-check to detect if we have a session before even loading
-  useEffect(() => {
+  React.useEffect(() => {
     const checkExistingSession = async () => {
       try {
         const { data } = await supabase.auth.getSession();
@@ -389,7 +389,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
 }
 
 export const useAuth = (): AuthContextType => {
-  const context = useContext(AuthContext);
+  const context = React.useContext(AuthContext);
   if (!context) {
     throw new Error("useAuth must be used within an AuthProvider");
   }
