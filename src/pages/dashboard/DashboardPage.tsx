@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useCallback, useMemo } from "react";
 import { PageHeader } from "@/components/ui/page-header";
 import { useAuth } from "@/contexts/AuthContext";
@@ -47,6 +46,7 @@ const DashboardPageContent = () => {
   const [loading, setLoading] = useState(true);
   const [events, setEvents] = useState<Event[]>([]);
   const { isAdminRole, isSuperAdmin } = usePermissions();
+  const [isDataLoaded, setIsDataLoaded] = useState(false);
   
   // Get current time of day for greeting - memoized to prevent re-renders
   const getTimeOfDay = useCallback(() => {
@@ -82,11 +82,18 @@ const DashboardPageContent = () => {
   }, []);
 
   useEffect(() => {
-    // Load data only once when auth loading is complete
+    // Only attempt to load data when auth state is confirmed
     if (!authLoading) {
       const loadData = async () => {
-        await fetchEvents();
-        setLoading(false);
+        setLoading(true);
+        try {
+          await fetchEvents();
+        } catch (err) {
+          console.error("Error loading dashboard data:", err);
+        } finally {
+          setLoading(false);
+          setIsDataLoaded(true);
+        }
       };
       
       loadData();
@@ -103,8 +110,8 @@ const DashboardPageContent = () => {
     navigate("/dashboard/admin");
   };
   
-  // Use conditional rendering instead of early returns
-  if (loading || authLoading) {
+  // Prevent flash of loading state - only show loading when needed
+  if ((loading || authLoading) && !isDataLoaded) {
     return (
       <div className="container mx-auto px-4 flex justify-center items-center min-h-[60vh]">
         <Spinner size="lg" />

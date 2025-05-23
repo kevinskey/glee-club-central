@@ -21,6 +21,7 @@ const LoginPage = () => {
   const [password, setPassword] = React.useState('');
   const [isSubmitting, setIsSubmitting] = React.useState(false);
   const [isResetting, setIsResetting] = React.useState(false);
+  const [pageInitialized, setPageInitialized] = React.useState(false);
   
   // Get saved redirect path from sessionStorage with default fallback
   const getRedirectPath = () => {
@@ -35,10 +36,18 @@ const LoginPage = () => {
     return '/role-dashboard';
   };
   
+  // Initialize the page to prevent early redirects
+  React.useEffect(() => {
+    const timer = setTimeout(() => {
+      setPageInitialized(true);
+    }, 200);
+    return () => clearTimeout(timer);
+  }, []);
+  
   // Redirect if already authenticated - using useEffect for controlled navigation
   React.useEffect(() => {
-    // Only redirect if auth check is complete
-    if (isAuthenticated && !isLoading && !isSubmitting) {
+    // Only redirect if auth check is complete and not during form submission
+    if (isAuthenticated && !isLoading && !isSubmitting && pageInitialized) {
       const redirectPath = getRedirectPath();
       
       // Small delay to prevent flashing UI and allow toast to be visible
@@ -52,7 +61,7 @@ const LoginPage = () => {
       
       return () => clearTimeout(timer);
     }
-  }, [isAuthenticated, isLoading, navigate, isSubmitting]);
+  }, [isAuthenticated, isLoading, navigate, isSubmitting, pageInitialized]);
   
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -106,8 +115,13 @@ const LoginPage = () => {
     }
   };
   
+  // Apply fadeIn animation to prevent blinking
+  const containerClasses = `flex items-center min-h-[80vh] bg-background transition-opacity duration-300 ${
+    pageInitialized ? 'opacity-100' : 'opacity-0'
+  }`;
+  
   // Show minimal loading state while checking auth to prevent flashing
-  if (isLoading) {
+  if (isLoading && !pageInitialized) {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <Spinner size="lg" />
@@ -116,17 +130,19 @@ const LoginPage = () => {
   }
   
   // Don't render login form if already authenticated and about to redirect
-  if (isAuthenticated && !isSubmitting) {
+  if (isAuthenticated && !isSubmitting && pageInitialized) {
     return (
       <div className="flex items-center justify-center min-h-screen">
-        <Spinner size="lg" />
-        <p className="ml-2 text-muted-foreground">Redirecting...</p>
+        <div className="flex flex-col items-center space-y-4">
+          <Spinner size="lg" />
+          <p className="ml-2 text-muted-foreground">Redirecting to dashboard...</p>
+        </div>
       </div>
     );
   }
   
   return (
-    <div className="flex items-center min-h-[80vh] bg-background">
+    <div className={containerClasses}>
       {/* Left column with login form */}
       <div className="w-full md:w-1/2 px-4 flex justify-center">
         <Card className="w-full max-w-md border-border bg-card">

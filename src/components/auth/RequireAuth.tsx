@@ -27,22 +27,14 @@ const RequireAuth = ({ children, requireAdmin, allowedUserTypes }: RequireAuthPr
     }
   }, [isLoading, isAuthenticated, location.pathname, isRedirecting]);
   
-  // Debug logging
-  React.useEffect(() => {
-    console.log("RequireAuth state:", { 
-      isAuthenticated, 
-      isLoading, 
-      path: location.pathname,
-      isRedirecting,
-      redirectAttempted: redirectAttemptedRef.current
-    });
-  }, [isAuthenticated, isLoading, location.pathname, isRedirecting]);
-  
-  // Show loading state while authentication is being checked
+  // Show enhanced loading state while authentication is being checked
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <Spinner size="lg" />
+      <div className="flex items-center justify-center min-h-screen bg-background">
+        <div className="flex flex-col items-center space-y-4">
+          <Spinner size="lg" />
+          <p className="text-muted-foreground text-sm animate-pulse">Verifying authentication...</p>
+        </div>
       </div>
     );
   }
