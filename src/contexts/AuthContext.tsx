@@ -1,4 +1,6 @@
-import React, { useState, useEffect, useCallback, useContext } from 'react';
+
+import * as React from 'react';
+import { useState, useEffect, useCallback, useContext } from 'react';
 import {
   useSession,
   useSupabaseClient,
