@@ -1,4 +1,17 @@
 
+// Types
+export interface NoteEvent {
+  note: string;
+  frequency: number;
+  timestamp: number;
+}
+
+export interface RecordingData {
+  audioBlob: Blob;
+  duration: number;
+  timestamps: NoteEvent[];
+}
+
 // Simple logger for audio-related operations
 export const audioLogger = {
   log: (message: string, ...args: any[]) => {
@@ -10,6 +23,35 @@ export const audioLogger = {
   warn: (message: string, ...args: any[]) => {
     console.warn(`[Audio Warning] ${message}`, ...args);
   }
+};
+
+// Function to create a new audio context with optimal settings
+export const createAudioContext = (): AudioContext => {
+  try {
+    // Try to use the modern constructor with options for lower latency
+    return new (window.AudioContext || (window as any).webkitAudioContext)({
+      latencyHint: 'interactive',
+      sampleRate: 48000
+    });
+  } catch (e) {
+    // Fall back to standard constructor if options aren't supported
+    return new (window.AudioContext || (window as any).webkitAudioContext)();
+  }
+};
+
+// Function to resume audio context (useful for mobile browsers)
+export const resumeAudioContext = async (audioContext: AudioContext): Promise<boolean> => {
+  if (audioContext.state === 'suspended') {
+    try {
+      await audioContext.resume();
+      audioLogger.log('Audio context resumed successfully');
+      return true;
+    } catch (error) {
+      audioLogger.error('Failed to resume audio context:', error);
+      return false;
+    }
+  }
+  return audioContext.state === 'running';
 };
 
 // Function to request microphone access
@@ -46,30 +88,88 @@ export const releaseMicrophone = (stream: MediaStream): void => {
 };
 
 // Function to play a click sound (useful for metronome or UI feedback)
-export const playClick = async (audioContext?: AudioContext): Promise<void> => {
-  const context = audioContext || new (window.AudioContext || (window as any).webkitAudioContext)();
-  
+export const playClick = async (
+  audioContext: AudioContext, 
+  isAccent: boolean = false,
+  volume: number = 0.5
+): Promise<void> => {
   try {
-    const oscillator = context.createOscillator();
-    const gainNode = context.createGain();
+    const oscillator = audioContext.createOscillator();
+    const gainNode = audioContext.createGain();
     
     oscillator.connect(gainNode);
-    gainNode.connect(context.destination);
+    gainNode.connect(audioContext.destination);
     
     // Configure sound
-    oscillator.type = 'sine';
-    oscillator.frequency.setValueAtTime(800, context.currentTime);
-    gainNode.gain.setValueAtTime(0.5, context.currentTime);
+    oscillator.type = isAccent ? 'triangle' : 'sine';
+    oscillator.frequency.setValueAtTime(isAccent ? 1000 : 800, audioContext.currentTime);
+    gainNode.gain.setValueAtTime(volume, audioContext.currentTime);
     
     // Envelope
-    gainNode.gain.exponentialRampToValueAtTime(0.001, context.currentTime + 0.1);
+    gainNode.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + 0.1);
     
     // Play
     oscillator.start();
-    oscillator.stop(context.currentTime + 0.1);
+    oscillator.stop(audioContext.currentTime + 0.1);
   } catch (error) {
     audioLogger.error('Error playing click sound:', error);
   }
+};
+
+// Function to play a tone at a specific frequency
+export const playTone = (
+  audioContext: AudioContext, 
+  frequency: number, 
+  duration: number = 1, 
+  volume: number = 0.7
+): OscillatorNode => {
+  const oscillator = audioContext.createOscillator();
+  const gainNode = audioContext.createGain();
+  
+  oscillator.connect(gainNode);
+  gainNode.connect(audioContext.destination);
+  
+  oscillator.type = 'sine';
+  oscillator.frequency.value = frequency;
+  gainNode.gain.value = volume;
+  
+  oscillator.start();
+  
+  if (duration > 0) {
+    // Fade out towards the end
+    const now = audioContext.currentTime;
+    gainNode.gain.setValueAtTime(volume, now);
+    gainNode.gain.exponentialRampToValueAtTime(0.001, now + duration);
+    
+    // Stop after duration
+    setTimeout(() => {
+      oscillator.stop();
+      oscillator.disconnect();
+      gainNode.disconnect();
+    }, duration * 1000);
+  }
+  
+  return oscillator;
+};
+
+// Get frequency for a specific note
+export const getNoteFrequency = (note: string): number => {
+  const noteToFrequency: Record<string, number> = {
+    'C': 261.63,
+    'C#': 277.18,
+    'D': 293.66,
+    'D#': 311.13,
+    'E': 329.63,
+    'F': 349.23,
+    'F#': 369.99,
+    'G': 392.00,
+    'G#': 415.30,
+    'A': 440.00,
+    'A#': 466.16,
+    'B': 493.88
+  };
+  
+  return noteToFrequency[note] || 440; // Default to A440 if note not found
 };
 
 // Utility to create waveform visualization data from audio buffer
@@ -90,4 +190,50 @@ export const createWaveformData = (buffer: AudioBuffer, numPoints: number): numb
   }
   
   return result;
+};
+
+// Function to register keyboard shortcuts
+export const registerKeyboardShortcut = (key: string, callback: () => void): (() => void) => {
+  const handleKeyDown = (event: KeyboardEvent) => {
+    if (event.key.toLowerCase() === key.toLowerCase()) {
+      callback();
+    }
+  };
+  
+  window.addEventListener('keydown', handleKeyDown);
+  
+  // Return cleanup function
+  return () => {
+    window.removeEventListener('keydown', handleKeyDown);
+  };
+};
+
+// Function to create a regular click sound buffer
+export const createClickBuffer = (audioContext: AudioContext): AudioBuffer => {
+  const sampleRate = audioContext.sampleRate;
+  const buffer = audioContext.createBuffer(1, sampleRate * 0.1, sampleRate);
+  const data = buffer.getChannelData(0);
+  
+  for (let i = 0; i < data.length; i++) {
+    const t = i / sampleRate;
+    // Simple sine wave with exponential decay
+    data[i] = Math.sin(2 * Math.PI * 800 * t) * Math.exp(-30 * t);
+  }
+  
+  return buffer;
+};
+
+// Function to create an accented click sound buffer
+export const createAccentClickBuffer = (audioContext: AudioContext): AudioBuffer => {
+  const sampleRate = audioContext.sampleRate;
+  const buffer = audioContext.createBuffer(1, sampleRate * 0.1, sampleRate);
+  const data = buffer.getChannelData(0);
+  
+  for (let i = 0; i < data.length; i++) {
+    const t = i / sampleRate;
+    // Higher frequency and slower decay for accented clicks
+    data[i] = Math.sin(2 * Math.PI * 1000 * t) * Math.exp(-20 * t);
+  }
+  
+  return buffer;
 };
