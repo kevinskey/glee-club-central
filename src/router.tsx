@@ -11,6 +11,7 @@ import HomePage from './pages/HomePage';
 import HomeLayout from './layouts/HomeLayout';
 import RequireAuth from './components/auth/RequireAuth';
 import RoleDashboard from './components/auth/RoleDashboard';
+import RecordingsPage from './pages/RecordingsPage'; // Import the main recordings page
 
 // Create a properly structured router with all routes
 export const router = createBrowserRouter([
@@ -68,6 +69,11 @@ export const router = createBrowserRouter([
           {
             path: 'under-construction',
             element: <StaticLandingPage />,
+          },
+          // Add a top-level recordings route that's protected
+          {
+            path: 'recordings',
+            element: <RequireAuth><RecordingsPage /></RequireAuth>,
           },
         ],
       },

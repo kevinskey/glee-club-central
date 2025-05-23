@@ -18,10 +18,11 @@ const RequireAuth = ({ children, requireAdmin, allowedUserTypes }: RequireAuthPr
   
   // Track redirect state to prevent multiple redirects
   const [isRedirecting, setIsRedirecting] = React.useState(false);
+  const redirectAttemptedRef = React.useRef(false);
   
   // Show toast only once per session and only when not loading
   React.useEffect(() => {
-    if (!isLoading && !isAuthenticated && !location.pathname.includes('login') && !isRedirecting) {
+    if (!isLoading && !isAuthenticated && !location.pathname.includes('login') && !isRedirecting && !redirectAttemptedRef.current) {
       toast.error("Please log in to access this page");
     }
   }, [isLoading, isAuthenticated, location.pathname, isRedirecting]);
@@ -36,20 +37,24 @@ const RequireAuth = ({ children, requireAdmin, allowedUserTypes }: RequireAuthPr
   }
   
   // Only redirect once and avoid multiple redirects
-  if (!isAuthenticated && !isRedirecting) {
-    // Prevent multiple redirects by setting state
+  if (!isAuthenticated && !isRedirecting && !redirectAttemptedRef.current) {
+    // Prevent multiple redirects by setting refs and state
     setIsRedirecting(true);
+    redirectAttemptedRef.current = true;
     
     // Store the current URL to redirect back after login
-    const searchParams = new URLSearchParams();
-    searchParams.set('returnTo', location.pathname);
+    const currentPath = location.pathname;
+    sessionStorage.setItem('authRedirectPath', currentPath);
     
     // For recording-specific paths, set an intent parameter
     if (location.pathname.includes('recording')) {
-      searchParams.set('intent', 'recording');
+      sessionStorage.setItem('authRedirectIntent', 'recording');
     }
     
-    return <Navigate to={`/login?${searchParams.toString()}`} replace />;
+    // Add a timestamp to prevent stale redirects
+    sessionStorage.setItem('authRedirectTimestamp', Date.now().toString());
+    
+    return <Navigate to="/login" replace />;
   }
   
   // Check if admin access is required

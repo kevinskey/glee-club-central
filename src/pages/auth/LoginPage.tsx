@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useNavigate, useLocation, Link } from 'react-router-dom';
@@ -19,33 +20,37 @@ const LoginPage = () => {
   const [password, setPassword] = React.useState('');
   const [isSubmitting, setIsSubmitting] = React.useState(false);
   
-  // Get returnTo from query params, with a default that won't cause issues
-  const searchParams = new URLSearchParams(location.search);
-  const returnTo = searchParams.get('returnTo') || '/role-dashboard';
-  const intent = searchParams.get('intent');
-  
-  // Store returnTo in sessionStorage for use after login
-  React.useEffect(() => {
-    if (returnTo) {
-      sessionStorage.setItem('authRedirectPath', returnTo);
+  // Get saved redirect path from sessionStorage with default fallback
+  const getRedirectPath = () => {
+    const savedPath = sessionStorage.getItem('authRedirectPath');
+    const timestamp = sessionStorage.getItem('authRedirectTimestamp');
+    
+    // Check if the saved path is still valid (within 5 minutes)
+    if (savedPath && timestamp && Date.now() - parseInt(timestamp) < 5 * 60 * 1000) {
+      return savedPath;
     }
-    if (intent) {
-      sessionStorage.setItem('authRedirectIntent', intent);
-    }
-  }, [returnTo, intent]);
+    
+    return '/role-dashboard';
+  };
   
   // Redirect if already authenticated - using useEffect for controlled navigation
   React.useEffect(() => {
     // Only redirect if auth check is complete
     if (isAuthenticated && !isLoading && !isSubmitting) {
-      // Small delay to prevent flashing UI
+      const redirectPath = getRedirectPath();
+      
+      // Small delay to prevent flashing UI and allow toast to be visible
       const timer = setTimeout(() => {
-        navigate(returnTo);
-      }, 100);
+        navigate(redirectPath);
+        
+        // Clean up stored redirect path after successful navigation
+        sessionStorage.removeItem('authRedirectPath');
+        sessionStorage.removeItem('authRedirectTimestamp');
+      }, 300);
       
       return () => clearTimeout(timer);
     }
-  }, [isAuthenticated, isLoading, navigate, returnTo, isSubmitting]);
+  }, [isAuthenticated, isLoading, navigate, isSubmitting]);
   
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -64,12 +69,16 @@ const LoginPage = () => {
         console.error("Login error:", result.error);
         toast.error(result.error.message || "Login failed");
       } else {
-        // Get redirectPath from result if it exists
-        const redirectPath = 'returnTo' in result ? result.returnTo : returnTo;
+        // Get redirectPath from session storage
+        const redirectPath = getRedirectPath();
         toast.success("Login successful!");
         
         // Use navigate instead of direct location change
-        navigate(redirectPath || returnTo);
+        navigate(redirectPath);
+        
+        // Clean up stored redirect path
+        sessionStorage.removeItem('authRedirectPath');
+        sessionStorage.removeItem('authRedirectTimestamp');
       }
     } catch (err) {
       console.error("Unexpected login error:", err);
