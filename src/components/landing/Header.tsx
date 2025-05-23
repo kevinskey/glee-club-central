@@ -6,15 +6,24 @@ import { HeaderLogo } from "@/components/layout/header/HeaderLogo";
 import { HeaderActions } from "@/components/layout/header/HeaderActions";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
-import { LogIn, User } from "lucide-react";
+import { LogIn, User, LogOut } from "lucide-react";
 
 export function Header() {
   const navigate = useNavigate();
   const [showNewsTicker, setShowNewsTicker] = React.useState(true);
-  const { isAuthenticated, profile } = useAuth();
+  const { isAuthenticated, profile, logout } = useAuth();
   
   const handleDashboardClick = () => {
     navigate("/role-dashboard");
+  };
+  
+  const handleLogout = async () => {
+    try {
+      await logout();
+      navigate("/");
+    } catch (error) {
+      console.error("Logout error:", error);
+    }
   };
   
   return (
@@ -47,22 +56,33 @@ export function Header() {
           {/* Right side: Actions and Auth */}
           <div className="flex items-center gap-4">
             {isAuthenticated ? (
-              <Button 
-                variant="default"
-                onClick={handleDashboardClick}
-                className="hidden md:flex items-center bg-glee-spelman hover:bg-glee-spelman/90"
-              >
-                <User className="w-4 h-4 mr-2" />
-                {profile?.first_name ? `${profile.first_name}'s Dashboard` : 'My Dashboard'}
-              </Button>
+              <div className="flex items-center gap-2">
+                <Button 
+                  variant="default"
+                  onClick={handleDashboardClick}
+                  className="hidden sm:flex items-center bg-glee-spelman hover:bg-glee-spelman/90"
+                >
+                  <User className="w-4 h-4 mr-2" />
+                  {profile?.first_name ? `${profile.first_name}'s Dashboard` : 'My Dashboard'}
+                </Button>
+                <Button 
+                  variant="outline"
+                  onClick={handleLogout}
+                  className="flex items-center border-glee-spelman text-glee-spelman hover:bg-glee-spelman/10"
+                >
+                  <LogOut className="w-4 h-4 mr-2" />
+                  <span className="hidden sm:inline">Sign Out</span>
+                </Button>
+              </div>
             ) : (
               <Button 
                 variant="default"
                 onClick={() => navigate("/login")}
-                className="hidden md:flex items-center bg-glee-spelman hover:bg-glee-spelman/90"
+                className="flex items-center bg-glee-spelman hover:bg-glee-spelman/90"
               >
                 <LogIn className="w-4 h-4 mr-2" />
-                Member Login
+                <span className="hidden sm:inline">Member Login</span>
+                <span className="sm:hidden">Login</span>
               </Button>
             )}
             <HeaderActions />
