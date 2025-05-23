@@ -1,4 +1,3 @@
-
 import * as React from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useNavigate, useLocation, Link } from 'react-router-dom';
@@ -7,9 +6,10 @@ import { Spinner } from '@/components/ui/spinner';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
-import { LogIn, UserPlus, Mail } from 'lucide-react';
+import { LogIn, UserPlus, Mail, RefreshCcw } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { SiteImage } from '@/components/site/SiteImage';
+import { cleanupAuthState, resetAuthSystem } from '@/contexts/AuthContext';
 
 const LoginPage = () => {
   const { login, isAuthenticated, isLoading } = useAuth();
@@ -20,6 +20,7 @@ const LoginPage = () => {
   const [email, setEmail] = React.useState('');
   const [password, setPassword] = React.useState('');
   const [isSubmitting, setIsSubmitting] = React.useState(false);
+  const [isResetting, setIsResetting] = React.useState(false);
   
   // Get saved redirect path from sessionStorage with default fallback
   const getRedirectPath = () => {
@@ -86,6 +87,22 @@ const LoginPage = () => {
       toast.error("An unexpected error occurred");
     } finally {
       setIsSubmitting(false);
+    }
+  };
+  
+  // Handle auth system reset
+  const handleResetAuth = async () => {
+    if (window.confirm("Are you sure you want to reset the authentication system? This will clear all login data.")) {
+      setIsResetting(true);
+      try {
+        await resetAuthSystem();
+        toast.success("Authentication system reset successfully");
+        // Page will be reloaded by resetAuthSystem
+      } catch (error) {
+        console.error("Error resetting auth system:", error);
+        toast.error("Failed to reset authentication system");
+        setIsResetting(false);
+      }
     }
   };
   
@@ -189,6 +206,15 @@ const LoginPage = () => {
               <Button variant="outline" className="w-full border-input text-foreground hover:bg-accent/10">
                 <Mail className="w-4 h-4 mr-2" />
                 Contact Administrator
+              </Button>
+              <Button 
+                variant="outline" 
+                className="w-full border-input text-destructive hover:bg-destructive/10"
+                onClick={handleResetAuth}
+                disabled={isResetting}
+              >
+                <RefreshCcw className="w-4 h-4 mr-2" />
+                {isResetting ? "Resetting..." : "Reset Authentication"}
               </Button>
             </div>
           </CardFooter>

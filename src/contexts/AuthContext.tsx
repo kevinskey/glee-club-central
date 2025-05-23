@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { useState, useEffect, useCallback, useContext } from 'react';
 import {
@@ -15,14 +14,17 @@ import { supabase } from '@/integrations/supabase/client';
 // Create a properly initialized AuthContext with null as default
 const AuthContext = React.createContext<AuthContextType | null>(null);
 
-// Define a separate cleanupAuthState function to avoid duplication
+// Enhanced cleanup function that thoroughly removes all auth state
 export const cleanupAuthState = () => {
+  console.log("Cleaning up auth state completely");
+  
   // Remove standard auth tokens
   localStorage.removeItem('supabase.auth.token');
   
   // Remove all Supabase auth keys from localStorage
   Object.keys(localStorage).forEach((key) => {
     if (key.startsWith('supabase.auth.') || key.includes('sb-')) {
+      console.log("Removing localStorage key:", key);
       localStorage.removeItem(key);
     }
   });
@@ -30,9 +32,46 @@ export const cleanupAuthState = () => {
   // Remove from sessionStorage if in use
   Object.keys(sessionStorage || {}).forEach((key) => {
     if (key.startsWith('supabase.auth.') || key.includes('sb-')) {
+      console.log("Removing sessionStorage key:", key);
       sessionStorage.removeItem(key);
     }
   });
+  
+  // Clear any redirect paths
+  sessionStorage.removeItem('authRedirectPath');
+  sessionStorage.removeItem('authRedirectTimestamp');
+  sessionStorage.removeItem('authRedirectIntent');
+  
+  // Clear any other app-specific auth data
+  localStorage.removeItem('lastAuthUser');
+  localStorage.removeItem('userRole');
+
+  // Clear cookies that might be related to auth
+  document.cookie.split(";").forEach((c) => {
+    document.cookie = c
+      .replace(/^ +/, "")
+      .replace(/=.*/, `=;expires=${new Date().toUTCString()};path=/`);
+  });
+};
+
+// Function to completely reset the auth system
+export const resetAuthSystem = async () => {
+  try {
+    // Try global sign out first (cleans up on server side)
+    await supabase.auth.signOut({ scope: 'global' });
+    console.log("Successfully performed global sign out");
+  } catch (error) {
+    console.error("Error during global sign out:", error);
+    // Continue with local cleanup even if global signout fails
+  }
+  
+  // Clean up local storage
+  cleanupAuthState();
+  
+  // Force page reload to ensure clean state
+  window.location.href = '/login';
+  
+  return { success: true };
 };
 
 interface AuthProviderProps {
@@ -40,11 +79,11 @@ interface AuthProviderProps {
 }
 
 export function AuthProvider({ children }: AuthProviderProps) {
-  // Use React's useState directly
-  const [authUser, setAuthUser] = useState<AuthUser | null>(null);
-  const [profile, setProfile] = useState<Profile | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [permissions, setPermissions] = useState<{ [key: string]: boolean }>({});
+  // Use React hooks through the React namespace
+  const [authUser, setAuthUser] = React.useState<AuthUser | null>(null);
+  const [profile, setProfile] = React.useState<Profile | null>(null);
+  const [isLoading, setIsLoading] = React.useState(true);
+  const [permissions, setPermissions] = React.useState<{ [key: string]: boolean }>({});
   
   // These hooks can only be used inside a component that is a child of the SessionContextProvider
   const session = useSession();
@@ -52,7 +91,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const user = useUser();
 
   // Function to refresh user permissions
-  const refreshPermissions = useCallback(async () => {
+  const refreshPermissions = React.useCallback(async () => {
     if (profile && profile.id) {
       try {
         const userPermissions = await fetchUserPermissions(profile.id);
@@ -64,7 +103,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
   }, [profile]);
   
   // Add a pre-check to detect if we have a session before even loading
-  useEffect(() => {
+  React.useEffect(() => {
     const checkExistingSession = async () => {
       try {
         const { data } = await supabase.auth.getSession();
@@ -166,20 +205,20 @@ export function AuthProvider({ children }: AuthProviderProps) {
   }, [user, supabaseClient, refreshPermissions]);
   
   // User role and type helper functions
-  const isAdmin = useCallback(() => {
+  const isAdmin = React.useCallback(() => {
     return !!(profile?.is_super_admin || profile?.role === 'admin');
   }, [profile]);
   
-  const isMember = useCallback(() => {
+  const isMember = React.useCallback(() => {
     return profile?.role === 'member';
   }, [profile]);
   
-  const isFan = useCallback(() => {
+  const isFan = React.useCallback(() => {
     return profile?.user_type === 'fan';
   }, [profile]);
   
   // getUserType function defined in the provider
-  const getUserType = useCallback((): UserType => {
+  const getUserType = React.useCallback((): UserType => {
     const userType = profile?.user_type || '';
     
     // If user_type doesn't exist, infer from role
@@ -197,9 +236,11 @@ export function AuthProvider({ children }: AuthProviderProps) {
   }, [profile]);
 
   // Auth methods using window.location for navigation instead of router hooks
-  const handleLogout = useCallback(async () => {
+  const handleLogout = React.useCallback(async () => {
     try {
-      // Only clean up auth state during explicit logout
+      console.log("Executing logout process");
+      
+      // Clean up auth state first
       cleanupAuthState();
       
       const { error } = await supabase.auth.signOut();
@@ -207,12 +248,13 @@ export function AuthProvider({ children }: AuthProviderProps) {
         toast.error(error.message);
       }
       
+      // Clear all local state
       setProfile(null);
       setAuthUser(null);
       setPermissions({});
       
-      // Use window.location for navigation
-      window.location.href = '/';
+      // Use window.location for navigation to ensure full page refresh
+      window.location.href = '/login';
       
       return { error: error as Error, data: {} };
     } catch (err) {
@@ -221,9 +263,9 @@ export function AuthProvider({ children }: AuthProviderProps) {
       return { error: err as Error, data: {} };
     }
   }, []);
-
+  
   // Enhanced login function with better logging and error handling
-  const defaultLogin = useCallback(async (email: string, password: string) => {
+  const defaultLogin = React.useCallback(async (email: string, password: string) => {
     console.log("Login attempt with email:", email);
     
     try {
@@ -330,6 +372,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
     },
     permissions,
     refreshPermissions,
+    resetAuthSystem, // Add the new reset function to the context
   };
   
   console.log("Rendering AuthProvider with value:", { 

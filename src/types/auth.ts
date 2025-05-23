@@ -60,4 +60,5 @@ export interface AuthContextType {
   resetPassword: (email: string) => Promise<{ error: any }>;
   permissions: { [key: string]: boolean };
   refreshPermissions: () => Promise<void>;
+  resetAuthSystem: () => Promise<{ success: boolean }>; // Add the new reset function
 }
