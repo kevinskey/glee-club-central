@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useCallback, useContext } from 'react';
 import {
   useSession,
@@ -9,7 +8,7 @@ import { AuthUser, AuthContextType, Profile, UserType } from '@/types/auth';
 import { toast } from "sonner";
 import { fetchUserPermissions } from '@/utils/supabase/permissions';
 import { getProfile } from '@/utils/supabase/profiles';
-import { supabase } from '@/integrations/supabase/client';
+import { supabase, cleanupAuthState } from '@/integrations/supabase/client';
 
 // Create a properly initialized AuthContext with null as default
 const AuthContext = React.createContext<AuthContextType | null>(null);
@@ -17,9 +16,6 @@ const AuthContext = React.createContext<AuthContextType | null>(null);
 interface AuthProviderProps {
   children: React.ReactNode | ((props: { isLoading: boolean }) => React.ReactNode);
 }
-
-// Use the imported cleanupAuthState function from supabase client
-import { cleanupAuthState } from '@/integrations/supabase/client';
 
 export function AuthProvider({ children }: AuthProviderProps) {
   // Use the named imports directly
