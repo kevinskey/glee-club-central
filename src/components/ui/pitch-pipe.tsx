@@ -1,8 +1,7 @@
-
 import React, { useState, useEffect, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
-import { audioLogger, resumeAudioContext, playTone } from '@/utils/audioUtils';
+import { audioLogger, resumeAudioContext, playTone, getNoteFrequency } from '@/utils/audioUtils';
 
 // Notes with their frequencies in Hz
 const NOTES = [
