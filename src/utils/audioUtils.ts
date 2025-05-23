@@ -4,12 +4,18 @@ export interface NoteEvent {
   note: string;
   frequency: number;
   timestamp: number;
+  waveform?: OscillatorType;
+  duration?: number;
+  volume?: number;
 }
 
 export interface RecordingData {
-  audioBlob: Blob;
+  audioBlob?: Blob;
   duration: number;
-  timestamps: NoteEvent[];
+  timestamps?: NoteEvent[];
+  events: NoteEvent[];
+  totalDuration?: number;
+  createdAt?: string;
 }
 
 // Simple logger for audio-related operations
@@ -116,10 +122,11 @@ export const playClick = async (
   }
 };
 
-// Function to play a tone at a specific frequency
+// Function to play a tone at a specific frequency with waveform type
 export const playTone = (
   audioContext: AudioContext, 
   frequency: number, 
+  waveform: OscillatorType = 'sine',
   duration: number = 1, 
   volume: number = 0.7
 ): OscillatorNode => {
@@ -129,7 +136,7 @@ export const playTone = (
   oscillator.connect(gainNode);
   gainNode.connect(audioContext.destination);
   
-  oscillator.type = 'sine';
+  oscillator.type = waveform;
   oscillator.frequency.value = frequency;
   gainNode.gain.value = volume;
   
@@ -152,8 +159,9 @@ export const playTone = (
   return oscillator;
 };
 
-// Get frequency for a specific note
-export const getNoteFrequency = (note: string): number => {
+// Get frequency for a specific note with octave parameter
+export const getNoteFrequency = (note: string, octave: number = 4): number => {
+  // Base frequencies for notes in octave 4
   const noteToFrequency: Record<string, number> = {
     'C': 261.63,
     'C#': 277.18,
@@ -169,7 +177,15 @@ export const getNoteFrequency = (note: string): number => {
     'B': 493.88
   };
   
-  return noteToFrequency[note] || 440; // Default to A440 if note not found
+  // Calculate the frequency with octave adjustment
+  if (octave === 4) {
+    return noteToFrequency[note] || 440; // Default to A440 if note not found
+  }
+  
+  // For other octaves, adjust the frequency
+  const baseFreq = noteToFrequency[note] || 440;
+  const octaveDiff = octave - 4;
+  return baseFreq * Math.pow(2, octaveDiff);
 };
 
 // Utility to create waveform visualization data from audio buffer

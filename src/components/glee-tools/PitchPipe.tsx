@@ -131,8 +131,8 @@ export function PitchPipe({ onClose, audioContextRef }: PitchPipeProps) {
         const noteEvent: NoteEvent = {
           note: noteName,
           frequency,
-          waveform,
           timestamp: relativeTime,
+          waveform,
           duration: 1,
           volume
         };
@@ -186,6 +186,8 @@ export function PitchPipe({ onClose, audioContextRef }: PitchPipeProps) {
       events,
       totalDuration: events.length > 0 ? 
         Math.max(...events.map(e => e.timestamp)) / 1000 : 0,
+      duration: events.length > 0 ? 
+        Math.max(...events.map(e => e.timestamp)) / 1000 : 0,
       createdAt: new Date().toISOString()
     };
     
@@ -225,9 +227,9 @@ export function PitchPipe({ onClose, audioContextRef }: PitchPipeProps) {
           playTone(
             audioContext, 
             event.frequency,
-            event.waveform,
-            event.duration,
-            event.volume
+            event.waveform || 'sine',
+            event.duration || 1,
+            event.volume || 0.7
           );
         }, event.timestamp);
       });
@@ -366,6 +368,8 @@ export function PitchPipe({ onClose, audioContextRef }: PitchPipeProps) {
                 if (events.length > 0) {
                   playRecording({
                     events,
+                    duration: events.length > 0 ? 
+                      Math.max(...events.map(e => e.timestamp)) / 1000 : 0,
                     totalDuration: events.length > 0 ? 
                       Math.max(...events.map(e => e.timestamp)) / 1000 : 0,
                     createdAt: new Date().toISOString()
