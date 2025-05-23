@@ -1,5 +1,4 @@
-
-import * as React from 'react';
+import React from 'react';
 import { useState, useEffect, useCallback, useContext } from 'react';
 import {
   useSession,
@@ -10,17 +9,37 @@ import { AuthUser, AuthContextType, Profile, UserType } from '@/types/auth';
 import { toast } from "sonner";
 import { fetchUserPermissions } from '@/utils/supabase/permissions';
 import { getProfile } from '@/utils/supabase/profiles';
-import { supabase, cleanupAuthState } from '@/integrations/supabase/client';
+import { supabase } from '@/integrations/supabase/client';
 
 // Create a properly initialized AuthContext with null as default
 const AuthContext = React.createContext<AuthContextType | null>(null);
+
+// Define a separate cleanupAuthState function to avoid duplication
+export const cleanupAuthState = () => {
+  // Remove standard auth tokens
+  localStorage.removeItem('supabase.auth.token');
+  
+  // Remove all Supabase auth keys from localStorage
+  Object.keys(localStorage).forEach((key) => {
+    if (key.startsWith('supabase.auth.') || key.includes('sb-')) {
+      localStorage.removeItem(key);
+    }
+  });
+  
+  // Remove from sessionStorage if in use
+  Object.keys(sessionStorage || {}).forEach((key) => {
+    if (key.startsWith('supabase.auth.') || key.includes('sb-')) {
+      sessionStorage.removeItem(key);
+    }
+  });
+};
 
 interface AuthProviderProps {
   children: React.ReactNode | ((props: { isLoading: boolean }) => React.ReactNode);
 }
 
 export function AuthProvider({ children }: AuthProviderProps) {
-  // Use the named imports directly
+  // Use React's useState directly
   const [authUser, setAuthUser] = useState<AuthUser | null>(null);
   const [profile, setProfile] = useState<Profile | null>(null);
   const [isLoading, setIsLoading] = useState(true);
