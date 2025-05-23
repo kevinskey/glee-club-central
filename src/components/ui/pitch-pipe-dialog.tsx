@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Music } from "lucide-react";
-import { PitchPipe } from "@/components/glee-tools/PitchPipe";
+import { PitchPipe } from "@/components/ui/pitch-pipe";
 
 interface PitchPipeDialogProps {
   triggerClassName?: string;
@@ -43,7 +43,7 @@ export function PitchPipeDialog({ triggerClassName }: PitchPipeDialogProps) {
         <DialogHeader>
           <DialogTitle>Pitch Pipe</DialogTitle>
         </DialogHeader>
-        <PitchPipe onClose={() => setOpen(false)} audioContextRef={audioContextRef} />
+        <PitchPipe audioContextRef={audioContextRef} />
       </DialogContent>
     </Dialog>
   );

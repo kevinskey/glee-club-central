@@ -1,10 +1,11 @@
+
 import React, { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
-import { playTone, getNoteFrequency, NoteEvent, RecordingData } from "@/utils/audioUtils";
+import { playTone, getNoteFrequency, NoteEvent, RecordingData, audioLogger } from "@/utils/audioUtils";
 import { Square, Triangle, Disc, Play } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
