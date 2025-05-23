@@ -119,7 +119,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
     checkExistingSession();
   }, []);
   
-  useEffect(() => {
+  React.useEffect(() => {
     console.log("AuthProvider useEffect - checking user:", user);
     
     const fetchProfile = async () => {
@@ -204,20 +204,20 @@ export function AuthProvider({ children }: AuthProviderProps) {
   }, [user, supabaseClient, refreshPermissions]);
   
   // User role and type helper functions
-  const isAdmin = useCallback(() => {
+  const isAdmin = React.useCallback(() => {
     return !!(profile?.is_super_admin || profile?.role === 'admin');
   }, [profile]);
   
-  const isMember = useCallback(() => {
+  const isMember = React.useCallback(() => {
     return profile?.role === 'member';
   }, [profile]);
   
-  const isFan = useCallback(() => {
+  const isFan = React.useCallback(() => {
     return profile?.user_type === 'fan';
   }, [profile]);
   
   // getUserType function defined in the provider
-  const getUserType = useCallback((): UserType => {
+  const getUserType = React.useCallback((): UserType => {
     const userType = profile?.user_type || '';
     
     // If user_type doesn't exist, infer from role
@@ -235,7 +235,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
   }, [profile]);
 
   // Auth methods using window.location for navigation instead of router hooks
-  const handleLogout = useCallback(async () => {
+  const handleLogout = React.useCallback(async () => {
     try {
       console.log("Executing logout process");
       
@@ -264,7 +264,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
   }, []);
   
   // Enhanced login function with better logging and error handling
-  const defaultLogin = useCallback(async (email: string, password: string) => {
+  const defaultLogin = React.useCallback(async (email: string, password: string) => {
     console.log("Login attempt with email:", email);
     
     try {
