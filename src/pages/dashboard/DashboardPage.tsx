@@ -30,6 +30,7 @@ import { DuesStatusCard } from "@/components/dashboard/DuesStatusCard";
 import { AdminDashboardAccess } from "@/components/dashboard/AdminDashboardAccess";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { GleeTools } from "@/components/glee-tools/GleeTools";
 
 export interface Event {
   id: string;
@@ -172,6 +173,22 @@ const DashboardPageContent = () => {
               </Button>
             </div>
           </div>
+        </CardContent>
+      </Card>
+      
+      {/* GleeTools Section - Replacement for separate metronome and pitch pipe */}
+      <Card className="shadow-md">
+        <CardHeader className="pb-2">
+          <CardTitle className="flex items-center">
+            <Headphones className="h-5 w-5 mr-2 text-glee-spelman" />
+            <span>Glee Tools</span>
+          </CardTitle>
+          <CardDescription>
+            Access music practice tools for rehearsal and performance
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <GleeTools variant="default" className="my-2" />
         </CardContent>
       </Card>
       
