@@ -1,5 +1,5 @@
-import React from 'react';
-import { useState, useEffect, useCallback, useContext } from 'react';
+
+import React, { useState, useEffect, useCallback, useContext } from 'react';
 import {
   useSession,
   useSupabaseClient,
@@ -79,11 +79,10 @@ interface AuthProviderProps {
 }
 
 export function AuthProvider({ children }: AuthProviderProps) {
-  // Use React hooks through the React namespace
-  const [authUser, setAuthUser] = React.useState<AuthUser | null>(null);
-  const [profile, setProfile] = React.useState<Profile | null>(null);
-  const [isLoading, setIsLoading] = React.useState(true);
-  const [permissions, setPermissions] = React.useState<{ [key: string]: boolean }>({});
+  const [authUser, setAuthUser] = useState<AuthUser | null>(null);
+  const [profile, setProfile] = useState<Profile | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [permissions, setPermissions] = useState<{ [key: string]: boolean }>({});
   
   // These hooks can only be used inside a component that is a child of the SessionContextProvider
   const session = useSession();
@@ -91,7 +90,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const user = useUser();
 
   // Function to refresh user permissions
-  const refreshPermissions = React.useCallback(async () => {
+  const refreshPermissions = useCallback(async () => {
     if (profile && profile.id) {
       try {
         const userPermissions = await fetchUserPermissions(profile.id);
@@ -103,7 +102,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
   }, [profile]);
   
   // Add a pre-check to detect if we have a session before even loading
-  React.useEffect(() => {
+  useEffect(() => {
     const checkExistingSession = async () => {
       try {
         const { data } = await supabase.auth.getSession();
@@ -205,20 +204,20 @@ export function AuthProvider({ children }: AuthProviderProps) {
   }, [user, supabaseClient, refreshPermissions]);
   
   // User role and type helper functions
-  const isAdmin = React.useCallback(() => {
+  const isAdmin = useCallback(() => {
     return !!(profile?.is_super_admin || profile?.role === 'admin');
   }, [profile]);
   
-  const isMember = React.useCallback(() => {
+  const isMember = useCallback(() => {
     return profile?.role === 'member';
   }, [profile]);
   
-  const isFan = React.useCallback(() => {
+  const isFan = useCallback(() => {
     return profile?.user_type === 'fan';
   }, [profile]);
   
   // getUserType function defined in the provider
-  const getUserType = React.useCallback((): UserType => {
+  const getUserType = useCallback((): UserType => {
     const userType = profile?.user_type || '';
     
     // If user_type doesn't exist, infer from role
@@ -236,7 +235,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
   }, [profile]);
 
   // Auth methods using window.location for navigation instead of router hooks
-  const handleLogout = React.useCallback(async () => {
+  const handleLogout = useCallback(async () => {
     try {
       console.log("Executing logout process");
       
@@ -265,7 +264,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
   }, []);
   
   // Enhanced login function with better logging and error handling
-  const defaultLogin = React.useCallback(async (email: string, password: string) => {
+  const defaultLogin = useCallback(async (email: string, password: string) => {
     console.log("Login attempt with email:", email);
     
     try {
