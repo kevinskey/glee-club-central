@@ -1,5 +1,5 @@
 
-import * as React from 'react';
+import React from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useForm } from 'react-hook-form';
 import { Button } from '@/components/ui/button';
