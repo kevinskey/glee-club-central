@@ -11,7 +11,9 @@ import HomePage from './pages/HomePage';
 import HomeLayout from './layouts/HomeLayout';
 import RequireAuth from './components/auth/RequireAuth';
 import RoleDashboard from './components/auth/RoleDashboard';
-import RecordingsPage from './pages/recordings/RecordingsPage'; // Use consistent import from recordings folder
+import RecordingsPage from './pages/recordings/RecordingsPage';
+import AboutPage from './pages/AboutPage';
+import ContactPage from './pages/ContactPage';
 
 // Create a properly structured router with all routes
 export const router = createBrowserRouter([
@@ -69,6 +71,15 @@ export const router = createBrowserRouter([
           {
             path: 'under-construction',
             element: <StaticLandingPage />,
+          },
+          // Add About and Contact routes
+          {
+            path: 'about',
+            element: <AboutPage />,
+          },
+          {
+            path: 'contact',
+            element: <ContactPage />,
           },
           // Add a top-level recordings route that's protected
           {
