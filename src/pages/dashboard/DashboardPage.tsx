@@ -249,7 +249,15 @@ const DashboardPageContent = () => {
                   ))}
                 </div>
               ) : (
-                <p className="text-muted-foreground">No upcoming events scheduled.</p>
+                <div className="text-center py-4">
+                  <p className="text-muted-foreground mb-3">No upcoming events scheduled.</p>
+                  <Button variant="outline" size="sm" asChild>
+                    <Link to="/dashboard/calendar">
+                      <CalendarDays className="h-4 w-4 mr-2" />
+                      View Calendar
+                    </Link>
+                  </Button>
+                </div>
               )}
             </CardContent>
           </Card>

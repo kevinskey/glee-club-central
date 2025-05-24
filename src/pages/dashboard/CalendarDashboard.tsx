@@ -1,110 +1,194 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { PageHeaderWithToggle } from "@/components/ui/page-header-with-toggle";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { CalendarIcon, Clock, MapPin } from "lucide-react";
-import { MonthlyCalendar } from "@/components/dashboard/Calendar";
-
-// Sample events data
-const SAMPLE_EVENTS = [
-  {
-    date: new Date(2025, 4, 15),
-    title: "Weekly Rehearsal",
-    color: "bg-blue-100 text-blue-700 dark:bg-blue-900/50 dark:text-blue-300",
-    time: "6:00 PM - 8:00 PM",
-    location: "Music Hall Room 101"
-  },
-  {
-    date: new Date(2025, 4, 18),
-    title: "Spring Concert",
-    color: "bg-purple-100 text-purple-700 dark:bg-purple-900/50 dark:text-purple-300",
-    time: "7:30 PM - 9:30 PM",
-    location: "Spelman Auditorium"
-  },
-  {
-    date: new Date(2025, 4, 22),
-    title: "Weekly Rehearsal",
-    color: "bg-blue-100 text-blue-700 dark:bg-blue-900/50 dark:text-blue-300",
-    time: "6:00 PM - 8:00 PM",
-    location: "Music Hall Room 101"
-  },
-  {
-    date: new Date(2025, 4, 25),
-    title: "Community Performance",
-    color: "bg-amber-100 text-amber-700 dark:bg-amber-900/50 dark:text-amber-300",
-    time: "2:00 PM - 3:30 PM",
-    location: "Downtown Arts Center"
-  },
-  {
-    date: new Date(2025, 4, 29),
-    title: "Weekly Rehearsal",
-    color: "bg-blue-100 text-blue-700 dark:bg-blue-900/50 dark:text-blue-300",
-    time: "6:00 PM - 8:00 PM",
-    location: "Music Hall Room 101"
-  },
-  {
-    date: new Date(2025, 5, 5),
-    title: "Alumni Event",
-    color: "bg-green-100 text-green-700 dark:bg-green-900/50 dark:text-green-300",
-    time: "5:00 PM - 7:00 PM",
-    location: "Spelman College Alumni Hall"
-  }
-];
+import { CalendarIcon, Clock, MapPin, CalendarPlus } from "lucide-react";
+import { useCalendarStore } from "@/hooks/useCalendarStore";
+import { CalendarEvent } from '@/types/calendar';
+import CalendarMain from "@/components/calendar/CalendarMain";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { EventModal } from "@/components/calendar/EventModal";
+import { ViewEventModal } from "@/components/calendar/ViewEventModal";
+import { Spinner } from "@/components/ui/spinner";
+import { useAuth } from "@/contexts/AuthContext";
+import { toast } from "sonner";
 
 export default function CalendarDashboard() {
-  // State for current month and year
-  const currentDate = new Date();
-  const [currentMonth, setCurrentMonth] = useState(currentDate.getMonth());
-  const [currentYear, setCurrentYear] = useState(currentDate.getFullYear());
+  const [events, setEvents] = useState<CalendarEvent[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [isViewModalOpen, setIsViewModalOpen] = useState(false);
+  const [selectedEvent, setSelectedEvent] = useState<CalendarEvent | null>(null);
+  const [selectedDate, setSelectedDate] = useState<Date | null>(null);
+  
+  const { fetchEvents, addEvent, updateEvent, deleteEvent } = useCalendarStore();
+  const { user } = useAuth();
 
-  // Handlers for month navigation
-  const handlePrevMonth = () => {
-    if (currentMonth === 0) {
-      setCurrentMonth(11);
-      setCurrentYear(prevYear => prevYear - 1);
-    } else {
-      setCurrentMonth(prevMonth => prevMonth - 1);
-    }
-  };
-
-  const handleNextMonth = () => {
-    if (currentMonth === 11) {
-      setCurrentMonth(0);
-      setCurrentYear(prevYear => prevYear + 1);
-    } else {
-      setCurrentMonth(prevMonth => prevMonth + 1);
-    }
-  };
+  // Load calendar events on component mount
+  useEffect(() => {
+    const loadEvents = async () => {
+      try {
+        setIsLoading(true);
+        await fetchEvents();
+        // Get events from the store after fetching
+        const storeEvents = useCalendarStore.getState().events;
+        setEvents(storeEvents);
+      } catch (error) {
+        console.error("Error loading calendar events:", error);
+        toast.error("Failed to load calendar events");
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    
+    loadEvents();
+  }, [fetchEvents]);
 
   // Get upcoming events (next 30 days)
-  const upcomingEvents = SAMPLE_EVENTS
-    .filter(event => {
-      const eventDate = new Date(event.date);
-      const today = new Date();
-      const thirtyDaysLater = new Date();
-      thirtyDaysLater.setDate(today.getDate() + 30);
+  const getUpcomingEvents = (events: CalendarEvent[]) => {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const thirtyDaysLater = new Date();
+    thirtyDaysLater.setDate(today.getDate() + 30);
+    
+    return events
+      .filter(event => {
+        const eventDate = new Date(event.start);
+        return eventDate >= today && eventDate <= thirtyDaysLater;
+      })
+      .sort((a, b) => new Date(a.start).getTime() - new Date(b.start).getTime())
+      .slice(0, 5);
+  };
+
+  const upcomingEvents = getUpcomingEvents(events);
+
+  // Event handlers
+  const handleDateClick = (info: any) => {
+    setSelectedDate(info.date);
+    setIsCreateModalOpen(true);
+  };
+  
+  const handleEventClick = (event: CalendarEvent) => {
+    setSelectedEvent(event);
+    setIsViewModalOpen(true);
+  };
+  
+  const handleCreateEvent = async (eventData: any) => {
+    try {
+      const success = await addEvent({
+        ...eventData,
+        created_by: user?.id
+      });
       
-      return eventDate >= today && eventDate <= thirtyDaysLater;
-    })
-    .sort((a, b) => a.date.getTime() - b.date.getTime());
+      if (success) {
+        setIsCreateModalOpen(false);
+        // Refresh events
+        const storeEvents = useCalendarStore.getState().events;
+        setEvents(storeEvents);
+        toast.success("Event created successfully");
+      }
+    } catch (error) {
+      console.error("Error creating event:", error);
+      toast.error("Failed to create event");
+    }
+  };
+  
+  const handleUpdateEvent = async (eventData: CalendarEvent): Promise<boolean> => {
+    try {
+      const success = await updateEvent(eventData);
+      if (success) {
+        setIsViewModalOpen(false);
+        setSelectedEvent(null);
+        // Refresh events
+        const storeEvents = useCalendarStore.getState().events;
+        setEvents(storeEvents);
+        toast.success("Event updated successfully");
+        return true;
+      }
+      return false;
+    } catch (error) {
+      console.error("Error updating event:", error);
+      toast.error("Failed to update event");
+      return false;
+    }
+  };
+  
+  const handleDeleteEvent = async (eventId: string): Promise<boolean> => {
+    try {
+      const success = await deleteEvent(eventId);
+      if (success) {
+        setIsViewModalOpen(false);
+        setSelectedEvent(null);
+        // Refresh events
+        const storeEvents = useCalendarStore.getState().events;
+        setEvents(storeEvents);
+        toast.success("Event deleted successfully");
+        return true;
+      }
+      return false;
+    } catch (error) {
+      console.error("Error deleting event:", error);
+      toast.error("Failed to delete event");
+      return false;
+    }
+  };
+
+  if (isLoading) {
+    return (
+      <div className="container mx-auto py-8">
+        <div className="flex justify-center items-center h-64">
+          <Spinner size="lg" />
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="container mx-auto py-8">
-      <PageHeaderWithToggle 
-        title="Calendar"
-        icon={<CalendarIcon className="h-6 w-6" />}
-      />
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6">
+        <PageHeaderWithToggle 
+          title="Calendar"
+          icon={<CalendarIcon className="h-6 w-6" />}
+        />
+        
+        <Button 
+          onClick={() => setIsCreateModalOpen(true)}
+          className="mt-4 sm:mt-0 bg-glee-spelman hover:bg-glee-spelman/90"
+        >
+          <CalendarPlus className="mr-2 h-4 w-4" />
+          Add Event
+        </Button>
+      </div>
       
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-6">
         <div className="lg:col-span-2">
-          <MonthlyCalendar 
-            month={currentMonth} 
-            year={currentYear}
-            onPrevMonth={handlePrevMonth}
-            onNextMonth={handleNextMonth}
-            events={SAMPLE_EVENTS}
-          />
+          {events.length === 0 ? (
+            <Card>
+              <CardContent className="flex flex-col items-center justify-center p-10">
+                <CalendarIcon className="h-12 w-12 text-gray-400 mb-4" />
+                <h3 className="text-xl font-medium mb-2">No events scheduled</h3>
+                <p className="text-gray-500 dark:text-gray-400 mb-6">
+                  Click the "Add Event" button to create your first calendar event.
+                </p>
+                <Button 
+                  onClick={() => setIsCreateModalOpen(true)}
+                  className="bg-glee-spelman hover:bg-glee-spelman/90"
+                >
+                  <CalendarPlus className="mr-2 h-4 w-4" />
+                  Add Your First Event
+                </Button>
+              </CardContent>
+            </Card>
+          ) : (
+            <CalendarMain
+              events={events}
+              calendarView="dayGridMonth"
+              userCanCreate={true}
+              handleDateClick={handleDateClick}
+              handleEventClick={handleEventClick}
+            />
+          )}
         </div>
         
         <div className="space-y-6">
@@ -118,22 +202,20 @@ export default function CalendarDashboard() {
             <CardContent>
               <div className="space-y-4">
                 {upcomingEvents.length > 0 ? (
-                  upcomingEvents.map((event, index) => (
-                    <div key={index} className="rounded-lg border p-3">
+                  upcomingEvents.map((event) => (
+                    <div key={event.id} className="rounded-lg border p-3 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-900" onClick={() => handleEventClick(event)}>
                       <h3 className="font-medium">{event.title}</h3>
                       <div className="mt-2 text-sm text-muted-foreground">
                         <p className="flex items-center">
                           <CalendarIcon className="mr-2 h-4 w-4" />
-                          {event.date.toLocaleDateString()}
+                          {new Date(event.start).toLocaleDateString()}
                         </p>
-                        <p className="flex items-center mt-1">
-                          <Clock className="mr-2 h-4 w-4" />
-                          {event.time}
-                        </p>
-                        <p className="flex items-center mt-1">
-                          <MapPin className="mr-2 h-4 w-4" />
-                          {event.location}
-                        </p>
+                        {event.location && (
+                          <p className="flex items-center mt-1">
+                            <MapPin className="mr-2 h-4 w-4" />
+                            {event.location}
+                          </p>
+                        )}
                       </div>
                     </div>
                   ))
@@ -141,9 +223,6 @@ export default function CalendarDashboard() {
                   <p className="text-center text-muted-foreground">No upcoming events</p>
                 )}
               </div>
-              <Button className="w-full mt-4" variant="outline">
-                View All Events
-              </Button>
             </CardContent>
           </Card>
           
@@ -152,7 +231,11 @@ export default function CalendarDashboard() {
               <CardTitle>Quick Actions</CardTitle>
             </CardHeader>
             <CardContent className="space-y-2">
-              <Button className="w-full" variant="outline">
+              <Button 
+                className="w-full" 
+                variant="outline"
+                onClick={() => setIsCreateModalOpen(true)}
+              >
                 Add Event
               </Button>
               <Button className="w-full" variant="outline">
@@ -165,6 +248,32 @@ export default function CalendarDashboard() {
           </Card>
         </div>
       </div>
+      
+      {/* Create Event Modal */}
+      <Dialog open={isCreateModalOpen} onOpenChange={setIsCreateModalOpen}>
+        <DialogContent className="sm:max-w-md">
+          <EventModal 
+            onClose={() => setIsCreateModalOpen(false)} 
+            onSave={handleCreateEvent} 
+            initialDate={selectedDate}
+          />
+        </DialogContent>
+      </Dialog>
+      
+      {/* View/Edit Event Modal */}
+      {selectedEvent && (
+        <Dialog open={isViewModalOpen} onOpenChange={setIsViewModalOpen}>
+          <DialogContent className="sm:max-w-md">
+            <ViewEventModal 
+              event={selectedEvent} 
+              onOpenChange={setIsViewModalOpen}
+              onUpdate={handleUpdateEvent}
+              onDelete={handleDeleteEvent}
+              userCanEdit={true}
+            />
+          </DialogContent>
+        </Dialog>
+      )}
     </div>
   );
 }

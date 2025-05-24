@@ -6,7 +6,8 @@ import { toast } from 'sonner';
 
 interface CalendarStore {
   events: CalendarEvent[];
-  fetchEvents: () => Promise<void>;
+  isLoading: boolean;
+  fetchEvents: () => Promise<CalendarEvent[] | void>;
   addEvent: (event: Omit<CalendarEvent, 'id'>) => Promise<boolean>;
   updateEvent: (event: CalendarEvent) => Promise<boolean>;
   deleteEvent: (id: string) => Promise<boolean>;
@@ -14,9 +15,11 @@ interface CalendarStore {
 
 export const useCalendarStore = create<CalendarStore>((set, get) => ({
   events: [],
+  isLoading: false,
   
   fetchEvents: async () => {
     try {
+      set({ isLoading: true });
       const { data, error } = await supabase
         .from('calendar_events')
         .select('*')
@@ -38,21 +41,21 @@ export const useCalendarStore = create<CalendarStore>((set, get) => ({
         location: event.location || '',
         description: event.description || '',
         image_url: event.image_url || null,
-        created_by: event.user_id
+        created_by: event.user_id,
+        allDay: event.allday || false
       }));
       
-      set({ events });
+      set({ events, isLoading: false });
+      return events;
     } catch (error) {
       console.error('Error in fetchEvents:', error);
       toast.error('Failed to load calendar events');
+      set({ isLoading: false });
     }
   },
   
   addEvent: async (event) => {
     try {
-      // Handle file upload if there's a selected image
-      let imageUrl = event.image_url;
-      
       // Transform our CalendarEvent type to match DB schema
       const dbEvent = {
         title: event.title,
@@ -61,8 +64,9 @@ export const useCalendarStore = create<CalendarStore>((set, get) => ({
         time: new Date(event.start).toISOString().split('T')[1].substring(0, 8), // Extract HH:MM:SS
         location: event.location || '',
         description: event.description || '',
-        image_url: imageUrl,
-        user_id: event.created_by
+        image_url: event.image_url,
+        user_id: event.created_by,
+        allday: event.allDay || false
       };
       
       const { data, error } = await supabase
@@ -87,7 +91,8 @@ export const useCalendarStore = create<CalendarStore>((set, get) => ({
         location: data.location || '',
         description: data.description || '',
         image_url: data.image_url || null,
-        created_by: data.user_id
+        created_by: data.user_id,
+        allDay: data.allday || false
       };
       
       set(state => ({
@@ -113,6 +118,7 @@ export const useCalendarStore = create<CalendarStore>((set, get) => ({
         location: event.location || '',
         description: event.description || '',
         image_url: event.image_url || null,
+        allday: event.allDay || false
       };
       
       const { error } = await supabase
