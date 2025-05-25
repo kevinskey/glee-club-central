@@ -10,7 +10,7 @@ import CalendarMain from "@/components/calendar/CalendarMain";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { EventModal } from "@/components/calendar/EventModal";
 import { ViewEventModal } from "@/components/calendar/ViewEventModal";
-import { Spinner } from "@/components/ui/spinner";
+import { DashboardEventsSkeleton, DashboardCardSkeleton } from "@/components/ui/dashboard-skeleton";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
 
@@ -120,9 +120,19 @@ export default function CalendarDashboard() {
 
   if (isLoading) {
     return (
-      <div className="container mx-auto py-8">
-        <div className="flex justify-center items-center h-64">
-          <Spinner size="lg" />
+      <div className="container mx-auto py-8 space-y-6">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6">
+          <DashboardCardSkeleton />
+        </div>
+        
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-6">
+          <div className="lg:col-span-2">
+            <DashboardEventsSkeleton />
+          </div>
+          <div className="space-y-6">
+            <DashboardCardSkeleton />
+            <DashboardCardSkeleton />
+          </div>
         </div>
       </div>
     );
@@ -187,7 +197,7 @@ export default function CalendarDashboard() {
               <div className="space-y-4">
                 {upcomingEvents.length > 0 ? (
                   upcomingEvents.map((event) => (
-                    <div key={event.id} className="rounded-lg border p-3 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-900" onClick={() => handleEventClick(event)}>
+                    <div key={event.id} className="rounded-lg border p-3 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-900 transition-colors" onClick={() => handleEventClick(event)}>
                       <h3 className="font-medium">{event.title}</h3>
                       <div className="mt-2 text-sm text-muted-foreground">
                         <p className="flex items-center">

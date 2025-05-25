@@ -1,4 +1,5 @@
-import React, { useState, useEffect, useCallback, useMemo } from "react";
+
+import React, { useMemo } from "react";
 import { PageHeader } from "@/components/ui/page-header";
 import { useAuth } from "@/contexts/AuthContext";
 import { Link, useNavigate } from "react-router-dom";
@@ -16,9 +17,6 @@ import {
   ArrowRight,
   Mic
 } from "lucide-react";
-import { Spinner } from "@/components/ui/spinner";
-import { supabase } from "@/integrations/supabase/client";
-import { toast } from "sonner";
 import { usePermissions } from "@/hooks/usePermissions";
 import ErrorBoundary from "@/components/ErrorBoundary";
 import { NextEventCountdown } from "@/components/dashboard/NextEventCountdown";
@@ -30,6 +28,13 @@ import { AdminDashboardAccess } from "@/components/dashboard/AdminDashboardAcces
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { GleeTools } from "@/components/glee-tools/GleeTools";
+import { useDashboardData } from "@/hooks/useDashboardData";
+import { 
+  DashboardWelcomeSkeleton, 
+  DashboardCardSkeleton, 
+  DashboardEventsSkeleton, 
+  DashboardSidebarSkeleton 
+} from "@/components/ui/dashboard-skeleton";
 
 export interface Event {
   id: string;
@@ -40,60 +45,19 @@ export interface Event {
 }
 
 const DashboardPageContent = () => {
-  const { profile, isLoading: authLoading } = useAuth();
+  const { profile } = useAuth();
   const navigate = useNavigate();
-  const [events, setEvents] = useState<Event[]>([]);
-  const [isInitialized, setIsInitialized] = useState(false);
+  const { events, isReady, error } = useDashboardData();
   const { isAdminRole, isSuperAdmin } = usePermissions();
   
   // Get current time of day for greeting - memoized to prevent re-renders
-  const getTimeOfDay = useCallback(() => {
+  const getTimeOfDay = useMemo(() => {
     const hour = new Date().getHours();
     
     if (hour < 12) return "Good morning";
     if (hour < 18) return "Good afternoon";
     return "Good evening";
   }, []);
-  
-  // Memoized fetch events function to prevent recreation on each render
-  const fetchEvents = useCallback(async () => {
-    try {
-      const { data, error } = await supabase
-        .from('calendar_events')
-        .select('*')
-        .gt('date', new Date().toISOString().split('T')[0])
-        .order('date', { ascending: true })
-        .limit(3);
-        
-      if (error) throw error;
-      
-      if (data) {
-        // Convert string dates to Date objects
-        setEvents(data.map(event => ({
-          ...event,
-          date: new Date(event.date)
-        })));
-      }
-    } catch (error) {
-      console.error('Error fetching events:', error);
-    }
-  }, []);
-
-  useEffect(() => {
-    if (!authLoading && !isInitialized) {
-      const loadData = async () => {
-        try {
-          await fetchEvents();
-        } catch (err) {
-          console.error("Error loading dashboard data:", err);
-        } finally {
-          setIsInitialized(true);
-        }
-      };
-      
-      loadData();
-    }
-  }, [authLoading, isInitialized, fetchEvents]);
   
   // Next upcoming event for countdown - memoize to prevent re-renders
   const nextEvent = useMemo(() => 
@@ -105,11 +69,40 @@ const DashboardPageContent = () => {
     navigate("/dashboard/admin");
   };
   
-  // Show loading only when auth is loading or data hasn't been initialized
-  if (authLoading || !isInitialized) {
+  // Show loading state with skeletons
+  if (!isReady) {
     return (
-      <div className="max-w-screen-2xl mx-auto px-4 flex justify-center items-center min-h-[60vh]">
-        <Spinner size="lg" />
+      <div className="max-w-screen-2xl mx-auto px-4 space-y-6 animate-pulse">
+        <DashboardWelcomeSkeleton />
+        <DashboardCardSkeleton />
+        <DashboardCardSkeleton />
+        <QuickAccess />
+        
+        <div className="grid grid-cols-1 md:grid-cols-12 gap-6">
+          <div className="md:col-span-8 space-y-6">
+            <DashboardEventsSkeleton />
+            <DashboardCardSkeleton />
+            <DashboardCardSkeleton />
+          </div>
+          <div className="md:col-span-4">
+            <DashboardSidebarSkeleton />
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="max-w-screen-2xl mx-auto px-4 py-8">
+        <Card className="border-destructive">
+          <CardContent className="p-6 text-center">
+            <p className="text-destructive">{error}</p>
+            <Button onClick={() => window.location.reload()} className="mt-4">
+              Reload Page
+            </Button>
+          </CardContent>
+        </Card>
       </div>
     );
   }
@@ -120,7 +113,7 @@ const DashboardPageContent = () => {
       <div className="bg-gradient-to-r from-glee-spelman to-glee-spelman/80 rounded-xl shadow-lg p-6 md:p-8 text-white">
         <div className="flex flex-col md:flex-row md:items-center md:justify-between">
           <div className="space-y-2">
-            <h1 className="text-2xl md:text-3xl font-bold">{getTimeOfDay()}, {profile?.first_name || 'Member'}</h1>
+            <h1 className="text-2xl md:text-3xl font-bold">{getTimeOfDay}, {profile?.first_name || 'Member'}</h1>
             <p className="text-white/80">Welcome to your Spelman College Glee Club dashboard</p>
           </div>
           <div className="mt-4 md:mt-0 flex flex-col sm:flex-row gap-3">
@@ -226,16 +219,22 @@ const DashboardPageContent = () => {
             <CardContent>
               {events.length > 0 ? (
                 <div className="space-y-3">
-                  {events.map((event, index) => (
+                  {events.slice(0, 3).map((event, index) => (
                     <div key={index} className="flex items-start border-b last:border-0 pb-3 last:pb-0">
                       <div className="bg-muted text-center p-2 rounded-md min-w-[60px]">
-                        <div className="text-xs font-medium text-muted-foreground">{event.date.toLocaleDateString(undefined, { month: 'short' })}</div>
-                        <div className="text-lg font-bold">{event.date.getDate()}</div>
+                        <div className="text-xs font-medium text-muted-foreground">
+                          {new Date(event.start).toLocaleDateString(undefined, { month: 'short' })}
+                        </div>
+                        <div className="text-lg font-bold">{new Date(event.start).getDate()}</div>
                       </div>
                       <div className="ml-4">
                         <h4 className="font-medium">{event.title}</h4>
                         <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                          <Clock className="h-3 w-3" /> {event.time}
+                          <Clock className="h-3 w-3" /> 
+                          {new Date(event.start).toLocaleTimeString(undefined, { 
+                            hour: '2-digit', 
+                            minute: '2-digit' 
+                          })}
                           {event.location && <span>• {event.location}</span>}
                         </div>
                       </div>
