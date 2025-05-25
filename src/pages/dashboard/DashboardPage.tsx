@@ -94,7 +94,7 @@ const DashboardPageContent = () => {
   // Show loading state with skeletons
   if (!isReady) {
     return (
-      <div className="max-w-screen-2xl mx-auto px-4 space-y-6 dashboard-content dashboard-loading">
+      <div className="max-w-screen-2xl mx-auto px-4 space-y-6">
         <DashboardWelcomeSkeleton />
         <DashboardCardSkeleton />
         <DashboardCardSkeleton />
@@ -130,7 +130,7 @@ const DashboardPageContent = () => {
   }
     
   return (
-    <div className="max-w-screen-2xl mx-auto px-4 space-y-6 dashboard-content dashboard-loaded">
+    <div className="max-w-screen-2xl mx-auto px-4 space-y-6">
       {/* Welcome Banner with User Info */}
       <div className="bg-gradient-to-r from-glee-spelman to-glee-spelman/80 rounded-xl shadow-lg p-6 md:p-8 text-white">
         <div className="flex flex-col md:flex-row md:items-center md:justify-between">
