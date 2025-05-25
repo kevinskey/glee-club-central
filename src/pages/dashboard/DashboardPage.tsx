@@ -41,7 +41,6 @@ export interface Event {
 }
 
 const DashboardPageContent = () => {
-  // All hooks at the top of the component
   const { profile, isLoading: authLoading } = useAuth();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
@@ -82,7 +81,6 @@ const DashboardPageContent = () => {
   }, []);
 
   useEffect(() => {
-    // Only attempt to load data when auth state is confirmed
     if (!authLoading) {
       const loadData = async () => {
         setLoading(true);
@@ -109,10 +107,10 @@ const DashboardPageContent = () => {
     navigate("/dashboard/admin");
   };
   
-  // Only show loading when actually loading and not already loaded
-  if (authLoading || (loading && events.length === 0)) {
+  // Show loading only when actually loading
+  if (authLoading || loading) {
     return (
-      <div className="container mx-auto px-4 flex justify-center items-center min-h-[60vh]">
+      <div className="max-w-screen-2xl mx-auto px-4 flex justify-center items-center min-h-[60vh]">
         <Spinner size="lg" />
       </div>
     );
@@ -127,7 +125,7 @@ const DashboardPageContent = () => {
             <h1 className="text-2xl md:text-3xl font-bold">{getTimeOfDay()}, {profile?.first_name || 'Member'}</h1>
             <p className="text-white/80">Welcome to your Spelman College Glee Club dashboard</p>
           </div>
-          <div className="mt-4 md:mt-0 flex gap-3">
+          <div className="mt-4 md:mt-0 flex flex-col sm:flex-row gap-3">
             <Button 
               size="lg"
               variant="secondary" 
@@ -137,7 +135,6 @@ const DashboardPageContent = () => {
               <Link to="/dashboard/profile">View Profile <ChevronRight className="ml-2 h-4 w-4" /></Link>
             </Button>
             
-            {/* Added direct link to Member Dashboard */}
             <Button 
               size="lg"
               variant="outline" 
@@ -152,7 +149,7 @@ const DashboardPageContent = () => {
         </div>
       </div>
       
-      {/* Add a prominent Member Access section at the top */}
+      {/* Member Resources Section */}
       <Card className="shadow-md border-l-4 border-l-glee-spelman">
         <CardContent className="p-6">
           <div className="flex flex-col md:flex-row md:items-center justify-between">
@@ -182,7 +179,7 @@ const DashboardPageContent = () => {
         </CardContent>
       </Card>
       
-      {/* GleeTools Section - Replacement for separate metronome and pitch pipe */}
+      {/* GleeTools Section */}
       <Card className="shadow-md">
         <CardHeader className="pb-2">
           <CardTitle className="flex items-center">

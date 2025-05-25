@@ -28,7 +28,10 @@ export default function CalendarDashboard() {
   useEffect(() => {
     const loadEvents = async () => {
       try {
-        await fetchEvents();
+        const success = await fetchEvents();
+        if (!success) {
+          toast.error("Failed to load calendar events");
+        }
       } catch (error) {
         console.error("Error loading calendar events:", error);
         toast.error("Failed to load calendar events");
