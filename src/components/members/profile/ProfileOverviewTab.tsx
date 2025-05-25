@@ -208,14 +208,14 @@ export const ProfileOverviewTab: React.FC<ProfileOverviewTabProps> = ({
               <div className="space-y-2">
                 <Label htmlFor="personal_title">Title</Label>
                 <Select
-                  value={formData.personal_title || ''}
-                  onValueChange={(value) => handleSelectChange('personal_title', value)}
+                  value={formData.personal_title || 'none'}
+                  onValueChange={(value) => handleSelectChange('personal_title', value === 'none' ? '' : value)}
                 >
                   <SelectTrigger id="personal_title">
                     <SelectValue placeholder="Select title" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">None</SelectItem>
+                    <SelectItem value="none">None</SelectItem>
                     <SelectItem value="Mr.">Mr.</SelectItem>
                     <SelectItem value="Mrs.">Mrs.</SelectItem>
                     <SelectItem value="Miss">Miss</SelectItem>
@@ -267,13 +267,14 @@ export const ProfileOverviewTab: React.FC<ProfileOverviewTabProps> = ({
               <div className="space-y-2">
                 <Label htmlFor="voice_part">Voice Part</Label>
                 <Select
-                  value={formData.voice_part || ''}
-                  onValueChange={(value) => handleSelectChange('voice_part', value)}
+                  value={formData.voice_part || 'none'}
+                  onValueChange={(value) => handleSelectChange('voice_part', value === 'none' ? '' : value)}
                 >
                   <SelectTrigger id="voice_part">
                     <SelectValue placeholder="Select voice part" />
                   </SelectTrigger>
                   <SelectContent>
+                    <SelectItem value="none">Not assigned</SelectItem>
                     <SelectItem value="soprano_1">Soprano 1</SelectItem>
                     <SelectItem value="soprano_2">Soprano 2</SelectItem>
                     <SelectItem value="alto_1">Alto 1</SelectItem>
