@@ -16,16 +16,7 @@ interface DashboardLayoutProps {
 
 const DashboardLayout = ({ children }: DashboardLayoutProps) => {
   const isMobile = useMedia("(max-width: 768px)");
-  const location = useLocation();
   
-  useEffect(() => {
-    // Set viewport-specific body class
-    document.body.classList.toggle('is-mobile-view', isMobile);
-    return () => {
-      document.body.classList.remove('is-mobile-view');
-    };
-  }, [isMobile]);
-
   return (
     <SidebarProvider>
       <div className="min-h-screen flex flex-col bg-background w-full">

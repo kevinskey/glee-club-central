@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { PageHeaderWithToggle } from "@/components/ui/page-header-with-toggle";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -28,10 +27,7 @@ export default function CalendarDashboard() {
   useEffect(() => {
     const loadEvents = async () => {
       try {
-        const success = await fetchEvents();
-        if (!success) {
-          toast.error("Failed to load calendar events");
-        }
+        await fetchEvents();
       } catch (error) {
         console.error("Error loading calendar events:", error);
         toast.error("Failed to load calendar events");

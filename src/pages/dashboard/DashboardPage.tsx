@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useCallback, useMemo } from "react";
 import { PageHeader } from "@/components/ui/page-header";
 import { useAuth } from "@/contexts/AuthContext";
@@ -43,8 +42,8 @@ export interface Event {
 const DashboardPageContent = () => {
   const { profile, isLoading: authLoading } = useAuth();
   const navigate = useNavigate();
-  const [loading, setLoading] = useState(false);
   const [events, setEvents] = useState<Event[]>([]);
+  const [isInitialized, setIsInitialized] = useState(false);
   const { isAdminRole, isSuperAdmin } = usePermissions();
   
   // Get current time of day for greeting - memoized to prevent re-renders
@@ -81,21 +80,20 @@ const DashboardPageContent = () => {
   }, []);
 
   useEffect(() => {
-    if (!authLoading) {
+    if (!authLoading && !isInitialized) {
       const loadData = async () => {
-        setLoading(true);
         try {
           await fetchEvents();
         } catch (err) {
           console.error("Error loading dashboard data:", err);
         } finally {
-          setLoading(false);
+          setIsInitialized(true);
         }
       };
       
       loadData();
     }
-  }, [authLoading, fetchEvents]);
+  }, [authLoading, isInitialized, fetchEvents]);
   
   // Next upcoming event for countdown - memoize to prevent re-renders
   const nextEvent = useMemo(() => 
@@ -107,8 +105,8 @@ const DashboardPageContent = () => {
     navigate("/dashboard/admin");
   };
   
-  // Show loading only when actually loading
-  if (authLoading || loading) {
+  // Show loading only when auth is loading or data hasn't been initialized
+  if (authLoading || !isInitialized) {
     return (
       <div className="max-w-screen-2xl mx-auto px-4 flex justify-center items-center min-h-[60vh]">
         <Spinner size="lg" />
