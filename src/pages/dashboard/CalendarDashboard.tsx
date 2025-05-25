@@ -71,15 +71,13 @@ export default function CalendarDashboard() {
   
   const handleCreateEvent = async (eventData: any) => {
     try {
-      const success = await addEvent({
+      await addEvent({
         ...eventData,
         created_by: user?.id
       });
       
-      if (success) {
-        setIsCreateModalOpen(false);
-        toast.success("Event created successfully");
-      }
+      setIsCreateModalOpen(false);
+      toast.success("Event created successfully");
     } catch (error) {
       console.error("Error creating event:", error);
       toast.error("Failed to create event");
