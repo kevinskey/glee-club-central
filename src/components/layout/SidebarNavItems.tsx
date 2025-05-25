@@ -91,14 +91,7 @@ export function SidebarNavItems() {
           Attendance
         </a>
         
-        {/* Only show Members link for admin users and when NOT on a members page */}
-        {showAdminItems && !isOnMembersPage && (
-          <a href="/dashboard/members" className={`flex items-center gap-3 rounded-md px-3 py-2 text-sm transition-colors ${isActive('/dashboard/members') ? 'bg-accent text-accent-foreground' : 'hover:bg-accent hover:text-accent-foreground'}`}>
-            <Users className="h-4 w-4" />
-            Members
-          </a>
-        )}
-        
+        {/* Admin Settings - only show for admin users */}
         {showAdminItems && (
           <a href="/admin/settings" className={`flex items-center gap-3 rounded-md px-3 py-2 text-sm transition-colors ${isActive('/admin/settings') ? 'bg-accent text-accent-foreground' : 'hover:bg-accent hover:text-accent-foreground'}`}>
             <Settings className="h-4 w-4" />
