@@ -18,6 +18,9 @@ export const useCalendarStore = create<CalendarStore>((set, get) => ({
   isLoading: false,
   
   fetchEvents: async (): Promise<void> => {
+    // Don't fetch if already loading
+    if (get().isLoading) return;
+    
     try {
       set({ isLoading: true });
       const { data, error } = await supabase

@@ -45,7 +45,7 @@ export interface Event {
 }
 
 const DashboardPageContent = () => {
-  const { profile } = useAuth();
+  const { profile, isLoading: authLoading } = useAuth();
   const navigate = useNavigate();
   const { events, isReady, error } = useDashboardData();
   const { isAdminRole, isSuperAdmin } = usePermissions();
@@ -69,8 +69,8 @@ const DashboardPageContent = () => {
     navigate("/dashboard/admin");
   };
   
-  // Show loading state with skeletons
-  if (!isReady) {
+  // Show loading state with skeletons while auth or data is loading
+  if (authLoading || !isReady) {
     return (
       <div className="max-w-screen-2xl mx-auto px-4 space-y-6">
         <DashboardWelcomeSkeleton />
@@ -108,7 +108,7 @@ const DashboardPageContent = () => {
   }
     
   return (
-    <div className="max-w-screen-2xl mx-auto px-4 space-y-6">
+    <div className="max-w-screen-2xl mx-auto px-4 space-y-6 dashboard-content dashboard-loaded">
       {/* Welcome Banner with User Info */}
       <div className="bg-gradient-to-r from-glee-spelman to-glee-spelman/80 rounded-xl shadow-lg p-6 md:p-8 text-white">
         <div className="flex flex-col md:flex-row md:items-center md:justify-between">
@@ -217,7 +217,7 @@ const DashboardPageContent = () => {
               </Button>
             </CardHeader>
             <CardContent>
-              {events.length > 0 ? (
+              {events && events.length > 0 ? (
                 <div className="space-y-3">
                   {events.slice(0, 3).map((event, index) => (
                     <div key={index} className="flex items-start border-b last:border-0 pb-3 last:pb-0">

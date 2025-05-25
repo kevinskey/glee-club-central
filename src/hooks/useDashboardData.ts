@@ -18,20 +18,22 @@ export const useDashboardData = () => {
   });
   
   const { user, profile, isLoading: authLoading } = useAuth();
-  const { events, fetchEvents } = useCalendarStore();
+  const { events, fetchEvents, isLoading: eventsLoading } = useCalendarStore();
   const { isLoading: permissionsLoading } = usePermissions();
 
   const loadDashboardData = useCallback(async () => {
-    if (authLoading || permissionsLoading) return;
+    if (authLoading || permissionsLoading || !user) return;
     
     try {
       setData(prev => ({ ...prev, isLoading: true, error: null }));
       
-      // Load events
-      await fetchEvents();
+      // Only fetch if events are not already loaded
+      if (!events || events.length === 0) {
+        await fetchEvents();
+      }
       
       setData({
-        events,
+        events: events || [],
         isLoading: false,
         error: null
       });
@@ -43,7 +45,18 @@ export const useDashboardData = () => {
         error: 'Failed to load dashboard data'
       }));
     }
-  }, [authLoading, permissionsLoading, fetchEvents, events]);
+  }, [authLoading, permissionsLoading, user, fetchEvents, events]);
+
+  // Update events when they change in the store
+  useEffect(() => {
+    if (events && !eventsLoading) {
+      setData(prev => ({ 
+        ...prev, 
+        events: events || [],
+        isLoading: false 
+      }));
+    }
+  }, [events, eventsLoading]);
 
   useEffect(() => {
     if (!authLoading && !permissionsLoading && user) {
@@ -51,7 +64,7 @@ export const useDashboardData = () => {
     }
   }, [authLoading, permissionsLoading, user, loadDashboardData]);
 
-  const isReady = !authLoading && !permissionsLoading && !data.isLoading;
+  const isReady = !authLoading && !permissionsLoading && !data.isLoading && !!user;
 
   return {
     ...data,

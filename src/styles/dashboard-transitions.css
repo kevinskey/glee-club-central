@@ -59,6 +59,34 @@
   transition: opacity 0.2s ease-in-out;
 }
 
+/* Loading guard to prevent flashing */
+.dashboard-content:not(.dashboard-loaded) {
+  opacity: 0;
+}
+
+/* Anti-flicker loading state */
+.dashboard-loading-guard {
+  position: relative;
+  min-height: 200px;
+}
+
+.dashboard-loading-guard::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(255, 255, 255, 0.8);
+  z-index: 1;
+  opacity: 0;
+  transition: opacity 0.2s ease-in-out;
+}
+
+.dashboard-loading-guard.loading::before {
+  opacity: 1;
+}
+
 /* Reduce motion for users who prefer it */
 @media (prefers-reduced-motion: reduce) {
   .dashboard-content,
@@ -69,4 +97,14 @@
   .skeleton-shimmer {
     animation: none;
   }
+  
+  .card-content-enter,
+  .card-content-enter-active {
+    transition: none;
+  }
+}
+
+/* Debounced loading states */
+.dashboard-debounced-loading {
+  transition-delay: 150ms;
 }
