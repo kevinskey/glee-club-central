@@ -18,14 +18,21 @@ export const useDashboardData = () => {
     error: null
   });
   
-  const { user, profile, isLoading: authLoading } = useAuth();
+  const { user, profile, isLoading: authLoading, isAuthenticated } = useAuth();
   const { events, fetchEvents, isLoading: eventsLoading } = useCalendarStore();
   const { isLoading: permissionsLoading } = usePermissions();
   const { setLoading, isReady: coordinatorReady } = useLoadingCoordinator();
   
-  // Memoize dependencies to prevent unnecessary re-renders
-  const isAuthReady = useMemo(() => !authLoading && !!user, [authLoading, user]);
-  const isPermissionsReady = useMemo(() => !permissionsLoading, [permissionsLoading]);
+  // Memoize authentication readiness to prevent unnecessary re-renders
+  const isAuthReady = useMemo(() => 
+    isAuthenticated && !authLoading && !!user && !!profile, 
+    [isAuthenticated, authLoading, user, profile]
+  );
+  
+  const isPermissionsReady = useMemo(() => 
+    !permissionsLoading, 
+    [permissionsLoading]
+  );
   
   // Update loading coordinator when auth state changes
   useEffect(() => {
@@ -40,9 +47,10 @@ export const useDashboardData = () => {
     setLoading('profile', !profile);
   }, [profile, setLoading]);
 
+  // Memoized data loading function to prevent unnecessary re-renders
   const loadDashboardData = useCallback(async () => {
     if (!isAuthReady || !isPermissionsReady) {
-      console.log('Dashboard data loading skipped - auth not ready');
+      console.log('Dashboard data loading skipped - dependencies not ready');
       return;
     }
     
@@ -70,7 +78,7 @@ export const useDashboardData = () => {
     }
   }, [isAuthReady, isPermissionsReady, fetchEvents]);
 
-  // Load data when auth is ready, but only once
+  // Load data when auth is ready, but only once - with proper dependency management
   useEffect(() => {
     let mounted = true;
     
@@ -88,9 +96,9 @@ export const useDashboardData = () => {
     };
   }, [isAuthReady, isPermissionsReady, loadDashboardData, data.events.length, data.isLoading]);
 
-  // Sync events from calendar store to local state
+  // Sync events from calendar store to local state - optimized to prevent loops
   useEffect(() => {
-    if (events && events.length > 0 && !eventsLoading) {
+    if (events && events.length > 0 && !eventsLoading && data.events.length === 0) {
       console.log('Syncing events from calendar store to dashboard');
       setData(prev => ({ 
         ...prev, 
@@ -98,8 +106,9 @@ export const useDashboardData = () => {
         isLoading: false 
       }));
     }
-  }, [events, eventsLoading]);
+  }, [events, eventsLoading, data.events.length]);
 
+  // Memoized readiness state to prevent unnecessary re-renders
   const isReady = useMemo(() => 
     isAuthReady && isPermissionsReady && !data.isLoading && coordinatorReady,
     [isAuthReady, isPermissionsReady, data.isLoading, coordinatorReady]

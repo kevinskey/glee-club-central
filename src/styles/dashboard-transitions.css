@@ -7,8 +7,8 @@
 }
 
 .dashboard-loading {
-  opacity: 0.7;
-  transform: translateY(10px);
+  opacity: 0.8;
+  transform: translateY(5px);
 }
 
 .dashboard-loaded {
@@ -57,36 +57,7 @@
   pointer-events: all;
 }
 
-/* Card content transitions with staggered entrance */
-.card-content-enter {
-  opacity: 0;
-  transform: translateY(20px);
-}
-
-.card-content-enter-active {
-  opacity: 1;
-  transform: translateY(0);
-  transition: opacity 0.5s ease-out, transform 0.4s ease-out;
-}
-
-/* Staggered animations for dashboard cards */
-.dashboard-content .card:nth-child(1) {
-  animation-delay: 0ms;
-}
-
-.dashboard-content .card:nth-child(2) {
-  animation-delay: 100ms;
-}
-
-.dashboard-content .card:nth-child(3) {
-  animation-delay: 200ms;
-}
-
-.dashboard-content .card:nth-child(4) {
-  animation-delay: 300ms;
-}
-
-/* Prevent layout shift during loading */
+/* Prevent layout shift during loading with auth optimization */
 .layout-stable {
   min-height: 100vh;
   contain: layout;
@@ -97,21 +68,21 @@
   will-change: opacity, transform;
 }
 
-/* Smooth content transitions with debouncing */
+/* Smooth content transitions with auth debouncing */
 .dashboard-content > * {
   transition: opacity 0.3s ease-in-out;
 }
 
-/* Anti-flicker loading state with minimum duration */
+/* Auth-optimized loading state with minimum duration */
 .dashboard-content:not(.dashboard-loaded) {
   opacity: 0;
 }
 
-/* Loading guard to prevent rapid state changes */
+/* Loading guard with auth debouncing */
 .dashboard-loading-guard {
   position: relative;
   min-height: 200px;
-  transition-delay: 100ms; /* Debounce rapid changes */
+  transition-delay: 200ms; /* Debounce rapid auth changes */
 }
 
 .dashboard-loading-guard::before {
@@ -131,7 +102,7 @@
   opacity: 1;
 }
 
-/* Enhanced skeleton loading timing */
+/* Enhanced skeleton loading with auth timing */
 .skeleton-content {
   animation: fadeInUp 0.6s ease-out;
 }
@@ -139,7 +110,7 @@
 @keyframes fadeInUp {
   from {
     opacity: 0;
-    transform: translateY(30px);
+    transform: translateY(20px);
   }
   to {
     opacity: 1;
@@ -147,10 +118,10 @@
   }
 }
 
-/* Coordinated loading states */
+/* Coordinated loading states with auth optimization */
 .coordinator-loading {
   .dashboard-content {
-    opacity: 0.6;
+    opacity: 0.7;
     pointer-events: none;
   }
 }
@@ -163,35 +134,41 @@
   }
 }
 
+/* Auth state change optimizations */
+.auth-loading {
+  opacity: 0.6;
+  transition: opacity 0.2s ease-in-out;
+}
+
+.auth-ready {
+  opacity: 1;
+  transition: opacity 0.4s ease-in-out;
+}
+
 /* Reduce motion for users who prefer it */
 @media (prefers-reduced-motion: reduce) {
   .dashboard-content,
   .dashboard-content > *,
   .skeleton-shimmer,
-  .card-content-enter,
-  .card-content-enter-active {
+  .skeleton-content {
     transition: none;
     animation: none;
   }
-  
-  .dashboard-content .card {
-    animation-delay: 0ms;
-  }
 }
 
-/* Debounced loading states with coordination */
+/* Debounced loading states with auth coordination */
 .dashboard-debounced-loading {
-  transition-delay: 200ms;
+  transition-delay: 300ms; /* Longer delay for auth changes */
 }
 
-/* Loading coordination fade */
+/* Loading coordination fade optimized for auth */
 .loading-fade-enter {
   opacity: 0;
 }
 
 .loading-fade-enter-active {
   opacity: 1;
-  transition: opacity 0.4s ease-in-out;
+  transition: opacity 0.5s ease-in-out;
 }
 
 .loading-fade-exit {
@@ -201,4 +178,27 @@
 .loading-fade-exit-active {
   opacity: 0;
   transition: opacity 0.3s ease-in-out;
+}
+
+/* Auth-specific transition states */
+.auth-transition-enter {
+  opacity: 0;
+  transform: scale(0.98);
+}
+
+.auth-transition-enter-active {
+  opacity: 1;
+  transform: scale(1);
+  transition: opacity 0.4s ease-out, transform 0.3s ease-out;
+}
+
+.auth-transition-exit {
+  opacity: 1;
+  transform: scale(1);
+}
+
+.auth-transition-exit-active {
+  opacity: 0;
+  transform: scale(0.98);
+  transition: opacity 0.3s ease-in, transform 0.2s ease-in;
 }

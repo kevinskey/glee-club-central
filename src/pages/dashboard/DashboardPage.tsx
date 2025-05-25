@@ -45,22 +45,40 @@ export interface Event {
   location: string;
 }
 
-const DashboardPageContent = () => {
+// Memoized skeleton component to prevent re-renders
+const DashboardLoadingSkeleton = React.memo(() => (
+  <div className="max-w-screen-2xl mx-auto px-4 space-y-6 dashboard-content dashboard-loading">
+    <DashboardWelcomeSkeleton />
+    <DashboardCardSkeleton />
+    <DashboardCardSkeleton />
+    <QuickAccess />
+    
+    <div className="grid grid-cols-1 md:grid-cols-12 gap-6">
+      <div className="md:col-span-8 space-y-6">
+        <DashboardEventsSkeleton />
+        <DashboardCardSkeleton />
+        <DashboardCardSkeleton />
+      </div>
+      <div className="md:col-span-4">
+        <DashboardSidebarSkeleton />
+      </div>
+    </div>
+  </div>
+));
+
+const DashboardPageContent = React.memo(() => {
   const { profile, isLoading: authLoading } = useAuth();
   const navigate = useNavigate();
   const { events, isReady, error } = useDashboardData();
   const { isAdminRole, isSuperAdmin } = usePermissions();
   const { isAnyLoading, isReady: coordinatorReady } = useLoadingCoordinator();
   
-  console.log('Dashboard render state:', { 
-    authLoading, 
-    isReady, 
-    coordinatorReady, 
-    isAnyLoading: isAnyLoading(),
-    eventsCount: events?.length || 0 
-  });
+  // Memoize expensive computations
+  const shouldShowLoading = useMemo(() => 
+    authLoading || !isReady || isAnyLoading(),
+    [authLoading, isReady, isAnyLoading]
+  );
   
-  // Get current time of day for greeting - memoized to prevent re-renders
   const getTimeOfDay = useMemo(() => {
     const hour = new Date().getHours();
     
@@ -69,40 +87,28 @@ const DashboardPageContent = () => {
     return "Good evening";
   }, []);
   
-  // Next upcoming event for countdown - memoize to prevent re-renders
   const nextEvent = useMemo(() => 
     events && events.length > 0 ? events[0] : null, 
     [events]
   );
   
-  const handleRegisterAsAdmin = () => {
+  const handleRegisterAsAdmin = React.useCallback(() => {
     navigate("/dashboard/admin");
-  };
+  }, [navigate]);
   
-  // Show loading state with minimum duration to prevent flashing
-  const shouldShowLoading = authLoading || !isReady || isAnyLoading();
+  console.log('Dashboard render state:', { 
+    authLoading, 
+    isReady, 
+    coordinatorReady, 
+    isAnyLoading: isAnyLoading(),
+    eventsCount: events?.length || 0,
+    shouldShowLoading
+  });
   
+  // Show loading state with stable skeleton
   if (shouldShowLoading) {
     console.log('Showing loading skeletons');
-    return (
-      <div className="max-w-screen-2xl mx-auto px-4 space-y-6 dashboard-content dashboard-loading">
-        <DashboardWelcomeSkeleton />
-        <DashboardCardSkeleton />
-        <DashboardCardSkeleton />
-        <QuickAccess />
-        
-        <div className="grid grid-cols-1 md:grid-cols-12 gap-6">
-          <div className="md:col-span-8 space-y-6">
-            <DashboardEventsSkeleton />
-            <DashboardCardSkeleton />
-            <DashboardCardSkeleton />
-          </div>
-          <div className="md:col-span-4">
-            <DashboardSidebarSkeleton />
-          </div>
-        </div>
-      </div>
-    );
+    return <DashboardLoadingSkeleton />;
   }
 
   if (error) {
@@ -324,7 +330,7 @@ const DashboardPageContent = () => {
       </div>
     </div>
   );
-};
+});
 
 // Wrap the component with ErrorBoundary for better error handling
 const DashboardPage = React.memo(() => {

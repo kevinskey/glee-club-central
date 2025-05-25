@@ -14,6 +14,7 @@ interface LoadingCoordinator {
   isAnyLoading: () => boolean;
   isReady: () => boolean;
   reset: () => void;
+  getLoadingStates: () => LoadingState;
 }
 
 export const useLoadingCoordinator = create<LoadingCoordinator>((set, get) => ({
@@ -25,12 +26,18 @@ export const useLoadingCoordinator = create<LoadingCoordinator>((set, get) => ({
   },
   
   setLoading: (key, loading) => {
-    set(state => ({
-      loadingStates: {
+    set(state => {
+      const newState = {
         ...state.loadingStates,
         [key]: loading
-      }
-    }));
+      };
+      
+      console.log(`Loading coordinator: ${key} = ${loading}`, newState);
+      
+      return {
+        loadingStates: newState
+      };
+    });
   },
   
   isAnyLoading: () => {
@@ -40,10 +47,21 @@ export const useLoadingCoordinator = create<LoadingCoordinator>((set, get) => ({
   
   isReady: () => {
     const states = get().loadingStates;
-    return Object.values(states).every(loading => !loading);
+    const ready = Object.values(states).every(loading => !loading);
+    
+    if (ready) {
+      console.log('Loading coordinator: All systems ready');
+    }
+    
+    return ready;
+  },
+  
+  getLoadingStates: () => {
+    return get().loadingStates;
   },
   
   reset: () => {
+    console.log('Loading coordinator: Resetting all states');
     set({
       loadingStates: {
         auth: true,
