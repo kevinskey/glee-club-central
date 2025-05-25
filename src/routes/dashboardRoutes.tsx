@@ -16,6 +16,10 @@ import ArchivesPage from '../pages/dashboard/ArchivesPage';
 import AttendancePage from '../pages/dashboard/AttendancePage';
 import AudioManagementPage from '../pages/audio-management/AudioManagementPage';
 import DashboardLayout from '../layouts/DashboardLayout';
+import AdminDashboardPage from '../pages/dashboard/AdminDashboardPage';
+import MembersPage from '../pages/members/MembersPage';
+import SettingsPage from '../pages/settings/SettingsPage';
+import FinancesPage from '../pages/dashboard/FinancesPage';
 
 // Define routes without duplicating wrapper components
 export const dashboardRoutes = {
@@ -77,6 +81,23 @@ export const dashboardRoutes = {
     {
       path: 'attendance',
       element: <AttendancePage />,
+    },
+    // Admin routes within dashboard
+    {
+      path: 'admin',
+      element: <RequireAuth requireAdmin={true}><AdminDashboardPage /></RequireAuth>,
+    },
+    {
+      path: 'admin/members',
+      element: <RequireAuth requireAdmin={true}><MembersPage /></RequireAuth>,
+    },
+    {
+      path: 'finances',
+      element: <RequireAuth requireAdmin={true}><FinancesPage /></RequireAuth>,
+    },
+    {
+      path: 'settings',
+      element: <RequireAuth requireAdmin={true}><SettingsPage /></RequireAuth>,
     },
   ],
 };
