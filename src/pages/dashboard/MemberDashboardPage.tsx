@@ -2,13 +2,32 @@
 import React from "react";
 import { PageHeader } from "@/components/ui/page-header";
 import { useAuth } from "@/contexts/AuthContext";
-import { DashboardQuickAccess } from "@/components/dashboard/DashboardQuickAccess";
 import { UpcomingEventsList } from "@/components/calendar/UpcomingEventsList";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Calendar, Music, Bell } from "lucide-react";
+import { Calendar, Music, Bell, Link } from "lucide-react";
+import {
+  Music as MusicIcon,
+  Calendar as CalendarIcon,
+  MessageSquare,
+  DollarSign,
+  Bell as BellIcon,
+  Upload,
+  Settings
+} from "lucide-react";
 
 export default function MemberDashboardPage() {
   const { profile } = useAuth();
+
+  // Custom quick access items for members
+  const memberQuickAccessLinks = [
+    { icon: <MusicIcon className="h-5 w-5" />, title: "Sheet Music", path: "/dashboard/sheet-music", color: "bg-purple-500" },
+    { icon: <CalendarIcon className="h-5 w-5" />, title: "Calendar", path: "/dashboard/calendar", color: "bg-green-500" },
+    { icon: <MessageSquare className="h-5 w-5" />, title: "Messaging", path: "/dashboard/messaging", color: "bg-blue-500" },
+    { icon: <DollarSign className="h-5 w-5" />, title: "Finance", path: "/dashboard/finances", color: "bg-emerald-500" },
+    { icon: <BellIcon className="h-5 w-5" />, title: "Announcements", path: "/dashboard/announcements", color: "bg-red-500" },
+    { icon: <Upload className="h-5 w-5" />, title: "Media Manager", path: "/dashboard/media-library", color: "bg-pink-500" },
+    { icon: <Settings className="h-5 w-5" />, title: "Settings", path: "/dashboard/settings", color: "bg-gray-500" },
+  ];
 
   return (
     <div className="space-y-6">
@@ -17,8 +36,32 @@ export default function MemberDashboardPage() {
         description="Access your Glee Club resources and stay up to date"
       />
 
-      {/* Quick Access - Main feature for members */}
-      <DashboardQuickAccess />
+      {/* Quick Access Section */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Quick Access</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+            {memberQuickAccessLinks.map((link, index) => (
+              <Link 
+                key={index} 
+                to={link.path} 
+                className="group no-underline block"
+              >
+                <div className="w-full h-auto flex flex-col items-center justify-center py-4 gap-2 border rounded-md transition-all duration-200 hover:border-glee-spelman/20 hover:bg-glee-spelman/5 hover:shadow-md">
+                  <div className={`${link.color} text-white p-2 rounded-full group-hover:scale-110 transition-transform duration-200`}>
+                    {link.icon}
+                  </div>
+                  <span className="text-xs font-medium text-center group-hover:text-glee-spelman transition-colors duration-200">
+                    {link.title}
+                  </span>
+                </div>
+              </Link>
+            ))}
+          </div>
+        </CardContent>
+      </Card>
 
       {/* Additional member-specific content */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
