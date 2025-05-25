@@ -7,7 +7,7 @@ import { toast } from 'sonner';
 interface CalendarStore {
   events: CalendarEvent[];
   isLoading: boolean;
-  fetchEvents: () => Promise<CalendarEvent[] | void>;
+  fetchEvents: () => Promise<boolean>;
   addEvent: (event: Omit<CalendarEvent, 'id'>) => Promise<boolean>;
   updateEvent: (event: CalendarEvent) => Promise<boolean>;
   deleteEvent: (id: string) => Promise<boolean>;
@@ -28,7 +28,8 @@ export const useCalendarStore = create<CalendarStore>((set, get) => ({
       if (error) {
         console.error('Error fetching events:', error);
         toast.error('Failed to load calendar events');
-        return;
+        set({ isLoading: false });
+        return false;
       }
       
       // Transform the data from DB schema to our CalendarEvent type
@@ -46,11 +47,12 @@ export const useCalendarStore = create<CalendarStore>((set, get) => ({
       }));
       
       set({ events, isLoading: false });
-      return events;
+      return true;
     } catch (error) {
       console.error('Error in fetchEvents:', error);
       toast.error('Failed to load calendar events');
       set({ isLoading: false });
+      return false;
     }
   },
   

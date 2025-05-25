@@ -30,10 +30,12 @@ export default function CalendarDashboard() {
     const loadEvents = async () => {
       try {
         setIsLoading(true);
-        await fetchEvents();
-        // Get events from the store after fetching
-        const storeEvents = useCalendarStore.getState().events;
-        setEvents(storeEvents);
+        const success = await fetchEvents();
+        if (success) {
+          // Get events from the store after fetching
+          const storeEvents = useCalendarStore.getState().events;
+          setEvents(storeEvents);
+        }
       } catch (error) {
         console.error("Error loading calendar events:", error);
         toast.error("Failed to load calendar events");
