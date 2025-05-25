@@ -1,171 +1,208 @@
 
-import React from "react";
-import { useAuth } from "@/contexts/AuthContext";
-import { Spinner } from "@/components/ui/spinner";
+import React, { useState } from "react";
 import { PageHeader } from "@/components/ui/page-header";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Link } from "react-router-dom";
-import { 
-  Users, 
-  Calendar, 
-  DollarSign, 
-  Settings, 
-  BarChart3, 
-  FileMusic,
-  Shield,
-  TrendingUp
-} from "lucide-react";
+import { useAuth } from "@/contexts/AuthContext";
+import { Sparkles, Users, Music, Calendar, DollarSign, Settings, BarChart } from "lucide-react";
+import { Link, useNavigate } from "react-router-dom";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { QuickActions } from "@/components/admin/QuickActions";
+import ErrorBoundary from "@/components/ErrorBoundary";
 
 const AdminDashboardPage = () => {
-  const { isAuthenticated, isAdmin, isLoading, profile } = useAuth();
+  const { profile } = useAuth();
+  const navigate = useNavigate();
+  const [activeTab, setActiveTab] = useState("overview");
   
-  // Show loading while checking auth
-  if (isLoading) {
-    return (
-      <div className="flex items-center justify-center min-h-[60vh]">
-        <Spinner size="lg" />
-      </div>
-    );
-  }
-  
-  // Check admin access
-  const hasAdminAccess = isAdmin && isAdmin();
-  
-  if (!isAuthenticated || !hasAdminAccess) {
-    return (
-      <div className="flex items-center justify-center min-h-[60vh]">
-        <Card className="w-full max-w-md">
-          <CardContent className="p-6 text-center">
-            <Shield className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
-            <h2 className="text-lg font-semibold mb-2">Access Denied</h2>
-            <p className="text-muted-foreground">You don't have permission to access this area.</p>
-          </CardContent>
-        </Card>
-      </div>
-    );
-  }
-
   const adminModules = [
     {
       title: "Member Management",
-      description: "Manage member accounts and permissions",
       icon: <Users className="h-6 w-6" />,
-      link: "/dashboard/admin/members",
-      color: "bg-blue-500"
+      description: "Manage member accounts and permissions",
+      link: "/admin/members",
+      color: "from-blue-500 to-blue-700"
     },
     {
-      title: "Financial Records",
-      description: "Track dues and manage finances",
-      icon: <DollarSign className="h-6 w-6" />,
-      link: "/dashboard/finances",
-      color: "bg-green-500"
+      title: "Sheet Music Library",
+      icon: <Music className="h-6 w-6" />,
+      description: "Add, remove, and organize music",
+      link: "/admin/sheet-music",
+      color: "from-purple-500 to-purple-700"
     },
     {
       title: "Calendar Management",
-      description: "Manage events and rehearsals",
       icon: <Calendar className="h-6 w-6" />,
-      link: "/dashboard/calendar",
-      color: "bg-purple-500"
+      description: "Schedule events and rehearsals",
+      link: "/admin/calendar",
+      color: "from-green-500 to-green-700"
+    },
+    {
+      title: "Financial Records",
+      icon: <DollarSign className="h-6 w-6" />,
+      description: "Track dues and manage finances",
+      link: "/admin/finances",
+      color: "from-yellow-500 to-yellow-700"
+    },
+    {
+      title: "Analytics",
+      icon: <BarChart className="h-6 w-6" />,
+      description: "View reports and statistics",
+      link: "/admin/analytics",
+      color: "from-pink-500 to-pink-700"
     },
     {
       title: "Settings",
-      description: "Configure system settings",
       icon: <Settings className="h-6 w-6" />,
-      link: "/dashboard/settings",
-      color: "bg-gray-500"
+      description: "Configure system settings",
+      link: "/admin/settings",
+      color: "from-gray-500 to-gray-700"
     }
   ];
 
-  const quickStats = [
-    { label: "Total Members", value: "40", icon: <Users className="h-4 w-4" /> },
-    { label: "Active Events", value: "12", icon: <Calendar className="h-4 w-4" /> },
-    { label: "Dues Collected", value: "85%", icon: <TrendingUp className="h-4 w-4" /> },
-    { label: "Sheet Music", value: "156", icon: <FileMusic className="h-4 w-4" /> }
-  ];
-  
   return (
-    <div className="space-y-6">
-      <PageHeader
-        title="Admin Dashboard"
-        description={`Welcome, ${profile?.first_name || 'Administrator'} - Administrative controls and overview`}
-        icon={<Shield className="h-6 w-6" />}
-      />
-
-      {/* Quick Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        {quickStats.map((stat, index) => (
-          <Card key={index}>
-            <CardContent className="p-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm text-muted-foreground">{stat.label}</p>
-                  <p className="text-2xl font-bold">{stat.value}</p>
-                </div>
-                <div className="text-glee-spelman">
-                  {stat.icon}
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
-      
-      {/* Admin Modules */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {adminModules.map((module, index) => (
-          <Card key={index} className="hover:shadow-lg transition-shadow">
-            <CardHeader className="pb-4">
-              <div className="flex items-center space-x-3">
-                <div className={`p-2 rounded-md ${module.color} text-white`}>
-                  {module.icon}
-                </div>
-                <div>
-                  <CardTitle className="text-lg">{module.title}</CardTitle>
-                  <p className="text-sm text-muted-foreground">{module.description}</p>
-                </div>
-              </div>
-            </CardHeader>
-            <CardContent className="pt-0">
-              <Button asChild className="w-full">
-                <Link to={module.link}>
-                  Access {module.title}
-                </Link>
-              </Button>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
-
-      {/* Quick Actions */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Quick Actions</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <Button variant="outline" asChild>
-              <Link to="/admin">
-                <BarChart3 className="h-4 w-4 mr-2" />
-                Full Admin Panel
-              </Link>
-            </Button>
-            <Button variant="outline" asChild>
-              <Link to="/dashboard/announcements">
-                <FileMusic className="h-4 w-4 mr-2" />
-                Manage Announcements
-              </Link>
-            </Button>
-            <Button variant="outline" asChild>
-              <Link to="/dashboard/sheet-music">
-                <FileMusic className="h-4 w-4 mr-2" />
-                Sheet Music Library
-              </Link>
-            </Button>
+    <ErrorBoundary>
+      <div className="space-y-6">
+        <div className="flex justify-between items-center">
+          <PageHeader
+            title="Admin Dashboard"
+            description={`Welcome, ${profile?.first_name || 'Administrator'} - Full administrative access`}
+          />
+          <div className="hidden md:flex items-center bg-amber-100 text-amber-800 px-4 py-2 rounded-md">
+            <Sparkles className="h-5 w-5 mr-2" />
+            <span className="text-sm font-medium">Admin Mode</span>
           </div>
-        </CardContent>
-      </Card>
-    </div>
+        </div>
+
+        <Tabs defaultValue={activeTab} onValueChange={setActiveTab} className="w-full">
+          <TabsList className="grid w-full grid-cols-4">
+            <TabsTrigger value="overview">Overview</TabsTrigger>
+            <TabsTrigger value="management">Management</TabsTrigger>
+            <TabsTrigger value="analytics">Analytics</TabsTrigger>
+            <TabsTrigger value="settings">Settings</TabsTrigger>
+          </TabsList>
+          
+          <TabsContent value="overview" className="space-y-6">
+            <QuickActions />
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Recent Activity</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <ul className="space-y-2">
+                    <li className="py-2 border-b">
+                      <div className="font-medium">New member registered</div>
+                      <div className="text-sm text-muted-foreground">May 13, 2025 • 10:45 AM</div>
+                    </li>
+                    <li className="py-2 border-b">
+                      <div className="font-medium">Sheet music uploaded</div>
+                      <div className="text-sm text-muted-foreground">May 12, 2025 • 3:22 PM</div>
+                    </li>
+                    <li className="py-2 border-b">
+                      <div className="font-medium">Event schedule updated</div>
+                      <div className="text-sm text-muted-foreground">May 11, 2025 • 1:15 PM</div>
+                    </li>
+                    <li className="py-2">
+                      <div className="font-medium">Dues payment received</div>
+                      <div className="text-sm text-muted-foreground">May 10, 2025 • 9:30 AM</div>
+                    </li>
+                  </ul>
+                </CardContent>
+              </Card>
+              
+              <Card>
+                <CardHeader>
+                  <CardTitle>System Stats</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    <div className="flex justify-between">
+                      <span>Total Members</span>
+                      <span className="font-semibold">42</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span>Active Events</span>
+                      <span className="font-semibold">8</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span>Sheet Music Files</span>
+                      <span className="font-semibold">156</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span>Storage Used</span>
+                      <span className="font-semibold">2.4 GB</span>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          </TabsContent>
+          
+          <TabsContent value="management" className="space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {adminModules.slice(0, 3).map((module, index) => (
+                <Link key={index} to={module.link} className="no-underline">
+                  <Card className="h-full hover:shadow-lg transition-shadow cursor-pointer">
+                    <CardHeader className={`bg-gradient-to-r ${module.color} text-white rounded-t-lg`}>
+                      <CardTitle className="flex items-center">
+                        <div className="bg-white/20 p-2 rounded-md mr-3">
+                          {module.icon}
+                        </div>
+                        {module.title}
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="pt-4">
+                      <p className="text-muted-foreground">{module.description}</p>
+                    </CardContent>
+                  </Card>
+                </Link>
+              ))}
+            </div>
+          </TabsContent>
+          
+          <TabsContent value="analytics" className="space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              <Link to="/admin/analytics" className="no-underline">
+                <Card className="h-full hover:shadow-lg transition-shadow cursor-pointer">
+                  <CardHeader className="bg-gradient-to-r from-pink-500 to-pink-700 text-white rounded-t-lg">
+                    <CardTitle className="flex items-center">
+                      <div className="bg-white/20 p-2 rounded-md mr-3">
+                        <BarChart className="h-6 w-6" />
+                      </div>
+                      Analytics
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="pt-4">
+                    <p className="text-muted-foreground">View reports and statistics</p>
+                  </CardContent>
+                </Card>
+              </Link>
+            </div>
+          </TabsContent>
+          
+          <TabsContent value="settings" className="space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              <Link to="/admin/settings" className="no-underline">
+                <Card className="h-full hover:shadow-lg transition-shadow cursor-pointer">
+                  <CardHeader className="bg-gradient-to-r from-gray-500 to-gray-700 text-white rounded-t-lg">
+                    <CardTitle className="flex items-center">
+                      <div className="bg-white/20 p-2 rounded-md mr-3">
+                        <Settings className="h-6 w-6" />
+                      </div>
+                      Settings
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="pt-4">
+                    <p className="text-muted-foreground">Configure system settings</p>
+                  </CardContent>
+                </Card>
+              </Link>
+            </div>
+          </TabsContent>
+        </Tabs>
+      </div>
+    </ErrorBoundary>
   );
 };
 
