@@ -12,7 +12,6 @@ import {
   Bell,
   Archive,
   ClipboardCheck,
-  Users,
   FileAudio,
   Settings,
   Mic,
@@ -30,9 +29,6 @@ export function SidebarNavItems() {
 
   // Only show admin items for admin users
   const showAdminItems = userRole === 'admin';
-  
-  // Check if we're on any members-related page
-  const isOnMembersPage = location.pathname.includes('/members');
 
   return (
     <>
