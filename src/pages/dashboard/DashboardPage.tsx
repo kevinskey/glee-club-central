@@ -44,28 +44,6 @@ export interface Event {
   location: string;
 }
 
-// Safe Link component that handles router context errors
-const SafeLink = ({ to, children, className, ...props }: any) => {
-  try {
-    return (
-      <Link to={to} className={className} {...props}>
-        {children}
-      </Link>
-    );
-  } catch (error) {
-    console.error('Router context error, falling back to button:', error);
-    return (
-      <button 
-        className={className} 
-        onClick={() => window.location.href = to}
-        {...props}
-      >
-        {children}
-      </button>
-    );
-  }
-};
-
 const DashboardPageContent = () => {
   const { profile } = useAuth();
   const navigate = useNavigate();
@@ -145,7 +123,7 @@ const DashboardPageContent = () => {
               className="bg-white hover:bg-white/90 text-glee-spelman"
               asChild
             >
-              <SafeLink to="/dashboard/profile">View Profile <ChevronRight className="ml-2 h-4 w-4" /></SafeLink>
+              <Link to="/dashboard/profile">View Profile <ChevronRight className="ml-2 h-4 w-4" /></Link>
             </Button>
             
             <Button 
@@ -154,9 +132,9 @@ const DashboardPageContent = () => {
               className="bg-white/20 text-white hover:bg-white/30 border-white/40"
               asChild
             >
-              <SafeLink to="/dashboard/member">
+              <Link to="/dashboard/member">
                 Member Dashboard <ChevronRight className="ml-2 h-4 w-4" />
-              </SafeLink>
+              </Link>
             </Button>
           </div>
         </div>
@@ -177,15 +155,15 @@ const DashboardPageContent = () => {
             </div>
             <div className="flex flex-col sm:flex-row gap-3">
               <Button asChild className="bg-glee-spelman hover:bg-glee-spelman/90">
-                <SafeLink to="/dashboard/member">
+                <Link to="/dashboard/member">
                   Member Dashboard
-                </SafeLink>
+                </Link>
               </Button>
               <Button asChild variant="outline">
-                <SafeLink to="/dashboard/recording-studio">
+                <Link to="/dashboard/recording-studio">
                   <Mic className="h-4 w-4 mr-2" />
                   Recording Studio
-                </SafeLink>
+                </Link>
               </Button>
             </div>
           </div>
@@ -235,7 +213,7 @@ const DashboardPageContent = () => {
                 className="text-sm text-glee-spelman hover:underline p-0"
                 asChild
               >
-                <SafeLink to="/dashboard/calendar">View Calendar</SafeLink>
+                <Link to="/dashboard/calendar">View Calendar</Link>
               </Button>
             </CardHeader>
             <CardContent>
@@ -267,10 +245,10 @@ const DashboardPageContent = () => {
                 <div className="text-center py-4">
                   <p className="text-muted-foreground mb-3">No upcoming events scheduled.</p>
                   <Button variant="outline" size="sm" asChild>
-                    <SafeLink to="/dashboard/calendar">
+                    <Link to="/dashboard/calendar">
                       <CalendarDays className="h-4 w-4 mr-2" />
                       View Calendar
-                    </SafeLink>
+                    </Link>
                   </Button>
                 </div>
               )}
@@ -316,7 +294,7 @@ const DashboardPageContent = () => {
                   className="flex items-center justify-center w-full text-sm text-glee-spelman hover:underline"
                   asChild
                 >
-                  <SafeLink to="/dashboard/sheet-music">View all resources <ArrowRight className="ml-1 h-3 w-3" /></SafeLink>
+                  <Link to="/dashboard/sheet-music">View all resources <ArrowRight className="ml-1 h-3 w-3" /></Link>
                 </Button>
               </div>
             </CardContent>

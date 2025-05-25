@@ -30,7 +30,6 @@ export const useDashboardData = () => {
       // Load events
       await fetchEvents();
       
-      // Set the events from the store after fetch completes
       setData({
         events,
         isLoading: false,
@@ -44,14 +43,7 @@ export const useDashboardData = () => {
         error: 'Failed to load dashboard data'
       }));
     }
-  }, [authLoading, permissionsLoading, fetchEvents]);
-
-  // Separate effect for updating events when they change in the store
-  useEffect(() => {
-    if (!data.isLoading) {
-      setData(prev => ({ ...prev, events }));
-    }
-  }, [events, data.isLoading]);
+  }, [authLoading, permissionsLoading, fetchEvents, events]);
 
   useEffect(() => {
     if (!authLoading && !permissionsLoading && user) {
