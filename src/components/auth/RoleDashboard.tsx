@@ -12,10 +12,11 @@ const RoleDashboard = () => {
   // Get user role from profile
   const userRole = profile?.role;
   const userType = getUserType();
+  const isAdmin = profile?.is_super_admin;
   
   useEffect(() => {
-    console.log("RoleDashboard - redirecting based on:", { userRole, userType });
-  }, [userRole, userType]);
+    console.log("RoleDashboard - redirecting based on:", { userRole, userType, isAdmin });
+  }, [userRole, userType, isAdmin]);
 
   if (isLoading) {
     return (
@@ -25,8 +26,8 @@ const RoleDashboard = () => {
     );
   }
 
-  // Redirect based on role - members go to their primary dashboard
-  if (userRole === 'admin' || profile?.is_super_admin) {
+  // Redirect based on role - prioritize admin status first
+  if (isAdmin || userRole === 'admin') {
     return <Navigate to="/dashboard" replace />;
   } else if (userRole === 'member' || userType === 'member') {
     return <Navigate to="/dashboard/member" replace />;

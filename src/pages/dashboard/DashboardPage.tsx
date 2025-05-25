@@ -1,4 +1,3 @@
-
 import React, { useMemo } from "react";
 import { Navigate } from "react-router-dom";
 import { PageHeader } from "@/components/ui/page-header";
@@ -74,17 +73,26 @@ const DashboardPageContent = React.memo(() => {
   const { isAdminRole, isSuperAdmin } = usePermissions();
   const { isAnyLoading, isReady: coordinatorReady } = useLoadingCoordinator();
   
-  // Redirect non-admin users to their appropriate dashboard
+  // Check if user is admin
   const userRole = profile?.role;
   const isAdmin = profile?.is_super_admin || isAdminRole || isSuperAdmin;
   
-  // Redirect members to their primary dashboard
+  // IMMEDIATELY redirect non-admin users to their appropriate dashboard
   if (!authLoading && profile && !isAdmin) {
+    console.log('Non-admin user accessing admin dashboard, redirecting...', { userRole, isAdmin });
     if (userRole === 'member') {
       return <Navigate to="/dashboard/member" replace />;
     } else if (userRole === 'fan') {
       return <Navigate to="/dashboard/fan" replace />;
+    } else {
+      // Default to member dashboard for any authenticated non-admin user
+      return <Navigate to="/dashboard/member" replace />;
     }
+  }
+  
+  // Only show admin dashboard if user is confirmed admin
+  if (!authLoading && (!profile || !isAdmin)) {
+    return <Navigate to="/dashboard/member" replace />;
   }
   
   // Memoize expensive computations
@@ -110,13 +118,14 @@ const DashboardPageContent = React.memo(() => {
     navigate("/dashboard/admin");
   }, [navigate]);
   
-  console.log('Dashboard render state:', { 
+  console.log('Admin Dashboard render state:', { 
     authLoading, 
     isReady, 
     coordinatorReady, 
     isAnyLoading: isAnyLoading(),
     eventsCount: events?.length || 0,
-    shouldShowLoading
+    shouldShowLoading,
+    isAdmin
   });
   
   // Show loading state with stable skeleton
