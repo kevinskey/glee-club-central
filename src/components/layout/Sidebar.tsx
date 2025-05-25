@@ -1,4 +1,3 @@
-
 import React from "react";
 import { Link, useLocation } from "react-router-dom";
 import { cn } from "@/lib/utils";
@@ -28,22 +27,15 @@ export function Sidebar({ className }: SidebarProps) {
   const { profile } = useAuth();
   const { isAdminRole, isSuperAdmin } = usePermissions();
   
-  const menuItems = [
-    {
-      title: "Dashboard",
-      href: "/dashboard",
-      icon: Home,
-      exact: true
-    },
+  // Check if user is admin
+  const isAdmin = profile?.is_super_admin || isAdminRole || isSuperAdmin;
+  
+  // Base menu items that all users can see
+  const baseMenuItems = [
     {
       title: "Calendar",
       href: "/dashboard/calendar",
       icon: Calendar
-    },
-    {
-      title: "Member Dashboard",
-      href: "/dashboard/member",
-      icon: User
     },
     {
       title: "Sheet Music",
@@ -82,6 +74,23 @@ export function Sidebar({ className }: SidebarProps) {
     }
   ];
 
+  // Admin-only menu items
+  const adminMenuItems = [
+    {
+      title: "Members",
+      href: "/dashboard/members",
+      icon: Users
+    },
+    {
+      title: "Admin Dashboard",
+      href: "/dashboard/admin",
+      icon: Settings
+    }
+  ];
+
+  // Combine menu items based on role
+  const menuItems = isAdmin ? [...baseMenuItems, ...adminMenuItems] : baseMenuItems;
+
   const isActiveRoute = (href: string, exact?: boolean) => {
     if (exact) {
       return location.pathname === href;
@@ -101,13 +110,29 @@ export function Sidebar({ className }: SidebarProps) {
           </h3>
         </div>
         
+        {/* Dashboard link - role-based */}
+        <Button
+          variant={isActiveRoute(isAdmin ? "/dashboard" : "/dashboard/member", true) ? "secondary" : "ghost"}
+          className={cn(
+            "w-full justify-start",
+            isActiveRoute(isAdmin ? "/dashboard" : "/dashboard/member", true) && "bg-glee-spelman/10 text-glee-spelman"
+          )}
+          asChild
+        >
+          <Link to={isAdmin ? "/dashboard" : "/dashboard/member"}>
+            <Home className="mr-2 h-4 w-4" />
+            Dashboard
+          </Link>
+        </Button>
+        
+        {/* Other menu items */}
         {menuItems.map((item) => (
           <Button
             key={item.href}
-            variant={isActiveRoute(item.href, item.exact) ? "secondary" : "ghost"}
+            variant={isActiveRoute(item.href) ? "secondary" : "ghost"}
             className={cn(
               "w-full justify-start",
-              isActiveRoute(item.href, item.exact) && "bg-glee-spelman/10 text-glee-spelman"
+              isActiveRoute(item.href) && "bg-glee-spelman/10 text-glee-spelman"
             )}
             asChild
           >
@@ -117,29 +142,6 @@ export function Sidebar({ className }: SidebarProps) {
             </Link>
           </Button>
         ))}
-        
-        {(isAdminRole || isSuperAdmin) && (
-          <>
-            <div className="mb-4 mt-6">
-              <h3 className="mb-2 px-2 text-sm font-semibold text-muted-foreground">
-                Admin
-              </h3>
-            </div>
-            <Button
-              variant={isActiveRoute("/dashboard/admin") ? "secondary" : "ghost"}
-              className={cn(
-                "w-full justify-start",
-                isActiveRoute("/dashboard/admin") && "bg-glee-spelman/10 text-glee-spelman"
-              )}
-              asChild
-            >
-              <Link to="/dashboard/admin">
-                <Settings className="mr-2 h-4 w-4" />
-                Admin Dashboard
-              </Link>
-            </Button>
-          </>
-        )}
       </nav>
     </div>
   );
