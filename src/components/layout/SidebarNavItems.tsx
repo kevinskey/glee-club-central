@@ -30,6 +30,9 @@ export function SidebarNavItems() {
 
   // Only show admin items for admin users
   const showAdminItems = userRole === 'admin';
+  
+  // Check if we're on any members-related page
+  const isOnMembersPage = location.pathname.includes('/members');
 
   return (
     <>
@@ -88,7 +91,8 @@ export function SidebarNavItems() {
           Attendance
         </a>
         
-        {showAdminItems && (
+        {/* Only show Members link for admin users and when NOT on a members page */}
+        {showAdminItems && !isOnMembersPage && (
           <a href="/dashboard/members" className={`flex items-center gap-3 rounded-md px-3 py-2 text-sm transition-colors ${isActive('/dashboard/members') ? 'bg-accent text-accent-foreground' : 'hover:bg-accent hover:text-accent-foreground'}`}>
             <Users className="h-4 w-4" />
             Members
