@@ -2,8 +2,7 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import {
   User,
   Music,
@@ -65,16 +64,19 @@ export function DashboardQuickAccess() {
       <CardContent>
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
           {currentLinks.map((link, index) => (
-            <Link key={index} to={link.path} className="no-underline">
-              <Button 
-                variant="outline" 
-                className="w-full h-auto flex-col py-4 gap-2 hover:border-glee-spelman/20 hover:bg-glee-spelman/5"
-              >
-                <div className={`${link.color} text-white p-2 rounded-full`}>
+            <Link 
+              key={index} 
+              to={link.path} 
+              className="group no-underline block"
+            >
+              <div className="w-full h-auto flex flex-col items-center justify-center py-4 gap-2 border rounded-md transition-all duration-200 hover:border-glee-spelman/20 hover:bg-glee-spelman/5 hover:shadow-md">
+                <div className={`${link.color} text-white p-2 rounded-full group-hover:scale-110 transition-transform duration-200`}>
                   {link.icon}
                 </div>
-                <span className="text-xs font-medium">{link.title}</span>
-              </Button>
+                <span className="text-xs font-medium text-center group-hover:text-glee-spelman transition-colors duration-200">
+                  {link.title}
+                </span>
+              </div>
             </Link>
           ))}
         </div>
