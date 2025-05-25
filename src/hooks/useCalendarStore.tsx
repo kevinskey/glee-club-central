@@ -2,26 +2,53 @@ import { create } from 'zustand';
 import { CalendarEvent, EventType } from '@/types/calendar';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import { useLoadingCoordinator } from './useLoadingCoordinator';
 
 interface CalendarStore {
   events: CalendarEvent[];
   isLoading: boolean;
+  lastFetch: number | null;
+  fetchInProgress: boolean;
   fetchEvents: () => Promise<CalendarEvent[]>;
   addEvent: (event: Omit<CalendarEvent, 'id'>) => Promise<boolean>;
   updateEvent: (event: CalendarEvent) => Promise<boolean>;
   deleteEvent: (id: string) => Promise<boolean>;
 }
 
+// Debounce time in milliseconds
+const FETCH_DEBOUNCE_TIME = 500;
+const CACHE_DURATION = 30000; // 30 seconds
+
 export const useCalendarStore = create<CalendarStore>((set, get) => ({
   events: [],
   isLoading: false,
+  lastFetch: null,
+  fetchInProgress: false,
   
   fetchEvents: async (): Promise<CalendarEvent[]> => {
-    // Don't fetch if already loading
-    if (get().isLoading) return get().events;
+    const state = get();
+    const now = Date.now();
+    
+    // Return cached events if recently fetched
+    if (state.lastFetch && (now - state.lastFetch) < CACHE_DURATION && state.events.length > 0) {
+      console.log('Using cached calendar events');
+      return state.events;
+    }
+    
+    // Prevent multiple simultaneous fetches
+    if (state.fetchInProgress) {
+      console.log('Fetch already in progress, returning current events');
+      return state.events;
+    }
     
     try {
-      set({ isLoading: true });
+      set({ isLoading: true, fetchInProgress: true });
+      
+      // Set loading state in coordinator
+      useLoadingCoordinator.getState().setLoading('calendar', true);
+      
+      console.log('Fetching calendar events from database');
+      
       const { data, error } = await supabase
         .from('calendar_events')
         .select('*')
@@ -30,12 +57,13 @@ export const useCalendarStore = create<CalendarStore>((set, get) => ({
       if (error) {
         console.error('Error fetching events:', error);
         toast.error('Failed to load calendar events');
-        set({ isLoading: false });
-        return [];
+        set({ isLoading: false, fetchInProgress: false });
+        useLoadingCoordinator.getState().setLoading('calendar', false);
+        return state.events;
       }
       
       // Transform the data from DB schema to our CalendarEvent type
-      const events: CalendarEvent[] = data.map(event => ({
+      const events: CalendarEvent[] = (data || []).map(event => ({
         id: event.id,
         title: event.title,
         type: event.type as EventType,
@@ -48,13 +76,24 @@ export const useCalendarStore = create<CalendarStore>((set, get) => ({
         allDay: event.allday || false
       }));
       
-      set({ events, isLoading: false });
+      set({ 
+        events, 
+        isLoading: false, 
+        fetchInProgress: false,
+        lastFetch: now 
+      });
+      
+      // Mark calendar loading as complete
+      useLoadingCoordinator.getState().setLoading('calendar', false);
+      
+      console.log(`Loaded ${events.length} calendar events`);
       return events;
     } catch (error) {
       console.error('Error in fetchEvents:', error);
       toast.error('Failed to load calendar events');
-      set({ isLoading: false });
-      return [];
+      set({ isLoading: false, fetchInProgress: false });
+      useLoadingCoordinator.getState().setLoading('calendar', false);
+      return state.events;
     }
   },
   

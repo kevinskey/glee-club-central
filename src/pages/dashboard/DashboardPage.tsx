@@ -29,6 +29,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Button } from "@/components/ui/button";
 import { GleeTools } from "@/components/glee-tools/GleeTools";
 import { useDashboardData } from "@/hooks/useDashboardData";
+import { useLoadingCoordinator } from "@/hooks/useLoadingCoordinator";
 import { 
   DashboardWelcomeSkeleton, 
   DashboardCardSkeleton, 
@@ -49,6 +50,15 @@ const DashboardPageContent = () => {
   const navigate = useNavigate();
   const { events, isReady, error } = useDashboardData();
   const { isAdminRole, isSuperAdmin } = usePermissions();
+  const { isAnyLoading, isReady: coordinatorReady } = useLoadingCoordinator();
+  
+  console.log('Dashboard render state:', { 
+    authLoading, 
+    isReady, 
+    coordinatorReady, 
+    isAnyLoading: isAnyLoading(),
+    eventsCount: events?.length || 0 
+  });
   
   // Get current time of day for greeting - memoized to prevent re-renders
   const getTimeOfDay = useMemo(() => {
@@ -69,10 +79,13 @@ const DashboardPageContent = () => {
     navigate("/dashboard/admin");
   };
   
-  // Show loading state with skeletons while auth or data is loading
-  if (authLoading || !isReady) {
+  // Show loading state with minimum duration to prevent flashing
+  const shouldShowLoading = authLoading || !isReady || isAnyLoading();
+  
+  if (shouldShowLoading) {
+    console.log('Showing loading skeletons');
     return (
-      <div className="max-w-screen-2xl mx-auto px-4 space-y-6">
+      <div className="max-w-screen-2xl mx-auto px-4 space-y-6 dashboard-content dashboard-loading">
         <DashboardWelcomeSkeleton />
         <DashboardCardSkeleton />
         <DashboardCardSkeleton />
@@ -93,6 +106,7 @@ const DashboardPageContent = () => {
   }
 
   if (error) {
+    console.error('Dashboard error:', error);
     return (
       <div className="max-w-screen-2xl mx-auto px-4 py-8">
         <Card className="border-destructive">
@@ -106,6 +120,8 @@ const DashboardPageContent = () => {
       </div>
     );
   }
+  
+  console.log('Rendering dashboard content with', events?.length || 0, 'events');
     
   return (
     <div className="max-w-screen-2xl mx-auto px-4 space-y-6 dashboard-content dashboard-loaded">
@@ -220,7 +236,7 @@ const DashboardPageContent = () => {
               {events && events.length > 0 ? (
                 <div className="space-y-3">
                   {events.slice(0, 3).map((event, index) => (
-                    <div key={index} className="flex items-start border-b last:border-0 pb-3 last:pb-0">
+                    <div key={event.id || index} className="flex items-start border-b last:border-0 pb-3 last:pb-0">
                       <div className="bg-muted text-center p-2 rounded-md min-w-[60px]">
                         <div className="text-xs font-medium text-muted-foreground">
                           {new Date(event.start).toLocaleDateString(undefined, { month: 'short' })}

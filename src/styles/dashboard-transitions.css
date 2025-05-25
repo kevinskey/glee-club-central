@@ -1,8 +1,9 @@
 
-/* Dashboard smooth transitions */
+/* Dashboard smooth transitions with loading coordination */
 .dashboard-content {
-  transition: opacity 0.3s ease-in-out, transform 0.3s ease-in-out;
+  transition: opacity 0.4s ease-in-out, transform 0.3s ease-in-out;
   min-height: calc(100vh - 200px);
+  will-change: opacity, transform;
 }
 
 .dashboard-loading {
@@ -15,7 +16,7 @@
   transform: translateY(0);
 }
 
-/* Skeleton animation improvements */
+/* Enhanced skeleton animation improvements */
 @keyframes shimmer {
   0% {
     background-position: -200px 0;
@@ -28,10 +29,35 @@
 .skeleton-shimmer {
   background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
   background-size: 200px 100%;
-  animation: shimmer 1.5s infinite;
+  animation: shimmer 2s infinite;
 }
 
-/* Card content transitions */
+/* Loading coordination styles */
+.loading-coordinator {
+  position: relative;
+  min-height: 100vh;
+}
+
+.loading-coordinator::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(255, 255, 255, 0.9);
+  z-index: 10;
+  opacity: 0;
+  transition: opacity 0.3s ease-in-out;
+  pointer-events: none;
+}
+
+.loading-coordinator.loading::before {
+  opacity: 1;
+  pointer-events: all;
+}
+
+/* Card content transitions with staggered entrance */
 .card-content-enter {
   opacity: 0;
   transform: translateY(20px);
@@ -40,7 +66,24 @@
 .card-content-enter-active {
   opacity: 1;
   transform: translateY(0);
-  transition: opacity 0.4s ease-out, transform 0.4s ease-out;
+  transition: opacity 0.5s ease-out, transform 0.4s ease-out;
+}
+
+/* Staggered animations for dashboard cards */
+.dashboard-content .card:nth-child(1) {
+  animation-delay: 0ms;
+}
+
+.dashboard-content .card:nth-child(2) {
+  animation-delay: 100ms;
+}
+
+.dashboard-content .card:nth-child(3) {
+  animation-delay: 200ms;
+}
+
+.dashboard-content .card:nth-child(4) {
+  animation-delay: 300ms;
 }
 
 /* Prevent layout shift during loading */
@@ -54,20 +97,21 @@
   will-change: opacity, transform;
 }
 
-/* Smooth content transitions */
+/* Smooth content transitions with debouncing */
 .dashboard-content > * {
-  transition: opacity 0.2s ease-in-out;
+  transition: opacity 0.3s ease-in-out;
 }
 
-/* Loading guard to prevent flashing */
+/* Anti-flicker loading state with minimum duration */
 .dashboard-content:not(.dashboard-loaded) {
   opacity: 0;
 }
 
-/* Anti-flicker loading state */
+/* Loading guard to prevent rapid state changes */
 .dashboard-loading-guard {
   position: relative;
   min-height: 200px;
+  transition-delay: 100ms; /* Debounce rapid changes */
 }
 
 .dashboard-loading-guard::before {
@@ -80,31 +124,81 @@
   background: rgba(255, 255, 255, 0.8);
   z-index: 1;
   opacity: 0;
-  transition: opacity 0.2s ease-in-out;
+  transition: opacity 0.3s ease-in-out;
 }
 
 .dashboard-loading-guard.loading::before {
   opacity: 1;
 }
 
-/* Reduce motion for users who prefer it */
-@media (prefers-reduced-motion: reduce) {
-  .dashboard-content,
-  .dashboard-content > * {
-    transition: none;
+/* Enhanced skeleton loading timing */
+.skeleton-content {
+  animation: fadeInUp 0.6s ease-out;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
   }
-  
-  .skeleton-shimmer {
-    animation: none;
-  }
-  
-  .card-content-enter,
-  .card-content-enter-active {
-    transition: none;
+  to {
+    opacity: 1;
+    transform: translateY(0);
   }
 }
 
-/* Debounced loading states */
+/* Coordinated loading states */
+.coordinator-loading {
+  .dashboard-content {
+    opacity: 0.6;
+    pointer-events: none;
+  }
+}
+
+.coordinator-ready {
+  .dashboard-content {
+    opacity: 1;
+    pointer-events: auto;
+    transition: opacity 0.4s ease-in-out;
+  }
+}
+
+/* Reduce motion for users who prefer it */
+@media (prefers-reduced-motion: reduce) {
+  .dashboard-content,
+  .dashboard-content > *,
+  .skeleton-shimmer,
+  .card-content-enter,
+  .card-content-enter-active {
+    transition: none;
+    animation: none;
+  }
+  
+  .dashboard-content .card {
+    animation-delay: 0ms;
+  }
+}
+
+/* Debounced loading states with coordination */
 .dashboard-debounced-loading {
-  transition-delay: 150ms;
+  transition-delay: 200ms;
+}
+
+/* Loading coordination fade */
+.loading-fade-enter {
+  opacity: 0;
+}
+
+.loading-fade-enter-active {
+  opacity: 1;
+  transition: opacity 0.4s ease-in-out;
+}
+
+.loading-fade-exit {
+  opacity: 1;
+}
+
+.loading-fade-exit-active {
+  opacity: 0;
+  transition: opacity 0.3s ease-in-out;
 }

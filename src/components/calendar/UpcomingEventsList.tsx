@@ -35,7 +35,7 @@ export const UpcomingEventsList: React.FC<UpcomingEventsListProps> = ({
   
   const [events, setEvents] = useState<CalendarEvent[]>([]);
   const [loading, setLoading] = useState(true);
-  const { fetchEvents } = useCalendarStore();
+  const { fetchEvents, events: storeEvents } = useCalendarStore();
   const navigate = useNavigate();
   
   useEffect(() => {
@@ -46,9 +46,43 @@ export const UpcomingEventsList: React.FC<UpcomingEventsListProps> = ({
       return;
     }
     
+    // Use events from store if already loaded
+    if (storeEvents && storeEvents.length > 0) {
+      console.log('Using existing store events');
+      let filteredEvents = [...storeEvents];
+      
+      if (actualType !== 'all') {
+        filteredEvents = filteredEvents.filter(event => event.type === actualType);
+      }
+      
+      // Sort by date (closest first)
+      const sortedEvents = filteredEvents.sort((a, b) => {
+        const dateA = new Date(a.start).getTime();
+        const dateB = new Date(b.start).getTime();
+        return dateA - dateB;
+      });
+      
+      // Only get upcoming events
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      
+      const upcomingEvents = sortedEvents.filter(event => 
+        new Date(event.start) >= today
+      );
+      
+      // Limit to specified number
+      const limitedEvents = upcomingEvents.slice(0, actualLimit);
+      
+      setEvents(limitedEvents);
+      setLoading(false);
+      return;
+    }
+    
     const loadEvents = async () => {
       try {
         setLoading(true);
+        console.log('Fetching events for upcoming events list');
+        
         const fetchedEvents = await fetchEvents();
         
         // Filter by event type if specified
@@ -76,6 +110,7 @@ export const UpcomingEventsList: React.FC<UpcomingEventsListProps> = ({
         const limitedEvents = upcomingEvents.slice(0, actualLimit);
         
         setEvents(limitedEvents);
+        console.log(`Loaded ${limitedEvents.length} upcoming events`);
       } catch (error) {
         console.error('Error loading events:', error);
         setEvents([]);
@@ -85,7 +120,7 @@ export const UpcomingEventsList: React.FC<UpcomingEventsListProps> = ({
     };
     
     loadEvents();
-  }, [fetchEvents, actualLimit, actualType, propEvents]);
+  }, [fetchEvents, actualLimit, actualType, propEvents, storeEvents]);
   
   // Helper to format a date consistently
   const formatDate = (date: string | Date): string => {

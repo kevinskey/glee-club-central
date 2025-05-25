@@ -1,8 +1,9 @@
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useCalendarStore } from '@/hooks/useCalendarStore';
 import { usePermissions } from '@/hooks/usePermissions';
+import { useLoadingCoordinator } from '@/hooks/useLoadingCoordinator';
 
 export interface DashboardData {
   events: any[];
@@ -20,14 +21,36 @@ export const useDashboardData = () => {
   const { user, profile, isLoading: authLoading } = useAuth();
   const { events, fetchEvents, isLoading: eventsLoading } = useCalendarStore();
   const { isLoading: permissionsLoading } = usePermissions();
+  const { setLoading, isReady: coordinatorReady } = useLoadingCoordinator();
+  
+  // Memoize dependencies to prevent unnecessary re-renders
+  const isAuthReady = useMemo(() => !authLoading && !!user, [authLoading, user]);
+  const isPermissionsReady = useMemo(() => !permissionsLoading, [permissionsLoading]);
+  
+  // Update loading coordinator when auth state changes
+  useEffect(() => {
+    setLoading('auth', authLoading);
+  }, [authLoading, setLoading]);
+  
+  useEffect(() => {
+    setLoading('permissions', permissionsLoading);
+  }, [permissionsLoading, setLoading]);
+  
+  useEffect(() => {
+    setLoading('profile', !profile);
+  }, [profile, setLoading]);
 
   const loadDashboardData = useCallback(async () => {
-    if (authLoading || permissionsLoading || !user) return;
+    if (!isAuthReady || !isPermissionsReady) {
+      console.log('Dashboard data loading skipped - auth not ready');
+      return;
+    }
     
     try {
+      console.log('Loading dashboard data...');
       setData(prev => ({ ...prev, isLoading: true, error: null }));
       
-      // Get events from store - fetchEvents now returns the events
+      // Get events from store - this will use cache if available
       const calendarEvents = await fetchEvents();
       
       setData({
@@ -35,6 +58,8 @@ export const useDashboardData = () => {
         isLoading: false,
         error: null
       });
+      
+      console.log(`Dashboard data loaded with ${calendarEvents?.length || 0} events`);
     } catch (error) {
       console.error('Error loading dashboard data:', error);
       setData(prev => ({
@@ -43,27 +68,42 @@ export const useDashboardData = () => {
         error: 'Failed to load dashboard data'
       }));
     }
-  }, [authLoading, permissionsLoading, user, fetchEvents]);
+  }, [isAuthReady, isPermissionsReady, fetchEvents]);
 
-  // Update events when they change in the store
+  // Load data when auth is ready, but only once
   useEffect(() => {
-    if (events && !eventsLoading) {
+    let mounted = true;
+    
+    if (isAuthReady && isPermissionsReady && data.events.length === 0 && !data.isLoading) {
+      console.log('Triggering initial dashboard data load');
+      loadDashboardData().then(() => {
+        if (mounted) {
+          console.log('Initial dashboard data load completed');
+        }
+      });
+    }
+    
+    return () => {
+      mounted = false;
+    };
+  }, [isAuthReady, isPermissionsReady, loadDashboardData, data.events.length, data.isLoading]);
+
+  // Sync events from calendar store to local state
+  useEffect(() => {
+    if (events && events.length > 0 && !eventsLoading) {
+      console.log('Syncing events from calendar store to dashboard');
       setData(prev => ({ 
         ...prev, 
-        events: events || [],
+        events: events,
         isLoading: false 
       }));
     }
   }, [events, eventsLoading]);
 
-  // Only load data once when dependencies are ready
-  useEffect(() => {
-    if (!authLoading && !permissionsLoading && user && data.events.length === 0) {
-      loadDashboardData();
-    }
-  }, [authLoading, permissionsLoading, user, loadDashboardData, data.events.length]);
-
-  const isReady = !authLoading && !permissionsLoading && !data.isLoading && !!user;
+  const isReady = useMemo(() => 
+    isAuthReady && isPermissionsReady && !data.isLoading && coordinatorReady,
+    [isAuthReady, isPermissionsReady, data.isLoading, coordinatorReady]
+  );
 
   return {
     ...data,
