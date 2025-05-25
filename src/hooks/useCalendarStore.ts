@@ -1,12 +1,11 @@
 
 import { create } from 'zustand';
 import { CalendarEvent } from '@/types/calendar';
-import { useCalendarEvents } from './useCalendarEvents';
 
 // Interface for calendar store state
 export interface CalendarState {
   events: CalendarEvent[];
-  loading: boolean;
+  isLoading: boolean;
   fetchEvents: () => Promise<CalendarEvent[]>;
   addEvent: (event: CalendarEvent) => void;
   updateEvent: (event: CalendarEvent) => Promise<boolean>;
@@ -18,9 +17,9 @@ export interface CalendarState {
 // Create the calendar store
 export const useCalendarStore = create<CalendarState>((set, get) => ({
   events: [],
-  loading: false,
+  isLoading: false,
   fetchEvents: async () => {
-    set({ loading: true });
+    set({ isLoading: true });
     try {
       // For now, we'll use mock data
       // In a real app, this would fetch from an API or database
@@ -44,11 +43,11 @@ export const useCalendarStore = create<CalendarState>((set, get) => ({
           description: 'Annual spring concert performance'
         }
       ];
-      set({ events: mockEvents, loading: false });
+      set({ events: mockEvents, isLoading: false });
       return mockEvents;
     } catch (error) {
       console.error('Error fetching events:', error);
-      set({ loading: false });
+      set({ isLoading: false });
       return [];
     }
   },

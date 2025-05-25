@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useCalendarStore } from '@/hooks/useCalendarStore';
 import { CalendarEvent } from '@/types/calendar';
 import { DashboardEventsSkeleton } from '@/components/ui/dashboard-skeleton';
@@ -9,7 +9,12 @@ export default function CalendarPage() {
   const [currentMonth, setCurrentMonth] = useState(new Date().getMonth());
   const [currentYear, setCurrentYear] = useState(new Date().getFullYear());
   
-  const { events, isLoading } = useCalendarStore();
+  const { events, isLoading, fetchEvents } = useCalendarStore();
+  
+  // Fetch events on component mount
+  useEffect(() => {
+    fetchEvents();
+  }, [fetchEvents]);
   
   const handlePrevMonth = () => {
     if (currentMonth === 0) {
