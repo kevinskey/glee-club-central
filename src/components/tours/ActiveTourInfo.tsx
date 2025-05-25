@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -30,7 +29,7 @@ interface TourAssignment {
   roommate: {
     first_name: string;
     last_name: string;
-  };
+  } | null;
 }
 
 export const ActiveTourInfo: React.FC = () => {
@@ -74,7 +73,15 @@ export const ActiveTourInfo: React.FC = () => {
         .single();
 
       if (!assignmentError && assignmentData) {
-        setAssignment(assignmentData);
+        // Handle the case where roommate could be an array or null
+        const roommateData = Array.isArray(assignmentData.roommate) 
+          ? assignmentData.roommate[0] 
+          : assignmentData.roommate;
+        
+        setAssignment({
+          room_number: assignmentData.room_number,
+          roommate: roommateData || null
+        });
       }
     } catch (error) {
       console.error('Error loading active tour:', error);

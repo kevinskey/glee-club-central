@@ -77,14 +77,12 @@ export default function MemberDashboardPage() {
       title: "Upload Files",
       description: "Submit auditions, forms, and surveys",
       icon: <Upload className="h-4 w-4 mr-2 text-white" />,
-      link: "#uploads",
       onClick: () => setActiveTab("uploads")
     },
     {
       title: "Vote & Feedback",
       description: "Participate in polls and provide feedback",
       icon: <Vote className="h-4 w-4 mr-2 text-white" />,
-      link: "#polls",
       onClick: () => setActiveTab("polls")
     },
     {

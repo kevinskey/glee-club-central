@@ -15,6 +15,7 @@ interface UploadedFile {
   id: string;
   file_name: string;
   file_url: string;
+  file_path: string;
   upload_category: string;
   description: string;
   created_at: string;
