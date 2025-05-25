@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { PageHeader } from "@/components/ui/page-header";
 import { FileMusic, Search, Filter } from "lucide-react";
@@ -6,17 +7,43 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
+import EnhancedPDFViewer from "@/components/pdf/EnhancedPDFViewer";
 
 export default function SheetMusicPage() {
   const [searchQuery, setSearchQuery] = useState("");
+  const [selectedPDF, setSelectedPDF] = useState<any>(null);
   const navigate = useNavigate();
   
   // This would be integrated with actual sheet music data in a real implementation
   const placeholderSheetMusic = [
-    { id: "1", title: "Ave Maria", composer: "Franz Schubert", voicePart: "Soprano" },
-    { id: "2", title: "Hallelujah", composer: "Leonard Cohen", voicePart: "All Parts" },
-    { id: "3", title: "The Storm Is Passing Over", composer: "Charles A. Tindley", voicePart: "Alto" },
-    { id: "4", title: "Amazing Grace", composer: "John Newton", voicePart: "All Parts" },
+    { 
+      id: "1", 
+      title: "Ave Maria", 
+      composer: "Franz Schubert", 
+      voicePart: "Soprano",
+      file_url: "https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf"
+    },
+    { 
+      id: "2", 
+      title: "Hallelujah", 
+      composer: "Leonard Cohen", 
+      voicePart: "All Parts",
+      file_url: "https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf"
+    },
+    { 
+      id: "3", 
+      title: "The Storm Is Passing Over", 
+      composer: "Charles A. Tindley", 
+      voicePart: "Alto",
+      file_url: "https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf"
+    },
+    { 
+      id: "4", 
+      title: "Amazing Grace", 
+      composer: "John Newton", 
+      voicePart: "All Parts",
+      file_url: "https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf"
+    },
   ];
   
   const filteredMusic = searchQuery 
@@ -25,6 +52,30 @@ export default function SheetMusicPage() {
                item.composer.toLowerCase().includes(searchQuery.toLowerCase())
       )
     : placeholderSheetMusic;
+
+  const handleViewPDF = (item: any) => {
+    setSelectedPDF(item);
+  };
+
+  const handleBackToList = () => {
+    setSelectedPDF(null);
+  };
+
+  // If a PDF is selected, show the enhanced viewer
+  if (selectedPDF) {
+    return (
+      <div className="h-screen flex flex-col">
+        <MusicAppHeader currentSection="sheet-music" />
+        <div className="flex-1">
+          <EnhancedPDFViewer 
+            url={selectedPDF.file_url} 
+            title={`${selectedPDF.title} - ${selectedPDF.composer}`}
+            onBack={handleBackToList}
+          />
+        </div>
+      </div>
+    );
+  }
   
   return (
     <>
@@ -32,7 +83,7 @@ export default function SheetMusicPage() {
       <div className="container py-6">
         <PageHeader
           title="Sheet Music Library"
-          description="Access and view your sheet music collection"
+          description="Access and view your sheet music collection with enhanced PDF viewing"
           icon={<FileMusic className="h-6 w-6" />}
         />
         
@@ -61,7 +112,7 @@ export default function SheetMusicPage() {
             <Card 
               key={item.id} 
               className="overflow-hidden transition-all hover:shadow-md cursor-pointer"
-              onClick={() => navigate(`/sheet-music/${item.id}`)}
+              onClick={() => handleViewPDF(item)}
             >
               <div className="bg-muted h-40 flex items-center justify-center">
                 <FileMusic className="h-12 w-12 text-muted-foreground" />
@@ -73,7 +124,7 @@ export default function SheetMusicPage() {
                   <span className="text-xs bg-primary/10 text-primary px-2 py-1 rounded-full">
                     {item.voicePart}
                   </span>
-                  <Button variant="ghost" size="sm">View</Button>
+                  <Button variant="ghost" size="sm">View PDF</Button>
                 </div>
               </CardContent>
             </Card>

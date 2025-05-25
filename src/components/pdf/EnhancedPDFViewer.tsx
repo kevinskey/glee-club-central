@@ -1,25 +1,22 @@
 
-import React, { useState, useRef, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState, useCallback } from 'react';
+import { Document, Page, pdfjs } from 'react-pdf';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent } from '@/components/ui/card';
 import { 
   ZoomIn, 
   ZoomOut, 
-  RotateCw, 
-  BookmarkCheck,
-  ArrowLeft, 
-  ArrowRight, 
-  Layers,
-  FileText
+  ChevronLeft, 
+  ChevronRight, 
+  Download,
+  RotateCw,
+  Maximize,
+  ArrowLeft
 } from 'lucide-react';
-import { Button } from "@/components/ui/button";
-import { Slider } from "@/components/ui/slider";
-import { toast } from "sonner";
-import { 
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
+import { cn } from '@/lib/utils';
+
+// Set up PDF.js worker
+pdfjs.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.min.js`;
 
 interface EnhancedPDFViewerProps {
   url: string;
@@ -27,227 +24,156 @@ interface EnhancedPDFViewerProps {
   onBack?: () => void;
 }
 
-const EnhancedPDFViewer: React.FC<EnhancedPDFViewerProps> = ({ 
-  url, 
-  title,
-  onBack 
-}) => {
-  const [scale, setScale] = useState(1);
-  const [rotation, setRotation] = useState(0);
-  const [currentPage, setCurrentPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(1);
-  const [isBookmarked, setIsBookmarked] = useState(false);
-  const iframeRef = useRef<HTMLIFrameElement>(null);
-  const navigate = useNavigate();
-  
-  // Function to zoom in
-  const zoomIn = () => {
-    setScale(prevScale => Math.min(prevScale + 0.25, 3));
-  };
-  
-  // Function to zoom out
-  const zoomOut = () => {
-    setScale(prevScale => Math.max(prevScale - 0.25, 0.5));
-  };
-  
-  // Function to rotate
-  const rotate = () => {
-    setRotation(prev => (prev + 90) % 360);
-  };
-  
-  // Function to toggle bookmark
-  const toggleBookmark = () => {
-    setIsBookmarked(prev => !prev);
-    
-    // Save bookmark to local storage or database
-    if (!isBookmarked) {
-      toast.success("Page bookmarked", {
-        description: `Bookmarked page ${currentPage} in ${title}`
-      });
-    } else {
-      toast.info("Bookmark removed");
-    }
-  };
-  
-  // Function to go to previous page
-  const prevPage = () => {
-    if (currentPage > 1) {
-      setCurrentPage(currentPage - 1);
-    }
-  };
-  
-  // Function to go to next page
-  const nextPage = () => {
-    if (currentPage < totalPages) {
-      setCurrentPage(currentPage + 1);
-    }
-  };
-  
-  // Handle back navigation
-  const handleBack = () => {
-    if (onBack) {
-      onBack();
-    } else {
-      navigate(-1);
-    }
-  };
-  
-  // Set up keyboard shortcuts
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'ArrowRight') {
-        nextPage();
-      } else if (e.key === 'ArrowLeft') {
-        prevPage();
-      } else if (e.key === '+') {
-        zoomIn();
-      } else if (e.key === '-') {
-        zoomOut();
-      } else if (e.key === 'r') {
-        rotate();
-      } else if (e.key === 'b') {
-        toggleBookmark();
-      }
-    };
-    
-    window.addEventListener('keydown', handleKeyDown);
-    
-    return () => {
-      window.removeEventListener('keydown', handleKeyDown);
-    };
-  }, [currentPage, totalPages]);
+const EnhancedPDFViewer: React.FC<EnhancedPDFViewerProps> = ({ url, title, onBack }) => {
+  const [numPages, setNumPages] = useState<number>(0);
+  const [pageNumber, setPageNumber] = useState<number>(1);
+  const [scale, setScale] = useState<number>(1.0);
+  const [rotation, setRotation] = useState<number>(0);
+  const [isFullscreen, setIsFullscreen] = useState<boolean>(false);
 
-  // Effect to update the iframe with scale and rotation
-  useEffect(() => {
-    const iframe = iframeRef.current;
-    if (iframe && iframe.contentDocument) {
-      const pdfViewer = iframe.contentDocument.querySelector('iframe');
-      if (pdfViewer) {
-        pdfViewer.style.transform = `scale(${scale}) rotate(${rotation}deg)`;
-        pdfViewer.style.transformOrigin = 'center center';
-      }
-    }
-  }, [scale, rotation]);
+  const onDocumentLoadSuccess = useCallback(({ numPages }: { numPages: number }) => {
+    setNumPages(numPages);
+  }, []);
+
+  const goToPrevPage = () => setPageNumber(page => Math.max(1, page - 1));
+  const goToNextPage = () => setPageNumber(page => Math.min(numPages, page + 1));
+  const zoomIn = () => setScale(scale => Math.min(3.0, scale + 0.2));
+  const zoomOut = () => setScale(scale => Math.max(0.5, scale - 0.2));
+  const rotate = () => setRotation(rotation => (rotation + 90) % 360);
   
+  const handleDownload = () => {
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `${title}.pdf`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
+  const toggleFullscreen = () => {
+    if (!document.fullscreenElement) {
+      document.documentElement.requestFullscreen();
+      setIsFullscreen(true);
+    } else {
+      document.exitFullscreen();
+      setIsFullscreen(false);
+    }
+  };
+
   return (
-    <div className="flex flex-col h-full">
-      <div className="flex justify-between items-center bg-muted p-2 rounded-md mb-2">
-        <div className="flex items-center">
-          <Button variant="outline" onClick={handleBack} size="sm" className="mr-2">
-            <ArrowLeft className="h-4 w-4 mr-1" />
-            Back
+    <div className={cn(
+      "flex flex-col h-full",
+      isFullscreen ? "fixed inset-0 z-50 bg-white" : ""
+    )}>
+      {/* Header Controls */}
+      <div className="flex items-center justify-between p-4 border-b bg-background">
+        <div className="flex items-center gap-4">
+          {onBack && (
+            <Button variant="outline" size="sm" onClick={onBack}>
+              <ArrowLeft className="h-4 w-4 mr-2" />
+              Back
+            </Button>
+          )}
+          <h3 className="font-semibold text-lg">{title}</h3>
+        </div>
+        
+        <div className="flex items-center gap-2">
+          <Button variant="outline" size="sm" onClick={handleDownload}>
+            <Download className="h-4 w-4 mr-2" />
+            Download
           </Button>
-          <h2 className="text-lg font-medium truncate max-w-md">{title}</h2>
-        </div>
-        
-        <div className="flex items-center gap-1">
-          <TooltipProvider>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button variant="ghost" size="sm" onClick={prevPage} disabled={currentPage <= 1}>
-                  <ArrowLeft className="h-4 w-4" />
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent>Previous Page</TooltipContent>
-            </Tooltip>
-            
-            <div className="text-sm mx-2">
-              Page {currentPage} of {totalPages}
-            </div>
-            
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button variant="ghost" size="sm" onClick={nextPage} disabled={currentPage >= totalPages}>
-                  <ArrowRight className="h-4 w-4" />
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent>Next Page</TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
-        </div>
-        
-        <div className="flex items-center gap-1">
-          <TooltipProvider>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button variant="ghost" size="sm" onClick={zoomOut}>
-                  <ZoomOut className="h-4 w-4" />
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent>Zoom Out</TooltipContent>
-            </Tooltip>
-            
-            <div className="w-24 mx-2">
-              <Slider 
-                value={[scale * 100]} 
-                min={50} 
-                max={300} 
-                step={25} 
-                onValueChange={(value) => setScale(value[0] / 100)} 
-              />
-            </div>
-            
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button variant="ghost" size="sm" onClick={zoomIn}>
-                  <ZoomIn className="h-4 w-4" />
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent>Zoom In</TooltipContent>
-            </Tooltip>
-            
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button variant="ghost" size="sm" onClick={rotate}>
-                  <RotateCw className="h-4 w-4" />
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent>Rotate</TooltipContent>
-            </Tooltip>
-            
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button 
-                  variant={isBookmarked ? "secondary" : "ghost"} 
-                  size="sm"
-                  onClick={toggleBookmark}
-                >
-                  <BookmarkCheck className="h-4 w-4" />
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent>{isBookmarked ? "Remove Bookmark" : "Add Bookmark"}</TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
+          <Button variant="outline" size="sm" onClick={toggleFullscreen}>
+            <Maximize className="h-4 w-4" />
+          </Button>
         </div>
       </div>
-      
-      <div className="flex-1 border rounded-md shadow-sm overflow-hidden bg-white">
-        <iframe 
-          ref={iframeRef}
-          src={`${url}#page=${currentPage}&zoom=${scale * 100}&toolbar=0&view=FitH`}
-          title={title}
-          className="w-full h-full"
-          onLoad={() => {
-            // Attempt to detect total pages - this is a simplified approach
-            // Advanced PDF libraries would provide better page detection
-            setTimeout(() => {
-              setTotalPages(Math.max(totalPages, 1));
-            }, 1000);
-          }}
-          allowFullScreen
-        />
-      </div>
-      
-      <div className="mt-2 flex justify-between">
-        <Button variant="outline" size="sm" onClick={handleBack}>
-          <Layers className="h-4 w-4 mr-2" /> Back to Library
-        </Button>
+
+      {/* Navigation and Zoom Controls */}
+      <div className="flex items-center justify-between p-4 border-b bg-muted/30">
+        <div className="flex items-center gap-2">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={goToPrevPage}
+            disabled={pageNumber <= 1}
+          >
+            <ChevronLeft className="h-4 w-4" />
+          </Button>
+          
+          <span className="text-sm font-medium px-3">
+            Page {pageNumber} of {numPages}
+          </span>
+          
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={goToNextPage}
+            disabled={pageNumber >= numPages}
+          >
+            <ChevronRight className="h-4 w-4" />
+          </Button>
+        </div>
         
-        <Button variant="outline" size="sm" asChild>
-          <a href={url} download target="_blank" rel="noreferrer">
-            <FileText className="h-4 w-4 mr-2" /> Download PDF
-          </a>
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button variant="outline" size="sm" onClick={zoomOut} disabled={scale <= 0.5}>
+            <ZoomOut className="h-4 w-4" />
+          </Button>
+          
+          <span className="text-sm font-medium px-3">
+            {Math.round(scale * 100)}%
+          </span>
+          
+          <Button variant="outline" size="sm" onClick={zoomIn} disabled={scale >= 3.0}>
+            <ZoomIn className="h-4 w-4" />
+          </Button>
+          
+          <Button variant="outline" size="sm" onClick={rotate}>
+            <RotateCw className="h-4 w-4" />
+          </Button>
+        </div>
+      </div>
+
+      {/* PDF Viewer */}
+      <div className="flex-1 overflow-auto bg-gray-100 p-4">
+        <div className="flex justify-center">
+          <Card className="shadow-lg">
+            <CardContent className="p-0">
+              <Document
+                file={url}
+                onLoadSuccess={onDocumentLoadSuccess}
+                loading={
+                  <div className="flex items-center justify-center h-96">
+                    <div className="text-center">
+                      <div className="h-8 w-8 rounded-full border-4 border-primary border-t-transparent animate-spin mx-auto mb-2"></div>
+                      <p className="text-muted-foreground">Loading PDF...</p>
+                    </div>
+                  </div>
+                }
+                error={
+                  <div className="flex items-center justify-center h-96 text-center p-8">
+                    <div>
+                      <p className="text-destructive font-medium mb-2">Failed to load PDF</p>
+                      <p className="text-muted-foreground text-sm">
+                        Please check your connection and try again.
+                      </p>
+                    </div>
+                  </div>
+                }
+              >
+                <Page
+                  pageNumber={pageNumber}
+                  scale={scale}
+                  rotate={rotation}
+                  loading={
+                    <div className="flex items-center justify-center h-96">
+                      <div className="h-6 w-6 rounded-full border-4 border-primary border-t-transparent animate-spin"></div>
+                    </div>
+                  }
+                />
+              </Document>
+            </CardContent>
+          </Card>
+        </div>
       </div>
     </div>
   );

@@ -9,6 +9,61 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      absence_requests: {
+        Row: {
+          event_id: string | null
+          id: string
+          member_id: string | null
+          reason: string
+          reviewed_at: string | null
+          reviewed_by: string | null
+          status: string | null
+          submitted_at: string | null
+        }
+        Insert: {
+          event_id?: string | null
+          id?: string
+          member_id?: string | null
+          reason: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string | null
+          submitted_at?: string | null
+        }
+        Update: {
+          event_id?: string | null
+          id?: string
+          member_id?: string | null
+          reason?: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string | null
+          submitted_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "absence_requests_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "calendar_events"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "absence_requests_member_id_fkey"
+            columns: ["member_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "absence_requests_reviewed_by_fkey"
+            columns: ["reviewed_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       attendance_records: {
         Row: {
           calendar_event_id: string | null
@@ -269,6 +324,50 @@ export type Database = {
           },
         ]
       }
+      member_uploads: {
+        Row: {
+          created_at: string | null
+          description: string | null
+          file_name: string
+          file_path: string
+          file_type: string
+          file_url: string
+          id: string
+          member_id: string | null
+          upload_category: string
+        }
+        Insert: {
+          created_at?: string | null
+          description?: string | null
+          file_name: string
+          file_path: string
+          file_type: string
+          file_url: string
+          id?: string
+          member_id?: string | null
+          upload_category: string
+        }
+        Update: {
+          created_at?: string | null
+          description?: string | null
+          file_name?: string
+          file_path?: string
+          file_type?: string
+          file_url?: string
+          id?: string
+          member_id?: string | null
+          upload_category?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "member_uploads_member_id_fkey"
+            columns: ["member_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       metronome_presets: {
         Row: {
           bpm: number
@@ -460,6 +559,86 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      }
+      poll_votes: {
+        Row: {
+          created_at: string | null
+          id: string
+          member_id: string | null
+          option_index: number
+          poll_id: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          member_id?: string | null
+          option_index: number
+          poll_id?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          member_id?: string | null
+          option_index?: number
+          poll_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "poll_votes_member_id_fkey"
+            columns: ["member_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "poll_votes_poll_id_fkey"
+            columns: ["poll_id"]
+            isOneToOne: false
+            referencedRelation: "polls"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      polls: {
+        Row: {
+          created_at: string | null
+          created_by: string | null
+          description: string | null
+          expires_at: string | null
+          id: string
+          is_active: boolean | null
+          options: Json
+          title: string
+        }
+        Insert: {
+          created_at?: string | null
+          created_by?: string | null
+          description?: string | null
+          expires_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          options: Json
+          title: string
+        }
+        Update: {
+          created_at?: string | null
+          created_by?: string | null
+          description?: string | null
+          expires_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          options?: Json
+          title?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "polls_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       practice_logs: {
         Row: {
@@ -717,6 +896,163 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      tour_assignments: {
+        Row: {
+          created_at: string | null
+          id: string
+          member_id: string | null
+          room_number: string | null
+          roommate_id: string | null
+          tour_id: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          member_id?: string | null
+          room_number?: string | null
+          roommate_id?: string | null
+          tour_id?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          member_id?: string | null
+          room_number?: string | null
+          roommate_id?: string | null
+          tour_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tour_assignments_member_id_fkey"
+            columns: ["member_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tour_assignments_roommate_id_fkey"
+            columns: ["roommate_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tour_assignments_tour_id_fkey"
+            columns: ["tour_id"]
+            isOneToOne: false
+            referencedRelation: "tours"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      tours: {
+        Row: {
+          created_at: string | null
+          end_date: string
+          id: string
+          is_active: boolean | null
+          itinerary: Json | null
+          name: string
+          packing_guide: string | null
+          start_date: string
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          end_date: string
+          id?: string
+          is_active?: boolean | null
+          itinerary?: Json | null
+          name: string
+          packing_guide?: string | null
+          start_date: string
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          end_date?: string
+          id?: string
+          is_active?: boolean | null
+          itinerary?: Json | null
+          name?: string
+          packing_guide?: string | null
+          start_date?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      uniform_assignments: {
+        Row: {
+          checked_in_at: string | null
+          checked_out_at: string | null
+          id: string
+          member_id: string | null
+          notes: string | null
+          uniform_item_id: string | null
+        }
+        Insert: {
+          checked_in_at?: string | null
+          checked_out_at?: string | null
+          id?: string
+          member_id?: string | null
+          notes?: string | null
+          uniform_item_id?: string | null
+        }
+        Update: {
+          checked_in_at?: string | null
+          checked_out_at?: string | null
+          id?: string
+          member_id?: string | null
+          notes?: string | null
+          uniform_item_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "uniform_assignments_member_id_fkey"
+            columns: ["member_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "uniform_assignments_uniform_item_id_fkey"
+            columns: ["uniform_item_id"]
+            isOneToOne: false
+            referencedRelation: "uniform_items"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      uniform_items: {
+        Row: {
+          condition: string | null
+          created_at: string | null
+          id: string
+          is_available: boolean | null
+          item_number: string | null
+          item_type: string
+          size: string | null
+        }
+        Insert: {
+          condition?: string | null
+          created_at?: string | null
+          id?: string
+          is_available?: boolean | null
+          item_number?: string | null
+          item_type: string
+          size?: string | null
+        }
+        Update: {
+          condition?: string | null
+          created_at?: string | null
+          id?: string
+          is_available?: boolean | null
+          item_number?: string | null
+          item_type?: string
+          size?: string | null
+        }
+        Relationships: []
       }
       user_google_tokens: {
         Row: {

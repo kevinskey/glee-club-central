@@ -3,7 +3,7 @@ import { PageHeader } from '@/components/ui/page-header';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { 
   Calendar, Music, Bell, User, BookOpen, Headphones, Shirt, FileCheck, 
-  Edit, Download, FileText, Upload, Award 
+  Edit, Download, FileText, Upload, Award, MapPin, Vote
 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
@@ -16,6 +16,10 @@ import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Link } from 'react-router-dom';
+import { AbsenceRequestForm } from '@/components/attendance/AbsenceRequestForm';
+import { MemberPolls } from '@/components/polls/MemberPolls';
+import { MemberUploadPortal } from '@/components/uploads/MemberUploadPortal';
+import { ActiveTourInfo } from '@/components/tours/ActiveTourInfo';
 
 export default function MemberDashboardPage() {
   const { profile } = useAuth();
@@ -30,12 +34,30 @@ export default function MemberDashboardPage() {
     time: "7:00 PM",
     location: "Sisters Chapel"
   };
+
+  // Mock upcoming events for absence requests
+  const upcomingEvents = [
+    {
+      id: "event-1",
+      title: "Weekly Rehearsal",
+      date: new Date(new Date().getTime() + 2 * 24 * 60 * 60 * 1000).toISOString(),
+      time: "6:00 PM",
+      location: "Music Hall"
+    },
+    {
+      id: "event-2", 
+      title: "Special Performance",
+      date: new Date(new Date().getTime() + 5 * 24 * 60 * 60 * 1000).toISOString(),
+      time: "7:30 PM",
+      location: "Sisters Chapel"
+    }
+  ];
   
   // Quick access items for members
   const memberItems: QuickAccessItem[] = [
     {
       title: "Sheet Music",
-      description: "Access sheet music by section and song",
+      description: "Access sheet music with enhanced PDF viewer",
       icon: <Music className="h-4 w-4 mr-2 text-white" />,
       link: "/dashboard/sheet-music",
     },
@@ -52,16 +74,18 @@ export default function MemberDashboardPage() {
       link: "/dashboard/recordings",
     },
     {
-      title: "Resources",
-      description: "Access handbook and resources",
-      icon: <BookOpen className="h-4 w-4 mr-2 text-white" />,
-      link: "/dashboard/resources",
+      title: "Upload Files",
+      description: "Submit auditions, forms, and surveys",
+      icon: <Upload className="h-4 w-4 mr-2 text-white" />,
+      link: "#uploads",
+      onClick: () => setActiveTab("uploads")
     },
     {
-      title: "Uniform Info",
-      description: "Check wardrobe requirements",
-      icon: <Shirt className="h-4 w-4 mr-2 text-white" />,
-      link: "/dashboard/wardrobe",
+      title: "Vote & Feedback",
+      description: "Participate in polls and provide feedback",
+      icon: <Vote className="h-4 w-4 mr-2 text-white" />,
+      link: "#polls",
+      onClick: () => setActiveTab("polls")
     },
     {
       title: "Profile",
@@ -94,13 +118,15 @@ export default function MemberDashboardPage() {
       />
 
       <Tabs defaultValue={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="grid w-full grid-cols-3 md:grid-cols-6 mb-8">
+        <TabsList className="grid w-full grid-cols-3 md:grid-cols-8 mb-8">
           <TabsTrigger value="overview">Overview</TabsTrigger>
           <TabsTrigger value="identity">Identity</TabsTrigger>
           <TabsTrigger value="academic">Academic</TabsTrigger>
           <TabsTrigger value="music">Musical Role</TabsTrigger>
           <TabsTrigger value="logistics">Logistics</TabsTrigger>
           <TabsTrigger value="media">Media</TabsTrigger>
+          <TabsTrigger value="uploads">Uploads</TabsTrigger>
+          <TabsTrigger value="polls">Polls</TabsTrigger>
         </TabsList>
         
         {/* Overview Tab */}
@@ -112,6 +138,9 @@ export default function MemberDashboardPage() {
             <div className="md:col-span-8 space-y-6">
               {/* Next Rehearsal Countdown */}
               <NextEventCountdown event={nextEvent} />
+              
+              {/* Active Tour Information */}
+              <ActiveTourInfo />
               
               <Card>
                 <CardHeader className="pb-2">
@@ -133,6 +162,9 @@ export default function MemberDashboardPage() {
                   <UpcomingEventsList limit={4} />
                 </CardContent>
               </Card>
+
+              {/* Absence Request Form */}
+              <AbsenceRequestForm events={upcomingEvents} />
             </div>
             
             {/* Sidebar - Right 1/3 */}
@@ -145,7 +177,7 @@ export default function MemberDashboardPage() {
                 <CardContent className="space-y-4">
                   <div className="flex items-center justify-between">
                     <span className="text-sm font-medium">Dues Status:</span>
-                    <Badge variant={profile?.dues_paid ? "success" : "destructive"}>
+                    <Badge variant={profile?.dues_paid ? "default" : "destructive"}>
                       {profile?.dues_paid ? "Paid" : "Unpaid"}
                     </Badge>
                   </div>
@@ -180,7 +212,7 @@ export default function MemberDashboardPage() {
                     onClick={() => navigate("/dashboard/sheet-music")}
                   >
                     <Music className="mr-2 h-4 w-4" />
-                    Access Sheet Music
+                    Enhanced Sheet Music Viewer
                   </Button>
                   <Button 
                     variant="outline" 
@@ -193,10 +225,10 @@ export default function MemberDashboardPage() {
                   <Button 
                     variant="outline" 
                     className="w-full text-left justify-start" 
-                    onClick={() => navigate("/dashboard/wardrobe")}
+                    onClick={() => setActiveTab("uploads")}
                   >
-                    <Shirt className="mr-2 h-4 w-4" />
-                    Uniform Information
+                    <Upload className="mr-2 h-4 w-4" />
+                    Upload Portal
                   </Button>
                   <Button 
                     variant="outline" 
@@ -204,7 +236,7 @@ export default function MemberDashboardPage() {
                     onClick={() => window.open("https://drive.google.com/drive", "_blank", "noopener,noreferrer")}
                   >
                     <FileCheck className="mr-2 h-4 w-4" />
-                    Google Drive
+                    Member Handbook
                   </Button>
                 </CardContent>
               </Card>
@@ -260,8 +292,12 @@ export default function MemberDashboardPage() {
                     </div>
                   </div>
                   <div className="mt-4">
-                    <h4 className="text-sm font-medium">Pronouns</h4>
+                    <h4 className="text-sm font-medium">Emergency Contact</h4>
                     <p className="text-sm text-muted-foreground">Not provided</p>
+                    <Button size="sm" variant="outline" className="mt-2">
+                      <Edit className="mr-2 h-4 w-4" />
+                      Add Emergency Contact
+                    </Button>
                   </div>
                 </div>
               </CardContent>
@@ -390,7 +426,7 @@ export default function MemberDashboardPage() {
               <CardContent className="space-y-4">
                 <div className="flex justify-between items-center">
                   <h4 className="text-sm font-medium">Current Status</h4>
-                  <Badge variant="success">Active Member</Badge>
+                  <Badge className="bg-green-100 text-green-800">Active Member</Badge>
                 </div>
                 
                 <div className="pt-4 border-t">
@@ -437,7 +473,7 @@ export default function MemberDashboardPage() {
                 <div className="space-y-2">
                   <div className="flex justify-between items-center">
                     <h4 className="text-sm font-medium">Dues Status</h4>
-                    <Badge variant={profile?.dues_paid ? "success" : "destructive"}>
+                    <Badge variant={profile?.dues_paid ? "default" : "destructive"}>
                       {profile?.dues_paid ? "Paid in Full" : "Unpaid"}
                     </Badge>
                   </div>
@@ -451,12 +487,12 @@ export default function MemberDashboardPage() {
                 <div className="pt-4 border-t">
                   <div className="flex justify-between items-center mb-2">
                     <h4 className="text-sm font-medium">Sheet Music Status</h4>
-                    <Badge variant="outline">Incomplete</Badge>
+                    <Badge variant="outline">Complete</Badge>
                   </div>
-                  <p className="text-sm text-muted-foreground">3/5 pieces received</p>
+                  <p className="text-sm text-muted-foreground">All sheet music received</p>
                   <Button size="sm" variant="outline" className="mt-2">
                     <FileCheck className="mr-2 h-4 w-4" />
-                    View Missing Music
+                    View Sheet Music Library
                   </Button>
                 </div>
                 
@@ -501,7 +537,7 @@ export default function MemberDashboardPage() {
                   </div>
                   <Button size="sm" variant="outline" className="w-full mt-2">
                     <Calendar className="mr-2 h-4 w-4" />
-                    View Full Attendance Record
+                    Submit Absence Request
                   </Button>
                 </div>
                 
@@ -510,20 +546,20 @@ export default function MemberDashboardPage() {
                   <div className="space-y-2">
                     <div className="flex justify-between items-center">
                       <span className="text-sm">Travel Release Form</span>
-                      <Badge variant="destructive">Missing</Badge>
+                      <Badge className="bg-green-100 text-green-800">Completed</Badge>
                     </div>
                     <div className="flex justify-between items-center">
                       <span className="text-sm">Media Release Form</span>
-                      <Badge variant="success">Completed</Badge>
+                      <Badge className="bg-green-100 text-green-800">Completed</Badge>
                     </div>
                     <div className="flex justify-between items-center">
                       <span className="text-sm">Health Information</span>
-                      <Badge variant="destructive">Missing</Badge>
+                      <Badge className="bg-green-100 text-green-800">Completed</Badge>
                     </div>
                   </div>
-                  <Button size="sm" variant="secondary" className="w-full mt-2">
+                  <Button size="sm" variant="secondary" className="w-full mt-2" onClick={() => setActiveTab("uploads")}>
                     <FileText className="mr-2 h-4 w-4" />
-                    Complete Missing Forms
+                    Upload Additional Forms
                   </Button>
                 </div>
               </CardContent>
@@ -554,7 +590,7 @@ export default function MemberDashboardPage() {
                   
                   <div className="pt-4 border-t">
                     <h4 className="text-sm font-medium mb-2">Media Release Status</h4>
-                    <Badge variant="success">Approved</Badge>
+                    <Badge className="bg-green-100 text-green-800">Approved</Badge>
                     <p className="text-xs text-muted-foreground mt-1">
                       You have approved the Glee Club to use your image and recordings in promotional materials.
                     </p>
@@ -585,32 +621,6 @@ export default function MemberDashboardPage() {
                   ))}
                 </div>
                 
-                <div className="pt-4 border-t">
-                  <h4 className="text-sm font-medium mb-2">Digital ID Badge</h4>
-                  {profile ? (
-                    <div className="border rounded-md p-4 bg-white dark:bg-gray-900">
-                      <div className="flex flex-col items-center">
-                        <div className="bg-blue-100 dark:bg-blue-900 w-full text-center py-2 rounded-t-md">
-                          <h3 className="text-sm font-bold">SPELMAN COLLEGE GLEE CLUB</h3>
-                        </div>
-                        <Avatar className="w-24 h-24 my-4">
-                          <AvatarImage src={profile?.avatar_url || ""} alt={profile?.first_name || "Member"} />
-                          <AvatarFallback>{profile?.first_name?.charAt(0) || "M"}{profile?.last_name?.charAt(0) || ""}</AvatarFallback>
-                        </Avatar>
-                        <h3 className="font-bold text-lg">{profile.first_name} {profile.last_name}</h3>
-                        <p className="text-sm text-muted-foreground">{profile.voice_part || "Voice Part Not Assigned"}</p>
-                        <p className="text-sm mt-1">{profile.class_year || "Class Year Not Specified"}</p>
-                        
-                        <div className="mt-4 w-full border-t pt-2 text-center">
-                          <p className="text-xs text-muted-foreground">Member Since: {profile.join_date || "Not Specified"}</p>
-                        </div>
-                      </div>
-                    </div>
-                  ) : (
-                    <p className="text-sm text-muted-foreground">Unable to generate ID badge. Profile information incomplete.</p>
-                  )}
-                </div>
-                
                 <Button size="sm" variant="outline" className="w-full mt-2">
                   <Download className="mr-2 h-4 w-4" />
                   Download Digital ID Badge
@@ -618,6 +628,16 @@ export default function MemberDashboardPage() {
               </CardContent>
             </Card>
           </div>
+        </TabsContent>
+
+        {/* New Uploads Tab */}
+        <TabsContent value="uploads">
+          <MemberUploadPortal />
+        </TabsContent>
+
+        {/* New Polls Tab */}
+        <TabsContent value="polls">
+          <MemberPolls />
         </TabsContent>
       </Tabs>
     </div>
