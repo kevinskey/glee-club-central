@@ -25,7 +25,7 @@ const RoleDashboard = () => {
     );
   }
 
-  // Redirect based on role
+  // Redirect based on role - members go to their primary dashboard
   if (userRole === 'admin' || profile?.is_super_admin) {
     return <Navigate to="/dashboard" replace />;
   } else if (userRole === 'member' || userType === 'member') {
@@ -34,8 +34,8 @@ const RoleDashboard = () => {
     return <Navigate to="/dashboard/fan" replace />;
   }
 
-  // Default to main dashboard
-  return <Navigate to="/dashboard" replace />;
+  // Default to member dashboard for authenticated users
+  return <Navigate to="/dashboard/member" replace />;
 };
 
 export default RoleDashboard;

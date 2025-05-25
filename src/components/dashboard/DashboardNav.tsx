@@ -10,7 +10,8 @@ import {
   Bell,
   DollarSign,
   Settings,
-  Mic
+  Mic,
+  Home
 } from 'lucide-react';
 import { useRolePermissions } from '@/contexts/RolePermissionContext';
 import { useAuth } from '@/contexts/AuthContext';
@@ -25,23 +26,37 @@ export function DashboardNav({
   ...props
 }: DashboardNavProps) {
   const { pathname } = useLocation();
-  const { hasPermission } = useRolePermissions();
+  const { hasPermission, userRole } = useRolePermissions();
   const { isAdmin, profile } = useAuth();
   const isAdminUser = profile?.is_super_admin || (isAdmin && isAdmin());
   
   // All buttons will use 'ghost' variant to remove highlights
   return (
     <nav className={cn('flex flex-col gap-2', className)} {...props}>
-      <Button
-        variant="ghost"
-        className={cn('justify-start', isCollapsed && 'justify-center')}
-        asChild
-      >
-        <Link to="/dashboard">
-          <Mic className="h-5 w-5 mr-2" />
-          {!isCollapsed && <span>Dashboard</span>}
-        </Link>
-      </Button>
+      {/* Dashboard link - different for admins vs members */}
+      {isAdminUser ? (
+        <Button
+          variant="ghost"
+          className={cn('justify-start', isCollapsed && 'justify-center')}
+          asChild
+        >
+          <Link to="/dashboard">
+            <Home className="h-5 w-5 mr-2" />
+            {!isCollapsed && <span>Dashboard</span>}
+          </Link>
+        </Button>
+      ) : (
+        <Button
+          variant="ghost"
+          className={cn('justify-start', isCollapsed && 'justify-center')}
+          asChild
+        >
+          <Link to="/dashboard/member">
+            <Home className="h-5 w-5 mr-2" />
+            {!isCollapsed && <span>Dashboard</span>}
+          </Link>
+        </Button>
+      )}
 
       <Button
         variant="ghost"

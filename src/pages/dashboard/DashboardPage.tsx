@@ -1,5 +1,6 @@
 
 import React, { useMemo } from "react";
+import { Navigate } from "react-router-dom";
 import { PageHeader } from "@/components/ui/page-header";
 import { useAuth } from "@/contexts/AuthContext";
 import { Link, useNavigate } from "react-router-dom";
@@ -73,6 +74,19 @@ const DashboardPageContent = React.memo(() => {
   const { isAdminRole, isSuperAdmin } = usePermissions();
   const { isAnyLoading, isReady: coordinatorReady } = useLoadingCoordinator();
   
+  // Redirect non-admin users to their appropriate dashboard
+  const userRole = profile?.role;
+  const isAdmin = profile?.is_super_admin || isAdminRole || isSuperAdmin;
+  
+  // Redirect members to their primary dashboard
+  if (!authLoading && profile && !isAdmin) {
+    if (userRole === 'member') {
+      return <Navigate to="/dashboard/member" replace />;
+    } else if (userRole === 'fan') {
+      return <Navigate to="/dashboard/fan" replace />;
+    }
+  }
+  
   // Memoize expensive computations
   const shouldShowLoading = useMemo(() => 
     authLoading || !isReady || isAnyLoading(),
@@ -127,16 +141,16 @@ const DashboardPageContent = React.memo(() => {
     );
   }
   
-  console.log('Rendering dashboard content with', events?.length || 0, 'events');
+  console.log('Rendering admin dashboard content with', events?.length || 0, 'events');
     
   return (
     <div className="max-w-screen-2xl mx-auto px-4 space-y-6 dashboard-content dashboard-loaded">
-      {/* Welcome Banner with User Info */}
+      {/* Welcome Banner for Admin Users */}
       <div className="bg-gradient-to-r from-glee-spelman to-glee-spelman/80 rounded-xl shadow-lg p-6 md:p-8 text-white">
         <div className="flex flex-col md:flex-row md:items-center md:justify-between">
           <div className="space-y-2">
-            <h1 className="text-2xl md:text-3xl font-bold">{getTimeOfDay}, {profile?.first_name || 'Member'}</h1>
-            <p className="text-white/80">Welcome to your Spelman College Glee Club dashboard</p>
+            <h1 className="text-2xl md:text-3xl font-bold">{getTimeOfDay}, {profile?.first_name || 'Administrator'}</h1>
+            <p className="text-white/80">Welcome to the Spelman College Glee Club Admin Dashboard</p>
           </div>
           <div className="mt-4 md:mt-0 flex flex-col sm:flex-row gap-3">
             <Button 
@@ -154,57 +168,41 @@ const DashboardPageContent = React.memo(() => {
               className="bg-white/20 text-white hover:bg-white/30 border-white/40"
               asChild
             >
-              <Link to="/dashboard/member">
-                Member Dashboard <ChevronRight className="ml-2 h-4 w-4" />
+              <Link to="/admin">
+                Admin Panel <ChevronRight className="ml-2 h-4 w-4" />
               </Link>
             </Button>
           </div>
         </div>
       </div>
       
-      {/* Member Resources Section */}
+      {/* Admin Tools Section */}
       <Card className="shadow-md border-l-4 border-l-glee-spelman">
         <CardContent className="p-6">
           <div className="flex flex-col md:flex-row md:items-center justify-between">
             <div className="mb-4 md:mb-0">
               <h2 className="text-xl font-semibold flex items-center">
                 <Mic className="h-5 w-5 mr-2 text-glee-spelman" />
-                Member Resources
+                Administrative Tools
               </h2>
               <p className="text-muted-foreground mt-1">
-                Access specialized tools for Glee Club members
+                Manage the Glee Club and access administrative features
               </p>
             </div>
             <div className="flex flex-col sm:flex-row gap-3">
               <Button asChild className="bg-glee-spelman hover:bg-glee-spelman/90">
-                <Link to="/dashboard/member">
-                  Member Dashboard
+                <Link to="/admin">
+                  Admin Panel
                 </Link>
               </Button>
               <Button asChild variant="outline">
-                <Link to="/dashboard/recording-studio">
-                  <Mic className="h-4 w-4 mr-2" />
-                  Recording Studio
+                <Link to="/dashboard/members">
+                  <User className="h-4 w-4 mr-2" />
+                  Manage Members
                 </Link>
               </Button>
             </div>
           </div>
-        </CardContent>
-      </Card>
-      
-      {/* GleeTools Section */}
-      <Card className="shadow-md">
-        <CardHeader className="pb-2">
-          <CardTitle className="flex items-center">
-            <Headphones className="h-5 w-5 mr-2 text-glee-spelman" />
-            <span>Glee Tools</span>
-          </CardTitle>
-          <CardDescription>
-            Access music practice tools for rehearsal and performance
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <GleeTools variant="default" className="my-2" />
         </CardContent>
       </Card>
       
@@ -286,9 +284,6 @@ const DashboardPageContent = React.memo(() => {
         
         {/* Column 2 - Side Content */}
         <div className="md:col-span-4 space-y-6">
-          {/* Dues Status Card */}
-          <DuesStatusCard />
-          
           {/* Latest Resources */}
           <Card className="shadow-md">
             <CardHeader className="pb-2">
@@ -322,10 +317,8 @@ const DashboardPageContent = React.memo(() => {
             </CardContent>
           </Card>
           
-          {/* Admin Dashboard Access (only if admin) */}
-          {(isAdminRole || isSuperAdmin) && (
-            <AdminDashboardAccess onAccess={handleRegisterAsAdmin} />
-          )}
+          {/* Admin Dashboard Access */}
+          <AdminDashboardAccess onAccess={handleRegisterAsAdmin} />
         </div>
       </div>
     </div>

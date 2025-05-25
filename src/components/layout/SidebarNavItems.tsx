@@ -37,24 +37,25 @@ export function SidebarNavItems() {
   return (
     <>
       <div className="px-3 py-2">
-        <a href="/dashboard" className={`flex items-center gap-3 rounded-md px-3 py-2 text-sm transition-colors ${isActive('/dashboard') && !isActive('/dashboard/member') && !isActive('/dashboard/admin') ? 'bg-accent text-accent-foreground' : 'hover:bg-accent hover:text-accent-foreground'}`}>
-          <Home className="h-4 w-4" />
-          Dashboard
-        </a>
+        {/* Dashboard link - different for admins vs members */}
+        {showAdminItems ? (
+          <a href="/dashboard" className={`flex items-center gap-3 rounded-md px-3 py-2 text-sm transition-colors ${isActive('/dashboard') && !isActive('/dashboard/member') && !isActive('/dashboard/admin') ? 'bg-accent text-accent-foreground' : 'hover:bg-accent hover:text-accent-foreground'}`}>
+            <Home className="h-4 w-4" />
+            Dashboard
+          </a>
+        ) : (
+          <a href="/dashboard/member" className={`flex items-center gap-3 rounded-md px-3 py-2 text-sm transition-colors ${isActive('/dashboard/member') ? 'bg-accent text-accent-foreground' : 'hover:bg-accent hover:text-accent-foreground'}`}>
+            <Home className="h-4 w-4" />
+            Dashboard
+          </a>
+        )}
         
+        {/* Recording Studio for members */}
         {showMemberItems && (
-          <>
-            <a href="/dashboard/member" className={`flex items-center gap-3 rounded-md px-3 py-2 text-sm transition-colors ${isActive('/dashboard/member') ? 'bg-accent text-accent-foreground' : 'hover:bg-accent hover:text-accent-foreground'}`}>
-              <Home className="h-4 w-4" />
-              Member Dashboard
-            </a>
-            
-            {/* Highlight Recording Studio with a special style */}
-            <a href="/dashboard/recording-studio" className={`flex items-center gap-3 rounded-md px-3 py-2 text-sm transition-colors mt-2 ${isActive('/dashboard/recording-studio') ? 'bg-glee-spelman text-white' : 'bg-glee-spelman/10 text-glee-spelman hover:bg-glee-spelman/20'}`}>
-              <Mic className="h-4 w-4" />
-              Recording Studio
-            </a>
-          </>
+          <a href="/dashboard/recording-studio" className={`flex items-center gap-3 rounded-md px-3 py-2 text-sm transition-colors mt-2 ${isActive('/dashboard/recording-studio') ? 'bg-glee-spelman text-white' : 'bg-glee-spelman/10 text-glee-spelman hover:bg-glee-spelman/20'}`}>
+            <Mic className="h-4 w-4" />
+            Recording Studio
+          </a>
         )}
       </div>
       
