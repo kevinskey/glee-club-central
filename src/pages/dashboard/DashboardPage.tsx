@@ -44,6 +44,28 @@ export interface Event {
   location: string;
 }
 
+// Safe Link component that handles router context errors
+const SafeLink = ({ to, children, className, ...props }: any) => {
+  try {
+    return (
+      <Link to={to} className={className} {...props}>
+        {children}
+      </Link>
+    );
+  } catch (error) {
+    console.error('Router context error, falling back to button:', error);
+    return (
+      <button 
+        className={className} 
+        onClick={() => window.location.href = to}
+        {...props}
+      >
+        {children}
+      </button>
+    );
+  }
+};
+
 const DashboardPageContent = () => {
   const { profile } = useAuth();
   const navigate = useNavigate();
@@ -72,7 +94,7 @@ const DashboardPageContent = () => {
   // Show loading state with skeletons
   if (!isReady) {
     return (
-      <div className="max-w-screen-2xl mx-auto px-4 space-y-6 animate-pulse">
+      <div className="max-w-screen-2xl mx-auto px-4 space-y-6 dashboard-content dashboard-loading">
         <DashboardWelcomeSkeleton />
         <DashboardCardSkeleton />
         <DashboardCardSkeleton />
@@ -108,7 +130,7 @@ const DashboardPageContent = () => {
   }
     
   return (
-    <div className="max-w-screen-2xl mx-auto px-4 space-y-6">
+    <div className="max-w-screen-2xl mx-auto px-4 space-y-6 dashboard-content dashboard-loaded">
       {/* Welcome Banner with User Info */}
       <div className="bg-gradient-to-r from-glee-spelman to-glee-spelman/80 rounded-xl shadow-lg p-6 md:p-8 text-white">
         <div className="flex flex-col md:flex-row md:items-center md:justify-between">
@@ -123,7 +145,7 @@ const DashboardPageContent = () => {
               className="bg-white hover:bg-white/90 text-glee-spelman"
               asChild
             >
-              <Link to="/dashboard/profile">View Profile <ChevronRight className="ml-2 h-4 w-4" /></Link>
+              <SafeLink to="/dashboard/profile">View Profile <ChevronRight className="ml-2 h-4 w-4" /></SafeLink>
             </Button>
             
             <Button 
@@ -132,9 +154,9 @@ const DashboardPageContent = () => {
               className="bg-white/20 text-white hover:bg-white/30 border-white/40"
               asChild
             >
-              <Link to="/dashboard/member">
+              <SafeLink to="/dashboard/member">
                 Member Dashboard <ChevronRight className="ml-2 h-4 w-4" />
-              </Link>
+              </SafeLink>
             </Button>
           </div>
         </div>
@@ -155,15 +177,15 @@ const DashboardPageContent = () => {
             </div>
             <div className="flex flex-col sm:flex-row gap-3">
               <Button asChild className="bg-glee-spelman hover:bg-glee-spelman/90">
-                <Link to="/dashboard/member">
+                <SafeLink to="/dashboard/member">
                   Member Dashboard
-                </Link>
+                </SafeLink>
               </Button>
               <Button asChild variant="outline">
-                <Link to="/dashboard/recording-studio">
+                <SafeLink to="/dashboard/recording-studio">
                   <Mic className="h-4 w-4 mr-2" />
                   Recording Studio
-                </Link>
+                </SafeLink>
               </Button>
             </div>
           </div>
@@ -213,7 +235,7 @@ const DashboardPageContent = () => {
                 className="text-sm text-glee-spelman hover:underline p-0"
                 asChild
               >
-                <Link to="/dashboard/calendar">View Calendar</Link>
+                <SafeLink to="/dashboard/calendar">View Calendar</SafeLink>
               </Button>
             </CardHeader>
             <CardContent>
@@ -245,10 +267,10 @@ const DashboardPageContent = () => {
                 <div className="text-center py-4">
                   <p className="text-muted-foreground mb-3">No upcoming events scheduled.</p>
                   <Button variant="outline" size="sm" asChild>
-                    <Link to="/dashboard/calendar">
+                    <SafeLink to="/dashboard/calendar">
                       <CalendarDays className="h-4 w-4 mr-2" />
                       View Calendar
-                    </Link>
+                    </SafeLink>
                   </Button>
                 </div>
               )}
@@ -294,7 +316,7 @@ const DashboardPageContent = () => {
                   className="flex items-center justify-center w-full text-sm text-glee-spelman hover:underline"
                   asChild
                 >
-                  <Link to="/dashboard/sheet-music">View all resources <ArrowRight className="ml-1 h-3 w-3" /></Link>
+                  <SafeLink to="/dashboard/sheet-music">View all resources <ArrowRight className="ml-1 h-3 w-3" /></SafeLink>
                 </Button>
               </div>
             </CardContent>

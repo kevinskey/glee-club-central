@@ -2,6 +2,7 @@
 /* Dashboard smooth transitions */
 .dashboard-content {
   transition: opacity 0.3s ease-in-out, transform 0.3s ease-in-out;
+  min-height: calc(100vh - 200px);
 }
 
 .dashboard-loading {
@@ -50,4 +51,22 @@
 
 .content-wrapper {
   min-height: calc(100vh - 200px);
+  will-change: opacity, transform;
+}
+
+/* Smooth content transitions */
+.dashboard-content > * {
+  transition: opacity 0.2s ease-in-out;
+}
+
+/* Reduce motion for users who prefer it */
+@media (prefers-reduced-motion: reduce) {
+  .dashboard-content,
+  .dashboard-content > * {
+    transition: none;
+  }
+  
+  .skeleton-shimmer {
+    animation: none;
+  }
 }
