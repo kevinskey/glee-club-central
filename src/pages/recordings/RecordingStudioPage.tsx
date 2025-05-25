@@ -4,7 +4,6 @@ import { PageHeader } from "@/components/ui/page-header";
 import { Mic } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { RecordingSection } from "@/components/audio/RecordingSection";
-import { MusicAppHeader } from "@/components/layout/MusicAppHeader";
 import { toast } from "sonner";
 import { AlertCircle } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
@@ -46,39 +45,36 @@ export default function RecordingStudioPage() {
   }, [isAuthenticated, user]);
 
   return (
-    <>
-      <MusicAppHeader currentSection="recording" />
-      <div className="container py-6">
-        <PageHeader
-          title="Recording Studio"
-          description="Record, save, and manage your vocal recordings"
-          icon={<Mic className="h-6 w-6" />}
-        />
+    <div className="container py-6">
+      <PageHeader
+        title="Recording Studio"
+        description="Record, save, and manage your vocal recordings"
+        icon={<Mic className="h-6 w-6" />}
+      />
 
-        {error && (
-          <Alert variant="destructive" className="mb-6">
-            <AlertCircle className="h-4 w-4" />
-            <AlertTitle>Error</AlertTitle>
-            <AlertDescription>{error}</AlertDescription>
-          </Alert>
-        )}
+      {error && (
+        <Alert variant="destructive" className="mb-6">
+          <AlertCircle className="h-4 w-4" />
+          <AlertTitle>Error</AlertTitle>
+          <AlertDescription>{error}</AlertDescription>
+        </Alert>
+      )}
 
-        {isLoading ? (
-          <div className="flex items-center justify-center h-48">
-            <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-glee-spelman"></div>
-          </div>
-        ) : (
-          <div className="mt-8">
-            <RecordingSection 
-              onRecordingSaved={(category) => {
-                toast.success(`Recording saved successfully to ${category === "my_tracks" ? "My Tracks" : 
-                              category === "part_tracks" ? "Part Tracks" : 
-                              "Recordings"}`);
-              }}
-            />
-          </div>
-        )}
-      </div>
-    </>
+      {isLoading ? (
+        <div className="flex items-center justify-center h-48">
+          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-glee-spelman"></div>
+        </div>
+      ) : (
+        <div className="mt-8">
+          <RecordingSection 
+            onRecordingSaved={(category) => {
+              toast.success(`Recording saved successfully to ${category === "my_tracks" ? "My Tracks" : 
+                            category === "part_tracks" ? "Part Tracks" : 
+                            "Recordings"}`);
+            }}
+          />
+        </div>
+      )}
+    </div>
   );
 }
