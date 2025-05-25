@@ -1,4 +1,3 @@
-
 import { create } from 'zustand';
 import { CalendarEvent, EventType } from '@/types/calendar';
 import { supabase } from '@/integrations/supabase/client';
@@ -7,7 +6,7 @@ import { toast } from 'sonner';
 interface CalendarStore {
   events: CalendarEvent[];
   isLoading: boolean;
-  fetchEvents: () => Promise<void>;
+  fetchEvents: () => Promise<CalendarEvent[]>;
   addEvent: (event: Omit<CalendarEvent, 'id'>) => Promise<boolean>;
   updateEvent: (event: CalendarEvent) => Promise<boolean>;
   deleteEvent: (id: string) => Promise<boolean>;
@@ -17,9 +16,9 @@ export const useCalendarStore = create<CalendarStore>((set, get) => ({
   events: [],
   isLoading: false,
   
-  fetchEvents: async (): Promise<void> => {
+  fetchEvents: async (): Promise<CalendarEvent[]> => {
     // Don't fetch if already loading
-    if (get().isLoading) return;
+    if (get().isLoading) return get().events;
     
     try {
       set({ isLoading: true });
@@ -32,7 +31,7 @@ export const useCalendarStore = create<CalendarStore>((set, get) => ({
         console.error('Error fetching events:', error);
         toast.error('Failed to load calendar events');
         set({ isLoading: false });
-        return;
+        return [];
       }
       
       // Transform the data from DB schema to our CalendarEvent type
@@ -50,10 +49,12 @@ export const useCalendarStore = create<CalendarStore>((set, get) => ({
       }));
       
       set({ events, isLoading: false });
+      return events;
     } catch (error) {
       console.error('Error in fetchEvents:', error);
       toast.error('Failed to load calendar events');
       set({ isLoading: false });
+      return [];
     }
   },
   

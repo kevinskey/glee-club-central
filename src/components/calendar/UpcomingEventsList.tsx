@@ -51,13 +51,6 @@ export const UpcomingEventsList: React.FC<UpcomingEventsListProps> = ({
         setLoading(true);
         const fetchedEvents = await fetchEvents();
         
-        // Properly handle the case when fetchEvents returns undefined
-        if (!fetchedEvents) {
-          setEvents([]);
-          setLoading(false);
-          return;
-        }
-        
         // Filter by event type if specified
         let filteredEvents = [...fetchedEvents]; 
         if (actualType !== 'all') {

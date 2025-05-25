@@ -27,13 +27,11 @@ export const useDashboardData = () => {
     try {
       setData(prev => ({ ...prev, isLoading: true, error: null }));
       
-      // Only fetch if events are not already loaded
-      if (!events || events.length === 0) {
-        await fetchEvents();
-      }
+      // Get events from store - fetchEvents now returns the events
+      const calendarEvents = await fetchEvents();
       
       setData({
-        events: events || [],
+        events: calendarEvents || [],
         isLoading: false,
         error: null
       });
@@ -45,7 +43,7 @@ export const useDashboardData = () => {
         error: 'Failed to load dashboard data'
       }));
     }
-  }, [authLoading, permissionsLoading, user, fetchEvents, events]);
+  }, [authLoading, permissionsLoading, user, fetchEvents]);
 
   // Update events when they change in the store
   useEffect(() => {
@@ -58,11 +56,12 @@ export const useDashboardData = () => {
     }
   }, [events, eventsLoading]);
 
+  // Only load data once when dependencies are ready
   useEffect(() => {
-    if (!authLoading && !permissionsLoading && user) {
+    if (!authLoading && !permissionsLoading && user && data.events.length === 0) {
       loadDashboardData();
     }
-  }, [authLoading, permissionsLoading, user, loadDashboardData]);
+  }, [authLoading, permissionsLoading, user, loadDashboardData, data.events.length]);
 
   const isReady = !authLoading && !permissionsLoading && !data.isLoading && !!user;
 
