@@ -3,7 +3,6 @@ import React, { useEffect } from 'react';
 import { Navigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { Spinner } from '@/components/ui/spinner';
-import { UserType } from '@/types/auth';
 
 // This component redirects users to the appropriate dashboard based on their role
 const RoleDashboard = () => {
@@ -30,7 +29,7 @@ const RoleDashboard = () => {
   if (isAdmin || userRole === 'admin') {
     return <Navigate to="/dashboard" replace />;
   } else {
-    // All non-admin users (members, fans, etc.) go to the single member dashboard
+    // All non-admin users go to the member dashboard
     return <Navigate to="/dashboard/member" replace />;
   }
 };

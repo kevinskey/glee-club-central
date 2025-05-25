@@ -103,12 +103,8 @@ export function AuthProvider({ children }: AuthProviderProps) {
   }, [profile?.is_super_admin, profile?.role]);
   
   const isMember = React.useCallback(() => {
-    return profile?.role === 'member';
-  }, [profile?.role]);
-  
-  const isFan = React.useCallback(() => {
-    return profile?.user_type === 'fan';
-  }, [profile?.user_type]);
+    return profile?.role === 'member' || (!profile?.is_super_admin && profile?.role !== 'admin');
+  }, [profile?.role, profile?.is_super_admin]);
   
   // getUserType function defined in the provider - memoized
   const getUserType = React.useCallback((): UserType => {
@@ -118,10 +114,8 @@ export function AuthProvider({ children }: AuthProviderProps) {
     if (!userType && profile) {
       if (profile.is_super_admin || profile.role === 'admin') {
         return 'admin';
-      } else if (profile.role === 'member') {
-        return 'member';
       } else {
-        return 'fan';
+        return 'member';
       }
     }
     
@@ -205,7 +199,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
     logout: handleLogout,
     signIn: defaultLogin,
     signOut: handleLogout,
-    signUp: async (email: string, password: string, firstName: string, lastName: string, userType: UserType = 'fan') => {
+    signUp: async (email: string, password: string, firstName: string, lastName: string, userType: UserType = 'member') => {
       console.log("Signup attempt for:", email);
       
       try {
@@ -241,7 +235,6 @@ export function AuthProvider({ children }: AuthProviderProps) {
     },
     isAdmin,
     isMember,
-    isFan,
     getUserType,
     updatePassword: async (newPassword: string) => {
       const { data, error } = await supabase.auth.updateUser({ password: newPassword });
@@ -262,7 +255,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
     permissions,
     refreshPermissions: refreshUserData,
     resetAuthSystem,
-  }), [authUser, profile, session, supabaseClient, isInitialized, isLoading, defaultLogin, handleLogout, isAdmin, isMember, isFan, getUserType, permissions, refreshUserData]);
+  }), [authUser, profile, session, supabaseClient, isInitialized, isLoading, defaultLogin, handleLogout, isAdmin, isMember, getUserType, permissions, refreshUserData]);
   
   console.log("Rendering AuthProvider with value:", { 
     isAuthenticated: value.isAuthenticated,

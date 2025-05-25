@@ -1,5 +1,5 @@
 
-export type UserType = 'admin' | 'member' | 'fan' | '';
+export type UserType = 'admin' | 'member';
 
 export interface AuthUser {
   id: string;
@@ -54,11 +54,10 @@ export interface AuthContextType {
   signUp: (email: string, password: string, firstName: string, lastName: string, userType?: UserType) => Promise<{ error: any, data: any }>;
   isAdmin: () => boolean;
   isMember: () => boolean;
-  isFan: () => boolean;
   getUserType: () => UserType;
   updatePassword: (newPassword: string) => Promise<{ error: any }>;
   resetPassword: (email: string) => Promise<{ error: any }>;
   permissions: { [key: string]: boolean };
   refreshPermissions: () => Promise<void>;
-  resetAuthSystem: () => Promise<{ success: boolean }>; // Add the new reset function
+  resetAuthSystem: () => Promise<{ success: boolean }>;
 }

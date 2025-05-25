@@ -11,7 +11,6 @@ import RecordingStudioPage from '../pages/recordings/RecordingStudioPage';
 import CalendarPage from '../pages/dashboard/calendar';
 import CalendarDashboard from '../pages/dashboard/CalendarDashboard';
 import MemberDashboardPage from '../pages/dashboard/MemberDashboardPage';
-import FanDashboardPage from '../pages/FanDashboardPage';
 import AnnouncementsPage from '../pages/dashboard/AnnouncementsPage';
 import ArchivesPage from '../pages/dashboard/ArchivesPage';
 import AttendancePage from '../pages/dashboard/AttendancePage';
@@ -30,10 +29,6 @@ export const dashboardRoutes = {
     {
       path: 'member',
       element: <MemberDashboardPage />,
-    },
-    {
-      path: 'fan',
-      element: <FanDashboardPage />,
     },
     {
       path: 'profile',

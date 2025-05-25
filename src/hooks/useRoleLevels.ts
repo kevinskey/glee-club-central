@@ -1,6 +1,7 @@
 
 import { useAuth } from "@/contexts/AuthContext";
-import { UserLevel } from "@/types/permissions";
+
+type UserLevel = 'admin' | 'member';
 
 export function useRoleLevels() {
   const { profile, isAdmin } = useAuth();
