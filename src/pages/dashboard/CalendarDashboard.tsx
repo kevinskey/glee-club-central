@@ -15,27 +15,20 @@ import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
 
 export default function CalendarDashboard() {
-  const [events, setEvents] = useState<CalendarEvent[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [isViewModalOpen, setIsViewModalOpen] = useState(false);
   const [selectedEvent, setSelectedEvent] = useState<CalendarEvent | null>(null);
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   
-  const { fetchEvents, addEvent, updateEvent, deleteEvent } = useCalendarStore();
+  const { events, fetchEvents, addEvent, updateEvent, deleteEvent } = useCalendarStore();
   const { user } = useAuth();
 
   // Load calendar events on component mount
   useEffect(() => {
     const loadEvents = async () => {
       try {
-        setIsLoading(true);
-        const success = await fetchEvents();
-        if (success) {
-          // Get events from the store after fetching
-          const storeEvents = useCalendarStore.getState().events;
-          setEvents(storeEvents);
-        }
+        await fetchEvents();
       } catch (error) {
         console.error("Error loading calendar events:", error);
         toast.error("Failed to load calendar events");
@@ -85,9 +78,6 @@ export default function CalendarDashboard() {
       
       if (success) {
         setIsCreateModalOpen(false);
-        // Refresh events
-        const storeEvents = useCalendarStore.getState().events;
-        setEvents(storeEvents);
         toast.success("Event created successfully");
       }
     } catch (error) {
@@ -102,9 +92,6 @@ export default function CalendarDashboard() {
       if (success) {
         setIsViewModalOpen(false);
         setSelectedEvent(null);
-        // Refresh events
-        const storeEvents = useCalendarStore.getState().events;
-        setEvents(storeEvents);
         toast.success("Event updated successfully");
         return true;
       }
@@ -122,9 +109,6 @@ export default function CalendarDashboard() {
       if (success) {
         setIsViewModalOpen(false);
         setSelectedEvent(null);
-        // Refresh events
-        const storeEvents = useCalendarStore.getState().events;
-        setEvents(storeEvents);
         toast.success("Event deleted successfully");
         return true;
       }

@@ -1,4 +1,3 @@
-
 import { create } from 'zustand';
 import { CalendarEvent, EventType } from '@/types/calendar';
 import { supabase } from '@/integrations/supabase/client';
@@ -17,7 +16,7 @@ export const useCalendarStore = create<CalendarStore>((set, get) => ({
   events: [],
   isLoading: false,
   
-  fetchEvents: async () => {
+  fetchEvents: async (): Promise<boolean> => {
     try {
       set({ isLoading: true });
       const { data, error } = await supabase

@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useCallback, useMemo } from "react";
 import { PageHeader } from "@/components/ui/page-header";
 import { useAuth } from "@/contexts/AuthContext";
@@ -43,10 +44,9 @@ const DashboardPageContent = () => {
   // All hooks at the top of the component
   const { profile, isLoading: authLoading } = useAuth();
   const navigate = useNavigate();
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [events, setEvents] = useState<Event[]>([]);
   const { isAdminRole, isSuperAdmin } = usePermissions();
-  const [isDataLoaded, setIsDataLoaded] = useState(false);
   
   // Get current time of day for greeting - memoized to prevent re-renders
   const getTimeOfDay = useCallback(() => {
@@ -92,7 +92,6 @@ const DashboardPageContent = () => {
           console.error("Error loading dashboard data:", err);
         } finally {
           setLoading(false);
-          setIsDataLoaded(true);
         }
       };
       
@@ -110,8 +109,8 @@ const DashboardPageContent = () => {
     navigate("/dashboard/admin");
   };
   
-  // Prevent flash of loading state - only show loading when needed
-  if ((loading || authLoading) && !isDataLoaded) {
+  // Only show loading when actually loading and not already loaded
+  if (authLoading || (loading && events.length === 0)) {
     return (
       <div className="container mx-auto px-4 flex justify-center items-center min-h-[60vh]">
         <Spinner size="lg" />
