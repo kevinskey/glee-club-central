@@ -1,3 +1,4 @@
+
 import React from "react";
 import { Link, useLocation } from "react-router-dom";
 import { cn } from "@/lib/utils";
@@ -110,16 +111,16 @@ export function Sidebar({ className }: SidebarProps) {
           </h3>
         </div>
         
-        {/* Dashboard link - role-based */}
+        {/* Dashboard link - everyone goes to member dashboard for simplicity */}
         <Button
-          variant={isActiveRoute(isAdmin ? "/dashboard" : "/dashboard/member", true) ? "secondary" : "ghost"}
+          variant={isActiveRoute("/dashboard/member", true) ? "secondary" : "ghost"}
           className={cn(
             "w-full justify-start",
-            isActiveRoute(isAdmin ? "/dashboard" : "/dashboard/member", true) && "bg-glee-spelman/10 text-glee-spelman"
+            isActiveRoute("/dashboard/member", true) && "bg-glee-spelman/10 text-glee-spelman"
           )}
           asChild
         >
-          <Link to={isAdmin ? "/dashboard" : "/dashboard/member"}>
+          <Link to="/dashboard/member">
             <Home className="mr-2 h-4 w-4" />
             Dashboard
           </Link>

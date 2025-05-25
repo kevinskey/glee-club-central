@@ -30,33 +30,21 @@ export function SidebarNavItems() {
 
   // Only show admin items for admin users
   const showAdminItems = userRole === 'admin';
-  
-  // Only show member items for members and admins
-  const showMemberItems = userRole === 'member' || userRole === 'admin';
 
   return (
     <>
       <div className="px-3 py-2">
-        {/* Dashboard link - different for admins vs members */}
-        {showAdminItems ? (
-          <a href="/dashboard" className={`flex items-center gap-3 rounded-md px-3 py-2 text-sm transition-colors ${isActive('/dashboard') && !isActive('/dashboard/member') && !isActive('/dashboard/admin') ? 'bg-accent text-accent-foreground' : 'hover:bg-accent hover:text-accent-foreground'}`}>
-            <Home className="h-4 w-4" />
-            Dashboard
-          </a>
-        ) : (
-          <a href="/dashboard/member" className={`flex items-center gap-3 rounded-md px-3 py-2 text-sm transition-colors ${isActive('/dashboard/member') ? 'bg-accent text-accent-foreground' : 'hover:bg-accent hover:text-accent-foreground'}`}>
-            <Home className="h-4 w-4" />
-            Dashboard
-          </a>
-        )}
+        {/* Single Dashboard link for everyone - points to member dashboard */}
+        <a href="/dashboard/member" className={`flex items-center gap-3 rounded-md px-3 py-2 text-sm transition-colors ${isActive('/dashboard/member') ? 'bg-accent text-accent-foreground' : 'hover:bg-accent hover:text-accent-foreground'}`}>
+          <Home className="h-4 w-4" />
+          Dashboard
+        </a>
         
-        {/* Recording Studio for members */}
-        {showMemberItems && (
-          <a href="/dashboard/recording-studio" className={`flex items-center gap-3 rounded-md px-3 py-2 text-sm transition-colors mt-2 ${isActive('/dashboard/recording-studio') ? 'bg-glee-spelman text-white' : 'bg-glee-spelman/10 text-glee-spelman hover:bg-glee-spelman/20'}`}>
-            <Mic className="h-4 w-4" />
-            Recording Studio
-          </a>
-        )}
+        {/* Recording Studio highlight for all users */}
+        <a href="/dashboard/recording-studio" className={`flex items-center gap-3 rounded-md px-3 py-2 text-sm transition-colors mt-2 ${isActive('/dashboard/recording-studio') ? 'bg-glee-spelman text-white' : 'bg-glee-spelman/10 text-glee-spelman hover:bg-glee-spelman/20'}`}>
+          <Mic className="h-4 w-4" />
+          Recording Studio
+        </a>
       </div>
       
       <div className="px-3 py-2">
@@ -66,18 +54,14 @@ export function SidebarNavItems() {
           Calendar
         </a>
         
-        {showMemberItems && (
-          <>
-            <a href="/dashboard/sheet-music" className={`flex items-center gap-3 rounded-md px-3 py-2 text-sm transition-colors ${isActive('/dashboard/sheet-music') ? 'bg-accent text-accent-foreground' : 'hover:bg-accent hover:text-accent-foreground'}`}>
-              <FileText className="h-4 w-4" />
-              Sheet Music
-            </a>
-            <a href="/dashboard/recordings" className={`flex items-center gap-3 rounded-md px-3 py-2 text-sm transition-colors ${isActive('/dashboard/recordings') ? 'bg-accent text-accent-foreground' : 'hover:bg-accent hover:text-accent-foreground'}`}>
-              <FileAudio className="h-4 w-4" />
-              Recordings
-            </a>
-          </>
-        )}
+        <a href="/dashboard/sheet-music" className={`flex items-center gap-3 rounded-md px-3 py-2 text-sm transition-colors ${isActive('/dashboard/sheet-music') ? 'bg-accent text-accent-foreground' : 'hover:bg-accent hover:text-accent-foreground'}`}>
+          <FileText className="h-4 w-4" />
+          Sheet Music
+        </a>
+        <a href="/dashboard/recordings" className={`flex items-center gap-3 rounded-md px-3 py-2 text-sm transition-colors ${isActive('/dashboard/recordings') ? 'bg-accent text-accent-foreground' : 'hover:bg-accent hover:text-accent-foreground'}`}>
+          <FileAudio className="h-4 w-4" />
+          Recordings
+        </a>
         
         <a href="/dashboard/announcements" className={`flex items-center gap-3 rounded-md px-3 py-2 text-sm transition-colors ${isActive('/dashboard/announcements') ? 'bg-accent text-accent-foreground' : 'hover:bg-accent hover:text-accent-foreground'}`}>
           <Bell className="h-4 w-4" />
@@ -99,12 +83,10 @@ export function SidebarNavItems() {
           Archives
         </a>
         
-        {showMemberItems && (
-          <a href="/dashboard/attendance" className={`flex items-center gap-3 rounded-md px-3 py-2 text-sm transition-colors ${isActive('/dashboard/attendance') ? 'bg-accent text-accent-foreground' : 'hover:bg-accent hover:text-accent-foreground'}`}>
-            <ClipboardCheck className="h-4 w-4" />
-            Attendance
-          </a>
-        )}
+        <a href="/dashboard/attendance" className={`flex items-center gap-3 rounded-md px-3 py-2 text-sm transition-colors ${isActive('/dashboard/attendance') ? 'bg-accent text-accent-foreground' : 'hover:bg-accent hover:text-accent-foreground'}`}>
+          <ClipboardCheck className="h-4 w-4" />
+          Attendance
+        </a>
         
         {showAdminItems && (
           <a href="/dashboard/members" className={`flex items-center gap-3 rounded-md px-3 py-2 text-sm transition-colors ${isActive('/dashboard/members') ? 'bg-accent text-accent-foreground' : 'hover:bg-accent hover:text-accent-foreground'}`}>

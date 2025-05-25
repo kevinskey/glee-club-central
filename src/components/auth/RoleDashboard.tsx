@@ -26,17 +26,13 @@ const RoleDashboard = () => {
     );
   }
 
-  // Redirect based on role - prioritize admin status first
+  // Redirect based on role - admins go to admin dashboard, everyone else goes to member dashboard
   if (isAdmin || userRole === 'admin') {
     return <Navigate to="/dashboard" replace />;
-  } else if (userRole === 'member' || userType === 'member') {
+  } else {
+    // All non-admin users (members, fans, etc.) go to the single member dashboard
     return <Navigate to="/dashboard/member" replace />;
-  } else if (userRole === 'fan' || userType === 'fan') {
-    return <Navigate to="/dashboard/fan" replace />;
   }
-
-  // Default to member dashboard for authenticated users
-  return <Navigate to="/dashboard/member" replace />;
 };
 
 export default RoleDashboard;
