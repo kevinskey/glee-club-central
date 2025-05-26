@@ -20,13 +20,13 @@ export default function MemberDashboardPage() {
 
   // Custom quick access items for members
   const memberQuickAccessLinks = [
-    { icon: <MusicIcon className="h-5 w-5" />, title: "Sheet Music", path: "/dashboard/sheet-music", color: "bg-purple-500" },
-    { icon: <CalendarIcon className="h-5 w-5" />, title: "Calendar", path: "/dashboard/calendar", color: "bg-green-500" },
-    { icon: <MessageSquare className="h-5 w-5" />, title: "Messaging", path: "/dashboard/messaging", color: "bg-blue-500" },
-    { icon: <DollarSign className="h-5 w-5" />, title: "Finance", path: "/dashboard/finances", color: "bg-emerald-500" },
-    { icon: <BellIcon className="h-5 w-5" />, title: "Announcements", path: "/dashboard/announcements", color: "bg-red-500" },
-    { icon: <Upload className="h-5 w-5" />, title: "Media Manager", path: "/dashboard/media-library", color: "bg-pink-500" },
-    { icon: <Settings className="h-5 w-5" />, title: "Settings", path: "/dashboard/settings", color: "bg-gray-500" },
+    { icon: MusicIcon, title: "Sheet Music", path: "/dashboard/sheet-music", color: "bg-purple-500" },
+    { icon: CalendarIcon, title: "Calendar", path: "/dashboard/calendar", color: "bg-green-500" },
+    { icon: MessageSquare, title: "Messaging", path: "/dashboard/messaging", color: "bg-blue-500" },
+    { icon: DollarSign, title: "Finance", path: "/dashboard/finances", color: "bg-emerald-500" },
+    { icon: BellIcon, title: "Announcements", path: "/dashboard/announcements", color: "bg-red-500" },
+    { icon: Upload, title: "Media Manager", path: "/dashboard/media-library", color: "bg-pink-500" },
+    { icon: Settings, title: "Settings", path: "/dashboard/settings", color: "bg-gray-500" },
   ];
 
   return (
@@ -51,7 +51,7 @@ export default function MemberDashboardPage() {
               >
                 <div className="w-full h-auto flex flex-col items-center justify-center py-4 gap-2 border rounded-md transition-all duration-200 hover:border-glee-spelman/20 hover:bg-glee-spelman/5 hover:shadow-md">
                   <div className={`${link.color} text-white p-2 rounded-full group-hover:scale-110 transition-transform duration-200`}>
-                    {link.icon}
+                    <link.icon className="h-5 w-5" />
                   </div>
                   <span className="text-xs font-medium text-center group-hover:text-glee-spelman transition-colors duration-200">
                     {link.title}
