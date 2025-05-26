@@ -6,7 +6,7 @@ import { Spinner } from '@/components/ui/spinner';
 
 // This component redirects users to the appropriate dashboard based on their role
 const RoleDashboard = () => {
-  const { profile, isLoading, getUserType } = useAuth();
+  const { profile, isLoading, getUserType, isAuthenticated } = useAuth();
 
   // Get user role from profile
   const userRole = profile?.role;
@@ -14,10 +14,16 @@ const RoleDashboard = () => {
   const isAdmin = profile?.is_super_admin;
   
   useEffect(() => {
-    console.log("RoleDashboard - redirecting based on:", { userRole, userType, isAdmin });
-  }, [userRole, userType, isAdmin]);
+    console.log("RoleDashboard - redirecting based on:", { 
+      userRole, 
+      userType, 
+      isAdmin, 
+      isAuthenticated,
+      hasProfile: !!profile 
+    });
+  }, [userRole, userType, isAdmin, isAuthenticated, profile]);
 
-  if (isLoading) {
+  if (isLoading || !isAuthenticated) {
     return (
       <div className="flex justify-center items-center h-screen">
         <Spinner size="lg" />
@@ -25,11 +31,18 @@ const RoleDashboard = () => {
     );
   }
 
+  // If user is not authenticated, redirect to login
+  if (!isAuthenticated) {
+    return <Navigate to="/login" replace />;
+  }
+
   // Redirect based on role - admins go to admin dashboard, everyone else goes to member dashboard
   if (isAdmin || userRole === 'admin') {
+    console.log("Redirecting admin user to admin dashboard");
     return <Navigate to="/dashboard" replace />;
   } else {
     // All non-admin users go to the member dashboard
+    console.log("Redirecting member user to member dashboard");
     return <Navigate to="/dashboard/member" replace />;
   }
 };

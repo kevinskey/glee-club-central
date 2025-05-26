@@ -4,7 +4,6 @@ import { createBrowserRouter, Navigate, Outlet } from 'react-router-dom';
 import ErrorBoundary from "./components/ErrorBoundary";
 import StaticLandingPage from './pages/StaticLandingPage';
 import HomeTemp from './pages/HomeTemp';
-import { dashboardRoutes } from './routes/dashboardRoutes';
 import { authRoutes } from './routes/authRoutes';
 import MainLayout from './layouts/MainLayout';
 import HomePage from './pages/HomePage';
@@ -13,6 +12,24 @@ import RequireAuth from './components/auth/RequireAuth';
 import RoleDashboard from './components/auth/RoleDashboard';
 import AboutPage from './pages/AboutPage';
 import ContactPage from './pages/ContactPage';
+import DashboardLayout from './layouts/DashboardLayout';
+import DashboardPage from './pages/dashboard/DashboardPage';
+import MemberDashboardPage from './pages/dashboard/MemberDashboardPage';
+import ProfilePage from './pages/profile/ProfilePage';
+import MediaLibraryPage from './pages/MediaLibraryPage';
+import SheetMusicPage from './pages/SheetMusicPage';
+import PDFViewerPage from './pages/PDFViewerPage';
+import RecordingsPage from './pages/RecordingsPage';
+import RecordingStudioPage from './pages/recordings/RecordingStudioPage';
+import CalendarDashboard from './pages/dashboard/CalendarDashboard';
+import AnnouncementsPage from './pages/dashboard/AnnouncementsPage';
+import ArchivesPage from './pages/dashboard/ArchivesPage';
+import AttendancePage from './pages/dashboard/AttendancePage';
+import AudioManagementPage from './pages/audio-management/AudioManagementPage';
+import AdminDashboardPage from './pages/dashboard/AdminDashboardPage';
+import MembersPage from './pages/members/MembersPage';
+import SettingsPage from './pages/settings/SettingsPage';
+import FinancesPage from './pages/dashboard/FinancesPage';
 
 // Create a properly structured router with all routes
 export const router = createBrowserRouter([
@@ -58,6 +75,85 @@ export const router = createBrowserRouter([
         path: '/role-dashboard',
         element: <RequireAuth><RoleDashboard /></RequireAuth>,
       },
+      // Dashboard routes with proper authentication
+      {
+        path: '/dashboard',
+        element: <RequireAuth><DashboardLayout /></RequireAuth>,
+        children: [
+          {
+            index: true,
+            element: <DashboardPage />,
+          },
+          {
+            path: 'member',
+            element: <MemberDashboardPage />,
+          },
+          {
+            path: 'profile',
+            element: <ProfilePage />,
+          },
+          {
+            path: 'media-library',
+            element: <MediaLibraryPage />,
+          },
+          {
+            path: 'sheet-music',
+            element: <SheetMusicPage />,
+          },
+          {
+            path: 'sheet-music/:id',
+            element: <PDFViewerPage />,
+          },
+          {
+            path: 'media/pdf/:id',
+            element: <PDFViewerPage />,
+          },
+          {
+            path: 'recordings',
+            element: <RecordingsPage />,
+          },
+          {
+            path: 'recording-studio',
+            element: <RecordingStudioPage />,
+          },
+          {
+            path: 'audio-management',
+            element: <AudioManagementPage />,
+          },
+          {
+            path: 'calendar',
+            element: <CalendarDashboard />,
+          },
+          {
+            path: 'announcements',
+            element: <AnnouncementsPage />,
+          },
+          {
+            path: 'archives',
+            element: <ArchivesPage />,
+          },
+          {
+            path: 'attendance',
+            element: <AttendancePage />,
+          },
+          {
+            path: 'admin',
+            element: <RequireAuth requireAdmin={true}><AdminDashboardPage /></RequireAuth>,
+          },
+          {
+            path: 'admin/members',
+            element: <RequireAuth requireAdmin={true}><MembersPage /></RequireAuth>,
+          },
+          {
+            path: 'finances',
+            element: <RequireAuth requireAdmin={true}><FinancesPage /></RequireAuth>,
+          },
+          {
+            path: 'settings',
+            element: <RequireAuth requireAdmin={true}><SettingsPage /></RequireAuth>,
+          },
+        ],
+      },
       // Secondary routes with MainLayout
       {
         path: '/',
@@ -82,8 +178,6 @@ export const router = createBrowserRouter([
           },
         ],
       },
-      // Include dashboard routes directly
-      dashboardRoutes,
       // Auth routes
       ...authRoutes,
     ],
