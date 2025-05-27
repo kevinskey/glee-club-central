@@ -2,7 +2,6 @@
 import { useState, useEffect } from 'react';
 import { 
   isConnected, 
-  connect, 
   connectToGoogleCalendar, 
   disconnect, 
   syncCalendar
@@ -33,21 +32,29 @@ export const useGoogleCalendar = () => {
 
   const handleConnect = async () => {
     try {
-      await connect();
-      setIsGoogleConnected(true);
+      setIsLoading(true);
+      await connectToGoogleCalendar();
+      // Connection status will be checked when popup closes
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to connect to Google Calendar');
       console.error('Error connecting to Google Calendar:', err);
+    } finally {
+      setIsLoading(false);
     }
   };
 
   const handleDisconnect = async () => {
     try {
-      await disconnect();
-      setIsGoogleConnected(false);
+      setIsLoading(true);
+      const success = await disconnect();
+      if (success) {
+        setIsGoogleConnected(false);
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to disconnect from Google Calendar');
       console.error('Error disconnecting from Google Calendar:', err);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -55,12 +62,21 @@ export const useGoogleCalendar = () => {
     try {
       setIsSyncing(true);
       await syncCalendar();
-      // Success would be handled here, possibly with a toast notification
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to sync with Google Calendar');
       console.error('Error syncing with Google Calendar:', err);
     } finally {
       setIsSyncing(false);
+    }
+  };
+
+  // Refresh connection status
+  const refreshConnectionStatus = async () => {
+    try {
+      const connected = await isConnected();
+      setIsGoogleConnected(connected);
+    } catch (err) {
+      console.error('Error refreshing connection status:', err);
     }
   };
 
@@ -71,8 +87,9 @@ export const useGoogleCalendar = () => {
     error,
     connect: handleConnect,
     disconnect: handleDisconnect,
-    connectToGoogleCalendar: handleConnect,  // Alias for backward compatibility
-    syncCalendar: handleSyncCalendar
+    connectToGoogleCalendar: handleConnect,
+    syncCalendar: handleSyncCalendar,
+    refreshConnectionStatus
   };
 };
 

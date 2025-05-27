@@ -2,10 +2,10 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
-// Google OAuth credentials
+// Google OAuth credentials from environment
 const GOOGLE_OAUTH_CLIENT_ID = Deno.env.get("GOOGLE_OAUTH_CLIENT_ID") || "";
 const GOOGLE_OAUTH_CLIENT_SECRET = Deno.env.get("GOOGLE_OAUTH_CLIENT_SECRET") || "";
-const REDIRECT_URI = Deno.env.get("GOOGLE_OAUTH_REDIRECT_URI") || "https://dzzptovqfqausipsgabw.supabase.co/functions/v1/google-calendar-auth";
+const REDIRECT_URI = `${Deno.env.get("SUPABASE_URL")}/functions/v1/google-calendar-auth`;
 const GOOGLE_OAUTH_ENDPOINT = "https://accounts.google.com/o/oauth2/v2/auth";
 const GOOGLE_TOKEN_ENDPOINT = "https://oauth2.googleapis.com/token";
 const GOOGLE_SCOPE = "https://www.googleapis.com/auth/calendar";
@@ -17,25 +17,21 @@ const corsHeaders = {
 };
 
 serve(async (req) => {
-  // Handle CORS preflight request
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
   }
   
-  // Initialize Supabase client with admin privileges
   const supabaseAdmin = createClient(
     Deno.env.get('SUPABASE_URL') as string,
     Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') as string
   );
   
-  // Parse URL and query params
   const url = new URL(req.url);
   const code = url.searchParams.get('code');
   
-  // If we have a code parameter, this is the OAuth callback
+  // Handle OAuth callback
   if (code) {
     try {
-      // Get user ID from state parameter (used for storing tokens)
       const state = url.searchParams.get('state');
       if (!state) {
         throw new Error('Missing state parameter');
@@ -73,18 +69,16 @@ serve(async (req) => {
         .maybeSingle();
         
       if (existingToken) {
-        // Update existing token
         await supabaseAdmin
           .from('user_google_tokens')
           .update({
             access_token: tokens.access_token,
-            refresh_token: tokens.refresh_token || null, // Only update if provided
+            refresh_token: tokens.refresh_token || null,
             expires_at: new Date(Date.now() + tokens.expires_in * 1000).toISOString(),
             updated_at: new Date().toISOString()
           })
           .eq('user_id', userId);
       } else {
-        // Insert new token
         await supabaseAdmin
           .from('user_google_tokens')
           .insert({
@@ -95,7 +89,6 @@ serve(async (req) => {
           });
       }
       
-      // Return success page that can be closed
       return new Response(`
         <html>
           <head><title>Calendar Connected</title></head>
@@ -127,9 +120,7 @@ serve(async (req) => {
       requestData = await req.json();
     } catch (e) {
       return new Response(
-        JSON.stringify({
-          error: 'Invalid JSON in request body'
-        }),
+        JSON.stringify({ error: 'Invalid JSON in request body' }),
         {
           status: 400,
           headers: { ...corsHeaders, 'Content-Type': 'application/json' }
@@ -164,21 +155,8 @@ serve(async (req) => {
       );
     }
     
-    // Check user permissions
-    const { data: profile } = await supabaseAdmin
-      .from('profiles')
-      .select('role, is_super_admin')
-      .eq('id', user.id)
-      .single();
-    
-    const isAdmin = profile?.is_super_admin || 
-                    profile?.role === 'admin' || 
-                    profile?.role === 'administrator' ||
-                    profile?.role === 'director';
-    
     switch (action) {
       case 'get_auth_url':
-        // Generate OAuth URL for connecting Google Calendar
         const authUrl = `${GOOGLE_OAUTH_ENDPOINT}?` + new URLSearchParams({
           client_id: GOOGLE_OAUTH_CLIENT_ID,
           redirect_uri: REDIRECT_URI,
@@ -186,7 +164,7 @@ serve(async (req) => {
           access_type: 'offline',
           prompt: 'consent',
           scope: GOOGLE_SCOPE,
-          state: user.id, // Use state parameter to store user ID
+          state: user.id,
         }).toString();
         
         return new Response(
@@ -198,7 +176,6 @@ serve(async (req) => {
         );
       
       case 'check_connection':
-        // Check if user has a valid Google Calendar connection
         const { data: tokenData } = await supabaseAdmin
           .from('user_google_tokens')
           .select('access_token, expires_at')
@@ -216,18 +193,6 @@ serve(async (req) => {
         );
         
       case 'disconnect':
-        // Only admins can disconnect calendar
-        if (!isAdmin) {
-          return new Response(
-            JSON.stringify({ error: 'Unauthorized: Admin privileges required' }),
-            { 
-              status: 403, 
-              headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-            }
-          );
-        }
-        
-        // Delete token from database
         await supabaseAdmin
           .from('user_google_tokens')
           .delete()

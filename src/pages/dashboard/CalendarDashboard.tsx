@@ -13,6 +13,7 @@ import { ViewEventModal } from "@/components/calendar/ViewEventModal";
 import { DashboardEventsSkeleton, DashboardCardSkeleton } from "@/components/ui/dashboard-skeleton";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
+import { GoogleCalendarConnect } from "@/components/calendar/GoogleCalendarConnect";
 
 export default function CalendarDashboard() {
   const [isLoading, setIsLoading] = useState(true);
@@ -186,6 +187,9 @@ export default function CalendarDashboard() {
         </div>
         
         <div className="space-y-6">
+          {/* Google Calendar Integration */}
+          <GoogleCalendarConnect />
+          
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center">
