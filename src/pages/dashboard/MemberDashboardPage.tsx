@@ -4,7 +4,8 @@ import { PageHeader } from "@/components/ui/page-header";
 import { useAuth } from "@/contexts/AuthContext";
 import { UpcomingEventsList } from "@/components/calendar/UpcomingEventsList";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Calendar, Music, Bell, Link as RouterLink } from "react-router-dom";
+import { Link as RouterLink } from "react-router-dom";
+import { Calendar, Music, Bell } from "lucide-react";
 import {
   Music as MusicIcon,
   Calendar as CalendarIcon,
