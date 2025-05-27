@@ -1,4 +1,3 @@
-
 // Service for handling Google Calendar integration and synchronization
 
 import { supabase } from "@/integrations/supabase/client";
@@ -59,9 +58,9 @@ export const connectToGoogleCalendar = async (): Promise<string> => {
 
     console.log("User authenticated, requesting Google Calendar auth URL...");
 
-    // Call the edge function with JSON string body
+    // Call the edge function - let supabase handle the body serialization
     const { data, error } = await supabase.functions.invoke('google-calendar-auth', {
-      body: JSON.stringify({ action: 'get_auth_url' }),
+      body: { action: 'get_auth_url' },
       headers: {
         'Authorization': `Bearer ${session.access_token}`,
         'Content-Type': 'application/json'

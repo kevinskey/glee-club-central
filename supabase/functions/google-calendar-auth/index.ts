@@ -1,4 +1,3 @@
-
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
@@ -135,22 +134,23 @@ serve(async (req) => {
   try {
     let requestData: any = {};
     
-    // Handle different request methods and body parsing
+    // Better body parsing for POST requests
     if (req.method === 'POST') {
-      const contentType = req.headers.get('content-type');
-      console.log("Content-Type:", contentType);
-      
-      if (contentType?.includes('application/json')) {
+      try {
+        // Try to get the body as JSON directly
+        requestData = await req.json();
+        console.log("Parsed request data:", requestData);
+      } catch (e) {
+        console.error("Error parsing JSON body:", e);
+        // If that fails, try to get as text and parse
         try {
           const bodyText = await req.text();
-          console.log("Raw body:", bodyText);
-          
+          console.log("Raw body text:", bodyText);
           if (bodyText && bodyText.trim()) {
             requestData = JSON.parse(bodyText);
-            console.log("Parsed request data:", requestData);
           }
-        } catch (e) {
-          console.error("Error parsing JSON body:", e);
+        } catch (textError) {
+          console.error("Error parsing body as text:", textError);
           return new Response(
             JSON.stringify({ error: 'Invalid JSON in request body' }),
             {
