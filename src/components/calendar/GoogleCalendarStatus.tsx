@@ -30,7 +30,7 @@ export function GoogleCalendarStatus({ onConnectionChange }: GoogleCalendarStatu
       console.log("Checking connection with action: check_connection");
       
       const { data, error } = await supabase.functions.invoke('google-calendar-auth', {
-        body: { action: 'check_connection' },
+        body: JSON.stringify({ action: 'check_connection' }),
         headers: {
           'Authorization': `Bearer ${session.access_token}`,
           'Content-Type': 'application/json'
@@ -79,7 +79,7 @@ export function GoogleCalendarStatus({ onConnectionChange }: GoogleCalendarStatu
       console.log("Getting auth URL with action: get_auth_url");
 
       const { data, error } = await supabase.functions.invoke('google-calendar-auth', {
-        body: { action: 'get_auth_url' },
+        body: JSON.stringify({ action: 'get_auth_url' }),
         headers: {
           'Authorization': `Bearer ${session.access_token}`,
           'Content-Type': 'application/json'
@@ -135,7 +135,7 @@ export function GoogleCalendarStatus({ onConnectionChange }: GoogleCalendarStatu
       console.log("Disconnecting with action: disconnect");
 
       const { data, error } = await supabase.functions.invoke('google-calendar-auth', {
-        body: { action: 'disconnect' },
+        body: JSON.stringify({ action: 'disconnect' }),
         headers: {
           'Authorization': `Bearer ${session.access_token}`,
           'Content-Type': 'application/json'
