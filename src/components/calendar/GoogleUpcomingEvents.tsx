@@ -3,9 +3,10 @@ import React, { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Calendar, MapPin, Clock, RefreshCw } from "lucide-react";
-import { fetchGoogleCalendarEvents } from "@/services/googleCalendar";
+import { supabase } from "@/integrations/supabase/client";
 import { CalendarEvent } from "@/types/calendar";
 import { format } from "date-fns";
+import { toast } from "sonner";
 
 interface GoogleUpcomingEventsProps {
   isConnected: boolean;
@@ -21,10 +22,44 @@ export function GoogleUpcomingEvents({ isConnected, selectedCalendarId = 'primar
     
     setIsLoading(true);
     try {
-      const googleEvents = await fetchGoogleCalendarEvents(selectedCalendarId);
-      setEvents(googleEvents);
+      const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+      
+      if (sessionError || !session) {
+        console.error("No valid session");
+        toast.error("Please log in to fetch events");
+        return;
+      }
+
+      console.log("Fetching events with action: fetch_events");
+      
+      const { data, error } = await supabase.functions.invoke('google-calendar-auth', {
+        body: { 
+          action: 'fetch_events',
+          calendar_id: selectedCalendarId
+        },
+        headers: {
+          'Authorization': `Bearer ${session.access_token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+
+      if (error) {
+        console.error("Error loading Google Calendar events:", error);
+        toast.error("Failed to fetch Google Calendar events");
+        return;
+      }
+
+      if (data?.error) {
+        console.error("API error:", data.error);
+        toast.error(data.error);
+        return;
+      }
+
+      console.log("Successfully loaded", data?.events?.length || 0, "events");
+      setEvents(data?.events || []);
     } catch (error) {
       console.error("Error loading Google Calendar events:", error);
+      toast.error("Failed to fetch Google Calendar events");
     } finally {
       setIsLoading(false);
     }
@@ -107,7 +142,19 @@ export function GoogleUpcomingEvents({ isConnected, selectedCalendarId = 'primar
               </div>
             ))
           ) : (
-            <p className="text-center text-muted-foreground text-sm">No upcoming events</p>
+            <div className="text-center py-4">
+              <p className="text-muted-foreground text-sm">No upcoming events</p>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={loadEvents}
+                disabled={isLoading}
+                className="mt-2"
+              >
+                <RefreshCw className={`mr-2 h-4 w-4 ${isLoading ? 'animate-spin' : ''}`} />
+                Refresh Events
+              </Button>
+            </div>
           )}
         </div>
       </CardContent>

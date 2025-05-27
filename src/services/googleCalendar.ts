@@ -13,22 +13,25 @@ export const isConnected = async (): Promise<boolean> => {
     if (!user || !user.user) {
       return false;
     }
+
+    const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+    if (sessionError || !session) {
+      return false;
+    }
     
-    const { data, error } = await supabase
-      .from('user_google_tokens')
-      .select('*')
-      .eq('user_id', user.user.id)
-      .single();
+    const { data, error } = await supabase.functions.invoke('google-calendar-auth', {
+      body: { action: 'check_connection' },
+      headers: {
+        'Authorization': `Bearer ${session.access_token}`,
+        'Content-Type': 'application/json'
+      }
+    });
       
     if (error || !data) {
       return false;
     }
     
-    // Check if token is expired
-    const expiresAt = new Date(data.expires_at);
-    const now = new Date();
-    
-    return expiresAt > now;
+    return data.connected === true;
   } catch (error) {
     console.error("Error checking Google Calendar connection status:", error);
     return false;
@@ -58,7 +61,7 @@ export const connectToGoogleCalendar = async (): Promise<string> => {
 
     console.log("User authenticated, requesting Google Calendar auth URL...");
 
-    // Call the edge function - let supabase handle the body serialization
+    // Call the edge function with proper formatting
     const { data, error } = await supabase.functions.invoke('google-calendar-auth', {
       body: { action: 'get_auth_url' },
       headers: {

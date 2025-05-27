@@ -165,17 +165,67 @@ serve(async (req) => {
     // Handle request body for POST requests
     if (req.method === 'POST') {
       try {
-        // For Supabase functions.invoke(), the body is already JSON
-        requestData = await req.json();
-        console.log("Received request data:", requestData);
+        const contentType = req.headers.get('content-type') || '';
+        console.log("Content-Type:", contentType);
+        
+        if (contentType.includes('application/json')) {
+          const bodyText = await req.text();
+          console.log("Raw body:", bodyText);
+          
+          if (bodyText.trim()) {
+            requestData = JSON.parse(bodyText);
+          } else {
+            console.log("Empty body received");
+            requestData = {};
+          }
+        } else {
+          console.log("Non-JSON content type, treating as empty body");
+          requestData = {};
+        }
+        
+        console.log("Parsed request data:", requestData);
       } catch (e) {
-        console.error("Error parsing JSON body:", e);
-        requestData = {};
+        console.error("Error parsing request body:", e);
+        return new Response(
+          JSON.stringify({ error: 'Invalid request body' }),
+          { 
+            status: 400, 
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+          }
+        );
       }
     }
     
     const { action } = requestData;
     console.log("Processing action:", action || 'undefined');
+    
+    // Helper function to get and verify user token
+    const getUserToken = async () => {
+      const { data: tokenData, error } = await supabaseAdmin
+        .from('user_google_tokens')
+        .select('access_token, expires_at, refresh_token')
+        .eq('user_id', user.id)
+        .maybeSingle();
+        
+      if (error) {
+        console.error("Error fetching token:", error);
+        throw new Error('Failed to fetch token');
+      }
+        
+      if (!tokenData) {
+        throw new Error('Google Calendar not connected');
+      }
+      
+      // Check if token is expired
+      const expiresAt = new Date(tokenData.expires_at);
+      const now = new Date();
+      
+      if (expiresAt <= now) {
+        throw new Error('Google Calendar token expired. Please reconnect.');
+      }
+      
+      return tokenData;
+    };
     
     switch (action) {
       case 'get_auth_url':
@@ -212,61 +262,73 @@ serve(async (req) => {
           }
         );
       
+      case 'check_connection':
+        try {
+          const tokenData = await getUserToken();
+          return new Response(
+            JSON.stringify({ 
+              connected: true,
+              expires_at: tokenData.expires_at
+            }),
+            { 
+              status: 200, 
+              headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+            }
+          );
+        } catch (error) {
+          return new Response(
+            JSON.stringify({ 
+              connected: false,
+              error: error.message
+            }),
+            { 
+              status: 200, 
+              headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+            }
+          );
+        }
+      
       case 'list_calendars':
         console.log("Fetching calendars for user:", user.id);
         
-        // Get user's access token
-        const { data: tokenData } = await supabaseAdmin
-          .from('user_google_tokens')
-          .select('access_token, expires_at')
-          .eq('user_id', user.id)
-          .maybeSingle();
+        try {
+          const tokenData = await getUserToken();
           
-        if (!tokenData) {
-          return new Response(
-            JSON.stringify({ 
-              error: 'Google Calendar not connected',
-              calendars: []
-            }),
-            { 
-              status: 400, 
-              headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+          // Fetch calendars from Google Calendar API
+          const calendarsResponse = await fetch(
+            'https://www.googleapis.com/calendar/v3/users/me/calendarList',
+            {
+              headers: {
+                'Authorization': `Bearer ${tokenData.access_token}`,
+              },
             }
           );
-        }
-        
-        // Check if token is expired
-        const expiresAt = new Date(tokenData.expires_at);
-        const now = new Date();
-        
-        if (expiresAt <= now) {
-          return new Response(
-            JSON.stringify({ 
-              error: 'Google Calendar token expired. Please reconnect.',
-              calendars: []
-            }),
-            { 
-              status: 400, 
-              headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-            }
-          );
-        }
-        
-        // Fetch calendars from Google Calendar API
-        const calendarsResponse = await fetch(
-          'https://www.googleapis.com/calendar/v3/users/me/calendarList',
-          {
-            headers: {
-              'Authorization': `Bearer ${tokenData.access_token}`,
-            },
+          
+          if (!calendarsResponse.ok) {
+            const errorText = await calendarsResponse.text();
+            console.error("Failed to fetch calendars:", errorText);
+            throw new Error('Failed to fetch calendars from Google');
           }
-        );
-        
-        if (!calendarsResponse.ok) {
-          console.error("Failed to fetch calendars:", await calendarsResponse.text());
+          
+          const calendarsData = await calendarsResponse.json();
+          const calendars = calendarsData.items?.map((cal: any) => ({
+            id: cal.id,
+            name: cal.summary,
+            primary: cal.primary || false
+          })) || [];
+          
+          return new Response(
+            JSON.stringify({ calendars }),
+            { 
+              status: 200, 
+              headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+            }
+          );
+        } catch (error) {
+          console.error("Error in list_calendars:", error);
           return new Response(
             JSON.stringify({ 
-              error: 'Failed to fetch calendars from Google',
+              error: error.message,
               calendars: []
             }),
             { 
@@ -275,146 +337,109 @@ serve(async (req) => {
             }
           );
         }
-        
-        const calendarsData = await calendarsResponse.json();
-        const calendars = calendarsData.items?.map((cal: any) => ({
-          id: cal.id,
-          name: cal.summary,
-          primary: cal.primary || false
-        })) || [];
-        
-        return new Response(
-          JSON.stringify({ calendars }),
-          { 
-            status: 200, 
-            headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-          }
-        );
 
       case 'fetch_events':
         console.log("Fetching events for user:", user.id);
         
-        // Get user's access token
-        const { data: eventsTokenData } = await supabaseAdmin
-          .from('user_google_tokens')
-          .select('access_token, expires_at')
-          .eq('user_id', user.id)
-          .maybeSingle();
+        try {
+          const tokenData = await getUserToken();
           
-        if (!eventsTokenData) {
-          return new Response(
-            JSON.stringify({ 
-              error: 'Google Calendar not connected',
-              events: []
-            }),
-            { 
-              status: 400, 
-              headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-            }
-          );
-        }
-        
-        // Check if token is expired
-        const eventExpiresAt = new Date(eventsTokenData.expires_at);
-        const eventNow = new Date();
-        
-        if (eventExpiresAt <= eventNow) {
-          return new Response(
-            JSON.stringify({ 
-              error: 'Google Calendar token expired. Please reconnect.',
-              events: []
-            }),
-            { 
-              status: 400, 
-              headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-            }
-          );
-        }
-
-        // Fetch next 5 upcoming events
-        const calendarId = requestData.calendar_id || 'primary';
-        const timeMin = new Date().toISOString();
-        
-        const eventsResponse = await fetch(
-          `https://www.googleapis.com/calendar/v3/calendars/${encodeURIComponent(calendarId)}/events?` + 
-          new URLSearchParams({
-            timeMin,
-            maxResults: '5',
-            singleEvents: 'true',
-            orderBy: 'startTime'
-          }).toString(),
-          {
-            headers: {
-              'Authorization': `Bearer ${eventsTokenData.access_token}`,
-            },
-          }
-        );
-        
-        if (!eventsResponse.ok) {
-          console.error("Failed to fetch events:", await eventsResponse.text());
-          return new Response(
-            JSON.stringify({ 
-              error: 'Failed to fetch events from Google',
-              events: []
-            }),
-            { 
-              status: 400, 
-              headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-            }
-          );
-        }
-        
-        const eventsData = await eventsResponse.json();
-        const events = eventsData.items?.map((event: any) => ({
-          id: event.id,
-          title: event.summary || 'Untitled Event',
-          start: event.start?.dateTime || event.start?.date,
-          end: event.end?.dateTime || event.end?.date,
-          location: event.location || '',
-          description: event.description || '',
-          allDay: !event.start?.dateTime,
-          source: 'google'
-        })) || [];
-        
-        return new Response(
-          JSON.stringify({ events }),
-          { 
-            status: 200, 
-            headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-          }
-        );
-      
-      case 'check_connection':
-        const { data: connectionTokenData } = await supabaseAdmin
-          .from('user_google_tokens')
-          .select('access_token, expires_at')
-          .eq('user_id', user.id)
-          .maybeSingle();
+          // Fetch next 5 upcoming events
+          const calendarId = requestData.calendar_id || 'primary';
+          const timeMin = new Date().toISOString();
           
-        const connected = !!connectionTokenData && !!connectionTokenData.access_token;
-        
-        return new Response(
-          JSON.stringify({ connected }),
-          { 
-            status: 200, 
-            headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+          console.log("Fetching events from calendar:", calendarId);
+          
+          const eventsResponse = await fetch(
+            `https://www.googleapis.com/calendar/v3/calendars/${encodeURIComponent(calendarId)}/events?` + 
+            new URLSearchParams({
+              timeMin,
+              maxResults: '5',
+              singleEvents: 'true',
+              orderBy: 'startTime'
+            }).toString(),
+            {
+              headers: {
+                'Authorization': `Bearer ${tokenData.access_token}`,
+              },
+            }
+          );
+          
+          if (!eventsResponse.ok) {
+            const errorText = await eventsResponse.text();
+            console.error("Failed to fetch events:", errorText);
+            throw new Error('Failed to fetch events from Google');
           }
-        );
+          
+          const eventsData = await eventsResponse.json();
+          console.log("Fetched", eventsData.items?.length || 0, "events");
+          
+          const events = eventsData.items?.map((event: any) => ({
+            id: event.id,
+            title: event.summary || 'Untitled Event',
+            start: event.start?.dateTime || event.start?.date,
+            end: event.end?.dateTime || event.end?.date,
+            location: event.location || '',
+            description: event.description || '',
+            allDay: !event.start?.dateTime,
+            source: 'google'
+          })) || [];
+          
+          return new Response(
+            JSON.stringify({ events }),
+            { 
+              status: 200, 
+              headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+            }
+          );
+        } catch (error) {
+          console.error("Error in fetch_events:", error);
+          return new Response(
+            JSON.stringify({ 
+              error: error.message,
+              events: []
+            }),
+            { 
+              status: 400, 
+              headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+            }
+          );
+        }
         
       case 'disconnect':
         console.log("Disconnecting Google Calendar for user:", user.id);
-        await supabaseAdmin
-          .from('user_google_tokens')
-          .delete()
-          .eq('user_id', user.id);
-          
-        return new Response(
-          JSON.stringify({ success: true }),
-          { 
-            status: 200, 
-            headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        
+        try {
+          const { error } = await supabaseAdmin
+            .from('user_google_tokens')
+            .delete()
+            .eq('user_id', user.id);
+            
+          if (error) {
+            console.error("Error disconnecting:", error);
+            throw error;
           }
-        );
+          
+          return new Response(
+            JSON.stringify({ success: true }),
+            { 
+              status: 200, 
+              headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+            }
+          );
+        } catch (error) {
+          console.error("Error in disconnect:", error);
+          return new Response(
+            JSON.stringify({ 
+              success: false,
+              error: error.message 
+            }),
+            { 
+              status: 500, 
+              headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+            }
+          );
+        }
         
       default:
         console.error("Unknown action:", action);
