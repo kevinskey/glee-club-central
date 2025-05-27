@@ -189,7 +189,7 @@ serve(async (req) => {
       );
     }
     
-    // Parse request body safely with proper error handling
+    // Parse request body safely with improved error handling
     let requestData: any = {};
     if (req.method === 'POST') {
       try {
@@ -197,16 +197,30 @@ serve(async (req) => {
         console.log("Raw request body:", bodyText);
         
         if (bodyText && bodyText.trim()) {
-          requestData = JSON.parse(bodyText);
-          console.log("Parsed request data:", requestData);
+          try {
+            requestData = JSON.parse(bodyText);
+            console.log("Parsed request data:", requestData);
+          } catch (parseError) {
+            console.error("JSON parsing failed:", parseError);
+            return new Response(
+              JSON.stringify({ 
+                error: 'Invalid JSON in request body',
+                received: bodyText 
+              }),
+              { 
+                status: 400, 
+                headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+              }
+            );
+          }
         } else {
           console.log("Empty body received, using default empty object");
           requestData = {};
         }
       } catch (e) {
-        console.error("Error parsing request body:", e);
+        console.error("Error reading request body:", e);
         return new Response(
-          JSON.stringify({ error: 'Invalid JSON in request body' }),
+          JSON.stringify({ error: 'Failed to read request body' }),
           { 
             status: 400, 
             headers: { ...corsHeaders, 'Content-Type': 'application/json' }
@@ -215,16 +229,16 @@ serve(async (req) => {
       }
     }
     
-    // Extract action with fallback
-    const action = requestData.action;
+    // Extract action with improved validation
+    const action = requestData?.action;
     console.log(`Processing action: "${action}" for user: ${user.id}`);
     
-    // Check if action is missing or undefined
-    if (!action) {
-      console.error("Missing or undefined action in request");
+    // Check if action is missing, undefined, or empty
+    if (!action || typeof action !== 'string' || action.trim() === '') {
+      console.error("Missing, undefined, or empty action in request. Request data:", JSON.stringify(requestData));
       return new Response(
         JSON.stringify({ 
-          error: 'Action is required',
+          error: 'Action is required and must be a non-empty string',
           received: requestData,
           validActions: ['get_auth_url', 'check_connection', 'list_calendars', 'fetch_events', 'disconnect']
         }),
@@ -264,7 +278,7 @@ serve(async (req) => {
       return tokenData;
     };
     
-    switch (action) {
+    switch (action.toLowerCase().trim()) {
       case 'get_auth_url':
         console.log("Generating auth URL for user:", user.id);
         
@@ -498,7 +512,10 @@ serve(async (req) => {
   } catch (error) {
     console.error('Unhandled error:', error);
     return new Response(
-      JSON.stringify({ error: error.message }),
+      JSON.stringify({ 
+        error: 'Internal server error',
+        message: error.message 
+      }),
       { 
         status: 500, 
         headers: { ...corsHeaders, 'Content-Type': 'application/json' }
