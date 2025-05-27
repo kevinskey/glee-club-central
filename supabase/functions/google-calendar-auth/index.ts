@@ -1,3 +1,4 @@
+
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
@@ -132,21 +133,32 @@ serve(async (req) => {
   
   // Handle API requests
   try {
-    let requestData = {};
+    let requestData: any = {};
     
-    // Parse request body if present
-    if (req.body) {
-      try {
-        requestData = await req.json();
-      } catch (e) {
-        console.error("Error parsing JSON:", e);
-        return new Response(
-          JSON.stringify({ error: 'Invalid JSON in request body' }),
-          {
-            status: 400,
-            headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+    // Handle different request methods and body parsing
+    if (req.method === 'POST') {
+      const contentType = req.headers.get('content-type');
+      console.log("Content-Type:", contentType);
+      
+      if (contentType?.includes('application/json')) {
+        try {
+          const bodyText = await req.text();
+          console.log("Raw body:", bodyText);
+          
+          if (bodyText && bodyText.trim()) {
+            requestData = JSON.parse(bodyText);
+            console.log("Parsed request data:", requestData);
           }
-        );
+        } catch (e) {
+          console.error("Error parsing JSON body:", e);
+          return new Response(
+            JSON.stringify({ error: 'Invalid JSON in request body' }),
+            {
+              status: 400,
+              headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+            }
+          );
+        }
       }
     }
     
