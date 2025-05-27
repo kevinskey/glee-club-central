@@ -196,8 +196,11 @@ serve(async (req) => {
         const bodyText = await req.text();
         console.log("Raw request body:", bodyText);
         
-        if (bodyText.trim()) {
+        if (bodyText && bodyText.trim()) {
           requestData = JSON.parse(bodyText);
+          console.log("Parsed request data:", requestData);
+        } else {
+          console.log("Empty body received");
         }
       } catch (e) {
         console.error("Error parsing request body:", e);
