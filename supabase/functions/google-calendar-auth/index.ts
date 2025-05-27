@@ -1,4 +1,3 @@
-
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
@@ -135,27 +134,7 @@ serve(async (req) => {
   try {
     let requestData: any = {};
     
-    // Handle request body for POST requests
-    if (req.method === 'POST') {
-      try {
-        requestData = await req.json();
-        console.log("Parsed request data:", requestData);
-      } catch (e) {
-        console.error("Error parsing request body:", e);
-        return new Response(
-          JSON.stringify({ error: 'Invalid request body' }),
-          {
-            status: 400,
-            headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-          }
-        );
-      }
-    }
-    
-    const { action } = requestData;
-    console.log("Processing action:", action);
-    
-    // Get auth user
+    // Get auth user first
     const authHeader = req.headers.get('Authorization');
     if (!authHeader) {
       console.error("Missing Authorization header");
@@ -181,6 +160,47 @@ serve(async (req) => {
         }
       );
     }
+    
+    // Handle request body for POST requests
+    if (req.method === 'POST') {
+      try {
+        const contentType = req.headers.get('content-type') || '';
+        
+        if (contentType.includes('application/json')) {
+          const bodyText = await req.text();
+          console.log("Raw body text:", bodyText);
+          
+          if (bodyText && bodyText.trim()) {
+            requestData = JSON.parse(bodyText);
+          }
+        } else {
+          // Try to parse as JSON anyway
+          const bodyText = await req.text();
+          if (bodyText) {
+            try {
+              requestData = JSON.parse(bodyText);
+            } catch {
+              // If not JSON, create a basic structure
+              requestData = {};
+            }
+          }
+        }
+        
+        console.log("Parsed request data:", requestData);
+      } catch (e) {
+        console.error("Error parsing request body:", e);
+        return new Response(
+          JSON.stringify({ error: 'Invalid request body' }),
+          {
+            status: 400,
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+          }
+        );
+      }
+    }
+    
+    const { action } = requestData;
+    console.log("Processing action:", action);
     
     switch (action) {
       case 'get_auth_url':
