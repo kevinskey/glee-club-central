@@ -134,31 +134,36 @@ serve(async (req) => {
   try {
     let requestData: any = {};
     
-    // Better body parsing for POST requests
+    // Properly parse request body for POST requests
     if (req.method === 'POST') {
       try {
-        // Try to get the body as JSON directly
-        requestData = await req.json();
+        const bodyText = await req.text();
+        console.log("Raw body text:", bodyText);
+        
+        if (bodyText && bodyText.trim()) {
+          // Check if it's JSON or if Supabase already parsed it
+          if (bodyText.startsWith('{')) {
+            requestData = JSON.parse(bodyText);
+          } else {
+            // Handle case where Supabase sends the parsed object as string
+            try {
+              requestData = JSON.parse(bodyText);
+            } catch {
+              // If it's not valid JSON, treat as plain text
+              requestData = { rawBody: bodyText };
+            }
+          }
+        }
         console.log("Parsed request data:", requestData);
       } catch (e) {
-        console.error("Error parsing JSON body:", e);
-        // If that fails, try to get as text and parse
-        try {
-          const bodyText = await req.text();
-          console.log("Raw body text:", bodyText);
-          if (bodyText && bodyText.trim()) {
-            requestData = JSON.parse(bodyText);
+        console.error("Error parsing request body:", e);
+        return new Response(
+          JSON.stringify({ error: 'Invalid request body' }),
+          {
+            status: 400,
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' }
           }
-        } catch (textError) {
-          console.error("Error parsing body as text:", textError);
-          return new Response(
-            JSON.stringify({ error: 'Invalid JSON in request body' }),
-            {
-              status: 400,
-              headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-            }
-          );
-        }
+        );
       }
     }
     
