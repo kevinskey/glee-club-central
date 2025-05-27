@@ -8,5 +8,6 @@ export {
   syncCalendar,
   syncWithGoogleCalendar,
   fetchGoogleCalendarToken,
+  fetchGoogleCalendarEvents,
   handleGoogleCalendarCallback
 } from "@/services/googleCalendar";

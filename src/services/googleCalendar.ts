@@ -104,6 +104,50 @@ export const connectToGoogleCalendar = async (): Promise<string> => {
 };
 
 /**
+ * Fetch Google Calendar events
+ */
+export const fetchGoogleCalendarEvents = async (calendarId = 'primary'): Promise<CalendarEvent[]> => {
+  try {
+    // Verify user is authenticated
+    const { data: { user }, error: userError } = await supabase.auth.getUser();
+    if (userError || !user) {
+      console.error("User not authenticated:", userError);
+      return [];
+    }
+
+    // Get current session
+    const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+    if (sessionError || !session) {
+      console.error("No valid session:", sessionError);
+      return [];
+    }
+    
+    const { data, error } = await supabase.functions.invoke('google-calendar-auth', {
+      body: { 
+        action: 'fetch_events',
+        calendar_id: calendarId
+      },
+      headers: {
+        'Authorization': `Bearer ${session.access_token}`,
+        'Content-Type': 'application/json'
+      }
+    });
+    
+    if (error) {
+      console.error("Error fetching events:", error);
+      toast.error("Failed to fetch Google Calendar events");
+      return [];
+    }
+    
+    return data?.events || [];
+  } catch (error) {
+    console.error("Error fetching Google Calendar events:", error);
+    toast.error("Failed to fetch Google Calendar events");
+    return [];
+  }
+};
+
+/**
  * Alias for backward compatibility
  */
 export const connect = connectToGoogleCalendar;

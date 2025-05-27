@@ -1,3 +1,4 @@
+
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
@@ -17,7 +18,7 @@ if (!GOOGLE_OAUTH_CLIENT_SECRET) {
 const REDIRECT_URI = `${SUPABASE_URL}/functions/v1/google-calendar-auth`;
 const GOOGLE_OAUTH_ENDPOINT = "https://accounts.google.com/o/oauth2/v2/auth";
 const GOOGLE_TOKEN_ENDPOINT = "https://oauth2.googleapis.com/token";
-const GOOGLE_SCOPE = "https://www.googleapis.com/auth/calendar";
+const GOOGLE_SCOPE = "https://www.googleapis.com/auth/calendar.readonly";
 
 // CORS headers
 const corsHeaders = {
@@ -164,43 +165,17 @@ serve(async (req) => {
     // Handle request body for POST requests
     if (req.method === 'POST') {
       try {
-        const contentType = req.headers.get('content-type') || '';
-        
-        if (contentType.includes('application/json')) {
-          const bodyText = await req.text();
-          console.log("Raw body text:", bodyText);
-          
-          if (bodyText && bodyText.trim()) {
-            requestData = JSON.parse(bodyText);
-          }
-        } else {
-          // Try to parse as JSON anyway
-          const bodyText = await req.text();
-          if (bodyText) {
-            try {
-              requestData = JSON.parse(bodyText);
-            } catch {
-              // If not JSON, create a basic structure
-              requestData = {};
-            }
-          }
-        }
-        
-        console.log("Parsed request data:", requestData);
+        // For Supabase functions.invoke(), the body is already JSON
+        requestData = await req.json();
+        console.log("Received request data:", requestData);
       } catch (e) {
-        console.error("Error parsing request body:", e);
-        return new Response(
-          JSON.stringify({ error: 'Invalid request body' }),
-          {
-            status: 400,
-            headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-          }
-        );
+        console.error("Error parsing JSON body:", e);
+        requestData = {};
       }
     }
     
     const { action } = requestData;
-    console.log("Processing action:", action);
+    console.log("Processing action:", action || 'undefined');
     
     switch (action) {
       case 'get_auth_url':
@@ -245,7 +220,7 @@ serve(async (req) => {
           .from('user_google_tokens')
           .select('access_token, expires_at')
           .eq('user_id', user.id)
-          .single();
+          .maybeSingle();
           
         if (!tokenData) {
           return new Response(
@@ -315,6 +290,99 @@ serve(async (req) => {
             headers: { ...corsHeaders, 'Content-Type': 'application/json' }
           }
         );
+
+      case 'fetch_events':
+        console.log("Fetching events for user:", user.id);
+        
+        // Get user's access token
+        const { data: eventsTokenData } = await supabaseAdmin
+          .from('user_google_tokens')
+          .select('access_token, expires_at')
+          .eq('user_id', user.id)
+          .maybeSingle();
+          
+        if (!eventsTokenData) {
+          return new Response(
+            JSON.stringify({ 
+              error: 'Google Calendar not connected',
+              events: []
+            }),
+            { 
+              status: 400, 
+              headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+            }
+          );
+        }
+        
+        // Check if token is expired
+        const eventExpiresAt = new Date(eventsTokenData.expires_at);
+        const eventNow = new Date();
+        
+        if (eventExpiresAt <= eventNow) {
+          return new Response(
+            JSON.stringify({ 
+              error: 'Google Calendar token expired. Please reconnect.',
+              events: []
+            }),
+            { 
+              status: 400, 
+              headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+            }
+          );
+        }
+
+        // Fetch next 5 upcoming events
+        const calendarId = requestData.calendar_id || 'primary';
+        const timeMin = new Date().toISOString();
+        
+        const eventsResponse = await fetch(
+          `https://www.googleapis.com/calendar/v3/calendars/${encodeURIComponent(calendarId)}/events?` + 
+          new URLSearchParams({
+            timeMin,
+            maxResults: '5',
+            singleEvents: 'true',
+            orderBy: 'startTime'
+          }).toString(),
+          {
+            headers: {
+              'Authorization': `Bearer ${eventsTokenData.access_token}`,
+            },
+          }
+        );
+        
+        if (!eventsResponse.ok) {
+          console.error("Failed to fetch events:", await eventsResponse.text());
+          return new Response(
+            JSON.stringify({ 
+              error: 'Failed to fetch events from Google',
+              events: []
+            }),
+            { 
+              status: 400, 
+              headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+            }
+          );
+        }
+        
+        const eventsData = await eventsResponse.json();
+        const events = eventsData.items?.map((event: any) => ({
+          id: event.id,
+          title: event.summary || 'Untitled Event',
+          start: event.start?.dateTime || event.start?.date,
+          end: event.end?.dateTime || event.end?.date,
+          location: event.location || '',
+          description: event.description || '',
+          allDay: !event.start?.dateTime,
+          source: 'google'
+        })) || [];
+        
+        return new Response(
+          JSON.stringify({ events }),
+          { 
+            status: 200, 
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+          }
+        );
       
       case 'check_connection':
         const { data: connectionTokenData } = await supabaseAdmin
@@ -351,7 +419,7 @@ serve(async (req) => {
       default:
         console.error("Unknown action:", action);
         return new Response(
-          JSON.stringify({ error: 'Unknown action' }),
+          JSON.stringify({ error: `Unknown action: ${action}` }),
           { 
             status: 400, 
             headers: { ...corsHeaders, 'Content-Type': 'application/json' }
