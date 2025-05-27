@@ -2,9 +2,10 @@
 import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { useGoogleCalendar } from "@/hooks/useGoogleCalendar";
-import { RefreshCw, Link, Link2Off, AlertCircle } from "lucide-react";
+import { RefreshCw, Link, Link2Off, AlertCircle, LogIn } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { CalendarSelector } from "./CalendarSelector";
+import { useAuth } from "@/contexts/AuthContext";
 
 export function GoogleCalendarConnect() {
   const { 
@@ -17,11 +18,26 @@ export function GoogleCalendarConnect() {
     syncCalendar 
   } = useGoogleCalendar();
   
+  const { isAuthenticated } = useAuth();
   const [selectedCalendarId, setSelectedCalendarId] = useState('primary');
   
   const handleSync = () => {
     syncCalendar(selectedCalendarId);
   };
+  
+  // Show login prompt if user is not authenticated
+  if (!isAuthenticated) {
+    return (
+      <div className="rounded-lg border p-4 space-y-4 bg-white dark:bg-gray-800">
+        <h3 className="text-lg font-medium">Google Calendar</h3>
+        
+        <div className="flex items-center space-x-2 text-orange-600 dark:text-orange-400">
+          <LogIn className="h-4 w-4" />
+          <span className="text-sm">Please log in to connect Google Calendar</span>
+        </div>
+      </div>
+    );
+  }
   
   return (
     <div className="rounded-lg border p-4 space-y-4 bg-white dark:bg-gray-800">
