@@ -134,16 +134,12 @@ serve(async (req) => {
   try {
     let requestData = {};
     
-    // Only try to parse JSON if the request has a body
-    const contentType = req.headers.get('content-type');
-    if (contentType && contentType.includes('application/json')) {
+    // Parse request body if present
+    if (req.body) {
       try {
-        const body = await req.text();
-        if (body.trim()) {
-          requestData = JSON.parse(body);
-        }
+        requestData = await req.json();
       } catch (e) {
-        console.error("Invalid JSON in request body:", e);
+        console.error("Error parsing JSON:", e);
         return new Response(
           JSON.stringify({ error: 'Invalid JSON in request body' }),
           {
