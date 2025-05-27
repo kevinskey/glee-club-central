@@ -3,7 +3,7 @@ import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Loader2 } from "lucide-react";
-import { fetchGoogleCalendars } from "@/services/googleCalendar";
+import { supabase } from "@/integrations/supabase/client";
 
 interface Calendar {
   id: string;
@@ -30,14 +30,35 @@ export function CalendarSelector({ selectedCalendarId, onCalendarSelect, isConne
   const loadCalendars = async () => {
     setIsLoading(true);
     try {
-      const fetchedCalendars = await fetchGoogleCalendars();
-      if (fetchedCalendars) {
-        setCalendars(fetchedCalendars);
+      const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+      
+      if (sessionError || !session) {
+        console.error("No valid session");
+        return;
+      }
+
+      console.log("Loading calendars with action: list_calendars");
+
+      const { data, error } = await supabase.functions.invoke('google-calendar-auth', {
+        body: { action: 'list_calendars' },
+        headers: {
+          'Authorization': `Bearer ${session.access_token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+
+      if (error) {
+        console.error("Error loading calendars:", error);
+        return;
+      }
+
+      if (data?.calendars) {
+        setCalendars(data.calendars);
         
         // If no calendar is selected and we have calendars, select the primary one or first one
-        if (!selectedCalendarId && fetchedCalendars.length > 0) {
-          const primaryCalendar = fetchedCalendars.find(cal => cal.primary);
-          onCalendarSelect(primaryCalendar?.id || fetchedCalendars[0].id);
+        if (!selectedCalendarId && data.calendars.length > 0) {
+          const primaryCalendar = data.calendars.find((cal: Calendar) => cal.primary);
+          onCalendarSelect(primaryCalendar?.id || data.calendars[0].id);
         }
       }
     } catch (error) {
