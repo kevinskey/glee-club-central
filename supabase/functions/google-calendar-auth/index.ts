@@ -1,4 +1,3 @@
-
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
@@ -213,14 +212,93 @@ serve(async (req) => {
           }
         );
       
-      case 'check_connection':
+      case 'list_calendars':
+        console.log("Fetching calendars for user:", user.id);
+        
+        // Get user's access token
         const { data: tokenData } = await supabaseAdmin
+          .from('user_google_tokens')
+          .select('access_token, expires_at')
+          .eq('user_id', user.id)
+          .single();
+          
+        if (!tokenData) {
+          return new Response(
+            JSON.stringify({ 
+              error: 'Google Calendar not connected',
+              calendars: []
+            }),
+            { 
+              status: 400, 
+              headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+            }
+          );
+        }
+        
+        // Check if token is expired
+        const expiresAt = new Date(tokenData.expires_at);
+        const now = new Date();
+        
+        if (expiresAt <= now) {
+          return new Response(
+            JSON.stringify({ 
+              error: 'Google Calendar token expired. Please reconnect.',
+              calendars: []
+            }),
+            { 
+              status: 400, 
+              headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+            }
+          );
+        }
+        
+        // Fetch calendars from Google Calendar API
+        const calendarsResponse = await fetch(
+          'https://www.googleapis.com/calendar/v3/users/me/calendarList',
+          {
+            headers: {
+              'Authorization': `Bearer ${tokenData.access_token}`,
+            },
+          }
+        );
+        
+        if (!calendarsResponse.ok) {
+          console.error("Failed to fetch calendars:", await calendarsResponse.text());
+          return new Response(
+            JSON.stringify({ 
+              error: 'Failed to fetch calendars from Google',
+              calendars: []
+            }),
+            { 
+              status: 400, 
+              headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+            }
+          );
+        }
+        
+        const calendarsData = await calendarsResponse.json();
+        const calendars = calendarsData.items?.map((cal: any) => ({
+          id: cal.id,
+          name: cal.summary,
+          primary: cal.primary || false
+        })) || [];
+        
+        return new Response(
+          JSON.stringify({ calendars }),
+          { 
+            status: 200, 
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+          }
+        );
+      
+      case 'check_connection':
+        const { data: connectionTokenData } = await supabaseAdmin
           .from('user_google_tokens')
           .select('access_token, expires_at')
           .eq('user_id', user.id)
           .maybeSingle();
           
-        const connected = !!tokenData && !!tokenData.access_token;
+        const connected = !!connectionTokenData && !!connectionTokenData.access_token;
         
         return new Response(
           JSON.stringify({ connected }),

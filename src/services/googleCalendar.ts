@@ -1,4 +1,3 @@
-
 // Service for handling Google Calendar integration and synchronization
 
 import { supabase } from "@/integrations/supabase/client";
@@ -111,6 +110,32 @@ export const disconnect = async (): Promise<boolean> => {
     console.error("Error disconnecting from Google Calendar:", error);
     toast.error("Failed to disconnect from Google Calendar");
     return false;
+  }
+};
+
+/**
+ * Fetch available Google Calendars for the user
+ */
+export const fetchGoogleCalendars = async (): Promise<Array<{id: string, name: string, primary?: boolean}> | null> => {
+  try {
+    const { data: user } = await supabase.auth.getUser();
+    if (!user || !user.user) {
+      return null;
+    }
+    
+    const { data, error } = await supabase.functions.invoke('google-calendar-auth', {
+      body: { action: 'list_calendars' }
+    });
+    
+    if (error) {
+      throw error;
+    }
+    
+    return data?.calendars || [];
+  } catch (error) {
+    console.error("Error fetching Google Calendars:", error);
+    toast.error("Failed to fetch calendars");
+    return null;
   }
 };
 

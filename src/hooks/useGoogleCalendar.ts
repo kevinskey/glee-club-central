@@ -4,7 +4,7 @@ import {
   isConnected, 
   connectToGoogleCalendar, 
   disconnect, 
-  syncCalendar
+  syncWithGoogleCalendar
 } from '@/services/googleCalendar';
 
 export const useGoogleCalendar = () => {
@@ -92,10 +92,10 @@ export const useGoogleCalendar = () => {
     }
   };
 
-  const handleSyncCalendar = async () => {
+  const handleSyncCalendar = async (calendarId = 'primary') => {
     try {
       setIsSyncing(true);
-      await syncCalendar();
+      await syncWithGoogleCalendar(calendarId);
       setError('');
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to sync with Google Calendar');
