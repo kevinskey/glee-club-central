@@ -7,6 +7,12 @@ const GOOGLE_OAUTH_CLIENT_ID = Deno.env.get("GOOGLE_OAUTH_CLIENT_ID");
 const GOOGLE_OAUTH_CLIENT_SECRET = Deno.env.get("GOOGLE_OAUTH_CLIENT_SECRET");
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL");
 
+console.log("Environment check:", {
+  hasClientId: !!GOOGLE_OAUTH_CLIENT_ID,
+  hasClientSecret: !!GOOGLE_OAUTH_CLIENT_SECRET,
+  hasSupabaseUrl: !!SUPABASE_URL
+});
+
 if (!GOOGLE_OAUTH_CLIENT_ID) {
   console.error("GOOGLE_OAUTH_CLIENT_ID environment variable is not set");
 }
@@ -27,7 +33,7 @@ const corsHeaders = {
 };
 
 serve(async (req) => {
-  console.log(`Received ${req.method} request to ${req.url}`);
+  console.log(`[${new Date().toISOString()}] ${req.method} ${req.url}`);
   
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
@@ -43,7 +49,7 @@ serve(async (req) => {
   
   // Handle OAuth callback
   if (code) {
-    console.log("Handling OAuth callback with code:", code.substring(0, 10) + "...");
+    console.log("Processing OAuth callback...");
     
     try {
       const state = url.searchParams.get('state');
@@ -76,7 +82,7 @@ serve(async (req) => {
       }
       
       const tokens = await tokenResponse.json();
-      console.log("Token exchange successful");
+      console.log("Token exchange successful, expires in:", tokens.expires_in);
       
       // Store tokens in database
       const { data: existingToken } = await supabaseAdmin
@@ -87,7 +93,7 @@ serve(async (req) => {
         
       if (existingToken) {
         console.log("Updating existing token for user:", userId);
-        await supabaseAdmin
+        const { error } = await supabaseAdmin
           .from('user_google_tokens')
           .update({
             access_token: tokens.access_token,
@@ -96,9 +102,14 @@ serve(async (req) => {
             updated_at: new Date().toISOString()
           })
           .eq('user_id', userId);
+          
+        if (error) {
+          console.error("Failed to update token:", error);
+          throw error;
+        }
       } else {
         console.log("Creating new token for user:", userId);
-        await supabaseAdmin
+        const { error } = await supabaseAdmin
           .from('user_google_tokens')
           .insert({
             user_id: userId,
@@ -106,18 +117,24 @@ serve(async (req) => {
             refresh_token: tokens.refresh_token,
             expires_at: new Date(Date.now() + tokens.expires_in * 1000).toISOString()
           });
+          
+        if (error) {
+          console.error("Failed to insert token:", error);
+          throw error;
+        }
       }
       
       return new Response(`
         <html>
           <head><title>Calendar Connected</title></head>
-          <body>
-            <h2>Calendar Connected Successfully!</h2>
-            <p>Your Google Calendar has been connected to GleeWorld. You can close this window now.</p>
+          <body style="font-family: Arial, sans-serif; padding: 20px; text-align: center;">
+            <h2>✅ Calendar Connected Successfully!</h2>
+            <p>Your Google Calendar has been connected to GleeWorld.</p>
+            <p>You can close this window now.</p>
             <script>
               setTimeout(() => {
                 window.close();
-              }, 3000);
+              }, 2000);
             </script>
           </body>
         </html>
@@ -126,21 +143,31 @@ serve(async (req) => {
         status: 200,
       });
     } catch (error) {
-      console.error('Error handling OAuth callback:', error);
-      return new Response(`Error: ${error.message}`, { status: 500 });
+      console.error('OAuth callback error:', error);
+      return new Response(`
+        <html>
+          <head><title>Connection Failed</title></head>
+          <body style="font-family: Arial, sans-serif; padding: 20px; text-align: center;">
+            <h2>❌ Connection Failed</h2>
+            <p>Error: ${error.message}</p>
+            <p>Please try again.</p>
+          </body>
+        </html>
+      `, { 
+        headers: { 'Content-Type': 'text/html' },
+        status: 500 
+      });
     }
   }
   
   // Handle API requests
   try {
-    let requestData: any = {};
-    
     // Get auth user first
     const authHeader = req.headers.get('Authorization');
     if (!authHeader) {
       console.error("Missing Authorization header");
       return new Response(
-        JSON.stringify({ error: 'Missing Authorization header' }),
+        JSON.stringify({ error: 'Authorization required' }),
         { 
           status: 401, 
           headers: { ...corsHeaders, 'Content-Type': 'application/json' }
@@ -154,7 +181,7 @@ serve(async (req) => {
     if (authError || !user) {
       console.error("Authentication failed:", authError);
       return new Response(
-        JSON.stringify({ error: 'Unauthorized' }),
+        JSON.stringify({ error: 'Invalid authentication' }),
         { 
           status: 401, 
           headers: { ...corsHeaders, 'Content-Type': 'application/json' }
@@ -162,32 +189,20 @@ serve(async (req) => {
       );
     }
     
-    // Handle request body for POST requests
+    // Parse request body safely
+    let requestData: any = {};
     if (req.method === 'POST') {
       try {
-        const contentType = req.headers.get('content-type') || '';
-        console.log("Content-Type:", contentType);
+        const bodyText = await req.text();
+        console.log("Raw request body:", bodyText);
         
-        if (contentType.includes('application/json')) {
-          const bodyText = await req.text();
-          console.log("Raw body:", bodyText);
-          
-          if (bodyText.trim()) {
-            requestData = JSON.parse(bodyText);
-          } else {
-            console.log("Empty body received");
-            requestData = {};
-          }
-        } else {
-          console.log("Non-JSON content type, treating as empty body");
-          requestData = {};
+        if (bodyText.trim()) {
+          requestData = JSON.parse(bodyText);
         }
-        
-        console.log("Parsed request data:", requestData);
       } catch (e) {
         console.error("Error parsing request body:", e);
         return new Response(
-          JSON.stringify({ error: 'Invalid request body' }),
+          JSON.stringify({ error: 'Invalid JSON in request body' }),
           { 
             status: 400, 
             headers: { ...corsHeaders, 'Content-Type': 'application/json' }
@@ -197,7 +212,7 @@ serve(async (req) => {
     }
     
     const { action } = requestData;
-    console.log("Processing action:", action || 'undefined');
+    console.log(`Processing action: "${action}" for user: ${user.id}`);
     
     // Helper function to get and verify user token
     const getUserToken = async () => {
@@ -221,6 +236,7 @@ serve(async (req) => {
       const now = new Date();
       
       if (expiresAt <= now) {
+        console.log("Token expired, needs refresh");
         throw new Error('Google Calendar token expired. Please reconnect.');
       }
       
@@ -252,7 +268,7 @@ serve(async (req) => {
           state: user.id,
         }).toString();
         
-        console.log("Generated auth URL:", authUrl.substring(0, 100) + "...");
+        console.log("Generated auth URL");
         
         return new Response(
           JSON.stringify({ authUrl }),
@@ -265,6 +281,7 @@ serve(async (req) => {
       case 'check_connection':
         try {
           const tokenData = await getUserToken();
+          console.log("Connection check: CONNECTED");
           return new Response(
             JSON.stringify({ 
               connected: true,
@@ -276,6 +293,7 @@ serve(async (req) => {
             }
           );
         } catch (error) {
+          console.log("Connection check: NOT CONNECTED -", error.message);
           return new Response(
             JSON.stringify({ 
               connected: false,
@@ -294,7 +312,6 @@ serve(async (req) => {
         try {
           const tokenData = await getUserToken();
           
-          // Fetch calendars from Google Calendar API
           const calendarsResponse = await fetch(
             'https://www.googleapis.com/calendar/v3/users/me/calendarList',
             {
@@ -316,6 +333,8 @@ serve(async (req) => {
             name: cal.summary,
             primary: cal.primary || false
           })) || [];
+          
+          console.log(`Fetched ${calendars.length} calendars`);
           
           return new Response(
             JSON.stringify({ calendars }),
@@ -344,11 +363,10 @@ serve(async (req) => {
         try {
           const tokenData = await getUserToken();
           
-          // Fetch next 5 upcoming events
           const calendarId = requestData.calendar_id || 'primary';
           const timeMin = new Date().toISOString();
           
-          console.log("Fetching events from calendar:", calendarId);
+          console.log(`Fetching events from calendar: ${calendarId}`);
           
           const eventsResponse = await fetch(
             `https://www.googleapis.com/calendar/v3/calendars/${encodeURIComponent(calendarId)}/events?` + 
@@ -372,7 +390,7 @@ serve(async (req) => {
           }
           
           const eventsData = await eventsResponse.json();
-          console.log("Fetched", eventsData.items?.length || 0, "events");
+          console.log(`Successfully fetched ${eventsData.items?.length || 0} events`);
           
           const events = eventsData.items?.map((event: any) => ({
             id: event.id,
@@ -420,6 +438,8 @@ serve(async (req) => {
             throw error;
           }
           
+          console.log("Successfully disconnected user:", user.id);
+          
           return new Response(
             JSON.stringify({ success: true }),
             { 
@@ -442,7 +462,7 @@ serve(async (req) => {
         }
         
       default:
-        console.error("Unknown action:", action);
+        console.error(`Unknown action: "${action}"`);
         return new Response(
           JSON.stringify({ error: `Unknown action: ${action}` }),
           { 
@@ -452,7 +472,7 @@ serve(async (req) => {
         );
     }
   } catch (error) {
-    console.error('Error handling request:', error);
+    console.error('Unhandled error:', error);
     return new Response(
       JSON.stringify({ error: error.message }),
       { 
