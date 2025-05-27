@@ -10,9 +10,17 @@ import { useAuth } from "@/contexts/AuthContext";
 export function HeroSection() {
   const { isAuthenticated } = useAuth();
 
+  // Define hero images for the slideshow
+  const heroImages = [
+    "/lovable-uploads/92a39fc3-43b7-4240-982b-bff85ae2fdca.png",
+    "/lovable-uploads/8aa13e63-fb9a-4c52-95cf-86b458c58f1c.png",
+    "/lovable-uploads/65c0e4fd-f960-4e32-a3cd-dc46f81be743.png",
+    "/lovable-uploads/daf81087-d822-4f6c-9859-43580f9a3971.png"
+  ];
+
   return (
     <section className="relative min-h-[90vh] flex items-center justify-center overflow-hidden">
-      <BackgroundSlideshow />
+      <BackgroundSlideshow images={heroImages} />
       
       {/* Overlay for better text readability */}
       <div className="absolute inset-0 bg-black/40 z-10" />

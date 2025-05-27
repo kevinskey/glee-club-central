@@ -4,7 +4,7 @@ import { PageHeader } from "@/components/ui/page-header";
 import { useAuth } from "@/contexts/AuthContext";
 import { UpcomingEventsList } from "@/components/calendar/UpcomingEventsList";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Calendar, Music, Bell, Link } from "lucide-react";
+import { Calendar, Music, Bell, Link as RouterLink } from "react-router-dom";
 import {
   Music as MusicIcon,
   Calendar as CalendarIcon,
@@ -44,7 +44,7 @@ export default function MemberDashboardPage() {
         <CardContent>
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
             {memberQuickAccessLinks.map((link, index) => (
-              <Link 
+              <RouterLink 
                 key={index} 
                 to={link.path} 
                 className="group no-underline block"
@@ -57,7 +57,7 @@ export default function MemberDashboardPage() {
                     {link.title}
                   </span>
                 </div>
-              </Link>
+              </RouterLink>
             ))}
           </div>
         </CardContent>

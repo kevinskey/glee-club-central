@@ -3,12 +3,15 @@ import React, { useEffect, memo } from "react";
 import { Outlet, useLocation } from "react-router-dom";
 import { Sidebar } from "@/components/layout/Sidebar";
 import { ConsolidatedHeader } from "@/components/layout/ConsolidatedHeader";
+import { MobileNav } from "@/components/layout/MobileNav";
 import { SidebarProvider } from "@/components/ui/sidebar";
 import { useMedia } from "@/hooks/use-mobile";
+import { useAuth } from "@/contexts/AuthContext";
 
 // Memoize the header and sidebar to prevent unnecessary re-renders
 const MemoizedHeader = memo(ConsolidatedHeader);
 const MemoizedSidebar = memo(Sidebar);
+const MemoizedMobileNav = memo(MobileNav);
 
 interface DashboardLayoutProps {
   children?: React.ReactNode;
@@ -16,6 +19,8 @@ interface DashboardLayoutProps {
 
 const DashboardLayout = ({ children }: DashboardLayoutProps) => {
   const isMobile = useMedia("(max-width: 768px)");
+  const { profile } = useAuth();
+  const isAdmin = profile?.is_super_admin || profile?.role === 'admin';
   
   return (
     <SidebarProvider>
@@ -33,6 +38,9 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
             </div>
           </main>
         </div>
+        
+        {/* Mobile Navigation */}
+        <MemoizedMobileNav isAdmin={isAdmin} />
       </div>
     </SidebarProvider>
   );
