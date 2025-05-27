@@ -255,43 +255,4 @@ export function GoogleCalendarStatus({ onConnectionChange }: GoogleCalendarStatu
       </CardContent>
     </Card>
   );
-
-  function getStatusIcon() {
-    switch (status) {
-      case 'connected':
-        return <CheckCircle className="h-4 w-4 text-green-500" />;
-      case 'expired':
-        return <AlertCircle className="h-4 w-4 text-yellow-500" />;
-      case 'disconnected':
-        return <XCircle className="h-4 w-4 text-red-500" />;
-      default:
-        return <RefreshCw className="h-4 w-4 animate-spin" />;
-    }
-  }
-
-  function getStatusText() {
-    switch (status) {
-      case 'connected':
-        return 'Connected';
-      case 'expired':
-        return 'Token Expired';
-      case 'disconnected':
-        return 'Not Connected';
-      default:
-        return 'Checking...';
-    }
-  }
-
-  function getStatusVariant() {
-    switch (status) {
-      case 'connected':
-        return 'default' as const;
-      case 'expired':
-        return 'secondary' as const;
-      case 'disconnected':
-        return 'destructive' as const;
-      default:
-        return 'outline' as const;
-    }
-  }
 }
