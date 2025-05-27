@@ -21,7 +21,7 @@ export const isConnected = async (): Promise<boolean> => {
     }
     
     const { data, error } = await supabase.functions.invoke('google-calendar-auth', {
-      body: JSON.stringify({ action: 'check_connection' }),
+      body: { action: 'check_connection' },
       headers: {
         'Authorization': `Bearer ${session.access_token}`,
         'Content-Type': 'application/json'
@@ -65,7 +65,7 @@ export const connectToGoogleCalendar = async (): Promise<string> => {
 
     // Call the edge function with proper formatting
     const { data, error } = await supabase.functions.invoke('google-calendar-auth', {
-      body: JSON.stringify({ action: 'get_auth_url' }),
+      body: { action: 'get_auth_url' },
       headers: {
         'Authorization': `Bearer ${session.access_token}`,
         'Content-Type': 'application/json'
@@ -128,10 +128,10 @@ export const fetchGoogleCalendarEvents = async (calendarId = 'primary'): Promise
     }
     
     const { data, error } = await supabase.functions.invoke('google-calendar-auth', {
-      body: JSON.stringify({ 
+      body: { 
         action: 'fetch_events',
         calendar_id: calendarId
-      }),
+      },
       headers: {
         'Authorization': `Bearer ${session.access_token}`,
         'Content-Type': 'application/json'
@@ -179,7 +179,7 @@ export const disconnect = async (): Promise<boolean> => {
     
     // Call the edge function to disconnect
     const { data, error } = await supabase.functions.invoke('google-calendar-auth', {
-      body: JSON.stringify({ action: 'disconnect' }),
+      body: { action: 'disconnect' },
       headers: {
         'Authorization': `Bearer ${session.access_token}`,
         'Content-Type': 'application/json'
@@ -224,7 +224,7 @@ export const fetchGoogleCalendars = async (): Promise<Array<{id: string, name: s
     }
     
     const { data, error } = await supabase.functions.invoke('google-calendar-auth', {
-      body: JSON.stringify({ action: 'list_calendars' }),
+      body: { action: 'list_calendars' },
       headers: {
         'Authorization': `Bearer ${session.access_token}`,
         'Content-Type': 'application/json'
