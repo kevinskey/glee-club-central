@@ -126,10 +126,33 @@ const EventCalendar: React.FC = () => {
       
       if (!token) {
         // If no token, initiate OAuth flow
-        const connectUrl = connectToGoogleCalendar();
-        if (connectUrl) {
-          window.location.href = connectUrl;
-        } else {
+        try {
+          const authUrl = await connectToGoogleCalendar();
+          
+          // Open the OAuth URL in a new popup window
+          const popup = window.open(
+            authUrl,
+            'google-oauth',
+            'width=500,height=600,scrollbars=yes,resizable=yes'
+          );
+
+          // Listen for the popup to close
+          const checkClosed = setInterval(() => {
+            if (popup?.closed) {
+              clearInterval(checkClosed);
+              // Check if connection was successful and sync
+              setTimeout(async () => {
+                const newToken = await fetchGoogleCalendarToken(user.id);
+                if (newToken) {
+                  await syncWithGoogleCalendar("primary", newToken.access_token);
+                  await fetchEvents();
+                }
+              }, 1000);
+            }
+          }, 1000);
+          
+        } catch (error) {
+          console.error("Error connecting to Google Calendar:", error);
           toast.error("Failed to connect to Google Calendar");
         }
         return;

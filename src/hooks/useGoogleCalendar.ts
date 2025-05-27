@@ -33,8 +33,30 @@ export const useGoogleCalendar = () => {
   const handleConnect = async () => {
     try {
       setIsLoading(true);
-      await connectToGoogleCalendar();
-      // Connection status will be checked when popup closes
+      const authUrl = await connectToGoogleCalendar();
+      
+      // Open the OAuth URL in a new popup window
+      const popup = window.open(
+        authUrl,
+        'google-oauth',
+        'width=500,height=600,scrollbars=yes,resizable=yes'
+      );
+
+      // Listen for the popup to close
+      const checkClosed = setInterval(() => {
+        if (popup?.closed) {
+          clearInterval(checkClosed);
+          // Check if connection was successful
+          setTimeout(async () => {
+            const connected = await isConnected();
+            setIsGoogleConnected(connected);
+            if (connected) {
+              setError('');
+            }
+          }, 1000);
+        }
+      }, 1000);
+      
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to connect to Google Calendar');
       console.error('Error connecting to Google Calendar:', err);
@@ -49,6 +71,7 @@ export const useGoogleCalendar = () => {
       const success = await disconnect();
       if (success) {
         setIsGoogleConnected(false);
+        setError('');
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to disconnect from Google Calendar');
@@ -62,6 +85,7 @@ export const useGoogleCalendar = () => {
     try {
       setIsSyncing(true);
       await syncCalendar();
+      setError('');
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to sync with Google Calendar');
       console.error('Error syncing with Google Calendar:', err);

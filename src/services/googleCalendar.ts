@@ -39,12 +39,12 @@ export const isConnected = async (): Promise<boolean> => {
 /**
  * Start the OAuth flow to connect to Google Calendar
  */
-export const connectToGoogleCalendar = async (): Promise<void> => {
+export const connectToGoogleCalendar = async (): Promise<string> => {
   try {
     const { data: user } = await supabase.auth.getUser();
     if (!user || !user.user) {
       toast.error("You must be logged in to connect Google Calendar");
-      return;
+      throw new Error("User not authenticated");
     }
 
     // Call the edge function to get the OAuth URL
@@ -53,36 +53,21 @@ export const connectToGoogleCalendar = async (): Promise<void> => {
     });
 
     if (error) {
+      console.error("Error getting OAuth URL:", error);
+      toast.error("Failed to get Google Calendar authorization URL");
       throw error;
     }
 
     if (data?.authUrl) {
-      // Open the OAuth URL in a new popup window
-      const popup = window.open(
-        data.authUrl,
-        'google-oauth',
-        'width=500,height=600,scrollbars=yes,resizable=yes'
-      );
-
-      // Listen for the popup to close
-      const checkClosed = setInterval(() => {
-        if (popup?.closed) {
-          clearInterval(checkClosed);
-          // Check if connection was successful
-          setTimeout(async () => {
-            const connected = await isConnected();
-            if (connected) {
-              toast.success("Google Calendar connected successfully!");
-            }
-          }, 1000);
-        }
-      }, 1000);
+      return data.authUrl;
     } else {
       toast.error("Failed to get OAuth URL");
+      throw new Error("No auth URL returned");
     }
   } catch (error) {
     console.error("Error connecting to Google Calendar:", error);
     toast.error("Failed to connect to Google Calendar");
+    throw error;
   }
 };
 

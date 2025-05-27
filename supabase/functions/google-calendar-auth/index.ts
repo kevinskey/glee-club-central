@@ -3,9 +3,19 @@ import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 // Google OAuth credentials from environment
-const GOOGLE_OAUTH_CLIENT_ID = Deno.env.get("GOOGLE_OAUTH_CLIENT_ID") || "";
-const GOOGLE_OAUTH_CLIENT_SECRET = Deno.env.get("GOOGLE_OAUTH_CLIENT_SECRET") || "";
-const REDIRECT_URI = `${Deno.env.get("SUPABASE_URL")}/functions/v1/google-calendar-auth`;
+const GOOGLE_OAUTH_CLIENT_ID = Deno.env.get("GOOGLE_OAUTH_CLIENT_ID");
+const GOOGLE_OAUTH_CLIENT_SECRET = Deno.env.get("GOOGLE_OAUTH_CLIENT_SECRET");
+const SUPABASE_URL = Deno.env.get("SUPABASE_URL");
+
+if (!GOOGLE_OAUTH_CLIENT_ID) {
+  console.error("GOOGLE_OAUTH_CLIENT_ID environment variable is not set");
+}
+
+if (!GOOGLE_OAUTH_CLIENT_SECRET) {
+  console.error("GOOGLE_OAUTH_CLIENT_SECRET environment variable is not set");
+}
+
+const REDIRECT_URI = `${SUPABASE_URL}/functions/v1/google-calendar-auth`;
 const GOOGLE_OAUTH_ENDPOINT = "https://accounts.google.com/o/oauth2/v2/auth";
 const GOOGLE_TOKEN_ENDPOINT = "https://oauth2.googleapis.com/token";
 const GOOGLE_SCOPE = "https://www.googleapis.com/auth/calendar";
@@ -17,6 +27,8 @@ const corsHeaders = {
 };
 
 serve(async (req) => {
+  console.log(`Received ${req.method} request to ${req.url}`);
+  
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
   }
@@ -31,6 +43,8 @@ serve(async (req) => {
   
   // Handle OAuth callback
   if (code) {
+    console.log("Handling OAuth callback with code:", code.substring(0, 10) + "...");
+    
     try {
       const state = url.searchParams.get('state');
       if (!state) {
@@ -38,6 +52,7 @@ serve(async (req) => {
       }
       
       const userId = state;
+      console.log("Processing callback for user:", userId);
       
       // Exchange code for tokens
       const tokenResponse = await fetch(GOOGLE_TOKEN_ENDPOINT, {
@@ -47,8 +62,8 @@ serve(async (req) => {
         },
         body: new URLSearchParams({
           code,
-          client_id: GOOGLE_OAUTH_CLIENT_ID,
-          client_secret: GOOGLE_OAUTH_CLIENT_SECRET,
+          client_id: GOOGLE_OAUTH_CLIENT_ID || '',
+          client_secret: GOOGLE_OAUTH_CLIENT_SECRET || '',
           redirect_uri: REDIRECT_URI,
           grant_type: 'authorization_code',
         }).toString(),
@@ -56,10 +71,12 @@ serve(async (req) => {
       
       if (!tokenResponse.ok) {
         const errorText = await tokenResponse.text();
+        console.error("Token exchange failed:", errorText);
         throw new Error(`Failed to exchange code for tokens: ${errorText}`);
       }
       
       const tokens = await tokenResponse.json();
+      console.log("Token exchange successful");
       
       // Store tokens in database
       const { data: existingToken } = await supabaseAdmin
@@ -69,6 +86,7 @@ serve(async (req) => {
         .maybeSingle();
         
       if (existingToken) {
+        console.log("Updating existing token for user:", userId);
         await supabaseAdmin
           .from('user_google_tokens')
           .update({
@@ -79,6 +97,7 @@ serve(async (req) => {
           })
           .eq('user_id', userId);
       } else {
+        console.log("Creating new token for user:", userId);
         await supabaseAdmin
           .from('user_google_tokens')
           .insert({
@@ -119,6 +138,7 @@ serve(async (req) => {
     try {
       requestData = await req.json();
     } catch (e) {
+      console.error("Invalid JSON in request body:", e);
       return new Response(
         JSON.stringify({ error: 'Invalid JSON in request body' }),
         {
@@ -129,10 +149,12 @@ serve(async (req) => {
     }
     
     const { action } = requestData || {};
+    console.log("Processing action:", action);
     
     // Get auth user
     const authHeader = req.headers.get('Authorization');
     if (!authHeader) {
+      console.error("Missing Authorization header");
       return new Response(
         JSON.stringify({ error: 'Missing Authorization header' }),
         { 
@@ -146,6 +168,7 @@ serve(async (req) => {
     const { data: { user }, error: authError } = await supabaseAdmin.auth.getUser(token);
     
     if (authError || !user) {
+      console.error("Authentication failed:", authError);
       return new Response(
         JSON.stringify({ error: 'Unauthorized' }),
         { 
@@ -157,6 +180,19 @@ serve(async (req) => {
     
     switch (action) {
       case 'get_auth_url':
+        console.log("Generating auth URL for user:", user.id);
+        
+        if (!GOOGLE_OAUTH_CLIENT_ID) {
+          console.error("GOOGLE_OAUTH_CLIENT_ID is not configured");
+          return new Response(
+            JSON.stringify({ error: 'Google OAuth not configured' }),
+            { 
+              status: 500, 
+              headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+            }
+          );
+        }
+        
         const authUrl = `${GOOGLE_OAUTH_ENDPOINT}?` + new URLSearchParams({
           client_id: GOOGLE_OAUTH_CLIENT_ID,
           redirect_uri: REDIRECT_URI,
@@ -166,6 +202,8 @@ serve(async (req) => {
           scope: GOOGLE_SCOPE,
           state: user.id,
         }).toString();
+        
+        console.log("Generated auth URL:", authUrl.substring(0, 100) + "...");
         
         return new Response(
           JSON.stringify({ authUrl }),
@@ -193,6 +231,7 @@ serve(async (req) => {
         );
         
       case 'disconnect':
+        console.log("Disconnecting Google Calendar for user:", user.id);
         await supabaseAdmin
           .from('user_google_tokens')
           .delete()
@@ -207,6 +246,7 @@ serve(async (req) => {
         );
         
       default:
+        console.error("Unknown action:", action);
         return new Response(
           JSON.stringify({ error: 'Unknown action' }),
           { 
