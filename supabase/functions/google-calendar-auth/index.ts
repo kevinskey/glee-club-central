@@ -132,22 +132,29 @@ serve(async (req) => {
   
   // Handle API requests
   try {
-    let requestData;
+    let requestData = {};
     
-    try {
-      requestData = await req.json();
-    } catch (e) {
-      console.error("Invalid JSON in request body:", e);
-      return new Response(
-        JSON.stringify({ error: 'Invalid JSON in request body' }),
-        {
-          status: 400,
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+    // Only try to parse JSON if the request has a body
+    const contentType = req.headers.get('content-type');
+    if (contentType && contentType.includes('application/json')) {
+      try {
+        const body = await req.text();
+        if (body.trim()) {
+          requestData = JSON.parse(body);
         }
-      );
+      } catch (e) {
+        console.error("Invalid JSON in request body:", e);
+        return new Response(
+          JSON.stringify({ error: 'Invalid JSON in request body' }),
+          {
+            status: 400,
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+          }
+        );
+      }
     }
     
-    const { action } = requestData || {};
+    const { action } = requestData;
     console.log("Processing action:", action);
     
     // Get auth user
