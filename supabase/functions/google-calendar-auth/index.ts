@@ -1,3 +1,4 @@
+
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
@@ -134,26 +135,10 @@ serve(async (req) => {
   try {
     let requestData: any = {};
     
-    // Properly parse request body for POST requests
+    // Handle request body for POST requests
     if (req.method === 'POST') {
       try {
-        const bodyText = await req.text();
-        console.log("Raw body text:", bodyText);
-        
-        if (bodyText && bodyText.trim()) {
-          // Check if it's JSON or if Supabase already parsed it
-          if (bodyText.startsWith('{')) {
-            requestData = JSON.parse(bodyText);
-          } else {
-            // Handle case where Supabase sends the parsed object as string
-            try {
-              requestData = JSON.parse(bodyText);
-            } catch {
-              // If it's not valid JSON, treat as plain text
-              requestData = { rawBody: bodyText };
-            }
-          }
-        }
+        requestData = await req.json();
         console.log("Parsed request data:", requestData);
       } catch (e) {
         console.error("Error parsing request body:", e);
