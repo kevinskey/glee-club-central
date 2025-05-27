@@ -18,6 +18,7 @@ export const useGoogleCalendar = () => {
       try {
         setIsLoading(true);
         const connected = await isConnected();
+        console.log("Google Calendar connection status:", connected);
         setIsGoogleConnected(connected);
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Failed to check Google Calendar connection');
@@ -33,7 +34,11 @@ export const useGoogleCalendar = () => {
   const handleConnect = async () => {
     try {
       setIsLoading(true);
+      setError('');
+      console.log("Starting Google Calendar connection...");
+      
       const authUrl = await connectToGoogleCalendar();
+      console.log("Got auth URL, opening popup...");
       
       // Open the OAuth URL in a new popup window
       const popup = window.open(
@@ -42,13 +47,19 @@ export const useGoogleCalendar = () => {
         'width=500,height=600,scrollbars=yes,resizable=yes'
       );
 
+      if (!popup) {
+        throw new Error('Failed to open popup window. Please allow popups for this site.');
+      }
+
       // Listen for the popup to close
       const checkClosed = setInterval(() => {
         if (popup?.closed) {
           clearInterval(checkClosed);
+          console.log("Popup closed, checking connection status...");
           // Check if connection was successful
           setTimeout(async () => {
             const connected = await isConnected();
+            console.log("Connection status after popup closed:", connected);
             setIsGoogleConnected(connected);
             if (connected) {
               setError('');

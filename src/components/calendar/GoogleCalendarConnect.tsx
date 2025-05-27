@@ -2,13 +2,15 @@
 import React from "react";
 import { Button } from "@/components/ui/button";
 import { useGoogleCalendar } from "@/hooks/useGoogleCalendar";
-import { RefreshCw, Link, Link2Off } from "lucide-react";
+import { RefreshCw, Link, Link2Off, AlertCircle } from "lucide-react";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
 export function GoogleCalendarConnect() {
   const { 
     isConnected, 
     isLoading, 
     isSyncing, 
+    error,
     connectToGoogleCalendar, 
     disconnect, 
     syncCalendar 
@@ -22,9 +24,21 @@ export function GoogleCalendarConnect() {
         Connect with Google Calendar to sync your Glee Club events.
       </p>
       
+      {error && (
+        <Alert variant="destructive">
+          <AlertCircle className="h-4 w-4" />
+          <AlertDescription>{error}</AlertDescription>
+        </Alert>
+      )}
+      
       <div className="space-y-2">
         {isConnected ? (
           <>
+            <div className="text-sm text-green-600 dark:text-green-400 flex items-center gap-2 mb-2">
+              <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+              Connected to Google Calendar
+            </div>
+            
             <Button 
               variant="destructive" 
               className="w-full"
@@ -52,15 +66,15 @@ export function GoogleCalendarConnect() {
             onClick={connectToGoogleCalendar}
             disabled={isLoading}
           >
-            <Link className="mr-2 h-4 w-4" />
-            Connect Google Calendar
+            {isLoading ? (
+              <RefreshCw className="mr-2 h-4 w-4 animate-spin" />
+            ) : (
+              <Link className="mr-2 h-4 w-4" />
+            )}
+            {isLoading ? 'Connecting...' : 'Connect Google Calendar'}
           </Button>
         )}
       </div>
-      
-      {isConnected && (
-        <p className="text-sm text-green-500">✓ Connected to Google Calendar</p>
-      )}
     </div>
   );
 }

@@ -47,6 +47,8 @@ export const connectToGoogleCalendar = async (): Promise<string> => {
       throw new Error("User not authenticated");
     }
 
+    console.log("Requesting Google Calendar auth URL...");
+
     // Call the edge function to get the OAuth URL
     const { data, error } = await supabase.functions.invoke('google-calendar-auth', {
       body: { action: 'get_auth_url' }
@@ -58,7 +60,10 @@ export const connectToGoogleCalendar = async (): Promise<string> => {
       throw error;
     }
 
+    console.log("Received auth URL response:", data);
+
     if (data?.authUrl) {
+      console.log("Opening OAuth URL:", data.authUrl.substring(0, 100) + "...");
       return data.authUrl;
     } else {
       toast.error("Failed to get OAuth URL");
