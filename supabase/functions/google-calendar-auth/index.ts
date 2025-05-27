@@ -189,7 +189,7 @@ serve(async (req) => {
       );
     }
     
-    // Parse request body safely
+    // Parse request body safely with proper error handling
     let requestData: any = {};
     if (req.method === 'POST') {
       try {
@@ -200,7 +200,8 @@ serve(async (req) => {
           requestData = JSON.parse(bodyText);
           console.log("Parsed request data:", requestData);
         } else {
-          console.log("Empty body received");
+          console.log("Empty body received, using default empty object");
+          requestData = {};
         }
       } catch (e) {
         console.error("Error parsing request body:", e);
@@ -214,8 +215,25 @@ serve(async (req) => {
       }
     }
     
-    const { action } = requestData;
+    // Extract action with fallback
+    const action = requestData.action;
     console.log(`Processing action: "${action}" for user: ${user.id}`);
+    
+    // Check if action is missing or undefined
+    if (!action) {
+      console.error("Missing or undefined action in request");
+      return new Response(
+        JSON.stringify({ 
+          error: 'Action is required',
+          received: requestData,
+          validActions: ['get_auth_url', 'check_connection', 'list_calendars', 'fetch_events', 'disconnect']
+        }),
+        { 
+          status: 400, 
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        }
+      );
+    }
     
     // Helper function to get and verify user token
     const getUserToken = async () => {
@@ -467,7 +485,10 @@ serve(async (req) => {
       default:
         console.error(`Unknown action: "${action}"`);
         return new Response(
-          JSON.stringify({ error: `Unknown action: ${action}` }),
+          JSON.stringify({ 
+            error: `Unknown action: ${action}`,
+            validActions: ['get_auth_url', 'check_connection', 'list_calendars', 'fetch_events', 'disconnect']
+          }),
           { 
             status: 400, 
             headers: { ...corsHeaders, 'Content-Type': 'application/json' }
