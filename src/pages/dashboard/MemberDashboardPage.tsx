@@ -4,6 +4,7 @@ import { PageHeader } from "@/components/ui/page-header";
 import { DashboardModules } from "@/components/dashboard/DashboardModules";
 import { useAuth } from "@/contexts/AuthContext";
 import { useCalendarEvents } from "@/hooks/useCalendarEvents";
+import { useMediaLibrary } from "@/hooks/useMediaLibrary";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Users, Music, Calendar, Bell } from "lucide-react";
 import { findNextEvent, formatEventDate, formatEventTime } from "@/utils/calendarUtils";
@@ -12,9 +13,17 @@ import ErrorBoundary from "@/components/ErrorBoundary";
 const MemberDashboardPage = () => {
   const { profile } = useAuth();
   const { events, loading: eventsLoading } = useCalendarEvents();
+  const { allMediaFiles, loading: mediaLoading } = useMediaLibrary();
   
   // Find the next upcoming event
   const nextEvent = findNextEvent(events, true); // Include private events for members
+  
+  // Count sheet music files (PDFs in the media library)
+  const sheetMusicCount = allMediaFiles.filter(file => 
+    file.file_type === 'application/pdf' || 
+    file.file_type.includes('pdf') ||
+    file.folder === 'sheet-music'
+  ).length;
   
   return (
     <ErrorBoundary>
@@ -72,8 +81,14 @@ const MemberDashboardPage = () => {
               <Music className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">12</div>
-              <p className="text-xs text-muted-foreground">Available pieces</p>
+              {mediaLoading ? (
+                <div className="text-sm text-muted-foreground">Loading...</div>
+              ) : (
+                <>
+                  <div className="text-2xl font-bold">{sheetMusicCount}</div>
+                  <p className="text-xs text-muted-foreground">Available pieces</p>
+                </>
+              )}
             </CardContent>
           </Card>
 
