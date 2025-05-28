@@ -20,14 +20,14 @@ export function GoogleCalendarAuthIntegrated({ onConnectionChange }: GoogleCalen
   const checkConnectionStatus = async () => {
     setIsLoading(true);
     try {
-      // First check if we have a stored Google token
+      // Check if we have a stored Google token
       const storedToken = localStorage.getItem('google_access_token');
       console.log("Checking stored Google token:", !!storedToken);
       
       if (storedToken) {
         setGoogleToken(storedToken);
         
-        // Test the stored token by making a direct API call to Google
+        // Test the stored token by making a simple API call
         try {
           const response = await fetch('https://www.googleapis.com/calendar/v3/users/me/calendarList', {
             headers: {
@@ -53,46 +53,9 @@ export function GoogleCalendarAuthIntegrated({ onConnectionChange }: GoogleCalen
         }
       }
 
-      // Fallback to checking with Supabase session
-      const { data: { session }, error: sessionError } = await supabase.auth.getSession();
-      
-      if (sessionError || !session?.access_token) {
-        console.error("No valid session for Google Calendar check:", sessionError);
-        setStatus('disconnected');
-        onConnectionChange?.(false);
-        return;
-      }
-
-      console.log("Checking Google Calendar connection with valid session");
-      
-      const { data, error } = await supabase.functions.invoke('google-calendar-auth', { 
-        body: { action: 'check_connection' },
-        headers: {
-          'Authorization': `Bearer ${session.access_token}`,
-        }
-      });
-
-      if (error) {
-        console.error("Error checking connection:", error);
-        setStatus('disconnected');
-        onConnectionChange?.(false);
-        toast.error("Failed to check Google Calendar connection");
-        return;
-      }
-
-      if (data?.connected) {
-        setStatus('connected');
-        setExpiresAt(data.expires_at);
-        onConnectionChange?.(true);
-      } else {
-        const errorMessage = data?.error || 'Not connected';
-        if (errorMessage.includes('expired')) {
-          setStatus('expired');
-        } else {
-          setStatus('disconnected');
-        }
-        onConnectionChange?.(false);
-      }
+      // If no valid Google token, set as disconnected
+      setStatus('disconnected');
+      onConnectionChange?.(false);
     } catch (error) {
       console.error("Error checking connection status:", error);
       setStatus('disconnected');
@@ -209,27 +172,6 @@ export function GoogleCalendarAuthIntegrated({ onConnectionChange }: GoogleCalen
       setGoogleToken(null);
       console.log("Removed Google token from localStorage");
       
-      const { data: { session }, error: sessionError } = await supabase.auth.getSession();
-      if (sessionError || !session?.access_token) {
-        toast.error("Please log in to disconnect Google Calendar");
-        return;
-      }
-
-      console.log("Disconnecting Google Calendar with session");
-
-      const { data, error } = await supabase.functions.invoke('google-calendar-auth', { 
-        body: { action: 'disconnect' },
-        headers: {
-          'Authorization': `Bearer ${session.access_token}`,
-        }
-      });
-
-      if (error || !data?.success) {
-        console.error("Error disconnecting:", error);
-        toast.error("Failed to disconnect Google Calendar");
-        return;
-      }
-
       toast.success("Google Calendar disconnected successfully");
       setStatus('disconnected');
       setExpiresAt(null);
@@ -302,13 +244,7 @@ export function GoogleCalendarAuthIntegrated({ onConnectionChange }: GoogleCalen
         console.log("Found stored Google token on component mount");
       }
       
-      const { data: { session } } = await supabase.auth.getSession();
-      if (session?.access_token || storedToken) {
-        checkConnectionStatus();
-      } else {
-        setStatus('disconnected');
-        setIsLoading(false);
-      }
+      checkConnectionStatus();
     };
     
     checkAuth();

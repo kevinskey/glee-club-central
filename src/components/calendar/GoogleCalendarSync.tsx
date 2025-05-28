@@ -23,75 +23,37 @@ export function GoogleCalendarSync({ onEventsSync, isConnected }: GoogleCalendar
 
     setIsSyncing(true);
     try {
-      // First try to get the session for Supabase authentication
-      const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+      console.log('Attempting to sync Google Calendar events...');
       
-      if (sessionError || !session?.access_token) {
-        toast.error('Please log in again to sync Google Calendar');
+      // Get stored Google token
+      const googleToken = localStorage.getItem('google_access_token');
+      
+      if (!googleToken) {
+        toast.error('No Google access token found. Please reconnect to Google Calendar.');
+        setIsSyncing(false);
         return;
       }
 
-      console.log('Attempting to sync Google Calendar events...');
-      
-      // Try calling with Supabase session first
+      console.log('Found Google token, calling sync function...');
+
+      // Call the edge function with the Google token
       const { data, error } = await supabase.functions.invoke('google-calendar-auth', {
         body: { action: 'fetch_events', calendar_id: 'primary' },
         headers: {
-          'Authorization': `Bearer ${session.access_token}`,
+          'Authorization': `Bearer ${googleToken}`,
         }
       });
 
       if (error) {
-        console.error('Error with Supabase auth, trying stored Google token:', error);
+        console.error('Error syncing:', error);
         
-        // Fallback to stored Google token
-        const googleToken = localStorage.getItem('google_access_token');
-        
-        if (!googleToken) {
-          toast.error('No Google access token found. Please reconnect to Google Calendar.');
-          return;
+        // If token is invalid, remove it and ask user to reconnect
+        if (error.message?.includes('401') || error.message?.includes('invalid')) {
+          localStorage.removeItem('google_access_token');
+          toast.error('Google token expired. Please reconnect to Google Calendar.');
+        } else {
+          toast.error('Failed to sync Google Calendar. Please try again.');
         }
-
-        // Try with Google token directly
-        const { data: googleData, error: googleError } = await supabase.functions.invoke('google-calendar-auth', {
-          body: { action: 'fetch_events', calendar_id: 'primary' },
-          headers: {
-            'Authorization': `Bearer ${googleToken}`,
-          }
-        });
-
-        if (googleError) {
-          console.error('Error with Google token:', googleError);
-          toast.error('Failed to sync Google Calendar. Please reconnect.');
-          return;
-        }
-
-        if (googleData?.error) {
-          console.error('API error:', googleData.error);
-          toast.error(googleData.error);
-          return;
-        }
-
-        const googleEvents = googleData?.events || [];
-        console.log(`Fetched ${googleEvents.length} Google Calendar events`);
-        
-        // Transform and sync events
-        const transformedEvents: CalendarEvent[] = googleEvents.map((event: any) => ({
-          id: `google-${event.id}`,
-          title: event.title,
-          start: event.start,
-          end: event.end || event.start,
-          description: event.description || '',
-          location: event.location || '',
-          type: 'event' as const,
-          allDay: event.allDay || false,
-          source: 'google' as const,
-          created_by: undefined
-        }));
-
-        onEventsSync(transformedEvents);
-        setLastSyncTime(new Date());
-        toast.success(`Synced ${googleEvents.length} Google Calendar events`);
         return;
       }
 
