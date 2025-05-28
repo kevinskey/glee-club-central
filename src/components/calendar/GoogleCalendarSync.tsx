@@ -23,27 +23,75 @@ export function GoogleCalendarSync({ onEventsSync, isConnected }: GoogleCalendar
 
     setIsSyncing(true);
     try {
-      // Get the stored Google token
-      const googleToken = localStorage.getItem('google_access_token');
+      // First try to get the session for Supabase authentication
+      const { data: { session }, error: sessionError } = await supabase.auth.getSession();
       
-      if (!googleToken) {
-        toast.error('No Google access token found. Please reconnect.');
+      if (sessionError || !session?.access_token) {
+        toast.error('Please log in again to sync Google Calendar');
         return;
       }
 
-      console.log('Fetching Google Calendar events...');
+      console.log('Attempting to sync Google Calendar events...');
       
-      // Call the edge function to fetch Google Calendar events
+      // Try calling with Supabase session first
       const { data, error } = await supabase.functions.invoke('google-calendar-auth', {
         body: { action: 'fetch_events', calendar_id: 'primary' },
         headers: {
-          'Authorization': `Bearer ${googleToken}`,
+          'Authorization': `Bearer ${session.access_token}`,
         }
       });
 
       if (error) {
-        console.error('Error fetching Google Calendar events:', error);
-        toast.error('Failed to fetch Google Calendar events');
+        console.error('Error with Supabase auth, trying stored Google token:', error);
+        
+        // Fallback to stored Google token
+        const googleToken = localStorage.getItem('google_access_token');
+        
+        if (!googleToken) {
+          toast.error('No Google access token found. Please reconnect to Google Calendar.');
+          return;
+        }
+
+        // Try with Google token directly
+        const { data: googleData, error: googleError } = await supabase.functions.invoke('google-calendar-auth', {
+          body: { action: 'fetch_events', calendar_id: 'primary' },
+          headers: {
+            'Authorization': `Bearer ${googleToken}`,
+          }
+        });
+
+        if (googleError) {
+          console.error('Error with Google token:', googleError);
+          toast.error('Failed to sync Google Calendar. Please reconnect.');
+          return;
+        }
+
+        if (googleData?.error) {
+          console.error('API error:', googleData.error);
+          toast.error(googleData.error);
+          return;
+        }
+
+        const googleEvents = googleData?.events || [];
+        console.log(`Fetched ${googleEvents.length} Google Calendar events`);
+        
+        // Transform and sync events
+        const transformedEvents: CalendarEvent[] = googleEvents.map((event: any) => ({
+          id: `google-${event.id}`,
+          title: event.title,
+          start: event.start,
+          end: event.end || event.start,
+          description: event.description || '',
+          location: event.location || '',
+          type: 'event' as const,
+          allDay: event.allDay || false,
+          source: 'google' as const,
+          created_by: undefined
+        }));
+
+        onEventsSync(transformedEvents);
+        setLastSyncTime(new Date());
+        toast.success(`Synced ${googleEvents.length} Google Calendar events`);
         return;
       }
 

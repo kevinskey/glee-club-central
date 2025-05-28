@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { PageHeaderWithToggle } from "@/components/ui/page-header-with-toggle";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { CalendarIcon, Clock, MapPin, CalendarPlus } from "lucide-react";
+import { CalendarIcon, Clock, MapPin, CalendarPlus, List } from "lucide-react";
 import { useCalendarStore } from "@/hooks/useCalendarStore";
 import { CalendarEvent } from '@/types/calendar';
 import CalendarMain from "@/components/calendar/CalendarMain";
@@ -15,6 +15,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
 import { GoogleCalendarAuthIntegrated } from "@/components/calendar/GoogleCalendarAuthIntegrated";
 import { GoogleCalendarSync } from "@/components/calendar/GoogleCalendarSync";
+import { AllUpcomingEventsList } from "@/components/calendar/AllUpcomingEventsList";
 
 export default function CalendarDashboard() {
   const [isLoading, setIsLoading] = useState(true);
@@ -24,6 +25,7 @@ export default function CalendarDashboard() {
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [googleCalendarConnected, setGoogleCalendarConnected] = useState(false);
   const [googleEvents, setGoogleEvents] = useState<CalendarEvent[]>([]);
+  const [showAllEventsList, setShowAllEventsList] = useState(false);
   
   const { events, fetchEvents, addEvent, updateEvent, deleteEvent } = useCalendarStore();
   const { user } = useAuth();
@@ -47,7 +49,7 @@ export default function CalendarDashboard() {
   // Combine local events with Google Calendar events
   const allEvents = [...events, ...googleEvents];
 
-  // Get upcoming events (next 30 days)
+  // Get upcoming events (next 30 days for the quick view)
   const getUpcomingEvents = (events: CalendarEvent[]) => {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
@@ -163,42 +165,60 @@ export default function CalendarDashboard() {
           icon={<CalendarIcon className="h-6 w-6" />}
         />
         
-        <Button 
-          onClick={() => setIsCreateModalOpen(true)}
-          className="mt-4 sm:mt-0 bg-glee-spelman hover:bg-glee-spelman/90"
-        >
-          <CalendarPlus className="mr-2 h-4 w-4" />
-          Add Event
-        </Button>
+        <div className="flex gap-2 mt-4 sm:mt-0">
+          <Button 
+            variant="outline"
+            onClick={() => setShowAllEventsList(!showAllEventsList)}
+          >
+            <List className="mr-2 h-4 w-4" />
+            {showAllEventsList ? 'Calendar View' : 'List All Events'}
+          </Button>
+          <Button 
+            onClick={() => setIsCreateModalOpen(true)}
+            className="bg-glee-spelman hover:bg-glee-spelman/90"
+          >
+            <CalendarPlus className="mr-2 h-4 w-4" />
+            Add Event
+          </Button>
+        </div>
       </div>
       
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-6">
         <div className="lg:col-span-2">
-          {allEvents.length === 0 ? (
-            <Card>
-              <CardContent className="flex flex-col items-center justify-center p-10">
-                <CalendarIcon className="h-12 w-12 text-gray-400 mb-4" />
-                <h3 className="text-xl font-medium mb-2">No events scheduled</h3>
-                <p className="text-gray-500 dark:text-gray-400 mb-6">
-                  Click the "Add Event" button to create your first calendar event.
-                </p>
-                <Button 
-                  onClick={() => setIsCreateModalOpen(true)}
-                  className="bg-glee-spelman hover:bg-glee-spelman/90"
-                >
-                  <CalendarPlus className="mr-2 h-4 w-4" />
-                  Add Your First Event
-                </Button>
-              </CardContent>
-            </Card>
-          ) : (
-            <CalendarMain
+          {showAllEventsList ? (
+            <AllUpcomingEventsList 
               events={allEvents}
-              calendarView="dayGridMonth"
-              userCanCreate={true}
-              handleDateClick={handleDateClick}
-              handleEventClick={handleEventClick}
+              onEventClick={handleEventClick}
             />
+          ) : (
+            <>
+              {allEvents.length === 0 ? (
+                <Card>
+                  <CardContent className="flex flex-col items-center justify-center p-10">
+                    <CalendarIcon className="h-12 w-12 text-gray-400 mb-4" />
+                    <h3 className="text-xl font-medium mb-2">No events scheduled</h3>
+                    <p className="text-gray-500 dark:text-gray-400 mb-6">
+                      Click the "Add Event" button to create your first calendar event.
+                    </p>
+                    <Button 
+                      onClick={() => setIsCreateModalOpen(true)}
+                      className="bg-glee-spelman hover:bg-glee-spelman/90"
+                    >
+                      <CalendarPlus className="mr-2 h-4 w-4" />
+                      Add Your First Event
+                    </Button>
+                  </CardContent>
+                </Card>
+              ) : (
+                <CalendarMain
+                  events={allEvents}
+                  calendarView="dayGridMonth"
+                  userCanCreate={true}
+                  handleDateClick={handleDateClick}
+                  handleEventClick={handleEventClick}
+                />
+              )}
+            </>
           )}
         </div>
         
@@ -224,50 +244,52 @@ export default function CalendarDashboard() {
             </CardContent>
           </Card>
           
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center">
-                <CalendarIcon className="mr-2 h-5 w-5" />
-                Upcoming Events
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                {upcomingEvents.length > 0 ? (
-                  upcomingEvents.map((event) => (
-                    <div 
-                      key={event.id} 
-                      className="rounded-lg border p-3 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-900 transition-colors" 
-                      onClick={() => handleEventClick(event)}
-                    >
-                      <div className="flex items-start justify-between">
-                        <h3 className="font-medium">{event.title}</h3>
-                        {event.source === 'google' && (
-                          <span className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded">
-                            Google
-                          </span>
-                        )}
-                      </div>
-                      <div className="mt-2 text-sm text-muted-foreground">
-                        <p className="flex items-center">
-                          <CalendarIcon className="mr-2 h-4 w-4" />
-                          {new Date(event.start).toLocaleDateString()}
-                        </p>
-                        {event.location && (
-                          <p className="flex items-center mt-1">
-                            <MapPin className="mr-2 h-4 w-4" />
-                            {event.location}
+          {!showAllEventsList && (
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center">
+                  <CalendarIcon className="mr-2 h-5 w-5" />
+                  Upcoming Events (Next 30 Days)
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  {upcomingEvents.length > 0 ? (
+                    upcomingEvents.map((event) => (
+                      <div 
+                        key={event.id} 
+                        className="rounded-lg border p-3 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-900 transition-colors" 
+                        onClick={() => handleEventClick(event)}
+                      >
+                        <div className="flex items-start justify-between">
+                          <h3 className="font-medium">{event.title}</h3>
+                          {event.source === 'google' && (
+                            <span className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded">
+                              Google
+                            </span>
+                          )}
+                        </div>
+                        <div className="mt-2 text-sm text-muted-foreground">
+                          <p className="flex items-center">
+                            <CalendarIcon className="mr-2 h-4 w-4" />
+                            {new Date(event.start).toLocaleDateString()}
                           </p>
-                        )}
+                          {event.location && (
+                            <p className="flex items-center mt-1">
+                              <MapPin className="mr-2 h-4 w-4" />
+                              {event.location}
+                            </p>
+                          )}
+                        </div>
                       </div>
-                    </div>
-                  ))
-                ) : (
-                  <p className="text-center text-muted-foreground">No upcoming events</p>
-                )}
-              </div>
-            </CardContent>
-          </Card>
+                    ))
+                  ) : (
+                    <p className="text-center text-muted-foreground">No upcoming events</p>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+          )}
           
           <Card>
             <CardHeader>
@@ -281,8 +303,12 @@ export default function CalendarDashboard() {
               >
                 Add Event
               </Button>
-              <Button className="w-full" variant="outline">
-                View Performance Schedule
+              <Button 
+                className="w-full" 
+                variant="outline"
+                onClick={() => setShowAllEventsList(!showAllEventsList)}
+              >
+                {showAllEventsList ? 'Calendar View' : 'View All Events'}
               </Button>
               <Button className="w-full" variant="outline">
                 Export Calendar (iCal)
