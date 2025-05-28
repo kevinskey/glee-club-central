@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -36,10 +35,6 @@ export function GoogleUpcomingEvents({ isConnected, selectedCalendarId = 'primar
         body: { 
           action: 'fetch_events',
           calendar_id: selectedCalendarId
-        },
-        headers: {
-          'Authorization': `Bearer ${session.access_token}`,
-          'Content-Type': 'application/json'
         }
       });
 

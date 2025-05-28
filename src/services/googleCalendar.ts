@@ -1,4 +1,3 @@
-
 // Service for handling Google Calendar integration and synchronization
 
 import { supabase } from "@/integrations/supabase/client";
@@ -21,11 +20,7 @@ export const isConnected = async (): Promise<boolean> => {
     }
     
     const { data, error } = await supabase.functions.invoke('google-calendar-auth', {
-      body: { action: 'check_connection' },
-      headers: {
-        'Authorization': `Bearer ${session.access_token}`,
-        'Content-Type': 'application/json'
-      }
+      body: { action: 'check_connection' }
     });
       
     if (error || !data) {
@@ -63,13 +58,9 @@ export const connectToGoogleCalendar = async (): Promise<string> => {
 
     console.log("User authenticated, requesting Google Calendar auth URL...");
 
-    // Call the edge function with raw object (not stringified)
+    // Call the edge function with proper body format
     const { data, error } = await supabase.functions.invoke('google-calendar-auth', {
-      body: { action: 'generate_oauth_url' },
-      headers: {
-        'Authorization': `Bearer ${session.access_token}`,
-        'Content-Type': 'application/json'
-      }
+      body: { action: 'generate_oauth_url' }
     });
 
     if (error) {
@@ -131,10 +122,6 @@ export const fetchGoogleCalendarEvents = async (calendarId = 'primary'): Promise
       body: { 
         action: 'fetch_events',
         calendar_id: calendarId
-      },
-      headers: {
-        'Authorization': `Bearer ${session.access_token}`,
-        'Content-Type': 'application/json'
       }
     });
     
@@ -179,11 +166,7 @@ export const disconnect = async (): Promise<boolean> => {
     
     // Call the edge function to disconnect
     const { data, error } = await supabase.functions.invoke('google-calendar-auth', {
-      body: { action: 'disconnect' },
-      headers: {
-        'Authorization': `Bearer ${session.access_token}`,
-        'Content-Type': 'application/json'
-      }
+      body: { action: 'disconnect' }
     });
     
     if (error) {
@@ -224,11 +207,7 @@ export const fetchGoogleCalendars = async (): Promise<Array<{id: string, name: s
     }
     
     const { data, error } = await supabase.functions.invoke('google-calendar-auth', {
-      body: { action: 'list_calendars' },
-      headers: {
-        'Authorization': `Bearer ${session.access_token}`,
-        'Content-Type': 'application/json'
-      }
+      body: { action: 'list_calendars' }
     });
     
     if (error) {
@@ -303,10 +282,6 @@ export const syncWithGoogleCalendar = async (calendarId = 'primary', accessToken
       body: { 
         action: 'full_sync', 
         calendar_id: calendarId
-      },
-      headers: {
-        'Authorization': `Bearer ${session.access_token}`,
-        'Content-Type': 'application/json'
       }
     });
     
