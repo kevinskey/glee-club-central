@@ -311,7 +311,7 @@ export default function SheetMusicPage() {
     setSelectedSetlistId(null);
   };
 
-  // View sheet music - single function definition
+  // View sheet music - updated to use the correct route
   const viewSheetMusic = (id: string) => {
     navigate(`/dashboard/sheet-music/${id}`);
   };
