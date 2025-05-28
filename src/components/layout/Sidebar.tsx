@@ -1,4 +1,3 @@
-
 import React from "react";
 import { Link, useLocation } from "react-router-dom";
 import { cn } from "@/lib/utils";
@@ -13,7 +12,9 @@ import {
   Mic,
   Settings,
   Archive,
-  ClipboardList
+  ClipboardList,
+  Calendar,
+  LayoutDashboard
 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { usePermissions } from "@/hooks/usePermissions";
@@ -25,10 +26,17 @@ interface SidebarProps {
 export function Sidebar({ className }: SidebarProps) {
   const location = useLocation();
   const { profile } = useAuth();
-  const { isAdminRole, isSuperAdmin } = usePermissions();
+  const { isSuperAdmin } = usePermissions();
   
   // Check if user is admin
-  const isAdmin = profile?.is_super_admin || isAdminRole || isSuperAdmin;
+  const isAdmin = profile?.is_super_admin || isSuperAdmin;
+  
+  console.log('Sidebar - Admin check:', { 
+    profileSuperAdmin: profile?.is_super_admin, 
+    isSuperAdmin, 
+    isAdmin,
+    profile: profile
+  });
   
   // Base menu items that all users can see - moved Profile to top
   const baseMenuItems = [
@@ -72,13 +80,23 @@ export function Sidebar({ className }: SidebarProps) {
   // Admin-only menu items
   const adminMenuItems = [
     {
+      title: "Admin Dashboard",
+      href: "/admin",
+      icon: LayoutDashboard
+    },
+    {
+      title: "Admin Calendar",
+      href: "/admin/calendar",
+      icon: Calendar
+    },
+    {
       title: "Members",
       href: "/dashboard/members",
       icon: Users
     },
     {
-      title: "Admin Dashboard",
-      href: "/dashboard/admin",
+      title: "Settings",
+      href: "/admin/settings",
       icon: Settings
     }
   ];
@@ -119,6 +137,13 @@ export function Sidebar({ className }: SidebarProps) {
             Dashboard
           </Link>
         </Button>
+        
+        {/* Show admin status for debugging */}
+        {isAdmin && (
+          <div className="mb-4 p-2 bg-amber-100 text-amber-800 rounded text-xs">
+            Admin Mode Active
+          </div>
+        )}
         
         {/* Other menu items */}
         {menuItems.map((item) => (

@@ -1,89 +1,110 @@
 
 import React from "react";
 import { Link, useLocation } from "react-router-dom";
-import { useAuth } from "@/contexts/AuthContext";
 import { cn } from "@/lib/utils";
 import { 
-  LayoutDashboard, 
-  FileText, 
+  Home, 
+  Music, 
+  Bell, 
   User,
-  Bell,
-  Mic
+  Users,
+  Mic,
+  Settings,
+  Calendar,
+  LayoutDashboard
 } from "lucide-react";
+import { useAuth } from "@/contexts/AuthContext";
+import { usePermissions } from "@/hooks/usePermissions";
 
 interface MobileNavProps {
-  isAdmin: boolean;
+  isAdmin?: boolean;
 }
 
-export function MobileNav({ isAdmin }: MobileNavProps) {
-  const { pathname } = useLocation();
-  const { isAuthenticated } = useAuth();
+export function MobileNav({ isAdmin: propIsAdmin }: MobileNavProps) {
+  const location = useLocation();
+  const { profile } = useAuth();
+  const { isSuperAdmin } = usePermissions();
   
-  if (!isAuthenticated) return null;
+  // Check if user is admin
+  const isAdmin = profile?.is_super_admin || isSuperAdmin || propIsAdmin;
   
-  // Only show in dashboard paths
-  if (!pathname.startsWith('/dashboard')) return null;
-  
-  // Don't show in PDF viewer pages
-  if (pathname.includes('/sheet-music/') && pathname.split('/').length > 3) return null;
-  
-  // Bottom navigation tabs with improved styling
+  // Base navigation items
+  const baseNavItems = [
+    {
+      title: "Dashboard",
+      href: "/dashboard/member",
+      icon: Home
+    },
+    {
+      title: "Profile",
+      href: "/dashboard/profile",
+      icon: User
+    },
+    {
+      title: "Music",
+      href: "/dashboard/sheet-music",
+      icon: Music
+    },
+    {
+      title: "Studio",
+      href: "/dashboard/recording-studio",
+      icon: Mic
+    }
+  ];
+
+  // Admin navigation items
+  const adminNavItems = [
+    {
+      title: "Admin",
+      href: "/admin",
+      icon: LayoutDashboard
+    },
+    {
+      title: "Calendar",
+      href: "/admin/calendar",
+      icon: Calendar
+    },
+    {
+      title: "Members",
+      href: "/dashboard/members",
+      icon: Users
+    },
+    {
+      title: "Settings",
+      href: "/admin/settings",
+      icon: Settings
+    }
+  ];
+
+  // Show admin items if user is admin
+  const navItems = isAdmin ? [...baseNavItems, ...adminNavItems] : baseNavItems;
+
+  const isActive = (href: string) => {
+    if (href === "/dashboard/member") {
+      return location.pathname === href || location.pathname === "/dashboard";
+    }
+    return location.pathname.startsWith(href);
+  };
+
   return (
-    <div className="fixed bottom-0 left-0 right-0 z-40 bg-background/95 backdrop-blur border-t md:hidden">
-      <div className="flex items-center justify-between px-2 py-2">
-        <div className="flex items-center justify-around w-full">
-          <Link 
-            to="/dashboard" 
+    <nav className="fixed bottom-0 left-0 right-0 z-50 bg-background border-t md:hidden">
+      <div className="flex justify-around items-center py-2">
+        {navItems.map((item) => (
+          <Link
+            key={item.href}
+            to={item.href}
             className={cn(
-              "flex flex-col items-center justify-center px-2 py-1.5",
-              pathname === "/dashboard" ? "text-glee-spelman" : "text-muted-foreground"
+              "flex flex-col items-center justify-center p-2 text-xs",
+              isActive(item.href)
+                ? "text-glee-spelman"
+                : "text-muted-foreground hover:text-foreground"
             )}
           >
-            <LayoutDashboard className="h-5 w-5" />
-            <span className="text-xs mt-1">Home</span>
+            <item.icon className="h-5 w-5 mb-1" />
+            <span className="truncate max-w-[60px]">{item.title}</span>
           </Link>
-          <Link 
-            to="/dashboard/sheet-music" 
-            className={cn(
-              "flex flex-col items-center justify-center px-2 py-1.5",
-              pathname.includes("/dashboard/sheet-music") ? "text-glee-spelman" : "text-muted-foreground"
-            )}
-          >
-            <FileText className="h-5 w-5" />
-            <span className="text-xs mt-1">Music</span>
-          </Link>
-          <Link 
-            to="/dashboard/recordings" 
-            className={cn(
-              "flex flex-col items-center justify-center px-2 py-1.5",
-              pathname.includes("/dashboard/recordings") ? "text-glee-spelman" : "text-muted-foreground"
-            )}
-          >
-            <Mic className="h-5 w-5" />
-            <span className="text-xs mt-1">Audio</span>
-          </Link>
-          <Link 
-            to="/dashboard/announcements" 
-            className={cn(
-              "flex flex-col items-center justify-center px-2 py-1.5",
-              pathname.includes("/dashboard/announcements") ? "text-glee-spelman" : "text-muted-foreground"
-            )}
-          >
-            <Bell className="h-5 w-5" />
-            <span className="text-xs mt-1">Alerts</span>
-          </Link>
-          <Link 
-            to="/dashboard/profile" 
-            className={cn(
-              "flex flex-col items-center justify-center px-2 py-1.5",
-              pathname.includes("/dashboard/profile") ? "text-glee-spelman" : "text-muted-foreground"
-            )}
-          >
-            <User className="h-5 w-5" />
-            <span className="text-xs mt-1">Profile</span>
-          </Link>
-        </div>
+        ))}
       </div>
-    </div>
+    </nav>
   );
 }
