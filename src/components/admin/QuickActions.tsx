@@ -18,19 +18,19 @@ export function QuickActions() {
     {
       title: "Add Member",
       icon: Users,
-      action: () => navigate("/dashboard/admin/members/add"),
+      action: () => navigate("/dashboard/members"),
       color: "bg-blue-500"
     },
     {
       title: "Schedule Event",
       icon: Calendar,
-      action: () => navigate("/dashboard/calendar"),
+      action: () => navigate("/admin/calendar"),
       color: "bg-green-500"
     },
     {
       title: "Send Announcement",
       icon: Bell,
-      action: () => navigate("/dashboard/announcements/new"),
+      action: () => navigate("/dashboard/announcements"),
       color: "bg-red-500"
     },
     {
