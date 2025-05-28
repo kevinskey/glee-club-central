@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useRef } from 'react';
 import { CalendarView } from '@/components/calendar/CalendarView';
 import { EventDialog } from '@/components/calendar/EventDialog';
 import { EventEditor } from '@/components/admin/EventEditor';
@@ -20,31 +20,6 @@ export default function AdminCalendarPage() {
   
   // Use ref to track if we're intentionally closing the dialog
   const intentionalCloseRef = useRef(false);
-
-  // Prevent dialog from closing on window blur/focus events
-  useEffect(() => {
-    const handleVisibilityChange = () => {
-      // Prevent automatic closing when switching tabs/windows
-      if (document.hidden && (isCreating || editingEvent)) {
-        console.log('Preventing dialog close due to window visibility change');
-      }
-    };
-
-    const handleBlur = () => {
-      // Prevent automatic closing when window loses focus
-      if (isCreating || editingEvent) {
-        console.log('Preventing dialog close due to window blur');
-      }
-    };
-
-    document.addEventListener('visibilitychange', handleVisibilityChange);
-    window.addEventListener('blur', handleBlur);
-
-    return () => {
-      document.removeEventListener('visibilitychange', handleVisibilityChange);
-      window.removeEventListener('blur', handleBlur);
-    };
-  }, [isCreating, editingEvent]);
 
   const handleEventClick = (event: CalendarEvent) => {
     setSelectedEvent(event);
@@ -198,7 +173,7 @@ export default function AdminCalendarPage() {
           />
         )}
 
-        {/* Event Editor - Enhanced to prevent unwanted closing */}
+        {/* Event Editor */}
         <EventEditor
           event={editingEvent}
           isOpen={isCreating || !!editingEvent}
