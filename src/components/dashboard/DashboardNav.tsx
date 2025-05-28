@@ -107,7 +107,7 @@ export function DashboardNav({
             className={cn('justify-start', isCollapsed && 'justify-center')}
             asChild
           >
-            <Link to="/dashboard/admin/members">
+            <Link to="/admin/members">
               <Users className="h-5 w-5 mr-2" />
               {!isCollapsed && <span>Member Management</span>}
             </Link>
@@ -118,7 +118,7 @@ export function DashboardNav({
             className={cn('justify-start', isCollapsed && 'justify-center')}
             asChild
           >
-            <Link to="/dashboard/settings">
+            <Link to="/admin/settings">
               <Settings className="h-5 w-5 mr-2" />
               {!isCollapsed && <span>Settings</span>}
             </Link>
