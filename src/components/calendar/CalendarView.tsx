@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { CalendarEvent } from '@/types/calendar';
 import { Button } from '@/components/ui/button';
@@ -101,7 +102,7 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
     }
     
     if (hasHoliday) {
-      classes += 'bg-red-50 border-red-200 ';
+      classes += 'bg-gradient-to-br from-red-50 via-white to-blue-50 border-red-300 shadow-sm ';
     }
     
     if (isTodayDate) {
@@ -130,7 +131,7 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
     }
     
     if (hasHoliday) {
-      classes += 'font-bold text-red-600 ';
+      classes += 'font-bold text-blue-800 ';
     } else if (isTodayDate) {
       classes += 'font-bold text-orange-600 ';
     } else if (isSelected) {
@@ -192,7 +193,7 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
                     <div className="space-y-1">
                       {/* Show holiday first if present */}
                       {holiday && (
-                        <div className="text-xs p-1 rounded bg-red-100 text-red-800 truncate font-medium">
+                        <div className="text-xs p-1 rounded bg-gradient-to-r from-red-100 via-white to-blue-100 text-blue-800 border border-red-200 truncate font-medium shadow-sm">
                           {holiday.title}
                         </div>
                       )}
@@ -231,20 +232,20 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
                   holiday.date.getFullYear() === currentDate.getFullYear()
                 )
                 .map(holiday => (
-                  <Card key={holiday.id} className="border-red-200 bg-red-50">
+                  <Card key={holiday.id} className="border-red-300 bg-gradient-to-r from-red-50 via-white to-blue-50 shadow-md">
                     <CardContent className="p-4">
                       <div className="flex justify-between items-start">
                         <div className="flex-1">
-                          <h3 className="font-semibold text-red-800">{holiday.title}</h3>
-                          <div className="flex items-center gap-4 mt-2 text-sm text-red-600">
+                          <h3 className="font-semibold text-blue-900">{holiday.title}</h3>
+                          <div className="flex items-center gap-4 mt-2 text-sm text-red-700">
                             <div className="flex items-center gap-1">
                               <Clock className="h-4 w-4" />
                               {format(holiday.date, 'MMM d, yyyy')}
                             </div>
                           </div>
-                          <p className="mt-2 text-sm text-red-700">{holiday.description}</p>
+                          <p className="mt-2 text-sm text-blue-800">{holiday.description}</p>
                         </div>
-                        <div className="ml-4 w-16 h-16 rounded overflow-hidden">
+                        <div className="ml-4 w-16 h-16 rounded overflow-hidden border-2 border-red-200">
                           <img 
                             src={holiday.imageUrl} 
                             alt={holiday.title}
