@@ -23,6 +23,7 @@ export const PDFThumbnail = ({
 }: PDFThumbnailProps) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
+  const [containerWidth, setContainerWidth] = useState<number>(200);
 
   // Reset loading state when URL changes
   useEffect(() => {
@@ -41,7 +42,7 @@ export const PDFThumbnail = ({
   };
 
   return (
-    <div className={`bg-muted flex items-center justify-center overflow-hidden relative ${className}`}>
+    <div className={`bg-muted flex items-start justify-center overflow-hidden relative ${className}`}>
       <AspectRatio ratio={aspectRatio} className="w-full">
         {loading && (
           <div className="absolute inset-0 flex items-center justify-center bg-muted/80 z-10">
@@ -56,23 +57,31 @@ export const PDFThumbnail = ({
             </svg>
           </div>
         ) : (
-          <div className="h-full w-full flex items-center justify-center">
+          <div className="h-full w-full flex items-start justify-center overflow-hidden">
             <Document
               file={url}
               onLoadSuccess={handleLoadSuccess}
               onLoadError={handleLoadError}
               loading={null}
-              className="flex items-center justify-center h-full w-full"
+              className="flex items-start justify-center h-full w-full"
             >
               <Page 
                 pageNumber={1} 
-                width={undefined}
+                width={containerWidth}
                 height={undefined}
-                scale={1}
-                className="overflow-hidden flex items-center justify-center max-w-full max-h-full"
+                scale={undefined}
+                className="overflow-hidden flex items-start justify-center"
                 renderTextLayer={false}
                 renderAnnotationLayer={false}
                 loading={null}
+                onRenderSuccess={(page) => {
+                  // Get the container width to scale the PDF appropriately
+                  const container = document.querySelector(`[data-pdf-url="${url}"]`);
+                  if (container) {
+                    const rect = container.getBoundingClientRect();
+                    setContainerWidth(rect.width);
+                  }
+                }}
               />
             </Document>
           </div>
