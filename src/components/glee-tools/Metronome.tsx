@@ -1,4 +1,3 @@
-
 import React, { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -26,8 +25,7 @@ export function Metronome({ onClose }: MetronomeProps) {
   
   // Refs for managing timing and audio
   const audioContextRef = useRef<AudioContext | null>(null);
-  const timerRef = useRef<number | null>(null);
-  const lastTickTimeRef = useRef<number | null>(null);
+  const intervalRef = useRef<number | null>(null);
   const isInitializedRef = useRef<boolean>(false);
   
   // Auth - Try to use auth context, fallback to false if not available
@@ -149,7 +147,6 @@ export function Metronome({ onClose }: MetronomeProps) {
       return;
     }
     
-    // Resume audio context if suspended (needed for some browsers)
     if (audioContextRef.current.state === 'suspended') {
       resumeAudioContext(audioContextRef.current)
         .then(resumed => {
@@ -172,59 +169,55 @@ export function Metronome({ onClose }: MetronomeProps) {
   
   const beginMetronome = () => {
     setIsPlaying(true);
-    lastTickTimeRef.current = Date.now();
     setCurrentBeat(0);
     
-    // Play an initial click immediately
+    // Play initial click
     if (audioContextRef.current) {
       playClick(audioContextRef.current, true, volume);
     }
     
-    // Start the tick loop
-    scheduleTick();
+    // Use setInterval for more reliable timing
+    const beatInterval = 60000 / bpm; // milliseconds per beat
+    
+    intervalRef.current = window.setInterval(() => {
+      setCurrentBeat(prev => {
+        const newBeat = (prev + 1) % 4;
+        
+        // Play click sound
+        if (audioContextRef.current) {
+          playClick(audioContextRef.current, newBeat === 0, volume);
+        }
+        
+        return newBeat;
+      });
+    }, beatInterval);
   };
   
   const stopMetronome = () => {
     setIsPlaying(false);
     
-    if (timerRef.current) {
-      clearTimeout(timerRef.current);
-      timerRef.current = null;
+    if (intervalRef.current) {
+      clearInterval(intervalRef.current);
+      intervalRef.current = null;
     }
-  };
-  
-  const scheduleTick = () => {
-    if (!isPlaying) return;
-    
-    const now = Date.now();
-    const beatInterval = 60000 / bpm; // milliseconds per beat
-    
-    // Check if it's time for a tick
-    if (!lastTickTimeRef.current || now - lastTickTimeRef.current >= beatInterval) {
-      // Play the tick sound
-      if (audioContextRef.current) {
-        playClick(audioContextRef.current, currentBeat === 0, volume);
-      }
-      
-      // Update state for animation
-      setCurrentBeat((prev) => (prev + 1) % 4);
-      lastTickTimeRef.current = now;
-    }
-    
-    // Schedule the next check
-    timerRef.current = window.setTimeout(scheduleTick, 10);
   };
   
   const handleBpmChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     let value = parseInt(event.target.value);
     
-    // Enforce BPM limits
     if (isNaN(value)) value = 100;
     if (value < 40) value = 40;
     if (value > 240) value = 240;
     
     setBpm(value);
-    setActivePreset(null); // Clear active preset when manually changing BPM
+    setActivePreset(null);
+    
+    // If playing, restart with new BPM
+    if (isPlaying) {
+      stopMetronome();
+      // Small delay to ensure cleanup
+      setTimeout(() => startMetronome(), 50);
+    }
   };
   
   const togglePlayback = () => {
@@ -308,10 +301,9 @@ export function Metronome({ onClose }: MetronomeProps) {
     setBpm(preset.bpm);
     setActivePreset(preset.id);
     
-    // If already playing, restart with new BPM
     if (isPlaying) {
       stopMetronome();
-      setTimeout(() => startMetronome(), 10);
+      setTimeout(() => startMetronome(), 50);
     }
   };
 

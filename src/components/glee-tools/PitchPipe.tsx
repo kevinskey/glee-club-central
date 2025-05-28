@@ -1,9 +1,9 @@
+
 import React, { useState, useEffect, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { audioLogger, resumeAudioContext, playTone, getNoteFrequency } from '@/utils/audioUtils';
 
-// Notes with their frequencies in Hz
 const NOTES = [
   { name: 'C', frequency: 261.63 },
   { name: 'C#', frequency: 277.18 },
@@ -14,7 +14,7 @@ const NOTES = [
   { name: 'F#', frequency: 369.99 },
   { name: 'G', frequency: 392.00 },
   { name: 'G#', frequency: 415.30 },
-  { name: 'A', frequency: 440.00 }, // A440 standard concert pitch
+  { name: 'A', frequency: 440.00 },
   { name: 'A#', frequency: 466.16 },
   { name: 'B', frequency: 493.88 }
 ];
@@ -36,15 +36,14 @@ export function PitchPipe({
   const oscillatorRef = useRef<OscillatorNode | null>(null);
   const gainNodeRef = useRef<GainNode | null>(null);
   const localAudioContextRef = useRef<AudioContext | null>(null);
+  const timeoutRef = useRef<number | null>(null);
 
   // Get or create audio context
   const getAudioContext = (): AudioContext => {
-    // Use the provided audio context if available
     if (audioContextRef?.current) {
       return audioContextRef.current;
     }
     
-    // Otherwise create or use our local audio context
     if (!localAudioContextRef.current) {
       localAudioContextRef.current = new (window.AudioContext || (window as any).webkitAudioContext)();
     }
@@ -55,6 +54,10 @@ export function PitchPipe({
   // Clean up audio resources when component unmounts
   useEffect(() => {
     return () => {
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+      }
+      
       if (oscillatorRef.current) {
         try {
           oscillatorRef.current.stop();
@@ -79,24 +82,17 @@ export function PitchPipe({
     try {
       const audioContext = getAudioContext();
       
-      // Resume audio context if suspended (needed for mobile browsers)
+      // Resume audio context if suspended
       if (audioContext.state === 'suspended') {
         audioContext.resume().catch(console.error);
       }
       
       // Stop any currently playing note
-      if (oscillatorRef.current) {
-        try {
-          oscillatorRef.current.stop();
-          oscillatorRef.current.disconnect();
-        } catch (e) {
-          // Ignore stop errors
-        }
-      }
+      stopNote();
       
-      // Set up gain node for smooth fade out
+      // Set up gain node
       gainNodeRef.current = audioContext.createGain();
-      gainNodeRef.current.gain.value = 0.7; // Set volume
+      gainNodeRef.current.gain.value = 0.7;
       gainNodeRef.current.connect(audioContext.destination);
       
       // Find the note data
@@ -105,37 +101,20 @@ export function PitchPipe({
       
       // Create and configure oscillator
       oscillatorRef.current = audioContext.createOscillator();
-      oscillatorRef.current.type = 'sine'; // Smooth tone
+      oscillatorRef.current.type = 'sine';
       oscillatorRef.current.frequency.value = note.frequency;
       oscillatorRef.current.connect(gainNodeRef.current);
       
-      // Start immediately - this is crucial for responsiveness
+      // Start immediately
       oscillatorRef.current.start(0);
       
       // Set active note for UI
       setActiveNote(noteName);
       
-      // Schedule automatic note stop after 2 seconds
-      setTimeout(() => {
-        if (gainNodeRef.current && oscillatorRef.current) {
-          // Fade out over 100ms for a smooth ending
-          const now = audioContext.currentTime;
-          gainNodeRef.current.gain.setValueAtTime(gainNodeRef.current.gain.value, now);
-          gainNodeRef.current.gain.exponentialRampToValueAtTime(0.001, now + 0.1);
-          
-          // Stop the oscillator after fade completes
-          setTimeout(() => {
-            if (oscillatorRef.current) {
-              try {
-                oscillatorRef.current.stop();
-                setActiveNote(null);
-              } catch (e) {
-                // Ignore stop errors
-              }
-            }
-          }, 110);
-        }
-      }, 2000);
+      // Auto-stop after 3 seconds instead of 2
+      timeoutRef.current = window.setTimeout(() => {
+        stopNote();
+      }, 3000);
       
       audioLogger.log(`Playing note: ${noteName} (${note.frequency}Hz)`);
     } catch (error) {
@@ -146,26 +125,49 @@ export function PitchPipe({
 
   // Stop the currently playing note
   const stopNote = () => {
+    if (timeoutRef.current) {
+      clearTimeout(timeoutRef.current);
+      timeoutRef.current = null;
+    }
+    
     if (gainNodeRef.current && oscillatorRef.current) {
       try {
         const audioContext = getAudioContext();
         
-        // Quick fade out
+        // Fade out over 100ms
         const now = audioContext.currentTime;
         gainNodeRef.current.gain.setValueAtTime(gainNodeRef.current.gain.value, now);
-        gainNodeRef.current.gain.exponentialRampToValueAtTime(0.001, now + 0.05);
+        gainNodeRef.current.gain.exponentialRampToValueAtTime(0.001, now + 0.1);
         
         // Stop oscillator after fade
         setTimeout(() => {
           if (oscillatorRef.current) {
-            oscillatorRef.current.stop();
-            setActiveNote(null);
+            try {
+              oscillatorRef.current.stop();
+              oscillatorRef.current.disconnect();
+              oscillatorRef.current = null;
+            } catch (e) {
+              // Ignore stop errors
+            }
           }
-        }, 60);
+          
+          if (gainNodeRef.current) {
+            try {
+              gainNodeRef.current.disconnect();
+              gainNodeRef.current = null;
+            } catch (e) {
+              // Ignore disconnect errors
+            }
+          }
+          
+          setActiveNote(null);
+        }, 110);
       } catch (e) {
-        // Ignore stop errors
         console.error('Error stopping note:', e);
+        setActiveNote(null);
       }
+    } else {
+      setActiveNote(null);
     }
   };
 
@@ -180,29 +182,26 @@ export function PitchPipe({
 
   // Control which notes to display based on size
   const displayedNotes = size === 'sm' 
-    ? ['C', 'E', 'G', 'A'] // Fewer notes for small size
+    ? ['C', 'E', 'G', 'A'] 
     : NOTES.map(n => n.name);
 
-  // Handle initial user interaction to unblock audio (especially on iOS)
+  // Handle initial user interaction
   const handleButtonClick = (note: string) => {
     const audioContext = getAudioContext();
     
-    // For iOS Safari, we need user interaction to start audio
     if (audioContext.state === 'suspended') {
       audioContext.resume().then(() => {
-        // After resuming, play the note
         playNote(note);
       }).catch(err => {
         console.error('Failed to resume audio context:', err);
       });
     } else {
-      // Context already running, just play the note
       playNote(note);
     }
   };
 
   return (
-    <div className={cn("flex flex-col items-center p-2", className)} onClick={() => getAudioContext().resume()}>
+    <div className={cn("flex flex-col items-center p-2", className)}>
       <div className="grid grid-cols-4 gap-2 mb-2">
         {displayedNotes.map((note) => (
           <Button
@@ -216,8 +215,6 @@ export function PitchPipe({
               activeNote === note ? "bg-glee-purple text-white" : "hover:bg-secondary"
             )}
             onClick={() => handleButtonClick(note)}
-            onMouseDown={() => handleButtonClick(note)} // For faster response on desktop
-            onTouchStart={() => handleButtonClick(note)} // For faster response on mobile
           >
             {note}
           </Button>
