@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { PageHeader } from "@/components/ui/page-header";
-import { FileText, Plus, Upload, FolderOpen, ListMusic, X, TableIcon } from "lucide-react";
+import { FileText, Plus, Upload, FolderOpen, ListMusic, X, TableIcon, Grid, List } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -58,6 +58,7 @@ interface Setlist {
 }
 
 type SortOption = "newest" | "oldest" | "title" | "composer";
+type ViewMode = "grid" | "list";
 
 export default function SheetMusicPage() {
   const { toast } = useToast();
@@ -74,6 +75,7 @@ export default function SheetMusicPage() {
   const [isSetlistDrawerOpen, setIsSetlistDrawerOpen] = useState(false);
   const [selectedFiles, setSelectedFiles] = useState<SheetMusic[]>([]);
   const [sortOrder, setSortOrder] = useState<SortOption>("newest");
+  const [viewMode, setViewMode] = useState<ViewMode>("grid");
   const [highlightedMediaId, setHighlightedMediaId] = useState<string | null>(null);
   
   // State for setlist filtering
@@ -341,6 +343,135 @@ export default function SheetMusicPage() {
     );
   }
 
+  // Render grid view
+  const renderGridView = () => (
+    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+      {filteredFiles.map((file) => (
+        <Card 
+          key={file.id} 
+          id={`sheet-music-${file.mediaSourceId}`}
+          className={`overflow-hidden transition-all hover:shadow-md cursor-pointer group ${
+            highlightedMediaId === file.mediaSourceId ? 'ring-2 ring-primary' : ''
+          }`}
+          onClick={() => viewSheetMusic(file.id)}
+        >
+          <div className="relative">
+            <div className="bg-muted h-48 flex items-center justify-center overflow-hidden">
+              <div className="w-full h-full bg-white border border-gray-200">
+                <PDFThumbnail 
+                  url={file.file_url} 
+                  title={file.title}
+                  className="w-full h-full"
+                  aspectRatio={3/4}
+                />
+              </div>
+            </div>
+            
+            {/* Overlay with actions */}
+            <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-40 transition-all flex items-center justify-center opacity-0 group-hover:opacity-100">
+              <Button variant="secondary" size="sm">
+                Open Advanced Viewer
+              </Button>
+            </div>
+          </div>
+          
+          <CardContent className="p-4">
+            <h3 className="font-bold text-sm mb-1 truncate" title={file.title}>
+              {file.title}
+            </h3>
+            <p className="text-sm text-muted-foreground mb-2 truncate" title={file.composer}>
+              {file.composer}
+            </p>
+            <div className="flex items-center justify-between">
+              <Badge variant="secondary" className="text-xs">
+                PDF
+              </Badge>
+              <span className="text-xs text-muted-foreground">
+                {file.created_at}
+              </span>
+            </div>
+          </CardContent>
+        </Card>
+      ))}
+    </div>
+  );
+
+  // Render list view
+  const renderListView = () => (
+    <div className="bg-white rounded-lg border">
+      <Table>
+        <TableHeader>
+          <TableRow>
+            <TableHead className="w-16"></TableHead>
+            <TableHead 
+              className="cursor-pointer hover:bg-muted/50"
+              onClick={() => setSortOrder(sortOrder === "title" ? "newest" : "title")}
+            >
+              Title
+              {sortOrder === "title" && <span className="ml-1">↑</span>}
+            </TableHead>
+            <TableHead 
+              className="cursor-pointer hover:bg-muted/50"
+              onClick={() => setSortOrder(sortOrder === "composer" ? "newest" : "composer")}
+            >
+              Composer
+              {sortOrder === "composer" && <span className="ml-1">↑</span>}
+            </TableHead>
+            <TableHead 
+              className="cursor-pointer hover:bg-muted/50"
+              onClick={() => setSortOrder(sortOrder === "newest" ? "oldest" : "newest")}
+            >
+              Date Added
+              {(sortOrder === "newest" || sortOrder === "oldest") && (
+                <span className="ml-1">{sortOrder === "newest" ? "↓" : "↑"}</span>
+              )}
+            </TableHead>
+            <TableHead className="w-20">Type</TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {filteredFiles.map((file) => (
+            <TableRow 
+              key={file.id}
+              id={`sheet-music-${file.mediaSourceId}`}
+              className={`cursor-pointer hover:bg-muted/50 transition-colors ${
+                highlightedMediaId === file.mediaSourceId ? 'bg-primary/10' : ''
+              }`}
+              onClick={() => viewSheetMusic(file.id)}
+            >
+              <TableCell className="p-2">
+                <div className="w-12 h-16 bg-white border border-gray-200 rounded overflow-hidden">
+                  <PDFThumbnail 
+                    url={file.file_url} 
+                    title={file.title}
+                    className="w-full h-full"
+                    aspectRatio={3/4}
+                  />
+                </div>
+              </TableCell>
+              <TableCell className="font-medium">
+                <div className="flex flex-col">
+                  <span className="font-semibold text-sm">{file.title}</span>
+                </div>
+              </TableCell>
+              <TableCell className="text-muted-foreground">
+                {file.composer}
+              </TableCell>
+              <TableCell className="text-sm text-muted-foreground">
+                {file.created_at}
+              </TableCell>
+              <TableCell>
+                <Badge variant="secondary" className="text-xs">
+                  PDF
+                </Badge>
+              </TableCell>
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
+    </div>
+  );
+
   return (
     <div className="container py-6">
       <PageHeader
@@ -361,6 +492,44 @@ export default function SheetMusicPage() {
         }
       />
 
+      {/* Filters and View Toggle */}
+      <div className="mb-6 flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
+        <div className="flex gap-2 items-center">
+          <Select value={sortOrder} onValueChange={(value: SortOption) => setSortOrder(value)}>
+            <SelectTrigger className="w-40">
+              <SelectValue placeholder="Sort by..." />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="newest">Newest First</SelectItem>
+              <SelectItem value="oldest">Oldest First</SelectItem>
+              <SelectItem value="title">Title A-Z</SelectItem>
+              <SelectItem value="composer">Composer A-Z</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+
+        <div className="flex gap-1 bg-muted p-1 rounded-lg">
+          <Button
+            variant={viewMode === "grid" ? "default" : "ghost"}
+            size="sm"
+            onClick={() => setViewMode("grid")}
+            className="flex items-center gap-2"
+          >
+            <Grid className="h-4 w-4" />
+            Grid
+          </Button>
+          <Button
+            variant={viewMode === "list" ? "default" : "ghost"}
+            size="sm"
+            onClick={() => setViewMode("list")}
+            className="flex items-center gap-2"
+          >
+            <List className="h-4 w-4" />
+            List
+          </Button>
+        </div>
+      </div>
+
       {filteredFiles.length === 0 ? (
         <div className="text-center py-12">
           <FileText className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
@@ -377,55 +546,9 @@ export default function SheetMusicPage() {
           </div>
         </div>
       ) : (
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-          {filteredFiles.map((file) => (
-            <Card 
-              key={file.id} 
-              id={`sheet-music-${file.mediaSourceId}`}
-              className={`overflow-hidden transition-all hover:shadow-md cursor-pointer group ${
-                highlightedMediaId === file.mediaSourceId ? 'ring-2 ring-primary' : ''
-              }`}
-              onClick={() => viewSheetMusic(file.id)}
-            >
-              <div className="relative">
-                <div className="bg-muted h-48 flex items-center justify-center overflow-hidden">
-                  <div className="w-full h-full bg-white border border-gray-200">
-                    <PDFThumbnail 
-                      url={file.file_url} 
-                      title={file.title}
-                      className="w-full h-full"
-                      aspectRatio={3/4}
-                    />
-                  </div>
-                </div>
-                
-                {/* Overlay with actions */}
-                <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-40 transition-all flex items-center justify-center opacity-0 group-hover:opacity-100">
-                  <Button variant="secondary" size="sm">
-                    Open Advanced Viewer
-                  </Button>
-                </div>
-              </div>
-              
-              <CardContent className="p-4">
-                <h3 className="font-bold text-sm mb-1 truncate" title={file.title}>
-                  {file.title}
-                </h3>
-                <p className="text-sm text-muted-foreground mb-2 truncate" title={file.composer}>
-                  {file.composer}
-                </p>
-                <div className="flex items-center justify-between">
-                  <Badge variant="secondary" className="text-xs">
-                    PDF
-                  </Badge>
-                  <span className="text-xs text-muted-foreground">
-                    {file.created_at}
-                  </span>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
+        <>
+          {viewMode === "grid" ? renderGridView() : renderListView()}
+        </>
       )}
 
       <UploadSheetMusicModal
