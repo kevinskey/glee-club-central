@@ -1,31 +1,29 @@
 
 import React from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Clock } from "lucide-react";
+import { Music } from "lucide-react";
 import { DropdownMenuItem } from "@/components/ui/dropdown-menu";
-import { SimpleMetronome } from "../SimpleMetronome";
+import { BasicPitchPipe } from "../BasicPitchPipe";
 
-export function SimpleMetronomeDialog() {
+export function BasicPitchPipeDialog() {
   const [open, setOpen] = React.useState(false);
 
   return (
     <>
       <DropdownMenuItem 
         onClick={() => setOpen(true)}
-        className="cursor-pointer flex items-center gap-2 text-popover-foreground"
+        className="cursor-pointer flex items-center gap-2"
       >
-        <Clock className="h-4 w-4" />
-        Metronome
+        <Music className="h-4 w-4" />
+        Pitch Pipe
       </DropdownMenuItem>
       
       <Dialog open={open} onOpenChange={setOpen}>
-        <DialogContent className="sm:max-w-md bg-background text-foreground">
+        <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle>Metronome</DialogTitle>
+            <DialogTitle>Pitch Pipe</DialogTitle>
           </DialogHeader>
-          <div className="mt-2">
-            <SimpleMetronome onClose={() => setOpen(false)} />
-          </div>
+          <BasicPitchPipe onClose={() => setOpen(false)} />
         </DialogContent>
       </Dialog>
     </>

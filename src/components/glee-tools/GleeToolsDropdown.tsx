@@ -10,26 +10,15 @@ import {
   DropdownMenuTrigger
 } from "@/components/ui/dropdown-menu";
 
-// Import our simplified dialog components
-import { SimplePitchPipeDialog } from "./dialogs/SimplePitchPipeDialog";
-import { SimpleMetronomeDialog } from "./dialogs/SimpleMetronomeDialog";
-import { PianoKeyboardDialog } from "./dialogs/PianoKeyboardDialog";
-import { RecordingStudioDialog } from "./dialogs/RecordingStudioDialog";
+import { BasicPitchPipeDialog } from "./dialogs/BasicPitchPipeDialog";
+import { BasicMetronomeDialog } from "./dialogs/BasicMetronomeDialog";
 import { AboutGleeToolsItem } from "./dialogs/AboutGleeToolsItem";
-import { useAudioContext } from "@/hooks/use-audio-context";
 
 export function GleeToolsDropdown() {
-  const { audioContextRef, initializeAudioContext } = useAudioContext();
-
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button
-          variant="ghost"
-          size="icon"
-          className="relative"
-          onClick={initializeAudioContext}
-        >
+        <Button variant="ghost" size="icon" className="relative">
           <Headphones className="h-5 w-5" />
           <span className="sr-only">Glee Tools</span>
           <span className="absolute -bottom-1 -right-1 flex h-3 w-3">
@@ -38,19 +27,12 @@ export function GleeToolsDropdown() {
           </span>
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent 
-        align="end" 
-        className="w-56 !bg-popover !text-popover-foreground border border-border shadow-md"
-        style={{ backgroundColor: 'var(--popover)', color: 'var(--popover-foreground)' }}
-      >
-        <DropdownMenuLabel className="font-semibold text-popover-foreground">Glee Tools</DropdownMenuLabel>
+      <DropdownMenuContent align="end" className="w-56">
+        <DropdownMenuLabel className="font-semibold">Glee Tools</DropdownMenuLabel>
         <DropdownMenuSeparator />
         
-        {/* Use simplified dialog components */}
-        <SimplePitchPipeDialog />
-        <SimpleMetronomeDialog />
-        <PianoKeyboardDialog audioContextRef={audioContextRef} />
-        <RecordingStudioDialog audioContextRef={audioContextRef} />
+        <BasicPitchPipeDialog />
+        <BasicMetronomeDialog />
         
         <DropdownMenuSeparator />
         <AboutGleeToolsItem />
