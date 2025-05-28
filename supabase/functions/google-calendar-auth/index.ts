@@ -10,9 +10,12 @@ const SUPABASE_URL = Deno.env.get("SUPABASE_URL");
 console.log("Environment check:", {
   hasClientId: !!GOOGLE_OAUTH_CLIENT_ID,
   hasClientSecret: !!GOOGLE_OAUTH_CLIENT_SECRET,
-  hasSupabaseUrl: !!SUPABASE_URL
+  hasSupabaseUrl: !!SUPABASE_URL,
+  clientIdLength: GOOGLE_OAUTH_CLIENT_ID?.length || 0,
+  supabaseUrl: SUPABASE_URL
 });
 
+// Validate required environment variables
 if (!GOOGLE_OAUTH_CLIENT_ID) {
   console.error("GOOGLE_OAUTH_CLIENT_ID environment variable is not set");
 }
@@ -21,10 +24,20 @@ if (!GOOGLE_OAUTH_CLIENT_SECRET) {
   console.error("GOOGLE_OAUTH_CLIENT_SECRET environment variable is not set");
 }
 
+if (!SUPABASE_URL) {
+  console.error("SUPABASE_URL environment variable is not set");
+}
+
 const REDIRECT_URI = `${SUPABASE_URL}/functions/v1/google-calendar-auth`;
 const GOOGLE_OAUTH_ENDPOINT = "https://accounts.google.com/o/oauth2/v2/auth";
 const GOOGLE_TOKEN_ENDPOINT = "https://oauth2.googleapis.com/token";
 const GOOGLE_SCOPE = "https://www.googleapis.com/auth/calendar.readonly";
+
+console.log("OAuth configuration:", {
+  redirectUri: REDIRECT_URI,
+  scope: GOOGLE_SCOPE,
+  endpoint: GOOGLE_OAUTH_ENDPOINT
+});
 
 // CORS headers
 const corsHeaders = {
@@ -282,10 +295,14 @@ serve(async (req) => {
       case 'get_auth_url':
         console.log("Generating auth URL for user:", user.id);
         
+        // Check for missing credentials
         if (!GOOGLE_OAUTH_CLIENT_ID) {
           console.error("GOOGLE_OAUTH_CLIENT_ID is not configured");
           return new Response(
-            JSON.stringify({ error: 'Google OAuth not configured' }),
+            JSON.stringify({ 
+              error: 'Google OAuth Client ID not configured in Supabase secrets',
+              details: 'Please set GOOGLE_OAUTH_CLIENT_ID in your Supabase project secrets'
+            }),
             { 
               status: 500, 
               headers: { ...corsHeaders, 'Content-Type': 'application/json' }
@@ -293,25 +310,65 @@ serve(async (req) => {
           );
         }
         
-        const authUrl = `${GOOGLE_OAUTH_ENDPOINT}?` + new URLSearchParams({
-          client_id: GOOGLE_OAUTH_CLIENT_ID,
-          redirect_uri: REDIRECT_URI,
-          response_type: 'code',
-          access_type: 'offline',
-          prompt: 'consent',
-          scope: GOOGLE_SCOPE,
-          state: user.id,
-        }).toString();
+        if (!GOOGLE_OAUTH_CLIENT_SECRET) {
+          console.error("GOOGLE_OAUTH_CLIENT_SECRET is not configured");
+          return new Response(
+            JSON.stringify({ 
+              error: 'Google OAuth Client Secret not configured in Supabase secrets',
+              details: 'Please set GOOGLE_OAUTH_CLIENT_SECRET in your Supabase project secrets'
+            }),
+            { 
+              status: 500, 
+              headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+            }
+          );
+        }
         
-        console.log("Generated auth URL");
-        
-        return new Response(
-          JSON.stringify({ authUrl }),
-          { 
-            status: 200, 
-            headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-          }
-        );
+        try {
+          const authUrlParams = new URLSearchParams({
+            client_id: GOOGLE_OAUTH_CLIENT_ID,
+            redirect_uri: REDIRECT_URI,
+            response_type: 'code',
+            access_type: 'offline',
+            prompt: 'consent',
+            scope: GOOGLE_SCOPE,
+            state: user.id,
+          });
+          
+          const authUrl = `${GOOGLE_OAUTH_ENDPOINT}?${authUrlParams.toString()}`;
+          
+          console.log("Generated OAuth URL:", authUrl);
+          console.log("OAuth URL components:", {
+            clientId: GOOGLE_OAUTH_CLIENT_ID?.substring(0, 20) + '...',
+            redirectUri: REDIRECT_URI,
+            scope: GOOGLE_SCOPE,
+            state: user.id
+          });
+          
+          return new Response(
+            JSON.stringify({ 
+              authUrl,
+              redirectUri: REDIRECT_URI,
+              scope: GOOGLE_SCOPE
+            }),
+            { 
+              status: 200, 
+              headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+            }
+          );
+        } catch (error) {
+          console.error("Error generating OAuth URL:", error);
+          return new Response(
+            JSON.stringify({ 
+              error: 'Failed to generate OAuth URL',
+              details: error.message
+            }),
+            { 
+              status: 500, 
+              headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+            }
+          );
+        }
       
       case 'check_connection':
         try {
