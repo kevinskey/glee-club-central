@@ -1,3 +1,4 @@
+
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { AudioEngine } from '@/lib/audio/AudioEngine';
 import { SoundFontManager, AVAILABLE_INSTRUMENTS } from '@/lib/audio/SoundFont';
@@ -22,10 +23,12 @@ export function useAdvancedAudio() {
   const audioEngineRef = useRef<AudioEngine | null>(null);
   const soundFontManagerRef = useRef<SoundFontManager | null>(null);
   const activeNotesRef = useRef<Map<string, any>>(new Map());
+  const initializationAttemptedRef = useRef(false);
   
   const initialize = useCallback(async () => {
-    if (isInitialized || isLoading) return;
+    if (isInitialized || isLoading || initializationAttemptedRef.current) return;
     
+    initializationAttemptedRef.current = true;
     setIsLoading(true);
     setError(null);
     
@@ -34,8 +37,12 @@ export function useAdvancedAudio() {
       audioEngineRef.current = AudioEngine.getInstance();
       await audioEngineRef.current.initialize();
       
-      // Create SoundFont manager with proper typing
+      // Create SoundFont manager - ensure we have a proper AudioContext
       const context = audioEngineRef.current.getContext();
+      if (!context || !context.rawContext) {
+        throw new Error('Audio context not available');
+      }
+      
       const audioContext = context.rawContext as AudioContext;
       soundFontManagerRef.current = new SoundFontManager(audioContext);
       
@@ -60,10 +67,12 @@ export function useAdvancedAudio() {
       const errorMessage = err instanceof Error ? err.message : 'Unknown audio initialization error';
       setError(errorMessage);
       console.error('Failed to initialize advanced audio:', err);
+      // Don't reset initialization flag on error - allow retry
+      initializationAttemptedRef.current = false;
     } finally {
       setIsLoading(false);
     }
-  }, [isInitialized, isLoading, audioSettings.latency]);
+  }, [audioSettings.latency]);
   
   const playNote = useCallback(async (
     note: string,
@@ -71,7 +80,10 @@ export function useAdvancedAudio() {
     duration?: number,
     instrumentId: string = 'acoustic_grand_piano'
   ) => {
-    if (!soundFontManagerRef.current || !isInitialized) return;
+    if (!soundFontManagerRef.current || !isInitialized) {
+      console.warn('Audio system not ready for note playback');
+      return;
+    }
     
     try {
       let instrument = soundFontManagerRef.current.getLoadedInstrument(instrumentId);
@@ -161,16 +173,28 @@ export function useAdvancedAudio() {
     }
     
     setIsInitialized(false);
+    initializationAttemptedRef.current = false;
   }, [stopAllNotes]);
   
   // Auto-initialize on mount
   useEffect(() => {
-    initialize();
+    // Small delay to ensure component is mounted
+    const timer = setTimeout(() => {
+      initialize();
+    }, 100);
     
     return () => {
+      clearTimeout(timer);
       dispose();
     };
-  }, [initialize, dispose]);
+  }, []);
+  
+  // Retry initialization if there was an error
+  const retryInitialization = useCallback(() => {
+    initializationAttemptedRef.current = false;
+    setError(null);
+    initialize();
+  }, [initialize]);
   
   return {
     isInitialized,
@@ -184,6 +208,7 @@ export function useAdvancedAudio() {
     loadInstrument,
     updateAudioSettings,
     initialize,
+    retryInitialization,
     dispose,
     audioEngine: audioEngineRef.current,
     soundFontManager: soundFontManagerRef.current

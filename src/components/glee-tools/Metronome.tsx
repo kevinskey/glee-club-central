@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -34,63 +35,66 @@ export function Metronome({ onClose }: MetronomeProps) {
   const [volume, setVolume] = useState(75);
   const [currentBeat, setCurrentBeat] = useState(0);
   const [timeSignature, setTimeSignature] = useState(TIME_SIGNATURES[0]);
-  const [soundType, setSoundType] = useState('woodblock');
+  const [soundType, setSoundType] = useState('synth'); // Use synth as default for reliability
   const [tapTimes, setTapTimes] = useState<number[]>([]);
   
   const { 
     isInitialized, 
     isLoading, 
     error,
-    playNote,
-    loadInstrument
+    retryInitialization
   } = useAdvancedAudio();
   
   const intervalRef = useRef<number | null>(null);
-  const startTimeRef = useRef<number>(0);
+  const synthRef = useRef<Tone.Synth | null>(null);
+  const mountedRef = useRef(true);
+
+  // Initialize synth for reliable metronome sound
+  useEffect(() => {
+    if (isInitialized && !synthRef.current) {
+      try {
+        synthRef.current = new Tone.Synth({
+          oscillator: { type: 'triangle' },
+          envelope: { attack: 0.01, decay: 0.1, sustain: 0, release: 0.1 }
+        }).toDestination();
+      } catch (error) {
+        console.error('Failed to create synth:', error);
+      }
+    }
+    
+    return () => {
+      if (synthRef.current) {
+        synthRef.current.dispose();
+        synthRef.current = null;
+      }
+    };
+  }, [isInitialized]);
 
   const playMetronomeSound = useCallback(async (isAccent: boolean = false) => {
-    if (!isInitialized) return;
+    if (!isInitialized || !synthRef.current || !mountedRef.current) return;
     
     try {
-      const velocity = Math.round((volume / 100) * 127);
-      const note = isAccent ? 'C5' : 'C4';
+      const frequency = isAccent ? 1000 : 800;
+      const velocity = (volume / 100) * 0.5;
       
-      switch (soundType) {
-        case 'woodblock':
-          await playNote(note, velocity, 0.1, 'woodblock');
-          break;
-        case 'synth':
-          const synth = new Tone.Synth().toDestination();
-          synth.triggerAttackRelease(isAccent ? 1000 : 800, '16n');
-          break;
-        case 'percussion':
-          await playNote(note, velocity, 0.1, 'acoustic_bass_drum');
-          break;
-        case 'bell':
-          await playNote(note, velocity, 0.2, 'tubular_bells');
-          break;
-        default:
-          const osc = new Tone.Oscillator(isAccent ? 1000 : 800, 'triangle').toDestination();
-          const gain = new Tone.Gain((volume / 100) * 0.3).toDestination();
-          osc.connect(gain);
-          osc.start();
-          osc.stop('+0.1');
-      }
+      synthRef.current.volume.value = Tone.gainToDb(velocity);
+      synthRef.current.triggerAttackRelease(frequency, '16n');
     } catch (error) {
       console.error('Error playing metronome sound:', error);
     }
-  }, [isInitialized, volume, soundType, playNote]);
+  }, [isInitialized, volume]);
 
   const startMetronome = useCallback(() => {
-    if (!isInitialized || isPlaying) return;
+    if (!isInitialized || isPlaying || !mountedRef.current) return;
     
     setIsPlaying(true);
     setCurrentBeat(0);
-    startTimeRef.current = Date.now();
     
     const beatInterval = (60 / bpm) * 1000;
     
     const tick = () => {
+      if (!mountedRef.current) return;
+      
       setCurrentBeat(prevBeat => {
         const newBeat = (prevBeat + 1) % timeSignature.beats;
         const isAccent = newBeat === 0;
@@ -101,7 +105,10 @@ export function Metronome({ onClose }: MetronomeProps) {
       });
     };
     
+    // Play first beat immediately
     tick();
+    
+    // Set up interval for subsequent beats
     intervalRef.current = window.setInterval(tick, beatInterval);
   }, [isInitialized, isPlaying, bpm, timeSignature.beats, playMetronomeSound]);
 
@@ -147,6 +154,7 @@ export function Metronome({ onClose }: MetronomeProps) {
     }, 3000);
   }, [tapTimes]);
 
+  // Update metronome when BPM changes
   useEffect(() => {
     if (isPlaying) {
       stopMetronome();
@@ -154,8 +162,11 @@ export function Metronome({ onClose }: MetronomeProps) {
     }
   }, [bpm]);
 
+  // Cleanup on unmount
   useEffect(() => {
+    mountedRef.current = true;
     return () => {
+      mountedRef.current = false;
       stopMetronome();
     };
   }, [stopMetronome]);
@@ -179,7 +190,10 @@ export function Metronome({ onClose }: MetronomeProps) {
         <CardContent className="p-6">
           <div className="text-center">
             <div className="text-red-500 mb-2">Audio Error</div>
-            <div className="text-sm text-muted-foreground">{error}</div>
+            <div className="text-sm text-muted-foreground mb-4">{error}</div>
+            <Button onClick={retryInitialization} size="sm">
+              Retry
+            </Button>
           </div>
         </CardContent>
       </Card>
@@ -229,22 +243,6 @@ export function Metronome({ onClose }: MetronomeProps) {
               {TIME_SIGNATURES.map(sig => (
                 <SelectItem key={sig.name} value={sig.name}>
                   {sig.name}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-
-        <div className="space-y-2">
-          <label className="text-sm font-medium">Sound</label>
-          <Select value={soundType} onValueChange={setSoundType}>
-            <SelectTrigger>
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              {METRONOME_SOUNDS.map(sound => (
-                <SelectItem key={sound.id} value={sound.id}>
-                  {sound.name}
                 </SelectItem>
               ))}
             </SelectContent>
