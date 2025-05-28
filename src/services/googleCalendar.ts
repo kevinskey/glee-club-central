@@ -6,30 +6,47 @@ import { CalendarEvent, GoogleCalendarToken } from "@/types/calendar";
 import { toast } from "sonner";
 
 /**
+ * Helper function to get current session and handle auth
+ */
+const getAuthenticatedSession = async () => {
+  const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+  
+  if (sessionError || !session?.access_token) {
+    throw new Error("No valid session found. Please log in again.");
+  }
+  
+  return session;
+};
+
+/**
+ * Helper function to make authenticated requests to the edge function
+ */
+const callEdgeFunction = async (body: any) => {
+  const session = await getAuthenticatedSession();
+  
+  const { data, error } = await supabase.functions.invoke('google-calendar-auth', {
+    body,
+    headers: {
+      'Authorization': `Bearer ${session.access_token}`,
+      'Content-Type': 'application/json'
+    }
+  });
+  
+  if (error) {
+    console.error("Edge function error:", error);
+    throw error;
+  }
+  
+  return data;
+};
+
+/**
  * Check if the user has already connected their Google Calendar
  */
 export const isConnected = async (): Promise<boolean> => {
   try {
-    const { data: user } = await supabase.auth.getUser();
-    if (!user || !user.user) {
-      return false;
-    }
-
-    const { data: { session }, error: sessionError } = await supabase.auth.getSession();
-    if (sessionError || !session) {
-      return false;
-    }
-    
-    const { data, error } = await supabase.functions.invoke('google-calendar-auth', { 
-      body: { action: 'check_connection' } 
-    });
-      
-    if (error || !data) {
-      console.error("Error checking connection:", error);
-      return false;
-    }
-    
-    return data.connected === true;
+    const data = await callEdgeFunction({ action: 'check_connection' });
+    return data?.connected === true;
   } catch (error) {
     console.error("Error checking Google Calendar connection status:", error);
     return false;
@@ -41,45 +58,9 @@ export const isConnected = async (): Promise<boolean> => {
  */
 export const connectToGoogleCalendar = async (): Promise<string> => {
   try {
-    // Verify user is authenticated
-    const { data: { user }, error: userError } = await supabase.auth.getUser();
-    if (userError || !user) {
-      console.error("User not authenticated:", userError);
-      toast.error("You must be logged in to connect Google Calendar");
-      throw new Error("User not authenticated");
-    }
-
-    // Check if session is valid
-    const { data: { session }, error: sessionError } = await supabase.auth.getSession();
-    if (sessionError || !session) {
-      console.error("No valid session:", sessionError);
-      toast.error("Please log in again to continue");
-      throw new Error("No valid session");
-    }
-
     console.log("User authenticated, requesting Google Calendar auth URL...");
 
-    // Call the edge function with proper body format
-    const { data, error } = await supabase.functions.invoke('google-calendar-auth', { 
-      body: { action: 'generate_oauth_url' } 
-    });
-
-    if (error) {
-      console.error("Error calling edge function:", error);
-      
-      // Handle specific error cases
-      if (error.message?.includes('401') || error.message?.includes('authorization')) {
-        toast.error("Authentication expired. Please refresh the page and try again.");
-        // Try to refresh the session
-        await supabase.auth.refreshSession();
-        throw new Error("Authentication expired");
-      } else {
-        toast.error("Failed to connect to Google Calendar service");
-        throw error;
-      }
-    }
-
-    console.log("Received auth URL response:", data);
+    const data = await callEdgeFunction({ action: 'generate_oauth_url' });
 
     if (data?.authUrl) {
       console.log("Opening OAuth URL");
@@ -91,9 +72,9 @@ export const connectToGoogleCalendar = async (): Promise<string> => {
   } catch (error) {
     console.error("Error connecting to Google Calendar:", error);
     
-    // Don't show duplicate toast messages
-    if (!error.message?.includes("Authentication expired") && 
-        !error.message?.includes("You must be logged in")) {
+    if (error.message?.includes("No valid session")) {
+      toast.error("Please log in again to continue");
+    } else {
       toast.error("Failed to connect to Google Calendar");
     }
     throw error;
@@ -105,32 +86,10 @@ export const connectToGoogleCalendar = async (): Promise<string> => {
  */
 export const fetchGoogleCalendarEvents = async (calendarId = 'primary'): Promise<CalendarEvent[]> => {
   try {
-    // Verify user is authenticated
-    const { data: { user }, error: userError } = await supabase.auth.getUser();
-    if (userError || !user) {
-      console.error("User not authenticated:", userError);
-      return [];
-    }
-
-    // Get current session
-    const { data: { session }, error: sessionError } = await supabase.auth.getSession();
-    if (sessionError || !session) {
-      console.error("No valid session:", sessionError);
-      return [];
-    }
-    
-    const { data, error } = await supabase.functions.invoke('google-calendar-auth', { 
-      body: {
-        action: 'fetch_events',
-        calendar_id: calendarId
-      }
+    const data = await callEdgeFunction({
+      action: 'fetch_events',
+      calendar_id: calendarId
     });
-    
-    if (error) {
-      console.error("Error fetching events:", error);
-      toast.error("Failed to fetch Google Calendar events");
-      return [];
-    }
     
     return data?.events || [];
   } catch (error) {
@@ -150,30 +109,7 @@ export const connect = connectToGoogleCalendar;
  */
 export const disconnect = async (): Promise<boolean> => {
   try {
-    // Verify user is authenticated
-    const { data: { user }, error: userError } = await supabase.auth.getUser();
-    if (userError || !user) {
-      console.error("User not authenticated:", userError);
-      return false;
-    }
-
-    // Get current session
-    const { data: { session }, error: sessionError } = await supabase.auth.getSession();
-    if (sessionError || !session) {
-      console.error("No valid session:", sessionError);
-      toast.error("Please log in again to continue");
-      return false;
-    }
-    
-    // Call the edge function to disconnect
-    const { data, error } = await supabase.functions.invoke('google-calendar-auth', { 
-      body: { action: 'disconnect' } 
-    });
-    
-    if (error) {
-      console.error("Error disconnecting:", error);
-      throw error;
-    }
+    const data = await callEdgeFunction({ action: 'disconnect' });
     
     if (data?.success) {
       toast.success("Google Calendar disconnected successfully");
@@ -193,29 +129,7 @@ export const disconnect = async (): Promise<boolean> => {
  */
 export const fetchGoogleCalendars = async (): Promise<Array<{id: string, name: string, primary?: boolean}> | null> => {
   try {
-    // Verify user is authenticated
-    const { data: { user }, error: userError } = await supabase.auth.getUser();
-    if (userError || !user) {
-      console.error("User not authenticated:", userError);
-      return null;
-    }
-
-    // Get current session
-    const { data: { session }, error: sessionError } = await supabase.auth.getSession();
-    if (sessionError || !session) {
-      console.error("No valid session:", sessionError);
-      return null;
-    }
-    
-    const { data, error } = await supabase.functions.invoke('google-calendar-auth', { 
-      body: { action: 'list_calendars' } 
-    });
-    
-    if (error) {
-      console.error("Error fetching calendars:", error);
-      throw error;
-    }
-    
+    const data = await callEdgeFunction({ action: 'list_calendars' });
     return data?.calendars || [];
   } catch (error) {
     console.error("Error fetching Google Calendars:", error);
@@ -262,22 +176,6 @@ export const fetchGoogleCalendarToken = async (userId: string): Promise<GoogleCa
  */
 export const syncWithGoogleCalendar = async (calendarId = 'primary', accessToken?: string): Promise<boolean> => {
   try {
-    // Verify user is authenticated
-    const { data: { user }, error: userError } = await supabase.auth.getUser();
-    if (userError || !user) {
-      console.error("User not authenticated:", userError);
-      toast.error("You must be logged in to sync with Google Calendar");
-      return false;
-    }
-
-    // Get current session
-    const { data: { session }, error: sessionError } = await supabase.auth.getSession();
-    if (sessionError || !session) {
-      console.error("No valid session:", sessionError);
-      toast.error("Please log in again to continue");
-      return false;
-    }
-    
     // Call the sync function
     const { data, error } = await supabase.functions.invoke('google-calendar-sync', { 
       body: {
