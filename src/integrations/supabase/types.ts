@@ -42,13 +42,6 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "absence_requests_event_id_fkey"
-            columns: ["event_id"]
-            isOneToOne: false
-            referencedRelation: "calendar_events"
-            referencedColumns: ["id"]
-          },
-          {
             foreignKeyName: "absence_requests_member_id_fkey"
             columns: ["member_id"]
             isOneToOne: false
@@ -91,13 +84,6 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "attendance_records_calendar_event_id_fkey"
-            columns: ["calendar_event_id"]
-            isOneToOne: false
-            referencedRelation: "calendar_events"
-            referencedColumns: ["id"]
-          },
-          {
             foreignKeyName: "attendance_records_member_id_fkey"
             columns: ["member_id"]
             isOneToOne: false
@@ -139,57 +125,6 @@ export type Database = {
           is_backing_track?: boolean | null
           title?: string
           uploaded_by?: string
-        }
-        Relationships: []
-      }
-      calendar_events: {
-        Row: {
-          allday: boolean | null
-          created_at: string
-          date: string
-          description: string | null
-          google_event_id: string | null
-          id: string
-          image_url: string | null
-          last_synced_at: string | null
-          location: string
-          time: string
-          title: string
-          type: string
-          updated_at: string
-          user_id: string
-        }
-        Insert: {
-          allday?: boolean | null
-          created_at?: string
-          date: string
-          description?: string | null
-          google_event_id?: string | null
-          id?: string
-          image_url?: string | null
-          last_synced_at?: string | null
-          location: string
-          time: string
-          title: string
-          type: string
-          updated_at?: string
-          user_id: string
-        }
-        Update: {
-          allday?: boolean | null
-          created_at?: string
-          date?: string
-          description?: string | null
-          google_event_id?: string | null
-          id?: string
-          image_url?: string | null
-          last_synced_at?: string | null
-          location?: string
-          time?: string
-          title?: string
-          type?: string
-          updated_at?: string
-          user_id?: string
         }
         Relationships: []
       }
@@ -1051,36 +986,6 @@ export type Database = {
           item_number?: string | null
           item_type?: string
           size?: string | null
-        }
-        Relationships: []
-      }
-      user_google_tokens: {
-        Row: {
-          access_token: string
-          created_at: string
-          expires_at: string
-          id: string
-          refresh_token: string
-          updated_at: string
-          user_id: string
-        }
-        Insert: {
-          access_token: string
-          created_at?: string
-          expires_at: string
-          id?: string
-          refresh_token: string
-          updated_at?: string
-          user_id: string
-        }
-        Update: {
-          access_token?: string
-          created_at?: string
-          expires_at?: string
-          id?: string
-          refresh_token?: string
-          updated_at?: string
-          user_id?: string
         }
         Relationships: []
       }

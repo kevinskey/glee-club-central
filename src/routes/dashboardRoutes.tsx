@@ -8,8 +8,6 @@ import SheetMusicPage from '../pages/SheetMusicPage';
 import PDFViewerPage from '../pages/PDFViewerPage';
 import RecordingsPage from '../pages/RecordingsPage';
 import RecordingStudioPage from '../pages/recordings/RecordingStudioPage';
-import CalendarPage from '../pages/dashboard/calendar';
-import CalendarDashboard from '../pages/dashboard/CalendarDashboard';
 import MemberDashboardPage from '../pages/dashboard/MemberDashboardPage';
 import AnnouncementsPage from '../pages/dashboard/AnnouncementsPage';
 import ArchivesPage from '../pages/dashboard/ArchivesPage';
@@ -67,10 +65,6 @@ export const dashboardRoutes = {
       element: <AudioManagementPage />,
     },
     {
-      path: 'calendar',
-      element: <CalendarDashboard />,
-    },
-    {
       path: 'announcements',
       element: <AnnouncementsPage />,
     },
@@ -92,12 +86,12 @@ export const dashboardRoutes = {
       element: <RequireAuth requireAdmin={true}><MembersPage /></RequireAuth>,
     },
     {
-      path: 'finances',
-      element: <RequireAuth requireAdmin={true}><FinancesPage /></RequireAuth>,
+      path: 'admin/settings',
+      element: <RequireAuth requireAdmin={true}><SettingsPage /></RequireAuth>,
     },
     {
-      path: 'settings',
-      element: <RequireAuth requireAdmin={true}><SettingsPage /></RequireAuth>,
+      path: 'finances',
+      element: <FinancesPage />,
     },
   ],
 };
