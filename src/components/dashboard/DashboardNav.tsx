@@ -11,7 +11,8 @@ import {
   Settings,
   Mic,
   Home,
-  Calendar
+  Calendar,
+  LayoutDashboard
 } from 'lucide-react';
 import { useRolePermissions } from '@/contexts/RolePermissionContext';
 import { useAuth } from '@/contexts/AuthContext';
@@ -80,6 +81,17 @@ export function DashboardNav({
 
       {isAdminUser && (
         <>
+          <Button
+            variant="ghost"
+            className={cn('justify-start', isCollapsed && 'justify-center')}
+            asChild
+          >
+            <Link to="/admin">
+              <LayoutDashboard className="h-5 w-5 mr-2" />
+              {!isCollapsed && <span>Admin Dashboard</span>}
+            </Link>
+          </Button>
+
           <Button
             variant="ghost"
             className={cn('justify-start', isCollapsed && 'justify-center')}
