@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -32,8 +33,10 @@ export function GoogleUpcomingEvents({ isConnected, selectedCalendarId = 'primar
       console.log("Fetching events with action: fetch_events");
       
       const { data, error } = await supabase.functions.invoke('google-calendar-auth', {
-        action: 'fetch_events',
-        calendar_id: selectedCalendarId
+        body: {
+          action: 'fetch_events',
+          calendar_id: selectedCalendarId
+        }
       });
 
       if (error) {

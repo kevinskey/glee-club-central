@@ -39,7 +39,9 @@ export function CalendarSelector({ selectedCalendarId, onCalendarSelect, isConne
 
       console.log("Loading calendars with action: list_calendars");
 
-      const { data, error } = await supabase.functions.invoke('google-calendar-auth', { action: 'list_calendars' });
+      const { data, error } = await supabase.functions.invoke('google-calendar-auth', { 
+        body: { action: 'list_calendars' } 
+      });
 
       if (error) {
         console.error("Error loading calendars:", error);

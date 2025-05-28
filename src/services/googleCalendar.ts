@@ -1,3 +1,4 @@
+
 // Service for handling Google Calendar integration and synchronization
 
 import { supabase } from "@/integrations/supabase/client";
@@ -19,7 +20,9 @@ export const isConnected = async (): Promise<boolean> => {
       return false;
     }
     
-    const { data, error } = await supabase.functions.invoke('google-calendar-auth', { action: 'check_connection' });
+    const { data, error } = await supabase.functions.invoke('google-calendar-auth', { 
+      body: { action: 'check_connection' } 
+    });
       
     if (error || !data) {
       console.error("Error checking connection:", error);
@@ -57,7 +60,9 @@ export const connectToGoogleCalendar = async (): Promise<string> => {
     console.log("User authenticated, requesting Google Calendar auth URL...");
 
     // Call the edge function with proper body format
-    const { data, error } = await supabase.functions.invoke('google-calendar-auth', { action: 'generate_oauth_url' });
+    const { data, error } = await supabase.functions.invoke('google-calendar-auth', { 
+      body: { action: 'generate_oauth_url' } 
+    });
 
     if (error) {
       console.error("Error calling edge function:", error);
@@ -115,8 +120,10 @@ export const fetchGoogleCalendarEvents = async (calendarId = 'primary'): Promise
     }
     
     const { data, error } = await supabase.functions.invoke('google-calendar-auth', { 
-      action: 'fetch_events',
-      calendar_id: calendarId
+      body: {
+        action: 'fetch_events',
+        calendar_id: calendarId
+      }
     });
     
     if (error) {
@@ -159,7 +166,9 @@ export const disconnect = async (): Promise<boolean> => {
     }
     
     // Call the edge function to disconnect
-    const { data, error } = await supabase.functions.invoke('google-calendar-auth', { action: 'disconnect' });
+    const { data, error } = await supabase.functions.invoke('google-calendar-auth', { 
+      body: { action: 'disconnect' } 
+    });
     
     if (error) {
       console.error("Error disconnecting:", error);
@@ -198,7 +207,9 @@ export const fetchGoogleCalendars = async (): Promise<Array<{id: string, name: s
       return null;
     }
     
-    const { data, error } = await supabase.functions.invoke('google-calendar-auth', { action: 'list_calendars' });
+    const { data, error } = await supabase.functions.invoke('google-calendar-auth', { 
+      body: { action: 'list_calendars' } 
+    });
     
     if (error) {
       console.error("Error fetching calendars:", error);
@@ -269,8 +280,10 @@ export const syncWithGoogleCalendar = async (calendarId = 'primary', accessToken
     
     // Call the sync function
     const { data, error } = await supabase.functions.invoke('google-calendar-sync', { 
-      action: 'full_sync', 
-      calendar_id: calendarId
+      body: {
+        action: 'full_sync', 
+        calendar_id: calendarId
+      }
     });
     
     if (error) {
@@ -307,7 +320,9 @@ export const handleGoogleCalendarCallback = async (code: string): Promise<boolea
       throw new Error("No authenticated user");
     }
     
-    const { data, error } = await supabase.functions.invoke('google-calendar-auth', { code });
+    const { data, error } = await supabase.functions.invoke('google-calendar-auth', { 
+      body: { code } 
+    });
     
     if (error) {
       throw error;
