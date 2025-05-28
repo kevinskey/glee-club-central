@@ -12,7 +12,7 @@ import { toast } from 'sonner';
 import ErrorBoundary from '@/components/ErrorBoundary';
 
 export default function AdminCalendarPage() {
-  const { events, loading, error, createEvent, updateEvent, deleteEvent } = useCalendarEvents();
+  const { events, loading, error, createEvent, updateEvent, deleteEvent, fetchEvents } = useCalendarEvents();
   const [selectedEvent, setSelectedEvent] = useState<CalendarEvent | null>(null);
   const [editingEvent, setEditingEvent] = useState<CalendarEvent | null>(null);
   const [isCreating, setIsCreating] = useState(false);
@@ -36,7 +36,8 @@ export default function AdminCalendarPage() {
       setIsCreating(false);
     } catch (error) {
       console.error('Error saving event:', error);
-      toast.error('Failed to save event');
+      const errorMessage = error instanceof Error ? error.message : 'Failed to save event';
+      toast.error(errorMessage);
     }
   };
 
@@ -49,7 +50,8 @@ export default function AdminCalendarPage() {
         setIsDialogOpen(false);
       } catch (error) {
         console.error('Error deleting event:', error);
-        toast.error('Failed to delete event');
+        const errorMessage = error instanceof Error ? error.message : 'Failed to delete event';
+        toast.error(errorMessage);
       }
     }
   };
@@ -86,9 +88,12 @@ export default function AdminCalendarPage() {
             icon={<Calendar className="h-6 w-6" />}
           />
           <div className="flex flex-col items-center justify-center h-64 space-y-4">
-            <div className="text-red-600">Error loading calendar: {error}</div>
-            <Button onClick={() => window.location.reload()}>
-              Retry
+            <div className="text-red-600 text-center">
+              <p className="font-semibold">Error loading calendar</p>
+              <p className="text-sm">{error}</p>
+            </div>
+            <Button onClick={fetchEvents} variant="outline">
+              Try Again
             </Button>
           </div>
         </div>

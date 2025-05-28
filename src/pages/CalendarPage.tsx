@@ -10,9 +10,10 @@ import { Calendar } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
+import { Button } from '@/components/ui/button';
 
 export default function CalendarPage() {
-  const { events, loading } = useCalendarEvents();
+  const { events, loading, error, fetchEvents } = useCalendarEvents();
   const { userRole, isMember } = useUserRole();
   const { user } = useAuth();
   const [selectedEvent, setSelectedEvent] = useState<CalendarEvent | null>(null);
@@ -22,15 +23,20 @@ export default function CalendarPage() {
     setSelectedEvent(event);
     
     if (event.allow_rsvp && user) {
-      // Fetch user's current RSVP status
-      const { data } = await supabase
-        .from('event_rsvps')
-        .select('status')
-        .eq('event_id', event.id)
-        .eq('user_id', user.id)
-        .single();
-      
-      setUserRSVP(data?.status || null);
+      try {
+        // Fetch user's current RSVP status
+        const { data } = await supabase
+          .from('event_rsvps')
+          .select('status')
+          .eq('event_id', event.id)
+          .eq('user_id', user.id)
+          .single();
+        
+        setUserRSVP(data?.status || null);
+      } catch (error) {
+        console.error('Error fetching RSVP status:', error);
+        setUserRSVP(null);
+      }
     }
   };
 
@@ -67,6 +73,27 @@ export default function CalendarPage() {
         />
         <div className="flex items-center justify-center h-64">
           <div className="text-muted-foreground">Loading calendar...</div>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="container mx-auto p-6">
+        <PageHeader
+          title="Calendar"
+          description="View upcoming events and performances"
+          icon={<Calendar className="h-6 w-6" />}
+        />
+        <div className="flex flex-col items-center justify-center h-64 space-y-4">
+          <div className="text-red-600 text-center">
+            <p className="font-semibold">Error loading calendar</p>
+            <p className="text-sm">{error}</p>
+          </div>
+          <Button onClick={fetchEvents} variant="outline">
+            Try Again
+          </Button>
         </div>
       </div>
     );
