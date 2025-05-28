@@ -19,8 +19,7 @@ interface EventEditorProps {
   onSave: (eventData: Omit<CalendarEvent, 'id' | 'created_at'>) => Promise<void>;
 }
 
-const DRAFT_STORAGE_KEY = 'event-editor-draft';
-const EDITOR_STATE_KEY = 'event-editor-state';
+const STORAGE_KEY = 'glee-event-editor-data';
 
 export const EventEditor: React.FC<EventEditorProps> = ({
   event,
@@ -47,28 +46,25 @@ export const EventEditor: React.FC<EventEditorProps> = ({
   });
 
   const [loading, setLoading] = useState(false);
-  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const [isMediaPickerOpen, setIsMediaPickerOpen] = useState(false);
-  const [hasDraftData, setHasDraftData] = useState(false);
-  const [showDraftAlert, setShowDraftAlert] = useState(false);
+  const [showRestoreAlert, setShowRestoreAlert] = useState(false);
 
-  // Check for draft data on mount
+  // Save to localStorage whenever form data changes (but not when editing existing events)
+  useEffect(() => {
+    if (isOpen && !event) {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify({
+        formData,
+        timestamp: Date.now(),
+        isCreating: true
+      }));
+    }
+  }, [formData, isOpen, event]);
+
+  // Load saved data when component opens
   useEffect(() => {
     if (isOpen) {
-      const savedDraft = localStorage.getItem(DRAFT_STORAGE_KEY);
-      const savedState = localStorage.getItem(EDITOR_STATE_KEY);
-      
-      if (savedDraft && savedState && !event) {
-        const draftData = JSON.parse(savedDraft);
-        const stateData = JSON.parse(savedState);
-        
-        // Only show draft alert if we have meaningful data
-        if (draftData.title || draftData.short_description) {
-          setHasDraftData(true);
-          setShowDraftAlert(true);
-        }
-      } else if (event) {
-        // Populate with event data for editing
+      if (event) {
+        // Editing existing event - populate with event data
         setFormData({
           title: event.title || '',
           start_time: event.start_time ? new Date(event.start_time).toISOString().slice(0, 16) : '',
@@ -86,72 +82,48 @@ export const EventEditor: React.FC<EventEditorProps> = ({
           allow_ics_download: event.allow_ics_download ?? true,
           allow_google_map_link: event.allow_google_map_link ?? true,
         });
+      } else {
+        // Creating new event - check for saved data
+        const savedData = localStorage.getItem(STORAGE_KEY);
+        if (savedData) {
+          try {
+            const parsed = JSON.parse(savedData);
+            // Check if we have meaningful data to restore
+            if (parsed.formData && (parsed.formData.title || parsed.formData.short_description)) {
+              setShowRestoreAlert(true);
+            }
+          } catch (error) {
+            console.error('Error parsing saved data:', error);
+            localStorage.removeItem(STORAGE_KEY);
+          }
+        }
       }
     }
   }, [isOpen, event]);
 
-  // Auto-save draft every 2 seconds when there are changes
-  useEffect(() => {
-    if (!isOpen || event) return; // Don't save drafts when editing existing events
-    
-    const timeoutId = setTimeout(() => {
-      if (hasUnsavedChanges) {
-        localStorage.setItem(DRAFT_STORAGE_KEY, JSON.stringify(formData));
-        localStorage.setItem(EDITOR_STATE_KEY, JSON.stringify({ 
-          isCreating: true, 
-          timestamp: Date.now() 
-        }));
+  const restoreSavedData = () => {
+    const savedData = localStorage.getItem(STORAGE_KEY);
+    if (savedData) {
+      try {
+        const parsed = JSON.parse(savedData);
+        setFormData(parsed.formData);
+        setShowRestoreAlert(false);
+        toast.success('Draft restored');
+      } catch (error) {
+        console.error('Error restoring data:', error);
+        toast.error('Failed to restore draft');
       }
-    }, 2000);
-
-    return () => clearTimeout(timeoutId);
-  }, [formData, hasUnsavedChanges, isOpen, event]);
-
-  // Track if form has been modified
-  useEffect(() => {
-    const isModified = formData.title !== (event?.title || '') ||
-      formData.short_description !== (event?.short_description || '') ||
-      formData.full_description !== (event?.full_description || '') ||
-      formData.location_name !== (event?.location_name || '') ||
-      formData.event_host_name !== (event?.event_host_name || '');
-    setHasUnsavedChanges(isModified);
-  }, [formData, event]);
-
-  const restoreDraft = () => {
-    const savedDraft = localStorage.getItem(DRAFT_STORAGE_KEY);
-    if (savedDraft) {
-      const draftData = JSON.parse(savedDraft);
-      setFormData(draftData);
-      setShowDraftAlert(false);
-      setHasDraftData(false);
-      toast.success('Draft restored');
     }
   };
 
-  const discardDraft = () => {
-    localStorage.removeItem(DRAFT_STORAGE_KEY);
-    localStorage.removeItem(EDITOR_STATE_KEY);
-    setShowDraftAlert(false);
-    setHasDraftData(false);
+  const discardSavedData = () => {
+    localStorage.removeItem(STORAGE_KEY);
+    setShowRestoreAlert(false);
     toast.info('Draft discarded');
   };
 
-  const clearDraft = () => {
-    localStorage.removeItem(DRAFT_STORAGE_KEY);
-    localStorage.removeItem(EDITOR_STATE_KEY);
-  };
-
-  // Prevent accidental closing when there are unsaved changes
-  const handleCloseAttempt = (open: boolean) => {
-    if (!open && (hasUnsavedChanges || hasDraftData)) {
-      const confirmClose = window.confirm('You have unsaved changes. Are you sure you want to close?');
-      if (!confirmClose) {
-        return; // Prevent closing
-      }
-    }
-    if (!open) {
-      onClose();
-    }
+  const clearSavedData = () => {
+    localStorage.removeItem(STORAGE_KEY);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -165,8 +137,7 @@ export const EventEditor: React.FC<EventEditorProps> = ({
         end_time: new Date(formData.end_time).toISOString(),
       } as Omit<CalendarEvent, 'id' | 'created_at'>);
       
-      setHasUnsavedChanges(false);
-      clearDraft(); // Clear draft on successful save
+      clearSavedData(); // Clear saved data on successful save
       onClose();
     } catch (error) {
       console.error('Error saving event:', error);
@@ -184,26 +155,30 @@ export const EventEditor: React.FC<EventEditorProps> = ({
     setIsMediaPickerOpen(false);
   };
 
+  const handleClose = () => {
+    // Don't clear data when closing - let it persist
+    onClose();
+  };
+
   return (
-    <Dialog open={isOpen} onOpenChange={handleCloseAttempt}>
+    <Dialog open={isOpen} onOpenChange={(open) => !open && handleClose()}>
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>
             {event ? 'Edit Event' : 'Create New Event'}
-            {hasUnsavedChanges && <span className="text-amber-500 ml-2">*</span>}
           </DialogTitle>
         </DialogHeader>
 
-        {showDraftAlert && (
+        {showRestoreAlert && (
           <Alert className="mb-4">
             <AlertCircle className="h-4 w-4" />
             <AlertDescription className="flex items-center justify-between">
               <span>You have unsaved draft data. Would you like to restore it?</span>
               <div className="flex gap-2 ml-4">
-                <Button variant="outline" size="sm" onClick={restoreDraft}>
+                <Button variant="outline" size="sm" onClick={restoreSavedData}>
                   Restore
                 </Button>
-                <Button variant="ghost" size="sm" onClick={discardDraft}>
+                <Button variant="ghost" size="sm" onClick={discardSavedData}>
                   Discard
                 </Button>
               </div>
@@ -393,7 +368,7 @@ export const EventEditor: React.FC<EventEditorProps> = ({
             <Button 
               type="button" 
               variant="outline" 
-              onClick={() => handleCloseAttempt(false)}
+              onClick={handleClose}
               disabled={loading}
             >
               Cancel

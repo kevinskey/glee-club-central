@@ -11,7 +11,7 @@ import { Calendar, Plus, Edit, Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
 import ErrorBoundary from '@/components/ErrorBoundary';
 
-const EDITOR_STATE_KEY = 'event-editor-state';
+const STORAGE_KEY = 'glee-event-editor-data';
 
 export default function AdminCalendarPage() {
   const { events, loading, error, createEvent, updateEvent, deleteEvent, fetchEvents } = useCalendarEvents();
@@ -19,29 +19,21 @@ export default function AdminCalendarPage() {
   const [editingEvent, setEditingEvent] = useState<CalendarEvent | null>(null);
   const [isCreating, setIsCreating] = useState(false);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-  
-  // Use ref to track if we're intentionally closing the dialog
-  const intentionalCloseRef = useRef(false);
 
-  // Restore editor state on page load
+  // Check for saved draft on page load
   useEffect(() => {
-    const savedState = localStorage.getItem(EDITOR_STATE_KEY);
-    if (savedState) {
+    const savedData = localStorage.getItem(STORAGE_KEY);
+    if (savedData) {
       try {
-        const stateData = JSON.parse(savedState);
-        const timeDiff = Date.now() - stateData.timestamp;
-        
-        // Only restore if less than 1 hour old and was creating a new event
-        if (timeDiff < 3600000 && stateData.isCreating) {
+        const parsed = JSON.parse(savedData);
+        // If we have meaningful draft data, automatically open the creator
+        if (parsed.isCreating && (parsed.formData?.title || parsed.formData?.short_description)) {
           setIsCreating(true);
-          toast.info('Restored your draft event form');
-        } else {
-          // Clean up old state
-          localStorage.removeItem(EDITOR_STATE_KEY);
+          toast.info('Restored your event draft');
         }
       } catch (error) {
-        console.error('Error restoring editor state:', error);
-        localStorage.removeItem(EDITOR_STATE_KEY);
+        console.error('Error checking saved data:', error);
+        localStorage.removeItem(STORAGE_KEY);
       }
     }
   }, []);
@@ -61,9 +53,6 @@ export default function AdminCalendarPage() {
         toast.success('Event created successfully');
       }
       
-      // Mark as intentional close and clean up state
-      intentionalCloseRef.current = true;
-      localStorage.removeItem(EDITOR_STATE_KEY);
       setEditingEvent(null);
       setIsCreating(false);
     } catch (error) {
@@ -89,27 +78,16 @@ export default function AdminCalendarPage() {
   };
 
   const handleCreateNew = () => {
-    intentionalCloseRef.current = false;
     setIsCreating(true);
     setEditingEvent(null);
-    
-    // Save state to localStorage
-    localStorage.setItem(EDITOR_STATE_KEY, JSON.stringify({
-      isCreating: true,
-      timestamp: Date.now()
-    }));
   };
 
   const handleEditEvent = (event: CalendarEvent) => {
-    intentionalCloseRef.current = false;
     setEditingEvent(event);
     setIsDialogOpen(false);
   };
 
   const handleCloseEditor = () => {
-    // Clean up state when closing
-    localStorage.removeItem(EDITOR_STATE_KEY);
-    intentionalCloseRef.current = true;
     setIsCreating(false);
     setEditingEvent(null);
   };
@@ -206,7 +184,7 @@ export default function AdminCalendarPage() {
           />
         )}
 
-        {/* Event Editor with enhanced persistence */}
+        {/* Event Editor */}
         <EventEditor
           event={editingEvent}
           isOpen={isCreating || !!editingEvent}
