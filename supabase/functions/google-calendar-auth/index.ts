@@ -49,7 +49,7 @@ serve(async (req) => {
   
   // Handle OAuth callback - NO AUTH REQUIRED for this path
   if (code) {
-    console.log("Processing OAuth callback...");
+    console.log("Processing OAuth callback with code:", code.substring(0, 20) + "...");
     
     try {
       const state = url.searchParams.get('state');
@@ -124,13 +124,15 @@ serve(async (req) => {
         }
       }
       
+      console.log("Successfully stored tokens, redirecting to success page");
+      
       return new Response(`
         <html>
           <head><title>Calendar Connected</title></head>
           <body style="font-family: Arial, sans-serif; padding: 20px; text-align: center;">
             <h2>✅ Calendar Connected Successfully!</h2>
             <p>Your Google Calendar has been connected to GleeWorld.</p>
-            <p>You can close this window now.</p>
+            <p>You can close this window now and return to the app.</p>
             <script>
               setTimeout(() => {
                 window.close();
@@ -165,7 +167,7 @@ serve(async (req) => {
     // Get auth user first
     const authHeader = req.headers.get('Authorization');
     if (!authHeader) {
-      console.error("Missing Authorization header");
+      console.error("Missing Authorization header for API request");
       return new Response(
         JSON.stringify({ error: 'Authorization required' }),
         { 
