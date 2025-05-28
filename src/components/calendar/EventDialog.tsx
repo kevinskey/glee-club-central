@@ -12,6 +12,7 @@ interface EventDialogProps {
   isOpen: boolean;
   onClose: () => void;
   canRSVP?: boolean;
+  userRSVP?: 'going' | 'maybe' | 'not_going' | null;
   onRSVP?: (status: 'going' | 'maybe' | 'not_going') => void;
   adminActions?: React.ReactNode;
 }
@@ -21,6 +22,7 @@ export const EventDialog: React.FC<EventDialogProps> = ({
   isOpen,
   onClose,
   canRSVP = false,
+  userRSVP,
   onRSVP,
   adminActions
 }) => {
@@ -80,6 +82,22 @@ export const EventDialog: React.FC<EventDialogProps> = ({
     URL.revokeObjectURL(url);
   };
 
+  const getButtonVariant = (status: 'going' | 'maybe' | 'not_going') => {
+    if (userRSVP === status) {
+      switch (status) {
+        case 'going':
+          return 'default';
+        case 'maybe':
+          return 'secondary';
+        case 'not_going':
+          return 'destructive';
+        default:
+          return 'outline';
+      }
+    }
+    return 'outline';
+  };
+
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
@@ -108,6 +126,11 @@ export const EventDialog: React.FC<EventDialogProps> = ({
             )}
             {event.allow_rsvp && (
               <Badge variant="outline">RSVP Enabled</Badge>
+            )}
+            {userRSVP && (
+              <Badge variant={userRSVP === 'going' ? 'default' : userRSVP === 'maybe' ? 'secondary' : 'destructive'}>
+                {userRSVP === 'going' ? 'Going' : userRSVP === 'maybe' ? 'Maybe' : "Can't Go"}
+              </Badge>
             )}
           </div>
 
@@ -181,21 +204,22 @@ export const EventDialog: React.FC<EventDialogProps> = ({
               <div className="flex gap-2">
                 <Button
                   size="sm"
+                  variant={getButtonVariant('going')}
                   onClick={() => onRSVP('going')}
-                  className="bg-green-600 hover:bg-green-700"
+                  className={userRSVP === 'going' ? 'bg-green-600 hover:bg-green-700 text-white' : ''}
                 >
                   Going
                 </Button>
                 <Button
                   size="sm"
-                  variant="outline"
+                  variant={getButtonVariant('maybe')}
                   onClick={() => onRSVP('maybe')}
                 >
                   Maybe
                 </Button>
                 <Button
                   size="sm"
-                  variant="outline"
+                  variant={getButtonVariant('not_going')}
                   onClick={() => onRSVP('not_going')}
                 >
                   Can't Go
