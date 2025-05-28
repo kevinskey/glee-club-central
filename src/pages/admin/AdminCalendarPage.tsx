@@ -72,7 +72,7 @@ export default function AdminCalendarPage() {
         title="Calendar Management"
         description="Manage all events and calendar settings"
         icon={<Calendar className="h-6 w-6" />}
-        action={
+        actions={
           <Button onClick={() => setIsCreating(true)}>
             <Plus className="h-4 w-4 mr-2" />
             Create Event
