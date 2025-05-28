@@ -3,12 +3,18 @@ import React from "react";
 import { PageHeader } from "@/components/ui/page-header";
 import { DashboardModules } from "@/components/dashboard/DashboardModules";
 import { useAuth } from "@/contexts/AuthContext";
+import { useCalendarEvents } from "@/hooks/useCalendarEvents";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Users, Music, Calendar, Bell } from "lucide-react";
+import { findNextEvent, formatEventDate, formatEventTime } from "@/utils/calendarUtils";
 import ErrorBoundary from "@/components/ErrorBoundary";
 
 const MemberDashboardPage = () => {
   const { profile } = useAuth();
+  const { events, loading: eventsLoading } = useCalendarEvents();
+  
+  // Find the next upcoming event
+  const nextEvent = findNextEvent(events, true); // Include private events for members
   
   return (
     <ErrorBoundary>
@@ -38,8 +44,25 @@ const MemberDashboardPage = () => {
               <Calendar className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">Spring Concert</div>
-              <p className="text-xs text-muted-foreground">May 15, 2025</p>
+              {eventsLoading ? (
+                <div className="text-sm text-muted-foreground">Loading...</div>
+              ) : nextEvent ? (
+                <>
+                  <div className="text-2xl font-bold truncate">{nextEvent.title}</div>
+                  <p className="text-xs text-muted-foreground">
+                    {formatEventDate(nextEvent.start_time)}
+                  </p>
+                  <p className="text-xs text-muted-foreground">
+                    {formatEventTime(nextEvent.start_time)}
+                    {nextEvent.location_name && ` • ${nextEvent.location_name}`}
+                  </p>
+                </>
+              ) : (
+                <>
+                  <div className="text-2xl font-bold">No Events</div>
+                  <p className="text-xs text-muted-foreground">No upcoming events scheduled</p>
+                </>
+              )}
             </CardContent>
           </Card>
 

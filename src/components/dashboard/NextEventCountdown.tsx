@@ -3,17 +3,11 @@ import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Calendar, Clock } from 'lucide-react';
-
-interface Event {
-  id: string;
-  title: string;
-  date: Date;
-  time: string;
-  location: string;
-}
+import { CalendarEvent } from '@/types/calendar';
+import { formatEventDate, formatEventTime } from '@/utils/calendarUtils';
 
 interface NextEventCountdownProps {
-  event: Event;
+  event: CalendarEvent;
 }
 
 export function NextEventCountdown({ event }: NextEventCountdownProps) {
@@ -26,7 +20,8 @@ export function NextEventCountdown({ event }: NextEventCountdownProps) {
   
   useEffect(() => {
     const calculateTimeLeft = () => {
-      const difference = event.date.getTime() - new Date().getTime();
+      const eventDate = new Date(event.start_time);
+      const difference = eventDate.getTime() - new Date().getTime();
       
       if (difference > 0) {
         setCountdown({
@@ -42,7 +37,7 @@ export function NextEventCountdown({ event }: NextEventCountdownProps) {
     calculateTimeLeft();
     
     return () => clearInterval(timer);
-  }, [event.date]);
+  }, [event.start_time]);
   
   return (
     <Card className="overflow-hidden">
@@ -58,18 +53,14 @@ export function NextEventCountdown({ event }: NextEventCountdownProps) {
             <p className="font-semibold text-lg">{event.title}</p>
             <div className="flex items-center text-muted-foreground text-sm mt-1">
               <Calendar className="mr-1 h-4 w-4" />
-              <span>
-                {event.date.toLocaleDateString(undefined, { 
-                  weekday: 'long', 
-                  year: 'numeric', 
-                  month: 'long', 
-                  day: 'numeric' 
-                })}
-              </span>
+              <span>{formatEventDate(event.start_time)}</span>
             </div>
             <div className="flex items-center text-muted-foreground text-sm mt-1">
               <Clock className="mr-1 h-4 w-4" />
-              <span>{event.time} • {event.location}</span>
+              <span>
+                {formatEventTime(event.start_time)}
+                {event.location_name && ` • ${event.location_name}`}
+              </span>
             </div>
           </div>
           
