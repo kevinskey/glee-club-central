@@ -97,17 +97,42 @@ serve(async (req) => {
     // Route to appropriate handler
     switch (action) {
       case 'generate_oauth_url':
-        return await generateOAuthUrl(user!);
+        if (!user) {
+          return new Response(
+            JSON.stringify({ error: 'User authentication required for OAuth URL generation' }),
+            { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+          );
+        }
+        return await generateOAuthUrl(user);
       
       case 'check_connection':
-        return await checkConnection(user!, supabaseAdmin);
+        if (googleAccessToken) {
+          // Direct check with Google token
+          return new Response(
+            JSON.stringify({ connected: true, source: 'google_token' }),
+            { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+          );
+        }
+        if (!user) {
+          return new Response(
+            JSON.stringify({ connected: false, error: 'No authentication' }),
+            { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+          );
+        }
+        return await checkConnection(user, supabaseAdmin);
       
       case 'list_calendars':
         if (googleAccessToken) {
           // Direct Google API call with provided token
           return await listCalendarsWithToken(googleAccessToken);
         }
-        return await listCalendars(user!, supabaseAdmin);
+        if (!user) {
+          return new Response(
+            JSON.stringify({ error: 'Authentication required', calendars: [] }),
+            { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+          );
+        }
+        return await listCalendars(user, supabaseAdmin);
 
       case 'fetch_events':
         const calendarId = requestData.calendar_id || 'primary';
@@ -115,10 +140,22 @@ serve(async (req) => {
           // Direct Google API call with provided token
           return await fetchEventsWithToken(googleAccessToken, calendarId);
         }
-        return await fetchEvents(user!, supabaseAdmin, calendarId);
+        if (!user) {
+          return new Response(
+            JSON.stringify({ error: 'Authentication required', events: [] }),
+            { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+          );
+        }
+        return await fetchEvents(user, supabaseAdmin, calendarId);
         
       case 'disconnect':
-        return await disconnect(user!, supabaseAdmin);
+        if (!user) {
+          return new Response(
+            JSON.stringify({ success: false, error: 'User authentication required' }),
+            { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+          );
+        }
+        return await disconnect(user, supabaseAdmin);
         
       default:
         console.error(`Unknown action: "${action}"`);
@@ -200,7 +237,7 @@ async function fetchEventsWithToken(accessToken: string, calendarId: string = 'p
       `https://www.googleapis.com/calendar/v3/calendars/${encodeURIComponent(calendarId)}/events?` + 
       new URLSearchParams({
         timeMin,
-        maxResults: '5',
+        maxResults: '10',
         singleEvents: 'true',
         orderBy: 'startTime'
       }).toString(),

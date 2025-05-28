@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { PageHeaderWithToggle } from "@/components/ui/page-header-with-toggle";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -13,7 +12,7 @@ import { ViewEventModal } from "@/components/calendar/ViewEventModal";
 import { DashboardEventsSkeleton, DashboardCardSkeleton } from "@/components/ui/dashboard-skeleton";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
-import { GoogleCalendarConnect } from "@/components/calendar/GoogleCalendarConnect";
+import { GoogleCalendarAuthIntegrated } from "@/components/calendar/GoogleCalendarAuthIntegrated";
 
 export default function CalendarDashboard() {
   const [isLoading, setIsLoading] = useState(true);
@@ -187,8 +186,8 @@ export default function CalendarDashboard() {
         </div>
         
         <div className="space-y-6">
-          {/* Google Calendar Integration */}
-          <GoogleCalendarConnect />
+          {/* Updated Google Calendar Integration */}
+          <GoogleCalendarAuthIntegrated />
           
           <Card>
             <CardHeader>
