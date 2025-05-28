@@ -1,7 +1,6 @@
 
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
-import { useCalendarStore } from '@/hooks/useCalendarStore';
 import { usePermissions } from '@/hooks/usePermissions';
 import { useLoadingCoordinator } from '@/hooks/useLoadingCoordinator';
 
@@ -19,7 +18,6 @@ export const useDashboardData = () => {
   });
   
   const { user, profile, isLoading: authLoading, isAuthenticated } = useAuth();
-  const { events, fetchEvents, isLoading: eventsLoading } = useCalendarStore();
   const { isLoading: permissionsLoading } = usePermissions();
   const { setLoading, isReady: coordinatorReady } = useLoadingCoordinator();
   
@@ -58,16 +56,14 @@ export const useDashboardData = () => {
       console.log('Loading dashboard data...');
       setData(prev => ({ ...prev, isLoading: true, error: null }));
       
-      // Get events from store - this will use cache if available
-      const calendarEvents = await fetchEvents();
-      
+      // Since calendar functionality is removed, just return empty events
       setData({
-        events: calendarEvents || [],
+        events: [],
         isLoading: false,
         error: null
       });
       
-      console.log(`Dashboard data loaded with ${calendarEvents?.length || 0} events`);
+      console.log('Dashboard data loaded');
     } catch (error) {
       console.error('Error loading dashboard data:', error);
       setData(prev => ({
@@ -76,9 +72,9 @@ export const useDashboardData = () => {
         error: 'Failed to load dashboard data'
       }));
     }
-  }, [isAuthReady, isPermissionsReady, fetchEvents]);
+  }, [isAuthReady, isPermissionsReady]);
 
-  // Load data when auth is ready, but only once - with proper dependency management
+  // Load data when auth is ready
   useEffect(() => {
     let mounted = true;
     
@@ -95,18 +91,6 @@ export const useDashboardData = () => {
       mounted = false;
     };
   }, [isAuthReady, isPermissionsReady, loadDashboardData, data.events.length, data.isLoading]);
-
-  // Sync events from calendar store to local state - optimized to prevent loops
-  useEffect(() => {
-    if (events && events.length > 0 && !eventsLoading && data.events.length === 0) {
-      console.log('Syncing events from calendar store to dashboard');
-      setData(prev => ({ 
-        ...prev, 
-        events: events,
-        isLoading: false 
-      }));
-    }
-  }, [events, eventsLoading, data.events.length]);
 
   // Memoized readiness state to prevent unnecessary re-renders
   const isReady = useMemo(() => 
