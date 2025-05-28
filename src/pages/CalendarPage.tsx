@@ -65,14 +65,14 @@ export default function CalendarPage() {
 
   if (loading) {
     return (
-      <div className="container mx-auto p-6">
+      <div className="mobile-container mobile-section-padding">
         <PageHeader
           title="Calendar"
           description="View upcoming events and performances"
-          icon={<Calendar className="h-6 w-6" />}
+          icon={<Calendar className="h-5 w-5 sm:h-6 sm:w-6" />}
         />
-        <div className="flex items-center justify-center h-64">
-          <div className="text-muted-foreground">Loading calendar...</div>
+        <div className="flex items-center justify-center h-48 sm:h-64">
+          <div className="text-muted-foreground text-sm sm:text-base">Loading calendar...</div>
         </div>
       </div>
     );
@@ -80,18 +80,18 @@ export default function CalendarPage() {
 
   if (error) {
     return (
-      <div className="container mx-auto p-6">
+      <div className="mobile-container mobile-section-padding">
         <PageHeader
           title="Calendar"
           description="View upcoming events and performances"
-          icon={<Calendar className="h-6 w-6" />}
+          icon={<Calendar className="h-5 w-5 sm:h-6 sm:w-6" />}
         />
-        <div className="flex flex-col items-center justify-center h-64 space-y-4">
+        <div className="flex flex-col items-center justify-center h-48 sm:h-64 space-y-4">
           <div className="text-red-600 text-center">
-            <p className="font-semibold">Error loading calendar</p>
-            <p className="text-sm">{error}</p>
+            <p className="font-semibold text-sm sm:text-base">Error loading calendar</p>
+            <p className="text-xs sm:text-sm mt-1">{error}</p>
           </div>
-          <Button onClick={fetchEvents} variant="outline">
+          <Button onClick={fetchEvents} variant="outline" className="mobile-touch-target">
             Try Again
           </Button>
         </div>
@@ -100,11 +100,11 @@ export default function CalendarPage() {
   }
 
   return (
-    <div className="container mx-auto p-6 space-y-6">
+    <div className="mobile-container mobile-section-padding space-y-4 sm:space-y-6 mobile-scroll">
       <PageHeader
         title="Calendar"
         description="View upcoming events and performances"
-        icon={<Calendar className="h-6 w-6" />}
+        icon={<Calendar className="h-5 w-5 sm:h-6 sm:w-6" />}
       />
 
       <CalendarView

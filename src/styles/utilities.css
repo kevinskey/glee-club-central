@@ -34,6 +34,28 @@
     @apply leading-tight;
   }
 
+  /* Line clamp utilities for mobile text truncation */
+  .line-clamp-1 {
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 1;
+  }
+  
+  .line-clamp-2 {
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+  }
+  
+  .line-clamp-3 {
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 3;
+  }
+
   /* Animation utilities */
   .animate-marquee {
     animation: marquee 60s linear infinite;
@@ -137,7 +159,7 @@
   
   /* Mobile-first responsive utilities */
   .mobile-container {
-    @apply px-4 sm:px-6 md:px-8 w-full max-w-7xl mx-auto;
+    @apply px-3 sm:px-4 md:px-6 lg:px-8 w-full max-w-7xl mx-auto;
   }
   
   /* For non-mobile screens only */
@@ -148,11 +170,11 @@
   }
   
   .mobile-section-padding {
-    @apply py-8 sm:py-12 md:py-16 lg:py-20;
+    @apply py-6 sm:py-8 md:py-12 lg:py-16;
   }
   
   .mobile-card-padding {
-    @apply p-4 sm:p-6 md:p-8;
+    @apply p-3 sm:p-4 md:p-6;
   }
   
   /* Stack items on mobile */
@@ -167,5 +189,97 @@
   /* Enhance readability on mobile */
   .mobile-readable {
     @apply max-w-full sm:max-w-md md:max-w-lg lg:max-w-xl mx-auto;
+  }
+  
+  /* Mobile calendar optimizations */
+  .mobile-calendar-day {
+    @apply min-h-[60px] sm:min-h-[80px] p-1 sm:p-2;
+    touch-action: manipulation; /* Improve touch response */
+  }
+  
+  /* Better touch targets for mobile */
+  .mobile-touch-target {
+    @apply min-h-[44px] min-w-[44px]; /* Apple recommended minimum */
+    touch-action: manipulation;
+  }
+  
+  /* Smooth scrolling for mobile */
+  .mobile-scroll {
+    -webkit-overflow-scrolling: touch;
+    scroll-behavior: smooth;
+  }
+  
+  /* Prevent text selection on calendar interactions */
+  .no-select {
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+  }
+  
+  /* Calendar specific mobile improvements */
+  .calendar-grid {
+    @apply grid grid-cols-7 gap-0.5 sm:gap-1;
+    touch-action: manipulation;
+  }
+  
+  .calendar-day-content {
+    @apply space-y-0.5 sm:space-y-1 mt-1;
+    overflow: hidden; /* Prevent content overflow */
+  }
+  
+  /* Event card mobile optimizations */
+  .event-card-mobile {
+    @apply border-l-4 border-l-orange-500;
+    transition: transform 0.1s ease, box-shadow 0.2s ease;
+    touch-action: manipulation;
+  }
+  
+  .event-card-mobile:active {
+    transform: scale(0.98);
+  }
+  
+  /* Dark mode specific mobile improvements */
+  @media (prefers-color-scheme: dark) {
+    .mobile-container {
+      @apply bg-background text-foreground;
+    }
+    
+    .event-card-mobile {
+      @apply border-l-orange-400;
+    }
+  }
+  
+  /* iOS specific improvements */
+  @supports (-webkit-touch-callout: none) {
+    .mobile-calendar-day {
+      -webkit-tap-highlight-color: rgba(0, 0, 0, 0.1);
+    }
+    
+    .event-card-mobile {
+      -webkit-tap-highlight-color: rgba(0, 0, 0, 0.05);
+    }
+  }
+  
+  /* Android specific improvements */
+  @media screen and (-webkit-min-device-pixel-ratio: 0) and (min-resolution: .001dpcm) {
+    .mobile-calendar-day,
+    .event-card-mobile {
+      touch-action: manipulation;
+      -webkit-user-select: none;
+    }
+  }
+  
+  /* Responsive font scaling for very small screens */
+  @media (max-width: 360px) {
+    .calendar-day-content {
+      font-size: 0.625rem; /* 10px */
+    }
+    
+    .mobile-card-padding {
+      @apply p-2;
+    }
   }
 }

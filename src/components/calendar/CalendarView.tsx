@@ -1,8 +1,9 @@
+
 import React, { useState } from 'react';
 import { CalendarEvent } from '@/types/calendar';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { ChevronLeft, ChevronRight, Calendar, MapPin, Clock, Users } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Calendar, MapPin, Clock, Users, ExternalLink } from 'lucide-react';
 import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameMonth, isSameDay, addMonths, subMonths, isToday, startOfDay, getDay } from 'date-fns';
 import { getNationalHolidays, getHolidayByDate } from '@/utils/nationalHolidays';
 import { HolidayCard } from './HolidayCard';
@@ -109,7 +110,7 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
     const hasHoliday = getHolidayForDate(day);
     const hasSpelmanDate = getSpelmanDateForDate(day);
     
-    let classes = 'min-h-[80px] p-1 border rounded cursor-pointer transition-colors hover:bg-muted/30 ';
+    let classes = 'min-h-[60px] sm:min-h-[80px] p-1 border rounded cursor-pointer transition-colors hover:bg-muted/30 ';
     
     if (isCurrentMonth) {
       classes += 'bg-background ';
@@ -141,7 +142,7 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
     const hasHoliday = getHolidayForDate(day);
     const hasSpelmanDate = getSpelmanDateForDate(day);
     
-    let classes = 'text-sm ';
+    let classes = 'text-xs sm:text-sm font-medium ';
     
     if (isCurrentMonth) {
       classes += 'text-foreground ';
@@ -162,38 +163,108 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
     return classes;
   };
 
+  const createGoogleMapsLink = (location: string) => {
+    return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(location)}`;
+  };
+
+  const EventCard = ({ event }: { event: CalendarEvent }) => (
+    <Card 
+      className="cursor-pointer hover:shadow-md transition-shadow border-l-4 border-l-orange-500 mobile-card-padding"
+      onClick={() => onEventClick?.(event)}
+    >
+      <CardContent className="p-3 sm:p-4">
+        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-3">
+          <div className="flex-1 min-w-0">
+            <h3 className="font-semibold text-sm sm:text-base leading-tight mb-2 line-clamp-2">{event.title}</h3>
+            <div className="space-y-1.5">
+              <div className="flex items-center gap-1.5 text-xs sm:text-sm text-muted-foreground">
+                <Clock className="h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0" />
+                <span className="truncate">
+                  {format(new Date(event.start_time), 'MMM d, yyyy h:mm a')}
+                </span>
+              </div>
+              {event.location_name && (
+                <div className="flex items-center gap-1.5 text-xs sm:text-sm text-muted-foreground">
+                  <MapPin className="h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0" />
+                  <a 
+                    href={createGoogleMapsLink(event.location_name)}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 truncate flex items-center gap-1"
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    <span className="truncate">{event.location_name}</span>
+                    <ExternalLink className="h-3 w-3 flex-shrink-0" />
+                  </a>
+                </div>
+              )}
+              {event.allow_rsvp && (
+                <div className="flex items-center gap-1.5 text-xs sm:text-sm text-muted-foreground">
+                  <Users className="h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0" />
+                  <span>RSVP Available</span>
+                </div>
+              )}
+            </div>
+            {event.short_description && (
+              <p className="mt-2 text-xs sm:text-sm text-muted-foreground line-clamp-2">{event.short_description}</p>
+            )}
+          </div>
+          <div className="flex items-center gap-2 flex-shrink-0">
+            {event.is_private && (
+              <span className="bg-orange-100 text-orange-800 dark:bg-orange-900/50 dark:text-orange-300 text-xs px-2 py-1 rounded whitespace-nowrap">
+                Private
+              </span>
+            )}
+            {event.image_url && (
+              <div className="w-12 h-12 sm:w-16 sm:h-16 rounded overflow-hidden border">
+                <img 
+                  src={event.image_url} 
+                  alt={event.title}
+                  className="w-full h-full object-cover"
+                />
+              </div>
+            )}
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  );
+
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6 mobile-container">
       <Card>
-        <CardHeader>
-          <div className="flex items-center justify-between">
-            <CardTitle className="flex items-center gap-2">
-              <Calendar className="h-5 w-5" />
-              {format(currentDate, 'MMMM yyyy')}
+        <CardHeader className="pb-3 sm:pb-6">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+            <CardTitle className="flex items-center gap-2 text-lg sm:text-xl">
+              <Calendar className="h-4 w-4 sm:h-5 sm:w-5" />
+              <span className="truncate">{format(currentDate, 'MMMM yyyy')}</span>
             </CardTitle>
-            <div className="flex items-center gap-2">
-              <Button variant="outline" size="sm" onClick={goToToday}>
+            <div className="flex flex-wrap items-center gap-2">
+              <Button variant="outline" size="sm" onClick={goToToday} className="text-xs sm:text-sm">
                 Today
               </Button>
-              <Button variant="outline" size="sm" onClick={() => setView(view === 'month' ? 'list' : 'month')}>
-                {view === 'month' ? 'List View' : 'Month View'}
+              <Button variant="outline" size="sm" onClick={() => setView(view === 'month' ? 'list' : 'month')} className="text-xs sm:text-sm">
+                {view === 'month' ? 'List' : 'Month'}
               </Button>
-              <Button variant="outline" size="sm" onClick={() => navigateMonth('prev')}>
-                <ChevronLeft className="h-4 w-4" />
-              </Button>
-              <Button variant="outline" size="sm" onClick={() => navigateMonth('next')}>
-                <ChevronRight className="h-4 w-4" />
-              </Button>
+              <div className="flex items-center">
+                <Button variant="outline" size="sm" onClick={() => navigateMonth('prev')} className="rounded-r-none">
+                  <ChevronLeft className="h-4 w-4" />
+                </Button>
+                <Button variant="outline" size="sm" onClick={() => navigateMonth('next')} className="rounded-l-none border-l-0">
+                  <ChevronRight className="h-4 w-4" />
+                </Button>
+              </div>
             </div>
           </div>
         </CardHeader>
-        <CardContent>
+        <CardContent className="p-3 sm:p-6">
           {view === 'month' ? (
-            <div className="grid grid-cols-7 gap-1">
+            <div className="grid grid-cols-7 gap-0.5 sm:gap-1">
               {/* Day headers */}
               {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(day => (
-                <div key={day} className="p-2 text-center font-medium text-sm text-muted-foreground">
-                  {day}
+                <div key={day} className="p-1 sm:p-2 text-center font-medium text-xs sm:text-sm text-muted-foreground">
+                  <span className="hidden sm:inline">{day}</span>
+                  <span className="sm:hidden">{day.charAt(0)}</span>
                 </div>
               ))}
               
@@ -212,38 +283,41 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
                     <div className={getDayNumberClasses(day)}>
                       {format(day, 'd')}
                     </div>
-                    <div className="space-y-1">
+                    <div className="space-y-0.5 sm:space-y-1 mt-1">
                       {/* Show holiday first if present */}
                       {holiday && (
-                        <div className="text-xs p-1 rounded bg-gradient-to-r from-red-100 via-white to-blue-100 text-blue-800 border border-red-200 truncate font-medium shadow-sm">
-                          {holiday.title}
+                        <div className="text-[10px] sm:text-xs p-0.5 sm:p-1 rounded bg-gradient-to-r from-red-100 via-white to-blue-100 text-blue-800 border border-red-200 truncate font-medium shadow-sm">
+                          <span className="hidden sm:inline">{holiday.title}</span>
+                          <span className="sm:hidden">Holiday</span>
                         </div>
                       )}
                       {/* Show Spelman date if present and no holiday */}
                       {!holiday && spelmanDate && (
-                        <div className="text-xs p-1 rounded bg-gradient-to-r from-orange-100 via-white to-orange-100 text-orange-800 border border-orange-200 truncate font-medium shadow-sm">
-                          {spelmanDate.title}
+                        <div className="text-[10px] sm:text-xs p-0.5 sm:p-1 rounded bg-gradient-to-r from-orange-100 via-white to-orange-100 text-orange-800 border border-orange-200 truncate font-medium shadow-sm">
+                          <span className="hidden sm:inline">{spelmanDate.title}</span>
+                          <span className="sm:hidden">Academic</span>
                         </div>
                       )}
                       {/* Show events */}
                       {dayEvents.slice(0, (holiday || spelmanDate) ? 1 : 2).map(event => (
                         <div
                           key={event.id}
-                          className={`text-xs p-1 rounded cursor-pointer truncate ${
-                            event.is_private ? 'bg-orange-100 text-orange-800' : 'bg-blue-100 text-blue-800'
+                          className={`text-[10px] sm:text-xs p-0.5 sm:p-1 rounded cursor-pointer truncate ${
+                            event.is_private ? 'bg-orange-100 text-orange-800 dark:bg-orange-900/50 dark:text-orange-300' : 'bg-blue-100 text-blue-800 dark:bg-blue-900/50 dark:text-blue-300'
                           }`}
                           onClick={(e) => {
                             e.stopPropagation();
                             onEventClick?.(event);
                           }}
                         >
-                          {event.title}
+                          <span className="hidden sm:inline">{event.title}</span>
+                          <span className="sm:hidden">Event</span>
                         </div>
                       ))}
                       {/* Show more indicator */}
                       {(dayEvents.length + ((holiday || spelmanDate) ? 1 : 0)) > 2 && (
-                        <div className="text-xs text-muted-foreground">
-                          +{dayEvents.length + ((holiday || spelmanDate) ? 1 : 0) - 2} more
+                        <div className="text-[10px] sm:text-xs text-muted-foreground">
+                          +{dayEvents.length + ((holiday || spelmanDate) ? 1 : 0) - 2}
                         </div>
                       )}
                     </div>
@@ -252,7 +326,7 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
               })}
             </div>
           ) : (
-            <div className="space-y-4">
+            <div className="space-y-3 sm:space-y-4">
               {/* Show holidays in list view only if enabled */}
               {showNationalHolidays && holidays
                 .filter(holiday => 
@@ -260,29 +334,7 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
                   holiday.date.getFullYear() === currentDate.getFullYear()
                 )
                 .map(holiday => (
-                  <Card key={holiday.id} className="border-red-300 bg-gradient-to-r from-red-50 via-white to-blue-50 shadow-md">
-                    <CardContent className="p-4">
-                      <div className="flex justify-between items-start">
-                        <div className="flex-1">
-                          <h3 className="font-semibold text-blue-900">{holiday.title}</h3>
-                          <div className="flex items-center gap-4 mt-2 text-sm text-red-700">
-                            <div className="flex items-center gap-1">
-                              <Clock className="h-4 w-4" />
-                              {format(holiday.date, 'MMM d, yyyy')}
-                            </div>
-                          </div>
-                          <p className="mt-2 text-sm text-blue-800">{holiday.description}</p>
-                        </div>
-                        <div className="ml-4 w-16 h-16 rounded overflow-hidden border-2 border-red-200">
-                          <img 
-                            src={holiday.imageUrl} 
-                            alt={holiday.title}
-                            className="w-full h-full object-cover"
-                          />
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
+                  <HolidayCard key={holiday.id} holiday={holiday} />
                 ))}
               
               {/* Show Spelman academic dates in list view only if enabled */}
@@ -297,45 +349,7 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
               
               {/* Show regular events */}
               {filteredEvents.map(event => (
-                <Card 
-                  key={event.id} 
-                  className="cursor-pointer hover:shadow-md transition-shadow"
-                  onClick={() => onEventClick?.(event)}
-                >
-                  <CardContent className="p-4">
-                    <div className="flex justify-between items-start">
-                      <div className="flex-1">
-                        <h3 className="font-semibold">{event.title}</h3>
-                        <div className="flex items-center gap-4 mt-2 text-sm text-muted-foreground">
-                          <div className="flex items-center gap-1">
-                            <Clock className="h-4 w-4" />
-                            {format(new Date(event.start_time), 'MMM d, yyyy h:mm a')}
-                          </div>
-                          {event.location_name && (
-                            <div className="flex items-center gap-1">
-                              <MapPin className="h-4 w-4" />
-                              {event.location_name}
-                            </div>
-                          )}
-                          {event.allow_rsvp && (
-                            <div className="flex items-center gap-1">
-                              <Users className="h-4 w-4" />
-                              RSVP
-                            </div>
-                          )}
-                        </div>
-                        {event.short_description && (
-                          <p className="mt-2 text-sm text-muted-foreground">{event.short_description}</p>
-                        )}
-                      </div>
-                      {event.is_private && (
-                        <span className="bg-orange-100 text-orange-800 text-xs px-2 py-1 rounded">
-                          Private
-                        </span>
-                      )}
-                    </div>
-                  </CardContent>
-                </Card>
+                <EventCard key={event.id} event={event} />
               ))}
             </div>
           )}
