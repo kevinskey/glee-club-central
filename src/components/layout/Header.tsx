@@ -1,7 +1,6 @@
 
 import React from "react";
 import { Link } from "react-router-dom";
-import { GleeToolsDropdown } from "@/components/glee-tools/GleeToolsDropdown";
 import { Icons } from "@/components/Icons";
 
 export function Header() {
@@ -14,11 +13,6 @@ export function Header() {
             <Icons.logo className="h-6 w-auto" />
             <span className="text-base text-foreground">Glee World</span>
           </Link>
-        </div>
-          
-        {/* Right side: only GleeToolsDropdown */}
-        <div className="flex items-center">
-          <GleeToolsDropdown />
         </div>
       </div>
     </header>
