@@ -2,9 +2,9 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
-// Google OAuth credentials from environment
-const GOOGLE_OAUTH_CLIENT_ID = Deno.env.get("GOOGLE_OAUTH_CLIENT_ID") || "774938147540-usqdo6ttbg1f7hhqcp5n12h7qh3mkp18.apps.googleusercontent.com";
-const GOOGLE_OAUTH_CLIENT_SECRET = Deno.env.get("GOOGLE_OAUTH_CLIENT_SECRET");
+// Google OAuth credentials - updated with new credentials
+const GOOGLE_OAUTH_CLIENT_ID = "774938147540-lv0j2tkim0k8fbdvov1s7rqtmphqj3q9.apps.googleusercontent.com";
+const GOOGLE_OAUTH_CLIENT_SECRET = "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";
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL");
 
 console.log("Environment check:", {
@@ -14,19 +14,6 @@ console.log("Environment check:", {
   clientIdLength: GOOGLE_OAUTH_CLIENT_ID?.length || 0,
   supabaseUrl: SUPABASE_URL
 });
-
-// Validate required environment variables
-if (!GOOGLE_OAUTH_CLIENT_ID) {
-  console.error("GOOGLE_OAUTH_CLIENT_ID environment variable is not set");
-}
-
-if (!GOOGLE_OAUTH_CLIENT_SECRET) {
-  console.error("GOOGLE_OAUTH_CLIENT_SECRET environment variable is not set");
-}
-
-if (!SUPABASE_URL) {
-  console.error("SUPABASE_URL environment variable is not set");
-}
 
 const REDIRECT_URI = `${SUPABASE_URL}/functions/v1/google-calendar-auth`;
 const GOOGLE_OAUTH_ENDPOINT = "https://accounts.google.com/o/oauth2/v2/auth";
@@ -81,8 +68,8 @@ serve(async (req) => {
         },
         body: new URLSearchParams({
           code,
-          client_id: GOOGLE_OAUTH_CLIENT_ID || '',
-          client_secret: GOOGLE_OAUTH_CLIENT_SECRET || '',
+          client_id: GOOGLE_OAUTH_CLIENT_ID,
+          client_secret: GOOGLE_OAUTH_CLIENT_SECRET,
           redirect_uri: REDIRECT_URI,
           grant_type: 'authorization_code',
         }).toString(),
@@ -294,35 +281,6 @@ serve(async (req) => {
     switch (action.toLowerCase().trim()) {
       case 'generate_oauth_url':
         console.log("Generating auth URL for user:", user.id);
-        
-        // Check for missing credentials
-        if (!GOOGLE_OAUTH_CLIENT_ID) {
-          console.error("GOOGLE_OAUTH_CLIENT_ID is not configured");
-          return new Response(
-            JSON.stringify({ 
-              error: 'Google OAuth Client ID not configured in Supabase secrets',
-              details: 'Please set GOOGLE_OAUTH_CLIENT_ID in your Supabase project secrets'
-            }),
-            { 
-              status: 500, 
-              headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-            }
-          );
-        }
-        
-        if (!GOOGLE_OAUTH_CLIENT_SECRET) {
-          console.error("GOOGLE_OAUTH_CLIENT_SECRET is not configured");
-          return new Response(
-            JSON.stringify({ 
-              error: 'Google OAuth Client Secret not configured in Supabase secrets',
-              details: 'Please set GOOGLE_OAUTH_CLIENT_SECRET in your Supabase project secrets'
-            }),
-            { 
-              status: 500, 
-              headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-            }
-          );
-        }
         
         try {
           const authUrlParams = new URLSearchParams({
