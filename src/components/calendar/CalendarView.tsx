@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { CalendarEvent } from '@/types/calendar';
 import { Button } from '@/components/ui/button';
@@ -7,6 +6,7 @@ import { ChevronLeft, ChevronRight, Calendar, MapPin, Clock, Users } from 'lucid
 import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameMonth, isSameDay, addMonths, subMonths, isToday, startOfDay, getDay } from 'date-fns';
 import { getNationalHolidays, getHolidayByDate } from '@/utils/nationalHolidays';
 import { HolidayCard } from './HolidayCard';
+import { useSiteSettings } from '@/hooks/useSiteSettings';
 
 interface CalendarViewProps {
   events: CalendarEvent[];
@@ -25,10 +25,15 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
   const [selectedDate, setSelectedDate] = useState<Date | null>(startOfDay(today));
   const [view, setView] = useState<'month' | 'list'>('month');
 
+  const { settings } = useSiteSettings();
+  
+  // Check if national holidays should be shown (default to true if setting doesn't exist)
+  const showNationalHolidays = settings.show_national_holidays !== false;
+
+  // Get all days for the calendar grid (including padding days from previous/next month)
   const monthStart = startOfMonth(currentDate);
   const monthEnd = endOfMonth(currentDate);
   
-  // Get all days for the calendar grid (including padding days from previous/next month)
   const calendarStart = startOfDay(new Date(monthStart));
   const startDayOfWeek = getDay(calendarStart);
   const paddedStart = new Date(calendarStart);
@@ -45,7 +50,7 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
     showPrivateEvents || !event.is_private
   );
 
-  const holidays = getNationalHolidays(currentDate.getFullYear());
+  const holidays = showNationalHolidays ? getNationalHolidays(currentDate.getFullYear()) : [];
 
   const getEventsForDate = (date: Date) => {
     return filteredEvents.filter(event => {
@@ -55,7 +60,7 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
   };
 
   const getHolidayForDate = (date: Date) => {
-    return getHolidayByDate(date);
+    return showNationalHolidays ? getHolidayByDate(date) : null;
   };
 
   const navigateMonth = (direction: 'prev' | 'next') => {
@@ -205,7 +210,7 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
                             event.is_private ? 'bg-orange-100 text-orange-800' : 'bg-blue-100 text-blue-800'
                           }`}
                           onClick={(e) => {
-                            e.stopPropagation(); // Prevent day selection when clicking event
+                            e.stopPropagation();
                             onEventClick?.(event);
                           }}
                         >
@@ -225,8 +230,8 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
             </div>
           ) : (
             <div className="space-y-4">
-              {/* Show holidays in list view */}
-              {holidays
+              {/* Show holidays in list view only if enabled */}
+              {showNationalHolidays && holidays
                 .filter(holiday => 
                   holiday.date.getMonth() === currentDate.getMonth() &&
                   holiday.date.getFullYear() === currentDate.getFullYear()
@@ -304,7 +309,7 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
       </Card>
 
       {/* Holiday Details Card for Selected Date */}
-      {selectedDate && (() => {
+      {selectedDate && showNationalHolidays && (() => {
         const selectedHoliday = getHolidayForDate(selectedDate);
         return selectedHoliday ? (
           <HolidayCard holiday={selectedHoliday} />

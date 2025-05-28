@@ -28,22 +28,33 @@ import {
   SelectTrigger,
   SelectValue
 } from "@/components/ui/select";
+import { useSiteSettings } from "@/hooks/useSiteSettings";
+import { toast } from "sonner";
 
 export default function AdminSettingsPage() {
   const { isAdmin, isLoading, isAuthenticated } = useAuth();
+  const { settings, updateSetting, loading } = useSiteSettings();
   
   // Redirect if user is not authenticated or not an admin
   if (!isLoading && (!isAuthenticated || !isAdmin())) {
     return <Navigate to="/dashboard" />;
   }
   
-  if (isLoading) {
+  if (isLoading || loading) {
     return (
       <div className="flex items-center justify-center min-h-[60vh]">
         <div className="h-8 w-8 rounded-full border-4 border-primary border-t-transparent animate-spin"></div>
       </div>
     );
   }
+
+  const handleNationalHolidaysToggle = async (enabled: boolean) => {
+    try {
+      await updateSetting('show_national_holidays', enabled);
+    } catch (error) {
+      console.error('Failed to update national holidays setting:', error);
+    }
+  };
 
   return (
     <div className="container mx-auto p-4 space-y-6">
@@ -62,58 +73,82 @@ export default function AdminSettingsPage() {
         </TabsList>
         
         <TabsContent value="general">
-          <Card>
-            <CardHeader>
-              <CardTitle>General Settings</CardTitle>
-              <CardDescription>
-                Configure basic site settings and information
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="site-name">Site Name</Label>
-                <Input id="site-name" placeholder="Glee World" defaultValue="Glee World" />
-              </div>
-              
-              <div className="space-y-2">
-                <Label htmlFor="site-description">Site Description</Label>
-                <Input 
-                  id="site-description" 
-                  placeholder="Spelman College Glee Club Central Hub" 
-                  defaultValue="Spelman College Glee Club Central Hub" 
-                />
-              </div>
-              
-              <div className="space-y-2">
-                <Label htmlFor="contact-email">Contact Email</Label>
-                <Input 
-                  id="contact-email" 
-                  type="email" 
-                  placeholder="gleeclub@spelman.edu" 
-                  defaultValue="gleeclub@spelman.edu" 
-                />
-              </div>
-              
-              <div className="space-y-2">
-                <Label htmlFor="academic-year">Current Academic Year</Label>
-                <Select defaultValue="2024-2025">
-                  <SelectTrigger id="academic-year">
-                    <SelectValue placeholder="Select academic year" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="2023-2024">2023-2024</SelectItem>
-                    <SelectItem value="2024-2025">2024-2025</SelectItem>
-                    <SelectItem value="2025-2026">2025-2026</SelectItem>
-                    <SelectItem value="2026-2027">2026-2027</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              
-              <div className="flex items-center justify-between pt-2">
-                <Button>Save Changes</Button>
-              </div>
-            </CardContent>
-          </Card>
+          <div className="space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle>General Settings</CardTitle>
+                <CardDescription>
+                  Configure basic site settings and information
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="site-name">Site Name</Label>
+                  <Input id="site-name" placeholder="Glee World" defaultValue="Glee World" />
+                </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="site-description">Site Description</Label>
+                  <Input 
+                    id="site-description" 
+                    placeholder="Spelman College Glee Club Central Hub" 
+                    defaultValue="Spelman College Glee Club Central Hub" 
+                  />
+                </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="contact-email">Contact Email</Label>
+                  <Input 
+                    id="contact-email" 
+                    type="email" 
+                    placeholder="gleeclub@spelman.edu" 
+                    defaultValue="gleeclub@spelman.edu" 
+                  />
+                </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="academic-year">Current Academic Year</Label>
+                  <Select defaultValue="2024-2025">
+                    <SelectTrigger id="academic-year">
+                      <SelectValue placeholder="Select academic year" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="2023-2024">2023-2024</SelectItem>
+                      <SelectItem value="2024-2025">2024-2025</SelectItem>
+                      <SelectItem value="2025-2026">2025-2026</SelectItem>
+                      <SelectItem value="2026-2027">2026-2027</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                
+                <div className="flex items-center justify-between pt-2">
+                  <Button>Save Changes</Button>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle>Calendar Settings</CardTitle>
+                <CardDescription>
+                  Configure calendar display options and features
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <Label htmlFor="show-holidays" className="text-base font-medium">Show National Holidays</Label>
+                    <p className="text-sm text-muted-foreground">Display U.S. national holidays on the calendar</p>
+                  </div>
+                  <Switch 
+                    id="show-holidays" 
+                    checked={settings.show_national_holidays !== false}
+                    onCheckedChange={handleNationalHolidaysToggle}
+                  />
+                </div>
+              </CardContent>
+            </Card>
+          </div>
         </TabsContent>
         
         <TabsContent value="appearance">
