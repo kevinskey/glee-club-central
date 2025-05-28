@@ -1,3 +1,4 @@
+
 import React from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { Navigate } from "react-router-dom";
@@ -31,48 +32,24 @@ import { useSiteSettings } from "@/hooks/useSiteSettings";
 import { toast } from "sonner";
 
 const SiteSettingsPage = () => {
-  console.log('SiteSettingsPage component is rendering');
-  
   const { isAdmin, isLoading, isAuthenticated } = useAuth();
   const { settings, updateSetting, loading, error } = useSiteSettings();
   
-  console.log('Auth state:', { isAdmin: isAdmin?.(), isLoading, isAuthenticated });
-  console.log('Settings state:', { settings, loading, error });
-  
-  // Add visible debug info for iPad
-  const debugInfo = {
-    isLoading,
-    isAuthenticated,
-    isAdminFunc: typeof isAdmin,
-    isAdminResult: isAdmin?.(),
-    settingsLoading: loading,
-    settingsError: error,
-    settingsData: settings
-  };
-  
   // Redirect if user is not authenticated or not an admin
   if (!isLoading && (!isAuthenticated || !isAdmin())) {
-    console.log('Redirecting to dashboard - not admin');
     return <Navigate to="/dashboard" />;
   }
   
   if (isLoading || loading) {
-    console.log('Showing loading state');
     return (
       <div className="flex items-center justify-center min-h-[60vh]">
         <div className="h-8 w-8 rounded-full border-4 border-primary border-t-transparent animate-spin"></div>
-        <div className="ml-4 text-sm">
-          <p>Loading... Auth: {isLoading ? 'loading' : 'done'}, Settings: {loading ? 'loading' : 'done'}</p>
-        </div>
       </div>
     );
   }
 
-  console.log('Rendering main content');
-
   const handleNationalHolidaysToggle = async (enabled: boolean) => {
     try {
-      console.log('Toggling national holidays to:', enabled);
       await updateSetting('show_national_holidays', enabled);
       toast.success('Calendar settings updated successfully');
     } catch (error) {
@@ -83,12 +60,6 @@ const SiteSettingsPage = () => {
 
   return (
     <div className="container mx-auto p-4 space-y-6">
-      {/* Debug info for iPad */}
-      <div className="bg-yellow-100 p-3 rounded text-xs mb-4">
-        <p><strong>Debug Info:</strong></p>
-        <pre>{JSON.stringify(debugInfo, null, 2)}</pre>
-      </div>
-      
       <PageHeader
         title="Site Settings"
         description="Configure system settings and preferences"
