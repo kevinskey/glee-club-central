@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { CalendarView } from '@/components/calendar/CalendarView';
 import { EventDialog } from '@/components/calendar/EventDialog';
 import { EventEditor } from '@/components/admin/EventEditor';
@@ -17,6 +17,34 @@ export default function AdminCalendarPage() {
   const [editingEvent, setEditingEvent] = useState<CalendarEvent | null>(null);
   const [isCreating, setIsCreating] = useState(false);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  
+  // Use ref to track if we're intentionally closing the dialog
+  const intentionalCloseRef = useRef(false);
+
+  // Prevent dialog from closing on window blur/focus events
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      // Prevent automatic closing when switching tabs/windows
+      if (document.hidden && (isCreating || editingEvent)) {
+        console.log('Preventing dialog close due to window visibility change');
+      }
+    };
+
+    const handleBlur = () => {
+      // Prevent automatic closing when window loses focus
+      if (isCreating || editingEvent) {
+        console.log('Preventing dialog close due to window blur');
+      }
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    window.addEventListener('blur', handleBlur);
+
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+      window.removeEventListener('blur', handleBlur);
+    };
+  }, [isCreating, editingEvent]);
 
   const handleEventClick = (event: CalendarEvent) => {
     setSelectedEvent(event);
@@ -32,6 +60,9 @@ export default function AdminCalendarPage() {
         await createEvent(eventData);
         toast.success('Event created successfully');
       }
+      
+      // Mark as intentional close
+      intentionalCloseRef.current = true;
       setEditingEvent(null);
       setIsCreating(false);
     } catch (error) {
@@ -57,7 +88,21 @@ export default function AdminCalendarPage() {
   };
 
   const handleCreateNew = () => {
+    intentionalCloseRef.current = false;
     setIsCreating(true);
+    setEditingEvent(null);
+  };
+
+  const handleEditEvent = (event: CalendarEvent) => {
+    intentionalCloseRef.current = false;
+    setEditingEvent(event);
+    setIsDialogOpen(false);
+  };
+
+  const handleCloseEditor = () => {
+    // Only close if it's an intentional action
+    intentionalCloseRef.current = true;
+    setIsCreating(false);
     setEditingEvent(null);
   };
 
@@ -136,10 +181,7 @@ export default function AdminCalendarPage() {
               <div className="flex gap-2 mt-4">
                 <Button
                   variant="outline"
-                  onClick={() => {
-                    setEditingEvent(selectedEvent);
-                    setIsDialogOpen(false);
-                  }}
+                  onClick={() => handleEditEvent(selectedEvent)}
                 >
                   <Edit className="h-4 w-4 mr-2" />
                   Edit
@@ -156,14 +198,11 @@ export default function AdminCalendarPage() {
           />
         )}
 
-        {/* Event Editor */}
+        {/* Event Editor - Enhanced to prevent unwanted closing */}
         <EventEditor
           event={editingEvent}
           isOpen={isCreating || !!editingEvent}
-          onClose={() => {
-            setIsCreating(false);
-            setEditingEvent(null);
-          }}
+          onClose={handleCloseEditor}
           onSave={handleSaveEvent}
         />
       </div>

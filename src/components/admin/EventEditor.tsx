@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { CalendarEvent } from '@/types/calendar';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -41,6 +41,28 @@ export const EventEditor: React.FC<EventEditorProps> = ({
   });
 
   const [loading, setLoading] = useState(false);
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
+
+  // Track if form has been modified
+  useEffect(() => {
+    const isModified = formData.title !== (event?.title || '') ||
+      formData.short_description !== (event?.short_description || '') ||
+      formData.full_description !== (event?.full_description || '');
+    setHasUnsavedChanges(isModified);
+  }, [formData, event]);
+
+  // Prevent accidental closing when there are unsaved changes
+  const handleCloseAttempt = (open: boolean) => {
+    if (!open && hasUnsavedChanges) {
+      const confirmClose = window.confirm('You have unsaved changes. Are you sure you want to close?');
+      if (!confirmClose) {
+        return; // Prevent closing
+      }
+    }
+    if (!open) {
+      onClose();
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -52,6 +74,7 @@ export const EventEditor: React.FC<EventEditorProps> = ({
         start_time: new Date(formData.start_time).toISOString(),
         end_time: new Date(formData.end_time).toISOString(),
       } as Omit<CalendarEvent, 'id' | 'created_at'>);
+      setHasUnsavedChanges(false);
       onClose();
     } catch (error) {
       console.error('Error saving event:', error);
@@ -61,11 +84,12 @@ export const EventEditor: React.FC<EventEditorProps> = ({
   };
 
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
+    <Dialog open={isOpen} onOpenChange={handleCloseAttempt}>
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>
             {event ? 'Edit Event' : 'Create New Event'}
+            {hasUnsavedChanges && <span className="text-amber-500 ml-2">*</span>}
           </DialogTitle>
         </DialogHeader>
 
@@ -223,7 +247,12 @@ export const EventEditor: React.FC<EventEditorProps> = ({
           </div>
 
           <div className="flex justify-end gap-2 pt-4">
-            <Button type="button" variant="outline" onClick={onClose}>
+            <Button 
+              type="button" 
+              variant="outline" 
+              onClick={() => handleCloseAttempt(false)}
+              disabled={loading}
+            >
               Cancel
             </Button>
             <Button type="submit" disabled={loading}>
