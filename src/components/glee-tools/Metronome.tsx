@@ -22,20 +22,12 @@ const TIME_SIGNATURES = [
   { name: '7/8', beats: 7 }
 ];
 
-const METRONOME_SOUNDS = [
-  { name: 'Classic Click', id: 'woodblock' },
-  { name: 'Digital Beep', id: 'synth' },
-  { name: 'Drum Stick', id: 'percussion' },
-  { name: 'Bell', id: 'bell' }
-];
-
 export function Metronome({ onClose }: MetronomeProps) {
   const [isPlaying, setIsPlaying] = useState(false);
   const [bpm, setBpm] = useState(120);
   const [volume, setVolume] = useState(75);
   const [currentBeat, setCurrentBeat] = useState(0);
   const [timeSignature, setTimeSignature] = useState(TIME_SIGNATURES[0]);
-  const [soundType, setSoundType] = useState('synth'); // Use synth as default for reliability
   const [tapTimes, setTapTimes] = useState<number[]>([]);
   
   const { 
@@ -49,7 +41,7 @@ export function Metronome({ onClose }: MetronomeProps) {
   const synthRef = useRef<Tone.Synth | null>(null);
   const mountedRef = useRef(true);
 
-  // Initialize synth for reliable metronome sound
+  // Initialize synth when audio is ready
   useEffect(() => {
     if (isInitialized && !synthRef.current) {
       try {
@@ -57,8 +49,9 @@ export function Metronome({ onClose }: MetronomeProps) {
           oscillator: { type: 'triangle' },
           envelope: { attack: 0.01, decay: 0.1, sustain: 0, release: 0.1 }
         }).toDestination();
+        console.log('Metronome synth created successfully');
       } catch (error) {
-        console.error('Failed to create synth:', error);
+        console.error('Failed to create metronome synth:', error);
       }
     }
     

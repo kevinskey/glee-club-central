@@ -43,7 +43,8 @@ export function PitchPipe({ onClose }: PitchPipeProps) {
     stopNote, 
     stopAllNotes,
     availableInstruments,
-    loadInstrument
+    loadInstrument,
+    retryInitialization
   } = useAdvancedAudio();
 
   const handlePlayNote = useCallback(async (noteName: string) => {
@@ -79,7 +80,6 @@ export function PitchPipe({ onClose }: PitchPipeProps) {
 
   const handleInstrumentChange = useCallback(async (instrumentId: string) => {
     setSelectedInstrument(instrumentId);
-    // Preload the instrument
     await loadInstrument(instrumentId);
   }, [loadInstrument]);
 
@@ -89,7 +89,7 @@ export function PitchPipe({ onClose }: PitchPipeProps) {
         <CardContent className="flex items-center justify-center p-8">
           <div className="text-center">
             <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-primary mx-auto mb-2"></div>
-            <div className="text-sm text-muted-foreground">Initializing advanced audio system...</div>
+            <div className="text-sm text-muted-foreground">Initializing pitch pipe...</div>
           </div>
         </CardContent>
       </Card>
@@ -102,7 +102,10 @@ export function PitchPipe({ onClose }: PitchPipeProps) {
         <CardContent className="p-6">
           <div className="text-center">
             <div className="text-red-500 mb-2">Audio Error</div>
-            <div className="text-sm text-muted-foreground">{error}</div>
+            <div className="text-sm text-muted-foreground mb-4">{error}</div>
+            <Button onClick={retryInitialization} size="sm">
+              Retry
+            </Button>
           </div>
         </CardContent>
       </Card>

@@ -26,6 +26,7 @@ export function useAdvancedAudio() {
   const initializationAttemptedRef = useRef(false);
   
   const initialize = useCallback(async () => {
+    // Prevent multiple initialization attempts
     if (isInitialized || isLoading || initializationAttemptedRef.current) return;
     
     initializationAttemptedRef.current = true;
@@ -33,32 +34,33 @@ export function useAdvancedAudio() {
     setError(null);
     
     try {
+      console.log('Starting audio system initialization...');
+      
       // Get audio engine instance
       audioEngineRef.current = AudioEngine.getInstance();
       await audioEngineRef.current.initialize();
       
-      // Create SoundFont manager - ensure we have a proper AudioContext
-      const context = audioEngineRef.current.getContext();
+      // Get the audio context from Tone.js
+      const context = Tone.getContext();
       if (!context || !context.rawContext) {
-        throw new Error('Audio context not available');
+        throw new Error('Failed to get audio context from Tone.js');
       }
       
-      const audioContext = context.rawContext as AudioContext;
-      soundFontManagerRef.current = new SoundFontManager(audioContext);
+      console.log('Audio context obtained successfully');
+      
+      // Create SoundFont manager with the raw AudioContext
+      soundFontManagerRef.current = new SoundFontManager(context.rawContext as AudioContext);
       
       // Set up Tone.js settings
       Tone.Transport.bpm.value = 120;
-      Tone.context.lookAhead = audioSettings.latency;
       
-      // Preload essential instruments
+      // Preload a few essential instruments for immediate use
       const essentialInstruments = [
         'acoustic_grand_piano',
-        'choir_aahs',
-        'violin',
-        'cello',
-        'acoustic_guitar_nylon'
+        'choir_aahs'
       ];
       
+      console.log('Preloading essential instruments...');
       await soundFontManagerRef.current.preloadInstruments(essentialInstruments);
       
       setIsInitialized(true);
@@ -67,12 +69,11 @@ export function useAdvancedAudio() {
       const errorMessage = err instanceof Error ? err.message : 'Unknown audio initialization error';
       setError(errorMessage);
       console.error('Failed to initialize advanced audio:', err);
-      // Don't reset initialization flag on error - allow retry
-      initializationAttemptedRef.current = false;
+      initializationAttemptedRef.current = false; // Allow retry on error
     } finally {
       setIsLoading(false);
     }
-  }, [audioSettings.latency]);
+  }, []);
   
   const playNote = useCallback(async (
     note: string,
@@ -89,6 +90,7 @@ export function useAdvancedAudio() {
       let instrument = soundFontManagerRef.current.getLoadedInstrument(instrumentId);
       
       if (!instrument) {
+        console.log(`Loading instrument: ${instrumentId}`);
         instrument = await soundFontManagerRef.current.loadInstrument(instrumentId);
       }
       
@@ -111,7 +113,7 @@ export function useAdvancedAudio() {
       activeNotesRef.current.set(noteKey, playedNote);
       
       // Auto-cleanup after duration or default timeout
-      const cleanupTime = duration ? duration * 1000 : 5000;
+      const cleanupTime = duration ? duration * 1000 : 3000;
       setTimeout(() => {
         activeNotesRef.current.delete(noteKey);
       }, cleanupTime);
@@ -154,11 +156,6 @@ export function useAdvancedAudio() {
   
   const updateAudioSettings = useCallback((newSettings: Partial<AudioSettings>) => {
     setAudioSettings(prev => ({ ...prev, ...newSettings }));
-    
-    // Apply settings to Tone.js
-    if (newSettings.latency !== undefined) {
-      Tone.context.lookAhead = newSettings.latency;
-    }
   }, []);
   
   const dispose = useCallback(() => {
@@ -178,7 +175,6 @@ export function useAdvancedAudio() {
   
   // Auto-initialize on mount
   useEffect(() => {
-    // Small delay to ensure component is mounted
     const timer = setTimeout(() => {
       initialize();
     }, 100);
@@ -189,7 +185,6 @@ export function useAdvancedAudio() {
     };
   }, []);
   
-  // Retry initialization if there was an error
   const retryInitialization = useCallback(() => {
     initializationAttemptedRef.current = false;
     setError(null);

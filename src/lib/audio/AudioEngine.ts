@@ -1,12 +1,9 @@
 
 import * as Tone from 'tone';
-import { WebMidi, Input, Output } from 'webmidi';
 
 export class AudioEngine {
   private static instance: AudioEngine;
   private initialized = false;
-  private midiInputs: Input[] = [];
-  private midiOutputs: Output[] = [];
   private midiEnabled = false;
   
   private constructor() {}
@@ -22,23 +19,29 @@ export class AudioEngine {
     if (this.initialized) return;
     
     try {
-      // Initialize Tone.js first - this is essential
-      await Tone.start();
-      console.log('Tone.js initialized successfully');
+      console.log('Initializing Tone.js...');
       
-      // Try to initialize WebMidi, but don't fail if it's not available
+      // Start Tone.js - this is the most critical step
+      await Tone.start();
+      console.log('Tone.js started successfully');
+      
+      // Set up basic audio settings
+      Tone.Transport.bpm.value = 120;
+      
+      // MIDI is optional - don't fail if it's not available
       try {
-        await WebMidi.enable();
-        this.midiEnabled = true;
-        this.midiInputs = WebMidi.inputs;
-        this.midiOutputs = WebMidi.outputs;
-        console.log('WebMidi enabled successfully');
-        console.log('MIDI Inputs:', this.midiInputs.map(input => input.name));
-        console.log('MIDI Outputs:', this.midiOutputs.map(output => output.name));
+        // Try to enable WebMidi if available
+        if (typeof navigator !== 'undefined' && 'requestMIDIAccess' in navigator) {
+          const { WebMidi } = await import('webmidi');
+          await WebMidi.enable();
+          this.midiEnabled = true;
+          console.log('WebMidi enabled successfully');
+        } else {
+          console.log('MIDI not available in this environment');
+        }
       } catch (midiError) {
-        console.warn('MIDI not available in this environment:', midiError);
+        console.warn('MIDI initialization failed, continuing without MIDI:', midiError);
         this.midiEnabled = false;
-        // Continue without MIDI - this is not a critical failure
       }
       
       this.initialized = true;
@@ -57,29 +60,24 @@ export class AudioEngine {
     return this.midiEnabled;
   }
   
-  getMidiInputs(): Input[] {
-    return this.midiInputs;
-  }
-  
-  getMidiOutputs(): Output[] {
-    return this.midiOutputs;
-  }
-  
   getContext(): typeof Tone.context {
     return Tone.context;
   }
   
   async dispose(): Promise<void> {
-    if (this.midiEnabled && WebMidi.enabled) {
+    if (this.midiEnabled) {
       try {
-        WebMidi.disable();
+        const { WebMidi } = await import('webmidi');
+        if (WebMidi.enabled) {
+          WebMidi.disable();
+        }
       } catch (error) {
         console.warn('Error disabling WebMidi:', error);
       }
     }
     
     try {
-      await Tone.Transport.stop();
+      Tone.Transport.stop();
     } catch (error) {
       console.warn('Error stopping Tone transport:', error);
     }
