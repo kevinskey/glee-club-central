@@ -4,7 +4,7 @@ import { Navigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { Spinner } from '@/components/ui/spinner';
 
-// This component redirects users to the appropriate dashboard based on their role
+// This component redirects users to the member dashboard
 const RoleDashboard = () => {
   const { profile, isLoading, getUserType, isAuthenticated } = useAuth();
 

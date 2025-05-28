@@ -13,7 +13,6 @@ import RoleDashboard from './components/auth/RoleDashboard';
 import AboutPage from './pages/AboutPage';
 import ContactPage from './pages/ContactPage';
 import DashboardLayout from './layouts/DashboardLayout';
-import DashboardPage from './pages/dashboard/DashboardPage';
 import MemberDashboardPage from './pages/dashboard/MemberDashboardPage';
 import ProfilePage from './pages/profile/ProfilePage';
 import MediaLibraryPage from './pages/MediaLibraryPage';
@@ -81,7 +80,7 @@ export const router = createBrowserRouter([
         children: [
           {
             index: true,
-            element: <DashboardPage />,
+            element: <Navigate to="/dashboard/member" replace />,
           },
           {
             path: 'member',

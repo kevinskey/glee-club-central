@@ -20,7 +20,7 @@ interface BackButtonProps {
 export const BackButton = ({ 
   className = "", 
   label = "Back", 
-  fallbackPath = "/dashboard",
+  fallbackPath = "/dashboard/member",
   size = "default"
 }: BackButtonProps) => {
   const navigate = useNavigate();

@@ -1,7 +1,6 @@
 
 import React from 'react';
 import RequireAuth from '../components/auth/RequireAuth';
-import DashboardPage from '../pages/dashboard/DashboardPage';
 import ProfilePage from '../pages/profile/ProfilePage';
 import MediaLibraryPage from '../pages/MediaLibraryPage';
 import SheetMusicPage from '../pages/SheetMusicPage';
@@ -18,6 +17,7 @@ import AdminDashboardPage from '../pages/dashboard/AdminDashboardPage';
 import MembersPage from '../pages/members/MembersPage';
 import SettingsPage from '../pages/settings/SettingsPage';
 import FinancesPage from '../pages/dashboard/FinancesPage';
+import { Navigate } from 'react-router-dom';
 
 // Define routes without duplicating wrapper components
 export const dashboardRoutes = {
@@ -26,7 +26,7 @@ export const dashboardRoutes = {
   children: [
     {
       path: '',
-      element: <DashboardPage />,
+      element: <Navigate to="/dashboard/member" replace />,
     },
     {
       path: 'member',
