@@ -1,5 +1,5 @@
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { PageHeader } from "@/components/ui/page-header";
 import { FileMusic, Search, Filter } from "lucide-react";
 import { MusicAppHeader } from "@/components/layout/MusicAppHeader";
@@ -7,51 +7,109 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
+import { Badge } from "@/components/ui/badge";
+import { PDFThumbnail } from "@/components/pdf/PDFThumbnail";
+import { useMediaLibrary } from "@/hooks/useMediaLibrary";
+import { getMediaType } from "@/utils/mediaUtils";
+import { Spinner } from "@/components/ui/spinner";
 import EnhancedPDFViewer from "@/components/pdf/EnhancedPDFViewer";
+
+interface SheetMusic {
+  id: string;
+  title: string;
+  composer: string;
+  file_url: string;
+  created_at: string;
+  mediaSourceId: string;
+  category: string;
+}
 
 export default function SheetMusicPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedPDF, setSelectedPDF] = useState<any>(null);
+  const [musicFiles, setMusicFiles] = useState<SheetMusic[]>([]);
+  const [filteredFiles, setFilteredFiles] = useState<SheetMusic[]>([]);
+  const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
   
-  // This would be integrated with actual sheet music data in a real implementation
-  const placeholderSheetMusic = [
-    { 
-      id: "1", 
-      title: "Ave Maria", 
-      composer: "Franz Schubert", 
-      voicePart: "Soprano",
-      file_url: "https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf"
-    },
-    { 
-      id: "2", 
-      title: "Hallelujah", 
-      composer: "Leonard Cohen", 
-      voicePart: "All Parts",
-      file_url: "https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf"
-    },
-    { 
-      id: "3", 
-      title: "The Storm Is Passing Over", 
-      composer: "Charles A. Tindley", 
-      voicePart: "Alto",
-      file_url: "https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf"
-    },
-    { 
-      id: "4", 
-      title: "Amazing Grace", 
-      composer: "John Newton", 
-      voicePart: "All Parts",
-      file_url: "https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf"
-    },
-  ];
+  // Media library integration
+  const {
+    isLoading: mediaLoading,
+    allMediaFiles,
+    fetchAllMedia,
+  } = useMediaLibrary();
+
+  // Fetch sheet music data from media library
+  const fetchSheetMusic = async () => {
+    setLoading(true);
+    try {
+      console.log("Fetching sheet music from media library...");
+      console.log("All media files:", allMediaFiles.length);
+      
+      // Filter for PDF files from media library with enhanced detection
+      const pdfFiles = allMediaFiles
+        .filter(file => {
+          const isPdf = (
+            file.file_type === "application/pdf" || 
+            file.file_type.includes("pdf") ||
+            getMediaType(file.file_type) === "pdf" ||
+            (file.file_path && file.file_path.toLowerCase().endsWith('.pdf')) ||
+            (file.tags && file.tags.includes("pdf")) ||
+            (file.folder && file.folder.toLowerCase() === "sheet-music") ||
+            (file.category && file.category.toLowerCase() === "sheet-music")
+          );
+          
+          console.log(`File: ${file.title}, type: ${file.file_type}, isPdf: ${isPdf}`);
+          return isPdf;
+        })
+        .map(file => ({
+          id: file.id,
+          title: file.title || "Untitled PDF",
+          composer: file.description || "Unknown Composer",
+          file_url: file.file_url,
+          created_at: new Date(file.created_at).toLocaleDateString(),
+          mediaSourceId: file.id,
+          category: file.category || "sheet-music"
+        }));
+      
+      console.log(`Found ${pdfFiles.length} PDF files to display as sheet music`);
+      
+      setMusicFiles(pdfFiles);
+      setFilteredFiles(pdfFiles);
+      
+    } catch (error: any) {
+      console.error("Error processing sheet music:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Initial data fetch
+  useEffect(() => {
+    fetchAllMedia();
+  }, []);
   
-  const filteredMusic = searchQuery 
-    ? placeholderSheetMusic.filter(
-        item => item.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-               item.composer.toLowerCase().includes(searchQuery.toLowerCase())
-      )
-    : placeholderSheetMusic;
+  // Update music files when media library is loaded
+  useEffect(() => {
+    if (!mediaLoading && allMediaFiles.length >= 0) {
+      fetchSheetMusic();
+    }
+  }, [mediaLoading, allMediaFiles]);
+
+  // Apply search filter
+  useEffect(() => {
+    if (searchQuery) {
+      const query = searchQuery.toLowerCase();
+      const filtered = musicFiles.filter(
+        file => 
+          file.title.toLowerCase().includes(query) || 
+          file.composer.toLowerCase().includes(query)
+      );
+      setFilteredFiles(filtered);
+    } else {
+      setFilteredFiles(musicFiles);
+    }
+  }, [searchQuery, musicFiles]);
 
   const handleViewPDF = (item: any) => {
     setSelectedPDF(item);
@@ -74,6 +132,24 @@ export default function SheetMusicPage() {
           />
         </div>
       </div>
+    );
+  }
+
+  if (loading || mediaLoading) {
+    return (
+      <>
+        <MusicAppHeader currentSection="sheet-music" />
+        <div className="container py-6">
+          <PageHeader
+            title="Sheet Music Library"
+            description="Access and view your sheet music collection with enhanced PDF viewing"
+            icon={<FileMusic className="h-6 w-6" />}
+          />
+          <div className="flex items-center justify-center py-8">
+            <Spinner />
+          </div>
+        </div>
+      </>
     );
   }
   
@@ -107,35 +183,62 @@ export default function SheetMusicPage() {
           </CardContent>
         </Card>
         
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-          {filteredMusic.map((item) => (
-            <Card 
-              key={item.id} 
-              className="overflow-hidden transition-all hover:shadow-md cursor-pointer"
-              onClick={() => handleViewPDF(item)}
-            >
-              <div className="bg-muted h-40 flex items-center justify-center">
-                <FileMusic className="h-12 w-12 text-muted-foreground" />
-              </div>
-              <CardContent className="p-4">
-                <h3 className="font-bold">{item.title}</h3>
-                <p className="text-sm text-muted-foreground">{item.composer}</p>
-                <div className="mt-2 flex items-center justify-between">
-                  <span className="text-xs bg-primary/10 text-primary px-2 py-1 rounded-full">
-                    {item.voicePart}
-                  </span>
-                  <Button variant="ghost" size="sm">View PDF</Button>
+        {filteredFiles.length === 0 ? (
+          <div className="text-center py-12">
+            <FileMusic className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
+            <h3 className="text-lg font-medium mb-2">No sheet music found</h3>
+            <p className="text-muted-foreground mb-4">
+              {searchQuery ? "No files match your search criteria." : "No PDF files available in the media library."}
+            </p>
+          </div>
+        ) : (
+          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+            {filteredFiles.map((item) => (
+              <Card 
+                key={item.id} 
+                className="overflow-hidden transition-all hover:shadow-md cursor-pointer group"
+                onClick={() => handleViewPDF(item)}
+              >
+                <div className="relative">
+                  <div className="bg-muted h-48 flex items-center justify-center overflow-hidden">
+                    <div className="w-full h-full bg-white border border-gray-200">
+                      <PDFThumbnail 
+                        url={item.file_url} 
+                        title={item.title}
+                        className="w-full h-full"
+                        aspectRatio={3/4}
+                      />
+                    </div>
+                  </div>
+                  
+                  {/* Overlay with actions */}
+                  <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-40 transition-all flex items-center justify-center opacity-0 group-hover:opacity-100">
+                    <Button variant="secondary" size="sm">
+                      View PDF
+                    </Button>
+                  </div>
                 </div>
-              </CardContent>
-            </Card>
-          ))}
-          
-          {filteredMusic.length === 0 && (
-            <div className="md:col-span-2 lg:col-span-3 py-12 text-center text-muted-foreground">
-              No sheet music found matching your search.
-            </div>
-          )}
-        </div>
+                
+                <CardContent className="p-4">
+                  <h3 className="font-bold text-sm mb-1 truncate" title={item.title}>
+                    {item.title}
+                  </h3>
+                  <p className="text-sm text-muted-foreground mb-2 truncate" title={item.composer}>
+                    {item.composer}
+                  </p>
+                  <div className="flex items-center justify-between">
+                    <Badge variant="secondary" className="text-xs">
+                      PDF
+                    </Badge>
+                    <span className="text-xs text-muted-foreground">
+                      {item.created_at}
+                    </span>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        )}
       </div>
     </>
   );
