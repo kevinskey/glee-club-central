@@ -90,11 +90,11 @@ export const router = createBrowserRouter([
       // Dashboard routes with proper authentication - MAIN DASHBOARD ROUTE
       {
         path: '/dashboard',
-        element: <RoleBasedLayout requiredRole="member"><DashboardLayout /></RoleBasedLayout>,
+        element: <RequireAuth><DashboardLayout /></RequireAuth>,
         children: [
           {
             index: true,
-            element: <Navigate to="/dashboard/member" replace />,
+            element: <MemberDashboardPage />,
           },
           {
             path: 'member',
