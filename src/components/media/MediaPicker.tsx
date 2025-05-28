@@ -7,6 +7,7 @@ import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Upload, ExternalLink, Image as ImageIcon } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
 
 interface MediaItem {
@@ -29,6 +30,7 @@ export const MediaPicker: React.FC<MediaPickerProps> = ({
   onSelect,
   currentImageUrl = ''
 }) => {
+  const { user } = useAuth();
   const [mediaItems, setMediaItems] = useState<MediaItem[]>([]);
   const [loading, setLoading] = useState(false);
   const [uploading, setUploading] = useState(false);
@@ -65,7 +67,10 @@ export const MediaPicker: React.FC<MediaPickerProps> = ({
   };
 
   const handleFileUpload = async () => {
-    if (!selectedFile) return;
+    if (!selectedFile || !user?.id) {
+      toast.error('Please select a file and ensure you are logged in');
+      return;
+    }
 
     setUploading(true);
     try {
@@ -85,7 +90,7 @@ export const MediaPicker: React.FC<MediaPickerProps> = ({
         .from('media-library')
         .getPublicUrl(filePath);
 
-      // Save to media_library table
+      // Save to media_library table with proper uploaded_by field
       const { error: dbError } = await supabase
         .from('media_library')
         .insert({
@@ -93,7 +98,8 @@ export const MediaPicker: React.FC<MediaPickerProps> = ({
           file_path: filePath,
           file_url: urlData.publicUrl,
           file_type: selectedFile.type,
-          folder: 'events'
+          folder: 'events',
+          uploaded_by: user.id // Fix: Ensure uploaded_by is set
         });
 
       if (dbError) throw dbError;
@@ -212,7 +218,7 @@ export const MediaPicker: React.FC<MediaPickerProps> = ({
                   <Button variant="outline" onClick={onClose}>
                     Cancel
                   </Button>
-                  <Button onClick={handleFileUpload} disabled={uploading}>
+                  <Button onClick={handleFileUpload} disabled={uploading || !user}>
                     <Upload className="h-4 w-4 mr-2" />
                     {uploading ? 'Uploading...' : 'Upload & Use'}
                   </Button>
