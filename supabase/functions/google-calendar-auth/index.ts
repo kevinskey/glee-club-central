@@ -193,58 +193,29 @@ serve(async (req) => {
     let requestData: any = {};
     if (req.method === 'POST') {
       try {
-        const contentType = req.headers.get('content-type') || '';
-        console.log("Content-Type:", contentType);
+        const bodyText = await req.text();
+        console.log("Raw request body:", bodyText);
         
-        if (contentType.includes('application/json')) {
-          const bodyText = await req.text();
-          console.log("Raw request body:", bodyText);
-          
-          if (bodyText && bodyText.trim()) {
-            try {
-              requestData = JSON.parse(bodyText);
-              console.log("Parsed request data:", requestData);
-            } catch (parseError) {
-              console.error("JSON parsing failed:", parseError);
-              // If JSON parsing fails, try to extract action from URL params as fallback
-              const urlParams = new URL(req.url).searchParams;
-              const actionFromParams = urlParams.get('action');
-              if (actionFromParams) {
-                requestData = { action: actionFromParams };
-                console.log("Using action from URL params:", requestData);
-              } else {
-                return new Response(
-                  JSON.stringify({ 
-                    error: 'Invalid JSON in request body',
-                    received: bodyText 
-                  }),
-                  { 
-                    status: 400, 
-                    headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-                  }
-                );
+        if (bodyText && bodyText.trim()) {
+          try {
+            requestData = JSON.parse(bodyText);
+            console.log("Parsed request data:", requestData);
+          } catch (parseError) {
+            console.error("JSON parsing failed:", parseError);
+            return new Response(
+              JSON.stringify({ 
+                error: 'Invalid JSON in request body',
+                received: bodyText 
+              }),
+              { 
+                status: 400, 
+                headers: { ...corsHeaders, 'Content-Type': 'application/json' }
               }
-            }
-          } else {
-            console.log("Empty body received");
-            // Try to get action from URL params if body is empty
-            const urlParams = new URL(req.url).searchParams;
-            const actionFromParams = urlParams.get('action');
-            if (actionFromParams) {
-              requestData = { action: actionFromParams };
-              console.log("Using action from URL params:", requestData);
-            } else {
-              requestData = {};
-            }
+            );
           }
         } else {
-          // For non-JSON content types, try URL params
-          const urlParams = new URL(req.url).searchParams;
-          const actionFromParams = urlParams.get('action');
-          if (actionFromParams) {
-            requestData = { action: actionFromParams };
-            console.log("Using action from URL params for non-JSON:", requestData);
-          }
+          console.log("Empty body received");
+          requestData = {};
         }
       } catch (e) {
         console.error("Error reading request body:", e);
@@ -324,13 +295,7 @@ serve(async (req) => {
           
           const authUrl = `${GOOGLE_OAUTH_ENDPOINT}?${authUrlParams.toString()}`;
           
-          console.log("Generated OAuth URL:", authUrl);
-          console.log("OAuth URL components:", {
-            clientId: GOOGLE_OAUTH_CLIENT_ID?.substring(0, 20) + '...',
-            redirectUri: REDIRECT_URI,
-            scope: GOOGLE_SCOPE,
-            state: user.id
-          });
+          console.log("Generated OAuth URL successfully");
           
           return new Response(
             JSON.stringify({ 
