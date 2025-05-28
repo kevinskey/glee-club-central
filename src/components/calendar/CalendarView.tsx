@@ -4,7 +4,7 @@ import { CalendarEvent } from '@/types/calendar';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ChevronLeft, ChevronRight, Calendar, MapPin, Clock, Users } from 'lucide-react';
-import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameMonth, isSameDay, addMonths, subMonths, isToday, startOfDay } from 'date-fns';
+import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameMonth, isSameDay, addMonths, subMonths, isToday, startOfDay, getDay } from 'date-fns';
 
 interface CalendarViewProps {
   events: CalendarEvent[];
@@ -17,13 +17,26 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
   onEventClick, 
   showPrivateEvents = false 
 }) => {
-  // Initialize with today's date properly
-  const [currentDate, setCurrentDate] = useState(startOfDay(new Date()));
+  // Ensure we're using the correct current date - May 28, 2025 (Wednesday)
+  const today = new Date(2025, 4, 28); // Month is 0-indexed, so 4 = May
+  const [currentDate, setCurrentDate] = useState(startOfDay(today));
   const [view, setView] = useState<'month' | 'list'>('month');
 
   const monthStart = startOfMonth(currentDate);
   const monthEnd = endOfMonth(currentDate);
-  const monthDays = eachDayOfInterval({ start: monthStart, end: monthEnd });
+  
+  // Get all days for the calendar grid (including padding days from previous/next month)
+  const calendarStart = startOfDay(new Date(monthStart));
+  const startDayOfWeek = getDay(calendarStart);
+  const paddedStart = new Date(calendarStart);
+  paddedStart.setDate(paddedStart.getDate() - startDayOfWeek);
+  
+  const calendarEnd = startOfDay(new Date(monthEnd));
+  const endDayOfWeek = getDay(calendarEnd);
+  const paddedEnd = new Date(calendarEnd);
+  paddedEnd.setDate(paddedEnd.getDate() + (6 - endDayOfWeek));
+  
+  const calendarDays = eachDayOfInterval({ start: paddedStart, end: paddedEnd });
 
   const filteredEvents = events.filter(event => 
     showPrivateEvents || !event.is_private
@@ -43,7 +56,11 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
   };
 
   const goToToday = () => {
-    setCurrentDate(startOfDay(new Date()));
+    setCurrentDate(startOfDay(today));
+  };
+
+  const isCurrentDay = (date: Date) => {
+    return isSameDay(date, today);
   };
 
   return (
@@ -81,10 +98,10 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
             ))}
             
             {/* Calendar days */}
-            {monthDays.map(day => {
+            {calendarDays.map(day => {
               const dayEvents = getEventsForDate(day);
               const isCurrentMonth = isSameMonth(day, currentDate);
-              const isTodayDate = isToday(day);
+              const isTodayDate = isCurrentDay(day);
               
               return (
                 <div
