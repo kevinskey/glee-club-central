@@ -76,10 +76,10 @@ export function GoogleCalendarStatus({ onConnectionChange }: GoogleCalendarStatu
         return;
       }
 
-      console.log("Getting auth URL with action: get_auth_url");
+      console.log("Getting auth URL with action: generate_oauth_url");
 
       const { data, error } = await supabase.functions.invoke('google-calendar-auth', {
-        body: { action: 'get_auth_url' },
+        body: { action: 'generate_oauth_url' },
         headers: {
           'Authorization': `Bearer ${session.access_token}`,
           'Content-Type': 'application/json'
