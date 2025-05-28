@@ -4,6 +4,7 @@ import AdminDashboard from "@/pages/admin/AdminDashboard";
 import LandingPageSettingsPage from "@/pages/admin/LandingPageSettingsPage";
 import MediaLibrary from "@/pages/admin/MediaLibrary";
 import NewsItemsPage from "@/pages/admin/NewsItemsPage";
+import SiteSettingsPage from "@/pages/admin/SiteSettingsPage";
 
 // Define the admin routes
 export const adminRoutes: RouteObject[] = [
@@ -22,5 +23,9 @@ export const adminRoutes: RouteObject[] = [
   {
     path: "news",
     element: <NewsItemsPage />,
+  },
+  {
+    path: "settings",
+    element: <SiteSettingsPage />,
   },
 ];

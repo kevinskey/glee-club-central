@@ -3,7 +3,7 @@ import React from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { Navigate } from "react-router-dom";
 import { PageHeader } from "@/components/ui/page-header";
-import { Settings, Globe, Bell, Shield, User, Mail } from "lucide-react";
+import { Settings } from "lucide-react";
 import { 
   Card, 
   CardContent, 
