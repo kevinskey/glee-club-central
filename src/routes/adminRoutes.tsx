@@ -6,6 +6,8 @@ import MediaLibrary from "@/pages/admin/MediaLibrary";
 import NewsItemsPage from "@/pages/admin/NewsItemsPage";
 import SiteSettingsPage from "@/pages/admin/SiteSettingsPage";
 
+console.log('Admin routes loading...');
+
 // Define the admin routes
 export const adminRoutes: RouteObject[] = [
   {
@@ -17,7 +19,7 @@ export const adminRoutes: RouteObject[] = [
     element: <LandingPageSettingsPage />,
   },
   {
-    path: "media",
+    path: "media", 
     element: <MediaLibrary />,
   },
   {
@@ -29,3 +31,5 @@ export const adminRoutes: RouteObject[] = [
     element: <SiteSettingsPage />,
   },
 ];
+
+console.log('Admin routes configured:', adminRoutes);
