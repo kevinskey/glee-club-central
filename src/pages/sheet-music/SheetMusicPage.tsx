@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { PageHeader } from "@/components/ui/page-header";
@@ -127,7 +128,7 @@ export default function SheetMusicPage() {
       const pdfFiles = allMediaFiles
         .filter(file => {
           // Improved PDF detection logic
-          return (
+          const isPdf = (
             file.file_type === "application/pdf" || 
             file.file_type.includes("pdf") ||
             getMediaType(file.file_type) === "pdf" ||
@@ -136,6 +137,9 @@ export default function SheetMusicPage() {
             (file.folder && file.folder.toLowerCase() === "sheet-music") ||
             (file.category && file.category.toLowerCase() === "sheet-music")
           );
+          
+          console.log(`File: ${file.title}, type: ${file.file_type}, isPdf: ${isPdf}`);
+          return isPdf;
         })
         .map(file => ({
           id: file.id,
@@ -325,7 +329,6 @@ export default function SheetMusicPage() {
   // Handle upload complete
   const handleUploadComplete = () => {
     console.log("Upload complete, refreshing data from media library");
-    // Refetch all media files without filtering to get the latest uploads
     fetchAllMedia();
     toast({
       title: "Upload complete",
@@ -333,11 +336,114 @@ export default function SheetMusicPage() {
     });
   };
 
+  // View sheet music
+  const viewSheetMusic = (id: string) => {
+    navigate(`/dashboard/sheet-music/${id}`);
+  };
+
+  if (loading || mediaLoading) {
+    return (
+      <div className="container py-6">
+        <PageHeader
+          title="Sheet Music Library"
+          description="Access and view your sheet music collection"
+          icon={<FileText className="h-6 w-6" />}
+        />
+        <div className="flex items-center justify-center py-8">
+          <Spinner />
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div>
-      {/* Component UI implementation */}
-      <h1>Sheet Music Page</h1>
-      {/* The rest of the component's UI would go here */}
+    <div className="container py-6">
+      <PageHeader
+        title="Sheet Music Library"
+        description="Access and view your sheet music collection with PDF previews"
+        icon={<FileText className="h-6 w-6" />}
+        actions={
+          <div className="flex gap-2">
+            <Button
+              onClick={() => setIsUploadModalOpen(true)}
+              className="flex items-center gap-2"
+            >
+              <Upload className="h-4 w-4" />
+              Upload Sheet Music
+            </Button>
+          </div>
+        }
+      />
+
+      {filteredFiles.length === 0 ? (
+        <div className="text-center py-12">
+          <FileText className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
+          <h3 className="text-lg font-medium mb-2">No sheet music found</h3>
+          <p className="text-muted-foreground mb-4">
+            {searchQuery ? "No files match your search criteria." : "Upload your first PDF to get started."}
+          </p>
+          <Button onClick={() => setIsUploadModalOpen(true)}>
+            <Upload className="h-4 w-4 mr-2" />
+            Upload Sheet Music
+          </Button>
+        </div>
+      ) : (
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+          {filteredFiles.map((file) => (
+            <Card 
+              key={file.id} 
+              id={`sheet-music-${file.mediaSourceId}`}
+              className={`overflow-hidden transition-all hover:shadow-md cursor-pointer group ${
+                highlightedMediaId === file.mediaSourceId ? 'ring-2 ring-primary' : ''
+              }`}
+              onClick={() => viewSheetMusic(file.id)}
+            >
+              <div className="relative">
+                <div className="bg-muted h-48 flex items-center justify-center overflow-hidden">
+                  <div className="w-full h-full bg-white">
+                    <PDFThumbnail 
+                      url={file.file_url} 
+                      title={file.title}
+                      className="w-full h-full"
+                      aspectRatio={3/4}
+                    />
+                  </div>
+                </div>
+                
+                {/* Overlay with actions */}
+                <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-40 transition-all flex items-center justify-center opacity-0 group-hover:opacity-100">
+                  <Button variant="secondary" size="sm">
+                    View PDF
+                  </Button>
+                </div>
+              </div>
+              
+              <CardContent className="p-4">
+                <h3 className="font-bold text-sm mb-1 truncate" title={file.title}>
+                  {file.title}
+                </h3>
+                <p className="text-sm text-muted-foreground mb-2 truncate" title={file.composer}>
+                  {file.composer}
+                </p>
+                <div className="flex items-center justify-between">
+                  <Badge variant="secondary" className="text-xs">
+                    PDF
+                  </Badge>
+                  <span className="text-xs text-muted-foreground">
+                    {file.created_at}
+                  </span>
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      )}
+
+      <UploadSheetMusicModal
+        open={isUploadModalOpen}
+        onOpenChange={setIsUploadModalOpen}
+        onUploadComplete={handleUploadComplete}
+      />
     </div>
   );
 }
