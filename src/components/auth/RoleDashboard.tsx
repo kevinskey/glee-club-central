@@ -36,10 +36,9 @@ const RoleDashboard = () => {
     return <Navigate to="/login" replace />;
   }
 
-  // Redirect based on role - all authenticated users go to the main dashboard initially
-  // The dashboard will handle showing admin vs member content based on permissions
-  console.log("Redirecting authenticated user to main dashboard");
-  return <Navigate to="/dashboard" replace />;
+  // Redirect to the Member Dashboard page which has all the quick access buttons
+  console.log("Redirecting authenticated user to member dashboard");
+  return <Navigate to="/dashboard/member" replace />;
 };
 
 export default RoleDashboard;

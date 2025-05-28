@@ -32,13 +32,13 @@ export function DashboardNav({
   // All buttons will use 'ghost' variant to remove highlights
   return (
     <nav className={cn('flex flex-col gap-2', className)} {...props}>
-      {/* Dashboard link - goes to main dashboard for all users */}
+      {/* Dashboard link - goes to member dashboard for all users */}
       <Button
         variant="ghost"
         className={cn('justify-start', isCollapsed && 'justify-center')}
         asChild
       >
-        <Link to="/dashboard">
+        <Link to="/dashboard/member">
           <Home className="h-5 w-5 mr-2" />
           {!isCollapsed && <span>Dashboard</span>}
         </Link>
