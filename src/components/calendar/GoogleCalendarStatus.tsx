@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -18,7 +19,6 @@ export function GoogleCalendarStatus({ onConnectionChange }: GoogleCalendarStatu
   const checkConnectionStatus = async () => {
     setIsLoading(true);
     try {
-      // Get the current session with explicit refresh
       const { data: { session }, error: sessionError } = await supabase.auth.getSession();
       
       if (sessionError || !session?.access_token) {
@@ -30,7 +30,6 @@ export function GoogleCalendarStatus({ onConnectionChange }: GoogleCalendarStatu
 
       console.log("Checking Google Calendar connection with valid session");
       
-      // Make the request with explicit authorization header
       const { data, error } = await supabase.functions.invoke('google-calendar-auth', { 
         body: { action: 'check_connection' },
         headers: {
@@ -73,7 +72,6 @@ export function GoogleCalendarStatus({ onConnectionChange }: GoogleCalendarStatu
     try {
       setIsLoading(true);
       
-      // Get session with explicit refresh
       const { data: { session }, error: sessionError } = await supabase.auth.getSession();
       if (sessionError || !session?.access_token) {
         toast.error("Please log in to connect Google Calendar");
@@ -121,15 +119,17 @@ export function GoogleCalendarStatus({ onConnectionChange }: GoogleCalendarStatu
         return;
       }
 
-      // Check for popup closure
+      // Check for popup closure with more frequent checks
       const checkClosed = setInterval(() => {
         if (popup?.closed) {
           clearInterval(checkClosed);
+          console.log("Popup closed, checking connection status...");
+          // Wait a bit longer for the backend to process the tokens
           setTimeout(() => {
             checkConnectionStatus();
-          }, 1000);
+          }, 2000);
         }
-      }, 1000);
+      }, 500); // Check every 500ms instead of 1000ms
 
     } catch (error) {
       console.error("Error connecting:", error);
@@ -143,7 +143,6 @@ export function GoogleCalendarStatus({ onConnectionChange }: GoogleCalendarStatu
     try {
       setIsLoading(true);
       
-      // Get session with explicit refresh
       const { data: { session }, error: sessionError } = await supabase.auth.getSession();
       if (sessionError || !session?.access_token) {
         toast.error("Please log in to disconnect Google Calendar");
@@ -178,7 +177,6 @@ export function GoogleCalendarStatus({ onConnectionChange }: GoogleCalendarStatu
   };
 
   useEffect(() => {
-    // Check if user is authenticated before checking connection
     const checkAuth = async () => {
       const { data: { session } } = await supabase.auth.getSession();
       if (session?.access_token) {
