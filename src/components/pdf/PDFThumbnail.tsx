@@ -56,23 +56,29 @@ export const PDFThumbnail = ({
             </svg>
           </div>
         ) : (
-          <div className="h-full w-full">
+          <div className="h-full w-full flex items-center justify-center">
             <Document
               file={url}
               onLoadSuccess={handleLoadSuccess}
               onLoadError={handleLoadError}
               loading={null}
-              className="h-full"
+              className="flex items-center justify-center h-full w-full"
             >
               <Page 
                 pageNumber={1} 
                 width={undefined}
                 height={undefined}
                 scale={1}
-                className="overflow-hidden"
+                className="overflow-hidden flex items-center justify-center"
                 renderTextLayer={false}
                 renderAnnotationLayer={false}
                 loading={null}
+                style={{
+                  maxWidth: '100%',
+                  maxHeight: '100%',
+                  objectFit: 'contain',
+                  objectPosition: 'center'
+                }}
               />
             </Document>
           </div>
