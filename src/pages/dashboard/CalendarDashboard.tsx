@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { PageHeaderWithToggle } from "@/components/ui/page-header-with-toggle";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -13,6 +14,7 @@ import { DashboardEventsSkeleton, DashboardCardSkeleton } from "@/components/ui/
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
 import { GoogleCalendarAuthIntegrated } from "@/components/calendar/GoogleCalendarAuthIntegrated";
+import { GoogleCalendarSync } from "@/components/calendar/GoogleCalendarSync";
 
 export default function CalendarDashboard() {
   const [isLoading, setIsLoading] = useState(true);
@@ -20,6 +22,8 @@ export default function CalendarDashboard() {
   const [isViewModalOpen, setIsViewModalOpen] = useState(false);
   const [selectedEvent, setSelectedEvent] = useState<CalendarEvent | null>(null);
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
+  const [googleCalendarConnected, setGoogleCalendarConnected] = useState(false);
+  const [googleEvents, setGoogleEvents] = useState<CalendarEvent[]>([]);
   
   const { events, fetchEvents, addEvent, updateEvent, deleteEvent } = useCalendarStore();
   const { user } = useAuth();
@@ -40,6 +44,9 @@ export default function CalendarDashboard() {
     loadEvents();
   }, [fetchEvents]);
 
+  // Combine local events with Google Calendar events
+  const allEvents = [...events, ...googleEvents];
+
   // Get upcoming events (next 30 days)
   const getUpcomingEvents = (events: CalendarEvent[]) => {
     const today = new Date();
@@ -56,7 +63,7 @@ export default function CalendarDashboard() {
       .slice(0, 5);
   };
 
-  const upcomingEvents = getUpcomingEvents(events);
+  const upcomingEvents = getUpcomingEvents(allEvents);
 
   // Event handlers
   const handleDateClick = (info: any) => {
@@ -65,6 +72,12 @@ export default function CalendarDashboard() {
   };
   
   const handleEventClick = (event: CalendarEvent) => {
+    // Only allow editing of local events, not Google Calendar events
+    if (event.source === 'google') {
+      toast.info("Google Calendar events can only be edited in Google Calendar");
+      return;
+    }
+    
     setSelectedEvent(event);
     setIsViewModalOpen(true);
   };
@@ -118,6 +131,10 @@ export default function CalendarDashboard() {
     }
   };
 
+  const handleGoogleEventsSync = (syncedEvents: CalendarEvent[]) => {
+    setGoogleEvents(syncedEvents);
+  };
+
   if (isLoading) {
     return (
       <div className="container mx-auto py-8 space-y-6">
@@ -157,7 +174,7 @@ export default function CalendarDashboard() {
       
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-6">
         <div className="lg:col-span-2">
-          {events.length === 0 ? (
+          {allEvents.length === 0 ? (
             <Card>
               <CardContent className="flex flex-col items-center justify-center p-10">
                 <CalendarIcon className="h-12 w-12 text-gray-400 mb-4" />
@@ -176,7 +193,7 @@ export default function CalendarDashboard() {
             </Card>
           ) : (
             <CalendarMain
-              events={events}
+              events={allEvents}
               calendarView="dayGridMonth"
               userCanCreate={true}
               handleDateClick={handleDateClick}
@@ -186,8 +203,26 @@ export default function CalendarDashboard() {
         </div>
         
         <div className="space-y-6">
-          {/* Updated Google Calendar Integration */}
-          <GoogleCalendarAuthIntegrated />
+          {/* Google Calendar Integration */}
+          <GoogleCalendarAuthIntegrated 
+            onConnectionChange={setGoogleCalendarConnected}
+          />
+          
+          {/* Google Calendar Sync */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center">
+                <CalendarIcon className="mr-2 h-5 w-5" />
+                Google Calendar Sync
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <GoogleCalendarSync 
+                onEventsSync={handleGoogleEventsSync}
+                isConnected={googleCalendarConnected}
+              />
+            </CardContent>
+          </Card>
           
           <Card>
             <CardHeader>
@@ -200,8 +235,19 @@ export default function CalendarDashboard() {
               <div className="space-y-4">
                 {upcomingEvents.length > 0 ? (
                   upcomingEvents.map((event) => (
-                    <div key={event.id} className="rounded-lg border p-3 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-900 transition-colors" onClick={() => handleEventClick(event)}>
-                      <h3 className="font-medium">{event.title}</h3>
+                    <div 
+                      key={event.id} 
+                      className="rounded-lg border p-3 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-900 transition-colors" 
+                      onClick={() => handleEventClick(event)}
+                    >
+                      <div className="flex items-start justify-between">
+                        <h3 className="font-medium">{event.title}</h3>
+                        {event.source === 'google' && (
+                          <span className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded">
+                            Google
+                          </span>
+                        )}
+                      </div>
                       <div className="mt-2 text-sm text-muted-foreground">
                         <p className="flex items-center">
                           <CalendarIcon className="mr-2 h-4 w-4" />
