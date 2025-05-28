@@ -7,7 +7,8 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
-import { Calendar, Clock } from 'lucide-react';
+import { Calendar, Clock, Image as ImageIcon } from 'lucide-react';
+import { MediaPicker } from '@/components/media/MediaPicker';
 
 interface EventEditorProps {
   event?: CalendarEvent | null;
@@ -42,6 +43,7 @@ export const EventEditor: React.FC<EventEditorProps> = ({
 
   const [loading, setLoading] = useState(false);
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
+  const [isMediaPickerOpen, setIsMediaPickerOpen] = useState(false);
 
   // Track if form has been modified
   useEffect(() => {
@@ -81,6 +83,11 @@ export const EventEditor: React.FC<EventEditorProps> = ({
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleImageSelect = (imageUrl: string) => {
+    setFormData(prev => ({ ...prev, feature_image_url: imageUrl }));
+    setIsMediaPickerOpen(false);
   };
 
   return (
@@ -188,13 +195,38 @@ export const EventEditor: React.FC<EventEditorProps> = ({
           </div>
 
           <div>
-            <Label htmlFor="feature_image_url">Feature Image URL</Label>
-            <Input
-              id="feature_image_url"
-              value={formData.feature_image_url}
-              onChange={(e) => setFormData(prev => ({ ...prev, feature_image_url: e.target.value }))}
-              placeholder="https://..."
-            />
+            <Label>Event Image</Label>
+            <div className="space-y-2">
+              {formData.feature_image_url && (
+                <div className="border rounded-lg p-2">
+                  <img 
+                    src={formData.feature_image_url} 
+                    alt="Event preview"
+                    className="w-full h-32 object-cover rounded"
+                  />
+                </div>
+              )}
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setIsMediaPickerOpen(true)}
+                className="w-full"
+              >
+                <ImageIcon className="h-4 w-4 mr-2" />
+                {formData.feature_image_url ? 'Change Image' : 'Select Image'}
+              </Button>
+              {formData.feature_image_url && (
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setFormData(prev => ({ ...prev, feature_image_url: '' }))}
+                  className="w-full text-red-600 hover:text-red-700"
+                >
+                  Remove Image
+                </Button>
+              )}
+            </div>
           </div>
 
           <div className="space-y-4 p-4 border rounded-lg">
@@ -260,6 +292,13 @@ export const EventEditor: React.FC<EventEditorProps> = ({
             </Button>
           </div>
         </form>
+
+        <MediaPicker
+          isOpen={isMediaPickerOpen}
+          onClose={() => setIsMediaPickerOpen(false)}
+          onSelect={handleImageSelect}
+          currentImageUrl={formData.feature_image_url}
+        />
       </DialogContent>
     </Dialog>
   );
