@@ -7,8 +7,10 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
-import { Calendar, Clock, Image as ImageIcon } from 'lucide-react';
+import { Calendar, Clock, Image as ImageIcon, AlertCircle } from 'lucide-react';
 import { MediaPicker } from '@/components/media/MediaPicker';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { toast } from 'sonner';
 
 interface EventEditorProps {
   event?: CalendarEvent | null;
@@ -17,6 +19,9 @@ interface EventEditorProps {
   onSave: (eventData: Omit<CalendarEvent, 'id' | 'created_at'>) => Promise<void>;
 }
 
+const DRAFT_STORAGE_KEY = 'event-editor-draft';
+const EDITOR_STATE_KEY = 'event-editor-state';
+
 export const EventEditor: React.FC<EventEditorProps> = ({
   event,
   isOpen,
@@ -24,38 +29,121 @@ export const EventEditor: React.FC<EventEditorProps> = ({
   onSave
 }) => {
   const [formData, setFormData] = useState({
-    title: event?.title || '',
-    start_time: event?.start_time ? new Date(event.start_time).toISOString().slice(0, 16) : '',
-    end_time: event?.end_time ? new Date(event.end_time).toISOString().slice(0, 16) : '',
-    location_name: event?.location_name || '',
-    location_map_url: event?.location_map_url || '',
-    feature_image_url: event?.feature_image_url || '',
-    short_description: event?.short_description || '',
-    full_description: event?.full_description || '',
-    event_host_name: event?.event_host_name || '',
-    event_host_contact: event?.event_host_contact || '',
-    is_private: event?.is_private || false,
-    allow_rsvp: event?.allow_rsvp || false,
-    allow_reminders: event?.allow_reminders || false,
-    allow_ics_download: event?.allow_ics_download ?? true,
-    allow_google_map_link: event?.allow_google_map_link ?? true,
+    title: '',
+    start_time: '',
+    end_time: '',
+    location_name: '',
+    location_map_url: '',
+    feature_image_url: '',
+    short_description: '',
+    full_description: '',
+    event_host_name: '',
+    event_host_contact: '',
+    is_private: false,
+    allow_rsvp: false,
+    allow_reminders: false,
+    allow_ics_download: true,
+    allow_google_map_link: true,
   });
 
   const [loading, setLoading] = useState(false);
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const [isMediaPickerOpen, setIsMediaPickerOpen] = useState(false);
+  const [hasDraftData, setHasDraftData] = useState(false);
+  const [showDraftAlert, setShowDraftAlert] = useState(false);
+
+  // Check for draft data on mount
+  useEffect(() => {
+    if (isOpen) {
+      const savedDraft = localStorage.getItem(DRAFT_STORAGE_KEY);
+      const savedState = localStorage.getItem(EDITOR_STATE_KEY);
+      
+      if (savedDraft && savedState && !event) {
+        const draftData = JSON.parse(savedDraft);
+        const stateData = JSON.parse(savedState);
+        
+        // Only show draft alert if we have meaningful data
+        if (draftData.title || draftData.short_description) {
+          setHasDraftData(true);
+          setShowDraftAlert(true);
+        }
+      } else if (event) {
+        // Populate with event data for editing
+        setFormData({
+          title: event.title || '',
+          start_time: event.start_time ? new Date(event.start_time).toISOString().slice(0, 16) : '',
+          end_time: event.end_time ? new Date(event.end_time).toISOString().slice(0, 16) : '',
+          location_name: event.location_name || '',
+          location_map_url: event.location_map_url || '',
+          feature_image_url: event.feature_image_url || '',
+          short_description: event.short_description || '',
+          full_description: event.full_description || '',
+          event_host_name: event.event_host_name || '',
+          event_host_contact: event.event_host_contact || '',
+          is_private: event.is_private || false,
+          allow_rsvp: event.allow_rsvp || false,
+          allow_reminders: event.allow_reminders || false,
+          allow_ics_download: event.allow_ics_download ?? true,
+          allow_google_map_link: event.allow_google_map_link ?? true,
+        });
+      }
+    }
+  }, [isOpen, event]);
+
+  // Auto-save draft every 2 seconds when there are changes
+  useEffect(() => {
+    if (!isOpen || event) return; // Don't save drafts when editing existing events
+    
+    const timeoutId = setTimeout(() => {
+      if (hasUnsavedChanges) {
+        localStorage.setItem(DRAFT_STORAGE_KEY, JSON.stringify(formData));
+        localStorage.setItem(EDITOR_STATE_KEY, JSON.stringify({ 
+          isCreating: true, 
+          timestamp: Date.now() 
+        }));
+      }
+    }, 2000);
+
+    return () => clearTimeout(timeoutId);
+  }, [formData, hasUnsavedChanges, isOpen, event]);
 
   // Track if form has been modified
   useEffect(() => {
     const isModified = formData.title !== (event?.title || '') ||
       formData.short_description !== (event?.short_description || '') ||
-      formData.full_description !== (event?.full_description || '');
+      formData.full_description !== (event?.full_description || '') ||
+      formData.location_name !== (event?.location_name || '') ||
+      formData.event_host_name !== (event?.event_host_name || '');
     setHasUnsavedChanges(isModified);
   }, [formData, event]);
 
+  const restoreDraft = () => {
+    const savedDraft = localStorage.getItem(DRAFT_STORAGE_KEY);
+    if (savedDraft) {
+      const draftData = JSON.parse(savedDraft);
+      setFormData(draftData);
+      setShowDraftAlert(false);
+      setHasDraftData(false);
+      toast.success('Draft restored');
+    }
+  };
+
+  const discardDraft = () => {
+    localStorage.removeItem(DRAFT_STORAGE_KEY);
+    localStorage.removeItem(EDITOR_STATE_KEY);
+    setShowDraftAlert(false);
+    setHasDraftData(false);
+    toast.info('Draft discarded');
+  };
+
+  const clearDraft = () => {
+    localStorage.removeItem(DRAFT_STORAGE_KEY);
+    localStorage.removeItem(EDITOR_STATE_KEY);
+  };
+
   // Prevent accidental closing when there are unsaved changes
   const handleCloseAttempt = (open: boolean) => {
-    if (!open && hasUnsavedChanges) {
+    if (!open && (hasUnsavedChanges || hasDraftData)) {
       const confirmClose = window.confirm('You have unsaved changes. Are you sure you want to close?');
       if (!confirmClose) {
         return; // Prevent closing
@@ -76,7 +164,9 @@ export const EventEditor: React.FC<EventEditorProps> = ({
         start_time: new Date(formData.start_time).toISOString(),
         end_time: new Date(formData.end_time).toISOString(),
       } as Omit<CalendarEvent, 'id' | 'created_at'>);
+      
       setHasUnsavedChanges(false);
+      clearDraft(); // Clear draft on successful save
       onClose();
     } catch (error) {
       console.error('Error saving event:', error);
@@ -85,8 +175,12 @@ export const EventEditor: React.FC<EventEditorProps> = ({
     }
   };
 
+  const handleInputChange = (field: string, value: any) => {
+    setFormData(prev => ({ ...prev, [field]: value }));
+  };
+
   const handleImageSelect = (imageUrl: string) => {
-    setFormData(prev => ({ ...prev, feature_image_url: imageUrl }));
+    handleInputChange('feature_image_url', imageUrl);
     setIsMediaPickerOpen(false);
   };
 
@@ -100,13 +194,30 @@ export const EventEditor: React.FC<EventEditorProps> = ({
           </DialogTitle>
         </DialogHeader>
 
+        {showDraftAlert && (
+          <Alert className="mb-4">
+            <AlertCircle className="h-4 w-4" />
+            <AlertDescription className="flex items-center justify-between">
+              <span>You have unsaved draft data. Would you like to restore it?</span>
+              <div className="flex gap-2 ml-4">
+                <Button variant="outline" size="sm" onClick={restoreDraft}>
+                  Restore
+                </Button>
+                <Button variant="ghost" size="sm" onClick={discardDraft}>
+                  Discard
+                </Button>
+              </div>
+            </AlertDescription>
+          </Alert>
+        )}
+
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
             <Label htmlFor="title">Event Title</Label>
             <Input
               id="title"
               value={formData.title}
-              onChange={(e) => setFormData(prev => ({ ...prev, title: e.target.value }))}
+              onChange={(e) => handleInputChange('title', e.target.value)}
               required
             />
           </div>
@@ -118,7 +229,7 @@ export const EventEditor: React.FC<EventEditorProps> = ({
                 id="start_time"
                 type="datetime-local"
                 value={formData.start_time}
-                onChange={(e) => setFormData(prev => ({ ...prev, start_time: e.target.value }))}
+                onChange={(e) => handleInputChange('start_time', e.target.value)}
                 required
               />
             </div>
@@ -128,7 +239,7 @@ export const EventEditor: React.FC<EventEditorProps> = ({
                 id="end_time"
                 type="datetime-local"
                 value={formData.end_time}
-                onChange={(e) => setFormData(prev => ({ ...prev, end_time: e.target.value }))}
+                onChange={(e) => handleInputChange('end_time', e.target.value)}
                 required
               />
             </div>
@@ -139,7 +250,7 @@ export const EventEditor: React.FC<EventEditorProps> = ({
             <Textarea
               id="short_description"
               value={formData.short_description}
-              onChange={(e) => setFormData(prev => ({ ...prev, short_description: e.target.value }))}
+              onChange={(e) => handleInputChange('short_description', e.target.value)}
               rows={2}
             />
           </div>
@@ -149,7 +260,7 @@ export const EventEditor: React.FC<EventEditorProps> = ({
             <Textarea
               id="full_description"
               value={formData.full_description}
-              onChange={(e) => setFormData(prev => ({ ...prev, full_description: e.target.value }))}
+              onChange={(e) => handleInputChange('full_description', e.target.value)}
               rows={4}
             />
           </div>
@@ -160,7 +271,7 @@ export const EventEditor: React.FC<EventEditorProps> = ({
               <Input
                 id="location_name"
                 value={formData.location_name}
-                onChange={(e) => setFormData(prev => ({ ...prev, location_name: e.target.value }))}
+                onChange={(e) => handleInputChange('location_name', e.target.value)}
               />
             </div>
             <div>
@@ -168,7 +279,7 @@ export const EventEditor: React.FC<EventEditorProps> = ({
               <Input
                 id="location_map_url"
                 value={formData.location_map_url}
-                onChange={(e) => setFormData(prev => ({ ...prev, location_map_url: e.target.value }))}
+                onChange={(e) => handleInputChange('location_map_url', e.target.value)}
                 placeholder="https://maps.google.com/..."
               />
             </div>
@@ -180,7 +291,7 @@ export const EventEditor: React.FC<EventEditorProps> = ({
               <Input
                 id="event_host_name"
                 value={formData.event_host_name}
-                onChange={(e) => setFormData(prev => ({ ...prev, event_host_name: e.target.value }))}
+                onChange={(e) => handleInputChange('event_host_name', e.target.value)}
               />
             </div>
             <div>
@@ -188,7 +299,7 @@ export const EventEditor: React.FC<EventEditorProps> = ({
               <Input
                 id="event_host_contact"
                 value={formData.event_host_contact}
-                onChange={(e) => setFormData(prev => ({ ...prev, event_host_contact: e.target.value }))}
+                onChange={(e) => handleInputChange('event_host_contact', e.target.value)}
                 placeholder="email or phone"
               />
             </div>
@@ -220,7 +331,7 @@ export const EventEditor: React.FC<EventEditorProps> = ({
                   type="button"
                   variant="ghost"
                   size="sm"
-                  onClick={() => setFormData(prev => ({ ...prev, feature_image_url: '' }))}
+                  onClick={() => handleInputChange('feature_image_url', '')}
                   className="w-full text-red-600 hover:text-red-700"
                 >
                   Remove Image
@@ -237,7 +348,7 @@ export const EventEditor: React.FC<EventEditorProps> = ({
               <Switch
                 id="is_private"
                 checked={formData.is_private}
-                onCheckedChange={(checked) => setFormData(prev => ({ ...prev, is_private: checked }))}
+                onCheckedChange={(checked) => handleInputChange('is_private', checked)}
               />
             </div>
 
@@ -246,7 +357,7 @@ export const EventEditor: React.FC<EventEditorProps> = ({
               <Switch
                 id="allow_rsvp"
                 checked={formData.allow_rsvp}
-                onCheckedChange={(checked) => setFormData(prev => ({ ...prev, allow_rsvp: checked }))}
+                onCheckedChange={(checked) => handleInputChange('allow_rsvp', checked)}
               />
             </div>
 
@@ -255,7 +366,7 @@ export const EventEditor: React.FC<EventEditorProps> = ({
               <Switch
                 id="allow_reminders"
                 checked={formData.allow_reminders}
-                onCheckedChange={(checked) => setFormData(prev => ({ ...prev, allow_reminders: checked }))}
+                onCheckedChange={(checked) => handleInputChange('allow_reminders', checked)}
               />
             </div>
 
@@ -264,7 +375,7 @@ export const EventEditor: React.FC<EventEditorProps> = ({
               <Switch
                 id="allow_ics_download"
                 checked={formData.allow_ics_download}
-                onCheckedChange={(checked) => setFormData(prev => ({ ...prev, allow_ics_download: checked }))}
+                onCheckedChange={(checked) => handleInputChange('allow_ics_download', checked)}
               />
             </div>
 
@@ -273,7 +384,7 @@ export const EventEditor: React.FC<EventEditorProps> = ({
               <Switch
                 id="allow_google_map_link"
                 checked={formData.allow_google_map_link}
-                onCheckedChange={(checked) => setFormData(prev => ({ ...prev, allow_google_map_link: checked }))}
+                onCheckedChange={(checked) => handleInputChange('allow_google_map_link', checked)}
               />
             </div>
           </div>

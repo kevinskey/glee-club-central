@@ -1,5 +1,5 @@
 
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { CalendarView } from '@/components/calendar/CalendarView';
 import { EventDialog } from '@/components/calendar/EventDialog';
 import { EventEditor } from '@/components/admin/EventEditor';
@@ -11,6 +11,8 @@ import { Calendar, Plus, Edit, Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
 import ErrorBoundary from '@/components/ErrorBoundary';
 
+const EDITOR_STATE_KEY = 'event-editor-state';
+
 export default function AdminCalendarPage() {
   const { events, loading, error, createEvent, updateEvent, deleteEvent, fetchEvents } = useCalendarEvents();
   const [selectedEvent, setSelectedEvent] = useState<CalendarEvent | null>(null);
@@ -20,6 +22,29 @@ export default function AdminCalendarPage() {
   
   // Use ref to track if we're intentionally closing the dialog
   const intentionalCloseRef = useRef(false);
+
+  // Restore editor state on page load
+  useEffect(() => {
+    const savedState = localStorage.getItem(EDITOR_STATE_KEY);
+    if (savedState) {
+      try {
+        const stateData = JSON.parse(savedState);
+        const timeDiff = Date.now() - stateData.timestamp;
+        
+        // Only restore if less than 1 hour old and was creating a new event
+        if (timeDiff < 3600000 && stateData.isCreating) {
+          setIsCreating(true);
+          toast.info('Restored your draft event form');
+        } else {
+          // Clean up old state
+          localStorage.removeItem(EDITOR_STATE_KEY);
+        }
+      } catch (error) {
+        console.error('Error restoring editor state:', error);
+        localStorage.removeItem(EDITOR_STATE_KEY);
+      }
+    }
+  }, []);
 
   const handleEventClick = (event: CalendarEvent) => {
     setSelectedEvent(event);
@@ -36,8 +61,9 @@ export default function AdminCalendarPage() {
         toast.success('Event created successfully');
       }
       
-      // Mark as intentional close
+      // Mark as intentional close and clean up state
       intentionalCloseRef.current = true;
+      localStorage.removeItem(EDITOR_STATE_KEY);
       setEditingEvent(null);
       setIsCreating(false);
     } catch (error) {
@@ -66,6 +92,12 @@ export default function AdminCalendarPage() {
     intentionalCloseRef.current = false;
     setIsCreating(true);
     setEditingEvent(null);
+    
+    // Save state to localStorage
+    localStorage.setItem(EDITOR_STATE_KEY, JSON.stringify({
+      isCreating: true,
+      timestamp: Date.now()
+    }));
   };
 
   const handleEditEvent = (event: CalendarEvent) => {
@@ -75,7 +107,8 @@ export default function AdminCalendarPage() {
   };
 
   const handleCloseEditor = () => {
-    // Only close if it's an intentional action
+    // Clean up state when closing
+    localStorage.removeItem(EDITOR_STATE_KEY);
     intentionalCloseRef.current = true;
     setIsCreating(false);
     setEditingEvent(null);
@@ -173,7 +206,7 @@ export default function AdminCalendarPage() {
           />
         )}
 
-        {/* Event Editor */}
+        {/* Event Editor with enhanced persistence */}
         <EventEditor
           event={editingEvent}
           isOpen={isCreating || !!editingEvent}
