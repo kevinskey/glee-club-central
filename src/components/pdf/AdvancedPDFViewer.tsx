@@ -17,19 +17,16 @@ import {
   Search,
   Bookmark,
   BookmarkCheck,
-  Palette,
-  Type,
-  Eraser,
-  Eye,
-  EyeOff,
   Printer,
-  Calendar,
   Settings
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { usePDFAnnotations } from '@/hooks/usePDFAnnotations';
+import { AnnotationToolbar } from './AnnotationToolbar';
+import { AnnotationCanvas } from './AnnotationCanvas';
 
 // Set up PDF.js worker
 pdfjs.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.min.js`;
@@ -46,14 +43,6 @@ interface Bookmark {
   page_number: number;
   title: string;
   created_at: string;
-}
-
-interface Annotation {
-  id: string;
-  page_number: number;
-  annotation_type: string;
-  annotations: any[];
-  is_visible: boolean;
 }
 
 const AdvancedPDFViewer: React.FC<AdvancedPDFViewerProps> = ({ 
@@ -74,7 +63,6 @@ const AdvancedPDFViewer: React.FC<AdvancedPDFViewerProps> = ({
   
   // UI state
   const [showToolbar, setShowToolbar] = useState<boolean>(true);
-  const [showAnnotations, setShowAnnotations] = useState<boolean>(true);
   const [currentTool, setCurrentTool] = useState<string>('none');
   
   // Search state
@@ -82,22 +70,46 @@ const AdvancedPDFViewer: React.FC<AdvancedPDFViewerProps> = ({
   const [searchResults, setSearchResults] = useState<any[]>([]);
   const [currentSearchIndex, setCurrentSearchIndex] = useState<number>(0);
   
-  // Bookmarks and annotations
+  // Annotation state
+  const [currentColor, setCurrentColor] = useState<string>('#FF0000');
+  const [strokeWidth, setStrokeWidth] = useState<number>(2);
+  const [showAnnotations, setShowAnnotations] = useState<boolean>(true);
+  
+  // Bookmarks
   const [bookmarks, setBookmarks] = useState<Bookmark[]>([]);
-  const [annotations, setAnnotations] = useState<Annotation[]>([]);
   const [currentPageBookmarked, setCurrentPageBookmarked] = useState<boolean>(false);
   
   // Refs
   const viewerRef = useRef<HTMLDivElement>(null);
-  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const pageRef = useRef<HTMLDivElement>(null);
+  const [pageSize, setPageSize] = useState<{width: number, height: number}>({width: 0, height: 0});
 
-  // Load bookmarks and annotations
+  // Annotation hook
+  const {
+    currentPageAnnotations,
+    addAnnotation,
+    removeAnnotation,
+    undo,
+    redo,
+    clearPageAnnotations,
+    loadAnnotations,
+    loadPageAnnotations,
+    canUndo,
+    canRedo
+  } = usePDFAnnotations(sheetMusicId);
+
+  // Load data on mount
   useEffect(() => {
     if (user && sheetMusicId) {
       loadBookmarks();
       loadAnnotations();
     }
   }, [user, sheetMusicId]);
+
+  // Load page annotations when page changes
+  useEffect(() => {
+    loadPageAnnotations(pageNumber);
+  }, [pageNumber, loadPageAnnotations]);
 
   // Check if current page is bookmarked
   useEffect(() => {
@@ -121,12 +133,12 @@ const AdvancedPDFViewer: React.FC<AdvancedPDFViewerProps> = ({
           if (isFullscreen) {
             exitFullscreen();
           }
+          setCurrentTool('none');
           break;
         case 'f':
         case 'F':
           if (event.ctrlKey || event.metaKey) {
             event.preventDefault();
-            // Focus search input if it exists
             const searchInput = document.querySelector('input[placeholder*="Search"]') as HTMLInputElement;
             searchInput?.focus();
           }
@@ -148,6 +160,23 @@ const AdvancedPDFViewer: React.FC<AdvancedPDFViewerProps> = ({
     return () => document.removeEventListener('fullscreenchange', handleFullscreenChange);
   }, []);
 
+  // Update page size when page renders
+  useEffect(() => {
+    if (pageRef.current) {
+      const updateSize = () => {
+        const rect = pageRef.current?.getBoundingClientRect();
+        if (rect) {
+          setPageSize({ width: rect.width, height: rect.height });
+        }
+      };
+      
+      // Update on render and resize
+      updateSize();
+      window.addEventListener('resize', updateSize);
+      return () => window.removeEventListener('resize', updateSize);
+    }
+  }, [scale, pageNumber]);
+
   const loadBookmarks = async () => {
     if (!user) return;
     
@@ -163,23 +192,6 @@ const AdvancedPDFViewer: React.FC<AdvancedPDFViewerProps> = ({
       setBookmarks(data || []);
     } catch (error) {
       console.error('Error loading bookmarks:', error);
-    }
-  };
-
-  const loadAnnotations = async () => {
-    if (!user) return;
-    
-    try {
-      const { data, error } = await supabase
-        .from('pdf_annotations')
-        .select('*')
-        .eq('user_id', user.id)
-        .eq('sheet_music_id', sheetMusicId);
-
-      if (error) throw error;
-      setAnnotations(data || []);
-    } catch (error) {
-      console.error('Error loading annotations:', error);
     }
   };
 
@@ -269,6 +281,19 @@ const AdvancedPDFViewer: React.FC<AdvancedPDFViewerProps> = ({
     setPageNumber(bookmark.page_number);
   };
 
+  const handleAnnotationAdd = (annotation: any) => {
+    addAnnotation(annotation, pageNumber);
+  };
+
+  const handleSaveAnnotations = () => {
+    toast({ title: "Annotations saved" });
+  };
+
+  const handleClearAnnotations = () => {
+    clearPageAnnotations(pageNumber);
+    toast({ title: "Annotations cleared" });
+  };
+
   return (
     <div className={cn(
       "flex flex-col h-full bg-background",
@@ -301,7 +326,7 @@ const AdvancedPDFViewer: React.FC<AdvancedPDFViewerProps> = ({
         </div>
       )}
 
-      {/* Secondary Toolbar */}
+      {/* Navigation Toolbar */}
       {(showToolbar || !isFullscreen) && (
         <div className="flex items-center justify-between p-2 border-b bg-muted/30">
           {/* Navigation Controls */}
@@ -369,14 +394,6 @@ const AdvancedPDFViewer: React.FC<AdvancedPDFViewerProps> = ({
             >
               {currentPageBookmarked ? <BookmarkCheck className="h-4 w-4" /> : <Bookmark className="h-4 w-4" />}
             </Button>
-
-            <Button
-              variant={showAnnotations ? "default" : "outline"}
-              size="sm"
-              onClick={() => setShowAnnotations(!showAnnotations)}
-            >
-              {showAnnotations ? <Eye className="h-4 w-4" /> : <EyeOff className="h-4 w-4" />}
-            </Button>
           </div>
         </div>
       )}
@@ -417,12 +434,31 @@ const AdvancedPDFViewer: React.FC<AdvancedPDFViewerProps> = ({
         )}
       </div>
 
+      {/* Annotation Toolbar */}
+      <AnnotationToolbar
+        currentTool={currentTool}
+        onToolChange={setCurrentTool}
+        currentColor={currentColor}
+        onColorChange={setCurrentColor}
+        strokeWidth={strokeWidth}
+        onStrokeWidthChange={setStrokeWidth}
+        canUndo={canUndo}
+        canRedo={canRedo}
+        onUndo={() => undo(pageNumber)}
+        onRedo={() => redo(pageNumber)}
+        onSave={handleSaveAnnotations}
+        onClear={handleClearAnnotations}
+        showAnnotations={showAnnotations}
+        onToggleAnnotations={() => setShowAnnotations(!showAnnotations)}
+        className="border-b"
+      />
+
       {/* Main PDF Viewer */}
       <div className="flex-1 overflow-auto bg-gray-100 relative" ref={viewerRef}>
         <div className="flex justify-center p-4">
           <div className="relative">
             <Card className="shadow-lg">
-              <CardContent className="p-0 relative">
+              <CardContent className="p-0 relative" ref={pageRef}>
                 <Document
                   file={url}
                   onLoadSuccess={onDocumentLoadSuccess}
@@ -458,15 +494,18 @@ const AdvancedPDFViewer: React.FC<AdvancedPDFViewerProps> = ({
                 </Document>
                 
                 {/* Annotation Canvas Overlay */}
-                {showAnnotations && (
-                  <canvas
-                    ref={canvasRef}
-                    className="absolute top-0 left-0 pointer-events-none"
-                    style={{ 
-                      width: '100%',
-                      height: '100%',
-                      zIndex: 10
-                    }}
+                {pageSize.width > 0 && pageSize.height > 0 && (
+                  <AnnotationCanvas
+                    width={pageSize.width}
+                    height={pageSize.height}
+                    currentTool={currentTool}
+                    currentColor={currentColor}
+                    strokeWidth={strokeWidth}
+                    annotations={currentPageAnnotations}
+                    onAnnotationAdd={handleAnnotationAdd}
+                    showAnnotations={showAnnotations}
+                    scale={scale}
+                    className="absolute top-0 left-0"
                   />
                 )}
               </CardContent>
