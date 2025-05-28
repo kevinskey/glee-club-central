@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { PageHeader } from "@/components/ui/page-header";
@@ -10,6 +9,7 @@ import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { UploadSheetMusicModal } from "@/components/UploadSheetMusicModal";
 import { SetlistDrawer } from "@/components/setlist/SetlistDrawer";
+import { TodaysConcertButton } from "@/components/pdf/TodaysConcertButton";
 import { useAuth } from "@/contexts/AuthContext";
 import { PDFThumbnail } from "@/components/pdf/PDFThumbnail";
 import { PDFPreview } from "@/components/pdf/PDFPreview";
@@ -345,10 +345,11 @@ export default function SheetMusicPage() {
     <div className="container py-6">
       <PageHeader
         title="Sheet Music Library"
-        description="Access and view your sheet music collection with PDF previews"
+        description="Access and view your sheet music collection with advanced PDF viewing"
         icon={<FileText className="h-6 w-6" />}
         actions={
           <div className="flex gap-2">
+            <TodaysConcertButton />
             <Button
               onClick={() => setIsUploadModalOpen(true)}
               className="flex items-center gap-2"
@@ -367,10 +368,13 @@ export default function SheetMusicPage() {
           <p className="text-muted-foreground mb-4">
             {searchQuery ? "No files match your search criteria." : "Upload your first PDF to get started."}
           </p>
-          <Button onClick={() => setIsUploadModalOpen(true)}>
-            <Upload className="h-4 w-4 mr-2" />
-            Upload Sheet Music
-          </Button>
+          <div className="flex gap-2 justify-center">
+            <TodaysConcertButton />
+            <Button onClick={() => setIsUploadModalOpen(true)}>
+              <Upload className="h-4 w-4 mr-2" />
+              Upload Sheet Music
+            </Button>
+          </div>
         </div>
       ) : (
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
@@ -398,7 +402,7 @@ export default function SheetMusicPage() {
                 {/* Overlay with actions */}
                 <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-40 transition-all flex items-center justify-center opacity-0 group-hover:opacity-100">
                   <Button variant="secondary" size="sm">
-                    View PDF
+                    Open Advanced Viewer
                   </Button>
                 </div>
               </div>

@@ -515,25 +515,34 @@ export type Database = {
       }
       pdf_annotations: {
         Row: {
+          annotation_type: string | null
           annotations: Json
           created_at: string
           id: string
+          is_visible: boolean | null
+          page_number: number | null
           sheet_music_id: string
           updated_at: string
           user_id: string
         }
         Insert: {
+          annotation_type?: string | null
           annotations?: Json
           created_at?: string
           id?: string
+          is_visible?: boolean | null
+          page_number?: number | null
           sheet_music_id: string
           updated_at?: string
           user_id: string
         }
         Update: {
+          annotation_type?: string | null
           annotations?: Json
           created_at?: string
           id?: string
+          is_visible?: boolean | null
+          page_number?: number | null
           sheet_music_id?: string
           updated_at?: string
           user_id?: string
@@ -541,6 +550,41 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "pdf_annotations_sheet_music_id_fkey"
+            columns: ["sheet_music_id"]
+            isOneToOne: false
+            referencedRelation: "sheet_music"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      pdf_bookmarks: {
+        Row: {
+          created_at: string
+          id: string
+          page_number: number
+          sheet_music_id: string
+          title: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          page_number: number
+          sheet_music_id: string
+          title?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          page_number?: number
+          sheet_music_id?: string
+          title?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pdf_bookmarks_sheet_music_id_fkey"
             columns: ["sheet_music_id"]
             isOneToOne: false
             referencedRelation: "sheet_music"
@@ -789,6 +833,7 @@ export type Database = {
       }
       setlists: {
         Row: {
+          concert_date: string | null
           created_at: string
           id: string
           name: string
@@ -796,6 +841,7 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          concert_date?: string | null
           created_at?: string
           id?: string
           name: string
@@ -803,6 +849,7 @@ export type Database = {
           user_id: string
         }
         Update: {
+          concert_date?: string | null
           created_at?: string
           id?: string
           name?: string

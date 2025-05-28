@@ -1,9 +1,7 @@
 
 import React from 'react';
 import { useParams, useLocation, useNavigate } from 'react-router-dom';
-import { PageHeader } from '@/components/ui/page-header';
-import { FileText } from 'lucide-react';
-import EnhancedPDFViewer from '@/components/pdf/EnhancedPDFViewer';
+import AdvancedPDFViewer from '@/components/pdf/AdvancedPDFViewer';
 
 interface PDFViewerPageProps {
   // Any additional props can be added here
@@ -26,20 +24,13 @@ const PDFViewerPage: React.FC<PDFViewerPageProps> = () => {
   };
 
   return (
-    <div className="h-full flex flex-col">
-      <PageHeader
+    <div className="h-screen">
+      <AdvancedPDFViewer 
+        url={pdfInfo.file_url} 
         title={pdfInfo.title}
-        description="Sheet Music Viewer"
-        icon={<FileText className="h-6 w-6" />}
+        sheetMusicId={pdfInfo.id}
+        onBack={handleBack}
       />
-      
-      <div className="flex-1 mt-4">
-        <EnhancedPDFViewer 
-          url={pdfInfo.file_url} 
-          title={pdfInfo.title}
-          onBack={handleBack}
-        />
-      </div>
     </div>
   );
 };
