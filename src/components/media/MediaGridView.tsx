@@ -8,6 +8,7 @@ import { MediaType, getMediaType } from "@/utils/mediaUtils";
 import { Eye, Download, Trash2, FileText, Image, Music, Video, File } from "lucide-react";
 import { formatFileSize } from "@/utils/file-utils";
 import { format } from "date-fns";
+import { PDFThumbnail } from "@/components/pdf/PDFThumbnail";
 
 interface MediaGridViewProps {
   mediaFiles: MediaFile[];
@@ -46,6 +47,7 @@ export function MediaGridView({ mediaFiles, canEdit, canDelete, onDelete }: Medi
       {mediaFiles.map((file) => {
         const mediaType = getMediaType(file.file_type);
         const isImage = mediaType === "image";
+        const isPdf = mediaType === "pdf";
         
         return (
           <Card key={file.id} className="overflow-hidden group">
@@ -59,6 +61,13 @@ export function MediaGridView({ mediaFiles, canEdit, canDelete, onDelete }: Medi
                     onError={(e) => {
                       (e.target as HTMLImageElement).src = "/placeholder-image.svg";
                     }}
+                  />
+                ) : isPdf ? (
+                  <PDFThumbnail 
+                    url={file.file_url} 
+                    title={file.title}
+                    className="w-full h-full"
+                    aspectRatio={16/9}
                   />
                 ) : (
                   <div className="flex items-center justify-center w-full h-full">

@@ -6,6 +6,7 @@ import { Eye, Download, Trash2, FileText, Image, Music, Video, File } from "luci
 import { Button } from "@/components/ui/button";
 import { formatFileSize } from "@/utils/file-utils";
 import { format } from "date-fns";
+import { PDFThumbnail } from "@/components/pdf/PDFThumbnail";
 
 interface MediaListViewProps {
   mediaFiles: MediaFile[];
@@ -55,6 +56,7 @@ export function MediaListView({ mediaFiles, canEdit, canDelete, onDelete }: Medi
           {mediaFiles.map((file) => {
             const mediaType = getMediaType(file.file_type);
             const isImage = mediaType === "image";
+            const isPdf = mediaType === "pdf";
             
             return (
               <tr key={file.id} className="hover:bg-muted/30">
@@ -69,6 +71,13 @@ export function MediaListView({ mediaFiles, canEdit, canDelete, onDelete }: Medi
                           onError={(e) => {
                             (e.target as HTMLImageElement).src = "/placeholder-image.svg";
                           }}
+                        />
+                      ) : isPdf ? (
+                        <PDFThumbnail 
+                          url={file.file_url} 
+                          title={file.title}
+                          className="w-full h-full"
+                          aspectRatio={1}
                         />
                       ) : (
                         getMediaIcon(mediaType)
