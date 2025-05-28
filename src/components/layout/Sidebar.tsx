@@ -1,3 +1,4 @@
+
 import React from "react";
 import { Link, useLocation } from "react-router-dom";
 import { cn } from "@/lib/utils";
@@ -29,8 +30,13 @@ export function Sidebar({ className }: SidebarProps) {
   // Check if user is admin
   const isAdmin = profile?.is_super_admin || isAdminRole || isSuperAdmin;
   
-  // Base menu items that all users can see
+  // Base menu items that all users can see - moved Profile to top
   const baseMenuItems = [
+    {
+      title: "Profile",
+      href: "/dashboard/profile",
+      icon: User
+    },
     {
       title: "Sheet Music",
       href: "/dashboard/sheet-music",
@@ -60,11 +66,6 @@ export function Sidebar({ className }: SidebarProps) {
       title: "Attendance",
       href: "/dashboard/attendance",
       icon: ClipboardList
-    },
-    {
-      title: "Profile",
-      href: "/dashboard/profile",
-      icon: User
     }
   ];
 

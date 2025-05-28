@@ -14,6 +14,7 @@ import {
   FileAudio,
   Settings,
   Mic,
+  User,
 } from 'lucide-react';
 
 export function SidebarNavItems() {
@@ -48,6 +49,10 @@ export function SidebarNavItems() {
       <div className="px-3 py-2">
         <h3 className="mb-2 px-4 text-xs font-medium">Menu</h3>
         
+        <a href="/dashboard/profile" className={`flex items-center gap-3 rounded-md px-3 py-2 text-sm transition-colors ${isActive('/dashboard/profile') ? 'bg-accent text-accent-foreground' : 'hover:bg-accent hover:text-accent-foreground'}`}>
+          <User className="h-4 w-4" />
+          Profile
+        </a>
         <a href="/dashboard/sheet-music" className={`flex items-center gap-3 rounded-md px-3 py-2 text-sm transition-colors ${isActive('/dashboard/sheet-music') ? 'bg-accent text-accent-foreground' : 'hover:bg-accent hover:text-accent-foreground'}`}>
           <FileText className="h-4 w-4" />
           Sheet Music

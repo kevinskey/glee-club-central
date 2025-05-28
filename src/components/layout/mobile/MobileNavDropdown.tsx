@@ -24,13 +24,13 @@ export function MobileNavDropdown() {
   const navigate = useNavigate();
 
   const menuItems = [
+    { icon: User, label: "Profile", path: "/dashboard/profile" },
     { icon: Music, label: "Sheet Music", path: "/dashboard/sheet-music" },
     { icon: Mic, label: "Recordings", path: "/dashboard/recordings" },
     { icon: Mic, label: "Recording Studio", path: "/dashboard/recording-studio" },
     { icon: Bell, label: "Announcements", path: "/dashboard/announcements" },
     { icon: Archive, label: "Archives", path: "/dashboard/archives" },
     { icon: ClipboardList, label: "Attendance", path: "/dashboard/attendance" },
-    { icon: User, label: "Profile", path: "/dashboard/profile" },
   ];
 
   return (
@@ -51,7 +51,7 @@ export function MobileNavDropdown() {
               <item.icon className="mr-2 h-4 w-4" />
               {item.label}
             </DropdownMenuItem>
-            {index === 2 && <DropdownMenuSeparator />}
+            {index === 0 && <DropdownMenuSeparator />}
           </React.Fragment>
         ))}
       </DropdownMenuContent>
