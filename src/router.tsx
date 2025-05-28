@@ -21,7 +21,6 @@ import SheetMusicPage from './pages/SheetMusicPage';
 import PDFViewerPage from './pages/PDFViewerPage';
 import RecordingsPage from './pages/RecordingsPage';
 import RecordingStudioPage from './pages/recordings/RecordingStudioPage';
-import CalendarDashboard from './pages/dashboard/CalendarDashboard';
 import AnnouncementsPage from './pages/dashboard/AnnouncementsPage';
 import ArchivesPage from './pages/dashboard/ArchivesPage';
 import AttendancePage from './pages/dashboard/AttendancePage';
@@ -119,10 +118,6 @@ export const router = createBrowserRouter([
           {
             path: 'audio-management',
             element: <AudioManagementPage />,
-          },
-          {
-            path: 'calendar',
-            element: <CalendarDashboard />,
           },
           {
             path: 'announcements',

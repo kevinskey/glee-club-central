@@ -1,97 +1,111 @@
 
-import React from "react";
-import { Calendar, ArrowRight } from "lucide-react";
-import { Link } from "react-router-dom";
-import { useIsMobile } from "@/hooks/use-mobile";
-import { fetchUpcomingPerformances, PerformanceEvent } from "@/utils/supabase/calendar";
-import { useQuery } from "@tanstack/react-query";
-import { Button } from "@/components/ui/button";
-import {
-  Carousel,
-  CarouselContent,
-  CarouselItem,
-  CarouselNext,
-  CarouselPrevious,
-} from "@/components/ui/carousel";
+import React from 'react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { CalendarDays, MapPin, Clock } from 'lucide-react';
+
+// Sample events data since calendar functionality is removed
+const sampleEvents = [
+  {
+    id: '1',
+    title: 'Weekly Rehearsal',
+    type: 'rehearsal',
+    date: '2024-02-15',
+    time: '7:00 PM',
+    location: 'Music Building, Room 101',
+    description: 'Regular rehearsal for current repertoire'
+  },
+  {
+    id: '2',
+    title: 'Spring Concert',
+    type: 'concert',
+    date: '2024-04-20',
+    time: '7:30 PM',
+    location: 'Sisters Chapel',
+    description: 'Annual spring showcase performance'
+  },
+  {
+    id: '3',
+    title: 'Soprano Sectional',
+    type: 'sectional',
+    date: '2024-02-18',
+    time: '6:00 PM',
+    location: 'Music Building, Room 205',
+    description: 'Voice part rehearsal for sopranos'
+  }
+];
+
+const getEventTypeColor = (type: string) => {
+  switch (type) {
+    case 'concert':
+      return 'bg-glee-purple text-white';
+    case 'rehearsal':
+      return 'bg-glee-spelman text-white';
+    case 'sectional':
+      return 'bg-orange-500 text-white';
+    default:
+      return 'bg-gray-500 text-white';
+  }
+};
+
+const formatEventType = (type: string) => {
+  return type.charAt(0).toUpperCase() + type.slice(1);
+};
 
 export function EventsSlider() {
-  const isMobile = useIsMobile();
-  
-  // Use React Query to fetch upcoming events - removed the limit parameter
-  const { data: events = [], isLoading } = useQuery({
-    queryKey: ['upcomingEvents'],
-    queryFn: async () => {
-      // Fetch all upcoming events without a limit
-      return fetchUpcomingPerformances();
-    }
-  });
-  
-  if (isLoading) {
-    return (
-      <div className="py-12 flex justify-center">
-        <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-glee-purple"></div>
-      </div>
-    );
-  }
-
-  // If no events, don't show the section
-  if (events.length === 0) {
-    return null;
-  }
-
   return (
-    <section className="bg-gray-50 dark:bg-gray-900 py-12 md:py-16">
-      <div className="container px-4 md:px-6">
-        <div className="flex items-center justify-between mb-8">
-          <div className="flex items-center gap-2">
-            <Calendar className="h-5 w-5 text-glee-spelman" />
-            <h2 className="text-2xl md:text-3xl font-playfair font-bold">Upcoming Performances</h2>
-          </div>
-          <Link to="/calendar">
-            <Button variant="ghost" className="text-glee-spelman hover:text-glee-spelman/90">
-              View All <ArrowRight className="ml-1 h-4 w-4" />
-            </Button>
-          </Link>
+    <section className="py-16 bg-gray-50">
+      <div className="container mx-auto px-4">
+        <div className="text-center mb-12">
+          <h2 className="text-3xl md:text-4xl font-bold text-glee-purple mb-4">
+            Upcoming Events
+          </h2>
+          <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+            Stay updated with our rehearsals, concerts, and special events
+          </p>
         </div>
-
-        <Carousel
-          opts={{ loop: true, align: "center" }}
-          className="w-full"
-        >
-          <CarouselContent className="-ml-2 md:-ml-4">
-            {events.map((event) => (
-              <CarouselItem key={event.id} className="pl-2 md:pl-4 basis-full sm:basis-1/2 lg:basis-1/3">
-                <Link to={`/calendar?event=${event.id}`} className="h-full">
-                  <div className="h-full overflow-hidden rounded-lg bg-white dark:bg-gray-800 shadow-md hover:shadow-lg transition-shadow duration-300">
-                    <div className={`${isMobile ? 'h-36' : 'h-48'} bg-muted relative`}>
-                      {event.image ? (
-                        <img
-                          src={event.image}
-                          alt={event.title}
-                          className="w-full h-full object-cover"
-                        />
-                      ) : (
-                        <div className="w-full h-full bg-gradient-to-r from-glee-spelman/20 to-glee-spelman/10 flex items-center justify-center">
-                          <Calendar className="h-12 w-12 text-glee-spelman/40" />
-                        </div>
-                      )}
-                      <div className="absolute bottom-0 w-full p-3 md:p-4 bg-gradient-to-t from-black/60 to-transparent">
-                        <h3 className="text-lg md:text-xl font-bold text-white">{event.title}</h3>
-                      </div>
-                    </div>
-                    <div className="p-4">
-                      <p className="font-medium">{event.date}</p>
-                      <p className="text-sm text-gray-500 dark:text-gray-400 mb-2">{event.location}</p>
-                      <p className="text-sm text-gray-500 dark:text-gray-400 line-clamp-2">{event.description}</p>
-                    </div>
-                  </div>
-                </Link>
-              </CarouselItem>
-            ))}
-          </CarouselContent>
-          <CarouselPrevious className="hidden md:flex -left-12" />
-          <CarouselNext className="hidden md:flex -right-12" />
-        </Carousel>
+        
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+          {sampleEvents.map((event) => (
+            <Card key={event.id} className="hover:shadow-lg transition-shadow">
+              <CardHeader>
+                <div className="flex justify-between items-start">
+                  <CardTitle className="text-xl text-glee-purple">
+                    {event.title}
+                  </CardTitle>
+                  <Badge className={getEventTypeColor(event.type)}>
+                    {formatEventType(event.type)}
+                  </Badge>
+                </div>
+              </CardHeader>
+              
+              <CardContent className="space-y-3">
+                <div className="flex items-center text-gray-600">
+                  <CalendarDays className="h-4 w-4 mr-2" />
+                  <span>{new Date(event.date).toLocaleDateString('en-US', { 
+                    weekday: 'short', 
+                    month: 'short', 
+                    day: 'numeric' 
+                  })}</span>
+                </div>
+                
+                <div className="flex items-center text-gray-600">
+                  <Clock className="h-4 w-4 mr-2" />
+                  <span>{event.time}</span>
+                </div>
+                
+                <div className="flex items-center text-gray-600">
+                  <MapPin className="h-4 w-4 mr-2" />
+                  <span>{event.location}</span>
+                </div>
+                
+                <p className="text-gray-700 text-sm">
+                  {event.description}
+                </p>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
       </div>
     </section>
   );

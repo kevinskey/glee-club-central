@@ -1,136 +1,104 @@
 
-import React, { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
-import {
-  Carousel,
-  CarouselContent,
-  CarouselItem,
-  CarouselNext,
-  CarouselPrevious,
-} from "@/components/ui/carousel";
-import { Button } from "@/components/ui/button";
-import { Calendar, MapPin, ChevronRight } from "lucide-react";
-import { format } from "date-fns";
-import { getPerformanceEvents } from "@/utils/performanceSync";
-import { CalendarEvent } from "@/types/calendar";
-import { ResponsiveSection } from "@/components/ui/responsive-section";
+import React from 'react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { CalendarDays, MapPin, Clock, Music } from 'lucide-react';
+import { Link } from 'react-router-dom';
+
+// Sample concerts data since calendar functionality is removed
+const sampleConcerts = [
+  {
+    id: '1',
+    title: 'Spring Gala Concert',
+    date: '2024-04-15',
+    time: '7:00 PM',
+    location: 'Sisters Chapel, Spelman College',
+    description: 'Our annual spring showcase featuring classical and contemporary pieces.',
+    image_url: '/lovable-uploads/spelman-concert-1.jpg'
+  },
+  {
+    id: '2',
+    title: 'Homecoming Performance',
+    date: '2024-10-20',
+    time: '6:30 PM',
+    location: 'Manley College Center',
+    description: 'Celebrating Spelman traditions with beloved alumni favorites.',
+    image_url: '/lovable-uploads/spelman-concert-2.jpg'
+  },
+  {
+    id: '3',
+    title: 'Holiday Concert',
+    date: '2024-12-10',
+    time: '7:30 PM',
+    location: 'Sisters Chapel, Spelman College',
+    description: 'Festive holiday melodies to celebrate the season.',
+    image_url: '/lovable-uploads/spelman-concert-3.jpg'
+  }
+];
 
 export function ConcertsScroller() {
-  const [events, setEvents] = useState<CalendarEvent[]>([]);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    const fetchEvents = async () => {
-      try {
-        const concerts = await getPerformanceEvents(5);
-        setEvents(concerts);
-      } catch (error) {
-        console.error("Error fetching concert events:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchEvents();
-  }, []);
-
-  if (loading) {
-    return (
-      <ResponsiveSection className="py-8">
-        <h2 className="text-2xl font-bold mb-6 text-center">Upcoming Concerts</h2>
-        <div className="w-full flex justify-center">
-          <div className="w-full max-w-4xl animate-pulse">
-            <div className="flex gap-4 overflow-hidden">
-              {[1, 2, 3].map((i) => (
-                <div key={i} className="min-w-[300px] h-[250px] bg-gray-200 dark:bg-gray-800 rounded-lg"></div>
-              ))}
-            </div>
-          </div>
-        </div>
-      </ResponsiveSection>
-    );
-  }
-
-  if (events.length === 0) {
-    return null; // Don't show section if no events
-  }
-
   return (
-    <ResponsiveSection className="py-8 bg-gray-50 dark:bg-gray-900/50">
-      <h2 className="text-2xl font-bold mb-6 text-center">Upcoming Concerts</h2>
-      
-      <Carousel
-        opts={{
-          align: "start",
-          loop: events.length > 3,
-        }}
-        className="w-full"
-      >
-        <CarouselContent className="-ml-2 md:-ml-4">
-          {events.map((event) => (
-            <CarouselItem 
-              key={event.id} 
-              className="pl-2 md:pl-4 sm:basis-1/2 md:basis-1/3 lg:basis-1/4"
-            >
-              <div className="bg-background rounded-lg overflow-hidden border border-border h-full flex flex-col">
-                {event.image_url ? (
-                  <div className="w-full aspect-video overflow-hidden">
-                    <img 
-                      src={event.image_url} 
-                      alt={event.title} 
-                      className="w-full h-full object-cover"
-                      onError={(e) => {
-                        (e.target as HTMLImageElement).src = "https://via.placeholder.com/300x200?text=Concert";
-                      }}
-                    />
-                  </div>
-                ) : (
-                  <div className="w-full aspect-video bg-glee-purple/20 flex items-center justify-center text-glee-purple">
-                    <Calendar className="w-10 h-10" />
-                  </div>
-                )}
-                
-                <div className="p-4 flex-1 flex flex-col">
-                  <h3 className="font-bold text-lg mb-2 line-clamp-2">{event.title}</h3>
-                  
-                  <div className="space-y-2 mt-2 mb-4 flex-1">
-                    <div className="flex items-center text-sm text-muted-foreground">
-                      <Calendar className="w-4 h-4 mr-2" />
-                      {format(new Date(event.start), "MMMM d, yyyy")}
-                      {event.allDay ? "" : (typeof event.start === 'string' ? 
-                        ` at ${event.start.split('T')[1]?.substring(0, 5) || ''}` : 
-                        ` at ${format(event.start, "HH:mm")}`)}
-                    </div>
-                    
-                    {event.location && (
-                      <div className="flex items-center text-sm text-muted-foreground">
-                        <MapPin className="w-4 h-4 mr-2" />
-                        {event.location}
-                      </div>
-                    )}
-                  </div>
-                  
-                  <Button variant="outline" size="sm" asChild className="mt-auto">
-                    <Link to={`/events`}>
-                      View Details <ChevronRight className="ml-1 h-4 w-4" />
-                    </Link>
-                  </Button>
-                </div>
+    <section className="py-16 bg-gradient-to-br from-white to-glee-purple/5">
+      <div className="container mx-auto px-4">
+        <div className="text-center mb-12">
+          <h2 className="text-3xl md:text-4xl font-bold text-glee-purple mb-4">
+            Upcoming Concerts
+          </h2>
+          <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+            Experience the beauty and power of our performances throughout the year
+          </p>
+        </div>
+        
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 mb-12">
+          {sampleConcerts.map((concert) => (
+            <Card key={concert.id} className="overflow-hidden hover:shadow-lg transition-shadow">
+              <div className="aspect-video bg-gradient-to-br from-glee-purple/20 to-glee-spelman/20 flex items-center justify-center">
+                <Music className="h-12 w-12 text-glee-purple/60" />
               </div>
-            </CarouselItem>
+              
+              <CardHeader>
+                <CardTitle className="text-xl text-glee-purple">
+                  {concert.title}
+                </CardTitle>
+              </CardHeader>
+              
+              <CardContent className="space-y-3">
+                <div className="flex items-center text-gray-600">
+                  <CalendarDays className="h-4 w-4 mr-2" />
+                  <span>{new Date(concert.date).toLocaleDateString('en-US', { 
+                    weekday: 'long', 
+                    year: 'numeric', 
+                    month: 'long', 
+                    day: 'numeric' 
+                  })}</span>
+                </div>
+                
+                <div className="flex items-center text-gray-600">
+                  <Clock className="h-4 w-4 mr-2" />
+                  <span>{concert.time}</span>
+                </div>
+                
+                <div className="flex items-center text-gray-600">
+                  <MapPin className="h-4 w-4 mr-2" />
+                  <span>{concert.location}</span>
+                </div>
+                
+                <p className="text-gray-700 text-sm">
+                  {concert.description}
+                </p>
+              </CardContent>
+            </Card>
           ))}
-        </CarouselContent>
-        <CarouselPrevious className="hidden md:flex left-0 translate-x-0" />
-        <CarouselNext className="hidden md:flex right-0 translate-x-0" />
-      </Carousel>
-      
-      <div className="flex justify-center mt-6">
-        <Button asChild className="bg-glee-purple hover:bg-glee-purple/90">
-          <Link to="/events">
-            View All Performances <ChevronRight className="ml-1 h-4 w-4" />
+        </div>
+        
+        <div className="text-center">
+          <Link to="/contact">
+            <Button size="lg" className="bg-glee-spelman hover:bg-glee-spelman/90">
+              Get Performance Updates
+            </Button>
           </Link>
-        </Button>
+        </div>
       </div>
-    </ResponsiveSection>
+    </section>
   );
 }

@@ -1,115 +1,121 @@
 
-import React, { useEffect, useState } from "react";
-import { fetchPerformanceEvents, getPerformanceEvents } from "@/utils/performanceSync";
-import { CalendarEvent } from "@/types/calendar";
+import React from 'react';
+import { Card, CardContent } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Music, Calendar, Users, Award } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
-// Rename this interface to avoid name clash with the imported type
-interface PerformanceEventDisplay {
-  id: string;
-  title: string;
-  date: string | Date;
-  location?: string;
-  description?: string;
-  imageUrl?: string;
-}
-
-// Create or update the PerformanceEvent component
-const PerformanceEvent: React.FC<{ event: PerformanceEventDisplay }> = ({ event }) => {
-  const eventDate = new Date(event.date);
-  const formattedDate = eventDate.toLocaleDateString('en-US', {
-    weekday: 'long',
-    month: 'long',
-    day: 'numeric',
-    year: 'numeric'
-  });
-
-  return (
-    <div className="bg-white shadow-md rounded-lg overflow-hidden flex flex-col md:flex-row">
-      {event.imageUrl ? (
-        <div className="md:w-1/3">
-          <img 
-            src={event.imageUrl} 
-            alt={event.title} 
-            className="w-full h-48 md:h-full object-cover"
-          />
-        </div>
-      ) : null}
-      <div className={`p-6 ${event.imageUrl ? 'md:w-2/3' : 'w-full'}`}>
-        <h3 className="text-xl font-bold mb-2">{event.title}</h3>
-        <p className="text-gray-600 mb-3">{formattedDate}</p>
-        {event.location && (
-          <p className="text-gray-800 mb-3">
-            <strong>Location:</strong> {event.location}
-          </p>
-        )}
-        {event.description && (
-          <p className="text-gray-700">{event.description}</p>
-        )}
-      </div>
-    </div>
-  );
-};
-
-export const PerformanceSection: React.FC = () => {
-  const [performances, setPerformances] = useState<PerformanceEventDisplay[]>([]);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    const fetchPerformances = async () => {
-      try {
-        // Get performance events from our synchronization utility
-        const events = await getPerformanceEvents();
-        
-        // Convert from CalendarEvent to PerformanceEvent format
-        const performanceEvents: PerformanceEventDisplay[] = events.map(event => ({
-          id: event.id,
-          title: event.title,
-          date: event.start,
-          location: event.location,
-          description: event.description,
-          imageUrl: event.image_url,
-        }));
-        
-        setPerformances(performanceEvents);
-      } catch (error) {
-        console.error("Error fetching performances:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchPerformances();
-  }, []);
-
-  if (loading) {
-    return (
-      <div className="py-12">
-        <div className="container mx-auto px-4">
-          <h2 className="text-3xl font-bold text-center mb-8">Upcoming Performances</h2>
-          <div className="animate-pulse space-y-4">
-            {[1, 2, 3].map((i) => (
-              <div key={i} className="h-40 bg-gray-200 rounded-lg"></div>
-            ))}
-          </div>
-        </div>
-      </div>
-    );
+// Sample performance data since calendar functionality is removed
+const upcomingPerformances = [
+  {
+    id: '1',
+    title: 'Spring Gala Concert',
+    date: '2024-04-15',
+    venue: 'Sisters Chapel, Spelman College',
+    description: 'Our signature spring performance featuring classical and contemporary works.'
+  },
+  {
+    id: '2',
+    title: 'Community Outreach Concert',
+    date: '2024-05-20',
+    venue: 'Atlanta Symphony Hall',
+    description: 'Special community performance in partnership with local arts organizations.'
   }
+];
 
-  if (performances.length === 0) {
-    return null; // Don't show the section if there are no performances
+const stats = [
+  {
+    icon: <Users className="h-8 w-8 text-glee-purple" />,
+    value: '45+',
+    label: 'Active Members'
+  },
+  {
+    icon: <Calendar className="h-8 w-8 text-glee-spelman" />,
+    value: '143',
+    label: 'Years of Excellence'
+  },
+  {
+    icon: <Music className="h-8 w-8 text-glee-purple" />,
+    value: '20+',
+    label: 'Annual Performances'
+  },
+  {
+    icon: <Award className="h-8 w-8 text-glee-spelman" />,
+    value: '50+',
+    label: 'Awards & Honors'
   }
+];
 
+export function PerformanceSection() {
   return (
-    <div className="py-12 bg-gray-50">
+    <section className="py-16 bg-white">
       <div className="container mx-auto px-4">
-        <h2 className="text-3xl font-bold text-center mb-8">Upcoming Performances</h2>
-        <div className="space-y-6">
-          {performances.map((performance) => (
-            <PerformanceEvent key={performance.id} event={performance} />
+        {/* Stats Section */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-8 mb-16">
+          {stats.map((stat, index) => (
+            <div key={index} className="text-center">
+              <div className="flex justify-center mb-3">
+                {stat.icon}
+              </div>
+              <div className="text-3xl font-bold text-gray-900 mb-1">
+                {stat.value}
+              </div>
+              <div className="text-gray-600">
+                {stat.label}
+              </div>
+            </div>
           ))}
         </div>
+
+        {/* Upcoming Performances */}
+        <div className="text-center mb-12">
+          <h2 className="text-3xl md:text-4xl font-bold text-glee-purple mb-4">
+            Upcoming Performances
+          </h2>
+          <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+            Experience the artistry and excellence of the Spelman College Glee Club
+          </p>
+        </div>
+
+        <div className="grid md:grid-cols-2 gap-8 mb-12">
+          {upcomingPerformances.map((performance) => (
+            <Card key={performance.id} className="overflow-hidden hover:shadow-lg transition-shadow">
+              <CardContent className="p-6">
+                <div className="flex items-start justify-between mb-4">
+                  <div className="flex-1">
+                    <h3 className="text-xl font-semibold text-glee-purple mb-2">
+                      {performance.title}
+                    </h3>
+                    <div className="text-glee-spelman font-medium mb-1">
+                      {new Date(performance.date).toLocaleDateString('en-US', { 
+                        weekday: 'long', 
+                        year: 'numeric', 
+                        month: 'long', 
+                        day: 'numeric' 
+                      })}
+                    </div>
+                    <div className="text-gray-600 mb-3">
+                      {performance.venue}
+                    </div>
+                  </div>
+                  <Music className="h-8 w-8 text-glee-purple/30 flex-shrink-0" />
+                </div>
+                <p className="text-gray-700 mb-4">
+                  {performance.description}
+                </p>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+
+        <div className="text-center">
+          <Link to="/contact">
+            <Button size="lg" className="bg-glee-spelman hover:bg-glee-spelman/90">
+              Get Performance Updates
+            </Button>
+          </Link>
+        </div>
       </div>
-    </div>
+    </section>
   );
-};
+}
