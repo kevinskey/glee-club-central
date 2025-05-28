@@ -1,11 +1,10 @@
 
 import React from "react";
-import { Outlet } from "react-router-dom";
-import DashboardLayout from "./layouts/DashboardLayout";
+import { RouterProvider } from "react-router-dom";
+import { router } from "./router";
 
 function App() {
-  // App now simply returns the DashboardLayout, which handles routing internally
-  return <DashboardLayout />;
+  return <RouterProvider router={router} />;
 }
 
 export default App;

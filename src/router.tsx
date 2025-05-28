@@ -74,7 +74,7 @@ export const router = createBrowserRouter([
         path: '/role-dashboard',
         element: <RequireAuth><RoleDashboard /></RequireAuth>,
       },
-      // Dashboard routes with proper authentication
+      // Dashboard routes with proper authentication - MAIN DASHBOARD ROUTE
       {
         path: '/dashboard',
         element: <RequireAuth><DashboardLayout /></RequireAuth>,
