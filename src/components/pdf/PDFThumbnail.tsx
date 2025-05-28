@@ -69,16 +69,10 @@ export const PDFThumbnail = ({
                 width={undefined}
                 height={undefined}
                 scale={1}
-                className="overflow-hidden flex items-center justify-center"
+                className="overflow-hidden flex items-center justify-center max-w-full max-h-full"
                 renderTextLayer={false}
                 renderAnnotationLayer={false}
                 loading={null}
-                style={{
-                  maxWidth: '100%',
-                  maxHeight: '100%',
-                  objectFit: 'contain',
-                  objectPosition: 'center'
-                }}
               />
             </Document>
           </div>
