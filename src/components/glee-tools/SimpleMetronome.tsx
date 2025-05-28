@@ -141,6 +141,7 @@ export function SimpleMetronome({ onClose }: SimpleMetronomeProps) {
     }
   }, [bpm]);
 
+  // Show loading state
   if (!isReady) {
     return (
       <Card className="w-full max-w-md mx-auto">

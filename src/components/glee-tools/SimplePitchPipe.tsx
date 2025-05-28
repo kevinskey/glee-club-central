@@ -107,6 +107,7 @@ export function SimplePitchPipe({ onClose }: SimplePitchPipeProps) {
     }
   }, []);
 
+  // Show loading state
   if (!isReady) {
     return (
       <Card className="w-full max-w-md mx-auto">
