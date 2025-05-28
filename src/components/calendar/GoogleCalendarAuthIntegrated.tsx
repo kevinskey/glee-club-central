@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -21,11 +22,12 @@ export function GoogleCalendarAuthIntegrated({ onConnectionChange }: GoogleCalen
     try {
       // First check if we have a stored Google token
       const storedToken = localStorage.getItem('google_access_token');
-      console.log("Stored Google token found:", !!storedToken);
-      setGoogleToken(storedToken);
-
+      console.log("Checking stored Google token:", !!storedToken);
+      
       if (storedToken) {
-        // Test the stored token by making a direct API call
+        setGoogleToken(storedToken);
+        
+        // Test the stored token by making a direct API call to Google
         try {
           const response = await fetch('https://www.googleapis.com/calendar/v3/users/me/calendarList', {
             headers: {
@@ -241,6 +243,7 @@ export function GoogleCalendarAuthIntegrated({ onConnectionChange }: GoogleCalen
   };
 
   const callSupabaseWithStoredToken = async () => {
+    // Get the current token from state or localStorage
     const token = googleToken || localStorage.getItem('google_access_token');
     console.log("Attempting to call Supabase with token:", !!token);
     
@@ -253,6 +256,7 @@ export function GoogleCalendarAuthIntegrated({ onConnectionChange }: GoogleCalen
       setIsLoading(true);
       console.log("Calling Supabase with stored Google token...");
       
+      // Call the edge function with the Google token as Authorization header
       const { data, error } = await supabase.functions.invoke('google-calendar-auth', {
         body: { action: 'list_calendars' },
         headers: {
@@ -293,7 +297,10 @@ export function GoogleCalendarAuthIntegrated({ onConnectionChange }: GoogleCalen
     const checkAuth = async () => {
       // Check for stored Google token first
       const storedToken = localStorage.getItem('google_access_token');
-      setGoogleToken(storedToken);
+      if (storedToken) {
+        setGoogleToken(storedToken);
+        console.log("Found stored Google token on component mount");
+      }
       
       const { data: { session } } = await supabase.auth.getSession();
       if (session?.access_token || storedToken) {
