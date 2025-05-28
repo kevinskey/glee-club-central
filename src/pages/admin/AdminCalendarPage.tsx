@@ -9,6 +9,7 @@ import { PageHeader } from '@/components/ui/page-header';
 import { Button } from '@/components/ui/button';
 import { Calendar, Plus, Edit, Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
+import ErrorBoundary from '@/components/ErrorBoundary';
 
 export default function AdminCalendarPage() {
   const { events, loading, error, createEvent, updateEvent, deleteEvent } = useCalendarEvents();
@@ -53,99 +54,114 @@ export default function AdminCalendarPage() {
     }
   };
 
+  const handleCreateNew = () => {
+    setIsCreating(true);
+    setEditingEvent(null);
+  };
+
   if (loading) {
     return (
-      <div className="container mx-auto p-6">
-        <PageHeader
-          title="Calendar Management"
-          description="Manage all events and calendar settings"
-          icon={<Calendar className="h-6 w-6" />}
-        />
-        <div className="flex items-center justify-center h-64">
-          <div className="text-muted-foreground">Loading calendar...</div>
+      <ErrorBoundary>
+        <div className="container mx-auto p-6">
+          <PageHeader
+            title="Calendar Management"
+            description="Manage all events and calendar settings"
+            icon={<Calendar className="h-6 w-6" />}
+          />
+          <div className="flex items-center justify-center h-64">
+            <div className="text-muted-foreground">Loading calendar...</div>
+          </div>
         </div>
-      </div>
+      </ErrorBoundary>
     );
   }
 
   if (error) {
     return (
-      <div className="container mx-auto p-6">
-        <PageHeader
-          title="Calendar Management"
-          description="Manage all events and calendar settings"
-          icon={<Calendar className="h-6 w-6" />}
-        />
-        <div className="flex items-center justify-center h-64">
-          <div className="text-red-600">Error loading calendar: {error}</div>
+      <ErrorBoundary>
+        <div className="container mx-auto p-6">
+          <PageHeader
+            title="Calendar Management"
+            description="Manage all events and calendar settings"
+            icon={<Calendar className="h-6 w-6" />}
+          />
+          <div className="flex flex-col items-center justify-center h-64 space-y-4">
+            <div className="text-red-600">Error loading calendar: {error}</div>
+            <Button onClick={() => window.location.reload()}>
+              Retry
+            </Button>
+          </div>
         </div>
-      </div>
+      </ErrorBoundary>
     );
   }
 
   return (
-    <div className="container mx-auto p-6 space-y-6">
-      <PageHeader
-        title="Calendar Management"
-        description="Manage all events and calendar settings"
-        icon={<Calendar className="h-6 w-6" />}
-        actions={
-          <Button onClick={() => setIsCreating(true)}>
-            <Plus className="h-4 w-4 mr-2" />
-            Create Event
-          </Button>
-        }
-      />
+    <ErrorBoundary>
+      <div className="container mx-auto p-6 space-y-6">
+        <PageHeader
+          title="Calendar Management"
+          description="Manage all events and calendar settings"
+          icon={<Calendar className="h-6 w-6" />}
+          actions={
+            <Button onClick={handleCreateNew}>
+              <Plus className="h-4 w-4 mr-2" />
+              Create Event
+            </Button>
+          }
+        />
 
-      <CalendarView
-        events={events}
-        onEventClick={handleEventClick}
-        showPrivateEvents={true}
-      />
+        <CalendarView
+          events={events}
+          onEventClick={handleEventClick}
+          showPrivateEvents={true}
+        />
 
-      {/* Event Details Dialog with Admin Actions */}
-      <EventDialog
-        event={selectedEvent}
-        isOpen={isDialogOpen}
-        onClose={() => {
-          setIsDialogOpen(false);
-          setSelectedEvent(null);
-        }}
-        canRSVP={false}
-      />
-
-      {selectedEvent && isDialogOpen && (
-        <div className="fixed bottom-4 right-4 flex gap-2 z-50">
-          <Button
-            variant="outline"
-            onClick={() => {
-              setEditingEvent(selectedEvent);
+        {/* Event Details Dialog with Admin Actions */}
+        {selectedEvent && (
+          <EventDialog
+            event={selectedEvent}
+            isOpen={isDialogOpen}
+            onClose={() => {
               setIsDialogOpen(false);
+              setSelectedEvent(null);
             }}
-          >
-            <Edit className="h-4 w-4 mr-2" />
-            Edit
-          </Button>
-          <Button
-            variant="destructive"
-            onClick={() => handleDeleteEvent(selectedEvent)}
-          >
-            <Trash2 className="h-4 w-4 mr-2" />
-            Delete
-          </Button>
-        </div>
-      )}
+            canRSVP={false}
+            adminActions={
+              <div className="flex gap-2 mt-4">
+                <Button
+                  variant="outline"
+                  onClick={() => {
+                    setEditingEvent(selectedEvent);
+                    setIsDialogOpen(false);
+                  }}
+                >
+                  <Edit className="h-4 w-4 mr-2" />
+                  Edit
+                </Button>
+                <Button
+                  variant="destructive"
+                  onClick={() => handleDeleteEvent(selectedEvent)}
+                >
+                  <Trash2 className="h-4 w-4 mr-2" />
+                  Delete
+                </Button>
+              </div>
+            }
+          />
+        )}
 
-      {/* Event Editor */}
-      <EventEditor
-        event={editingEvent}
-        isOpen={isCreating || !!editingEvent}
-        onClose={() => {
-          setIsCreating(false);
-          setEditingEvent(null);
-        }}
-        onSave={handleSaveEvent}
-      />
-    </div>
+        {/* Event Editor */}
+        <EventEditor
+          event={editingEvent}
+          isOpen={isCreating || !!editingEvent}
+          onClose={() => {
+            setIsCreating(false);
+            setEditingEvent(null);
+          }}
+          onSave={handleSaveEvent}
+        />
+      </div>
+    </ErrorBoundary>
   );
 }
