@@ -1,9 +1,10 @@
+
 import React, { useState } from 'react';
 import { CalendarEvent } from '@/types/calendar';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ChevronLeft, ChevronRight, Calendar, MapPin, Clock, Users } from 'lucide-react';
-import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameMonth, isSameDay, addMonths, subMonths, isToday } from 'date-fns';
+import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameMonth, isSameDay, addMonths, subMonths, isToday, startOfDay } from 'date-fns';
 
 interface CalendarViewProps {
   events: CalendarEvent[];
@@ -16,7 +17,8 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
   onEventClick, 
   showPrivateEvents = false 
 }) => {
-  const [currentDate, setCurrentDate] = useState(new Date());
+  // Initialize with today's date properly
+  const [currentDate, setCurrentDate] = useState(startOfDay(new Date()));
   const [view, setView] = useState<'month' | 'list'>('month');
 
   const monthStart = startOfMonth(currentDate);
@@ -41,7 +43,7 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
   };
 
   const goToToday = () => {
-    setCurrentDate(new Date());
+    setCurrentDate(startOfDay(new Date()));
   };
 
   return (
