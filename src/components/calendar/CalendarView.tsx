@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { CalendarEvent } from '@/types/calendar';
 import { Button } from '@/components/ui/button';
@@ -20,6 +19,7 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
   // Ensure we're using the correct current date - May 28, 2025 (Wednesday)
   const today = new Date(2025, 4, 28); // Month is 0-indexed, so 4 = May
   const [currentDate, setCurrentDate] = useState(startOfDay(today));
+  const [selectedDate, setSelectedDate] = useState<Date | null>(startOfDay(today));
   const [view, setView] = useState<'month' | 'list'>('month');
 
   const monthStart = startOfMonth(currentDate);
@@ -57,10 +57,71 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
 
   const goToToday = () => {
     setCurrentDate(startOfDay(today));
+    setSelectedDate(startOfDay(today));
   };
 
   const isCurrentDay = (date: Date) => {
     return isSameDay(date, today);
+  };
+
+  const isSelectedDay = (date: Date) => {
+    return selectedDate && isSameDay(date, selectedDate);
+  };
+
+  const handleDayClick = (date: Date) => {
+    const dayStartOfDay = startOfDay(date);
+    setSelectedDate(dayStartOfDay);
+    
+    // If clicking on a day from previous/next month, navigate to that month
+    if (!isSameMonth(date, currentDate)) {
+      setCurrentDate(dayStartOfDay);
+    }
+  };
+
+  const getDayClasses = (day: Date) => {
+    const isCurrentMonth = isSameMonth(day, currentDate);
+    const isTodayDate = isCurrentDay(day);
+    const isSelected = isSelectedDay(day);
+    
+    let classes = 'min-h-[80px] p-1 border rounded cursor-pointer transition-colors hover:bg-muted/30 ';
+    
+    if (isCurrentMonth) {
+      classes += 'bg-background ';
+    } else {
+      classes += 'bg-muted/50 ';
+    }
+    
+    if (isTodayDate) {
+      classes += 'ring-2 ring-orange-500 bg-orange-50 ';
+    }
+    
+    if (isSelected && !isTodayDate) {
+      classes += 'ring-2 ring-blue-500 bg-blue-50 ';
+    }
+    
+    return classes;
+  };
+
+  const getDayNumberClasses = (day: Date) => {
+    const isCurrentMonth = isSameMonth(day, currentDate);
+    const isTodayDate = isCurrentDay(day);
+    const isSelected = isSelectedDay(day);
+    
+    let classes = 'text-sm ';
+    
+    if (isCurrentMonth) {
+      classes += 'text-foreground ';
+    } else {
+      classes += 'text-muted-foreground ';
+    }
+    
+    if (isTodayDate) {
+      classes += 'font-bold text-orange-600 ';
+    } else if (isSelected) {
+      classes += 'font-bold text-blue-600 ';
+    }
+    
+    return classes;
   };
 
   return (
@@ -100,19 +161,14 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
             {/* Calendar days */}
             {calendarDays.map(day => {
               const dayEvents = getEventsForDate(day);
-              const isCurrentMonth = isSameMonth(day, currentDate);
-              const isTodayDate = isCurrentDay(day);
               
               return (
                 <div
                   key={day.toISOString()}
-                  className={`min-h-[80px] p-1 border rounded ${
-                    isCurrentMonth ? 'bg-background' : 'bg-muted/50'
-                  } ${isTodayDate ? 'ring-2 ring-orange-500 bg-orange-50' : ''}`}
+                  className={getDayClasses(day)}
+                  onClick={() => handleDayClick(day)}
                 >
-                  <div className={`text-sm ${
-                    isCurrentMonth ? 'text-foreground' : 'text-muted-foreground'
-                  } ${isTodayDate ? 'font-bold text-orange-600' : ''}`}>
+                  <div className={getDayNumberClasses(day)}>
                     {format(day, 'd')}
                   </div>
                   <div className="space-y-1">
@@ -122,7 +178,10 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
                         className={`text-xs p-1 rounded cursor-pointer truncate ${
                           event.is_private ? 'bg-orange-100 text-orange-800' : 'bg-blue-100 text-blue-800'
                         }`}
-                        onClick={() => onEventClick?.(event)}
+                        onClick={(e) => {
+                          e.stopPropagation(); // Prevent day selection when clicking event
+                          onEventClick?.(event);
+                        }}
                       >
                         {event.title}
                       </div>
