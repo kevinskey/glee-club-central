@@ -12,7 +12,8 @@ import {
   Mic,
   Home,
   Calendar,
-  LayoutDashboard
+  LayoutDashboard,
+  Library
 } from 'lucide-react';
 import { useRolePermissions } from '@/contexts/RolePermissionContext';
 import { useAuth } from '@/contexts/AuthContext';
@@ -65,6 +66,17 @@ export function DashboardNav({
         <Link to="/dashboard/sheet-music">
           <FileMusic className="h-5 w-5 mr-2" />
           {!isCollapsed && <span>Sheet Music</span>}
+        </Link>
+      </Button>
+
+      <Button
+        variant="ghost"
+        className={cn('justify-start', isCollapsed && 'justify-center')}
+        asChild
+      >
+        <Link to="/dashboard/media-library">
+          <Library className="h-5 w-5 mr-2" />
+          {!isCollapsed && <span>Media Library</span>}
         </Link>
       </Button>
 

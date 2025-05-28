@@ -1,3 +1,4 @@
+
 import React from "react";
 import { Link, useLocation } from "react-router-dom";
 import { cn } from "@/lib/utils";
@@ -14,7 +15,8 @@ import {
   Archive,
   ClipboardList,
   Calendar,
-  LayoutDashboard
+  LayoutDashboard,
+  Library
 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { usePermissions } from "@/hooks/usePermissions";
@@ -49,6 +51,11 @@ export function Sidebar({ className }: SidebarProps) {
       title: "Sheet Music",
       href: "/dashboard/sheet-music",
       icon: Music
+    },
+    {
+      title: "Media Library",
+      href: "/dashboard/media-library",
+      icon: Library
     },
     {
       title: "Recordings",

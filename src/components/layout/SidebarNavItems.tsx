@@ -15,6 +15,7 @@ import {
   Settings,
   Mic,
   User,
+  Library,
 } from 'lucide-react';
 
 export function SidebarNavItems() {
@@ -62,19 +63,19 @@ export function SidebarNavItems() {
           Recordings
         </a>
         
-        <a href="/dashboard/announcements" className={`flex items-center gap-3 rounded-md px-3 py-2 text-sm transition-colors ${isActive('/dashboard/announcements') ? 'bg-accent text-accent-foreground' : 'hover:bg-accent hover:text-accent-foreground'}`}>
-          <Bell className="h-4 w-4" />
-          Announcements
-        </a>
-        
         <a href="/dashboard/media-library" className={`flex items-center gap-3 rounded-md px-3 py-2 text-sm transition-colors ${isActive('/dashboard/media-library') ? 'bg-accent text-accent-foreground' : 'hover:bg-accent hover:text-accent-foreground'}`}>
-          <Music className="h-4 w-4" />
+          <Library className="h-4 w-4" />
           Media Library
           {totalCount > 0 && (
             <span className="ml-auto bg-primary/10 text-primary rounded-full px-2 py-0.5 text-xs">
               {totalCount}
             </span>
           )}
+        </a>
+        
+        <a href="/dashboard/announcements" className={`flex items-center gap-3 rounded-md px-3 py-2 text-sm transition-colors ${isActive('/dashboard/announcements') ? 'bg-accent text-accent-foreground' : 'hover:bg-accent hover:text-accent-foreground'}`}>
+          <Bell className="h-4 w-4" />
+          Announcements
         </a>
         
         <a href="/dashboard/archives" className={`flex items-center gap-3 rounded-md px-3 py-2 text-sm transition-colors ${isActive('/dashboard/archives') ? 'bg-accent text-accent-foreground' : 'hover:bg-accent hover:text-accent-foreground'}`}>
