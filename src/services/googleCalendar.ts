@@ -63,9 +63,9 @@ export const connectToGoogleCalendar = async (): Promise<string> => {
 
     console.log("User authenticated, requesting Google Calendar auth URL...");
 
-    // Call the edge function with proper formatting
+    // Call the edge function with the correct action name
     const { data, error } = await supabase.functions.invoke('google-calendar-auth', {
-      body: { action: 'get_auth_url' },
+      body: { action: 'generate_oauth_url' },
       headers: {
         'Authorization': `Bearer ${session.access_token}`,
         'Content-Type': 'application/json'
