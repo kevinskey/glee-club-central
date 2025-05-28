@@ -28,6 +28,9 @@ import AdminDashboardPage from './pages/dashboard/AdminDashboardPage';
 import MembersPage from './pages/members/MembersPage';
 import SettingsPage from './pages/settings/SettingsPage';
 import FinancesPage from './pages/dashboard/FinancesPage';
+import CalendarPage from './pages/CalendarPage';
+import AdminCalendarPage from './pages/admin/AdminCalendarPage';
+import { RoleBasedLayout } from './components/layout/RoleBasedLayout';
 
 // Create a properly structured router with all routes
 export const router = createBrowserRouter([
@@ -68,6 +71,17 @@ export const router = createBrowserRouter([
           },
         ],
       },
+      // Public calendar route
+      {
+        path: '/calendar',
+        element: <MainLayout />,
+        children: [
+          {
+            index: true,
+            element: <CalendarPage />,
+          },
+        ],
+      },
       // Role-based dashboard redirection for authenticated users
       {
         path: '/role-dashboard',
@@ -76,7 +90,7 @@ export const router = createBrowserRouter([
       // Dashboard routes with proper authentication - MAIN DASHBOARD ROUTE
       {
         path: '/dashboard',
-        element: <RequireAuth><DashboardLayout /></RequireAuth>,
+        element: <RoleBasedLayout requiredRole="member"><DashboardLayout /></RoleBasedLayout>,
         children: [
           {
             index: true,
@@ -131,20 +145,31 @@ export const router = createBrowserRouter([
             element: <AttendancePage />,
           },
           {
-            path: 'admin',
-            element: <RequireAuth requireAdmin={true}><AdminDashboardPage /></RequireAuth>,
-          },
-          {
-            path: 'admin/members',
-            element: <RequireAuth requireAdmin={true}><MembersPage /></RequireAuth>,
-          },
-          {
             path: 'finances',
-            element: <RequireAuth requireAdmin={true}><FinancesPage /></RequireAuth>,
+            element: <FinancesPage />,
+          },
+        ],
+      },
+      // Admin routes with role-based protection
+      {
+        path: '/admin',
+        element: <RoleBasedLayout requiredRole="admin"><DashboardLayout /></RoleBasedLayout>,
+        children: [
+          {
+            index: true,
+            element: <AdminDashboardPage />,
+          },
+          {
+            path: 'calendar',
+            element: <AdminCalendarPage />,
+          },
+          {
+            path: 'members',
+            element: <MembersPage />,
           },
           {
             path: 'settings',
-            element: <RequireAuth requireAdmin={true}><SettingsPage /></RequireAuth>,
+            element: <SettingsPage />,
           },
         ],
       },

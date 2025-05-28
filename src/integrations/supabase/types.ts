@@ -175,6 +175,104 @@ export type Database = {
           },
         ]
       }
+      event_rsvps: {
+        Row: {
+          created_at: string | null
+          event_id: string | null
+          id: string
+          status: string
+          updated_at: string | null
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          event_id?: string | null
+          id?: string
+          status: string
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          event_id?: string | null
+          id?: string
+          status?: string
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "event_rsvps_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "events"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      events: {
+        Row: {
+          allow_google_map_link: boolean | null
+          allow_ics_download: boolean | null
+          allow_reminders: boolean | null
+          allow_rsvp: boolean | null
+          created_at: string | null
+          created_by: string | null
+          end_time: string
+          event_host_contact: string | null
+          event_host_name: string | null
+          feature_image_url: string | null
+          full_description: string | null
+          id: string
+          is_private: boolean | null
+          location_map_url: string | null
+          location_name: string | null
+          short_description: string | null
+          start_time: string
+          title: string
+        }
+        Insert: {
+          allow_google_map_link?: boolean | null
+          allow_ics_download?: boolean | null
+          allow_reminders?: boolean | null
+          allow_rsvp?: boolean | null
+          created_at?: string | null
+          created_by?: string | null
+          end_time: string
+          event_host_contact?: string | null
+          event_host_name?: string | null
+          feature_image_url?: string | null
+          full_description?: string | null
+          id?: string
+          is_private?: boolean | null
+          location_map_url?: string | null
+          location_name?: string | null
+          short_description?: string | null
+          start_time: string
+          title: string
+        }
+        Update: {
+          allow_google_map_link?: boolean | null
+          allow_ics_download?: boolean | null
+          allow_reminders?: boolean | null
+          allow_rsvp?: boolean | null
+          created_at?: string | null
+          created_by?: string | null
+          end_time?: string
+          event_host_contact?: string | null
+          event_host_name?: string | null
+          feature_image_url?: string | null
+          full_description?: string | null
+          id?: string
+          is_private?: boolean | null
+          location_map_url?: string | null
+          location_name?: string | null
+          short_description?: string | null
+          start_time?: string
+          title?: string
+        }
+        Relationships: []
+      }
       media_library: {
         Row: {
           created_at: string
@@ -687,15 +785,7 @@ export type Database = {
           permission?: Database["public"]["Enums"]["permission_name"]
           role_id?: string | null
         }
-        Relationships: [
-          {
-            foreignKeyName: "role_permissions_role_id_fkey"
-            columns: ["role_id"]
-            isOneToOne: false
-            referencedRelation: "user_roles"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       setlists: {
         Row: {
@@ -790,6 +880,30 @@ export type Database = {
           position?: number | null
           updated_at?: string | null
           uploaded_by?: string | null
+        }
+        Relationships: []
+      }
+      site_settings: {
+        Row: {
+          id: string
+          key: string
+          updated_at: string | null
+          updated_by: string | null
+          value: Json | null
+        }
+        Insert: {
+          id?: string
+          key: string
+          updated_at?: string | null
+          updated_by?: string | null
+          value?: Json | null
+        }
+        Update: {
+          id?: string
+          key?: string
+          updated_at?: string | null
+          updated_by?: string | null
+          value?: Json | null
         }
         Relationships: []
       }
@@ -1030,19 +1144,19 @@ export type Database = {
       }
       user_roles: {
         Row: {
-          description: string | null
-          id: string
-          title: Database["public"]["Enums"]["user_title"]
+          created_at: string | null
+          role: string
+          user_id: string
         }
         Insert: {
-          description?: string | null
-          id?: string
-          title: Database["public"]["Enums"]["user_title"]
+          created_at?: string | null
+          role?: string
+          user_id: string
         }
         Update: {
-          description?: string | null
-          id?: string
-          title?: Database["public"]["Enums"]["user_title"]
+          created_at?: string | null
+          role?: string
+          user_id?: string
         }
         Relationships: []
       }
@@ -1130,6 +1244,10 @@ export type Database = {
           permission: string
           granted: boolean
         }[]
+      }
+      get_user_role: {
+        Args: { p_user_id: string }
+        Returns: string
       }
       handle_user_role: {
         Args: { p_user_id: string; p_role: string }
