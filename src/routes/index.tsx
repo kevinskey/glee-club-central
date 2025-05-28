@@ -11,7 +11,7 @@ import LoginPage from "@/pages/auth/LoginPage";
 import RegisterPage from "@/pages/RegisterPage";
 import ResetPasswordPage from "@/pages/ResetPasswordPage";
 import ForgotPasswordPage from "@/pages/ForgotPasswordPage";
-import DashboardPage from "@/pages/dashboard/DashboardPage";
+import MemberDashboardPage from "@/pages/dashboard/MemberDashboardPage";
 import AdministrationPage from "@/pages/AdministrationPage";
 import NotFoundPage from "@/pages/NotFoundPage";
 import { adminRoutes } from "@/routes/adminRoutes";
@@ -20,6 +20,7 @@ import RecordingStudioPage from "@/pages/recordings/RecordingStudioPage";
 import AudioManagementPage from "@/pages/audio-management/AudioManagementPage";
 import PracticePage from "@/pages/practice/PracticePage";
 import SheetMusicPage from "@/pages/SheetMusicPage";
+import { Navigate } from "react-router-dom";
 
 // Route definitions
 const routes: RouteObject[] = [
@@ -93,7 +94,11 @@ const routes: RouteObject[] = [
     children: [
       {
         path: "",
-        element: <DashboardPage />,
+        element: <Navigate to="/dashboard/member" replace />,
+      },
+      {
+        path: "member",
+        element: <MemberDashboardPage />,
       },
       // Base recordings route under dashboard
       {

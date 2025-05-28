@@ -1,7 +1,15 @@
 
 import React from "react";
 import { Link } from "react-router-dom";
-import { Event } from "@/pages/dashboard/DashboardPage";
+
+// Define Event interface locally since we removed DashboardPage
+export interface Event {
+  id: string;
+  title: string;
+  date: Date;
+  time: string;
+  location?: string;
+}
 
 interface DashboardEventsProps {
   events: Event[];
