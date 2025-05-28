@@ -189,33 +189,62 @@ serve(async (req) => {
       );
     }
     
-    // Parse request body safely with improved error handling
+    // Parse request body with improved handling
     let requestData: any = {};
     if (req.method === 'POST') {
       try {
-        const bodyText = await req.text();
-        console.log("Raw request body:", bodyText);
+        const contentType = req.headers.get('content-type') || '';
+        console.log("Content-Type:", contentType);
         
-        if (bodyText && bodyText.trim()) {
-          try {
-            requestData = JSON.parse(bodyText);
-            console.log("Parsed request data:", requestData);
-          } catch (parseError) {
-            console.error("JSON parsing failed:", parseError);
-            return new Response(
-              JSON.stringify({ 
-                error: 'Invalid JSON in request body',
-                received: bodyText 
-              }),
-              { 
-                status: 400, 
-                headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        if (contentType.includes('application/json')) {
+          const bodyText = await req.text();
+          console.log("Raw request body:", bodyText);
+          
+          if (bodyText && bodyText.trim()) {
+            try {
+              requestData = JSON.parse(bodyText);
+              console.log("Parsed request data:", requestData);
+            } catch (parseError) {
+              console.error("JSON parsing failed:", parseError);
+              // If JSON parsing fails, try to extract action from URL params as fallback
+              const urlParams = new URL(req.url).searchParams;
+              const actionFromParams = urlParams.get('action');
+              if (actionFromParams) {
+                requestData = { action: actionFromParams };
+                console.log("Using action from URL params:", requestData);
+              } else {
+                return new Response(
+                  JSON.stringify({ 
+                    error: 'Invalid JSON in request body',
+                    received: bodyText 
+                  }),
+                  { 
+                    status: 400, 
+                    headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+                  }
+                );
               }
-            );
+            }
+          } else {
+            console.log("Empty body received");
+            // Try to get action from URL params if body is empty
+            const urlParams = new URL(req.url).searchParams;
+            const actionFromParams = urlParams.get('action');
+            if (actionFromParams) {
+              requestData = { action: actionFromParams };
+              console.log("Using action from URL params:", requestData);
+            } else {
+              requestData = {};
+            }
           }
         } else {
-          console.log("Empty body received, using default empty object");
-          requestData = {};
+          // For non-JSON content types, try URL params
+          const urlParams = new URL(req.url).searchParams;
+          const actionFromParams = urlParams.get('action');
+          if (actionFromParams) {
+            requestData = { action: actionFromParams };
+            console.log("Using action from URL params for non-JSON:", requestData);
+          }
         }
       } catch (e) {
         console.error("Error reading request body:", e);
