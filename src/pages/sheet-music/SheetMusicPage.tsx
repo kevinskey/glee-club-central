@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { PageHeader } from "@/components/ui/page-header";
@@ -34,6 +33,8 @@ import { Badge } from "@/components/ui/badge";
 import { AdvancedSearch, SearchResultItem, SearchFilter } from "@/components/ui/advanced-search";
 import { useMediaLibrary } from "@/hooks/useMediaLibrary";
 import { getMediaType } from "@/utils/mediaUtils";
+import { SheetMusicFilters, FilterState } from "@/components/sheet-music/SheetMusicFilters";
+import { ActiveFilters } from "@/components/sheet-music/ActiveFilters";
 
 interface SheetMusic {
   id: string;
@@ -86,7 +87,13 @@ export default function SheetMusicPage() {
   
   // State for composers list (for search filters)
   const [composers, setComposers] = useState<string[]>([]);
-
+  
+  // State for filter state
+  const [filters, setFilters] = useState<FilterState>({
+    composers: [],
+    dateRange: {},
+  });
+  
   // Media library integration
   const {
     isLoading: mediaLoading,
@@ -245,6 +252,31 @@ export default function SheetMusicPage() {
       );
     }
     
+    // Apply composer filter
+    if (filters.composers.length > 0) {
+      result = result.filter(file => 
+        filters.composers.includes(file.composer)
+      );
+    }
+    
+    // Apply date range filter
+    if (filters.dateRange.from || filters.dateRange.to) {
+      result = result.filter(file => {
+        const fileDate = new Date(file.created_at);
+        const fromDate = filters.dateRange.from;
+        const toDate = filters.dateRange.to;
+        
+        if (fromDate && toDate) {
+          return fileDate >= fromDate && fileDate <= toDate;
+        } else if (fromDate) {
+          return fileDate >= fromDate;
+        } else if (toDate) {
+          return fileDate <= toDate;
+        }
+        return true;
+      });
+    }
+    
     // Apply search query filter
     if (searchQuery) {
       const query = searchQuery.toLowerCase();
@@ -276,7 +308,7 @@ export default function SheetMusicPage() {
     }
     
     setFilteredFiles(result);
-  }, [musicFiles, sortOrder, selectedSetlist, searchQuery]);
+  }, [musicFiles, sortOrder, selectedSetlist, searchQuery, filters]);
 
   // Handle search results
   const handleSearchResults = (results: SheetMusicSearchItem[]) => {
@@ -326,6 +358,18 @@ export default function SheetMusicPage() {
     toast({
       title: "Upload complete",
       description: "Your sheet music has been uploaded successfully",
+    });
+  };
+
+  // Add filter handlers
+  const handleFiltersChange = (newFilters: FilterState) => {
+    setFilters(newFilters);
+  };
+
+  const handleClearFilters = () => {
+    setFilters({
+      composers: [],
+      dateRange: {},
     });
   };
 
@@ -513,6 +557,13 @@ export default function SheetMusicPage() {
               <SelectItem value="composer">Composer A-Z</SelectItem>
             </SelectContent>
           </Select>
+
+          <SheetMusicFilters
+            availableComposers={composers}
+            filters={filters}
+            onFiltersChange={handleFiltersChange}
+            onClearFilters={handleClearFilters}
+          />
         </div>
 
         <div className="flex gap-1 bg-muted p-1 rounded-lg">
@@ -537,12 +588,26 @@ export default function SheetMusicPage() {
         </div>
       </div>
 
+      {/* Active Filters */}
+      <ActiveFilters
+        filters={filters}
+        onFiltersChange={handleFiltersChange}
+        onClearFilters={handleClearFilters}
+      />
+
+      {/* Add spacing after active filters if they exist */}
+      {(filters.composers.length > 0 || filters.dateRange.from || filters.dateRange.to) && (
+        <div className="mb-6" />
+      )}
+
       {filteredFiles.length === 0 ? (
         <div className="text-center py-12">
           <FileText className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
           <h3 className="text-lg font-medium mb-2">No sheet music found</h3>
           <p className="text-muted-foreground mb-4">
-            {searchQuery ? "No files match your search criteria." : "Upload your first PDF to get started."}
+            {searchQuery || filters.composers.length > 0 || filters.dateRange.from || filters.dateRange.to
+              ? "No files match your search criteria or filters." 
+              : "Upload your first PDF to get started."}
           </p>
           <div className="flex gap-2 justify-center">
             <TodaysConcertButton />
