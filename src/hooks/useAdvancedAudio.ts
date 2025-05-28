@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { AudioEngine } from '@/lib/audio/AudioEngine';
 import { SoundFontManager, AVAILABLE_INSTRUMENTS } from '@/lib/audio/SoundFont';
@@ -35,9 +34,10 @@ export function useAdvancedAudio() {
       audioEngineRef.current = AudioEngine.getInstance();
       await audioEngineRef.current.initialize();
       
-      // Create SoundFont manager
+      // Create SoundFont manager with proper typing
       const context = audioEngineRef.current.getContext();
-      soundFontManagerRef.current = new SoundFontManager(context.rawContext);
+      const audioContext = context.rawContext as AudioContext;
+      soundFontManagerRef.current = new SoundFontManager(audioContext);
       
       // Set up Tone.js settings
       Tone.Transport.bpm.value = 120;

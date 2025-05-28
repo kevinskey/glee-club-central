@@ -28,7 +28,7 @@ export function PitchPipeDialog({ audioContextRef }: PitchPipeDialogProps) {
             <DialogTitle>Pitch Pipe</DialogTitle>
           </DialogHeader>
           <div className="mt-2">
-            <PitchPipe audioContextRef={audioContextRef} onClose={() => setOpen(false)} />
+            <PitchPipe onClose={() => setOpen(false)} />
           </div>
         </DialogContent>
       </Dialog>

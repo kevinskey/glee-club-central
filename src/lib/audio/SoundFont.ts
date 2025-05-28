@@ -1,4 +1,3 @@
-
 import Soundfont from 'soundfont-player';
 
 export interface SoundFontInstrument {
@@ -133,7 +132,8 @@ export class SoundFontManager {
     }
     
     try {
-      const instrument = await Soundfont.instrument(this.audioContext, instrumentId);
+      // Use proper type assertion for the instrument loader
+      const instrument = await Soundfont.instrument(this.audioContext, instrumentId as any);
       this.instruments.set(instrumentId, instrument);
       console.log(`Loaded instrument: ${instrumentId}`);
       return instrument;

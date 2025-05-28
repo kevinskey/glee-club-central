@@ -1,10 +1,10 @@
-
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Slider } from '@/components/ui/slider';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Play, Pause, Volume2 } from 'lucide-react';
+import { cn } from '@/lib/utils';
 import { useAdvancedAudio } from '@/hooks/useAdvancedAudio';
 import * as Tone from 'tone';
 
@@ -48,7 +48,6 @@ export function Metronome({ onClose }: MetronomeProps) {
   const intervalRef = useRef<number | null>(null);
   const startTimeRef = useRef<number>(0);
 
-  // Create metronome sounds using Tone.js
   const playMetronomeSound = useCallback(async (isAccent: boolean = false) => {
     if (!isInitialized) return;
     
@@ -61,7 +60,6 @@ export function Metronome({ onClose }: MetronomeProps) {
           await playNote(note, velocity, 0.1, 'woodblock');
           break;
         case 'synth':
-          // Use a synthetic tone
           const synth = new Tone.Synth().toDestination();
           synth.triggerAttackRelease(isAccent ? 1000 : 800, '16n');
           break;
@@ -72,7 +70,6 @@ export function Metronome({ onClose }: MetronomeProps) {
           await playNote(note, velocity, 0.2, 'tubular_bells');
           break;
         default:
-          // Fallback to simple oscillator
           const osc = new Tone.Oscillator(isAccent ? 1000 : 800, 'triangle').toDestination();
           const gain = new Tone.Gain((volume / 100) * 0.3).toDestination();
           osc.connect(gain);
@@ -91,7 +88,7 @@ export function Metronome({ onClose }: MetronomeProps) {
     setCurrentBeat(0);
     startTimeRef.current = Date.now();
     
-    const beatInterval = (60 / bpm) * 1000; // milliseconds per beat
+    const beatInterval = (60 / bpm) * 1000;
     
     const tick = () => {
       setCurrentBeat(prevBeat => {
@@ -104,10 +101,7 @@ export function Metronome({ onClose }: MetronomeProps) {
       });
     };
     
-    // Play the first beat immediately
     tick();
-    
-    // Set up the interval
     intervalRef.current = window.setInterval(tick, beatInterval);
   }, [isInitialized, isPlaying, bpm, timeSignature.beats, playMetronomeSound]);
 
@@ -128,10 +122,9 @@ export function Metronome({ onClose }: MetronomeProps) {
     }
   }, [isPlaying, startMetronome, stopMetronome]);
 
-  // Tap tempo functionality
   const handleTapTempo = useCallback(() => {
     const now = Date.now();
-    const newTapTimes = [...tapTimes, now].slice(-4); // Keep only last 4 taps
+    const newTapTimes = [...tapTimes, now].slice(-4);
     
     setTapTimes(newTapTimes);
     
@@ -149,21 +142,18 @@ export function Metronome({ onClose }: MetronomeProps) {
       }
     }
     
-    // Clear tap times after 3 seconds of inactivity
     setTimeout(() => {
       setTapTimes(prev => prev.filter(time => now - time < 3000));
     }, 3000);
   }, [tapTimes]);
 
-  // Update interval when BPM changes during playback
   useEffect(() => {
     if (isPlaying) {
       stopMetronome();
-      setTimeout(startMetronome, 100); // Small delay to avoid timing issues
+      setTimeout(startMetronome, 100);
     }
-  }, [bpm]); // Only depend on bpm to avoid infinite loops
+  }, [bpm]);
 
-  // Cleanup on unmount
   useEffect(() => {
     return () => {
       stopMetronome();
@@ -202,13 +192,11 @@ export function Metronome({ onClose }: MetronomeProps) {
         <CardTitle className="text-center">Professional Metronome</CardTitle>
       </CardHeader>
       <CardContent className="space-y-6">
-        {/* BPM Display */}
         <div className="text-center">
           <div className="text-4xl font-mono font-bold mb-2">{bpm}</div>
           <div className="text-sm text-muted-foreground">BPM</div>
         </div>
 
-        {/* BPM Slider */}
         <div className="space-y-2">
           <label className="text-sm font-medium">Tempo</label>
           <Slider
@@ -225,7 +213,6 @@ export function Metronome({ onClose }: MetronomeProps) {
           </div>
         </div>
 
-        {/* Time Signature */}
         <div className="space-y-2">
           <label className="text-sm font-medium">Time Signature</label>
           <Select 
@@ -248,7 +235,6 @@ export function Metronome({ onClose }: MetronomeProps) {
           </Select>
         </div>
 
-        {/* Sound Type */}
         <div className="space-y-2">
           <label className="text-sm font-medium">Sound</label>
           <Select value={soundType} onValueChange={setSoundType}>
@@ -265,7 +251,6 @@ export function Metronome({ onClose }: MetronomeProps) {
           </Select>
         </div>
 
-        {/* Volume Control */}
         <div className="space-y-2">
           <label className="text-sm font-medium flex items-center gap-2">
             <Volume2 className="h-4 w-4" />
@@ -281,7 +266,6 @@ export function Metronome({ onClose }: MetronomeProps) {
           />
         </div>
 
-        {/* Beat Indicator */}
         <div className="flex justify-center space-x-2">
           {Array.from({ length: timeSignature.beats }, (_, i) => (
             <div
@@ -296,7 +280,6 @@ export function Metronome({ onClose }: MetronomeProps) {
           ))}
         </div>
 
-        {/* Controls */}
         <div className="flex justify-center space-x-4">
           <Button
             onClick={toggleMetronome}
@@ -322,7 +305,6 @@ export function Metronome({ onClose }: MetronomeProps) {
           </Button>
         </div>
 
-        {/* Close Button */}
         {onClose && (
           <div className="flex justify-center">
             <Button variant="ghost" size="sm" onClick={onClose}>
