@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -31,7 +30,7 @@ export function GoogleCalendarStatus({ onConnectionChange }: GoogleCalendarStatu
       console.log("Checking connection with action: check_connection");
       
       const { data, error } = await supabase.functions.invoke('google-calendar-auth', {
-        body: JSON.stringify({ action: 'check_connection' }),
+        body: { action: 'check_connection' },
         headers: {
           'Authorization': `Bearer ${session.access_token}`,
           'Content-Type': 'application/json'
@@ -80,7 +79,7 @@ export function GoogleCalendarStatus({ onConnectionChange }: GoogleCalendarStatu
       console.log("Getting auth URL with action: generate_oauth_url");
 
       const { data, error } = await supabase.functions.invoke('google-calendar-auth', {
-        body: JSON.stringify({ action: 'generate_oauth_url' }),
+        body: { action: 'generate_oauth_url' },
         headers: {
           'Authorization': `Bearer ${session.access_token}`,
           'Content-Type': 'application/json'
@@ -150,7 +149,7 @@ export function GoogleCalendarStatus({ onConnectionChange }: GoogleCalendarStatu
       console.log("Disconnecting with action: disconnect");
 
       const { data, error } = await supabase.functions.invoke('google-calendar-auth', {
-        body: JSON.stringify({ action: 'disconnect' }),
+        body: { action: 'disconnect' },
         headers: {
           'Authorization': `Bearer ${session.access_token}`,
           'Content-Type': 'application/json'
