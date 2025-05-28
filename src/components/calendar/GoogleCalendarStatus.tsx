@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -19,16 +18,18 @@ export function GoogleCalendarStatus({ onConnectionChange }: GoogleCalendarStatu
   const checkConnectionStatus = async () => {
     setIsLoading(true);
     try {
+      // First verify we have a valid session
       const { data: { session }, error: sessionError } = await supabase.auth.getSession();
       
       if (sessionError || !session) {
-        console.error("No valid session");
+        console.error("No valid session for Google Calendar check:", sessionError);
         setStatus('disconnected');
         onConnectionChange?.(false);
+        toast.error("Please log in to check Google Calendar connection");
         return;
       }
 
-      console.log("Checking connection with action: check_connection");
+      console.log("Checking Google Calendar connection with valid session");
       
       const { data, error } = await supabase.functions.invoke('google-calendar-auth', { 
         body: { action: 'check_connection' } 
@@ -38,6 +39,7 @@ export function GoogleCalendarStatus({ onConnectionChange }: GoogleCalendarStatu
         console.error("Error checking connection:", error);
         setStatus('disconnected');
         onConnectionChange?.(false);
+        toast.error("Failed to check Google Calendar connection");
         return;
       }
 
@@ -58,6 +60,7 @@ export function GoogleCalendarStatus({ onConnectionChange }: GoogleCalendarStatu
       console.error("Error checking connection status:", error);
       setStatus('disconnected');
       onConnectionChange?.(false);
+      toast.error("Failed to check connection status");
     } finally {
       setIsLoading(false);
     }
@@ -67,13 +70,14 @@ export function GoogleCalendarStatus({ onConnectionChange }: GoogleCalendarStatu
     try {
       setIsLoading(true);
       
+      // Verify session first
       const { data: { session }, error: sessionError } = await supabase.auth.getSession();
       if (sessionError || !session) {
         toast.error("Please log in to connect Google Calendar");
         return;
       }
 
-      console.log("Getting auth URL with action: generate_oauth_url");
+      console.log("Getting Google OAuth URL with session");
 
       const { data, error } = await supabase.functions.invoke('google-calendar-auth', { 
         body: { action: 'generate_oauth_url' } 
@@ -133,13 +137,14 @@ export function GoogleCalendarStatus({ onConnectionChange }: GoogleCalendarStatu
     try {
       setIsLoading(true);
       
+      // Verify session first
       const { data: { session }, error: sessionError } = await supabase.auth.getSession();
       if (sessionError || !session) {
         toast.error("Please log in to disconnect Google Calendar");
         return;
       }
 
-      console.log("Disconnecting with action: disconnect");
+      console.log("Disconnecting Google Calendar with session");
 
       const { data, error } = await supabase.functions.invoke('google-calendar-auth', { 
         body: { action: 'disconnect' } 
@@ -164,7 +169,18 @@ export function GoogleCalendarStatus({ onConnectionChange }: GoogleCalendarStatu
   };
 
   useEffect(() => {
-    checkConnectionStatus();
+    // Check if user is authenticated before checking connection
+    const checkAuth = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session) {
+        checkConnectionStatus();
+      } else {
+        setStatus('disconnected');
+        setIsLoading(false);
+      }
+    };
+    
+    checkAuth();
   }, []);
 
   const getStatusIcon = () => {
