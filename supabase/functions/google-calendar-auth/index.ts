@@ -47,7 +47,7 @@ serve(async (req) => {
   const url = new URL(req.url);
   const code = url.searchParams.get('code');
   
-  // Handle OAuth callback
+  // Handle OAuth callback - NO AUTH REQUIRED for this path
   if (code) {
     console.log("Processing OAuth callback...");
     
@@ -160,7 +160,7 @@ serve(async (req) => {
     }
   }
   
-  // Handle API requests
+  // Handle API requests - AUTH REQUIRED for these paths
   try {
     // Get auth user first
     const authHeader = req.headers.get('Authorization');
