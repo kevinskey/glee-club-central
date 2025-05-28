@@ -1,5 +1,5 @@
 
-import React, { useRef } from "react";
+import React from "react";
 import { Headphones } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { 
@@ -10,9 +10,9 @@ import {
   DropdownMenuTrigger
 } from "@/components/ui/dropdown-menu";
 
-// Import our refactored dialog components
-import { PitchPipeDialog } from "./dialogs/PitchPipeDialog";
-import { MetronomeDialog } from "./dialogs/MetronomeDialog";
+// Import our simplified dialog components
+import { SimplePitchPipeDialog } from "./dialogs/SimplePitchPipeDialog";
+import { SimpleMetronomeDialog } from "./dialogs/SimpleMetronomeDialog";
 import { PianoKeyboardDialog } from "./dialogs/PianoKeyboardDialog";
 import { RecordingStudioDialog } from "./dialogs/RecordingStudioDialog";
 import { AboutGleeToolsItem } from "./dialogs/AboutGleeToolsItem";
@@ -46,9 +46,9 @@ export function GleeToolsDropdown() {
         <DropdownMenuLabel className="font-semibold text-popover-foreground">Glee Tools</DropdownMenuLabel>
         <DropdownMenuSeparator />
         
-        {/* Import our dialog components */}
-        <PitchPipeDialog audioContextRef={audioContextRef} />
-        <MetronomeDialog audioContextRef={audioContextRef} />
+        {/* Use simplified dialog components */}
+        <SimplePitchPipeDialog />
+        <SimpleMetronomeDialog />
         <PianoKeyboardDialog audioContextRef={audioContextRef} />
         <RecordingStudioDialog audioContextRef={audioContextRef} />
         

@@ -1,6 +1,5 @@
 
-import { useRef, useCallback } from "react";
-import { toast } from "sonner";
+import { useRef, useCallback } from 'react';
 
 export function useAudioContext() {
   const audioContextRef = useRef<AudioContext | null>(null);
@@ -8,26 +7,25 @@ export function useAudioContext() {
   const initializeAudioContext = useCallback(() => {
     if (!audioContextRef.current) {
       try {
-        audioContextRef.current = new AudioContext();
-        
-        if (audioContextRef.current.state === 'suspended') {
-          audioContextRef.current.resume().catch(console.error);
-        }
+        // Create audio context with fallback for older browsers
+        const AudioContextClass = window.AudioContext || (window as any).webkitAudioContext;
+        audioContextRef.current = new AudioContextClass();
+        console.log('Audio context created successfully');
       } catch (error) {
-        console.error("Failed to initialize audio context:", error);
-        toast.error("Could not initialize audio. Please check browser permissions.");
+        console.error('Failed to create audio context:', error);
       }
     }
-    return audioContextRef.current;
-  }, []);
 
-  const getAudioContext = useCallback(() => {
+    // Resume audio context if suspended (required for mobile browsers)
+    if (audioContextRef.current && audioContextRef.current.state === 'suspended') {
+      audioContextRef.current.resume().catch(console.error);
+    }
+
     return audioContextRef.current;
   }, []);
 
   return {
     audioContextRef,
-    initializeAudioContext,
-    getAudioContext
+    initializeAudioContext
   };
 }
