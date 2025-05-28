@@ -15,21 +15,21 @@ export const adminRoutes: RouteObject[] = [
     element: <AdminDashboard />,
   },
   {
-    path: "landing",
+    path: "/landing",
     element: <LandingPageSettingsPage />,
   },
   {
-    path: "media", 
+    path: "/media", 
     element: <MediaLibrary />,
   },
   {
-    path: "news",
+    path: "/news",
     element: <NewsItemsPage />,
   },
   {
-    path: "settings",
+    path: "/settings",
     element: <SiteSettingsPage />,
   },
 ];
 
-console.log('Admin routes configured:', adminRoutes);
+console.log('Admin routes configured:', adminRoutes.map(r => r.path));
