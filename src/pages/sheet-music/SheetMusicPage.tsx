@@ -114,20 +114,12 @@ export default function SheetMusicPage() {
   const fetchSheetMusic = async () => {
     setLoading(true);
     try {
-      // Set media library to only show PDF files
-      setSelectedMediaType("pdf");
+      console.log("Fetching sheet music from media library...");
+      console.log("All media files:", allMediaFiles.length);
       
-      // Wait for media library to load
-      if (mediaLoading) {
-        return; // Will try again when mediaLoading changes
-      }
-
-      console.log("Media files loaded:", filteredMediaFiles.length);
-      
-      // Map PDF files from media library to sheet music format - enhanced PDF detection
+      // Filter for PDF files from media library with enhanced detection
       const pdfFiles = allMediaFiles
         .filter(file => {
-          // Improved PDF detection logic
           const isPdf = (
             file.file_type === "application/pdf" || 
             file.file_type.includes("pdf") ||
@@ -151,7 +143,7 @@ export default function SheetMusicPage() {
           category: file.category || "sheet-music"
         }));
       
-      console.log(`Found ${pdfFiles.length} PDF files in the media library`);
+      console.log(`Found ${pdfFiles.length} PDF files to display as sheet music`);
       
       setMusicFiles(pdfFiles);
       setFilteredFiles(pdfFiles);
@@ -220,13 +212,11 @@ export default function SheetMusicPage() {
   useEffect(() => {
     // Force refresh of all media
     fetchAllMedia();
-    // Then fetch setlists separately
-    // fetchSetlists();
   }, []);
   
   // Update music files when media library is loaded
   useEffect(() => {
-    if (!mediaLoading) {
+    if (!mediaLoading && allMediaFiles.length >= 0) {
       fetchSheetMusic();
     }
   }, [mediaLoading, allMediaFiles]);
@@ -321,7 +311,7 @@ export default function SheetMusicPage() {
     setSelectedSetlistId(null);
   };
 
-  // View sheet music
+  // View sheet music - single function definition
   const viewSheetMusic = (id: string) => {
     navigate(`/dashboard/sheet-music/${id}`);
   };
@@ -334,11 +324,6 @@ export default function SheetMusicPage() {
       title: "Upload complete",
       description: "Your sheet music has been uploaded successfully",
     });
-  };
-
-  // View sheet music
-  const viewSheetMusic = (id: string) => {
-    navigate(`/dashboard/sheet-music/${id}`);
   };
 
   if (loading || mediaLoading) {
@@ -400,7 +385,7 @@ export default function SheetMusicPage() {
             >
               <div className="relative">
                 <div className="bg-muted h-48 flex items-center justify-center overflow-hidden">
-                  <div className="w-full h-full bg-white">
+                  <div className="w-full h-full bg-white border border-gray-200">
                     <PDFThumbnail 
                       url={file.file_url} 
                       title={file.title}
