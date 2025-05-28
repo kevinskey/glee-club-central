@@ -1142,6 +1142,33 @@ export type Database = {
         }
         Relationships: []
       }
+      user_permissions: {
+        Row: {
+          created_at: string
+          granted: boolean
+          id: string
+          permission_name: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          granted?: boolean
+          id?: string
+          permission_name: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          granted?: boolean
+          id?: string
+          permission_name?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       user_roles: {
         Row: {
           created_at: string | null
@@ -1249,6 +1276,10 @@ export type Database = {
         Args: { p_user_id: string }
         Returns: string
       }
+      get_user_role_secure: {
+        Args: { p_user_id: string }
+        Returns: string
+      }
       handle_user_role: {
         Args: { p_user_id: string; p_role: string }
         Returns: undefined
@@ -1259,6 +1290,10 @@ export type Database = {
           p_permission: Database["public"]["Enums"]["permission_name"]
         }
         Returns: boolean
+      }
+      initialize_user_permissions: {
+        Args: { p_user_id: string }
+        Returns: undefined
       }
       is_admin: {
         Args: Record<PropertyKey, never>

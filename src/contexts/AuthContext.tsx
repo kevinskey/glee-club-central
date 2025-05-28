@@ -10,6 +10,7 @@ import { toast } from "sonner";
 import { supabase } from '@/integrations/supabase/client';
 import { useAuthState } from '@/hooks/useAuthState';
 import { useLoadingCoordinator } from '@/hooks/useLoadingCoordinator';
+import { initializeUserPermissions } from '@/utils/supabase/permissions';
 
 // Create a properly initialized AuthContext with null as default
 const AuthContext = React.createContext<AuthContextType | null>(null);
@@ -166,6 +167,14 @@ export function AuthProvider({ children }: AuthProviderProps) {
       
       if (data && data.user) {
         console.log("Login successful for user:", data.user.id);
+        
+        // Initialize permissions for the user if they don't exist
+        try {
+          await initializeUserPermissions(data.user.id);
+        } catch (permError) {
+          console.warn("Could not initialize permissions:", permError);
+        }
+        
         toast.success("Login successful!");
         
         // Try to load return URL from storage
@@ -186,6 +195,18 @@ export function AuthProvider({ children }: AuthProviderProps) {
       return { error: err, data: null };
     }
   }, []);
+
+  // Enhanced refresh permissions function
+  const refreshPermissions = React.useCallback(async () => {
+    if (authUser) {
+      try {
+        await initializeUserPermissions(authUser.id);
+        await refreshUserData();
+      } catch (error) {
+        console.error("Error refreshing permissions:", error);
+      }
+    }
+  }, [authUser, refreshUserData]);
 
   // Memoized context value to prevent unnecessary re-renders
   const value = React.useMemo((): AuthContextType => ({
@@ -253,9 +274,9 @@ export function AuthProvider({ children }: AuthProviderProps) {
       return { error };
     },
     permissions,
-    refreshPermissions: refreshUserData,
+    refreshPermissions,
     resetAuthSystem,
-  }), [authUser, profile, session, supabaseClient, isInitialized, isLoading, defaultLogin, handleLogout, isAdmin, isMember, getUserType, permissions, refreshUserData]);
+  }), [authUser, profile, session, supabaseClient, isInitialized, isLoading, defaultLogin, handleLogout, isAdmin, isMember, getUserType, permissions, refreshPermissions]);
   
   console.log("Rendering AuthProvider with value:", { 
     isAuthenticated: value.isAuthenticated,

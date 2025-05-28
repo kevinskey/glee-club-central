@@ -2,6 +2,7 @@
 import React from "react";
 import { Navigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
+import { usePermissions } from "@/hooks/usePermissions";
 import { Spinner } from "@/components/ui/spinner";
 import { toast } from "sonner";
 
@@ -10,17 +11,19 @@ interface AdminRouteProps {
 }
 
 export const AdminRoute: React.FC<AdminRouteProps> = ({ children }) => {
-  const { user, profile, isLoading, isAuthenticated, isAdmin } = useAuth();
+  const { user, profile, isLoading: authLoading, isAuthenticated, isAdmin } = useAuth();
+  const { isSuperAdmin, isLoading: permissionsLoading } = usePermissions();
   
-  // For development purposes - enable this for easier testing
-  const isDevelopmentMode = true; // Set to true during development, false for production
+  const isLoading = authLoading || permissionsLoading;
   
-  // Debug info (add console logging for troubleshooting)
+  // Debug info for troubleshooting
   console.log('AdminRoute check:', {
     isLoading,
     isAuthenticated,
     email: user?.email,
-    isSuperAdmin: profile?.is_super_admin
+    isSuperAdmin,
+    profileIsSuperAdmin: profile?.is_super_admin,
+    isAdmin: isAdmin ? isAdmin() : false
   });
   
   // Show loading state while checking admin status
@@ -38,15 +41,10 @@ export const AdminRoute: React.FC<AdminRouteProps> = ({ children }) => {
     return <Navigate to="/login" replace />;
   }
   
-  // DEVELOPMENT MODE: Allow all authenticated users access in development mode
-  if (isDevelopmentMode) {
-    console.log('Development mode active: Granting admin access to all authenticated users');
-    return <>{children}</>;
-  }
-  
-  // PRODUCTION CHECKS - Check for admin access
-  // This includes super admin users
-  const hasAdminAccess = isAdmin() || profile?.is_super_admin === true;
+  // Check for admin access - include multiple sources
+  const hasAdminAccess = isSuperAdmin || 
+                        profile?.is_super_admin === true || 
+                        (isAdmin && isAdmin());
   
   // Redirect non-admin users to the dashboard
   if (!hasAdminAccess) {

@@ -2,6 +2,7 @@
 import * as React from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
+import { usePermissions } from '@/hooks/usePermissions';
 import { Spinner } from '@/components/ui/spinner';
 import { UserType } from '@/types/auth';
 import { toast } from 'sonner';
@@ -13,8 +14,11 @@ interface RequireAuthProps {
 }
 
 const RequireAuth = ({ children, requireAdmin, allowedUserTypes }: RequireAuthProps) => {
-  const { isAuthenticated, isLoading, isAdmin, getUserType } = useAuth();
+  const { isAuthenticated, isLoading: authLoading, isAdmin, getUserType } = useAuth();
+  const { isSuperAdmin, isLoading: permissionsLoading } = usePermissions();
   const location = useLocation();
+  
+  const isLoading = authLoading || permissionsLoading;
   
   // Track redirect state to prevent multiple redirects
   const [isRedirecting, setIsRedirecting] = React.useState(false);
@@ -62,9 +66,12 @@ const RequireAuth = ({ children, requireAdmin, allowedUserTypes }: RequireAuthPr
   }
   
   // Check if admin access is required
-  if (requireAdmin && !isAdmin()) {
-    toast.error("You don't have admin privileges to access this page");
-    return <Navigate to="/dashboard" replace />;
+  if (requireAdmin) {
+    const hasAdminAccess = isSuperAdmin || (isAdmin && isAdmin());
+    if (!hasAdminAccess) {
+      toast.error("You don't have admin privileges to access this page");
+      return <Navigate to="/dashboard" replace />;
+    }
   }
   
   // Check if user type is in allowed types
