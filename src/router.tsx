@@ -19,6 +19,7 @@ import AdminDashboardPage from './pages/admin/AdminDashboardPage';
 import ProfilePage from './pages/profile/ProfilePage';
 import MediaLibraryPage from './pages/MediaLibraryPage';
 import SheetMusicPage from './pages/SheetMusicPage';
+import ViewSheetMusicPage from './pages/sheet-music/ViewSheetMusicPage';
 import PDFViewerPage from './pages/PDFViewerPage';
 import RecordingsPage from './pages/RecordingsPage';
 import RecordingStudioPage from './pages/recordings/RecordingStudioPage';
@@ -115,7 +116,7 @@ export const router = createBrowserRouter([
           },
           {
             path: 'sheet-music/:id',
-            element: <PDFViewerPage />,
+            element: <ViewSheetMusicPage />,
           },
           {
             path: 'media/pdf/:id',
