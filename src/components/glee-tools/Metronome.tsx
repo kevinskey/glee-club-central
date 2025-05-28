@@ -1,197 +1,309 @@
 
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Slider } from '@/components/ui/slider';
-import { Card, CardContent } from '@/components/ui/card';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Play, Pause, Volume2 } from 'lucide-react';
-import { audioLogger } from '@/utils/audioUtils';
+import { useAdvancedAudio } from '@/hooks/useAdvancedAudio';
+import * as Tone from 'tone';
 
 interface MetronomeProps {
-  audioContextRef?: React.RefObject<AudioContext | null>;
   onClose?: () => void;
 }
 
-export function Metronome({ audioContextRef, onClose }: MetronomeProps) {
+const TIME_SIGNATURES = [
+  { name: '4/4', beats: 4 },
+  { name: '3/4', beats: 3 },
+  { name: '2/4', beats: 2 },
+  { name: '6/8', beats: 6 },
+  { name: '5/4', beats: 5 },
+  { name: '7/8', beats: 7 }
+];
+
+const METRONOME_SOUNDS = [
+  { name: 'Classic Click', id: 'woodblock' },
+  { name: 'Digital Beep', id: 'synth' },
+  { name: 'Drum Stick', id: 'percussion' },
+  { name: 'Bell', id: 'bell' }
+];
+
+export function Metronome({ onClose }: MetronomeProps) {
   const [isPlaying, setIsPlaying] = useState(false);
   const [bpm, setBpm] = useState(120);
-  const [volume, setVolume] = useState(0.5);
+  const [volume, setVolume] = useState(75);
   const [currentBeat, setCurrentBeat] = useState(0);
-  const [isReady, setIsReady] = useState(false);
+  const [timeSignature, setTimeSignature] = useState(TIME_SIGNATURES[0]);
+  const [soundType, setSoundType] = useState('woodblock');
+  const [tapTimes, setTapTimes] = useState<number[]>([]);
+  
+  const { 
+    isInitialized, 
+    isLoading, 
+    error,
+    playNote,
+    loadInstrument
+  } = useAdvancedAudio();
   
   const intervalRef = useRef<number | null>(null);
-  const localAudioContextRef = useRef<AudioContext | null>(null);
-  const nextBeatTime = useRef<number>(0);
+  const startTimeRef = useRef<number>(0);
 
-  // Initialize audio context
-  useEffect(() => {
-    const initAudio = async () => {
-      try {
-        if (!audioContextRef?.current && !localAudioContextRef.current) {
-          localAudioContextRef.current = new (window.AudioContext || (window as any).webkitAudioContext)();
-        }
-        
-        const context = audioContextRef?.current || localAudioContextRef.current;
-        if (context && context.state === 'suspended') {
-          await context.resume();
-        }
-        
-        setIsReady(true);
-        audioLogger.log('Metronome: Audio context initialized');
-      } catch (error) {
-        audioLogger.error('Metronome: Failed to initialize audio', error);
-      }
-    };
-
-    initAudio();
+  // Create metronome sounds using Tone.js
+  const playMetronomeSound = useCallback(async (isAccent: boolean = false) => {
+    if (!isInitialized) return;
     
-    return () => {
-      stop();
-    };
-  }, [audioContextRef]);
-
-  const getAudioContext = (): AudioContext | null => {
-    return audioContextRef?.current || localAudioContextRef.current;
-  };
-
-  const playClick = useCallback((isAccent: boolean = false) => {
     try {
-      const audioContext = getAudioContext();
-      if (!audioContext) return;
-
-      const oscillator = audioContext.createOscillator();
-      const gainNode = audioContext.createGain();
+      const velocity = Math.round((volume / 100) * 127);
+      const note = isAccent ? 'C5' : 'C4';
       
-      oscillator.connect(gainNode);
-      gainNode.connect(audioContext.destination);
-      
-      oscillator.type = isAccent ? 'triangle' : 'sine';
-      oscillator.frequency.setValueAtTime(isAccent ? 1000 : 800, audioContext.currentTime);
-      gainNode.gain.setValueAtTime(volume, audioContext.currentTime);
-      
-      gainNode.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + 0.1);
-      
-      oscillator.start();
-      oscillator.stop(audioContext.currentTime + 0.1);
-    } catch (error) {
-      audioLogger.error('Error playing metronome click:', error);
-    }
-  }, [volume]);
-
-  const scheduleNextBeat = useCallback(() => {
-    const audioContext = getAudioContext();
-    if (!audioContext) return;
-
-    const secondsPerBeat = 60.0 / bpm;
-    
-    // Schedule beats slightly ahead of time for precision
-    while (nextBeatTime.current < audioContext.currentTime + 0.1) {
-      const isAccent = currentBeat === 0;
-      playClick(isAccent);
-      
-      setCurrentBeat(prevBeat => (prevBeat + 1) % 4);
-      nextBeatTime.current += secondsPerBeat;
-    }
-  }, [bpm, currentBeat, playClick]);
-
-  const start = useCallback(async () => {
-    try {
-      const audioContext = getAudioContext();
-      if (!audioContext) return;
-
-      if (audioContext.state === 'suspended') {
-        await audioContext.resume();
+      switch (soundType) {
+        case 'woodblock':
+          await playNote(note, velocity, 0.1, 'woodblock');
+          break;
+        case 'synth':
+          // Use a synthetic tone
+          const synth = new Tone.Synth().toDestination();
+          synth.triggerAttackRelease(isAccent ? 1000 : 800, '16n');
+          break;
+        case 'percussion':
+          await playNote(note, velocity, 0.1, 'acoustic_bass_drum');
+          break;
+        case 'bell':
+          await playNote(note, velocity, 0.2, 'tubular_bells');
+          break;
+        default:
+          // Fallback to simple oscillator
+          const osc = new Tone.Oscillator(isAccent ? 1000 : 800, 'triangle').toDestination();
+          const gain = new Tone.Gain((volume / 100) * 0.3).toDestination();
+          osc.connect(gain);
+          osc.start();
+          osc.stop('+0.1');
       }
-
-      nextBeatTime.current = audioContext.currentTime;
-      setCurrentBeat(0);
-      setIsPlaying(true);
-
-      // Use a more precise timing method
-      const tick = () => {
-        scheduleNextBeat();
-        intervalRef.current = requestAnimationFrame(tick);
-      };
-      
-      tick();
-      audioLogger.log(`Metronome started at ${bpm} BPM`);
     } catch (error) {
-      audioLogger.error('Error starting metronome:', error);
+      console.error('Error playing metronome sound:', error);
     }
-  }, [bpm, scheduleNextBeat]);
+  }, [isInitialized, volume, soundType, playNote]);
 
-  const stop = useCallback(() => {
+  const startMetronome = useCallback(() => {
+    if (!isInitialized || isPlaying) return;
+    
+    setIsPlaying(true);
+    setCurrentBeat(0);
+    startTimeRef.current = Date.now();
+    
+    const beatInterval = (60 / bpm) * 1000; // milliseconds per beat
+    
+    const tick = () => {
+      setCurrentBeat(prevBeat => {
+        const newBeat = (prevBeat + 1) % timeSignature.beats;
+        const isAccent = newBeat === 0;
+        
+        playMetronomeSound(isAccent);
+        
+        return newBeat;
+      });
+    };
+    
+    // Play the first beat immediately
+    tick();
+    
+    // Set up the interval
+    intervalRef.current = window.setInterval(tick, beatInterval);
+  }, [isInitialized, isPlaying, bpm, timeSignature.beats, playMetronomeSound]);
+
+  const stopMetronome = useCallback(() => {
     if (intervalRef.current) {
-      cancelAnimationFrame(intervalRef.current);
+      clearInterval(intervalRef.current);
       intervalRef.current = null;
     }
     setIsPlaying(false);
     setCurrentBeat(0);
-    audioLogger.log('Metronome stopped');
   }, []);
 
-  const toggle = useCallback(() => {
+  const toggleMetronome = useCallback(() => {
     if (isPlaying) {
-      stop();
+      stopMetronome();
     } else {
-      start();
+      startMetronome();
     }
-  }, [isPlaying, start, stop]);
+  }, [isPlaying, startMetronome, stopMetronome]);
 
-  if (!isReady) {
+  // Tap tempo functionality
+  const handleTapTempo = useCallback(() => {
+    const now = Date.now();
+    const newTapTimes = [...tapTimes, now].slice(-4); // Keep only last 4 taps
+    
+    setTapTimes(newTapTimes);
+    
+    if (newTapTimes.length >= 2) {
+      const intervals = [];
+      for (let i = 1; i < newTapTimes.length; i++) {
+        intervals.push(newTapTimes[i] - newTapTimes[i - 1]);
+      }
+      
+      const averageInterval = intervals.reduce((sum, interval) => sum + interval, 0) / intervals.length;
+      const calculatedBpm = Math.round(60000 / averageInterval);
+      
+      if (calculatedBpm >= 40 && calculatedBpm <= 300) {
+        setBpm(calculatedBpm);
+      }
+    }
+    
+    // Clear tap times after 3 seconds of inactivity
+    setTimeout(() => {
+      setTapTimes(prev => prev.filter(time => now - time < 3000));
+    }, 3000);
+  }, [tapTimes]);
+
+  // Update interval when BPM changes during playback
+  useEffect(() => {
+    if (isPlaying) {
+      stopMetronome();
+      setTimeout(startMetronome, 100); // Small delay to avoid timing issues
+    }
+  }, [bpm]); // Only depend on bpm to avoid infinite loops
+
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => {
+      stopMetronome();
+    };
+  }, [stopMetronome]);
+
+  if (isLoading) {
     return (
-      <div className="flex items-center justify-center p-4">
-        <div className="text-sm text-muted-foreground">Initializing audio...</div>
-      </div>
+      <Card className="w-full max-w-md mx-auto">
+        <CardContent className="flex items-center justify-center p-8">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-primary mx-auto mb-2"></div>
+            <div className="text-sm text-muted-foreground">Initializing metronome...</div>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  if (error) {
+    return (
+      <Card className="w-full max-w-md mx-auto">
+        <CardContent className="p-6">
+          <div className="text-center">
+            <div className="text-red-500 mb-2">Audio Error</div>
+            <div className="text-sm text-muted-foreground">{error}</div>
+          </div>
+        </CardContent>
+      </Card>
     );
   }
 
   return (
-    <Card className="w-full max-w-sm mx-auto">
-      <CardContent className="p-6">
-        <div className="text-center mb-6">
-          <div className="text-3xl font-mono font-bold mb-2">{bpm}</div>
+    <Card className="w-full max-w-md mx-auto">
+      <CardHeader>
+        <CardTitle className="text-center">Professional Metronome</CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-6">
+        {/* BPM Display */}
+        <div className="text-center">
+          <div className="text-4xl font-mono font-bold mb-2">{bpm}</div>
           <div className="text-sm text-muted-foreground">BPM</div>
         </div>
 
-        <div className="space-y-4 mb-6">
-          <div>
-            <label className="text-sm font-medium mb-2 block">Tempo</label>
-            <Slider
-              value={[bpm]}
-              onValueChange={(values) => setBpm(values[0])}
-              min={60}
-              max={200}
-              step={1}
-              className="w-full"
-            />
-            <div className="flex justify-between text-xs text-muted-foreground mt-1">
-              <span>60</span>
-              <span>200</span>
-            </div>
-          </div>
-
-          <div>
-            <label className="text-sm font-medium mb-2 block flex items-center gap-1">
-              <Volume2 className="h-3 w-3" />
-              Volume
-            </label>
-            <Slider
-              value={[volume * 100]}
-              onValueChange={(values) => setVolume(values[0] / 100)}
-              min={0}
-              max={100}
-              step={1}
-              className="w-full"
-            />
+        {/* BPM Slider */}
+        <div className="space-y-2">
+          <label className="text-sm font-medium">Tempo</label>
+          <Slider
+            value={[bpm]}
+            onValueChange={(values) => setBpm(values[0])}
+            min={40}
+            max={300}
+            step={1}
+            className="w-full"
+          />
+          <div className="flex justify-between text-xs text-muted-foreground">
+            <span>40</span>
+            <span>300</span>
           </div>
         </div>
 
-        <div className="flex justify-center mb-4">
+        {/* Time Signature */}
+        <div className="space-y-2">
+          <label className="text-sm font-medium">Time Signature</label>
+          <Select 
+            value={timeSignature.name} 
+            onValueChange={(value) => {
+              const sig = TIME_SIGNATURES.find(ts => ts.name === value);
+              if (sig) setTimeSignature(sig);
+            }}
+          >
+            <SelectTrigger>
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {TIME_SIGNATURES.map(sig => (
+                <SelectItem key={sig.name} value={sig.name}>
+                  {sig.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+
+        {/* Sound Type */}
+        <div className="space-y-2">
+          <label className="text-sm font-medium">Sound</label>
+          <Select value={soundType} onValueChange={setSoundType}>
+            <SelectTrigger>
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {METRONOME_SOUNDS.map(sound => (
+                <SelectItem key={sound.id} value={sound.id}>
+                  {sound.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+
+        {/* Volume Control */}
+        <div className="space-y-2">
+          <label className="text-sm font-medium flex items-center gap-2">
+            <Volume2 className="h-4 w-4" />
+            Volume: {volume}%
+          </label>
+          <Slider
+            value={[volume]}
+            onValueChange={(values) => setVolume(values[0])}
+            min={0}
+            max={100}
+            step={1}
+            className="w-full"
+          />
+        </div>
+
+        {/* Beat Indicator */}
+        <div className="flex justify-center space-x-2">
+          {Array.from({ length: timeSignature.beats }, (_, i) => (
+            <div
+              key={i}
+              className={cn(
+                "w-3 h-3 rounded-full transition-colors duration-150",
+                isPlaying && currentBeat === i
+                  ? i === 0 ? 'bg-red-500 shadow-lg' : 'bg-blue-500 shadow-lg'
+                  : 'bg-gray-300'
+              )}
+            />
+          ))}
+        </div>
+
+        {/* Controls */}
+        <div className="flex justify-center space-x-4">
           <Button
-            onClick={toggle}
+            onClick={toggleMetronome}
             variant={isPlaying ? "destructive" : "default"}
             size="lg"
             className="w-16 h-16 rounded-full"
+            disabled={!isInitialized}
           >
             {isPlaying ? (
               <Pause className="h-6 w-6" />
@@ -199,21 +311,18 @@ export function Metronome({ audioContextRef, onClose }: MetronomeProps) {
               <Play className="h-6 w-6" />
             )}
           </Button>
+          
+          <Button
+            onClick={handleTapTempo}
+            variant="outline"
+            size="lg"
+            className="px-6"
+          >
+            Tap Tempo
+          </Button>
         </div>
 
-        <div className="flex justify-center space-x-2 mb-4">
-          {[0, 1, 2, 3].map((beat) => (
-            <div
-              key={beat}
-              className={`w-3 h-3 rounded-full transition-colors ${
-                isPlaying && currentBeat === beat
-                  ? beat === 0 ? 'bg-red-500' : 'bg-blue-500'
-                  : 'bg-gray-300'
-              }`}
-            />
-          ))}
-        </div>
-
+        {/* Close Button */}
         {onClose && (
           <div className="flex justify-center">
             <Button variant="ghost" size="sm" onClick={onClose}>

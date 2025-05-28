@@ -1,11 +1,14 @@
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Slider } from '@/components/ui/slider';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { cn } from '@/lib/utils';
-import { audioLogger } from '@/utils/audioUtils';
+import { useAdvancedAudio } from '@/hooks/useAdvancedAudio';
+import { Volume2 } from 'lucide-react';
 
-// Notes with their frequencies in Hz
-const NOTES = [
+const CHROMATIC_NOTES = [
   { name: 'C', frequency: 261.63 },
   { name: 'C#', frequency: 277.18 },
   { name: 'D', frequency: 293.66 },
@@ -20,172 +23,221 @@ const NOTES = [
   { name: 'B', frequency: 493.88 }
 ];
 
+const OCTAVES = [3, 4, 5];
+
 interface PitchPipeProps {
-  audioContextRef?: React.RefObject<AudioContext | null>;
   onClose?: () => void;
 }
 
-export function PitchPipe({ audioContextRef, onClose }: PitchPipeProps) {
+export function PitchPipe({ onClose }: PitchPipeProps) {
   const [activeNote, setActiveNote] = useState<string | null>(null);
-  const [isReady, setIsReady] = useState(false);
-  const oscillatorRef = useRef<OscillatorNode | null>(null);
-  const gainNodeRef = useRef<GainNode | null>(null);
-  const localAudioContextRef = useRef<AudioContext | null>(null);
+  const [selectedOctave, setSelectedOctave] = useState(4);
+  const [selectedInstrument, setSelectedInstrument] = useState('acoustic_grand_piano');
+  const [volume, setVolume] = useState(70);
+  
+  const { 
+    isInitialized, 
+    isLoading, 
+    error, 
+    playNote, 
+    stopNote, 
+    stopAllNotes,
+    availableInstruments,
+    loadInstrument
+  } = useAdvancedAudio();
 
-  // Initialize audio context when component mounts
-  useEffect(() => {
-    const initAudio = async () => {
-      try {
-        if (!audioContextRef?.current && !localAudioContextRef.current) {
-          localAudioContextRef.current = new (window.AudioContext || (window as any).webkitAudioContext)();
-        }
-        
-        const context = audioContextRef?.current || localAudioContextRef.current;
-        if (context && context.state === 'suspended') {
-          await context.resume();
-        }
-        
-        setIsReady(true);
-        audioLogger.log('PitchPipe: Audio context initialized');
-      } catch (error) {
-        audioLogger.error('PitchPipe: Failed to initialize audio', error);
-      }
-    };
-
-    initAudio();
+  const handlePlayNote = useCallback(async (noteName: string) => {
+    if (!isInitialized) return;
     
-    return () => {
-      stopCurrentNote();
-    };
-  }, [audioContextRef]);
-
-  const getAudioContext = (): AudioContext | null => {
-    return audioContextRef?.current || localAudioContextRef.current;
-  };
-
-  const stopCurrentNote = () => {
-    if (oscillatorRef.current) {
-      try {
-        oscillatorRef.current.stop();
-        oscillatorRef.current.disconnect();
-        oscillatorRef.current = null;
-      } catch (e) {
-        // Ignore stop errors
-      }
-    }
+    const noteWithOctave = `${noteName}${selectedOctave}`;
     
-    if (gainNodeRef.current) {
-      try {
-        gainNodeRef.current.disconnect();
-        gainNodeRef.current = null;
-      } catch (e) {
-        // Ignore disconnect errors
-      }
-    }
-    
-    setActiveNote(null);
-  };
-
-  const playNote = async (noteName: string) => {
     try {
-      const audioContext = getAudioContext();
-      if (!audioContext) return;
-
-      // Resume audio context if needed
-      if (audioContext.state === 'suspended') {
-        await audioContext.resume();
-      }
-
       // Stop any currently playing note
-      stopCurrentNote();
-
-      // Find the note data
-      const note = NOTES.find(n => n.name === noteName);
-      if (!note) return;
-
-      // Create gain node
-      gainNodeRef.current = audioContext.createGain();
-      gainNodeRef.current.gain.value = 0.5;
-      gainNodeRef.current.connect(audioContext.destination);
-
-      // Create oscillator
-      oscillatorRef.current = audioContext.createOscillator();
-      oscillatorRef.current.type = 'sine';
-      oscillatorRef.current.frequency.value = note.frequency;
-      oscillatorRef.current.connect(gainNodeRef.current);
-
-      // Start the oscillator
-      oscillatorRef.current.start();
-      setActiveNote(noteName);
-
-      // Set up auto-stop after 2 seconds
+      if (activeNote) {
+        stopNote(activeNote, selectedInstrument);
+      }
+      
+      // Play the new note
+      await playNote(noteWithOctave, Math.round((volume / 100) * 127), 2, selectedInstrument);
+      setActiveNote(noteWithOctave);
+      
+      // Auto-stop after 2 seconds
       setTimeout(() => {
-        if (gainNodeRef.current && oscillatorRef.current) {
-          const now = audioContext.currentTime;
-          gainNodeRef.current.gain.setValueAtTime(gainNodeRef.current.gain.value, now);
-          gainNodeRef.current.gain.exponentialRampToValueAtTime(0.001, now + 0.1);
-          
-          setTimeout(() => {
-            stopCurrentNote();
-          }, 110);
-        }
+        setActiveNote(null);
       }, 2000);
-
-      audioLogger.log(`Playing note: ${noteName} (${note.frequency}Hz)`);
     } catch (error) {
-      audioLogger.error('Error playing note:', error);
+      console.error('Error playing note:', error);
     }
-  };
+  }, [isInitialized, activeNote, selectedOctave, selectedInstrument, volume, playNote, stopNote]);
 
-  if (!isReady) {
+  const handleStopNote = useCallback(() => {
+    if (activeNote) {
+      stopNote(activeNote, selectedInstrument);
+      setActiveNote(null);
+    }
+  }, [activeNote, selectedInstrument, stopNote]);
+
+  const handleInstrumentChange = useCallback(async (instrumentId: string) => {
+    setSelectedInstrument(instrumentId);
+    // Preload the instrument
+    await loadInstrument(instrumentId);
+  }, [loadInstrument]);
+
+  if (isLoading) {
     return (
-      <div className="flex items-center justify-center p-4">
-        <div className="text-sm text-muted-foreground">Initializing audio...</div>
-      </div>
+      <Card className="w-full max-w-md mx-auto">
+        <CardContent className="flex items-center justify-center p-8">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-primary mx-auto mb-2"></div>
+            <div className="text-sm text-muted-foreground">Initializing advanced audio system...</div>
+          </div>
+        </CardContent>
+      </Card>
     );
   }
 
+  if (error) {
+    return (
+      <Card className="w-full max-w-md mx-auto">
+        <CardContent className="p-6">
+          <div className="text-center">
+            <div className="text-red-500 mb-2">Audio Error</div>
+            <div className="text-sm text-muted-foreground">{error}</div>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  if (!isInitialized) {
+    return (
+      <Card className="w-full max-w-md mx-auto">
+        <CardContent className="flex items-center justify-center p-8">
+          <div className="text-sm text-muted-foreground">Audio system not ready</div>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  const voiceInstruments = availableInstruments.filter(inst => 
+    inst.category === 'Ensemble' || inst.category === 'Piano' || inst.category === 'Strings'
+  );
+
   return (
-    <div className="flex flex-col items-center p-4">
-      <div className="grid grid-cols-4 gap-2 mb-4">
-        {NOTES.map((note) => (
-          <Button
-            key={note.name}
-            type="button"
-            size="sm"
-            variant={activeNote === note.name ? "default" : "outline"}
-            className={cn(
-              "h-10 w-10 rounded-full flex items-center justify-center transition-colors",
-              activeNote === note.name ? "bg-glee-purple text-white" : "hover:bg-secondary"
-            )}
-            onClick={() => playNote(note.name)}
+    <Card className="w-full max-w-md mx-auto">
+      <CardHeader>
+        <CardTitle className="text-center">Professional Pitch Pipe</CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-6">
+        {/* Instrument Selection */}
+        <div className="space-y-2">
+          <label className="text-sm font-medium">Instrument</label>
+          <Select value={selectedInstrument} onValueChange={handleInstrumentChange}>
+            <SelectTrigger>
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {voiceInstruments.map(instrument => (
+                <SelectItem key={instrument.id} value={instrument.id}>
+                  {instrument.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+
+        {/* Octave Selection */}
+        <div className="space-y-2">
+          <label className="text-sm font-medium">Octave</label>
+          <Select value={selectedOctave.toString()} onValueChange={(value) => setSelectedOctave(parseInt(value))}>
+            <SelectTrigger>
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {OCTAVES.map(octave => (
+                <SelectItem key={octave} value={octave.toString()}>
+                  Octave {octave}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+
+        {/* Volume Control */}
+        <div className="space-y-2">
+          <label className="text-sm font-medium flex items-center gap-2">
+            <Volume2 className="h-4 w-4" />
+            Volume: {volume}%
+          </label>
+          <Slider
+            value={[volume]}
+            onValueChange={(values) => setVolume(values[0])}
+            min={0}
+            max={100}
+            step={1}
+            className="w-full"
+          />
+        </div>
+
+        {/* Note Buttons */}
+        <div className="grid grid-cols-4 gap-2">
+          {CHROMATIC_NOTES.map((note) => {
+            const noteWithOctave = `${note.name}${selectedOctave}`;
+            const isActive = activeNote === noteWithOctave;
+            
+            return (
+              <Button
+                key={note.name}
+                type="button"
+                size="sm"
+                variant={isActive ? "default" : "outline"}
+                className={cn(
+                  "h-12 w-full font-mono text-sm transition-all duration-200",
+                  isActive ? "bg-primary text-primary-foreground shadow-lg scale-105" : "hover:bg-secondary"
+                )}
+                onClick={() => handlePlayNote(note.name)}
+                disabled={!isInitialized}
+              >
+                <div className="flex flex-col items-center">
+                  <span className="font-semibold">{note.name}</span>
+                  <span className="text-xs opacity-70">{Math.round(note.frequency)}Hz</span>
+                </div>
+              </Button>
+            );
+          })}
+        </div>
+        
+        {/* Control Buttons */}
+        <div className="flex justify-center space-x-2">
+          {activeNote && (
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={handleStopNote}
+            >
+              Stop
+            </Button>
+          )}
+          
+          <Button 
+            variant="outline" 
+            size="sm" 
+            onClick={stopAllNotes}
           >
-            {note.name}
+            Stop All
           </Button>
-        ))}
-      </div>
-      
-      {activeNote && (
-        <Button 
-          variant="outline" 
-          size="sm" 
-          onClick={stopCurrentNote}
-          className="text-xs"
-        >
-          Stop
-        </Button>
-      )}
-      
-      {onClose && (
-        <Button 
-          variant="ghost" 
-          size="sm" 
-          onClick={onClose}
-          className="mt-2 text-xs"
-        >
-          Close
-        </Button>
-      )}
-    </div>
+          
+          {onClose && (
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              onClick={onClose}
+            >
+              Close
+            </Button>
+          )}
+        </div>
+      </CardContent>
+    </Card>
   );
 }
