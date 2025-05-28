@@ -1,4 +1,3 @@
-
 import React from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { Navigate } from "react-router-dom";
@@ -78,6 +77,16 @@ const SiteSettingsPage = () => {
       toast.success('Calendar settings updated successfully');
     } catch (error) {
       console.error('Failed to update national holidays setting:', error);
+      toast.error('Failed to update calendar settings');
+    }
+  };
+
+  const handleSpelmanDatesToggle = async (enabled: boolean) => {
+    try {
+      await updateSetting('show_spelman_academic_dates', enabled);
+      toast.success('Calendar settings updated successfully');
+    } catch (error) {
+      console.error('Failed to update Spelman dates setting:', error);
       toast.error('Failed to update calendar settings');
     }
   };
@@ -172,6 +181,18 @@ const SiteSettingsPage = () => {
                     id="show-holidays" 
                     checked={settings?.show_national_holidays !== false}
                     onCheckedChange={handleNationalHolidaysToggle}
+                  />
+                </div>
+                
+                <div className="flex items-center justify-between">
+                  <div className="space-y-1">
+                    <Label htmlFor="show-spelman-dates" className="text-base font-medium">Show Spelman Academic Dates</Label>
+                    <p className="text-sm text-muted-foreground">Display Spelman College academic calendar dates</p>
+                  </div>
+                  <Switch 
+                    id="show-spelman-dates" 
+                    checked={settings?.show_spelman_academic_dates !== false}
+                    onCheckedChange={handleSpelmanDatesToggle}
                   />
                 </div>
               </CardContent>

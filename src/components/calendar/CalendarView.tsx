@@ -7,6 +7,8 @@ import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameMonth, isSam
 import { getNationalHolidays, getHolidayByDate } from '@/utils/nationalHolidays';
 import { HolidayCard } from './HolidayCard';
 import { useSiteSettings } from '@/hooks/useSiteSettings';
+import { getSpelmanAcademicDates, getSpelmanDateByDate } from '@/utils/spelmanAcademicDates';
+import { SpelmanDateCard } from './SpelmanDateCard';
 
 interface CalendarViewProps {
   events: CalendarEvent[];
@@ -29,6 +31,9 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
   
   // Check if national holidays should be shown (default to true if setting doesn't exist)
   const showNationalHolidays = settings.show_national_holidays !== false;
+  
+  // Check if Spelman academic dates should be shown (default to true if setting doesn't exist)
+  const showSpelmanAcademicDates = settings.show_spelman_academic_dates !== false;
 
   // Get all days for the calendar grid (including padding days from previous/next month)
   const monthStart = startOfMonth(currentDate);
@@ -51,6 +56,7 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
   );
 
   const holidays = showNationalHolidays ? getNationalHolidays(currentDate.getFullYear()) : [];
+  const spelmanDates = showSpelmanAcademicDates ? getSpelmanAcademicDates(currentDate.getFullYear()) : [];
 
   const getEventsForDate = (date: Date) => {
     return filteredEvents.filter(event => {
@@ -61,6 +67,10 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
 
   const getHolidayForDate = (date: Date) => {
     return showNationalHolidays ? getHolidayByDate(date) : null;
+  };
+
+  const getSpelmanDateForDate = (date: Date) => {
+    return showSpelmanAcademicDates ? getSpelmanDateByDate(date) : null;
   };
 
   const navigateMonth = (direction: 'prev' | 'next') => {
@@ -97,6 +107,7 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
     const isTodayDate = isCurrentDay(day);
     const isSelected = isSelectedDay(day);
     const hasHoliday = getHolidayForDate(day);
+    const hasSpelmanDate = getSpelmanDateForDate(day);
     
     let classes = 'min-h-[80px] p-1 border rounded cursor-pointer transition-colors hover:bg-muted/30 ';
     
@@ -108,6 +119,8 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
     
     if (hasHoliday) {
       classes += 'bg-gradient-to-br from-red-50 via-white to-blue-50 border-red-300 shadow-sm ';
+    } else if (hasSpelmanDate) {
+      classes += 'bg-gradient-to-br from-orange-50 via-white to-orange-50 border-orange-300 shadow-sm ';
     }
     
     if (isTodayDate) {
@@ -126,6 +139,7 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
     const isTodayDate = isCurrentDay(day);
     const isSelected = isSelectedDay(day);
     const hasHoliday = getHolidayForDate(day);
+    const hasSpelmanDate = getSpelmanDateForDate(day);
     
     let classes = 'text-sm ';
     
@@ -137,6 +151,8 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
     
     if (hasHoliday) {
       classes += 'font-bold text-blue-800 ';
+    } else if (hasSpelmanDate) {
+      classes += 'font-bold text-orange-800 ';
     } else if (isTodayDate) {
       classes += 'font-bold text-orange-600 ';
     } else if (isSelected) {
@@ -185,6 +201,7 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
               {calendarDays.map(day => {
                 const dayEvents = getEventsForDate(day);
                 const holiday = getHolidayForDate(day);
+                const spelmanDate = getSpelmanDateForDate(day);
                 
                 return (
                   <div
@@ -202,8 +219,14 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
                           {holiday.title}
                         </div>
                       )}
+                      {/* Show Spelman date if present and no holiday */}
+                      {!holiday && spelmanDate && (
+                        <div className="text-xs p-1 rounded bg-gradient-to-r from-orange-100 via-white to-orange-100 text-orange-800 border border-orange-200 truncate font-medium shadow-sm">
+                          {spelmanDate.title}
+                        </div>
+                      )}
                       {/* Show events */}
-                      {dayEvents.slice(0, holiday ? 1 : 2).map(event => (
+                      {dayEvents.slice(0, (holiday || spelmanDate) ? 1 : 2).map(event => (
                         <div
                           key={event.id}
                           className={`text-xs p-1 rounded cursor-pointer truncate ${
@@ -218,9 +241,9 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
                         </div>
                       ))}
                       {/* Show more indicator */}
-                      {(dayEvents.length + (holiday ? 1 : 0)) > 2 && (
+                      {(dayEvents.length + ((holiday || spelmanDate) ? 1 : 0)) > 2 && (
                         <div className="text-xs text-muted-foreground">
-                          +{dayEvents.length + (holiday ? 1 : 0) - 2} more
+                          +{dayEvents.length + ((holiday || spelmanDate) ? 1 : 0) - 2} more
                         </div>
                       )}
                     </div>
@@ -261,6 +284,17 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
                     </CardContent>
                   </Card>
                 ))}
+              
+              {/* Show Spelman academic dates in list view only if enabled */}
+              {showSpelmanAcademicDates && spelmanDates
+                .filter(spelmanDate => 
+                  spelmanDate.date.getMonth() === currentDate.getMonth() &&
+                  spelmanDate.date.getFullYear() === currentDate.getFullYear()
+                )
+                .map(spelmanDate => (
+                  <SpelmanDateCard key={spelmanDate.id} spelmanDate={spelmanDate} />
+                ))}
+              
               {/* Show regular events */}
               {filteredEvents.map(event => (
                 <Card 
@@ -313,6 +347,14 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
         const selectedHoliday = getHolidayForDate(selectedDate);
         return selectedHoliday ? (
           <HolidayCard holiday={selectedHoliday} />
+        ) : null;
+      })()}
+
+      {/* Spelman Date Details Card for Selected Date */}
+      {selectedDate && showSpelmanAcademicDates && (() => {
+        const selectedSpelmanDate = getSpelmanDateForDate(selectedDate);
+        return selectedSpelmanDate ? (
+          <SpelmanDateCard spelmanDate={selectedSpelmanDate} />
         ) : null;
       })()}
     </div>
