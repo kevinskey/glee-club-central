@@ -4,7 +4,6 @@ import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import { Music } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
-import { GleeToolsDropdown } from "@/components/glee-tools/GleeToolsDropdown";
 
 interface MusicAppHeaderProps {
   currentSection?: string;
@@ -20,13 +19,11 @@ export function MusicAppHeader({ currentSection }: MusicAppHeaderProps) {
           <div className="flex items-center">
             <Link to="/dashboard" className="flex items-center mr-6">
               <Music className="h-6 w-6 text-glee-purple mr-2" />
-              <span className="font-bold text-lg">Glee Tools</span>
+              <span className="font-bold text-lg">Glee World</span>
             </Link>
           </div>
           
           <div className="flex items-center gap-2">
-            <GleeToolsDropdown />
-            
             {isAuthenticated ? (
               <Link to="/dashboard">
                 <Button variant="outline" size="sm">Back to Dashboard</Button>
