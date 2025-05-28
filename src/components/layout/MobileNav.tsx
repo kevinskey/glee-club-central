@@ -6,9 +6,9 @@ import { cn } from "@/lib/utils";
 import { 
   LayoutDashboard, 
   FileText, 
-  Calendar, 
   User,
-  Bell
+  Bell,
+  Mic
 } from "lucide-react";
 
 interface MobileNavProps {
@@ -53,14 +53,14 @@ export function MobileNav({ isAdmin }: MobileNavProps) {
             <span className="text-xs mt-1">Music</span>
           </Link>
           <Link 
-            to="/dashboard/calendar" 
+            to="/dashboard/recordings" 
             className={cn(
               "flex flex-col items-center justify-center px-2 py-1.5",
-              pathname.includes("/dashboard/calendar") ? "text-glee-spelman" : "text-muted-foreground"
+              pathname.includes("/dashboard/recordings") ? "text-glee-spelman" : "text-muted-foreground"
             )}
           >
-            <Calendar className="h-5 w-5" />
-            <span className="text-xs mt-1">Calendar</span>
+            <Mic className="h-5 w-5" />
+            <span className="text-xs mt-1">Audio</span>
           </Link>
           <Link 
             to="/dashboard/announcements" 

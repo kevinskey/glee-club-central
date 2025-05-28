@@ -6,7 +6,6 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import {
   User,
   Music,
-  Calendar,
   CheckSquare,
   Bell,
   MessageSquare,
@@ -28,7 +27,6 @@ export function DashboardQuickAccess() {
     { icon: <User className="h-5 w-5" />, title: "My Profile", path: "/dashboard/profile", color: "bg-glee-spelman" },
     { icon: <Music className="h-5 w-5" />, title: "Sheet Music", path: "/dashboard/sheet-music", color: "bg-purple-500" },
     { icon: <Headphones className="h-5 w-5" />, title: "Practice Tracks", path: "/dashboard/recordings", color: "bg-blue-500" },
-    { icon: <Calendar className="h-5 w-5" />, title: "Calendar", path: "/dashboard/calendar", color: "bg-green-500" },
     { icon: <CheckSquare className="h-5 w-5" />, title: "Attendance", path: "/dashboard/attendance", color: "bg-amber-500" },
     { icon: <Shirt className="h-5 w-5" />, title: "Wardrobe", path: "/dashboard/wardrobe", color: "bg-pink-500" },
     { icon: <DollarSign className="h-5 w-5" />, title: "Dues", path: "/dashboard/dues", color: "bg-emerald-500" },
@@ -39,7 +37,6 @@ export function DashboardQuickAccess() {
   const adminQuickLinks = [
     { icon: <Users className="h-5 w-5" />, title: "Member Management", path: "/dashboard/admin/members", color: "bg-slate-500" },
     { icon: <Music className="h-5 w-5" />, title: "Sheet Music", path: "/dashboard/sheet-music", color: "bg-purple-500" },
-    { icon: <Calendar className="h-5 w-5" />, title: "Event Manager", path: "/dashboard/admin/events", color: "bg-yellow-500" },
     { icon: <MessageSquare className="h-5 w-5" />, title: "Messaging", path: "/dashboard/messaging", color: "bg-blue-500" },
     { icon: <DollarSign className="h-5 w-5" />, title: "Finance", path: "/dashboard/admin/finances", color: "bg-emerald-500" },
     { icon: <Bell className="h-5 w-5" />, title: "Announcements", path: "/dashboard/announcements/new", color: "bg-red-500" },

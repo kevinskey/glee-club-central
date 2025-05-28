@@ -11,7 +11,6 @@ import {
 import { useNavigate } from "react-router-dom";
 import { 
   Menu,
-  Calendar, 
   Music, 
   Bell, 
   FileText, 
@@ -25,7 +24,6 @@ export function MobileNavDropdown() {
   const navigate = useNavigate();
 
   const menuItems = [
-    { icon: Calendar, label: "Calendar", path: "/dashboard/calendar" },
     { icon: Music, label: "Sheet Music", path: "/dashboard/sheet-music" },
     { icon: Mic, label: "Recordings", path: "/dashboard/recordings" },
     { icon: Mic, label: "Recording Studio", path: "/dashboard/recording-studio" },
@@ -53,7 +51,7 @@ export function MobileNavDropdown() {
               <item.icon className="mr-2 h-4 w-4" />
               {item.label}
             </DropdownMenuItem>
-            {index === 3 && <DropdownMenuSeparator />}
+            {index === 2 && <DropdownMenuSeparator />}
           </React.Fragment>
         ))}
       </DropdownMenuContent>

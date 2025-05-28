@@ -1,11 +1,9 @@
-
 import React from "react";
 import { Link, useLocation } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { 
   Home, 
-  Calendar, 
   Music, 
   Bell, 
   FileText, 
@@ -33,11 +31,6 @@ export function Sidebar({ className }: SidebarProps) {
   
   // Base menu items that all users can see
   const baseMenuItems = [
-    {
-      title: "Calendar",
-      href: "/dashboard/calendar",
-      icon: Calendar
-    },
     {
       title: "Sheet Music",
       href: "/dashboard/sheet-music",
