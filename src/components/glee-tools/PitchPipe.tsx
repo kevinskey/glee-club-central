@@ -2,8 +2,9 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
-import { audioLogger, resumeAudioContext, playTone, getNoteFrequency } from '@/utils/audioUtils';
+import { audioLogger } from '@/utils/audioUtils';
 
+// Notes with their frequencies in Hz
 const NOTES = [
   { name: 'C', frequency: 261.63 },
   { name: 'C#', frequency: 277.18 },
@@ -20,236 +21,171 @@ const NOTES = [
 ];
 
 interface PitchPipeProps {
-  size?: 'sm' | 'md' | 'lg';
-  className?: string;
   audioContextRef?: React.RefObject<AudioContext | null>;
   onClose?: () => void;
 }
 
-export function PitchPipe({ 
-  size = 'md', 
-  className,
-  audioContextRef,
-  onClose
-}: PitchPipeProps) {
+export function PitchPipe({ audioContextRef, onClose }: PitchPipeProps) {
   const [activeNote, setActiveNote] = useState<string | null>(null);
-  const [isInitialized, setIsInitialized] = useState(false);
+  const [isReady, setIsReady] = useState(false);
+  const oscillatorRef = useRef<OscillatorNode | null>(null);
+  const gainNodeRef = useRef<GainNode | null>(null);
   const localAudioContextRef = useRef<AudioContext | null>(null);
-  const activeOscillatorRef = useRef<{
-    oscillator: OscillatorNode;
-    gainNode: GainNode;
-    timeoutId: number;
-  } | null>(null);
 
-  // Get or create audio context
-  const getAudioContext = (): AudioContext | null => {
-    if (audioContextRef?.current) {
-      return audioContextRef.current;
-    }
-    
-    if (!localAudioContextRef.current) {
+  // Initialize audio context when component mounts
+  useEffect(() => {
+    const initAudio = async () => {
       try {
-        localAudioContextRef.current = new (window.AudioContext || (window as any).webkitAudioContext)();
-        console.log('PitchPipe: Created audio context with state:', localAudioContextRef.current.state);
+        if (!audioContextRef?.current && !localAudioContextRef.current) {
+          localAudioContextRef.current = new (window.AudioContext || (window as any).webkitAudioContext)();
+        }
+        
+        const context = audioContextRef?.current || localAudioContextRef.current;
+        if (context && context.state === 'suspended') {
+          await context.resume();
+        }
+        
+        setIsReady(true);
+        audioLogger.log('PitchPipe: Audio context initialized');
       } catch (error) {
-        console.error('PitchPipe: Failed to create audio context:', error);
-        return null;
+        audioLogger.error('PitchPipe: Failed to initialize audio', error);
       }
-    }
+    };
+
+    initAudio();
     
-    return localAudioContextRef.current;
-  };
-
-  // Initialize audio context on mount
-  useEffect(() => {
-    const audioContext = getAudioContext();
-    if (audioContext) {
-      setIsInitialized(true);
-      console.log('PitchPipe: Audio context initialized');
-    }
-  }, []);
-
-  // Clean up on unmount
-  useEffect(() => {
     return () => {
       stopCurrentNote();
     };
-  }, []);
+  }, [audioContextRef]);
 
-  // Stop the current playing note
-  const stopCurrentNote = () => {
-    if (activeOscillatorRef.current) {
-      const { oscillator, gainNode, timeoutId } = activeOscillatorRef.current;
-      
-      // Clear timeout
-      clearTimeout(timeoutId);
-      
-      try {
-        // Quick fade out
-        const audioContext = getAudioContext();
-        if (audioContext && gainNode) {
-          const now = audioContext.currentTime;
-          gainNode.gain.setValueAtTime(gainNode.gain.value, now);
-          gainNode.gain.exponentialRampToValueAtTime(0.001, now + 0.1);
-        }
-        
-        // Stop oscillator after fade
-        setTimeout(() => {
-          try {
-            oscillator.stop();
-            oscillator.disconnect();
-            gainNode.disconnect();
-          } catch (e) {
-            // Ignore cleanup errors
-          }
-        }, 110);
-      } catch (e) {
-        console.error('Error stopping note:', e);
-      }
-      
-      activeOscillatorRef.current = null;
-      setActiveNote(null);
-    }
+  const getAudioContext = (): AudioContext | null => {
+    return audioContextRef?.current || localAudioContextRef.current;
   };
 
-  // Play a note
-  const playNote = async (noteName: string) => {
-    const audioContext = getAudioContext();
-    if (!audioContext) {
-      console.error('PitchPipe: No audio context available');
-      return;
+  const stopCurrentNote = () => {
+    if (oscillatorRef.current) {
+      try {
+        oscillatorRef.current.stop();
+        oscillatorRef.current.disconnect();
+        oscillatorRef.current = null;
+      } catch (e) {
+        // Ignore stop errors
+      }
     }
+    
+    if (gainNodeRef.current) {
+      try {
+        gainNodeRef.current.disconnect();
+        gainNodeRef.current = null;
+      } catch (e) {
+        // Ignore disconnect errors
+      }
+    }
+    
+    setActiveNote(null);
+  };
 
-    // Stop any currently playing note
-    stopCurrentNote();
-
+  const playNote = async (noteName: string) => {
     try {
-      // Resume audio context if suspended
+      const audioContext = getAudioContext();
+      if (!audioContext) return;
+
+      // Resume audio context if needed
       if (audioContext.state === 'suspended') {
-        console.log('PitchPipe: Resuming suspended audio context');
         await audioContext.resume();
       }
 
-      // Find the note frequency
+      // Stop any currently playing note
+      stopCurrentNote();
+
+      // Find the note data
       const note = NOTES.find(n => n.name === noteName);
-      if (!note) {
-        console.error('PitchPipe: Note not found:', noteName);
-        return;
-      }
+      if (!note) return;
 
-      // Create oscillator and gain node
-      const oscillator = audioContext.createOscillator();
-      const gainNode = audioContext.createGain();
+      // Create gain node
+      gainNodeRef.current = audioContext.createGain();
+      gainNodeRef.current.gain.value = 0.5;
+      gainNodeRef.current.connect(audioContext.destination);
 
-      // Configure oscillator
-      oscillator.type = 'sine';
-      oscillator.frequency.value = note.frequency;
+      // Create oscillator
+      oscillatorRef.current = audioContext.createOscillator();
+      oscillatorRef.current.type = 'sine';
+      oscillatorRef.current.frequency.value = note.frequency;
+      oscillatorRef.current.connect(gainNodeRef.current);
 
-      // Configure gain
-      gainNode.gain.value = 0.5;
-
-      // Connect audio graph
-      oscillator.connect(gainNode);
-      gainNode.connect(audioContext.destination);
-
-      // Start playing
-      oscillator.start(0);
-      
-      // Set active note
+      // Start the oscillator
+      oscillatorRef.current.start();
       setActiveNote(noteName);
 
-      // Schedule auto-stop after 3 seconds
-      const timeoutId = window.setTimeout(() => {
-        stopCurrentNote();
-      }, 3000);
+      // Set up auto-stop after 2 seconds
+      setTimeout(() => {
+        if (gainNodeRef.current && oscillatorRef.current) {
+          const now = audioContext.currentTime;
+          gainNodeRef.current.gain.setValueAtTime(gainNodeRef.current.gain.value, now);
+          gainNodeRef.current.gain.exponentialRampToValueAtTime(0.001, now + 0.1);
+          
+          setTimeout(() => {
+            stopCurrentNote();
+          }, 110);
+        }
+      }, 2000);
 
-      // Store reference for cleanup
-      activeOscillatorRef.current = {
-        oscillator,
-        gainNode,
-        timeoutId
-      };
-
-      console.log(`PitchPipe: Playing ${noteName} at ${note.frequency}Hz`);
+      audioLogger.log(`Playing note: ${noteName} (${note.frequency}Hz)`);
     } catch (error) {
-      console.error('PitchPipe: Error playing note:', error);
-      setActiveNote(null);
+      audioLogger.error('Error playing note:', error);
     }
   };
 
-  // Handle button click with user interaction
-  const handleNoteClick = async (noteName: string) => {
-    console.log('PitchPipe: Note clicked:', noteName);
-    
-    if (!isInitialized) {
-      console.log('PitchPipe: Not initialized, attempting to initialize');
-      const audioContext = getAudioContext();
-      if (audioContext) {
-        setIsInitialized(true);
-      }
-    }
-
-    await playNote(noteName);
-  };
-
-  // Determine size classes
-  const getSizeClass = () => {
-    switch (size) {
-      case 'sm': return 'h-8 w-8 text-xs';
-      case 'lg': return 'h-14 w-14 text-lg';
-      default: return 'h-10 w-10 text-sm';
-    }
-  };
-
-  // Control which notes to display based on size
-  const displayedNotes = size === 'sm' 
-    ? ['C', 'E', 'G', 'A'] 
-    : NOTES.map(n => n.name);
+  if (!isReady) {
+    return (
+      <div className="flex items-center justify-center p-4">
+        <div className="text-sm text-muted-foreground">Initializing audio...</div>
+      </div>
+    );
+  }
 
   return (
-    <div className={cn("flex flex-col items-center p-2", className)}>
-      <div className="grid grid-cols-4 gap-2 mb-2">
-        {displayedNotes.map((note) => (
+    <div className="flex flex-col items-center p-4">
+      <div className="grid grid-cols-4 gap-2 mb-4">
+        {NOTES.map((note) => (
           <Button
-            key={note}
+            key={note.name}
             type="button"
             size="sm"
-            variant={activeNote === note ? "default" : "outline"}
+            variant={activeNote === note.name ? "default" : "outline"}
             className={cn(
-              getSizeClass(),
-              "rounded-full flex items-center justify-center transition-colors",
-              activeNote === note ? "bg-glee-purple text-white" : "hover:bg-secondary"
+              "h-10 w-10 rounded-full flex items-center justify-center transition-colors",
+              activeNote === note.name ? "bg-glee-purple text-white" : "hover:bg-secondary"
             )}
-            onClick={() => handleNoteClick(note)}
+            onClick={() => playNote(note.name)}
           >
-            {note}
+            {note.name}
           </Button>
         ))}
       </div>
       
-      <div className="flex gap-2 mt-2">
-        {activeNote && (
-          <Button 
-            variant="outline" 
-            size="sm" 
-            onClick={stopCurrentNote}
-            className="text-xs"
-          >
-            Stop
-          </Button>
-        )}
-        
-        {onClose && (
-          <Button 
-            variant="secondary" 
-            size="sm" 
-            onClick={onClose}
-            className="text-xs"
-          >
-            Close
-          </Button>
-        )}
-      </div>
+      {activeNote && (
+        <Button 
+          variant="outline" 
+          size="sm" 
+          onClick={stopCurrentNote}
+          className="text-xs"
+        >
+          Stop
+        </Button>
+      )}
+      
+      {onClose && (
+        <Button 
+          variant="ghost" 
+          size="sm" 
+          onClick={onClose}
+          className="mt-2 text-xs"
+        >
+          Close
+        </Button>
+      )}
     </div>
   );
 }

@@ -1,395 +1,227 @@
-import React, { useState, useRef, useEffect } from "react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Slider } from "@/components/ui/slider";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { createAudioContext, resumeAudioContext, playClick } from "@/utils/audioUtils";
-import { Play, Pause, Save, Trash2 } from "lucide-react";
-import { toast } from "sonner";
-import { supabase } from "@/integrations/supabase/client";
-import { useAuth } from "@/contexts/AuthContext";
+
+import React, { useState, useEffect, useRef, useCallback } from 'react';
+import { Button } from '@/components/ui/button';
+import { Slider } from '@/components/ui/slider';
+import { Card, CardContent } from '@/components/ui/card';
+import { Play, Pause, Volume2 } from 'lucide-react';
+import { audioLogger } from '@/utils/audioUtils';
 
 interface MetronomeProps {
+  audioContextRef?: React.RefObject<AudioContext | null>;
   onClose?: () => void;
 }
 
-export function Metronome({ onClose }: MetronomeProps) {
-  const [bpm, setBpm] = useState<number>(100);
-  const [isPlaying, setIsPlaying] = useState<boolean>(false);
-  const [volume, setVolume] = useState<number>(0.5);
-  const [presetName, setPresetName] = useState<string>('');
-  const [presets, setPresets] = useState<{id: string, label: string, bpm: number}[]>([]);
-  const [activePreset, setActivePreset] = useState<string | null>(null);
-  const [currentBeat, setCurrentBeat] = useState<number>(0);
-  const [isInitialized, setIsInitialized] = useState<boolean>(false);
+export function Metronome({ audioContextRef, onClose }: MetronomeProps) {
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [bpm, setBpm] = useState(120);
+  const [volume, setVolume] = useState(0.5);
+  const [currentBeat, setCurrentBeat] = useState(0);
+  const [isReady, setIsReady] = useState(false);
   
-  const audioContextRef = useRef<AudioContext | null>(null);
   const intervalRef = useRef<number | null>(null);
-  
-  // Auth context
-  let isAuthenticated = false;
-  try {
-    const auth = useAuth();
-    isAuthenticated = auth.isAuthenticated;
-  } catch (error) {
-    console.log("Metronome: Auth context not available, operating in guest mode");
-  }
-  
+  const localAudioContextRef = useRef<AudioContext | null>(null);
+  const nextBeatTime = useRef<number>(0);
+
   // Initialize audio context
-  const initializeAudio = async () => {
-    if (!audioContextRef.current) {
+  useEffect(() => {
+    const initAudio = async () => {
       try {
-        audioContextRef.current = createAudioContext();
-        console.log('Metronome: Audio context created with state:', audioContextRef.current.state);
-        
-        if (audioContextRef.current.state === 'suspended') {
-          await audioContextRef.current.resume();
-          console.log('Metronome: Audio context resumed');
+        if (!audioContextRef?.current && !localAudioContextRef.current) {
+          localAudioContextRef.current = new (window.AudioContext || (window as any).webkitAudioContext)();
         }
         
-        setIsInitialized(true);
-        return true;
+        const context = audioContextRef?.current || localAudioContextRef.current;
+        if (context && context.state === 'suspended') {
+          await context.resume();
+        }
+        
+        setIsReady(true);
+        audioLogger.log('Metronome: Audio context initialized');
       } catch (error) {
-        console.error("Metronome: Failed to create audio context:", error);
-        toast.error("Audio system not available");
-        return false;
-      }
-    }
-    
-    if (audioContextRef.current.state === 'suspended') {
-      try {
-        await audioContextRef.current.resume();
-        console.log('Metronome: Audio context resumed');
-      } catch (error) {
-        console.error("Metronome: Failed to resume audio context:", error);
-        return false;
-      }
-    }
-    
-    return true;
-  };
-
-  // Initialize on mount
-  useEffect(() => {
-    initializeAudio();
-    
-    return () => {
-      stopMetronome();
-      if (audioContextRef.current && audioContextRef.current.state !== 'closed') {
-        audioContextRef.current.close().catch(console.error);
+        audioLogger.error('Metronome: Failed to initialize audio', error);
       }
     };
-  }, []);
-  
-  // Load presets
-  useEffect(() => {
-    if (isAuthenticated) {
-      fetchPresets();
-    }
-  }, [isAuthenticated]);
-  
-  const fetchPresets = async () => {
-    if (!isAuthenticated) return;
+
+    initAudio();
     
-    try {
-      const { data, error } = await supabase
-        .from('metronome_presets')
-        .select('id, label, bpm')
-        .order('created_at', { ascending: false });
-      
-      if (error) throw error;
-      
-      setPresets(data || []);
-    } catch (error) {
-      console.error('Error fetching presets:', error);
-    }
+    return () => {
+      stop();
+    };
+  }, [audioContextRef]);
+
+  const getAudioContext = (): AudioContext | null => {
+    return audioContextRef?.current || localAudioContextRef.current;
   };
 
-  // Play metronome click
-  const playMetronomeClick = async (isAccent: boolean = false) => {
-    if (!audioContextRef.current) {
-      console.log('Metronome: No audio context available for click');
-      return;
-    }
-
+  const playClick = useCallback((isAccent: boolean = false) => {
     try {
-      // Create oscillator and gain node
-      const oscillator = audioContextRef.current.createOscillator();
-      const gainNode = audioContextRef.current.createGain();
+      const audioContext = getAudioContext();
+      if (!audioContext) return;
 
-      // Configure sound
-      oscillator.type = 'sine';
-      oscillator.frequency.value = isAccent ? 800 : 600;
-      gainNode.gain.value = volume * (isAccent ? 1.2 : 1.0);
-
-      // Connect audio graph
+      const oscillator = audioContext.createOscillator();
+      const gainNode = audioContext.createGain();
+      
       oscillator.connect(gainNode);
-      gainNode.connect(audioContextRef.current.destination);
-
-      // Create envelope
-      const now = audioContextRef.current.currentTime;
-      gainNode.gain.setValueAtTime(gainNode.gain.value, now);
-      gainNode.gain.exponentialRampToValueAtTime(0.001, now + 0.1);
-
-      // Play
-      oscillator.start(now);
-      oscillator.stop(now + 0.1);
-
-      console.log(`Metronome: Played ${isAccent ? 'accent' : 'regular'} click`);
+      gainNode.connect(audioContext.destination);
+      
+      oscillator.type = isAccent ? 'triangle' : 'sine';
+      oscillator.frequency.setValueAtTime(isAccent ? 1000 : 800, audioContext.currentTime);
+      gainNode.gain.setValueAtTime(volume, audioContext.currentTime);
+      
+      gainNode.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + 0.1);
+      
+      oscillator.start();
+      oscillator.stop(audioContext.currentTime + 0.1);
     } catch (error) {
-      console.error('Metronome: Error playing click:', error);
+      audioLogger.error('Error playing metronome click:', error);
     }
-  };
-  
-  const startMetronome = async () => {
-    console.log('Metronome: Starting metronome');
-    
-    // Ensure audio is initialized
-    const audioReady = await initializeAudio();
-    if (!audioReady) {
-      console.error('Metronome: Audio not ready');
-      return;
-    }
+  }, [volume]);
 
-    setIsPlaying(true);
-    setCurrentBeat(0);
+  const scheduleNextBeat = useCallback(() => {
+    const audioContext = getAudioContext();
+    if (!audioContext) return;
+
+    const secondsPerBeat = 60.0 / bpm;
     
-    // Play initial click
-    await playMetronomeClick(true);
-    
-    // Set up interval for subsequent beats
-    const intervalMs = (60 / bpm) * 1000;
-    
-    intervalRef.current = window.setInterval(async () => {
-      setCurrentBeat(prev => {
-        const newBeat = (prev + 1) % 4;
-        
-        // Play click sound
-        playMetronomeClick(newBeat === 0);
-        
-        return newBeat;
-      });
-    }, intervalMs);
-    
-    console.log(`Metronome: Started at ${bpm} BPM`);
-  };
-  
-  const stopMetronome = () => {
-    console.log('Metronome: Stopping metronome');
-    setIsPlaying(false);
-    
+    // Schedule beats slightly ahead of time for precision
+    while (nextBeatTime.current < audioContext.currentTime + 0.1) {
+      const isAccent = currentBeat === 0;
+      playClick(isAccent);
+      
+      setCurrentBeat(prevBeat => (prevBeat + 1) % 4);
+      nextBeatTime.current += secondsPerBeat;
+    }
+  }, [bpm, currentBeat, playClick]);
+
+  const start = useCallback(async () => {
+    try {
+      const audioContext = getAudioContext();
+      if (!audioContext) return;
+
+      if (audioContext.state === 'suspended') {
+        await audioContext.resume();
+      }
+
+      nextBeatTime.current = audioContext.currentTime;
+      setCurrentBeat(0);
+      setIsPlaying(true);
+
+      // Use a more precise timing method
+      const tick = () => {
+        scheduleNextBeat();
+        intervalRef.current = requestAnimationFrame(tick);
+      };
+      
+      tick();
+      audioLogger.log(`Metronome started at ${bpm} BPM`);
+    } catch (error) {
+      audioLogger.error('Error starting metronome:', error);
+    }
+  }, [bpm, scheduleNextBeat]);
+
+  const stop = useCallback(() => {
     if (intervalRef.current) {
-      clearInterval(intervalRef.current);
+      cancelAnimationFrame(intervalRef.current);
       intervalRef.current = null;
     }
-  };
-  
-  const handleBpmChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    let value = parseInt(event.target.value);
-    
-    if (isNaN(value)) value = 100;
-    if (value < 40) value = 40;
-    if (value > 240) value = 240;
-    
-    setBpm(value);
-    setActivePreset(null);
-    
-    // If playing, restart with new BPM
+    setIsPlaying(false);
+    setCurrentBeat(0);
+    audioLogger.log('Metronome stopped');
+  }, []);
+
+  const toggle = useCallback(() => {
     if (isPlaying) {
-      stopMetronome();
-      setTimeout(() => startMetronome(), 100);
-    }
-  };
-  
-  const togglePlayback = async () => {
-    console.log('Metronome: Toggle playback, currently playing:', isPlaying);
-    
-    if (isPlaying) {
-      stopMetronome();
+      stop();
     } else {
-      await startMetronome();
+      start();
     }
-  };
-  
-  const savePreset = async () => {
-    if (!isAuthenticated) {
-      toast.error("You must be logged in to save presets");
-      return;
-    }
-    
-    if (!presetName.trim()) {
-      toast.error("Please enter a name for this preset");
-      return;
-    }
-    
-    try {
-      const { error } = await supabase
-        .from('metronome_presets')
-        .insert({
-          label: presetName,
-          bpm: bpm
-        });
-      
-      if (error) throw error;
-      
-      toast.success("Preset saved");
-      setPresetName('');
-      fetchPresets();
-    } catch (error) {
-      console.error('Error saving preset:', error);
-      toast.error("Failed to save preset");
-    }
-  };
-  
-  const deletePreset = async (id: string) => {
-    try {
-      const { error } = await supabase
-        .from('metronome_presets')
-        .delete()
-        .eq('id', id);
-      
-      if (error) throw error;
-      
-      if (activePreset === id) {
-        setActivePreset(null);
-      }
-      
-      toast.success("Preset deleted");
-      fetchPresets();
-    } catch (error) {
-      console.error('Error deleting preset:', error);
-      toast.error("Failed to delete preset");
-    }
-  };
-  
-  const loadPreset = (preset: {id: string, label: string, bpm: number}) => {
-    setBpm(preset.bpm);
-    setActivePreset(preset.id);
-    
-    if (isPlaying) {
-      stopMetronome();
-      setTimeout(() => startMetronome(), 100);
-    }
-  };
+  }, [isPlaying, start, stop]);
+
+  if (!isReady) {
+    return (
+      <div className="flex items-center justify-center p-4">
+        <div className="text-sm text-muted-foreground">Initializing audio...</div>
+      </div>
+    );
+  }
 
   return (
-    <div className="w-full p-2 space-y-4">
-      <div className="flex items-center space-x-4">
-        <div className="flex-1">
-          <label htmlFor="bpm" className="text-sm font-medium leading-none mb-2 block">
-            Tempo: {bpm} BPM
-          </label>
-          <Input 
-            id="bpm"
-            type="number"
-            min={40}
-            max={240}
-            value={bpm}
-            onChange={handleBpmChange}
-            className="w-full"
-          />
+    <Card className="w-full max-w-sm mx-auto">
+      <CardContent className="p-6">
+        <div className="text-center mb-6">
+          <div className="text-3xl font-mono font-bold mb-2">{bpm}</div>
+          <div className="text-sm text-muted-foreground">BPM</div>
         </div>
-        
-        <Button 
-          onClick={togglePlayback}
-          variant={isPlaying ? "default" : "outline"}
-          size="sm"
-          className="h-10"
-          disabled={!isInitialized}
-        >
-          {isPlaying ? (
-            <Pause className="mr-1 h-4 w-4" />
-          ) : (
-            <Play className="mr-1 h-4 w-4" />
-          )}
-          {isPlaying ? "Stop" : "Start"}
-        </Button>
-      </div>
-      
-      <div className="flex items-center gap-2">
-        <span className="text-sm">Volume:</span>
-        <Slider 
-          value={[volume]} 
-          max={1} 
-          step={0.01}
-          onValueChange={([val]) => setVolume(val)} 
-          className="flex-1" 
-        />
-      </div>
-      
-      <div className="grid grid-cols-4 gap-2 h-8">
-        {[0, 1, 2, 3].map((beat) => (
-          <div 
-            key={beat}
-            className={`
-              rounded-full transition-colors
-              ${currentBeat === beat && isPlaying 
-                ? beat === 0 
-                  ? 'bg-primary animate-pulse' 
-                  : 'bg-secondary animate-pulse' 
-                : 'bg-muted'}
-            `}
-          />
-        ))}
-      </div>
-      
-      {/* Save preset - only show when authenticated */}
-      {isAuthenticated && (
-        <div className="flex gap-2">
-          <Input 
-            placeholder="Preset name"
-            value={presetName}
-            onChange={(e) => setPresetName(e.target.value)}
-            className="flex-1"
-          />
-          <Button 
-            onClick={savePreset} 
-            disabled={!presetName.trim()} 
-            variant="outline"
-          >
-            <Save className="mr-1 h-4 w-4" />
-            Save
-          </Button>
-        </div>
-      )}
-      
-      {/* Saved presets - only show when authenticated */}
-      {isAuthenticated && presets.length > 0 && (
-        <div className="space-y-2">
-          <h3 className="text-sm font-medium">Saved Presets</h3>
-          <div className="max-h-40 overflow-y-auto space-y-2">
-            {presets.map((preset) => (
-              <div 
-                key={preset.id} 
-                className={`
-                  flex items-center justify-between border rounded p-2 cursor-pointer
-                  ${activePreset === preset.id ? 'border-primary bg-primary/10' : ''}
-                `}
-                onClick={() => loadPreset(preset)}
-              >
-                <div className="flex items-center gap-2">
-                  <Play className="h-4 w-4" />
-                  <span className="text-sm">{preset.label}</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <span className="text-xs font-medium">{preset.bpm} BPM</span>
-                  <Button 
-                    variant="ghost" 
-                    size="icon" 
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      deletePreset(preset.id);
-                    }}
-                    className="h-6 w-6"
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
-                </div>
-              </div>
-            ))}
+
+        <div className="space-y-4 mb-6">
+          <div>
+            <label className="text-sm font-medium mb-2 block">Tempo</label>
+            <Slider
+              value={[bpm]}
+              onValueChange={(values) => setBpm(values[0])}
+              min={60}
+              max={200}
+              step={1}
+              className="w-full"
+            />
+            <div className="flex justify-between text-xs text-muted-foreground mt-1">
+              <span>60</span>
+              <span>200</span>
+            </div>
+          </div>
+
+          <div>
+            <label className="text-sm font-medium mb-2 block flex items-center gap-1">
+              <Volume2 className="h-3 w-3" />
+              Volume
+            </label>
+            <Slider
+              value={[volume * 100]}
+              onValueChange={(values) => setVolume(values[0] / 100)}
+              min={0}
+              max={100}
+              step={1}
+              className="w-full"
+            />
           </div>
         </div>
-      )}
-    </div>
+
+        <div className="flex justify-center mb-4">
+          <Button
+            onClick={toggle}
+            variant={isPlaying ? "destructive" : "default"}
+            size="lg"
+            className="w-16 h-16 rounded-full"
+          >
+            {isPlaying ? (
+              <Pause className="h-6 w-6" />
+            ) : (
+              <Play className="h-6 w-6" />
+            )}
+          </Button>
+        </div>
+
+        <div className="flex justify-center space-x-2 mb-4">
+          {[0, 1, 2, 3].map((beat) => (
+            <div
+              key={beat}
+              className={`w-3 h-3 rounded-full transition-colors ${
+                isPlaying && currentBeat === beat
+                  ? beat === 0 ? 'bg-red-500' : 'bg-blue-500'
+                  : 'bg-gray-300'
+              }`}
+            />
+          ))}
+        </div>
+
+        {onClose && (
+          <div className="flex justify-center">
+            <Button variant="ghost" size="sm" onClick={onClose}>
+              Close
+            </Button>
+          </div>
+        )}
+      </CardContent>
+    </Card>
   );
 }
