@@ -22,13 +22,11 @@ const PIANO_KEYS = [
   { note: 'B', isSharp: false }
 ];
 
-// Pre-calculate frequencies for quick access
 const calculateFrequencies = () => {
   const freqMap: Record<string, number[]> = {};
   for (const key of PIANO_KEYS) {
     freqMap[key.note] = [];
     for (let oct = 1; oct <= 7; oct++) {
-      // Calculate frequency: C4 (middle C) = 261.63 Hz
       const baseFreq = {
         'C': 261.63, 'C#': 277.18, 'D': 293.66, 'D#': 311.13,
         'E': 329.63, 'F': 349.23, 'F#': 369.99, 'G': 392.00,
@@ -55,6 +53,8 @@ export function PianoKeyboard({ onClose, audioContextRef }: PianoKeyboardProps) 
   const [keySize, setKeySize] = useState<KeySizeOption>('medium');
   const [volume, setVolume] = useState(0.7);
   const [activeNotes, setActiveNotes] = useState<Set<string>>(new Set());
+  const [isInitialized, setIsInitialized] = useState(false);
+  
   const isMobile = useIsMobile();
   const isSmallMobile = useIsSmallMobile();
   const localAudioContextRef = useRef<AudioContext | null>(null);
@@ -62,55 +62,30 @@ export function PianoKeyboard({ onClose, audioContextRef }: PianoKeyboardProps) 
   const keyboardRef = useRef<HTMLDivElement>(null);
   
   // Get or create audio context
-  const getAudioContext = (): AudioContext => {
+  const getAudioContext = (): AudioContext | null => {
     if (audioContextRef?.current) {
       return audioContextRef.current;
     }
     
     if (!localAudioContextRef.current) {
-      localAudioContextRef.current = createAudioContext();
+      try {
+        localAudioContextRef.current = createAudioContext();
+        console.log('PianoKeyboard: Created audio context with state:', localAudioContextRef.current.state);
+      } catch (error) {
+        console.error('PianoKeyboard: Failed to create audio context:', error);
+        return null;
+      }
     }
     
     return localAudioContextRef.current;
   };
   
-  // Determine key size dimensions based on selected size and screen size
-  const getKeySizes = () => {
-    let whiteKeyHeight = 120;
-    let blackKeyHeight = 72;
-    
-    if (isSmallMobile) {
-      whiteKeyHeight = 100;
-      blackKeyHeight = 60;
-    } else if (isMobile) {
-      whiteKeyHeight = 110;
-      blackKeyHeight = 66;
-    }
-    
-    const sizeModifiers = {
-      small: 0.75,
-      medium: 1,
-      large: 1.25
-    };
-    
-    const modifier = sizeModifiers[keySize];
-    
-    return {
-      whiteKeyHeight: Math.round(whiteKeyHeight * modifier),
-      blackKeyHeight: Math.round(blackKeyHeight * modifier)
-    };
-  };
-  
-  const { whiteKeyHeight, blackKeyHeight } = getKeySizes();
-  
   // Initialize audio context
   useEffect(() => {
-    if (!audioContextRef?.current) {
-      localAudioContextRef.current = createAudioContext();
-      
-      if (localAudioContextRef.current && 'audioWorklet' in localAudioContextRef.current) {
-        localAudioContextRef.current.resume().catch(console.error);
-      }
+    const audioContext = getAudioContext();
+    if (audioContext) {
+      setIsInitialized(true);
+      console.log('PianoKeyboard: Audio context initialized');
     }
     
     return () => {
@@ -139,12 +114,52 @@ export function PianoKeyboard({ onClose, audioContextRef }: PianoKeyboardProps) 
     }
   }, [keySize]);
   
-  // Play piano note
-  const playNote = (note: string, octave: number) => {
-    const ctx = getAudioContext();
+  // Determine key size dimensions
+  const getKeySizes = () => {
+    let whiteKeyHeight = 120;
+    let blackKeyHeight = 72;
     
-    if (ctx.state === 'suspended') {
-      resumeAudioContext(ctx).catch(console.error);
+    if (isSmallMobile) {
+      whiteKeyHeight = 100;
+      blackKeyHeight = 60;
+    } else if (isMobile) {
+      whiteKeyHeight = 110;
+      blackKeyHeight = 66;
+    }
+    
+    const sizeModifiers = {
+      small: 0.75,
+      medium: 1,
+      large: 1.25
+    };
+    
+    const modifier = sizeModifiers[keySize];
+    
+    return {
+      whiteKeyHeight: Math.round(whiteKeyHeight * modifier),
+      blackKeyHeight: Math.round(blackKeyHeight * modifier)
+    };
+  };
+  
+  const { whiteKeyHeight, blackKeyHeight } = getKeySizes();
+  
+  // Play piano note
+  const playNote = async (note: string, octave: number) => {
+    const audioContext = getAudioContext();
+    if (!audioContext) {
+      console.error('PianoKeyboard: No audio context available');
+      return;
+    }
+    
+    // Resume context if suspended
+    if (audioContext.state === 'suspended') {
+      try {
+        await audioContext.resume();
+        console.log('PianoKeyboard: Audio context resumed');
+      } catch (error) {
+        console.error('PianoKeyboard: Failed to resume audio context:', error);
+        return;
+      }
     }
     
     const noteKey = `${note}-${octave}`;
@@ -154,20 +169,26 @@ export function PianoKeyboard({ onClose, audioContextRef }: PianoKeyboardProps) 
       return;
     }
     
-    const osc = ctx.createOscillator();
-    const gain = ctx.createGain();
-    
-    osc.frequency.value = NOTE_FREQUENCIES[note][octave];
-    osc.type = 'sine';
-    gain.gain.value = volume;
-    
-    osc.connect(gain);
-    gain.connect(ctx.destination);
-    
-    osc.start();
-    
-    oscillatorsRef.current.set(noteKey, { oscillator: osc, gain });
-    setActiveNotes(prev => new Set([...prev, noteKey]));
+    try {
+      const osc = audioContext.createOscillator();
+      const gain = audioContext.createGain();
+      
+      osc.frequency.value = NOTE_FREQUENCIES[note][octave];
+      osc.type = 'sine';
+      gain.gain.value = volume;
+      
+      osc.connect(gain);
+      gain.connect(audioContext.destination);
+      
+      osc.start();
+      
+      oscillatorsRef.current.set(noteKey, { oscillator: osc, gain });
+      setActiveNotes(prev => new Set([...prev, noteKey]));
+      
+      console.log(`PianoKeyboard: Playing ${noteKey} at ${NOTE_FREQUENCIES[note][octave]}Hz`);
+    } catch (error) {
+      console.error('PianoKeyboard: Error playing note:', error);
+    }
   };
   
   // Stop a specific note
@@ -176,11 +197,13 @@ export function PianoKeyboard({ onClose, audioContextRef }: PianoKeyboardProps) 
     if (nodes) {
       try {
         const { oscillator, gain } = nodes;
-        const ctx = getAudioContext();
+        const audioContext = getAudioContext();
         
-        // Quick fade out
-        gain.gain.setValueAtTime(gain.gain.value, ctx.currentTime);
-        gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 0.1);
+        if (audioContext) {
+          // Quick fade out
+          gain.gain.setValueAtTime(gain.gain.value, audioContext.currentTime);
+          gain.gain.exponentialRampToValueAtTime(0.0001, audioContext.currentTime + 0.1);
+        }
         
         setTimeout(() => {
           try {
@@ -198,8 +221,10 @@ export function PianoKeyboard({ onClose, audioContextRef }: PianoKeyboardProps) 
           newSet.delete(noteKey);
           return newSet;
         });
+        
+        console.log(`PianoKeyboard: Stopped ${noteKey}`);
       } catch (e) {
-        console.error('Error stopping note:', e);
+        console.error('PianoKeyboard: Error stopping note:', e);
       }
     }
   };

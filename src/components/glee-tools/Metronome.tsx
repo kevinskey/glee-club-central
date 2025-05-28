@@ -14,7 +14,6 @@ interface MetronomeProps {
 }
 
 export function Metronome({ onClose }: MetronomeProps) {
-  // Metronome state
   const [bpm, setBpm] = useState<number>(100);
   const [isPlaying, setIsPlaying] = useState<boolean>(false);
   const [volume, setVolume] = useState<number>(0.5);
@@ -22,106 +21,72 @@ export function Metronome({ onClose }: MetronomeProps) {
   const [presets, setPresets] = useState<{id: string, label: string, bpm: number}[]>([]);
   const [activePreset, setActivePreset] = useState<string | null>(null);
   const [currentBeat, setCurrentBeat] = useState<number>(0);
+  const [isInitialized, setIsInitialized] = useState<boolean>(false);
   
-  // Refs for managing timing and audio
   const audioContextRef = useRef<AudioContext | null>(null);
   const intervalRef = useRef<number | null>(null);
-  const isInitializedRef = useRef<boolean>(false);
   
-  // Auth - Try to use auth context, fallback to false if not available
+  // Auth context
   let isAuthenticated = false;
   try {
     const auth = useAuth();
     isAuthenticated = auth.isAuthenticated;
   } catch (error) {
-    // Auth context is not available, continue with isAuthenticated = false
-    console.log("Auth context not available, operating in guest mode");
+    console.log("Metronome: Auth context not available, operating in guest mode");
   }
   
   // Initialize audio context
-  useEffect(() => {
+  const initializeAudio = async () => {
     if (!audioContextRef.current) {
       try {
         audioContextRef.current = createAudioContext();
         console.log('Metronome: Audio context created with state:', audioContextRef.current.state);
+        
+        if (audioContextRef.current.state === 'suspended') {
+          await audioContextRef.current.resume();
+          console.log('Metronome: Audio context resumed');
+        }
+        
+        setIsInitialized(true);
+        return true;
       } catch (error) {
-        toast.error("WebAudio API is not supported in this browser");
-        console.error("Error creating audio context:", error);
+        console.error("Metronome: Failed to create audio context:", error);
+        toast.error("Audio system not available");
+        return false;
       }
     }
     
-    // Initialize with a silent sound to unlock audio on iOS
-    const unlockAudio = () => {
-      if (audioContextRef.current && !isInitializedRef.current) {
-        // Resume context if suspended
-        if (audioContextRef.current.state === 'suspended') {
-          audioContextRef.current.resume().then(() => {
-            console.log('Audio context resumed');
-            isInitializedRef.current = true;
-          }).catch(e => console.error('Failed to resume audio context:', e));
-        }
-        
-        // Play silent sound
-        try {
-          const oscillator = audioContextRef.current.createOscillator();
-          const gainNode = audioContextRef.current.createGain();
-          gainNode.gain.value = 0.00001; // Nearly silent
-          oscillator.connect(gainNode);
-          gainNode.connect(audioContextRef.current.destination);
-          oscillator.start(0);
-          oscillator.stop(audioContextRef.current.currentTime + 0.001);
-          isInitializedRef.current = true;
-        } catch (e) {
-          console.error('Error during audio initialization:', e);
-        }
+    if (audioContextRef.current.state === 'suspended') {
+      try {
+        await audioContextRef.current.resume();
+        console.log('Metronome: Audio context resumed');
+      } catch (error) {
+        console.error("Metronome: Failed to resume audio context:", error);
+        return false;
       }
-    };
+    }
     
-    // Initialize immediately and attach to document
-    unlockAudio();
-    document.addEventListener('click', unlockAudio);
-    document.addEventListener('touchstart', unlockAudio);
+    return true;
+  };
+
+  // Initialize on mount
+  useEffect(() => {
+    initializeAudio();
     
     return () => {
       stopMetronome();
-      document.removeEventListener('click', unlockAudio);
-      document.removeEventListener('touchstart', unlockAudio);
+      if (audioContextRef.current && audioContextRef.current.state !== 'closed') {
+        audioContextRef.current.close().catch(console.error);
+      }
     };
   }, []);
   
-  // Load user's presets
+  // Load presets
   useEffect(() => {
     if (isAuthenticated) {
       fetchPresets();
     }
   }, [isAuthenticated]);
-  
-  // Clean up when component unmounts
-  useEffect(() => {
-    return () => {
-      stopMetronome();
-      
-      if (audioContextRef.current && audioContextRef.current.state !== 'closed') {
-        try {
-          audioContextRef.current.close().catch(console.error);
-        } catch (e) {
-          // Ignore closing errors
-        }
-      }
-    };
-  }, []);
-  
-  // Handle keyboard shortcuts
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "Escape" && onClose) {
-        onClose();
-      }
-    };
-    
-    window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [onClose]);
   
   const fetchPresets = async () => {
     if (!isAuthenticated) return;
@@ -139,61 +104,78 @@ export function Metronome({ onClose }: MetronomeProps) {
       console.error('Error fetching presets:', error);
     }
   };
-  
-  const startMetronome = () => {
+
+  // Play metronome click
+  const playMetronomeClick = async (isAccent: boolean = false) => {
     if (!audioContextRef.current) {
-      console.error('Audio context not available');
-      toast.error("Audio system not ready. Please try again.");
+      console.log('Metronome: No audio context available for click');
       return;
     }
-    
-    if (audioContextRef.current.state === 'suspended') {
-      resumeAudioContext(audioContextRef.current)
-        .then(resumed => {
-          if (resumed) {
-            console.log('Audio context resumed successfully');
-            beginMetronome();
-          } else {
-            console.error('Failed to resume audio context');
-            toast.error("Please tap anywhere on the screen to enable audio");
-          }
-        })
-        .catch(err => {
-          console.error('Error resuming audio context:', err);
-          toast.error("Audio error. Please reload the page.");
-        });
-    } else {
-      beginMetronome();
+
+    try {
+      // Create oscillator and gain node
+      const oscillator = audioContextRef.current.createOscillator();
+      const gainNode = audioContextRef.current.createGain();
+
+      // Configure sound
+      oscillator.type = 'sine';
+      oscillator.frequency.value = isAccent ? 800 : 600;
+      gainNode.gain.value = volume * (isAccent ? 1.2 : 1.0);
+
+      // Connect audio graph
+      oscillator.connect(gainNode);
+      gainNode.connect(audioContextRef.current.destination);
+
+      // Create envelope
+      const now = audioContextRef.current.currentTime;
+      gainNode.gain.setValueAtTime(gainNode.gain.value, now);
+      gainNode.gain.exponentialRampToValueAtTime(0.001, now + 0.1);
+
+      // Play
+      oscillator.start(now);
+      oscillator.stop(now + 0.1);
+
+      console.log(`Metronome: Played ${isAccent ? 'accent' : 'regular'} click`);
+    } catch (error) {
+      console.error('Metronome: Error playing click:', error);
     }
   };
   
-  const beginMetronome = () => {
+  const startMetronome = async () => {
+    console.log('Metronome: Starting metronome');
+    
+    // Ensure audio is initialized
+    const audioReady = await initializeAudio();
+    if (!audioReady) {
+      console.error('Metronome: Audio not ready');
+      return;
+    }
+
     setIsPlaying(true);
     setCurrentBeat(0);
     
     // Play initial click
-    if (audioContextRef.current) {
-      playClick(audioContextRef.current, true, volume);
-    }
+    await playMetronomeClick(true);
     
-    // Use setInterval for more reliable timing
-    const beatInterval = 60000 / bpm; // milliseconds per beat
+    // Set up interval for subsequent beats
+    const intervalMs = (60 / bpm) * 1000;
     
-    intervalRef.current = window.setInterval(() => {
+    intervalRef.current = window.setInterval(async () => {
       setCurrentBeat(prev => {
         const newBeat = (prev + 1) % 4;
         
         // Play click sound
-        if (audioContextRef.current) {
-          playClick(audioContextRef.current, newBeat === 0, volume);
-        }
+        playMetronomeClick(newBeat === 0);
         
         return newBeat;
       });
-    }, beatInterval);
+    }, intervalMs);
+    
+    console.log(`Metronome: Started at ${bpm} BPM`);
   };
   
   const stopMetronome = () => {
+    console.log('Metronome: Stopping metronome');
     setIsPlaying(false);
     
     if (intervalRef.current) {
@@ -215,34 +197,17 @@ export function Metronome({ onClose }: MetronomeProps) {
     // If playing, restart with new BPM
     if (isPlaying) {
       stopMetronome();
-      // Small delay to ensure cleanup
-      setTimeout(() => startMetronome(), 50);
+      setTimeout(() => startMetronome(), 100);
     }
   };
   
-  const togglePlayback = () => {
-    // Check audio context and try to initialize if needed
-    if (!audioContextRef.current) {
-      try {
-        audioContextRef.current = createAudioContext();
-      } catch (error) {
-        console.error("Failed to create audio context:", error);
-        toast.error("Audio system not available");
-        return;
-      }
-    }
-    
-    // Unlock audio on iOS/Safari with user gesture
-    if (audioContextRef.current && audioContextRef.current.state === 'suspended') {
-      audioContextRef.current.resume().catch(err => {
-        console.error("Failed to resume audio context:", err);
-      });
-    }
+  const togglePlayback = async () => {
+    console.log('Metronome: Toggle playback, currently playing:', isPlaying);
     
     if (isPlaying) {
       stopMetronome();
     } else {
-      startMetronome();
+      await startMetronome();
     }
   };
   
@@ -303,13 +268,12 @@ export function Metronome({ onClose }: MetronomeProps) {
     
     if (isPlaying) {
       stopMetronome();
-      setTimeout(() => startMetronome(), 50);
+      setTimeout(() => startMetronome(), 100);
     }
   };
 
   return (
     <div className="w-full p-2 space-y-4">
-      {/* BPM control */}
       <div className="flex items-center space-x-4">
         <div className="flex-1">
           <label htmlFor="bpm" className="text-sm font-medium leading-none mb-2 block">
@@ -331,6 +295,7 @@ export function Metronome({ onClose }: MetronomeProps) {
           variant={isPlaying ? "default" : "outline"}
           size="sm"
           className="h-10"
+          disabled={!isInitialized}
         >
           {isPlaying ? (
             <Pause className="mr-1 h-4 w-4" />
@@ -341,7 +306,6 @@ export function Metronome({ onClose }: MetronomeProps) {
         </Button>
       </div>
       
-      {/* Volume slider */}
       <div className="flex items-center gap-2">
         <span className="text-sm">Volume:</span>
         <Slider 
@@ -353,7 +317,6 @@ export function Metronome({ onClose }: MetronomeProps) {
         />
       </div>
       
-      {/* Visual indicator */}
       <div className="grid grid-cols-4 gap-2 h-8">
         {[0, 1, 2, 3].map((beat) => (
           <div 
