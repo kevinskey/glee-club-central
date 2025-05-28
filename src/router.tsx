@@ -150,10 +150,10 @@ export const router = createBrowserRouter([
           },
         ],
       },
-      // Admin routes with role-based protection
+      // Admin routes with role-based protection - FIXED STRUCTURE
       {
         path: '/admin',
-        element: <RoleBasedLayout requiredRole="admin"><DashboardLayout /></RoleBasedLayout>,
+        element: <RequireAuth><RoleBasedLayout requiredRole="admin"><DashboardLayout /></RoleBasedLayout></RequireAuth>,
         children: [
           {
             index: true,

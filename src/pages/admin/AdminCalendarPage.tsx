@@ -11,7 +11,7 @@ import { Calendar, Plus, Edit, Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
 
 export default function AdminCalendarPage() {
-  const { events, loading, createEvent, updateEvent, deleteEvent } = useCalendarEvents();
+  const { events, loading, error, createEvent, updateEvent, deleteEvent } = useCalendarEvents();
   const [selectedEvent, setSelectedEvent] = useState<CalendarEvent | null>(null);
   const [editingEvent, setEditingEvent] = useState<CalendarEvent | null>(null);
   const [isCreating, setIsCreating] = useState(false);
@@ -34,6 +34,7 @@ export default function AdminCalendarPage() {
       setEditingEvent(null);
       setIsCreating(false);
     } catch (error) {
+      console.error('Error saving event:', error);
       toast.error('Failed to save event');
     }
   };
@@ -46,6 +47,7 @@ export default function AdminCalendarPage() {
         setSelectedEvent(null);
         setIsDialogOpen(false);
       } catch (error) {
+        console.error('Error deleting event:', error);
         toast.error('Failed to delete event');
       }
     }
@@ -61,6 +63,21 @@ export default function AdminCalendarPage() {
         />
         <div className="flex items-center justify-center h-64">
           <div className="text-muted-foreground">Loading calendar...</div>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="container mx-auto p-6">
+        <PageHeader
+          title="Calendar Management"
+          description="Manage all events and calendar settings"
+          icon={<Calendar className="h-6 w-6" />}
+        />
+        <div className="flex items-center justify-center h-64">
+          <div className="text-red-600">Error loading calendar: {error}</div>
         </div>
       </div>
     );
@@ -98,7 +115,7 @@ export default function AdminCalendarPage() {
       />
 
       {selectedEvent && isDialogOpen && (
-        <div className="fixed bottom-4 right-4 flex gap-2">
+        <div className="fixed bottom-4 right-4 flex gap-2 z-50">
           <Button
             variant="outline"
             onClick={() => {
