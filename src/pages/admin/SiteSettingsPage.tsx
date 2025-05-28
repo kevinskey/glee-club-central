@@ -32,21 +32,30 @@ import { useSiteSettings } from "@/hooks/useSiteSettings";
 import { toast } from "sonner";
 
 const SiteSettingsPage = () => {
+  console.log('SiteSettingsPage component is rendering');
+  
   const { isAdmin, isLoading, isAuthenticated } = useAuth();
   const { settings, updateSetting, loading, error } = useSiteSettings();
   
+  console.log('Auth state:', { isAdmin: isAdmin?.(), isLoading, isAuthenticated });
+  console.log('Settings state:', { settings, loading, error });
+  
   // Redirect if user is not authenticated or not an admin
   if (!isLoading && (!isAuthenticated || !isAdmin())) {
+    console.log('Redirecting to dashboard - not admin');
     return <Navigate to="/dashboard" />;
   }
   
   if (isLoading || loading) {
+    console.log('Showing loading state');
     return (
       <div className="flex items-center justify-center min-h-[60vh]">
         <div className="h-8 w-8 rounded-full border-4 border-primary border-t-transparent animate-spin"></div>
       </div>
     );
   }
+
+  console.log('Rendering main content');
 
   const handleNationalHolidaysToggle = async (enabled: boolean) => {
     try {
