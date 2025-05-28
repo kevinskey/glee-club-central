@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -15,10 +14,44 @@ export function GoogleCalendarAuthIntegrated({ onConnectionChange }: GoogleCalen
   const [status, setStatus] = useState<'checking' | 'connected' | 'disconnected' | 'expired'>('checking');
   const [isLoading, setIsLoading] = useState(false);
   const [expiresAt, setExpiresAt] = useState<string | null>(null);
+  const [googleToken, setGoogleToken] = useState<string | null>(null);
 
   const checkConnectionStatus = async () => {
     setIsLoading(true);
     try {
+      // First check if we have a stored Google token
+      const storedToken = localStorage.getItem('google_access_token');
+      console.log("Stored Google token found:", !!storedToken);
+      setGoogleToken(storedToken);
+
+      if (storedToken) {
+        // Test the stored token by making a direct API call
+        try {
+          const response = await fetch('https://www.googleapis.com/calendar/v3/users/me/calendarList', {
+            headers: {
+              'Authorization': `Bearer ${storedToken}`,
+            },
+          });
+          
+          if (response.ok) {
+            console.log("Google token is valid");
+            setStatus('connected');
+            onConnectionChange?.(true);
+            setIsLoading(false);
+            return;
+          } else {
+            console.log("Google token is invalid, removing from storage");
+            localStorage.removeItem('google_access_token');
+            setGoogleToken(null);
+          }
+        } catch (error) {
+          console.error("Error testing Google token:", error);
+          localStorage.removeItem('google_access_token');
+          setGoogleToken(null);
+        }
+      }
+
+      // Fallback to checking with Supabase session
       const { data: { session }, error: sessionError } = await supabase.auth.getSession();
       
       if (sessionError || !session?.access_token) {
@@ -129,6 +162,8 @@ export function GoogleCalendarAuthIntegrated({ onConnectionChange }: GoogleCalen
           
           // Store the Google access token
           localStorage.setItem('google_access_token', access_token);
+          setGoogleToken(access_token);
+          console.log("Stored Google token in localStorage");
           
           // Close popup and check connection
           popup.close();
@@ -169,6 +204,8 @@ export function GoogleCalendarAuthIntegrated({ onConnectionChange }: GoogleCalen
       
       // Remove stored Google token
       localStorage.removeItem('google_access_token');
+      setGoogleToken(null);
+      console.log("Removed Google token from localStorage");
       
       const { data: { session }, error: sessionError } = await supabase.auth.getSession();
       if (sessionError || !session?.access_token) {
@@ -204,8 +241,10 @@ export function GoogleCalendarAuthIntegrated({ onConnectionChange }: GoogleCalen
   };
 
   const callSupabaseWithStoredToken = async () => {
-    const googleToken = localStorage.getItem('google_access_token');
-    if (!googleToken) {
+    const token = googleToken || localStorage.getItem('google_access_token');
+    console.log("Attempting to call Supabase with token:", !!token);
+    
+    if (!token) {
       toast.error("No Google access token found. Please reconnect.");
       return;
     }
@@ -217,13 +256,22 @@ export function GoogleCalendarAuthIntegrated({ onConnectionChange }: GoogleCalen
       const { data, error } = await supabase.functions.invoke('google-calendar-auth', {
         body: { action: 'list_calendars' },
         headers: {
-          'Authorization': `Bearer ${googleToken}`,
+          'Authorization': `Bearer ${token}`,
         }
       });
 
       if (error) {
         console.error("Supabase call failed:", error);
-        toast.error("Error calling Supabase function");
+        
+        // If token is invalid, remove it and ask user to reconnect
+        if (error.message?.includes('401') || error.message?.includes('invalid')) {
+          localStorage.removeItem('google_access_token');
+          setGoogleToken(null);
+          setStatus('disconnected');
+          toast.error("Google token expired. Please reconnect.");
+        } else {
+          toast.error("Error calling Supabase function");
+        }
         return;
       }
 
@@ -243,8 +291,12 @@ export function GoogleCalendarAuthIntegrated({ onConnectionChange }: GoogleCalen
 
   useEffect(() => {
     const checkAuth = async () => {
+      // Check for stored Google token first
+      const storedToken = localStorage.getItem('google_access_token');
+      setGoogleToken(storedToken);
+      
       const { data: { session } } = await supabase.auth.getSession();
-      if (session?.access_token) {
+      if (session?.access_token || storedToken) {
         checkConnectionStatus();
       } else {
         setStatus('disconnected');
@@ -306,6 +358,12 @@ export function GoogleCalendarAuthIntegrated({ onConnectionChange }: GoogleCalen
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
+        {googleToken && (
+          <p className="text-sm text-muted-foreground">
+            Token stored: {googleToken.substring(0, 20)}...
+          </p>
+        )}
+        
         {expiresAt && status === 'connected' && (
           <p className="text-sm text-muted-foreground">
             Token expires: {new Date(expiresAt).toLocaleDateString()}
@@ -313,7 +371,7 @@ export function GoogleCalendarAuthIntegrated({ onConnectionChange }: GoogleCalen
         )}
         
         <div className="flex gap-2 flex-wrap">
-          {status === 'connected' ? (
+          {status === 'connected' || googleToken ? (
             <>
               <Button
                 variant="outline"
