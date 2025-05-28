@@ -3,7 +3,7 @@ import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 // Google OAuth credentials from environment
-const GOOGLE_OAUTH_CLIENT_ID = Deno.env.get("GOOGLE_OAUTH_CLIENT_ID");
+const GOOGLE_OAUTH_CLIENT_ID = Deno.env.get("GOOGLE_OAUTH_CLIENT_ID") || "774938147540-usqdo6ttbg1f7hhqcp5n12h7qh3mkp18.apps.googleusercontent.com";
 const GOOGLE_OAUTH_CLIENT_SECRET = Deno.env.get("GOOGLE_OAUTH_CLIENT_SECRET");
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL");
 
@@ -253,7 +253,7 @@ serve(async (req) => {
         JSON.stringify({ 
           error: 'Action is required and must be a non-empty string',
           received: requestData,
-          validActions: ['get_auth_url', 'check_connection', 'list_calendars', 'fetch_events', 'disconnect']
+          validActions: ['generate_oauth_url', 'check_connection', 'list_calendars', 'fetch_events', 'disconnect']
         }),
         { 
           status: 400, 
@@ -292,7 +292,7 @@ serve(async (req) => {
     };
     
     switch (action.toLowerCase().trim()) {
-      case 'get_auth_url':
+      case 'generate_oauth_url':
         console.log("Generating auth URL for user:", user.id);
         
         // Check for missing credentials
@@ -558,7 +558,7 @@ serve(async (req) => {
         return new Response(
           JSON.stringify({ 
             error: `Unknown action: ${action}`,
-            validActions: ['get_auth_url', 'check_connection', 'list_calendars', 'fetch_events', 'disconnect']
+            validActions: ['generate_oauth_url', 'check_connection', 'list_calendars', 'fetch_events', 'disconnect']
           }),
           { 
             status: 400, 
