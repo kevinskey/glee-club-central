@@ -32,7 +32,7 @@ export function CalendarSelector({ selectedCalendarId, onCalendarSelect, isConne
     try {
       const { data: { session }, error: sessionError } = await supabase.auth.getSession();
       
-      if (sessionError || !session) {
+      if (sessionError || !session?.access_token) {
         console.error("No valid session");
         return;
       }
@@ -40,7 +40,10 @@ export function CalendarSelector({ selectedCalendarId, onCalendarSelect, isConne
       console.log("Loading calendars with action: list_calendars");
 
       const { data, error } = await supabase.functions.invoke('google-calendar-auth', { 
-        body: { action: 'list_calendars' } 
+        body: { action: 'list_calendars' },
+        headers: {
+          'Authorization': `Bearer ${session.access_token}`,
+        }
       });
 
       if (error) {

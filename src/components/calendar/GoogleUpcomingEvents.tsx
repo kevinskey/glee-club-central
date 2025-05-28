@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -24,7 +23,7 @@ export function GoogleUpcomingEvents({ isConnected, selectedCalendarId = 'primar
     try {
       const { data: { session }, error: sessionError } = await supabase.auth.getSession();
       
-      if (sessionError || !session) {
+      if (sessionError || !session?.access_token) {
         console.error("No valid session");
         toast.error("Please log in to fetch events");
         return;
@@ -36,6 +35,9 @@ export function GoogleUpcomingEvents({ isConnected, selectedCalendarId = 'primar
         body: {
           action: 'fetch_events',
           calendar_id: selectedCalendarId
+        },
+        headers: {
+          'Authorization': `Bearer ${session.access_token}`,
         }
       });
 
