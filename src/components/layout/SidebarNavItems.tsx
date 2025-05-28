@@ -5,7 +5,6 @@ import { useMediaLibrary } from '@/hooks/useMediaLibrary';
 import { useLocation } from 'react-router-dom';
 
 import {
-  CalendarDays,
   FileText,
   Home,
   Music,
@@ -48,10 +47,6 @@ export function SidebarNavItems() {
       
       <div className="px-3 py-2">
         <h3 className="mb-2 px-4 text-xs font-medium">Menu</h3>
-        <a href="/dashboard/calendar" className={`flex items-center gap-3 rounded-md px-3 py-2 text-sm transition-colors ${isActive('/dashboard/calendar') ? 'bg-accent text-accent-foreground' : 'hover:bg-accent hover:text-accent-foreground'}`}>
-          <CalendarDays className="h-4 w-4" />
-          Calendar
-        </a>
         
         <a href="/dashboard/sheet-music" className={`flex items-center gap-3 rounded-md px-3 py-2 text-sm transition-colors ${isActive('/dashboard/sheet-music') ? 'bg-accent text-accent-foreground' : 'hover:bg-accent hover:text-accent-foreground'}`}>
           <FileText className="h-4 w-4" />

@@ -5,10 +5,9 @@ import { useAuth } from "@/contexts/AuthContext";
 import { UpcomingEventsList } from "@/components/calendar/UpcomingEventsList";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Link as RouterLink } from "react-router-dom";
-import { Calendar, Music, Bell } from "lucide-react";
+import { Music, Bell } from "lucide-react";
 import {
   Music as MusicIcon,
-  Calendar as CalendarIcon,
   MessageSquare,
   DollarSign,
   Bell as BellIcon,
@@ -19,10 +18,9 @@ import {
 export default function MemberDashboardPage() {
   const { profile } = useAuth();
 
-  // Custom quick access items for members
+  // Custom quick access items for members (removed calendar)
   const memberQuickAccessLinks = [
     { icon: MusicIcon, title: "Sheet Music", path: "/dashboard/sheet-music", color: "bg-purple-500" },
-    { icon: CalendarIcon, title: "Calendar", path: "/dashboard/calendar", color: "bg-green-500" },
     { icon: MessageSquare, title: "Messaging", path: "/dashboard/messaging", color: "bg-blue-500" },
     { icon: DollarSign, title: "Finance", path: "/dashboard/finances", color: "bg-emerald-500" },
     { icon: BellIcon, title: "Announcements", path: "/dashboard/announcements", color: "bg-red-500" },
@@ -43,7 +41,7 @@ export default function MemberDashboardPage() {
           <CardTitle>Quick Access</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
             {memberQuickAccessLinks.map((link, index) => (
               <RouterLink 
                 key={index} 
@@ -69,18 +67,6 @@ export default function MemberDashboardPage() {
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center">
-              <Calendar className="mr-2 h-5 w-5" />
-              Upcoming Events
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <UpcomingEventsList limit={3} />
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center">
               <Bell className="mr-2 h-5 w-5" />
               Recent Announcements
             </CardTitle>
@@ -100,6 +86,31 @@ export default function MemberDashboardPage() {
                   Practice tracks for "Ave Maria" have been uploaded to the recordings section.
                 </p>
                 <p className="text-xs mt-2">May 18, 2025</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center">
+              <Music className="mr-2 h-5 w-5" />
+              Recently Added Music
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+              <div className="p-3 border rounded-md hover:bg-muted/50 cursor-pointer">
+                <h4 className="font-medium text-sm">Ave Maria</h4>
+                <p className="text-xs text-muted-foreground">Soprano 1 & 2</p>
+              </div>
+              <div className="p-3 border rounded-md hover:bg-muted/50 cursor-pointer">
+                <h4 className="font-medium text-sm">Amazing Grace</h4>
+                <p className="text-xs text-muted-foreground">All Parts</p>
+              </div>
+              <div className="p-3 border rounded-md hover:bg-muted/50 cursor-pointer">
+                <h4 className="font-medium text-sm">Swing Low</h4>
+                <p className="text-xs text-muted-foreground">Alto 1 & 2</p>
               </div>
             </div>
           </CardContent>

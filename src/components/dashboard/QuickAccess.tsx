@@ -17,12 +17,6 @@ interface QuickAccessProps {
 
 const defaultItems: QuickAccessItem[] = [
   {
-    title: "Calendar",
-    description: "View upcoming events and performances",
-    icon: <span>📅</span>,
-    link: "/dashboard/calendar",
-  },
-  {
     title: "Sheet Music",
     description: "Access your sheet music collection",
     icon: <span>🎵</span>,
@@ -33,6 +27,12 @@ const defaultItems: QuickAccessItem[] = [
     description: "Listen to recordings and practice tracks",
     icon: <span>🎧</span>,
     link: "/dashboard/recordings",
+  },
+  {
+    title: "Announcements",
+    description: "View important updates and notices",
+    icon: <span>📢</span>,
+    link: "/dashboard/announcements",
   },
   {
     title: "Profile",
