@@ -10,7 +10,8 @@ import {
   DollarSign,
   Settings,
   Mic,
-  Home
+  Home,
+  Calendar
 } from 'lucide-react';
 import { useRolePermissions } from '@/contexts/RolePermissionContext';
 import { useAuth } from '@/contexts/AuthContext';
@@ -49,6 +50,17 @@ export function DashboardNav({
         className={cn('justify-start', isCollapsed && 'justify-center')}
         asChild
       >
+        <Link to="/calendar">
+          <Calendar className="h-5 w-5 mr-2" />
+          {!isCollapsed && <span>Calendar</span>}
+        </Link>
+      </Button>
+
+      <Button
+        variant="ghost"
+        className={cn('justify-start', isCollapsed && 'justify-center')}
+        asChild
+      >
         <Link to="/dashboard/sheet-music">
           <FileMusic className="h-5 w-5 mr-2" />
           {!isCollapsed && <span>Sheet Music</span>}
@@ -76,6 +88,17 @@ export function DashboardNav({
             <Link to="/dashboard/finances">
               <DollarSign className="h-5 w-5 mr-2" />
               {!isCollapsed && <span>Finances</span>}
+            </Link>
+          </Button>
+
+          <Button
+            variant="ghost"
+            className={cn('justify-start', isCollapsed && 'justify-center')}
+            asChild
+          >
+            <Link to="/admin/calendar">
+              <Calendar className="h-5 w-5 mr-2" />
+              {!isCollapsed && <span>Admin Calendar</span>}
             </Link>
           </Button>
 
