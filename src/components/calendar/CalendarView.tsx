@@ -1,10 +1,9 @@
-
 import React, { useState } from 'react';
 import { CalendarEvent } from '@/types/calendar';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ChevronLeft, ChevronRight, Calendar, MapPin, Clock, Users } from 'lucide-react';
-import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameMonth, isSameDay, addMonths, subMonths } from 'date-fns';
+import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameMonth, isSameDay, addMonths, subMonths, isToday } from 'date-fns';
 
 interface CalendarViewProps {
   events: CalendarEvent[];
@@ -41,6 +40,10 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
     );
   };
 
+  const goToToday = () => {
+    setCurrentDate(new Date());
+  };
+
   return (
     <Card>
       <CardHeader>
@@ -50,6 +53,9 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
             {format(currentDate, 'MMMM yyyy')}
           </CardTitle>
           <div className="flex items-center gap-2">
+            <Button variant="outline" size="sm" onClick={goToToday}>
+              Today
+            </Button>
             <Button variant="outline" size="sm" onClick={() => setView(view === 'month' ? 'list' : 'month')}>
               {view === 'month' ? 'List View' : 'Month View'}
             </Button>
@@ -76,15 +82,18 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
             {monthDays.map(day => {
               const dayEvents = getEventsForDate(day);
               const isCurrentMonth = isSameMonth(day, currentDate);
+              const isTodayDate = isToday(day);
               
               return (
                 <div
                   key={day.toISOString()}
                   className={`min-h-[80px] p-1 border rounded ${
                     isCurrentMonth ? 'bg-background' : 'bg-muted/50'
-                  }`}
+                  } ${isTodayDate ? 'ring-2 ring-orange-500 bg-orange-50' : ''}`}
                 >
-                  <div className={`text-sm ${isCurrentMonth ? 'text-foreground' : 'text-muted-foreground'}`}>
+                  <div className={`text-sm ${
+                    isCurrentMonth ? 'text-foreground' : 'text-muted-foreground'
+                  } ${isTodayDate ? 'font-bold text-orange-600' : ''}`}>
                     {format(day, 'd')}
                   </div>
                   <div className="space-y-1">
