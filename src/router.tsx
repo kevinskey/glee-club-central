@@ -13,7 +13,9 @@ import RoleDashboard from './components/auth/RoleDashboard';
 import AboutPage from './pages/AboutPage';
 import ContactPage from './pages/ContactPage';
 import DashboardLayout from './layouts/DashboardLayout';
+import AdminLayout from './layouts/AdminLayout';
 import MemberDashboardPage from './pages/dashboard/MemberDashboardPage';
+import AdminDashboardPage from './pages/admin/AdminDashboardPage';
 import ProfilePage from './pages/profile/ProfilePage';
 import MediaLibraryPage from './pages/MediaLibraryPage';
 import SheetMusicPage from './pages/SheetMusicPage';
@@ -24,13 +26,12 @@ import AnnouncementsPage from './pages/dashboard/AnnouncementsPage';
 import ArchivesPage from './pages/dashboard/ArchivesPage';
 import AttendancePage from './pages/dashboard/AttendancePage';
 import AudioManagementPage from './pages/audio-management/AudioManagementPage';
-import AdminDashboardPage from './pages/dashboard/AdminDashboardPage';
 import MembersPage from './pages/members/MembersPage';
 import SettingsPage from './pages/settings/SettingsPage';
 import FinancesPage from './pages/dashboard/FinancesPage';
 import CalendarPage from './pages/CalendarPage';
 import AdminCalendarPage from './pages/admin/AdminCalendarPage';
-import { RoleBasedLayout } from './components/layout/RoleBasedLayout';
+import { AdminRoute } from './components/auth/AdminRoute';
 
 // Create a properly structured router with all routes
 export const router = createBrowserRouter([
@@ -87,14 +88,14 @@ export const router = createBrowserRouter([
         path: '/role-dashboard',
         element: <RequireAuth><RoleDashboard /></RequireAuth>,
       },
-      // Dashboard routes with proper authentication - MAIN DASHBOARD ROUTE
+      // Member Dashboard routes with DashboardLayout
       {
         path: '/dashboard',
         element: <RequireAuth><DashboardLayout /></RequireAuth>,
         children: [
           {
             index: true,
-            element: <MemberDashboardPage />,
+            element: <Navigate to="/dashboard/member" replace />,
           },
           {
             path: 'member',
@@ -148,12 +149,16 @@ export const router = createBrowserRouter([
             path: 'finances',
             element: <FinancesPage />,
           },
+          {
+            path: 'members',
+            element: <AdminRoute><MembersPage /></AdminRoute>,
+          },
         ],
       },
-      // Admin routes with role-based protection - FIXED STRUCTURE
+      // Admin Dashboard routes with AdminLayout (completely separate)
       {
         path: '/admin',
-        element: <RequireAuth><RoleBasedLayout requiredRole="admin"><DashboardLayout /></RoleBasedLayout></RequireAuth>,
+        element: <AdminRoute><AdminLayout /></AdminRoute>,
         children: [
           {
             index: true,
