@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { PageHeader } from "@/components/ui/page-header";
@@ -404,27 +405,33 @@ export default function SheetMusicPage() {
           <TableRow>
             <TableHead className="w-16"></TableHead>
             <TableHead 
-              className="cursor-pointer hover:bg-muted/50"
+              className="cursor-pointer hover:bg-muted/50 transition-colors"
               onClick={() => setSortOrder(sortOrder === "title" ? "newest" : "title")}
             >
-              Title
-              {sortOrder === "title" && <span className="ml-1">↑</span>}
+              <div className="flex items-center gap-1">
+                Title
+                {sortOrder === "title" && <span className="text-xs">↑</span>}
+              </div>
             </TableHead>
             <TableHead 
-              className="cursor-pointer hover:bg-muted/50"
+              className="cursor-pointer hover:bg-muted/50 transition-colors"
               onClick={() => setSortOrder(sortOrder === "composer" ? "newest" : "composer")}
             >
-              Composer
-              {sortOrder === "composer" && <span className="ml-1">↑</span>}
+              <div className="flex items-center gap-1">
+                Composer
+                {sortOrder === "composer" && <span className="text-xs">↑</span>}
+              </div>
             </TableHead>
             <TableHead 
-              className="cursor-pointer hover:bg-muted/50"
+              className="cursor-pointer hover:bg-muted/50 transition-colors"
               onClick={() => setSortOrder(sortOrder === "newest" ? "oldest" : "newest")}
             >
-              Date Added
-              {(sortOrder === "newest" || sortOrder === "oldest") && (
-                <span className="ml-1">{sortOrder === "newest" ? "↓" : "↑"}</span>
-              )}
+              <div className="flex items-center gap-1">
+                Date Added
+                {(sortOrder === "newest" || sortOrder === "oldest") && (
+                  <span className="text-xs">{sortOrder === "newest" ? "↓" : "↑"}</span>
+                )}
+              </div>
             </TableHead>
             <TableHead className="w-20">Type</TableHead>
           </TableRow>
