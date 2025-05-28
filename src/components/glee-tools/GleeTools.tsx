@@ -7,9 +7,9 @@ import { Music, Clock, Headphones } from "lucide-react";
 import { registerKeyboardShortcut } from "@/utils/audioUtils";
 import { useIsMobile } from "@/hooks/use-mobile";
 
-// Import our custom implementations
-import { PitchPipe } from "./PitchPipe";
-import { Metronome } from "./Metronome";
+// Import our basic implementations
+import { BasicPitchPipe } from "./BasicPitchPipe";
+import { BasicMetronome } from "./BasicMetronome";
 
 export interface GleeToolsProps {
   variant?: "default" | "minimal";
@@ -105,7 +105,7 @@ export function GleeTools({ variant = "default", className = "" }: GleeToolsProp
             <DialogHeader>
               <DialogTitle>Pitch Pipe</DialogTitle>
             </DialogHeader>
-            <PitchPipe onClose={() => setPitchPipeOpen(false)} />
+            <BasicPitchPipe onClose={() => setPitchPipeOpen(false)} />
           </DialogContent>
         </Dialog>
         
@@ -115,7 +115,7 @@ export function GleeTools({ variant = "default", className = "" }: GleeToolsProp
             <DialogHeader>
               <DialogTitle>Metronome</DialogTitle>
             </DialogHeader>
-            <Metronome onClose={() => setMetronomeOpen(false)} />
+            <BasicMetronome onClose={() => setMetronomeOpen(false)} />
           </DialogContent>
         </Dialog>
       </div>
@@ -150,7 +150,7 @@ export function GleeTools({ variant = "default", className = "" }: GleeToolsProp
           <DialogHeader>
             <DialogTitle>Pitch Pipe</DialogTitle>
           </DialogHeader>
-          <PitchPipe onClose={() => setPitchPipeOpen(false)} />
+          <BasicPitchPipe onClose={() => setPitchPipeOpen(false)} />
         </DialogContent>
       </Dialog>
       
@@ -160,7 +160,7 @@ export function GleeTools({ variant = "default", className = "" }: GleeToolsProp
           <DialogHeader>
             <DialogTitle>Metronome</DialogTitle>
           </DialogHeader>
-          <Metronome onClose={() => setMetronomeOpen(false)} />
+          <BasicMetronome onClose={() => setMetronomeOpen(false)} />
         </DialogContent>
       </Dialog>
     </div>

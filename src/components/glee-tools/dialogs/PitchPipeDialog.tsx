@@ -3,7 +3,7 @@ import React from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Music } from "lucide-react";
 import { DropdownMenuItem } from "@/components/ui/dropdown-menu";
-import { PitchPipe } from "../PitchPipe";
+import { BasicPitchPipe } from "../BasicPitchPipe";
 
 interface PitchPipeDialogProps {
   audioContextRef: React.RefObject<AudioContext | null>;
@@ -28,7 +28,7 @@ export function PitchPipeDialog({ audioContextRef }: PitchPipeDialogProps) {
             <DialogTitle>Pitch Pipe</DialogTitle>
           </DialogHeader>
           <div className="mt-2">
-            <PitchPipe onClose={() => setOpen(false)} />
+            <BasicPitchPipe onClose={() => setOpen(false)} />
           </div>
         </DialogContent>
       </Dialog>
