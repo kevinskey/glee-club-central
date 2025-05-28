@@ -1,5 +1,5 @@
+
 import React, { useMemo } from "react";
-import { Navigate } from "react-router-dom";
 import { PageHeader } from "@/components/ui/page-header";
 import { useAuth } from "@/contexts/AuthContext";
 import { Link, useNavigate } from "react-router-dom";
@@ -77,24 +77,6 @@ const DashboardPageContent = React.memo(() => {
   const userRole = profile?.role;
   const isAdmin = profile?.is_super_admin || isAdminRole || isSuperAdmin;
   
-  // IMMEDIATELY redirect non-admin users to their appropriate dashboard
-  if (!authLoading && profile && !isAdmin) {
-    console.log('Non-admin user accessing admin dashboard, redirecting...', { userRole, isAdmin });
-    if (userRole === 'member') {
-      return <Navigate to="/dashboard/member" replace />;
-    } else if (userRole === 'fan') {
-      return <Navigate to="/dashboard/fan" replace />;
-    } else {
-      // Default to member dashboard for any authenticated non-admin user
-      return <Navigate to="/dashboard/member" replace />;
-    }
-  }
-  
-  // Only show admin dashboard if user is confirmed admin
-  if (!authLoading && (!profile || !isAdmin)) {
-    return <Navigate to="/dashboard/member" replace />;
-  }
-  
   // Memoize expensive computations
   const shouldShowLoading = useMemo(() => 
     authLoading || !isReady || isAnyLoading(),
@@ -118,14 +100,15 @@ const DashboardPageContent = React.memo(() => {
     navigate("/dashboard/admin");
   }, [navigate]);
   
-  console.log('Admin Dashboard render state:', { 
+  console.log('Dashboard render state:', { 
     authLoading, 
     isReady, 
     coordinatorReady, 
     isAnyLoading: isAnyLoading(),
     eventsCount: events?.length || 0,
     shouldShowLoading,
-    isAdmin
+    isAdmin,
+    userRole
   });
   
   // Show loading state with stable skeleton
@@ -150,16 +133,23 @@ const DashboardPageContent = React.memo(() => {
     );
   }
   
-  console.log('Rendering admin dashboard content with', events?.length || 0, 'events');
+  console.log('Rendering dashboard content with', events?.length || 0, 'events');
     
   return (
     <div className="max-w-screen-2xl mx-auto px-4 space-y-6 dashboard-content dashboard-loaded">
-      {/* Welcome Banner for Admin Users */}
-      <div className="bg-gradient-to-r from-glee-spelman to-glee-spelman/80 rounded-xl shadow-lg p-6 md:p-8 text-white">
+      {/* Welcome Banner - Different for Admin vs Member */}
+      <div className={`bg-gradient-to-r ${isAdmin ? 'from-glee-spelman to-glee-spelman/80' : 'from-glee-purple to-glee-purple/80'} rounded-xl shadow-lg p-6 md:p-8 text-white`}>
         <div className="flex flex-col md:flex-row md:items-center md:justify-between">
           <div className="space-y-2">
-            <h1 className="text-2xl md:text-3xl font-bold">{getTimeOfDay}, {profile?.first_name || 'Administrator'}</h1>
-            <p className="text-white/80">Welcome to the Spelman College Glee Club Admin Dashboard</p>
+            <h1 className="text-2xl md:text-3xl font-bold">
+              {getTimeOfDay}, {profile?.first_name || 'Member'}
+            </h1>
+            <p className="text-white/80">
+              {isAdmin 
+                ? 'Welcome to the Spelman College Glee Club Admin Dashboard' 
+                : 'Welcome to your Spelman College Glee Club Dashboard'
+              }
+            </p>
           </div>
           <div className="mt-4 md:mt-0 flex flex-col sm:flex-row gap-3">
             <Button 
@@ -171,49 +161,53 @@ const DashboardPageContent = React.memo(() => {
               <Link to="/dashboard/profile">View Profile <ChevronRight className="ml-2 h-4 w-4" /></Link>
             </Button>
             
-            <Button 
-              size="lg"
-              variant="outline" 
-              className="bg-white/20 text-white hover:bg-white/30 border-white/40"
-              asChild
-            >
-              <Link to="/admin">
-                Admin Panel <ChevronRight className="ml-2 h-4 w-4" />
-              </Link>
-            </Button>
+            {isAdmin && (
+              <Button 
+                size="lg"
+                variant="outline" 
+                className="bg-white/20 text-white hover:bg-white/30 border-white/40"
+                asChild
+              >
+                <Link to="/admin">
+                  Admin Panel <ChevronRight className="ml-2 h-4 w-4" />
+                </Link>
+              </Button>
+            )}
           </div>
         </div>
       </div>
       
-      {/* Admin Tools Section */}
-      <Card className="shadow-md border-l-4 border-l-glee-spelman">
-        <CardContent className="p-6">
-          <div className="flex flex-col md:flex-row md:items-center justify-between">
-            <div className="mb-4 md:mb-0">
-              <h2 className="text-xl font-semibold flex items-center">
-                <Mic className="h-5 w-5 mr-2 text-glee-spelman" />
-                Administrative Tools
-              </h2>
-              <p className="text-muted-foreground mt-1">
-                Manage the Glee Club and access administrative features
-              </p>
+      {/* Admin Tools Section - Only for admins */}
+      {isAdmin && (
+        <Card className="shadow-md border-l-4 border-l-glee-spelman">
+          <CardContent className="p-6">
+            <div className="flex flex-col md:flex-row md:items-center justify-between">
+              <div className="mb-4 md:mb-0">
+                <h2 className="text-xl font-semibold flex items-center">
+                  <Mic className="h-5 w-5 mr-2 text-glee-spelman" />
+                  Administrative Tools
+                </h2>
+                <p className="text-muted-foreground mt-1">
+                  Manage the Glee Club and access administrative features
+                </p>
+              </div>
+              <div className="flex flex-col sm:flex-row gap-3">
+                <Button asChild className="bg-glee-spelman hover:bg-glee-spelman/90">
+                  <Link to="/admin">
+                    Admin Panel
+                  </Link>
+                </Button>
+                <Button asChild variant="outline">
+                  <Link to="/dashboard/members">
+                    <User className="h-4 w-4 mr-2" />
+                    Manage Members
+                  </Link>
+                </Button>
+              </div>
             </div>
-            <div className="flex flex-col sm:flex-row gap-3">
-              <Button asChild className="bg-glee-spelman hover:bg-glee-spelman/90">
-                <Link to="/admin">
-                  Admin Panel
-                </Link>
-              </Button>
-              <Button asChild variant="outline">
-                <Link to="/dashboard/members">
-                  <User className="h-4 w-4 mr-2" />
-                  Manage Members
-                </Link>
-              </Button>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
+          </CardContent>
+        </Card>
+      )}
       
       {/* Quick Access Grid */}
       <QuickAccess />
@@ -242,7 +236,7 @@ const DashboardPageContent = React.memo(() => {
                 className="text-sm text-glee-spelman hover:underline p-0"
                 asChild
               >
-                <Link to="/dashboard/calendar">View Calendar</Link>
+                <Link to="/dashboard/announcements">View All</Link>
               </Button>
             </CardHeader>
             <CardContent>
@@ -274,9 +268,9 @@ const DashboardPageContent = React.memo(() => {
                 <div className="text-center py-4">
                   <p className="text-muted-foreground mb-3">No upcoming events scheduled.</p>
                   <Button variant="outline" size="sm" asChild>
-                    <Link to="/dashboard/calendar">
+                    <Link to="/dashboard/announcements">
                       <CalendarDays className="h-4 w-4 mr-2" />
-                      View Calendar
+                      View Announcements
                     </Link>
                   </Button>
                 </div>
@@ -326,8 +320,8 @@ const DashboardPageContent = React.memo(() => {
             </CardContent>
           </Card>
           
-          {/* Admin Dashboard Access */}
-          <AdminDashboardAccess onAccess={handleRegisterAsAdmin} />
+          {/* Admin Dashboard Access - Only for admins */}
+          {isAdmin && <AdminDashboardAccess onAccess={handleRegisterAsAdmin} />}
         </div>
       </div>
     </div>

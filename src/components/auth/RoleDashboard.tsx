@@ -36,15 +36,10 @@ const RoleDashboard = () => {
     return <Navigate to="/login" replace />;
   }
 
-  // Redirect based on role - admins go to admin dashboard, everyone else goes to member dashboard
-  if (isAdmin || userRole === 'admin') {
-    console.log("Redirecting admin user to admin dashboard");
-    return <Navigate to="/dashboard" replace />;
-  } else {
-    // All non-admin users go to the member dashboard
-    console.log("Redirecting member user to member dashboard");
-    return <Navigate to="/dashboard/member" replace />;
-  }
+  // Redirect based on role - all authenticated users go to the main dashboard initially
+  // The dashboard will handle showing admin vs member content based on permissions
+  console.log("Redirecting authenticated user to main dashboard");
+  return <Navigate to="/dashboard" replace />;
 };
 
 export default RoleDashboard;
