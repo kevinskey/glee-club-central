@@ -33,7 +33,7 @@ import { toast } from "sonner";
 
 export default function AdminSettingsPage() {
   const { isAdmin, isLoading, isAuthenticated } = useAuth();
-  const { settings, updateSetting, loading } = useSiteSettings();
+  const { settings, updateSetting, loading, error } = useSiteSettings();
   
   // Redirect if user is not authenticated or not an admin
   if (!isLoading && (!isAuthenticated || !isAdmin())) {
@@ -48,8 +48,14 @@ export default function AdminSettingsPage() {
     );
   }
 
+  // Debug logging
+  console.log('Settings data:', settings);
+  console.log('Settings loading:', loading);
+  console.log('Settings error:', error);
+
   const handleNationalHolidaysToggle = async (enabled: boolean) => {
     try {
+      console.log('Toggling national holidays to:', enabled);
       await updateSetting('show_national_holidays', enabled);
       toast.success('Calendar settings updated successfully');
     } catch (error) {
@@ -144,9 +150,16 @@ export default function AdminSettingsPage() {
                   </div>
                   <Switch 
                     id="show-holidays" 
-                    checked={settings.show_national_holidays !== false}
+                    checked={settings?.show_national_holidays !== false}
                     onCheckedChange={handleNationalHolidaysToggle}
                   />
+                </div>
+                
+                {/* Debug info - remove this after testing */}
+                <div className="mt-4 p-3 bg-gray-100 rounded text-xs">
+                  <p><strong>Debug info:</strong></p>
+                  <p>Settings loaded: {JSON.stringify(settings)}</p>
+                  <p>Show holidays value: {String(settings?.show_national_holidays)}</p>
                 </div>
               </CardContent>
             </Card>
