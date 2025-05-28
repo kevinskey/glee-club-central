@@ -50,8 +50,8 @@ serve(async (req) => {
   
   // Handle API requests - AUTH REQUIRED for these paths
   try {
-    // Authenticate user
-    const { user, response: authResponse } = await authenticateUser(req, supabaseAdmin);
+    // Authenticate user (handles both Supabase and Google tokens)
+    const { user, response: authResponse, googleAccessToken } = await authenticateUser(req, supabaseAdmin);
     if (authResponse) {
       return authResponse;
     }
@@ -92,7 +92,7 @@ serve(async (req) => {
       );
     }
     
-    console.log(`Processing action: "${action}" for user: ${user!.id}`);
+    console.log(`Processing action: "${action}" for user: ${user?.id || 'Google token user'}`);
     
     // Route to appropriate handler
     switch (action) {
@@ -103,10 +103,18 @@ serve(async (req) => {
         return await checkConnection(user!, supabaseAdmin);
       
       case 'list_calendars':
+        if (googleAccessToken) {
+          // Direct Google API call with provided token
+          return await listCalendarsWithToken(googleAccessToken);
+        }
         return await listCalendars(user!, supabaseAdmin);
 
       case 'fetch_events':
         const calendarId = requestData.calendar_id || 'primary';
+        if (googleAccessToken) {
+          // Direct Google API call with provided token
+          return await fetchEventsWithToken(googleAccessToken, calendarId);
+        }
         return await fetchEvents(user!, supabaseAdmin, calendarId);
         
       case 'disconnect':
@@ -139,3 +147,103 @@ serve(async (req) => {
     );
   }
 });
+
+// Helper functions for direct Google API calls
+async function listCalendarsWithToken(accessToken: string) {
+  try {
+    const response = await fetch(
+      'https://www.googleapis.com/calendar/v3/users/me/calendarList',
+      {
+        headers: {
+          'Authorization': `Bearer ${accessToken}`,
+        },
+      }
+    );
+    
+    if (!response.ok) {
+      throw new Error('Failed to fetch calendars from Google');
+    }
+    
+    const data = await response.json();
+    const calendars = data.items?.map((cal: any) => ({
+      id: cal.id,
+      name: cal.summary,
+      primary: cal.primary || false
+    })) || [];
+    
+    return new Response(
+      JSON.stringify({ calendars }),
+      { 
+        status: 200, 
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+      }
+    );
+  } catch (error) {
+    return new Response(
+      JSON.stringify({ 
+        error: error.message,
+        calendars: []
+      }),
+      { 
+        status: 400, 
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+      }
+    );
+  }
+}
+
+async function fetchEventsWithToken(accessToken: string, calendarId: string = 'primary') {
+  try {
+    const timeMin = new Date().toISOString();
+    
+    const response = await fetch(
+      `https://www.googleapis.com/calendar/v3/calendars/${encodeURIComponent(calendarId)}/events?` + 
+      new URLSearchParams({
+        timeMin,
+        maxResults: '5',
+        singleEvents: 'true',
+        orderBy: 'startTime'
+      }).toString(),
+      {
+        headers: {
+          'Authorization': `Bearer ${accessToken}`,
+        },
+      }
+    );
+    
+    if (!response.ok) {
+      throw new Error('Failed to fetch events from Google');
+    }
+    
+    const data = await response.json();
+    const events = data.items?.map((event: any) => ({
+      id: event.id,
+      title: event.summary || 'Untitled Event',
+      start: event.start?.dateTime || event.start?.date,
+      end: event.end?.dateTime || event.end?.date,
+      location: event.location || '',
+      description: event.description || '',
+      allDay: !event.start?.dateTime,
+      source: 'google'
+    })) || [];
+    
+    return new Response(
+      JSON.stringify({ events }),
+      { 
+        status: 200, 
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+      }
+    );
+  } catch (error) {
+    return new Response(
+      JSON.stringify({ 
+        error: error.message,
+        events: []
+      }),
+      { 
+        status: 400, 
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+      }
+    );
+  }
+}

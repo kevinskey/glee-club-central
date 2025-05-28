@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -119,17 +118,40 @@ export function GoogleCalendarStatus({ onConnectionChange }: GoogleCalendarStatu
         return;
       }
 
-      // Check for popup closure with more frequent checks
+      // Listen for popup messages
+      const handleMessage = (event: MessageEvent) => {
+        if (event.origin !== window.location.origin) return;
+        
+        if (event.data.type === 'GOOGLE_OAUTH_SUCCESS') {
+          console.log("Received OAuth success message with token");
+          const { access_token } = event.data;
+          
+          // Store the Google access token
+          localStorage.setItem('google_access_token', access_token);
+          
+          // Close popup and check connection
+          popup.close();
+          window.removeEventListener('message', handleMessage);
+          
+          setTimeout(() => {
+            checkConnectionStatus();
+          }, 1000);
+        }
+      };
+
+      window.addEventListener('message', handleMessage);
+
+      // Check for popup closure as fallback
       const checkClosed = setInterval(() => {
         if (popup?.closed) {
           clearInterval(checkClosed);
+          window.removeEventListener('message', handleMessage);
           console.log("Popup closed, checking connection status...");
-          // Wait a bit longer for the backend to process the tokens
           setTimeout(() => {
             checkConnectionStatus();
           }, 2000);
         }
-      }, 500); // Check every 500ms instead of 1000ms
+      }, 500);
 
     } catch (error) {
       console.error("Error connecting:", error);
@@ -142,6 +164,9 @@ export function GoogleCalendarStatus({ onConnectionChange }: GoogleCalendarStatu
   const handleDisconnect = async () => {
     try {
       setIsLoading(true);
+      
+      // Remove stored Google token
+      localStorage.removeItem('google_access_token');
       
       const { data: { session }, error: sessionError } = await supabase.auth.getSession();
       if (sessionError || !session?.access_token) {

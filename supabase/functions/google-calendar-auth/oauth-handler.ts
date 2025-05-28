@@ -91,6 +91,14 @@ export async function handleOAuthCallback(
         <p>Your Google Calendar has been connected to GleeWorld.</p>
         <p>You can close this window now and return to the app.</p>
         <script>
+          // Send the access token back to the parent window
+          if (window.opener) {
+            window.opener.postMessage({
+              type: 'GOOGLE_OAUTH_SUCCESS',
+              access_token: '${tokens.access_token}'
+            }, window.location.origin);
+          }
+          
           setTimeout(() => {
             window.close();
           }, 2000);
