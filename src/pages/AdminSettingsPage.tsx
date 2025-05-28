@@ -51,8 +51,10 @@ export default function AdminSettingsPage() {
   const handleNationalHolidaysToggle = async (enabled: boolean) => {
     try {
       await updateSetting('show_national_holidays', enabled);
+      toast.success('Calendar settings updated successfully');
     } catch (error) {
       console.error('Failed to update national holidays setting:', error);
+      toast.error('Failed to update calendar settings');
     }
   };
 
@@ -136,7 +138,7 @@ export default function AdminSettingsPage() {
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="flex items-center justify-between">
-                  <div>
+                  <div className="space-y-1">
                     <Label htmlFor="show-holidays" className="text-base font-medium">Show National Holidays</Label>
                     <p className="text-sm text-muted-foreground">Display U.S. national holidays on the calendar</p>
                   </div>
