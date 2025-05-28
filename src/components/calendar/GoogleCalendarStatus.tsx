@@ -30,7 +30,7 @@ export function GoogleCalendarStatus({ onConnectionChange }: GoogleCalendarStatu
       console.log("Checking connection with action: check_connection");
       
       const { data, error } = await supabase.functions.invoke('google-calendar-auth', {
-        body: JSON.stringify({ action: 'check_connection' }),
+        body: { action: 'check_connection' },
         headers: {
           'Authorization': `Bearer ${session.access_token}`,
           'Content-Type': 'application/json'
@@ -79,18 +79,32 @@ export function GoogleCalendarStatus({ onConnectionChange }: GoogleCalendarStatu
       console.log("Getting auth URL with action: get_auth_url");
 
       const { data, error } = await supabase.functions.invoke('google-calendar-auth', {
-        body: JSON.stringify({ action: 'get_auth_url' }),
+        body: { action: 'get_auth_url' },
         headers: {
           'Authorization': `Bearer ${session.access_token}`,
           'Content-Type': 'application/json'
         }
       });
 
-      if (error || !data?.authUrl) {
+      if (error) {
         console.error("Error getting auth URL:", error);
-        toast.error("Failed to get OAuth URL");
+        toast.error("Failed to get OAuth URL: " + (error.message || 'Unknown error'));
         return;
       }
+
+      if (data?.error) {
+        console.error("API error:", data.error);
+        toast.error(data.error);
+        return;
+      }
+
+      if (!data?.authUrl) {
+        console.error("No auth URL returned:", data);
+        toast.error("Failed to get OAuth URL - no URL returned");
+        return;
+      }
+
+      console.log("Successfully got auth URL, opening popup...");
 
       // Open OAuth popup
       const popup = window.open(
@@ -135,7 +149,7 @@ export function GoogleCalendarStatus({ onConnectionChange }: GoogleCalendarStatu
       console.log("Disconnecting with action: disconnect");
 
       const { data, error } = await supabase.functions.invoke('google-calendar-auth', {
-        body: JSON.stringify({ action: 'disconnect' }),
+        body: { action: 'disconnect' },
         headers: {
           'Authorization': `Bearer ${session.access_token}`,
           'Content-Type': 'application/json'

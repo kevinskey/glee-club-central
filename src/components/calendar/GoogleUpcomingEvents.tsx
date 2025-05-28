@@ -32,10 +32,10 @@ export function GoogleUpcomingEvents({ isConnected, selectedCalendarId = 'primar
       console.log("Fetching events with action: fetch_events");
       
       const { data, error } = await supabase.functions.invoke('google-calendar-auth', {
-        body: JSON.stringify({ 
+        body: { 
           action: 'fetch_events',
           calendar_id: selectedCalendarId
-        }),
+        },
         headers: {
           'Authorization': `Bearer ${session.access_token}`,
           'Content-Type': 'application/json'

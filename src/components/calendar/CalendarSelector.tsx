@@ -40,7 +40,7 @@ export function CalendarSelector({ selectedCalendarId, onCalendarSelect, isConne
       console.log("Loading calendars with action: list_calendars");
 
       const { data, error } = await supabase.functions.invoke('google-calendar-auth', {
-        body: JSON.stringify({ action: 'list_calendars' }),
+        body: { action: 'list_calendars' },
         headers: {
           'Authorization': `Bearer ${session.access_token}`,
           'Content-Type': 'application/json'
