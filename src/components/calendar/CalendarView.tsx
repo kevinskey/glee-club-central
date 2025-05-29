@@ -1,4 +1,3 @@
-
 import React, { useState, useMemo, useRef } from 'react';
 import FullCalendar from '@fullcalendar/react';
 import dayGridPlugin from '@fullcalendar/daygrid';
@@ -43,6 +42,7 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
   const [selectedEventTypes, setSelectedEventTypes] = useState<string[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
+  const [lastChangedEventId, setLastChangedEventId] = useState<string>('');
   const calendarRef = useRef<FullCalendar>(null);
 
   // Get holidays and academic dates
@@ -236,6 +236,14 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
     }
   };
 
+  // Enhanced event types change handler that tracks changes and maintains list view
+  const handleEventTypesChange = (eventId: string, newTypes: string[]) => {
+    setLastChangedEventId(eventId);
+    if (onEventTypesChange) {
+      onEventTypesChange(eventId, newTypes);
+    }
+  };
+
   const clearFilters = () => {
     setSelectedEventTypes([]);
     setSearchTerm('');
@@ -373,8 +381,9 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
             <EventsListView
               events={filteredEvents}
               onEventClick={onEventClick}
-              onEventTypesChange={onEventTypesChange}
+              onEventTypesChange={handleEventTypesChange}
               showEventTypeDropdown={showEventTypeDropdown}
+              lastChangedEventId={lastChangedEventId}
             />
           ) : (
             <FullCalendar

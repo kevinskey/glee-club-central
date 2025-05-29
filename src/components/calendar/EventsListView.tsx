@@ -14,7 +14,7 @@ import {
   PaginationEllipsis
 } from '@/components/ui/pagination';
 import { Calendar, Clock, MapPin, User } from 'lucide-react';
-import { format, isSameDay, isToday, isTomorrow, isYesterday } from 'date-fns';
+import { format, isSameDay, isToday, isTomorrow, isYesterday, startOfToday } from 'date-fns';
 import { getEventTypeLabel, getEventTypeColor } from '@/utils/eventTypes';
 import { EventTypeDropdown } from './EventTypeDropdown';
 
@@ -23,6 +23,7 @@ interface EventsListViewProps {
   onEventClick?: (event: CalendarEvent) => void;
   onEventTypesChange?: (eventId: string, newTypes: string[]) => void;
   showEventTypeDropdown?: boolean;
+  lastChangedEventId?: string;
 }
 
 const EVENTS_PER_PAGE = 7;
@@ -31,22 +32,37 @@ export const EventsListView: React.FC<EventsListViewProps> = ({
   events,
   onEventClick,
   onEventTypesChange,
-  showEventTypeDropdown = false
+  showEventTypeDropdown = false,
+  lastChangedEventId
 }) => {
   const [currentPage, setCurrentPage] = useState(1);
 
-  // Sort events chronologically by start time
-  const sortedEvents = useMemo(() => {
-    return [...events].sort((a, b) => 
-      new Date(a.start_time).getTime() - new Date(b.start_time).getTime()
-    );
+  // Filter events from today forward and sort chronologically
+  const futureEvents = useMemo(() => {
+    const today = startOfToday();
+    return [...events]
+      .filter(event => new Date(event.start_time) >= today)
+      .sort((a, b) => 
+        new Date(a.start_time).getTime() - new Date(b.start_time).getTime()
+      );
   }, [events]);
 
   // Calculate pagination
-  const totalPages = Math.ceil(sortedEvents.length / EVENTS_PER_PAGE);
+  const totalPages = Math.ceil(futureEvents.length / EVENTS_PER_PAGE);
   const startIndex = (currentPage - 1) * EVENTS_PER_PAGE;
   const endIndex = startIndex + EVENTS_PER_PAGE;
-  const currentEvents = sortedEvents.slice(startIndex, endIndex);
+  const currentEvents = futureEvents.slice(startIndex, endIndex);
+
+  // Find the page containing the last changed event and navigate to it
+  React.useEffect(() => {
+    if (lastChangedEventId) {
+      const eventIndex = futureEvents.findIndex(event => event.id === lastChangedEventId);
+      if (eventIndex !== -1) {
+        const targetPage = Math.floor(eventIndex / EVENTS_PER_PAGE) + 1;
+        setCurrentPage(targetPage);
+      }
+    }
+  }, [lastChangedEventId, futureEvents]);
 
   const formatEventDate = (date: Date) => {
     if (isToday(date)) return 'Today';
@@ -171,13 +187,13 @@ export const EventsListView: React.FC<EventsListViewProps> = ({
     return items;
   };
 
-  if (sortedEvents.length === 0) {
+  if (futureEvents.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center py-12 text-center">
         <Calendar className="h-12 w-12 text-muted-foreground mb-4" />
-        <h3 className="text-lg font-semibold text-muted-foreground mb-2">No Events Found</h3>
+        <h3 className="text-lg font-semibold text-muted-foreground mb-2">No Upcoming Events</h3>
         <p className="text-sm text-muted-foreground">
-          There are no events matching your current filters.
+          There are no events scheduled from today forward.
         </p>
       </div>
     );
@@ -192,11 +208,14 @@ export const EventsListView: React.FC<EventsListViewProps> = ({
           const endDate = new Date(event.end_time);
           const eventTypes = event.event_types || (event.event_type ? [event.event_type] : []);
           const isVirtual = isVirtualEvent(event);
+          const isLastChanged = event.id === lastChangedEventId;
 
           return (
             <Card 
               key={event.id} 
-              className={`transition-colors ${isVirtual ? '' : 'cursor-pointer hover:bg-muted/50'}`}
+              className={`transition-colors ${isVirtual ? '' : 'cursor-pointer hover:bg-muted/50'} ${
+                isLastChanged ? 'ring-2 ring-blue-500 bg-blue-50/50' : ''
+              }`}
               onClick={() => handleEventClick(event)}
             >
               <CardContent className="p-6">
@@ -300,7 +319,7 @@ export const EventsListView: React.FC<EventsListViewProps> = ({
           </Pagination>
           
           <div className="text-sm text-muted-foreground">
-            Showing {startIndex + 1}-{Math.min(endIndex, sortedEvents.length)} of {sortedEvents.length} events
+            Showing {startIndex + 1}-{Math.min(endIndex, futureEvents.length)} of {futureEvents.length} upcoming events
           </div>
         </div>
       )}
