@@ -1,5 +1,5 @@
 
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useMemo } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { CalendarView } from '@/components/calendar/CalendarView';
 import { EventDialog } from '@/components/calendar/EventDialog';
@@ -9,7 +9,7 @@ import { CalendarEvent } from '@/types/calendar';
 import { PageHeader } from '@/components/ui/page-header';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { Calendar, Plus, Edit, Trash2 } from 'lucide-react';
+import { Calendar, Plus, Edit, Trash2, Music } from 'lucide-react';
 import { toast } from 'sonner';
 import ErrorBoundary from '@/components/ErrorBoundary';
 
@@ -24,6 +24,32 @@ export default function AdminCalendarPage() {
   const [editingEvent, setEditingEvent] = useState<CalendarEvent | null>(null);
   const [isCreating, setIsCreating] = useState(false);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+
+  // Calculate dynamic stats from events
+  const eventStats = useMemo(() => {
+    const now = new Date();
+    
+    const totalEvents = events.length;
+    
+    const upcomingEvents = events.filter(event => 
+      new Date(event.start_time) > now
+    ).length;
+    
+    const concerts = events.filter(event => {
+      const eventTypes = event.event_types || (event.event_type ? [event.event_type] : []);
+      return eventTypes.includes('performance') || 
+             eventTypes.includes('concert') || 
+             eventTypes.includes('tour_concert') ||
+             event.event_type === 'concert' ||
+             event.event_type === 'performance';
+    }).length;
+    
+    return {
+      totalEvents,
+      upcomingEvents,
+      concerts
+    };
+  }, [events]);
 
   // Handle URL parameters for editing
   useEffect(() => {
@@ -193,7 +219,7 @@ export default function AdminCalendarPage() {
                   </div>
                   <div>
                     <p className="text-sm text-muted-foreground">Total Events</p>
-                    <p className="text-xl font-semibold">{events.length}</p>
+                    <p className="text-xl font-semibold">{eventStats.totalEvents}</p>
                   </div>
                 </div>
               </CardContent>
@@ -207,9 +233,7 @@ export default function AdminCalendarPage() {
                   </div>
                   <div>
                     <p className="text-sm text-muted-foreground">Upcoming Events</p>
-                    <p className="text-xl font-semibold">
-                      {events.filter(event => new Date(event.start_time) > new Date()).length}
-                    </p>
+                    <p className="text-xl font-semibold">{eventStats.upcomingEvents}</p>
                   </div>
                 </div>
               </CardContent>
@@ -219,17 +243,11 @@ export default function AdminCalendarPage() {
               <CardContent className="p-4">
                 <div className="flex items-center space-x-3">
                   <div className="p-2 bg-purple-100 rounded-lg">
-                    <Calendar className="h-5 w-5 text-purple-600" />
+                    <Music className="h-5 w-5 text-purple-600" />
                   </div>
                   <div>
                     <p className="text-sm text-muted-foreground">Concerts</p>
-                    <p className="text-xl font-semibold">
-                      {events.filter(event => 
-                        event.event_types?.includes('concert') || 
-                        event.event_types?.includes('tour_concert') ||
-                        event.event_type === 'concert'
-                      ).length}
-                    </p>
+                    <p className="text-xl font-semibold">{eventStats.concerts}</p>
                   </div>
                 </div>
               </CardContent>
