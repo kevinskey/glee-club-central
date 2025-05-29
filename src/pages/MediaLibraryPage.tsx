@@ -81,8 +81,18 @@ const MediaLibraryPage: React.FC<MediaLibraryPageProps> = ({ isAdminView = false
     });
   });
 
-  // Filter PDFs specifically for the documents tab
-  const pdfFiles = sortedFilteredFiles.filter(file => getMediaType(file.file_type) === "pdf");
+  // Filter PDFs specifically for the documents tab with debugging
+  const pdfFiles = sortedFilteredFiles.filter(file => {
+    const mediaType = getMediaType(file.file_type);
+    const isPdf = mediaType === "pdf";
+    console.log(`File: ${file.title}, Type: ${file.file_type}, MediaType: ${mediaType}, IsPDF: ${isPdf}`);
+    return isPdf;
+  });
+
+  // Log PDF files for debugging
+  console.log("Total filtered files:", sortedFilteredFiles.length);
+  console.log("PDF files found:", pdfFiles.length);
+  console.log("PDF files:", pdfFiles.map(f => ({ title: f.title, type: f.file_type, url: f.file_url })));
 
   return (
     <div className="container mx-auto px-4 py-6">
@@ -130,7 +140,7 @@ const MediaLibraryPage: React.FC<MediaLibraryPageProps> = ({ isAdminView = false
       >
         <TabsList className="grid grid-cols-5 mb-8">
           <TabsTrigger value="all" className="flex items-center gap-1">
-            <Library className="h-4 w-4" /> All
+            <Library className="h-4 w-4" /> All ({sortedFilteredFiles.length})
           </TabsTrigger>
           <TabsTrigger value="pdf" className="flex items-center gap-1">
             <FileText className="h-4 w-4" /> Documents ({pdfFiles.length})
@@ -188,13 +198,15 @@ interface MediaGridProps {
 }
 
 const MediaGrid: React.FC<MediaGridProps> = ({ files, onViewPDF, showPDFCount = false }) => {
+  console.log("MediaGrid received files:", files.length, files.map(f => ({ title: f.title, type: f.file_type })));
+  
   if (files.length === 0) {
     return (
       <div className="text-center py-12 border border-dashed rounded-lg">
         <Library className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
         <h3 className="text-lg font-medium mb-2">No media files found</h3>
         <p className="text-muted-foreground">
-          {showPDFCount ? "No PDF documents available" : "Try changing your search or filter settings"}
+          {showPDFCount ? "No PDF documents available. Try uploading some PDF files." : "Try changing your search or filter settings"}
         </p>
       </div>
     );
@@ -213,41 +225,45 @@ const MediaGrid: React.FC<MediaGridProps> = ({ files, onViewPDF, showPDFCount = 
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
         {files.map((file) => {
           const mediaType = getMediaType(file.file_type);
+          console.log(`Rendering file: ${file.title}, mediaType: ${mediaType}, file_type: ${file.file_type}`);
           
           return (
             <Card key={file.id} className="overflow-hidden h-full flex flex-col">
               <div className="relative aspect-video bg-muted flex items-center justify-center">
-                {mediaType === "pdf" && (
-                  <PDFPreview
-                    url={file.file_url}
-                    title={file.title}
-                    className="w-full h-full cursor-pointer"
-                    previewWidth={300}
-                    previewHeight={200}
-                    mediaSourceId={file.id}
-                    category={file.category || "General"}
-                  >
-                    <FileText className="h-16 w-16 text-muted-foreground" />
-                  </PDFPreview>
-                )}
-                {mediaType === "image" && (
+                {mediaType === "pdf" ? (
+                  <div className="w-full h-full bg-white relative">
+                    <PDFPreview
+                      url={file.file_url}
+                      title={file.title}
+                      className="w-full h-full cursor-pointer"
+                      previewWidth={300}
+                      previewHeight={200}
+                      mediaSourceId={file.id}
+                      category={file.category || "General"}
+                    >
+                      <div className="w-full h-full flex items-center justify-center bg-gray-100">
+                        <FileText className="h-16 w-16 text-muted-foreground" />
+                        <div className="absolute bottom-2 left-2 right-2 text-xs text-gray-600 bg-white/80 p-1 rounded truncate">
+                          {file.title}
+                        </div>
+                      </div>
+                    </PDFPreview>
+                  </div>
+                ) : mediaType === "image" ? (
                   <img 
                     src={file.file_url} 
                     alt={file.title}
                     className="w-full h-full object-cover"
                   />
-                )}
-                {mediaType === "audio" && (
+                ) : mediaType === "audio" ? (
                   <div className="w-full h-full flex items-center justify-center">
                     <Music className="h-16 w-16 text-muted-foreground" />
                   </div>
-                )}
-                {mediaType === "video" && (
+                ) : mediaType === "video" ? (
                   <div className="w-full h-full flex items-center justify-center">
                     <Video className="h-16 w-16 text-muted-foreground" />
                   </div>
-                )}
-                {mediaType === "other" && (
+                ) : (
                   <div className="w-full h-full flex items-center justify-center">
                     <FileText className="h-16 w-16 text-muted-foreground" />
                   </div>
