@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { format, startOfMonth, endOfMonth, isSameDay, isToday, startOfWeek, endOfWeek, eachDayOfInterval } from 'date-fns';
-import { ChevronLeft, ChevronRight, Calendar as CalendarIcon, MapPin, Clock, ExternalLink } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Calendar as CalendarIcon, MapPin, Clock, ExternalLink, List } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { CalendarEvent } from '@/types/calendar';
@@ -19,7 +19,8 @@ interface CalendarViewProps {
 
 export function CalendarView({ events, onEventClick, showPrivateEvents = false }: CalendarViewProps) {
   const [currentDate, setCurrentDate] = useState(new Date());
-  const [view, setView] = useState<'month' | 'week'>('month');
+  const [view, setView] = useState<'month' | 'day' | 'list'>('month');
+  const [selectedDay, setSelectedDay] = useState<Date | null>(null);
   const { settings } = useSiteSettings();
   
   const showNationalHolidays = settings.showNationalHolidays ?? true;
@@ -92,6 +93,236 @@ export function CalendarView({ events, onEventClick, showPrivateEvents = false }
     return format(new Date(dateTime), 'h:mm a');
   };
 
+  const handleDayClick = (day: Date) => {
+    setSelectedDay(day);
+    setView('day');
+  };
+
+  // Get upcoming events for list view
+  const upcomingEvents = filteredEvents
+    .filter(event => new Date(event.start_time) >= new Date())
+    .sort((a, b) => new Date(a.start_time).getTime() - new Date(b.start_time).getTime());
+
+  const renderMonthView = () => (
+    <div className="border border-border rounded-lg overflow-hidden bg-background">
+      {/* Day headers */}
+      <div className="grid grid-cols-7 bg-muted border-b">
+        {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map((day) => (
+          <div
+            key={day}
+            className="p-3 text-center text-sm font-medium text-muted-foreground border-r last:border-r-0"
+          >
+            <span className="hidden sm:inline">{day}</span>
+            <span className="sm:hidden">{day.charAt(0)}</span>
+          </div>
+        ))}
+      </div>
+
+      {/* Calendar days grid */}
+      <div className="grid grid-cols-7">
+        {calendarDays.map((day) => {
+          const dayEvents = getEventsForDay(day);
+          const dayHolidays = getHolidaysForDay(day);
+          const daySpelmanDates = getSpelmanDatesForDay(day);
+          const isCurrentMonth = day.getMonth() === currentDate.getMonth();
+          const isDayToday = isToday(day);
+
+          return (
+            <div
+              key={day.toString()}
+              className={`min-h-[120px] border-r border-b last:border-r-0 p-2 cursor-pointer hover:bg-muted/50 ${
+                !isCurrentMonth ? 'bg-muted/30 text-muted-foreground' : 'bg-background'
+              } ${isDayToday ? 'bg-primary/5 border-primary' : ''}`}
+              onClick={() => handleDayClick(day)}
+            >
+              <div className={`text-sm font-medium mb-2 ${
+                isDayToday ? 'text-primary font-semibold' : ''
+              }`}>
+                {format(day, 'd')}
+              </div>
+              
+              <div className="space-y-1">
+                {/* Events - Show only title and time, NO descriptions */}
+                {dayEvents.slice(0, 3).map((event, index) => (
+                  <div
+                    key={`${event.id}-${index}`}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onEventClick(event);
+                    }}
+                    className="bg-primary/10 text-primary rounded-sm p-1 cursor-pointer text-xs leading-tight hover:bg-primary/20 transition-colors"
+                  >
+                    <div className="font-medium truncate" title={event.title}>
+                      {event.title}
+                    </div>
+                    <div className="flex items-center gap-1 text-[10px] text-muted-foreground">
+                      <Clock className="h-2 w-2 flex-shrink-0" />
+                      <span className="truncate">{formatEventTime(event.start_time)}</span>
+                    </div>
+                  </div>
+                ))}
+
+                {/* More events indicator */}
+                {dayEvents.length > 3 && (
+                  <div className="text-[10px] text-muted-foreground font-medium">
+                    +{dayEvents.length - 3} more
+                  </div>
+                )}
+
+                {/* Holidays */}
+                {dayHolidays.map((holiday, index) => (
+                  <HolidayCard key={`holiday-${index}`} holiday={holiday} />
+                ))}
+
+                {/* Spelman Dates */}
+                {daySpelmanDates.map((date, index) => (
+                  <SpelmanDateCard key={`spelman-${index}`} spelmanDate={date} />
+                ))}
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+
+  const renderDayView = () => {
+    if (!selectedDay) return null;
+    
+    const dayEvents = getEventsForDay(selectedDay);
+    const dayHolidays = getHolidaysForDay(selectedDay);
+    const daySpelmanDates = getSpelmanDatesForDay(selectedDay);
+
+    return (
+      <div className="space-y-4">
+        <div className="flex items-center justify-between">
+          <h3 className="text-lg font-semibold">
+            Events for {format(selectedDay, 'EEEE, MMMM d, yyyy')}
+          </h3>
+          <Button variant="outline" onClick={() => setView('month')}>
+            Back to Month
+          </Button>
+        </div>
+        
+        <div className="space-y-3">
+          {dayEvents.length === 0 && dayHolidays.length === 0 && daySpelmanDates.length === 0 ? (
+            <Card>
+              <CardContent className="p-6 text-center text-muted-foreground">
+                No events scheduled for this day
+              </CardContent>
+            </Card>
+          ) : (
+            <>
+              {/* Regular Events */}
+              {dayEvents.map((event) => (
+                <Card key={event.id} className="cursor-pointer hover:shadow-md transition-shadow" onClick={() => onEventClick(event)}>
+                  <CardContent className="p-4">
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="flex-1">
+                        <h4 className="font-medium text-lg">{event.title}</h4>
+                        <div className="flex items-center gap-4 mt-2 text-sm text-muted-foreground">
+                          <div className="flex items-center gap-1">
+                            <Clock className="h-4 w-4" />
+                            <span>{formatEventTime(event.start_time)}</span>
+                          </div>
+                          {event.location_name && (
+                            <div className="flex items-center gap-1">
+                              <MapPin className="h-4 w-4" />
+                              <span>{event.location_name}</span>
+                            </div>
+                          )}
+                        </div>
+                        {event.short_description && (
+                          <p className="text-sm text-muted-foreground mt-2">
+                            {event.short_description}
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+              
+              {/* Holidays */}
+              {dayHolidays.map((holiday, index) => (
+                <Card key={`holiday-${index}`}>
+                  <CardContent className="p-4">
+                    <h4 className="font-medium text-lg text-green-700">{holiday.name}</h4>
+                    <p className="text-sm text-muted-foreground">National Holiday</p>
+                  </CardContent>
+                </Card>
+              ))}
+              
+              {/* Spelman Dates */}
+              {daySpelmanDates.map((date, index) => (
+                <Card key={`spelman-${index}`}>
+                  <CardContent className="p-4">
+                    <h4 className="font-medium text-lg text-purple-700">{date.name}</h4>
+                    <p className="text-sm text-muted-foreground">Spelman Academic Date</p>
+                  </CardContent>
+                </Card>
+              ))}
+            </>
+          )}
+        </div>
+      </div>
+    );
+  };
+
+  const renderListView = () => (
+    <div className="space-y-4">
+      <h3 className="text-lg font-semibold">All Upcoming Events</h3>
+      
+      <div className="space-y-3">
+        {upcomingEvents.length === 0 ? (
+          <Card>
+            <CardContent className="p-6 text-center text-muted-foreground">
+              No upcoming events
+            </CardContent>
+          </Card>
+        ) : (
+          upcomingEvents.map((event) => (
+            <Card key={event.id} className="cursor-pointer hover:shadow-md transition-shadow" onClick={() => onEventClick(event)}>
+              <CardContent className="p-4">
+                <div className="flex items-start justify-between gap-3">
+                  <div className="flex-1">
+                    <h4 className="font-medium text-lg">{event.title}</h4>
+                    <div className="flex items-center gap-4 mt-2 text-sm text-muted-foreground">
+                      <div className="flex items-center gap-1">
+                        <CalendarIcon className="h-4 w-4" />
+                        <span>{format(new Date(event.start_time), 'EEE, MMM d, yyyy')}</span>
+                      </div>
+                      <div className="flex items-center gap-1">
+                        <Clock className="h-4 w-4" />
+                        <span>{formatEventTime(event.start_time)}</span>
+                      </div>
+                      {event.location_name && (
+                        <div className="flex items-center gap-1">
+                          <MapPin className="h-4 w-4" />
+                          <span>{event.location_name}</span>
+                        </div>
+                      )}
+                    </div>
+                    {event.short_description && (
+                      <p className="text-sm text-muted-foreground mt-2">
+                        {event.short_description}
+                      </p>
+                    )}
+                  </div>
+                  {event.event_type && (
+                    <span className="text-xs bg-primary/10 text-primary px-2 py-1 rounded-full">
+                      {event.event_type}
+                    </span>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+          ))
+        )}
+      </div>
+    </div>
+  );
+
   return (
     <div className="w-full space-y-4">
       {/* Calendar Header */}
@@ -101,18 +332,25 @@ export function CalendarView({ events, onEventClick, showPrivateEvents = false }
             variant="outline"
             size="sm"
             onClick={() => navigateMonth('prev')}
+            disabled={view === 'day'}
           >
             <ChevronLeft className="h-4 w-4" />
           </Button>
           
           <h2 className="text-lg sm:text-xl font-semibold text-center min-w-[140px] sm:min-w-[160px]">
-            {format(currentDate, 'MMMM yyyy')}
+            {view === 'day' && selectedDay 
+              ? format(selectedDay, 'MMMM d, yyyy')
+              : view === 'list' 
+                ? 'All Events'
+                : format(currentDate, 'MMMM yyyy')
+            }
           </h2>
           
           <Button
             variant="outline"
             size="sm"
             onClick={() => navigateMonth('next')}
+            disabled={view === 'day'}
           >
             <ChevronRight className="h-4 w-4" />
           </Button>
@@ -128,143 +366,73 @@ export function CalendarView({ events, onEventClick, showPrivateEvents = false }
             Month
           </Button>
           <Button
-            variant={view === 'week' ? 'default' : 'ghost'}
+            variant={view === 'list' ? 'default' : 'ghost'}
             size="sm"
-            onClick={() => setView('week')}
+            onClick={() => setView('list')}
             className="text-xs sm:text-sm"
           >
-            Week
+            <List className="h-4 w-4 mr-1" />
+            List
           </Button>
         </div>
       </div>
 
-      {/* Calendar Grid */}
-      <div className="border border-border rounded-lg overflow-hidden bg-background">
-        {/* Day headers */}
-        <div className="grid grid-cols-7 bg-muted border-b">
-          {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map((day) => (
-            <div
-              key={day}
-              className="p-3 text-center text-sm font-medium text-muted-foreground border-r last:border-r-0"
-            >
-              <span className="hidden sm:inline">{day}</span>
-              <span className="sm:hidden">{day.charAt(0)}</span>
-            </div>
-          ))}
-        </div>
+      {/* Calendar Content */}
+      {view === 'month' && renderMonthView()}
+      {view === 'day' && renderDayView()}
+      {view === 'list' && renderListView()}
 
-        {/* Calendar days grid */}
-        <div className="grid grid-cols-7">
-          {calendarDays.map((day) => {
-            const dayEvents = getEventsForDay(day);
-            const dayHolidays = getHolidaysForDay(day);
-            const daySpelmanDates = getSpelmanDatesForDay(day);
-            const isCurrentMonth = day.getMonth() === currentDate.getMonth();
-            const isDayToday = isToday(day);
-
-            return (
-              <div
-                key={day.toString()}
-                className={`min-h-[120px] border-r border-b last:border-r-0 p-2 ${
-                  !isCurrentMonth ? 'bg-muted/30 text-muted-foreground' : 'bg-background'
-                } ${isDayToday ? 'bg-primary/5 border-primary' : ''}`}
-              >
-                <div className={`text-sm font-medium mb-2 ${
-                  isDayToday ? 'text-primary font-semibold' : ''
-                }`}>
-                  {format(day, 'd')}
-                </div>
-                
-                <div className="space-y-1">
-                  {/* Events - Show only title and time */}
-                  {dayEvents.slice(0, 3).map((event, index) => (
-                    <div
-                      key={`${event.id}-${index}`}
-                      onClick={() => onEventClick(event)}
-                      className="bg-primary/10 text-primary rounded-sm p-1 cursor-pointer text-xs leading-tight hover:bg-primary/20 transition-colors"
-                    >
-                      <div className="font-medium truncate" title={event.title}>
-                        {event.title}
-                      </div>
-                      <div className="flex items-center gap-1 text-[10px] text-muted-foreground">
-                        <Clock className="h-2 w-2 flex-shrink-0" />
-                        <span className="truncate">{formatEventTime(event.start_time)}</span>
-                      </div>
-                    </div>
-                  ))}
-
-                  {/* More events indicator */}
-                  {dayEvents.length > 3 && (
-                    <div className="text-[10px] text-muted-foreground font-medium">
-                      +{dayEvents.length - 3} more
-                    </div>
-                  )}
-
-                  {/* Holidays */}
-                  {dayHolidays.map((holiday, index) => (
-                    <HolidayCard key={`holiday-${index}`} holiday={holiday} />
-                  ))}
-
-                  {/* Spelman Dates */}
-                  {daySpelmanDates.map((date, index) => (
-                    <SpelmanDateCard key={`spelman-${index}`} spelmanDate={date} />
-                  ))}
-                </div>
-              </div>
-            );
-          })}
-        </div>
-      </div>
-
-      {/* Mobile: Upcoming Events List */}
-      <div className="block sm:hidden">
-        <h3 className="text-base font-semibold mb-3">Upcoming Events</h3>
-        <div className="space-y-2">
-          {filteredEvents
-            .filter(event => new Date(event.start_time) >= new Date())
-            .slice(0, 5)
-            .map((event) => (
-              <Card 
-                key={event.id} 
-                className="cursor-pointer hover:shadow-md transition-shadow"
-                onClick={() => onEventClick(event)}
-              >
-                <CardContent className="p-3">
-                  <div className="flex items-start justify-between gap-3">
-                    <div className="flex-1 min-w-0">
-                      <h4 className="font-medium text-sm line-clamp-1" title={event.title}>
-                        {event.title}
-                      </h4>
-                      <div className="flex items-center gap-2 mt-1 text-xs text-muted-foreground">
-                        <div className="flex items-center gap-1">
-                          <CalendarIcon className="h-3 w-3 flex-shrink-0" />
-                          <span>{format(new Date(event.start_time), 'MMM d')}</span>
+      {/* Mobile: Upcoming Events List - only show in month view */}
+      {view === 'month' && (
+        <div className="block sm:hidden">
+          <h3 className="text-base font-semibold mb-3">Upcoming Events</h3>
+          <div className="space-y-2">
+            {filteredEvents
+              .filter(event => new Date(event.start_time) >= new Date())
+              .slice(0, 5)
+              .map((event) => (
+                <Card 
+                  key={event.id} 
+                  className="cursor-pointer hover:shadow-md transition-shadow"
+                  onClick={() => onEventClick(event)}
+                >
+                  <CardContent className="p-3">
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="flex-1 min-w-0">
+                        <h4 className="font-medium text-sm line-clamp-1" title={event.title}>
+                          {event.title}
+                        </h4>
+                        <div className="flex items-center gap-2 mt-1 text-xs text-muted-foreground">
+                          <div className="flex items-center gap-1">
+                            <CalendarIcon className="h-3 w-3 flex-shrink-0" />
+                            <span>{format(new Date(event.start_time), 'MMM d')}</span>
+                          </div>
+                          <div className="flex items-center gap-1">
+                            <Clock className="h-3 w-3 flex-shrink-0" />
+                            <span>{formatEventTime(event.start_time)}</span>
+                          </div>
                         </div>
-                        <div className="flex items-center gap-1">
-                          <Clock className="h-3 w-3 flex-shrink-0" />
-                          <span>{formatEventTime(event.start_time)}</span>
-                        </div>
+                        {event.location_name && (
+                          <a
+                            href={createGoogleMapsLink(event.location_name)}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="flex items-center gap-1 mt-1 text-xs text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300"
+                            onClick={(e) => e.stopPropagation()}
+                          >
+                            <MapPin className="h-3 w-3 flex-shrink-0" />
+                            <span className="truncate">{event.location_name}</span>
+                            <ExternalLink className="h-2 w-2 flex-shrink-0" />
+                          </a>
+                        )}
                       </div>
-                      {event.location_name && (
-                        <a
-                          href={createGoogleMapsLink(event.location_name)}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="flex items-center gap-1 mt-1 text-xs text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300"
-                          onClick={(e) => e.stopPropagation()}
-                        >
-                          <MapPin className="h-3 w-3 flex-shrink-0" />
-                          <span className="truncate">{event.location_name}</span>
-                          <ExternalLink className="h-2 w-2 flex-shrink-0" />
-                        </a>
-                      )}
                     </div>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
+                  </CardContent>
+                </Card>
+              ))}
+          </div>
         </div>
-      </div>
+      )}
     </div>
   );
 }
