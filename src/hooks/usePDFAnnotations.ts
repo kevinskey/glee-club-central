@@ -1,3 +1,4 @@
+
 import { useState, useCallback, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
@@ -27,6 +28,7 @@ interface AnnotationData {
   y?: number;
   width?: number;
   height?: number;
+  id?: string; // Made optional for compatibility
 }
 
 export const usePDFAnnotations = (sheetMusicId: string) => {
@@ -121,6 +123,7 @@ export const usePDFAnnotations = (sheetMusicId: string) => {
     return getCachedAnnotations(pageNumber);
   }, [getCachedAnnotations]);
 
+  // Debounced save to reduce server calls
   const savePageAnnotations = useCallback(async (
     pageNumber: number,
     annotationData: AnnotationData[]
@@ -193,10 +196,6 @@ export const usePDFAnnotations = (sheetMusicId: string) => {
       // Mark page as saved in cache
       markPageSaved(pageNumber);
       
-      toast({
-        title: "Success",
-        description: "Annotations saved successfully",
-      });
     } catch (error) {
       console.error('Error saving annotations:', error);
       toast({
@@ -222,7 +221,11 @@ export const usePDFAnnotations = (sheetMusicId: string) => {
 
     const newAnnotations = [...currentAnnotations, annotationWithId];
     updateCachedAnnotations(pageNumber, newAnnotations);
-    savePageAnnotations(pageNumber, newAnnotations);
+    
+    // Debounce the save operation to reduce server calls
+    setTimeout(() => {
+      savePageAnnotations(pageNumber, newAnnotations);
+    }, 100);
   }, [getCachedAnnotations, updateCachedAnnotations, savePageAnnotations]);
 
   const removeAnnotation = useCallback((index: number, pageNumber: number) => {
@@ -234,7 +237,11 @@ export const usePDFAnnotations = (sheetMusicId: string) => {
 
     const newAnnotations = currentAnnotations.filter((_, i) => i !== index);
     updateCachedAnnotations(pageNumber, newAnnotations);
-    savePageAnnotations(pageNumber, newAnnotations);
+    
+    // Debounce the save operation
+    setTimeout(() => {
+      savePageAnnotations(pageNumber, newAnnotations);
+    }, 100);
   }, [getCachedAnnotations, updateCachedAnnotations, savePageAnnotations]);
 
   // New function to remove annotation by ID (for eraser tool)
@@ -246,10 +253,14 @@ export const usePDFAnnotations = (sheetMusicId: string) => {
     setRedoStack([]);
 
     const newAnnotations = currentAnnotations.filter(annotation => 
-      annotation.id !== annotationId
+      (annotation.id || `annotation-${currentAnnotations.indexOf(annotation)}`) !== annotationId
     );
     updateCachedAnnotations(pageNumber, newAnnotations);
-    savePageAnnotations(pageNumber, newAnnotations);
+    
+    // Debounce the save operation
+    setTimeout(() => {
+      savePageAnnotations(pageNumber, newAnnotations);
+    }, 100);
   }, [getCachedAnnotations, updateCachedAnnotations, savePageAnnotations]);
 
   const undo = useCallback((pageNumber: number) => {
@@ -262,6 +273,8 @@ export const usePDFAnnotations = (sheetMusicId: string) => {
     setRedoStack(prev => [...prev, currentAnnotations]);
     setUndoStack(newUndoStack);
     updateCachedAnnotations(pageNumber, previousState);
+    
+    // Immediate save for undo/redo operations
     savePageAnnotations(pageNumber, previousState);
   }, [undoStack, getCachedAnnotations, updateCachedAnnotations, savePageAnnotations]);
 
@@ -275,6 +288,8 @@ export const usePDFAnnotations = (sheetMusicId: string) => {
     setUndoStack(prev => [...prev, currentAnnotations]);
     setRedoStack(newRedoStack);
     updateCachedAnnotations(pageNumber, nextState);
+    
+    // Immediate save for undo/redo operations
     savePageAnnotations(pageNumber, nextState);
   }, [redoStack, getCachedAnnotations, updateCachedAnnotations, savePageAnnotations]);
 

@@ -1,4 +1,3 @@
-
 import React, { useRef, useEffect, useState, useCallback } from 'react';
 import { cn } from '@/lib/utils';
 
@@ -211,9 +210,10 @@ export const AnnotationCanvas: React.FC<AnnotationCanvasProps> = ({
     if (currentTool === 'eraser') {
       // Handle eraser tool
       const annotationToRemove = findAnnotationAtPoint(point);
-      if (annotationToRemove && annotationToRemove.id && onAnnotationRemove) {
-        console.log('Erasing annotation:', annotationToRemove.id);
-        onAnnotationRemove(annotationToRemove.id);
+      if (annotationToRemove && onAnnotationRemove) {
+        const annotationId = annotationToRemove.id || `annotation-${annotationsWithIds.indexOf(annotationToRemove)}`;
+        console.log('Erasing annotation:', annotationId);
+        onAnnotationRemove(annotationId);
       }
       return;
     }
@@ -228,15 +228,16 @@ export const AnnotationCanvas: React.FC<AnnotationCanvasProps> = ({
       setCurrentPath([point]);
       console.log('Drawing started, isDrawing set to true');
     }
-  }, [currentTool, findAnnotationAtPoint, onAnnotationRemove]);
+  }, [currentTool, annotationsWithIds, onAnnotationRemove]);
 
   const continueDrawing = useCallback((point: Point) => {
     if (currentTool === 'eraser') {
       // Continue erasing while dragging
       const annotationToRemove = findAnnotationAtPoint(point);
-      if (annotationToRemove && annotationToRemove.id && onAnnotationRemove) {
-        console.log('Continuing to erase annotation:', annotationToRemove.id);
-        onAnnotationRemove(annotationToRemove.id);
+      if (annotationToRemove && onAnnotationRemove) {
+        const annotationId = annotationToRemove.id || `annotation-${annotationsWithIds.indexOf(annotationToRemove)}`;
+        console.log('Continuing to erase annotation:', annotationId);
+        onAnnotationRemove(annotationId);
       }
       return;
     }
@@ -278,7 +279,7 @@ export const AnnotationCanvas: React.FC<AnnotationCanvasProps> = ({
         ctx.restore();
       }
     }
-  }, [isDrawing, currentPath, currentTool, currentColor, strokeWidth, findAnnotationAtPoint, onAnnotationRemove]);
+  }, [isDrawing, currentPath, currentTool, currentColor, strokeWidth, annotationsWithIds, onAnnotationRemove]);
 
   const finishDrawing = useCallback(() => {
     console.log('Finishing drawing, isDrawing:', isDrawing, 'path length:', currentPath.length);
