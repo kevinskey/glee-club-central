@@ -247,7 +247,7 @@ export function CalendarView({ events, onEventClick, showPrivateEvents = false }
               {dayHolidays.map((holiday, index) => (
                 <Card key={`holiday-${index}`}>
                   <CardContent className="p-4">
-                    <h4 className="font-medium text-lg text-green-700">{holiday.name}</h4>
+                    <h4 className="font-medium text-lg text-green-700">{holiday.title}</h4>
                     <p className="text-sm text-muted-foreground">National Holiday</p>
                   </CardContent>
                 </Card>
@@ -257,7 +257,7 @@ export function CalendarView({ events, onEventClick, showPrivateEvents = false }
               {daySpelmanDates.map((date, index) => (
                 <Card key={`spelman-${index}`}>
                   <CardContent className="p-4">
-                    <h4 className="font-medium text-lg text-purple-700">{date.name}</h4>
+                    <h4 className="font-medium text-lg text-purple-700">{date.title}</h4>
                     <p className="text-sm text-muted-foreground">Spelman Academic Date</p>
                   </CardContent>
                 </Card>
