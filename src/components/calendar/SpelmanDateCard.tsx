@@ -22,7 +22,7 @@ const getCategoryColor = (category: string) => {
     case 'holiday':
       return 'from-red-50 via-white to-blue-50 border-red-300';
     case 'orientation':
-      return 'from-purple-50 via-white to-purple-50 border-purple-300';
+      return 'from-blue-50 via-white to-blue-50 border-blue-300';
     case 'registration':
       return 'from-orange-50 via-white to-orange-50 border-orange-300';
     case 'classes':
@@ -34,9 +34,9 @@ const getCategoryColor = (category: string) => {
     case 'deadline':
       return 'from-red-50 via-white to-red-50 border-red-400';
     case 'special':
-      return 'from-indigo-50 via-white to-indigo-50 border-indigo-300';
+      return 'from-blue-50 via-white to-blue-50 border-blue-300';
     default:
-      return 'from-gray-50 via-white to-gray-50 border-gray-300';
+      return 'from-blue-50 via-white to-blue-50 border-blue-300';
   }
 };
 
@@ -45,7 +45,7 @@ const getCategoryTextColor = (category: string) => {
     case 'holiday':
       return 'text-red-800';
     case 'orientation':
-      return 'text-purple-800';
+      return 'text-blue-800';
     case 'registration':
       return 'text-orange-800';
     case 'classes':
@@ -57,9 +57,9 @@ const getCategoryTextColor = (category: string) => {
     case 'deadline':
       return 'text-red-900';
     case 'special':
-      return 'text-indigo-800';
+      return 'text-blue-800';
     default:
-      return 'text-gray-800';
+      return 'text-blue-800';
   }
 };
 

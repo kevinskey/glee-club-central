@@ -189,14 +189,14 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
       }
     }));
 
-    // Add Spelman academic dates (without descriptions in month view)
+    // Add Spelman academic dates (without descriptions in month view) - using Carolina blue
     const spelmanEvents = spelmanDates.map(date => ({
       id: `spelman-${date.id}`,
       title: date.title,
       start: date.date.toISOString().split('T')[0],
       allDay: true,
-      backgroundColor: '#7c3aed',
-      borderColor: '#6d28d9',
+      backgroundColor: '#0B3C84', // Carolina blue
+      borderColor: '#0B3C84', // Carolina blue
       textColor: 'white',
       extendedProps: {
         type: 'spelman',
@@ -392,7 +392,7 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
                 if (type === 'holiday') {
                   info.el.style.borderLeft = '4px solid #dc2626';
                 } else if (type === 'spelman') {
-                  info.el.style.borderLeft = '4px solid #7c3aed';
+                  info.el.style.borderLeft = '4px solid #0B3C84'; // Carolina blue
                 }
               }}
               eventContent={(eventInfo) => {
