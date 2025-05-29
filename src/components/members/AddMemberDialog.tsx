@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Loader2, Camera } from 'lucide-react';
 import { z } from 'zod';
@@ -45,6 +46,26 @@ interface AddMemberDialogProps {
   isEditing?: boolean;
 }
 
+const titleOptions = [
+  'Dr.',
+  'Prof.',
+  'Rev.',
+  'Mr.',
+  'Mrs.',
+  'Ms.',
+  'Miss',
+  'Sir',
+  'Madam',
+  'Lord',
+  'Lady',
+  'Hon.',
+  'Capt.',
+  'Col.',
+  'Lt.',
+  'Maj.',
+  'Sgt.'
+];
+
 export function AddMemberDialog({
   isOpen,
   onOpenChange,
@@ -59,6 +80,7 @@ export function AddMemberDialog({
   const form = useForm<UserFormValues>({
     resolver: zodResolver(userFormSchema),
     defaultValues: {
+      title: initialValues?.title || '',
       first_name: initialValues?.first_name || '',
       last_name: initialValues?.last_name || '',
       email: initialValues?.email || '',
@@ -90,9 +112,10 @@ export function AddMemberDialog({
     form.setValue('avatar_url', photoUrl);
   };
 
+  const title = form.watch('title');
   const firstName = form.watch('first_name');
   const lastName = form.watch('last_name');
-  const displayName = `${firstName} ${lastName}`.trim();
+  const displayName = `${title ? title + ' ' : ''}${firstName} ${lastName}`.trim();
 
   return (
     <>
@@ -128,6 +151,34 @@ export function AddMemberDialog({
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <FormField
+                  control={form.control}
+                  name="title"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Title</FormLabel>
+                      <Select 
+                        onValueChange={field.onChange} 
+                        defaultValue={field.value || undefined}
+                      >
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select title" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          {titleOptions.map((title) => (
+                            <SelectItem key={title} value={title}>
+                              {title}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                
                 <FormField
                   control={form.control}
                   name="first_name"
