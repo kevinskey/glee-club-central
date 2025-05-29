@@ -25,11 +25,10 @@ export const useUsers = (): UseUsersResponse => {
     try {
       console.log('Fetching users from profiles table');
       
-      // Get profiles with all fields
+      // Get ALL profiles - don't filter out any users at this level
       const { data: profiles, error: profilesError } = await supabase
         .from('profiles')
         .select('*')
-        .neq('status', 'deleted') // Exclude deleted users
         .order('last_name', { ascending: true });
 
       if (profilesError) {
@@ -38,6 +37,8 @@ export const useUsers = (): UseUsersResponse => {
         toast.error('Failed to load users');
         return null;
       }
+
+      console.log('Raw profiles fetched:', profiles?.length || 0);
 
       // Get auth users to get email addresses - with proper typing
       let authUsers: any[] = [];
@@ -49,20 +50,19 @@ export const useUsers = (): UseUsersResponse => {
           // Continue without auth data - we'll use profile email if available
         } else {
           authUsers = authData?.users || [];
+          console.log('Auth users fetched:', authUsers.length);
         }
       } catch (err) {
         console.error('Error accessing auth users:', err);
         // Continue without auth data
       }
 
-      console.log('Successfully fetched profiles:', profiles?.length || 0);
-      
       // Transform the data to match User interface with all fields
       const users: User[] = (profiles || []).map(profile => {
         // Find corresponding auth user for email - with proper type checking
         const authUser = authUsers.find((u: any) => u?.id === profile.id);
         
-        return {
+        const user: User = {
           id: profile.id,
           email: authUser?.email || null,
           first_name: profile.first_name || '',
@@ -84,7 +84,16 @@ export const useUsers = (): UseUsersResponse => {
           title: profile.title,
           special_roles: profile.special_roles
         };
+
+        console.log('Mapped user:', user.first_name, user.last_name, 'Status:', user.status);
+        return user;
       });
+
+      console.log('Total users processed:', users.length);
+      console.log('Users by status:', users.reduce((acc, user) => {
+        acc[user.status] = (acc[user.status] || 0) + 1;
+        return acc;
+      }, {} as Record<string, number>));
 
       setUserCount(users.length);
       return users;
@@ -101,10 +110,10 @@ export const useUsers = (): UseUsersResponse => {
 
   const getUserCount = useCallback(async (): Promise<number> => {
     try {
+      // Count ALL profiles, not just active ones
       const { count, error: countError } = await supabase
         .from('profiles')
-        .select('*', { count: 'exact', head: true })
-        .neq('status', 'deleted'); // Exclude deleted users
+        .select('*', { count: 'exact', head: true });
 
       if (countError) {
         console.error('Error getting user count:', countError);

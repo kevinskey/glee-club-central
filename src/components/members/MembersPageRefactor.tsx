@@ -1,4 +1,3 @@
-
 import React, { useState, useCallback } from "react";
 import { User } from "@/hooks/useUserManagement";
 import { Navigate } from "react-router-dom";
@@ -83,16 +82,41 @@ export function MembersPageComponent({ useUserManagementHook }: MembersPageProps
     deleteUser
   } = useUserManagementHook();
   
-  console.log("[DEBUG] MembersPageComponent - Initializing with", allMembers?.length || 0, "members");
-  if (allMembers?.length === 0) {
-    console.log("[DEBUG] No members available to display");
-  } else if (allMembers?.length > 0) {
-    console.log("[DEBUG] Members sample:", allMembers?.slice(0, 2));
-  }
+  console.log("[DEBUG] MembersPageComponent - All members from hook:", allMembers?.length || 0);
   
-  // Explicitly filter out deleted users
-  const members = allMembers ? allMembers.filter(member => member.status !== 'deleted') : [];
-  console.log("[DEBUG] MembersPageComponent - After filtering deleted members:", members.length);
+  // Apply filters based on search and status - but don't filter out users by default
+  const filteredMembers = React.useMemo(() => {
+    if (!allMembers) return [];
+    
+    return allMembers.filter(member => {
+      // Search filter
+      const matchesSearch = 
+        !searchQuery || 
+        (member.first_name || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
+        (member.last_name || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
+        (member.email || '').toLowerCase().includes(searchQuery.toLowerCase());
+      
+      if (!matchesSearch) return false;
+      
+      // Role filter
+      const matchesRole = roleFilter === "all" || (member.role || '') === roleFilter;
+      if (!matchesRole) return false;
+      
+      // Status filter - show all statuses unless specifically filtered
+      const matchesStatus = statusFilter === "all" || (member.status || '') === statusFilter;
+      if (!matchesStatus) return false;
+      
+      return true;
+    });
+  }, [allMembers, searchQuery, roleFilter, statusFilter]);
+
+  console.log("[DEBUG] MembersPageComponent - Filtered members:", filteredMembers.length);
+  console.log("[DEBUG] Current filters - Search:", searchQuery, "Role:", roleFilter, "Status:", statusFilter);
+  
+  // Show all members that pass the filters (including deleted, pending, etc.)
+  const members = filteredMembers;
+  
+  console.log("[DEBUG] MembersPageComponent - After filtering members:", members.length);
   
   // Create a wrapper function for fetchUsers that returns void
   const refreshUsers = createMemberRefreshFunction(fetchUsers);
@@ -255,15 +279,31 @@ export function MembersPageComponent({ useUserManagementHook }: MembersPageProps
           </div>
         ) : members.length === 0 ? (
           <div className="text-center p-8">
-            <p className="text-muted-foreground mb-2">No members found</p>
-            <Button 
-              variant="outline" 
-              onClick={() => setIsAddMemberOpen(true)}
-              className="mt-2"
-            >
-              <UserPlus className="mr-2 h-4 w-4" />
-              Add your first member
-            </Button>
+            <p className="text-muted-foreground mb-2">
+              {allMembers?.length === 0 ? "No members found" : "No members match your current filters"}
+            </p>
+            {allMembers?.length === 0 ? (
+              <Button 
+                variant="outline" 
+                onClick={() => setIsAddMemberOpen(true)}
+                className="mt-2"
+              >
+                <UserPlus className="mr-2 h-4 w-4" />
+                Add your first member
+              </Button>
+            ) : (
+              <Button 
+                variant="outline" 
+                onClick={() => {
+                  setSearchQuery("");
+                  setRoleFilter("all");
+                  setStatusFilter("all");
+                }}
+                className="mt-2"
+              >
+                Clear Filters
+              </Button>
+            )}
           </div>
         ) : (
           <MembersList 
