@@ -1,3 +1,4 @@
+
 import React, { useState, useCallback, useEffect, useRef } from 'react';
 import { Document, Page, pdfjs } from 'react-pdf';
 import { Button } from '@/components/ui/button';
@@ -12,6 +13,7 @@ import {
   Download,
   RotateCw,
   Maximize,
+  Minimize,
   ArrowLeft,
   Search,
   Bookmark,
@@ -156,6 +158,17 @@ const AdvancedPDFViewer: React.FC<AdvancedPDFViewerProps> = ({
             event.preventDefault();
             const searchInput = document.querySelector('input[placeholder*="Search"]') as HTMLInputElement;
             searchInput?.focus();
+          } else if (!event.ctrlKey && !event.metaKey) {
+            // F key alone for fullscreen
+            event.preventDefault();
+            toggleFullscreen();
+          }
+          break;
+        case 'r':
+        case 'R':
+          if (!event.ctrlKey && !event.metaKey) {
+            event.preventDefault();
+            rotate();
           }
           break;
       }
@@ -190,7 +203,7 @@ const AdvancedPDFViewer: React.FC<AdvancedPDFViewerProps> = ({
       window.addEventListener('resize', updateSize);
       return () => window.removeEventListener('resize', updateSize);
     }
-  }, [scale, pageNumber]);
+  }, [scale, pageNumber, rotation]);
 
   const loadBookmarks = async () => {
     if (!user) return;
@@ -263,7 +276,10 @@ const AdvancedPDFViewer: React.FC<AdvancedPDFViewerProps> = ({
   const goToNextPage = () => setPageNumber(page => Math.min(numPages, page + 1));
   const zoomIn = () => setScale(scale => Math.min(3.0, scale + 0.2));
   const zoomOut = () => setScale(scale => Math.max(0.5, scale - 0.2));
-  const rotate = () => setRotation(rotation => (rotation + 90) % 360);
+  const rotate = () => {
+    setRotation(rotation => (rotation + 90) % 360);
+    toast({ title: `Rotated to ${((rotation + 90) % 360)}°` });
+  };
   
   const handleDownload = () => {
     const link = document.createElement('a');
@@ -274,17 +290,34 @@ const AdvancedPDFViewer: React.FC<AdvancedPDFViewerProps> = ({
     document.body.removeChild(link);
   };
 
-  const toggleFullscreen = () => {
-    if (!document.fullscreenElement) {
-      document.documentElement.requestFullscreen();
-    } else {
-      document.exitFullscreen();
+  const toggleFullscreen = async () => {
+    try {
+      if (!document.fullscreenElement) {
+        if (viewerRef.current) {
+          await viewerRef.current.requestFullscreen();
+          toast({ title: "Entered fullscreen mode", description: "Press ESC or F to exit" });
+        }
+      } else {
+        await document.exitFullscreen();
+        toast({ title: "Exited fullscreen mode" });
+      }
+    } catch (error) {
+      console.error('Fullscreen error:', error);
+      toast({ 
+        title: "Fullscreen Error", 
+        description: "Unable to toggle fullscreen mode",
+        variant: "destructive" 
+      });
     }
   };
 
-  const exitFullscreen = () => {
+  const exitFullscreen = async () => {
     if (document.fullscreenElement) {
-      document.exitFullscreen();
+      try {
+        await document.exitFullscreen();
+      } catch (error) {
+        console.error('Exit fullscreen error:', error);
+      }
     }
   };
 
@@ -320,10 +353,13 @@ const AdvancedPDFViewer: React.FC<AdvancedPDFViewerProps> = ({
   };
 
   return (
-    <div className={cn(
-      "flex flex-col h-screen bg-background",
-      isFullscreen ? "fixed inset-0 z-50" : ""
-    )}>
+    <div 
+      ref={viewerRef}
+      className={cn(
+        "flex flex-col h-screen bg-background",
+        isFullscreen ? "fixed inset-0 z-50" : ""
+      )}
+    >
       {/* Enhanced Header with Navigation */}
       {(showToolbar || !isFullscreen) && (
         <div className="flex items-center justify-between p-2 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 h-14">
@@ -410,11 +446,11 @@ const AdvancedPDFViewer: React.FC<AdvancedPDFViewerProps> = ({
                 </DropdownMenuItem>
                 <DropdownMenuItem onClick={rotate}>
                   <RotateCw className="h-4 w-4 mr-2" />
-                  Rotate
+                  Rotate ({rotation}°)
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem onClick={toggleFullscreen}>
-                  <Maximize className="h-4 w-4 mr-2" />
+                  {isFullscreen ? <Minimize className="h-4 w-4 mr-2" /> : <Maximize className="h-4 w-4 mr-2" />}
                   {isFullscreen ? 'Exit Fullscreen' : 'Fullscreen'}
                 </DropdownMenuItem>
                 <DropdownMenuItem onClick={() => setShowAnnotations(!showAnnotations)}>
@@ -480,64 +516,68 @@ const AdvancedPDFViewer: React.FC<AdvancedPDFViewerProps> = ({
       )}
 
       {/* Search Bar - Compact */}
-      <div className="flex items-center gap-2 p-2 border-b bg-muted/30 h-10">
-        <div className="relative flex-1 max-w-md">
-          <Search className="absolute left-2 top-2 h-3 w-3 text-muted-foreground" />
-          <Input
-            placeholder="Search..."
-            className="pl-7 h-6 text-xs"
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-          />
-        </div>
-        {searchResults.length > 0 && (
-          <div className="flex items-center gap-1">
-            <Badge variant="secondary" className="text-xs px-1 py-0">
-              {currentSearchIndex + 1}/{searchResults.length}
-            </Badge>
-            <Button
-              variant="outline"
-              size="sm"
-              className="h-6 w-6 p-0"
-              onClick={() => setCurrentSearchIndex(Math.max(0, currentSearchIndex - 1))}
-              disabled={currentSearchIndex <= 0}
-            >
-              <ChevronLeft className="h-3 w-3" />
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              className="h-6 w-6 p-0"
-              onClick={() => setCurrentSearchIndex(Math.min(searchResults.length - 1, currentSearchIndex + 1))}
-              disabled={currentSearchIndex >= searchResults.length - 1}
-            >
-              <ChevronRight className="h-3 w-3" />
-            </Button>
+      {!isFullscreen && (
+        <div className="flex items-center gap-2 p-2 border-b bg-muted/30 h-10">
+          <div className="relative flex-1 max-w-md">
+            <Search className="absolute left-2 top-2 h-3 w-3 text-muted-foreground" />
+            <Input
+              placeholder="Search..."
+              className="pl-7 h-6 text-xs"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
           </div>
-        )}
-      </div>
+          {searchResults.length > 0 && (
+            <div className="flex items-center gap-1">
+              <Badge variant="secondary" className="text-xs px-1 py-0">
+                {currentSearchIndex + 1}/{searchResults.length}
+              </Badge>
+              <Button
+                variant="outline"
+                size="sm"
+                className="h-6 w-6 p-0"
+                onClick={() => setCurrentSearchIndex(Math.max(0, currentSearchIndex - 1))}
+                disabled={currentSearchIndex <= 0}
+              >
+                <ChevronLeft className="h-3 w-3" />
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                className="h-6 w-6 p-0"
+                onClick={() => setCurrentSearchIndex(Math.min(searchResults.length - 1, currentSearchIndex + 1))}
+                disabled={currentSearchIndex >= searchResults.length - 1}
+              >
+                <ChevronRight className="h-3 w-3" />
+              </Button>
+            </div>
+          )}
+        </div>
+      )}
 
       {/* Annotation Toolbar - Compact */}
-      <AnnotationToolbar
-        currentTool={currentTool}
-        onToolChange={setCurrentTool}
-        currentColor={currentColor}
-        onColorChange={setCurrentColor}
-        strokeWidth={strokeWidth}
-        onStrokeWidthChange={setStrokeWidth}
-        canUndo={canUndo}
-        canRedo={canRedo}
-        onUndo={() => undo(pageNumber)}
-        onRedo={() => redo(pageNumber)}
-        onSave={handleSaveAnnotations}
-        onClear={handleClearAnnotations}
-        showAnnotations={showAnnotations}
-        onToggleAnnotations={() => setShowAnnotations(!showAnnotations)}
-        className="border-b h-10"
-      />
+      {!isFullscreen && (
+        <AnnotationToolbar
+          currentTool={currentTool}
+          onToolChange={setCurrentTool}
+          currentColor={currentColor}
+          onColorChange={setCurrentColor}
+          strokeWidth={strokeWidth}
+          onStrokeWidthChange={setStrokeWidth}
+          canUndo={canUndo}
+          canRedo={canRedo}
+          onUndo={() => undo(pageNumber)}
+          onRedo={() => redo(pageNumber)}
+          onSave={handleSaveAnnotations}
+          onClear={handleClearAnnotations}
+          showAnnotations={showAnnotations}
+          onToggleAnnotations={() => setShowAnnotations(!showAnnotations)}
+          className="border-b h-10"
+        />
+      )}
 
       {/* Main PDF Viewer */}
-      <div className="flex-1 overflow-auto bg-gray-100 relative" ref={viewerRef}>
+      <div className="flex-1 overflow-auto bg-gray-100 relative">
         <div className="flex justify-center p-4">
           <div className="relative">
             <Card className="shadow-lg">
@@ -621,6 +661,18 @@ const AdvancedPDFViewer: React.FC<AdvancedPDFViewerProps> = ({
               </button>
             ))}
           </div>
+        </div>
+      )}
+
+      {/* Fullscreen overlay controls */}
+      {isFullscreen && (
+        <div className="absolute top-4 right-4 z-10 flex gap-2 bg-background/80 backdrop-blur rounded-lg p-2">
+          <Button variant="outline" size="sm" onClick={rotate}>
+            <RotateCw className="h-4 w-4" />
+          </Button>
+          <Button variant="outline" size="sm" onClick={toggleFullscreen}>
+            <Minimize className="h-4 w-4" />
+          </Button>
         </div>
       )}
     </div>
