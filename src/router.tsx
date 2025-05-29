@@ -32,6 +32,7 @@ import SettingsPage from './pages/settings/SettingsPage';
 import FinancesPage from './pages/dashboard/FinancesPage';
 import CalendarPage from './pages/CalendarPage';
 import AdminCalendarPage from './pages/admin/AdminCalendarPage';
+import EventDetailsPage from './pages/events/EventDetailsPage';
 import { AdminRoute } from './components/auth/AdminRoute';
 
 // Create a properly structured router with all routes
@@ -168,6 +169,10 @@ export const router = createBrowserRouter([
           {
             path: 'calendar',
             element: <AdminCalendarPage />,
+          },
+          {
+            path: 'events/:id',
+            element: <EventDetailsPage />,
           },
           {
             path: 'members',
