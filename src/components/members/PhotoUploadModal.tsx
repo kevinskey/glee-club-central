@@ -1,12 +1,14 @@
+
 import React, { useState, useRef, useCallback } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Upload, Camera, X, RefreshCw, Loader2, Wand2 } from 'lucide-react';
+import { Upload, Camera, X, RefreshCw, Loader2, Wand2, AlertCircle } from 'lucide-react';
 import { toast } from 'sonner';
 import { PhotoEnhancementModal } from './PhotoEnhancementModal';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 
 interface PhotoUploadModalProps {
   isOpen: boolean;
@@ -33,25 +35,71 @@ export function PhotoUploadModal({
   const [stream, setStream] = useState<MediaStream | null>(null);
   const [showEnhancement, setShowEnhancement] = useState(false);
   const [capturedPhotoForEnhancement, setCapturedPhotoForEnhancement] = useState<string>('');
+  const [cameraError, setCameraError] = useState<string>('');
   const fileInputRef = useRef<HTMLInputElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
+
+  const checkCameraPermissions = useCallback(async (): Promise<boolean> => {
+    try {
+      console.log('🔐 Checking camera permissions...');
+      
+      // Check if navigator.permissions is supported
+      if ('permissions' in navigator) {
+        const permission = await navigator.permissions.query({ name: 'camera' as PermissionName });
+        console.log('📋 Camera permission status:', permission.state);
+        
+        if (permission.state === 'denied') {
+          toast.error('Camera access denied. Please enable camera permissions in your browser settings.');
+          return false;
+        }
+      }
+      
+      return true;
+    } catch (error) {
+      console.log('⚠️ Permission check not supported or failed:', error);
+      // Continue anyway, will handle in getUserMedia
+      return true;
+    }
+  }, []);
 
   const startCamera = useCallback(async () => {
     console.log('🎥 Starting camera...');
     setIsCameraLoading(true);
     setIsVideoReady(false);
+    setCameraError('');
     
     try {
-      const mediaStream = await navigator.mediaDevices.getUserMedia({ 
-        video: { 
-          width: { ideal: 640 }, 
-          height: { ideal: 480 },
-          facingMode: 'user'
-        } 
-      });
+      // Check permissions first
+      const hasPermission = await checkCameraPermissions();
+      if (!hasPermission) {
+        setIsCameraLoading(false);
+        return;
+      }
+
+      // Enhanced constraints for better Mac compatibility
+      const constraints: MediaStreamConstraints = {
+        video: {
+          width: { ideal: 640, max: 1280 },
+          height: { ideal: 480, max: 720 },
+          facingMode: 'user',
+          frameRate: { ideal: 30, max: 30 }
+        },
+        audio: false
+      };
+
+      console.log('📱 Requesting media with constraints:', constraints);
+      
+      const mediaStream = await navigator.mediaDevices.getUserMedia(constraints);
       
       console.log('✅ Camera stream obtained successfully');
+      console.log('🎬 Stream tracks:', mediaStream.getTracks().map(track => ({
+        kind: track.kind,
+        label: track.label,
+        enabled: track.enabled,
+        readyState: track.readyState
+      })));
+      
       setStream(mediaStream);
       setIsCameraMode(true);
       
@@ -59,54 +107,142 @@ export function PhotoUploadModal({
         videoRef.current.srcObject = mediaStream;
         console.log('📹 Video source set to element');
         
-        videoRef.current.addEventListener('canplay', () => {
+        // Force video to load
+        videoRef.current.load();
+        
+        // Multiple event listeners for better compatibility
+        const video = videoRef.current;
+        
+        const handleCanPlay = () => {
           console.log('🎬 Video can play event fired');
-        });
+          setIsVideoReady(true);
+          setIsCameraLoading(false);
+        };
+
+        const handleLoadedData = () => {
+          console.log('📊 Video loaded data event fired');
+          if (video.videoWidth > 0 && video.videoHeight > 0) {
+            setIsVideoReady(true);
+            setIsCameraLoading(false);
+          }
+        };
+
+        const handleLoadedMetadata = () => {
+          console.log('📐 Video metadata loaded');
+          console.log('Video dimensions:', video.videoWidth, 'x', video.videoHeight);
+        };
+
+        video.addEventListener('canplay', handleCanPlay);
+        video.addEventListener('loadeddata', handleLoadedData);
+        video.addEventListener('loadedmetadata', handleLoadedMetadata);
+        
+        // Cleanup function
+        const cleanup = () => {
+          video.removeEventListener('canplay', handleCanPlay);
+          video.removeEventListener('loadeddata', handleLoadedData);
+          video.removeEventListener('loadedmetadata', handleLoadedMetadata);
+        };
+
+        // Set a timeout to check if video is ready after some time
+        setTimeout(() => {
+          if (video.readyState >= 2 && video.videoWidth > 0) {
+            console.log('✅ Video ready after timeout check');
+            setIsVideoReady(true);
+            setIsCameraLoading(false);
+          }
+          cleanup();
+        }, 3000);
       }
     } catch (error) {
       console.error('❌ Error accessing camera:', error);
       setIsCameraLoading(false);
       setIsCameraMode(false);
       
+      let errorMessage = 'Unable to access camera.';
+      
       if (error instanceof Error) {
-        if (error.name === 'NotAllowedError') {
-          toast.error('Camera access denied. Please allow camera permissions and try again.');
-        } else if (error.name === 'NotFoundError') {
-          toast.error('No camera found on this device.');
-        } else {
-          toast.error(`Camera error: ${error.message}`);
+        console.log('📋 Error details:', {
+          name: error.name,
+          message: error.message,
+          stack: error.stack
+        });
+        
+        switch (error.name) {
+          case 'NotAllowedError':
+            errorMessage = 'Camera access denied. Please allow camera permissions and try again.';
+            break;
+          case 'NotFoundError':
+            errorMessage = 'No camera found on this device.';
+            break;
+          case 'NotReadableError':
+            errorMessage = 'Camera is already in use by another application. Please close other apps using the camera.';
+            break;
+          case 'OverconstrainedError':
+            errorMessage = 'Camera constraints could not be satisfied. Trying with basic settings...';
+            // Try again with minimal constraints
+            setTimeout(() => startCameraWithMinimalConstraints(), 1000);
+            return;
+          case 'SecurityError':
+            errorMessage = 'Camera access blocked due to security restrictions. Please ensure you\'re using HTTPS.';
+            break;
+          case 'AbortError':
+            errorMessage = 'Camera access was interrupted.';
+            break;
+          default:
+            errorMessage = `Camera error: ${error.message}`;
         }
-      } else {
-        toast.error('Unable to access camera. Please check permissions.');
       }
+      
+      setCameraError(errorMessage);
+      toast.error(errorMessage);
+    }
+  }, [checkCameraPermissions]);
+
+  const startCameraWithMinimalConstraints = useCallback(async () => {
+    console.log('🔄 Trying camera with minimal constraints...');
+    try {
+      const minimalConstraints: MediaStreamConstraints = {
+        video: true,
+        audio: false
+      };
+      
+      const mediaStream = await navigator.mediaDevices.getUserMedia(minimalConstraints);
+      console.log('✅ Camera working with minimal constraints');
+      
+      setStream(mediaStream);
+      setIsCameraMode(true);
+      setCameraError('');
+      
+      if (videoRef.current) {
+        videoRef.current.srcObject = mediaStream;
+        setTimeout(() => {
+          setIsVideoReady(true);
+          setIsCameraLoading(false);
+        }, 1000);
+      }
+    } catch (error) {
+      console.error('❌ Minimal constraints also failed:', error);
+      setCameraError('Camera initialization failed completely. Please try using file upload instead.');
     }
   }, []);
 
   const handleVideoReady = useCallback(() => {
-    console.log('🎯 Video loadeddata event fired');
+    console.log('🎯 Video ready handler called');
     
     if (videoRef.current) {
       const video = videoRef.current;
-      console.log('📐 Video dimensions:', {
+      console.log('📐 Video ready state:', {
+        readyState: video.readyState,
         videoWidth: video.videoWidth,
         videoHeight: video.videoHeight,
-        readyState: video.readyState,
-        currentTime: video.currentTime
+        currentTime: video.currentTime,
+        duration: video.duration
       });
       
-      if (video.videoWidth > 0 && video.videoHeight > 0) {
-        console.log('✅ Video is ready for capture');
+      if (video.readyState >= 2 && video.videoWidth > 0 && video.videoHeight > 0) {
+        console.log('✅ Video is fully ready for capture');
         setIsVideoReady(true);
         setIsCameraLoading(false);
-      } else {
-        console.log('⚠️ Video dimensions are still zero, waiting...');
-        setTimeout(() => {
-          if (video.videoWidth > 0 && video.videoHeight > 0) {
-            console.log('✅ Video ready after retry');
-            setIsVideoReady(true);
-            setIsCameraLoading(false);
-          }
-        }, 500);
       }
     }
   }, []);
@@ -116,13 +252,14 @@ export function PhotoUploadModal({
     if (stream) {
       stream.getTracks().forEach(track => {
         track.stop();
-        console.log('⏹️ Track stopped:', track.kind);
+        console.log('⏹️ Track stopped:', track.kind, track.label);
       });
       setStream(null);
     }
     setIsCameraMode(false);
     setIsVideoReady(false);
     setIsCameraLoading(false);
+    setCameraError('');
   }, [stream]);
 
   const capturePhoto = useCallback(async () => {
@@ -155,7 +292,11 @@ export function PhotoUploadModal({
         throw new Error('Video dimensions are invalid');
       }
 
-      console.log('🎨 Drawing to canvas...');
+      console.log('🎨 Drawing to canvas with dimensions:', {
+        videoWidth: video.videoWidth,
+        videoHeight: video.videoHeight
+      });
+      
       canvas.width = video.videoWidth;
       canvas.height = video.videoHeight;
       
@@ -183,6 +324,7 @@ export function PhotoUploadModal({
   const retryCamera = useCallback(() => {
     console.log('🔄 Retrying camera setup...');
     stopCamera();
+    setCameraError('');
     setTimeout(() => {
       startCamera();
     }, 500);
@@ -251,6 +393,7 @@ export function PhotoUploadModal({
     stopCamera();
     setShowEnhancement(false);
     setCapturedPhotoForEnhancement('');
+    setCameraError('');
     onClose();
   };
 
@@ -271,6 +414,16 @@ export function PhotoUploadModal({
           </DialogHeader>
 
           <div className="space-y-6">
+            {/* Camera Error Alert */}
+            {cameraError && (
+              <Alert variant="destructive">
+                <AlertCircle className="h-4 w-4" />
+                <AlertDescription>
+                  {cameraError}
+                </AlertDescription>
+              </Alert>
+            )}
+
             {/* Camera View */}
             {isCameraMode ? (
               <div className="space-y-4">
@@ -280,7 +433,10 @@ export function PhotoUploadModal({
                       ref={videoRef}
                       autoPlay
                       playsInline
+                      muted
                       onLoadedData={handleVideoReady}
+                      onCanPlay={handleVideoReady}
+                      onLoadedMetadata={handleVideoReady}
                       className="w-full max-w-sm rounded-lg"
                       style={{ display: isCameraLoading ? 'none' : 'block' }}
                     />
@@ -288,14 +444,15 @@ export function PhotoUploadModal({
                       <div className="flex flex-col items-center justify-center p-8 space-y-4">
                         <Loader2 className="h-8 w-8 animate-spin text-glee-spelman" />
                         <p className="text-sm text-muted-foreground">Initializing camera...</p>
+                        <p className="text-xs text-muted-foreground">This may take a few seconds on Mac</p>
                       </div>
                     )}
                   </div>
                 </div>
                 
                 {isVideoReady && (
-                  <div className="text-xs text-center text-muted-foreground">
-                    Camera ready for capture
+                  <div className="text-xs text-center text-green-600">
+                    ✅ Camera ready for capture
                   </div>
                 )}
                 
@@ -329,7 +486,7 @@ export function PhotoUploadModal({
                   </Button>
                 </div>
                 
-                {!isVideoReady && !isCameraLoading && (
+                {!isVideoReady && !isCameraLoading && !cameraError && (
                   <p className="text-sm text-muted-foreground text-center">
                     Waiting for camera to be ready...
                   </p>
@@ -377,6 +534,7 @@ export function PhotoUploadModal({
                       variant="outline"
                       onClick={startCamera}
                       className="w-full"
+                      disabled={isCameraLoading}
                     >
                       <Camera className="h-4 w-4 mr-2" />
                       Take Photo
