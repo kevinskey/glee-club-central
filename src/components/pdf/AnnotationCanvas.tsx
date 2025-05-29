@@ -17,6 +17,7 @@ interface AnnotationData {
   y?: number;
   width?: number;
   height?: number;
+  id?: string; // Add unique ID for tracking
 }
 
 interface AnnotationCanvasProps {
@@ -27,6 +28,7 @@ interface AnnotationCanvasProps {
   strokeWidth: number;
   annotations: AnnotationData[];
   onAnnotationAdd: (annotation: AnnotationData) => void;
+  onAnnotationRemove?: (annotationId: string) => void;
   showAnnotations: boolean;
   scale: number;
   className?: string;
@@ -40,6 +42,7 @@ export const AnnotationCanvas: React.FC<AnnotationCanvasProps> = ({
   strokeWidth,
   annotations,
   onAnnotationAdd,
+  onAnnotationRemove,
   showAnnotations,
   scale,
   className
@@ -49,6 +52,56 @@ export const AnnotationCanvas: React.FC<AnnotationCanvasProps> = ({
   const [isDrawing, setIsDrawing] = useState(false);
   const [currentPath, setCurrentPath] = useState<Point[]>([]);
   const [textInput, setTextInput] = useState<{x: number, y: number, text: string} | null>(null);
+
+  // Add unique IDs to annotations if they don't have them
+  const annotationsWithIds = annotations.map((annotation, index) => ({
+    ...annotation,
+    id: annotation.id || `annotation-${index}-${Date.now()}`
+  }));
+
+  // Function to check if a point is near a drawn path
+  const isPointNearPath = (point: Point, pathPoints: number[], threshold: number = 20): boolean => {
+    if (!pathPoints || pathPoints.length < 4) return false;
+    
+    for (let i = 0; i < pathPoints.length - 2; i += 2) {
+      const pathX = pathPoints[i];
+      const pathY = pathPoints[i + 1];
+      const distance = Math.sqrt(Math.pow(point.x - pathX, 2) + Math.pow(point.y - pathY, 2));
+      if (distance <= threshold) return true;
+    }
+    return false;
+  };
+
+  // Function to check if a point is near text annotation
+  const isPointNearText = (point: Point, annotation: AnnotationData, threshold: number = 30): boolean => {
+    if (!annotation.x || !annotation.y || !annotation.text) return false;
+    
+    // Estimate text bounds (rough approximation)
+    const textWidth = annotation.text.length * (annotation.strokeWidth * 2);
+    const textHeight = annotation.strokeWidth * 4;
+    
+    return (
+      point.x >= annotation.x - threshold &&
+      point.x <= annotation.x + textWidth + threshold &&
+      point.y >= annotation.y - textHeight - threshold &&
+      point.y <= annotation.y + threshold
+    );
+  };
+
+  // Function to find annotation at point
+  const findAnnotationAtPoint = (point: Point): AnnotationData | null => {
+    // Check annotations in reverse order (top to bottom)
+    for (let i = annotationsWithIds.length - 1; i >= 0; i--) {
+      const annotation = annotationsWithIds[i];
+      
+      if (annotation.type === 'text') {
+        if (isPointNearText(point, annotation)) return annotation;
+      } else if (annotation.points) {
+        if (isPointNearPath(point, annotation.points)) return annotation;
+      }
+    }
+    return null;
+  };
 
   // Redraw all annotations when they change
   useEffect(() => {
@@ -71,7 +124,7 @@ export const AnnotationCanvas: React.FC<AnnotationCanvasProps> = ({
     // Clear and redraw all annotations
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     
-    annotations.forEach(annotation => {
+    annotationsWithIds.forEach(annotation => {
       drawAnnotation(ctx, annotation);
     });
   }, [annotations, showAnnotations, scale]);
@@ -155,6 +208,16 @@ export const AnnotationCanvas: React.FC<AnnotationCanvasProps> = ({
   const startDrawing = useCallback((point: Point) => {
     console.log('Starting drawing with tool:', currentTool);
     
+    if (currentTool === 'eraser') {
+      // Handle eraser tool
+      const annotationToRemove = findAnnotationAtPoint(point);
+      if (annotationToRemove && annotationToRemove.id && onAnnotationRemove) {
+        console.log('Erasing annotation:', annotationToRemove.id);
+        onAnnotationRemove(annotationToRemove.id);
+      }
+      return;
+    }
+    
     if (currentTool === 'text') {
       setTextInput({ x: point.x, y: point.y, text: '' });
       return;
@@ -165,9 +228,19 @@ export const AnnotationCanvas: React.FC<AnnotationCanvasProps> = ({
       setCurrentPath([point]);
       console.log('Drawing started, isDrawing set to true');
     }
-  }, [currentTool]);
+  }, [currentTool, findAnnotationAtPoint, onAnnotationRemove]);
 
   const continueDrawing = useCallback((point: Point) => {
+    if (currentTool === 'eraser') {
+      // Continue erasing while dragging
+      const annotationToRemove = findAnnotationAtPoint(point);
+      if (annotationToRemove && annotationToRemove.id && onAnnotationRemove) {
+        console.log('Continuing to erase annotation:', annotationToRemove.id);
+        onAnnotationRemove(annotationToRemove.id);
+      }
+      return;
+    }
+
     if (!isDrawing || (currentTool !== 'pen' && currentTool !== 'highlighter')) return;
     
     const newPath = [...currentPath, point];
@@ -205,10 +278,15 @@ export const AnnotationCanvas: React.FC<AnnotationCanvasProps> = ({
         ctx.restore();
       }
     }
-  }, [isDrawing, currentPath, currentTool, currentColor, strokeWidth]);
+  }, [isDrawing, currentPath, currentTool, currentColor, strokeWidth, findAnnotationAtPoint, onAnnotationRemove]);
 
   const finishDrawing = useCallback(() => {
     console.log('Finishing drawing, isDrawing:', isDrawing, 'path length:', currentPath.length);
+    
+    if (currentTool === 'eraser') {
+      // Nothing special to do for eraser on finish
+      return;
+    }
     
     if (!isDrawing || currentPath.length < 2) {
       setIsDrawing(false);
@@ -235,7 +313,8 @@ export const AnnotationCanvas: React.FC<AnnotationCanvasProps> = ({
       type: currentTool as 'pen' | 'highlighter',
       color: currentColor,
       strokeWidth,
-      points
+      points,
+      id: `annotation-${Date.now()}-${Math.random()}`
     };
     
     console.log('Adding annotation:', annotation);
@@ -262,7 +341,8 @@ export const AnnotationCanvas: React.FC<AnnotationCanvasProps> = ({
         strokeWidth,
         text: textInput.text,
         x: textInput.x,
-        y: textInput.y
+        y: textInput.y,
+        id: `text-${Date.now()}-${Math.random()}`
       };
       
       onAnnotationAdd(annotation);

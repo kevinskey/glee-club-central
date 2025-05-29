@@ -1,4 +1,3 @@
-
 import React, { useEffect, useMemo } from 'react';
 import { Document, Page, pdfjs } from 'react-pdf';
 import { Card, CardContent } from '@/components/ui/card';
@@ -96,6 +95,7 @@ const AdvancedPDFViewer: React.FC<AdvancedPDFViewerProps> = ({
     currentPageAnnotations,
     addAnnotation,
     removeAnnotation,
+    removeAnnotationById,
     undo,
     redo,
     clearPageAnnotations,
@@ -182,6 +182,10 @@ const AdvancedPDFViewer: React.FC<AdvancedPDFViewerProps> = ({
 
   const handleAnnotationAdd = (annotation: any) => {
     addAnnotation(annotation, pageNumber);
+  };
+
+  const handleAnnotationRemove = (annotationId: string) => {
+    removeAnnotationById(annotationId, pageNumber);
   };
 
   const handleSaveAnnotations = () => {
@@ -389,6 +393,7 @@ const AdvancedPDFViewer: React.FC<AdvancedPDFViewerProps> = ({
                     strokeWidth={strokeWidth}
                     annotations={pageAnnotations}
                     onAnnotationAdd={handleAnnotationAdd}
+                    onAnnotationRemove={handleAnnotationRemove}
                     showAnnotations={showAnnotations}
                     scale={isMobile ? Math.min(scale, 1.5) : scale}
                     className="absolute top-0 left-0 transition-opacity duration-200"

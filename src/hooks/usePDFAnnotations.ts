@@ -214,7 +214,13 @@ export const usePDFAnnotations = (sheetMusicId: string) => {
     setUndoStack(prev => [...prev, currentAnnotations]);
     setRedoStack([]); // Clear redo stack when new action is performed
 
-    const newAnnotations = [...currentAnnotations, annotation];
+    // Ensure annotation has an ID
+    const annotationWithId = {
+      ...annotation,
+      id: annotation.id || `annotation-${Date.now()}-${Math.random()}`
+    };
+
+    const newAnnotations = [...currentAnnotations, annotationWithId];
     updateCachedAnnotations(pageNumber, newAnnotations);
     savePageAnnotations(pageNumber, newAnnotations);
   }, [getCachedAnnotations, updateCachedAnnotations, savePageAnnotations]);
@@ -227,6 +233,21 @@ export const usePDFAnnotations = (sheetMusicId: string) => {
     setRedoStack([]);
 
     const newAnnotations = currentAnnotations.filter((_, i) => i !== index);
+    updateCachedAnnotations(pageNumber, newAnnotations);
+    savePageAnnotations(pageNumber, newAnnotations);
+  }, [getCachedAnnotations, updateCachedAnnotations, savePageAnnotations]);
+
+  // New function to remove annotation by ID (for eraser tool)
+  const removeAnnotationById = useCallback((annotationId: string, pageNumber: number) => {
+    const currentAnnotations = getCachedAnnotations(pageNumber);
+    
+    // Save current state for undo
+    setUndoStack(prev => [...prev, currentAnnotations]);
+    setRedoStack([]);
+
+    const newAnnotations = currentAnnotations.filter(annotation => 
+      annotation.id !== annotationId
+    );
     updateCachedAnnotations(pageNumber, newAnnotations);
     savePageAnnotations(pageNumber, newAnnotations);
   }, [getCachedAnnotations, updateCachedAnnotations, savePageAnnotations]);
@@ -351,6 +372,7 @@ export const usePDFAnnotations = (sheetMusicId: string) => {
     loadPageAnnotations,
     addAnnotation,
     removeAnnotation,
+    removeAnnotationById,
     undo,
     redo,
     clearPageAnnotations,
