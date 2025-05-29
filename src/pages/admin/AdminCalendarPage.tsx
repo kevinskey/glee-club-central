@@ -7,6 +7,7 @@ import { useCalendarEvents } from '@/hooks/useCalendarEvents';
 import { CalendarEvent } from '@/types/calendar';
 import { PageHeader } from '@/components/ui/page-header';
 import { Button } from '@/components/ui/button';
+import { Card, CardContent } from '@/components/ui/card';
 import { Calendar, Plus, Edit, Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
 import ErrorBoundary from '@/components/ErrorBoundary';
@@ -95,14 +96,21 @@ export default function AdminCalendarPage() {
   if (loading) {
     return (
       <ErrorBoundary>
-        <div className="container mx-auto p-6">
-          <PageHeader
-            title="Calendar Management"
-            description="Manage all events and calendar settings"
-            icon={<Calendar className="h-6 w-6" />}
-          />
-          <div className="flex items-center justify-center h-64">
-            <div className="text-muted-foreground">Loading calendar...</div>
+        <div className="min-h-screen bg-gray-50/50">
+          <div className="container mx-auto px-4 py-6 max-w-7xl">
+            <PageHeader
+              title="Calendar Management"
+              description="Manage all events and calendar settings"
+              icon={<Calendar className="h-6 w-6" />}
+            />
+            <Card className="mt-6">
+              <CardContent className="flex items-center justify-center h-64">
+                <div className="text-center space-y-3">
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-glee-purple mx-auto"></div>
+                  <div className="text-muted-foreground">Loading calendar...</div>
+                </div>
+              </CardContent>
+            </Card>
           </div>
         </div>
       </ErrorBoundary>
@@ -112,20 +120,24 @@ export default function AdminCalendarPage() {
   if (error) {
     return (
       <ErrorBoundary>
-        <div className="container mx-auto p-6">
-          <PageHeader
-            title="Calendar Management"
-            description="Manage all events and calendar settings"
-            icon={<Calendar className="h-6 w-6" />}
-          />
-          <div className="flex flex-col items-center justify-center h-64 space-y-4">
-            <div className="text-red-600 text-center">
-              <p className="font-semibold">Error loading calendar</p>
-              <p className="text-sm">{error}</p>
-            </div>
-            <Button onClick={fetchEvents} variant="outline">
-              Try Again
-            </Button>
+        <div className="min-h-screen bg-gray-50/50">
+          <div className="container mx-auto px-4 py-6 max-w-7xl">
+            <PageHeader
+              title="Calendar Management"
+              description="Manage all events and calendar settings"
+              icon={<Calendar className="h-6 w-6" />}
+            />
+            <Card className="mt-6">
+              <CardContent className="flex flex-col items-center justify-center h-64 space-y-4">
+                <div className="text-red-600 text-center">
+                  <p className="font-semibold">Error loading calendar</p>
+                  <p className="text-sm mt-1">{error}</p>
+                </div>
+                <Button onClick={fetchEvents} variant="outline">
+                  Try Again
+                </Button>
+              </CardContent>
+            </Card>
           </div>
         </div>
       </ErrorBoundary>
@@ -134,63 +146,133 @@ export default function AdminCalendarPage() {
 
   return (
     <ErrorBoundary>
-      <div className="container mx-auto p-6 space-y-6">
-        <PageHeader
-          title="Calendar Management"
-          description="Manage all events and calendar settings"
-          icon={<Calendar className="h-6 w-6" />}
-          actions={
-            <Button onClick={handleCreateNew}>
-              <Plus className="h-4 w-4 mr-2" />
-              Create Event
-            </Button>
-          }
-        />
-
-        <CalendarView
-          events={events}
-          onEventClick={handleEventClick}
-          showPrivateEvents={true}
-        />
-
-        {/* Event Details Dialog with Admin Actions */}
-        {selectedEvent && (
-          <EventDialog
-            event={selectedEvent}
-            isOpen={isDialogOpen}
-            onClose={() => {
-              setIsDialogOpen(false);
-              setSelectedEvent(null);
-            }}
-            canRSVP={false}
-            adminActions={
-              <div className="flex gap-2 mt-4">
-                <Button
-                  variant="outline"
-                  onClick={() => handleEditEvent(selectedEvent)}
-                >
-                  <Edit className="h-4 w-4 mr-2" />
-                  Edit
+      <div className="min-h-screen bg-gray-50/50">
+        <div className="container mx-auto px-4 py-6 max-w-7xl space-y-6">
+          {/* Header Section */}
+          <div className="bg-white rounded-lg border shadow-sm p-6">
+            <PageHeader
+              title="Calendar Management"
+              description="Create, edit, and manage all Glee Club events and performances"
+              icon={<Calendar className="h-6 w-6" />}
+              actions={
+                <Button onClick={handleCreateNew} className="bg-glee-purple hover:bg-glee-purple/90">
+                  <Plus className="h-4 w-4 mr-2" />
+                  Create Event
                 </Button>
-                <Button
-                  variant="destructive"
-                  onClick={() => handleDeleteEvent(selectedEvent)}
-                >
-                  <Trash2 className="h-4 w-4 mr-2" />
-                  Delete
-                </Button>
+              }
+            />
+          </div>
+
+          {/* Stats Cards */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <Card>
+              <CardContent className="p-4">
+                <div className="flex items-center space-x-3">
+                  <div className="p-2 bg-blue-100 rounded-lg">
+                    <Calendar className="h-5 w-5 text-blue-600" />
+                  </div>
+                  <div>
+                    <p className="text-sm text-muted-foreground">Total Events</p>
+                    <p className="text-xl font-semibold">{events.length}</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+            
+            <Card>
+              <CardContent className="p-4">
+                <div className="flex items-center space-x-3">
+                  <div className="p-2 bg-green-100 rounded-lg">
+                    <Calendar className="h-5 w-5 text-green-600" />
+                  </div>
+                  <div>
+                    <p className="text-sm text-muted-foreground">Upcoming Events</p>
+                    <p className="text-xl font-semibold">
+                      {events.filter(event => new Date(event.start_time) > new Date()).length}
+                    </p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+            
+            <Card>
+              <CardContent className="p-4">
+                <div className="flex items-center space-x-3">
+                  <div className="p-2 bg-purple-100 rounded-lg">
+                    <Calendar className="h-5 w-5 text-purple-600" />
+                  </div>
+                  <div>
+                    <p className="text-sm text-muted-foreground">Concerts</p>
+                    <p className="text-xl font-semibold">
+                      {events.filter(event => event.event_type === 'concert').length}
+                    </p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Calendar Section */}
+          <Card className="shadow-sm">
+            <CardContent className="p-6">
+              <div className="mb-4">
+                <h3 className="text-lg font-semibold text-gray-900">Event Calendar</h3>
+                <p className="text-sm text-muted-foreground">
+                  Click on any event to view details or use the actions to edit or delete
+                </p>
               </div>
-            }
-          />
-        )}
+              
+              <div className="bg-white rounded-lg border">
+                <CalendarView
+                  events={events}
+                  onEventClick={handleEventClick}
+                  showPrivateEvents={true}
+                />
+              </div>
+            </CardContent>
+          </Card>
 
-        {/* Event Editor */}
-        <EventEditor
-          event={editingEvent}
-          isOpen={isCreating || !!editingEvent}
-          onClose={handleCloseEditor}
-          onSave={handleSaveEvent}
-        />
+          {/* Event Details Dialog with Admin Actions */}
+          {selectedEvent && (
+            <EventDialog
+              event={selectedEvent}
+              isOpen={isDialogOpen}
+              onClose={() => {
+                setIsDialogOpen(false);
+                setSelectedEvent(null);
+              }}
+              canRSVP={false}
+              adminActions={
+                <div className="flex gap-2 mt-6 pt-4 border-t">
+                  <Button
+                    variant="outline"
+                    onClick={() => handleEditEvent(selectedEvent)}
+                    className="flex-1"
+                  >
+                    <Edit className="h-4 w-4 mr-2" />
+                    Edit Event
+                  </Button>
+                  <Button
+                    variant="destructive"
+                    onClick={() => handleDeleteEvent(selectedEvent)}
+                    className="flex-1"
+                  >
+                    <Trash2 className="h-4 w-4 mr-2" />
+                    Delete Event
+                  </Button>
+                </div>
+              }
+            />
+          )}
+
+          {/* Event Editor */}
+          <EventEditor
+            event={editingEvent}
+            isOpen={isCreating || !!editingEvent}
+            onClose={handleCloseEditor}
+            onSave={handleSaveEvent}
+          />
+        </div>
       </div>
     </ErrorBoundary>
   );
