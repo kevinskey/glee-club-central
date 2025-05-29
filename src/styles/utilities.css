@@ -1,3 +1,4 @@
+
 @tailwind utilities;
 
 @layer utilities {
@@ -80,6 +81,10 @@
   }
   
   /* Light blue glow animation that responds to dark/light mode */
+  .light-blue-glow {
+    animation: light-blue-glow 4s ease-in-out infinite;
+  }
+  
   @keyframes light-blue-glow {
     0%, 100% {
       box-shadow: 0 0 20px rgba(59, 130, 246, 0.4), 0 0 40px rgba(59, 130, 246, 0.2);

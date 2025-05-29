@@ -82,11 +82,7 @@ export default function PublicEventsPage() {
               <TooltipTrigger asChild>
                 <Button 
                   asChild
-                  className="relative bg-gradient-to-r from-blue-500 to-blue-600 dark:from-blue-400 dark:to-blue-500 text-white font-medium px-6 py-3 rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 group"
-                  style={{
-                    boxShadow: '0 0 20px rgba(59, 130, 246, 0.4), 0 0 40px rgba(59, 130, 246, 0.2)',
-                    animation: 'light-blue-glow 4s ease-in-out infinite'
-                  }}
+                  className="relative bg-gradient-to-r from-blue-500 to-blue-600 dark:from-blue-400 dark:to-blue-500 text-white font-medium px-6 py-3 rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 group light-blue-glow"
                 >
                   <Link to="/join-glee-fam" className="flex items-center space-x-2">
                     <Users className="h-4 w-4" />
