@@ -233,7 +233,7 @@ export const EventsListView: React.FC<EventsListViewProps> = ({
                       )}
                     </div>
                     
-                    {/* Event Types - only show dropdown if allowed */}
+                    {/* Event Types - only show dropdown if allowed and event is editable */}
                     {showEventTypeDropdown && onEventTypesChange && !isVirtual && (
                       <div onClick={(e) => e.stopPropagation()}>
                         <EventTypeDropdown
