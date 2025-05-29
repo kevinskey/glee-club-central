@@ -1,5 +1,5 @@
 
-import { useState, useCallback, useRef, useEffect } from 'react';
+import { useState, useCallback, useRef, useEffect, useMemo } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
@@ -22,6 +22,7 @@ export const usePDFViewer = (sheetMusicId: string) => {
   const [rotation, setRotation] = useState<number>(0);
   const [isFullscreen, setIsFullscreen] = useState<boolean>(false);
   const [preFullscreenScale, setPreFullscreenScale] = useState<number>(1.0);
+  const [isPageLoading, setIsPageLoading] = useState<boolean>(false);
   
   // UI state
   const [showToolbar, setShowToolbar] = useState<boolean>(true);
@@ -45,6 +46,9 @@ export const usePDFViewer = (sheetMusicId: string) => {
   const viewerRef = useRef<HTMLDivElement>(null);
   const pageRef = useRef<HTMLDivElement>(null);
   const [pageSize, setPageSize] = useState<{width: number, height: number}>({width: 0, height: 0});
+
+  // Page navigation optimization - debounce page changes
+  const pageChangeTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   // Calculate optimal scale for fullscreen
   const calculateFullscreenScale = useCallback(() => {
@@ -129,10 +133,37 @@ export const usePDFViewer = (sheetMusicId: string) => {
 
   const onDocumentLoadSuccess = useCallback(({ numPages }: { numPages: number }) => {
     setNumPages(numPages);
+    setIsPageLoading(false);
   }, []);
 
-  const goToPrevPage = () => setPageNumber(page => Math.max(1, page - 1));
-  const goToNextPage = () => setPageNumber(page => Math.min(numPages, page + 1));
+  // Optimized page navigation with debouncing and loading states
+  const navigateToPage = useCallback((newPageNumber: number) => {
+    if (newPageNumber < 1 || newPageNumber > numPages || newPageNumber === pageNumber) {
+      return;
+    }
+
+    // Clear any pending page changes
+    if (pageChangeTimeoutRef.current) {
+      clearTimeout(pageChangeTimeoutRef.current);
+    }
+
+    setIsPageLoading(true);
+    
+    // Debounced page change for smoother navigation
+    pageChangeTimeoutRef.current = setTimeout(() => {
+      setPageNumber(newPageNumber);
+      setIsPageLoading(false);
+    }, 50);
+  }, [numPages, pageNumber]);
+
+  const goToPrevPage = useCallback(() => {
+    navigateToPage(pageNumber - 1);
+  }, [pageNumber, navigateToPage]);
+
+  const goToNextPage = useCallback(() => {
+    navigateToPage(pageNumber + 1);
+  }, [pageNumber, navigateToPage]);
+
   const zoomIn = () => setScale(scale => Math.min(3.0, scale + 0.2));
   const zoomOut = () => setScale(scale => Math.max(0.5, scale - 0.2));
   const rotate = () => {
@@ -165,6 +196,15 @@ export const usePDFViewer = (sheetMusicId: string) => {
     setScale(preFullscreenScale);
     toast({ title: "Exited fullscreen mode" });
   };
+
+  // Cleanup timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (pageChangeTimeoutRef.current) {
+        clearTimeout(pageChangeTimeoutRef.current);
+      }
+    };
+  }, []);
 
   // Load data on mount
   useEffect(() => {
@@ -213,9 +253,10 @@ export const usePDFViewer = (sheetMusicId: string) => {
     pageSize,
     viewerRef,
     pageRef,
+    isPageLoading,
     
     // Setters
-    setPageNumber,
+    setPageNumber: navigateToPage,
     setScale,
     setRotation,
     setShowToolbar,

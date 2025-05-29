@@ -50,6 +50,7 @@ const AdvancedPDFViewer: React.FC<AdvancedPDFViewerProps> = ({
     pageSize,
     viewerRef,
     pageRef,
+    isPageLoading,
     
     // Setters
     setPageNumber,
@@ -278,6 +279,13 @@ const AdvancedPDFViewer: React.FC<AdvancedPDFViewerProps> = ({
           <div className="relative">
             <Card className="shadow-lg">
               <CardContent className="p-0 relative" ref={pageRef}>
+                {/* Loading overlay for page transitions */}
+                {isPageLoading && (
+                  <div className="absolute inset-0 bg-white/80 flex items-center justify-center z-10">
+                    <div className="h-6 w-6 rounded-full border-4 border-primary border-t-transparent animate-spin"></div>
+                  </div>
+                )}
+                
                 <Document
                   file={url}
                   onLoadSuccess={onDocumentLoadSuccess}
@@ -309,6 +317,8 @@ const AdvancedPDFViewer: React.FC<AdvancedPDFViewerProps> = ({
                         <div className="h-6 w-6 rounded-full border-4 border-primary border-t-transparent animate-spin"></div>
                       </div>
                     }
+                    renderTextLayer={false}
+                    renderAnnotationLayer={false}
                   />
                 </Document>
                 
