@@ -70,13 +70,13 @@
     }
   }
 
-  /* Cardinal blue glow animation */
-  @keyframes cardinal-glow {
+  /* Carolina blue glow animation */
+  @keyframes carolina-glow {
     0%, 100% {
-      box-shadow: 0 0 20px rgba(11, 60, 132, 0.4), 0 0 40px rgba(11, 60, 132, 0.2);
+      box-shadow: 0 0 20px rgba(79, 158, 232, 0.4), 0 0 40px rgba(79, 158, 232, 0.2);
     }
     50% {
-      box-shadow: 0 0 30px rgba(11, 60, 132, 0.6), 0 0 60px rgba(11, 60, 132, 0.3);
+      box-shadow: 0 0 30px rgba(79, 158, 232, 0.6), 0 0 60px rgba(79, 158, 232, 0.3);
     }
   }
   
@@ -87,10 +87,10 @@
   
   @keyframes light-blue-glow {
     0%, 100% {
-      box-shadow: 0 0 20px rgba(59, 130, 246, 0.4), 0 0 40px rgba(59, 130, 246, 0.2);
+      box-shadow: 0 0 20px rgba(79, 158, 232, 0.4), 0 0 40px rgba(79, 158, 232, 0.2);
     }
     50% {
-      box-shadow: 0 0 30px rgba(59, 130, 246, 0.6), 0 0 60px rgba(59, 130, 246, 0.3);
+      box-shadow: 0 0 30px rgba(79, 158, 232, 0.6), 0 0 60px rgba(79, 158, 232, 0.3);
     }
   }
 
@@ -101,10 +101,10 @@
 
   @keyframes light-blue-glow-dark {
     0%, 100% {
-      box-shadow: 0 0 20px rgba(96, 165, 250, 0.4), 0 0 40px rgba(96, 165, 250, 0.2);
+      box-shadow: 0 0 20px rgba(107, 182, 255, 0.4), 0 0 40px rgba(107, 182, 255, 0.2);
     }
     50% {
-      box-shadow: 0 0 30px rgba(96, 165, 250, 0.6), 0 0 60px rgba(96, 165, 250, 0.3);
+      box-shadow: 0 0 30px rgba(107, 182, 255, 0.6), 0 0 60px rgba(107, 182, 255, 0.3);
     }
   }
   
@@ -128,7 +128,7 @@
   .animate-gradient {
     background-size: 200% 200%;
     animation: gradient 8s ease infinite; /* Changed from 3s to 8s */
-    background-image: linear-gradient(45deg, white, #0B4EA2, white);
+    background-image: linear-gradient(45deg, white, #4F9EE8, white);
   }
   
   @keyframes gradient {
@@ -255,6 +255,7 @@
     -moz-user-select: none;
     -ms-user-select: none;
     user-select: none;
+    -webkit-touch-callout: none;
   }
   
   /* Calendar specific mobile improvements */
@@ -270,7 +271,7 @@
   
   /* Event card mobile optimizations */
   .event-card-mobile {
-    @apply border-l-4 border-l-orange-500;
+    @apply border-l-4 border-l-blue-500;
     transition: transform 0.1s ease, box-shadow 0.2s ease;
     touch-action: manipulation;
   }
@@ -286,7 +287,7 @@
     }
     
     .event-card-mobile {
-      @apply border-l-orange-400;
+      @apply border-l-blue-400;
     }
   }
   

@@ -58,20 +58,20 @@ module.exports = {
           foreground: "hsl(var(--card-foreground))",
         },
         glee: {
-          orange: "#FF6B00", // Keeping old orange reference for backward compatibility
-          carolina: "#0B3C84", // Adding Carolina blue
+          orange: "#4F9EE8", // Changed from orange to Carolina blue
+          carolina: "#4F9EE8", // Updated to lighter Carolina blue
           purple: "#9b87f5",
           darkPurple: "#7E69AB",
           lightPurple: "#D6BCFA",
           gray: "#8E9196",
-          columbia: "#0B3C84", // Darker Spelman blue
+          columbia: "#4F9EE8", // Updated to lighter Carolina blue
         },
-        'glee-spelman': "#0B3C84", // Changed from orange to Carolina blue
-        'columbia-blue': "#0B3C84", // Keeping for consistency
+        'glee-spelman': "#4F9EE8", // Changed to lighter Carolina blue
+        'columbia-blue': "#4F9EE8", // Updated to lighter Carolina blue
         'blue': {
-          800: "#0B3C84", // Darker Spelman blue
-          700: "#0D47A1",
-          600: "#1565C0",
+          800: "#4F9EE8", // Updated to lighter Carolina blue
+          700: "#5CAEF0",
+          600: "#6BB6FF",
         }
       },
       borderRadius: {

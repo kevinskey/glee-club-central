@@ -131,7 +131,7 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
               }}
               modifiersStyles={{
                 hasEvents: {
-                  backgroundColor: 'rgb(249 115 22 / 0.2)',
+                  backgroundColor: 'rgb(79 158 232 / 0.2)',
                   fontWeight: 'bold'
                 },
                 holiday: {
@@ -213,7 +213,7 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
           </CardHeader>
           <CardContent className="space-y-2">
             <div className="flex items-center space-x-2 text-xs">
-              <div className="w-3 h-3 bg-orange-500/20 rounded border border-orange-500/50"></div>
+              <div className="w-3 h-3 bg-blue-500/20 rounded border border-blue-500/50"></div>
               <span className="dark:text-gray-300">Events</span>
             </div>
             <div className="flex items-center space-x-2 text-xs">

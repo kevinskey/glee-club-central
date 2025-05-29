@@ -12,7 +12,7 @@
     --popover: 0 0% 100%;
     --popover-foreground: 240 10% 3.9%;
 
-    --primary: 210 100% 30%;  /* Darker Spelman blue */
+    --primary: 211 84% 61%;  /* Updated to lighter Carolina blue */
     --primary-foreground: 0 0% 98%;
 
     --secondary: 240 4.8% 95.9%;
@@ -21,7 +21,7 @@
     --muted: 240 4.8% 95.9%;
     --muted-foreground: 240 3.8% 46.1%;
 
-    --accent: 210 100% 30%;  /* Changed from orange to Carolina blue */
+    --accent: 211 84% 61%;  /* Updated to lighter Carolina blue */
     --accent-foreground: 0 0% 98%;
 
     --destructive: 0 84.2% 60.2%;
@@ -29,13 +29,13 @@
 
     --border: 240 5.9% 90%;
     --input: 240 5.9% 90%;
-    --ring: 210 100% 30%;  /* Darker Spelman blue for focus rings */
+    --ring: 211 84% 61%;  /* Updated to lighter Carolina blue */
 
     --radius: 0.5rem;
     
     --glee-purple: 258 74% 74%;
-    --glee-spelman: 210 100% 30%;  /* Changed from orange to Carolina blue */
-    --glee-columbia: 210 100% 30%;  /* Darker Spelman blue */
+    --glee-spelman: 211 84% 61%;  /* Updated to lighter Carolina blue */
+    --glee-columbia: 211 84% 61%;  /* Updated to lighter Carolina blue */
   }
 
   .dark {
@@ -48,7 +48,7 @@
     --popover: 240 10% 3.9%;
     --popover-foreground: 0 0% 98%;
 
-    --primary: 210 100% 40%;  /* Slightly lighter for dark mode */
+    --primary: 211 100% 70%;  /* Slightly lighter for dark mode */
     --primary-foreground: 0 0% 98%;
 
     --secondary: 240 3.7% 15.9%;
@@ -57,7 +57,7 @@
     --muted: 240 3.7% 15.9%;
     --muted-foreground: 240 5% 64.9%;
 
-    --accent: 210 100% 40%;  /* Changed from orange to Carolina blue */
+    --accent: 211 100% 70%;  /* Slightly lighter for dark mode */
     --accent-foreground: 0 0% 98%;
 
     --destructive: 0 62.8% 30.6%;
@@ -65,7 +65,7 @@
 
     --border: 240 3.7% 15.9%;
     --input: 240 3.7% 15.9%;
-    --ring: 210 100% 40%;  /* Slightly lighter for dark mode */
+    --ring: 211 100% 70%;  /* Slightly lighter for dark mode */
   }
 
   * {
