@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { CalendarView } from '@/components/calendar/CalendarView';
 import { EventDialog } from '@/components/calendar/EventDialog';
@@ -81,9 +82,10 @@ export default function PublicEventsPage() {
               <TooltipTrigger asChild>
                 <Button 
                   asChild
-                  className="relative bg-gradient-to-r from-glee-spelman to-glee-purple text-white font-medium px-6 py-3 rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 animate-pulse hover:animate-none group"
+                  className="relative bg-gradient-to-r from-glee-spelman to-blue-700 text-white font-medium px-6 py-3 rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 group"
                   style={{
-                    boxShadow: '0 0 20px rgba(109, 40, 217, 0.4), 0 0 40px rgba(109, 40, 217, 0.2)'
+                    boxShadow: '0 0 20px rgba(11, 60, 132, 0.4), 0 0 40px rgba(11, 60, 132, 0.2)',
+                    animation: 'cardinal-glow 4s ease-in-out infinite'
                   }}
                 >
                   <Link to="/join-glee-fam" className="flex items-center space-x-2">

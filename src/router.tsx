@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { createBrowserRouter, Navigate, Outlet } from 'react-router-dom';
 import ErrorBoundary from "./components/ErrorBoundary";
@@ -34,6 +35,8 @@ import CalendarPage from './pages/CalendarPage';
 import AdminCalendarPage from './pages/admin/AdminCalendarPage';
 import EventDetailsPage from './pages/events/EventDetailsPage';
 import PublicEventsPage from './pages/PublicEventsPage';
+import JoinGleeFamPage from './pages/JoinGleeFamPage';
+import FanDashboardPage from './pages/dashboard/FanDashboardPage';
 import { AdminRoute } from './components/auth/AdminRoute';
 
 // Create a properly structured router with all routes
@@ -238,7 +241,7 @@ export const router = createBrowserRouter([
         children: [
           {
             index: true,
-            element: React.lazy(() => import('./pages/JoinGleeFamPage')),
+            element: <JoinGleeFamPage />,
           },
         ],
       },
@@ -249,7 +252,7 @@ export const router = createBrowserRouter([
         children: [
           {
             index: true,
-            element: React.lazy(() => import('./pages/dashboard/FanDashboardPage')),
+            element: <FanDashboardPage />,
           },
         ],
       },
