@@ -4,9 +4,9 @@ import FullCalendar from '@fullcalendar/react';
 import dayGridPlugin from '@fullcalendar/daygrid';
 import timeGridPlugin from '@fullcalendar/timegrid';
 import interactionPlugin from '@fullcalendar/interaction';
-import listPlugin from '@fullcalendar/list';
 import { CalendarEvent } from '@/types/calendar';
 import { EventTypeFilter } from './EventTypeFilter';
+import { EventsListView } from './EventsListView';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
@@ -170,6 +170,12 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
 
   const hasActiveFilters = selectedEventTypes.length > 0 || searchTerm.length > 0;
 
+  // Handle view changes
+  const handleViewChange = (viewType: string) => {
+    setCurrentView(viewType);
+    setSelectedDate(null); // Clear selected date when changing views
+  };
+
   return (
     <div className="space-y-6">
       {/* Search and Filter Controls */}
@@ -232,71 +238,114 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
         </CardContent>
       </Card>
 
-      {/* Calendar */}
+      {/* View Toggle Buttons */}
       <Card>
-        <CardContent className="p-0">
-          <FullCalendar
-            plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin, listPlugin]}
-            initialView="dayGridMonth"
-            viewDidMount={(viewInfo) => setCurrentView(viewInfo.view.type)}
-            headerToolbar={{
-              left: 'prev,next today',
-              center: 'title',
-              right: 'dayGridMonth,timeGridWeek,timeGridDay,listWeek'
-            }}
-            events={calendarEvents}
-            eventClick={handleEventClick}
-            dateClick={handleDateClick}
-            height="auto"
-            eventDisplay="block"
-            dayMaxEvents={3}
-            moreLinkClick="popover"
-            eventDidMount={(info) => {
-              // Add custom styling for different event types
-              const { type } = info.event.extendedProps;
-              if (type === 'holiday') {
-                info.el.style.borderLeft = '4px solid #dc2626';
-              } else if (type === 'spelman') {
-                info.el.style.borderLeft = '4px solid #7c3aed';
-              }
-            }}
-            eventContent={(eventInfo) => {
-              const { type, eventTypes } = eventInfo.event.extendedProps;
-              
-              return (
-                <div className="p-1 text-xs">
-                  <div className="font-medium truncate">{eventInfo.event.title}</div>
-                  {currentView !== 'dayGridMonth' && eventInfo.event.extendedProps.description && (
-                    <div className="text-xs opacity-90 truncate mt-1">
-                      {eventInfo.event.extendedProps.description}
-                    </div>
-                  )}
-                  {eventTypes && eventTypes.length > 0 && currentView !== 'dayGridMonth' && (
-                    <div className="flex flex-wrap gap-1 mt-1">
-                      {eventTypes.slice(0, 2).map((type: string) => (
-                        <span
-                          key={type}
-                          className="inline-block px-1 py-0.5 bg-white/20 rounded text-xs"
-                        >
-                          {getEventTypeLabel(type)}
-                        </span>
-                      ))}
-                      {eventTypes.length > 2 && (
-                        <span className="inline-block px-1 py-0.5 bg-white/20 rounded text-xs">
-                          +{eventTypes.length - 2}
-                        </span>
-                      )}
-                    </div>
-                  )}
-                </div>
-              );
-            }}
-          />
+        <CardContent className="p-4">
+          <div className="flex flex-wrap gap-2">
+            <Button
+              variant={currentView === 'dayGridMonth' ? 'default' : 'outline'}
+              size="sm"
+              onClick={() => handleViewChange('dayGridMonth')}
+            >
+              Month
+            </Button>
+            <Button
+              variant={currentView === 'timeGridWeek' ? 'default' : 'outline'}
+              size="sm"
+              onClick={() => handleViewChange('timeGridWeek')}
+            >
+              Week
+            </Button>
+            <Button
+              variant={currentView === 'timeGridDay' ? 'default' : 'outline'}
+              size="sm"
+              onClick={() => handleViewChange('timeGridDay')}
+            >
+              Day
+            </Button>
+            <Button
+              variant={currentView === 'eventsList' ? 'default' : 'outline'}
+              size="sm"
+              onClick={() => handleViewChange('eventsList')}
+            >
+              Events List
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Calendar or List View */}
+      <Card>
+        <CardContent className="p-6">
+          {currentView === 'eventsList' ? (
+            <EventsListView
+              events={filteredEvents}
+              onEventClick={onEventClick}
+            />
+          ) : (
+            <FullCalendar
+              plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
+              initialView="dayGridMonth"
+              view={currentView}
+              events={calendarEvents}
+              eventClick={handleEventClick}
+              dateClick={handleDateClick}
+              height="auto"
+              eventDisplay="block"
+              dayMaxEvents={3}
+              moreLinkClick="popover"
+              headerToolbar={{
+                left: '',
+                center: 'title',
+                right: 'prev,next today'
+              }}
+              eventDidMount={(info) => {
+                // Add custom styling for different event types
+                const { type } = info.event.extendedProps;
+                if (type === 'holiday') {
+                  info.el.style.borderLeft = '4px solid #dc2626';
+                } else if (type === 'spelman') {
+                  info.el.style.borderLeft = '4px solid #7c3aed';
+                }
+              }}
+              eventContent={(eventInfo) => {
+                const { type, eventTypes } = eventInfo.event.extendedProps;
+                
+                return (
+                  <div className="p-1 text-xs">
+                    <div className="font-medium truncate">{eventInfo.event.title}</div>
+                    {currentView !== 'dayGridMonth' && eventInfo.event.extendedProps.description && (
+                      <div className="text-xs opacity-90 truncate mt-1">
+                        {eventInfo.event.extendedProps.description}
+                      </div>
+                    )}
+                    {eventTypes && eventTypes.length > 0 && currentView !== 'dayGridMonth' && (
+                      <div className="flex flex-wrap gap-1 mt-1">
+                        {eventTypes.slice(0, 2).map((type: string) => (
+                          <span
+                            key={type}
+                            className="inline-block px-1 py-0.5 bg-white/20 rounded text-xs"
+                          >
+                            {getEventTypeLabel(type)}
+                          </span>
+                        ))}
+                        {eventTypes.length > 2 && (
+                          <span className="inline-block px-1 py-0.5 bg-white/20 rounded text-xs">
+                            +{eventTypes.length - 2}
+                          </span>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                );
+              }}
+            />
+          )}
         </CardContent>
       </Card>
 
       {/* Selected Date Details */}
-      {selectedDate && (
+      {selectedDate && currentView !== 'eventsList' && (
         <Card>
           <CardContent className="p-6">
             <h3 className="text-lg font-semibold mb-4 flex items-center">
