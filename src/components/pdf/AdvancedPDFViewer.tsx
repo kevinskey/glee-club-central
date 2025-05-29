@@ -1,4 +1,3 @@
-
 import React, { useState, useCallback, useEffect, useRef } from 'react';
 import { Document, Page, pdfjs } from 'react-pdf';
 import { Button } from '@/components/ui/button';
@@ -18,8 +17,22 @@ import {
   Bookmark,
   BookmarkCheck,
   Printer,
-  Settings
+  Settings,
+  MoreHorizontal,
+  Eye,
+  EyeOff,
+  Save,
+  Trash2,
+  Undo,
+  Redo
 } from 'lucide-react';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
@@ -299,38 +312,18 @@ const AdvancedPDFViewer: React.FC<AdvancedPDFViewerProps> = ({
       "flex flex-col h-full bg-background",
       isFullscreen ? "fixed inset-0 z-50" : ""
     )}>
-      {/* Top Toolbar */}
+      {/* Compact Header - forScore Style */}
       {(showToolbar || !isFullscreen) && (
-        <div className="flex items-center justify-between p-2 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+        <div className="flex items-center justify-between p-2 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 h-12">
+          {/* Left Section */}
           <div className="flex items-center gap-2">
             {onBack && (
               <Button variant="outline" size="sm" onClick={onBack}>
-                <ArrowLeft className="h-4 w-4 mr-2" />
-                Back
+                <ArrowLeft className="h-4 w-4" />
               </Button>
             )}
-            <h3 className="font-semibold text-sm truncate max-w-[200px]">{title}</h3>
-          </div>
-          
-          <div className="flex items-center gap-1">
-            <Button variant="outline" size="sm" onClick={handleDownload}>
-              <Download className="h-4 w-4" />
-            </Button>
-            <Button variant="outline" size="sm" onClick={handlePrint}>
-              <Printer className="h-4 w-4" />
-            </Button>
-            <Button variant="outline" size="sm" onClick={toggleFullscreen}>
-              <Maximize className="h-4 w-4" />
-            </Button>
-          </div>
-        </div>
-      )}
-
-      {/* Navigation Toolbar */}
-      {(showToolbar || !isFullscreen) && (
-        <div className="flex items-center justify-between p-2 border-b bg-muted/30">
-          {/* Navigation Controls */}
-          <div className="flex items-center gap-2">
+            
+            {/* Navigation Controls */}
             <Button
               variant="outline"
               size="sm"
@@ -340,7 +333,7 @@ const AdvancedPDFViewer: React.FC<AdvancedPDFViewerProps> = ({
               <ChevronLeft className="h-4 w-4" />
             </Button>
             
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1">
               <Input
                 type="number"
                 value={pageNumber}
@@ -350,12 +343,12 @@ const AdvancedPDFViewer: React.FC<AdvancedPDFViewerProps> = ({
                     setPageNumber(page);
                   }
                 }}
-                className="w-16 h-8 text-center"
+                className="w-12 h-8 text-center text-xs"
                 min={1}
                 max={numPages}
               />
-              <span className="text-sm text-muted-foreground">
-                of {numPages}
+              <span className="text-xs text-muted-foreground">
+                /{numPages}
               </span>
             </div>
             
@@ -368,73 +361,140 @@ const AdvancedPDFViewer: React.FC<AdvancedPDFViewerProps> = ({
               <ChevronRight className="h-4 w-4" />
             </Button>
           </div>
-          
-          {/* Zoom and Tools */}
-          <div className="flex items-center gap-2">
-            <Button variant="outline" size="sm" onClick={zoomOut} disabled={scale <= 0.5}>
-              <ZoomOut className="h-4 w-4" />
-            </Button>
-            
-            <span className="text-sm font-medium px-2 min-w-[60px] text-center">
-              {Math.round(scale * 100)}%
-            </span>
-            
-            <Button variant="outline" size="sm" onClick={zoomIn} disabled={scale >= 3.0}>
-              <ZoomIn className="h-4 w-4" />
-            </Button>
-            
-            <Button variant="outline" size="sm" onClick={rotate}>
-              <RotateCw className="h-4 w-4" />
-            </Button>
 
-            <Button
-              variant={currentPageBookmarked ? "default" : "outline"}
-              size="sm"
-              onClick={toggleBookmark}
-            >
-              {currentPageBookmarked ? <BookmarkCheck className="h-4 w-4" /> : <Bookmark className="h-4 w-4" />}
-            </Button>
+          {/* Center Section - Title */}
+          <div className="flex-1 text-center">
+            <h3 className="font-medium text-sm truncate max-w-[200px] mx-auto">{title}</h3>
+          </div>
+          
+          {/* Right Section - Tool Dropdowns */}
+          <div className="flex items-center gap-1">
+            {/* View Controls Dropdown */}
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" size="sm">
+                  <Eye className="h-4 w-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-48">
+                <DropdownMenuItem onClick={zoomOut} disabled={scale <= 0.5}>
+                  <ZoomOut className="h-4 w-4 mr-2" />
+                  Zoom Out ({Math.round(scale * 100)}%)
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={zoomIn} disabled={scale >= 3.0}>
+                  <ZoomIn className="h-4 w-4 mr-2" />
+                  Zoom In ({Math.round(scale * 100)}%)
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={rotate}>
+                  <RotateCw className="h-4 w-4 mr-2" />
+                  Rotate
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={toggleFullscreen}>
+                  <Maximize className="h-4 w-4 mr-2" />
+                  {isFullscreen ? 'Exit Fullscreen' : 'Fullscreen'}
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => setShowAnnotations(!showAnnotations)}>
+                  {showAnnotations ? <EyeOff className="h-4 w-4 mr-2" /> : <Eye className="h-4 w-4 mr-2" />}
+                  {showAnnotations ? 'Hide Annotations' : 'Show Annotations'}
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+
+            {/* Annotation Tools Dropdown */}
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" size="sm">
+                  <Settings className="h-4 w-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-48">
+                <DropdownMenuItem onClick={() => undo(pageNumber)} disabled={!canUndo}>
+                  <Undo className="h-4 w-4 mr-2" />
+                  Undo
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => redo(pageNumber)} disabled={!canRedo}>
+                  <Redo className="h-4 w-4 mr-2" />
+                  Redo
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={handleSaveAnnotations}>
+                  <Save className="h-4 w-4 mr-2" />
+                  Save Annotations
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={handleClearAnnotations}>
+                  <Trash2 className="h-4 w-4 mr-2" />
+                  Clear Page Annotations
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+
+            {/* Actions Dropdown */}
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" size="sm">
+                  <MoreHorizontal className="h-4 w-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-48">
+                <DropdownMenuItem onClick={toggleBookmark}>
+                  {currentPageBookmarked ? <BookmarkCheck className="h-4 w-4 mr-2" /> : <Bookmark className="h-4 w-4 mr-2" />}
+                  {currentPageBookmarked ? 'Remove Bookmark' : 'Add Bookmark'}
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={handleDownload}>
+                  <Download className="h-4 w-4 mr-2" />
+                  Download PDF
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={handlePrint}>
+                  <Printer className="h-4 w-4 mr-2" />
+                  Print
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
         </div>
       )}
 
-      {/* Search Bar */}
-      <div className="flex items-center gap-2 p-2 border-b">
+      {/* Search Bar - Compact */}
+      <div className="flex items-center gap-2 p-2 border-b bg-muted/30 h-10">
         <div className="relative flex-1 max-w-md">
-          <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+          <Search className="absolute left-2 top-2 h-3 w-3 text-muted-foreground" />
           <Input
-            placeholder="Search in PDF..."
-            className="pl-8"
+            placeholder="Search..."
+            className="pl-7 h-6 text-xs"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
           />
         </div>
         {searchResults.length > 0 && (
-          <div className="flex items-center gap-2">
-            <Badge variant="secondary">
-              {currentSearchIndex + 1} of {searchResults.length}
+          <div className="flex items-center gap-1">
+            <Badge variant="secondary" className="text-xs px-1 py-0">
+              {currentSearchIndex + 1}/{searchResults.length}
             </Badge>
             <Button
               variant="outline"
               size="sm"
+              className="h-6 w-6 p-0"
               onClick={() => setCurrentSearchIndex(Math.max(0, currentSearchIndex - 1))}
               disabled={currentSearchIndex <= 0}
             >
-              <ChevronLeft className="h-4 w-4" />
+              <ChevronLeft className="h-3 w-3" />
             </Button>
             <Button
               variant="outline"
               size="sm"
+              className="h-6 w-6 p-0"
               onClick={() => setCurrentSearchIndex(Math.min(searchResults.length - 1, currentSearchIndex + 1))}
               disabled={currentSearchIndex >= searchResults.length - 1}
             >
-              <ChevronRight className="h-4 w-4" />
+              <ChevronRight className="h-3 w-3" />
             </Button>
           </div>
         )}
       </div>
 
-      {/* Annotation Toolbar */}
+      {/* Annotation Toolbar - Compact */}
       <AnnotationToolbar
         currentTool={currentTool}
         onToolChange={setCurrentTool}
@@ -450,7 +510,7 @@ const AdvancedPDFViewer: React.FC<AdvancedPDFViewerProps> = ({
         onClear={handleClearAnnotations}
         showAnnotations={showAnnotations}
         onToggleAnnotations={() => setShowAnnotations(!showAnnotations)}
-        className="border-b"
+        className="border-b h-10"
       />
 
       {/* Main PDF Viewer */}
