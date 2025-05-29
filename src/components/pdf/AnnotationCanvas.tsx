@@ -86,6 +86,7 @@ export const AnnotationCanvas: React.FC<AnnotationCanvasProps> = ({
         ctx.lineWidth = annotation.strokeWidth;
         ctx.lineCap = 'round';
         ctx.lineJoin = 'round';
+        ctx.globalAlpha = 1;
         
         if (annotation.points && annotation.points.length >= 4) {
           ctx.beginPath();
@@ -98,11 +99,12 @@ export const AnnotationCanvas: React.FC<AnnotationCanvasProps> = ({
         break;
         
       case 'highlighter':
-        ctx.globalAlpha = 0.3;
         ctx.strokeStyle = annotation.color;
-        ctx.lineWidth = annotation.strokeWidth * 2;
+        ctx.lineWidth = Math.max(annotation.strokeWidth * 3, 12); // Make highlighter thicker
         ctx.lineCap = 'round';
         ctx.lineJoin = 'round';
+        ctx.globalAlpha = 0.4; // Semi-transparent for highlighting effect
+        ctx.globalCompositeOperation = 'multiply'; // Blend mode for highlighting
         
         if (annotation.points && annotation.points.length >= 4) {
           ctx.beginPath();
@@ -117,6 +119,7 @@ export const AnnotationCanvas: React.FC<AnnotationCanvasProps> = ({
       case 'text':
         ctx.fillStyle = annotation.color;
         ctx.font = `${annotation.strokeWidth * 3}px Arial`;
+        ctx.globalAlpha = 1;
         if (annotation.text && annotation.x !== undefined && annotation.y !== undefined) {
           ctx.fillText(annotation.text, annotation.x, annotation.y);
         }
@@ -127,7 +130,7 @@ export const AnnotationCanvas: React.FC<AnnotationCanvasProps> = ({
   };
 
   const getMousePos = useCallback((e: React.MouseEvent<HTMLCanvasElement>) => {
-    const canvas = canvasRef.current;
+    const canvas = overlayCanvasRef.current;
     if (!canvas) return { x: 0, y: 0 };
     
     const rect = canvas.getBoundingClientRect();
@@ -138,7 +141,7 @@ export const AnnotationCanvas: React.FC<AnnotationCanvasProps> = ({
   }, []);
 
   const getTouchPos = useCallback((e: React.TouchEvent<HTMLCanvasElement>) => {
-    const canvas = canvasRef.current;
+    const canvas = overlayCanvasRef.current;
     if (!canvas || e.touches.length === 0) return { x: 0, y: 0 };
     
     const rect = canvas.getBoundingClientRect();
@@ -150,6 +153,8 @@ export const AnnotationCanvas: React.FC<AnnotationCanvasProps> = ({
   }, []);
 
   const startDrawing = useCallback((point: Point) => {
+    console.log('Starting drawing with tool:', currentTool);
+    
     if (currentTool === 'text') {
       setTextInput({ x: point.x, y: point.y, text: '' });
       return;
@@ -158,38 +163,44 @@ export const AnnotationCanvas: React.FC<AnnotationCanvasProps> = ({
     if (currentTool === 'pen' || currentTool === 'highlighter') {
       setIsDrawing(true);
       setCurrentPath([point]);
+      console.log('Drawing started, isDrawing set to true');
     }
   }, [currentTool]);
 
   const continueDrawing = useCallback((point: Point) => {
     if (!isDrawing || (currentTool !== 'pen' && currentTool !== 'highlighter')) return;
     
-    setCurrentPath(prev => [...prev, point]);
+    const newPath = [...currentPath, point];
+    setCurrentPath(newPath);
     
     // Draw current stroke on overlay canvas for immediate feedback
     const overlayCanvas = overlayCanvasRef.current;
     if (overlayCanvas) {
       const ctx = overlayCanvas.getContext('2d');
-      if (ctx && currentPath.length > 0) {
+      if (ctx && newPath.length > 1) {
         ctx.clearRect(0, 0, overlayCanvas.width, overlayCanvas.height);
         
         ctx.save();
+        
         if (currentTool === 'highlighter') {
-          ctx.globalAlpha = 0.3;
-          ctx.lineWidth = strokeWidth * 2;
+          ctx.strokeStyle = currentColor;
+          ctx.lineWidth = Math.max(strokeWidth * 3, 12);
+          ctx.globalAlpha = 0.4;
+          ctx.globalCompositeOperation = 'multiply';
         } else {
+          ctx.strokeStyle = currentColor;
           ctx.lineWidth = strokeWidth;
+          ctx.globalAlpha = 1;
         }
-        ctx.strokeStyle = currentColor;
+        
         ctx.lineCap = 'round';
         ctx.lineJoin = 'round';
         
         ctx.beginPath();
-        ctx.moveTo(currentPath[0].x, currentPath[0].y);
-        for (let i = 1; i < currentPath.length; i++) {
-          ctx.lineTo(currentPath[i].x, currentPath[i].y);
+        ctx.moveTo(newPath[0].x, newPath[0].y);
+        for (let i = 1; i < newPath.length; i++) {
+          ctx.lineTo(newPath[i].x, newPath[i].y);
         }
-        ctx.lineTo(point.x, point.y);
         ctx.stroke();
         ctx.restore();
       }
@@ -197,6 +208,8 @@ export const AnnotationCanvas: React.FC<AnnotationCanvasProps> = ({
   }, [isDrawing, currentPath, currentTool, currentColor, strokeWidth]);
 
   const finishDrawing = useCallback(() => {
+    console.log('Finishing drawing, isDrawing:', isDrawing, 'path length:', currentPath.length);
+    
     if (!isDrawing || currentPath.length < 2) {
       setIsDrawing(false);
       setCurrentPath([]);
@@ -225,6 +238,7 @@ export const AnnotationCanvas: React.FC<AnnotationCanvasProps> = ({
       points
     };
     
+    console.log('Adding annotation:', annotation);
     onAnnotationAdd(annotation);
     
     setIsDrawing(false);
@@ -294,6 +308,22 @@ export const AnnotationCanvas: React.FC<AnnotationCanvasProps> = ({
     finishDrawing();
   };
 
+  // Determine cursor style based on current tool
+  const getCursorStyle = () => {
+    switch (currentTool) {
+      case 'pen':
+        return 'crosshair';
+      case 'highlighter':
+        return 'crosshair';
+      case 'text':
+        return 'text';
+      case 'eraser':
+        return 'grab';
+      default:
+        return 'default';
+    }
+  };
+
   return (
     <div className={cn("absolute inset-0", className)} style={{ pointerEvents: currentTool === 'none' ? 'none' : 'auto' }}>
       {/* Main annotation canvas */}
@@ -310,7 +340,8 @@ export const AnnotationCanvas: React.FC<AnnotationCanvasProps> = ({
         ref={overlayCanvasRef}
         width={width}
         height={height}
-        className="absolute inset-0 cursor-crosshair"
+        className="absolute inset-0"
+        style={{ cursor: getCursorStyle() }}
         onMouseDown={handleMouseDown}
         onMouseMove={handleMouseMove}
         onMouseUp={handleMouseUp}

@@ -100,35 +100,6 @@ export const AnnotationToolbar: React.FC<AnnotationToolbarProps> = ({
     onStrokeWidthChange(parseInt(width));
   };
 
-  const handleUndo = () => {
-    console.log('Undo clicked, canUndo:', canUndo);
-    if (canUndo) {
-      onUndo();
-    }
-  };
-
-  const handleRedo = () => {
-    console.log('Redo clicked, canRedo:', canRedo);
-    if (canRedo) {
-      onRedo();
-    }
-  };
-
-  const handleSave = () => {
-    console.log('Save clicked');
-    onSave();
-  };
-
-  const handleClear = () => {
-    console.log('Clear clicked');
-    onClear();
-  };
-
-  const handleToggleAnnotations = () => {
-    console.log('Toggle annotations clicked, current state:', showAnnotations);
-    onToggleAnnotations();
-  };
-
   return (
     <div className={cn("flex items-center gap-2 p-2 bg-background border rounded-lg shadow-sm overflow-x-auto", className)}>
       {/* Drawing Tools */}
@@ -138,6 +109,10 @@ export const AnnotationToolbar: React.FC<AnnotationToolbarProps> = ({
           size="sm"
           onClick={() => handleToolSelect('pen')}
           title="Pen"
+          className={cn(
+            "transition-all",
+            currentTool === 'pen' && "bg-primary text-primary-foreground shadow-md"
+          )}
         >
           <Palette className="h-4 w-4" />
         </Button>
@@ -146,6 +121,10 @@ export const AnnotationToolbar: React.FC<AnnotationToolbarProps> = ({
           size="sm"
           onClick={() => handleToolSelect('highlighter')}
           title="Highlighter"
+          className={cn(
+            "transition-all",
+            currentTool === 'highlighter' && "bg-yellow-500 text-yellow-900 shadow-md hover:bg-yellow-600"
+          )}
         >
           <Highlighter className="h-4 w-4" />
         </Button>
@@ -154,6 +133,10 @@ export const AnnotationToolbar: React.FC<AnnotationToolbarProps> = ({
           size="sm"
           onClick={() => handleToolSelect('text')}
           title="Text"
+          className={cn(
+            "transition-all",
+            currentTool === 'text' && "bg-primary text-primary-foreground shadow-md"
+          )}
         >
           <Type className="h-4 w-4" />
         </Button>
@@ -162,6 +145,10 @@ export const AnnotationToolbar: React.FC<AnnotationToolbarProps> = ({
           size="sm"
           onClick={() => handleToolSelect('eraser')}
           title="Eraser"
+          className={cn(
+            "transition-all",
+            currentTool === 'eraser' && "bg-primary text-primary-foreground shadow-md"
+          )}
         >
           <Eraser className="h-4 w-4" />
         </Button>
@@ -173,20 +160,20 @@ export const AnnotationToolbar: React.FC<AnnotationToolbarProps> = ({
           <DropdownMenuTrigger asChild>
             <Button variant="outline" size="sm" className="flex items-center gap-2">
               <div 
-                className="w-4 h-4 rounded border"
+                className="w-4 h-4 rounded border border-gray-300"
                 style={{ backgroundColor: currentColor }}
               />
               <span className="hidden sm:inline text-xs">{getCurrentColorName()}</span>
               <ChevronDown className="h-3 w-3" />
             </Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent className="w-48 p-2 bg-white dark:bg-gray-800 z-50">
+          <DropdownMenuContent className="w-48 p-2 bg-white dark:bg-gray-800 z-50" align="start">
             <div className="grid grid-cols-4 gap-2">
               {colors.map((color) => (
                 <button
                   key={color.value}
                   className={cn(
-                    "w-8 h-8 rounded border-2 transition-all hover:scale-110",
+                    "w-8 h-8 rounded border-2 transition-all hover:scale-110 focus:outline-none focus:ring-2 focus:ring-blue-500",
                     currentColor === color.value ? "border-gray-600 ring-2 ring-blue-500" : "border-gray-300"
                   )}
                   style={{ backgroundColor: color.value }}
@@ -221,7 +208,7 @@ export const AnnotationToolbar: React.FC<AnnotationToolbarProps> = ({
         <Button
           variant="outline"
           size="sm"
-          onClick={handleUndo}
+          onClick={onUndo}
           disabled={!canUndo}
           title="Undo"
         >
@@ -230,7 +217,7 @@ export const AnnotationToolbar: React.FC<AnnotationToolbarProps> = ({
         <Button
           variant="outline"
           size="sm"
-          onClick={handleRedo}
+          onClick={onRedo}
           disabled={!canRedo}
           title="Redo"
         >
@@ -239,7 +226,7 @@ export const AnnotationToolbar: React.FC<AnnotationToolbarProps> = ({
         <Button
           variant="outline"
           size="sm"
-          onClick={handleSave}
+          onClick={onSave}
           title="Save annotations"
         >
           <Save className="h-4 w-4" />
@@ -247,7 +234,7 @@ export const AnnotationToolbar: React.FC<AnnotationToolbarProps> = ({
         <Button
           variant="outline"
           size="sm"
-          onClick={handleClear}
+          onClick={onClear}
           title="Clear all annotations"
         >
           <Trash2 className="h-4 w-4" />
@@ -259,7 +246,7 @@ export const AnnotationToolbar: React.FC<AnnotationToolbarProps> = ({
         <Button
           variant={showAnnotations ? 'default' : 'outline'}
           size="sm"
-          onClick={handleToggleAnnotations}
+          onClick={onToggleAnnotations}
           title={showAnnotations ? 'Hide annotations' : 'Show annotations'}
         >
           {showAnnotations ? <Eye className="h-4 w-4" /> : <EyeOff className="h-4 w-4" />}
