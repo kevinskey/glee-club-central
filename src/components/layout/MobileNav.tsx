@@ -22,6 +22,13 @@ interface MobileNavProps {
   isAdmin?: boolean;
 }
 
+interface NavItem {
+  title: string;
+  href: string;
+  icon: React.ComponentType<{ className?: string }>;
+  badge?: number | string | null;
+}
+
 export function MobileNav({ isAdmin: propIsAdmin }: MobileNavProps) {
   const location = useLocation();
   const { profile } = useAuth();
@@ -32,7 +39,7 @@ export function MobileNav({ isAdmin: propIsAdmin }: MobileNavProps) {
   const isAdmin = profile?.is_super_admin || isSuperAdmin || propIsAdmin;
   
   // Base navigation items - most frequently used
-  const baseNavItems = [
+  const baseNavItems: NavItem[] = [
     {
       title: "Home",
       href: "/dashboard/member",
@@ -57,7 +64,7 @@ export function MobileNav({ isAdmin: propIsAdmin }: MobileNavProps) {
   ];
 
   // Admin gets admin-focused bottom nav
-  const adminNavItems = [
+  const adminNavItems: NavItem[] = [
     {
       title: "Dashboard",
       href: "/dashboard/member",

@@ -12,7 +12,7 @@ import { PDFThumbnail } from "@/components/pdf/PDFThumbnail";
 import { useMediaLibrary } from "@/hooks/useMediaLibrary";
 import { getMediaType } from "@/utils/mediaUtils";
 import { Spinner } from "@/components/ui/spinner";
-import EnhancedPDFViewer from "@/components/pdf/EnhancedPDFViewer";
+import AdvancedPDFViewer from "@/components/pdf/AdvancedPDFViewer";
 
 interface SheetMusic {
   id: string;
@@ -119,15 +119,16 @@ export default function SheetMusicPage() {
     setSelectedPDF(null);
   };
 
-  // If a PDF is selected, show the enhanced viewer
+  // If a PDF is selected, show the advanced viewer
   if (selectedPDF) {
     return (
       <div className="h-screen flex flex-col">
         <MusicAppHeader currentSection="sheet-music" />
         <div className="flex-1">
-          <EnhancedPDFViewer 
+          <AdvancedPDFViewer 
             url={selectedPDF.file_url} 
             title={`${selectedPDF.title} - ${selectedPDF.composer}`}
+            sheetMusicId={selectedPDF.id}
             onBack={handleBackToList}
           />
         </div>
