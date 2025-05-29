@@ -6,6 +6,7 @@ import interactionPlugin from '@fullcalendar/interaction';
 import { CalendarEvent } from '@/types/calendar';
 import { EventTypeFilter } from './EventTypeFilter';
 import { EventsListView } from './EventsListView';
+import { SearchResultsSection } from './SearchResultsSection';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
@@ -249,6 +250,10 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
     }
   };
 
+  const handleShowAllSearchResults = () => {
+    setCurrentView('eventsList');
+  };
+
   return (
     <div className="space-y-6">
       {/* Search and Filter Controls */}
@@ -310,6 +315,15 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
           </div>
         </CardContent>
       </Card>
+
+      {/* Search Results Section - appears when searching */}
+      <SearchResultsSection
+        events={filteredEvents}
+        searchTerm={searchTerm}
+        onEventClick={onEventClick}
+        onShowAllResults={handleShowAllSearchResults}
+        maxResults={5}
+      />
 
       {/* View Toggle Buttons */}
       <Card>
