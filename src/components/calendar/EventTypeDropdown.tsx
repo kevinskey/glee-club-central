@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -10,7 +10,7 @@ import {
 import { Badge } from '@/components/ui/badge';
 import { CalendarEvent } from '@/types/calendar';
 import { EVENT_TYPES, getEventTypeLabel, getEventTypeColor } from '@/utils/eventTypes';
-import { ChevronDown } from 'lucide-react';
+import { ChevronDown, Loader2 } from 'lucide-react';
 
 interface EventTypeDropdownProps {
   event: CalendarEvent;
@@ -23,25 +23,34 @@ export const EventTypeDropdown: React.FC<EventTypeDropdownProps> = ({
   onEventTypesChange,
   disabled = false
 }) => {
+  const [isUpdating, setIsUpdating] = useState(false);
   const currentTypes = event.event_types || (event.event_type ? [event.event_type] : []);
 
-  const handleTypeToggle = (typeValue: string, checked: boolean) => {
-    let newTypes: string[];
+  const handleTypeToggle = async (typeValue: string, checked: boolean) => {
+    setIsUpdating(true);
     
-    if (checked) {
-      // Add the type if it's not already present
-      newTypes = [...currentTypes, typeValue];
-    } else {
-      // Remove the type
-      newTypes = currentTypes.filter(type => type !== typeValue);
+    try {
+      let newTypes: string[];
+      
+      if (checked) {
+        // Add the type if it's not already present
+        newTypes = [...currentTypes, typeValue];
+      } else {
+        // Remove the type
+        newTypes = currentTypes.filter(type => type !== typeValue);
+      }
+      
+      // Ensure at least one type is selected
+      if (newTypes.length === 0) {
+        newTypes = ['event']; // Default to 'event' type
+      }
+      
+      await onEventTypesChange(event.id, newTypes);
+    } catch (error) {
+      console.error('Error updating event types:', error);
+    } finally {
+      setIsUpdating(false);
     }
-    
-    // Ensure at least one type is selected
-    if (newTypes.length === 0) {
-      newTypes = ['event']; // Default to 'event' type
-    }
-    
-    onEventTypesChange(event.id, newTypes);
   };
 
   if (disabled) {
@@ -63,21 +72,28 @@ export const EventTypeDropdown: React.FC<EventTypeDropdownProps> = ({
 
   return (
     <DropdownMenu>
-      <DropdownMenuTrigger asChild>
+      <DropdownMenuTrigger asChild disabled={isUpdating}>
         <div className="flex flex-wrap gap-1 cursor-pointer">
-          {currentTypes.map(type => (
+          {currentTypes.map((type, index) => (
             <Badge
               key={type}
               variant="outline"
-              className={`text-xs ${getEventTypeColor(type)} hover:opacity-80 transition-opacity`}
+              className={`text-xs ${getEventTypeColor(type)} hover:opacity-80 transition-opacity flex items-center gap-1`}
             >
               {getEventTypeLabel(type)}
-              <ChevronDown className="ml-1 h-3 w-3" />
+              {/* Show chevron only on the last badge and when not updating */}
+              {index === currentTypes.length - 1 && (
+                isUpdating ? (
+                  <Loader2 className="h-3 w-3 animate-spin" />
+                ) : (
+                  <ChevronDown className="h-3 w-3" />
+                )
+              )}
             </Badge>
           ))}
         </div>
       </DropdownMenuTrigger>
-      <DropdownMenuContent className="w-56 max-h-96 overflow-y-auto bg-white" align="end">
+      <DropdownMenuContent className="w-56 max-h-96 overflow-y-auto bg-white z-50" align="end">
         <div className="p-2 text-sm font-medium text-muted-foreground">
           Select Event Types
         </div>
@@ -88,6 +104,7 @@ export const EventTypeDropdown: React.FC<EventTypeDropdownProps> = ({
             checked={currentTypes.includes(eventType.value)}
             onCheckedChange={(checked) => handleTypeToggle(eventType.value, checked)}
             className="text-sm"
+            disabled={isUpdating}
           >
             <span className={`inline-block w-3 h-3 rounded-full mr-2 ${
               getEventTypeColor(eventType.value).includes('purple') ? 'bg-purple-500' :

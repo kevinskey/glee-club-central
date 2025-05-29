@@ -70,6 +70,31 @@ export const EventsListView: React.FC<EventsListViewProps> = ({
     setCurrentPage(page);
   };
 
+  // Check if an event is a virtual event (holiday or academic date)
+  const isVirtualEvent = (event: CalendarEvent) => {
+    return event.id.startsWith('holiday-') || event.id.startsWith('spelman-');
+  };
+
+  // Handle event click with proper navigation logic
+  const handleEventClick = (event: CalendarEvent) => {
+    // Don't navigate for virtual events (holidays, academic dates)
+    if (isVirtualEvent(event)) {
+      return;
+    }
+    
+    onEventClick?.(event);
+  };
+
+  // Handle event types change with validation
+  const handleEventTypesChange = (eventId: string, newTypes: string[]) => {
+    // Don't allow changes for virtual events
+    if (eventId.startsWith('holiday-') || eventId.startsWith('spelman-')) {
+      return;
+    }
+    
+    onEventTypesChange?.(eventId, newTypes);
+  };
+
   const renderPaginationItems = () => {
     const items = [];
     const maxVisiblePages = 5;
@@ -166,12 +191,13 @@ export const EventsListView: React.FC<EventsListViewProps> = ({
           const startDate = new Date(event.start_time);
           const endDate = new Date(event.end_time);
           const eventTypes = event.event_types || (event.event_type ? [event.event_type] : []);
+          const isVirtual = isVirtualEvent(event);
 
           return (
             <Card 
               key={event.id} 
-              className="cursor-pointer transition-colors hover:bg-muted/50"
-              onClick={() => onEventClick?.(event)}
+              className={`transition-colors ${isVirtual ? '' : 'cursor-pointer hover:bg-muted/50'}`}
+              onClick={() => handleEventClick(event)}
             >
               <CardContent className="p-6">
                 <div className="flex flex-col space-y-3">
@@ -190,11 +216,11 @@ export const EventsListView: React.FC<EventsListViewProps> = ({
                     
                     {/* Event Types */}
                     {eventTypes.length > 0 && (
-                      <div onClick={(e) => showEventTypeDropdown && e.stopPropagation()}>
-                        {showEventTypeDropdown && onEventTypesChange ? (
+                      <div onClick={(e) => !isVirtual && showEventTypeDropdown && e.stopPropagation()}>
+                        {showEventTypeDropdown && onEventTypesChange && !isVirtual ? (
                           <EventTypeDropdown
                             event={event}
-                            onEventTypesChange={onEventTypesChange}
+                            onEventTypesChange={handleEventTypesChange}
                           />
                         ) : (
                           <div className="flex flex-wrap gap-1">
@@ -244,14 +270,19 @@ export const EventsListView: React.FC<EventsListViewProps> = ({
                     )}
                   </div>
 
-                  {/* Private Event Indicator */}
-                  {event.is_private && (
-                    <div className="pt-2 border-t">
+                  {/* Special indicators */}
+                  <div className="flex gap-2 pt-2 border-t">
+                    {event.is_private && (
                       <Badge variant="secondary" className="text-xs">
                         Private Event
                       </Badge>
-                    </div>
-                  )}
+                    )}
+                    {isVirtual && (
+                      <Badge variant="outline" className="text-xs text-muted-foreground">
+                        {event.id.startsWith('holiday-') ? 'Holiday' : 'Academic Date'}
+                      </Badge>
+                    )}
+                  </div>
                 </div>
               </CardContent>
             </Card>
