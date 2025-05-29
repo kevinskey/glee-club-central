@@ -1,803 +1,375 @@
-import React, { useState, useEffect } from 'react';
-import { format, startOfMonth, endOfMonth, isSameDay, isToday, startOfWeek, endOfWeek, eachDayOfInterval, addWeeks, subWeeks, startOfDay } from 'date-fns';
-import { ChevronLeft, ChevronRight, Calendar as CalendarIcon, MapPin, Clock, ExternalLink, Search } from 'lucide-react';
+
+import React, { useState, useMemo } from 'react';
+import FullCalendar from '@fullcalendar/react';
+import dayGridPlugin from '@fullcalendar/daygrid';
+import timeGridPlugin from '@fullcalendar/timegrid';
+import interactionPlugin from '@fullcalendar/interaction';
+import listPlugin from '@fullcalendar/list';
+import { CalendarEvent } from '@/types/calendar';
+import { EventTypeFilter } from './EventTypeFilter';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
-import { CalendarEvent } from '@/types/calendar';
-import { getNationalHolidays } from '@/utils/nationalHolidays';
-import { getSpelmanAcademicDates } from '@/utils/spelmanAcademicDates';
+import { Card, CardContent } from '@/components/ui/card';
+import { Search, Calendar, Filter } from 'lucide-react';
+import { getEventTypeLabel, getEventTypeColor } from '@/utils/eventTypes';
+import { getNationalHolidays, getHolidayByDate } from '@/utils/nationalHolidays';
+import { getSpelmanAcademicDates, getSpelmanDateByDate } from '@/utils/spelmanAcademicDates';
 import { HolidayCard } from './HolidayCard';
 import { SpelmanDateCard } from './SpelmanDateCard';
-import { EventTypeFilter } from './EventTypeFilter';
-import { useSiteSettings } from '@/hooks/useSiteSettings';
-import { getEventTypeLabel, getEventTypeColor } from '@/utils/eventTypes';
+import { format, isSameDay } from 'date-fns';
 
 interface CalendarViewProps {
   events: CalendarEvent[];
-  onEventClick: (event: CalendarEvent) => void;
+  onEventClick?: (event: CalendarEvent) => void;
   showPrivateEvents?: boolean;
+  canCreateEvents?: boolean;
+  onDateSelect?: (date: Date) => void;
 }
 
-interface UnifiedEvent {
-  id: string;
-  title: string;
-  date: Date;
-  type: 'event' | 'holiday' | 'spelman';
-  event?: CalendarEvent;
-  holiday?: any;
-  spelmanDate?: any;
-}
-
-export function CalendarView({ events, onEventClick, showPrivateEvents = false }: CalendarViewProps) {
-  const [currentDate, setCurrentDate] = useState(new Date());
-  const [view, setView] = useState<'month' | 'week' | 'day' | 'list'>('month');
-  const [selectedDay, setSelectedDay] = useState<Date | null>(null);
-  const [searchQuery, setSearchQuery] = useState('');
+export const CalendarView: React.FC<CalendarViewProps> = ({
+  events,
+  onEventClick,
+  showPrivateEvents = false,
+  canCreateEvents = false,
+  onDateSelect
+}) => {
+  const [currentView, setCurrentView] = useState('dayGridMonth');
   const [selectedEventTypes, setSelectedEventTypes] = useState<string[]>([]);
-  const { settings } = useSiteSettings();
-  
-  const showNationalHolidays = settings.showNationalHolidays ?? true;
-  const showSpelmanDates = settings.showSpelmanAcademicDates ?? true;
+  const [searchTerm, setSearchTerm] = useState('');
+  const [selectedDate, setSelectedDate] = useState<Date | null>(null);
 
-  // Filter events based on privacy, search, and type filters
-  const filteredEvents = events.filter(event => {
-    // Privacy filter
-    if (!showPrivateEvents && event.is_private) return false;
-    
-    // Search filter
-    if (searchQuery) {
-      const searchTerm = searchQuery.toLowerCase();
-      const matchesSearch = 
-        event.title.toLowerCase().includes(searchTerm) ||
-        (event.short_description && event.short_description.toLowerCase().includes(searchTerm)) ||
-        (event.location_name && event.location_name.toLowerCase().includes(searchTerm));
-      if (!matchesSearch) return false;
-    }
-    
-    // Event type filter
-    if (selectedEventTypes.length > 0) {
-      const eventTypes = event.event_types || (event.event_type ? [event.event_type] : []);
-      const hasMatchingType = selectedEventTypes.some(type => eventTypes.includes(type));
-      if (!hasMatchingType) return false;
-    }
-    
-    return true;
-  });
+  // Get holidays and academic dates
+  const holidays = getNationalHolidays();
+  const spelmanDates = getSpelmanAcademicDates();
 
-  // Get holidays for current period if enabled
-  const currentPeriodHolidays = showNationalHolidays 
-    ? getNationalHolidays(currentDate.getFullYear()).filter(holiday => {
-        if (view === 'month') {
-          return holiday.date.getMonth() === currentDate.getMonth() && 
-                 holiday.date.getFullYear() === currentDate.getFullYear();
-        } else if (view === 'week') {
-          const weekStart = startOfWeek(currentDate);
-          const weekEnd = endOfWeek(currentDate);
-          return holiday.date >= weekStart && holiday.date <= weekEnd;
-        }
-        return true;
-      })
-    : [];
-
-  // Get Spelman dates for current period if enabled
-  const currentPeriodSpelmanDates = showSpelmanDates 
-    ? getSpelmanAcademicDates(currentDate.getFullYear()).filter(date => {
-        if (view === 'month') {
-          return date.date.getMonth() === currentDate.getMonth() && 
-                 date.date.getFullYear() === currentDate.getFullYear();
-        } else if (view === 'week') {
-          const weekStart = startOfWeek(currentDate);
-          const weekEnd = endOfWeek(currentDate);
-          return date.date >= weekStart && date.date <= weekEnd;
-        }
-        return true;
-      })
-    : [];
-
-  // Create unified upcoming events array for list view
-  const getAllUpcomingEvents = (): UnifiedEvent[] => {
-    const now = new Date();
-    const currentYear = now.getFullYear();
-    const unifiedEvents: UnifiedEvent[] = [];
-
-    // Add regular events
-    filteredEvents
-      .filter(event => {
-        const eventDate = new Date(event.start_time);
-        return eventDate >= now;
-      })
-      .forEach(event => {
-        unifiedEvents.push({
-          id: `event-${event.id}`,
-          title: event.title,
-          date: new Date(event.start_time),
-          type: 'event',
-          event
-        });
-      });
-
-    // Add holidays if enabled and no event type filter is active
-    if (showNationalHolidays && selectedEventTypes.length === 0) {
-      getNationalHolidays(currentYear)
-        .filter(holiday => holiday.date >= now)
-        .forEach(holiday => {
-          unifiedEvents.push({
-            id: `holiday-${holiday.id}`,
-            title: holiday.title,
-            date: holiday.date,
-            type: 'holiday',
-            holiday
-          });
-        });
-
-      // Also include next year's holidays
-      getNationalHolidays(currentYear + 1)
-        .filter(holiday => holiday.date >= now)
-        .forEach(holiday => {
-          unifiedEvents.push({
-            id: `holiday-${holiday.id}-${currentYear + 1}`,
-            title: holiday.title,
-            date: holiday.date,
-            type: 'holiday',
-            holiday
-          });
-        });
-    }
-
-    // Add Spelman dates if enabled and no event type filter is active
-    if (showSpelmanDates && selectedEventTypes.length === 0) {
-      getSpelmanAcademicDates(currentYear)
-        .filter(date => date.date >= now)
-        .forEach(spelmanDate => {
-          unifiedEvents.push({
-            id: `spelman-${spelmanDate.id}`,
-            title: spelmanDate.title,
-            date: spelmanDate.date,
-            type: 'spelman',
-            spelmanDate
-          });
-        });
-
-      // Also include next year's Spelman dates
-      getSpelmanAcademicDates(currentYear + 1)
-        .filter(date => date.date >= now)
-        .forEach(spelmanDate => {
-          unifiedEvents.push({
-            id: `spelman-${spelmanDate.id}-${currentYear + 1}`,
-            title: spelmanDate.title,
-            date: spelmanDate.date,
-            type: 'spelman',
-            spelmanDate
-          });
-        });
-    }
-
-    // Sort all events chronologically
-    return unifiedEvents.sort((a, b) => a.date.getTime() - b.date.getTime());
-  };
-
-  const allUpcomingEvents = getAllUpcomingEvents();
-
-  const handleEventTypeToggle = (type: string) => {
-    setSelectedEventTypes(prev => 
-      prev.includes(type) 
-        ? prev.filter(t => t !== type)
-        : [...prev, type]
-    );
-  };
-
-  const handleClearFilters = () => {
-    setSelectedEventTypes([]);
-    setSearchQuery('');
-  };
-
-  const navigatePeriod = (direction: 'prev' | 'next') => {
-    setCurrentDate(prev => {
-      const newDate = new Date(prev);
-      if (view === 'month') {
-        if (direction === 'prev') {
-          newDate.setMonth(prev.getMonth() - 1);
-        } else {
-          newDate.setMonth(prev.getMonth() + 1);
-        }
-      } else if (view === 'week') {
-        if (direction === 'prev') {
-          return subWeeks(prev, 1);
-        } else {
-          return addWeeks(prev, 1);
-        }
-      } else if (view === 'day') {
-        if (direction === 'prev') {
-          newDate.setDate(prev.getDate() - 1);
-        } else {
-          newDate.setDate(prev.getDate() + 1);
-        }
+  // Filter events based on privacy, search, and event types
+  const filteredEvents = useMemo(() => {
+    return events.filter(event => {
+      // Privacy filter
+      if (!showPrivateEvents && event.is_private) {
+        return false;
       }
-      return newDate;
-    });
-  };
 
-  const getEventsForDay = (day: Date) => {
-    return filteredEvents.filter(event => {
-      const eventDate = new Date(event.start_time);
-      return isSameDay(eventDate, day);
-    });
-  };
-
-  const getHolidaysForDay = (day: Date) => {
-    return currentPeriodHolidays.filter(holiday => {
-      return isSameDay(holiday.date, day);
-    });
-  };
-
-  const getSpelmanDatesForDay = (day: Date) => {
-    return currentPeriodSpelmanDates.filter(date => {
-      return isSameDay(date.date, day);
-    });
-  };
-
-  const createGoogleMapsLink = (location: string) => {
-    return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(location)}`;
-  };
-
-  const formatEventTime = (dateTime: string) => {
-    return format(new Date(dateTime), 'h:mm a');
-  };
-
-  const handleDayClick = (day: Date) => {
-    setSelectedDay(day);
-    setCurrentDate(day);
-    setView('day');
-  };
-
-  const renderEventTypesBadges = (event: CalendarEvent) => {
-    const eventTypes = event.event_types || (event.event_type ? [event.event_type] : []);
-    if (eventTypes.length === 0) return null;
-
-    return (
-      <div className="flex flex-wrap gap-1 mt-1">
-        {eventTypes.slice(0, 2).map(type => (
-          <Badge
-            key={type}
-            variant="outline"
-            className={`text-[10px] px-1 py-0 ${getEventTypeColor(type)}`}
-          >
-            {getEventTypeLabel(type)}
-          </Badge>
-        ))}
-        {eventTypes.length > 2 && (
-          <Badge variant="outline" className="text-[10px] px-1 py-0 bg-gray-100 text-gray-600">
-            +{eventTypes.length - 2}
-          </Badge>
-        )}
-      </div>
-    );
-  };
-
-  const renderMonthView = () => {
-    const monthStart = startOfMonth(currentDate);
-    const monthEnd = endOfMonth(currentDate);
-    const calendarStart = startOfWeek(monthStart);
-    const calendarEnd = endOfWeek(monthEnd);
-    const calendarDays = eachDayOfInterval({ start: calendarStart, end: calendarEnd });
-
-    return (
-      <div className="border border-border rounded-lg overflow-hidden bg-background">
-        {/* Day headers */}
-        <div className="grid grid-cols-7 bg-muted border-b">
-          {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map((day) => (
-            <div
-              key={day}
-              className="p-3 text-center text-sm font-medium text-muted-foreground border-r last:border-r-0"
-            >
-              <span className="hidden sm:inline">{day}</span>
-              <span className="sm:hidden">{day.charAt(0)}</span>
-            </div>
-          ))}
-        </div>
-
-        {/* Calendar days grid */}
-        <div className="grid grid-cols-7">
-          {calendarDays.map((day) => {
-            const dayEvents = getEventsForDay(day);
-            const dayHolidays = getHolidaysForDay(day);
-            const daySpelmanDates = getSpelmanDatesForDay(day);
-            const isCurrentMonth = day.getMonth() === currentDate.getMonth();
-            const isDayToday = isToday(day);
-
-            return (
-              <div
-                key={day.toString()}
-                className={`min-h-[120px] border-r border-b last:border-r-0 p-2 cursor-pointer hover:bg-muted/50 ${
-                  !isCurrentMonth ? 'bg-muted/30 text-muted-foreground' : 'bg-background'
-                } ${isDayToday ? 'bg-primary/5 border-primary' : ''}`}
-                onClick={() => handleDayClick(day)}
-              >
-                <div className={`text-sm font-medium mb-2 ${
-                  isDayToday ? 'text-primary font-semibold' : ''
-                }`}>
-                  {format(day, 'd')}
-                </div>
-                
-                <div className="space-y-1">
-                  {/* Events - Show only title and time, NO descriptions */}
-                  {dayEvents.slice(0, 3).map((event, index) => (
-                    <div
-                      key={`${event.id}-${index}`}
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        onEventClick(event);
-                      }}
-                      className="bg-primary/10 text-primary rounded-sm p-1 cursor-pointer text-xs leading-tight hover:bg-primary/20 transition-colors"
-                    >
-                      <div className="font-medium truncate" title={event.title}>
-                        {event.title}
-                      </div>
-                      <div className="flex items-center gap-1 text-[10px] text-muted-foreground">
-                        <Clock className="h-2 w-2 flex-shrink-0" />
-                        <span className="truncate">{formatEventTime(event.start_time)}</span>
-                      </div>
-                      {renderEventTypesBadges(event)}
-                    </div>
-                  ))}
-
-                  {/* More events indicator */}
-                  {dayEvents.length > 3 && (
-                    <div className="text-[10px] text-muted-foreground font-medium">
-                      +{dayEvents.length - 3} more
-                    </div>
-                  )}
-
-                  {/* Holidays */}
-                  {dayHolidays.map((holiday, index) => (
-                    <HolidayCard key={`holiday-${index}`} holiday={holiday} />
-                  ))}
-
-                  {/* Spelman Dates */}
-                  {daySpelmanDates.map((date, index) => (
-                    <SpelmanDateCard key={`spelman-${index}`} spelmanDate={date} />
-                  ))}
-                </div>
-              </div>
-            );
-          })}
-        </div>
-      </div>
-    );
-  };
-
-  const renderWeekView = () => {
-    const weekStart = startOfWeek(currentDate);
-    const weekEnd = endOfWeek(currentDate);
-    const weekDays = eachDayOfInterval({ start: weekStart, end: weekEnd });
-
-    return (
-      <div className="border border-border rounded-lg overflow-hidden bg-background">
-        {/* Day headers */}
-        <div className="grid grid-cols-7 bg-muted border-b">
-          {weekDays.map((day) => (
-            <div
-              key={day.toString()}
-              className="p-3 text-center text-sm font-medium text-muted-foreground border-r last:border-r-0"
-            >
-              <div className="text-xs">{format(day, 'EEE')}</div>
-              <div className={`text-lg font-semibold ${isToday(day) ? 'text-primary' : ''}`}>
-                {format(day, 'd')}
-              </div>
-            </div>
-          ))}
-        </div>
-
-        {/* Week days grid */}
-        <div className="grid grid-cols-7">
-          {weekDays.map((day) => {
-            const dayEvents = getEventsForDay(day);
-            const dayHolidays = getHolidaysForDay(day);
-            const daySpelmanDates = getSpelmanDatesForDay(day);
-            const isDayToday = isToday(day);
-
-            return (
-              <div
-                key={day.toString()}
-                className={`min-h-[200px] border-r border-b last:border-r-0 p-2 cursor-pointer hover:bg-muted/50 ${
-                  isDayToday ? 'bg-primary/5 border-primary' : 'bg-background'
-                }`}
-                onClick={() => handleDayClick(day)}
-              >
-                <div className="space-y-1">
-                  {/* Events */}
-                  {dayEvents.map((event, index) => (
-                    <div
-                      key={`${event.id}-${index}`}
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        onEventClick(event);
-                      }}
-                      className="bg-primary/10 text-primary rounded-sm p-2 cursor-pointer text-xs leading-tight hover:bg-primary/20 transition-colors"
-                    >
-                      <div className="font-medium truncate" title={event.title}>
-                        {event.title}
-                      </div>
-                      <div className="flex items-center gap-1 text-[10px] text-muted-foreground">
-                        <Clock className="h-2 w-2 flex-shrink-0" />
-                        <span className="truncate">{formatEventTime(event.start_time)}</span>
-                      </div>
-                      {renderEventTypesBadges(event)}
-                    </div>
-                  ))}
-
-                  {/* Holidays */}
-                  {dayHolidays.map((holiday, index) => (
-                    <HolidayCard key={`holiday-${index}`} holiday={holiday} />
-                  ))}
-
-                  {/* Spelman Dates */}
-                  {daySpelmanDates.map((date, index) => (
-                    <SpelmanDateCard key={`spelman-${index}`} spelmanDate={date} />
-                  ))}
-                </div>
-              </div>
-            );
-          })}
-        </div>
-      </div>
-    );
-  };
-
-  const renderDayView = () => {
-    const dayToShow = selectedDay || currentDate;
-    const dayEvents = getEventsForDay(dayToShow);
-    const dayHolidays = getHolidaysForDay(dayToShow);
-    const daySpelmanDates = getSpelmanDatesForDay(dayToShow);
-
-    return (
-      <div className="space-y-4">
-        <div className="flex items-center justify-between">
-          <h3 className="text-lg font-semibold">
-            Events for {format(dayToShow, 'EEEE, MMMM d, yyyy')}
-          </h3>
-        </div>
+      // Search filter
+      if (searchTerm) {
+        const searchLower = searchTerm.toLowerCase();
+        const matchesSearch = 
+          event.title.toLowerCase().includes(searchLower) ||
+          event.short_description?.toLowerCase().includes(searchLower) ||
+          event.location_name?.toLowerCase().includes(searchLower);
         
-        <div className="space-y-3">
-          {dayEvents.length === 0 && dayHolidays.length === 0 && daySpelmanDates.length === 0 ? (
-            <Card>
-              <CardContent className="p-6 text-center text-muted-foreground">
-                No events scheduled for this day
-              </CardContent>
-            </Card>
-          ) : (
-            <>
-              {/* Regular Events */}
-              {dayEvents.map((event) => (
-                <Card key={event.id} className="cursor-pointer hover:shadow-md transition-shadow" onClick={() => onEventClick(event)}>
-                  <CardContent className="p-4">
-                    <div className="flex items-start justify-between gap-3">
-                      <div className="flex-1">
-                        <h4 className="font-medium text-lg">{event.title}</h4>
-                        <div className="flex items-center gap-4 mt-2 text-sm text-muted-foreground">
-                          <div className="flex items-center gap-1">
-                            <Clock className="h-4 w-4" />
-                            <span>{formatEventTime(event.start_time)}</span>
-                          </div>
-                          {event.location_name && (
-                            <div className="flex items-center gap-1">
-                              <MapPin className="h-4 w-4" />
-                              <span>{event.location_name}</span>
-                            </div>
-                          )}
-                        </div>
-                        {event.short_description && (
-                          <p className="text-sm text-muted-foreground mt-2">
-                            {event.short_description}
-                          </p>
-                        )}
-                        {renderEventTypesBadges(event)}
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-              
-              {/* Holidays */}
-              {dayHolidays.map((holiday, index) => (
-                <Card key={`holiday-${index}`}>
-                  <CardContent className="p-4">
-                    <h4 className="font-medium text-lg text-green-700">{holiday.title}</h4>
-                    <p className="text-sm text-muted-foreground">National Holiday</p>
-                  </CardContent>
-                </Card>
-              ))}
-              
-              {/* Spelman Dates */}
-              {daySpelmanDates.map((date, index) => (
-                <Card key={`spelman-${index}`}>
-                  <CardContent className="p-4">
-                    <h4 className="font-medium text-lg text-purple-700">{date.title}</h4>
-                    <p className="text-sm text-muted-foreground">Spelman Academic Date</p>
-                  </CardContent>
-                </Card>
-              ))}
-            </>
-          )}
-        </div>
-      </div>
-    );
+        if (!matchesSearch) return false;
+      }
+
+      // Event type filter
+      if (selectedEventTypes.length > 0) {
+        const eventTypes = event.event_types || (event.event_type ? [event.event_type] : []);
+        const hasSelectedType = eventTypes.some(type => selectedEventTypes.includes(type));
+        if (!hasSelectedType) return false;
+      }
+
+      return true;
+    });
+  }, [events, showPrivateEvents, searchTerm, selectedEventTypes]);
+
+  // Convert events to FullCalendar format
+  const calendarEvents = useMemo(() => {
+    const eventItems = filteredEvents.map(event => {
+      const eventTypes = event.event_types || (event.event_type ? [event.event_type] : []);
+      const primaryType = eventTypes[0] || 'meeting';
+      
+      return {
+        id: event.id,
+        title: event.title,
+        start: event.start_time,
+        end: event.end_time,
+        backgroundColor: getEventTypeColor(primaryType).includes('purple') ? '#7c3aed' :
+                        getEventTypeColor(primaryType).includes('blue') ? '#2563eb' :
+                        getEventTypeColor(primaryType).includes('green') ? '#16a34a' :
+                        getEventTypeColor(primaryType).includes('orange') ? '#ea580c' :
+                        getEventTypeColor(primaryType).includes('red') ? '#dc2626' :
+                        getEventTypeColor(primaryType).includes('yellow') ? '#ca8a04' :
+                        getEventTypeColor(primaryType).includes('pink') ? '#db2777' :
+                        getEventTypeColor(primaryType).includes('indigo') ? '#4f46e5' :
+                        getEventTypeColor(primaryType).includes('cyan') ? '#0891b2' : '#6b7280',
+        borderColor: 'transparent',
+        textColor: 'white',
+        extendedProps: {
+          event: event,
+          eventTypes: eventTypes,
+          description: event.short_description,
+          location: event.location_name,
+          isPrivate: event.is_private
+        }
+      };
+    });
+
+    // Add holidays as events (without descriptions in month view)
+    const holidayEvents = holidays.map(holiday => ({
+      id: `holiday-${holiday.id}`,
+      title: holiday.title,
+      start: holiday.date.toISOString().split('T')[0],
+      allDay: true,
+      backgroundColor: '#dc2626',
+      borderColor: '#b91c1c',
+      textColor: 'white',
+      extendedProps: {
+        type: 'holiday',
+        holiday: holiday,
+        description: currentView === 'dayGridMonth' ? '' : holiday.description // Hide description in month view
+      }
+    }));
+
+    // Add Spelman academic dates (without descriptions in month view)
+    const spelmanEvents = spelmanDates.map(date => ({
+      id: `spelman-${date.id}`,
+      title: date.title,
+      start: date.date.toISOString().split('T')[0],
+      allDay: true,
+      backgroundColor: '#7c3aed',
+      borderColor: '#6d28d9',
+      textColor: 'white',
+      extendedProps: {
+        type: 'spelman',
+        spelmanDate: date,
+        description: currentView === 'dayGridMonth' ? '' : date.description // Hide description in month view
+      }
+    }));
+
+    return [...eventItems, ...holidayEvents, ...spelmanEvents];
+  }, [filteredEvents, holidays, spelmanDates, currentView]);
+
+  // Get special dates for selected date
+  const getSpecialDatesForDay = (date: Date) => {
+    const holiday = getHolidayByDate(date);
+    const spelmanDate = getSpelmanDateByDate(date);
+    return { holiday, spelmanDate };
   };
 
-  const renderListView = () => (
-    <div className="space-y-4">
-      {/* Search and Filter Controls */}
-      <div className="flex flex-col sm:flex-row gap-4">
-        <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-          <Input
-            placeholder="Search events..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-9"
-          />
-        </div>
-        <EventTypeFilter
-          selectedTypes={selectedEventTypes}
-          onTypeToggle={handleEventTypeToggle}
-          onClearFilters={handleClearFilters}
-        />
-      </div>
-
-      <div className="flex items-center justify-between">
-        <h3 className="text-lg font-semibold">
-          {searchQuery || selectedEventTypes.length > 0 ? 'Filtered Events' : 'All Upcoming Events'} 
-          ({allUpcomingEvents.length})
-        </h3>
-        {(searchQuery || selectedEventTypes.length > 0) && (
-          <Button variant="outline" size="sm" onClick={handleClearFilters}>
-            Clear Filters
-          </Button>
-        )}
-      </div>
-      
-      <div className="space-y-3">
-        {allUpcomingEvents.length === 0 ? (
-          <Card>
-            <CardContent className="p-6 text-center text-muted-foreground">
-              <p>No events found matching your criteria.</p>
-            </CardContent>
-          </Card>
-        ) : (
-          allUpcomingEvents.map((unifiedEvent) => {
-            if (unifiedEvent.type === 'event' && unifiedEvent.event) {
-              const event = unifiedEvent.event;
-              return (
-                <Card key={unifiedEvent.id} className="cursor-pointer hover:shadow-md transition-shadow" onClick={() => onEventClick(event)}>
-                  <CardContent className="p-4">
-                    <div className="flex items-start justify-between gap-3">
-                      <div className="flex-1">
-                        <h4 className="font-medium text-lg">{event.title}</h4>
-                        <div className="flex items-center gap-4 mt-2 text-sm text-muted-foreground">
-                          <div className="flex items-center gap-1">
-                            <CalendarIcon className="h-4 w-4" />
-                            <span>{format(new Date(event.start_time), 'EEE, MMM d, yyyy')}</span>
-                          </div>
-                          <div className="flex items-center gap-1">
-                            <Clock className="h-4 w-4" />
-                            <span>{formatEventTime(event.start_time)}</span>
-                          </div>
-                          {event.location_name && (
-                            <div className="flex items-center gap-1">
-                              <MapPin className="h-4 w-4" />
-                              <span>{event.location_name}</span>
-                            </div>
-                          )}
-                        </div>
-                        {event.short_description && (
-                          <p className="text-sm text-muted-foreground mt-2">
-                            {event.short_description}
-                          </p>
-                        )}
-                        {renderEventTypesBadges(event)}
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              );
-            }
-
-            if (unifiedEvent.type === 'holiday' && unifiedEvent.holiday) {
-              const holiday = unifiedEvent.holiday;
-              return (
-                <Card key={unifiedEvent.id} className="border-red-200 bg-gradient-to-r from-red-50 to-blue-50">
-                  <CardContent className="p-4">
-                    <div className="flex items-start justify-between gap-3">
-                      <div className="flex-1">
-                        <h4 className="font-medium text-lg text-red-800">{holiday.title}</h4>
-                        <div className="flex items-center gap-4 mt-2 text-sm text-red-700">
-                          <div className="flex items-center gap-1">
-                            <CalendarIcon className="h-4 w-4" />
-                            <span>{format(holiday.date, 'EEE, MMM d, yyyy')}</span>
-                          </div>
-                        </div>
-                        <p className="text-sm text-red-700 mt-2">{holiday.description}</p>
-                      </div>
-                      <span className="text-xs bg-red-100 text-red-800 px-2 py-1 rounded-full">
-                        Federal Holiday
-                      </span>
-                    </div>
-                  </CardContent>
-                </Card>
-              );
-            }
-
-            if (unifiedEvent.type === 'spelman' && unifiedEvent.spelmanDate) {
-              const spelmanDate = unifiedEvent.spelmanDate;
-              return (
-                <Card key={unifiedEvent.id} className="border-purple-200 bg-gradient-to-r from-purple-50 to-indigo-50">
-                  <CardContent className="p-4">
-                    <div className="flex items-start justify-between gap-3">
-                      <div className="flex-1">
-                        <h4 className="font-medium text-lg text-purple-800">{spelmanDate.title}</h4>
-                        <div className="flex items-center gap-4 mt-2 text-sm text-purple-700">
-                          <div className="flex items-center gap-1">
-                            <CalendarIcon className="h-4 w-4" />
-                            <span>{format(spelmanDate.date, 'EEE, MMM d, yyyy')}</span>
-                          </div>
-                        </div>
-                        <p className="text-sm text-purple-700 mt-2">{spelmanDate.description}</p>
-                      </div>
-                      <span className="text-xs bg-purple-100 text-purple-800 px-2 py-1 rounded-full capitalize">
-                        {spelmanDate.category.replace('_', ' ')}
-                      </span>
-                    </div>
-                  </CardContent>
-                </Card>
-              );
-            }
-
-            return null;
-          })
-        )}
-      </div>
-    </div>
-  );
-
-  const getHeaderTitle = () => {
-    switch (view) {
-      case 'day':
-        return format(selectedDay || currentDate, 'MMMM d, yyyy');
-      case 'week':
-        const weekStart = startOfWeek(currentDate);
-        const weekEnd = endOfWeek(currentDate);
-        return `${format(weekStart, 'MMM d')} - ${format(weekEnd, 'MMM d, yyyy')}`;
-      case 'list':
-        return 'All Events';
-      default:
-        return format(currentDate, 'MMMM yyyy');
+  const handleEventClick = (clickInfo: any) => {
+    const { event } = clickInfo.event.extendedProps;
+    if (event && onEventClick) {
+      onEventClick(event);
     }
   };
+
+  const handleDateClick = (dateClickInfo: any) => {
+    const clickedDate = new Date(dateClickInfo.date);
+    setSelectedDate(clickedDate);
+    
+    if (onDateSelect) {
+      onDateSelect(clickedDate);
+    }
+  };
+
+  const clearFilters = () => {
+    setSelectedEventTypes([]);
+    setSearchTerm('');
+  };
+
+  const hasActiveFilters = selectedEventTypes.length > 0 || searchTerm.length > 0;
 
   return (
-    <div className="w-full space-y-4">
-      {/* Calendar Header */}
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-        <div className="flex items-center gap-2 sm:gap-4">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => navigatePeriod('prev')}
-            disabled={view === 'list'}
-          >
-            <ChevronLeft className="h-4 w-4" />
-          </Button>
-          
-          <h2 className="text-lg sm:text-xl font-semibold text-center min-w-[140px] sm:min-w-[200px]">
-            {getHeaderTitle()}
-          </h2>
-          
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => navigatePeriod('next')}
-            disabled={view === 'list'}
-          >
-            <ChevronRight className="h-4 w-4" />
-          </Button>
-        </div>
+    <div className="space-y-6">
+      {/* Search and Filter Controls */}
+      <Card>
+        <CardContent className="p-4 space-y-4">
+          <div className="flex flex-col sm:flex-row gap-4">
+            {/* Search Input */}
+            <div className="relative flex-1">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
+              <Input
+                placeholder="Search events..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="pl-10"
+              />
+            </div>
 
-        <div className="flex gap-1 bg-muted p-1 rounded-lg">
-          <Button
-            variant={view === 'month' ? 'default' : 'ghost'}
-            size="sm"
-            onClick={() => setView('month')}
-            className="text-xs sm:text-sm"
-          >
-            Month
-          </Button>
-          <Button
-            variant={view === 'week' ? 'default' : 'ghost'}
-            size="sm"
-            onClick={() => setView('week')}
-            className="text-xs sm:text-sm"
-          >
-            Week
-          </Button>
-          <Button
-            variant={view === 'day' ? 'default' : 'ghost'}
-            size="sm"
-            onClick={() => setView('day')}
-            className="text-xs sm:text-sm"
-          >
-            Day
-          </Button>
-          <Button
-            variant={view === 'list' ? 'default' : 'ghost'}
-            size="sm"
-            onClick={() => setView('list')}
-            className="text-xs sm:text-sm"
-          >
-            List
-          </Button>
-        </div>
-      </div>
+            {/* Event Type Filter */}
+            <EventTypeFilter
+              selectedTypes={selectedEventTypes}
+              onTypesChange={setSelectedEventTypes}
+            />
 
-      {/* Calendar Content */}
-      {view === 'month' && renderMonthView()}
-      {view === 'week' && renderWeekView()}
-      {view === 'day' && renderDayView()}
-      {view === 'list' && renderListView()}
+            {/* Clear Filters Button */}
+            {hasActiveFilters && (
+              <Button
+                variant="outline"
+                onClick={clearFilters}
+                className="whitespace-nowrap"
+              >
+                <Filter className="h-4 w-4 mr-2" />
+                Clear Filters
+              </Button>
+            )}
+          </div>
 
-      {/* Mobile: Upcoming Events List - only show in month view */}
-      {view === 'month' && (
-        <div className="block sm:hidden">
-          <h3 className="text-base font-semibold mb-3">Upcoming Events</h3>
-          <div className="space-y-2">
-            {filteredEvents
-              .filter(event => new Date(event.start_time) >= new Date())
-              .slice(0, 5)
-              .map((event) => (
-                <Card 
-                  key={event.id} 
-                  className="cursor-pointer hover:shadow-md transition-shadow"
-                  onClick={() => onEventClick(event)}
-                >
-                  <CardContent className="p-3">
-                    <div className="flex items-start justify-between gap-3">
-                      <div className="flex-1 min-w-0">
-                        <h4 className="font-medium text-sm line-clamp-1" title={event.title}>
-                          {event.title}
-                        </h4>
-                        <div className="flex items-center gap-2 mt-1 text-xs text-muted-foreground">
-                          <div className="flex items-center gap-1">
-                            <CalendarIcon className="h-3 w-3 flex-shrink-0" />
-                            <span>{format(new Date(event.start_time), 'MMM d')}</span>
-                          </div>
-                          <div className="flex items-center gap-1">
-                            <Clock className="h-3 w-3 flex-shrink-0" />
-                            <span>{formatEventTime(event.start_time)}</span>
-                          </div>
-                        </div>
-                        {event.location_name && (
-                          <a
-                            href={createGoogleMapsLink(event.location_name)}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="flex items-center gap-1 mt-1 text-xs text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300"
-                            onClick={(e) => e.stopPropagation()}
-                          >
-                            <MapPin className="h-3 w-3 flex-shrink-0" />
-                            <span className="truncate">{event.location_name}</span>
-                            <ExternalLink className="h-2 w-2 flex-shrink-0" />
-                          </a>
+          {/* Active Filters Display */}
+          {hasActiveFilters && (
+            <div className="flex flex-wrap gap-2">
+              {searchTerm && (
+                <Badge variant="secondary" className="text-xs">
+                  Search: "{searchTerm}"
+                </Badge>
+              )}
+              {selectedEventTypes.map(type => (
+                <Badge key={type} variant="secondary" className="text-xs">
+                  {getEventTypeLabel(type)}
+                </Badge>
+              ))}
+            </div>
+          )}
+
+          {/* Results Summary */}
+          <div className="text-sm text-muted-foreground">
+            Showing {filteredEvents.length} of {events.length} events
+            {!showPrivateEvents && (
+              <span className="ml-2 text-xs">(Private events hidden)</span>
+            )}
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Calendar */}
+      <Card>
+        <CardContent className="p-0">
+          <FullCalendar
+            plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin, listPlugin]}
+            initialView="dayGridMonth"
+            viewDidMount={(viewInfo) => setCurrentView(viewInfo.view.type)}
+            headerToolbar={{
+              left: 'prev,next today',
+              center: 'title',
+              right: 'dayGridMonth,timeGridWeek,timeGridDay,listWeek'
+            }}
+            events={calendarEvents}
+            eventClick={handleEventClick}
+            dateClick={handleDateClick}
+            height="auto"
+            eventDisplay="block"
+            dayMaxEvents={3}
+            moreLinkClick="popover"
+            eventDidMount={(info) => {
+              // Add custom styling for different event types
+              const { type } = info.event.extendedProps;
+              if (type === 'holiday') {
+                info.el.style.borderLeft = '4px solid #dc2626';
+              } else if (type === 'spelman') {
+                info.el.style.borderLeft = '4px solid #7c3aed';
+              }
+            }}
+            eventContent={(eventInfo) => {
+              const { type, eventTypes } = eventInfo.event.extendedProps;
+              
+              return (
+                <div className="p-1 text-xs">
+                  <div className="font-medium truncate">{eventInfo.event.title}</div>
+                  {currentView !== 'dayGridMonth' && eventInfo.event.extendedProps.description && (
+                    <div className="text-xs opacity-90 truncate mt-1">
+                      {eventInfo.event.extendedProps.description}
+                    </div>
+                  )}
+                  {eventTypes && eventTypes.length > 0 && currentView !== 'dayGridMonth' && (
+                    <div className="flex flex-wrap gap-1 mt-1">
+                      {eventTypes.slice(0, 2).map((type: string) => (
+                        <span
+                          key={type}
+                          className="inline-block px-1 py-0.5 bg-white/20 rounded text-xs"
+                        >
+                          {getEventTypeLabel(type)}
+                        </span>
+                      ))}
+                      {eventTypes.length > 2 && (
+                        <span className="inline-block px-1 py-0.5 bg-white/20 rounded text-xs">
+                          +{eventTypes.length - 2}
+                        </span>
+                      )}
+                    </div>
+                  )}
+                </div>
+              );
+            }}
+          />
+        </CardContent>
+      </Card>
+
+      {/* Selected Date Details */}
+      {selectedDate && (
+        <Card>
+          <CardContent className="p-6">
+            <h3 className="text-lg font-semibold mb-4 flex items-center">
+              <Calendar className="h-5 w-5 mr-2" />
+              {format(selectedDate, 'EEEE, MMMM d, yyyy')}
+            </h3>
+            
+            <div className="space-y-4">
+              {/* Events for this date */}
+              {filteredEvents
+                .filter(event => isSameDay(new Date(event.start_time), selectedDate))
+                .map(event => (
+                  <div
+                    key={event.id}
+                    className="p-3 border rounded-lg cursor-pointer hover:bg-muted/50 transition-colors"
+                    onClick={() => onEventClick?.(event)}
+                  >
+                    <div className="flex justify-between items-start">
+                      <div className="flex-1">
+                        <h4 className="font-medium">{event.title}</h4>
+                        {event.short_description && (
+                          <p className="text-sm text-muted-foreground mt-1">
+                            {event.short_description}
+                          </p>
                         )}
-                        {renderEventTypesBadges(event)}
+                        <div className="flex items-center gap-2 mt-2 text-xs text-muted-foreground">
+                          <span>{format(new Date(event.start_time), 'h:mm a')}</span>
+                          {event.location_name && (
+                            <>
+                              <span>•</span>
+                              <span>{event.location_name}</span>
+                            </>
+                          )}
+                        </div>
+                      </div>
+                      <div className="flex flex-wrap gap-1 ml-4">
+                        {(event.event_types || (event.event_type ? [event.event_type] : [])).map(type => (
+                          <Badge
+                            key={type}
+                            variant="outline"
+                            className={`text-xs ${getEventTypeColor(type)}`}
+                          >
+                            {getEventTypeLabel(type)}
+                          </Badge>
+                        ))}
                       </div>
                     </div>
-                  </CardContent>
-                </Card>
-              ))}
-          </div>
-        </div>
+                  </div>
+                ))}
+
+              {/* Holiday for this date */}
+              {(() => {
+                const { holiday, spelmanDate } = getSpecialDatesForDay(selectedDate);
+                return (
+                  <div className="space-y-3">
+                    {holiday && <HolidayCard holiday={holiday} />}
+                    {spelmanDate && <SpelmanDateCard spelmanDate={spelmanDate} />}
+                  </div>
+                );
+              })()}
+
+              {/* No events message */}
+              {filteredEvents.filter(event => isSameDay(new Date(event.start_time), selectedDate)).length === 0 && 
+               !getSpecialDatesForDay(selectedDate).holiday && 
+               !getSpecialDatesForDay(selectedDate).spelmanDate && (
+                <p className="text-muted-foreground text-center py-4">
+                  No events scheduled for this date
+                </p>
+              )}
+            </div>
+          </CardContent>
+        </Card>
       )}
     </div>
   );
-}
+};
