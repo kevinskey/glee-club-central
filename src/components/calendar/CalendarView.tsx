@@ -1,527 +1,232 @@
-import React, { useState, useMemo, useRef } from 'react';
-import FullCalendar from '@fullcalendar/react';
-import dayGridPlugin from '@fullcalendar/daygrid';
-import timeGridPlugin from '@fullcalendar/timegrid';
-import interactionPlugin from '@fullcalendar/interaction';
-import { CalendarEvent } from '@/types/calendar';
-import { EventTypeFilter } from './EventTypeFilter';
-import { EventsListView } from './EventsListView';
-import { SearchResultsSection } from './SearchResultsSection';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
+
+import React, { useState, useMemo } from 'react';
+import { Calendar } from '@/components/ui/calendar';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Card, CardContent } from '@/components/ui/card';
-import { Search, Calendar, Filter } from 'lucide-react';
-import { getEventTypeLabel, getEventTypeColor } from '@/utils/eventTypes';
-import { getNationalHolidays, getHolidayByDate } from '@/utils/nationalHolidays';
-import { getSpelmanAcademicDates, getSpelmanDateByDate } from '@/utils/spelmanAcademicDates';
-import { HolidayCard } from './HolidayCard';
-import { SpelmanDateCard } from './SpelmanDateCard';
-import { format, isSameDay } from 'date-fns';
+import { Button } from '@/components/ui/button';
+import { CalendarEvent } from '@/types/calendar';
+import { format, isSameDay, startOfMonth, endOfMonth, eachDayOfInterval, isToday, parseISO } from 'date-fns';
+import { ChevronLeft, ChevronRight, Calendar as CalendarIcon, Clock, MapPin, Users } from 'lucide-react';
+import { getEventTypeColor } from '@/utils/eventTypes';
+import { nationalHolidays } from '@/utils/nationalHolidays';
+import { spelmanAcademicDates } from '@/utils/spelmanAcademicDates';
 
 interface CalendarViewProps {
   events: CalendarEvent[];
   onEventClick?: (event: CalendarEvent) => void;
-  onEventTypesChange?: (eventId: string, newTypes: string[]) => void;
   showPrivateEvents?: boolean;
-  canCreateEvents?: boolean;
-  onDateSelect?: (date: Date) => void;
-  showEventTypeDropdown?: boolean;
 }
 
 export const CalendarView: React.FC<CalendarViewProps> = ({
   events,
   onEventClick,
-  onEventTypesChange,
-  showPrivateEvents = false,
-  canCreateEvents = false,
-  onDateSelect,
-  showEventTypeDropdown = false
+  showPrivateEvents = true
 }) => {
-  const [currentView, setCurrentView] = useState('dayGridMonth');
-  const [selectedEventTypes, setSelectedEventTypes] = useState<string[]>([]);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [selectedDate, setSelectedDate] = useState<Date | null>(null);
-  const [lastChangedEventId, setLastChangedEventId] = useState<string>('');
-  const calendarRef = useRef<FullCalendar>(null);
+  const [selectedDate, setSelectedDate] = useState<Date>(new Date());
+  const [currentMonth, setCurrentMonth] = useState<Date>(new Date());
 
-  // Get holidays and academic dates
-  const holidays = getNationalHolidays();
-  const spelmanDates = getSpelmanAcademicDates();
-
-  // Convert holidays and academic dates to CalendarEvent format for the list view
-  const holidayEvents: CalendarEvent[] = useMemo(() => {
-    return holidays.map(holiday => ({
-      id: `holiday-${holiday.id}`,
-      title: holiday.title,
-      start_time: holiday.date.toISOString(),
-      end_time: holiday.date.toISOString(),
-      short_description: holiday.description,
-      full_description: holiday.description,
-      is_private: false,
-      allow_rsvp: false,
-      allow_reminders: false,
-      allow_ics_download: false,
-      allow_google_map_link: false,
-      created_at: new Date().toISOString(),
-      event_types: ['holiday'],
-      event_type: 'holiday'
-    }));
-  }, [holidays]);
-
-  const spelmanEvents: CalendarEvent[] = useMemo(() => {
-    return spelmanDates.map(date => ({
-      id: `spelman-${date.id}`,
-      title: date.title,
-      start_time: date.date.toISOString(),
-      end_time: date.date.toISOString(),
-      short_description: date.description,
-      full_description: date.description,
-      is_private: false,
-      allow_rsvp: false,
-      allow_reminders: false,
-      allow_ics_download: false,
-      allow_google_map_link: false,
-      created_at: new Date().toISOString(),
-      event_types: ['academic'],
-      event_type: 'academic'
-    }));
-  }, [spelmanDates]);
-
-  // Combine all events for the list view
-  const allEvents = useMemo(() => {
-    return [...events, ...holidayEvents, ...spelmanEvents];
-  }, [events, holidayEvents, spelmanEvents]);
-
-  // Filter events based on privacy, search, and event types
+  // Filter events based on showPrivateEvents prop
   const filteredEvents = useMemo(() => {
-    return allEvents.filter(event => {
-      // Privacy filter
-      if (!showPrivateEvents && event.is_private) {
-        return false;
-      }
-
-      // Search filter
-      if (searchTerm) {
-        const searchLower = searchTerm.toLowerCase();
-        const matchesSearch = 
-          event.title.toLowerCase().includes(searchLower) ||
-          event.short_description?.toLowerCase().includes(searchLower) ||
-          event.location_name?.toLowerCase().includes(searchLower);
-        
-        if (!matchesSearch) return false;
-      }
-
-      // Event type filter
-      if (selectedEventTypes.length > 0) {
-        const eventTypes = event.event_types || (event.event_type ? [event.event_type] : []);
-        const hasSelectedType = eventTypes.some(type => selectedEventTypes.includes(type));
-        if (!hasSelectedType) return false;
-      }
-
-      return true;
-    });
-  }, [allEvents, showPrivateEvents, searchTerm, selectedEventTypes]);
-
-  // Convert events to FullCalendar format (only for calendar views, not list view)
-  const calendarEvents = useMemo(() => {
-    const eventItems = events.filter(event => {
-      // Apply same filters as above but only to regular events for calendar
-      if (!showPrivateEvents && event.is_private) {
-        return false;
-      }
-
-      if (searchTerm) {
-        const searchLower = searchTerm.toLowerCase();
-        const matchesSearch = 
-          event.title.toLowerCase().includes(searchLower) ||
-          event.short_description?.toLowerCase().includes(searchLower) ||
-          event.location_name?.toLowerCase().includes(searchLower);
-        
-        if (!matchesSearch) return false;
-      }
-
-      if (selectedEventTypes.length > 0) {
-        const eventTypes = event.event_types || (event.event_type ? [event.event_type] : []);
-        const hasSelectedType = eventTypes.some(type => selectedEventTypes.includes(type));
-        if (!hasSelectedType) return false;
-      }
-
-      return true;
-    }).map(event => {
-      const eventTypes = event.event_types || (event.event_type ? [event.event_type] : []);
-      const primaryType = eventTypes[0] || 'meeting';
-      
-      return {
-        id: event.id,
-        title: event.title,
-        start: event.start_time,
-        end: event.end_time,
-        backgroundColor: getEventTypeColor(primaryType).includes('purple') ? '#7c3aed' :
-                        getEventTypeColor(primaryType).includes('blue') ? '#2563eb' :
-                        getEventTypeColor(primaryType).includes('green') ? '#16a34a' :
-                        getEventTypeColor(primaryType).includes('orange') ? '#ea580c' :
-                        getEventTypeColor(primaryType).includes('red') ? '#dc2626' :
-                        getEventTypeColor(primaryType).includes('yellow') ? '#ca8a04' :
-                        getEventTypeColor(primaryType).includes('pink') ? '#db2777' :
-                        getEventTypeColor(primaryType).includes('indigo') ? '#4f46e5' :
-                        getEventTypeColor(primaryType).includes('cyan') ? '#0891b2' : '#6b7280',
-        borderColor: 'transparent',
-        textColor: 'white',
-        extendedProps: {
-          event: event,
-          eventTypes: eventTypes,
-          description: event.short_description,
-          location: event.location_name,
-          isPrivate: event.is_private
-        }
-      };
-    });
-
-    // Add holidays as events (without descriptions in month view)
-    const holidayEvents = holidays.map(holiday => ({
-      id: `holiday-${holiday.id}`,
-      title: holiday.title,
-      start: holiday.date.toISOString().split('T')[0],
-      allDay: true,
-      backgroundColor: '#dc2626',
-      borderColor: '#b91c1c',
-      textColor: 'white',
-      extendedProps: {
-        type: 'holiday',
-        holiday: holiday,
-        description: currentView === 'dayGridMonth' ? '' : holiday.description // Hide description in month view
-      }
-    }));
-
-    // Add Spelman academic dates (without descriptions in month view) - using Carolina blue
-    const spelmanEvents = spelmanDates.map(date => ({
-      id: `spelman-${date.id}`,
-      title: date.title,
-      start: date.date.toISOString().split('T')[0],
-      allDay: true,
-      backgroundColor: '#0B3C84', // Carolina blue
-      borderColor: '#0B3C84', // Carolina blue
-      textColor: 'white',
-      extendedProps: {
-        type: 'spelman',
-        spelmanDate: date,
-        description: currentView === 'dayGridMonth' ? '' : date.description // Hide description in month view
-      }
-    }));
-
-    return [...eventItems, ...holidayEvents, ...spelmanEvents];
-  }, [events, holidays, spelmanDates, currentView, showPrivateEvents, searchTerm, selectedEventTypes]);
-
-  // Get special dates for selected date
-  const getSpecialDatesForDay = (date: Date) => {
-    const holiday = getHolidayByDate(date);
-    const spelmanDate = getSpelmanDateByDate(date);
-    return { holiday, spelmanDate };
-  };
-
-  const handleEventClick = (clickInfo: any) => {
-    const { event } = clickInfo.event.extendedProps;
-    if (event && onEventClick) {
-      onEventClick(event);
+    if (showPrivateEvents) {
+      return events;
     }
-  };
+    return events.filter(event => !event.is_private);
+  }, [events, showPrivateEvents]);
 
-  const handleDateClick = (dateClickInfo: any) => {
-    const clickedDate = new Date(dateClickInfo.date);
-    setSelectedDate(clickedDate);
+  // Get events for the selected date
+  const selectedDateEvents = useMemo(() => {
+    return filteredEvents.filter(event => 
+      isSameDay(parseISO(event.start_time), selectedDate)
+    );
+  }, [filteredEvents, selectedDate]);
+
+  // Get all dates in the current month that have events
+  const eventDates = useMemo(() => {
+    const monthStart = startOfMonth(currentMonth);
+    const monthEnd = endOfMonth(currentMonth);
+    const daysInMonth = eachDayOfInterval({ start: monthStart, end: monthEnd });
     
-    if (onDateSelect) {
-      onDateSelect(clickedDate);
-    }
-  };
+    return daysInMonth.filter(date => 
+      filteredEvents.some(event => isSameDay(parseISO(event.start_time), date))
+    );
+  }, [filteredEvents, currentMonth]);
 
-  // Enhanced event types change handler that tracks changes and maintains list view
-  const handleEventTypesChange = (eventId: string, newTypes: string[]) => {
-    setLastChangedEventId(eventId);
-    if (onEventTypesChange) {
-      onEventTypesChange(eventId, newTypes);
-    }
-  };
-
-  const clearFilters = () => {
-    setSelectedEventTypes([]);
-    setSearchTerm('');
-  };
-
-  const hasActiveFilters = selectedEventTypes.length > 0 || searchTerm.length > 0;
-
-  // Handle view changes
-  const handleViewChange = (viewType: string) => {
-    setCurrentView(viewType);
-    setSelectedDate(null); // Clear selected date when changing views
+  // Get holidays and academic dates for the current month
+  const monthHolidays = useMemo(() => {
+    const monthStart = startOfMonth(currentMonth);
+    const monthEnd = endOfMonth(currentMonth);
     
-    // Use FullCalendar's API to change the view
-    if (viewType !== 'eventsList' && calendarRef.current) {
-      const calendarApi = calendarRef.current.getApi();
-      calendarApi.changeView(viewType);
+    const holidays = nationalHolidays.filter(holiday => {
+      const holidayDate = new Date(currentMonth.getFullYear(), holiday.month - 1, holiday.day);
+      return holidayDate >= monthStart && holidayDate <= monthEnd;
+    });
+    
+    const academicDates = spelmanAcademicDates.filter(date => {
+      const academicDate = parseISO(date.date);
+      return academicDate >= monthStart && academicDate <= monthEnd;
+    });
+    
+    return { holidays, academicDates };
+  }, [currentMonth]);
+
+  const handleDateSelect = (date: Date | undefined) => {
+    if (date) {
+      setSelectedDate(date);
     }
   };
 
-  const handleShowAllSearchResults = () => {
-    setCurrentView('eventsList');
+  const handlePreviousMonth = () => {
+    setCurrentMonth(prev => new Date(prev.getFullYear(), prev.getMonth() - 1, 1));
+  };
+
+  const handleNextMonth = () => {
+    setCurrentMonth(prev => new Date(prev.getFullYear(), prev.getMonth() + 1, 1));
+  };
+
+  const handleEventClick = (event: CalendarEvent) => {
+    onEventClick?.(event);
   };
 
   return (
-    <div className="space-y-6">
-      {/* Search and Filter Controls */}
-      <Card>
-        <CardContent className="p-4 space-y-4">
-          <div className="flex flex-col sm:flex-row gap-4">
-            {/* Search Input */}
-            <div className="relative flex-1">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
-              <Input
-                placeholder="Search events..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10"
-              />
-            </div>
-
-            {/* Event Type Filter */}
-            <EventTypeFilter
-              selectedTypes={selectedEventTypes}
-              onTypesChange={setSelectedEventTypes}
-            />
-
-            {/* Clear Filters Button */}
-            {hasActiveFilters && (
+    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      {/* Calendar */}
+      <div className="lg:col-span-2">
+        <Card className="dark:bg-card/50 dark:border-border/50">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
+            <CardTitle className="text-xl font-semibold dark:text-foreground">
+              {format(currentMonth, 'MMMM yyyy')}
+            </CardTitle>
+            <div className="flex items-center space-x-2">
               <Button
                 variant="outline"
-                onClick={clearFilters}
-                className="whitespace-nowrap"
+                size="sm"
+                onClick={handlePreviousMonth}
+                className="dark:border-border dark:hover:bg-muted/40"
               >
-                <Filter className="h-4 w-4 mr-2" />
-                Clear Filters
+                <ChevronLeft className="h-4 w-4" />
               </Button>
-            )}
-          </div>
-
-          {/* Active Filters Display */}
-          {hasActiveFilters && (
-            <div className="flex flex-wrap gap-2">
-              {searchTerm && (
-                <Badge variant="secondary" className="text-xs">
-                  Search: "{searchTerm}"
-                </Badge>
-              )}
-              {selectedEventTypes.map(type => (
-                <Badge key={type} variant="secondary" className="text-xs">
-                  {getEventTypeLabel(type)}
-                </Badge>
-              ))}
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleNextMonth}
+                className="dark:border-border dark:hover:bg-muted/40"
+              >
+                <ChevronRight className="h-4 w-4" />
+              </Button>
             </div>
-          )}
-
-          {/* Results Summary */}
-          <div className="text-sm text-muted-foreground">
-            Showing {filteredEvents.length} of {allEvents.length} events
-            {!showPrivateEvents && (
-              <span className="ml-2 text-xs">(Private events hidden)</span>
-            )}
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Search Results Section - appears when searching */}
-      <SearchResultsSection
-        events={filteredEvents}
-        searchTerm={searchTerm}
-        onEventClick={onEventClick}
-        onShowAllResults={handleShowAllSearchResults}
-        maxResults={5}
-      />
-
-      {/* View Toggle Buttons */}
-      <Card>
-        <CardContent className="p-4">
-          <div className="flex flex-wrap gap-2">
-            <Button
-              variant={currentView === 'dayGridMonth' ? 'default' : 'outline'}
-              size="sm"
-              onClick={() => handleViewChange('dayGridMonth')}
-            >
-              Month
-            </Button>
-            <Button
-              variant={currentView === 'timeGridWeek' ? 'default' : 'outline'}
-              size="sm"
-              onClick={() => handleViewChange('timeGridWeek')}
-            >
-              Week
-            </Button>
-            <Button
-              variant={currentView === 'timeGridDay' ? 'default' : 'outline'}
-              size="sm"
-              onClick={() => handleViewChange('timeGridDay')}
-            >
-              Day
-            </Button>
-            <Button
-              variant={currentView === 'eventsList' ? 'default' : 'outline'}
-              size="sm"
-              onClick={() => handleViewChange('eventsList')}
-            >
-              Events List
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Calendar or List View */}
-      <Card>
-        <CardContent className="p-6">
-          {currentView === 'eventsList' ? (
-            <EventsListView
-              events={filteredEvents}
-              onEventClick={onEventClick}
-              onEventTypesChange={handleEventTypesChange}
-              showEventTypeDropdown={showEventTypeDropdown}
-              lastChangedEventId={lastChangedEventId}
-            />
-          ) : (
-            <FullCalendar
-              ref={calendarRef}
-              plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
-              initialView="dayGridMonth"
-              events={calendarEvents}
-              eventClick={handleEventClick}
-              dateClick={handleDateClick}
-              height="auto"
-              eventDisplay="block"
-              dayMaxEvents={3}
-              moreLinkClick="popover"
-              headerToolbar={{
-                left: '',
-                center: 'title',
-                right: 'prev,next today'
+          </CardHeader>
+          <CardContent>
+            <Calendar
+              mode="single"
+              selected={selectedDate}
+              onSelect={handleDateSelect}
+              month={currentMonth}
+              onMonthChange={setCurrentMonth}
+              modifiers={{
+                hasEvents: eventDates,
+                holiday: monthHolidays.holidays.map(h => 
+                  new Date(currentMonth.getFullYear(), h.month - 1, h.day)
+                ),
+                academic: monthHolidays.academicDates.map(d => parseISO(d.date))
               }}
-              eventDidMount={(info) => {
-                // Add custom styling for different event types
-                const { type } = info.event.extendedProps;
-                if (type === 'holiday') {
-                  info.el.style.borderLeft = '4px solid #dc2626';
-                } else if (type === 'spelman') {
-                  info.el.style.borderLeft = '4px solid #0B3C84'; // Carolina blue
+              modifiersStyles={{
+                hasEvents: {
+                  backgroundColor: 'rgb(249 115 22 / 0.2)',
+                  fontWeight: 'bold'
+                },
+                holiday: {
+                  backgroundColor: 'rgb(239 68 68 / 0.2)',
+                  color: 'rgb(239 68 68)'
+                },
+                academic: {
+                  backgroundColor: 'rgb(168 85 247 / 0.2)',
+                  color: 'rgb(168 85 247)'
                 }
               }}
-              eventContent={(eventInfo) => {
-                const { type, eventTypes } = eventInfo.event.extendedProps;
-                
-                return (
-                  <div className="p-1 text-xs">
-                    <div className="font-medium truncate">{eventInfo.event.title}</div>
-                    {currentView !== 'dayGridMonth' && eventInfo.event.extendedProps.description && (
-                      <div className="text-xs opacity-90 truncate mt-1">
-                        {eventInfo.event.extendedProps.description}
-                      </div>
-                    )}
-                    {eventTypes && eventTypes.length > 0 && currentView !== 'dayGridMonth' && (
-                      <div className="flex flex-wrap gap-1 mt-1">
-                        {eventTypes.slice(0, 2).map((type: string) => (
-                          <span
-                            key={type}
-                            className="inline-block px-1 py-0.5 bg-white/20 rounded text-xs"
-                          >
-                            {getEventTypeLabel(type)}
-                          </span>
-                        ))}
-                        {eventTypes.length > 2 && (
-                          <span className="inline-block px-1 py-0.5 bg-white/20 rounded text-xs">
-                            +{eventTypes.length - 2}
-                          </span>
-                        )}
-                      </div>
-                    )}
-                  </div>
-                );
-              }}
+              className="w-full"
             />
-          )}
-        </CardContent>
-      </Card>
+          </CardContent>
+        </Card>
+      </div>
 
-      {/* Selected Date Details */}
-      {selectedDate && currentView !== 'eventsList' && (
-        <Card>
-          <CardContent className="p-6">
-            <h3 className="text-lg font-semibold mb-4 flex items-center">
-              <Calendar className="h-5 w-5 mr-2" />
-              {format(selectedDate, 'EEEE, MMMM d, yyyy')}
-            </h3>
-            
-            <div className="space-y-4">
-              {/* Events for this date */}
-              {filteredEvents
-                .filter(event => isSameDay(new Date(event.start_time), selectedDate))
-                .map(event => (
-                  <div
-                    key={event.id}
-                    className="p-3 border rounded-lg cursor-pointer hover:bg-muted/50 transition-colors"
-                    onClick={() => onEventClick?.(event)}
-                  >
-                    <div className="flex justify-between items-start">
-                      <div className="flex-1">
-                        <h4 className="font-medium">{event.title}</h4>
-                        {event.short_description && (
-                          <p className="text-sm text-muted-foreground mt-1">
-                            {event.short_description}
-                          </p>
-                        )}
-                        <div className="flex items-center gap-2 mt-2 text-xs text-muted-foreground">
-                          <span>{format(new Date(event.start_time), 'h:mm a')}</span>
-                          {event.location_name && (
-                            <>
-                              <span>•</span>
-                              <span>{event.location_name}</span>
-                            </>
-                          )}
-                        </div>
-                      </div>
-                      <div className="flex flex-wrap gap-1 ml-4">
-                        {(event.event_types || (event.event_type ? [event.event_type] : [])).map(type => (
-                          <Badge
-                            key={type}
-                            variant="outline"
-                            className={`text-xs ${getEventTypeColor(type)}`}
-                          >
-                            {getEventTypeLabel(type)}
-                          </Badge>
-                        ))}
-                      </div>
+      {/* Events for Selected Date */}
+      <div className="space-y-4">
+        <Card className="dark:bg-card/50 dark:border-border/50">
+          <CardHeader>
+            <CardTitle className="text-lg flex items-center dark:text-foreground">
+              <CalendarIcon className="h-5 w-5 mr-2 text-glee-spelman dark:text-blue-400" />
+              {format(selectedDate, 'EEEE, MMMM d')}
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            {selectedDateEvents.length > 0 ? (
+              selectedDateEvents.map((event) => (
+                <div
+                  key={event.id}
+                  className="p-3 border rounded-lg cursor-pointer hover:bg-muted/50 dark:border-border dark:hover:bg-muted/40 transition-colors"
+                  onClick={() => handleEventClick(event)}
+                >
+                  <div className="flex justify-between items-start mb-2">
+                    <h4 className="font-medium text-sm dark:text-foreground">{event.title}</h4>
+                    {event.event_type && (
+                      <Badge 
+                        variant="secondary" 
+                        className={`text-xs ${getEventTypeColor(event.event_type)} dark:bg-muted dark:text-foreground`}
+                      >
+                        {event.event_type}
+                      </Badge>
+                    )}
+                  </div>
+                  
+                  <div className="space-y-1 text-xs text-muted-foreground dark:text-gray-400">
+                    <div className="flex items-center">
+                      <Clock className="h-3 w-3 mr-1" />
+                      {format(parseISO(event.start_time), 'h:mm a')}
                     </div>
+                    {event.location_name && (
+                      <div className="flex items-center">
+                        <MapPin className="h-3 w-3 mr-1" />
+                        {event.location_name}
+                      </div>
+                    )}
+                    {event.short_description && (
+                      <p className="text-xs mt-1 dark:text-gray-300">
+                        {event.short_description}
+                      </p>
+                    )}
                   </div>
-                ))}
+                </div>
+              ))
+            ) : (
+              <div className="text-center py-6 text-muted-foreground dark:text-gray-400">
+                <CalendarIcon className="h-8 w-8 mx-auto mb-2 opacity-50" />
+                <p className="text-sm">No events on this date</p>
+              </div>
+            )}
+          </CardContent>
+        </Card>
 
-              {/* Holiday for this date */}
-              {(() => {
-                const { holiday, spelmanDate } = getSpecialDatesForDay(selectedDate);
-                return (
-                  <div className="space-y-3">
-                    {holiday && <HolidayCard holiday={holiday} />}
-                    {spelmanDate && <SpelmanDateCard spelmanDate={spelmanDate} />}
-                  </div>
-                );
-              })()}
-
-              {/* No events message */}
-              {filteredEvents.filter(event => isSameDay(new Date(event.start_time), selectedDate)).length === 0 && 
-               !getSpecialDatesForDay(selectedDate).holiday && 
-               !getSpecialDatesForDay(selectedDate).spelmanDate && (
-                <p className="text-muted-foreground text-center py-4">
-                  No events scheduled for this date
-                </p>
-              )}
+        {/* Legend */}
+        <Card className="dark:bg-card/50 dark:border-border/50">
+          <CardHeader>
+            <CardTitle className="text-sm dark:text-foreground">Legend</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-2">
+            <div className="flex items-center space-x-2 text-xs">
+              <div className="w-3 h-3 bg-orange-500/20 rounded border border-orange-500/50"></div>
+              <span className="dark:text-gray-300">Events</span>
+            </div>
+            <div className="flex items-center space-x-2 text-xs">
+              <div className="w-3 h-3 bg-red-500/20 rounded border border-red-500/50"></div>
+              <span className="dark:text-gray-300">Holidays</span>
+            </div>
+            <div className="flex items-center space-x-2 text-xs">
+              <div className="w-3 h-3 bg-purple-500/20 rounded border border-purple-500/50"></div>
+              <span className="dark:text-gray-300">Academic Dates</span>
             </div>
           </CardContent>
         </Card>
-      )}
+      </div>
     </div>
   );
 };
