@@ -28,7 +28,8 @@ import {
   Undo,
   Redo,
   Home,
-  Music
+  Music,
+  X
 } from 'lucide-react';
 import {
   DropdownMenu,
@@ -123,18 +124,15 @@ const AdvancedPDFViewer: React.FC<AdvancedPDFViewerProps> = ({
     }
   }, [user, sheetMusicId]);
 
-  // Load page annotations when page changes
   useEffect(() => {
     loadPageAnnotations(pageNumber);
   }, [pageNumber, loadPageAnnotations]);
 
-  // Check if current page is bookmarked
   useEffect(() => {
     const isBookmarked = bookmarks.some(b => b.page_number === pageNumber);
     setCurrentPageBookmarked(isBookmarked);
   }, [bookmarks, pageNumber]);
 
-  // Keyboard navigation
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.target instanceof HTMLInputElement) return;
@@ -159,7 +157,6 @@ const AdvancedPDFViewer: React.FC<AdvancedPDFViewerProps> = ({
             const searchInput = document.querySelector('input[placeholder*="Search"]') as HTMLInputElement;
             searchInput?.focus();
           } else if (!event.ctrlKey && !event.metaKey) {
-            // F key alone for fullscreen
             event.preventDefault();
             toggleFullscreen();
           }
@@ -178,17 +175,6 @@ const AdvancedPDFViewer: React.FC<AdvancedPDFViewerProps> = ({
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [pageNumber, numPages, isFullscreen]);
 
-  // Fullscreen handling
-  useEffect(() => {
-    const handleFullscreenChange = () => {
-      setIsFullscreen(!!document.fullscreenElement);
-    };
-
-    document.addEventListener('fullscreenchange', handleFullscreenChange);
-    return () => document.removeEventListener('fullscreenchange', handleFullscreenChange);
-  }, []);
-
-  // Update page size when page renders
   useEffect(() => {
     if (pageRef.current) {
       const updateSize = () => {
@@ -198,7 +184,6 @@ const AdvancedPDFViewer: React.FC<AdvancedPDFViewerProps> = ({
         }
       };
       
-      // Update on render and resize
       updateSize();
       window.addEventListener('resize', updateSize);
       return () => window.removeEventListener('resize', updateSize);
@@ -228,7 +213,6 @@ const AdvancedPDFViewer: React.FC<AdvancedPDFViewerProps> = ({
 
     try {
       if (currentPageBookmarked) {
-        // Remove bookmark
         const { error } = await supabase
           .from('pdf_bookmarks')
           .delete()
@@ -241,7 +225,6 @@ const AdvancedPDFViewer: React.FC<AdvancedPDFViewerProps> = ({
         setBookmarks(prev => prev.filter(b => b.page_number !== pageNumber));
         toast({ title: "Bookmark removed" });
       } else {
-        // Add bookmark
         const { data, error } = await supabase
           .from('pdf_bookmarks')
           .insert({
@@ -290,35 +273,17 @@ const AdvancedPDFViewer: React.FC<AdvancedPDFViewerProps> = ({
     document.body.removeChild(link);
   };
 
-  const toggleFullscreen = async () => {
-    try {
-      if (!document.fullscreenElement) {
-        if (viewerRef.current) {
-          await viewerRef.current.requestFullscreen();
-          toast({ title: "Entered fullscreen mode", description: "Press ESC or F to exit" });
-        }
-      } else {
-        await document.exitFullscreen();
-        toast({ title: "Exited fullscreen mode" });
-      }
-    } catch (error) {
-      console.error('Fullscreen error:', error);
-      toast({ 
-        title: "Fullscreen Error", 
-        description: "Unable to toggle fullscreen mode",
-        variant: "destructive" 
-      });
+  const toggleFullscreen = () => {
+    setIsFullscreen(!isFullscreen);
+    if (!isFullscreen) {
+      toast({ title: "Entered fullscreen mode", description: "Press ESC or the X button to exit" });
+    } else {
+      toast({ title: "Exited fullscreen mode" });
     }
   };
 
-  const exitFullscreen = async () => {
-    if (document.fullscreenElement) {
-      try {
-        await document.exitFullscreen();
-      } catch (error) {
-        console.error('Exit fullscreen error:', error);
-      }
-    }
+  const exitFullscreen = () => {
+    setIsFullscreen(false);
   };
 
   const handlePrint = () => {
@@ -342,12 +307,10 @@ const AdvancedPDFViewer: React.FC<AdvancedPDFViewerProps> = ({
     toast({ title: "Annotations cleared" });
   };
 
-  // Enhanced navigation for the back button
   const handleBackNavigation = () => {
     if (onBack) {
       onBack();
     } else {
-      // Fallback navigation
       window.history.back();
     }
   };
@@ -356,12 +319,81 @@ const AdvancedPDFViewer: React.FC<AdvancedPDFViewerProps> = ({
     <div 
       ref={viewerRef}
       className={cn(
-        "flex flex-col h-screen bg-background",
-        isFullscreen ? "fixed inset-0 z-50" : ""
+        "flex flex-col bg-background",
+        isFullscreen ? "fixed inset-0 z-50 h-screen" : "h-screen"
       )}
     >
-      {/* Enhanced Header with Navigation */}
-      {(showToolbar || !isFullscreen) && (
+      {/* Fullscreen Header - Always visible in fullscreen */}
+      {isFullscreen && (
+        <div className="flex items-center justify-between p-4 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 h-16 z-10">
+          <div className="flex items-center gap-4">
+            <Button variant="outline" size="sm" onClick={handleBackNavigation} className="gap-2">
+              <ArrowLeft className="h-4 w-4" />
+              Back to Sheet Music
+            </Button>
+            <h3 className="font-medium text-lg">{title}</h3>
+          </div>
+          
+          <div className="flex items-center gap-2">
+            {/* Navigation in fullscreen */}
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={goToPrevPage}
+              disabled={pageNumber <= 1}
+            >
+              <ChevronLeft className="h-4 w-4" />
+            </Button>
+            
+            <div className="flex items-center gap-1">
+              <Input
+                type="number"
+                value={pageNumber}
+                onChange={(e) => {
+                  const page = parseInt(e.target.value);
+                  if (page >= 1 && page <= numPages) {
+                    setPageNumber(page);
+                  }
+                }}
+                className="w-12 h-8 text-center text-xs"
+                min={1}
+                max={numPages}
+              />
+              <span className="text-xs text-muted-foreground">
+                /{numPages}
+              </span>
+            </div>
+            
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={goToNextPage}
+              disabled={pageNumber >= numPages}
+            >
+              <ChevronRight className="h-4 w-4" />
+            </Button>
+            
+            <Button variant="outline" size="sm" onClick={rotate}>
+              <RotateCw className="h-4 w-4" />
+            </Button>
+            
+            <Button variant="outline" size="sm" onClick={zoomOut} disabled={scale <= 0.5}>
+              <ZoomOut className="h-4 w-4" />
+            </Button>
+            
+            <Button variant="outline" size="sm" onClick={zoomIn} disabled={scale >= 3.0}>
+              <ZoomIn className="h-4 w-4" />
+            </Button>
+            
+            <Button variant="outline" size="sm" onClick={exitFullscreen}>
+              <X className="h-4 w-4" />
+            </Button>
+          </div>
+        </div>
+      )}
+
+      {/* Regular Header - Only visible when not in fullscreen */}
+      {!isFullscreen && (
         <div className="flex items-center justify-between p-2 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 h-14">
           {/* Left Section - Navigation */}
           <div className="flex items-center gap-3">
@@ -421,7 +453,7 @@ const AdvancedPDFViewer: React.FC<AdvancedPDFViewerProps> = ({
             </div>
           </div>
 
-          {/* Center Section - Title (hidden on small screens to save space) */}
+          {/* Center Section - Title */}
           <div className="hidden md:flex flex-1 justify-center">
             <h3 className="font-medium text-sm truncate max-w-[300px]">{title}</h3>
           </div>
@@ -450,8 +482,8 @@ const AdvancedPDFViewer: React.FC<AdvancedPDFViewerProps> = ({
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem onClick={toggleFullscreen}>
-                  {isFullscreen ? <Minimize className="h-4 w-4 mr-2" /> : <Maximize className="h-4 w-4 mr-2" />}
-                  {isFullscreen ? 'Exit Fullscreen' : 'Fullscreen'}
+                  <Maximize className="h-4 w-4 mr-2" />
+                  Enter Fullscreen
                 </DropdownMenuItem>
                 <DropdownMenuItem onClick={() => setShowAnnotations(!showAnnotations)}>
                   {showAnnotations ? <EyeOff className="h-4 w-4 mr-2" /> : <Eye className="h-4 w-4 mr-2" />}
@@ -515,7 +547,7 @@ const AdvancedPDFViewer: React.FC<AdvancedPDFViewerProps> = ({
         </div>
       )}
 
-      {/* Search Bar - Compact */}
+      {/* Search Bar - Only visible when not in fullscreen */}
       {!isFullscreen && (
         <div className="flex items-center gap-2 p-2 border-b bg-muted/30 h-10">
           <div className="relative flex-1 max-w-md">
@@ -555,7 +587,7 @@ const AdvancedPDFViewer: React.FC<AdvancedPDFViewerProps> = ({
         </div>
       )}
 
-      {/* Annotation Toolbar - Compact */}
+      {/* Annotation Toolbar - Only visible when not in fullscreen */}
       {!isFullscreen && (
         <AnnotationToolbar
           currentTool={currentTool}
@@ -577,8 +609,8 @@ const AdvancedPDFViewer: React.FC<AdvancedPDFViewerProps> = ({
       )}
 
       {/* Main PDF Viewer */}
-      <div className="flex-1 overflow-auto bg-gray-100 relative">
-        <div className="flex justify-center p-4">
+      <div className="flex-1 overflow-auto bg-gray-100 relative flex">
+        <div className="flex-1 flex justify-center p-4">
           <div className="relative">
             <Card className="shadow-lg">
               <CardContent className="p-0 relative" ref={pageRef}>
@@ -635,46 +667,34 @@ const AdvancedPDFViewer: React.FC<AdvancedPDFViewerProps> = ({
             </Card>
           </div>
         </div>
-      </div>
 
-      {/* Bookmarks Sidebar (when not fullscreen) */}
-      {!isFullscreen && bookmarks.length > 0 && (
-        <div className="w-64 border-l bg-background p-4 overflow-y-auto">
-          <h4 className="font-semibold mb-3 flex items-center gap-2">
-            <Bookmark className="h-4 w-4" />
-            Bookmarks
-          </h4>
-          <div className="space-y-2">
-            {bookmarks.map((bookmark) => (
-              <button
-                key={bookmark.id}
-                onClick={() => jumpToBookmark(bookmark)}
-                className={cn(
-                  "w-full text-left p-2 rounded-md text-sm hover:bg-accent",
-                  bookmark.page_number === pageNumber && "bg-accent"
-                )}
-              >
-                <div className="font-medium">{bookmark.title}</div>
-                <div className="text-muted-foreground text-xs">
-                  Page {bookmark.page_number}
-                </div>
-              </button>
-            ))}
+        {/* Bookmarks Sidebar - Only visible when not fullscreen */}
+        {!isFullscreen && bookmarks.length > 0 && (
+          <div className="w-64 border-l bg-background p-4 overflow-y-auto">
+            <h4 className="font-semibold mb-3 flex items-center gap-2">
+              <Bookmark className="h-4 w-4" />
+              Bookmarks
+            </h4>
+            <div className="space-y-2">
+              {bookmarks.map((bookmark) => (
+                <button
+                  key={bookmark.id}
+                  onClick={() => jumpToBookmark(bookmark)}
+                  className={cn(
+                    "w-full text-left p-2 rounded-md text-sm hover:bg-accent",
+                    bookmark.page_number === pageNumber && "bg-accent"
+                  )}
+                >
+                  <div className="font-medium">{bookmark.title}</div>
+                  <div className="text-muted-foreground text-xs">
+                    Page {bookmark.page_number}
+                  </div>
+                </button>
+              ))}
+            </div>
           </div>
-        </div>
-      )}
-
-      {/* Fullscreen overlay controls */}
-      {isFullscreen && (
-        <div className="absolute top-4 right-4 z-10 flex gap-2 bg-background/80 backdrop-blur rounded-lg p-2">
-          <Button variant="outline" size="sm" onClick={rotate}>
-            <RotateCw className="h-4 w-4" />
-          </Button>
-          <Button variant="outline" size="sm" onClick={toggleFullscreen}>
-            <Minimize className="h-4 w-4" />
-          </Button>
-        </div>
-      )}
+        )}
+      </div>
     </div>
   );
 };
