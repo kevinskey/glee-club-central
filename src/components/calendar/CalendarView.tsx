@@ -1,12 +1,12 @@
 
 import React, { useState, useEffect } from 'react';
-import { format, startOfMonth, endOfMonth, eachDayOfMonth, isSameDay, isToday, startOfWeek, endOfWeek, eachDayOfInterval } from 'date-fns';
+import { format, startOfMonth, endOfMonth, isSameDay, isToday, startOfWeek, endOfWeek, eachDayOfInterval } from 'date-fns';
 import { ChevronLeft, ChevronRight, Calendar as CalendarIcon, MapPin, Clock, ExternalLink } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { CalendarEvent } from '@/types/calendar';
-import { nationalHolidays } from '@/utils/nationalHolidays';
-import { spelmanAcademicDates } from '@/utils/spelmanAcademicDates';
+import { getNationalHolidays } from '@/utils/nationalHolidays';
+import { getSpelmanAcademicDates } from '@/utils/spelmanAcademicDates';
 import { HolidayCard } from './HolidayCard';
 import { SpelmanDateCard } from './SpelmanDateCard';
 import { useSiteSettings } from '@/hooks/useSiteSettings';
@@ -20,10 +20,10 @@ interface CalendarViewProps {
 export function CalendarView({ events, onEventClick, showPrivateEvents = false }: CalendarViewProps) {
   const [currentDate, setCurrentDate] = useState(new Date());
   const [view, setView] = useState<'month' | 'week'>('month');
-  const { getSetting } = useSiteSettings();
+  const { settings } = useSiteSettings();
   
-  const showNationalHolidays = getSetting('showNationalHolidays', true);
-  const showSpelmanDates = getSetting('showSpelmanAcademicDates', true);
+  const showNationalHolidays = settings.showNationalHolidays ?? true;
+  const showSpelmanDates = settings.showSpelmanAcademicDates ?? true;
 
   // Filter events based on privacy settings
   const filteredEvents = events.filter(event => {
@@ -33,19 +33,17 @@ export function CalendarView({ events, onEventClick, showPrivateEvents = false }
 
   // Get holidays for current month if enabled
   const currentMonthHolidays = showNationalHolidays 
-    ? nationalHolidays.filter(holiday => {
-        const holidayDate = new Date(currentDate.getFullYear(), holiday.month - 1, holiday.day);
-        return holidayDate.getMonth() === currentDate.getMonth() && 
-               holidayDate.getFullYear() === currentDate.getFullYear();
+    ? getNationalHolidays(currentDate.getFullYear()).filter(holiday => {
+        return holiday.date.getMonth() === currentDate.getMonth() && 
+               holiday.date.getFullYear() === currentDate.getFullYear();
       })
     : [];
 
   // Get Spelman dates for current month if enabled
   const currentMonthSpelmanDates = showSpelmanDates 
-    ? spelmanAcademicDates.filter(date => {
-        const spelmanDate = new Date(currentDate.getFullYear(), date.month - 1, date.day);
-        return spelmanDate.getMonth() === currentDate.getMonth() && 
-               spelmanDate.getFullYear() === currentDate.getFullYear();
+    ? getSpelmanAcademicDates(currentDate.getFullYear()).filter(date => {
+        return date.date.getMonth() === currentDate.getMonth() && 
+               date.date.getFullYear() === currentDate.getFullYear();
       })
     : [];
 
@@ -76,15 +74,13 @@ export function CalendarView({ events, onEventClick, showPrivateEvents = false }
 
   const getHolidaysForDay = (day: Date) => {
     return currentMonthHolidays.filter(holiday => {
-      const holidayDate = new Date(day.getFullYear(), holiday.month - 1, holiday.day);
-      return isSameDay(holidayDate, day);
+      return isSameDay(holiday.date, day);
     });
   };
 
   const getSpelmanDatesForDay = (day: Date) => {
     return currentMonthSpelmanDates.filter(date => {
-      const spelmanDate = new Date(day.getFullYear(), date.month - 1, date.day);
-      return isSameDay(spelmanDate, day);
+      return isSameDay(date.date, day);
     });
   };
 
