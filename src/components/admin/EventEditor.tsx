@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useRef } from 'react';
 import { CalendarEvent } from '@/types/calendar';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
@@ -8,7 +9,7 @@ import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Checkbox } from '@/components/ui/checkbox';
-import { Calendar, Clock, Image as ImageIcon, AlertCircle, MapPin, ChevronDown, Check } from 'lucide-react';
+import { Calendar, Clock, Image as ImageIcon, AlertCircle, MapPin, ChevronDown, Check, Loader2 } from 'lucide-react';
 import { MediaPicker } from '@/components/media/MediaPicker';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
@@ -55,56 +56,85 @@ export const EventEditor: React.FC<EventEditorProps> = ({
   const [isMediaPickerOpen, setIsMediaPickerOpen] = useState(false);
   const [showRestoreAlert, setShowRestoreAlert] = useState(false);
   const [isEventTypesOpen, setIsEventTypesOpen] = useState(false);
+  const [googleMapsStatus, setGoogleMapsStatus] = useState<'loading' | 'ready' | 'error' | 'unavailable'>('loading');
+  const [showManualLocationInput, setShowManualLocationInput] = useState(false);
+  
   const locationInputRef = useRef<HTMLInputElement>(null);
   const autocompleteRef = useRef<google.maps.places.Autocomplete | null>(null);
 
   // Initialize Google Places Autocomplete
   useEffect(() => {
-    if (isOpen && locationInputRef.current && !autocompleteRef.current) {
-      const initializeAutocomplete = async () => {
-        try {
-          // Load Google Maps API
-          const { Loader } = await import('@googlemaps/js-api-loader');
-          const loader = new Loader({
-            apiKey: import.meta.env.VITE_GOOGLE_MAPS_API_KEY || '',
-            version: 'weekly',
-            libraries: ['places']
+    if (!isOpen) return;
+
+    const initializeGoogleMaps = async () => {
+      try {
+        // Check if API key is available
+        const apiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
+        if (!apiKey) {
+          console.warn('Google Maps API key not found');
+          setGoogleMapsStatus('unavailable');
+          setShowManualLocationInput(true);
+          return;
+        }
+
+        console.log('Initializing Google Maps with API key');
+        setGoogleMapsStatus('loading');
+
+        // Load Google Maps API
+        const { Loader } = await import('@googlemaps/js-api-loader');
+        const loader = new Loader({
+          apiKey,
+          version: 'weekly',
+          libraries: ['places']
+        });
+
+        await loader.load();
+        console.log('Google Maps API loaded successfully');
+
+        if (locationInputRef.current && !autocompleteRef.current) {
+          autocompleteRef.current = new google.maps.places.Autocomplete(
+            locationInputRef.current,
+            {
+              types: ['establishment', 'geocode'],
+              fields: ['formatted_address', 'name', 'place_id', 'url']
+            }
+          );
+
+          autocompleteRef.current.addListener('place_changed', () => {
+            const place = autocompleteRef.current?.getPlace();
+            if (place?.formatted_address) {
+              setFormData(prev => ({
+                ...prev,
+                location_name: place.formatted_address,
+                location_map_url: place.url || ''
+              }));
+              toast.success('Location selected from Google Maps');
+            }
           });
 
-          await loader.load();
-
-          if (locationInputRef.current) {
-            autocompleteRef.current = new google.maps.places.Autocomplete(
-              locationInputRef.current,
-              {
-                types: ['establishment', 'geocode'],
-                fields: ['formatted_address', 'name', 'place_id', 'url']
-              }
-            );
-
-            autocompleteRef.current.addListener('place_changed', () => {
-              const place = autocompleteRef.current?.getPlace();
-              if (place?.formatted_address) {
-                setFormData(prev => ({
-                  ...prev,
-                  location_name: place.formatted_address,
-                  location_map_url: place.url || ''
-                }));
-              }
-            });
-          }
-        } catch (error) {
-          console.warn('Google Places API not available:', error);
-          // Fallback: just use regular input without autocomplete
+          setGoogleMapsStatus('ready');
+          console.log('Google Places Autocomplete initialized');
         }
-      };
+      } catch (error) {
+        console.error('Failed to initialize Google Maps:', error);
+        setGoogleMapsStatus('error');
+        setShowManualLocationInput(true);
+        toast.error('Google Maps unavailable. You can enter location manually.');
+      }
+    };
 
-      initializeAutocomplete();
+    // Reset status when dialog opens
+    if (isOpen && locationInputRef.current) {
+      initializeGoogleMaps();
     }
 
     return () => {
       if (autocompleteRef.current) {
-        google.maps.event.clearInstanceListeners(autocompleteRef.current);
+        try {
+          google.maps.event.clearInstanceListeners(autocompleteRef.current);
+        } catch (error) {
+          console.warn('Error cleaning up Google Maps listeners:', error);
+        }
         autocompleteRef.current = null;
       }
     };
@@ -238,6 +268,42 @@ export const EventEditor: React.FC<EventEditorProps> = ({
 
   const handleEventTypesDone = () => {
     setIsEventTypesOpen(false);
+  };
+
+  const toggleManualLocationInput = () => {
+    setShowManualLocationInput(!showManualLocationInput);
+  };
+
+  const getLocationInputStatus = () => {
+    switch (googleMapsStatus) {
+      case 'loading':
+        return (
+          <div className="flex items-center text-xs text-muted-foreground mt-1">
+            <Loader2 className="h-3 w-3 animate-spin mr-1" />
+            Loading Google Maps...
+          </div>
+        );
+      case 'ready':
+        return (
+          <p className="text-xs text-green-600 mt-1">
+            ✓ Google Maps autocomplete ready
+          </p>
+        );
+      case 'error':
+        return (
+          <p className="text-xs text-amber-600 mt-1">
+            ⚠ Google Maps failed to load. Manual input available.
+          </p>
+        );
+      case 'unavailable':
+        return (
+          <p className="text-xs text-muted-foreground mt-1">
+            Google Maps not configured. Using manual input.
+          </p>
+        );
+      default:
+        return null;
+    }
   };
 
   return (
@@ -436,21 +502,33 @@ export const EventEditor: React.FC<EventEditorProps> = ({
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <Label htmlFor="location_name">Location</Label>
+              <div className="flex items-center justify-between mb-2">
+                <Label htmlFor="location_name">Location</Label>
+                {(googleMapsStatus === 'error' || googleMapsStatus === 'unavailable') && (
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    onClick={toggleManualLocationInput}
+                    className="text-xs"
+                  >
+                    {showManualLocationInput ? 'Use Autocomplete' : 'Manual Input'}
+                  </Button>
+                )}
+              </div>
               <div className="relative">
                 <MapPin className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
                 <Input
-                  ref={locationInputRef}
+                  ref={googleMapsStatus === 'ready' && !showManualLocationInput ? locationInputRef : undefined}
                   id="location_name"
                   value={formData.location_name}
                   onChange={(e) => handleInputChange('location_name', e.target.value)}
-                  placeholder="Start typing an address..."
+                  placeholder={showManualLocationInput ? "Enter location manually..." : "Start typing an address..."}
                   className="pl-10"
+                  disabled={googleMapsStatus === 'loading'}
                 />
               </div>
-              <p className="text-xs text-muted-foreground mt-1">
-                Start typing to search for places with Google Maps
-              </p>
+              {getLocationInputStatus()}
             </div>
             <div>
               <Label htmlFor="location_map_url">Map URL</Label>
@@ -458,8 +536,8 @@ export const EventEditor: React.FC<EventEditorProps> = ({
                 id="location_map_url"
                 value={formData.location_map_url}
                 onChange={(e) => handleInputChange('location_map_url', e.target.value)}
-                placeholder="Auto-filled from location search"
-                readOnly
+                placeholder={showManualLocationInput ? "Enter map URL manually..." : "Auto-filled from location search"}
+                readOnly={!showManualLocationInput && googleMapsStatus === 'ready'}
               />
             </div>
           </div>
