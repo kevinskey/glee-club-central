@@ -326,9 +326,7 @@ export default function AdminCalendarPage() {
                 <CalendarView
                   events={events}
                   onEventClick={handleEventClick}
-                  onEventTypesChange={handleEventTypesChange}
                   showPrivateEvents={true}
-                  showEventTypeDropdown={true}
                 />
               </div>
             </CardContent>
