@@ -1,11 +1,12 @@
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import { Document, Page, pdfjs } from 'react-pdf';
 import { Card, CardContent } from '@/components/ui/card';
 import { cn } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
 import { usePDFAnnotations } from '@/hooks/usePDFAnnotations';
 import { usePDFViewer } from './hooks/usePDFViewer';
+import { usePDFPagePreloader } from './hooks/usePDFPagePreloader';
 import { AnnotationToolbar } from './AnnotationToolbar';
 import { AnnotationCanvas } from './AnnotationCanvas';
 import { PDFFullscreenHeader } from './PDFFullscreenHeader';
@@ -72,7 +73,10 @@ const AdvancedPDFViewer: React.FC<AdvancedPDFViewerProps> = ({
     toggleBookmark
   } = usePDFViewer(sheetMusicId);
 
-  // Annotation hook
+  // Page preloader for instant page turns
+  const { preloadAdjacentPages, getPreloadedPage } = usePDFPagePreloader(url, numPages);
+
+  // Annotation hook with caching
   const {
     currentPageAnnotations,
     addAnnotation,
@@ -86,13 +90,21 @@ const AdvancedPDFViewer: React.FC<AdvancedPDFViewerProps> = ({
     canRedo
   } = usePDFAnnotations(sheetMusicId);
 
+  // Get current page annotations from cache
+  const pageAnnotations = useMemo(() => {
+    return currentPageAnnotations(pageNumber);
+  }, [currentPageAnnotations, pageNumber]);
+
   useEffect(() => {
     loadAnnotations();
   }, [loadAnnotations]);
 
+  // Preload adjacent pages when page or scale changes
   useEffect(() => {
-    loadPageAnnotations(pageNumber);
-  }, [pageNumber, loadPageAnnotations]);
+    if (numPages > 0) {
+      preloadAdjacentPages(pageNumber, scale, rotation);
+    }
+  }, [pageNumber, scale, rotation, numPages, preloadAdjacentPages]);
 
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
@@ -186,11 +198,11 @@ const AdvancedPDFViewer: React.FC<AdvancedPDFViewerProps> = ({
     <div 
       ref={viewerRef}
       className={cn(
-        "flex flex-col bg-background",
+        "flex flex-col bg-background transition-all duration-200",
         isFullscreen ? "fixed inset-0 z-50 h-screen" : "h-screen"
       )}
     >
-      {/* Fullscreen Header - Always visible in fullscreen */}
+      {/* Headers with smooth transitions */}
       {isFullscreen && (
         <PDFFullscreenHeader
           title={title}
@@ -208,75 +220,70 @@ const AdvancedPDFViewer: React.FC<AdvancedPDFViewerProps> = ({
         />
       )}
 
-      {/* Regular Header - Only visible when not in fullscreen */}
       {!isFullscreen && (
-        <PDFRegularHeader
-          title={title}
-          pageNumber={pageNumber}
-          numPages={numPages}
-          scale={scale}
-          rotation={rotation}
-          showAnnotations={showAnnotations}
-          currentPageBookmarked={currentPageBookmarked}
-          canUndo={canUndo}
-          canRedo={canRedo}
-          onBack={handleBackNavigation}
-          onPageChange={setPageNumber}
-          onPrevPage={goToPrevPage}
-          onNextPage={goToNextPage}
-          onZoomIn={zoomIn}
-          onZoomOut={zoomOut}
-          onRotate={rotate}
-          onToggleFullscreen={toggleFullscreen}
-          onToggleAnnotations={() => setShowAnnotations(!showAnnotations)}
-          onUndo={() => undo(pageNumber)}
-          onRedo={() => redo(pageNumber)}
-          onSaveAnnotations={handleSaveAnnotations}
-          onClearAnnotations={handleClearAnnotations}
-          onToggleBookmark={toggleBookmark}
-          onDownload={handleDownload}
-          onPrint={handlePrint}
-        />
+        <>
+          <PDFRegularHeader
+            title={title}
+            pageNumber={pageNumber}
+            numPages={numPages}
+            scale={scale}
+            rotation={rotation}
+            showAnnotations={showAnnotations}
+            currentPageBookmarked={currentPageBookmarked}
+            canUndo={canUndo}
+            canRedo={canRedo}
+            onBack={handleBackNavigation}
+            onPageChange={setPageNumber}
+            onPrevPage={goToPrevPage}
+            onNextPage={goToNextPage}
+            onZoomIn={zoomIn}
+            onZoomOut={zoomOut}
+            onRotate={rotate}
+            onToggleFullscreen={toggleFullscreen}
+            onToggleAnnotations={() => setShowAnnotations(!showAnnotations)}
+            onUndo={() => undo(pageNumber)}
+            onRedo={() => redo(pageNumber)}
+            onSaveAnnotations={handleSaveAnnotations}
+            onClearAnnotations={handleClearAnnotations}
+            onToggleBookmark={toggleBookmark}
+            onDownload={handleDownload}
+            onPrint={handlePrint}
+          />
+
+          <PDFSearchBar
+            searchTerm={searchTerm}
+            searchResults={searchResults}
+            currentSearchIndex={currentSearchIndex}
+            onSearchChange={setSearchTerm}
+            onPrevResult={handlePrevSearchResult}
+            onNextResult={handleNextSearchResult}
+          />
+
+          <AnnotationToolbar
+            currentTool={currentTool}
+            onToolChange={setCurrentTool}
+            currentColor={currentColor}
+            onColorChange={setCurrentColor}
+            strokeWidth={strokeWidth}
+            onStrokeWidthChange={setStrokeWidth}
+            canUndo={canUndo}
+            canRedo={canRedo}
+            onUndo={() => undo(pageNumber)}
+            onRedo={() => redo(pageNumber)}
+            onSave={handleSaveAnnotations}
+            onClear={handleClearAnnotations}
+            showAnnotations={showAnnotations}
+            onToggleAnnotations={() => setShowAnnotations(!showAnnotations)}
+            className="border-b h-10"
+          />
+        </>
       )}
 
-      {/* Search Bar - Only visible when not in fullscreen */}
-      {!isFullscreen && (
-        <PDFSearchBar
-          searchTerm={searchTerm}
-          searchResults={searchResults}
-          currentSearchIndex={currentSearchIndex}
-          onSearchChange={setSearchTerm}
-          onPrevResult={handlePrevSearchResult}
-          onNextResult={handleNextSearchResult}
-        />
-      )}
-
-      {/* Annotation Toolbar - Only visible when not in fullscreen */}
-      {!isFullscreen && (
-        <AnnotationToolbar
-          currentTool={currentTool}
-          onToolChange={setCurrentTool}
-          currentColor={currentColor}
-          onColorChange={setCurrentColor}
-          strokeWidth={strokeWidth}
-          onStrokeWidthChange={setStrokeWidth}
-          canUndo={canUndo}
-          canRedo={canRedo}
-          onUndo={() => undo(pageNumber)}
-          onRedo={() => redo(pageNumber)}
-          onSave={handleSaveAnnotations}
-          onClear={handleClearAnnotations}
-          showAnnotations={showAnnotations}
-          onToggleAnnotations={() => setShowAnnotations(!showAnnotations)}
-          className="border-b h-10"
-        />
-      )}
-
-      {/* Main PDF Viewer */}
+      {/* Main PDF Viewer with optimized rendering */}
       <div className="flex-1 overflow-auto bg-gray-100 relative flex">
         <div className="flex-1 flex justify-center p-4">
           <div className="relative">
-            <Card className="shadow-lg">
+            <Card className="shadow-lg transition-transform duration-200">
               <CardContent className="p-0 relative" ref={pageRef}>
                 <Document
                   file={url}
@@ -304,17 +311,14 @@ const AdvancedPDFViewer: React.FC<AdvancedPDFViewerProps> = ({
                     pageNumber={pageNumber}
                     scale={scale}
                     rotate={rotation}
-                    loading={
-                      <div className="flex items-center justify-center h-96">
-                        <div className="h-6 w-6 rounded-full border-4 border-primary border-t-transparent animate-spin"></div>
-                      </div>
-                    }
+                    loading={null} // Remove page loading spinner for instant transitions
                     renderTextLayer={false}
                     renderAnnotationLayer={false}
+                    className="transition-opacity duration-200"
                   />
                 </Document>
                 
-                {/* Annotation Canvas Overlay */}
+                {/* Annotation Canvas Overlay with optimized rendering */}
                 {pageSize.width > 0 && pageSize.height > 0 && (
                   <AnnotationCanvas
                     width={pageSize.width}
@@ -322,11 +326,11 @@ const AdvancedPDFViewer: React.FC<AdvancedPDFViewerProps> = ({
                     currentTool={currentTool}
                     currentColor={currentColor}
                     strokeWidth={strokeWidth}
-                    annotations={currentPageAnnotations}
+                    annotations={pageAnnotations}
                     onAnnotationAdd={handleAnnotationAdd}
                     showAnnotations={showAnnotations}
                     scale={scale}
-                    className="absolute top-0 left-0"
+                    className="absolute top-0 left-0 transition-opacity duration-200"
                   />
                 )}
               </CardContent>
@@ -334,7 +338,7 @@ const AdvancedPDFViewer: React.FC<AdvancedPDFViewerProps> = ({
           </div>
         </div>
 
-        {/* Bookmarks Sidebar - Only visible when not fullscreen */}
+        {/* Bookmarks Sidebar */}
         {!isFullscreen && (
           <PDFBookmarksSidebar
             bookmarks={bookmarks}

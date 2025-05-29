@@ -1,3 +1,4 @@
+
 import { useState, useCallback, useRef, useEffect, useMemo } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
@@ -43,12 +44,17 @@ export const usePDFViewer = (sheetMusicId: string) => {
   // Refs
   const viewerRef = useRef<HTMLDivElement>(null);
   const pageRef = useRef<HTMLDivElement>(null);
-  const [pageSize, setPageSize] = useState<{width: number, height: number}>({width: 0, height: 0});
+  
+  // Optimized page size calculation with memoization
+  const pageSize = useMemo(() => {
+    if (!pageRef.current) return { width: 0, height: 0 };
+    
+    const rect = pageRef.current.getBoundingClientRect();
+    return { width: rect.width, height: rect.height };
+  }, [scale, rotation]); // Only recalculate when scale or rotation changes
 
   // Calculate optimal scale for fullscreen
   const calculateFullscreenScale = useCallback(() => {
-    if (!pageRef.current) return 1.0;
-
     const viewport = {
       width: window.innerWidth,
       height: window.innerHeight - 80 // Account for header height
@@ -134,11 +140,12 @@ export const usePDFViewer = (sheetMusicId: string) => {
     setNumPages(numPages);
   }, []);
 
-  // Simple page navigation without debouncing or loading states
+  // Optimized page navigation - instant with no loading states
   const navigateToPage = useCallback((newPageNumber: number) => {
     if (newPageNumber < 1 || newPageNumber > numPages || newPageNumber === pageNumber) {
       return;
     }
+    // Instant page change - no loading states
     setPageNumber(newPageNumber);
   }, [numPages, pageNumber]);
 
@@ -194,21 +201,6 @@ export const usePDFViewer = (sheetMusicId: string) => {
     const isBookmarked = bookmarks.some(b => b.page_number === pageNumber);
     setCurrentPageBookmarked(isBookmarked);
   }, [bookmarks, pageNumber]);
-
-  useEffect(() => {
-    if (pageRef.current) {
-      const updateSize = () => {
-        const rect = pageRef.current?.getBoundingClientRect();
-        if (rect) {
-          setPageSize({ width: rect.width, height: rect.height });
-        }
-      };
-      
-      updateSize();
-      window.addEventListener('resize', updateSize);
-      return () => window.removeEventListener('resize', updateSize);
-    }
-  }, [scale, pageNumber, rotation]);
 
   return {
     // State

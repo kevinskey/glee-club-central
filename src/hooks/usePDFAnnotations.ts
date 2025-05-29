@@ -1,7 +1,8 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
+import { usePDFAnnotationCache } from '@/components/pdf/hooks/usePDFAnnotationCache';
 
 interface Annotation {
   id: string;
@@ -33,10 +34,18 @@ export const usePDFAnnotations = (sheetMusicId: string) => {
   const { toast } = useToast();
   
   const [annotations, setAnnotations] = useState<Annotation[]>([]);
-  const [currentPageAnnotations, setCurrentPageAnnotations] = useState<AnnotationData[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [undoStack, setUndoStack] = useState<AnnotationData[][]>([]);
   const [redoStack, setRedoStack] = useState<AnnotationData[][]>([]);
+
+  // Use the annotation cache hook
+  const {
+    getCachedAnnotations,
+    updateCachedAnnotations,
+    markPageSaved,
+    preloadAnnotationsIntoCache,
+    clearCache
+  } = usePDFAnnotationCache();
 
   const determineSourceTable = useCallback(async (fileId: string): Promise<'sheet_music' | 'media_library'> => {
     // First check if it exists in sheet_music table
@@ -88,6 +97,8 @@ export const usePDFAnnotations = (sheetMusicId: string) => {
       }
       
       setAnnotations(data || []);
+      // Preload all annotations into cache for instant access
+      preloadAnnotationsIntoCache(data || []);
     } catch (error) {
       console.error('Error loading annotations:', error);
       toast({
@@ -98,19 +109,17 @@ export const usePDFAnnotations = (sheetMusicId: string) => {
     } finally {
       setIsLoading(false);
     }
-  }, [user, sheetMusicId, toast]);
+  }, [user, sheetMusicId, toast, preloadAnnotationsIntoCache]);
 
+  // Optimized page annotation loading - uses cache for instant access
   const loadPageAnnotations = useCallback((pageNumber: number) => {
-    const pageAnnotation = annotations.find(
-      a => a.page_number === pageNumber && a.is_visible
-    );
-    
-    if (pageAnnotation) {
-      setCurrentPageAnnotations(pageAnnotation.annotations || []);
-    } else {
-      setCurrentPageAnnotations([]);
-    }
-  }, [annotations]);
+    return getCachedAnnotations(pageNumber);
+  }, [getCachedAnnotations]);
+
+  // Get current page annotations directly from cache
+  const currentPageAnnotations = useCallback((pageNumber: number) => {
+    return getCachedAnnotations(pageNumber);
+  }, [getCachedAnnotations]);
 
   const savePageAnnotations = useCallback(async (
     pageNumber: number,
@@ -120,6 +129,9 @@ export const usePDFAnnotations = (sheetMusicId: string) => {
       console.error('Missing user or sheet music ID for saving annotations');
       return;
     }
+
+    // Update cache immediately for instant UI response
+    updateCachedAnnotations(pageNumber, annotationData);
 
     try {
       console.log('Saving annotations for file ID:', sheetMusicId);
@@ -178,6 +190,9 @@ export const usePDFAnnotations = (sheetMusicId: string) => {
         setAnnotations(prev => [...prev, data]);
       }
 
+      // Mark page as saved in cache
+      markPageSaved(pageNumber);
+      
       toast({
         title: "Success",
         description: "Annotations saved successfully",
@@ -190,51 +205,57 @@ export const usePDFAnnotations = (sheetMusicId: string) => {
         variant: "destructive"
       });
     }
-  }, [user, sheetMusicId, annotations, toast, determineSourceTable]);
+  }, [user, sheetMusicId, annotations, toast, determineSourceTable, updateCachedAnnotations, markPageSaved]);
 
   const addAnnotation = useCallback((annotation: AnnotationData, pageNumber: number) => {
+    const currentAnnotations = getCachedAnnotations(pageNumber);
+    
     // Save current state for undo
-    setUndoStack(prev => [...prev, currentPageAnnotations]);
+    setUndoStack(prev => [...prev, currentAnnotations]);
     setRedoStack([]); // Clear redo stack when new action is performed
 
-    const newAnnotations = [...currentPageAnnotations, annotation];
-    setCurrentPageAnnotations(newAnnotations);
+    const newAnnotations = [...currentAnnotations, annotation];
+    updateCachedAnnotations(pageNumber, newAnnotations);
     savePageAnnotations(pageNumber, newAnnotations);
-  }, [currentPageAnnotations, savePageAnnotations]);
+  }, [getCachedAnnotations, updateCachedAnnotations, savePageAnnotations]);
 
   const removeAnnotation = useCallback((index: number, pageNumber: number) => {
+    const currentAnnotations = getCachedAnnotations(pageNumber);
+    
     // Save current state for undo
-    setUndoStack(prev => [...prev, currentPageAnnotations]);
+    setUndoStack(prev => [...prev, currentAnnotations]);
     setRedoStack([]);
 
-    const newAnnotations = currentPageAnnotations.filter((_, i) => i !== index);
-    setCurrentPageAnnotations(newAnnotations);
+    const newAnnotations = currentAnnotations.filter((_, i) => i !== index);
+    updateCachedAnnotations(pageNumber, newAnnotations);
     savePageAnnotations(pageNumber, newAnnotations);
-  }, [currentPageAnnotations, savePageAnnotations]);
+  }, [getCachedAnnotations, updateCachedAnnotations, savePageAnnotations]);
 
   const undo = useCallback((pageNumber: number) => {
     if (undoStack.length === 0) return;
 
+    const currentAnnotations = getCachedAnnotations(pageNumber);
     const previousState = undoStack[undoStack.length - 1];
     const newUndoStack = undoStack.slice(0, -1);
 
-    setRedoStack(prev => [...prev, currentPageAnnotations]);
+    setRedoStack(prev => [...prev, currentAnnotations]);
     setUndoStack(newUndoStack);
-    setCurrentPageAnnotations(previousState);
+    updateCachedAnnotations(pageNumber, previousState);
     savePageAnnotations(pageNumber, previousState);
-  }, [undoStack, currentPageAnnotations, savePageAnnotations]);
+  }, [undoStack, getCachedAnnotations, updateCachedAnnotations, savePageAnnotations]);
 
   const redo = useCallback((pageNumber: number) => {
     if (redoStack.length === 0) return;
 
+    const currentAnnotations = getCachedAnnotations(pageNumber);
     const nextState = redoStack[redoStack.length - 1];
     const newRedoStack = redoStack.slice(0, -1);
 
-    setUndoStack(prev => [...prev, currentPageAnnotations]);
+    setUndoStack(prev => [...prev, currentAnnotations]);
     setRedoStack(newRedoStack);
-    setCurrentPageAnnotations(nextState);
+    updateCachedAnnotations(pageNumber, nextState);
     savePageAnnotations(pageNumber, nextState);
-  }, [redoStack, currentPageAnnotations, savePageAnnotations]);
+  }, [redoStack, getCachedAnnotations, updateCachedAnnotations, savePageAnnotations]);
 
   const clearPageAnnotations = useCallback(async (pageNumber: number) => {
     if (!user || !sheetMusicId) return;
@@ -260,7 +281,7 @@ export const usePDFAnnotations = (sheetMusicId: string) => {
         ));
       }
 
-      setCurrentPageAnnotations([]);
+      updateCachedAnnotations(pageNumber, []);
       setUndoStack([]);
       setRedoStack([]);
       
@@ -276,7 +297,7 @@ export const usePDFAnnotations = (sheetMusicId: string) => {
         variant: "destructive"
       });
     }
-  }, [user, sheetMusicId, annotations, toast]);
+  }, [user, sheetMusicId, annotations, toast, updateCachedAnnotations]);
 
   const toggleAnnotationVisibility = useCallback(async (pageNumber: number) => {
     if (!user || !sheetMusicId) return;
@@ -312,6 +333,13 @@ export const usePDFAnnotations = (sheetMusicId: string) => {
       });
     }
   }, [user, sheetMusicId, annotations, toast]);
+
+  // Clear cache when component unmounts or sheet music changes
+  useEffect(() => {
+    return () => {
+      clearCache();
+    };
+  }, [sheetMusicId, clearCache]);
 
   return {
     annotations,

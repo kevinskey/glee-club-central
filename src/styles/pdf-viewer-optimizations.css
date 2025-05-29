@@ -1,0 +1,100 @@
+
+/* PDF Viewer Performance Optimizations */
+
+/* Smooth page transitions */
+.pdf-page-container {
+  transition: opacity 0.2s ease-in-out, transform 0.2s ease-in-out;
+  will-change: opacity, transform;
+}
+
+.pdf-page-container.changing {
+  opacity: 0.95;
+  transform: translateY(2px);
+}
+
+/* Optimized annotation canvas */
+.annotation-canvas {
+  transition: opacity 0.2s ease-in-out;
+  will-change: opacity;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+
+/* Smooth toolbar transitions */
+.pdf-toolbar {
+  transition: opacity 0.3s ease-in-out, transform 0.3s ease-in-out;
+  will-change: opacity, transform;
+}
+
+/* Optimized card transitions */
+.pdf-card {
+  transition: box-shadow 0.3s ease-in-out;
+  will-change: box-shadow;
+}
+
+.pdf-card:hover {
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+}
+
+/* Remove loading flicker */
+.react-pdf__Page {
+  transition: opacity 0.2s ease-in-out !important;
+}
+
+.react-pdf__Page canvas {
+  transition: opacity 0.2s ease-in-out !important;
+}
+
+/* Optimized fullscreen transitions */
+.pdf-fullscreen-enter {
+  opacity: 0;
+  transform: scale(0.98);
+}
+
+.pdf-fullscreen-enter-active {
+  opacity: 1;
+  transform: scale(1);
+  transition: opacity 0.3s ease-out, transform 0.3s ease-out;
+}
+
+.pdf-fullscreen-exit {
+  opacity: 1;
+  transform: scale(1);
+}
+
+.pdf-fullscreen-exit-active {
+  opacity: 0;
+  transform: scale(0.98);
+  transition: opacity 0.3s ease-in, transform 0.3s ease-in;
+}
+
+/* Prevent layout shifts during page changes */
+.pdf-container {
+  contain: layout style paint;
+}
+
+/* Optimized scrolling */
+.pdf-viewer-scroll {
+  scroll-behavior: smooth;
+  will-change: scroll-position;
+}
+
+/* Reduce motion for users who prefer it */
+@media (prefers-reduced-motion: reduce) {
+  .pdf-page-container,
+  .annotation-canvas,
+  .pdf-toolbar,
+  .pdf-card,
+  .react-pdf__Page,
+  .react-pdf__Page canvas {
+    transition: none !important;
+    animation: none !important;
+  }
+}
+
+/* GPU acceleration for better performance */
+.pdf-page-container,
+.annotation-canvas {
+  transform: translateZ(0);
+  -webkit-transform: translateZ(0);
+}
