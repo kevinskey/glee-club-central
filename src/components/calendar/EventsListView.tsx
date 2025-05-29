@@ -1,4 +1,3 @@
-
 import React, { useState, useMemo } from 'react';
 import { CalendarEvent } from '@/types/calendar';
 import { Card, CardContent } from '@/components/ui/card';
@@ -101,13 +100,8 @@ export const EventsListView: React.FC<EventsListViewProps> = ({
     onEventClick?.(event);
   };
 
-  // Handle event types change with validation
+  // Handle event types change - now allows changes for all events
   const handleEventTypesChange = (eventId: string, newTypes: string[]) => {
-    // Don't allow changes for virtual events
-    if (eventId.startsWith('holiday-') || eventId.startsWith('spelman-')) {
-      return;
-    }
-    
     onEventTypesChange?.(eventId, newTypes);
   };
 
@@ -233,8 +227,8 @@ export const EventsListView: React.FC<EventsListViewProps> = ({
                       )}
                     </div>
                     
-                    {/* Event Types - only show dropdown if allowed and event is editable */}
-                    {showEventTypeDropdown && onEventTypesChange && !isVirtual && (
+                    {/* Event Types - show dropdown for all events when editing is enabled */}
+                    {showEventTypeDropdown && onEventTypesChange && (
                       <div onClick={(e) => e.stopPropagation()}>
                         <EventTypeDropdown
                           event={event}
