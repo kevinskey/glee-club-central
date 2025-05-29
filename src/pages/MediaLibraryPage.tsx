@@ -63,12 +63,26 @@ const MediaLibraryPage: React.FC<MediaLibraryPageProps> = ({ isAdminView = false
 
   // Sort files by title for better organization, especially for PDFs
   const sortedFilteredFiles = [...filteredMediaFiles].sort((a, b) => {
+    const typeA = getMediaType(a.file_type);
+    const typeB = getMediaType(b.file_type);
+    
+    // For PDFs, prioritize sorting by title
+    if (typeA === "pdf" && typeB === "pdf") {
+      return a.title.localeCompare(b.title, undefined, { 
+        numeric: true, 
+        sensitivity: 'base' 
+      });
+    }
+    
     // First sort by title alphabetically
     return a.title.localeCompare(b.title, undefined, { 
       numeric: true, 
       sensitivity: 'base' 
     });
   });
+
+  // Filter PDFs specifically for the documents tab
+  const pdfFiles = sortedFilteredFiles.filter(file => getMediaType(file.file_type) === "pdf");
 
   return (
     <div className="container mx-auto px-4 py-6">
@@ -119,7 +133,7 @@ const MediaLibraryPage: React.FC<MediaLibraryPageProps> = ({ isAdminView = false
             <Library className="h-4 w-4" /> All
           </TabsTrigger>
           <TabsTrigger value="pdf" className="flex items-center gap-1">
-            <FileText className="h-4 w-4" /> Documents
+            <FileText className="h-4 w-4" /> Documents ({pdfFiles.length})
           </TabsTrigger>
           <TabsTrigger value="audio" className="flex items-center gap-1">
             <Music className="h-4 w-4" /> Audio
@@ -136,7 +150,15 @@ const MediaLibraryPage: React.FC<MediaLibraryPageProps> = ({ isAdminView = false
           <MediaGrid files={sortedFilteredFiles} onViewPDF={handleViewPDF} />
         </TabsContent>
         
-        {["pdf", "audio", "image", "video"].map((type) => (
+        <TabsContent value="pdf" className="w-full">
+          <MediaGrid 
+            files={pdfFiles}
+            onViewPDF={handleViewPDF}
+            showPDFCount={true}
+          />
+        </TabsContent>
+        
+        {["audio", "image", "video"].map((type) => (
           <TabsContent key={type} value={type} className="w-full">
             <MediaGrid 
               files={sortedFilteredFiles}
@@ -162,88 +184,101 @@ const MediaLibraryPage: React.FC<MediaLibraryPageProps> = ({ isAdminView = false
 interface MediaGridProps {
   files: any[];
   onViewPDF: (id: string, url: string, title: string) => void;
+  showPDFCount?: boolean;
 }
 
-const MediaGrid: React.FC<MediaGridProps> = ({ files, onViewPDF }) => {
+const MediaGrid: React.FC<MediaGridProps> = ({ files, onViewPDF, showPDFCount = false }) => {
   if (files.length === 0) {
     return (
       <div className="text-center py-12 border border-dashed rounded-lg">
         <Library className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
         <h3 className="text-lg font-medium mb-2">No media files found</h3>
-        <p className="text-muted-foreground">Try changing your search or filter settings</p>
+        <p className="text-muted-foreground">
+          {showPDFCount ? "No PDF documents available" : "Try changing your search or filter settings"}
+        </p>
       </div>
     );
   }
   
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-      {files.map((file) => {
-        const mediaType = getMediaType(file.file_type);
-        
-        return (
-          <Card key={file.id} className="overflow-hidden h-full flex flex-col">
-            <div className="relative aspect-video bg-muted flex items-center justify-center">
-              {mediaType === "pdf" && (
-                <PDFPreview
-                  url={file.file_url}
-                  title={file.title}
-                  className="w-full h-full cursor-pointer"
-                  previewWidth={300}
-                  previewHeight={200}
-                  mediaSourceId={file.id}
-                  category={file.category || "General"}
-                >
-                  <FileText className="h-16 w-16 text-muted-foreground" />
-                </PDFPreview>
-              )}
-              {mediaType === "image" && (
-                <img 
-                  src={file.file_url} 
-                  alt={file.title}
-                  className="w-full h-full object-cover"
-                />
-              )}
-              {mediaType === "audio" && (
-                <div className="w-full h-full flex items-center justify-center">
-                  <Music className="h-16 w-16 text-muted-foreground" />
-                </div>
-              )}
-              {mediaType === "video" && (
-                <div className="w-full h-full flex items-center justify-center">
-                  <Video className="h-16 w-16 text-muted-foreground" />
-                </div>
-              )}
-              {mediaType === "other" && (
-                <div className="w-full h-full flex items-center justify-center">
-                  <FileText className="h-16 w-16 text-muted-foreground" />
-                </div>
-              )}
-            </div>
-            <CardContent className="p-4 flex-1 flex flex-col">
-              <h3 className="font-medium line-clamp-1">{file.title}</h3>
-              <p className="text-sm text-muted-foreground line-clamp-2 mt-1">
-                {file.description || getMediaTypeLabel(mediaType)}
-              </p>
-              <div className="mt-auto pt-4">
-                <div className="flex justify-between items-center text-xs text-muted-foreground">
-                  <span>{mediaType.toUpperCase()}</span>
-                  <span>{formatFileSize(file.size || 0)}</span>
-                </div>
+    <div className="space-y-4">
+      {showPDFCount && (
+        <div className="flex items-center justify-between">
+          <p className="text-sm text-muted-foreground">
+            {files.length} document{files.length !== 1 ? 's' : ''} found
+          </p>
+        </div>
+      )}
+      
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+        {files.map((file) => {
+          const mediaType = getMediaType(file.file_type);
+          
+          return (
+            <Card key={file.id} className="overflow-hidden h-full flex flex-col">
+              <div className="relative aspect-video bg-muted flex items-center justify-center">
                 {mediaType === "pdf" && (
-                  <Button 
-                    variant="outline" 
-                    size="sm" 
-                    className="w-full mt-2"
-                    onClick={() => onViewPDF(file.id, file.file_url, file.title)}
+                  <PDFPreview
+                    url={file.file_url}
+                    title={file.title}
+                    className="w-full h-full cursor-pointer"
+                    previewWidth={300}
+                    previewHeight={200}
+                    mediaSourceId={file.id}
+                    category={file.category || "General"}
                   >
-                    <FileText className="mr-2 h-4 w-4" /> View PDF
-                  </Button>
+                    <FileText className="h-16 w-16 text-muted-foreground" />
+                  </PDFPreview>
+                )}
+                {mediaType === "image" && (
+                  <img 
+                    src={file.file_url} 
+                    alt={file.title}
+                    className="w-full h-full object-cover"
+                  />
+                )}
+                {mediaType === "audio" && (
+                  <div className="w-full h-full flex items-center justify-center">
+                    <Music className="h-16 w-16 text-muted-foreground" />
+                  </div>
+                )}
+                {mediaType === "video" && (
+                  <div className="w-full h-full flex items-center justify-center">
+                    <Video className="h-16 w-16 text-muted-foreground" />
+                  </div>
+                )}
+                {mediaType === "other" && (
+                  <div className="w-full h-full flex items-center justify-center">
+                    <FileText className="h-16 w-16 text-muted-foreground" />
+                  </div>
                 )}
               </div>
-            </CardContent>
-          </Card>
-        );
-      })}
+              <CardContent className="p-4 flex-1 flex flex-col">
+                <h3 className="font-medium line-clamp-2 mb-2">{file.title}</h3>
+                <p className="text-sm text-muted-foreground line-clamp-2 mt-1 flex-1">
+                  {file.description || getMediaTypeLabel(mediaType)}
+                </p>
+                <div className="mt-auto pt-4">
+                  <div className="flex justify-between items-center text-xs text-muted-foreground mb-2">
+                    <span>{mediaType.toUpperCase()}</span>
+                    <span>{formatFileSize(file.size || 0)}</span>
+                  </div>
+                  {mediaType === "pdf" && (
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      className="w-full"
+                      onClick={() => onViewPDF(file.id, file.file_url, file.title)}
+                    >
+                      <FileText className="mr-2 h-4 w-4" /> View Document
+                    </Button>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+          );
+        })}
+      </div>
     </div>
   );
 };
