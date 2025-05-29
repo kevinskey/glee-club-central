@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { CalendarEvent } from '@/types/calendar';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -6,11 +6,13 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Checkbox } from '@/components/ui/checkbox';
-import { Calendar, Clock, Image as ImageIcon, AlertCircle } from 'lucide-react';
+import { Calendar, Clock, Image as ImageIcon, AlertCircle, MapPin, ChevronDown } from 'lucide-react';
 import { MediaPicker } from '@/components/media/MediaPicker';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { toast } from 'sonner';
 import { EVENT_TYPES, getEventTypeColor } from '@/utils/eventTypes';
 
@@ -51,6 +53,61 @@ export const EventEditor: React.FC<EventEditorProps> = ({
   const [loading, setLoading] = useState(false);
   const [isMediaPickerOpen, setIsMediaPickerOpen] = useState(false);
   const [showRestoreAlert, setShowRestoreAlert] = useState(false);
+  const [isEventTypesOpen, setIsEventTypesOpen] = useState(false);
+  const locationInputRef = useRef<HTMLInputElement>(null);
+  const autocompleteRef = useRef<google.maps.places.Autocomplete | null>(null);
+
+  // Initialize Google Places Autocomplete
+  useEffect(() => {
+    if (isOpen && locationInputRef.current && !autocompleteRef.current) {
+      const initializeAutocomplete = async () => {
+        try {
+          // Load Google Maps API
+          const { Loader } = await import('@googlemaps/js-api-loader');
+          const loader = new Loader({
+            apiKey: process.env.REACT_APP_GOOGLE_MAPS_API_KEY || '',
+            version: 'weekly',
+            libraries: ['places']
+          });
+
+          await loader.load();
+
+          if (locationInputRef.current) {
+            autocompleteRef.current = new google.maps.places.Autocomplete(
+              locationInputRef.current,
+              {
+                types: ['establishment', 'geocode'],
+                fields: ['formatted_address', 'name', 'place_id', 'url']
+              }
+            );
+
+            autocompleteRef.current.addListener('place_changed', () => {
+              const place = autocompleteRef.current?.getPlace();
+              if (place?.formatted_address) {
+                setFormData(prev => ({
+                  ...prev,
+                  location_name: place.formatted_address,
+                  location_map_url: place.url || ''
+                }));
+              }
+            });
+          }
+        } catch (error) {
+          console.warn('Google Places API not available:', error);
+          // Fallback: just use regular input without autocomplete
+        }
+      };
+
+      initializeAutocomplete();
+    }
+
+    return () => {
+      if (autocompleteRef.current) {
+        google.maps.event.clearInstanceListeners(autocompleteRef.current);
+        autocompleteRef.current = null;
+      }
+    };
+  }, [isOpen]);
 
   // Save to localStorage whenever form data changes (but not when editing existing events)
   useEffect(() => {
@@ -140,10 +197,10 @@ export const EventEditor: React.FC<EventEditorProps> = ({
         ...formData,
         start_time: new Date(formData.start_time).toISOString(),
         end_time: new Date(formData.end_time).toISOString(),
-        event_type: formData.event_types[0] || 'event', // For backward compatibility
+        event_type: formData.event_types[0] || 'event',
       } as Omit<CalendarEvent, 'id' | 'created_at'>);
       
-      clearSavedData(); // Clear saved data on successful save
+      clearSavedData();
       onClose();
     } catch (error) {
       console.error('Error saving event:', error);
@@ -171,7 +228,6 @@ export const EventEditor: React.FC<EventEditorProps> = ({
   };
 
   const handleClose = () => {
-    // Don't clear data when closing - let it persist
     onClose();
   };
 
@@ -214,38 +270,53 @@ export const EventEditor: React.FC<EventEditorProps> = ({
 
           <div>
             <Label>Event Types</Label>
-            <div className="space-y-2">
-              <div className="grid grid-cols-2 gap-2">
-                {EVENT_TYPES.map((type) => (
-                  <div key={type.value} className="flex items-center space-x-2">
-                    <Checkbox
-                      id={type.value}
-                      checked={formData.event_types.includes(type.value)}
-                      onCheckedChange={() => handleEventTypeToggle(type.value)}
-                    />
-                    <label
-                      htmlFor={type.value}
-                      className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
-                    >
-                      {type.label}
-                    </label>
-                  </div>
-                ))}
-              </div>
-              {formData.event_types.length > 0 && (
-                <div className="flex flex-wrap gap-1 mt-2">
-                  {formData.event_types.map((type) => (
-                    <Badge
-                      key={type}
-                      variant="outline"
-                      className={`text-xs ${getEventTypeColor(type)}`}
-                    >
-                      {EVENT_TYPES.find(t => t.value === type)?.label || type}
-                    </Badge>
+            <Popover open={isEventTypesOpen} onOpenChange={setIsEventTypesOpen}>
+              <PopoverTrigger asChild>
+                <Button
+                  variant="outline"
+                  role="combobox"
+                  aria-expanded={isEventTypesOpen}
+                  className="w-full justify-between"
+                >
+                  {formData.event_types.length > 0
+                    ? `${formData.event_types.length} type${formData.event_types.length > 1 ? 's' : ''} selected`
+                    : "Select event types..."}
+                  <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-full p-0" align="start">
+                <div className="max-h-60 overflow-y-auto p-2">
+                  {EVENT_TYPES.map((type) => (
+                    <div key={type.value} className="flex items-center space-x-2 p-2 hover:bg-muted rounded-sm">
+                      <Checkbox
+                        id={type.value}
+                        checked={formData.event_types.includes(type.value)}
+                        onCheckedChange={() => handleEventTypeToggle(type.value)}
+                      />
+                      <label
+                        htmlFor={type.value}
+                        className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer flex-1"
+                      >
+                        {type.label}
+                      </label>
+                    </div>
                   ))}
                 </div>
-              )}
-            </div>
+              </PopoverContent>
+            </Popover>
+            {formData.event_types.length > 0 && (
+              <div className="flex flex-wrap gap-1 mt-2">
+                {formData.event_types.map((type) => (
+                  <Badge
+                    key={type}
+                    variant="outline"
+                    className={`text-xs ${getEventTypeColor(type)}`}
+                  >
+                    {EVENT_TYPES.find(t => t.value === type)?.label || type}
+                  </Badge>
+                ))}
+              </div>
+            )}
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -294,11 +365,20 @@ export const EventEditor: React.FC<EventEditorProps> = ({
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <Label htmlFor="location_name">Location</Label>
-              <Input
-                id="location_name"
-                value={formData.location_name}
-                onChange={(e) => handleInputChange('location_name', e.target.value)}
-              />
+              <div className="relative">
+                <MapPin className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
+                <Input
+                  ref={locationInputRef}
+                  id="location_name"
+                  value={formData.location_name}
+                  onChange={(e) => handleInputChange('location_name', e.target.value)}
+                  placeholder="Start typing an address..."
+                  className="pl-10"
+                />
+              </div>
+              <p className="text-xs text-muted-foreground mt-1">
+                Start typing to search for places with Google Maps
+              </p>
             </div>
             <div>
               <Label htmlFor="location_map_url">Map URL</Label>
@@ -306,7 +386,8 @@ export const EventEditor: React.FC<EventEditorProps> = ({
                 id="location_map_url"
                 value={formData.location_map_url}
                 onChange={(e) => handleInputChange('location_map_url', e.target.value)}
-                placeholder="https://maps.google.com/..."
+                placeholder="Auto-filled from location search"
+                readOnly
               />
             </div>
           </div>
