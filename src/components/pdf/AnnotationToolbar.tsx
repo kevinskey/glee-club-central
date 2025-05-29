@@ -12,7 +12,8 @@ import {
   Eye,
   EyeOff,
   Trash2,
-  ChevronDown
+  ChevronDown,
+  MousePointer
 } from 'lucide-react';
 import {
   Select,
@@ -104,6 +105,18 @@ export const AnnotationToolbar: React.FC<AnnotationToolbarProps> = ({
     <div className={cn("flex items-center gap-2 p-2 bg-background border rounded-lg shadow-sm overflow-x-auto", className)}>
       {/* Drawing Tools */}
       <div className="flex items-center gap-1 border-r pr-2 flex-shrink-0">
+        <Button
+          variant={currentTool === 'none' ? 'default' : 'outline'}
+          size="sm"
+          onClick={() => handleToolSelect('none')}
+          title="Select (Exit annotation mode)"
+          className={cn(
+            "transition-all",
+            currentTool === 'none' && "bg-primary text-primary-foreground shadow-md"
+          )}
+        >
+          <MousePointer className="h-4 w-4" />
+        </Button>
         <Button
           variant={currentTool === 'pen' ? 'default' : 'outline'}
           size="sm"
