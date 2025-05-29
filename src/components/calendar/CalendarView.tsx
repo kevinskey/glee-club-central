@@ -285,8 +285,7 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
           ) : (
             <FullCalendar
               plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
-              initialView="dayGridMonth"
-              view={currentView}
+              initialView={currentView}
               events={calendarEvents}
               eventClick={handleEventClick}
               dateClick={handleDateClick}
