@@ -276,11 +276,6 @@ export const EventsListView: React.FC<EventsListViewProps> = ({
                         Private Event
                       </Badge>
                     )}
-                    {isVirtual && (
-                      <Badge variant="outline" className="text-xs text-muted-foreground">
-                        {event.id.startsWith('holiday-') ? 'Holiday' : 'Academic Date'}
-                      </Badge>
-                    )}
                   </div>
                 </div>
               </CardContent>
