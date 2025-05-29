@@ -24,7 +24,9 @@ import {
   Save,
   Trash2,
   Undo,
-  Redo
+  Redo,
+  Home,
+  Music
 } from 'lucide-react';
 import {
   DropdownMenu,
@@ -307,64 +309,85 @@ const AdvancedPDFViewer: React.FC<AdvancedPDFViewerProps> = ({
     toast({ title: "Annotations cleared" });
   };
 
+  // Enhanced navigation for the back button
+  const handleBackNavigation = () => {
+    if (onBack) {
+      onBack();
+    } else {
+      // Fallback navigation
+      window.history.back();
+    }
+  };
+
   return (
     <div className={cn(
-      "flex flex-col h-full bg-background",
+      "flex flex-col h-screen bg-background",
       isFullscreen ? "fixed inset-0 z-50" : ""
     )}>
-      {/* Compact Header - forScore Style */}
+      {/* Enhanced Header with Navigation */}
       {(showToolbar || !isFullscreen) && (
-        <div className="flex items-center justify-between p-2 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 h-12">
-          {/* Left Section */}
-          <div className="flex items-center gap-2">
-            {onBack && (
-              <Button variant="outline" size="sm" onClick={onBack}>
-                <ArrowLeft className="h-4 w-4" />
-              </Button>
-            )}
-            
-            {/* Navigation Controls */}
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={goToPrevPage}
-              disabled={pageNumber <= 1}
-            >
-              <ChevronLeft className="h-4 w-4" />
+        <div className="flex items-center justify-between p-2 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 h-14">
+          {/* Left Section - Navigation */}
+          <div className="flex items-center gap-3">
+            <Button variant="outline" size="sm" onClick={handleBackNavigation}>
+              <ArrowLeft className="h-4 w-4 mr-1" />
+              Back
             </Button>
             
-            <div className="flex items-center gap-1">
-              <Input
-                type="number"
-                value={pageNumber}
-                onChange={(e) => {
-                  const page = parseInt(e.target.value);
-                  if (page >= 1 && page <= numPages) {
-                    setPageNumber(page);
-                  }
-                }}
-                className="w-12 h-8 text-center text-xs"
-                min={1}
-                max={numPages}
-              />
-              <span className="text-xs text-muted-foreground">
-                /{numPages}
-              </span>
+            {/* Breadcrumb */}
+            <div className="hidden sm:flex items-center gap-2 text-sm text-muted-foreground">
+              <Home className="h-3 w-3" />
+              <span>/</span>
+              <Music className="h-3 w-3" />
+              <span>Sheet Music</span>
+              <span>/</span>
+              <span className="text-foreground font-medium">{title}</span>
             </div>
             
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={goToNextPage}
-              disabled={pageNumber >= numPages}
-            >
-              <ChevronRight className="h-4 w-4" />
-            </Button>
+            {/* Navigation Controls */}
+            <div className="flex items-center gap-1 ml-4">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={goToPrevPage}
+                disabled={pageNumber <= 1}
+              >
+                <ChevronLeft className="h-4 w-4" />
+              </Button>
+              
+              <div className="flex items-center gap-1">
+                <Input
+                  type="number"
+                  value={pageNumber}
+                  onChange={(e) => {
+                    const page = parseInt(e.target.value);
+                    if (page >= 1 && page <= numPages) {
+                      setPageNumber(page);
+                    }
+                  }}
+                  className="w-12 h-8 text-center text-xs"
+                  min={1}
+                  max={numPages}
+                />
+                <span className="text-xs text-muted-foreground">
+                  /{numPages}
+                </span>
+              </div>
+              
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={goToNextPage}
+                disabled={pageNumber >= numPages}
+              >
+                <ChevronRight className="h-4 w-4" />
+              </Button>
+            </div>
           </div>
 
-          {/* Center Section - Title */}
-          <div className="flex-1 text-center">
-            <h3 className="font-medium text-sm truncate max-w-[200px] mx-auto">{title}</h3>
+          {/* Center Section - Title (hidden on small screens to save space) */}
+          <div className="hidden md:flex flex-1 justify-center">
+            <h3 className="font-medium text-sm truncate max-w-[300px]">{title}</h3>
           </div>
           
           {/* Right Section - Tool Dropdowns */}

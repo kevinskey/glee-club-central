@@ -1,10 +1,9 @@
 
 import React, { useState, useEffect } from 'react';
-import { useParams, useLocation } from 'react-router-dom';
+import { useParams, useLocation, useNavigate } from 'react-router-dom';
 import { PageHeader } from '@/components/ui/page-header';
 import { FileText } from 'lucide-react';
 import AdvancedPDFViewer from '@/components/pdf/AdvancedPDFViewer';
-import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { useMediaLibrary } from '@/hooks/useMediaLibrary';
 import { getMediaType } from '@/utils/mediaUtils';
@@ -63,28 +62,22 @@ const ViewSheetMusicPage = () => {
 
   if (loading) {
     return (
-      <div className="space-y-6 h-full flex flex-col">
-        <PageHeader
-          title="Loading..."
-          description="Sheet Music Viewer"
-          icon={<FileText className="h-6 w-6" />}
-        />
-        <div className="flex-1 flex items-center justify-center">
-          <div className="h-8 w-8 rounded-full border-4 border-primary border-t-transparent animate-spin"></div>
+      <div className="h-screen flex items-center justify-center">
+        <div className="text-center">
+          <div className="h-8 w-8 rounded-full border-4 border-primary border-t-transparent animate-spin mx-auto mb-2"></div>
+          <p className="text-muted-foreground">Loading PDF...</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="h-full">
-      <AdvancedPDFViewer 
-        url={pdfData.url || pdfData.file_url} 
-        title={pdfData.title}
-        sheetMusicId={pdfData.sheetMusicId || pdfData.id}
-        onBack={handleBack}
-      />
-    </div>
+    <AdvancedPDFViewer 
+      url={pdfData.url || pdfData.file_url} 
+      title={pdfData.title}
+      sheetMusicId={pdfData.sheetMusicId || pdfData.id}
+      onBack={handleBack}
+    />
   );
 };
 

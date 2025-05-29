@@ -12,7 +12,6 @@ import { PDFThumbnail } from "@/components/pdf/PDFThumbnail";
 import { useMediaLibrary } from "@/hooks/useMediaLibrary";
 import { getMediaType } from "@/utils/mediaUtils";
 import { Spinner } from "@/components/ui/spinner";
-import AdvancedPDFViewer from "@/components/pdf/AdvancedPDFViewer";
 
 interface SheetMusic {
   id: string;
@@ -26,7 +25,6 @@ interface SheetMusic {
 
 export default function SheetMusicPage() {
   const [searchQuery, setSearchQuery] = useState("");
-  const [selectedPDF, setSelectedPDF] = useState<any>(null);
   const [musicFiles, setMusicFiles] = useState<SheetMusic[]>([]);
   const [filteredFiles, setFilteredFiles] = useState<SheetMusic[]>([]);
   const [loading, setLoading] = useState(true);
@@ -112,29 +110,15 @@ export default function SheetMusicPage() {
   }, [searchQuery, musicFiles]);
 
   const handleViewPDF = (item: any) => {
-    setSelectedPDF(item);
+    // Navigate to dedicated PDF viewer route
+    navigate(`/dashboard/sheet-music/view/${item.id}`, {
+      state: { 
+        file: item,
+        title: item.title,
+        url: item.file_url 
+      }
+    });
   };
-
-  const handleBackToList = () => {
-    setSelectedPDF(null);
-  };
-
-  // If a PDF is selected, show the advanced viewer
-  if (selectedPDF) {
-    return (
-      <div className="h-screen flex flex-col">
-        <MusicAppHeader currentSection="sheet-music" />
-        <div className="flex-1">
-          <AdvancedPDFViewer 
-            url={selectedPDF.file_url} 
-            title={`${selectedPDF.title} - ${selectedPDF.composer}`}
-            sheetMusicId={selectedPDF.id}
-            onBack={handleBackToList}
-          />
-        </div>
-      </div>
-    );
-  }
 
   if (loading || mediaLoading) {
     return (
@@ -197,7 +181,7 @@ export default function SheetMusicPage() {
             {filteredFiles.map((item) => (
               <Card 
                 key={item.id} 
-                className="overflow-hidden transition-all hover:shadow-md cursor-pointer group"
+                className="overflow-hidden transition-all hover:shadow-lg cursor-pointer group hover:scale-[1.02]"
                 onClick={() => handleViewPDF(item)}
               >
                 <div className="relative">
@@ -212,12 +196,8 @@ export default function SheetMusicPage() {
                     </div>
                   </div>
                   
-                  {/* Overlay with actions */}
-                  <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-40 transition-all flex items-center justify-center opacity-0 group-hover:opacity-100">
-                    <Button variant="secondary" size="sm">
-                      View PDF
-                    </Button>
-                  </div>
+                  {/* Subtle hover overlay - no button */}
+                  <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-10 transition-all" />
                 </div>
                 
                 <CardContent className="p-4">

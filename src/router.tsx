@@ -13,6 +13,7 @@ import RoleDashboard from './components/auth/RoleDashboard';
 import AboutPage from './pages/AboutPage';
 import ContactPage from './pages/ContactPage';
 import DashboardLayout from './layouts/DashboardLayout';
+import PDFViewerLayout from './layouts/PDFViewerLayout';
 import AdminLayout from './layouts/AdminLayout';
 import MemberDashboardPage from './pages/dashboard/MemberDashboardPage';
 import AdminDashboardPage from './pages/admin/AdminDashboardPage';
@@ -154,6 +155,17 @@ export const router = createBrowserRouter([
           {
             path: 'members',
             element: <AdminRoute><MembersPage /></AdminRoute>,
+          },
+        ],
+      },
+      // Dedicated PDF Viewer routes with no sidebar (PDFViewerLayout)
+      {
+        path: '/dashboard/sheet-music/view',
+        element: <RequireAuth><PDFViewerLayout /></RequireAuth>,
+        children: [
+          {
+            path: ':id',
+            element: <ViewSheetMusicPage />,
           },
         ],
       },
