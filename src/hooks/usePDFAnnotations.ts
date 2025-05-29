@@ -1,4 +1,3 @@
-
 import { useState, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
@@ -50,7 +49,16 @@ export const usePDFAnnotations = (sheetMusicId: string) => {
         .eq('sheet_music_id', sheetMusicId)
         .order('page_number');
 
-      if (error) throw error;
+      if (error) {
+        console.error('Error loading annotations:', error);
+        toast({
+          title: "Error",
+          description: "Failed to load annotations",
+          variant: "destructive"
+        });
+        return;
+      }
+      
       setAnnotations(data || []);
     } catch (error) {
       console.error('Error loading annotations:', error);
@@ -80,9 +88,40 @@ export const usePDFAnnotations = (sheetMusicId: string) => {
     pageNumber: number,
     annotationData: AnnotationData[]
   ) => {
-    if (!user || !sheetMusicId) return;
+    if (!user || !sheetMusicId) {
+      console.error('Missing user or sheet music ID for saving annotations');
+      return;
+    }
 
     try {
+      console.log('Saving annotations for sheet music ID:', sheetMusicId);
+      
+      // First check if the sheet music exists in either sheet_music or media_library table
+      const { data: sheetMusicExists } = await supabase
+        .from('sheet_music')
+        .select('id')
+        .eq('id', sheetMusicId)
+        .single();
+
+      if (!sheetMusicExists) {
+        // Try checking media_library table as fallback
+        const { data: mediaExists } = await supabase
+          .from('media_library')
+          .select('id')
+          .eq('id', sheetMusicId)
+          .single();
+
+        if (!mediaExists) {
+          console.error('Sheet music ID not found in database:', sheetMusicId);
+          toast({
+            title: "Error",
+            description: "Invalid sheet music reference. Cannot save annotations.",
+            variant: "destructive"
+          });
+          return;
+        }
+      }
+
       const existingAnnotation = annotations.find(a => a.page_number === pageNumber);
 
       if (existingAnnotation) {
@@ -95,7 +134,10 @@ export const usePDFAnnotations = (sheetMusicId: string) => {
           })
           .eq('id', existingAnnotation.id);
 
-        if (error) throw error;
+        if (error) {
+          console.error('Error updating annotation:', error);
+          throw error;
+        }
 
         setAnnotations(prev => prev.map(a => 
           a.id === existingAnnotation.id 
@@ -103,29 +145,41 @@ export const usePDFAnnotations = (sheetMusicId: string) => {
             : a
         ));
       } else {
-        // Create new annotation
+        // Create new annotation - use media_library ID if sheet_music doesn't exist
+        const insertData = {
+          user_id: user.id,
+          sheet_music_id: sheetMusicId,
+          page_number: pageNumber,
+          annotation_type: 'mixed',
+          annotations: annotationData,
+          is_visible: true
+        };
+
+        console.log('Inserting new annotation:', insertData);
+
         const { data, error } = await supabase
           .from('pdf_annotations')
-          .insert({
-            user_id: user.id,
-            sheet_music_id: sheetMusicId,
-            page_number: pageNumber,
-            annotation_type: 'mixed',
-            annotations: annotationData,
-            is_visible: true
-          })
+          .insert(insertData)
           .select()
           .single();
 
-        if (error) throw error;
+        if (error) {
+          console.error('Error creating annotation:', error);
+          throw error;
+        }
 
         setAnnotations(prev => [...prev, data]);
       }
+
+      toast({
+        title: "Success",
+        description: "Annotations saved successfully",
+      });
     } catch (error) {
       console.error('Error saving annotations:', error);
       toast({
         title: "Error",
-        description: "Failed to save annotations",
+        description: "Failed to save annotations. Please try again.",
         variant: "destructive"
       });
     }
@@ -202,6 +256,11 @@ export const usePDFAnnotations = (sheetMusicId: string) => {
       setCurrentPageAnnotations([]);
       setUndoStack([]);
       setRedoStack([]);
+      
+      toast({
+        title: "Success",
+        description: "Annotations cleared successfully",
+      });
     } catch (error) {
       console.error('Error clearing annotations:', error);
       toast({
