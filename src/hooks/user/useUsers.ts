@@ -39,20 +39,28 @@ export const useUsers = (): UseUsersResponse => {
         return null;
       }
 
-      // Get auth users to get email addresses
-      const { data: { users: authUsers }, error: authError } = await supabase.auth.admin.listUsers();
-      
-      if (authError) {
-        console.error('Error fetching auth users:', authError);
-        // Continue without auth data - we'll use profile email if available
+      // Get auth users to get email addresses - with proper typing
+      let authUsers: any[] = [];
+      try {
+        const { data: authData, error: authError } = await supabase.auth.admin.listUsers();
+        
+        if (authError) {
+          console.error('Error fetching auth users:', authError);
+          // Continue without auth data - we'll use profile email if available
+        } else {
+          authUsers = authData?.users || [];
+        }
+      } catch (err) {
+        console.error('Error accessing auth users:', err);
+        // Continue without auth data
       }
 
       console.log('Successfully fetched profiles:', profiles?.length || 0);
       
       // Transform the data to match User interface
       const users: User[] = (profiles || []).map(profile => {
-        // Find corresponding auth user for email
-        const authUser = authUsers?.find(u => u.id === profile.id);
+        // Find corresponding auth user for email - with proper type checking
+        const authUser = authUsers.find((u: any) => u?.id === profile.id);
         
         return {
           id: profile.id,
@@ -123,8 +131,17 @@ export const useUsers = (): UseUsersResponse => {
 
       if (!data) return null;
 
-      // Get auth user for email
-      const { data: { user: authUser }, error: authError } = await supabase.auth.admin.getUserById(userId);
+      // Get auth user for email - with proper error handling
+      let authUser: any = null;
+      try {
+        const { data: authData, error: authError } = await supabase.auth.admin.getUserById(userId);
+        if (!authError) {
+          authUser = authData?.user;
+        }
+      } catch (err) {
+        console.error('Error fetching auth user:', err);
+        // Continue without auth data
+      }
       
       return {
         id: data.id,
