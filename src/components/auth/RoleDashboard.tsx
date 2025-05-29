@@ -13,7 +13,7 @@ export default function RoleDashboard() {
       // Determine redirect based on user role/type
       if (profile.role === 'admin' || profile.is_super_admin) {
         navigate('/admin', { replace: true });
-      } else if (profile.user_type === 'fan') {
+      } else if (profile.user_type === 'fan' as any) {
         navigate('/fan-dashboard', { replace: true });
       } else {
         // Default to member dashboard for regular members

@@ -1,4 +1,3 @@
-
 @tailwind utilities;
 
 @layer utilities {
@@ -77,6 +76,30 @@
     }
     50% {
       box-shadow: 0 0 30px rgba(11, 60, 132, 0.6), 0 0 60px rgba(11, 60, 132, 0.3);
+    }
+  }
+  
+  /* Light blue glow animation that responds to dark/light mode */
+  @keyframes light-blue-glow {
+    0%, 100% {
+      box-shadow: 0 0 20px rgba(59, 130, 246, 0.4), 0 0 40px rgba(59, 130, 246, 0.2);
+    }
+    50% {
+      box-shadow: 0 0 30px rgba(59, 130, 246, 0.6), 0 0 60px rgba(59, 130, 246, 0.3);
+    }
+  }
+
+  /* Dark mode version of light blue glow */
+  .dark .light-blue-glow {
+    animation: light-blue-glow-dark 4s ease-in-out infinite;
+  }
+
+  @keyframes light-blue-glow-dark {
+    0%, 100% {
+      box-shadow: 0 0 20px rgba(96, 165, 250, 0.4), 0 0 40px rgba(96, 165, 250, 0.2);
+    }
+    50% {
+      box-shadow: 0 0 30px rgba(96, 165, 250, 0.6), 0 0 60px rgba(96, 165, 250, 0.3);
     }
   }
   
