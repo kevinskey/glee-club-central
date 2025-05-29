@@ -15,7 +15,11 @@ import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 import { UploadMediaModal } from "@/components/UploadMediaModal";
 
-const MediaLibraryPage: React.FC = () => {
+interface MediaLibraryPageProps {
+  isAdminView?: boolean;
+}
+
+const MediaLibraryPage: React.FC<MediaLibraryPageProps> = ({ isAdminView = false }) => {
   const navigate = useNavigate();
   const {
     isLoading,
@@ -57,18 +61,29 @@ const MediaLibraryPage: React.FC = () => {
     setIsUploadModalOpen(false);
   };
 
+  // Sort files by title for better organization, especially for PDFs
+  const sortedFilteredFiles = [...filteredMediaFiles].sort((a, b) => {
+    // First sort by title alphabetically
+    return a.title.localeCompare(b.title, undefined, { 
+      numeric: true, 
+      sensitivity: 'base' 
+    });
+  });
+
   return (
     <div className="container mx-auto px-4 py-6">
       <PageHeader
         title="Media Library"
         icon={<Library className="h-6 w-6" />}
         actions={
-          <Button 
-            className="bg-glee-purple hover:bg-glee-purple/90"
-            onClick={() => setIsUploadModalOpen(true)}
-          >
-            <Upload className="mr-2 h-4 w-4" /> Upload Media
-          </Button>
+          isAdminView && (
+            <Button 
+              className="bg-glee-purple hover:bg-glee-purple/90"
+              onClick={() => setIsUploadModalOpen(true)}
+            >
+              <Upload className="mr-2 h-4 w-4" /> Upload Media
+            </Button>
+          )
         }
       />
       
@@ -118,13 +133,13 @@ const MediaLibraryPage: React.FC = () => {
         </TabsList>
         
         <TabsContent value="all" className="w-full">
-          <MediaGrid files={filteredMediaFiles} onViewPDF={handleViewPDF} />
+          <MediaGrid files={sortedFilteredFiles} onViewPDF={handleViewPDF} />
         </TabsContent>
         
         {["pdf", "audio", "image", "video"].map((type) => (
           <TabsContent key={type} value={type} className="w-full">
             <MediaGrid 
-              files={filteredMediaFiles}
+              files={sortedFilteredFiles}
               onViewPDF={handleViewPDF}
             />
           </TabsContent>
@@ -132,11 +147,13 @@ const MediaLibraryPage: React.FC = () => {
       </Tabs>
 
       {/* Upload Media Modal */}
-      <UploadMediaModal
-        open={isUploadModalOpen}
-        onOpenChange={setIsUploadModalOpen}
-        onUploadComplete={handleUploadComplete}
-      />
+      {isAdminView && (
+        <UploadMediaModal
+          open={isUploadModalOpen}
+          onOpenChange={setIsUploadModalOpen}
+          onUploadComplete={handleUploadComplete}
+        />
+      )}
     </div>
   );
 };
