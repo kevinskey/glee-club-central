@@ -9,15 +9,24 @@ import { EVENT_TYPES, getEventTypeLabel, getEventTypeColor } from '@/utils/event
 
 interface EventTypeFilterProps {
   selectedTypes: string[];
-  onTypeToggle: (type: string) => void;
-  onClearFilters: () => void;
+  onTypesChange: (types: string[]) => void;
 }
 
 export const EventTypeFilter: React.FC<EventTypeFilterProps> = ({
   selectedTypes,
-  onTypeToggle,
-  onClearFilters
+  onTypesChange
 }) => {
+  const handleTypeToggle = (type: string) => {
+    const newSelectedTypes = selectedTypes.includes(type)
+      ? selectedTypes.filter(t => t !== type)
+      : [...selectedTypes, type];
+    onTypesChange(newSelectedTypes);
+  };
+
+  const handleClearFilters = () => {
+    onTypesChange([]);
+  };
+
   return (
     <div className="flex items-center gap-2">
       <Popover>
@@ -40,7 +49,7 @@ export const EventTypeFilter: React.FC<EventTypeFilterProps> = ({
                 <Button
                   variant="ghost"
                   size="sm"
-                  onClick={onClearFilters}
+                  onClick={handleClearFilters}
                   className="h-auto p-1"
                 >
                   <X className="h-3 w-3" />
@@ -53,7 +62,7 @@ export const EventTypeFilter: React.FC<EventTypeFilterProps> = ({
                   <Checkbox
                     id={type.value}
                     checked={selectedTypes.includes(type.value)}
-                    onCheckedChange={() => onTypeToggle(type.value)}
+                    onCheckedChange={() => handleTypeToggle(type.value)}
                   />
                   <label
                     htmlFor={type.value}
@@ -76,7 +85,7 @@ export const EventTypeFilter: React.FC<EventTypeFilterProps> = ({
               key={type}
               variant="outline"
               className={`text-xs ${getEventTypeColor(type)} cursor-pointer`}
-              onClick={() => onTypeToggle(type)}
+              onClick={() => handleTypeToggle(type)}
             >
               {getEventTypeLabel(type)}
               <X className="h-2 w-2 ml-1" />
