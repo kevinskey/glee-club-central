@@ -35,6 +35,7 @@ export const EventEditor: React.FC<EventEditorProps> = ({
     title: '',
     start_time: '',
     end_time: '',
+    call_time: '',
     location_name: '',
     location_map_url: '',
     feature_image_url: '',
@@ -65,7 +66,7 @@ export const EventEditor: React.FC<EventEditorProps> = ({
           // Load Google Maps API
           const { Loader } = await import('@googlemaps/js-api-loader');
           const loader = new Loader({
-            apiKey: process.env.REACT_APP_GOOGLE_MAPS_API_KEY || '',
+            apiKey: import.meta.env.VITE_GOOGLE_MAPS_API_KEY || '',
             version: 'weekly',
             libraries: ['places']
           });
@@ -130,6 +131,7 @@ export const EventEditor: React.FC<EventEditorProps> = ({
           title: event.title || '',
           start_time: event.start_time ? new Date(event.start_time).toISOString().slice(0, 16) : '',
           end_time: event.end_time ? new Date(event.end_time).toISOString().slice(0, 16) : '',
+          call_time: event.call_time ? new Date(event.call_time).toISOString().slice(0, 16) : '',
           location_name: event.location_name || '',
           location_map_url: event.location_map_url || '',
           feature_image_url: event.feature_image_url || '',
@@ -193,12 +195,15 @@ export const EventEditor: React.FC<EventEditorProps> = ({
     setLoading(true);
 
     try {
-      await onSave({
+      const eventData = {
         ...formData,
         start_time: new Date(formData.start_time).toISOString(),
         end_time: new Date(formData.end_time).toISOString(),
+        call_time: formData.call_time ? new Date(formData.call_time).toISOString() : undefined,
         event_type: formData.event_types[0] || 'event',
-      } as Omit<CalendarEvent, 'id' | 'created_at'>);
+      };
+      
+      await onSave(eventData as Omit<CalendarEvent, 'id' | 'created_at'>);
       
       clearSavedData();
       onClose();
@@ -290,7 +295,6 @@ export const EventEditor: React.FC<EventEditorProps> = ({
               {isEventTypesOpen && (
                 <div className="absolute top-full left-0 right-0 z-50 mt-1 bg-white border rounded-lg shadow-lg p-4">
                   <div className="hidden md:block">
-                    {/* Desktop: Horizontal grid layout */}
                     <div className="grid grid-cols-3 gap-3 max-h-60 overflow-y-auto">
                       {EVENT_TYPES.map((type) => (
                         <div key={type.value} className="flex items-center space-x-2 p-2 hover:bg-muted rounded-sm">
@@ -322,7 +326,6 @@ export const EventEditor: React.FC<EventEditorProps> = ({
                     </div>
                   </div>
                   <div className="md:hidden">
-                    {/* Mobile: Vertical list layout */}
                     <div className="space-y-2 max-h-60 overflow-y-auto">
                       {EVENT_TYPES.map((type) => (
                         <div key={type.value} className="flex items-center space-x-2 p-2 hover:bg-muted rounded-sm">
@@ -372,7 +375,7 @@ export const EventEditor: React.FC<EventEditorProps> = ({
             )}
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div>
               <Label htmlFor="start_time">Start Date & Time</Label>
               <Input
@@ -382,6 +385,22 @@ export const EventEditor: React.FC<EventEditorProps> = ({
                 onChange={(e) => handleInputChange('start_time', e.target.value)}
                 required
               />
+            </div>
+            <div>
+              <Label htmlFor="call_time">Call Time</Label>
+              <div className="relative">
+                <Clock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
+                <Input
+                  id="call_time"
+                  type="datetime-local"
+                  value={formData.call_time}
+                  onChange={(e) => handleInputChange('call_time', e.target.value)}
+                  className="pl-10"
+                />
+              </div>
+              <p className="text-xs text-muted-foreground mt-1">
+                When members should arrive
+              </p>
             </div>
             <div>
               <Label htmlFor="end_time">End Date & Time</Label>

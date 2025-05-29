@@ -4,6 +4,7 @@ export interface CalendarEvent {
   title: string;
   start_time: string;
   end_time: string;
+  call_time?: string; // Time when members should arrive
   location_name?: string;
   location_map_url?: string;
   feature_image_url?: string;
