@@ -242,7 +242,7 @@ export const EventEditor: React.FC<EventEditorProps> = ({
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && handleClose()}>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>
             {event ? 'Edit Event' : 'Create New Event'}
@@ -484,87 +484,94 @@ export const EventEditor: React.FC<EventEditorProps> = ({
             </div>
           </div>
 
-          <div>
-            <Label>Event Image</Label>
-            <div className="space-y-2">
-              {formData.feature_image_url && (
-                <div className="border rounded-lg p-2">
-                  <img 
-                    src={formData.feature_image_url} 
-                    alt="Event preview"
-                    className="w-full h-32 object-cover rounded"
-                  />
-                </div>
-              )}
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => setIsMediaPickerOpen(true)}
-                className="w-full"
-              >
-                <ImageIcon className="h-4 w-4 mr-2" />
-                {formData.feature_image_url ? 'Change Image' : 'Select Image'}
-              </Button>
-              {formData.feature_image_url && (
+          {/* Two Column Layout: Event Image (50%) and Event Settings */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {/* Left Column - Event Image (50%) */}
+            <div>
+              <Label>Event Image</Label>
+              <div className="space-y-2">
+                {formData.feature_image_url && (
+                  <div className="border rounded-lg p-2">
+                    <img 
+                      src={formData.feature_image_url} 
+                      alt="Event preview"
+                      className="w-full h-64 object-cover rounded"
+                    />
+                  </div>
+                )}
                 <Button
                   type="button"
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => handleInputChange('feature_image_url', '')}
-                  className="w-full text-red-600 hover:text-red-700"
+                  variant="outline"
+                  onClick={() => setIsMediaPickerOpen(true)}
+                  className="w-full"
                 >
-                  Remove Image
+                  <ImageIcon className="h-4 w-4 mr-2" />
+                  {formData.feature_image_url ? 'Change Image' : 'Select Image'}
                 </Button>
-              )}
-            </div>
-          </div>
-
-          <div className="space-y-4 p-4 border rounded-lg">
-            <h3 className="font-semibold">Event Settings</h3>
-            
-            <div className="flex items-center justify-between">
-              <Label htmlFor="is_private">Private Event (Members Only)</Label>
-              <Switch
-                id="is_private"
-                checked={formData.is_private}
-                onCheckedChange={(checked) => handleInputChange('is_private', checked)}
-              />
+                {formData.feature_image_url && (
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => handleInputChange('feature_image_url', '')}
+                    className="w-full text-red-600 hover:text-red-700"
+                  >
+                    Remove Image
+                  </Button>
+                )}
+              </div>
             </div>
 
-            <div className="flex items-center justify-between">
-              <Label htmlFor="allow_rsvp">Allow RSVP</Label>
-              <Switch
-                id="allow_rsvp"
-                checked={formData.allow_rsvp}
-                onCheckedChange={(checked) => handleInputChange('allow_rsvp', checked)}
-              />
-            </div>
+            {/* Right Column - Event Settings */}
+            <div>
+              <div className="space-y-4 p-4 border rounded-lg h-full">
+                <h3 className="font-semibold">Event Settings</h3>
+                
+                <div className="flex items-center justify-between">
+                  <Label htmlFor="is_private" className="text-sm">Private Event (Members Only)</Label>
+                  <Switch
+                    id="is_private"
+                    checked={formData.is_private}
+                    onCheckedChange={(checked) => handleInputChange('is_private', checked)}
+                  />
+                </div>
 
-            <div className="flex items-center justify-between">
-              <Label htmlFor="allow_reminders">Send Reminders</Label>
-              <Switch
-                id="allow_reminders"
-                checked={formData.allow_reminders}
-                onCheckedChange={(checked) => handleInputChange('allow_reminders', checked)}
-              />
-            </div>
+                <div className="flex items-center justify-between">
+                  <Label htmlFor="allow_rsvp" className="text-sm">Allow RSVP</Label>
+                  <Switch
+                    id="allow_rsvp"
+                    checked={formData.allow_rsvp}
+                    onCheckedChange={(checked) => handleInputChange('allow_rsvp', checked)}
+                  />
+                </div>
 
-            <div className="flex items-center justify-between">
-              <Label htmlFor="allow_ics_download">Allow Calendar Download</Label>
-              <Switch
-                id="allow_ics_download"
-                checked={formData.allow_ics_download}
-                onCheckedChange={(checked) => handleInputChange('allow_ics_download', checked)}
-              />
-            </div>
+                <div className="flex items-center justify-between">
+                  <Label htmlFor="allow_reminders" className="text-sm">Send Reminders</Label>
+                  <Switch
+                    id="allow_reminders"
+                    checked={formData.allow_reminders}
+                    onCheckedChange={(checked) => handleInputChange('allow_reminders', checked)}
+                  />
+                </div>
 
-            <div className="flex items-center justify-between">
-              <Label htmlFor="allow_google_map_link">Show Map Link</Label>
-              <Switch
-                id="allow_google_map_link"
-                checked={formData.allow_google_map_link}
-                onCheckedChange={(checked) => handleInputChange('allow_google_map_link', checked)}
-              />
+                <div className="flex items-center justify-between">
+                  <Label htmlFor="allow_ics_download" className="text-sm">Allow Calendar Download</Label>
+                  <Switch
+                    id="allow_ics_download"
+                    checked={formData.allow_ics_download}
+                    onCheckedChange={(checked) => handleInputChange('allow_ics_download', checked)}
+                  />
+                </div>
+
+                <div className="flex items-center justify-between">
+                  <Label htmlFor="allow_google_map_link" className="text-sm">Show Map Link</Label>
+                  <Switch
+                    id="allow_google_map_link"
+                    checked={formData.allow_google_map_link}
+                    onCheckedChange={(checked) => handleInputChange('allow_google_map_link', checked)}
+                  />
+                </div>
+              </div>
             </div>
           </div>
 
