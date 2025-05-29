@@ -16,6 +16,17 @@ interface CalendarViewProps {
   showPrivateEvents?: boolean;
 }
 
+// Create unified event type for list view
+interface UnifiedEvent {
+  id: string;
+  title: string;
+  date: Date;
+  type: 'event' | 'holiday' | 'spelman';
+  event?: CalendarEvent;
+  holiday?: any;
+  spelmanDate?: any;
+}
+
 export function CalendarView({ events, onEventClick, showPrivateEvents = false }: CalendarViewProps) {
   const [currentDate, setCurrentDate] = useState(new Date());
   const [view, setView] = useState<'month' | 'week' | 'day' | 'list'>('month');
@@ -69,6 +80,99 @@ export function CalendarView({ events, onEventClick, showPrivateEvents = false }
         return true;
       })
     : [];
+
+  // Create unified upcoming events array for list view
+  const getAllUpcomingEvents = (): UnifiedEvent[] => {
+    const now = new Date();
+    const currentYear = now.getFullYear();
+    const unifiedEvents: UnifiedEvent[] = [];
+
+    // Add regular events
+    filteredEvents
+      .filter(event => {
+        const eventDate = new Date(event.start_time);
+        return eventDate >= now;
+      })
+      .forEach(event => {
+        unifiedEvents.push({
+          id: `event-${event.id}`,
+          title: event.title,
+          date: new Date(event.start_time),
+          type: 'event',
+          event
+        });
+      });
+
+    // Add federal holidays if enabled
+    if (showNationalHolidays) {
+      getNationalHolidays(currentYear)
+        .filter(holiday => holiday.date >= now)
+        .forEach(holiday => {
+          unifiedEvents.push({
+            id: `holiday-${holiday.id}`,
+            title: holiday.title,
+            date: holiday.date,
+            type: 'holiday',
+            holiday
+          });
+        });
+
+      // Also include next year's holidays
+      getNationalHolidays(currentYear + 1)
+        .filter(holiday => holiday.date >= now)
+        .forEach(holiday => {
+          unifiedEvents.push({
+            id: `holiday-${holiday.id}-${currentYear + 1}`,
+            title: holiday.title,
+            date: holiday.date,
+            type: 'holiday',
+            holiday
+          });
+        });
+    }
+
+    // Add Spelman academic dates if enabled
+    if (showSpelmanDates) {
+      getSpelmanAcademicDates(currentYear)
+        .filter(date => date.date >= now)
+        .forEach(spelmanDate => {
+          unifiedEvents.push({
+            id: `spelman-${spelmanDate.id}`,
+            title: spelmanDate.title,
+            date: spelmanDate.date,
+            type: 'spelman',
+            spelmanDate
+          });
+        });
+
+      // Also include next year's Spelman dates
+      getSpelmanAcademicDates(currentYear + 1)
+        .filter(date => date.date >= now)
+        .forEach(spelmanDate => {
+          unifiedEvents.push({
+            id: `spelman-${spelmanDate.id}-${currentYear + 1}`,
+            title: spelmanDate.title,
+            date: spelmanDate.date,
+            type: 'spelman',
+            spelmanDate
+          });
+        });
+    }
+
+    // Sort all events chronologically
+    return unifiedEvents.sort((a, b) => a.date.getTime() - b.date.getTime());
+  };
+
+  const allUpcomingEvents = getAllUpcomingEvents();
+
+  console.log('Unified upcoming events for list view:', {
+    totalUnified: allUpcomingEvents.length,
+    breakdown: {
+      events: allUpcomingEvents.filter(e => e.type === 'event').length,
+      holidays: allUpcomingEvents.filter(e => e.type === 'holiday').length,
+      spelman: allUpcomingEvents.filter(e => e.type === 'spelman').length
+    }
+  });
 
   const navigatePeriod = (direction: 'prev' | 'next') => {
     setCurrentDate(prev => {
@@ -376,83 +480,117 @@ export function CalendarView({ events, onEventClick, showPrivateEvents = false }
     );
   };
 
-  // Get upcoming events for list view
-  const upcomingEvents = filteredEvents
-    .filter(event => {
-      const eventDate = new Date(event.start_time);
-      const now = new Date();
-      const isUpcoming = eventDate >= now;
-      
-      // Debug individual event filtering
-      if (view === 'list') {
-        console.log('Event filtering:', {
-          title: event.title,
-          startTime: event.start_time,
-          eventDate: eventDate.toISOString(),
-          now: now.toISOString(),
-          isUpcoming,
-          isPrivate: event.is_private
-        });
-      }
-      
-      return isUpcoming;
-    })
-    .sort((a, b) => new Date(a.start_time).getTime() - new Date(b.start_time).getTime());
-
-  console.log('Upcoming events for list view:', upcomingEvents.length);
-
   const renderListView = () => (
     <div className="space-y-4">
-      <h3 className="text-lg font-semibold">All Upcoming Events ({upcomingEvents.length})</h3>
+      <h3 className="text-lg font-semibold">All Upcoming Events ({allUpcomingEvents.length})</h3>
       
       <div className="space-y-3">
-        {upcomingEvents.length === 0 ? (
+        {allUpcomingEvents.length === 0 ? (
           <Card>
             <CardContent className="p-6 text-center text-muted-foreground">
               <p>No upcoming events found.</p>
               <p className="text-xs mt-2">
-                Total events: {events.length} | Filtered events: {filteredEvents.length}
+                Database events: {filteredEvents.length} | 
+                Holidays enabled: {showNationalHolidays ? 'Yes' : 'No'} | 
+                Spelman dates enabled: {showSpelmanDates ? 'Yes' : 'No'}
               </p>
             </CardContent>
           </Card>
         ) : (
-          upcomingEvents.map((event) => (
-            <Card key={event.id} className="cursor-pointer hover:shadow-md transition-shadow" onClick={() => onEventClick(event)}>
-              <CardContent className="p-4">
-                <div className="flex items-start justify-between gap-3">
-                  <div className="flex-1">
-                    <h4 className="font-medium text-lg">{event.title}</h4>
-                    <div className="flex items-center gap-4 mt-2 text-sm text-muted-foreground">
-                      <div className="flex items-center gap-1">
-                        <CalendarIcon className="h-4 w-4" />
-                        <span>{format(new Date(event.start_time), 'EEE, MMM d, yyyy')}</span>
-                      </div>
-                      <div className="flex items-center gap-1">
-                        <Clock className="h-4 w-4" />
-                        <span>{formatEventTime(event.start_time)}</span>
-                      </div>
-                      {event.location_name && (
-                        <div className="flex items-center gap-1">
-                          <MapPin className="h-4 w-4" />
-                          <span>{event.location_name}</span>
+          allUpcomingEvents.map((unifiedEvent) => {
+            if (unifiedEvent.type === 'event' && unifiedEvent.event) {
+              const event = unifiedEvent.event;
+              return (
+                <Card key={unifiedEvent.id} className="cursor-pointer hover:shadow-md transition-shadow" onClick={() => onEventClick(event)}>
+                  <CardContent className="p-4">
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="flex-1">
+                        <h4 className="font-medium text-lg">{event.title}</h4>
+                        <div className="flex items-center gap-4 mt-2 text-sm text-muted-foreground">
+                          <div className="flex items-center gap-1">
+                            <CalendarIcon className="h-4 w-4" />
+                            <span>{format(new Date(event.start_time), 'EEE, MMM d, yyyy')}</span>
+                          </div>
+                          <div className="flex items-center gap-1">
+                            <Clock className="h-4 w-4" />
+                            <span>{formatEventTime(event.start_time)}</span>
+                          </div>
+                          {event.location_name && (
+                            <div className="flex items-center gap-1">
+                              <MapPin className="h-4 w-4" />
+                              <span>{event.location_name}</span>
+                            </div>
+                          )}
                         </div>
+                        {event.short_description && (
+                          <p className="text-sm text-muted-foreground mt-2">
+                            {event.short_description}
+                          </p>
+                        )}
+                      </div>
+                      {event.event_type && (
+                        <span className="text-xs bg-primary/10 text-primary px-2 py-1 rounded-full">
+                          {event.event_type}
+                        </span>
                       )}
                     </div>
-                    {event.short_description && (
-                      <p className="text-sm text-muted-foreground mt-2">
-                        {event.short_description}
-                      </p>
-                    )}
-                  </div>
-                  {event.event_type && (
-                    <span className="text-xs bg-primary/10 text-primary px-2 py-1 rounded-full">
-                      {event.event_type}
-                    </span>
-                  )}
-                </div>
-              </CardContent>
-            </Card>
-          ))
+                  </CardContent>
+                </Card>
+              );
+            }
+
+            if (unifiedEvent.type === 'holiday' && unifiedEvent.holiday) {
+              const holiday = unifiedEvent.holiday;
+              return (
+                <Card key={unifiedEvent.id} className="border-red-200 bg-gradient-to-r from-red-50 to-blue-50">
+                  <CardContent className="p-4">
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="flex-1">
+                        <h4 className="font-medium text-lg text-red-800">{holiday.title}</h4>
+                        <div className="flex items-center gap-4 mt-2 text-sm text-red-700">
+                          <div className="flex items-center gap-1">
+                            <CalendarIcon className="h-4 w-4" />
+                            <span>{format(holiday.date, 'EEE, MMM d, yyyy')}</span>
+                          </div>
+                        </div>
+                        <p className="text-sm text-red-700 mt-2">{holiday.description}</p>
+                      </div>
+                      <span className="text-xs bg-red-100 text-red-800 px-2 py-1 rounded-full">
+                        Federal Holiday
+                      </span>
+                    </div>
+                  </CardContent>
+                </Card>
+              );
+            }
+
+            if (unifiedEvent.type === 'spelman' && unifiedEvent.spelmanDate) {
+              const spelmanDate = unifiedEvent.spelmanDate;
+              return (
+                <Card key={unifiedEvent.id} className="border-purple-200 bg-gradient-to-r from-purple-50 to-indigo-50">
+                  <CardContent className="p-4">
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="flex-1">
+                        <h4 className="font-medium text-lg text-purple-800">{spelmanDate.title}</h4>
+                        <div className="flex items-center gap-4 mt-2 text-sm text-purple-700">
+                          <div className="flex items-center gap-1">
+                            <CalendarIcon className="h-4 w-4" />
+                            <span>{format(spelmanDate.date, 'EEE, MMM d, yyyy')}</span>
+                          </div>
+                        </div>
+                        <p className="text-sm text-purple-700 mt-2">{spelmanDate.description}</p>
+                      </div>
+                      <span className="text-xs bg-purple-100 text-purple-800 px-2 py-1 rounded-full capitalize">
+                        {spelmanDate.category.replace('_', ' ')}
+                      </span>
+                    </div>
+                  </CardContent>
+                </Card>
+              );
+            }
+
+            return null;
+          })
         )}
       </div>
     </div>
