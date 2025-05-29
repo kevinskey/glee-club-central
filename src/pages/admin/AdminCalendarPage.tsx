@@ -1,4 +1,3 @@
-
 import React, { useState, useRef, useEffect, useMemo } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { CalendarView } from '@/components/calendar/CalendarView';
@@ -12,6 +11,8 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Calendar, Plus, Edit, Trash2, Music } from 'lucide-react';
 import { toast } from 'sonner';
 import ErrorBoundary from '@/components/ErrorBoundary';
+import { getNationalHolidays } from '@/utils/nationalHolidays';
+import { getSpelmanAcademicDates } from '@/utils/spelmanAcademicDates';
 
 const STORAGE_KEY = 'glee-event-editor-data';
 
@@ -25,17 +26,59 @@ export default function AdminCalendarPage() {
   const [isCreating, setIsCreating] = useState(false);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
 
-  // Calculate dynamic stats from events
+  // Get holidays and academic dates
+  const holidays = getNationalHolidays();
+  const spelmanDates = getSpelmanAcademicDates();
+
+  // Calculate dynamic stats from all events including holidays and academic dates
   const eventStats = useMemo(() => {
     const now = new Date();
     
-    const totalEvents = events.length;
+    // Convert holidays and academic dates to CalendarEvent format for counting
+    const holidayEvents: CalendarEvent[] = holidays.map(holiday => ({
+      id: `holiday-${holiday.id}`,
+      title: holiday.title,
+      start_time: holiday.date.toISOString(),
+      end_time: holiday.date.toISOString(),
+      short_description: holiday.description,
+      full_description: holiday.description,
+      is_private: false,
+      allow_rsvp: false,
+      allow_reminders: false,
+      allow_ics_download: false,
+      allow_google_map_link: false,
+      created_at: new Date().toISOString(),
+      event_types: ['holiday'],
+      event_type: 'holiday'
+    }));
+
+    const spelmanEvents: CalendarEvent[] = spelmanDates.map(date => ({
+      id: `spelman-${date.id}`,
+      title: date.title,
+      start_time: date.date.toISOString(),
+      end_time: date.date.toISOString(),
+      short_description: date.description,
+      full_description: date.description,
+      is_private: false,
+      allow_rsvp: false,
+      allow_reminders: false,
+      allow_ics_download: false,
+      allow_google_map_link: false,
+      created_at: new Date().toISOString(),
+      event_types: ['academic'],
+      event_type: 'academic'
+    }));
+
+    // Combine all events
+    const allEvents = [...events, ...holidayEvents, ...spelmanEvents];
     
-    const upcomingEvents = events.filter(event => 
+    const totalEvents = allEvents.length;
+    
+    const upcomingEvents = allEvents.filter(event => 
       new Date(event.start_time) > now
     ).length;
     
-    const concerts = events.filter(event => {
+    const concerts = allEvents.filter(event => {
       const eventTypes = event.event_types || (event.event_type ? [event.event_type] : []);
       return eventTypes.includes('performance') || 
              eventTypes.includes('concert') || 
@@ -49,7 +92,7 @@ export default function AdminCalendarPage() {
       upcomingEvents,
       concerts
     };
-  }, [events]);
+  }, [events, holidays, spelmanDates]);
 
   // Handle URL parameters for editing
   useEffect(() => {
