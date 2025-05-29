@@ -6,11 +6,13 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Checkbox } from '@/components/ui/checkbox';
 import { Calendar, Clock, Image as ImageIcon, AlertCircle } from 'lucide-react';
 import { MediaPicker } from '@/components/media/MediaPicker';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Badge } from '@/components/ui/badge';
 import { toast } from 'sonner';
+import { EVENT_TYPES, getEventTypeColor } from '@/utils/eventTypes';
 
 interface EventEditorProps {
   event?: CalendarEvent | null;
@@ -20,19 +22,6 @@ interface EventEditorProps {
 }
 
 const STORAGE_KEY = 'glee-event-editor-data';
-
-const EVENT_TYPES = [
-  { value: 'concert', label: 'Concert' },
-  { value: 'rehearsal', label: 'Rehearsal' },
-  { value: 'sectional', label: 'Sectional' },
-  { value: 'meeting', label: 'Meeting' },
-  { value: 'workshop', label: 'Workshop' },
-  { value: 'social', label: 'Social Event' },
-  { value: 'fundraiser', label: 'Fundraiser' },
-  { value: 'tour', label: 'Tour' },
-  { value: 'masterclass', label: 'Masterclass' },
-  { value: 'event', label: 'General Event' },
-];
 
 export const EventEditor: React.FC<EventEditorProps> = ({
   event,
@@ -51,7 +40,7 @@ export const EventEditor: React.FC<EventEditorProps> = ({
     full_description: '',
     event_host_name: '',
     event_host_contact: '',
-    event_type: 'event',
+    event_types: [] as string[],
     is_private: false,
     allow_rsvp: false,
     allow_reminders: false,
@@ -79,6 +68,7 @@ export const EventEditor: React.FC<EventEditorProps> = ({
     if (isOpen) {
       if (event) {
         // Editing existing event - populate with event data
+        const eventTypes = event.event_types || (event.event_type ? [event.event_type] : []);
         setFormData({
           title: event.title || '',
           start_time: event.start_time ? new Date(event.start_time).toISOString().slice(0, 16) : '',
@@ -90,7 +80,7 @@ export const EventEditor: React.FC<EventEditorProps> = ({
           full_description: event.full_description || '',
           event_host_name: event.event_host_name || '',
           event_host_contact: event.event_host_contact || '',
-          event_type: event.event_type || 'event',
+          event_types: eventTypes,
           is_private: event.is_private || false,
           allow_rsvp: event.allow_rsvp || false,
           allow_reminders: event.allow_reminders || false,
@@ -150,6 +140,7 @@ export const EventEditor: React.FC<EventEditorProps> = ({
         ...formData,
         start_time: new Date(formData.start_time).toISOString(),
         end_time: new Date(formData.end_time).toISOString(),
+        event_type: formData.event_types[0] || 'event', // For backward compatibility
       } as Omit<CalendarEvent, 'id' | 'created_at'>);
       
       clearSavedData(); // Clear saved data on successful save
@@ -163,6 +154,15 @@ export const EventEditor: React.FC<EventEditorProps> = ({
 
   const handleInputChange = (field: string, value: any) => {
     setFormData(prev => ({ ...prev, [field]: value }));
+  };
+
+  const handleEventTypeToggle = (typeValue: string) => {
+    setFormData(prev => ({
+      ...prev,
+      event_types: prev.event_types.includes(typeValue)
+        ? prev.event_types.filter(t => t !== typeValue)
+        : [...prev.event_types, typeValue]
+    }));
   };
 
   const handleImageSelect = (imageUrl: string) => {
@@ -213,22 +213,39 @@ export const EventEditor: React.FC<EventEditorProps> = ({
           </div>
 
           <div>
-            <Label htmlFor="event_type">Event Type</Label>
-            <Select 
-              value={formData.event_type} 
-              onValueChange={(value) => handleInputChange('event_type', value)}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="Select event type" />
-              </SelectTrigger>
-              <SelectContent>
+            <Label>Event Types</Label>
+            <div className="space-y-2">
+              <div className="grid grid-cols-2 gap-2">
                 {EVENT_TYPES.map((type) => (
-                  <SelectItem key={type.value} value={type.value}>
-                    {type.label}
-                  </SelectItem>
+                  <div key={type.value} className="flex items-center space-x-2">
+                    <Checkbox
+                      id={type.value}
+                      checked={formData.event_types.includes(type.value)}
+                      onCheckedChange={() => handleEventTypeToggle(type.value)}
+                    />
+                    <label
+                      htmlFor={type.value}
+                      className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
+                    >
+                      {type.label}
+                    </label>
+                  </div>
                 ))}
-              </SelectContent>
-            </Select>
+              </div>
+              {formData.event_types.length > 0 && (
+                <div className="flex flex-wrap gap-1 mt-2">
+                  {formData.event_types.map((type) => (
+                    <Badge
+                      key={type}
+                      variant="outline"
+                      className={`text-xs ${getEventTypeColor(type)}`}
+                    >
+                      {EVENT_TYPES.find(t => t.value === type)?.label || type}
+                    </Badge>
+                  ))}
+                </div>
+              )}
+            </div>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

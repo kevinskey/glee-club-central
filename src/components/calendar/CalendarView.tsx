@@ -1,14 +1,18 @@
 import React, { useState, useEffect } from 'react';
 import { format, startOfMonth, endOfMonth, isSameDay, isToday, startOfWeek, endOfWeek, eachDayOfInterval, addWeeks, subWeeks, startOfDay } from 'date-fns';
-import { ChevronLeft, ChevronRight, Calendar as CalendarIcon, MapPin, Clock, ExternalLink } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Calendar as CalendarIcon, MapPin, Clock, ExternalLink, Search } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Badge } from '@/components/ui/badge';
 import { CalendarEvent } from '@/types/calendar';
 import { getNationalHolidays } from '@/utils/nationalHolidays';
 import { getSpelmanAcademicDates } from '@/utils/spelmanAcademicDates';
 import { HolidayCard } from './HolidayCard';
 import { SpelmanDateCard } from './SpelmanDateCard';
+import { EventTypeFilter } from './EventTypeFilter';
 import { useSiteSettings } from '@/hooks/useSiteSettings';
+import { getEventTypeLabel, getEventTypeColor } from '@/utils/eventTypes';
 
 interface CalendarViewProps {
   events: CalendarEvent[];
@@ -16,7 +20,6 @@ interface CalendarViewProps {
   showPrivateEvents?: boolean;
 }
 
-// Create unified event type for list view
 interface UnifiedEvent {
   id: string;
   title: string;
@@ -31,24 +34,36 @@ export function CalendarView({ events, onEventClick, showPrivateEvents = false }
   const [currentDate, setCurrentDate] = useState(new Date());
   const [view, setView] = useState<'month' | 'week' | 'day' | 'list'>('month');
   const [selectedDay, setSelectedDay] = useState<Date | null>(null);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [selectedEventTypes, setSelectedEventTypes] = useState<string[]>([]);
   const { settings } = useSiteSettings();
   
   const showNationalHolidays = settings.showNationalHolidays ?? true;
   const showSpelmanDates = settings.showSpelmanAcademicDates ?? true;
 
-  // Filter events based on privacy settings
+  // Filter events based on privacy, search, and type filters
   const filteredEvents = events.filter(event => {
-    if (showPrivateEvents) return true;
-    return !event.is_private;
-  });
-
-  // Debug logging for list view - moved after filteredEvents declaration
-  console.log('CalendarView Debug:', {
-    totalEvents: events.length,
-    filteredEvents: filteredEvents.length,
-    showPrivateEvents,
-    view,
-    currentTime: new Date().toISOString()
+    // Privacy filter
+    if (!showPrivateEvents && event.is_private) return false;
+    
+    // Search filter
+    if (searchQuery) {
+      const searchTerm = searchQuery.toLowerCase();
+      const matchesSearch = 
+        event.title.toLowerCase().includes(searchTerm) ||
+        (event.short_description && event.short_description.toLowerCase().includes(searchTerm)) ||
+        (event.location_name && event.location_name.toLowerCase().includes(searchTerm));
+      if (!matchesSearch) return false;
+    }
+    
+    // Event type filter
+    if (selectedEventTypes.length > 0) {
+      const eventTypes = event.event_types || (event.event_type ? [event.event_type] : []);
+      const hasMatchingType = selectedEventTypes.some(type => eventTypes.includes(type));
+      if (!hasMatchingType) return false;
+    }
+    
+    return true;
   });
 
   // Get holidays for current period if enabled
@@ -103,8 +118,8 @@ export function CalendarView({ events, onEventClick, showPrivateEvents = false }
         });
       });
 
-    // Add federal holidays if enabled
-    if (showNationalHolidays) {
+    // Add holidays if enabled and no event type filter is active
+    if (showNationalHolidays && selectedEventTypes.length === 0) {
       getNationalHolidays(currentYear)
         .filter(holiday => holiday.date >= now)
         .forEach(holiday => {
@@ -131,8 +146,8 @@ export function CalendarView({ events, onEventClick, showPrivateEvents = false }
         });
     }
 
-    // Add Spelman academic dates if enabled
-    if (showSpelmanDates) {
+    // Add Spelman dates if enabled and no event type filter is active
+    if (showSpelmanDates && selectedEventTypes.length === 0) {
       getSpelmanAcademicDates(currentYear)
         .filter(date => date.date >= now)
         .forEach(spelmanDate => {
@@ -165,14 +180,18 @@ export function CalendarView({ events, onEventClick, showPrivateEvents = false }
 
   const allUpcomingEvents = getAllUpcomingEvents();
 
-  console.log('Unified upcoming events for list view:', {
-    totalUnified: allUpcomingEvents.length,
-    breakdown: {
-      events: allUpcomingEvents.filter(e => e.type === 'event').length,
-      holidays: allUpcomingEvents.filter(e => e.type === 'holiday').length,
-      spelman: allUpcomingEvents.filter(e => e.type === 'spelman').length
-    }
-  });
+  const handleEventTypeToggle = (type: string) => {
+    setSelectedEventTypes(prev => 
+      prev.includes(type) 
+        ? prev.filter(t => t !== type)
+        : [...prev, type]
+    );
+  };
+
+  const handleClearFilters = () => {
+    setSelectedEventTypes([]);
+    setSearchQuery('');
+  };
 
   const navigatePeriod = (direction: 'prev' | 'next') => {
     setCurrentDate(prev => {
@@ -231,6 +250,30 @@ export function CalendarView({ events, onEventClick, showPrivateEvents = false }
     setSelectedDay(day);
     setCurrentDate(day);
     setView('day');
+  };
+
+  const renderEventTypesBadges = (event: CalendarEvent) => {
+    const eventTypes = event.event_types || (event.event_type ? [event.event_type] : []);
+    if (eventTypes.length === 0) return null;
+
+    return (
+      <div className="flex flex-wrap gap-1 mt-1">
+        {eventTypes.slice(0, 2).map(type => (
+          <Badge
+            key={type}
+            variant="outline"
+            className={`text-[10px] px-1 py-0 ${getEventTypeColor(type)}`}
+          >
+            {getEventTypeLabel(type)}
+          </Badge>
+        ))}
+        {eventTypes.length > 2 && (
+          <Badge variant="outline" className="text-[10px] px-1 py-0 bg-gray-100 text-gray-600">
+            +{eventTypes.length - 2}
+          </Badge>
+        )}
+      </div>
+    );
   };
 
   const renderMonthView = () => {
@@ -296,6 +339,7 @@ export function CalendarView({ events, onEventClick, showPrivateEvents = false }
                         <Clock className="h-2 w-2 flex-shrink-0" />
                         <span className="truncate">{formatEventTime(event.start_time)}</span>
                       </div>
+                      {renderEventTypesBadges(event)}
                     </div>
                   ))}
 
@@ -380,6 +424,7 @@ export function CalendarView({ events, onEventClick, showPrivateEvents = false }
                         <Clock className="h-2 w-2 flex-shrink-0" />
                         <span className="truncate">{formatEventTime(event.start_time)}</span>
                       </div>
+                      {renderEventTypesBadges(event)}
                     </div>
                   ))}
 
@@ -448,6 +493,7 @@ export function CalendarView({ events, onEventClick, showPrivateEvents = false }
                             {event.short_description}
                           </p>
                         )}
+                        {renderEventTypesBadges(event)}
                       </div>
                     </div>
                   </CardContent>
@@ -482,18 +528,41 @@ export function CalendarView({ events, onEventClick, showPrivateEvents = false }
 
   const renderListView = () => (
     <div className="space-y-4">
-      <h3 className="text-lg font-semibold">All Upcoming Events ({allUpcomingEvents.length})</h3>
+      {/* Search and Filter Controls */}
+      <div className="flex flex-col sm:flex-row gap-4">
+        <div className="relative flex-1">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <Input
+            placeholder="Search events..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="pl-9"
+          />
+        </div>
+        <EventTypeFilter
+          selectedTypes={selectedEventTypes}
+          onTypeToggle={handleEventTypeToggle}
+          onClearFilters={handleClearFilters}
+        />
+      </div>
+
+      <div className="flex items-center justify-between">
+        <h3 className="text-lg font-semibold">
+          {searchQuery || selectedEventTypes.length > 0 ? 'Filtered Events' : 'All Upcoming Events'} 
+          ({allUpcomingEvents.length})
+        </h3>
+        {(searchQuery || selectedEventTypes.length > 0) && (
+          <Button variant="outline" size="sm" onClick={handleClearFilters}>
+            Clear Filters
+          </Button>
+        )}
+      </div>
       
       <div className="space-y-3">
         {allUpcomingEvents.length === 0 ? (
           <Card>
             <CardContent className="p-6 text-center text-muted-foreground">
-              <p>No upcoming events found.</p>
-              <p className="text-xs mt-2">
-                Database events: {filteredEvents.length} | 
-                Holidays enabled: {showNationalHolidays ? 'Yes' : 'No'} | 
-                Spelman dates enabled: {showSpelmanDates ? 'Yes' : 'No'}
-              </p>
+              <p>No events found matching your criteria.</p>
             </CardContent>
           </Card>
         ) : (
@@ -527,12 +596,8 @@ export function CalendarView({ events, onEventClick, showPrivateEvents = false }
                             {event.short_description}
                           </p>
                         )}
+                        {renderEventTypesBadges(event)}
                       </div>
-                      {event.event_type && (
-                        <span className="text-xs bg-primary/10 text-primary px-2 py-1 rounded-full">
-                          {event.event_type}
-                        </span>
-                      )}
                     </div>
                   </CardContent>
                 </Card>
@@ -724,6 +789,7 @@ export function CalendarView({ events, onEventClick, showPrivateEvents = false }
                             <ExternalLink className="h-2 w-2 flex-shrink-0" />
                           </a>
                         )}
+                        {renderEventTypesBadges(event)}
                       </div>
                     </div>
                   </CardContent>

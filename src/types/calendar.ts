@@ -11,7 +11,8 @@ export interface CalendarEvent {
   full_description?: string;
   event_host_name?: string;
   event_host_contact?: string;
-  event_type?: string;
+  event_types?: string[]; // Changed to array for multi-select
+  event_type?: string; // Keep for backward compatibility
   is_private: boolean;
   allow_rsvp: boolean;
   allow_reminders: boolean;
