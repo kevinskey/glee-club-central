@@ -16,28 +16,23 @@ export const useUserCreate = (
     try {
       console.log('Adding new user with data:', userData);
       
-      // First, create the user in auth
-      let authData, authError;
-      
-      if (userData.email && userData.password) {
-        const { data, error } = await supabase.auth.signUp({
-          email: userData.email,
-          password: userData.password,
-          options: {
-            data: {
-              first_name: userData.first_name,
-              last_name: userData.last_name,
-            }
-          }
-        });
-        
-        authData = data;
-        authError = error;
-      } else {
+      if (!userData.email || !userData.password) {
         console.error('Email and password are required to create a user');
         toast.error('Email and password are required');
         return false;
       }
+      
+      // First, create the user in auth
+      const { data: authData, error: authError } = await supabase.auth.signUp({
+        email: userData.email,
+        password: userData.password,
+        options: {
+          data: {
+            first_name: userData.first_name,
+            last_name: userData.last_name,
+          }
+        }
+      });
       
       if (authError) {
         console.error('Error creating user in auth:', authError);
@@ -54,27 +49,32 @@ export const useUserCreate = (
       // Determine admin status from role
       const isAdmin = userData.role === 'admin' || userData.is_admin;
       
-      // Then update the profile with additional information
+      // Use UPSERT to handle profile creation/update properly
       const { error: profileError } = await supabase
         .from('profiles')
-        .update({
+        .upsert({
+          id: authData.user.id,
           first_name: userData.first_name,
           last_name: userData.last_name,
+          email: userData.email,
           phone: userData.phone || null,
           voice_part: userData.voice_part,
-          status: userData.status,
+          status: 'active', // Ensure new users are active by default
           class_year: userData.class_year || null,
           notes: userData.notes || null,
           dues_paid: userData.dues_paid || false,
           join_date: userData.join_date || new Date().toISOString().split('T')[0],
           is_super_admin: isAdmin,
-        })
-        .eq('id', authData.user.id);
+          role: isAdmin ? 'admin' : 'member',
+          updated_at: new Date().toISOString()
+        }, { 
+          onConflict: 'id' 
+        });
       
       if (profileError) {
-        console.error('Error updating profile:', profileError);
+        console.error('Error upserting profile:', profileError);
         toast.error('User created but profile update failed');
-        // We'll still return true since the user was created
+        // Still return true since the user was created successfully
       }
       
       console.log('User added successfully with ID:', authData.user.id);
@@ -95,7 +95,7 @@ export const useUserCreate = (
           last_name: userData.last_name,
           phone: userData.phone || null,
           voice_part: userData.voice_part,
-          status: userData.status,
+          status: 'active', // Set to active
           created_at: new Date().toISOString(),
           class_year: userData.class_year,
           notes: userData.notes,

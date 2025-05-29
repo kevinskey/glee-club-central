@@ -1,99 +1,91 @@
 
 import { useState, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { User, BaseHookResponse } from './types';
+import { User } from './types';
+import { toast } from 'sonner';
 
-interface UseUsersResponse extends BaseHookResponse {
-  users: User[];
+interface UseUsersResponse {
+  fetchUsers: () => Promise<User[] | null>;
+  isLoading: boolean;
+  error: string | null;
   userCount: number;
-  fetchUsers: () => Promise<User[]>;
   getUserCount: () => Promise<number>;
   getUserById: (userId: string) => Promise<User | null>;
 }
 
 export const useUsers = (): UseUsersResponse => {
-  const [users, setUsers] = useState<User[]>([]);
-  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [userCount, setUserCount] = useState<number>(0);
+  const [userCount, setUserCount] = useState(0);
 
-  const fetchUsers = useCallback(async () => {
+  const fetchUsers = useCallback(async (): Promise<User[] | null> => {
     setIsLoading(true);
     setError(null);
     
     try {
-      console.log('[DEBUG] Fetching users from database with RPC call "get_all_users"');
-      const { data, error } = await supabase
-        .rpc('get_all_users');
+      console.log('Fetching users from profiles table');
+      
+      const { data, error: fetchError } = await supabase
+        .from('profiles')
+        .select('*')
+        .neq('status', 'deleted') // Exclude deleted users
+        .order('last_name', { ascending: true });
 
-      if (error) {
-        console.error('[DEBUG] Error fetching users with RPC:', error);
-        setError(error.message);
-        return [];
+      if (fetchError) {
+        console.error('Error fetching users:', fetchError);
+        setError(fetchError.message);
+        toast.error('Failed to load users');
+        return null;
       }
 
-      console.log(`[DEBUG] Fetched ${data?.length || 0} users from database`);
+      console.log('Successfully fetched users:', data?.length || 0);
       
-      if (data) {
-        // Process the data to ensure consistent field formats
-        const processedData = data.map(user => {
-          // Create a consistent User object with all required fields
-          // Determine admin status from the role property since the database doesn't provide is_super_admin
-          const isAdmin = user.role === 'admin' || user.role === 'administrator';
-          
-          const processedUser: User = {
-            id: user.id,
-            email: user.email || null,
-            first_name: user.first_name || '',
-            last_name: user.last_name || '',
-            phone: user.phone || null,
-            voice_part: user.voice_part || null,
-            avatar_url: user.avatar_url || null,
-            status: user.status || 'pending',
-            last_sign_in_at: user.last_sign_in_at || null,
-            created_at: user.created_at || new Date().toISOString(),
-            updated_at: null, 
-            is_super_admin: isAdmin,
-            class_year: null, // Default value if not provided
-            join_date: user.join_date || null,
-            notes: null, // Default value if not provided
-            dues_paid: false, // Default value if not provided
-            role: user.role || (isAdmin ? 'admin' : 'member'), // Keep the original role if available
-          };
-          
-          return processedUser;
-        });
-        
-        console.log('[DEBUG] Processed data from DB:', processedData.length, 'users');
-        
-        setUsers(processedData);
-        setUserCount(processedData.length);
-        return processedData;
-      }
-      
-      console.log('[DEBUG] No data returned from database');
-      return [];
+      // Transform the data to match User interface
+      const users: User[] = (data || []).map(profile => ({
+        id: profile.id,
+        email: profile.email || null,
+        first_name: profile.first_name || '',
+        last_name: profile.last_name || '',
+        phone: profile.phone,
+        voice_part: profile.voice_part,
+        avatar_url: profile.avatar_url,
+        status: profile.status || 'active',
+        join_date: profile.join_date,
+        class_year: profile.class_year,
+        dues_paid: profile.dues_paid || false,
+        notes: profile.notes,
+        created_at: profile.created_at,
+        updated_at: profile.updated_at,
+        last_sign_in_at: profile.last_sign_in_at,
+        is_super_admin: profile.is_super_admin || false,
+        role: profile.role || 'member'
+      }));
+
+      setUserCount(users.length);
+      return users;
     } catch (err) {
-      console.error('[DEBUG] Unexpected error fetching users:', err);
-      setError('An unexpected error occurred while fetching users');
-      return [];
+      console.error('Unexpected error fetching users:', err);
+      const errorMessage = err instanceof Error ? err.message : 'Unknown error occurred';
+      setError(errorMessage);
+      toast.error('Failed to load users');
+      return null;
     } finally {
       setIsLoading(false);
     }
   }, []);
 
-  const getUserCount = useCallback(async () => {
+  const getUserCount = useCallback(async (): Promise<number> => {
     try {
-      const { count, error } = await supabase
+      const { count, error: countError } = await supabase
         .from('profiles')
-        .select('*', { count: 'exact', head: true });
-      
-      if (error) {
-        console.error('Error getting user count:', error);
+        .select('*', { count: 'exact', head: true })
+        .neq('status', 'deleted'); // Exclude deleted users
+
+      if (countError) {
+        console.error('Error getting user count:', countError);
         return 0;
       }
-      
-      setUserCount(count || 0);
+
       return count || 0;
     } catch (err) {
       console.error('Unexpected error getting user count:', err);
@@ -101,47 +93,53 @@ export const useUsers = (): UseUsersResponse => {
     }
   }, []);
 
-  const getUserById = useCallback(async (userId: string) => {
+  const getUserById = useCallback(async (userId: string): Promise<User | null> => {
     try {
-      console.log(`Fetching user with ID: ${userId}`);
-      const { data, error } = await supabase
-        .rpc('get_user_by_id', { p_user_id: userId });
+      const { data, error: fetchError } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', userId)
+        .neq('status', 'deleted') // Exclude deleted users
+        .single();
 
-      if (error) {
-        console.error('Error fetching user by ID:', error);
+      if (fetchError) {
+        console.error('Error fetching user by ID:', fetchError);
         return null;
       }
 
-      if (!data || data.length === 0) {
-        console.log('No user found with that ID');
-        return null;
-      }
-      
-      // Process the user data to add the is_super_admin property based on role
-      const userData = data[0];
-      const isAdmin = userData.role === 'admin' || userData.role === 'administrator';
-      
-      // Create a new object with all the original properties plus the computed ones
-      const processedUser = {
-        ...userData,
-        is_super_admin: isAdmin,
-        role: userData.role || (isAdmin ? 'admin' : 'member'), // Ensure role is always defined
+      if (!data) return null;
+
+      return {
+        id: data.id,
+        email: data.email || null,
+        first_name: data.first_name || '',
+        last_name: data.last_name || '',
+        phone: data.phone,
+        voice_part: data.voice_part,
+        avatar_url: data.avatar_url,
+        status: data.status || 'active',
+        join_date: data.join_date,
+        class_year: data.class_year,
+        dues_paid: data.dues_paid || false,
+        notes: data.notes,
+        created_at: data.created_at,
+        updated_at: data.updated_at,
+        last_sign_in_at: data.last_sign_in_at,
+        is_super_admin: data.is_super_admin || false,
+        role: data.role || 'member'
       };
-
-      return processedUser;
     } catch (err) {
-      console.error('Unexpected error getting user by ID:', err);
+      console.error('Unexpected error fetching user by ID:', err);
       return null;
     }
   }, []);
 
   return {
-    users,
+    fetchUsers,
     isLoading,
     error,
-    fetchUsers,
-    getUserCount,
     userCount,
+    getUserCount,
     getUserById
   };
 };
