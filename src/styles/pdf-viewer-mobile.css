@@ -1,0 +1,211 @@
+
+/* PDF Viewer Mobile Optimizations */
+
+/* Touch-friendly interactions */
+@media (max-width: 768px) {
+  /* Ensure all interactive elements meet 44px minimum tap target */
+  .pdf-mobile-tap-target {
+    min-height: 44px;
+    min-width: 44px;
+  }
+
+  /* PDF container optimizations for mobile */
+  .react-pdf__Document {
+    width: 100%;
+    max-width: 100%;
+  }
+
+  .react-pdf__Page {
+    max-width: 100% !important;
+    width: 100% !important;
+    margin: 0.5rem 0 !important;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1) !important;
+  }
+
+  .react-pdf__Page canvas {
+    max-width: 100% !important;
+    width: 100% !important;
+    height: auto !important;
+    touch-action: pan-x pan-y pinch-zoom;
+  }
+
+  /* Mobile toolbar styling */
+  .pdf-mobile-toolbar {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+    position: sticky;
+    top: 0;
+    z-index: 40;
+  }
+
+  /* Floating action button */
+  .pdf-mobile-fab {
+    position: fixed;
+    bottom: 1rem;
+    right: 1rem;
+    z-index: 50;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    border-radius: 50%;
+    width: 48px;
+    height: 48px;
+  }
+
+  /* Mobile sheet component adjustments */
+  .pdf-mobile-sheet {
+    max-height: 70vh;
+    border-radius: 1rem 1rem 0 0;
+  }
+
+  /* Prevent text selection during gestures */
+  .pdf-gesture-container {
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+    -webkit-touch-callout: none;
+  }
+
+  /* Optimize scrolling on mobile */
+  .pdf-mobile-scroll {
+    -webkit-overflow-scrolling: touch;
+    scroll-behavior: smooth;
+  }
+
+  /* Hide desktop-only elements */
+  .pdf-desktop-only {
+    display: none !important;
+  }
+
+  /* Mobile-specific grid layouts */
+  .pdf-mobile-grid-2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.75rem;
+  }
+
+  .pdf-mobile-grid-1 {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 0.75rem;
+  }
+
+  /* Annotation canvas touch optimization */
+  .annotation-canvas-mobile {
+    touch-action: none;
+    pointer-events: auto;
+  }
+
+  /* Ensure buttons are large enough for touch */
+  .pdf-mobile-button {
+    min-height: 44px;
+    min-width: 44px;
+    padding: 0.75rem;
+    font-size: 0.875rem;
+  }
+
+  /* Mobile input styling */
+  .pdf-mobile-input {
+    min-height: 44px;
+    font-size: 16px; /* Prevents zoom on iOS */
+    border-radius: 0.5rem;
+  }
+
+  /* Responsive text sizing */
+  .pdf-mobile-text-sm {
+    font-size: 0.875rem;
+    line-height: 1.25rem;
+  }
+
+  .pdf-mobile-text-xs {
+    font-size: 0.75rem;
+    line-height: 1rem;
+  }
+}
+
+/* Landscape orientation optimizations */
+@media (max-width: 768px) and (orientation: landscape) {
+  .pdf-mobile-landscape {
+    height: 100vh;
+    max-height: 100vh;
+  }
+
+  .pdf-mobile-toolbar {
+    padding: 0.5rem 1rem;
+  }
+
+  .react-pdf__Page {
+    margin: 0.25rem 0 !important;
+  }
+}
+
+/* iPhone SE (375px) specific optimizations */
+@media (max-width: 375px) {
+  .pdf-mobile-small {
+    padding: 0.5rem;
+  }
+
+  .pdf-mobile-button {
+    min-width: 40px;
+    padding: 0.5rem;
+  }
+
+  .pdf-mobile-fab {
+    width: 44px;
+    height: 44px;
+    bottom: 0.75rem;
+    right: 0.75rem;
+  }
+}
+
+/* High-DPI displays */
+@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+  .react-pdf__Page canvas {
+    image-rendering: -webkit-optimize-contrast;
+    image-rendering: crisp-edges;
+  }
+}
+
+/* Dark mode adjustments for mobile */
+@media (max-width: 768px) and (prefers-color-scheme: dark) {
+  .pdf-mobile-toolbar {
+    background: rgba(0, 0, 0, 0.95);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  }
+
+  .pdf-mobile-sheet {
+    background: hsl(var(--background));
+    color: hsl(var(--foreground));
+  }
+}
+
+/* Accessibility improvements for mobile */
+@media (max-width: 768px) {
+  /* Focus indicators */
+  .pdf-mobile-button:focus {
+    outline: 2px solid hsl(var(--ring));
+    outline-offset: 2px;
+  }
+
+  /* High contrast mode support */
+  @media (prefers-contrast: high) {
+    .pdf-mobile-toolbar {
+      border-bottom: 2px solid;
+    }
+    
+    .pdf-mobile-button {
+      border: 2px solid;
+    }
+  }
+
+  /* Reduced motion support */
+  @media (prefers-reduced-motion: reduce) {
+    .react-pdf__Page,
+    .pdf-mobile-toolbar,
+    .annotation-canvas-mobile {
+      transition: none !important;
+      animation: none !important;
+    }
+  }
+}

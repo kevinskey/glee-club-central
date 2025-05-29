@@ -7,10 +7,13 @@ import { useToast } from '@/hooks/use-toast';
 import { usePDFAnnotations } from '@/hooks/usePDFAnnotations';
 import { usePDFViewer } from './hooks/usePDFViewer';
 import { usePDFPagePreloader } from './hooks/usePDFPagePreloader';
+import { usePDFMobileGestures } from './hooks/usePDFMobileGestures';
+import { useIsMobile } from '@/hooks/use-mobile';
 import { AnnotationToolbar } from './AnnotationToolbar';
 import { AnnotationCanvas } from './AnnotationCanvas';
 import { PDFFullscreenHeader } from './PDFFullscreenHeader';
 import { PDFRegularHeader } from './PDFRegularHeader';
+import { PDFMobileToolbar } from './PDFMobileToolbar';
 import { PDFSearchBar } from './PDFSearchBar';
 import { PDFBookmarksSidebar } from './PDFBookmarksSidebar';
 
@@ -31,6 +34,7 @@ const AdvancedPDFViewer: React.FC<AdvancedPDFViewerProps> = ({
   onBack 
 }) => {
   const { toast } = useToast();
+  const isMobile = useIsMobile();
   
   const {
     // State
@@ -75,6 +79,17 @@ const AdvancedPDFViewer: React.FC<AdvancedPDFViewerProps> = ({
 
   // Page preloader for instant page turns
   const { preloadAdjacentPages, getPreloadedPage } = usePDFPagePreloader(url, numPages);
+
+  // Mobile gesture support
+  const { containerRef } = usePDFMobileGestures({
+    onPrevPage: goToPrevPage,
+    onNextPage: goToNextPage,
+    onZoomIn: zoomIn,
+    onZoomOut: zoomOut,
+    pageNumber,
+    numPages,
+    scale
+  });
 
   // Annotation hook with caching
   const {
@@ -220,7 +235,7 @@ const AdvancedPDFViewer: React.FC<AdvancedPDFViewerProps> = ({
         />
       )}
 
-      {!isFullscreen && (
+      {!isFullscreen && !isMobile && (
         <>
           <PDFRegularHeader
             title={title}
@@ -279,17 +294,59 @@ const AdvancedPDFViewer: React.FC<AdvancedPDFViewerProps> = ({
         </>
       )}
 
+      {/* Mobile-specific toolbar */}
+      {!isFullscreen && isMobile && (
+        <PDFMobileToolbar
+          pageNumber={pageNumber}
+          numPages={numPages}
+          scale={scale}
+          showAnnotations={showAnnotations}
+          currentPageBookmarked={currentPageBookmarked}
+          currentTool={currentTool}
+          canUndo={canUndo}
+          canRedo={canRedo}
+          onPageChange={setPageNumber}
+          onPrevPage={goToPrevPage}
+          onNextPage={goToNextPage}
+          onZoomIn={zoomIn}
+          onZoomOut={zoomOut}
+          onRotate={rotate}
+          onToggleFullscreen={toggleFullscreen}
+          onToggleAnnotations={() => setShowAnnotations(!showAnnotations)}
+          onToolChange={setCurrentTool}
+          onUndo={() => undo(pageNumber)}
+          onRedo={() => redo(pageNumber)}
+          onSaveAnnotations={handleSaveAnnotations}
+          onClearAnnotations={handleClearAnnotations}
+          onToggleBookmark={toggleBookmark}
+          onDownload={handleDownload}
+          onPrint={handlePrint}
+        />
+      )}
+
       {/* Main PDF Viewer with optimized rendering */}
       <div className="flex-1 overflow-auto bg-gray-100 relative flex">
-        <div className="flex-1 flex justify-center p-4">
-          <div className="relative">
-            <Card className="shadow-lg transition-transform duration-200">
+        <div 
+          ref={containerRef}
+          className={cn(
+            "flex-1 flex justify-center",
+            isMobile ? "p-2" : "p-4"
+          )}
+        >
+          <div className="relative w-full max-w-full">
+            <Card className={cn(
+              "shadow-lg transition-transform duration-200",
+              isMobile && "shadow-sm"
+            )}>
               <CardContent className="p-0 relative" ref={pageRef}>
                 <Document
                   file={url}
                   onLoadSuccess={onDocumentLoadSuccess}
                   loading={
-                    <div className="flex items-center justify-center h-96">
+                    <div className={cn(
+                      "flex items-center justify-center",
+                      isMobile ? "h-64" : "h-96"
+                    )}>
                       <div className="text-center">
                         <div className="h-8 w-8 rounded-full border-4 border-primary border-t-transparent animate-spin mx-auto mb-2"></div>
                         <p className="text-muted-foreground">Loading PDF...</p>
@@ -297,7 +354,10 @@ const AdvancedPDFViewer: React.FC<AdvancedPDFViewerProps> = ({
                     </div>
                   }
                   error={
-                    <div className="flex items-center justify-center h-96 text-center p-8">
+                    <div className={cn(
+                      "flex items-center justify-center text-center p-8",
+                      isMobile ? "h-64" : "h-96"
+                    )}>
                       <div>
                         <p className="text-destructive font-medium mb-2">Failed to load PDF</p>
                         <p className="text-muted-foreground text-sm">
@@ -309,12 +369,13 @@ const AdvancedPDFViewer: React.FC<AdvancedPDFViewerProps> = ({
                 >
                   <Page
                     pageNumber={pageNumber}
-                    scale={scale}
+                    scale={isMobile ? Math.min(scale, 1.5) : scale}
                     rotate={rotation}
-                    loading={null} // Remove page loading spinner for instant transitions
+                    loading={null}
                     renderTextLayer={false}
                     renderAnnotationLayer={false}
-                    className="transition-opacity duration-200"
+                    className="transition-opacity duration-200 max-w-full"
+                    width={isMobile ? Math.min(window.innerWidth - 16, 600) : undefined}
                   />
                 </Document>
                 
@@ -329,7 +390,7 @@ const AdvancedPDFViewer: React.FC<AdvancedPDFViewerProps> = ({
                     annotations={pageAnnotations}
                     onAnnotationAdd={handleAnnotationAdd}
                     showAnnotations={showAnnotations}
-                    scale={scale}
+                    scale={isMobile ? Math.min(scale, 1.5) : scale}
                     className="absolute top-0 left-0 transition-opacity duration-200"
                   />
                 )}
@@ -338,8 +399,8 @@ const AdvancedPDFViewer: React.FC<AdvancedPDFViewerProps> = ({
           </div>
         </div>
 
-        {/* Bookmarks Sidebar */}
-        {!isFullscreen && (
+        {/* Bookmarks Sidebar - Hidden on Mobile */}
+        {!isFullscreen && !isMobile && (
           <PDFBookmarksSidebar
             bookmarks={bookmarks}
             currentPage={pageNumber}
