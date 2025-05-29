@@ -176,7 +176,7 @@ export function CalendarView({ events, onEventClick, showPrivateEvents = false }
                 </div>
                 
                 <div className="space-y-1">
-                  {/* Events */}
+                  {/* Events - Show only title and time, no descriptions */}
                   {dayEvents.slice(0, 3).map((event, index) => (
                     <div
                       key={`${event.id}-${index}`}
