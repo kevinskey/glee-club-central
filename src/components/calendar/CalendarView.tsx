@@ -25,19 +25,19 @@ export function CalendarView({ events, onEventClick, showPrivateEvents = false }
   const showNationalHolidays = settings.showNationalHolidays ?? true;
   const showSpelmanDates = settings.showSpelmanAcademicDates ?? true;
 
-  // Debug logging for list view
+  // Filter events based on privacy settings
+  const filteredEvents = events.filter(event => {
+    if (showPrivateEvents) return true;
+    return !event.is_private;
+  });
+
+  // Debug logging for list view - moved after filteredEvents declaration
   console.log('CalendarView Debug:', {
     totalEvents: events.length,
     filteredEvents: filteredEvents.length,
     showPrivateEvents,
     view,
     currentTime: new Date().toISOString()
-  });
-
-  // Filter events based on privacy settings
-  const filteredEvents = events.filter(event => {
-    if (showPrivateEvents) return true;
-    return !event.is_private;
   });
 
   // Get holidays for current period if enabled
