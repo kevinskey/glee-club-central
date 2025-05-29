@@ -93,7 +93,7 @@ export function CalendarView({ events, onEventClick, showPrivateEvents = false }
   };
 
   return (
-    <div className="mobile-container space-y-4 sm:space-y-6">
+    <div className="w-full space-y-4">
       {/* Calendar Header */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div className="flex items-center gap-2 sm:gap-4">
@@ -101,7 +101,6 @@ export function CalendarView({ events, onEventClick, showPrivateEvents = false }
             variant="outline"
             size="sm"
             onClick={() => navigateMonth('prev')}
-            className="mobile-touch-target"
           >
             <ChevronLeft className="h-4 w-4" />
           </Button>
@@ -114,18 +113,17 @@ export function CalendarView({ events, onEventClick, showPrivateEvents = false }
             variant="outline"
             size="sm"
             onClick={() => navigateMonth('next')}
-            className="mobile-touch-target"
           >
             <ChevronRight className="h-4 w-4" />
           </Button>
         </div>
 
-        <div className="flex gap-1 bg-muted p-1 rounded-lg mobile-full-width sm:w-auto">
+        <div className="flex gap-1 bg-muted p-1 rounded-lg">
           <Button
             variant={view === 'month' ? 'default' : 'ghost'}
             size="sm"
             onClick={() => setView('month')}
-            className="flex-1 sm:flex-none text-xs sm:text-sm mobile-touch-target"
+            className="text-xs sm:text-sm"
           >
             Month
           </Button>
@@ -133,7 +131,7 @@ export function CalendarView({ events, onEventClick, showPrivateEvents = false }
             variant={view === 'week' ? 'default' : 'ghost'}
             size="sm"
             onClick={() => setView('week')}
-            className="flex-1 sm:flex-none text-xs sm:text-sm mobile-touch-target"
+            className="text-xs sm:text-sm"
           >
             Week
           </Button>
@@ -141,13 +139,13 @@ export function CalendarView({ events, onEventClick, showPrivateEvents = false }
       </div>
 
       {/* Calendar Grid */}
-      <div className="calendar-grid border border-border rounded-lg overflow-hidden bg-background">
+      <div className="border border-border rounded-lg overflow-hidden bg-background">
         {/* Day headers */}
-        <div className="calendar-grid bg-muted">
+        <div className="grid grid-cols-7 bg-muted border-b">
           {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map((day) => (
             <div
               key={day}
-              className="p-2 sm:p-3 text-center text-xs sm:text-sm font-medium text-muted-foreground border-r border-border last:border-r-0"
+              className="p-3 text-center text-sm font-medium text-muted-foreground border-r last:border-r-0"
             >
               <span className="hidden sm:inline">{day}</span>
               <span className="sm:hidden">{day.charAt(0)}</span>
@@ -155,75 +153,67 @@ export function CalendarView({ events, onEventClick, showPrivateEvents = false }
           ))}
         </div>
 
-        {/* Calendar days */}
-        {Array.from({ length: Math.ceil(calendarDays.length / 7) }, (_, weekIndex) => (
-          <div key={weekIndex} className="calendar-grid">
-            {calendarDays.slice(weekIndex * 7, (weekIndex + 1) * 7).map((day) => {
-              const dayEvents = getEventsForDay(day);
-              const dayHolidays = getHolidaysForDay(day);
-              const daySpelmanDates = getSpelmanDatesForDay(day);
-              const isCurrentMonth = day.getMonth() === currentDate.getMonth();
-              const isDayToday = isToday(day);
+        {/* Calendar days grid */}
+        <div className="grid grid-cols-7">
+          {calendarDays.map((day) => {
+            const dayEvents = getEventsForDay(day);
+            const dayHolidays = getHolidaysForDay(day);
+            const daySpelmanDates = getSpelmanDatesForDay(day);
+            const isCurrentMonth = day.getMonth() === currentDate.getMonth();
+            const isDayToday = isToday(day);
 
-              return (
-                <div
-                  key={day.toString()}
-                  className={`mobile-calendar-day border-r border-b border-border last:border-r-0 last:border-b-0 ${
-                    !isCurrentMonth ? 'bg-muted/30 text-muted-foreground' : 'bg-background'
-                  } ${isDayToday ? 'bg-primary/5 border-primary' : ''}`}
-                >
-                  <div className={`text-xs sm:text-sm font-medium p-1 sm:p-2 ${
-                    isDayToday ? 'text-primary font-semibold' : ''
-                  }`}>
-                    {format(day, 'd')}
-                  </div>
-                  
-                  <div className="calendar-day-content px-1 sm:px-2 pb-1 sm:pb-2">
-                    {/* Events */}
-                    {dayEvents.slice(0, 2).map((event, index) => (
-                      <div
-                        key={`${event.id}-${index}`}
-                        onClick={() => onEventClick(event)}
-                        className="event-card-mobile bg-primary/10 dark:bg-primary/20 text-primary dark:text-primary-foreground rounded-sm p-1 mb-1 cursor-pointer text-[10px] sm:text-xs leading-tight"
-                      >
-                        <div className="font-medium truncate" title={event.title}>
-                          {event.title}
-                        </div>
-                        <div className="flex items-center gap-1 text-[9px] sm:text-[10px] text-muted-foreground">
-                          <Clock className="h-2 w-2 sm:h-3 sm:w-3 flex-shrink-0" />
-                          <span className="truncate">{formatEventTime(event.start_time)}</span>
-                        </div>
-                        {event.location_name && (
-                          <div className="flex items-center gap-1 text-[9px] sm:text-[10px] text-muted-foreground">
-                            <MapPin className="h-2 w-2 sm:h-3 sm:w-3 flex-shrink-0" />
-                            <span className="truncate">{event.location_name}</span>
-                          </div>
-                        )}
-                      </div>
-                    ))}
-
-                    {/* More events indicator */}
-                    {dayEvents.length > 2 && (
-                      <div className="text-[9px] sm:text-[10px] text-muted-foreground font-medium">
-                        +{dayEvents.length - 2} more
-                      </div>
-                    )}
-
-                    {/* Holidays */}
-                    {dayHolidays.map((holiday, index) => (
-                      <HolidayCard key={`holiday-${index}`} holiday={holiday} />
-                    ))}
-
-                    {/* Spelman Dates */}
-                    {daySpelmanDates.map((date, index) => (
-                      <SpelmanDateCard key={`spelman-${index}`} spelmanDate={date} />
-                    ))}
-                  </div>
+            return (
+              <div
+                key={day.toString()}
+                className={`min-h-[120px] border-r border-b last:border-r-0 p-2 ${
+                  !isCurrentMonth ? 'bg-muted/30 text-muted-foreground' : 'bg-background'
+                } ${isDayToday ? 'bg-primary/5 border-primary' : ''}`}
+              >
+                <div className={`text-sm font-medium mb-2 ${
+                  isDayToday ? 'text-primary font-semibold' : ''
+                }`}>
+                  {format(day, 'd')}
                 </div>
-              );
-            })}
-          </div>
-        ))}
+                
+                <div className="space-y-1">
+                  {/* Events */}
+                  {dayEvents.slice(0, 3).map((event, index) => (
+                    <div
+                      key={`${event.id}-${index}`}
+                      onClick={() => onEventClick(event)}
+                      className="bg-primary/10 text-primary rounded-sm p-1 cursor-pointer text-xs leading-tight hover:bg-primary/20 transition-colors"
+                    >
+                      <div className="font-medium truncate" title={event.title}>
+                        {event.title}
+                      </div>
+                      <div className="flex items-center gap-1 text-[10px] text-muted-foreground">
+                        <Clock className="h-2 w-2 flex-shrink-0" />
+                        <span className="truncate">{formatEventTime(event.start_time)}</span>
+                      </div>
+                    </div>
+                  ))}
+
+                  {/* More events indicator */}
+                  {dayEvents.length > 3 && (
+                    <div className="text-[10px] text-muted-foreground font-medium">
+                      +{dayEvents.length - 3} more
+                    </div>
+                  )}
+
+                  {/* Holidays */}
+                  {dayHolidays.map((holiday, index) => (
+                    <HolidayCard key={`holiday-${index}`} holiday={holiday} />
+                  ))}
+
+                  {/* Spelman Dates */}
+                  {daySpelmanDates.map((date, index) => (
+                    <SpelmanDateCard key={`spelman-${index}`} spelmanDate={date} />
+                  ))}
+                </div>
+              </div>
+            );
+          })}
+        </div>
       </div>
 
       {/* Mobile: Upcoming Events List */}
@@ -236,10 +226,10 @@ export function CalendarView({ events, onEventClick, showPrivateEvents = false }
             .map((event) => (
               <Card 
                 key={event.id} 
-                className="event-card-mobile cursor-pointer"
+                className="cursor-pointer hover:shadow-md transition-shadow"
                 onClick={() => onEventClick(event)}
               >
-                <CardContent className="mobile-card-padding">
+                <CardContent className="p-3">
                   <div className="flex items-start justify-between gap-3">
                     <div className="flex-1 min-w-0">
                       <h4 className="font-medium text-sm line-clamp-1" title={event.title}>
