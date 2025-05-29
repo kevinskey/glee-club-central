@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { PageHeader } from "@/components/ui/page-header";
 import { Library, FileText, Image, Music, Video, Search, Filter, Upload } from "lucide-react";
@@ -24,6 +23,7 @@ const MediaLibraryPage: React.FC<MediaLibraryPageProps> = ({ isAdminView = false
   const {
     isLoading,
     error,
+    allMediaFiles,
     filteredMediaFiles,
     searchQuery,
     setSearchQuery,
@@ -44,6 +44,19 @@ const MediaLibraryPage: React.FC<MediaLibraryPageProps> = ({ isAdminView = false
   // State for upload modal
   const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
   
+  // Calculate counts for each media type from all files (not filtered)
+  const mediaCounts = {
+    all: allMediaFiles.length,
+    pdf: allMediaFiles.filter(file => getMediaType(file.file_type) === "pdf").length,
+    image: allMediaFiles.filter(file => getMediaType(file.file_type) === "image").length,
+    audio: allMediaFiles.filter(file => getMediaType(file.file_type) === "audio").length,
+    video: allMediaFiles.filter(file => getMediaType(file.file_type) === "video").length,
+  };
+  
+  console.log("Media counts:", mediaCounts);
+  console.log("All media files count:", allMediaFiles.length);
+  console.log("Filtered media files count:", filteredMediaFiles.length);
+  
   // Update state when mediaType is changed
   useEffect(() => {
     setSelectedMediaType(activeTab);
@@ -61,38 +74,27 @@ const MediaLibraryPage: React.FC<MediaLibraryPageProps> = ({ isAdminView = false
     setIsUploadModalOpen(false);
   };
 
-  // Sort files by title for better organization, especially for PDFs
-  const sortedFilteredFiles = [...filteredMediaFiles].sort((a, b) => {
-    const typeA = getMediaType(a.file_type);
-    const typeB = getMediaType(b.file_type);
+  // Filter files based on active tab
+  const getFilesForTab = (tabType: MediaType | "all") => {
+    if (tabType === "all") {
+      return filteredMediaFiles;
+    }
     
-    // For PDFs, prioritize sorting by title
-    if (typeA === "pdf" && typeB === "pdf") {
+    return filteredMediaFiles.filter(file => {
+      const mediaType = getMediaType(file.file_type);
+      return mediaType === tabType;
+    });
+  };
+
+  // Sort files by title for better organization
+  const sortFilesByTitle = (files: any[]) => {
+    return [...files].sort((a, b) => {
       return a.title.localeCompare(b.title, undefined, { 
         numeric: true, 
         sensitivity: 'base' 
       });
-    }
-    
-    // First sort by title alphabetically
-    return a.title.localeCompare(b.title, undefined, { 
-      numeric: true, 
-      sensitivity: 'base' 
     });
-  });
-
-  // Filter PDFs specifically for the documents tab with debugging
-  const pdfFiles = sortedFilteredFiles.filter(file => {
-    const mediaType = getMediaType(file.file_type);
-    const isPdf = mediaType === "pdf";
-    console.log(`File: ${file.title}, Type: ${file.file_type}, MediaType: ${mediaType}, IsPDF: ${isPdf}`);
-    return isPdf;
-  });
-
-  // Log PDF files for debugging
-  console.log("Total filtered files:", sortedFilteredFiles.length);
-  console.log("PDF files found:", pdfFiles.length);
-  console.log("PDF files:", pdfFiles.map(f => ({ title: f.title, type: f.file_type, url: f.file_url })));
+  };
 
   return (
     <div className="container mx-auto px-4 py-6">
@@ -131,7 +133,7 @@ const MediaLibraryPage: React.FC<MediaLibraryPageProps> = ({ isAdminView = false
         </div>
       </div>
       
-      {/* Media type tabs */}
+      {/* Media type tabs with fixed counts */}
       <Tabs 
         defaultValue="all" 
         value={activeTab}
@@ -140,42 +142,54 @@ const MediaLibraryPage: React.FC<MediaLibraryPageProps> = ({ isAdminView = false
       >
         <TabsList className="grid grid-cols-5 mb-8">
           <TabsTrigger value="all" className="flex items-center gap-1">
-            <Library className="h-4 w-4" /> All ({sortedFilteredFiles.length})
+            <Library className="h-4 w-4" /> All ({mediaCounts.all})
           </TabsTrigger>
           <TabsTrigger value="pdf" className="flex items-center gap-1">
-            <FileText className="h-4 w-4" /> Documents ({pdfFiles.length})
+            <FileText className="h-4 w-4" /> Documents ({mediaCounts.pdf})
           </TabsTrigger>
           <TabsTrigger value="audio" className="flex items-center gap-1">
-            <Music className="h-4 w-4" /> Audio
+            <Music className="h-4 w-4" /> Audio ({mediaCounts.audio})
           </TabsTrigger>
           <TabsTrigger value="image" className="flex items-center gap-1">
-            <Image className="h-4 w-4" /> Images
+            <Image className="h-4 w-4" /> Images ({mediaCounts.image})
           </TabsTrigger>
           <TabsTrigger value="video" className="flex items-center gap-1">
-            <Video className="h-4 w-4" /> Video
+            <Video className="h-4 w-4" /> Video ({mediaCounts.video})
           </TabsTrigger>
         </TabsList>
         
         <TabsContent value="all" className="w-full">
-          <MediaGrid files={sortedFilteredFiles} onViewPDF={handleViewPDF} />
+          <MediaGrid files={sortFilesByTitle(getFilesForTab("all"))} onViewPDF={handleViewPDF} />
         </TabsContent>
         
         <TabsContent value="pdf" className="w-full">
           <MediaGrid 
-            files={pdfFiles}
+            files={sortFilesByTitle(getFilesForTab("pdf"))}
             onViewPDF={handleViewPDF}
             showPDFCount={true}
           />
         </TabsContent>
         
-        {["audio", "image", "video"].map((type) => (
-          <TabsContent key={type} value={type} className="w-full">
-            <MediaGrid 
-              files={sortedFilteredFiles}
-              onViewPDF={handleViewPDF}
-            />
-          </TabsContent>
-        ))}
+        <TabsContent value="audio" className="w-full">
+          <MediaGrid 
+            files={sortFilesByTitle(getFilesForTab("audio"))}
+            onViewPDF={handleViewPDF}
+          />
+        </TabsContent>
+        
+        <TabsContent value="image" className="w-full">
+          <MediaGrid 
+            files={sortFilesByTitle(getFilesForTab("image"))}
+            onViewPDF={handleViewPDF}
+          />
+        </TabsContent>
+        
+        <TabsContent value="video" className="w-full">
+          <MediaGrid 
+            files={sortFilesByTitle(getFilesForTab("video"))}
+            onViewPDF={handleViewPDF}
+          />
+        </TabsContent>
       </Tabs>
 
       {/* Upload Media Modal */}
