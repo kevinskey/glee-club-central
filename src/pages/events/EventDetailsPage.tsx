@@ -141,14 +141,14 @@ END:VCALENDAR`;
             )}
           </div>
 
-          {/* Event Image */}
+          {/* Event Image - Full Size Display */}
           {event.feature_image_url && (
             <Card>
               <CardContent className="p-0">
                 <img 
                   src={event.feature_image_url} 
                   alt={event.title}
-                  className="w-full h-64 object-cover rounded-lg"
+                  className="w-full object-cover rounded-lg"
                 />
               </CardContent>
             </Card>
@@ -167,6 +167,13 @@ END:VCALENDAR`;
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-2">
+                  {event.call_time && (
+                    <div className="flex items-center text-sm">
+                      <Clock className="h-4 w-4 mr-2 text-muted-foreground" />
+                      <span className="font-medium">Call Time:</span>
+                      <span className="ml-2">{format(new Date(event.call_time), 'PPP p')}</span>
+                    </div>
+                  )}
                   <div className="flex items-center text-sm">
                     <Calendar className="h-4 w-4 mr-2 text-muted-foreground" />
                     <span className="font-medium">Start:</span>
