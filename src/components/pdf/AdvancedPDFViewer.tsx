@@ -1,4 +1,3 @@
-
 import React, { useState, useCallback, useEffect, useRef } from 'react';
 import { Document, Page, pdfjs } from 'react-pdf';
 import { Button } from '@/components/ui/button';
@@ -78,6 +77,7 @@ const AdvancedPDFViewer: React.FC<AdvancedPDFViewerProps> = ({
   const [scale, setScale] = useState<number>(1.0);
   const [rotation, setRotation] = useState<number>(0);
   const [isFullscreen, setIsFullscreen] = useState<boolean>(false);
+  const [preFullscreenScale, setPreFullscreenScale] = useState<number>(1.0);
   
   // UI state
   const [showToolbar, setShowToolbar] = useState<boolean>(true);
@@ -115,6 +115,30 @@ const AdvancedPDFViewer: React.FC<AdvancedPDFViewerProps> = ({
     canUndo,
     canRedo
   } = usePDFAnnotations(sheetMusicId);
+
+  // Calculate optimal scale for fullscreen
+  const calculateFullscreenScale = useCallback(() => {
+    if (!pageRef.current) return 1.0;
+
+    const viewport = {
+      width: window.innerWidth,
+      height: window.innerHeight - (isFullscreen ? 80 : 0) // Account for fullscreen header
+    };
+
+    // Get the current page dimensions at scale 1.0
+    const basePageWidth = 612; // Standard PDF page width at 72 DPI
+    const basePageHeight = 792; // Standard PDF page height at 72 DPI (letter size)
+    
+    // Calculate scale to fit width and height
+    const scaleToFitWidth = (viewport.width * 0.9) / basePageWidth; // 90% of viewport width
+    const scaleToFitHeight = (viewport.height * 0.9) / basePageHeight; // 90% of viewport height
+    
+    // Use the smaller scale to ensure the page fits entirely
+    const optimalScale = Math.min(scaleToFitWidth, scaleToFitHeight);
+    
+    // Clamp between reasonable bounds
+    return Math.max(0.5, Math.min(3.0, optimalScale));
+  }, [isFullscreen]);
 
   // Load data on mount
   useEffect(() => {
@@ -274,16 +298,32 @@ const AdvancedPDFViewer: React.FC<AdvancedPDFViewerProps> = ({
   };
 
   const toggleFullscreen = () => {
-    setIsFullscreen(!isFullscreen);
     if (!isFullscreen) {
-      toast({ title: "Entered fullscreen mode", description: "Press ESC or the X button to exit" });
+      // Entering fullscreen - store current scale and calculate optimal scale
+      setPreFullscreenScale(scale);
+      setIsFullscreen(true);
+      
+      // Calculate and apply optimal scale after a brief delay to ensure fullscreen is active
+      setTimeout(() => {
+        const optimalScale = calculateFullscreenScale();
+        setScale(optimalScale);
+        toast({ 
+          title: "Entered fullscreen mode", 
+          description: `PDF scaled to ${Math.round(optimalScale * 100)}% for optimal viewing. Press ESC or the X button to exit.` 
+        });
+      }, 100);
     } else {
+      // Exiting fullscreen - restore previous scale
+      setIsFullscreen(false);
+      setScale(preFullscreenScale);
       toast({ title: "Exited fullscreen mode" });
     }
   };
 
   const exitFullscreen = () => {
     setIsFullscreen(false);
+    setScale(preFullscreenScale);
+    toast({ title: "Exited fullscreen mode" });
   };
 
   const handlePrint = () => {
