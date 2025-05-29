@@ -24,7 +24,7 @@ export function PageHeader({
           {icon && <div className="text-primary flex items-center">{icon}</div>}
           <h1 className="text-2xl font-bold tracking-tight text-foreground leading-none">{title}</h1>
         </div>
-        {actions && <div className="flex items-end">{actions}</div>}
+        {actions && <div className="flex items-end mt-2">{actions}</div>}
       </div>
       {description && (
         <p className="text-base text-muted-foreground">{description}</p>
