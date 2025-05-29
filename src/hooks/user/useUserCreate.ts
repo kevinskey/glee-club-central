@@ -36,7 +36,15 @@ export const useUserCreate = (
       
       if (authError) {
         console.error('Error creating user in auth:', authError);
-        toast.error(authError.message || 'Failed to create user account');
+        
+        // Handle specific error cases
+        if (authError.message.includes('User already registered')) {
+          toast.error('A user with this email already exists');
+        } else if (authError.message.includes('Database error')) {
+          toast.error('Database error occurred. Please try again.');
+        } else {
+          toast.error(authError.message || 'Failed to create user account');
+        }
         return false;
       }
       
@@ -46,39 +54,40 @@ export const useUserCreate = (
         return false;
       }
       
+      // Wait a moment to ensure the user is properly created
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
       // Determine admin status from role
       const isAdmin = userData.role === 'admin' || userData.is_admin;
       
-      // Use UPSERT to handle profile creation/update properly
+      // Update the profile with additional data
       const { error: profileError } = await supabase
         .from('profiles')
-        .upsert({
-          id: authData.user.id,
+        .update({
           first_name: userData.first_name,
           last_name: userData.last_name,
-          email: userData.email,
           phone: userData.phone || null,
           voice_part: userData.voice_part,
-          status: 'active', // Ensure new users are active by default
+          status: 'active',
           class_year: userData.class_year || null,
           notes: userData.notes || null,
           dues_paid: userData.dues_paid || false,
           join_date: userData.join_date || new Date().toISOString().split('T')[0],
           is_super_admin: isAdmin,
           role: isAdmin ? 'admin' : 'member',
+          avatar_url: userData.avatar_url || null,
           updated_at: new Date().toISOString()
-        }, { 
-          onConflict: 'id' 
-        });
+        })
+        .eq('id', authData.user.id);
       
       if (profileError) {
-        console.error('Error upserting profile:', profileError);
+        console.error('Error updating profile:', profileError);
         toast.error('User created but profile update failed');
         // Still return true since the user was created successfully
+      } else {
+        console.log('User added successfully with ID:', authData.user.id);
+        toast.success(`Added ${userData.first_name} ${userData.last_name}`);
       }
-      
-      console.log('User added successfully with ID:', authData.user.id);
-      toast.success(`Added ${userData.first_name} ${userData.last_name}`);
       
       // Dispatch event for user added
       const userAddedEvent = new CustomEvent('user:added', {
@@ -95,14 +104,15 @@ export const useUserCreate = (
           last_name: userData.last_name,
           phone: userData.phone || null,
           voice_part: userData.voice_part,
-          status: 'active', // Set to active
+          status: 'active',
           created_at: new Date().toISOString(),
           class_year: userData.class_year,
           notes: userData.notes,
           dues_paid: userData.dues_paid,
           is_super_admin: isAdmin,
           role: isAdmin ? 'admin' : 'member',
-          join_date: userData.join_date
+          join_date: userData.join_date,
+          avatar_url: userData.avatar_url || null
         };
         
         setUsers(currentUsers => [...currentUsers, newUser]);
@@ -111,7 +121,7 @@ export const useUserCreate = (
       return true;
     } catch (err) {
       console.error('Unexpected error adding user:', err);
-      toast.error('An unexpected error occurred');
+      toast.error('An unexpected error occurred while creating the user');
       return false;
     }
   }, [setUsers]);
