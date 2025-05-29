@@ -222,6 +222,7 @@ export type Database = {
           event_host_contact: string | null
           event_host_name: string | null
           event_type: string | null
+          event_types: string[] | null
           feature_image_url: string | null
           full_description: string | null
           id: string
@@ -243,6 +244,7 @@ export type Database = {
           event_host_contact?: string | null
           event_host_name?: string | null
           event_type?: string | null
+          event_types?: string[] | null
           feature_image_url?: string | null
           full_description?: string | null
           id?: string
@@ -264,6 +266,7 @@ export type Database = {
           event_host_contact?: string | null
           event_host_name?: string | null
           event_type?: string | null
+          event_types?: string[] | null
           feature_image_url?: string | null
           full_description?: string | null
           id?: string

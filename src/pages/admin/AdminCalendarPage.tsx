@@ -1,5 +1,6 @@
 
 import React, { useState, useRef, useEffect } from 'react';
+import { useSearchParams, useNavigate } from 'react-router-dom';
 import { CalendarView } from '@/components/calendar/CalendarView';
 import { EventDialog } from '@/components/calendar/EventDialog';
 import { EventEditor } from '@/components/admin/EventEditor';
@@ -16,10 +17,24 @@ const STORAGE_KEY = 'glee-event-editor-data';
 
 export default function AdminCalendarPage() {
   const { events, loading, error, createEvent, updateEvent, deleteEvent, fetchEvents } = useCalendarEvents();
+  const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
+  
   const [selectedEvent, setSelectedEvent] = useState<CalendarEvent | null>(null);
   const [editingEvent, setEditingEvent] = useState<CalendarEvent | null>(null);
   const [isCreating, setIsCreating] = useState(false);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+
+  // Handle URL parameters for editing
+  useEffect(() => {
+    const editEventId = searchParams.get('edit');
+    if (editEventId) {
+      const eventToEdit = events.find(e => e.id === editEventId);
+      if (eventToEdit) {
+        setEditingEvent(eventToEdit);
+      }
+    }
+  }, [searchParams, events]);
 
   // Check for saved draft on page load
   useEffect(() => {
@@ -40,8 +55,8 @@ export default function AdminCalendarPage() {
   }, []);
 
   const handleEventClick = (event: CalendarEvent) => {
-    setSelectedEvent(event);
-    setIsDialogOpen(true);
+    // Navigate to event details page
+    navigate(`/admin/events/${event.id}`);
   };
 
   const handleSaveEvent = async (eventData: Omit<CalendarEvent, 'id' | 'created_at'>) => {
@@ -49,6 +64,8 @@ export default function AdminCalendarPage() {
       if (editingEvent) {
         await updateEvent(editingEvent.id, eventData);
         toast.success('Event updated successfully');
+        // Clear edit parameter from URL
+        navigate('/admin/calendar');
       } else {
         await createEvent(eventData);
         toast.success('Event created successfully');
@@ -81,16 +98,19 @@ export default function AdminCalendarPage() {
   const handleCreateNew = () => {
     setIsCreating(true);
     setEditingEvent(null);
+    // Clear any edit parameters from URL
+    navigate('/admin/calendar');
   };
 
   const handleEditEvent = (event: CalendarEvent) => {
-    setEditingEvent(event);
-    setIsDialogOpen(false);
+    navigate(`/admin/calendar?edit=${event.id}`);
   };
 
   const handleCloseEditor = () => {
     setIsCreating(false);
     setEditingEvent(null);
+    // Clear edit parameter from URL
+    navigate('/admin/calendar');
   };
 
   if (loading) {
@@ -204,7 +224,11 @@ export default function AdminCalendarPage() {
                   <div>
                     <p className="text-sm text-muted-foreground">Concerts</p>
                     <p className="text-xl font-semibold">
-                      {events.filter(event => event.event_type === 'concert').length}
+                      {events.filter(event => 
+                        event.event_types?.includes('concert') || 
+                        event.event_types?.includes('tour_concert') ||
+                        event.event_type === 'concert'
+                      ).length}
                     </p>
                   </div>
                 </div>
