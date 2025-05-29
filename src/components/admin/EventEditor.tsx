@@ -8,7 +8,7 @@ import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Checkbox } from '@/components/ui/checkbox';
-import { Calendar, Clock, Image as ImageIcon, AlertCircle, MapPin, ChevronDown } from 'lucide-react';
+import { Calendar, Clock, Image as ImageIcon, AlertCircle, MapPin, ChevronDown, Check } from 'lucide-react';
 import { MediaPicker } from '@/components/media/MediaPicker';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
@@ -231,6 +231,10 @@ export const EventEditor: React.FC<EventEditorProps> = ({
     onClose();
   };
 
+  const handleEventTypesDone = () => {
+    setIsEventTypesOpen(false);
+  };
+
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && handleClose()}>
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
@@ -270,40 +274,89 @@ export const EventEditor: React.FC<EventEditorProps> = ({
 
           <div>
             <Label>Event Types</Label>
-            <Popover open={isEventTypesOpen} onOpenChange={setIsEventTypesOpen}>
-              <PopoverTrigger asChild>
-                <Button
-                  variant="outline"
-                  role="combobox"
-                  aria-expanded={isEventTypesOpen}
-                  className="w-full justify-between"
-                >
-                  {formData.event_types.length > 0
-                    ? `${formData.event_types.length} type${formData.event_types.length > 1 ? 's' : ''} selected`
-                    : "Select event types..."}
-                  <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent className="w-full p-0" align="start">
-                <div className="max-h-60 overflow-y-auto p-2">
-                  {EVENT_TYPES.map((type) => (
-                    <div key={type.value} className="flex items-center space-x-2 p-2 hover:bg-muted rounded-sm">
-                      <Checkbox
-                        id={type.value}
-                        checked={formData.event_types.includes(type.value)}
-                        onCheckedChange={() => handleEventTypeToggle(type.value)}
-                      />
-                      <label
-                        htmlFor={type.value}
-                        className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer flex-1"
-                      >
-                        {type.label}
-                      </label>
+            <div className="relative">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setIsEventTypesOpen(!isEventTypesOpen)}
+                className="w-full justify-between"
+              >
+                {formData.event_types.length > 0
+                  ? `${formData.event_types.length} type${formData.event_types.length > 1 ? 's' : ''} selected`
+                  : "Select event types..."}
+                <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+              </Button>
+              
+              {isEventTypesOpen && (
+                <div className="absolute top-full left-0 right-0 z-50 mt-1 bg-white border rounded-lg shadow-lg p-4">
+                  <div className="hidden md:block">
+                    {/* Desktop: Horizontal grid layout */}
+                    <div className="grid grid-cols-3 gap-3 max-h-60 overflow-y-auto">
+                      {EVENT_TYPES.map((type) => (
+                        <div key={type.value} className="flex items-center space-x-2 p-2 hover:bg-muted rounded-sm">
+                          <Checkbox
+                            id={type.value}
+                            checked={formData.event_types.includes(type.value)}
+                            onCheckedChange={() => handleEventTypeToggle(type.value)}
+                          />
+                          <label
+                            htmlFor={type.value}
+                            className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer flex-1"
+                          >
+                            {type.label}
+                          </label>
+                        </div>
+                      ))}
                     </div>
-                  ))}
+                    <div className="flex justify-end mt-4 pt-3 border-t">
+                      <Button 
+                        type="button" 
+                        variant="default" 
+                        size="sm" 
+                        onClick={handleEventTypesDone}
+                        className="bg-glee-purple hover:bg-glee-purple/90"
+                      >
+                        <Check className="h-4 w-4 mr-1" />
+                        Done
+                      </Button>
+                    </div>
+                  </div>
+                  <div className="md:hidden">
+                    {/* Mobile: Vertical list layout */}
+                    <div className="space-y-2 max-h-60 overflow-y-auto">
+                      {EVENT_TYPES.map((type) => (
+                        <div key={type.value} className="flex items-center space-x-2 p-2 hover:bg-muted rounded-sm">
+                          <Checkbox
+                            id={type.value}
+                            checked={formData.event_types.includes(type.value)}
+                            onCheckedChange={() => handleEventTypeToggle(type.value)}
+                          />
+                          <label
+                            htmlFor={type.value}
+                            className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer flex-1"
+                          >
+                            {type.label}
+                          </label>
+                        </div>
+                      ))}
+                    </div>
+                    <div className="flex justify-end mt-4 pt-3 border-t">
+                      <Button 
+                        type="button" 
+                        variant="default" 
+                        size="sm" 
+                        onClick={handleEventTypesDone}
+                        className="bg-glee-purple hover:bg-glee-purple/90"
+                      >
+                        <Check className="h-4 w-4 mr-1" />
+                        Done
+                      </Button>
+                    </div>
+                  </div>
                 </div>
-              </PopoverContent>
-            </Popover>
+              )}
+            </div>
+            
             {formData.event_types.length > 0 && (
               <div className="flex flex-wrap gap-1 mt-2">
                 {formData.event_types.map((type) => (
