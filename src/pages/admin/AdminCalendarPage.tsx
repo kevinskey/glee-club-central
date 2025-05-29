@@ -244,7 +244,10 @@ export default function AdminCalendarPage() {
               description="Create, edit, and manage all Glee Club events and performances"
               icon={<Calendar className="h-6 w-6" />}
               actions={
-                <Button onClick={handleCreateNew} className="bg-glee-purple hover:bg-glee-purple/90">
+                <Button 
+                  onClick={handleCreateNew} 
+                  className="bg-glee-spelman hover:bg-glee-spelman/90 text-white border-glee-spelman"
+                >
                   <Plus className="h-4 w-4 mr-2" />
                   Create Event
                 </Button>
