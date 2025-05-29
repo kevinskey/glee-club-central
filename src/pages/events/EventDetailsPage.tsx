@@ -119,11 +119,27 @@ END:VCALENDAR`;
               </Button>
             </div>
             
-            <PageHeader
-              title={event.title}
-              description={event.short_description}
-              icon={<Calendar className="h-6 w-6" />}
-            />
+            <div className="flex gap-6 items-start">
+              {/* Event Image - Small size next to title */}
+              {event.feature_image_url && (
+                <div className="flex-shrink-0">
+                  <img 
+                    src={event.feature_image_url} 
+                    alt={event.title}
+                    className="w-32 h-24 object-cover rounded-lg border"
+                  />
+                </div>
+              )}
+              
+              {/* Title and Description */}
+              <div className="flex-1">
+                <PageHeader
+                  title={event.title}
+                  description={event.short_description}
+                  icon={<Calendar className="h-6 w-6" />}
+                />
+              </div>
+            </div>
 
             {/* Event Types */}
             {event.event_types && event.event_types.length > 0 && (
@@ -140,19 +156,6 @@ END:VCALENDAR`;
               </div>
             )}
           </div>
-
-          {/* Event Image - Full Size Display */}
-          {event.feature_image_url && (
-            <Card>
-              <CardContent className="p-0">
-                <img 
-                  src={event.feature_image_url} 
-                  alt={event.title}
-                  className="w-full object-cover rounded-lg"
-                />
-              </CardContent>
-            </Card>
-          )}
 
           {/* Main Details */}
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
