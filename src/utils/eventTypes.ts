@@ -1,5 +1,6 @@
 
 export const EVENT_TYPES = [
+  { value: 'event', label: 'Event' },
   { value: 'rehearsal', label: 'Rehearsal' },
   { value: 'performance', label: 'Performance' },
   { value: 'meeting', label: 'Meeting' },
@@ -23,6 +24,7 @@ export const getEventTypeLabel = (type: string): string => {
 
 export const getEventTypeColor = (type: string): string => {
   const colorMap: Record<string, string> = {
+    event: 'text-gray-700 bg-gray-100 border-gray-300',
     rehearsal: 'text-blue-700 bg-blue-100 border-blue-300',
     performance: 'text-purple-700 bg-purple-100 border-purple-300',
     meeting: 'text-green-700 bg-green-100 border-green-300',
