@@ -11,6 +11,7 @@ export interface CalendarEvent {
   full_description?: string;
   event_host_name?: string;
   event_host_contact?: string;
+  event_type?: string;
   is_private: boolean;
   allow_rsvp: boolean;
   allow_reminders: boolean;

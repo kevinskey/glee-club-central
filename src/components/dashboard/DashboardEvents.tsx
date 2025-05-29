@@ -37,16 +37,23 @@ export function DashboardEvents({ events, limit = 5 }: DashboardEventsProps) {
     <div className="space-y-3 md:space-y-4">
       {upcomingEvents.map(event => (
         <div key={event.id} className="border-b pb-3 last:border-0">
-          <h3 className="font-medium text-sm md:text-base">{event.title}</h3>
-          <div className="flex justify-between text-xs md:text-sm text-muted-foreground">
+          <div className="flex items-start justify-between">
+            <h3 className="font-medium text-sm md:text-base flex-1">{event.title}</h3>
+            {event.event_type && (
+              <span className="text-xs bg-glee-purple/10 text-glee-purple px-2 py-1 rounded-full ml-2 flex-shrink-0">
+                {event.event_type}
+              </span>
+            )}
+          </div>
+          <div className="flex justify-between text-xs md:text-sm text-muted-foreground mt-1">
             <span>{formatEventDate(event.start_time)}</span>
             <span>{formatEventTime(event.start_time)}</span>
           </div>
           {event.location_name && (
-            <div className="text-xs text-muted-foreground truncate">{event.location_name}</div>
+            <div className="text-xs text-muted-foreground truncate mt-1">{event.location_name}</div>
           )}
           {event.is_private && (
-            <div className="text-xs text-orange-600 font-medium">Members Only</div>
+            <div className="text-xs text-orange-600 font-medium mt-1">Members Only</div>
           )}
         </div>
       ))}

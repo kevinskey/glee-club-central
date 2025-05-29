@@ -2,84 +2,88 @@
 import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { CalendarDays, MapPin, Clock } from 'lucide-react';
+import { useCalendarEvents } from '@/hooks/useCalendarEvents';
+import { format } from 'date-fns';
 
 interface UpcomingEventsListProps {
   limit?: number;
-  type?: string;
+  eventType?: string;
 }
 
-// Sample events data since calendar functionality is removed
-const sampleEvents = [
-  {
-    id: '1',
-    title: 'Spring Concert',
-    date: '2024-04-20',
-    time: '7:30 PM',
-    location: 'Sisters Chapel',
-    description: 'Annual spring showcase performance'
-  },
-  {
-    id: '2',
-    title: 'Weekly Rehearsal',
-    date: '2024-02-15',
-    time: '7:00 PM',
-    location: 'Music Building, Room 101',
-    description: 'Regular rehearsal for current repertoire'
-  },
-  {
-    id: '3',
-    title: 'Soprano Sectional',
-    date: '2024-02-18',
-    time: '6:00 PM',
-    location: 'Music Building, Room 205',
-    description: 'Voice part rehearsal for sopranos'
-  }
-];
+export function UpcomingEventsList({ limit = 5, eventType }: UpcomingEventsListProps) {
+  const { events, loading, error } = useCalendarEvents();
 
-export function UpcomingEventsList({ limit = 5, type }: UpcomingEventsListProps) {
-  const events = sampleEvents.slice(0, limit);
-
-  if (events.length === 0) {
+  if (loading) {
     return (
       <div className="text-center text-muted-foreground py-8">
-        No upcoming events at this time.
+        Loading events...
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="text-center text-red-600 py-8">
+        Error loading events: {error}
+      </div>
+    );
+  }
+
+  // Filter events by type if specified, and get only upcoming events
+  const now = new Date();
+  const filteredEvents = events
+    .filter(event => {
+      const eventDate = new Date(event.start_time);
+      const isUpcoming = eventDate > now;
+      const matchesType = eventType ? event.event_type === eventType : true;
+      return isUpcoming && matchesType;
+    })
+    .slice(0, limit);
+
+  if (filteredEvents.length === 0) {
+    return (
+      <div className="text-center text-muted-foreground py-8">
+        No upcoming {eventType ? eventType.toLowerCase() + 's' : 'events'} at this time.
       </div>
     );
   }
 
   return (
     <div className="space-y-3">
-      {events.map((event) => (
+      {filteredEvents.map((event) => (
         <Card key={event.id} className="hover:shadow-md transition-shadow">
           <CardContent className="p-4">
             <div className="flex justify-between items-start mb-2">
               <h3 className="font-medium text-glee-purple">{event.title}</h3>
+              {event.event_type && (
+                <span className="text-xs bg-glee-purple/10 text-glee-purple px-2 py-1 rounded-full">
+                  {event.event_type}
+                </span>
+              )}
             </div>
             
             <div className="space-y-1 text-sm text-gray-600">
               <div className="flex items-center">
                 <CalendarDays className="h-4 w-4 mr-2" />
-                <span>{new Date(event.date).toLocaleDateString('en-US', { 
-                  weekday: 'short', 
-                  month: 'short', 
-                  day: 'numeric' 
-                })}</span>
+                <span>{format(new Date(event.start_time), 'EEE, MMM d')}</span>
               </div>
               
               <div className="flex items-center">
                 <Clock className="h-4 w-4 mr-2" />
-                <span>{event.time}</span>
+                <span>{format(new Date(event.start_time), 'h:mm a')}</span>
               </div>
               
-              <div className="flex items-center">
-                <MapPin className="h-4 w-4 mr-2" />
-                <span>{event.location}</span>
-              </div>
+              {event.location_name && (
+                <div className="flex items-center">
+                  <MapPin className="h-4 w-4 mr-2" />
+                  <span>{event.location_name}</span>
+                </div>
+              )}
             </div>
             
-            {event.description && (
+            {event.short_description && (
               <p className="text-sm text-gray-700 mt-2">
-                {event.description}
+                {event.short_description}
               </p>
             )}
           </CardContent>

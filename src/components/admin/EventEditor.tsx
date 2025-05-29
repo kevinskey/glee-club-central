@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { CalendarEvent } from '@/types/calendar';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
@@ -7,6 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Calendar, Clock, Image as ImageIcon, AlertCircle } from 'lucide-react';
 import { MediaPicker } from '@/components/media/MediaPicker';
 import { Alert, AlertDescription } from '@/components/ui/alert';
@@ -20,6 +20,19 @@ interface EventEditorProps {
 }
 
 const STORAGE_KEY = 'glee-event-editor-data';
+
+const EVENT_TYPES = [
+  { value: 'concert', label: 'Concert' },
+  { value: 'rehearsal', label: 'Rehearsal' },
+  { value: 'sectional', label: 'Sectional' },
+  { value: 'meeting', label: 'Meeting' },
+  { value: 'workshop', label: 'Workshop' },
+  { value: 'social', label: 'Social Event' },
+  { value: 'fundraiser', label: 'Fundraiser' },
+  { value: 'tour', label: 'Tour' },
+  { value: 'masterclass', label: 'Masterclass' },
+  { value: 'event', label: 'General Event' },
+];
 
 export const EventEditor: React.FC<EventEditorProps> = ({
   event,
@@ -38,6 +51,7 @@ export const EventEditor: React.FC<EventEditorProps> = ({
     full_description: '',
     event_host_name: '',
     event_host_contact: '',
+    event_type: 'event',
     is_private: false,
     allow_rsvp: false,
     allow_reminders: false,
@@ -76,6 +90,7 @@ export const EventEditor: React.FC<EventEditorProps> = ({
           full_description: event.full_description || '',
           event_host_name: event.event_host_name || '',
           event_host_contact: event.event_host_contact || '',
+          event_type: event.event_type || 'event',
           is_private: event.is_private || false,
           allow_rsvp: event.allow_rsvp || false,
           allow_reminders: event.allow_reminders || false,
@@ -195,6 +210,25 @@ export const EventEditor: React.FC<EventEditorProps> = ({
               onChange={(e) => handleInputChange('title', e.target.value)}
               required
             />
+          </div>
+
+          <div>
+            <Label htmlFor="event_type">Event Type</Label>
+            <Select 
+              value={formData.event_type} 
+              onValueChange={(value) => handleInputChange('event_type', value)}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Select event type" />
+              </SelectTrigger>
+              <SelectContent>
+                {EVENT_TYPES.map((type) => (
+                  <SelectItem key={type.value} value={type.value}>
+                    {type.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
