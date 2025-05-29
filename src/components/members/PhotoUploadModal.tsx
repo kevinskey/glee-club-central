@@ -4,8 +4,9 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Upload, Camera, X, RefreshCw, Loader2 } from 'lucide-react';
+import { Upload, Camera, X, RefreshCw, Loader2, Wand2 } from 'lucide-react';
 import { toast } from 'sonner';
+import { PhotoEnhancementModal } from './PhotoEnhancementModal';
 
 interface PhotoUploadModalProps {
   isOpen: boolean;
@@ -30,6 +31,8 @@ export function PhotoUploadModal({
   const [isCameraLoading, setIsCameraLoading] = useState(false);
   const [isCapturing, setIsCapturing] = useState(false);
   const [stream, setStream] = useState<MediaStream | null>(null);
+  const [showEnhancement, setShowEnhancement] = useState(false);
+  const [capturedPhotoForEnhancement, setCapturedPhotoForEnhancement] = useState<string>('');
   const fileInputRef = useRef<HTMLInputElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -56,7 +59,6 @@ export function PhotoUploadModal({
         videoRef.current.srcObject = mediaStream;
         console.log('📹 Video source set to element');
         
-        // Add event listener for when video can play
         videoRef.current.addEventListener('canplay', () => {
           console.log('🎬 Video can play event fired');
         });
@@ -92,14 +94,12 @@ export function PhotoUploadModal({
         currentTime: video.currentTime
       });
       
-      // Only set ready if video has valid dimensions
       if (video.videoWidth > 0 && video.videoHeight > 0) {
         console.log('✅ Video is ready for capture');
         setIsVideoReady(true);
         setIsCameraLoading(false);
       } else {
         console.log('⚠️ Video dimensions are still zero, waiting...');
-        // Try again after a short delay
         setTimeout(() => {
           if (video.videoWidth > 0 && video.videoHeight > 0) {
             console.log('✅ Video ready after retry');
@@ -127,12 +127,6 @@ export function PhotoUploadModal({
 
   const capturePhoto = useCallback(async () => {
     console.log('📸 Capture photo button clicked');
-    console.log('🔍 Current state:', {
-      isVideoReady,
-      isCapturing,
-      videoElement: !!videoRef.current,
-      canvasElement: !!canvasRef.current
-    });
 
     if (!videoRef.current || !canvasRef.current) {
       console.error('❌ Missing video or canvas element');
@@ -157,13 +151,6 @@ export function PhotoUploadModal({
         throw new Error('Could not get canvas context');
       }
 
-      // Double-check video dimensions before capture
-      console.log('📏 Pre-capture video check:', {
-        videoWidth: video.videoWidth,
-        videoHeight: video.videoHeight,
-        readyState: video.readyState
-      });
-
       if (video.videoWidth === 0 || video.videoHeight === 0) {
         throw new Error('Video dimensions are invalid');
       }
@@ -172,36 +159,18 @@ export function PhotoUploadModal({
       canvas.width = video.videoWidth;
       canvas.height = video.videoHeight;
       
-      // Draw the video frame to canvas
       context.drawImage(video, 0, 0, video.videoWidth, video.videoHeight);
 
-      console.log('🖼️ Converting canvas to blob...');
-      // Convert canvas to blob
-      const blob = await new Promise<Blob | null>((resolve) => {
-        canvas.toBlob((blob) => {
-          console.log('💾 Blob created:', blob ? `${blob.size} bytes` : 'null');
-          resolve(blob);
-        }, 'image/jpeg', 0.8);
-      });
+      console.log('🖼️ Converting canvas to base64...');
+      const base64String = canvas.toDataURL('image/jpeg', 0.8);
 
-      if (!blob) {
-        throw new Error('Failed to create image blob');
-      }
-
-      console.log('✅ Photo captured successfully, creating file...');
-      const file = new File([blob], 'camera-photo.jpg', { type: 'image/jpeg' });
-      setSelectedFile(file);
-      
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        const result = e.target?.result as string;
-        setPreviewUrl(result);
-        console.log('🖼️ Preview URL set successfully');
-      };
-      reader.readAsDataURL(file);
+      console.log('✅ Photo captured successfully');
+      setCapturedPhotoForEnhancement(base64String);
+      setPreviewUrl(base64String);
       
       stopCamera();
-      toast.success('Photo captured successfully!');
+      setShowEnhancement(true);
+      toast.success('Photo captured! Choose an enhancement option.');
       
     } catch (error) {
       console.error('❌ Error capturing photo:', error);
@@ -222,13 +191,11 @@ export function PhotoUploadModal({
   const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
-      // Validate file type
       if (!file.type.startsWith('image/')) {
         toast.error('Please select an image file');
         return;
       }
 
-      // Validate file size (max 5MB)
       if (file.size > 5 * 1024 * 1024) {
         toast.error('Image size must be less than 5MB');
         return;
@@ -236,32 +203,28 @@ export function PhotoUploadModal({
 
       setSelectedFile(file);
       
-      // Create preview URL
       const reader = new FileReader();
       reader.onload = (e) => {
-        setPreviewUrl(e.target?.result as string);
+        const result = e.target?.result as string;
+        setPreviewUrl(result);
+        setCapturedPhotoForEnhancement(result);
+        setShowEnhancement(true);
       };
       reader.readAsDataURL(file);
     }
   };
 
   const handleUpload = async () => {
-    if (!selectedFile) {
+    if (!previewUrl) {
       toast.error('Please select or capture a photo first');
       return;
     }
 
     setIsUploading(true);
     try {
-      // Convert file to base64 for now (in a real app, you'd upload to storage)
-      const reader = new FileReader();
-      reader.onload = () => {
-        const base64String = reader.result as string;
-        onPhotoSelect(base64String);
-        toast.success('Photo uploaded successfully');
-        onClose();
-      };
-      reader.readAsDataURL(selectedFile);
+      onPhotoSelect(previewUrl);
+      toast.success('Photo uploaded successfully');
+      onClose();
     } catch (error) {
       console.error('Error uploading photo:', error);
       toast.error('Failed to upload photo');
@@ -273,6 +236,7 @@ export function PhotoUploadModal({
   const handleRemovePhoto = () => {
     setSelectedFile(null);
     setPreviewUrl('');
+    setCapturedPhotoForEnhancement('');
     onPhotoSelect('');
     if (fileInputRef.current) {
       fileInputRef.current.value = '';
@@ -285,12 +249,19 @@ export function PhotoUploadModal({
 
   const handleClose = () => {
     stopCamera();
+    setShowEnhancement(false);
+    setCapturedPhotoForEnhancement('');
     onClose();
+  };
+
+  const handleEnhancementComplete = (enhancedPhotoUrl: string) => {
+    setPreviewUrl(enhancedPhotoUrl);
+    setShowEnhancement(false);
   };
 
   return (
     <>
-      <Dialog open={isOpen} onOpenChange={handleClose}>
+      <Dialog open={isOpen && !showEnhancement} onOpenChange={handleClose}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
@@ -322,7 +293,6 @@ export function PhotoUploadModal({
                   </div>
                 </div>
                 
-                {/* Debug info for troubleshooting */}
                 {isVideoReady && (
                   <div className="text-xs text-center text-muted-foreground">
                     Camera ready for capture
@@ -331,10 +301,7 @@ export function PhotoUploadModal({
                 
                 <div className="flex gap-2 justify-center">
                   <Button 
-                    onClick={() => {
-                      console.log('🔘 Capture button clicked, calling capturePhoto...');
-                      capturePhoto();
-                    }}
+                    onClick={capturePhoto}
                     size="lg" 
                     className="bg-glee-spelman hover:bg-glee-spelman/90"
                     disabled={!isVideoReady || isCapturing}
@@ -380,15 +347,26 @@ export function PhotoUploadModal({
                   </Avatar>
 
                   {previewUrl && (
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={handleRemovePhoto}
-                      className="text-destructive hover:text-destructive"
-                    >
-                      <X className="h-4 w-4 mr-2" />
-                      Remove Photo
-                    </Button>
+                    <div className="flex gap-2">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setShowEnhancement(true)}
+                        className="text-glee-spelman hover:text-glee-spelman"
+                      >
+                        <Wand2 className="h-4 w-4 mr-2" />
+                        Enhance Photo
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={handleRemovePhoto}
+                        className="text-destructive hover:text-destructive"
+                      >
+                        <X className="h-4 w-4 mr-2" />
+                        Remove Photo
+                      </Button>
+                    </div>
                   )}
                 </div>
 
@@ -413,7 +391,6 @@ export function PhotoUploadModal({
                     </Button>
                   </div>
 
-                  {/* File Input */}
                   <Input
                     ref={fileInputRef}
                     id="photo-upload"
@@ -441,7 +418,7 @@ export function PhotoUploadModal({
               </Button>
               <Button 
                 onClick={handleUpload} 
-                disabled={!selectedFile || isUploading}
+                disabled={!previewUrl || isUploading}
                 className="bg-glee-spelman hover:bg-glee-spelman/90"
               >
                 {isUploading ? (
@@ -457,6 +434,15 @@ export function PhotoUploadModal({
           )}
         </DialogContent>
       </Dialog>
+
+      {/* Photo Enhancement Modal */}
+      <PhotoEnhancementModal
+        isOpen={showEnhancement}
+        onClose={() => setShowEnhancement(false)}
+        onPhotoSelect={handleEnhancementComplete}
+        originalPhoto={capturedPhotoForEnhancement}
+        userName={userName}
+      />
 
       {/* Hidden canvas for photo capture */}
       <canvas ref={canvasRef} style={{ display: 'none' }} />
