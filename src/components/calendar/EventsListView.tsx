@@ -233,27 +233,13 @@ export const EventsListView: React.FC<EventsListViewProps> = ({
                       )}
                     </div>
                     
-                    {/* Event Types */}
-                    {eventTypes.length > 0 && (
-                      <div onClick={(e) => !isVirtual && showEventTypeDropdown && e.stopPropagation()}>
-                        {showEventTypeDropdown && onEventTypesChange && !isVirtual ? (
-                          <EventTypeDropdown
-                            event={event}
-                            onEventTypesChange={handleEventTypesChange}
-                          />
-                        ) : (
-                          <div className="flex flex-wrap gap-1">
-                            {eventTypes.map(type => (
-                              <Badge
-                                key={type}
-                                variant="outline"
-                                className={`text-xs ${getEventTypeColor(type)}`}
-                              >
-                                {getEventTypeLabel(type)}
-                              </Badge>
-                            ))}
-                          </div>
-                        )}
+                    {/* Event Types - only show dropdown if allowed */}
+                    {showEventTypeDropdown && onEventTypesChange && !isVirtual && (
+                      <div onClick={(e) => e.stopPropagation()}>
+                        <EventTypeDropdown
+                          event={event}
+                          onEventTypesChange={handleEventTypesChange}
+                        />
                       </div>
                     )}
                   </div>
