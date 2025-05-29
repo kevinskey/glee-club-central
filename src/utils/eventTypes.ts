@@ -26,7 +26,7 @@ export const getEventTypeColor = (type: string): string => {
   const colorMap: Record<string, string> = {
     event: 'text-gray-700 bg-gray-100 border-gray-300',
     rehearsal: 'text-blue-700 bg-blue-100 border-blue-300',
-    performance: 'text-purple-700 bg-purple-100 border-purple-300',
+    performance: 'text-green-700 bg-green-100 border-green-300',
     meeting: 'text-green-700 bg-green-100 border-green-300',
     social: 'text-pink-700 bg-pink-100 border-pink-300',
     workshop: 'text-orange-700 bg-orange-100 border-orange-300',
