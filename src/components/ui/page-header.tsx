@@ -19,12 +19,12 @@ export function PageHeader({
 }: PageHeaderProps) {
   return (
     <div className={cn("mb-6 space-y-2", className)}>
-      <div className="flex items-center justify-between">
+      <div className="flex justify-between">
         <div className="flex items-center gap-2">
           {icon && <div className="text-primary flex items-center">{icon}</div>}
           <h1 className="text-2xl font-bold tracking-tight text-foreground leading-none">{title}</h1>
         </div>
-        {actions && <div className="flex items-center">{actions}</div>}
+        {actions && <div className="flex items-end">{actions}</div>}
       </div>
       {description && (
         <p className="text-base text-muted-foreground">{description}</p>
