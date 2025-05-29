@@ -3,6 +3,7 @@ import React from "react";
 import { Link, useLocation } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
+import { Separator } from "@/components/ui/separator";
 import { 
   Home, 
   Music, 
@@ -16,10 +17,13 @@ import {
   ClipboardList,
   Calendar,
   LayoutDashboard,
-  Library
+  Library,
+  Headphones
 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { usePermissions } from "@/hooks/usePermissions";
+import { useNotifications } from "@/hooks/useNotifications";
+import { Badge } from "@/components/ui/badge";
 
 interface SidebarProps {
   className?: string;
@@ -29,62 +33,95 @@ export function Sidebar({ className }: SidebarProps) {
   const location = useLocation();
   const { profile } = useAuth();
   const { isSuperAdmin } = usePermissions();
+  const { unreadCount } = useNotifications();
   
   // Check if user is admin
   const isAdmin = profile?.is_super_admin || isSuperAdmin;
   
-  console.log('Sidebar - Admin check:', { 
-    profileSuperAdmin: profile?.is_super_admin, 
-    isSuperAdmin, 
-    isAdmin,
-    profile: profile
-  });
-  
-  // Base menu items that all users can see - moved Profile to top
-  const baseMenuItems = [
+  const isActiveRoute = (href: string, exact?: boolean) => {
+    if (exact) {
+      return location.pathname === href;
+    }
+    return location.pathname.startsWith(href);
+  };
+
+  // Organized menu sections
+  const menuSections = [
     {
-      title: "Profile",
-      href: "/dashboard/profile",
-      icon: User
+      title: "Dashboard",
+      items: [
+        {
+          title: "Home",
+          href: "/dashboard/member",
+          icon: Home,
+          exact: true
+        }
+      ]
     },
     {
-      title: "Sheet Music",
-      href: "/dashboard/sheet-music",
-      icon: Music
+      title: "My Music",
+      items: [
+        {
+          title: "Sheet Music",
+          href: "/dashboard/sheet-music",
+          icon: Music
+        },
+        {
+          title: "Practice Recordings",
+          href: "/dashboard/recordings",
+          icon: Headphones
+        },
+        {
+          title: "Recording Studio",
+          href: "/dashboard/recording-studio",
+          icon: Mic
+        },
+        {
+          title: "Media Library",
+          href: "/dashboard/media-library",
+          icon: Library
+        }
+      ]
     },
     {
-      title: "Media Library",
-      href: "/dashboard/media-library",
-      icon: Library
+      title: "Events & Activities",
+      items: [
+        {
+          title: "Calendar",
+          href: "/calendar",
+          icon: Calendar
+        },
+        {
+          title: "Attendance",
+          href: "/dashboard/attendance",
+          icon: ClipboardList
+        }
+      ]
     },
     {
-      title: "Recordings",
-      href: "/dashboard/recordings",
-      icon: Mic
-    },
-    {
-      title: "Recording Studio",
-      href: "/dashboard/recording-studio",
-      icon: Mic
-    },
-    {
-      title: "Announcements",
-      href: "/dashboard/announcements",
-      icon: Bell
-    },
-    {
-      title: "Archives",
-      href: "/dashboard/archives",
-      icon: Archive
-    },
-    {
-      title: "Attendance",
-      href: "/dashboard/attendance",
-      icon: ClipboardList
+      title: "Personal",
+      items: [
+        {
+          title: "My Profile",
+          href: "/dashboard/profile",
+          icon: User
+        },
+        {
+          title: "Announcements",
+          href: "/dashboard/announcements",
+          icon: Bell,
+          badge: unreadCount > 0 ? unreadCount : null
+        },
+        {
+          title: "Archives",
+          href: "/dashboard/archives",
+          icon: Archive
+        }
+      ]
     }
   ];
 
-  // Admin-only menu items
+  // Admin menu items
   const adminMenuItems = [
     {
       title: "Admin Dashboard",
@@ -97,7 +134,7 @@ export function Sidebar({ className }: SidebarProps) {
       icon: Calendar
     },
     {
-      title: "Members",
+      title: "Member Management",
       href: "/dashboard/members",
       icon: Users
     },
@@ -108,67 +145,76 @@ export function Sidebar({ className }: SidebarProps) {
     }
   ];
 
-  // Combine menu items based on role
-  const menuItems = isAdmin ? [...baseMenuItems, ...adminMenuItems] : baseMenuItems;
-
-  const isActiveRoute = (href: string, exact?: boolean) => {
-    if (exact) {
-      return location.pathname === href;
-    }
-    return location.pathname.startsWith(href);
-  };
-
   return (
     <div className={cn(
-      "fixed left-0 top-16 h-[calc(100vh-4rem)] w-64 border-r bg-background p-4 z-40 hidden md:block",
+      "fixed left-0 top-16 h-[calc(100vh-4rem)] w-64 border-r bg-background p-4 z-40 hidden md:block overflow-y-auto",
       className
     )}>
-      <nav className="space-y-2">
-        <div className="mb-4">
-          <h3 className="mb-2 px-2 text-sm font-semibold text-muted-foreground">
-            Navigation
-          </h3>
-        </div>
-        
-        {/* Dashboard link - everyone goes to member dashboard for simplicity */}
-        <Button
-          variant={isActiveRoute("/dashboard/member", true) ? "secondary" : "ghost"}
-          className={cn(
-            "w-full justify-start",
-            isActiveRoute("/dashboard/member", true) && "bg-glee-spelman/10 text-glee-spelman"
-          )}
-          asChild
-        >
-          <Link to="/dashboard/member">
-            <Home className="mr-2 h-4 w-4" />
-            Dashboard
-          </Link>
-        </Button>
-        
-        {/* Show admin status for debugging */}
-        {isAdmin && (
-          <div className="mb-4 p-2 bg-amber-100 text-amber-800 rounded text-xs">
-            Admin Mode Active
+      <nav className="space-y-6">
+        {/* Regular menu sections */}
+        {menuSections.map((section) => (
+          <div key={section.title}>
+            <h3 className="mb-3 px-2 text-sm font-semibold text-muted-foreground uppercase tracking-wider">
+              {section.title}
+            </h3>
+            <div className="space-y-1">
+              {section.items.map((item) => (
+                <Button
+                  key={item.href}
+                  variant={isActiveRoute(item.href, item.exact) ? "secondary" : "ghost"}
+                  className={cn(
+                    "w-full justify-start relative",
+                    isActiveRoute(item.href, item.exact) && "bg-glee-spelman/10 text-glee-spelman font-medium"
+                  )}
+                  asChild
+                >
+                  <Link to={item.href}>
+                    <item.icon className="mr-3 h-4 w-4" />
+                    {item.title}
+                    {item.badge && (
+                      <Badge 
+                        variant="destructive" 
+                        className="ml-auto h-5 w-5 rounded-full p-0 flex items-center justify-center text-xs"
+                      >
+                        {item.badge}
+                      </Badge>
+                    )}
+                  </Link>
+                </Button>
+              ))}
+            </div>
           </div>
-        )}
-        
-        {/* Other menu items */}
-        {menuItems.map((item) => (
-          <Button
-            key={item.href}
-            variant={isActiveRoute(item.href) ? "secondary" : "ghost"}
-            className={cn(
-              "w-full justify-start",
-              isActiveRoute(item.href) && "bg-glee-spelman/10 text-glee-spelman"
-            )}
-            asChild
-          >
-            <Link to={item.href}>
-              <item.icon className="mr-2 h-4 w-4" />
-              {item.title}
-            </Link>
-          </Button>
         ))}
+        
+        {/* Admin section */}
+        {isAdmin && (
+          <>
+            <Separator className="my-4" />
+            <div>
+              <h3 className="mb-3 px-2 text-sm font-semibold text-muted-foreground uppercase tracking-wider">
+                Administration
+              </h3>
+              <div className="space-y-1">
+                {adminMenuItems.map((item) => (
+                  <Button
+                    key={item.href}
+                    variant={isActiveRoute(item.href) ? "secondary" : "ghost"}
+                    className={cn(
+                      "w-full justify-start",
+                      isActiveRoute(item.href) && "bg-amber-100 text-amber-900 font-medium"
+                    )}
+                    asChild
+                  >
+                    <Link to={item.href}>
+                      <item.icon className="mr-3 h-4 w-4" />
+                      {item.title}
+                    </Link>
+                  </Button>
+                ))}
+              </div>
+            </div>
+          </>
+        )}
       </nav>
     </div>
   );
