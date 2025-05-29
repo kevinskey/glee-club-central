@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { createBrowserRouter, Navigate, Outlet } from 'react-router-dom';
 import ErrorBoundary from "./components/ErrorBoundary";
@@ -34,6 +33,7 @@ import FinancesPage from './pages/dashboard/FinancesPage';
 import CalendarPage from './pages/CalendarPage';
 import AdminCalendarPage from './pages/admin/AdminCalendarPage';
 import EventDetailsPage from './pages/events/EventDetailsPage';
+import PublicEventsPage from './pages/PublicEventsPage';
 import { AdminRoute } from './components/auth/AdminRoute';
 
 // Create a properly structured router with all routes
@@ -83,6 +83,17 @@ export const router = createBrowserRouter([
           {
             index: true,
             element: <CalendarPage />,
+          },
+        ],
+      },
+      // Public events page (for fans)
+      {
+        path: '/events',
+        element: <MainLayout />,
+        children: [
+          {
+            index: true,
+            element: <PublicEventsPage />,
           },
         ],
       },
