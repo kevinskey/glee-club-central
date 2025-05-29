@@ -34,7 +34,7 @@ export default function EventDetailsPage() {
     return (
       <ErrorBoundary>
         <div className="min-h-screen bg-gray-50/50">
-          <div className="container mx-auto px-4 py-6 max-w-4xl">
+          <div className="container mx-auto px-4 py-6 max-w-6xl">
             <div className="flex items-center justify-center h-64">
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-glee-purple"></div>
             </div>
@@ -48,7 +48,7 @@ export default function EventDetailsPage() {
     return (
       <ErrorBoundary>
         <div className="min-h-screen bg-gray-50/50">
-          <div className="container mx-auto px-4 py-6 max-w-4xl">
+          <div className="container mx-auto px-4 py-6 max-w-6xl">
             <Card>
               <CardContent className="flex flex-col items-center justify-center h-64 space-y-4">
                 <div className="text-center">
@@ -101,7 +101,7 @@ END:VCALENDAR`;
   return (
     <ErrorBoundary>
       <div className="min-h-screen bg-gray-50/50">
-        <div className="container mx-auto px-4 py-6 max-w-4xl space-y-6">
+        <div className="container mx-auto px-4 py-6 max-w-6xl space-y-6">
           {/* Header */}
           <div className="bg-white rounded-lg border shadow-sm p-6">
             <div className="flex items-center justify-between mb-4">
@@ -119,27 +119,11 @@ END:VCALENDAR`;
               </Button>
             </div>
             
-            <div className="flex gap-6 items-start">
-              {/* Event Image - Small size next to title */}
-              {event.feature_image_url && (
-                <div className="flex-shrink-0">
-                  <img 
-                    src={event.feature_image_url} 
-                    alt={event.title}
-                    className="w-32 h-24 object-cover rounded-lg border"
-                  />
-                </div>
-              )}
-              
-              {/* Title and Description */}
-              <div className="flex-1">
-                <PageHeader
-                  title={event.title}
-                  description={event.short_description}
-                  icon={<Calendar className="h-6 w-6" />}
-                />
-              </div>
-            </div>
+            <PageHeader
+              title={event.title}
+              description={event.short_description}
+              icon={<Calendar className="h-6 w-6" />}
+            />
 
             {/* Event Types */}
             {event.event_types && event.event_types.length > 0 && (
@@ -157,10 +141,23 @@ END:VCALENDAR`;
             )}
           </div>
 
-          {/* Main Details */}
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            {/* Event Information */}
-            <div className="lg:col-span-2 space-y-6">
+          {/* Main Content - Two Column Layout */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {/* Left Column - Event Image and Details */}
+            <div className="space-y-6">
+              {/* Event Image - 50% of left column */}
+              {event.feature_image_url && (
+                <Card>
+                  <CardContent className="p-0">
+                    <img 
+                      src={event.feature_image_url} 
+                      alt={event.title}
+                      className="w-full h-64 object-cover rounded-lg"
+                    />
+                  </CardContent>
+                </Card>
+              )}
+
               {/* Date & Time */}
               <Card>
                 <CardHeader>
@@ -230,7 +227,7 @@ END:VCALENDAR`;
               )}
             </div>
 
-            {/* Sidebar */}
+            {/* Right Column - Event Settings and Host Info */}
             <div className="space-y-6">
               {/* Host Information */}
               {(event.event_host_name || event.event_host_contact) && (
@@ -262,29 +259,43 @@ END:VCALENDAR`;
                 </Card>
               )}
 
-              {/* Event Settings */}
+              {/* Event Settings - Compact Layout */}
               <Card>
                 <CardHeader>
                   <CardTitle>Event Settings</CardTitle>
                 </CardHeader>
-                <CardContent className="space-y-3">
-                  <div className="flex items-center justify-between text-sm">
-                    <span>Private Event</span>
-                    <Badge variant={event.is_private ? "default" : "secondary"}>
-                      {event.is_private ? 'Yes' : 'No'}
-                    </Badge>
-                  </div>
-                  <div className="flex items-center justify-between text-sm">
-                    <span>RSVP Enabled</span>
-                    <Badge variant={event.allow_rsvp ? "default" : "secondary"}>
-                      {event.allow_rsvp ? 'Yes' : 'No'}
-                    </Badge>
-                  </div>
-                  <div className="flex items-center justify-between text-sm">
-                    <span>Reminders</span>
-                    <Badge variant={event.allow_reminders ? "default" : "secondary"}>
-                      {event.allow_reminders ? 'Yes' : 'No'}
-                    </Badge>
+                <CardContent className="space-y-4">
+                  <div className="grid grid-cols-1 gap-3">
+                    <div className="flex items-center justify-between py-2 border-b border-gray-100">
+                      <span className="text-sm font-medium">Private Event</span>
+                      <Badge variant={event.is_private ? "default" : "secondary"} className="text-xs">
+                        {event.is_private ? 'Yes' : 'No'}
+                      </Badge>
+                    </div>
+                    <div className="flex items-center justify-between py-2 border-b border-gray-100">
+                      <span className="text-sm font-medium">RSVP Enabled</span>
+                      <Badge variant={event.allow_rsvp ? "default" : "secondary"} className="text-xs">
+                        {event.allow_rsvp ? 'Yes' : 'No'}
+                      </Badge>
+                    </div>
+                    <div className="flex items-center justify-between py-2 border-b border-gray-100">
+                      <span className="text-sm font-medium">Reminders</span>
+                      <Badge variant={event.allow_reminders ? "default" : "secondary"} className="text-xs">
+                        {event.allow_reminders ? 'Yes' : 'No'}
+                      </Badge>
+                    </div>
+                    <div className="flex items-center justify-between py-2 border-b border-gray-100">
+                      <span className="text-sm font-medium">Calendar Download</span>
+                      <Badge variant={event.allow_ics_download ? "default" : "secondary"} className="text-xs">
+                        {event.allow_ics_download ? 'Enabled' : 'Disabled'}
+                      </Badge>
+                    </div>
+                    <div className="flex items-center justify-between py-2">
+                      <span className="text-sm font-medium">Map Link</span>
+                      <Badge variant={event.allow_google_map_link ? "default" : "secondary"} className="text-xs">
+                        {event.allow_google_map_link ? 'Enabled' : 'Disabled'}
+                      </Badge>
+                    </div>
                   </div>
                 </CardContent>
               </Card>
