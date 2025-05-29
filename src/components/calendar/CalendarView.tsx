@@ -43,9 +43,53 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
   const holidays = getNationalHolidays();
   const spelmanDates = getSpelmanAcademicDates();
 
+  // Convert holidays and academic dates to CalendarEvent format for the list view
+  const holidayEvents: CalendarEvent[] = useMemo(() => {
+    return holidays.map(holiday => ({
+      id: `holiday-${holiday.id}`,
+      title: holiday.title,
+      start_time: holiday.date.toISOString(),
+      end_time: holiday.date.toISOString(),
+      short_description: holiday.description,
+      full_description: holiday.description,
+      is_private: false,
+      allow_rsvp: false,
+      allow_reminders: false,
+      allow_ics_download: false,
+      allow_google_map_link: false,
+      created_at: new Date().toISOString(),
+      event_types: ['holiday'],
+      event_type: 'holiday'
+    }));
+  }, [holidays]);
+
+  const spelmanEvents: CalendarEvent[] = useMemo(() => {
+    return spelmanDates.map(date => ({
+      id: `spelman-${date.id}`,
+      title: date.title,
+      start_time: date.date.toISOString(),
+      end_time: date.date.toISOString(),
+      short_description: date.description,
+      full_description: date.description,
+      is_private: false,
+      allow_rsvp: false,
+      allow_reminders: false,
+      allow_ics_download: false,
+      allow_google_map_link: false,
+      created_at: new Date().toISOString(),
+      event_types: ['academic'],
+      event_type: 'academic'
+    }));
+  }, [spelmanDates]);
+
+  // Combine all events for the list view
+  const allEvents = useMemo(() => {
+    return [...events, ...holidayEvents, ...spelmanEvents];
+  }, [events, holidayEvents, spelmanEvents]);
+
   // Filter events based on privacy, search, and event types
   const filteredEvents = useMemo(() => {
-    return events.filter(event => {
+    return allEvents.filter(event => {
       // Privacy filter
       if (!showPrivateEvents && event.is_private) {
         return false;
@@ -71,11 +115,34 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
 
       return true;
     });
-  }, [events, showPrivateEvents, searchTerm, selectedEventTypes]);
+  }, [allEvents, showPrivateEvents, searchTerm, selectedEventTypes]);
 
-  // Convert events to FullCalendar format
+  // Convert events to FullCalendar format (only for calendar views, not list view)
   const calendarEvents = useMemo(() => {
-    const eventItems = filteredEvents.map(event => {
+    const eventItems = events.filter(event => {
+      // Apply same filters as above but only to regular events for calendar
+      if (!showPrivateEvents && event.is_private) {
+        return false;
+      }
+
+      if (searchTerm) {
+        const searchLower = searchTerm.toLowerCase();
+        const matchesSearch = 
+          event.title.toLowerCase().includes(searchLower) ||
+          event.short_description?.toLowerCase().includes(searchLower) ||
+          event.location_name?.toLowerCase().includes(searchLower);
+        
+        if (!matchesSearch) return false;
+      }
+
+      if (selectedEventTypes.length > 0) {
+        const eventTypes = event.event_types || (event.event_type ? [event.event_type] : []);
+        const hasSelectedType = eventTypes.some(type => selectedEventTypes.includes(type));
+        if (!hasSelectedType) return false;
+      }
+
+      return true;
+    }).map(event => {
       const eventTypes = event.event_types || (event.event_type ? [event.event_type] : []);
       const primaryType = eventTypes[0] || 'meeting';
       
@@ -138,7 +205,7 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
     }));
 
     return [...eventItems, ...holidayEvents, ...spelmanEvents];
-  }, [filteredEvents, holidays, spelmanDates, currentView]);
+  }, [events, holidays, spelmanDates, currentView, showPrivateEvents, searchTerm, selectedEventTypes]);
 
   // Get special dates for selected date
   const getSpecialDatesForDay = (date: Date) => {
@@ -236,7 +303,7 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
 
           {/* Results Summary */}
           <div className="text-sm text-muted-foreground">
-            Showing {filteredEvents.length} of {events.length} events
+            Showing {filteredEvents.length} of {allEvents.length} events
             {!showPrivateEvents && (
               <span className="ml-2 text-xs">(Private events hidden)</span>
             )}

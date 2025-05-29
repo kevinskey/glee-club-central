@@ -1,31 +1,41 @@
 
 export const EVENT_TYPES = [
-  { value: 'concert', label: 'Concert' },
-  { value: 'tour_concert', label: 'Tour Concert' },
   { value: 'rehearsal', label: 'Rehearsal' },
-  { value: 'sectional', label: 'Sectional' },
+  { value: 'performance', label: 'Performance' },
   { value: 'meeting', label: 'Meeting' },
-  { value: 'outing', label: 'Outing' },
-  { value: 'community_service', label: 'Community Service' },
-  { value: 'social_event', label: 'Social Event' },
-];
+  { value: 'social', label: 'Social Event' },
+  { value: 'workshop', label: 'Workshop' },
+  { value: 'audition', label: 'Audition' },
+  { value: 'fundraiser', label: 'Fundraiser' },
+  { value: 'competition', label: 'Competition' },
+  { value: 'masterclass', label: 'Master Class' },
+  { value: 'outreach', label: 'Outreach' },
+  { value: 'holiday', label: 'Holiday' },
+  { value: 'academic', label: 'Academic Date' },
+] as const;
 
-export const getEventTypeLabel = (value: string): string => {
-  const eventType = EVENT_TYPES.find(type => type.value === value);
-  return eventType?.label || value;
+export type EventType = typeof EVENT_TYPES[number]['value'];
+
+export const getEventTypeLabel = (type: string): string => {
+  const eventType = EVENT_TYPES.find(t => t.value === type);
+  return eventType?.label || type;
 };
 
-export const getEventTypeColor = (value: string): string => {
-  const colors: Record<string, string> = {
-    concert: 'bg-purple-100 text-purple-800 border-purple-300',
-    tour_concert: 'bg-indigo-100 text-indigo-800 border-indigo-300',
-    rehearsal: 'bg-blue-100 text-blue-800 border-blue-300',
-    sectional: 'bg-cyan-100 text-cyan-800 border-cyan-300',
-    meeting: 'bg-green-100 text-green-800 border-green-300',
-    outing: 'bg-yellow-100 text-yellow-800 border-yellow-300',
-    community_service: 'bg-orange-100 text-orange-800 border-orange-300',
-    social_event: 'bg-pink-100 text-pink-800 border-pink-300',
+export const getEventTypeColor = (type: string): string => {
+  const colorMap: Record<string, string> = {
+    rehearsal: 'text-blue-700 bg-blue-100 border-blue-300',
+    performance: 'text-purple-700 bg-purple-100 border-purple-300',
+    meeting: 'text-green-700 bg-green-100 border-green-300',
+    social: 'text-pink-700 bg-pink-100 border-pink-300',
+    workshop: 'text-orange-700 bg-orange-100 border-orange-300',
+    audition: 'text-red-700 bg-red-100 border-red-300',
+    fundraiser: 'text-yellow-700 bg-yellow-100 border-yellow-300',
+    competition: 'text-indigo-700 bg-indigo-100 border-indigo-300',
+    masterclass: 'text-cyan-700 bg-cyan-100 border-cyan-300',
+    outreach: 'text-green-700 bg-green-100 border-green-300',
+    holiday: 'text-red-700 bg-red-100 border-red-300',
+    academic: 'text-purple-700 bg-purple-100 border-purple-300',
   };
   
-  return colors[value] || 'bg-gray-100 text-gray-800 border-gray-300';
+  return colorMap[type] || 'text-gray-700 bg-gray-100 border-gray-300';
 };
