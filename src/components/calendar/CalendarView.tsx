@@ -8,8 +8,8 @@ import { CalendarEvent } from '@/types/calendar';
 import { format, isSameDay, startOfMonth, endOfMonth, eachDayOfInterval, isToday, parseISO } from 'date-fns';
 import { ChevronLeft, ChevronRight, Calendar as CalendarIcon, Clock, MapPin, Users } from 'lucide-react';
 import { getEventTypeColor } from '@/utils/eventTypes';
-import { nationalHolidays } from '@/utils/nationalHolidays';
-import { spelmanAcademicDates } from '@/utils/spelmanAcademicDates';
+import { getNationalHolidays } from '@/utils/nationalHolidays';
+import { getSpelmanAcademicDates } from '@/utils/spelmanAcademicDates';
 
 interface CalendarViewProps {
   events: CalendarEvent[];
@@ -56,13 +56,15 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
     const monthStart = startOfMonth(currentMonth);
     const monthEnd = endOfMonth(currentMonth);
     
+    const nationalHolidays = getNationalHolidays(currentMonth.getFullYear());
     const holidays = nationalHolidays.filter(holiday => {
-      const holidayDate = new Date(currentMonth.getFullYear(), holiday.month - 1, holiday.day);
+      const holidayDate = holiday.date;
       return holidayDate >= monthStart && holidayDate <= monthEnd;
     });
     
+    const spelmanAcademicDates = getSpelmanAcademicDates(currentMonth.getFullYear());
     const academicDates = spelmanAcademicDates.filter(date => {
-      const academicDate = parseISO(date.date);
+      const academicDate = date.date;
       return academicDate >= monthStart && academicDate <= monthEnd;
     });
     
@@ -124,10 +126,8 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
               onMonthChange={setCurrentMonth}
               modifiers={{
                 hasEvents: eventDates,
-                holiday: monthHolidays.holidays.map(h => 
-                  new Date(currentMonth.getFullYear(), h.month - 1, h.day)
-                ),
-                academic: monthHolidays.academicDates.map(d => parseISO(d.date))
+                holiday: monthHolidays.holidays.map(h => h.date),
+                academic: monthHolidays.academicDates.map(d => d.date)
               }}
               modifiersStyles={{
                 hasEvents: {
