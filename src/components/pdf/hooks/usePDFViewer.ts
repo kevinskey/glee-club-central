@@ -1,4 +1,3 @@
-
 import { useState, useCallback, useRef, useEffect, useMemo } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
@@ -52,19 +51,23 @@ export const usePDFViewer = (sheetMusicId: string) => {
 
     const viewport = {
       width: window.innerWidth,
-      height: window.innerHeight - (isFullscreen ? 80 : 0)
+      height: window.innerHeight - 80 // Account for header height
     };
 
+    // Standard PDF page dimensions (portrait orientation)
     const basePageWidth = 612;
     const basePageHeight = 792;
     
-    const scaleToFitWidth = (viewport.width * 0.9) / basePageWidth;
-    const scaleToFitHeight = (viewport.height * 0.9) / basePageHeight;
+    // Calculate scale to fit both width and height with some padding
+    const scaleToFitWidth = (viewport.width * 0.95) / basePageWidth;
+    const scaleToFitHeight = (viewport.height * 0.95) / basePageHeight;
     
+    // Use the smaller scale to ensure the page fits completely
     const optimalScale = Math.min(scaleToFitWidth, scaleToFitHeight);
     
-    return Math.max(0.5, Math.min(3.0, optimalScale));
-  }, [isFullscreen]);
+    // Ensure scale is within reasonable bounds
+    return Math.max(0.5, Math.min(2.5, optimalScale));
+  }, []);
 
   const loadBookmarks = async () => {
     if (!user) return;
