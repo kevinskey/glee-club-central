@@ -563,6 +563,7 @@ export type Database = {
           is_visible: boolean | null
           page_number: number | null
           sheet_music_id: string
+          source_table: string | null
           updated_at: string
           user_id: string
         }
@@ -574,6 +575,7 @@ export type Database = {
           is_visible?: boolean | null
           page_number?: number | null
           sheet_music_id: string
+          source_table?: string | null
           updated_at?: string
           user_id: string
         }
@@ -585,18 +587,11 @@ export type Database = {
           is_visible?: boolean | null
           page_number?: number | null
           sheet_music_id?: string
+          source_table?: string | null
           updated_at?: string
           user_id?: string
         }
-        Relationships: [
-          {
-            foreignKeyName: "pdf_annotations_sheet_music_id_fkey"
-            columns: ["sheet_music_id"]
-            isOneToOne: false
-            referencedRelation: "sheet_music"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       pdf_bookmarks: {
         Row: {

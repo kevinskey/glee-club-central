@@ -11,6 +11,7 @@ interface Annotation {
   annotation_type: string;
   annotations: any[];
   is_visible: boolean;
+  source_table: string;
   created_at: string;
   updated_at: string;
 }
@@ -36,6 +37,33 @@ export const usePDFAnnotations = (sheetMusicId: string) => {
   const [isLoading, setIsLoading] = useState(false);
   const [undoStack, setUndoStack] = useState<AnnotationData[][]>([]);
   const [redoStack, setRedoStack] = useState<AnnotationData[][]>([]);
+
+  const determineSourceTable = useCallback(async (fileId: string): Promise<'sheet_music' | 'media_library'> => {
+    // First check if it exists in sheet_music table
+    const { data: sheetMusicData } = await supabase
+      .from('sheet_music')
+      .select('id')
+      .eq('id', fileId)
+      .maybeSingle();
+
+    if (sheetMusicData) {
+      return 'sheet_music';
+    }
+
+    // Check if it exists in media_library table
+    const { data: mediaData } = await supabase
+      .from('media_library')
+      .select('id')
+      .eq('id', fileId)
+      .maybeSingle();
+
+    if (mediaData) {
+      return 'media_library';
+    }
+
+    // Default to media_library if neither found (for backwards compatibility)
+    return 'media_library';
+  }, []);
 
   const loadAnnotations = useCallback(async () => {
     if (!user || !sheetMusicId) return;
@@ -94,33 +122,11 @@ export const usePDFAnnotations = (sheetMusicId: string) => {
     }
 
     try {
-      console.log('Saving annotations for sheet music ID:', sheetMusicId);
+      console.log('Saving annotations for file ID:', sheetMusicId);
       
-      // First check if the sheet music exists in either sheet_music or media_library table
-      const { data: sheetMusicExists } = await supabase
-        .from('sheet_music')
-        .select('id')
-        .eq('id', sheetMusicId)
-        .single();
-
-      if (!sheetMusicExists) {
-        // Try checking media_library table as fallback
-        const { data: mediaExists } = await supabase
-          .from('media_library')
-          .select('id')
-          .eq('id', sheetMusicId)
-          .single();
-
-        if (!mediaExists) {
-          console.error('Sheet music ID not found in database:', sheetMusicId);
-          toast({
-            title: "Error",
-            description: "Invalid sheet music reference. Cannot save annotations.",
-            variant: "destructive"
-          });
-          return;
-        }
-      }
+      // Determine which table the file belongs to
+      const sourceTable = await determineSourceTable(sheetMusicId);
+      console.log('Determined source table:', sourceTable);
 
       const existingAnnotation = annotations.find(a => a.page_number === pageNumber);
 
@@ -145,14 +151,15 @@ export const usePDFAnnotations = (sheetMusicId: string) => {
             : a
         ));
       } else {
-        // Create new annotation - use media_library ID if sheet_music doesn't exist
+        // Create new annotation with correct source table
         const insertData = {
           user_id: user.id,
           sheet_music_id: sheetMusicId,
           page_number: pageNumber,
           annotation_type: 'mixed',
           annotations: annotationData,
-          is_visible: true
+          is_visible: true,
+          source_table: sourceTable
         };
 
         console.log('Inserting new annotation:', insertData);
@@ -183,7 +190,7 @@ export const usePDFAnnotations = (sheetMusicId: string) => {
         variant: "destructive"
       });
     }
-  }, [user, sheetMusicId, annotations, toast]);
+  }, [user, sheetMusicId, annotations, toast, determineSourceTable]);
 
   const addAnnotation = useCallback((annotation: AnnotationData, pageNumber: number) => {
     // Save current state for undo
