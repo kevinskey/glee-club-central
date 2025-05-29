@@ -36,10 +36,10 @@ export const CalendarHeader: React.FC<CalendarHeaderProps> = ({
           variant="outline"
           size="sm"
           onClick={onAddEvent}
-          className="flex items-center bg-[#003DA5] hover:bg-[#002A73] text-white border-[#003DA5] hover:border-[#002A73]"
+          className="flex items-center justify-center bg-glee-columbia hover:bg-blue-700 text-white border-glee-columbia hover:border-blue-700"
         >
           <CalendarPlus className="h-4 w-4 mr-2" />
-          Add Event
+          Create Event
         </Button>
         
         {onResetCalendar && (
