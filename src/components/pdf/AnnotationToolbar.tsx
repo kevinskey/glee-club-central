@@ -85,6 +85,50 @@ export const AnnotationToolbar: React.FC<AnnotationToolbarProps> = ({
     return color?.name || 'Custom';
   };
 
+  const handleToolSelect = (tool: string) => {
+    console.log('Tool selected:', tool);
+    onToolChange(tool);
+  };
+
+  const handleColorSelect = (color: string) => {
+    console.log('Color selected:', color);
+    onColorChange(color);
+  };
+
+  const handleStrokeWidthChange = (width: string) => {
+    console.log('Stroke width changed:', width);
+    onStrokeWidthChange(parseInt(width));
+  };
+
+  const handleUndo = () => {
+    console.log('Undo clicked, canUndo:', canUndo);
+    if (canUndo) {
+      onUndo();
+    }
+  };
+
+  const handleRedo = () => {
+    console.log('Redo clicked, canRedo:', canRedo);
+    if (canRedo) {
+      onRedo();
+    }
+  };
+
+  const handleSave = () => {
+    console.log('Save clicked');
+    onSave();
+  };
+
+  const handleClear = () => {
+    console.log('Clear clicked');
+    onClear();
+  };
+
+  const handleToggleAnnotations = () => {
+    console.log('Toggle annotations clicked, current state:', showAnnotations);
+    onToggleAnnotations();
+  };
+
   return (
     <div className={cn("flex items-center gap-2 p-2 bg-background border rounded-lg shadow-sm overflow-x-auto", className)}>
       {/* Drawing Tools */}
@@ -92,7 +136,7 @@ export const AnnotationToolbar: React.FC<AnnotationToolbarProps> = ({
         <Button
           variant={currentTool === 'pen' ? 'default' : 'outline'}
           size="sm"
-          onClick={() => onToolChange('pen')}
+          onClick={() => handleToolSelect('pen')}
           title="Pen"
         >
           <Palette className="h-4 w-4" />
@@ -100,7 +144,7 @@ export const AnnotationToolbar: React.FC<AnnotationToolbarProps> = ({
         <Button
           variant={currentTool === 'highlighter' ? 'default' : 'outline'}
           size="sm"
-          onClick={() => onToolChange('highlighter')}
+          onClick={() => handleToolSelect('highlighter')}
           title="Highlighter"
         >
           <Highlighter className="h-4 w-4" />
@@ -108,7 +152,7 @@ export const AnnotationToolbar: React.FC<AnnotationToolbarProps> = ({
         <Button
           variant={currentTool === 'text' ? 'default' : 'outline'}
           size="sm"
-          onClick={() => onToolChange('text')}
+          onClick={() => handleToolSelect('text')}
           title="Text"
         >
           <Type className="h-4 w-4" />
@@ -116,7 +160,7 @@ export const AnnotationToolbar: React.FC<AnnotationToolbarProps> = ({
         <Button
           variant={currentTool === 'eraser' ? 'default' : 'outline'}
           size="sm"
-          onClick={() => onToolChange('eraser')}
+          onClick={() => handleToolSelect('eraser')}
           title="Eraser"
         >
           <Eraser className="h-4 w-4" />
@@ -136,7 +180,7 @@ export const AnnotationToolbar: React.FC<AnnotationToolbarProps> = ({
               <ChevronDown className="h-3 w-3" />
             </Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent className="w-48 p-2">
+          <DropdownMenuContent className="w-48 p-2 bg-white dark:bg-gray-800 z-50">
             <div className="grid grid-cols-4 gap-2">
               {colors.map((color) => (
                 <button
@@ -146,7 +190,7 @@ export const AnnotationToolbar: React.FC<AnnotationToolbarProps> = ({
                     currentColor === color.value ? "border-gray-600 ring-2 ring-blue-500" : "border-gray-300"
                   )}
                   style={{ backgroundColor: color.value }}
-                  onClick={() => onColorChange(color.value)}
+                  onClick={() => handleColorSelect(color.value)}
                   title={color.name}
                 />
               ))}
@@ -158,11 +202,11 @@ export const AnnotationToolbar: React.FC<AnnotationToolbarProps> = ({
       {/* Stroke Width */}
       <div className="flex items-center gap-2 border-r pr-2 flex-shrink-0">
         <span className="text-sm text-muted-foreground hidden sm:inline">Size:</span>
-        <Select value={strokeWidth.toString()} onValueChange={(value) => onStrokeWidthChange(parseInt(value))}>
+        <Select value={strokeWidth.toString()} onValueChange={handleStrokeWidthChange}>
           <SelectTrigger className="w-16 h-8">
             <SelectValue />
           </SelectTrigger>
-          <SelectContent>
+          <SelectContent className="bg-white dark:bg-gray-800 z-50">
             {strokeWidths.map((width) => (
               <SelectItem key={width} value={width.toString()}>
                 {width}px
@@ -177,7 +221,7 @@ export const AnnotationToolbar: React.FC<AnnotationToolbarProps> = ({
         <Button
           variant="outline"
           size="sm"
-          onClick={onUndo}
+          onClick={handleUndo}
           disabled={!canUndo}
           title="Undo"
         >
@@ -186,7 +230,7 @@ export const AnnotationToolbar: React.FC<AnnotationToolbarProps> = ({
         <Button
           variant="outline"
           size="sm"
-          onClick={onRedo}
+          onClick={handleRedo}
           disabled={!canRedo}
           title="Redo"
         >
@@ -195,7 +239,7 @@ export const AnnotationToolbar: React.FC<AnnotationToolbarProps> = ({
         <Button
           variant="outline"
           size="sm"
-          onClick={onSave}
+          onClick={handleSave}
           title="Save annotations"
         >
           <Save className="h-4 w-4" />
@@ -203,7 +247,7 @@ export const AnnotationToolbar: React.FC<AnnotationToolbarProps> = ({
         <Button
           variant="outline"
           size="sm"
-          onClick={onClear}
+          onClick={handleClear}
           title="Clear all annotations"
         >
           <Trash2 className="h-4 w-4" />
@@ -215,7 +259,7 @@ export const AnnotationToolbar: React.FC<AnnotationToolbarProps> = ({
         <Button
           variant={showAnnotations ? 'default' : 'outline'}
           size="sm"
-          onClick={onToggleAnnotations}
+          onClick={handleToggleAnnotations}
           title={showAnnotations ? 'Hide annotations' : 'Show annotations'}
         >
           {showAnnotations ? <Eye className="h-4 w-4" /> : <EyeOff className="h-4 w-4" />}
