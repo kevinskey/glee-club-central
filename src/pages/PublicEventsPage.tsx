@@ -1,15 +1,15 @@
-
 import React, { useState } from 'react';
 import { CalendarView } from '@/components/calendar/CalendarView';
 import { EventDialog } from '@/components/calendar/EventDialog';
 import { useCalendarEvents } from '@/hooks/useCalendarEvents';
 import { CalendarEvent } from '@/types/calendar';
 import { PageHeader } from '@/components/ui/page-header';
-import { Calendar, ShoppingBag, Phone, ExternalLink } from 'lucide-react';
+import { Calendar, ShoppingBag, Phone, ExternalLink, Users } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { NewsTicker } from '@/components/landing/news/NewsTicker';
 import { Link } from 'react-router-dom';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
 export default function PublicEventsPage() {
   const { events, loading, error, fetchEvents } = useCalendarEvents();
@@ -25,11 +25,13 @@ export default function PublicEventsPage() {
   if (loading) {
     return (
       <div className="mobile-container mobile-section-padding">
-        <PageHeader
-          title="Performance Schedule"
-          description="View our upcoming public performances and events"
-          icon={<Calendar className="h-5 w-5 sm:h-6 sm:w-6" />}
-        />
+        <div className="flex justify-between items-start mb-6">
+          <PageHeader
+            title="Performance Schedule"
+            description="View our upcoming public performances and events"
+            icon={<Calendar className="h-5 w-5 sm:h-6 sm:w-6" />}
+          />
+        </div>
         <div className="flex items-center justify-center h-48 sm:h-64">
           <div className="text-muted-foreground text-sm sm:text-base">Loading events...</div>
         </div>
@@ -40,11 +42,13 @@ export default function PublicEventsPage() {
   if (error) {
     return (
       <div className="mobile-container mobile-section-padding">
-        <PageHeader
-          title="Performance Schedule"
-          description="View our upcoming public performances and events"
-          icon={<Calendar className="h-5 w-5 sm:h-6 sm:w-6" />}
-        />
+        <div className="flex justify-between items-start mb-6">
+          <PageHeader
+            title="Performance Schedule"
+            description="View our upcoming public performances and events"
+            icon={<Calendar className="h-5 w-5 sm:h-6 sm:w-6" />}
+          />
+        </div>
         <div className="flex flex-col items-center justify-center h-48 sm:h-64 space-y-4">
           <div className="text-red-600 text-center">
             <p className="font-semibold text-sm sm:text-base">Error loading events</p>
@@ -64,11 +68,36 @@ export default function PublicEventsPage() {
       <NewsTicker />
       
       <div className="mobile-container mobile-section-padding space-y-6 mobile-scroll">
-        <PageHeader
-          title="Performance Schedule"
-          description="View our upcoming public performances and events"
-          icon={<Calendar className="h-5 w-5 sm:h-6 sm:w-6" />}
-        />
+        {/* Header with Glowing Join Button */}
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+          <PageHeader
+            title="Performance Schedule"
+            description="View our upcoming public performances and events"
+            icon={<Calendar className="h-5 w-5 sm:h-6 sm:w-6" />}
+          />
+          
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button 
+                  asChild
+                  className="relative bg-gradient-to-r from-glee-spelman to-glee-purple text-white font-medium px-6 py-3 rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 animate-pulse hover:animate-none group"
+                  style={{
+                    boxShadow: '0 0 20px rgba(109, 40, 217, 0.4), 0 0 40px rgba(109, 40, 217, 0.2)'
+                  }}
+                >
+                  <Link to="/join-glee-fam" className="flex items-center space-x-2">
+                    <Users className="h-4 w-4" />
+                    <span>Join the Glee Fam!</span>
+                  </Link>
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>Receive up-to-date news about the glee club!</p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+        </div>
 
         {/* Welcome Message */}
         <Card className="bg-gradient-to-r from-glee-spelman/5 to-glee-purple/5 border-glee-spelman/20">

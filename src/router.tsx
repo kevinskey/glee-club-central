@@ -231,6 +231,28 @@ export const router = createBrowserRouter([
           },
         ],
       },
+      // Fan signup route
+      {
+        path: '/join-glee-fam',
+        element: <MainLayout />,
+        children: [
+          {
+            index: true,
+            element: React.lazy(() => import('./pages/JoinGleeFamPage')),
+          },
+        ],
+      },
+      // Fan Dashboard routes
+      {
+        path: '/fan-dashboard',
+        element: <RequireAuth><DashboardLayout /></RequireAuth>,
+        children: [
+          {
+            index: true,
+            element: React.lazy(() => import('./pages/dashboard/FanDashboardPage')),
+          },
+        ],
+      },
       // Auth routes
       ...authRoutes,
     ],

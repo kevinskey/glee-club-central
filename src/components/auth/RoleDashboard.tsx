@@ -1,44 +1,44 @@
 
 import React, { useEffect } from 'react';
-import { Navigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
-import { Spinner } from '@/components/ui/spinner';
+import { useNavigate, useLocation } from 'react-router-dom';
 
-// This component redirects users to the member dashboard
-const RoleDashboard = () => {
-  const { profile, isLoading, getUserType, isAuthenticated } = useAuth();
+export default function RoleDashboard() {
+  const { profile, isLoading } = useAuth();
+  const navigate = useNavigate();
+  const location = useLocation();
 
-  // Get user role from profile
-  const userRole = profile?.role;
-  const userType = getUserType();
-  const isAdmin = profile?.is_super_admin;
-  
   useEffect(() => {
-    console.log("RoleDashboard - redirecting based on:", { 
-      userRole, 
-      userType, 
-      isAdmin, 
-      isAuthenticated,
-      hasProfile: !!profile 
-    });
-  }, [userRole, userType, isAdmin, isAuthenticated, profile]);
+    if (!isLoading && profile) {
+      // Determine redirect based on user role/type
+      if (profile.role === 'admin' || profile.is_super_admin) {
+        navigate('/admin', { replace: true });
+      } else if (profile.user_type === 'fan') {
+        navigate('/fan-dashboard', { replace: true });
+      } else {
+        // Default to member dashboard for regular members
+        navigate('/dashboard/member', { replace: true });
+      }
+    } else if (!isLoading && !profile) {
+      // If no profile and not loading, redirect to login
+      navigate('/login', { 
+        replace: true,
+        state: { from: location }
+      });
+    }
+  }, [profile, isLoading, navigate, location]);
 
-  if (isLoading || !isAuthenticated) {
+  // Show loading while determining role
+  if (isLoading) {
     return (
-      <div className="flex justify-center items-center h-screen">
-        <Spinner size="lg" />
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-glee-purple mx-auto mb-4"></div>
+          <p className="text-muted-foreground">Loading your dashboard...</p>
+        </div>
       </div>
     );
   }
 
-  // If user is not authenticated, redirect to login
-  if (!isAuthenticated) {
-    return <Navigate to="/login" replace />;
-  }
-
-  // Redirect to the Member Dashboard page which has all the quick access buttons
-  console.log("Redirecting authenticated user to member dashboard");
-  return <Navigate to="/dashboard/member" replace />;
-};
-
-export default RoleDashboard;
+  return null;
+}
