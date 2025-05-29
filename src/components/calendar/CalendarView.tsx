@@ -1,5 +1,4 @@
-
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useRef } from 'react';
 import FullCalendar from '@fullcalendar/react';
 import dayGridPlugin from '@fullcalendar/daygrid';
 import timeGridPlugin from '@fullcalendar/timegrid';
@@ -38,6 +37,7 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
   const [selectedEventTypes, setSelectedEventTypes] = useState<string[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
+  const calendarRef = useRef<FullCalendar>(null);
 
   // Get holidays and academic dates
   const holidays = getNationalHolidays();
@@ -174,6 +174,12 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
   const handleViewChange = (viewType: string) => {
     setCurrentView(viewType);
     setSelectedDate(null); // Clear selected date when changing views
+    
+    // Use FullCalendar's API to change the view
+    if (viewType !== 'eventsList' && calendarRef.current) {
+      const calendarApi = calendarRef.current.getApi();
+      calendarApi.changeView(viewType);
+    }
   };
 
   return (
@@ -284,8 +290,9 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
             />
           ) : (
             <FullCalendar
+              ref={calendarRef}
               plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
-              initialView={currentView}
+              initialView="dayGridMonth"
               events={calendarEvents}
               eventClick={handleEventClick}
               dateClick={handleDateClick}
