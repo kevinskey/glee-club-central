@@ -77,13 +77,13 @@ export function PhotoUploadModal({
         return;
       }
 
-      // Enhanced constraints for better Mac compatibility
+      // iOS Safari optimized constraints
       const constraints: MediaStreamConstraints = {
         video: {
           width: { ideal: 640, max: 1280 },
           height: { ideal: 480, max: 720 },
           facingMode: 'user',
-          frameRate: { ideal: 30, max: 30 }
+          frameRate: { ideal: 15, max: 30 }
         },
         audio: false
       };
@@ -97,26 +97,50 @@ export function PhotoUploadModal({
         kind: track.kind,
         label: track.label,
         enabled: track.enabled,
-        readyState: track.readyState
+        readyState: track.readyState,
+        settings: track.getSettings()
       })));
       
       setStream(mediaStream);
       setIsCameraMode(true);
       
       if (videoRef.current) {
-        videoRef.current.srcObject = mediaStream;
-        console.log('📹 Video source set to element');
-        
-        // Force video to load
-        videoRef.current.load();
-        
-        // Multiple event listeners for better compatibility
         const video = videoRef.current;
         
+        // Critical iOS Safari compatibility settings
+        video.setAttribute('autoplay', 'true');
+        video.setAttribute('playsinline', 'true');
+        video.setAttribute('muted', 'true');
+        video.muted = true;
+        video.playsInline = true;
+        video.autoplay = true;
+        
+        video.srcObject = mediaStream;
+        console.log('📹 Video source set to element');
+        
+        // Handle video loading events
+        const handleLoadedMetadata = () => {
+          console.log('📐 Video metadata loaded');
+          console.log('Video dimensions:', video.videoWidth, 'x', video.videoHeight);
+          console.log('Video ready state:', video.readyState);
+          console.log('Video network state:', video.networkState);
+        };
+
         const handleCanPlay = () => {
           console.log('🎬 Video can play event fired');
-          setIsVideoReady(true);
-          setIsCameraLoading(false);
+          console.log('Video element state:', {
+            videoWidth: video.videoWidth,
+            videoHeight: video.videoHeight,
+            readyState: video.readyState,
+            paused: video.paused,
+            ended: video.ended,
+            currentTime: video.currentTime
+          });
+          
+          if (video.videoWidth > 0 && video.videoHeight > 0) {
+            setIsVideoReady(true);
+            setIsCameraLoading(false);
+          }
         };
 
         const handleLoadedData = () => {
@@ -127,31 +151,76 @@ export function PhotoUploadModal({
           }
         };
 
-        const handleLoadedMetadata = () => {
-          console.log('📐 Video metadata loaded');
-          console.log('Video dimensions:', video.videoWidth, 'x', video.videoHeight);
+        const handlePlay = () => {
+          console.log('▶️ Video play event fired');
+          setIsVideoReady(true);
+          setIsCameraLoading(false);
         };
 
+        const handleError = (error: Event) => {
+          console.error('❌ Video element error:', error);
+          setCameraError('Video playback error occurred');
+        };
+
+        // Add all event listeners
+        video.addEventListener('loadedmetadata', handleLoadedMetadata);
         video.addEventListener('canplay', handleCanPlay);
         video.addEventListener('loadeddata', handleLoadedData);
-        video.addEventListener('loadedmetadata', handleLoadedMetadata);
+        video.addEventListener('play', handlePlay);
+        video.addEventListener('error', handleError);
         
+        // Force load and play for iOS Safari
+        try {
+          video.load();
+          const playPromise = video.play();
+          if (playPromise !== undefined) {
+            playPromise
+              .then(() => {
+                console.log('✅ Video play() succeeded');
+                setIsVideoReady(true);
+                setIsCameraLoading(false);
+              })
+              .catch(err => {
+                console.error('❌ Video play() failed:', err);
+                // Try to continue anyway
+                setTimeout(() => {
+                  if (video.videoWidth > 0 && video.videoHeight > 0) {
+                    setIsVideoReady(true);
+                    setIsCameraLoading(false);
+                  }
+                }, 1000);
+              });
+          }
+        } catch (error) {
+          console.error('❌ Video load/play error:', error);
+        }
+
         // Cleanup function
         const cleanup = () => {
+          video.removeEventListener('loadedmetadata', handleLoadedMetadata);
           video.removeEventListener('canplay', handleCanPlay);
           video.removeEventListener('loadeddata', handleLoadedData);
-          video.removeEventListener('loadedmetadata', handleLoadedMetadata);
+          video.removeEventListener('play', handlePlay);
+          video.removeEventListener('error', handleError);
         };
 
         // Set a timeout to check if video is ready after some time
         setTimeout(() => {
-          if (video.readyState >= 2 && video.videoWidth > 0) {
+          console.log('⏰ Timeout check - Video state:', {
+            readyState: video.readyState,
+            videoWidth: video.videoWidth,
+            videoHeight: video.videoHeight,
+            paused: video.paused,
+            currentTime: video.currentTime
+          });
+          
+          if (video.readyState >= 2 && video.videoWidth > 0 && video.videoHeight > 0) {
             console.log('✅ Video ready after timeout check');
             setIsVideoReady(true);
             setIsCameraLoading(false);
           }
           cleanup();
-        }, 3000);
+        }, 5000);
       }
     } catch (error) {
       console.error('❌ Error accessing camera:', error);
@@ -214,7 +283,12 @@ export function PhotoUploadModal({
       setCameraError('');
       
       if (videoRef.current) {
-        videoRef.current.srcObject = mediaStream;
+        const video = videoRef.current;
+        video.setAttribute('autoplay', 'true');
+        video.setAttribute('playsinline', 'true');
+        video.setAttribute('muted', 'true');
+        video.srcObject = mediaStream;
+        
         setTimeout(() => {
           setIsVideoReady(true);
           setIsCameraLoading(false);
@@ -223,27 +297,6 @@ export function PhotoUploadModal({
     } catch (error) {
       console.error('❌ Minimal constraints also failed:', error);
       setCameraError('Camera initialization failed completely. Please try using file upload instead.');
-    }
-  }, []);
-
-  const handleVideoReady = useCallback(() => {
-    console.log('🎯 Video ready handler called');
-    
-    if (videoRef.current) {
-      const video = videoRef.current;
-      console.log('📐 Video ready state:', {
-        readyState: video.readyState,
-        videoWidth: video.videoWidth,
-        videoHeight: video.videoHeight,
-        currentTime: video.currentTime,
-        duration: video.duration
-      });
-      
-      if (video.readyState >= 2 && video.videoWidth > 0 && video.videoHeight > 0) {
-        console.log('✅ Video is fully ready for capture');
-        setIsVideoReady(true);
-        setIsCameraLoading(false);
-      }
     }
   }, []);
 
@@ -256,6 +309,11 @@ export function PhotoUploadModal({
       });
       setStream(null);
     }
+    
+    if (videoRef.current) {
+      videoRef.current.srcObject = null;
+    }
+    
     setIsCameraMode(false);
     setIsVideoReady(false);
     setIsCameraLoading(false);
@@ -263,11 +321,11 @@ export function PhotoUploadModal({
   }, [stream]);
 
   const capturePhoto = useCallback(async () => {
-    console.log('📸 Capture photo button clicked');
+    console.log('📸 Starting photo capture process...');
 
     if (!videoRef.current || !canvasRef.current) {
       console.error('❌ Missing video or canvas element');
-      toast.error('Camera not properly initialized. Please try again.');
+      toast.error('Camera components not properly initialized. Please try again.');
       return;
     }
 
@@ -277,44 +335,59 @@ export function PhotoUploadModal({
       return;
     }
 
+    const video = videoRef.current;
+    const canvas = canvasRef.current;
+
+    console.log('📹 Pre-capture video state:', {
+      videoWidth: video.videoWidth,
+      videoHeight: video.videoHeight,
+      readyState: video.readyState,
+      paused: video.paused,
+      currentTime: video.currentTime,
+      ended: video.ended
+    });
+
+    if (video.videoWidth === 0 || video.videoHeight === 0) {
+      console.error('❌ Video dimensions are invalid');
+      toast.error('Camera feed not ready. Please wait or try restarting the camera.');
+      return;
+    }
+
     setIsCapturing(true);
     
     try {
-      const video = videoRef.current;
-      const canvas = canvasRef.current;
       const context = canvas.getContext('2d');
-
       if (!context) {
         throw new Error('Could not get canvas context');
       }
 
-      if (video.videoWidth === 0 || video.videoHeight === 0) {
-        throw new Error('Video dimensions are invalid');
-      }
-
-      console.log('🎨 Drawing to canvas with dimensions:', {
-        videoWidth: video.videoWidth,
-        videoHeight: video.videoHeight
-      });
-      
+      console.log('🎨 Setting canvas dimensions to:', video.videoWidth, 'x', video.videoHeight);
       canvas.width = video.videoWidth;
       canvas.height = video.videoHeight;
       
+      console.log('🖼️ Drawing video frame to canvas...');
       context.drawImage(video, 0, 0, video.videoWidth, video.videoHeight);
 
-      console.log('🖼️ Converting canvas to base64...');
-      const base64String = canvas.toDataURL('image/jpeg', 0.8);
-
+      console.log('📤 Converting canvas to base64...');
+      const base64String = canvas.toDataURL('image/png', 1.0);
+      
       console.log('✅ Photo captured successfully');
+      console.log('📊 Captured image data length:', base64String.length);
+      console.log('🔗 Image data preview:', base64String.substring(0, 100) + '...');
+
+      // Store the captured photo
       setCapturedPhotoForEnhancement(base64String);
       setPreviewUrl(base64String);
       
+      // Stop camera after successful capture
       stopCamera();
+      
+      // Show enhancement modal
       setShowEnhancement(true);
       toast.success('Photo captured! Choose an enhancement option.');
       
     } catch (error) {
-      console.error('❌ Error capturing photo:', error);
+      console.error('❌ Error during photo capture:', error);
       toast.error(error instanceof Error ? error.message : 'Failed to capture photo');
     } finally {
       setIsCapturing(false);
@@ -364,6 +437,7 @@ export function PhotoUploadModal({
 
     setIsUploading(true);
     try {
+      console.log('📤 Uploading photo...');
       onPhotoSelect(previewUrl);
       toast.success('Photo uploaded successfully');
       onClose();
@@ -434,9 +508,6 @@ export function PhotoUploadModal({
                       autoPlay
                       playsInline
                       muted
-                      onLoadedData={handleVideoReady}
-                      onCanPlay={handleVideoReady}
-                      onLoadedMetadata={handleVideoReady}
                       className="w-full max-w-sm rounded-lg"
                       style={{ display: isCameraLoading ? 'none' : 'block' }}
                     />
@@ -444,7 +515,7 @@ export function PhotoUploadModal({
                       <div className="flex flex-col items-center justify-center p-8 space-y-4">
                         <Loader2 className="h-8 w-8 animate-spin text-glee-spelman" />
                         <p className="text-sm text-muted-foreground">Initializing camera...</p>
-                        <p className="text-xs text-muted-foreground">This may take a few seconds on Mac</p>
+                        <p className="text-xs text-muted-foreground">This may take a few seconds</p>
                       </div>
                     )}
                   </div>
