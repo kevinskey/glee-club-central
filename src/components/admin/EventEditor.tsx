@@ -376,20 +376,10 @@ export const EventEditor: React.FC<EventEditorProps> = ({
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div>
-              <Label htmlFor="start_time">Start Date & Time</Label>
-              <Input
-                id="start_time"
-                type="datetime-local"
-                value={formData.start_time}
-                onChange={(e) => handleInputChange('start_time', e.target.value)}
-                required
-              />
-            </div>
-            <div>
+            <div className="relative">
               <Label htmlFor="call_time">Call Time</Label>
               <div className="relative">
-                <Clock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
+                <Clock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4 z-10" />
                 <Input
                   id="call_time"
                   type="datetime-local"
@@ -402,7 +392,17 @@ export const EventEditor: React.FC<EventEditorProps> = ({
                 When members should arrive
               </p>
             </div>
-            <div>
+            <div className="relative">
+              <Label htmlFor="start_time">Start Date & Time</Label>
+              <Input
+                id="start_time"
+                type="datetime-local"
+                value={formData.start_time}
+                onChange={(e) => handleInputChange('start_time', e.target.value)}
+                required
+              />
+            </div>
+            <div className="relative">
               <Label htmlFor="end_time">End Date & Time</Label>
               <Input
                 id="end_time"
