@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useRef } from 'react';
 import { CalendarEvent } from '@/types/calendar';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
@@ -16,6 +15,7 @@ import { Badge } from '@/components/ui/badge';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { toast } from 'sonner';
 import { EVENT_TYPES, getEventTypeColor } from '@/utils/eventTypes';
+import { AIDescriptionButtons } from './AIDescriptionButtons';
 
 interface EventEditorProps {
   event?: CalendarEvent | null;
@@ -306,6 +306,14 @@ export const EventEditor: React.FC<EventEditorProps> = ({
     }
   };
 
+  const handleAIDescriptionGenerated = (description: string, type: 'short' | 'full') => {
+    if (type === 'short') {
+      handleInputChange('short_description', description);
+    } else {
+      handleInputChange('full_description', description);
+    }
+  };
+
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && handleClose()}>
       <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
@@ -481,22 +489,44 @@ export const EventEditor: React.FC<EventEditorProps> = ({
           </div>
 
           <div>
-            <Label htmlFor="short_description">Short Description</Label>
+            <div className="flex items-center justify-between mb-2">
+              <Label htmlFor="short_description">Short Description</Label>
+              <AIDescriptionButtons
+                title={formData.title}
+                eventTypes={formData.event_types}
+                location={formData.location_name}
+                startTime={formData.start_time}
+                callTime={formData.call_time}
+                onDescriptionGenerated={handleAIDescriptionGenerated}
+              />
+            </div>
             <Textarea
               id="short_description"
               value={formData.short_description}
               onChange={(e) => handleInputChange('short_description', e.target.value)}
               rows={2}
+              placeholder="Brief description of the event..."
             />
           </div>
 
           <div>
-            <Label htmlFor="full_description">Full Description</Label>
+            <div className="flex items-center justify-between mb-2">
+              <Label htmlFor="full_description">Full Description</Label>
+              <AIDescriptionButtons
+                title={formData.title}
+                eventTypes={formData.event_types}
+                location={formData.location_name}
+                startTime={formData.start_time}
+                callTime={formData.call_time}
+                onDescriptionGenerated={handleAIDescriptionGenerated}
+              />
+            </div>
             <Textarea
               id="full_description"
               value={formData.full_description}
               onChange={(e) => handleInputChange('full_description', e.target.value)}
               rows={4}
+              placeholder="Detailed description of the event..."
             />
           </div>
 
