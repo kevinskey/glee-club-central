@@ -18,8 +18,11 @@ export interface User {
   join_date?: string;
   notes?: string;
   dues_paid?: boolean;
-  // Add backward compatibility fields
+  // Add missing fields from profiles table
   role?: string; // Kept for backward compatibility
+  personal_title?: string;
+  title?: string;
+  special_roles?: string;
 }
 
 // Basic hook response type with loading and error states

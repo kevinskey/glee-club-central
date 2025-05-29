@@ -25,7 +25,7 @@ export const useUsers = (): UseUsersResponse => {
     try {
       console.log('Fetching users from profiles table');
       
-      // Get profiles with auth user data
+      // Get profiles with all fields
       const { data: profiles, error: profilesError } = await supabase
         .from('profiles')
         .select('*')
@@ -57,14 +57,14 @@ export const useUsers = (): UseUsersResponse => {
 
       console.log('Successfully fetched profiles:', profiles?.length || 0);
       
-      // Transform the data to match User interface
+      // Transform the data to match User interface with all fields
       const users: User[] = (profiles || []).map(profile => {
         // Find corresponding auth user for email - with proper type checking
         const authUser = authUsers.find((u: any) => u?.id === profile.id);
         
         return {
           id: profile.id,
-          email: profile.email || authUser?.email || null,
+          email: authUser?.email || null,
           first_name: profile.first_name || '',
           last_name: profile.last_name || '',
           phone: profile.phone,
@@ -79,7 +79,10 @@ export const useUsers = (): UseUsersResponse => {
           updated_at: profile.updated_at,
           last_sign_in_at: authUser?.last_sign_in_at || null,
           is_super_admin: profile.is_super_admin || false,
-          role: profile.role || 'member'
+          role: profile.role || 'member',
+          personal_title: profile.title, // Map title to personal_title for compatibility
+          title: profile.title,
+          special_roles: profile.special_roles
         };
       });
 
@@ -145,7 +148,7 @@ export const useUsers = (): UseUsersResponse => {
       
       return {
         id: data.id,
-        email: data.email || authUser?.email || null,
+        email: authUser?.email || null,
         first_name: data.first_name || '',
         last_name: data.last_name || '',
         phone: data.phone,
@@ -160,7 +163,10 @@ export const useUsers = (): UseUsersResponse => {
         updated_at: data.updated_at,
         last_sign_in_at: authUser?.last_sign_in_at || null,
         is_super_admin: data.is_super_admin || false,
-        role: data.role || 'member'
+        role: data.role || 'member',
+        personal_title: data.title,
+        title: data.title,
+        special_roles: data.special_roles
       };
     } catch (err) {
       console.error('Unexpected error fetching user by ID:', err);
