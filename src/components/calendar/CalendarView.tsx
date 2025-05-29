@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { format, startOfMonth, endOfMonth, isSameDay, isToday, startOfWeek, endOfWeek, eachDayOfInterval, addWeeks, subWeeks, startOfDay } from 'date-fns';
 import { ChevronLeft, ChevronRight, Calendar as CalendarIcon, MapPin, Clock, ExternalLink } from 'lucide-react';
@@ -25,6 +24,15 @@ export function CalendarView({ events, onEventClick, showPrivateEvents = false }
   
   const showNationalHolidays = settings.showNationalHolidays ?? true;
   const showSpelmanDates = settings.showSpelmanAcademicDates ?? true;
+
+  // Debug logging for list view
+  console.log('CalendarView Debug:', {
+    totalEvents: events.length,
+    filteredEvents: filteredEvents.length,
+    showPrivateEvents,
+    view,
+    currentTime: new Date().toISOString()
+  });
 
   // Filter events based on privacy settings
   const filteredEvents = events.filter(event => {
@@ -370,18 +378,41 @@ export function CalendarView({ events, onEventClick, showPrivateEvents = false }
 
   // Get upcoming events for list view
   const upcomingEvents = filteredEvents
-    .filter(event => new Date(event.start_time) >= new Date())
+    .filter(event => {
+      const eventDate = new Date(event.start_time);
+      const now = new Date();
+      const isUpcoming = eventDate >= now;
+      
+      // Debug individual event filtering
+      if (view === 'list') {
+        console.log('Event filtering:', {
+          title: event.title,
+          startTime: event.start_time,
+          eventDate: eventDate.toISOString(),
+          now: now.toISOString(),
+          isUpcoming,
+          isPrivate: event.is_private
+        });
+      }
+      
+      return isUpcoming;
+    })
     .sort((a, b) => new Date(a.start_time).getTime() - new Date(b.start_time).getTime());
+
+  console.log('Upcoming events for list view:', upcomingEvents.length);
 
   const renderListView = () => (
     <div className="space-y-4">
-      <h3 className="text-lg font-semibold">All Upcoming Events</h3>
+      <h3 className="text-lg font-semibold">All Upcoming Events ({upcomingEvents.length})</h3>
       
       <div className="space-y-3">
         {upcomingEvents.length === 0 ? (
           <Card>
             <CardContent className="p-6 text-center text-muted-foreground">
-              No upcoming events
+              <p>No upcoming events found.</p>
+              <p className="text-xs mt-2">
+                Total events: {events.length} | Filtered events: {filteredEvents.length}
+              </p>
             </CardContent>
           </Card>
         ) : (
