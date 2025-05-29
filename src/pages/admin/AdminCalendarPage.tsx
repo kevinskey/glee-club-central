@@ -1,3 +1,4 @@
+
 import React, { useState, useRef, useEffect, useMemo } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { CalendarView } from '@/components/calendar/CalendarView';
@@ -126,6 +127,17 @@ export default function AdminCalendarPage() {
   const handleEventClick = (event: CalendarEvent) => {
     // Navigate to event details page
     navigate(`/admin/events/${event.id}`);
+  };
+
+  const handleEventTypesChange = async (eventId: string, newTypes: string[]) => {
+    try {
+      await updateEvent(eventId, { event_types: newTypes });
+      toast.success('Event types updated successfully');
+    } catch (error) {
+      console.error('Error updating event types:', error);
+      const errorMessage = error instanceof Error ? error.message : 'Failed to update event types';
+      toast.error(errorMessage);
+    }
   };
 
   const handleSaveEvent = async (eventData: Omit<CalendarEvent, 'id' | 'created_at'>) => {
@@ -314,7 +326,9 @@ export default function AdminCalendarPage() {
                 <CalendarView
                   events={events}
                   onEventClick={handleEventClick}
+                  onEventTypesChange={handleEventTypesChange}
                   showPrivateEvents={true}
+                  showEventTypeDropdown={true}
                 />
               </div>
             </CardContent>

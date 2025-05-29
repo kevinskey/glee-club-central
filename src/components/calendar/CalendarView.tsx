@@ -1,3 +1,4 @@
+
 import React, { useState, useMemo, useRef } from 'react';
 import FullCalendar from '@fullcalendar/react';
 import dayGridPlugin from '@fullcalendar/daygrid';
@@ -22,17 +23,21 @@ import { format, isSameDay } from 'date-fns';
 interface CalendarViewProps {
   events: CalendarEvent[];
   onEventClick?: (event: CalendarEvent) => void;
+  onEventTypesChange?: (eventId: string, newTypes: string[]) => void;
   showPrivateEvents?: boolean;
   canCreateEvents?: boolean;
   onDateSelect?: (date: Date) => void;
+  showEventTypeDropdown?: boolean;
 }
 
 export const CalendarView: React.FC<CalendarViewProps> = ({
   events,
   onEventClick,
+  onEventTypesChange,
   showPrivateEvents = false,
   canCreateEvents = false,
-  onDateSelect
+  onDateSelect,
+  showEventTypeDropdown = false
 }) => {
   const [currentView, setCurrentView] = useState('dayGridMonth');
   const [selectedEventTypes, setSelectedEventTypes] = useState<string[]>([]);
@@ -368,6 +373,8 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
             <EventsListView
               events={filteredEvents}
               onEventClick={onEventClick}
+              onEventTypesChange={onEventTypesChange}
+              showEventTypeDropdown={showEventTypeDropdown}
             />
           ) : (
             <FullCalendar

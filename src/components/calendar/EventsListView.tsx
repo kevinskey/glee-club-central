@@ -16,17 +16,22 @@ import {
 import { Calendar, Clock, MapPin, User } from 'lucide-react';
 import { format, isSameDay, isToday, isTomorrow, isYesterday } from 'date-fns';
 import { getEventTypeLabel, getEventTypeColor } from '@/utils/eventTypes';
+import { EventTypeDropdown } from './EventTypeDropdown';
 
 interface EventsListViewProps {
   events: CalendarEvent[];
   onEventClick?: (event: CalendarEvent) => void;
+  onEventTypesChange?: (eventId: string, newTypes: string[]) => void;
+  showEventTypeDropdown?: boolean;
 }
 
 const EVENTS_PER_PAGE = 7;
 
 export const EventsListView: React.FC<EventsListViewProps> = ({
   events,
-  onEventClick
+  onEventClick,
+  onEventTypesChange,
+  showEventTypeDropdown = false
 }) => {
   const [currentPage, setCurrentPage] = useState(1);
 
@@ -185,16 +190,25 @@ export const EventsListView: React.FC<EventsListViewProps> = ({
                     
                     {/* Event Types */}
                     {eventTypes.length > 0 && (
-                      <div className="flex flex-wrap gap-1">
-                        {eventTypes.map(type => (
-                          <Badge
-                            key={type}
-                            variant="outline"
-                            className={`text-xs ${getEventTypeColor(type)}`}
-                          >
-                            {getEventTypeLabel(type)}
-                          </Badge>
-                        ))}
+                      <div onClick={(e) => showEventTypeDropdown && e.stopPropagation()}>
+                        {showEventTypeDropdown && onEventTypesChange ? (
+                          <EventTypeDropdown
+                            event={event}
+                            onEventTypesChange={onEventTypesChange}
+                          />
+                        ) : (
+                          <div className="flex flex-wrap gap-1">
+                            {eventTypes.map(type => (
+                              <Badge
+                                key={type}
+                                variant="outline"
+                                className={`text-xs ${getEventTypeColor(type)}`}
+                              >
+                                {getEventTypeLabel(type)}
+                              </Badge>
+                            ))}
+                          </div>
+                        )}
                       </div>
                     )}
                   </div>
