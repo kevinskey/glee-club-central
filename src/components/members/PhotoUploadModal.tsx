@@ -1,4 +1,3 @@
-
 import React, { useState, useRef, useCallback } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -36,11 +35,11 @@ export function PhotoUploadModal({
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
   const startCamera = useCallback(async () => {
+    console.log('🎥 Starting camera...');
     setIsCameraLoading(true);
     setIsVideoReady(false);
     
     try {
-      console.log('Starting camera...');
       const mediaStream = await navigator.mediaDevices.getUserMedia({ 
         video: { 
           width: { ideal: 640 }, 
@@ -49,16 +48,21 @@ export function PhotoUploadModal({
         } 
       });
       
-      console.log('Camera stream obtained');
+      console.log('✅ Camera stream obtained successfully');
       setStream(mediaStream);
       setIsCameraMode(true);
       
       if (videoRef.current) {
         videoRef.current.srcObject = mediaStream;
-        console.log('Video source set');
+        console.log('📹 Video source set to element');
+        
+        // Add event listener for when video can play
+        videoRef.current.addEventListener('canplay', () => {
+          console.log('🎬 Video can play event fired');
+        });
       }
     } catch (error) {
-      console.error('Error accessing camera:', error);
+      console.error('❌ Error accessing camera:', error);
       setIsCameraLoading(false);
       setIsCameraMode(false);
       
@@ -77,21 +81,42 @@ export function PhotoUploadModal({
   }, []);
 
   const handleVideoReady = useCallback(() => {
-    console.log('Video ready');
-    setIsVideoReady(true);
-    setIsCameraLoading(false);
+    console.log('🎯 Video loadeddata event fired');
     
     if (videoRef.current) {
-      console.log('Video dimensions:', videoRef.current.videoWidth, 'x', videoRef.current.videoHeight);
+      const video = videoRef.current;
+      console.log('📐 Video dimensions:', {
+        videoWidth: video.videoWidth,
+        videoHeight: video.videoHeight,
+        readyState: video.readyState,
+        currentTime: video.currentTime
+      });
+      
+      // Only set ready if video has valid dimensions
+      if (video.videoWidth > 0 && video.videoHeight > 0) {
+        console.log('✅ Video is ready for capture');
+        setIsVideoReady(true);
+        setIsCameraLoading(false);
+      } else {
+        console.log('⚠️ Video dimensions are still zero, waiting...');
+        // Try again after a short delay
+        setTimeout(() => {
+          if (video.videoWidth > 0 && video.videoHeight > 0) {
+            console.log('✅ Video ready after retry');
+            setIsVideoReady(true);
+            setIsCameraLoading(false);
+          }
+        }, 500);
+      }
     }
   }, []);
 
   const stopCamera = useCallback(() => {
-    console.log('Stopping camera');
+    console.log('🛑 Stopping camera');
     if (stream) {
       stream.getTracks().forEach(track => {
         track.stop();
-        console.log('Track stopped:', track.kind);
+        console.log('⏹️ Track stopped:', track.kind);
       });
       setStream(null);
     }
@@ -101,8 +126,22 @@ export function PhotoUploadModal({
   }, [stream]);
 
   const capturePhoto = useCallback(async () => {
-    if (!videoRef.current || !canvasRef.current || !isVideoReady) {
-      console.error('Video not ready for capture');
+    console.log('📸 Capture photo button clicked');
+    console.log('🔍 Current state:', {
+      isVideoReady,
+      isCapturing,
+      videoElement: !!videoRef.current,
+      canvasElement: !!canvasRef.current
+    });
+
+    if (!videoRef.current || !canvasRef.current) {
+      console.error('❌ Missing video or canvas element');
+      toast.error('Camera not properly initialized. Please try again.');
+      return;
+    }
+
+    if (!isVideoReady) {
+      console.error('❌ Video not ready for capture');
       toast.error('Video not ready. Please wait for the camera to initialize.');
       return;
     }
@@ -118,31 +157,38 @@ export function PhotoUploadModal({
         throw new Error('Could not get canvas context');
       }
 
-      // Check video dimensions
+      // Double-check video dimensions before capture
+      console.log('📏 Pre-capture video check:', {
+        videoWidth: video.videoWidth,
+        videoHeight: video.videoHeight,
+        readyState: video.readyState
+      });
+
       if (video.videoWidth === 0 || video.videoHeight === 0) {
         throw new Error('Video dimensions are invalid');
       }
 
-      console.log('Capturing photo with dimensions:', video.videoWidth, 'x', video.videoHeight);
-
-      // Set canvas dimensions to match video
+      console.log('🎨 Drawing to canvas...');
       canvas.width = video.videoWidth;
       canvas.height = video.videoHeight;
       
       // Draw the video frame to canvas
       context.drawImage(video, 0, 0, video.videoWidth, video.videoHeight);
 
+      console.log('🖼️ Converting canvas to blob...');
       // Convert canvas to blob
       const blob = await new Promise<Blob | null>((resolve) => {
-        canvas.toBlob(resolve, 'image/jpeg', 0.8);
+        canvas.toBlob((blob) => {
+          console.log('💾 Blob created:', blob ? `${blob.size} bytes` : 'null');
+          resolve(blob);
+        }, 'image/jpeg', 0.8);
       });
 
       if (!blob) {
         throw new Error('Failed to create image blob');
       }
 
-      console.log('Photo captured successfully, blob size:', blob.size);
-
+      console.log('✅ Photo captured successfully, creating file...');
       const file = new File([blob], 'camera-photo.jpg', { type: 'image/jpeg' });
       setSelectedFile(file);
       
@@ -150,7 +196,7 @@ export function PhotoUploadModal({
       reader.onload = (e) => {
         const result = e.target?.result as string;
         setPreviewUrl(result);
-        console.log('Preview URL set');
+        console.log('🖼️ Preview URL set successfully');
       };
       reader.readAsDataURL(file);
       
@@ -158,7 +204,7 @@ export function PhotoUploadModal({
       toast.success('Photo captured successfully!');
       
     } catch (error) {
-      console.error('Error capturing photo:', error);
+      console.error('❌ Error capturing photo:', error);
       toast.error(error instanceof Error ? error.message : 'Failed to capture photo');
     } finally {
       setIsCapturing(false);
@@ -166,6 +212,7 @@ export function PhotoUploadModal({
   }, [isVideoReady, stopCamera]);
 
   const retryCamera = useCallback(() => {
+    console.log('🔄 Retrying camera setup...');
     stopCamera();
     setTimeout(() => {
       startCamera();
@@ -275,9 +322,19 @@ export function PhotoUploadModal({
                   </div>
                 </div>
                 
+                {/* Debug info for troubleshooting */}
+                {isVideoReady && (
+                  <div className="text-xs text-center text-muted-foreground">
+                    Camera ready for capture
+                  </div>
+                )}
+                
                 <div className="flex gap-2 justify-center">
                   <Button 
-                    onClick={capturePhoto} 
+                    onClick={() => {
+                      console.log('🔘 Capture button clicked, calling capturePhoto...');
+                      capturePhoto();
+                    }}
                     size="lg" 
                     className="bg-glee-spelman hover:bg-glee-spelman/90"
                     disabled={!isVideoReady || isCapturing}
