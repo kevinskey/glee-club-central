@@ -16,7 +16,7 @@ interface AnnotationData {
   y?: number;
   width?: number;
   height?: number;
-  id?: string; // Add unique ID for tracking
+  id: string; // Made required
 }
 
 interface AnnotationCanvasProps {
@@ -52,7 +52,7 @@ export const AnnotationCanvas: React.FC<AnnotationCanvasProps> = ({
   const [currentPath, setCurrentPath] = useState<Point[]>([]);
   const [textInput, setTextInput] = useState<{x: number, y: number, text: string} | null>(null);
 
-  // Add unique IDs to annotations if they don't have them
+  // Ensure all annotations have IDs
   const annotationsWithIds = annotations.map((annotation, index) => ({
     ...annotation,
     id: annotation.id || `annotation-${index}-${Date.now()}`
@@ -211,9 +211,8 @@ export const AnnotationCanvas: React.FC<AnnotationCanvasProps> = ({
       // Handle eraser tool
       const annotationToRemove = findAnnotationAtPoint(point);
       if (annotationToRemove && onAnnotationRemove) {
-        const annotationId = annotationToRemove.id || `annotation-${annotationsWithIds.indexOf(annotationToRemove)}`;
-        console.log('Erasing annotation:', annotationId);
-        onAnnotationRemove(annotationId);
+        console.log('Erasing annotation:', annotationToRemove.id);
+        onAnnotationRemove(annotationToRemove.id);
       }
       return;
     }
@@ -235,9 +234,8 @@ export const AnnotationCanvas: React.FC<AnnotationCanvasProps> = ({
       // Continue erasing while dragging
       const annotationToRemove = findAnnotationAtPoint(point);
       if (annotationToRemove && onAnnotationRemove) {
-        const annotationId = annotationToRemove.id || `annotation-${annotationsWithIds.indexOf(annotationToRemove)}`;
-        console.log('Continuing to erase annotation:', annotationId);
-        onAnnotationRemove(annotationId);
+        console.log('Continuing to erase annotation:', annotationToRemove.id);
+        onAnnotationRemove(annotationToRemove.id);
       }
       return;
     }

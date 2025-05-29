@@ -1,4 +1,3 @@
-
 import { useState, useCallback, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
@@ -28,7 +27,7 @@ interface AnnotationData {
   y?: number;
   width?: number;
   height?: number;
-  id?: string; // Made optional for compatibility
+  id: string; // Made required to match interface
 }
 
 export const usePDFAnnotations = (sheetMusicId: string) => {
@@ -213,7 +212,7 @@ export const usePDFAnnotations = (sheetMusicId: string) => {
     setUndoStack(prev => [...prev, currentAnnotations]);
     setRedoStack([]); // Clear redo stack when new action is performed
 
-    // Ensure annotation has an ID
+    // Ensure annotation has an ID (it should already have one from interface)
     const annotationWithId = {
       ...annotation,
       id: annotation.id || `annotation-${Date.now()}-${Math.random()}`
@@ -253,7 +252,7 @@ export const usePDFAnnotations = (sheetMusicId: string) => {
     setRedoStack([]);
 
     const newAnnotations = currentAnnotations.filter(annotation => 
-      (annotation.id || `annotation-${currentAnnotations.indexOf(annotation)}`) !== annotationId
+      annotation.id !== annotationId
     );
     updateCachedAnnotations(pageNumber, newAnnotations);
     

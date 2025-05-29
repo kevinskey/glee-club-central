@@ -11,6 +11,7 @@ interface AnnotationData {
   y?: number;
   width?: number;
   height?: number;
+  id: string; // Made required
 }
 
 interface CachedAnnotations {
@@ -69,7 +70,12 @@ export const usePDFAnnotationCache = () => {
     
     annotationsData.forEach(annotation => {
       if (annotation.page_number && annotation.annotations) {
-        newCache[annotation.page_number] = annotation.annotations;
+        // Ensure all cached annotations have IDs
+        const annotationsWithIds = annotation.annotations.map((ann: any, index: number) => ({
+          ...ann,
+          id: ann.id || `annotation-${annotation.page_number}-${index}-${Date.now()}`
+        }));
+        newCache[annotation.page_number] = annotationsWithIds;
       }
     });
     
