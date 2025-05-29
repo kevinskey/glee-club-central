@@ -22,7 +22,23 @@ export const useUserCreate = (
         return false;
       }
       
-      // First, create the user in auth
+      // Check if user already exists in profiles table
+      const { data: existingProfile } = await supabase
+        .from('profiles')
+        .select('id')
+        .eq('email', userData.email)
+        .single();
+        
+      if (existingProfile) {
+        console.error('User with this email already exists in profiles');
+        toast.error('A user with this email already exists');
+        return false;
+      }
+      
+      // Determine admin status from role
+      const isAdmin = userData.role === 'admin' || userData.is_admin;
+      
+      // Create the user in auth with metadata
       const { data: authData, error: authError } = await supabase.auth.signUp({
         email: userData.email,
         password: userData.password,
@@ -30,6 +46,7 @@ export const useUserCreate = (
           data: {
             first_name: userData.first_name,
             last_name: userData.last_name,
+            role: isAdmin ? 'admin' : 'member'
           }
         }
       });
@@ -54,46 +71,48 @@ export const useUserCreate = (
         return false;
       }
       
-      // Wait a moment to ensure the user is properly created
+      // Wait a moment to ensure the trigger has fired
       await new Promise(resolve => setTimeout(resolve, 1000));
       
-      // Determine admin status from role
-      const isAdmin = userData.role === 'admin' || userData.is_admin;
+      // Update the profile with additional data that wasn't in the trigger
+      const updateData: any = {
+        phone: userData.phone || null,
+        voice_part: userData.voice_part,
+        status: 'active',
+        class_year: userData.class_year || null,
+        notes: userData.notes || null,
+        dues_paid: userData.dues_paid || false,
+        join_date: userData.join_date || new Date().toISOString().split('T')[0],
+        is_super_admin: isAdmin,
+        role: isAdmin ? 'admin' : 'member',
+        avatar_url: userData.avatar_url || null,
+        updated_at: new Date().toISOString()
+      };
       
-      // Update the profile with additional data
+      // Only update non-null email if it's different (though it shouldn't be)
+      const { data: currentProfile } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', authData.user.id)
+        .single();
+        
+      if (currentProfile && !currentProfile.email) {
+        updateData.email = userData.email;
+      }
+      
       const { error: profileError } = await supabase
         .from('profiles')
-        .update({
-          first_name: userData.first_name,
-          last_name: userData.last_name,
-          phone: userData.phone || null,
-          voice_part: userData.voice_part,
-          status: 'active',
-          class_year: userData.class_year || null,
-          notes: userData.notes || null,
-          dues_paid: userData.dues_paid || false,
-          join_date: userData.join_date || new Date().toISOString().split('T')[0],
-          is_super_admin: isAdmin,
-          role: isAdmin ? 'admin' : 'member',
-          avatar_url: userData.avatar_url || null,
-          updated_at: new Date().toISOString()
-        })
+        .update(updateData)
         .eq('id', authData.user.id);
       
       if (profileError) {
         console.error('Error updating profile:', profileError);
-        toast.error('User created but profile update failed');
+        toast.error('User created but profile update failed. Please refresh and try editing the user.');
         // Still return true since the user was created successfully
       } else {
         console.log('User added successfully with ID:', authData.user.id);
         toast.success(`Added ${userData.first_name} ${userData.last_name}`);
       }
-      
-      // Dispatch event for user added
-      const userAddedEvent = new CustomEvent('user:added', {
-        detail: { userId: authData.user.id }
-      });
-      window.dispatchEvent(userAddedEvent);
       
       // Add the user to local state immediately if setUsers function is provided
       if (setUsers) {

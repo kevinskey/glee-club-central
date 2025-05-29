@@ -25,41 +25,55 @@ export const useUsers = (): UseUsersResponse => {
     try {
       console.log('Fetching users from profiles table');
       
-      const { data, error: fetchError } = await supabase
+      // Get profiles with auth user data
+      const { data: profiles, error: profilesError } = await supabase
         .from('profiles')
         .select('*')
         .neq('status', 'deleted') // Exclude deleted users
         .order('last_name', { ascending: true });
 
-      if (fetchError) {
-        console.error('Error fetching users:', fetchError);
-        setError(fetchError.message);
+      if (profilesError) {
+        console.error('Error fetching profiles:', profilesError);
+        setError(profilesError.message);
         toast.error('Failed to load users');
         return null;
       }
 
-      console.log('Successfully fetched users:', data?.length || 0);
+      // Get auth users to get email addresses
+      const { data: { users: authUsers }, error: authError } = await supabase.auth.admin.listUsers();
+      
+      if (authError) {
+        console.error('Error fetching auth users:', authError);
+        // Continue without auth data - we'll use profile email if available
+      }
+
+      console.log('Successfully fetched profiles:', profiles?.length || 0);
       
       // Transform the data to match User interface
-      const users: User[] = (data || []).map(profile => ({
-        id: profile.id,
-        email: profile.email || null,
-        first_name: profile.first_name || '',
-        last_name: profile.last_name || '',
-        phone: profile.phone,
-        voice_part: profile.voice_part,
-        avatar_url: profile.avatar_url,
-        status: profile.status || 'active',
-        join_date: profile.join_date,
-        class_year: profile.class_year,
-        dues_paid: profile.dues_paid || false,
-        notes: profile.notes,
-        created_at: profile.created_at,
-        updated_at: profile.updated_at,
-        last_sign_in_at: profile.last_sign_in_at,
-        is_super_admin: profile.is_super_admin || false,
-        role: profile.role || 'member'
-      }));
+      const users: User[] = (profiles || []).map(profile => {
+        // Find corresponding auth user for email
+        const authUser = authUsers?.find(u => u.id === profile.id);
+        
+        return {
+          id: profile.id,
+          email: profile.email || authUser?.email || null,
+          first_name: profile.first_name || '',
+          last_name: profile.last_name || '',
+          phone: profile.phone,
+          voice_part: profile.voice_part,
+          avatar_url: profile.avatar_url,
+          status: profile.status || 'active',
+          join_date: profile.join_date,
+          class_year: profile.class_year,
+          dues_paid: profile.dues_paid || false,
+          notes: profile.notes,
+          created_at: profile.created_at,
+          updated_at: profile.updated_at,
+          last_sign_in_at: authUser?.last_sign_in_at || null,
+          is_super_admin: profile.is_super_admin || false,
+          role: profile.role || 'member'
+        };
+      });
 
       setUserCount(users.length);
       return users;
@@ -109,9 +123,12 @@ export const useUsers = (): UseUsersResponse => {
 
       if (!data) return null;
 
+      // Get auth user for email
+      const { data: { user: authUser }, error: authError } = await supabase.auth.admin.getUserById(userId);
+      
       return {
         id: data.id,
-        email: data.email || null,
+        email: data.email || authUser?.email || null,
         first_name: data.first_name || '',
         last_name: data.last_name || '',
         phone: data.phone,
@@ -124,7 +141,7 @@ export const useUsers = (): UseUsersResponse => {
         notes: data.notes,
         created_at: data.created_at,
         updated_at: data.updated_at,
-        last_sign_in_at: data.last_sign_in_at,
+        last_sign_in_at: authUser?.last_sign_in_at || null,
         is_super_admin: data.is_super_admin || false,
         role: data.role || 'member'
       };

@@ -1296,24 +1296,6 @@ export type Database = {
         }
         Relationships: []
       }
-      user_roles: {
-        Row: {
-          created_at: string | null
-          role: string
-          user_id: string
-        }
-        Insert: {
-          created_at?: string | null
-          role?: string
-          user_id: string
-        }
-        Update: {
-          created_at?: string | null
-          role?: string
-          user_id?: string
-        }
-        Relationships: []
-      }
       user_titles: {
         Row: {
           created_at: string
@@ -1398,14 +1380,6 @@ export type Database = {
           permission: string
           granted: boolean
         }[]
-      }
-      get_user_role: {
-        Args: { p_user_id: string }
-        Returns: string
-      }
-      get_user_role_secure: {
-        Args: { p_user_id: string }
-        Returns: string
       }
       handle_user_role: {
         Args: { p_user_id: string; p_role: string }

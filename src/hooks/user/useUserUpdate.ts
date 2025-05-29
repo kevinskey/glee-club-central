@@ -71,10 +71,9 @@ export const useUserUpdate = (refreshUsers?: () => Promise<any>): UseUserUpdateR
     try {
       console.log(`Updating user ${userId} status to ${status}`);
       const { error } = await supabase
-        .rpc('update_user_status', { 
-          p_user_id: userId, 
-          p_status: status 
-        });
+        .from('profiles')
+        .update({ status })
+        .eq('id', userId);
 
       if (error) {
         console.error('Error updating user status:', error);
