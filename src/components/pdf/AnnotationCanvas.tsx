@@ -272,39 +272,47 @@ export const AnnotationCanvas: React.FC<AnnotationCanvasProps> = ({
     }
   }, [textInput, currentColor, strokeWidth, onAnnotationAdd]);
 
-  // Mouse events
+  // Enhanced mouse events with better prevention
   const handleMouseDown = (e: React.MouseEvent<HTMLCanvasElement>) => {
     e.preventDefault();
+    e.stopPropagation();
     const point = getMousePos(e);
     startDrawing(point);
   };
 
   const handleMouseMove = (e: React.MouseEvent<HTMLCanvasElement>) => {
     e.preventDefault();
+    e.stopPropagation();
     const point = getMousePos(e);
     continueDrawing(point);
   };
 
   const handleMouseUp = (e: React.MouseEvent<HTMLCanvasElement>) => {
     e.preventDefault();
+    e.stopPropagation();
     finishDrawing();
   };
 
-  // Touch events
+  // Enhanced touch events with scroll prevention
   const handleTouchStart = (e: React.TouchEvent<HTMLCanvasElement>) => {
+    // Prevent page scrolling when drawing
     e.preventDefault();
+    e.stopPropagation();
     const point = getTouchPos(e);
     startDrawing(point);
   };
 
   const handleTouchMove = (e: React.TouchEvent<HTMLCanvasElement>) => {
+    // Critical: prevent page scrolling during annotation
     e.preventDefault();
+    e.stopPropagation();
     const point = getTouchPos(e);
     continueDrawing(point);
   };
 
   const handleTouchEnd = (e: React.TouchEvent<HTMLCanvasElement>) => {
     e.preventDefault();
+    e.stopPropagation();
     finishDrawing();
   };
 
@@ -335,13 +343,16 @@ export const AnnotationCanvas: React.FC<AnnotationCanvasProps> = ({
         style={{ pointerEvents: 'none' }}
       />
       
-      {/* Overlay canvas for current drawing */}
+      {/* Overlay canvas for current drawing with enhanced touch handling */}
       <canvas
         ref={overlayCanvasRef}
         width={width}
         height={height}
         className="absolute inset-0"
-        style={{ cursor: getCursorStyle() }}
+        style={{ 
+          cursor: getCursorStyle(),
+          touchAction: currentTool !== 'none' ? 'none' : 'auto' // Prevent scrolling during annotation
+        }}
         onMouseDown={handleMouseDown}
         onMouseMove={handleMouseMove}
         onMouseUp={handleMouseUp}
@@ -349,6 +360,7 @@ export const AnnotationCanvas: React.FC<AnnotationCanvasProps> = ({
         onTouchStart={handleTouchStart}
         onTouchMove={handleTouchMove}
         onTouchEnd={handleTouchEnd}
+        onContextMenu={(e) => e.preventDefault()} // Prevent right-click menu
       />
       
       {/* Text input overlay */}
