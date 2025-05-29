@@ -98,12 +98,12 @@ export default function PublicEventsPage() {
         </div>
 
         {/* Welcome Message */}
-        <Card className="bg-gradient-to-r from-glee-spelman/5 to-glee-purple/5 border-glee-spelman/20">
+        <Card className="bg-gradient-to-r from-glee-spelman/5 to-glee-purple/5 border-glee-spelman/20 dark:from-glee-spelman/10 dark:to-glee-purple/10 dark:border-glee-spelman/30">
           <CardContent className="p-6">
-            <h2 className="text-xl font-semibold text-glee-spelman mb-2">
+            <h2 className="text-xl font-semibold text-glee-spelman dark:text-blue-400 mb-2">
               Welcome, Music Lovers!
             </h2>
-            <p className="text-muted-foreground">
+            <p className="text-muted-foreground dark:text-gray-300">
               Stay up to date with the Spelman College Glee Club's upcoming public performances and events. 
               Mark your calendars and join us for unforgettable musical experiences.
             </p>
@@ -118,26 +118,26 @@ export default function PublicEventsPage() {
         />
 
         {/* Quick Actions for Fans */}
-        <Card>
+        <Card className="dark:bg-card/50 dark:border-border/50">
           <CardContent className="p-6">
-            <h3 className="text-lg font-semibold mb-4 flex items-center">
-              <ShoppingBag className="h-5 w-5 mr-2 text-glee-spelman" />
+            <h3 className="text-lg font-semibold mb-4 flex items-center dark:text-foreground">
+              <ShoppingBag className="h-5 w-5 mr-2 text-glee-spelman dark:text-blue-400" />
               Connect With Us
             </h3>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               {/* Merchandise Store */}
               <Button 
                 variant="outline" 
-                className="h-auto p-4 justify-start text-left hover:bg-glee-spelman/5 hover:border-glee-spelman/50"
+                className="h-auto p-4 justify-start text-left hover:bg-glee-spelman/5 hover:border-glee-spelman/50 dark:hover:bg-blue-400/10 dark:hover:border-blue-400/50 dark:border-border"
                 asChild
               >
                 <Link to="/merchandise" className="block">
                   <div>
                     <div className="flex items-center mb-1">
-                      <ShoppingBag className="h-4 w-4 mr-2 text-glee-spelman" />
-                      <span className="font-medium">Merchandise Store</span>
+                      <ShoppingBag className="h-4 w-4 mr-2 text-glee-spelman dark:text-blue-400" />
+                      <span className="font-medium dark:text-foreground">Merchandise Store</span>
                     </div>
-                    <p className="text-xs text-muted-foreground">
+                    <p className="text-xs text-muted-foreground dark:text-gray-400">
                       Shop official Glee Club merchandise
                     </p>
                   </div>
@@ -147,16 +147,16 @@ export default function PublicEventsPage() {
               {/* Contact Us */}
               <Button 
                 variant="outline" 
-                className="h-auto p-4 justify-start text-left hover:bg-glee-spelman/5 hover:border-glee-spelman/50"
+                className="h-auto p-4 justify-start text-left hover:bg-glee-spelman/5 hover:border-glee-spelman/50 dark:hover:bg-blue-400/10 dark:hover:border-blue-400/50 dark:border-border"
                 asChild
               >
                 <Link to="/contact" className="block">
                   <div>
                     <div className="flex items-center mb-1">
-                      <Phone className="h-4 w-4 mr-2 text-glee-spelman" />
-                      <span className="font-medium">Contact Us</span>
+                      <Phone className="h-4 w-4 mr-2 text-glee-spelman dark:text-blue-400" />
+                      <span className="font-medium dark:text-foreground">Contact Us</span>
                     </div>
-                    <p className="text-xs text-muted-foreground">
+                    <p className="text-xs text-muted-foreground dark:text-gray-400">
                       Get in touch with the Glee Club
                     </p>
                   </div>
@@ -167,58 +167,58 @@ export default function PublicEventsPage() {
         </Card>
 
         {/* Performance Stats */}
-        <Card>
+        <Card className="dark:bg-card/50 dark:border-border/50">
           <CardContent className="p-6">
-            <h3 className="text-lg font-semibold mb-4">This Season</h3>
+            <h3 className="text-lg font-semibold mb-4 dark:text-foreground">This Season</h3>
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
               <div className="text-center">
-                <div className="text-2xl font-bold text-glee-spelman">
+                <div className="text-2xl font-bold text-glee-spelman dark:text-blue-400">
                   {publicEvents.filter(e => new Date(e.start_time) > new Date()).length}
                 </div>
-                <div className="text-sm text-muted-foreground">Upcoming Shows</div>
+                <div className="text-sm text-muted-foreground dark:text-gray-400">Upcoming Shows</div>
               </div>
               <div className="text-center">
-                <div className="text-2xl font-bold text-glee-spelman">
+                <div className="text-2xl font-bold text-glee-spelman dark:text-blue-400">
                   {publicEvents.filter(e => e.event_type === 'concert').length}
                 </div>
-                <div className="text-sm text-muted-foreground">Concerts</div>
+                <div className="text-sm text-muted-foreground dark:text-gray-400">Concerts</div>
               </div>
               <div className="text-center">
-                <div className="text-2xl font-bold text-glee-spelman">
+                <div className="text-2xl font-bold text-glee-spelman dark:text-blue-400">
                   {publicEvents.filter(e => e.event_type === 'community').length}
                 </div>
-                <div className="text-sm text-muted-foreground">Community Events</div>
+                <div className="text-sm text-muted-foreground dark:text-gray-400">Community Events</div>
               </div>
               <div className="text-center">
-                <div className="text-2xl font-bold text-glee-spelman">
+                <div className="text-2xl font-bold text-glee-spelman dark:text-blue-400">
                   {publicEvents.filter(e => e.event_type === 'performance').length}
                 </div>
-                <div className="text-sm text-muted-foreground">Performances</div>
+                <div className="text-sm text-muted-foreground dark:text-gray-400">Performances</div>
               </div>
             </div>
           </CardContent>
         </Card>
 
         {/* Footer Links */}
-        <Card className="bg-muted/50">
+        <Card className="bg-muted/50 dark:bg-muted/20 dark:border-border/50">
           <CardContent className="p-6 text-center">
-            <p className="text-sm text-muted-foreground mb-4">
+            <p className="text-sm text-muted-foreground dark:text-gray-400 mb-4">
               Want to stay updated? Follow us on social media or join our mailing list.
             </p>
             <div className="flex flex-wrap justify-center gap-2">
-              <Button variant="ghost" size="sm" asChild>
-                <Link to="/social" className="flex items-center">
+              <Button variant="ghost" size="sm" asChild className="dark:hover:bg-muted/40">
+                <Link to="/social" className="flex items-center dark:text-foreground">
                   Follow Us
                   <ExternalLink className="h-3 w-3 ml-1" />
                 </Link>
               </Button>
-              <Button variant="ghost" size="sm" asChild>
-                <Link to="/about">
+              <Button variant="ghost" size="sm" asChild className="dark:hover:bg-muted/40">
+                <Link to="/about" className="dark:text-foreground">
                   About the Glee Club
                 </Link>
               </Button>
-              <Button variant="ghost" size="sm" asChild>
-                <Link to="/press-kit">
+              <Button variant="ghost" size="sm" asChild className="dark:hover:bg-muted/40">
+                <Link to="/press-kit" className="dark:text-foreground">
                   Press Kit
                 </Link>
               </Button>
