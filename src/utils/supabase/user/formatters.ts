@@ -17,6 +17,7 @@ export function formatVoicePart(voicePart: string | null): string {
     case "alto_2": return "Alto 2";
     case "tenor": return "Tenor";
     case "bass": return "Bass";
+    case "director": return "Director";
     default: return voicePart; // Return as-is if it doesn't match predefined values
   }
 }

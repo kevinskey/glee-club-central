@@ -11,7 +11,7 @@ export const userFormSchema = z.object({
   email: z.string().email("Invalid email format").regex(emailRegex, "Invalid email format"),
   password: z.string().optional(),
   phone: z.string().optional(),
-  voice_part: z.enum(["soprano_1", "soprano_2", "alto_1", "alto_2", "tenor", "bass"]).nullable(),
+  voice_part: z.enum(["soprano_1", "soprano_2", "alto_1", "alto_2", "tenor", "bass", "director"]).nullable(),
   status: z.enum(["active", "pending", "inactive", "alumni"]).default("active"),
   class_year: z.string().optional(),
   notes: z.string().optional(),
@@ -25,7 +25,7 @@ export const userFormSchema = z.object({
 
 export type UserFormValues = z.infer<typeof userFormSchema>;
 
-export type VoicePart = "soprano_1" | "soprano_2" | "alto_1" | "alto_2" | "tenor" | "bass" | null;
+export type VoicePart = "soprano_1" | "soprano_2" | "alto_1" | "alto_2" | "tenor" | "bass" | "director" | null;
 
 export const formatUserData = (formData: UserFormValues) => {
   // Format phone number if present

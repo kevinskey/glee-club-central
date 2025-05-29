@@ -273,6 +273,7 @@ export function AddMemberDialog({
                           <SelectItem value="alto_2">Alto 2</SelectItem>
                           <SelectItem value="tenor">Tenor</SelectItem>
                           <SelectItem value="bass">Bass</SelectItem>
+                          <SelectItem value="director">Director</SelectItem>
                         </SelectContent>
                       </Select>
                       <FormMessage />

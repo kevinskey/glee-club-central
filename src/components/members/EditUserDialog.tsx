@@ -56,7 +56,7 @@ export function EditUserDialog({
       last_name: user?.last_name || '',
       email: user?.email || '',
       phone: user?.phone || '',
-      voice_part: (user?.voice_part as "soprano_1" | "soprano_2" | "alto_1" | "alto_2" | "tenor" | "bass" | null) || null,
+      voice_part: (user?.voice_part as "soprano_1" | "soprano_2" | "alto_1" | "alto_2" | "tenor" | "bass" | "director" | null) || null,
       status: (user?.status as "active" | "pending" | "inactive" | "alumni") || 'active',
       class_year: user?.class_year || '',
       notes: user?.notes || '',
@@ -73,7 +73,7 @@ export function EditUserDialog({
         last_name: user.last_name || '',
         email: user.email || '',
         phone: user.phone || '',
-        voice_part: (user.voice_part as "soprano_1" | "soprano_2" | "alto_1" | "alto_2" | "tenor" | "bass" | null) || null,
+        voice_part: (user.voice_part as "soprano_1" | "soprano_2" | "alto_1" | "alto_2" | "tenor" | "bass" | "director" | null) || null,
         status: (user.status as "active" | "pending" | "inactive" | "alumni") || 'active',
         class_year: user.class_year || '',
         notes: user.notes || '',
@@ -205,6 +205,7 @@ export function EditUserDialog({
                         <SelectItem value="alto_2">Alto 2</SelectItem>
                         <SelectItem value="tenor">Tenor</SelectItem>
                         <SelectItem value="bass">Bass</SelectItem>
+                        <SelectItem value="director">Director</SelectItem>
                       </SelectContent>
                     </Select>
                     <FormMessage />

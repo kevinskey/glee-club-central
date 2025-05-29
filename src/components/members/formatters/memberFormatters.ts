@@ -26,6 +26,8 @@ export const formatVoicePart = (voicePart: string | null): string => {
       return 'Tenor';
     case 'bass':
       return 'Bass';
+    case 'director':
+      return 'Director';
     default:
       return voicePart;
   }
