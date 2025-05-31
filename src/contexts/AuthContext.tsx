@@ -1,3 +1,4 @@
+
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { Session, User } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
@@ -97,6 +98,22 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       if (error) {
         console.error('Error fetching profile:', error);
         setProfileLoadFailed(true);
+        
+        // For known admin email, create a temporary admin profile
+        if (user?.email === 'kevinskey@mac.com') {
+          console.log('Creating temporary admin profile for known admin email');
+          const tempAdminProfile: Profile = {
+            id: userId,
+            first_name: 'Admin',
+            last_name: 'User',
+            role: 'admin',
+            is_super_admin: true,
+            status: 'active'
+          };
+          setProfile(tempAdminProfile);
+          setProfileLoadFailed(false);
+          return tempAdminProfile;
+        }
         
         // Show warning about profile loading issue
         if (error.code !== 'PGRST116') { // Not a "no rows" error
@@ -375,7 +392,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       
       // Show a toast with manual override option for admins
       const userRole = user.user_metadata?.role || user.app_metadata?.role;
-      if (userRole === 'admin' || userRole === 'super_admin') {
+      if (userRole === 'admin' || userRole === 'super_admin' || user.email === 'kevinskey@mac.com') {
         toast.warning(
           'Profile loading failed. Click here to activate admin override.',
           {

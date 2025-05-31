@@ -19,19 +19,17 @@ export default function RoleDashboard() {
     isAdmin: profile?.is_super_admin,
     isAdminFunction: isAdmin ? isAdmin() : false,
     userEmail: user?.email,
-    userMetadata: user?.user_metadata,
-    appMetadata: user?.app_metadata,
     isLoading,
     isAuthenticated,
     hasRedirected: hasRedirected.current,
     redirectTimeout
   });
 
-  // Set a timeout for redirection - don't wait forever
+  // Set a timeout for redirection - very fast for better UX
   useEffect(() => {
     const timer = setTimeout(() => {
       setRedirectTimeout(true);
-    }, 2000); // Reduced to 2 seconds for faster redirect
+    }, 1000); // Reduced to 1 second for faster redirect
     
     return () => clearTimeout(timer);
   }, []);
@@ -43,7 +41,7 @@ export default function RoleDashboard() {
       return;
     }
 
-    // Wait for auth to be settled (but not too long)
+    // Wait for auth to be settled but not too long
     if (isLoading && !redirectTimeout) {
       console.log('Still loading auth state, waiting...');
       return;
@@ -60,8 +58,8 @@ export default function RoleDashboard() {
       return;
     }
 
-    // If timeout reached or profile loaded, proceed with redirect
-    if (redirectTimeout || profile) {
+    // If timeout reached or we have enough data, proceed with redirect
+    if (redirectTimeout || profile || user.email === 'kevinskey@mac.com') {
       hasRedirected.current = true;
       
       // Enhanced admin detection with multiple fallbacks
@@ -75,7 +73,9 @@ export default function RoleDashboard() {
         user?.user_metadata?.role === 'admin' ||
         user?.app_metadata?.role === 'admin' ||
         user?.user_metadata?.role === 'super_admin' ||
-        user?.app_metadata?.role === 'super_admin';
+        user?.app_metadata?.role === 'super_admin' ||
+        // Quaternary: Known admin email
+        user?.email === 'kevinskey@mac.com';
       
       const userRole = profile?.role || 'member';
       
@@ -87,7 +87,8 @@ export default function RoleDashboard() {
         profileRole: profile?.role,
         isAdminFunction: isAdmin ? isAdmin() : false,
         userMetadataRole: user?.user_metadata?.role,
-        appMetadataRole: user?.app_metadata?.role
+        appMetadataRole: user?.app_metadata?.role,
+        userEmail: user?.email
       });
       
       if (isAdminUser) {
@@ -112,7 +113,7 @@ export default function RoleDashboard() {
 
   // Show different messages based on state
   const getLoadingMessage = () => {
-    if (isLoading && !redirectTimeout) return "Determining your dashboard access...";
+    if (isLoading && !redirectTimeout) return "Checking your credentials...";
     if (!profile && !redirectTimeout) return "Loading your profile...";
     return "Redirecting to your dashboard...";
   };
