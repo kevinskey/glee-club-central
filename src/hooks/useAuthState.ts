@@ -25,6 +25,7 @@ export const useAuthState = () => {
   const initializationRef = useRef(false);
   const mountedRef = useRef(true);
   const profileFetchAttempts = useRef(0);
+  const maxProfileAttempts = 3;
   
   // Debug logging
   console.log('useAuthState current state:', {
@@ -37,7 +38,7 @@ export const useAuthState = () => {
     profileFetchAttempts: profileFetchAttempts.current
   });
   
-  // Fetch user data function with retry logic
+  // Fetch user data function with improved retry logic
   const fetchUserData = useCallback(async (userId: string) => {
     if (!mountedRef.current) return;
     
@@ -46,19 +47,27 @@ export const useAuthState = () => {
     try {
       console.log(`Fetching user data for: ${userId} (attempt ${profileFetchAttempts.current})`);
       
-      const [permissions] = await Promise.all([
-        fetchUserPermissions(userId)
-      ]);
-      
-      // Try to fetch profile, but don't fail if it doesn't work
+      // Try to fetch profile first
       let profile = null;
       try {
         profile = await getProfile(userId);
-        console.log('Fetched user profile:', profile);
+        console.log('Successfully fetched user profile:', profile);
       } catch (profileError) {
-        console.error('Profile fetch failed, continuing without profile:', profileError);
+        console.error('Profile fetch failed:', profileError);
         
-        // Create a minimal default profile if fetch fails
+        // Only retry if we haven't exceeded max attempts
+        if (profileFetchAttempts.current < maxProfileAttempts) {
+          console.log('Retrying profile fetch in 2 seconds...');
+          setTimeout(() => {
+            if (mountedRef.current) {
+              fetchUserData(userId);
+            }
+          }, 2000);
+          return;
+        }
+        
+        console.log('Max profile fetch attempts reached, using fallback');
+        // Create a minimal fallback profile after max attempts
         profile = {
           id: userId,
           first_name: 'User',
@@ -67,8 +76,19 @@ export const useAuthState = () => {
           status: 'active',
           is_super_admin: false
         } as Profile;
-        
-        console.log('Using default profile:', profile);
+      }
+      
+      // Fetch permissions in parallel
+      let permissions = {};
+      try {
+        permissions = await fetchUserPermissions(userId);
+      } catch (permError) {
+        console.warn('Failed to fetch permissions, using defaults:', permError);
+        permissions = {
+          'view_sheet_music': true,
+          'view_calendar': true,
+          'view_announcements': true
+        };
       }
       
       if (mountedRef.current) {
@@ -83,7 +103,7 @@ export const useAuthState = () => {
     } catch (error) {
       console.error('Error fetching user data:', error);
       if (mountedRef.current) {
-        // Set minimal state even on error to prevent infinite loading
+        // Set minimal state even on error
         setState(prev => ({
           ...prev,
           profile: {
@@ -94,7 +114,11 @@ export const useAuthState = () => {
             status: 'active',
             is_super_admin: false
           } as Profile,
-          permissions: {},
+          permissions: {
+            'view_sheet_music': true,
+            'view_calendar': true,
+            'view_announcements': true
+          },
           isLoading: false
         }));
       }
@@ -146,6 +170,9 @@ export const useAuthState = () => {
             isLoading: true, // Keep loading until profile is fetched
             isInitialized: true
           }));
+          
+          // Reset attempts for existing session
+          profileFetchAttempts.current = 0;
           
           // Fetch additional user data
           await fetchUserData(session.user.id);

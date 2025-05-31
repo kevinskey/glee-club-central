@@ -14,7 +14,7 @@ export const AdminRoute: React.FC<AdminRouteProps> = ({ children }) => {
   const { user, profile, isLoading: authLoading, isAuthenticated, isAdmin } = useAuth();
   const { isSuperAdmin, isLoading: permissionsLoading } = usePermissions();
   
-  const isLoading = authLoading || permissionsLoading;
+  const isLoading = authLoading;
   
   // Debug logging
   console.log('AdminRoute check:', {
@@ -46,8 +46,8 @@ export const AdminRoute: React.FC<AdminRouteProps> = ({ children }) => {
     return <Navigate to="/login" replace />;
   }
   
-  // Wait for profile to load before checking admin status
-  if (!profile) {
+  // If profile is still loading, show loader (but don't wait forever)
+  if (!profile && authLoading) {
     console.log('AdminRoute: Profile not loaded, showing loader');
     return (
       <PageLoader 
@@ -57,7 +57,7 @@ export const AdminRoute: React.FC<AdminRouteProps> = ({ children }) => {
     );
   }
   
-  // Check for admin access - include multiple sources
+  // Check for admin access - be more permissive if profile hasn't loaded
   const hasAdminAccess = isSuperAdmin || 
                         profile?.is_super_admin === true || 
                         profile?.role === 'admin' ||
@@ -65,11 +65,21 @@ export const AdminRoute: React.FC<AdminRouteProps> = ({ children }) => {
   
   console.log('AdminRoute: Admin access check result:', hasAdminAccess);
   
-  // Redirect non-admin users to the member dashboard
-  if (!hasAdminAccess) {
+  // Only redirect non-admin users if we have profile data to verify
+  if (!hasAdminAccess && profile) {
     console.log('AdminRoute: User does not have admin access, redirecting to member dashboard');
     toast.error("You don't have permission to access the admin dashboard");
     return <Navigate to="/dashboard/member" replace />;
+  }
+  
+  // If we don't have profile data yet but user is authenticated, show loading
+  if (!profile) {
+    return (
+      <PageLoader 
+        message="Verifying admin permissions..." 
+        className="min-h-screen"
+      />
+    );
   }
   
   // Render children for users with admin access
@@ -77,5 +87,4 @@ export const AdminRoute: React.FC<AdminRouteProps> = ({ children }) => {
   return <>{children}</>;
 };
 
-// Add a default export for backward compatibility
 export default AdminRoute;

@@ -10,6 +10,7 @@ export default function RoleDashboard() {
   const location = useLocation();
   const hasRedirected = useRef(false);
   const [profileWaitTime, setProfileWaitTime] = useState(0);
+  const [maxWaitReached, setMaxWaitReached] = useState(false);
 
   // Debug logging
   console.log('RoleDashboard state:', {
@@ -20,19 +21,26 @@ export default function RoleDashboard() {
     isLoading,
     isAuthenticated,
     hasRedirected: hasRedirected.current,
-    profileWaitTime
+    profileWaitTime,
+    maxWaitReached
   });
 
   // Track how long we've been waiting for profile
   useEffect(() => {
-    if (user && !profile && !isLoading) {
+    if (user && !profile && !isLoading && !maxWaitReached) {
       const timer = setInterval(() => {
-        setProfileWaitTime(prev => prev + 1);
+        setProfileWaitTime(prev => {
+          const newTime = prev + 1;
+          if (newTime >= 3) {
+            setMaxWaitReached(true);
+          }
+          return newTime;
+        });
       }, 1000);
       
       return () => clearInterval(timer);
     }
-  }, [user, profile, isLoading]);
+  }, [user, profile, isLoading, maxWaitReached]);
 
   useEffect(() => {
     // Prevent multiple redirects
@@ -58,53 +66,41 @@ export default function RoleDashboard() {
       return;
     }
 
-    // If profile hasn't loaded after 5 seconds, proceed with default role
-    if (!profile && profileWaitTime >= 5) {
-      console.log('Profile failed to load after 5 seconds, using default member role');
+    // If profile hasn't loaded after max wait time, proceed with fallback
+    if (!profile && maxWaitReached) {
+      console.log('Profile failed to load within timeout, using fallback member role');
       hasRedirected.current = true;
       navigate('/dashboard/member', { replace: true });
       return;
     }
 
     // Wait for profile to be loaded (but not indefinitely)
-    if (!profile && profileWaitTime < 5) {
+    if (!profile && !maxWaitReached) {
       console.log('Profile not loaded yet, waiting... (' + profileWaitTime + 's)');
       return;
     }
 
     // All conditions met - perform role-based redirect
-    hasRedirected.current = true;
-    
-    const userRole = profile?.role || 'member'; // Default to member if no role
-    const isAdmin = profile?.is_super_admin || userRole === 'admin';
-    
-    console.log('Performing role-based redirect:', { userRole, isAdmin });
-    
-    switch (userRole) {
-      case 'admin':
+    if (profile) {
+      hasRedirected.current = true;
+      
+      const userRole = profile.role || 'member';
+      const isAdmin = profile.is_super_admin || userRole === 'admin';
+      
+      console.log('Performing role-based redirect:', { userRole, isAdmin });
+      
+      if (isAdmin || userRole === 'admin') {
         console.log('Redirecting admin to /admin');
         navigate('/admin', { replace: true });
-        break;
-      case 'member':
-        if (isAdmin) {
-          console.log('Redirecting super admin to /admin');
-          navigate('/admin', { replace: true });
-        } else {
-          console.log('Redirecting member to /dashboard/member');
-          navigate('/dashboard/member', { replace: true });
-        }
-        break;
-      case 'fan':
+      } else if (userRole === 'fan') {
         console.log('Redirecting fan to /dashboard/fan');
         navigate('/dashboard/fan', { replace: true });
-        break;
-      default:
-        // Default to member dashboard for unknown roles
-        console.log('Unknown role, defaulting to member dashboard');
+      } else {
+        console.log('Redirecting member to /dashboard/member');
         navigate('/dashboard/member', { replace: true });
-        break;
+      }
     }
-  }, [user, profile, isLoading, isAuthenticated, navigate, location, profileWaitTime]);
+  }, [user, profile, isLoading, isAuthenticated, navigate, location, maxWaitReached, profileWaitTime]);
 
   // Reset redirect flag when component unmounts
   useEffect(() => {
@@ -116,9 +112,10 @@ export default function RoleDashboard() {
   // Show different messages based on wait time
   const getLoadingMessage = () => {
     if (isLoading) return "Determining your dashboard access...";
-    if (!profile && profileWaitTime < 3) return "Loading your profile...";
-    if (!profile && profileWaitTime < 5) return "Still loading profile data...";
-    return "Finalizing dashboard setup...";
+    if (!profile && profileWaitTime < 2) return "Loading your profile...";
+    if (!profile && profileWaitTime < 3) return "Still loading profile data...";
+    if (!profile && maxWaitReached) return "Finalizing dashboard setup...";
+    return "Redirecting to your dashboard...";
   };
 
   // Show loading while determining role

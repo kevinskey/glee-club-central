@@ -18,7 +18,7 @@ const RequireAuth = ({ children, requireAdmin, allowedUserTypes }: RequireAuthPr
   const { isSuperAdmin, isLoading: permissionsLoading } = usePermissions();
   const location = useLocation();
   
-  const isLoading = authLoading || permissionsLoading;
+  const isLoading = authLoading;
   
   // Track redirect attempts to prevent loops
   const redirectAttemptedRef = React.useRef(false);
@@ -61,23 +61,24 @@ const RequireAuth = ({ children, requireAdmin, allowedUserTypes }: RequireAuthPr
     return <Navigate to="/auth/login" replace />;
   }
   
-  // Check admin access if required
+  // Check admin access if required (only if we have profile data or timeout)
   if (requireAdmin && isAuthenticated) {
     const hasAdminAccess = isSuperAdmin || 
                           profile?.is_super_admin === true || 
+                          profile?.role === 'admin' ||
                           (isAdmin && isAdmin());
     
     console.log('RequireAuth: Admin check:', { hasAdminAccess, isSuperAdmin, profileIsAdmin: profile?.is_super_admin });
     
-    if (!hasAdminAccess) {
+    if (!hasAdminAccess && profile) { // Only block if we have profile data
       console.log('RequireAuth: User lacks admin access, redirecting to dashboard');
       toast.error("You don't have admin privileges to access this page");
       return <Navigate to="/dashboard/member" replace />;
     }
   }
   
-  // Check user type restrictions
-  if (allowedUserTypes && allowedUserTypes.length > 0 && isAuthenticated) {
+  // Check user type restrictions (only if we have profile data)
+  if (allowedUserTypes && allowedUserTypes.length > 0 && isAuthenticated && profile) {
     const userType = getUserType();
     
     console.log('RequireAuth: User type check:', { userType, allowedUserTypes });
