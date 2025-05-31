@@ -20,9 +20,23 @@ const RequireAuth = ({ children, requireAdmin, allowedUserTypes }: RequireAuthPr
   
   const isLoading = authLoading || permissionsLoading;
   
-  // Track redirect state to prevent multiple redirects
+  // Track redirect state to prevent multiple redirects and reduce blinking
   const [isRedirecting, setIsRedirecting] = React.useState(false);
   const redirectAttemptedRef = React.useRef(false);
+  const [showLoading, setShowLoading] = React.useState(false);
+  
+  // Debounce loading display to prevent blinking
+  React.useEffect(() => {
+    if (isLoading) {
+      const timer = setTimeout(() => {
+        setShowLoading(true);
+      }, 150); // Small delay before showing loading
+      
+      return () => clearTimeout(timer);
+    } else {
+      setShowLoading(false);
+    }
+  }, [isLoading]);
   
   // Show toast only once per session and only when not loading
   React.useEffect(() => {
@@ -31,8 +45,8 @@ const RequireAuth = ({ children, requireAdmin, allowedUserTypes }: RequireAuthPr
     }
   }, [isLoading, isAuthenticated, location.pathname, isRedirecting]);
   
-  // Show enhanced loading state while authentication is being checked
-  if (isLoading) {
+  // Show loading state only after debounce period
+  if (showLoading) {
     return (
       <div className="flex items-center justify-center min-h-screen bg-background">
         <div className="flex flex-col items-center space-y-4">
@@ -44,7 +58,7 @@ const RequireAuth = ({ children, requireAdmin, allowedUserTypes }: RequireAuthPr
   }
   
   // Only redirect once and avoid multiple redirects
-  if (!isAuthenticated && !isRedirecting && !redirectAttemptedRef.current) {
+  if (!isAuthenticated && !isRedirecting && !redirectAttemptedRef.current && !isLoading) {
     // Prevent multiple redirects by setting refs and state
     setIsRedirecting(true);
     redirectAttemptedRef.current = true;
@@ -66,7 +80,7 @@ const RequireAuth = ({ children, requireAdmin, allowedUserTypes }: RequireAuthPr
   }
   
   // Check if admin access is required
-  if (requireAdmin) {
+  if (requireAdmin && !isLoading) {
     const hasAdminAccess = isSuperAdmin || (isAdmin && isAdmin());
     if (!hasAdminAccess) {
       toast.error("You don't have admin privileges to access this page");
@@ -75,7 +89,7 @@ const RequireAuth = ({ children, requireAdmin, allowedUserTypes }: RequireAuthPr
   }
   
   // Check if user type is in allowed types
-  if (allowedUserTypes && allowedUserTypes.length > 0) {
+  if (allowedUserTypes && allowedUserTypes.length > 0 && !isLoading) {
     const userType = getUserType();
     
     if (!userType || !allowedUserTypes.includes(userType)) {

@@ -21,7 +21,7 @@ export const useLoadingCoordinator = create<LoadingCoordinator>((set, get) => ({
   loadingStates: {
     auth: true,
     permissions: true,
-    calendar: true,
+    calendar: false, // Changed to false to reduce initial loading
     profile: true,
   },
   
@@ -32,7 +32,10 @@ export const useLoadingCoordinator = create<LoadingCoordinator>((set, get) => ({
         [key]: loading
       };
       
-      console.log(`Loading coordinator: ${key} = ${loading}`, newState);
+      // Only log significant state changes to reduce noise
+      if (state.loadingStates[key] !== loading) {
+        console.log(`Loading coordinator: ${key} = ${loading}`);
+      }
       
       return {
         loadingStates: newState
@@ -42,16 +45,14 @@ export const useLoadingCoordinator = create<LoadingCoordinator>((set, get) => ({
   
   isAnyLoading: () => {
     const states = get().loadingStates;
-    return Object.values(states).some(loading => loading);
+    // Only consider auth and permissions as critical for readiness
+    return states.auth || states.permissions;
   },
   
   isReady: () => {
     const states = get().loadingStates;
-    const ready = Object.values(states).every(loading => !loading);
-    
-    if (ready) {
-      console.log('Loading coordinator: All systems ready');
-    }
+    // Only check critical states for readiness
+    const ready = !states.auth && !states.permissions && !states.profile;
     
     return ready;
   },
@@ -66,7 +67,7 @@ export const useLoadingCoordinator = create<LoadingCoordinator>((set, get) => ({
       loadingStates: {
         auth: true,
         permissions: true,
-        calendar: true,
+        calendar: false,
         profile: true,
       }
     });

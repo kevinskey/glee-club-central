@@ -13,7 +13,7 @@ export interface DashboardData {
 export const useDashboardData = () => {
   const [data, setData] = useState<DashboardData>({
     events: [],
-    isLoading: true,
+    isLoading: false, // Start with false to prevent initial blinking
     error: null
   });
   
@@ -21,7 +21,9 @@ export const useDashboardData = () => {
   const { isLoading: permissionsLoading } = usePermissions();
   const { setLoading, isReady: coordinatorReady } = useLoadingCoordinator();
   
-  // Memoize authentication readiness to prevent unnecessary re-renders
+  // Debounced authentication readiness to prevent rapid state changes
+  const [debouncedAuthReady, setDebouncedAuthReady] = useState(false);
+  
   const isAuthReady = useMemo(() => 
     isAuthenticated && !authLoading && !!user && !!profile, 
     [isAuthenticated, authLoading, user, profile]
@@ -32,7 +34,16 @@ export const useDashboardData = () => {
     [permissionsLoading]
   );
   
-  // Update loading coordinator when auth state changes
+  // Debounce auth ready state to prevent blinking
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedAuthReady(isAuthReady);
+    }, 100); // Small delay to debounce rapid changes
+    
+    return () => clearTimeout(timer);
+  }, [isAuthReady]);
+  
+  // Update loading coordinator when auth state changes (debounced)
   useEffect(() => {
     setLoading('auth', authLoading);
   }, [authLoading, setLoading]);
@@ -42,28 +53,23 @@ export const useDashboardData = () => {
   }, [permissionsLoading, setLoading]);
   
   useEffect(() => {
-    setLoading('profile', !profile);
-  }, [profile, setLoading]);
+    setLoading('profile', !profile && isAuthenticated);
+  }, [profile, setLoading, isAuthenticated]);
 
-  // Memoized data loading function to prevent unnecessary re-renders
+  // Simplified data loading function
   const loadDashboardData = useCallback(async () => {
-    if (!isAuthReady || !isPermissionsReady) {
-      console.log('Dashboard data loading skipped - dependencies not ready');
+    if (!debouncedAuthReady || !isPermissionsReady) {
       return;
     }
     
     try {
-      console.log('Loading dashboard data...');
-      setData(prev => ({ ...prev, isLoading: true, error: null }));
-      
       // Since calendar functionality is removed, just return empty events
+      // This prevents unnecessary loading states
       setData({
         events: [],
         isLoading: false,
         error: null
       });
-      
-      console.log('Dashboard data loaded');
     } catch (error) {
       console.error('Error loading dashboard data:', error);
       setData(prev => ({
@@ -72,30 +78,19 @@ export const useDashboardData = () => {
         error: 'Failed to load dashboard data'
       }));
     }
-  }, [isAuthReady, isPermissionsReady]);
+  }, [debouncedAuthReady, isPermissionsReady]);
 
-  // Load data when auth is ready
+  // Load data when auth is ready (debounced)
   useEffect(() => {
-    let mounted = true;
-    
-    if (isAuthReady && isPermissionsReady && data.events.length === 0 && !data.isLoading) {
-      console.log('Triggering initial dashboard data load');
-      loadDashboardData().then(() => {
-        if (mounted) {
-          console.log('Initial dashboard data load completed');
-        }
-      });
+    if (debouncedAuthReady && isPermissionsReady) {
+      loadDashboardData();
     }
-    
-    return () => {
-      mounted = false;
-    };
-  }, [isAuthReady, isPermissionsReady, loadDashboardData, data.events.length, data.isLoading]);
+  }, [debouncedAuthReady, isPermissionsReady, loadDashboardData]);
 
-  // Memoized readiness state to prevent unnecessary re-renders
+  // Simplified readiness state to prevent blinking
   const isReady = useMemo(() => 
-    isAuthReady && isPermissionsReady && !data.isLoading && coordinatorReady,
-    [isAuthReady, isPermissionsReady, data.isLoading, coordinatorReady]
+    debouncedAuthReady && isPermissionsReady && !data.isLoading,
+    [debouncedAuthReady, isPermissionsReady, data.isLoading]
   );
 
   return {
