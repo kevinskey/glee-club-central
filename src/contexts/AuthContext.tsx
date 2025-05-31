@@ -41,8 +41,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   // Keep track of session changes
   useEffect(() => {
+    let mounted = true;
+    
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
+        if (!mounted) return;
+        
         console.log('Auth state change:', event, session?.user?.id);
         setSession(session);
         
@@ -53,7 +57,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }
     );
 
-    return () => subscription.unsubscribe();
+    return () => {
+      mounted = false;
+      subscription.unsubscribe();
+    };
   }, []);
 
   const isAuthenticated = !!user && !!session;
@@ -61,7 +68,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const login = useCallback(async (email: string, password: string) => {
     try {
       console.log('Login attempt for:', email);
-      const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+      
+      // Clean up any existing auth state first
+      cleanupAuthState();
+      
+      const { data, error } = await supabase.auth.signInWithPassword({ 
+        email: email.trim(), 
+        password 
+      });
       
       if (error) {
         console.error('Login error:', error);
@@ -71,9 +85,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       if (data.session) {
         console.log('Login successful, session created');
         setSession(data.session);
+        return { error: null };
       }
       
-      return { error: null };
+      return { error: new Error('No session created') };
     } catch (err) {
       console.error('Unexpected login error:', err);
       return { error: err };
@@ -81,8 +96,17 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, []);
 
   const logout = useCallback(async () => {
-    const { error } = await supabase.auth.signOut();
-    return { error };
+    try {
+      cleanupAuthState();
+      const { error } = await supabase.auth.signOut();
+      if (!error) {
+        setSession(null);
+      }
+      return { error };
+    } catch (err) {
+      console.error('Logout error:', err);
+      return { error: err };
+    }
   }, []);
 
   const signIn = useCallback(async (email: string, password: string) => {
@@ -94,18 +118,23 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, [logout]);
 
   const signUp = useCallback(async (email: string, password: string, firstName: string, lastName: string, userType: any = 'member') => {
-    const { data, error } = await supabase.auth.signUp({
-      email,
-      password,
-      options: {
-        data: {
-          first_name: firstName,
-          last_name: lastName,
-          user_type: userType,
+    try {
+      const { data, error } = await supabase.auth.signUp({
+        email: email.trim(),
+        password,
+        options: {
+          data: {
+            first_name: firstName,
+            last_name: lastName,
+            user_type: userType,
+          },
         },
-      },
-    });
-    return { error, data };
+      });
+      return { error, data };
+    } catch (err) {
+      console.error('Sign up error:', err);
+      return { error: err, data: null };
+    }
   }, []);
 
   const isAdmin = useCallback(() => {
@@ -117,7 +146,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, [profile]);
 
   const getUserType = useCallback(() => {
-    return profile?.role === 'admin' ? 'admin' : 'member';
+    if (profile?.is_super_admin === true || profile?.role === 'admin') {
+      return 'admin';
+    }
+    return 'member';
   }, [profile]);
 
   const updatePassword = useCallback(async (newPassword: string) => {

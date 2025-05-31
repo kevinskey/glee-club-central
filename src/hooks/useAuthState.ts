@@ -23,6 +23,7 @@ export const useAuthState = () => {
   });
   
   const mountedRef = useRef(true);
+  const initTimeoutRef = useRef<NodeJS.Timeout>();
   
   // Create fallback profile
   const createFallbackProfile = useCallback((userId: string): Profile => ({
@@ -36,7 +37,7 @@ export const useAuthState = () => {
     updated_at: new Date().toISOString()
   }), []);
   
-  // Fetch user data with simplified error handling
+  // Fetch user data with improved error handling
   const fetchUserData = useCallback(async (userId: string) => {
     if (!mountedRef.current) return;
     
@@ -46,11 +47,11 @@ export const useAuthState = () => {
     let permissions = {};
     
     try {
-      // Try to fetch profile quickly
+      // Fetch profile with timeout
       profile = await Promise.race([
         getProfile(userId),
         new Promise<null>((_, reject) => {
-          setTimeout(() => reject(new Error('Profile timeout')), 800);
+          setTimeout(() => reject(new Error('Profile timeout')), 5000);
         })
       ]);
       console.log('Profile fetched:', profile);
@@ -60,11 +61,11 @@ export const useAuthState = () => {
     }
     
     try {
-      // Try to fetch permissions quickly
+      // Fetch permissions with timeout
       permissions = await Promise.race([
         fetchUserPermissions(userId),
         new Promise<{}>((_, reject) => {
-          setTimeout(() => reject(new Error('Permissions timeout')), 500);
+          setTimeout(() => reject(new Error('Permissions timeout')), 3000);
         })
       ]);
       console.log('Permissions fetched:', permissions);
@@ -92,8 +93,13 @@ export const useAuthState = () => {
   useEffect(() => {
     console.log('Initializing auth state...');
     
+    // Clear any existing timeout
+    if (initTimeoutRef.current) {
+      clearTimeout(initTimeoutRef.current);
+    }
+    
     // Hard timeout for initialization
-    const initTimeout = setTimeout(() => {
+    initTimeoutRef.current = setTimeout(() => {
       console.log('Auth initialization timeout reached');
       if (mountedRef.current) {
         setState(prev => ({
@@ -102,15 +108,16 @@ export const useAuthState = () => {
           isInitialized: true
         }));
       }
-    }, 1500); // Reduced to 1.5 seconds
+    }, 10000); // 10 second timeout
     
     const initializeAuth = async () => {
       try {
+        console.log('Getting current session...');
         const { data: { session }, error } = await supabase.auth.getSession();
         
         if (error) {
           console.error('Session error:', error);
-          clearTimeout(initTimeout);
+          if (initTimeoutRef.current) clearTimeout(initTimeoutRef.current);
           setState({
             user: null,
             profile: null,
@@ -135,21 +142,21 @@ export const useAuthState = () => {
           setState(prev => ({ 
             ...prev, 
             user: authUser,
-            isLoading: false, // Set to false immediately for faster UX
+            isLoading: false,
             isInitialized: true
           }));
           
-          clearTimeout(initTimeout);
+          if (initTimeoutRef.current) clearTimeout(initTimeoutRef.current);
           
           // Fetch additional data in background
           setTimeout(() => {
             if (mountedRef.current) {
               fetchUserData(session.user.id);
             }
-          }, 0);
+          }, 100);
         } else {
           console.log('No session found');
-          clearTimeout(initTimeout);
+          if (initTimeoutRef.current) clearTimeout(initTimeoutRef.current);
           setState({
             user: null,
             profile: null,
@@ -161,7 +168,7 @@ export const useAuthState = () => {
         
       } catch (error) {
         console.error('Auth initialization error:', error);
-        clearTimeout(initTimeout);
+        if (initTimeoutRef.current) clearTimeout(initTimeoutRef.current);
         if (mountedRef.current) {
           setState({
             user: null,
@@ -203,7 +210,7 @@ export const useAuthState = () => {
             if (mountedRef.current) {
               fetchUserData(session.user.id);
             }
-          }, 0);
+          }, 100);
           
         } else if (event === 'SIGNED_OUT') {
           setState({
@@ -221,7 +228,9 @@ export const useAuthState = () => {
     
     return () => {
       mountedRef.current = false;
-      clearTimeout(initTimeout);
+      if (initTimeoutRef.current) {
+        clearTimeout(initTimeoutRef.current);
+      }
       subscription.unsubscribe();
     };
   }, [fetchUserData]);
@@ -230,6 +239,9 @@ export const useAuthState = () => {
   useEffect(() => {
     return () => {
       mountedRef.current = false;
+      if (initTimeoutRef.current) {
+        clearTimeout(initTimeoutRef.current);
+      }
     };
   }, []);
   
