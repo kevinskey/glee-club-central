@@ -67,21 +67,21 @@ const AppLayout: React.FC<AppLayoutProps> = memo(function AppLayout({
   
   const effectiveSidebarType = getEffectiveSidebarType();
   
-  // Set viewport height for mobile
+  // Set viewport height for mobile - always call this hook
   useEffect(() => {
+    const setVh = () => {
+      const vh = window.innerHeight * 0.01;
+      document.documentElement.style.setProperty('--vh', `${vh}px`);
+    };
+    
     if (isMobile) {
-      const setVh = () => {
-        const vh = window.innerHeight * 0.01;
-        document.documentElement.style.setProperty('--vh', `${vh}px`);
-      };
-      
       setVh();
       window.addEventListener('resize', setVh);
       return () => window.removeEventListener('resize', setVh);
     }
   }, [isMobile]);
 
-  // Set viewport-specific body class
+  // Set viewport-specific body class - always call this hook
   useEffect(() => {
     document.body.classList.toggle('is-mobile-view', isMobile);
     return () => {
