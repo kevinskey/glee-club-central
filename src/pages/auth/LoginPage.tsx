@@ -23,7 +23,6 @@ const LoginPage = () => {
   const [password, setPassword] = React.useState('');
   const [isSubmitting, setIsSubmitting] = React.useState(false);
   const [isResetting, setIsResetting] = React.useState(false);
-  const [hasRedirected, setHasRedirected] = React.useState(false);
   const [imageLoaded, setImageLoaded] = React.useState(false);
   
   // Add the centennial image to library on component mount
@@ -50,27 +49,23 @@ const LoginPage = () => {
     return '/role-dashboard';
   };
   
-  // Handle authenticated user redirect
+  // Handle authenticated user redirect - simplified and more reliable
   React.useEffect(() => {
-    if (isAuthenticated && !isLoading && !hasRedirected) {
+    if (isAuthenticated && !isLoading) {
       const redirectPath = getRedirectPath();
       console.log('User authenticated, redirecting to:', redirectPath);
       
-      setHasRedirected(true);
-      
-      // Reset submitting state when authenticated
+      // Reset submitting state immediately
       setIsSubmitting(false);
       
-      // Use setTimeout to prevent redirect loops
-      setTimeout(() => {
-        navigate(redirectPath, { replace: true });
-        
-        // Clean up stored redirect path
-        sessionStorage.removeItem('authRedirectPath');
-        sessionStorage.removeItem('authRedirectTimestamp');
-      }, 100);
+      // Clean up stored redirect path
+      sessionStorage.removeItem('authRedirectPath');
+      sessionStorage.removeItem('authRedirectTimestamp');
+      
+      // Navigate immediately
+      navigate(redirectPath, { replace: true });
     }
-  }, [isAuthenticated, isLoading, navigate, hasRedirected]);
+  }, [isAuthenticated, isLoading, navigate]);
   
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -91,7 +86,7 @@ const LoginPage = () => {
         setIsSubmitting(false);
       } else {
         toast.success("Login successful!");
-        // Don't reset isSubmitting here - let the redirect effect handle it
+        // isSubmitting will be reset by the redirect effect
       }
     } catch (err) {
       console.error("Unexpected login error:", err);
@@ -127,16 +122,9 @@ const LoginPage = () => {
     );
   }
   
-  // Show redirecting state when authenticated
-  if (isAuthenticated && !hasRedirected) {
-    return (
-      <div className="flex items-center justify-center min-h-screen bg-background">
-        <div className="flex flex-col items-center space-y-4">
-          <Spinner size="lg" />
-          <p className="text-muted-foreground">Redirecting to dashboard...</p>
-        </div>
-      </div>
-    );
+  // If authenticated, don't show the redirecting message - just redirect
+  if (isAuthenticated) {
+    return null;
   }
 
   // Main login form
