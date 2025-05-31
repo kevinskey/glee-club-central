@@ -22,15 +22,6 @@ const LoginPage = () => {
   const [password, setPassword] = React.useState('');
   const [isSubmitting, setIsSubmitting] = React.useState(false);
   const [isResetting, setIsResetting] = React.useState(false);
-  const [pageReady, setPageReady] = React.useState(false);
-  
-  // Initialize page ready state
-  React.useEffect(() => {
-    const timer = setTimeout(() => {
-      setPageReady(true);
-    }, 100);
-    return () => clearTimeout(timer);
-  }, []);
   
   // Get saved redirect path from sessionStorage with default fallback
   const getRedirectPath = () => {
@@ -47,20 +38,17 @@ const LoginPage = () => {
   
   // Redirect if already authenticated
   React.useEffect(() => {
-    if (isAuthenticated && !isLoading && !isSubmitting && pageReady) {
+    if (isAuthenticated && !isLoading && !isSubmitting) {
       const redirectPath = getRedirectPath();
+      console.log('User is authenticated, redirecting to:', redirectPath);
       
-      const timer = setTimeout(() => {
-        navigate(redirectPath);
-        
-        // Clean up stored redirect path after successful navigation
-        sessionStorage.removeItem('authRedirectPath');
-        sessionStorage.removeItem('authRedirectTimestamp');
-      }, 200);
+      navigate(redirectPath);
       
-      return () => clearTimeout(timer);
+      // Clean up stored redirect path after successful navigation
+      sessionStorage.removeItem('authRedirectPath');
+      sessionStorage.removeItem('authRedirectTimestamp');
     }
-  }, [isAuthenticated, isLoading, navigate, isSubmitting, pageReady]);
+  }, [isAuthenticated, isLoading, navigate, isSubmitting]);
   
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -111,20 +99,22 @@ const LoginPage = () => {
     }
   };
   
-  // Show loading state while initializing
-  if (!pageReady || (isLoading && !isAuthenticated)) {
+  // Show loading state only if truly loading
+  if (isLoading) {
+    console.log('LoginPage: Showing loading state');
     return (
       <div className="flex items-center justify-center min-h-screen bg-background">
         <div className="flex flex-col items-center space-y-4">
           <Spinner size="lg" />
-          <p className="text-muted-foreground">Loading login page...</p>
+          <p className="text-muted-foreground">Loading...</p>
         </div>
       </div>
     );
   }
   
   // Show redirecting state when authenticated
-  if (isAuthenticated && pageReady) {
+  if (isAuthenticated) {
+    console.log('LoginPage: User authenticated, showing redirect message');
     return (
       <div className="flex items-center justify-center min-h-screen bg-background">
         <div className="flex flex-col items-center space-y-4">
@@ -135,6 +125,8 @@ const LoginPage = () => {
     );
   }
 
+  console.log('LoginPage: Rendering login form');
+  
   // Main login form
   return (
     <div className="relative min-h-screen flex items-center justify-center bg-background">
