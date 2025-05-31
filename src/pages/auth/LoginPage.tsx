@@ -1,4 +1,3 @@
-
 import * as React from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useNavigate, useLocation, Link } from 'react-router-dom';
@@ -24,10 +23,18 @@ const LoginPage = () => {
   const [isSubmitting, setIsSubmitting] = React.useState(false);
   const [isResetting, setIsResetting] = React.useState(false);
   const [hasRedirected, setHasRedirected] = React.useState(false);
+  const [imageLoaded, setImageLoaded] = React.useState(false);
   
   // Add the centennial image to library on component mount
   React.useEffect(() => {
     addCentennialImageToLibrary();
+  }, []);
+  
+  // Preload the background image
+  React.useEffect(() => {
+    const img = new Image();
+    img.src = '/lovable-uploads/5d6ba7fa-4ea7-42ac-872e-940fb620a273.png';
+    img.onload = () => setImageLoaded(true);
   }, []);
   
   // Get saved redirect path
@@ -130,16 +137,21 @@ const LoginPage = () => {
 
   // Main login form
   return (
-    <div className="relative min-h-screen flex items-center justify-center bg-background">
-      {/* Background image with overlay */}
+    <div className="relative min-h-screen w-full flex items-center justify-center overflow-hidden">
+      {/* Background image with smooth loading */}
       <div className="absolute inset-0 z-0">
-        <SiteImage 
-          src="/lovable-uploads/5d6ba7fa-4ea7-42ac-872e-940fb620a273.png"
-          alt="Centennial Celebration of Spelman College Glee Club"
-          className="w-full h-full object-cover opacity-90"
-          objectFit="cover"
+        <div 
+          className={`w-full h-full bg-cover bg-center bg-no-repeat transition-opacity duration-500 ${
+            imageLoaded ? 'opacity-100' : 'opacity-0'
+          }`}
+          style={{
+            backgroundImage: `url('/lovable-uploads/5d6ba7fa-4ea7-42ac-872e-940fb620a273.png')`
+          }}
         />
-        <div className="absolute inset-0 bg-black/40"></div>
+        {/* Fallback background color while image loads */}
+        <div className="absolute inset-0 bg-gray-900" />
+        {/* Overlay */}
+        <div className="absolute inset-0 bg-black/40" />
       </div>
       
       {/* Login form container */}
