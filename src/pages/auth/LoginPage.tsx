@@ -9,7 +9,6 @@ import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { LogIn, UserPlus, Mail, RefreshCcw } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { SiteImage } from '@/components/site/SiteImage';
 import { cleanupAuthState, resetAuthSystem } from '@/contexts/AuthContext';
 import { addCentennialImageToLibrary } from '@/utils/addCentennialImage';
 
@@ -29,15 +28,11 @@ const LoginPage = () => {
     addCentennialImageToLibrary();
   }, []);
   
-  // Handle authenticated user redirect - always go to role-dashboard
+  // Handle authenticated user redirect
   React.useEffect(() => {
     if (isAuthenticated && !isLoading) {
       console.log('User authenticated, redirecting to role-dashboard');
-      
-      // Reset submitting state immediately
       setIsSubmitting(false);
-      
-      // Navigate to role-dashboard for role-based routing
       navigate('/role-dashboard', { replace: true });
     }
   }, [isAuthenticated, isLoading, navigate]);
@@ -77,6 +72,7 @@ const LoginPage = () => {
       try {
         await resetAuthSystem();
         toast.success("Authentication system reset successfully");
+        window.location.reload(); // Force page reload after reset
       } catch (error) {
         console.error("Error resetting auth system:", error);
         toast.error("Failed to reset authentication system");
@@ -85,7 +81,7 @@ const LoginPage = () => {
     }
   };
   
-  // Show loading only for initial auth check
+  // Show minimal loading for initial auth check
   if (isLoading && !isAuthenticated) {
     return (
       <div className="flex items-center justify-center min-h-screen bg-background">
@@ -97,7 +93,7 @@ const LoginPage = () => {
     );
   }
   
-  // If authenticated, don't show the redirecting message - just redirect
+  // If authenticated, don't show anything while redirecting
   if (isAuthenticated) {
     return null;
   }
@@ -117,7 +113,7 @@ const LoginPage = () => {
       {/* Dark overlay for better contrast */}
       <div className="absolute inset-0 bg-black/30 z-0" />
       
-      {/* Login form container with reduced opacity */}
+      {/* Login form container */}
       <div className="relative z-10 w-full max-w-md px-4">
         <div className="bg-white/70 dark:bg-black/50 backdrop-blur-sm rounded-lg shadow-xl p-6 border border-white/20 dark:border-white/10">
           <Card className="w-full border-0 bg-transparent shadow-none">
@@ -200,10 +196,6 @@ const LoginPage = () => {
                     <UserPlus className="w-4 h-4 mr-2" />
                     Request Member Access
                   </Link>
-                </Button>
-                <Button variant="outline" className="w-full border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-100 bg-white/50 dark:bg-gray-900/50 hover:bg-white/70 dark:hover:bg-gray-800/70">
-                  <Mail className="w-4 h-4 mr-2" />
-                  Contact Administrator
                 </Button>
                 <Button 
                   variant="outline" 

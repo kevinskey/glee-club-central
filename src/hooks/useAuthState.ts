@@ -23,9 +23,8 @@ export const useAuthState = () => {
   });
   
   const mountedRef = useRef(true);
-  const initializationRef = useRef(false);
   
-  // Create fallback profile when fetch fails
+  // Create fallback profile
   const createFallbackProfile = useCallback((userId: string): Profile => ({
     id: userId,
     first_name: 'User',
@@ -37,30 +36,23 @@ export const useAuthState = () => {
     updated_at: new Date().toISOString()
   }), []);
   
-  // Simplified fetch user data function
+  // Fetch user data with simplified error handling
   const fetchUserData = useCallback(async (userId: string) => {
     if (!mountedRef.current) return;
     
     console.log(`Fetching user data for: ${userId}`);
     
-    // Set basic state first
-    setState(prev => ({ 
-      ...prev, 
-      isLoading: true,
-      isInitialized: true 
-    }));
-    
     let profile: Profile | null = null;
     let permissions = {};
     
     try {
-      // Quick profile fetch with timeout
-      const profilePromise = getProfile(userId);
-      const timeoutPromise = new Promise<never>((_, reject) => {
-        setTimeout(() => reject(new Error('Profile timeout')), 1000);
-      });
-      
-      profile = await Promise.race([profilePromise, timeoutPromise]);
+      // Try to fetch profile quickly
+      profile = await Promise.race([
+        getProfile(userId),
+        new Promise<null>((_, reject) => {
+          setTimeout(() => reject(new Error('Profile timeout')), 800);
+        })
+      ]);
       console.log('Profile fetched:', profile);
     } catch (error) {
       console.warn('Profile fetch failed, using fallback:', error);
@@ -68,13 +60,13 @@ export const useAuthState = () => {
     }
     
     try {
-      // Quick permissions fetch
-      const permissionsPromise = fetchUserPermissions(userId);
-      const permissionsTimeout = new Promise<never>((_, reject) => {
-        setTimeout(() => reject(new Error('Permissions timeout')), 500);
-      });
-      
-      permissions = await Promise.race([permissionsPromise, permissionsTimeout]);
+      // Try to fetch permissions quickly
+      permissions = await Promise.race([
+        fetchUserPermissions(userId),
+        new Promise<{}>((_, reject) => {
+          setTimeout(() => reject(new Error('Permissions timeout')), 500);
+        })
+      ]);
       console.log('Permissions fetched:', permissions);
     } catch (error) {
       console.warn('Permissions fetch failed, using defaults:', error);
@@ -98,12 +90,9 @@ export const useAuthState = () => {
   
   // Initialize auth state
   useEffect(() => {
-    if (initializationRef.current) return;
-    initializationRef.current = true;
-    
     console.log('Initializing auth state...');
     
-    // Set hard timeout for initialization
+    // Hard timeout for initialization
     const initTimeout = setTimeout(() => {
       console.log('Auth initialization timeout reached');
       if (mountedRef.current) {
@@ -113,7 +102,7 @@ export const useAuthState = () => {
           isInitialized: true
         }));
       }
-    }, 2000);
+    }, 1500); // Reduced to 1.5 seconds
     
     const initializeAuth = async () => {
       try {
@@ -146,13 +135,13 @@ export const useAuthState = () => {
           setState(prev => ({ 
             ...prev, 
             user: authUser,
-            isLoading: true,
+            isLoading: false, // Set to false immediately for faster UX
             isInitialized: true
           }));
           
           clearTimeout(initTimeout);
           
-          // Defer data fetching to prevent blocking
+          // Fetch additional data in background
           setTimeout(() => {
             if (mountedRef.current) {
               fetchUserData(session.user.id);
@@ -205,11 +194,11 @@ export const useAuthState = () => {
           setState(prev => ({ 
             ...prev, 
             user: authUser,
-            isLoading: true,
+            isLoading: false,
             isInitialized: true
           }));
           
-          // Defer data fetching
+          // Fetch additional data in background
           setTimeout(() => {
             if (mountedRef.current) {
               fetchUserData(session.user.id);
@@ -247,7 +236,6 @@ export const useAuthState = () => {
   // Refresh user data function
   const refreshUserData = useCallback(async () => {
     if (state.user?.id && mountedRef.current) {
-      setState(prev => ({ ...prev, isLoading: true }));
       await fetchUserData(state.user.id);
     }
   }, [state.user?.id, fetchUserData]);
