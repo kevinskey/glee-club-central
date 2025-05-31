@@ -31,41 +31,45 @@ export const NewsTicker: React.FC<NewsTickerProps> = ({
   const [isVisible, setIsVisible] = useState(true);
   const [newsArticles, setNewsArticles] = useState<NewsArticle[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   
   // Priority keywords for scoring articles
   const priorityKeywords = {
-    choir: 10,
-    choral: 10,
-    glee: 10,
-    singing: 8,
+    spelman: 15,
+    choir: 12,
+    choral: 12,
+    glee: 12,
+    hbcu: 10,
     music: 8,
     vocal: 8,
-    concert: 7,
-    performance: 7,
-    sorority: 6,
-    fraternity: 6,
+    sorority: 7,
+    fraternity: 7,
+    concert: 6,
+    performance: 6,
     scholarship: 6,
     grant: 5,
     funding: 5,
-    spelman: 12,
-    morehouse: 8,
-    hbcu: 5
+    morehouse: 5
   };
 
   const scoreArticle = (title: string): number => {
+    console.log('NewsTicker: Scoring article:', title);
     const lowerTitle = title.toLowerCase();
     let score = 0;
     
     Object.entries(priorityKeywords).forEach(([keyword, points]) => {
       if (lowerTitle.includes(keyword)) {
         score += points;
+        console.log(`NewsTicker: Found keyword "${keyword}" (+${points} points)`);
       }
     });
     
+    console.log(`NewsTicker: Final score for "${title}": ${score}`);
     return score;
   };
 
   const sortArticlesByPriority = (articles: NewsArticle[]): NewsArticle[] => {
+    console.log('NewsTicker: Sorting articles by priority');
     return articles
       .map(article => ({
         ...article,
@@ -75,8 +79,11 @@ export const NewsTicker: React.FC<NewsTickerProps> = ({
   };
   
   useEffect(() => {
+    console.log('NewsTicker: Starting to fetch news');
     const fetchGoogleNews = async () => {
       try {
+        setError(null);
+        
         // Fetch multiple RSS feeds to get more diverse content
         const feeds = [
           'https://news.google.com/rss/search?q=HBCU+choir&hl=en-US&gl=US&ceid=US:en',
@@ -89,15 +96,22 @@ export const NewsTicker: React.FC<NewsTickerProps> = ({
 
         const allArticles: NewsArticle[] = [];
 
+        console.log('NewsTicker: Fetching from', feeds.length, 'RSS feeds');
+
         for (const feed of feeds) {
           try {
+            console.log('NewsTicker: Fetching feed:', feed);
             const response = await fetch(
               `https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(feed)}`
             );
             
-            if (!response.ok) continue;
+            if (!response.ok) {
+              console.log('NewsTicker: Feed fetch failed:', response.status);
+              continue;
+            }
             
             const data = await response.json();
+            console.log('NewsTicker: Feed response:', data);
             
             if (data.status === 'ok' && data.items) {
               const articles = data.items
@@ -108,12 +122,15 @@ export const NewsTicker: React.FC<NewsTickerProps> = ({
                 }))
                 .filter((article: NewsArticle) => article.title && article.title.length > 0);
               
+              console.log('NewsTicker: Added', articles.length, 'articles from feed');
               allArticles.push(...articles);
             }
           } catch (error) {
-            console.error(`Error fetching feed ${feed}:`, error);
+            console.error(`NewsTicker: Error fetching feed ${feed}:`, error);
           }
         }
+
+        console.log('NewsTicker: Total articles fetched:', allArticles.length);
 
         if (allArticles.length > 0) {
           // Remove duplicates based on title similarity
@@ -121,14 +138,19 @@ export const NewsTicker: React.FC<NewsTickerProps> = ({
             index === self.findIndex(a => a.title === article.title)
           );
 
+          console.log('NewsTicker: Unique articles after deduplication:', uniqueArticles.length);
+
           // Sort by priority and take top 20
           const prioritizedArticles = sortArticlesByPriority(uniqueArticles).slice(0, 20);
+          console.log('NewsTicker: Final prioritized articles:', prioritizedArticles.length);
           setNewsArticles(prioritizedArticles);
         } else {
-          throw new Error('No articles found');
+          throw new Error('No articles found from any feed');
         }
       } catch (error) {
-        console.error("Error fetching Google News:", error);
+        console.error("NewsTicker: Error fetching Google News:", error);
+        setError('Failed to fetch news');
+        
         // Enhanced fallback with prioritized content
         const fallbackArticles = [
           { title: "Spelman College Glee Club Announces Spring Concert Tour", link: "#" },
@@ -153,10 +175,12 @@ export const NewsTicker: React.FC<NewsTickerProps> = ({
           { title: "Technology Partnership Benefits HBCU Community", link: "#" }
         ];
         
+        console.log('NewsTicker: Using fallback articles');
         const prioritizedFallback = sortArticlesByPriority(fallbackArticles);
         setNewsArticles(prioritizedFallback);
       } finally {
         setLoading(false);
+        console.log('NewsTicker: Finished loading news');
       }
     };
     
@@ -164,11 +188,13 @@ export const NewsTicker: React.FC<NewsTickerProps> = ({
   }, []);
   
   const handleClose = () => {
+    console.log('NewsTicker: Closing ticker');
     setIsVisible(false);
     if (onClose) onClose();
   };
   
-  const handleArticleClick = (link: string) => {
+  const handleArticleClick = (link: string, title: string) => {
+    console.log('NewsTicker: Clicked article:', title, 'Link:', link);
     if (link !== "#") {
       window.open(link, '_blank', 'noopener,noreferrer');
     }
@@ -177,7 +203,9 @@ export const NewsTicker: React.FC<NewsTickerProps> = ({
   // Auto-hide after specified duration if autoHide is true
   useEffect(() => {
     if (isVisible && autoHide) {
+      console.log('NewsTicker: Setting auto-hide timer for', hideAfter, 'ms');
       const timer = setTimeout(() => {
+        console.log('NewsTicker: Auto-hiding ticker');
         setIsVisible(false);
       }, hideAfter);
       
@@ -185,11 +213,15 @@ export const NewsTicker: React.FC<NewsTickerProps> = ({
     }
   }, [isVisible, autoHide, hideAfter]);
   
-  // If no news items or not visible, don't render
-  if (!isVisible || (newsArticles.length === 0 && !loading)) return null;
+  // If not visible, don't render
+  if (!isVisible) {
+    console.log('NewsTicker: Not visible, not rendering');
+    return null;
+  }
   
   // Display loading animation while fetching
   if (loading) {
+    console.log('NewsTicker: Showing loading state');
     return (
       <div className="bg-glee-columbia text-white py-1 relative">
         <div className="container flex items-center justify-center text-sm">
@@ -200,6 +232,27 @@ export const NewsTicker: React.FC<NewsTickerProps> = ({
       </div>
     );
   }
+
+  // Show error state
+  if (error && newsArticles.length === 0) {
+    console.log('NewsTicker: Showing error state');
+    return (
+      <div className="bg-red-600 text-white py-1 relative">
+        <div className="container flex items-center justify-center text-sm">
+          <span>📰 Unable to load news at this time</span>
+          <button 
+            onClick={handleClose} 
+            className="p-1 rounded-full hover:bg-white/10 transition-colors ml-4"
+            aria-label="Close news ticker"
+          >
+            <X className="h-4 w-4" />
+          </button>
+        </div>
+      </div>
+    );
+  }
+  
+  console.log('NewsTicker: Rendering with', newsArticles.length, 'articles');
   
   return (
     <div className="bg-glee-columbia text-white py-1 relative">
@@ -209,10 +262,11 @@ export const NewsTicker: React.FC<NewsTickerProps> = ({
             {newsArticles.map((article, index) => {
               const getEmoji = (title: string) => {
                 const lower = title.toLowerCase();
+                if (lower.includes('spelman')) return '💙';
                 if (lower.includes('choir') || lower.includes('glee') || lower.includes('choral')) return '🎵';
                 if (lower.includes('sorority') || lower.includes('fraternity')) return '🤝';
                 if (lower.includes('scholarship') || lower.includes('grant')) return '🎓';
-                if (lower.includes('spelman')) return '💙';
+                if (lower.includes('hbcu')) return '🏛️';
                 return '📰';
               };
 
@@ -220,7 +274,7 @@ export const NewsTicker: React.FC<NewsTickerProps> = ({
                 <span 
                   key={index} 
                   className="mx-6 cursor-pointer hover:text-yellow-200 transition-colors"
-                  onClick={() => handleArticleClick(article.link)}
+                  onClick={() => handleArticleClick(article.link, article.title)}
                   title="Click to read full article"
                 >
                   {getEmoji(article.title)} {article.title}
@@ -232,10 +286,11 @@ export const NewsTicker: React.FC<NewsTickerProps> = ({
             {newsArticles.map((article, index) => {
               const getEmoji = (title: string) => {
                 const lower = title.toLowerCase();
+                if (lower.includes('spelman')) return '💙';
                 if (lower.includes('choir') || lower.includes('glee') || lower.includes('choral')) return '🎵';
                 if (lower.includes('sorority') || lower.includes('fraternity')) return '🤝';
                 if (lower.includes('scholarship') || lower.includes('grant')) return '🎓';
-                if (lower.includes('spelman')) return '💙';
+                if (lower.includes('hbcu')) return '🏛️';
                 return '📰';
               };
 
@@ -243,7 +298,7 @@ export const NewsTicker: React.FC<NewsTickerProps> = ({
                 <span 
                   key={`repeat-${index}`} 
                   className="mx-6 cursor-pointer hover:text-yellow-200 transition-colors"
-                  onClick={() => handleArticleClick(article.link)}
+                  onClick={() => handleArticleClick(article.link, article.title)}
                   title="Click to read full article"
                 >
                   {getEmoji(article.title)} {article.title}
