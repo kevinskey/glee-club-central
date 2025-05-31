@@ -66,8 +66,8 @@ const handler = async (req: Request): Promise<Response> => {
     // Send the notification email
     console.log("Sending notification email...");
     const emailResponse = await resend.emails.send({
-      from: "GleeWorld <gleeworld@yourdomain.com>",
-      to: ["your@email.com"], // Replace with your admin email
+      from: "GleeWorld <admin@gleeworld.org>",
+      to: ["Kpj64110@gmail.com", "admin@gleeworld.org"],
       subject: emailSubject,
       html: emailBody,
     });
