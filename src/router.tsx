@@ -2,12 +2,8 @@ import React, { Suspense } from 'react';
 import { createBrowserRouter, Navigate, Outlet } from 'react-router-dom';
 import ErrorBoundary from "./components/ErrorBoundary";
 
-// Layouts
-import MainLayout from './layouts/MainLayout';
-import HomeLayout from './layouts/HomeLayout';
-import DashboardLayout from './layouts/DashboardLayout';
-import PDFViewerLayout from './layouts/PDFViewerLayout';
-import AdminLayout from './layouts/AdminLayout';
+// Unified Layout
+import AppLayout from './layouts/AppLayout';
 
 // Auth Components
 import RequireAuth from './components/auth/RequireAuth';
@@ -15,7 +11,7 @@ import { AdminRoute } from './components/auth/AdminRoute';
 import RoleDashboard from './components/auth/RoleDashboard';
 
 // Loading Component
-import { Spinner } from './components/ui/spinner';
+import { PageLoader } from './components/ui/page-loader';
 
 // Public Pages (keep as regular imports for faster initial load)
 import HomePage from './pages/HomePage';
@@ -58,23 +54,14 @@ const AdminHeroManager = React.lazy(() => import('./pages/admin/AdminHeroManager
 const UserManagementPage = React.lazy(() => import('./pages/admin/UserManagementPage'));
 const EventDetailsPage = React.lazy(() => import('./pages/events/EventDetailsPage'));
 
-// Loading Fallback Component
-const PageLoader = () => (
-  <div className="flex items-center justify-center min-h-[50vh]">
-    <div className="text-center">
-      <Spinner size="lg" />
-      <p className="mt-4 text-muted-foreground">Loading...</p>
-    </div>
-  </div>
-);
-
 /**
- * Unified Router Configuration for GleeWorld with Lazy Loading
+ * Unified Router Configuration for GleeWorld with AppLayout
  * 
  * Performance optimizations:
  * - Lazy loaded heavy dashboard pages and admin components
  * - Suspense fallbacks for smooth loading experience
  * - Route protection maintained with auth guards
+ * - Unified layout system with dynamic props
  * 
  * Route Structure:
  * - Public routes (home, about, events)
@@ -109,14 +96,14 @@ export const router = createBrowserRouter([
       // ==================== PUBLIC ROUTES ====================
       {
         path: '/',
-        element: <HomeLayout />,
+        element: <AppLayout sidebarType="none" showHeader={false} showFooter={true} />,
         children: [
           { index: true, element: <HomePage /> },
         ],
       },
       {
         path: '/',
-        element: <MainLayout />,
+        element: <AppLayout sidebarType="none" showHeader={true} showFooter={true} />,
         children: [
           { path: 'about', element: <AboutPage /> },
           { path: 'contact', element: <ContactPage /> },
@@ -127,12 +114,30 @@ export const router = createBrowserRouter([
       },
 
       // ==================== AUTHENTICATION ROUTES ====================
-      { path: '/login', element: <LoginPage /> },
-      { path: '/signup', element: <SignupPage /> },
-      { path: '/register', element: <AdminRegistrationPage /> },
-      { path: '/forgot-password', element: <ForgotPasswordPage /> },
-      { path: '/reset-password', element: <ResetPasswordPage /> },
-      { path: '/update-password', element: <ResetPasswordPage /> },
+      { 
+        path: '/login', 
+        element: <AppLayout sidebarType="none" showHeader={false} showFooter={false}><LoginPage /></AppLayout>
+      },
+      { 
+        path: '/signup', 
+        element: <AppLayout sidebarType="none" showHeader={false} showFooter={false}><SignupPage /></AppLayout>
+      },
+      { 
+        path: '/register', 
+        element: <AppLayout sidebarType="none" showHeader={false} showFooter={false}><AdminRegistrationPage /></AppLayout>
+      },
+      { 
+        path: '/forgot-password', 
+        element: <AppLayout sidebarType="none" showHeader={false} showFooter={false}><ForgotPasswordPage /></AppLayout>
+      },
+      { 
+        path: '/reset-password', 
+        element: <AppLayout sidebarType="none" showHeader={false} showFooter={false}><ResetPasswordPage /></AppLayout>
+      },
+      { 
+        path: '/update-password', 
+        element: <AppLayout sidebarType="none" showHeader={false} showFooter={false}><ResetPasswordPage /></AppLayout>
+      },
 
       // Role-based dashboard redirection
       {
@@ -143,7 +148,7 @@ export const router = createBrowserRouter([
       // ==================== MEMBER DASHBOARD ROUTES ====================
       {
         path: '/dashboard',
-        element: <RequireAuth><DashboardLayout /></RequireAuth>,
+        element: <RequireAuth><AppLayout sidebarType="member" showHeader={true} showFooter={false} /></RequireAuth>,
         children: [
           { index: true, element: <Navigate to="/dashboard/member" replace /> },
           { 
@@ -173,7 +178,7 @@ export const router = createBrowserRouter([
       // ==================== PDF VIEWER ROUTES ====================
       {
         path: '/dashboard/sheet-music/view',
-        element: <RequireAuth><PDFViewerLayout /></RequireAuth>,
+        element: <RequireAuth><AppLayout sidebarType="none" showHeader={true} showFooter={false} /></RequireAuth>,
         children: [
           { path: ':id', element: <ViewSheetMusicPage /> },
         ],
@@ -182,7 +187,7 @@ export const router = createBrowserRouter([
       // ==================== ADMIN DASHBOARD ROUTES (LAZY LOADED) ====================
       {
         path: '/admin',
-        element: <AdminRoute><AdminLayout /></AdminRoute>,
+        element: <AdminRoute><AppLayout sidebarType="admin" showHeader={true} showFooter={false} /></AdminRoute>,
         children: [
           { 
             index: true, 
@@ -233,7 +238,7 @@ export const router = createBrowserRouter([
       // ==================== FAN DASHBOARD ROUTES (LAZY LOADED) ====================
       {
         path: '/fan-dashboard',
-        element: <RequireAuth><DashboardLayout /></RequireAuth>,
+        element: <RequireAuth><AppLayout sidebarType="fan" showHeader={true} showFooter={false} /></RequireAuth>,
         children: [
           { 
             index: true, 

@@ -1,16 +1,14 @@
 
 import React from "react";
-import { Outlet } from "react-router-dom";
+import AppLayout from "./AppLayout";
 
-const PDFViewerLayout = () => {
+export default function PDFViewerLayout() {
   return (
-    <div className="min-h-screen flex flex-col bg-background w-full">
-      {/* No header or sidebar - PDF viewer takes full control */}
-      <main className="flex-1 overflow-hidden">
-        <Outlet />
-      </main>
-    </div>
+    <AppLayout 
+      sidebarType="none" 
+      showHeader={true} 
+      showFooter={false}
+      title="PDF Viewer"
+    />
   );
-};
-
-export default PDFViewerLayout;
+}
