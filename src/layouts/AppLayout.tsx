@@ -36,11 +36,39 @@ const AppLayout: React.FC<AppLayoutProps> = memo(function AppLayout({
   const location = useLocation();
   const isAdmin = profile?.is_super_admin || profile?.role === 'admin';
   
-  // Show loading state while auth is initializing to prevent blinking
+  // Set viewport height for mobile - always call this hook
+  useEffect(() => {
+    const setVh = () => {
+      const vh = window.innerHeight * 0.01;
+      document.documentElement.style.setProperty('--vh', `${vh}px`);
+    };
+    
+    setVh();
+    
+    if (isMobile) {
+      window.addEventListener('resize', setVh);
+      return () => window.removeEventListener('resize', setVh);
+    }
+  }, [isMobile]);
+
+  // Set viewport-specific body class - always call this hook
+  useEffect(() => {
+    if (isMobile) {
+      document.body.classList.add('is-mobile-view');
+    } else {
+      document.body.classList.remove('is-mobile-view');
+    }
+    
+    return () => {
+      document.body.classList.remove('is-mobile-view');
+    };
+  }, [isMobile]);
+  
+  // Show loading state while auth is initializing
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
-        <PageLoader message="Loading dashboard..." />
+        <PageLoader message="Loading..." />
       </div>
     );
   }
@@ -66,28 +94,6 @@ const AppLayout: React.FC<AppLayoutProps> = memo(function AppLayout({
   };
   
   const effectiveSidebarType = getEffectiveSidebarType();
-  
-  // Set viewport height for mobile - always call this hook
-  useEffect(() => {
-    const setVh = () => {
-      const vh = window.innerHeight * 0.01;
-      document.documentElement.style.setProperty('--vh', `${vh}px`);
-    };
-    
-    if (isMobile) {
-      setVh();
-      window.addEventListener('resize', setVh);
-      return () => window.removeEventListener('resize', setVh);
-    }
-  }, [isMobile]);
-
-  // Set viewport-specific body class - always call this hook
-  useEffect(() => {
-    document.body.classList.toggle('is-mobile-view', isMobile);
-    return () => {
-      document.body.classList.remove('is-mobile-view');
-    }
-  }, [isMobile]);
 
   // Render sidebar based on effective type
   const renderSidebar = () => {
@@ -126,7 +132,7 @@ const AppLayout: React.FC<AppLayoutProps> = memo(function AppLayout({
     return `${baseClasses} p-3 sm:p-4 md:p-5 lg:p-6 md:ml-64 pb-20 md:pb-6`;
   };
 
-  // Layout content with consistent styling to prevent white flashes
+  // Layout content with consistent styling
   const layoutContent = (
     <div className="min-h-screen flex flex-col bg-background w-full">
       <Toaster position={isMobile ? "bottom-center" : "top-right"} />
