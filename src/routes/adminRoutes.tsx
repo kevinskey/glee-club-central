@@ -1,6 +1,6 @@
 
 import { RouteObject } from "react-router-dom";
-import AdminDashboard from "@/pages/admin/AdminDashboard";
+import AdminDashboardPage from "@/pages/admin/AdminDashboardPage";
 import LandingPageSettingsPage from "@/pages/admin/LandingPageSettingsPage";
 import MediaLibrary from "@/pages/admin/MediaLibrary";
 import NewsItemsPage from "@/pages/admin/NewsItemsPage";
@@ -11,11 +11,14 @@ import EventDetailsPage from '@/pages/events/EventDetailsPage';
 
 console.log('Admin routes loading...');
 
-// Define the admin routes
+/**
+ * Admin Routes Configuration
+ * Consolidated and cleaned up for better organization
+ */
 export const adminRoutes: RouteObject[] = [
   {
     path: "/",
-    element: <AdminDashboard />,
+    element: <AdminDashboardPage />,
   },
   {
     path: "/landing",

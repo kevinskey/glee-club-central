@@ -2,21 +2,36 @@
 import React from 'react';
 import { createBrowserRouter, Navigate, Outlet } from 'react-router-dom';
 import ErrorBoundary from "./components/ErrorBoundary";
-import StaticLandingPage from './pages/StaticLandingPage';
-import HomeTemp from './pages/HomeTemp';
-import { authRoutes } from './routes/authRoutes';
+
+// Layouts
 import MainLayout from './layouts/MainLayout';
-import HomePage from './pages/HomePage';
 import HomeLayout from './layouts/HomeLayout';
-import RequireAuth from './components/auth/RequireAuth';
-import RoleDashboard from './components/auth/RoleDashboard';
-import AboutPage from './pages/AboutPage';
-import ContactPage from './pages/ContactPage';
 import DashboardLayout from './layouts/DashboardLayout';
 import PDFViewerLayout from './layouts/PDFViewerLayout';
 import AdminLayout from './layouts/AdminLayout';
+
+// Auth Components
+import RequireAuth from './components/auth/RequireAuth';
+import { AdminRoute } from './components/auth/AdminRoute';
+import RoleDashboard from './components/auth/RoleDashboard';
+
+// Public Pages
+import HomePage from './pages/HomePage';
+import AboutPage from './pages/AboutPage';
+import ContactPage from './pages/ContactPage';
+import PublicEventsPage from './pages/PublicEventsPage';
+import CalendarPage from './pages/CalendarPage';
+import JoinGleeFamPage from './pages/JoinGleeFamPage';
+
+// Auth Pages
+import LoginPage from './pages/auth/LoginPage';
+import SignupPage from './pages/auth/SignupPage';
+import AdminRegistrationPage from './pages/admin/AdminRegistrationPage';
+import ForgotPasswordPage from './pages/auth/ForgotPasswordPage';
+import ResetPasswordPage from './pages/auth/ResetPasswordPage';
+
+// Member Dashboard Pages
 import MemberDashboardPage from './pages/dashboard/MemberDashboardPage';
-import AdminDashboardPage from './pages/admin/AdminDashboardPage';
 import ProfilePage from './pages/profile/ProfilePage';
 import MediaLibraryPage from './pages/MediaLibraryPage';
 import SheetMusicPage from './pages/SheetMusicPage';
@@ -28,21 +43,32 @@ import AnnouncementsPage from './pages/dashboard/AnnouncementsPage';
 import ArchivesPage from './pages/dashboard/ArchivesPage';
 import AttendancePage from './pages/dashboard/AttendancePage';
 import AudioManagementPage from './pages/audio-management/AudioManagementPage';
-import MembersPage from './pages/members/MembersPage';
-import SettingsPage from './pages/settings/SettingsPage';
 import FinancesPage from './pages/dashboard/FinancesPage';
-import CalendarPage from './pages/CalendarPage';
+
+// Admin Pages
+import AdminDashboardPage from './pages/admin/AdminDashboardPage';
 import AdminCalendarPage from './pages/admin/AdminCalendarPage';
 import EventDetailsPage from './pages/events/EventDetailsPage';
-import PublicEventsPage from './pages/PublicEventsPage';
-import JoinGleeFamPage from './pages/JoinGleeFamPage';
-import FanDashboardPage from './pages/dashboard/FanDashboardPage';
-import { AdminRoute } from './components/auth/AdminRoute';
+import MembersPage from './pages/members/MembersPage';
+import SettingsPage from './pages/settings/SettingsPage';
 
-// Create a properly structured router with all routes
+// Fan Pages
+import FanDashboardPage from './pages/dashboard/FanDashboardPage';
+
+/**
+ * Unified Router Configuration for GleeWorld
+ * Consolidated from router.tsx, routes.tsx, and routerConfig.ts
+ * 
+ * Route Structure:
+ * - Public routes (home, about, events)
+ * - Authentication routes (login, signup, password reset)
+ * - Member dashboard (protected, role-based)
+ * - Admin dashboard (admin-only)
+ * - Fan dashboard (fan-specific features)
+ */
 export const router = createBrowserRouter([
   {
-    // Root element that wraps the outlet component
+    // Root element with error boundary
     element: <Outlet />,
     errorElement: (
       <ErrorBoundary>
@@ -63,201 +89,93 @@ export const router = createBrowserRouter([
       </ErrorBoundary>
     ),
     children: [
-      // Public routes with HomeLayout for the home page
+      // ==================== PUBLIC ROUTES ====================
       {
         path: '/',
         element: <HomeLayout />,
         children: [
-          {
-            index: true,
-            element: (
-              <React.Suspense fallback={<div>Loading...</div>}>
-                <HomePage />
-              </React.Suspense>
-            ),
-          },
+          { index: true, element: <HomePage /> },
         ],
       },
-      // Public calendar route
-      {
-        path: '/calendar',
-        element: <MainLayout />,
-        children: [
-          {
-            index: true,
-            element: <CalendarPage />,
-          },
-        ],
-      },
-      // Public events page (for fans)
-      {
-        path: '/events',
-        element: <MainLayout />,
-        children: [
-          {
-            index: true,
-            element: <PublicEventsPage />,
-          },
-        ],
-      },
-      // Role-based dashboard redirection for authenticated users
-      {
-        path: '/role-dashboard',
-        element: <RequireAuth><RoleDashboard /></RequireAuth>,
-      },
-      // Member Dashboard routes with DashboardLayout
-      {
-        path: '/dashboard',
-        element: <RequireAuth><DashboardLayout /></RequireAuth>,
-        children: [
-          {
-            index: true,
-            element: <Navigate to="/dashboard/member" replace />,
-          },
-          {
-            path: 'member',
-            element: <MemberDashboardPage />,
-          },
-          {
-            path: 'profile',
-            element: <ProfilePage />,
-          },
-          {
-            path: 'media-library',
-            element: <MediaLibraryPage />,
-          },
-          {
-            path: 'sheet-music',
-            element: <SheetMusicPage />,
-          },
-          {
-            path: 'sheet-music/:id',
-            element: <ViewSheetMusicPage />,
-          },
-          {
-            path: 'media/pdf/:id',
-            element: <PDFViewerPage />,
-          },
-          {
-            path: 'recordings',
-            element: <RecordingsPage />,
-          },
-          {
-            path: 'recording-studio',
-            element: <RecordingStudioPage />,
-          },
-          {
-            path: 'audio-management',
-            element: <AudioManagementPage />,
-          },
-          {
-            path: 'announcements',
-            element: <AnnouncementsPage />,
-          },
-          {
-            path: 'archives',
-            element: <ArchivesPage />,
-          },
-          {
-            path: 'attendance',
-            element: <AttendancePage />,
-          },
-          {
-            path: 'finances',
-            element: <FinancesPage />,
-          },
-          {
-            path: 'members',
-            element: <AdminRoute><MembersPage /></AdminRoute>,
-          },
-        ],
-      },
-      // Dedicated PDF Viewer routes with no sidebar (PDFViewerLayout)
-      {
-        path: '/dashboard/sheet-music/view',
-        element: <RequireAuth><PDFViewerLayout /></RequireAuth>,
-        children: [
-          {
-            path: ':id',
-            element: <ViewSheetMusicPage />,
-          },
-        ],
-      },
-      // Admin Dashboard routes with AdminLayout (completely separate)
-      {
-        path: '/admin',
-        element: <AdminRoute><AdminLayout /></AdminRoute>,
-        children: [
-          {
-            index: true,
-            element: <AdminDashboardPage />,
-          },
-          {
-            path: 'calendar',
-            element: <AdminCalendarPage />,
-          },
-          {
-            path: 'events/:id',
-            element: <EventDetailsPage />,
-          },
-          {
-            path: 'members',
-            element: <MembersPage />,
-          },
-          {
-            path: 'settings',
-            element: <SettingsPage />,
-          },
-        ],
-      },
-      // Secondary routes with MainLayout
       {
         path: '/',
         element: <MainLayout />,
         children: [
-          {
-            path: 'home-temp',
-            element: <HomeTemp />,
-          },
-          {
-            path: 'under-construction',
-            element: <StaticLandingPage />,
-          },
-          // Add About and Contact routes
-          {
-            path: 'about',
-            element: <AboutPage />,
-          },
-          {
-            path: 'contact',
-            element: <ContactPage />,
-          },
+          { path: 'about', element: <AboutPage /> },
+          { path: 'contact', element: <ContactPage /> },
+          { path: 'events', element: <PublicEventsPage /> },
+          { path: 'calendar', element: <CalendarPage /> },
+          { path: 'join-glee-fam', element: <JoinGleeFamPage /> },
         ],
       },
-      // Fan signup route
+
+      // ==================== AUTHENTICATION ROUTES ====================
+      { path: '/login', element: <LoginPage /> },
+      { path: '/signup', element: <SignupPage /> },
+      { path: '/register', element: <AdminRegistrationPage /> },
+      { path: '/forgot-password', element: <ForgotPasswordPage /> },
+      { path: '/reset-password', element: <ResetPasswordPage /> },
+      { path: '/update-password', element: <ResetPasswordPage /> },
+
+      // Role-based dashboard redirection
       {
-        path: '/join-glee-fam',
-        element: <MainLayout />,
+        path: '/role-dashboard',
+        element: <RequireAuth><RoleDashboard /></RequireAuth>,
+      },
+
+      // ==================== MEMBER DASHBOARD ROUTES ====================
+      {
+        path: '/dashboard',
+        element: <RequireAuth><DashboardLayout /></RequireAuth>,
         children: [
-          {
-            index: true,
-            element: <JoinGleeFamPage />,
-          },
+          { index: true, element: <Navigate to="/dashboard/member" replace /> },
+          { path: 'member', element: <MemberDashboardPage /> },
+          { path: 'profile', element: <ProfilePage /> },
+          { path: 'media-library', element: <MediaLibraryPage /> },
+          { path: 'sheet-music', element: <SheetMusicPage /> },
+          { path: 'sheet-music/:id', element: <ViewSheetMusicPage /> },
+          { path: 'media/pdf/:id', element: <PDFViewerPage /> },
+          { path: 'recordings', element: <RecordingsPage /> },
+          { path: 'recording-studio', element: <RecordingStudioPage /> },
+          { path: 'audio-management', element: <AudioManagementPage /> },
+          { path: 'announcements', element: <AnnouncementsPage /> },
+          { path: 'archives', element: <ArchivesPage /> },
+          { path: 'attendance', element: <AttendancePage /> },
+          { path: 'finances', element: <FinancesPage /> },
+          { path: 'members', element: <AdminRoute><MembersPage /></AdminRoute> },
         ],
       },
-      // Fan Dashboard routes
+
+      // ==================== PDF VIEWER ROUTES ====================
+      {
+        path: '/dashboard/sheet-music/view',
+        element: <RequireAuth><PDFViewerLayout /></RequireAuth>,
+        children: [
+          { path: ':id', element: <ViewSheetMusicPage /> },
+        ],
+      },
+
+      // ==================== ADMIN DASHBOARD ROUTES ====================
+      {
+        path: '/admin',
+        element: <AdminRoute><AdminLayout /></AdminRoute>,
+        children: [
+          { index: true, element: <AdminDashboardPage /> },
+          { path: 'calendar', element: <AdminCalendarPage /> },
+          { path: 'events/:id', element: <EventDetailsPage /> },
+          { path: 'members', element: <MembersPage /> },
+          { path: 'settings', element: <SettingsPage /> },
+        ],
+      },
+
+      // ==================== FAN DASHBOARD ROUTES ====================
       {
         path: '/fan-dashboard',
         element: <RequireAuth><DashboardLayout /></RequireAuth>,
         children: [
-          {
-            index: true,
-            element: <FanDashboardPage />,
-          },
+          { index: true, element: <FanDashboardPage /> },
         ],
       },
-      // Auth routes
-      ...authRoutes,
     ],
   },
 ]);

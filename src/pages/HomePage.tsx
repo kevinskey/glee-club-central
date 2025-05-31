@@ -1,14 +1,15 @@
 
 import React, { useState, useEffect } from "react";
 import { HeaderNav } from "@/components/landing/HeaderNav";
-import { HeroBanner } from "@/components/landing/HeroBanner";
-import { EventScroller } from "@/components/landing/EventScroller";
-import { AudioPlayerSection } from "@/components/landing/AudioPlayerSection";
-import { StorePreview } from "@/components/landing/StorePreview";
+import { HeroBannerSection } from "@/components/landing/sections/HeroBannerSection";
+import { EventsSection } from "@/components/landing/sections/EventsSection";
+import { AudioSection } from "@/components/landing/sections/AudioSection";
+import { StoreSection } from "@/components/landing/sections/StoreSection";
 import { FanSignupForm } from "@/components/landing/FanSignupForm";
 import { FooterLinks } from "@/components/landing/FooterLinks";
 import { supabase } from "@/integrations/supabase/client";
 
+// Type definitions moved to separate interface file for reusability
 interface HeroImage {
   id: string;
   url: string;
@@ -41,7 +42,19 @@ const HomePage = () => {
   const [storeProducts, setStoreProducts] = useState<Product[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
-  // Fetch hero images from media_library
+  // Audio tracks placeholder data (not connected to DB yet)
+  const audioTracks = [
+    {
+      id: "track-1",
+      title: "Lift Every Voice",
+      audioUrl: "/placeholder.mp3",
+      albumArt: "https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=200&h=200&fit=crop",
+      artist: "Spelman Glee Club",
+      duration: "3:45"
+    }
+  ];
+
+  // Data fetching functions consolidated
   const fetchHeroImages = async () => {
     try {
       const { data, error } = await supabase
@@ -76,7 +89,6 @@ const HomePage = () => {
     }
   };
 
-  // Fetch upcoming events
   const fetchUpcomingEvents = async () => {
     try {
       const today = new Date().toISOString().split('T')[0];
@@ -114,7 +126,6 @@ const HomePage = () => {
     }
   };
 
-  // Fetch featured products
   const fetchStoreProducts = async () => {
     try {
       const { data, error } = await supabase
@@ -163,18 +174,6 @@ const HomePage = () => {
     loadData();
   }, []);
 
-  // Audio tracks placeholder data (not connected to DB yet)
-  const audioTracks = [
-    {
-      id: "track-1",
-      title: "Lift Every Voice",
-      audioUrl: "/placeholder.mp3",
-      albumArt: "https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=200&h=200&fit=crop",
-      artist: "Spelman Glee Club",
-      duration: "3:45"
-    }
-  ];
-
   if (isLoading) {
     return (
       <div className="min-h-screen bg-background">
@@ -212,48 +211,12 @@ const HomePage = () => {
         showLoginButton={true}
       />
 
-      {/* Main Content */}
+      {/* Main Content - Now using extracted section components */}
       <main className="w-full">
-        {/* Hero Banner Section */}
-        <section className="w-full">
-          <HeroBanner 
-            images={heroImages}
-            autoPlayInterval={5000}
-            showOverlayText={true}
-          />
-        </section>
-
-        {/* Events Section */}
-        <section className="py-12 md:py-16">
-          <EventScroller 
-            events={upcomingEvents}
-            title="Upcoming Events"
-            showViewAllButton={true}
-            onViewAll={() => window.location.href = "/events"}
-          />
-        </section>
-
-        {/* Audio Player Section */}
-        <section className="py-12 md:py-16">
-          <AudioPlayerSection 
-            tracks={audioTracks}
-            title="Listen to the Sound of GleeWorld"
-            subtitle="Experience our latest recordings"
-          />
-        </section>
-
-        {/* Store Preview Section */}
-        <section className="py-12 md:py-16">
-          <StorePreview 
-            products={storeProducts}
-            title="Glee Club Store"
-            subtitle="Show your Spelman Glee Club pride"
-            showShopAllButton={true}
-            onShopAll={() => window.location.href = "/store"}
-          />
-        </section>
-
-        {/* Fan Signup Section */}
+        <HeroBannerSection images={heroImages} />
+        <EventsSection events={upcomingEvents} />
+        <AudioSection tracks={audioTracks} />
+        <StoreSection products={storeProducts} />
         <FanSignupForm />
       </main>
 
