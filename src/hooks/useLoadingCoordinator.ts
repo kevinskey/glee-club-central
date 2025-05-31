@@ -32,6 +32,7 @@ export const useLoadingCoordinator = () => {
   }, []);
 
   const isAnyLoading = Object.values(loadingStates).some(Boolean);
+  const isReady = !isAnyLoading;
 
   const clearLoading = useCallback((key: string) => {
     if (timeoutRef.current[key]) {
@@ -48,6 +49,7 @@ export const useLoadingCoordinator = () => {
   return {
     loadingStates,
     isAnyLoading,
+    isReady,
     setLoading,
     clearLoading
   };
