@@ -16,3 +16,6 @@ export default function HeroImageWithEvents({ className }: HeroImageWithEventsPr
     </div>
   );
 }
+
+// Named export for backward compatibility
+export { HeroImageWithEvents };

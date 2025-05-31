@@ -2,7 +2,7 @@
 import React from "react";
 import { cn } from "@/lib/utils";
 import { SidebarNavItems } from "@/components/layout/SidebarNavItems";
-import { adminNavItems, adminIcons } from "@/components/layout/AdminNavItems";
+import { adminNavItems } from "@/components/layout/AdminNavItems";
 import { SidebarHelp } from "@/components/layout/SidebarHelp";
 import { NavItem } from "@/components/ui/nav-item";
 
@@ -31,11 +31,11 @@ export function DesktopSidebar({ isOpen, isAdmin }: DesktopSidebarProps) {
               </h2>
               <div className="space-y-1">
                 {adminNavItems.map((item) => {
-                  const Icon = adminIcons[item.icon];
+                  const Icon = item.icon;
                   return (
                     <NavItem
-                      key={item.href}
-                      to={item.href}
+                      key={item.url}
+                      to={item.url}
                       label={item.title}
                       icon={Icon ? <Icon className="w-4 h-4" /> : undefined}
                     />

@@ -10,8 +10,15 @@ import {
   BarChart3,
   UserCog
 } from "lucide-react";
+import { LucideIcon } from "lucide-react";
 
-export const adminNavItems = [
+export interface AdminNavItem {
+  title: string;
+  url: string;
+  icon: LucideIcon;
+}
+
+export const adminNavItems: AdminNavItem[] = [
   {
     title: "Calendar",
     url: "/admin/calendar",

@@ -5,12 +5,13 @@ import { PageHeader } from "./page-header";
 interface PageHeaderWithToggleProps {
   title: string;
   description?: string;
+  icon?: React.ReactNode;
   children?: React.ReactNode;
 }
 
-export function PageHeaderWithToggle({ title, description, children }: PageHeaderWithToggleProps) {
+export function PageHeaderWithToggle({ title, description, icon, children }: PageHeaderWithToggleProps) {
   return (
-    <PageHeader title={title} description={description}>
+    <PageHeader title={title} description={description} icon={icon}>
       {children}
     </PageHeader>
   );

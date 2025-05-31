@@ -11,6 +11,9 @@ export interface SidebarContext {
   toggleSidebar: () => void;
 }
 
+// Export type alias for compatibility
+export type SidebarContextType = SidebarContext;
+
 export const SidebarContext = React.createContext<SidebarContext | null>(null);
 
 export function useSidebar() {

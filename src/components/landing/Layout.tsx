@@ -12,3 +12,6 @@ export default function Layout({ children }: LayoutProps) {
     </div>
   );
 }
+
+// Named export for backward compatibility
+export { Layout };
