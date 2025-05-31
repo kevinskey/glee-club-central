@@ -47,8 +47,8 @@ export default function RoleDashboard() {
       case isAdmin:
         navigate('/admin', { replace: true });
         break;
-      case userType === 'fan':
-        navigate('/fan-dashboard', { replace: true });
+      case userType === 'member':
+        navigate('/dashboard/member', { replace: true });
         break;
       default:
         // Default to member dashboard for regular members
