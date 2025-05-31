@@ -1,12 +1,17 @@
 
 import React, { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { PageHeader } from '@/components/ui/page-header';
 import { Button } from '@/components/ui/button';
 import { Spinner } from '@/components/ui/spinner';
 import { Users, TrendingUp, Download, Music } from 'lucide-react';
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar } from 'recharts';
 import { toast } from 'sonner';
+
+// Import our modular components
+import { FanStatsCard } from '@/components/analytics/FanStatsCard';
+import { SignupChart } from '@/components/analytics/SignupChart';
+import { FavoriteMemoriesList } from '@/components/analytics/FavoriteMemoriesList';
+import { RecentFansTable } from '@/components/analytics/RecentFansTable';
 
 interface Fan {
   id: string;
@@ -161,170 +166,52 @@ export default function FanAnalyticsPage() {
   }
 
   return (
-    <div className="space-y-6 p-4 md:p-6">
+    <div className="space-y-6">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-        <div>
-          <h1 className="text-2xl md:text-3xl font-bold text-glee-purple">Fan Analytics</h1>
-          <p className="text-muted-foreground">Real-time metrics from our fan community</p>
-        </div>
-        <Button onClick={exportToCSV} className="flex items-center gap-2">
-          <Download className="w-4 h-4" />
-          Export CSV
-        </Button>
-      </div>
+      <PageHeader
+        title="Fan Analytics"
+        description="Real-time metrics from our fan community"
+        actions={
+          <Button onClick={exportToCSV} className="flex items-center gap-2">
+            <Download className="w-4 h-4" />
+            Export CSV
+          </Button>
+        }
+      />
 
       {/* Overview Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Fans</CardTitle>
-            <Users className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-glee-purple">{totalFans}</div>
-            <p className="text-xs text-muted-foreground">
-              Registered fan community members
-            </p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">New This Week</CardTitle>
-            <TrendingUp className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-glee-spelman">{newSignupsThisWeek}</div>
-            <p className="text-xs text-muted-foreground">
-              Signups in the last 7 days
-            </p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Memories Shared</CardTitle>
-            <Music className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-glee-gold">{favoriteMemoryStats.length}</div>
-            <p className="text-xs text-muted-foreground">
-              Unique favorite memories
-            </p>
-          </CardContent>
-        </Card>
+        <FanStatsCard
+          title="Total Fans"
+          value={totalFans}
+          description="Registered fan community members"
+          icon={<Users />}
+          isLoading={isLoading}
+        />
+        <FanStatsCard
+          title="New This Week"
+          value={newSignupsThisWeek}
+          description="Signups in the last 7 days"
+          icon={<TrendingUp />}
+          isLoading={isLoading}
+        />
+        <FanStatsCard
+          title="Memories Shared"
+          value={favoriteMemoryStats.length}
+          description="Unique favorite memories"
+          icon={<Music />}
+          isLoading={isLoading}
+        />
       </div>
 
       {/* Charts Row */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Weekly Signups Chart */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Weekly Signup Trends</CardTitle>
-            <CardDescription>Fan signups over the last 30 days</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="h-[300px]">
-              <ResponsiveContainer width="100%" height="100%">
-                <LineChart data={weeklySignups}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis 
-                    dataKey="date" 
-                    tick={{ fontSize: 12 }}
-                    tickFormatter={(value) => new Date(value).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
-                  />
-                  <YAxis tick={{ fontSize: 12 }} />
-                  <Tooltip 
-                    labelFormatter={(value) => new Date(value).toLocaleDateString()}
-                    formatter={(value) => [value, 'Signups']}
-                  />
-                  <Line 
-                    type="monotone" 
-                    dataKey="count" 
-                    stroke="#8B2635" 
-                    strokeWidth={2}
-                    dot={{ fill: '#8B2635', strokeWidth: 2, r: 4 }}
-                  />
-                </LineChart>
-              </ResponsiveContainer>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Favorite Memories Chart */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Top Favorite Memories</CardTitle>
-            <CardDescription>Most mentioned memories by fans</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="h-[300px]">
-              <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={favoriteMemoryStats} layout="horizontal">
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis type="number" tick={{ fontSize: 12 }} />
-                  <YAxis 
-                    type="category" 
-                    dataKey="memory" 
-                    tick={{ fontSize: 10 }}
-                    width={120}
-                    tickFormatter={(value) => value.length > 15 ? value.substring(0, 15) + '...' : value}
-                  />
-                  <Tooltip 
-                    formatter={(value) => [value, 'Mentions']}
-                    labelFormatter={(value) => `Memory: ${value}`}
-                  />
-                  <Bar dataKey="count" fill="#D4A574" />
-                </BarChart>
-              </ResponsiveContainer>
-            </div>
-          </CardContent>
-        </Card>
+        <SignupChart data={weeklySignups} isLoading={isLoading} />
+        <FavoriteMemoriesList data={favoriteMemoryStats} isLoading={isLoading} />
       </div>
 
       {/* Recent Signups Table */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Recent Fan Signups</CardTitle>
-          <CardDescription>Latest 5 fans who joined our community</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="border-b">
-                  <th className="text-left py-2 px-2">Name</th>
-                  <th className="text-left py-2 px-2">Email</th>
-                  <th className="text-left py-2 px-2 hidden sm:table-cell">Favorite Memory</th>
-                  <th className="text-left py-2 px-2">Joined</th>
-                </tr>
-              </thead>
-              <tbody>
-                {recentFans.map((fan) => (
-                  <tr key={fan.id} className="border-b hover:bg-muted/50">
-                    <td className="py-2 px-2 font-medium">{fan.full_name}</td>
-                    <td className="py-2 px-2 text-muted-foreground">{fan.email}</td>
-                    <td className="py-2 px-2 hidden sm:table-cell">
-                      <div className="max-w-[200px] truncate">
-                        {fan.favorite_memory || 'Not provided'}
-                      </div>
-                    </td>
-                    <td className="py-2 px-2 text-muted-foreground">
-                      {new Date(fan.created_at).toLocaleDateString()}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-          {recentFans.length === 0 && (
-            <div className="text-center py-6 text-muted-foreground">
-              No fan signups yet
-            </div>
-          )}
-        </CardContent>
-      </Card>
+      <RecentFansTable data={recentFans} isLoading={isLoading} />
     </div>
   );
 }

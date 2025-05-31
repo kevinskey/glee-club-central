@@ -1,4 +1,3 @@
-
 import React, { Suspense } from 'react';
 import { createBrowserRouter, Navigate, Outlet } from 'react-router-dom';
 import ErrorBoundary from "./components/ErrorBoundary";
@@ -56,22 +55,6 @@ const AdminHeroManager = React.lazy(() => import('./pages/admin/AdminHeroManager
 const UserManagementPage = React.lazy(() => import('./pages/admin/UserManagementPage'));
 const EventDetailsPage = React.lazy(() => import('./pages/events/EventDetailsPage'));
 
-/**
- * Unified Router Configuration for GleeWorld with AppLayout
- * 
- * Performance optimizations:
- * - Lazy loaded heavy dashboard pages and admin components
- * - Suspense fallbacks for smooth loading experience
- * - Route protection maintained with auth guards
- * - Unified layout system with dynamic props
- * 
- * Route Structure:
- * - Public routes (home, about, events)
- * - Authentication routes (login, signup, password reset)
- * - Member dashboard (protected, role-based, lazy loaded)
- * - Admin dashboard (admin-only, lazy loaded)
- * - Fan dashboard (fan-specific features, lazy loaded)
- */
 export const router = createBrowserRouter([
   {
     // Root element with error boundary
