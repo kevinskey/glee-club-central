@@ -96,7 +96,7 @@ const AppLayout: React.FC<AppLayoutProps> = memo(function AppLayout({
       return `${baseClasses} ${showMobileBottomNav ? 'pb-20' : 'pb-6'}`;
     }
     
-    return `${baseClasses} p-3 sm:p-4 md:p-5 lg:p-6 ${sidebarType !== "none" ? 'md:ml-64' : ''} pb-20 md:pb-6`;
+    return `${baseClasses} p-3 sm:p-4 md:p-5 lg:p-6 md:ml-64 pb-20 md:pb-6`;
   };
 
   // Layout content
@@ -116,7 +116,7 @@ const AppLayout: React.FC<AppLayoutProps> = memo(function AppLayout({
         
         {/* Main content */}
         <main className={getMainClasses()}>
-          <div className={sidebarType === "none" && !isMobile ? "mobile-container" : "mobile-container"}>
+          <div className="mobile-container">
             {title && (
               <div className="mb-4">
                 <h1 className="text-2xl font-bold">{title}</h1>
