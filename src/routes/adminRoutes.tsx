@@ -1,9 +1,11 @@
+
 import { RouteObject } from "react-router-dom";
 import AdminDashboard from "@/pages/admin/AdminDashboard";
 import LandingPageSettingsPage from "@/pages/admin/LandingPageSettingsPage";
 import MediaLibrary from "@/pages/admin/MediaLibrary";
 import NewsItemsPage from "@/pages/admin/NewsItemsPage";
 import SiteSettingsPage from "@/pages/admin/SiteSettingsPage";
+import AdminHeroManager from "@/pages/admin/AdminHeroManager";
 import EventDetailsPage from '@/pages/events/EventDetailsPage';
 
 console.log('Admin routes loading...');
@@ -21,6 +23,10 @@ export const adminRoutes: RouteObject[] = [
   {
     path: "/media", 
     element: <MediaLibrary />,
+  },
+  {
+    path: "/hero-manager",
+    element: <AdminHeroManager />,
   },
   {
     path: "/news",
