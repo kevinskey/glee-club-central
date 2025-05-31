@@ -149,6 +149,15 @@ export const router = createBrowserRouter([
         element: <RequireAuth><RoleDashboard /></RequireAuth>,
       },
 
+      // ==================== PROFILE ROUTE ====================
+      {
+        path: '/profile',
+        element: <RequireAuth><AppLayout sidebarType="member" showHeader={true} showFooter={false} /></RequireAuth>,
+        children: [
+          { index: true, element: <ProfilePage /> },
+        ],
+      },
+
       // ==================== MEMBER DASHBOARD ROUTES ====================
       {
         path: '/dashboard',
