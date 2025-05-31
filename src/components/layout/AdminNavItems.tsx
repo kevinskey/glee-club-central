@@ -8,7 +8,8 @@ import {
   ShoppingBag, 
   Settings,
   BarChart3,
-  UserCog
+  UserCog,
+  Tags
 } from "lucide-react";
 import { LucideIcon } from "lucide-react";
 
@@ -33,6 +34,11 @@ export const adminNavItems: AdminNavItem[] = [
     title: "User Management",
     url: "/admin/user-management",
     icon: UserCog,
+  },
+  {
+    title: "Fan Tags",
+    url: "/admin/fan-tags",
+    icon: Tags,
   },
   {
     title: "Media Uploader",
@@ -70,6 +76,7 @@ export const adminIcons = {
   Settings,
   BarChart3,
   UserCog,
+  Tags,
 };
 
 export function AdminNavItems() {

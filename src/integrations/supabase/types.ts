@@ -341,6 +341,30 @@ export type Database = {
         }
         Relationships: []
       }
+      fan_tags: {
+        Row: {
+          created_at: string | null
+          created_by: string | null
+          description: string | null
+          id: string
+          label: string
+        }
+        Insert: {
+          created_at?: string | null
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          label: string
+        }
+        Update: {
+          created_at?: string | null
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          label?: string
+        }
+        Relationships: []
+      }
       fans: {
         Row: {
           created_at: string

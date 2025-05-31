@@ -1,4 +1,3 @@
-
 import React, { Suspense } from 'react';
 import { createBrowserRouter, Navigate, Outlet } from 'react-router-dom';
 import ErrorBoundary from "./components/ErrorBoundary";
@@ -58,6 +57,7 @@ const AdminMediaUploaderPage = React.lazy(() => import('./pages/admin/AdminMedia
 const AdminHeroManager = React.lazy(() => import('./pages/admin/AdminHeroManager'));
 const UserManagementPage = React.lazy(() => import('./pages/admin/UserManagementPage'));
 const EventDetailsPage = React.lazy(() => import('./pages/events/EventDetailsPage'));
+const FanTagManagerPage = React.lazy(() => import('./pages/admin/FanTagManagerPage'));
 
 export const router = createBrowserRouter([
   {
@@ -240,6 +240,14 @@ export const router = createBrowserRouter([
           },
           { path: 'orders', element: <OrdersPage /> },
           { path: 'settings', element: <SettingsPage /> },
+          { 
+            path: 'fan-tags', 
+            element: (
+              <Suspense fallback={<PageLoader />}>
+                <FanTagManagerPage />
+              </Suspense>
+            )
+          },
         ],
       },
 
