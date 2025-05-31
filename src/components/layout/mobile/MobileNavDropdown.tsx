@@ -1,5 +1,5 @@
 
-import React, { useState } from "react";
+import React from "react";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -22,7 +22,6 @@ import {
 
 export function MobileNavDropdown() {
   const navigate = useNavigate();
-  const [open, setOpen] = useState(false);
 
   const menuItems = [
     { icon: User, label: "Profile", path: "/dashboard/profile" },
@@ -36,18 +35,17 @@ export function MobileNavDropdown() {
 
   const handleItemClick = (path: string) => {
     navigate(path);
-    setOpen(false);
   };
 
   return (
-    <DropdownMenu open={open} onOpenChange={setOpen}>
+    <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Button variant="ghost" size="icon" className="md:hidden">
           <Menu className="h-5 w-5" />
           <span className="sr-only">Open navigation menu</span>
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="w-56">
+      <DropdownMenuContent align="end" className="w-56 bg-background border">
         {menuItems.map((item, index) => (
           <React.Fragment key={item.path}>
             <DropdownMenuItem 
