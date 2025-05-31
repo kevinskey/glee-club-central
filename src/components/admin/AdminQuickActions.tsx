@@ -8,7 +8,10 @@ import {
   Upload, 
   Users, 
   Plus,
-  ArrowRight
+  ArrowRight,
+  Settings,
+  BarChart3,
+  Bell
 } from "lucide-react";
 
 interface AdminQuickActionsProps {
@@ -18,27 +21,53 @@ interface AdminQuickActionsProps {
 export function AdminQuickActions({ isMobile = false }: AdminQuickActionsProps) {
   const navigate = useNavigate();
   
+  const handleNavigation = (path: string) => {
+    console.log('Navigating to:', path);
+    navigate(path);
+  };
+  
   const actions = [
     {
-      title: "Schedule Event",
-      description: "Create a new performance or rehearsal",
-      icon: Calendar,
-      color: "bg-blue-500 hover:bg-blue-600",
-      action: () => navigate("/admin/calendar"),
+      title: "Site Settings",
+      description: "Configure system settings",
+      icon: Settings,
+      color: "bg-gray-500 hover:bg-gray-600",
+      action: () => handleNavigation("/admin/settings"),
     },
     {
-      title: "Upload Media",
-      description: "Add photos, videos, or documents",
+      title: "User Management", 
+      description: "Manage users and permissions",
+      icon: Users,
+      color: "bg-blue-500 hover:bg-blue-600",
+      action: () => handleNavigation("/admin/members"),
+    },
+    {
+      title: "Media Uploader",
+      description: "Upload and manage media files",
       icon: Upload,
       color: "bg-green-500 hover:bg-green-600",
-      action: () => navigate("/admin/media-uploader"),
+      action: () => handleNavigation("/admin/media-uploader"),
     },
     {
-      title: "Invite Member",
-      description: "Add a new Glee Club member",
-      icon: Users,
+      title: "Analytics",
+      description: "View site usage and statistics",
+      icon: BarChart3,
       color: "bg-purple-500 hover:bg-purple-600",
-      action: () => navigate("/admin/members?action=invite"),
+      action: () => handleNavigation("/admin/analytics"),
+    },
+    {
+      title: "Calendar Events",
+      description: "Manage events and schedule",
+      icon: Calendar,
+      color: "bg-orange-500 hover:bg-orange-600",
+      action: () => handleNavigation("/admin/calendar"),
+    },
+    {
+      title: "Announcements",
+      description: "Send club announcements",
+      icon: Bell,
+      color: "bg-red-500 hover:bg-red-600",
+      action: () => handleNavigation("/admin/announcements"),
     },
   ];
   
@@ -49,6 +78,9 @@ export function AdminQuickActions({ isMobile = false }: AdminQuickActionsProps) 
           <Plus className="h-5 w-5 text-orange-500" />
           Quick Actions
         </CardTitle>
+        <p className="text-sm text-gray-600 dark:text-gray-400">
+          Common administrative tasks
+        </p>
       </CardHeader>
       <CardContent className="space-y-3">
         {actions.map((action, index) => {
