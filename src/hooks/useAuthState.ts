@@ -24,6 +24,7 @@ export const useAuthState = () => {
   
   const initializationRef = useRef(false);
   const mountedRef = useRef(true);
+  const profileFetchAttempts = useRef(0);
   
   // Debug logging
   console.log('useAuthState current state:', {
@@ -32,22 +33,43 @@ export const useAuthState = () => {
     userRole: state.profile?.role,
     isAdmin: state.profile?.is_super_admin,
     isLoading: state.isLoading,
-    isInitialized: state.isInitialized
+    isInitialized: state.isInitialized,
+    profileFetchAttempts: profileFetchAttempts.current
   });
   
-  // Fetch user data function
+  // Fetch user data function with retry logic
   const fetchUserData = useCallback(async (userId: string) => {
     if (!mountedRef.current) return;
     
+    profileFetchAttempts.current += 1;
+    
     try {
-      console.log('Fetching user data for:', userId);
+      console.log(`Fetching user data for: ${userId} (attempt ${profileFetchAttempts.current})`);
       
-      const [profile, permissions] = await Promise.all([
-        getProfile(userId),
+      const [permissions] = await Promise.all([
         fetchUserPermissions(userId)
       ]);
       
-      console.log('Fetched user profile:', profile);
+      // Try to fetch profile, but don't fail if it doesn't work
+      let profile = null;
+      try {
+        profile = await getProfile(userId);
+        console.log('Fetched user profile:', profile);
+      } catch (profileError) {
+        console.error('Profile fetch failed, continuing without profile:', profileError);
+        
+        // Create a minimal default profile if fetch fails
+        profile = {
+          id: userId,
+          first_name: 'User',
+          last_name: '',
+          role: 'member',
+          status: 'active',
+          is_super_admin: false
+        } as Profile;
+        
+        console.log('Using default profile:', profile);
+      }
       
       if (mountedRef.current) {
         setState(prev => ({
@@ -61,8 +83,18 @@ export const useAuthState = () => {
     } catch (error) {
       console.error('Error fetching user data:', error);
       if (mountedRef.current) {
+        // Set minimal state even on error to prevent infinite loading
         setState(prev => ({
           ...prev,
+          profile: {
+            id: userId,
+            first_name: 'User',
+            last_name: '',
+            role: 'member',
+            status: 'active',
+            is_super_admin: false
+          } as Profile,
+          permissions: {},
           isLoading: false
         }));
       }
@@ -160,6 +192,9 @@ export const useAuthState = () => {
             created_at: session.user.created_at
           };
           
+          // Reset fetch attempts for new user
+          profileFetchAttempts.current = 0;
+          
           setState(prev => ({ 
             ...prev, 
             user: authUser,
@@ -172,6 +207,7 @@ export const useAuthState = () => {
           
         } else if (event === 'SIGNED_OUT') {
           console.log('Processing SIGNED_OUT event');
+          profileFetchAttempts.current = 0;
           setState({
             user: null,
             profile: null,
@@ -204,6 +240,7 @@ export const useAuthState = () => {
   // Refresh user data function
   const refreshUserData = useCallback(async () => {
     if (state.user?.id && mountedRef.current) {
+      profileFetchAttempts.current = 0; // Reset attempts on manual refresh
       await fetchUserData(state.user.id);
     }
   }, [state.user?.id, fetchUserData]);

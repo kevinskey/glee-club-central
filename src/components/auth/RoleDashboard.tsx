@@ -1,5 +1,5 @@
 
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { PageLoader } from '@/components/ui/page-loader';
@@ -9,6 +9,7 @@ export default function RoleDashboard() {
   const navigate = useNavigate();
   const location = useLocation();
   const hasRedirected = useRef(false);
+  const [profileWaitTime, setProfileWaitTime] = useState(0);
 
   // Debug logging
   console.log('RoleDashboard state:', {
@@ -18,8 +19,20 @@ export default function RoleDashboard() {
     isAdmin: profile?.is_super_admin,
     isLoading,
     isAuthenticated,
-    hasRedirected: hasRedirected.current
+    hasRedirected: hasRedirected.current,
+    profileWaitTime
   });
+
+  // Track how long we've been waiting for profile
+  useEffect(() => {
+    if (user && !profile && !isLoading) {
+      const timer = setInterval(() => {
+        setProfileWaitTime(prev => prev + 1);
+      }, 1000);
+      
+      return () => clearInterval(timer);
+    }
+  }, [user, profile, isLoading]);
 
   useEffect(() => {
     // Prevent multiple redirects
@@ -45,17 +58,25 @@ export default function RoleDashboard() {
       return;
     }
 
-    // Wait for profile to be loaded
-    if (!profile) {
-      console.log('Profile not loaded yet, waiting...');
+    // If profile hasn't loaded after 5 seconds, proceed with default role
+    if (!profile && profileWaitTime >= 5) {
+      console.log('Profile failed to load after 5 seconds, using default member role');
+      hasRedirected.current = true;
+      navigate('/dashboard/member', { replace: true });
+      return;
+    }
+
+    // Wait for profile to be loaded (but not indefinitely)
+    if (!profile && profileWaitTime < 5) {
+      console.log('Profile not loaded yet, waiting... (' + profileWaitTime + 's)');
       return;
     }
 
     // All conditions met - perform role-based redirect
     hasRedirected.current = true;
     
-    const userRole = profile.role;
-    const isAdmin = profile.is_super_admin || userRole === 'admin';
+    const userRole = profile?.role || 'member'; // Default to member if no role
+    const isAdmin = profile?.is_super_admin || userRole === 'admin';
     
     console.log('Performing role-based redirect:', { userRole, isAdmin });
     
@@ -83,7 +104,7 @@ export default function RoleDashboard() {
         navigate('/dashboard/member', { replace: true });
         break;
     }
-  }, [user, profile, isLoading, isAuthenticated, navigate, location]);
+  }, [user, profile, isLoading, isAuthenticated, navigate, location, profileWaitTime]);
 
   // Reset redirect flag when component unmounts
   useEffect(() => {
@@ -92,10 +113,18 @@ export default function RoleDashboard() {
     };
   }, []);
 
+  // Show different messages based on wait time
+  const getLoadingMessage = () => {
+    if (isLoading) return "Determining your dashboard access...";
+    if (!profile && profileWaitTime < 3) return "Loading your profile...";
+    if (!profile && profileWaitTime < 5) return "Still loading profile data...";
+    return "Finalizing dashboard setup...";
+  };
+
   // Show loading while determining role
   return (
     <PageLoader 
-      message="Determining your dashboard access..." 
+      message={getLoadingMessage()} 
       className="min-h-screen"
     />
   );
