@@ -80,7 +80,6 @@ export function AdminAnalyticsChart({ isMobile = false }: AdminAnalyticsChartPro
                   borderRadius: '8px',
                   boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)'
                 }}
-                className="dark:bg-gray-800 dark:border-gray-700"
               />
               <Legend />
               <Area
