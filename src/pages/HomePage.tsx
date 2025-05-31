@@ -5,6 +5,7 @@ import { HeroBanner } from "@/components/landing/HeroBanner";
 import { EventScroller } from "@/components/landing/EventScroller";
 import { AudioPlayerSection } from "@/components/landing/AudioPlayerSection";
 import { StorePreview } from "@/components/landing/StorePreview";
+import { FanSignupForm } from "@/components/landing/FanSignupForm";
 import { FooterLinks } from "@/components/landing/FooterLinks";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -251,6 +252,9 @@ const HomePage = () => {
             onShopAll={() => window.location.href = "/store"}
           />
         </section>
+
+        {/* Fan Signup Section */}
+        <FanSignupForm />
       </main>
 
       {/* Footer */}

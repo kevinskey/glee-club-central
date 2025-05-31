@@ -320,6 +320,30 @@ export type Database = {
         }
         Relationships: []
       }
+      fans: {
+        Row: {
+          created_at: string
+          email: string
+          favorite_memory: string | null
+          full_name: string
+          id: string
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          favorite_memory?: string | null
+          full_name: string
+          id?: string
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          favorite_memory?: string | null
+          full_name?: string
+          id?: string
+        }
+        Relationships: []
+      }
       media_library: {
         Row: {
           created_at: string
