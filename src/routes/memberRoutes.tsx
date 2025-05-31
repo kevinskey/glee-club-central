@@ -21,6 +21,7 @@ import FinancesPage from '@/pages/dashboard/FinancesPage';
 import MembersPage from '@/pages/members/MembersPage';
 import FanAnalyticsPage from '@/pages/dashboard/FanAnalyticsPage';
 import RoleDashboard from '@/components/auth/RoleDashboard';
+import SettingsPage from '@/pages/settings/SettingsPage';
 
 // Lazy Load Heavy Components
 const MemberDashboardPage = React.lazy(() => import('@/pages/dashboard/MemberDashboardPage'));
@@ -31,6 +32,14 @@ export const memberRoutes: RouteObject[] = [
   {
     path: '/role-dashboard',
     element: <RequireAuth><RoleDashboard /></RequireAuth>,
+  },
+  // Settings Route - Dynamic sidebar based on user role
+  {
+    path: '/settings',
+    element: <RequireAuth><AppLayout showHeader={true} showFooter={false} /></RequireAuth>,
+    children: [
+      { index: true, element: <SettingsPage /> },
+    ],
   },
   // Profile Route
   {

@@ -1530,6 +1530,39 @@ export type Database = {
         }
         Relationships: []
       }
+      user_settings: {
+        Row: {
+          created_at: string | null
+          email_opt_in: boolean | null
+          event_reminders: boolean | null
+          newsletter_opt_in: boolean | null
+          order_confirmations: boolean | null
+          sms_opt_in: boolean | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          email_opt_in?: boolean | null
+          event_reminders?: boolean | null
+          newsletter_opt_in?: boolean | null
+          order_confirmations?: boolean | null
+          sms_opt_in?: boolean | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          email_opt_in?: boolean | null
+          event_reminders?: boolean | null
+          newsletter_opt_in?: boolean | null
+          order_confirmations?: boolean | null
+          sms_opt_in?: boolean | null
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       user_titles: {
         Row: {
           created_at: string

@@ -1,6 +1,6 @@
 
 import React, { useEffect, memo } from "react";
-import { Outlet } from "react-router-dom";
+import { Outlet, useLocation } from "react-router-dom";
 import { Toaster } from "sonner";
 import { SidebarProvider } from "@/components/ui/sidebar";
 import { ConsolidatedHeader } from "@/components/layout/ConsolidatedHeader";
@@ -32,6 +32,7 @@ const AppLayout: React.FC<AppLayoutProps> = memo(function AppLayout({
 }) {
   const isMobile = useIsMobile();
   const { profile } = useAuth();
+  const location = useLocation();
   const isAdmin = profile?.is_super_admin || profile?.role === 'admin';
   
   // Determine which header to show
@@ -39,6 +40,22 @@ const AppLayout: React.FC<AppLayoutProps> = memo(function AppLayout({
   
   // Determine if we need mobile bottom nav
   const showMobileBottomNav = sidebarType === "none" && isMobile;
+  
+  // Dynamic sidebar type determination for settings page
+  const getEffectiveSidebarType = (): SidebarType => {
+    if (sidebarType !== "none") return sidebarType;
+    
+    // For settings page, determine sidebar based on user role
+    if (location.pathname === '/settings') {
+      if (isAdmin) return "admin";
+      if (profile?.role === 'fan') return "fan";
+      return "member";
+    }
+    
+    return sidebarType;
+  };
+  
+  const effectiveSidebarType = getEffectiveSidebarType();
   
   // Set viewport height for mobile
   useEffect(() => {
@@ -62,11 +79,11 @@ const AppLayout: React.FC<AppLayoutProps> = memo(function AppLayout({
     }
   }, [isMobile]);
 
-  // Render sidebar based on type
+  // Render sidebar based on effective type
   const renderSidebar = () => {
-    if (sidebarType === "none" || isMobile) return null;
+    if (effectiveSidebarType === "none" || isMobile) return null;
     
-    switch (sidebarType) {
+    switch (effectiveSidebarType) {
       case "admin":
         return <AdminSidebar />;
       case "member":
@@ -81,7 +98,7 @@ const AppLayout: React.FC<AppLayoutProps> = memo(function AppLayout({
   const renderMobileNav = () => {
     if (!isMobile) return null;
     
-    if (sidebarType === "none") {
+    if (effectiveSidebarType === "none") {
       return showMobileBottomNav ? <MobileBottomNav /> : null;
     }
     
@@ -92,7 +109,7 @@ const AppLayout: React.FC<AppLayoutProps> = memo(function AppLayout({
   const getMainClasses = () => {
     const baseClasses = "flex-1 overflow-x-hidden";
     
-    if (sidebarType === "none") {
+    if (effectiveSidebarType === "none") {
       return `${baseClasses} ${showMobileBottomNav ? 'pb-20' : 'pb-6'}`;
     }
     
@@ -136,7 +153,7 @@ const AppLayout: React.FC<AppLayoutProps> = memo(function AppLayout({
   );
 
   // Wrap with SidebarProvider if we have a sidebar
-  if (sidebarType !== "none") {
+  if (effectiveSidebarType !== "none") {
     return (
       <SidebarProvider>
         {layoutContent}
