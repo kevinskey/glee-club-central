@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { format } from 'date-fns';
@@ -18,7 +17,8 @@ import {
   Edit, 
   ArrowLeft,
   Download,
-  ExternalLink
+  ExternalLink,
+  Users
 } from 'lucide-react';
 import { getEventTypeLabel, getEventTypeColor } from '@/utils/eventTypes';
 import ErrorBoundary from '@/components/ErrorBoundary';
@@ -71,6 +71,10 @@ export default function EventDetailsPage() {
     navigate(`/admin/calendar?edit=${event.id}`);
   };
 
+  const handleViewRSVPs = () => {
+    navigate(`/admin/events/${event.id}/rsvps`);
+  };
+
   const handleDownloadICS = () => {
     if (!event.allow_ics_download) return;
     
@@ -113,10 +117,18 @@ END:VCALENDAR`;
                 <ArrowLeft className="h-4 w-4 mr-2" />
                 Back to Calendar
               </Button>
-              <Button onClick={handleEdit} className="bg-glee-purple hover:bg-glee-purple/90">
-                <Edit className="h-4 w-4 mr-2" />
-                Edit Event
-              </Button>
+              <div className="flex gap-2">
+                {event.allow_rsvp && (
+                  <Button onClick={handleViewRSVPs} variant="outline">
+                    <Users className="h-4 w-4 mr-2" />
+                    View RSVPs
+                  </Button>
+                )}
+                <Button onClick={handleEdit} className="bg-glee-purple hover:bg-glee-purple/90">
+                  <Edit className="h-4 w-4 mr-2" />
+                  Edit Event
+                </Button>
+              </div>
             </div>
             
             <PageHeader

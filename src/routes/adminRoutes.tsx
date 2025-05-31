@@ -1,89 +1,39 @@
-
-import React, { Suspense } from 'react';
+import React from 'react';
 import { RouteObject } from 'react-router-dom';
+import { RequireAdmin } from '@/components/auth/RequireAdmin';
 import AppLayout from '@/layouts/AppLayout';
-import { AdminRoute } from '@/components/auth/AdminRoute';
-import { PageLoader } from '@/components/ui/page-loader';
 
-// Admin Pages
+// Import all existing admin pages
+import AdminDashboardPage from '@/pages/admin/AdminDashboardPage';
 import AdminCalendarPage from '@/pages/admin/AdminCalendarPage';
-import MembersPage from '@/pages/members/MembersPage';
-import SettingsPage from '@/pages/admin/SettingsPage';
-import OrdersPage from '@/pages/admin/OrdersPage';
-
-// Lazy Load Heavy Admin Pages
-const AdminDashboardPage = React.lazy(() => import('@/pages/admin/AdminDashboardPage'));
-const AdminMediaUploaderPage = React.lazy(() => import('@/pages/admin/AdminMediaUploaderPage'));
-const AdminHeroManager = React.lazy(() => import('@/pages/admin/AdminHeroManager'));
-const UserManagementPage = React.lazy(() => import('@/pages/admin/UserManagementPage'));
-const EventDetailsPage = React.lazy(() => import('@/pages/events/EventDetailsPage'));
-const FanTagManagerPage = React.lazy(() => import('@/pages/admin/FanTagManagerPage'));
+import AdminMembersPage from '@/pages/admin/AdminMembersPage';
+import AdminMediaPage from '@/pages/admin/AdminMediaPage';
+import AdminAnnouncementsPage from '@/pages/admin/AdminAnnouncementsPage';
+import AdminSettingsPage from '@/pages/admin/AdminSettingsPage';
+import AdminOrdersPage from '@/pages/admin/AdminOrdersPage';
+import AdminAnalyticsPage from '@/pages/admin/AdminAnalyticsPage';
+import EventDetailsPage from '@/pages/events/EventDetailsPage';
+import EventRSVPsPage from '@/pages/admin/EventRSVPsPage';
 
 export const adminRoutes: RouteObject[] = [
   {
     path: '/admin',
-    element: <AdminRoute><AppLayout sidebarType="admin" showHeader={true} showFooter={false} /></AdminRoute>,
+    element: (
+      <RequireAdmin>
+        <AppLayout sidebarType="admin" showHeader={true} showFooter={false} />
+      </RequireAdmin>
+    ),
     children: [
-      { 
-        index: true, 
-        element: (
-          <Suspense fallback={<PageLoader />}>
-            <AdminDashboardPage />
-          </Suspense>
-        )
-      },
+      { index: true, element: <AdminDashboardPage /> },
       { path: 'calendar', element: <AdminCalendarPage /> },
-      { 
-        path: 'events/:id', 
-        element: (
-          <Suspense fallback={<PageLoader />}>
-            <EventDetailsPage />
-          </Suspense>
-        )
-      },
-      { path: 'members', element: <MembersPage /> },
-      { 
-        path: 'user-management', 
-        element: (
-          <Suspense fallback={<PageLoader />}>
-            <UserManagementPage />
-          </Suspense>
-        )
-      },
-      { 
-        path: 'users', 
-        element: (
-          <Suspense fallback={<PageLoader />}>
-            <UserManagementPage />
-          </Suspense>
-        )
-      },
-      { 
-        path: 'media-uploader', 
-        element: (
-          <Suspense fallback={<PageLoader />}>
-            <AdminMediaUploaderPage />
-          </Suspense>
-        )
-      },
-      { 
-        path: 'hero-manager', 
-        element: (
-          <Suspense fallback={<PageLoader />}>
-            <AdminHeroManager />
-          </Suspense>
-        )
-      },
-      { path: 'orders', element: <OrdersPage /> },
-      { path: 'settings', element: <SettingsPage /> },
-      { 
-        path: 'fan-tags', 
-        element: (
-          <Suspense fallback={<PageLoader />}>
-            <FanTagManagerPage />
-          </Suspense>
-        )
-      },
+      { path: 'events/:id', element: <EventDetailsPage /> },
+      { path: 'events/:id/rsvps', element: <EventRSVPsPage /> },
+      { path: 'members', element: <AdminMembersPage /> },
+      { path: 'media', element: <AdminMediaPage /> },
+      { path: 'announcements', element: <AdminAnnouncementsPage /> },
+      { path: 'settings', element: <AdminSettingsPage /> },
+      { path: 'orders', element: <AdminOrdersPage /> },
+      { path: 'analytics', element: <AdminAnalyticsPage /> },
     ],
   },
 ];
