@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { CalendarEvent } from '@/types/calendar';
 import { Button } from '@/components/ui/button';
@@ -42,6 +43,7 @@ export const EventEditor: React.FC<EventEditorProps> = ({
     event_host_contact: '',
     event_types: [] as string[],
     is_private: false,
+    is_public: true, // Add the missing is_public property with default value
     allow_rsvp: true,
     allow_reminders: true,
     allow_ics_download: true,
@@ -66,6 +68,7 @@ export const EventEditor: React.FC<EventEditorProps> = ({
         event_host_contact: event.event_host_contact || '',
         event_types: event.event_types || (event.event_type ? [event.event_type] : []),
         is_private: event.is_private || false,
+        is_public: event.is_public !== undefined ? event.is_public : true, // Handle the is_public property
         allow_rsvp: event.allow_rsvp !== undefined ? event.allow_rsvp : true,
         allow_reminders: event.allow_reminders !== undefined ? event.allow_reminders : true,
         allow_ics_download: event.allow_ics_download !== undefined ? event.allow_ics_download : true,
@@ -113,6 +116,7 @@ export const EventEditor: React.FC<EventEditorProps> = ({
       event_host_contact: '',
       event_types: [],
       is_private: false,
+      is_public: true, // Add the missing is_public property with default value
       allow_rsvp: true,
       allow_reminders: true,
       allow_ics_download: true,
@@ -234,6 +238,7 @@ export const EventEditor: React.FC<EventEditorProps> = ({
                       start_time: formData.start_time,
                       end_time: formData.end_time,
                       is_private: formData.is_private,
+                      is_public: formData.is_public, // Add the missing is_public property
                       allow_rsvp: formData.allow_rsvp,
                       allow_reminders: formData.allow_reminders,
                       allow_ics_download: formData.allow_ics_download,
@@ -356,6 +361,15 @@ export const EventEditor: React.FC<EventEditorProps> = ({
                       onCheckedChange={(checked) => handleInputChange('is_private', checked)}
                     />
                     <Label htmlFor="is_private">Private Event</Label>
+                  </div>
+                  
+                  <div className="flex items-center space-x-2">
+                    <Checkbox
+                      id="is_public"
+                      checked={formData.is_public}
+                      onCheckedChange={(checked) => handleInputChange('is_public', checked)}
+                    />
+                    <Label htmlFor="is_public">Public Event</Label>
                   </div>
                   
                   <div className="flex items-center space-x-2">

@@ -1,4 +1,3 @@
-
 import React, { useState, useRef, useEffect, useMemo } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { CalendarView } from '@/components/calendar/CalendarView';
@@ -44,6 +43,7 @@ export default function AdminCalendarPage() {
       short_description: holiday.description,
       full_description: holiday.description,
       is_private: false,
+      is_public: true, // Add the missing is_public property
       allow_rsvp: false,
       allow_reminders: false,
       allow_ics_download: false,
@@ -61,6 +61,7 @@ export default function AdminCalendarPage() {
       short_description: date.description,
       full_description: date.description,
       is_private: false,
+      is_public: true, // Add the missing is_public property
       allow_rsvp: false,
       allow_reminders: false,
       allow_ics_download: false,
