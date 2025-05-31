@@ -89,7 +89,7 @@ export const NewsTicker: React.FC<NewsTickerProps> = ({
   // Display loading animation while fetching
   if (loading) {
     return (
-      <div className="bg-glee-columbia text-white py-4 relative">
+      <div className="bg-glee-columbia text-white py-2 relative">
         <div className="container flex items-center justify-center text-sm">
           <div className="flex-1 overflow-hidden">
             <div className="w-full animate-pulse h-4 bg-white/20 rounded"></div>
@@ -100,10 +100,10 @@ export const NewsTicker: React.FC<NewsTickerProps> = ({
   }
   
   return (
-    <div className="bg-glee-columbia text-white py-4 relative">
+    <div className="bg-glee-columbia text-white py-2 relative">
       <div className="container flex items-center justify-center text-sm">
         <div className="flex-1 overflow-hidden">
-          <div className="flex whitespace-nowrap animate-marquee">
+          <div className="flex whitespace-nowrap animate-marquee-fast">
             {newsItems.map((headline, index) => (
               <span key={index} className="mx-6">📰 {headline}</span>
             ))}
