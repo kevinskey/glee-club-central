@@ -19,14 +19,19 @@ export const useSiteSettings = () => {
   const fetchSettings = async () => {
     try {
       setLoading(true);
+      setError(null);
+      
       const { data, error } = await supabase
         .from('site_settings')
         .select('*');
 
-      if (error) throw error;
+      if (error) {
+        console.error('Error fetching site settings:', error);
+        throw error;
+      }
 
       // Convert array to key-value object
-      const settingsMap = data.reduce((acc, setting) => {
+      const settingsMap = (data || []).reduce((acc, setting) => {
         acc[setting.key] = setting.value;
         return acc;
       }, {} as Record<string, any>);
@@ -34,7 +39,9 @@ export const useSiteSettings = () => {
       setSettings(settingsMap);
     } catch (err) {
       console.error('Error fetching site settings:', err);
-      setError(err instanceof Error ? err.message : 'Failed to fetch settings');
+      const errorMessage = err instanceof Error ? err.message : 'Failed to fetch settings';
+      setError(errorMessage);
+      toast.error(errorMessage);
     } finally {
       setLoading(false);
     }
@@ -50,13 +57,19 @@ export const useSiteSettings = () => {
           updated_at: new Date().toISOString()
         });
 
-      if (error) throw error;
+      if (error) {
+        console.error('Error updating setting:', error);
+        throw error;
+      }
 
       setSettings(prev => ({ ...prev, [key]: value }));
       toast.success('Setting updated successfully');
+      
+      return { success: true };
     } catch (err) {
       console.error('Error updating setting:', err);
-      toast.error('Failed to update setting');
+      const errorMessage = err instanceof Error ? err.message : 'Failed to update setting';
+      toast.error(errorMessage);
       throw err;
     }
   };
