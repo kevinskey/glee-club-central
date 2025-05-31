@@ -1,6 +1,6 @@
 
 import React from "react";
-import { HeroSection } from "@/components/landing/HeroSection";
+import { EnhancedHeroSection } from "@/components/landing/hero/EnhancedHeroSection";
 import { FeaturesSection } from "@/components/landing/FeaturesSection";
 import { TestimonialSection } from "@/components/landing/TestimonialSection";
 import { CTASection } from "@/components/landing/CTASection";
@@ -10,7 +10,7 @@ export default function HomePage() {
   return (
     <div className="flex min-h-screen flex-col">
       <main className="flex-1">
-        <HeroSection />
+        <EnhancedHeroSection />
         <FeaturesSection />
         <TestimonialSection />
         <CTASection />
