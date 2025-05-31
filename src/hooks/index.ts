@@ -55,3 +55,6 @@ export { useToast } from './use-toast';
 export { useMedia, useIsMobile } from './use-mobile';
 export { useSidebar } from './use-sidebar';
 export { useIntersection } from './use-intersection';
+
+// Re-export PageLoader component for convenience
+export { PageLoader } from '../components/ui/page-loader';

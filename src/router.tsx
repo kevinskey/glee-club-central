@@ -1,5 +1,4 @@
-
-import React from 'react';
+import React, { Suspense } from 'react';
 import { createBrowserRouter, Navigate, Outlet } from 'react-router-dom';
 import ErrorBoundary from "./components/ErrorBoundary";
 
@@ -15,7 +14,10 @@ import RequireAuth from './components/auth/RequireAuth';
 import { AdminRoute } from './components/auth/AdminRoute';
 import RoleDashboard from './components/auth/RoleDashboard';
 
-// Public Pages
+// Loading Component
+import { Spinner } from './components/ui/spinner';
+
+// Public Pages (keep as regular imports for faster initial load)
 import HomePage from './pages/HomePage';
 import AboutPage from './pages/AboutPage';
 import ContactPage from './pages/ContactPage';
@@ -23,15 +25,14 @@ import PublicEventsPage from './pages/PublicEventsPage';
 import CalendarPage from './pages/CalendarPage';
 import JoinGleeFamPage from './pages/JoinGleeFamPage';
 
-// Auth Pages
+// Auth Pages (keep as regular imports)
 import LoginPage from './pages/auth/LoginPage';
 import SignupPage from './pages/auth/SignupPage';
 import AdminRegistrationPage from './pages/admin/AdminRegistrationPage';
 import ForgotPasswordPage from './pages/auth/ForgotPasswordPage';
 import ResetPasswordPage from './pages/auth/ResetPasswordPage';
 
-// Member Dashboard Pages
-import MemberDashboardPage from './pages/dashboard/MemberDashboardPage';
+// Regular Dashboard Pages (lighter components)
 import ProfilePage from './pages/profile/ProfilePage';
 import MediaLibraryPage from './pages/MediaLibraryPage';
 import SheetMusicPage from './pages/SheetMusicPage';
@@ -44,27 +45,43 @@ import ArchivesPage from './pages/dashboard/ArchivesPage';
 import AttendancePage from './pages/dashboard/AttendancePage';
 import AudioManagementPage from './pages/audio-management/AudioManagementPage';
 import FinancesPage from './pages/dashboard/FinancesPage';
-
-// Admin Pages
-import AdminDashboardPage from './pages/admin/AdminDashboardPage';
 import AdminCalendarPage from './pages/admin/AdminCalendarPage';
-import EventDetailsPage from './pages/events/EventDetailsPage';
 import MembersPage from './pages/members/MembersPage';
 import SettingsPage from './pages/settings/SettingsPage';
 
-// Fan Pages
-import FanDashboardPage from './pages/dashboard/FanDashboardPage';
+// Lazy Load Heavy/Admin Pages
+const MemberDashboardPage = React.lazy(() => import('./pages/dashboard/MemberDashboardPage'));
+const FanDashboardPage = React.lazy(() => import('./pages/FanDashboardPage'));
+const AdminDashboardPage = React.lazy(() => import('./pages/admin/AdminDashboardPage'));
+const AdminMediaUploaderPage = React.lazy(() => import('./pages/admin/AdminMediaUploaderPage'));
+const AdminHeroManager = React.lazy(() => import('./pages/admin/AdminHeroManager'));
+const UserManagementPage = React.lazy(() => import('./pages/admin/UserManagementPage'));
+const EventDetailsPage = React.lazy(() => import('./pages/events/EventDetailsPage'));
+
+// Loading Fallback Component
+const PageLoader = () => (
+  <div className="flex items-center justify-center min-h-[50vh]">
+    <div className="text-center">
+      <Spinner size="lg" />
+      <p className="mt-4 text-muted-foreground">Loading...</p>
+    </div>
+  </div>
+);
 
 /**
- * Unified Router Configuration for GleeWorld
- * Consolidated from router.tsx, routes.tsx, and routerConfig.ts
+ * Unified Router Configuration for GleeWorld with Lazy Loading
+ * 
+ * Performance optimizations:
+ * - Lazy loaded heavy dashboard pages and admin components
+ * - Suspense fallbacks for smooth loading experience
+ * - Route protection maintained with auth guards
  * 
  * Route Structure:
  * - Public routes (home, about, events)
  * - Authentication routes (login, signup, password reset)
- * - Member dashboard (protected, role-based)
- * - Admin dashboard (admin-only)
- * - Fan dashboard (fan-specific features)
+ * - Member dashboard (protected, role-based, lazy loaded)
+ * - Admin dashboard (admin-only, lazy loaded)
+ * - Fan dashboard (fan-specific features, lazy loaded)
  */
 export const router = createBrowserRouter([
   {
@@ -129,7 +146,14 @@ export const router = createBrowserRouter([
         element: <RequireAuth><DashboardLayout /></RequireAuth>,
         children: [
           { index: true, element: <Navigate to="/dashboard/member" replace /> },
-          { path: 'member', element: <MemberDashboardPage /> },
+          { 
+            path: 'member', 
+            element: (
+              <Suspense fallback={<PageLoader />}>
+                <MemberDashboardPage />
+              </Suspense>
+            )
+          },
           { path: 'profile', element: <ProfilePage /> },
           { path: 'media-library', element: <MediaLibraryPage /> },
           { path: 'sheet-music', element: <SheetMusicPage /> },
@@ -155,25 +179,70 @@ export const router = createBrowserRouter([
         ],
       },
 
-      // ==================== ADMIN DASHBOARD ROUTES ====================
+      // ==================== ADMIN DASHBOARD ROUTES (LAZY LOADED) ====================
       {
         path: '/admin',
         element: <AdminRoute><AdminLayout /></AdminRoute>,
         children: [
-          { index: true, element: <AdminDashboardPage /> },
+          { 
+            index: true, 
+            element: (
+              <Suspense fallback={<PageLoader />}>
+                <AdminDashboardPage />
+              </Suspense>
+            )
+          },
           { path: 'calendar', element: <AdminCalendarPage /> },
-          { path: 'events/:id', element: <EventDetailsPage /> },
+          { 
+            path: 'events/:id', 
+            element: (
+              <Suspense fallback={<PageLoader />}>
+                <EventDetailsPage />
+              </Suspense>
+            )
+          },
           { path: 'members', element: <MembersPage /> },
+          { 
+            path: 'user-management', 
+            element: (
+              <Suspense fallback={<PageLoader />}>
+                <UserManagementPage />
+              </Suspense>
+            )
+          },
+          { 
+            path: 'media-uploader', 
+            element: (
+              <Suspense fallback={<PageLoader />}>
+                <AdminMediaUploaderPage />
+              </Suspense>
+            )
+          },
+          { 
+            path: 'hero-manager', 
+            element: (
+              <Suspense fallback={<PageLoader />}>
+                <AdminHeroManager />
+              </Suspense>
+            )
+          },
           { path: 'settings', element: <SettingsPage /> },
         ],
       },
 
-      // ==================== FAN DASHBOARD ROUTES ====================
+      // ==================== FAN DASHBOARD ROUTES (LAZY LOADED) ====================
       {
         path: '/fan-dashboard',
         element: <RequireAuth><DashboardLayout /></RequireAuth>,
         children: [
-          { index: true, element: <FanDashboardPage /> },
+          { 
+            index: true, 
+            element: (
+              <Suspense fallback={<PageLoader />}>
+                <FanDashboardPage />
+              </Suspense>
+            )
+          },
         ],
       },
     ],
