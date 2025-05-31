@@ -7,7 +7,7 @@ import { HeroImageWithEvents } from './HeroImageWithEvents';
 
 export function HeroSection() {
   return (
-    <section className="relative min-h-screen flex items-center justify-center bg-gradient-to-br from-glee-columbia/10 to-glee-spelman/10">
+    <section className="relative min-h-screen flex items-center justify-center bg-gradient-to-br from-glee-columbia/10 to-glee-columbia/10">
       <div className="container mx-auto px-4 py-12">
         <div className="grid lg:grid-cols-2 gap-12 items-center">
           {/* Left side - Text content */}
@@ -16,7 +16,7 @@ export function HeroSection() {
               <h1 className="text-4xl md:text-6xl font-bold leading-tight">
                 <span className="text-glee-columbia">Spelman College</span>
                 <br />
-                <span className="text-glee-spelman">Glee Club</span>
+                <span className="text-glee-columbia">Glee Club</span>
               </h1>
               <p className="text-xl md:text-2xl text-gray-600 leading-relaxed">
                 A tradition of excellence in choral performance since 1881. 
@@ -26,7 +26,7 @@ export function HeroSection() {
             
             <div className="flex flex-col sm:flex-row gap-4">
               <Link to="/about">
-                <Button size="lg" className="bg-glee-spelman hover:bg-glee-spelman/90 text-white px-8 py-4 text-lg">
+                <Button size="lg" className="bg-glee-columbia hover:bg-glee-columbia/90 text-white px-8 py-4 text-lg">
                   Learn About Us
                   <ArrowRight className="ml-2 h-5 w-5" />
                 </Button>

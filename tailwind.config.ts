@@ -58,7 +58,7 @@ module.exports = {
           foreground: "hsl(var(--card-foreground))",
         },
         glee: {
-          orange: "#4F9EE8", // Kept as Carolina blue
+          orange: "#4F9EE8", // Carolina blue
           carolina: "#4F9EE8", // Carolina blue
           purple: "#4F9EE8", // Changed from purple to Carolina blue
           darkPurple: "#3A7BC8", // Darker Carolina blue
@@ -67,6 +67,7 @@ module.exports = {
           columbia: "#4F9EE8", // Carolina blue
         },
         'glee-spelman': "#4F9EE8", // Carolina blue
+        'glee-columbia': "#4F9EE8", // Carolina blue
         'columbia-blue': "#4F9EE8", // Carolina blue
         'blue': {
           800: "#1E3A8A", // Navy blue
