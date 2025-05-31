@@ -17,6 +17,13 @@ interface Profile {
   status?: string;
   is_super_admin?: boolean;
   dues_paid?: boolean;
+  personal_title?: string;
+  class_year?: string;
+  join_date?: string;
+  notes?: string;
+  created_at?: string;
+  updated_at?: string;
+  last_sign_in_at?: string;
 }
 
 interface AuthContextType {
@@ -81,22 +88,48 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [isInitialized, setIsInitialized] = useState(false);
   const [permissions, setPermissions] = useState<{ [key: string]: boolean }>({});
 
-  const fetchProfile = async (userId: string) => {
+  const fetchProfile = async (userId: string): Promise<Profile | null> => {
     try {
       console.log('Fetching profile for user:', userId);
-      const { data, error } = await supabase
+      
+      // Try multiple approaches to get user data
+      const { data: profileData, error: profileError } = await supabase
         .from('profiles')
         .select('*')
         .eq('id', userId)
         .single();
 
-      if (error) {
-        console.error('Error fetching profile:', error);
-        return null;
+      if (profileError && profileError.code !== 'PGRST116') {
+        console.error('Error fetching profile:', profileError);
+        throw profileError;
       }
 
-      console.log('Profile loaded successfully:', data);
-      return data;
+      if (profileData) {
+        console.log('Profile loaded successfully:', profileData);
+        return profileData;
+      }
+
+      // If no profile found, try to get user email from auth
+      const { data: { user: authUser } } = await supabase.auth.getUser();
+      
+      if (authUser) {
+        // Create minimal profile with available data
+        const minimalProfile: Profile = {
+          id: userId,
+          email: authUser.email,
+          first_name: authUser.user_metadata?.first_name || 'User',
+          last_name: authUser.user_metadata?.last_name || '',
+          role: 'member',
+          status: 'active',
+          is_super_admin: false,
+          created_at: authUser.created_at
+        };
+        
+        console.log('Created minimal profile:', minimalProfile);
+        return minimalProfile;
+      }
+
+      return null;
     } catch (error) {
       console.error('Profile fetch error:', error);
       return null;
@@ -105,23 +138,40 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const fetchPermissions = async (userId: string) => {
     try {
-      const { data } = await supabase
+      console.log('Fetching permissions for user:', userId);
+      const { data, error } = await supabase
         .rpc('get_user_permissions', { p_user_id: userId });
+      
+      if (error) {
+        console.error('Error fetching permissions:', error);
+        // Return default permissions on error
+        return {
+          'view_sheet_music': true,
+          'view_calendar': true,
+          'view_announcements': true
+        };
+      }
       
       const permissionsMap: { [key: string]: boolean } = {};
       data?.forEach((perm: any) => {
         permissionsMap[perm.permission] = perm.granted;
       });
       
+      console.log('Permissions loaded:', permissionsMap);
       return permissionsMap;
     } catch (error) {
       console.error('Error fetching permissions:', error);
-      return {};
+      return {
+        'view_sheet_music': true,
+        'view_calendar': true,
+        'view_announcements': true
+      };
     }
   };
 
   const refreshProfile = async () => {
     if (user?.id) {
+      console.log('Refreshing profile for user:', user.id);
       const profileData = await fetchProfile(user.id);
       setProfile(profileData);
     }
@@ -129,6 +179,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const refreshPermissions = async () => {
     if (user?.id) {
+      console.log('Refreshing permissions for user:', user.id);
       const permissionsData = await fetchPermissions(user.id);
       setPermissions(permissionsData);
     }
@@ -259,17 +310,18 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     let mounted = true;
     let initTimeout: NodeJS.Timeout;
 
-    // Set a maximum timeout for initialization
+    // Set a timeout for initialization
     initTimeout = setTimeout(() => {
       if (mounted && !isInitialized) {
         console.log('Auth initialization timeout, setting as initialized');
         setIsLoading(false);
         setIsInitialized(true);
       }
-    }, 5000);
+    }, 3000); // Reduced timeout
 
     const initializeAuth = async () => {
       try {
+        console.log('Initializing auth state...');
         const { data: { session: initialSession }, error } = await supabase.auth.getSession();
         
         if (error) {
@@ -278,21 +330,20 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
         if (mounted) {
           if (initialSession?.user) {
+            console.log('Found existing session for user:', initialSession.user.id);
             setSession(initialSession);
             setUser(initialSession.user);
             
-            // Fetch profile and permissions with timeout
+            // Fetch profile and permissions
             try {
-              const [profileData, permissionsData] = await Promise.allSettled([
-                fetchProfile(initialSession.user.id),
-                fetchPermissions(initialSession.user.id)
-              ]);
-
-              if (profileData.status === 'fulfilled') {
-                setProfile(profileData.value);
+              const profileData = await fetchProfile(initialSession.user.id);
+              if (mounted) {
+                setProfile(profileData);
               }
-              if (permissionsData.status === 'fulfilled') {
-                setPermissions(permissionsData.value);
+              
+              const permissionsData = await fetchPermissions(initialSession.user.id);
+              if (mounted) {
+                setPermissions(permissionsData);
               }
             } catch (dataError) {
               console.error('Error loading user data:', dataError);
@@ -326,13 +377,20 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setUser(currentSession?.user ?? null);
 
         if (currentSession?.user) {
+          // Defer data fetching to prevent deadlocks
           setTimeout(async () => {
+            if (!mounted) return;
+            
             const profileData = await fetchProfile(currentSession.user.id);
-            setProfile(profileData);
+            if (mounted) {
+              setProfile(profileData);
+            }
             
             const permissionsData = await fetchPermissions(currentSession.user.id);
-            setPermissions(permissionsData);
-          }, 0);
+            if (mounted) {
+              setPermissions(permissionsData);
+            }
+          }, 100);
         } else {
           setProfile(null);
           setPermissions({});
@@ -362,19 +420,97 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     hasUser: !!user,
     supabaseClient: supabase,
     permissions,
-    signOut,
-    logout,
+    signOut: async () => {
+      try {
+        cleanupAuthState();
+        await supabase.auth.signOut();
+        setUser(null);
+        setProfile(null);
+        setSession(null);
+        setPermissions({});
+      } catch (error) {
+        console.error('Error signing out:', error);
+      }
+    },
+    logout: async () => {
+      try {
+        await value.signOut();
+        return { error: null };
+      } catch (error) {
+        return { error };
+      }
+    },
     refreshProfile,
     refreshPermissions,
-    login,
-    signIn,
-    signUp,
+    login: async (email: string, password: string) => {
+      try {
+        cleanupAuthState();
+        const { data, error } = await supabase.auth.signInWithPassword({
+          email,
+          password,
+        });
+        return { error };
+      } catch (error) {
+        return { error };
+      }
+    },
+    signIn: async (email: string, password: string) => {
+      return value.login(email, password);
+    },
+    signUp: async (email: string, password: string, firstName: string, lastName: string, userType: string = 'member') => {
+      try {
+        cleanupAuthState();
+        const { data, error } = await supabase.auth.signUp({
+          email,
+          password,
+          options: {
+            data: {
+              first_name: firstName,
+              last_name: lastName,
+              user_type: userType,
+            },
+            emailRedirectTo: `${window.location.origin}/`,
+          },
+        });
+        return { data, error };
+      } catch (error) {
+        return { data: null, error };
+      }
+    },
     isAdmin,
     isMember,
     getUserType,
-    updatePassword,
-    resetPassword,
-    resetAuthSystem,
+    updatePassword: async (newPassword: string) => {
+      try {
+        const { error } = await supabase.auth.updateUser({
+          password: newPassword,
+        });
+        return { error };
+      } catch (error) {
+        return { error };
+      }
+    },
+    resetPassword: async (email: string) => {
+      try {
+        const { error } = await supabase.auth.resetPasswordForEmail(email, {
+          redirectTo: `${window.location.origin}/reset-password`,
+        });
+        return { error };
+      } catch (error) {
+        return { error };
+      }
+    },
+    resetAuthSystem: async () => {
+      try {
+        cleanupAuthState();
+        await supabase.auth.signOut({ scope: 'global' });
+        window.location.href = '/';
+        return { success: true };
+      } catch (error) {
+        console.error('Error resetting auth system:', error);
+        return { success: false };
+      }
+    },
   };
 
   return (
