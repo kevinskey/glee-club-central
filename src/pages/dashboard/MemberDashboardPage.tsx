@@ -36,7 +36,7 @@ export default function MemberDashboardPage() {
       <div className="grid gap-6">
         <DashboardModules />
         <div className="grid gap-6 lg:grid-cols-2">
-          <DashboardEvents />
+          <DashboardEvents events={[]} />
           <DashboardAnnouncements />
         </div>
       </div>

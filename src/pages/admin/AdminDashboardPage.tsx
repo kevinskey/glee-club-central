@@ -2,7 +2,7 @@
 import React from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { PageLoader } from "@/components/ui/page-loader";
-import { AdminDashboard } from "./AdminDashboard";
+import AdminDashboard from "./AdminDashboard";
 
 export default function AdminDashboardPage() {
   const { user, profile, isLoading } = useAuth();
