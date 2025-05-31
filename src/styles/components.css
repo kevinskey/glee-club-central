@@ -89,19 +89,19 @@
 }
 
 .animate-marquee {
-  animation: marquee 60s linear infinite;
+  animation: marquee 90s linear infinite;
 }
 
 .animate-marquee-fast {
-  animation: marquee-fast 45s linear infinite;
+  animation: marquee-fast 67.5s linear infinite;
 }
 
 .animate-marquee-normal {
-  animation: marquee-normal 50s linear infinite;
+  animation: marquee-normal 75s linear infinite;
 }
 
 .animate-marquee-slow {
-  animation: marquee-slow 60s linear infinite;
+  animation: marquee-slow 90s linear infinite;
 }
 
 /* Pause animation on hover */
