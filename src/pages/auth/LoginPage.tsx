@@ -23,18 +23,10 @@ const LoginPage = () => {
   const [password, setPassword] = React.useState('');
   const [isSubmitting, setIsSubmitting] = React.useState(false);
   const [isResetting, setIsResetting] = React.useState(false);
-  const [imageLoaded, setImageLoaded] = React.useState(false);
   
   // Add the centennial image to library on component mount
   React.useEffect(() => {
     addCentennialImageToLibrary();
-  }, []);
-  
-  // Preload the background image
-  React.useEffect(() => {
-    const img = new Image();
-    img.src = '/lovable-uploads/5d6ba7fa-4ea7-42ac-872e-940fb620a273.png';
-    img.onload = () => setImageLoaded(true);
   }, []);
   
   // Get saved redirect path
@@ -129,22 +121,18 @@ const LoginPage = () => {
 
   // Main login form
   return (
-    <div className="relative min-h-screen w-full flex items-center justify-center overflow-hidden">
-      {/* Background image with smooth loading */}
-      <div className="absolute inset-0 z-0">
-        <div 
-          className={`w-full h-full bg-cover bg-center bg-no-repeat transition-opacity duration-500 ${
-            imageLoaded ? 'opacity-100' : 'opacity-0'
-          }`}
-          style={{
-            backgroundImage: `url('/lovable-uploads/5d6ba7fa-4ea7-42ac-872e-940fb620a273.png')`
-          }}
-        />
-        {/* Fallback background color while image loads */}
-        <div className="absolute inset-0 bg-gray-900" />
-        {/* Overlay */}
-        <div className="absolute inset-0 bg-black/40" />
-      </div>
+    <div 
+      className="relative min-h-screen w-full flex items-center justify-center"
+      style={{
+        backgroundImage: `url('/lovable-uploads/5d6ba7fa-4ea7-42ac-872e-940fb620a273.png')`,
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+        backgroundRepeat: 'no-repeat',
+        backgroundAttachment: 'fixed'
+      }}
+    >
+      {/* Dark overlay for better text readability */}
+      <div className="absolute inset-0 bg-black/40 z-0" />
       
       {/* Login form container */}
       <div className="relative z-10 w-full max-w-md px-4">
