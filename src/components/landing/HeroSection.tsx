@@ -7,14 +7,14 @@ import { HeroImageWithEvents } from './HeroImageWithEvents';
 
 export function HeroSection() {
   return (
-    <section className="relative min-h-screen flex items-center justify-center bg-gradient-to-br from-glee-purple/10 to-glee-spelman/10">
+    <section className="relative min-h-screen flex items-center justify-center bg-gradient-to-br from-glee-columbia/10 to-glee-spelman/10">
       <div className="container mx-auto px-4 py-12">
         <div className="grid lg:grid-cols-2 gap-12 items-center">
           {/* Left side - Text content */}
           <div className="space-y-8">
             <div className="space-y-4">
               <h1 className="text-4xl md:text-6xl font-bold leading-tight">
-                <span className="text-glee-purple">Spelman College</span>
+                <span className="text-glee-columbia">Spelman College</span>
                 <br />
                 <span className="text-glee-spelman">Glee Club</span>
               </h1>
@@ -32,7 +32,7 @@ export function HeroSection() {
                 </Button>
               </Link>
               <Link to="/contact">
-                <Button variant="outline" size="lg" className="border-glee-purple text-glee-purple hover:bg-glee-purple hover:text-white px-8 py-4 text-lg">
+                <Button variant="outline" size="lg" className="border-glee-columbia text-glee-columbia hover:bg-glee-columbia hover:text-white px-8 py-4 text-lg">
                   <Music className="mr-2 h-5 w-5" />
                   Get Involved
                 </Button>

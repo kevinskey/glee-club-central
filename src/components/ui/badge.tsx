@@ -17,11 +17,11 @@ const badgeVariants = cva(
           "border-transparent bg-destructive text-destructive-foreground hover:bg-destructive/80",
         outline: "text-foreground",
         purple:
-          "border-transparent bg-glee-purple text-white hover:bg-glee-purple/90",
+          "border-transparent bg-glee-columbia text-white hover:bg-glee-columbia/90",
         success:
           "border-transparent bg-green-600 text-white hover:bg-green-700",
         spelman: 
-          "border-transparent bg-glee-columbia text-white hover:bg-glee-columbia/90 font-medium", /* Changed from orange to Carolina blue */
+          "border-transparent bg-glee-columbia text-white hover:bg-glee-columbia/90 font-medium",
       },
     },
     defaultVariants: {

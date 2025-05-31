@@ -12,7 +12,7 @@
     --popover: 0 0% 100%;
     --popover-foreground: 240 10% 3.9%;
 
-    --primary: 211 84% 61%;  /* Updated to lighter Carolina blue */
+    --primary: 211 84% 61%;  /* Carolina blue */
     --primary-foreground: 0 0% 98%;
 
     --secondary: 240 4.8% 95.9%;
@@ -21,7 +21,7 @@
     --muted: 240 4.8% 95.9%;
     --muted-foreground: 240 3.8% 46.1%;
 
-    --accent: 211 84% 61%;  /* Updated to lighter Carolina blue */
+    --accent: 211 84% 61%;  /* Carolina blue instead of purple */
     --accent-foreground: 0 0% 98%;
 
     --destructive: 0 84.2% 60.2%;
@@ -29,13 +29,13 @@
 
     --border: 240 5.9% 90%;
     --input: 240 5.9% 90%;
-    --ring: 211 84% 61%;  /* Updated to lighter Carolina blue */
+    --ring: 211 84% 61%;  /* Carolina blue */
 
     --radius: 0.5rem;
     
-    --glee-purple: 258 74% 74%;
-    --glee-spelman: 211 84% 61%;  /* Updated to lighter Carolina blue */
-    --glee-columbia: 211 84% 61%;  /* Updated to lighter Carolina blue */
+    --glee-purple: 211 84% 61%;  /* Changed to Carolina blue */
+    --glee-spelman: 211 84% 61%;  /* Carolina blue */
+    --glee-columbia: 211 84% 61%;  /* Carolina blue */
   }
 
   .dark {
@@ -48,7 +48,7 @@
     --popover: 240 10% 3.9%;
     --popover-foreground: 0 0% 98%;
 
-    --primary: 211 100% 70%;  /* Slightly lighter for dark mode */
+    --primary: 211 100% 70%;  /* Slightly lighter Carolina blue for dark mode */
     --primary-foreground: 0 0% 98%;
 
     --secondary: 240 3.7% 15.9%;
@@ -57,7 +57,7 @@
     --muted: 240 3.7% 15.9%;
     --muted-foreground: 240 5% 64.9%;
 
-    --accent: 211 100% 70%;  /* Slightly lighter for dark mode */
+    --accent: 211 100% 70%;  /* Carolina blue for dark mode */
     --accent-foreground: 0 0% 98%;
 
     --destructive: 0 62.8% 30.6%;
@@ -65,7 +65,7 @@
 
     --border: 240 3.7% 15.9%;
     --input: 240 3.7% 15.9%;
-    --ring: 211 100% 70%;  /* Slightly lighter for dark mode */
+    --ring: 211 100% 70%;  /* Carolina blue */
   }
 
   * {
