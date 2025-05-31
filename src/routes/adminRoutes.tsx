@@ -16,6 +16,10 @@ import AnalyticsPage from '@/pages/admin/AnalyticsPage';
 import EventDetailsPage from '@/pages/events/EventDetailsPage';
 import EventRSVPsPage from '@/pages/admin/EventRSVPsPage';
 
+// Import additional admin pages (these may need to be created if they don't exist)
+import AdminHeroManager from '@/pages/admin/AdminHeroManager';
+import AdminMediaUploaderPage from '@/pages/admin/AdminMediaUploaderPage';
+
 export const adminRoutes: RouteObject[] = [
   {
     path: '/admin',
@@ -30,11 +34,15 @@ export const adminRoutes: RouteObject[] = [
       { path: 'events/:id', element: <EventDetailsPage /> },
       { path: 'events/:id/rsvps', element: <EventRSVPsPage /> },
       { path: 'members', element: <UserManagementPage /> },
+      { path: 'user-management', element: <UserManagementPage /> },
+      { path: 'hero-manager', element: <AdminHeroManager /> },
+      { path: 'media-uploader', element: <AdminMediaUploaderPage /> },
       { path: 'media', element: <MediaLibraryPage /> },
-      { path: 'announcements', element: <AnnouncementsPage /> },
-      { path: 'settings', element: <SettingsPage /> },
       { path: 'orders', element: <OrdersPage /> },
       { path: 'analytics', element: <AnalyticsPage /> },
+      { path: 'fan-tags', element: <UserManagementPage /> }, // Can be updated to specific fan tags page
+      { path: 'announcements', element: <AnnouncementsPage /> },
+      { path: 'settings', element: <SettingsPage /> },
     ],
   },
 ];

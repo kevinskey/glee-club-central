@@ -3,13 +3,15 @@ import React from "react";
 import { 
   Calendar, 
   Users, 
+  User,
   Upload, 
   Image, 
   ShoppingBag, 
   Settings,
   BarChart3,
   UserCog,
-  Tags
+  Tags,
+  LayoutDashboard
 } from "lucide-react";
 import { LucideIcon } from "lucide-react";
 
@@ -20,6 +22,11 @@ export interface AdminNavItem {
 }
 
 export const adminNavItems: AdminNavItem[] = [
+  {
+    title: "Dashboard",
+    url: "/admin",
+    icon: LayoutDashboard,
+  },
   {
     title: "Calendar",
     url: "/admin/calendar",
@@ -36,19 +43,14 @@ export const adminNavItems: AdminNavItem[] = [
     icon: UserCog,
   },
   {
-    title: "Fan Tags",
-    url: "/admin/fan-tags",
-    icon: Tags,
-  },
-  {
-    title: "Media Uploader",
-    url: "/admin/media-uploader",
-    icon: Upload,
-  },
-  {
     title: "Hero Manager",
     url: "/admin/hero-manager",
     icon: Image,
+  },
+  {
+    title: "Media Manager",
+    url: "/admin/media-uploader",
+    icon: Upload,
   },
   {
     title: "Orders",
@@ -61,6 +63,11 @@ export const adminNavItems: AdminNavItem[] = [
     icon: BarChart3,
   },
   {
+    title: "Fan Tags",
+    url: "/admin/fan-tags",
+    icon: Tags,
+  },
+  {
     title: "Settings",
     url: "/admin/settings",
     icon: Settings,
@@ -68,8 +75,10 @@ export const adminNavItems: AdminNavItem[] = [
 ];
 
 export const adminIcons = {
+  LayoutDashboard,
   Calendar,
   Users,
+  User,
   Upload,
   Image,
   ShoppingBag,
