@@ -80,7 +80,7 @@ const AppLayout: React.FC<AppLayoutProps> = memo(function AppLayout({
     if (!isMobile) return null;
     
     if (sidebarType === "none") {
-      return showMobileBottomNav && <MobileBottomNav />;
+      return showMobileBottomNav ? <MobileBottomNav /> : null;
     }
     
     return <MobileNav isAdmin={isAdmin} />;
