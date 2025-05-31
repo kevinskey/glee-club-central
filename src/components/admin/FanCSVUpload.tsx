@@ -79,12 +79,6 @@ export const FanCSVUpload: React.FC = () => {
   const checkForDuplicates = async (users: CSVRow[]): Promise<string[]> => {
     const emails = users.map(user => user.Email);
     
-    // Check existing profiles
-    const { data: existingProfiles } = await supabase
-      .from('profiles')
-      .select('id')
-      .in('id', emails); // This won't work directly, need to check auth.users
-
     // Check existing fans
     const { data: existingFans } = await supabase
       .from('fans')
@@ -99,7 +93,7 @@ export const FanCSVUpload: React.FC = () => {
   };
 
   const insertFans = async (users: CSVRow[]) => {
-    const results = {
+    const insertResults = {
       total: users.length,
       successful: 0,
       failed: 0,
@@ -110,7 +104,7 @@ export const FanCSVUpload: React.FC = () => {
     // Check for duplicates
     const duplicateEmails = await checkForDuplicates(users);
     const uniqueUsers = users.filter(user => !duplicateEmails.includes(user.Email));
-    results.duplicates = duplicateEmails.length;
+    insertResults.duplicates = duplicateEmails.length;
 
     // Insert unique users as fans
     for (const user of uniqueUsers) {
@@ -124,18 +118,18 @@ export const FanCSVUpload: React.FC = () => {
           });
 
         if (error) {
-          results.failed++;
-          results.errors.push(`Failed to insert ${user.Email}: ${error.message}`);
+          insertResults.failed++;
+          insertResults.errors.push(`Failed to insert ${user.Email}: ${error.message}`);
         } else {
-          results.successful++;
+          insertResults.successful++;
         }
       } catch (err) {
-        results.failed++;
-        results.errors.push(`Failed to insert ${user.Email}: ${err}`);
+        insertResults.failed++;
+        insertResults.errors.push(`Failed to insert ${user.Email}: ${err}`);
       }
     }
 
-    return results;
+    return insertResults;
   };
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -163,12 +157,12 @@ export const FanCSVUpload: React.FC = () => {
       Papa.parse(file, {
         header: true,
         skipEmptyLines: true,
-        complete: async (results) => {
+        complete: async (parseResults) => {
           try {
-            console.log('Parsed CSV data:', results.data);
+            console.log('Parsed CSV data:', parseResults.data);
             
             // Validate data
-            const validation = validateCSVData(results.data as any[]);
+            const validation = validateCSVData(parseResults.data as any[]);
             
             if (validation.invalid.length > 0) {
               const errorMessages = validation.invalid.map(
@@ -186,17 +180,17 @@ export const FanCSVUpload: React.FC = () => {
             }
 
             // Insert fans
-            const results = await insertFans(validation.valid);
-            setUploadResults(results);
+            const finalResults = await insertFans(validation.valid);
+            setUploadResults(finalResults);
 
-            if (results.successful > 0) {
-              toast.success(`Successfully added ${results.successful} fans!`);
+            if (finalResults.successful > 0) {
+              toast.success(`Successfully added ${finalResults.successful} fans!`);
             }
-            if (results.duplicates > 0) {
-              toast.warning(`${results.duplicates} duplicates were skipped`);
+            if (finalResults.duplicates > 0) {
+              toast.warning(`${finalResults.duplicates} duplicates were skipped`);
             }
-            if (results.failed > 0) {
-              toast.error(`${results.failed} records failed to import`);
+            if (finalResults.failed > 0) {
+              toast.error(`${finalResults.failed} records failed to import`);
             }
 
           } catch (error) {
