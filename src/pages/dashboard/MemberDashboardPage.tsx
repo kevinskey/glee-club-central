@@ -17,16 +17,24 @@ export default function MemberDashboardPage() {
     isLoading
   });
 
-  // Show loading while auth data is being fetched
-  if (isLoading || !user || !profile) {
+  // Show loading only while auth is actively loading, not when profile is missing
+  if (isLoading) {
     return <PageLoader message="Loading your dashboard..." />;
   }
+
+  // If no user after loading is complete, something is wrong
+  if (!user) {
+    return <PageLoader message="Authentication required..." />;
+  }
+
+  // Get display name with fallback
+  const displayName = profile?.first_name || user?.email?.split('@')[0] || 'Member';
 
   return (
     <div className="space-y-6">
       <div className="flex flex-col space-y-2">
         <h1 className="text-2xl font-bold tracking-tight">
-          Welcome back, {profile.first_name}!
+          Welcome back, {displayName}!
         </h1>
         <p className="text-muted-foreground">
           Here's what's happening with the Spelman Glee Club
