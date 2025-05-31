@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import {
@@ -13,7 +13,8 @@ import {
   Calendar,
   LayoutDashboard,
   Library,
-  ChevronRight
+  ChevronRight,
+  LogOut
 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 
@@ -27,8 +28,18 @@ export function DashboardNav({
   ...props
 }: DashboardNavProps) {
   const { pathname } = useLocation();
-  const { isAdmin, profile } = useAuth();
+  const navigate = useNavigate();
+  const { isAdmin, profile, logout } = useAuth();
   const isAdminUser = profile?.is_super_admin || (isAdmin && isAdmin());
+  
+  const handleLogout = async () => {
+    try {
+      await logout();
+      navigate('/login');
+    } catch (error) {
+      console.error('Logout error:', error);
+    }
+  };
   
   const navItems = [
     {
@@ -91,9 +102,9 @@ export function DashboardNav({
   ];
   
   return (
-    <nav className={cn('flex flex-col gap-2', className)} {...props}>
+    <nav className={cn('flex flex-col gap-2 h-full', className)} {...props}>
       {/* Main Navigation */}
-      <div className="space-y-1">
+      <div className="space-y-1 flex-1">
         {navItems.map((item) => {
           const Icon = item.icon;
           return (
@@ -157,6 +168,21 @@ export function DashboardNav({
           </div>
         </>
       )}
+
+      {/* Logout Button */}
+      <div className="mt-auto pt-4 border-t">
+        <Button
+          variant="ghost"
+          onClick={handleLogout}
+          className={cn(
+            'justify-start w-full transition-all duration-200 text-muted-foreground hover:text-destructive hover:bg-destructive/10',
+            isCollapsed && 'justify-center px-2'
+          )}
+        >
+          <LogOut className={cn("h-4 w-4", !isCollapsed && "mr-3")} />
+          {!isCollapsed && <span>Sign Out</span>}
+        </Button>
+      </div>
     </nav>
   );
 }
