@@ -8,21 +8,20 @@ export default function RoleDashboard() {
   const navigate = useNavigate();
   const location = useLocation();
   const hasRedirected = useRef(false);
-  const redirectTimeout = useRef<NodeJS.Timeout>();
 
   useEffect(() => {
-    // Clear any pending redirects
-    if (redirectTimeout.current) {
-      clearTimeout(redirectTimeout.current);
-    }
-
-    // Don't redirect if already redirected or still loading
-    if (hasRedirected.current || isLoading) {
+    // Don't redirect if already redirected
+    if (hasRedirected.current) {
       return;
     }
 
-    // If not authenticated and not loading, redirect to login
-    if (!isAuthenticated && !isLoading) {
+    // Don't redirect if still loading
+    if (isLoading) {
+      return;
+    }
+
+    // If not authenticated, redirect to login
+    if (!isAuthenticated) {
       hasRedirected.current = true;
       navigate('/login', { 
         replace: true,
@@ -31,45 +30,41 @@ export default function RoleDashboard() {
       return;
     }
 
-    // If authenticated but no profile yet, wait a bit longer
-    if (isAuthenticated && !profile) {
+    // Wait for profile to be fully loaded before redirecting
+    if (!profile) {
       return;
     }
 
-    // Debounce the redirect to prevent rapid state changes
-    redirectTimeout.current = setTimeout(() => {
-      if (hasRedirected.current) return;
-
-      if (profile) {
-        hasRedirected.current = true;
-        
-        // Determine redirect based on user role/type
-        if (profile.role === 'admin' || profile.is_super_admin) {
-          navigate('/admin', { replace: true });
-        } else if (profile.user_type === 'fan' as any) {
-          navigate('/fan-dashboard', { replace: true });
-        } else {
-          // Default to member dashboard for regular members
-          navigate('/dashboard/member', { replace: true });
-        }
-      }
-    }, 100); // Small delay to prevent rapid redirects
-
-    return () => {
-      if (redirectTimeout.current) {
-        clearTimeout(redirectTimeout.current);
-      }
-    };
+    // All conditions met - perform redirect based on role
+    hasRedirected.current = true;
+    
+    // Single switch block for all role-based redirects
+    const userRole = profile.role;
+    const isAdmin = profile.is_super_admin || userRole === 'admin';
+    const userType = profile.user_type;
+    
+    switch (true) {
+      case isAdmin:
+        navigate('/admin', { replace: true });
+        break;
+      case userType === 'fan':
+        navigate('/fan-dashboard', { replace: true });
+        break;
+      default:
+        // Default to member dashboard for regular members
+        navigate('/dashboard/member', { replace: true });
+        break;
+    }
   }, [profile, isLoading, isAuthenticated, navigate, location]);
 
-  // Reset redirect flag when component unmounts or location changes significantly
+  // Reset redirect flag when leaving this component
   useEffect(() => {
     return () => {
       hasRedirected.current = false;
     };
-  }, [location.pathname]);
+  }, []);
 
-  // Show loading while determining role
+  // Show loading while determining role - don't render any layout to avoid flash
   if (isLoading || !hasRedirected.current) {
     return (
       <div className="flex items-center justify-center min-h-screen">
@@ -81,5 +76,6 @@ export default function RoleDashboard() {
     );
   }
 
+  // Return null after redirect to avoid any layout flash
   return null;
 }
