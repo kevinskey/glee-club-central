@@ -41,7 +41,7 @@ import PDFViewerPage from './pages/PDFViewerPage';
 import RecordingsPage from './pages/RecordingsPage';
 import RecordingStudioPage from './pages/recordings/RecordingStudioPage';
 import AnnouncementsPage from './pages/announcements/AnnouncementsPage';
-import AttendancePage from './pages/dashboard/AttendancePage';
+import AttendancePage from './pages/AttendancePage';
 import AudioManagementPage from './pages/audio-management/AudioManagementPage';
 import FinancesPage from './pages/dashboard/FinancesPage';
 import AdminCalendarPage from './pages/admin/AdminCalendarPage';
