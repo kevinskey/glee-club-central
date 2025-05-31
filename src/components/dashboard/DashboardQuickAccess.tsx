@@ -59,18 +59,18 @@ export function DashboardQuickAccess() {
         </div>
       </CardHeader>
       <CardContent>
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-7 gap-4">
           {currentLinks.map((link, index) => (
             <Link 
               key={index} 
               to={link.path} 
               className="group no-underline block"
             >
-              <div className="w-full h-auto flex flex-col items-center justify-center py-4 gap-2 border rounded-md transition-all duration-200 hover:border-glee-spelman/20 hover:bg-glee-spelman/5 hover:shadow-md">
-                <div className={`${link.color} text-white p-2 rounded-full group-hover:scale-110 transition-transform duration-200`}>
+              <div className="w-full h-auto flex flex-col items-center justify-center py-6 px-3 gap-3 border rounded-lg transition-all duration-200 hover:border-glee-spelman/30 hover:bg-glee-spelman/5 hover:shadow-lg hover:scale-105">
+                <div className={`${link.color} text-white p-3 rounded-full group-hover:scale-110 transition-transform duration-200 shadow-md`}>
                   {link.icon}
                 </div>
-                <span className="text-xs font-medium text-center group-hover:text-glee-spelman transition-colors duration-200">
+                <span className="text-sm font-medium text-center group-hover:text-glee-spelman transition-colors duration-200 leading-tight">
                   {link.title}
                 </span>
               </div>
