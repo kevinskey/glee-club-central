@@ -10,7 +10,7 @@ import {
 import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
 import { Label } from "@/components/ui/label";
-import { User } from "@/hooks/useUserManagement";
+import { User } from "@/hooks/user/useUserManagement";
 import { Camera, Tag, X } from "lucide-react";
 
 interface MediaConsentTabProps {

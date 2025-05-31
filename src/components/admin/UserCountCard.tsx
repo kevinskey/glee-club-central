@@ -2,7 +2,7 @@
 import React, { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Users } from "lucide-react";
-import { useUserManagement } from "@/hooks/useUserManagement";
+import { useUserManagement } from "@/hooks/user/useUserManagement";
 import { Spinner } from "@/components/ui/spinner";
 
 export function UserCountCard() {

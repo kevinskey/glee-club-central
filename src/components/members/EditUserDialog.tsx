@@ -1,3 +1,4 @@
+
 import React from "react";
 import { Button } from "@/components/ui/button";
 import { 
@@ -18,7 +19,7 @@ import {
   SelectValue 
 } from "@/components/ui/select";
 import { useForm } from "react-hook-form";
-import { User } from "@/hooks/useUserManagement";
+import { User } from "@/hooks/user/useUserManagement";
 import { formatPhoneNumber } from "@/utils/formatters";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { UserFormValues, userFormSchema } from "@/components/members/form/userFormSchema";

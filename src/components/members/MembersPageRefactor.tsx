@@ -1,5 +1,6 @@
+
 import React, { useState, useCallback } from "react";
-import { User } from "@/hooks/useUserManagement";
+import { User } from "@/hooks/user/useUserManagement";
 import { Navigate } from "react-router-dom";
 import { PageHeader } from "@/components/ui/page-header";
 import { Users } from "lucide-react";

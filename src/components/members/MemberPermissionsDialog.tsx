@@ -1,6 +1,5 @@
-
 import React from 'react';
-import { User } from '@/hooks/useUserManagement';
+import { User } from '@/hooks/user/useUserManagement';
 
 /**
  * This is a simplified stub component to maintain backward compatibility

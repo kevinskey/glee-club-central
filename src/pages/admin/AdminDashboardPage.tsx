@@ -8,7 +8,7 @@ import { QuickActions } from "@/components/admin/QuickActions";
 import { AdminMembersList } from "@/components/admin/AdminMembersList";
 import { AnalyticsCard } from "@/components/admin/AnalyticsCard";
 import { UserCountCard } from "@/components/admin/UserCountCard";
-import { useUserManagement } from "@/hooks/useUserManagement";
+import { useUserManagement } from "@/hooks/user/useUserManagement";
 import { Spinner } from "@/components/ui/spinner";
 import { Users, UserCheck, Wallet } from "lucide-react";
 

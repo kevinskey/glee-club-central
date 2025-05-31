@@ -15,10 +15,10 @@ import { usePermissions } from "@/hooks/usePermissions";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
-import { useUserManagement } from "@/hooks/useUserManagement";
+import { useUserManagement } from "@/hooks/user/useUserManagement";
 import { Spinner } from "@/components/ui/spinner";
 import { Profile } from "@/types/auth";
-import { User as UserType } from "@/hooks/useUserManagement";
+import { User as UserType } from "@/hooks/user/useUserManagement";
 import { useMedia } from "@/hooks/use-mobile";
 
 export default function ProfilePage() {

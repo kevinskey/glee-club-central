@@ -8,7 +8,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { User } from "@/hooks/useUserManagement";
+import { User } from "@/hooks/user/useUserManagement";
 import { Shirt, Check, X } from "lucide-react";
 
 interface WardrobeTabProps {

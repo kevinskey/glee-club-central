@@ -5,7 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Edit, Trash2, Shield, Settings } from "lucide-react";
-import { User } from "@/hooks/useUserManagement";
+import { User } from "@/hooks/user/useUserManagement";
 import { formatVoicePart } from "./formatters/memberFormatters";
 
 interface MembersListProps {

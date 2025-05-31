@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { PageHeader } from "@/components/ui/page-header";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -8,7 +7,7 @@ import { ProfileOverviewTab } from "@/components/members/profile/ProfileOverview
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
-import { useUserManagement } from "@/hooks/useUserManagement";
+import { useUserManagement } from "@/hooks/user/useUserManagement";
 
 export default function ProfilePage() {
   const { profile, isLoading } = useAuth();

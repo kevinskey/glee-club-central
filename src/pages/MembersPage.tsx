@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Link } from "react-router-dom";
-import { useUserManagement } from "@/hooks/useUserManagement";
+import { useUserManagement } from "@/hooks/user/useUserManagement";
 import { MembersList } from "@/components/members/MembersList";
 import { useMedia } from "@/hooks/use-mobile";
 import { AddMemberDialog } from "@/components/members/AddMemberDialog";
@@ -17,7 +17,7 @@ import { UserFormValues } from "@/components/members/form/userFormSchema";
 import { toast } from "sonner";
 import { usePermissions } from "@/hooks/usePermissions";
 import { DeleteMemberDialog } from "@/components/members/DeleteMemberDialog";
-import { User } from "@/hooks/useUserManagement";
+import { User } from "@/hooks/user/useUserManagement";
 import { Separator } from "@/components/ui/separator";
 import { createMemberRefreshFunction } from "@/components/members/MembersPageRefactor";
 
