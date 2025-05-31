@@ -1,7 +1,6 @@
 
 import React, { useState, useEffect } from "react";
 import { X } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
 
 export interface NewsItem {
   id: string;
@@ -24,35 +23,48 @@ export const NewsTicker: React.FC<NewsTickerProps> = ({
   hideAfter = 8000 
 }) => {
   const [isVisible, setIsVisible] = useState(true);
-  const [newsItems, setNewsItems] = useState<NewsItem[]>([]);
+  const [newsItems, setNewsItems] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
   
   useEffect(() => {
-    const fetchNewsItems = async () => {
+    const fetchGoogleNews = async () => {
       try {
-        const today = new Date().toISOString();
+        // Using RSS2JSON service to fetch Google News RSS feed for HBCU
+        const response = await fetch(
+          `https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(
+            'https://news.google.com/rss/search?q=HBCU&hl=en-US&gl=US&ceid=US:en'
+          )}`
+        );
         
-        const { data, error } = await supabase
-          .from('news_items')
-          .select('*')
-          .eq('active', true)
-          .lte('start_date', today)
-          .or(`end_date.gt.${today},end_date.is.null`)
-          .order('priority', { ascending: false })
-          .limit(5);
+        if (!response.ok) throw new Error('Failed to fetch news');
         
-        if (error) throw error;
+        const data = await response.json();
         
-        setNewsItems(data || []);
+        if (data.status === 'ok' && data.items) {
+          const headlines = data.items
+            .slice(0, 5) // Limit to 5 items
+            .map((item: any) => item.title)
+            .filter((title: string) => title && title.length > 0);
+          
+          setNewsItems(headlines);
+        } else {
+          throw new Error('Invalid response format');
+        }
       } catch (error) {
-        console.error("Error fetching news items:", error);
-        setNewsItems([]);
+        console.error("Error fetching Google News:", error);
+        // Fallback to sample HBCU news
+        setNewsItems([
+          "HBCU Students Excel in National Competition",
+          "New HBCU Partnership Announced for STEM Programs", 
+          "HBCU Alumni Making Impact in Tech Industry",
+          "Historic Black Colleges Receive Major Grant Funding"
+        ]);
       } finally {
         setLoading(false);
       }
     };
     
-    fetchNewsItems();
+    fetchGoogleNews();
   }, []);
   
   const handleClose = () => {
@@ -77,7 +89,7 @@ export const NewsTicker: React.FC<NewsTickerProps> = ({
   // Display loading animation while fetching
   if (loading) {
     return (
-      <div className="bg-glee-purple text-white py-1 relative">
+      <div className="bg-glee-purple text-white py-4 relative">
         <div className="container flex items-center justify-center text-sm">
           <div className="flex-1 overflow-hidden">
             <div className="w-full animate-pulse h-4 bg-white/20 rounded"></div>
@@ -88,23 +100,23 @@ export const NewsTicker: React.FC<NewsTickerProps> = ({
   }
   
   return (
-    <div className="bg-glee-purple text-white py-2 relative">
+    <div className="bg-glee-purple text-white py-4 relative">
       <div className="container flex items-center justify-center text-sm">
         <div className="flex-1 overflow-hidden">
           <div className="flex whitespace-nowrap animate-marquee">
-            {newsItems.map((item) => (
-              <span key={item.id} className="mx-4">📣 {item.headline}</span>
+            {newsItems.map((headline, index) => (
+              <span key={index} className="mx-6">📰 {headline}</span>
             ))}
             
             {/* Repeat items to create continuous scroll effect */}
-            {newsItems.map((item) => (
-              <span key={`repeat-${item.id}`} className="mx-4">📣 {item.headline}</span>
+            {newsItems.map((headline, index) => (
+              <span key={`repeat-${index}`} className="mx-6">📰 {headline}</span>
             ))}
           </div>
         </div>
         <button 
           onClick={handleClose} 
-          className="p-1 rounded-full hover:bg-white/10 transition-colors"
+          className="p-1 rounded-full hover:bg-white/10 transition-colors ml-4"
           aria-label="Close news ticker"
         >
           <X className="h-4 w-4" />
