@@ -10,11 +10,14 @@ interface Order {
   id: string;
   stripe_session_id: string;
   customer_email: string;
+  customer_name?: string;
   amount: number;
   currency: string;
   status: string;
   items: any[];
+  shipping_address?: any;
   created_at: string;
+  updated_at: string;
 }
 
 interface OrderTableRowProps {

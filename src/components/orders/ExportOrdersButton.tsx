@@ -14,6 +14,7 @@ interface Order {
   currency: string;
   status: string;
   items: any[];
+  shipping_address?: any;
   created_at: string;
   updated_at: string;
 }
