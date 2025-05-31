@@ -34,7 +34,7 @@ const AppLayout: React.FC<AppLayoutProps> = memo(function AppLayout({
   const { profile } = useAuth();
   const isAdmin = profile?.is_super_admin || profile?.role === 'admin';
   
-  // Determine which header to show - only one header should render
+  // Determine which header to show
   const isLandingHeader = sidebarType === "none";
   
   // Determine if we need mobile bottom nav
@@ -96,7 +96,7 @@ const AppLayout: React.FC<AppLayoutProps> = memo(function AppLayout({
       return `${baseClasses} ${showMobileBottomNav ? 'pb-20' : 'pb-6'}`;
     }
     
-    return `${baseClasses} p-4 md:p-6 md:ml-64 pb-20 md:pb-6`;
+    return `${baseClasses} p-3 sm:p-4 md:p-5 lg:p-6 md:ml-64 pb-20 md:pb-6`;
   };
 
   // Layout content
@@ -104,7 +104,7 @@ const AppLayout: React.FC<AppLayoutProps> = memo(function AppLayout({
     <div className="min-h-screen flex flex-col bg-background w-full">
       <Toaster position={isMobile ? "bottom-center" : "top-right"} />
       
-      {/* Single Header - either landing or dashboard */}
+      {/* Header */}
       {showHeader && (
         isLandingHeader ? <Header /> : <ConsolidatedHeader />
       )}
@@ -116,10 +116,10 @@ const AppLayout: React.FC<AppLayoutProps> = memo(function AppLayout({
         
         {/* Main content */}
         <main className={getMainClasses()}>
-          <div className="mobile-container max-w-full">
+          <div className="mobile-container">
             {title && (
-              <div className="mb-6">
-                <h1 className="text-2xl font-semibold tracking-tight">{title}</h1>
+              <div className="mb-4">
+                <h1 className="text-2xl font-bold">{title}</h1>
               </div>
             )}
             {children || <Outlet />}
@@ -127,7 +127,7 @@ const AppLayout: React.FC<AppLayoutProps> = memo(function AppLayout({
         </main>
       </div>
       
-      {/* Footer - only render if explicitly requested */}
+      {/* Footer */}
       {showFooter && <Footer />}
       
       {/* Mobile Navigation */}

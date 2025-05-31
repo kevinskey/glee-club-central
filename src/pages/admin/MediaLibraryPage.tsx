@@ -14,14 +14,13 @@ const AdminMediaLibraryPage = () => {
   };
   
   return (
-    <div className="space-y-6">
+    <div className="container mx-auto px-4 py-8">
       <PageHeader
         title="Media Library"
-        description="Manage photos, videos, and other media files"
         icon={<FileImage className="h-6 w-6" />}
       />
       
-      <div>
+      <div className="mt-8">
         <MediaLibraryPage isAdminView={true} />
       </div>
       
