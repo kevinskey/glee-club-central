@@ -2,7 +2,7 @@
 import React, { createContext, useContext, useEffect, useState, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { AuthUser, Profile, AuthContextType } from '@/types/auth';
-import { useAuthState } from '@/hooks/useAuthState';
+import { useAuthState } from '@/hooks/auth/useAuthState';
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 

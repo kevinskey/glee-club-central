@@ -12,7 +12,7 @@ export * from './user/useUserDelete';
 export { type User } from './user/types';
 
 // Authentication Hooks
-export { useAuthState as useAuth } from './useAuthState';
+export { useAuthState } from './auth/useAuthState';
 export { usePermissions } from './usePermissions';
 export { useUserRole } from './useUserRole';
 
