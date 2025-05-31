@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { X } from "lucide-react";
 
@@ -91,7 +90,7 @@ export const NewsTicker: React.FC<NewsTickerProps> = ({
     return (
       <div className="bg-glee-columbia text-white py-1 relative">
         <div className="container flex items-center justify-center text-sm">
-          <div className="flex-1 overflow-hidden">
+          <div className="flex-1 overflow-hidden flex items-center">
             <div className="w-full animate-pulse h-4 bg-white/20 rounded"></div>
           </div>
         </div>
@@ -102,7 +101,7 @@ export const NewsTicker: React.FC<NewsTickerProps> = ({
   return (
     <div className="bg-glee-columbia text-white py-1 relative">
       <div className="container flex items-center justify-center text-sm">
-        <div className="flex-1 overflow-hidden">
+        <div className="flex-1 overflow-hidden flex items-center">
           <div className="flex whitespace-nowrap animate-marquee-fast">
             {newsItems.map((headline, index) => (
               <span key={index} className="mx-6">📰 {headline}</span>
