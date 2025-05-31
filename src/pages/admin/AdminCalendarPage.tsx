@@ -22,6 +22,7 @@ export default function AdminCalendarPage() {
   const [editingEvent, setEditingEvent] = useState<CalendarEvent | null>(null);
   const [isCreating, setIsCreating] = useState(false);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [isEditorOpen, setIsEditorOpen] = useState(false);
 
   // Calculate dynamic stats from events
   const eventStats = useMemo(() => {
@@ -52,6 +53,7 @@ export default function AdminCalendarPage() {
       const eventToEdit = events.find(e => e.id === editEventId);
       if (eventToEdit) {
         setEditingEvent(eventToEdit);
+        setIsEditorOpen(true);
       }
     }
   }, [searchParams, events]);
@@ -74,6 +76,7 @@ export default function AdminCalendarPage() {
       
       setEditingEvent(null);
       setIsCreating(false);
+      setIsEditorOpen(false);
     } catch (error) {
       console.error('Error saving event:', error);
       const errorMessage = error instanceof Error ? error.message : 'Failed to save event';
@@ -99,10 +102,13 @@ export default function AdminCalendarPage() {
   const handleCreateNew = () => {
     setIsCreating(true);
     setEditingEvent(null);
+    setIsEditorOpen(true);
     navigate('/admin/calendar');
   };
 
   const handleEditEvent = (event: CalendarEvent) => {
+    setEditingEvent(event);
+    setIsEditorOpen(true);
     navigate(`/admin/calendar?edit=${event.id}`);
   };
 
@@ -113,6 +119,7 @@ export default function AdminCalendarPage() {
   const handleCloseEditor = () => {
     setIsCreating(false);
     setEditingEvent(null);
+    setIsEditorOpen(false);
     navigate('/admin/calendar');
   };
 
@@ -234,17 +241,8 @@ export default function AdminCalendarPage() {
             </Card>
           </div>
 
-          {/* Event Editor */}
-          {(isCreating || editingEvent) && (
-            <EventEditor
-              event={editingEvent}
-              onSave={handleSaveEvent}
-              onCancel={handleCloseEditor}
-            />
-          )}
-
           {/* Calendar View */}
-          {!isCreating && !editingEvent && (
+          {!isEditorOpen && (
             <div className="bg-white rounded-lg border shadow-sm p-6">
               <CalendarView
                 events={events}
@@ -292,6 +290,14 @@ export default function AdminCalendarPage() {
                 </div>
               )
             }
+          />
+
+          {/* Event Editor */}
+          <EventEditor
+            event={editingEvent}
+            isOpen={isEditorOpen}
+            onClose={handleCloseEditor}
+            onSave={handleSaveEvent}
           />
         </div>
       </div>
