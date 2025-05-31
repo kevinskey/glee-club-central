@@ -10,6 +10,8 @@ import { Link } from "react-router-dom";
  * Complete Admin Dashboard with all core administrative modules
  */
 const AdminDashboard: React.FC = () => {
+  console.log('AdminDashboard: Component rendering');
+
   const adminModules = [
     {
       title: "Calendar Management",

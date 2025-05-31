@@ -36,6 +36,14 @@ const AppLayout: React.FC<AppLayoutProps> = memo(function AppLayout({
   const location = useLocation();
   const isAdmin = profile?.is_super_admin || profile?.role === 'admin';
   
+  // Debug logging for admin layout
+  console.log('AppLayout render:', {
+    location: location.pathname,
+    sidebarType,
+    isAdmin,
+    profile: profile ? { role: profile.role, is_super_admin: profile.is_super_admin } : null
+  });
+  
   // Set viewport height for mobile
   useEffect(() => {
     const setVh = () => {
@@ -99,11 +107,15 @@ const AppLayout: React.FC<AppLayoutProps> = memo(function AppLayout({
   const renderSidebar = () => {
     if (effectiveSidebarType === "none" || isMobile) return null;
     
+    console.log('AppLayout: Rendering sidebar type:', effectiveSidebarType);
+    
     switch (effectiveSidebarType) {
       case "admin":
+        console.log('AppLayout: Rendering AdminSidebar');
         return <AdminSidebar />;
       case "member":
       case "fan":
+        console.log('AppLayout: Rendering regular Sidebar');
         return <Sidebar />;
       default:
         return null;
