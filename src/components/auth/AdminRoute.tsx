@@ -14,22 +14,22 @@ export const AdminRoute: React.FC<AdminRouteProps> = ({ children }) => {
   const { user, profile, isLoading: authLoading, isAuthenticated, isAdmin } = useAuth();
   const { isSuperAdmin, isLoading: permissionsLoading } = usePermissions();
   
-  // Reduced loading timeout since RLS issues are fixed
+  // Set a reasonable timeout for loading
   const [loadingTimeout, setLoadingTimeout] = React.useState(false);
   
   React.useEffect(() => {
     const timer = setTimeout(() => {
       setLoadingTimeout(true);
-    }, 3000); // Increased slightly to allow for proper profile loading
+    }, 2000); // Reduced timeout to prevent infinite loading
     
     return () => clearTimeout(timer);
   }, []);
   
   const isLoading = authLoading && !loadingTimeout;
   
-  // Enhanced admin detection - now more reliable with fixed RLS
+  // Enhanced admin detection
   const hasAdminAccess = React.useMemo(() => {
-    // Primary check: profile-based admin status (now working properly)
+    // Primary check: profile-based admin status
     if (isSuperAdmin || profile?.is_super_admin === true || profile?.role === 'admin') {
       return true;
     }
@@ -42,7 +42,6 @@ export const AdminRoute: React.FC<AdminRouteProps> = ({ children }) => {
     return false;
   }, [isSuperAdmin, profile, isAdmin]);
   
-  // Debug logging
   console.log('AdminRoute check:', {
     isLoading,
     isAuthenticated,
@@ -74,21 +73,11 @@ export const AdminRoute: React.FC<AdminRouteProps> = ({ children }) => {
     return <Navigate to="/login" replace />;
   }
   
-  // Redirect non-admin users if we have definitive data
-  if (!hasAdminAccess && profile) {
+  // Redirect non-admin users
+  if (!hasAdminAccess) {
     console.log('AdminRoute: User does not have admin access, redirecting to member dashboard');
     toast.error("You don't have permission to access the admin dashboard");
     return <Navigate to="/dashboard/member" replace />;
-  }
-  
-  // If we don't have profile data yet but user is authenticated, show brief loading
-  if (!profile && !loadingTimeout) {
-    return (
-      <PageLoader 
-        message="Loading profile..." 
-        className="min-h-screen"
-      />
-    );
   }
   
   // Render children for users with admin access

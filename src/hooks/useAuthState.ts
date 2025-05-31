@@ -24,22 +24,8 @@ export const useAuthState = () => {
   
   const initializationRef = useRef(false);
   const mountedRef = useRef(true);
-  const profileFetchAttempts = useRef(0);
-  const maxProfileAttempts = 3; // Increased since RLS is fixed
-  const profileTimeout = useRef<NodeJS.Timeout>();
   
-  // Debug logging
-  console.log('useAuthState current state:', {
-    hasUser: !!state.user,
-    hasProfile: !!state.profile,
-    userRole: state.profile?.role,
-    isAdmin: state.profile?.is_super_admin,
-    isLoading: state.isLoading,
-    isInitialized: state.isInitialized,
-    profileFetchAttempts: profileFetchAttempts.current
-  });
-  
-  // Create fallback profile when max attempts reached
+  // Create fallback profile when fetch fails
   const createFallbackProfile = useCallback((userId: string): Profile => ({
     id: userId,
     first_name: 'User',
@@ -51,58 +37,34 @@ export const useAuthState = () => {
     updated_at: new Date().toISOString()
   }), []);
   
-  // Optimized fetch user data function with improved error handling
+  // Simplified fetch user data function
   const fetchUserData = useCallback(async (userId: string) => {
     if (!mountedRef.current) return;
     
-    profileFetchAttempts.current += 1;
-    
     try {
-      console.log(`Fetching user data for: ${userId} (attempt ${profileFetchAttempts.current})`);
+      console.log(`Fetching user data for: ${userId}`);
       
-      // Set a timeout for profile fetching
+      // Try to fetch profile with timeout
       const profilePromise = getProfile(userId);
-      const timeoutPromise = new Promise((_, reject) => {
-        profileTimeout.current = setTimeout(() => {
-          reject(new Error('Profile fetch timeout'));
-        }, 5000); // Increased timeout since RLS is fixed
+      const timeoutPromise = new Promise<Profile | null>((_, reject) => {
+        setTimeout(() => reject(new Error('Profile fetch timeout')), 3000);
       });
       
-      let profile = null;
+      let profile: Profile | null = null;
       try {
         profile = await Promise.race([profilePromise, timeoutPromise]);
-        clearTimeout(profileTimeout.current);
-        
-        if (profile) {
-          console.log('Successfully fetched user profile:', profile);
-        } else {
-          throw new Error('No profile data returned');
-        }
+        console.log('Successfully fetched user profile:', profile);
       } catch (profileError) {
-        clearTimeout(profileTimeout.current);
-        console.error('Profile fetch failed:', profileError);
-        
-        // Only retry if we haven't reached max attempts
-        if (profileFetchAttempts.current < maxProfileAttempts) {
-          console.log('Retrying profile fetch in 2 seconds...');
-          setTimeout(() => {
-            if (mountedRef.current) {
-              fetchUserData(userId);
-            }
-          }, 2000);
-          return;
-        }
-        
-        console.log('Using fallback profile after max attempts');
+        console.warn('Profile fetch failed, using fallback:', profileError);
         profile = createFallbackProfile(userId);
       }
       
-      // Fetch permissions with timeout
+      // Fetch permissions with fallback
       let permissions = {};
       try {
         const permissionsPromise = fetchUserPermissions(userId);
-        const permissionsTimeout = new Promise((_, reject) => {
-          setTimeout(() => reject(new Error('Permissions timeout')), 3000);
+        const permissionsTimeout = new Promise<any>((_, reject) => {
+          setTimeout(() => reject(new Error('Permissions timeout')), 2000);
         });
         
         permissions = await Promise.race([permissionsPromise, permissionsTimeout]);
@@ -128,7 +90,6 @@ export const useAuthState = () => {
     } catch (error) {
       console.error('Error fetching user data:', error);
       if (mountedRef.current) {
-        // Always provide fallback data to prevent infinite loading
         setState(prev => ({
           ...prev,
           profile: createFallbackProfile(userId),
@@ -143,7 +104,7 @@ export const useAuthState = () => {
     }
   }, [createFallbackProfile]);
   
-  // Initialize auth state with improved session handling
+  // Initialize auth state
   useEffect(() => {
     if (initializationRef.current) return;
     initializationRef.current = true;
@@ -154,13 +115,7 @@ export const useAuthState = () => {
       try {
         console.log('Initializing auth state...');
         
-        // Get initial session with timeout
-        const sessionPromise = supabase.auth.getSession();
-        const sessionTimeout = new Promise((_, reject) => {
-          setTimeout(() => reject(new Error('Session fetch timeout')), 8000);
-        });
-        
-        const { data: { session }, error } = await Promise.race([sessionPromise, sessionTimeout]) as any;
+        const { data: { session }, error } = await supabase.auth.getSession();
         
         if (error) {
           console.error('Error getting session:', error);
@@ -190,14 +145,10 @@ export const useAuthState = () => {
           setState(prev => ({ 
             ...prev, 
             user: authUser,
-            isLoading: true, // Keep loading until profile is fetched
+            isLoading: true,
             isInitialized: true
           }));
           
-          // Reset attempts for existing session
-          profileFetchAttempts.current = 0;
-          
-          // Fetch additional user data
           await fetchUserData(session.user.id);
         } else {
           console.log('No existing session found');
@@ -242,9 +193,6 @@ export const useAuthState = () => {
             created_at: session.user.created_at
           };
           
-          // Reset fetch attempts for new user
-          profileFetchAttempts.current = 0;
-          
           setState(prev => ({ 
             ...prev, 
             user: authUser,
@@ -252,13 +200,10 @@ export const useAuthState = () => {
             isInitialized: true
           }));
           
-          // Fetch user data
           await fetchUserData(session.user.id);
           
         } else if (event === 'SIGNED_OUT') {
           console.log('Processing SIGNED_OUT event');
-          profileFetchAttempts.current = 0;
-          clearTimeout(profileTimeout.current);
           setState({
             user: null,
             profile: null,
@@ -270,12 +215,10 @@ export const useAuthState = () => {
       }
     );
     
-    // Initialize
     initializeAuth();
     
     return () => {
       mountedRef.current = false;
-      clearTimeout(profileTimeout.current);
       if (authSubscription?.data?.subscription) {
         authSubscription.data.subscription.unsubscribe();
       }
@@ -286,14 +229,12 @@ export const useAuthState = () => {
   useEffect(() => {
     return () => {
       mountedRef.current = false;
-      clearTimeout(profileTimeout.current);
     };
   }, []);
   
   // Refresh user data function
   const refreshUserData = useCallback(async () => {
     if (state.user?.id && mountedRef.current) {
-      profileFetchAttempts.current = 0; // Reset attempts on manual refresh
       await fetchUserData(state.user.id);
     }
   }, [state.user?.id, fetchUserData]);
