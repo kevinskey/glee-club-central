@@ -58,8 +58,6 @@ export function MediaListView({ mediaFiles, canEdit, canDelete, onDelete }: Medi
             const isImage = mediaType === "image";
             const isPdf = mediaType === "pdf";
             
-            console.log(`List view - Rendering file: ${file.title}, type: ${mediaType}, isPdf: ${isPdf}`);
-            
             return (
               <tr key={file.id} className="hover:bg-muted/30">
                 <td className="py-3 px-4">
@@ -75,7 +73,7 @@ export function MediaListView({ mediaFiles, canEdit, canDelete, onDelete }: Medi
                           }}
                         />
                       ) : isPdf ? (
-                        <div className="w-full h-full bg-white">
+                        <div className="w-full h-full">
                           <PDFThumbnail 
                             url={file.file_url} 
                             title={file.title}

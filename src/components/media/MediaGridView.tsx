@@ -49,8 +49,6 @@ export function MediaGridView({ mediaFiles, canEdit, canDelete, onDelete }: Medi
         const isImage = mediaType === "image";
         const isPdf = mediaType === "pdf";
         
-        console.log(`Rendering file: ${file.title}, type: ${mediaType}, isPdf: ${isPdf}, url: ${file.file_url}`);
-        
         return (
           <Card key={file.id} className="overflow-hidden group">
             <div className="relative">
@@ -65,7 +63,7 @@ export function MediaGridView({ mediaFiles, canEdit, canDelete, onDelete }: Medi
                     }}
                   />
                 ) : isPdf ? (
-                  <div className="w-full h-full bg-white">
+                  <div className="w-full h-full">
                     <PDFThumbnail 
                       url={file.file_url} 
                       title={file.title}
