@@ -6,7 +6,6 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { toast } from "sonner";
 import { 
   Select, 
   SelectContent, 
@@ -55,17 +54,6 @@ export function MediaUploadForm({
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
       const selectedFiles = Array.from(e.target.files);
-      
-      // Validate file size (max 25MB per file)
-      const oversizedFiles = selectedFiles.filter(file => file.size > 25 * 1024 * 1024);
-      
-      if (oversizedFiles.length > 0) {
-        toast("File size error", {
-          description: "Each file must be less than 25MB",
-        });
-        return;
-      }
-      
       setFiles(selectedFiles);
       
       // Auto-detect category based on file type
@@ -225,7 +213,7 @@ function FileInput({ files, handleFileChange }: FileInputProps) {
           multiple
         />
         <p className="text-xs text-muted-foreground mt-2">
-          Drag and drop files here or click to select files. Maximum 25MB per file.
+          Drag and drop files here or click to select files. No size or type restrictions.
         </p>
       </div>
       {files.length > 0 && (

@@ -39,19 +39,6 @@ export const MemberUploadPortal: React.FC = () => {
   const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
-      // Validate file size (10MB limit)
-      if (file.size > 10 * 1024 * 1024) {
-        toast.error('File size must be less than 10MB');
-        return;
-      }
-      
-      // Validate file type
-      const allowedTypes = ['application/pdf', 'audio/mpeg', 'audio/wav', 'audio/mp3', 'video/mp4', 'video/quicktime'];
-      if (!allowedTypes.includes(file.type)) {
-        toast.error('Please upload PDF, audio (MP3/WAV), or video (MP4/MOV) files only');
-        return;
-      }
-      
       setSelectedFile(file);
     }
   };
@@ -172,7 +159,7 @@ export const MemberUploadPortal: React.FC = () => {
             Upload Files
           </CardTitle>
           <CardDescription>
-            Upload solo auditions, required forms, or survey responses
+            Upload any file type - no restrictions on size or format
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
@@ -200,11 +187,10 @@ export const MemberUploadPortal: React.FC = () => {
             <Input
               ref={fileInputRef}
               type="file"
-              accept=".pdf,.mp3,.wav,.mp4,.mov"
               onChange={handleFileSelect}
             />
             <p className="text-xs text-muted-foreground">
-              Accepted formats: PDF, MP3, WAV, MP4, MOV (max 10MB)
+              All file types and sizes accepted
             </p>
           </div>
 

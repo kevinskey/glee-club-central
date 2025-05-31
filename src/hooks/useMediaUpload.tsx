@@ -31,15 +31,6 @@ export function useMediaUpload(onComplete: () => void, defaultCategory: string =
       return false;
     }
     
-    // Check file size limit (25MB)
-    const oversizedFiles = files.filter(file => file.size > 25 * 1024 * 1024);
-    if (oversizedFiles.length > 0) {
-      toast("File size limit exceeded", {
-        description: "Files must be under 25MB. Please remove any oversized files.",
-      });
-      return false;
-    }
-    
     return true;
   };
 

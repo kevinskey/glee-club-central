@@ -36,23 +36,15 @@ export function FileUploader() {
     processSelectedFile(file);
   };
   
-  // Process the selected audio file
+  // Process the selected file
   const processSelectedFile = (file: File) => {
-    // Check file type
-    if (!file.type.startsWith("audio/")) {
-      toast.error("Please select an audio file (MP3, WAV, etc.)");
-      return;
+    // Create preview URL for audio files
+    if (file.type.startsWith("audio/")) {
+      const previewUrl = URL.createObjectURL(file);
+      setAudioPreviewUrl(previewUrl);
+    } else {
+      setAudioPreviewUrl(null);
     }
-    
-    // Check file size (max 50MB)
-    if (file.size > 50 * 1024 * 1024) {
-      toast.error("File too large. Maximum size is 50MB");
-      return;
-    }
-    
-    // Create preview URL
-    const previewUrl = URL.createObjectURL(file);
-    setAudioPreviewUrl(previewUrl);
     
     // Set file and default title
     setSelectedFile(file);
@@ -204,10 +196,10 @@ export function FileUploader() {
                   </div>
                   <div>
                     <p className="text-sm font-medium mb-1">
-                      Drag and drop your audio file here
+                      Drag and drop your file here
                     </p>
                     <p className="text-xs text-muted-foreground">
-                      Supports MP3, WAV, M4A, and FLAC files up to 50MB
+                      No size or type restrictions - upload any file
                     </p>
                   </div>
                   <div>
@@ -222,7 +214,6 @@ export function FileUploader() {
                       type="file"
                       ref={fileInputRef}
                       onChange={handleFileSelect}
-                      accept="audio/*"
                       className="hidden"
                     />
                   </div>
