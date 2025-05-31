@@ -25,7 +25,7 @@ export const useAuthState = () => {
   const initializationRef = useRef(false);
   const mountedRef = useRef(true);
   const profileFetchAttempts = useRef(0);
-  const maxProfileAttempts = 2; // Reduced attempts
+  const maxProfileAttempts = 3; // Increased since RLS is fixed
   const profileTimeout = useRef<NodeJS.Timeout>();
   
   // Debug logging
@@ -51,7 +51,7 @@ export const useAuthState = () => {
     updated_at: new Date().toISOString()
   }), []);
   
-  // Optimized fetch user data function with shorter timeouts
+  // Optimized fetch user data function with improved error handling
   const fetchUserData = useCallback(async (userId: string) => {
     if (!mountedRef.current) return;
     
@@ -60,31 +60,36 @@ export const useAuthState = () => {
     try {
       console.log(`Fetching user data for: ${userId} (attempt ${profileFetchAttempts.current})`);
       
-      // Set a timeout for profile fetching - much shorter now
+      // Set a timeout for profile fetching
       const profilePromise = getProfile(userId);
       const timeoutPromise = new Promise((_, reject) => {
         profileTimeout.current = setTimeout(() => {
           reject(new Error('Profile fetch timeout'));
-        }, 3000); // Reduced from longer timeout to 3 seconds
+        }, 5000); // Increased timeout since RLS is fixed
       });
       
       let profile = null;
       try {
         profile = await Promise.race([profilePromise, timeoutPromise]);
         clearTimeout(profileTimeout.current);
-        console.log('Successfully fetched user profile:', profile);
+        
+        if (profile) {
+          console.log('Successfully fetched user profile:', profile);
+        } else {
+          throw new Error('No profile data returned');
+        }
       } catch (profileError) {
         clearTimeout(profileTimeout.current);
         console.error('Profile fetch failed:', profileError);
         
-        // Only retry once, then use fallback
+        // Only retry if we haven't reached max attempts
         if (profileFetchAttempts.current < maxProfileAttempts) {
-          console.log('Retrying profile fetch in 1 second...');
+          console.log('Retrying profile fetch in 2 seconds...');
           setTimeout(() => {
             if (mountedRef.current) {
               fetchUserData(userId);
             }
-          }, 1000); // Reduced retry delay
+          }, 2000);
           return;
         }
         
@@ -92,15 +97,16 @@ export const useAuthState = () => {
         profile = createFallbackProfile(userId);
       }
       
-      // Fetch permissions quickly with timeout
+      // Fetch permissions with timeout
       let permissions = {};
       try {
         const permissionsPromise = fetchUserPermissions(userId);
         const permissionsTimeout = new Promise((_, reject) => {
-          setTimeout(() => reject(new Error('Permissions timeout')), 2000); // 2 second timeout
+          setTimeout(() => reject(new Error('Permissions timeout')), 3000);
         });
         
         permissions = await Promise.race([permissionsPromise, permissionsTimeout]);
+        console.log('Successfully fetched permissions:', permissions);
       } catch (permError) {
         console.warn('Failed to fetch permissions, using defaults:', permError);
         permissions = {
@@ -137,7 +143,7 @@ export const useAuthState = () => {
     }
   }, [createFallbackProfile]);
   
-  // Initialize auth state with faster timeout
+  // Initialize auth state with improved session handling
   useEffect(() => {
     if (initializationRef.current) return;
     initializationRef.current = true;
@@ -151,7 +157,7 @@ export const useAuthState = () => {
         // Get initial session with timeout
         const sessionPromise = supabase.auth.getSession();
         const sessionTimeout = new Promise((_, reject) => {
-          setTimeout(() => reject(new Error('Session fetch timeout')), 5000);
+          setTimeout(() => reject(new Error('Session fetch timeout')), 8000);
         });
         
         const { data: { session }, error } = await Promise.race([sessionPromise, sessionTimeout]) as any;

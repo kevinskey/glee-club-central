@@ -14,22 +14,22 @@ export const AdminRoute: React.FC<AdminRouteProps> = ({ children }) => {
   const { user, profile, isLoading: authLoading, isAuthenticated, isAdmin } = useAuth();
   const { isSuperAdmin, isLoading: permissionsLoading } = usePermissions();
   
-  // Shorter loading timeout for admin routes
+  // Reduced loading timeout since RLS issues are fixed
   const [loadingTimeout, setLoadingTimeout] = React.useState(false);
   
   React.useEffect(() => {
     const timer = setTimeout(() => {
       setLoadingTimeout(true);
-    }, 2000); // Reduced timeout since RLS issues are fixed
+    }, 3000); // Increased slightly to allow for proper profile loading
     
     return () => clearTimeout(timer);
   }, []);
   
   const isLoading = authLoading && !loadingTimeout;
   
-  // Enhanced admin detection
+  // Enhanced admin detection - now more reliable with fixed RLS
   const hasAdminAccess = React.useMemo(() => {
-    // Primary check: profile-based admin status
+    // Primary check: profile-based admin status (now working properly)
     if (isSuperAdmin || profile?.is_super_admin === true || profile?.role === 'admin') {
       return true;
     }
@@ -39,17 +39,8 @@ export const AdminRoute: React.FC<AdminRouteProps> = ({ children }) => {
       return true;
     }
     
-    // Tertiary check: direct user metadata check
-    if (user && loadingTimeout) {
-      const userRole = user.user_metadata?.role || user.app_metadata?.role;
-      if (userRole === 'admin' || userRole === 'super_admin') {
-        console.log('AdminRoute: Admin access granted via user metadata');
-        return true;
-      }
-    }
-    
     return false;
-  }, [isSuperAdmin, profile, isAdmin, user, loadingTimeout]);
+  }, [isSuperAdmin, profile, isAdmin]);
   
   // Debug logging
   console.log('AdminRoute check:', {
@@ -83,8 +74,8 @@ export const AdminRoute: React.FC<AdminRouteProps> = ({ children }) => {
     return <Navigate to="/login" replace />;
   }
   
-  // Redirect non-admin users if we have definitive data or timeout
-  if (!hasAdminAccess && (profile || loadingTimeout)) {
+  // Redirect non-admin users if we have definitive data
+  if (!hasAdminAccess && profile) {
     console.log('AdminRoute: User does not have admin access, redirecting to member dashboard');
     toast.error("You don't have permission to access the admin dashboard");
     return <Navigate to="/dashboard/member" replace />;
@@ -100,7 +91,7 @@ export const AdminRoute: React.FC<AdminRouteProps> = ({ children }) => {
     );
   }
   
-  // Render children for users with admin access or when timeout reached
+  // Render children for users with admin access
   console.log('AdminRoute: Allowing access to admin content');
   return <>{children}</>;
 };
