@@ -36,23 +36,33 @@ export const AdminRoute: React.FC<AdminRouteProps> = ({ children }) => {
   const isLoading = authLoading && !loadingTimeout;
   
   const hasAdminAccess = React.useMemo(() => {
-    if (isSuperAdmin || profile?.is_super_admin === true || profile?.role === 'admin') {
-      return true;
-    }
+    const adminAccess = isSuperAdmin || profile?.is_super_admin === true || profile?.role === 'admin' || (isAdmin && isAdmin());
     
-    if (isAdmin && isAdmin()) {
-      return true;
-    }
+    console.log('🛡️ AdminRoute: Admin access check:', {
+      hasUser: !!user,
+      userId: user?.id,
+      userEmail: user?.email,
+      hasProfile: !!profile,
+      profileRole: profile?.role,
+      profileIsAdmin: profile?.is_super_admin,
+      isSuperAdmin,
+      isAdminFunction: isAdmin ? isAdmin() : false,
+      hasAdminAccess: adminAccess,
+      isLoading: authLoading,
+      permissionsLoading,
+      loadingTimeout
+    });
     
-    return false;
-  }, [isSuperAdmin, profile, isAdmin]);
+    return adminAccess;
+  }, [isSuperAdmin, profile, isAdmin, user, authLoading, permissionsLoading, loadingTimeout]);
   
   const handleCreateProfile = async () => {
     if (!user) return;
     
     setIsCreatingProfile(true);
     try {
-      // Create a basic profile for the user
+      console.log('🔧 AdminRoute: Creating admin profile for user:', user.id);
+      
       const { supabaseClient } = useAuth();
       const { error } = await supabaseClient
         .from('profiles')
@@ -67,8 +77,10 @@ export const AdminRoute: React.FC<AdminRouteProps> = ({ children }) => {
           updated_at: new Date().toISOString()
         });
       
+      console.log('🔧 AdminRoute: Profile creation result:', { error: error?.message });
+      
       if (error) {
-        console.error('Error creating profile:', error);
+        console.error('❌ AdminRoute: Error creating profile:', error);
         toast.error('Failed to create profile. Please try again.');
       } else {
         toast.success('Profile created successfully!');
@@ -79,14 +91,14 @@ export const AdminRoute: React.FC<AdminRouteProps> = ({ children }) => {
         setShowProfileWarning(false);
       }
     } catch (error) {
-      console.error('Error creating profile:', error);
+      console.error('💥 AdminRoute: Error creating profile:', error);
       toast.error('An unexpected error occurred while creating your profile.');
     } finally {
       setIsCreatingProfile(false);
     }
   };
   
-  console.log('AdminRoute check:', {
+  console.log('🛡️ AdminRoute: Route decision check:', {
     isLoading,
     isAuthenticated,
     hasUser: !!user,
@@ -103,7 +115,7 @@ export const AdminRoute: React.FC<AdminRouteProps> = ({ children }) => {
   
   // Show loading state briefly
   if (isLoading) {
-    console.log('AdminRoute: Still loading auth/permissions');
+    console.log('⏳ AdminRoute: Still loading auth/permissions');
     return (
       <PageLoader 
         message="Verifying admin access..." 
@@ -114,12 +126,13 @@ export const AdminRoute: React.FC<AdminRouteProps> = ({ children }) => {
   
   // Redirect unauthenticated users to login
   if (!isAuthenticated || !user) {
-    console.log('AdminRoute: User not authenticated, redirecting to login');
+    console.log('🚫 AdminRoute: User not authenticated, redirecting to login');
     return <Navigate to="/login" replace />;
   }
   
   // Show profile creation UI if user exists but no profile
   if (showProfileWarning && !profile) {
+    console.log('⚠️ AdminRoute: Showing profile creation UI');
     return (
       <div className="min-h-screen flex items-center justify-center p-4">
         <div className="max-w-md w-full p-6 bg-background border rounded-lg shadow-md text-center">
@@ -152,13 +165,13 @@ export const AdminRoute: React.FC<AdminRouteProps> = ({ children }) => {
   
   // Redirect non-admin users (only if we have profile data or timeout reached)
   if (!hasAdminAccess && (profile || loadingTimeout)) {
-    console.log('AdminRoute: User does not have admin access, redirecting to member dashboard');
+    console.log('🚫 AdminRoute: User does not have admin access, redirecting to member dashboard');
     toast.error("You don't have permission to access the admin dashboard");
     return <Navigate to="/dashboard/member" replace />;
   }
   
   // Render children for users with admin access
-  console.log('AdminRoute: Allowing access to admin content');
+  console.log('✅ AdminRoute: Allowing access to admin content');
   return <>{children}</>;
 };
 

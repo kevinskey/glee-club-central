@@ -37,16 +37,17 @@ export const useAuthState = () => {
     updated_at: new Date().toISOString()
   }), []);
   
-  // Fetch user data with improved error handling
+  // Fetch user data with improved error handling and debugging
   const fetchUserData = useCallback(async (userId: string) => {
     if (!mountedRef.current) return;
     
-    console.log(`Fetching user data for: ${userId}`);
+    console.log(`🔍 useAuthState: Fetching user data for: ${userId}`);
     
     let profile: Profile | null = null;
     let permissions = {};
     
     try {
+      console.log('📋 useAuthState: Fetching profile...');
       // Fetch profile with timeout
       profile = await Promise.race([
         getProfile(userId),
@@ -54,13 +55,19 @@ export const useAuthState = () => {
           setTimeout(() => reject(new Error('Profile timeout')), 5000);
         })
       ]);
-      console.log('Profile fetched:', profile);
+      console.log('📋 useAuthState: Profile fetch result:', {
+        hasProfile: !!profile,
+        profileRole: profile?.role,
+        profileIsAdmin: profile?.is_super_admin,
+        profileStatus: profile?.status
+      });
     } catch (error) {
-      console.warn('Profile fetch failed, using fallback:', error);
+      console.warn('⚠️ useAuthState: Profile fetch failed, using fallback:', error);
       profile = createFallbackProfile(userId);
     }
     
     try {
+      console.log('🔑 useAuthState: Fetching permissions...');
       // Fetch permissions with timeout
       permissions = await Promise.race([
         fetchUserPermissions(userId),
@@ -68,9 +75,12 @@ export const useAuthState = () => {
           setTimeout(() => reject(new Error('Permissions timeout')), 3000);
         })
       ]);
-      console.log('Permissions fetched:', permissions);
+      console.log('🔑 useAuthState: Permissions fetch result:', {
+        permissionCount: Object.keys(permissions).length,
+        permissions: Object.keys(permissions)
+      });
     } catch (error) {
-      console.warn('Permissions fetch failed, using defaults:', error);
+      console.warn('⚠️ useAuthState: Permissions fetch failed, using defaults:', error);
       permissions = {
         'view_sheet_music': true,
         'view_calendar': true,
@@ -79,6 +89,7 @@ export const useAuthState = () => {
     }
     
     if (mountedRef.current) {
+      console.log('✅ useAuthState: Updating state with fetched data');
       setState(prev => ({
         ...prev,
         profile,
@@ -91,7 +102,7 @@ export const useAuthState = () => {
   
   // Initialize auth state
   useEffect(() => {
-    console.log('Initializing auth state...');
+    console.log('🚀 useAuthState: Initializing auth state...');
     
     // Clear any existing timeout
     if (initTimeoutRef.current) {
@@ -100,7 +111,7 @@ export const useAuthState = () => {
     
     // Hard timeout for initialization
     initTimeoutRef.current = setTimeout(() => {
-      console.log('Auth initialization timeout reached');
+      console.log('⏰ useAuthState: Auth initialization timeout reached');
       if (mountedRef.current) {
         setState(prev => ({
           ...prev,
@@ -112,11 +123,19 @@ export const useAuthState = () => {
     
     const initializeAuth = async () => {
       try {
-        console.log('Getting current session...');
+        console.log('🔄 useAuthState: Getting current session...');
         const { data: { session }, error } = await supabase.auth.getSession();
         
+        console.log('🔄 useAuthState: Session check result:', {
+          hasSession: !!session,
+          hasUser: !!session?.user,
+          userId: session?.user?.id,
+          userEmail: session?.user?.email,
+          error: error?.message
+        });
+        
         if (error) {
-          console.error('Session error:', error);
+          console.error('❌ useAuthState: Session error:', error);
           if (initTimeoutRef.current) clearTimeout(initTimeoutRef.current);
           setState({
             user: null,
@@ -129,7 +148,7 @@ export const useAuthState = () => {
         }
         
         if (session?.user && mountedRef.current) {
-          console.log('Found session for user:', session.user.id);
+          console.log('✅ useAuthState: Found session for user:', session.user.id);
           const authUser: AuthUser = {
             id: session.user.id,
             email: session.user.email || '',
@@ -149,13 +168,14 @@ export const useAuthState = () => {
           if (initTimeoutRef.current) clearTimeout(initTimeoutRef.current);
           
           // Fetch additional data in background
+          console.log('📡 useAuthState: Scheduling user data fetch...');
           setTimeout(() => {
             if (mountedRef.current) {
               fetchUserData(session.user.id);
             }
           }, 100);
         } else {
-          console.log('No session found');
+          console.log('ℹ️ useAuthState: No session found');
           if (initTimeoutRef.current) clearTimeout(initTimeoutRef.current);
           setState({
             user: null,
@@ -167,7 +187,7 @@ export const useAuthState = () => {
         }
         
       } catch (error) {
-        console.error('Auth initialization error:', error);
+        console.error('💥 useAuthState: Auth initialization error:', error);
         if (initTimeoutRef.current) clearTimeout(initTimeoutRef.current);
         if (mountedRef.current) {
           setState({
@@ -186,7 +206,12 @@ export const useAuthState = () => {
       async (event, session) => {
         if (!mountedRef.current) return;
         
-        console.log('Auth state change:', event, session?.user?.id);
+        console.log('🔔 useAuthState: Auth state change:', {
+          event,
+          hasSession: !!session,
+          userId: session?.user?.id,
+          userEmail: session?.user?.email
+        });
         
         if (event === 'SIGNED_IN' && session?.user) {
           const authUser: AuthUser = {
@@ -206,6 +231,7 @@ export const useAuthState = () => {
           }));
           
           // Fetch additional data in background
+          console.log('📡 useAuthState: Scheduling user data fetch after sign in...');
           setTimeout(() => {
             if (mountedRef.current) {
               fetchUserData(session.user.id);
@@ -213,6 +239,7 @@ export const useAuthState = () => {
           }, 100);
           
         } else if (event === 'SIGNED_OUT') {
+          console.log('👋 useAuthState: User signed out');
           setState({
             user: null,
             profile: null,
@@ -248,6 +275,7 @@ export const useAuthState = () => {
   // Refresh user data function
   const refreshUserData = useCallback(async () => {
     if (state.user?.id && mountedRef.current) {
+      console.log('🔄 useAuthState: Refreshing user data for:', state.user.id);
       await fetchUserData(state.user.id);
     }
   }, [state.user?.id, fetchUserData]);
