@@ -24,6 +24,7 @@ export const useAuthState = () => {
   
   const initializationRef = useRef(false);
   const mountedRef = useRef(true);
+  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
   
   // Create fallback profile when fetch fails
   const createFallbackProfile = useCallback((userId: string): Profile => ({
@@ -37,21 +38,21 @@ export const useAuthState = () => {
     updated_at: new Date().toISOString()
   }), []);
   
-  // Simplified fetch user data function
+  // Simplified fetch user data function with better error handling
   const fetchUserData = useCallback(async (userId: string) => {
     if (!mountedRef.current) return;
     
     try {
       console.log(`Fetching user data for: ${userId}`);
       
-      // Try to fetch profile with timeout
-      const profilePromise = getProfile(userId);
-      const timeoutPromise = new Promise<Profile | null>((_, reject) => {
-        setTimeout(() => reject(new Error('Profile fetch timeout')), 3000);
-      });
-      
+      // Set a hard timeout for profile fetch
       let profile: Profile | null = null;
       try {
+        const profilePromise = getProfile(userId);
+        const timeoutPromise = new Promise<never>((_, reject) => {
+          setTimeout(() => reject(new Error('Profile fetch timeout')), 2000);
+        });
+        
         profile = await Promise.race([profilePromise, timeoutPromise]);
         console.log('Successfully fetched user profile:', profile);
       } catch (profileError) {
@@ -59,12 +60,12 @@ export const useAuthState = () => {
         profile = createFallbackProfile(userId);
       }
       
-      // Fetch permissions with fallback
+      // Fetch permissions with shorter timeout
       let permissions = {};
       try {
         const permissionsPromise = fetchUserPermissions(userId);
-        const permissionsTimeout = new Promise<any>((_, reject) => {
-          setTimeout(() => reject(new Error('Permissions timeout')), 2000);
+        const permissionsTimeout = new Promise<never>((_, reject) => {
+          setTimeout(() => reject(new Error('Permissions timeout')), 1500);
         });
         
         permissions = await Promise.race([permissionsPromise, permissionsTimeout]);
@@ -83,7 +84,8 @@ export const useAuthState = () => {
           ...prev,
           profile,
           permissions,
-          isLoading: false
+          isLoading: false,
+          isInitialized: true
         }));
       }
       
@@ -98,18 +100,31 @@ export const useAuthState = () => {
             'view_calendar': true,
             'view_announcements': true
           },
-          isLoading: false
+          isLoading: false,
+          isInitialized: true
         }));
       }
     }
   }, [createFallbackProfile]);
   
-  // Initialize auth state
+  // Initialize auth state with better timeout handling
   useEffect(() => {
     if (initializationRef.current) return;
     initializationRef.current = true;
     
     let authSubscription: any = null;
+    
+    // Set a maximum timeout for initialization
+    timeoutRef.current = setTimeout(() => {
+      console.log('Auth initialization timeout reached, setting initialized state');
+      if (mountedRef.current) {
+        setState(prev => ({
+          ...prev,
+          isLoading: false,
+          isInitialized: true
+        }));
+      }
+    }, 3000); // 3 second max timeout
     
     const initializeAuth = async () => {
       try {
@@ -119,6 +134,7 @@ export const useAuthState = () => {
         
         if (error) {
           console.error('Error getting session:', error);
+          if (timeoutRef.current) clearTimeout(timeoutRef.current);
           setState({
             user: null,
             profile: null,
@@ -149,9 +165,11 @@ export const useAuthState = () => {
             isInitialized: true
           }));
           
+          if (timeoutRef.current) clearTimeout(timeoutRef.current);
           await fetchUserData(session.user.id);
         } else {
           console.log('No existing session found');
+          if (timeoutRef.current) clearTimeout(timeoutRef.current);
           setState({
             user: null,
             profile: null,
@@ -164,6 +182,7 @@ export const useAuthState = () => {
       } catch (error) {
         console.error('Auth initialization error:', error);
         if (mountedRef.current) {
+          if (timeoutRef.current) clearTimeout(timeoutRef.current);
           setState({
             user: null,
             profile: null,
@@ -200,7 +219,10 @@ export const useAuthState = () => {
             isInitialized: true
           }));
           
-          await fetchUserData(session.user.id);
+          // Use setTimeout to prevent blocking
+          setTimeout(() => {
+            fetchUserData(session.user.id);
+          }, 0);
           
         } else if (event === 'SIGNED_OUT') {
           console.log('Processing SIGNED_OUT event');
@@ -219,6 +241,7 @@ export const useAuthState = () => {
     
     return () => {
       mountedRef.current = false;
+      if (timeoutRef.current) clearTimeout(timeoutRef.current);
       if (authSubscription?.data?.subscription) {
         authSubscription.data.subscription.unsubscribe();
       }
@@ -229,12 +252,14 @@ export const useAuthState = () => {
   useEffect(() => {
     return () => {
       mountedRef.current = false;
+      if (timeoutRef.current) clearTimeout(timeoutRef.current);
     };
   }, []);
   
   // Refresh user data function
   const refreshUserData = useCallback(async () => {
     if (state.user?.id && mountedRef.current) {
+      setState(prev => ({ ...prev, isLoading: true }));
       await fetchUserData(state.user.id);
     }
   }, [state.user?.id, fetchUserData]);
