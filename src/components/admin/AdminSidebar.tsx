@@ -18,6 +18,11 @@ export function AdminSidebar() {
       href: "/admin/orders",
     },
     {
+      title: "Users",
+      icon: <Users className="h-5 w-5" />,
+      href: "/admin/users",
+    },
+    {
       title: "Media Library",
       icon: <FileImage className="h-5 w-5" />,
       href: "/admin/media",
@@ -26,11 +31,6 @@ export function AdminSidebar() {
       title: "Site Images",
       icon: <FileImage className="h-5 w-5" />,
       href: "/admin/site-images",
-    },
-    {
-      title: "Users",
-      icon: <Users className="h-5 w-5" />,
-      href: "/admin/users",
     },
     {
       title: "Analytics",

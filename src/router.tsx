@@ -1,4 +1,3 @@
-
 import React, { Suspense } from 'react';
 import { createBrowserRouter, Navigate, Outlet } from 'react-router-dom';
 import ErrorBoundary from "./components/ErrorBoundary";
@@ -221,6 +220,7 @@ export const router = createBrowserRouter([
               </Suspense>
             )
           },
+          { path: 'users', element: <UserManagementPage /> },
           { 
             path: 'media-uploader', 
             element: (

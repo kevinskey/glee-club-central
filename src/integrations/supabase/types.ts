@@ -49,10 +49,24 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "absence_requests_member_id_fkey"
+            columns: ["member_id"]
+            isOneToOne: false
+            referencedRelation: "user_management_view"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "absence_requests_reviewed_by_fkey"
             columns: ["reviewed_by"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "absence_requests_reviewed_by_fkey"
+            columns: ["reviewed_by"]
+            isOneToOne: false
+            referencedRelation: "user_management_view"
             referencedColumns: ["id"]
           },
         ]
@@ -88,6 +102,13 @@ export type Database = {
             columns: ["member_id"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "attendance_records_member_id_fkey"
+            columns: ["member_id"]
+            isOneToOne: false
+            referencedRelation: "user_management_view"
             referencedColumns: ["id"]
           },
         ]
@@ -429,10 +450,24 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "member_notes_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "user_management_view"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "member_notes_member_id_fkey"
             columns: ["member_id"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "member_notes_member_id_fkey"
+            columns: ["member_id"]
+            isOneToOne: false
+            referencedRelation: "user_management_view"
             referencedColumns: ["id"]
           },
         ]
@@ -477,6 +512,13 @@ export type Database = {
             columns: ["member_id"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "member_uploads_member_id_fkey"
+            columns: ["member_id"]
+            isOneToOne: false
+            referencedRelation: "user_management_view"
             referencedColumns: ["id"]
           },
         ]
@@ -636,6 +678,13 @@ export type Database = {
             referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "payment_records_member_id_fkey"
+            columns: ["member_id"]
+            isOneToOne: false
+            referencedRelation: "user_management_view"
+            referencedColumns: ["id"]
+          },
         ]
       }
       pdf_annotations: {
@@ -788,6 +837,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "poll_votes_member_id_fkey"
+            columns: ["member_id"]
+            isOneToOne: false
+            referencedRelation: "user_management_view"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "poll_votes_poll_id_fkey"
             columns: ["poll_id"]
             isOneToOne: false
@@ -833,6 +889,13 @@ export type Database = {
             columns: ["created_by"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "polls_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "user_management_view"
             referencedColumns: ["id"]
           },
         ]
@@ -908,6 +971,7 @@ export type Database = {
           avatar_url: string | null
           class_year: string | null
           created_at: string
+          disabled: boolean | null
           dues_paid: boolean | null
           first_name: string | null
           id: string
@@ -927,6 +991,7 @@ export type Database = {
           avatar_url?: string | null
           class_year?: string | null
           created_at?: string
+          disabled?: boolean | null
           dues_paid?: boolean | null
           first_name?: string | null
           id: string
@@ -946,6 +1011,7 @@ export type Database = {
           avatar_url?: string | null
           class_year?: string | null
           created_at?: string
+          disabled?: boolean | null
           dues_paid?: boolean | null
           first_name?: string | null
           id?: string
@@ -1180,10 +1246,24 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "tour_assignments_member_id_fkey"
+            columns: ["member_id"]
+            isOneToOne: false
+            referencedRelation: "user_management_view"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "tour_assignments_roommate_id_fkey"
             columns: ["roommate_id"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tour_assignments_roommate_id_fkey"
+            columns: ["roommate_id"]
+            isOneToOne: false
+            referencedRelation: "user_management_view"
             referencedColumns: ["id"]
           },
           {
@@ -1262,6 +1342,13 @@ export type Database = {
             columns: ["member_id"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "uniform_assignments_member_id_fkey"
+            columns: ["member_id"]
+            isOneToOne: false
+            referencedRelation: "user_management_view"
             referencedColumns: ["id"]
           },
           {
@@ -1439,9 +1526,48 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      user_management_view: {
+        Row: {
+          avatar_url: string | null
+          class_year: string | null
+          created_at: string | null
+          disabled: boolean | null
+          dues_paid: boolean | null
+          email: string | null
+          first_name: string | null
+          full_name: string | null
+          id: string | null
+          is_super_admin: boolean | null
+          join_date: string | null
+          last_name: string | null
+          last_sign_in_at: string | null
+          notes: string | null
+          phone: string | null
+          role: string | null
+          status: string | null
+          voice_part: string | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
+      admin_invite_user: {
+        Args: {
+          user_email: string
+          user_role?: string
+          first_name?: string
+          last_name?: string
+        }
+        Returns: string
+      }
+      admin_toggle_user_status: {
+        Args: { target_user_id: string; is_disabled: boolean }
+        Returns: boolean
+      }
+      admin_update_user_role: {
+        Args: { target_user_id: string; new_role: string }
+        Returns: boolean
+      }
       get_all_users: {
         Args: Record<PropertyKey, never>
         Returns: {
