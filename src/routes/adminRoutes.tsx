@@ -15,6 +15,7 @@ import OrdersPage from '@/pages/admin/OrdersPage';
 import AnalyticsPage from '@/pages/admin/AnalyticsPage';
 import EventDetailsPage from '@/pages/events/EventDetailsPage';
 import EventRSVPsPage from '@/pages/admin/EventRSVPsPage';
+import FanBulkUploadPage from '@/pages/admin/FanBulkUploadPage';
 
 // Import additional admin pages (these may need to be created if they don't exist)
 import AdminHeroManager from '@/pages/admin/AdminHeroManager';
@@ -43,6 +44,7 @@ export const adminRoutes: RouteObject[] = [
       { path: 'orders', element: <OrdersPage /> },
       { path: 'analytics', element: <AnalyticsPage /> },
       { path: 'fan-tags', element: <UserManagementPage /> }, // Can be updated to specific fan tags page
+      { path: 'fan-upload', element: <FanBulkUploadPage /> },
       { path: 'announcements', element: <AnnouncementsPage /> },
       { path: 'settings', element: <SettingsPage /> },
     ],
