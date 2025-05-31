@@ -20,67 +20,69 @@ const RequireAuth = ({ children, requireAdmin, allowedUserTypes }: RequireAuthPr
   
   const isLoading = authLoading || permissionsLoading;
   
-  // Track redirect state to prevent multiple redirects and reduce blinking
-  const [isRedirecting, setIsRedirecting] = React.useState(false);
+  // Track redirect attempts to prevent loops
   const redirectAttemptedRef = React.useRef(false);
+  const [hasShownError, setHasShownError] = React.useState(false);
+  
+  // Show loading state with timeout to prevent infinite loading
   const [showLoading, setShowLoading] = React.useState(false);
   
-  // Debounce loading display to prevent blinking
   React.useEffect(() => {
     if (isLoading) {
       const timer = setTimeout(() => {
         setShowLoading(true);
-      }, 100); // Reduced delay to minimize perceived lag
+      }, 200);
       
-      return () => clearTimeout(timer);
+      // Auto-timeout after 10 seconds
+      const timeoutTimer = setTimeout(() => {
+        console.warn('Auth loading timeout - forcing completion');
+        setShowLoading(false);
+      }, 10000);
+      
+      return () => {
+        clearTimeout(timer);
+        clearTimeout(timeoutTimer);
+      };
     } else {
       setShowLoading(false);
     }
   }, [isLoading]);
   
-  // Show toast only once per session and only when not loading
+  // Show error toast only once when not authenticated
   React.useEffect(() => {
-    if (!isLoading && !isAuthenticated && !location.pathname.includes('login') && !isRedirecting && !redirectAttemptedRef.current) {
+    if (!isLoading && !isAuthenticated && !hasShownError && !location.pathname.includes('login')) {
       toast.error("Please log in to access this page");
+      setHasShownError(true);
     }
-  }, [isLoading, isAuthenticated, location.pathname, isRedirecting]);
+  }, [isLoading, isAuthenticated, location.pathname, hasShownError]);
   
-  // Show loading state with consistent styling
-  if (showLoading) {
+  // Show loading state
+  if (showLoading && isLoading) {
     return (
       <div className="flex items-center justify-center min-h-screen bg-background">
         <div className="flex flex-col items-center space-y-4">
           <Spinner size="lg" />
-          <p className="text-muted-foreground text-sm animate-pulse">Verifying authentication...</p>
+          <p className="text-muted-foreground text-sm">Verifying authentication...</p>
         </div>
       </div>
     );
   }
   
-  // Only redirect once and avoid multiple redirects
-  if (!isAuthenticated && !isRedirecting && !redirectAttemptedRef.current && !isLoading) {
-    // Prevent multiple redirects by setting refs and state
-    setIsRedirecting(true);
+  // Handle unauthenticated users
+  if (!isAuthenticated && !isLoading && !redirectAttemptedRef.current) {
     redirectAttemptedRef.current = true;
     
     // Store the current URL to redirect back after login
-    const currentPath = location.pathname;
+    const currentPath = location.pathname + location.search;
     sessionStorage.setItem('authRedirectPath', currentPath);
-    
-    // For recording-specific paths, set an intent parameter
-    if (location.pathname.includes('recording')) {
-      sessionStorage.setItem('authRedirectIntent', 'recording');
-    }
-    
-    // Add a timestamp to prevent stale redirects
     sessionStorage.setItem('authRedirectTimestamp', Date.now().toString());
     
     console.log("Redirecting to login from:", currentPath);
     return <Navigate to="/login" replace />;
   }
   
-  // Check if admin access is required
-  if (requireAdmin && !isLoading) {
+  // Check admin access if required
+  if (requireAdmin && !isLoading && isAuthenticated) {
     const hasAdminAccess = isSuperAdmin || (isAdmin && isAdmin());
     if (!hasAdminAccess) {
       toast.error("You don't have admin privileges to access this page");
@@ -88,8 +90,8 @@ const RequireAuth = ({ children, requireAdmin, allowedUserTypes }: RequireAuthPr
     }
   }
   
-  // Check if user type is in allowed types
-  if (allowedUserTypes && allowedUserTypes.length > 0 && !isLoading) {
+  // Check user type restrictions
+  if (allowedUserTypes && allowedUserTypes.length > 0 && !isLoading && isAuthenticated) {
     const userType = getUserType();
     
     if (!userType || !allowedUserTypes.includes(userType)) {
@@ -98,8 +100,20 @@ const RequireAuth = ({ children, requireAdmin, allowedUserTypes }: RequireAuthPr
     }
   }
   
-  // Authentication passed, render children
-  return <>{children}</>;
+  // If still loading but we have a user, show the content to prevent blocking
+  if (isAuthenticated) {
+    return <>{children}</>;
+  }
+  
+  // Final fallback - should not reach here under normal circumstances
+  return (
+    <div className="flex items-center justify-center min-h-screen bg-background">
+      <div className="flex flex-col items-center space-y-4">
+        <Spinner size="lg" />
+        <p className="text-muted-foreground text-sm">Loading...</p>
+      </div>
+    </div>
+  );
 };
 
 export default RequireAuth;

@@ -23,8 +23,9 @@ export const useAuthState = () => {
   });
   
   const initializationRef = useRef(false);
+  const isLoadingRef = useRef(true);
   
-  // Fetch user data function
+  // Fetch user data function - simplified and cached
   const fetchUserData = useCallback(async (userId: string) => {
     try {
       console.log('Fetching user data for:', userId);
@@ -37,27 +38,41 @@ export const useAuthState = () => {
       setState(prev => ({
         ...prev,
         profile,
-        permissions
+        permissions,
+        isLoading: false
       }));
+      
+      isLoadingRef.current = false;
       
     } catch (error) {
       console.error('Error fetching user data:', error);
+      setState(prev => ({
+        ...prev,
+        isLoading: false
+      }));
+      isLoadingRef.current = false;
     }
   }, []);
   
-  // Initialize auth state
+  // Initialize auth state with better error handling
   useEffect(() => {
     if (initializationRef.current) return;
     initializationRef.current = true;
     
     let mounted = true;
+    let authSubscription: any = null;
     
     const initializeAuth = async () => {
       try {
         console.log('Initializing auth state...');
         
-        // Get initial session
-        const { data: { session } } = await supabase.auth.getSession();
+        // Get initial session with timeout
+        const sessionPromise = supabase.auth.getSession();
+        const timeoutPromise = new Promise((_, reject) => 
+          setTimeout(() => reject(new Error('Session timeout')), 5000)
+        );
+        
+        const { data: { session } } = await Promise.race([sessionPromise, timeoutPromise]) as any;
         
         if (!mounted) return;
         
@@ -74,76 +89,91 @@ export const useAuthState = () => {
           setState(prev => ({ 
             ...prev, 
             user: authUser,
-            isLoading: false,
+            isLoading: true, // Keep loading until profile is fetched
             isInitialized: true
           }));
           
           // Fetch additional user data
           await fetchUserData(session.user.id);
         } else {
-          setState(prev => ({
-            ...prev,
+          setState({
             user: null,
             profile: null,
             permissions: {},
             isLoading: false,
             isInitialized: true
-          }));
+          });
+          isLoadingRef.current = false;
         }
         
       } catch (error) {
         console.error('Auth initialization error:', error);
         if (mounted) {
-          setState(prev => ({ 
-            ...prev, 
-            isLoading: false,
-            isInitialized: true
-          }));
-        }
-      }
-    };
-    
-    // Set up auth state listener
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, session) => {
-        if (!mounted) return;
-        
-        console.log('Auth state change:', event);
-        
-        if (event === 'SIGNED_IN' && session?.user) {
-          const authUser: AuthUser = {
-            id: session.user.id,
-            email: session.user.email || '',
-            app_metadata: session.user.app_metadata,
-            user_metadata: session.user.user_metadata,
-            aud: session.user.aud,
-            created_at: session.user.created_at
-          };
-          
-          setState(prev => ({ 
-            ...prev, 
-            user: authUser,
-            isLoading: false,
-            isInitialized: true
-          }));
-          
-          // Fetch user data
-          setTimeout(() => {
-            if (mounted) {
-              fetchUserData(session.user.id);
-            }
-          }, 100);
-          
-        } else if (event === 'SIGNED_OUT') {
-          setState(prev => ({
-            ...prev,
+          setState({
             user: null,
             profile: null,
             permissions: {},
             isLoading: false,
             isInitialized: true
-          }));
+          });
+          isLoadingRef.current = false;
         }
+      }
+    };
+    
+    // Set up auth state listener with debouncing
+    let authChangeTimeout: NodeJS.Timeout;
+    
+    authSubscription = supabase.auth.onAuthStateChange(
+      async (event, session) => {
+        if (!mounted) return;
+        
+        console.log('Auth state change:', event);
+        
+        // Clear any pending auth changes
+        if (authChangeTimeout) {
+          clearTimeout(authChangeTimeout);
+        }
+        
+        // Debounce auth state changes to prevent rapid updates
+        authChangeTimeout = setTimeout(async () => {
+          if (!mounted) return;
+          
+          if (event === 'SIGNED_IN' && session?.user) {
+            const authUser: AuthUser = {
+              id: session.user.id,
+              email: session.user.email || '',
+              app_metadata: session.user.app_metadata,
+              user_metadata: session.user.user_metadata,
+              aud: session.user.aud,
+              created_at: session.user.created_at
+            };
+            
+            setState(prev => ({ 
+              ...prev, 
+              user: authUser,
+              isLoading: true,
+              isInitialized: true
+            }));
+            
+            // Defer user data fetching to prevent blocking
+            setTimeout(() => {
+              if (mounted) {
+                fetchUserData(session.user.id);
+              }
+            }, 100);
+            
+          } else if (event === 'SIGNED_OUT') {
+            setState({
+              user: null,
+              profile: null,
+              permissions: {},
+              isLoading: false,
+              isInitialized: true
+            });
+            isLoadingRef.current = false;
+          }
+        }, 200); // Debounce by 200ms
       }
     );
     
@@ -152,13 +182,18 @@ export const useAuthState = () => {
     
     return () => {
       mounted = false;
-      subscription.unsubscribe();
+      if (authChangeTimeout) {
+        clearTimeout(authChangeTimeout);
+      }
+      if (authSubscription?.data?.subscription) {
+        authSubscription.data.subscription.unsubscribe();
+      }
     };
   }, [fetchUserData]);
   
   // Refresh user data function
   const refreshUserData = useCallback(async () => {
-    if (state.user?.id) {
+    if (state.user?.id && !isLoadingRef.current) {
       await fetchUserData(state.user.id);
     }
   }, [state.user?.id, fetchUserData]);

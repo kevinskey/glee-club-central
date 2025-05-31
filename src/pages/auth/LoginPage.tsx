@@ -1,4 +1,3 @@
-
 import * as React from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useNavigate, useLocation, Link } from 'react-router-dom';
@@ -22,13 +21,13 @@ const LoginPage = () => {
   const [password, setPassword] = React.useState('');
   const [isSubmitting, setIsSubmitting] = React.useState(false);
   const [isResetting, setIsResetting] = React.useState(false);
+  const [hasRedirected, setHasRedirected] = React.useState(false);
   
-  // Get saved redirect path from sessionStorage with default fallback
+  // Get saved redirect path
   const getRedirectPath = () => {
     const savedPath = sessionStorage.getItem('authRedirectPath');
     const timestamp = sessionStorage.getItem('authRedirectTimestamp');
     
-    // Check if the saved path is still valid (within 5 minutes)
     if (savedPath && timestamp && Date.now() - parseInt(timestamp) < 5 * 60 * 1000) {
       return savedPath;
     }
@@ -36,19 +35,24 @@ const LoginPage = () => {
     return '/role-dashboard';
   };
   
-  // Redirect if already authenticated
+  // Handle authenticated user redirect
   React.useEffect(() => {
-    if (isAuthenticated && !isLoading && !isSubmitting) {
+    if (isAuthenticated && !isLoading && !isSubmitting && !hasRedirected) {
       const redirectPath = getRedirectPath();
-      console.log('User is authenticated, redirecting to:', redirectPath);
+      console.log('User authenticated, redirecting to:', redirectPath);
       
-      navigate(redirectPath);
+      setHasRedirected(true);
       
-      // Clean up stored redirect path after successful navigation
-      sessionStorage.removeItem('authRedirectPath');
-      sessionStorage.removeItem('authRedirectTimestamp');
+      // Use setTimeout to prevent redirect loops
+      setTimeout(() => {
+        navigate(redirectPath, { replace: true });
+        
+        // Clean up stored redirect path
+        sessionStorage.removeItem('authRedirectPath');
+        sessionStorage.removeItem('authRedirectTimestamp');
+      }, 100);
     }
-  }, [isAuthenticated, isLoading, navigate, isSubmitting]);
+  }, [isAuthenticated, isLoading, navigate, isSubmitting, hasRedirected]);
   
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -66,20 +70,14 @@ const LoginPage = () => {
       if (result.error) {
         console.error("Login error:", result.error);
         toast.error(result.error.message || "Login failed");
+        setIsSubmitting(false);
       } else {
-        const redirectPath = getRedirectPath();
         toast.success("Login successful!");
-        
-        navigate(redirectPath);
-        
-        // Clean up stored redirect path
-        sessionStorage.removeItem('authRedirectPath');
-        sessionStorage.removeItem('authRedirectTimestamp');
+        // Don't set isSubmitting to false here - let the redirect effect handle it
       }
     } catch (err) {
       console.error("Unexpected login error:", err);
       toast.error("An unexpected error occurred");
-    } finally {
       setIsSubmitting(false);
     }
   };
@@ -99,22 +97,20 @@ const LoginPage = () => {
     }
   };
   
-  // Show loading state only if truly loading
-  if (isLoading) {
-    console.log('LoginPage: Showing loading state');
+  // Show loading only for initial auth check
+  if (isLoading && !isAuthenticated) {
     return (
       <div className="flex items-center justify-center min-h-screen bg-background">
         <div className="flex flex-col items-center space-y-4">
           <Spinner size="lg" />
-          <p className="text-muted-foreground">Loading...</p>
+          <p className="text-muted-foreground">Checking authentication...</p>
         </div>
       </div>
     );
   }
   
   // Show redirecting state when authenticated
-  if (isAuthenticated) {
-    console.log('LoginPage: User authenticated, showing redirect message');
+  if (isAuthenticated && !hasRedirected) {
     return (
       <div className="flex items-center justify-center min-h-screen bg-background">
         <div className="flex flex-col items-center space-y-4">
@@ -125,8 +121,6 @@ const LoginPage = () => {
     );
   }
 
-  console.log('LoginPage: Rendering login form');
-  
   // Main login form
   return (
     <div className="relative min-h-screen flex items-center justify-center bg-background">
@@ -162,6 +156,7 @@ const LoginPage = () => {
                   onChange={(e) => setEmail(e.target.value)}
                   className="bg-background/70 text-foreground border-input"
                   required
+                  disabled={isSubmitting}
                 />
               </div>
               <div className="space-y-2">
@@ -179,6 +174,7 @@ const LoginPage = () => {
                   onChange={(e) => setPassword(e.target.value)}
                   className="bg-background/70 text-foreground border-input"
                   required
+                  disabled={isSubmitting}
                 />
               </div>
               <Button 
@@ -191,7 +187,7 @@ const LoginPage = () => {
                 ) : (
                   <LogIn className="w-4 h-4 mr-2" />
                 )}
-                Sign In
+                {isSubmitting ? 'Signing In...' : 'Sign In'}
               </Button>
             </form>
             
@@ -202,6 +198,7 @@ const LoginPage = () => {
               </Link>
             </div>
           </CardContent>
+          
           <CardFooter className="flex flex-col space-y-4">
             <div className="relative">
               <div className="absolute inset-0 flex items-center">

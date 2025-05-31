@@ -36,7 +36,7 @@ const AppLayout: React.FC<AppLayoutProps> = memo(function AppLayout({
   const location = useLocation();
   const isAdmin = profile?.is_super_admin || profile?.role === 'admin';
   
-  // Set viewport height for mobile - always call this hook
+  // Set viewport height for mobile
   useEffect(() => {
     const setVh = () => {
       const vh = window.innerHeight * 0.01;
@@ -51,7 +51,7 @@ const AppLayout: React.FC<AppLayoutProps> = memo(function AppLayout({
     }
   }, [isMobile]);
 
-  // Set viewport-specific body class - always call this hook
+  // Set viewport-specific body class
   useEffect(() => {
     if (isMobile) {
       document.body.classList.add('is-mobile-view');
@@ -64,8 +64,8 @@ const AppLayout: React.FC<AppLayoutProps> = memo(function AppLayout({
     };
   }, [isMobile]);
   
-  // Show loading state while auth is initializing
-  if (isLoading) {
+  // Show loading state with timeout for auth pages
+  if (isLoading && location.pathname !== '/login') {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
         <PageLoader message="Loading..." />
