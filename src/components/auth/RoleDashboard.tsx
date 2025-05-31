@@ -21,15 +21,13 @@ export const RoleDashboard: React.FC = () => {
       hasRedirected
     });
 
-    // Only proceed if auth is initialized and we haven't redirected yet
+    // Wait for initialization
     if (!isInitialized || hasRedirected) {
-      console.log('RoleDashboard: Not initialized or already redirected');
       return;
     }
 
     // Wait for loading to complete
     if (isLoading) {
-      console.log('RoleDashboard: Still loading, waiting...');
       return;
     }
 
@@ -41,31 +39,25 @@ export const RoleDashboard: React.FC = () => {
       return;
     }
 
-    // Handle authenticated users - redirect based on role
+    // Handle authenticated users - simplified routing
     if (isAuthenticated && user) {
       console.log('RoleDashboard: User authenticated, determining route...');
       
       let targetRoute = '/dashboard/member'; // Default route
       
-      // Determine route based on role
       if (isAdmin()) {
         targetRoute = '/admin';
-        console.log('RoleDashboard: Routing admin user to admin dashboard');
       } else if (profile?.role === 'fan') {
         targetRoute = '/fan-dashboard';
-        console.log('RoleDashboard: Routing fan user to fan dashboard');
-      } else {
-        targetRoute = '/dashboard/member';
-        console.log('RoleDashboard: Routing member user to member dashboard');
       }
       
-      console.log('RoleDashboard: Final redirect to:', targetRoute);
+      console.log('RoleDashboard: Redirecting to:', targetRoute);
       setHasRedirected(true);
       navigate(targetRoute, { replace: true });
     }
   }, [isLoading, isAuthenticated, user, profile, isAdmin, navigate, isInitialized, hasRedirected]);
 
-  // Show loading state
+  // Show loading states with clearer messaging
   if (!isInitialized) {
     return (
       <PageLoader 
@@ -78,7 +70,7 @@ export const RoleDashboard: React.FC = () => {
   if (isLoading) {
     return (
       <PageLoader 
-        message="Verifying your credentials..."
+        message="Loading your profile..."
         className="min-h-screen"
       />
     );
@@ -93,16 +85,6 @@ export const RoleDashboard: React.FC = () => {
     );
   }
 
-  if (isAuthenticated && user && !hasRedirected) {
-    return (
-      <PageLoader 
-        message="Determining your access level..."
-        className="min-h-screen"
-      />
-    );
-  }
-
-  // Fallback loader while routing completes
   return (
     <PageLoader 
       message="Loading your dashboard..." 

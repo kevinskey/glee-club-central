@@ -1,3 +1,4 @@
+
 import React, { createContext, useContext, useEffect, useState, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { AuthUser, Profile, AuthContextType } from '@/types/auth';
@@ -5,22 +6,13 @@ import { useAuthState } from '@/hooks/auth/useAuthState';
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-// Export cleanup functions
+// Simplified cleanup function - only clear specific problematic keys
 export const cleanupAuthState = () => {
-  // Remove standard auth tokens
-  localStorage.removeItem('supabase.auth.token');
-  // Remove all Supabase auth keys from localStorage
-  Object.keys(localStorage).forEach((key) => {
-    if (key.startsWith('supabase.auth.') || key.includes('sb-')) {
-      localStorage.removeItem(key);
-    }
-  });
-  // Remove from sessionStorage if in use
-  Object.keys(sessionStorage || {}).forEach((key) => {
-    if (key.startsWith('supabase.auth.') || key.includes('sb-')) {
-      sessionStorage.removeItem(key);
-    }
-  });
+  // Only remove keys that might be causing conflicts
+  const keysToRemove = Object.keys(localStorage).filter(key => 
+    key.includes('sb-') && key.includes('auth-token')
+  );
+  keysToRemove.forEach(key => localStorage.removeItem(key));
 };
 
 export const resetAuthSystem = async () => {
@@ -38,26 +30,21 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const { user, profile, isLoading, isInitialized, permissions, refreshUserData } = useAuthState();
   const [session, setSession] = useState<any>(null);
 
-  // Keep track of session changes
+  // Simplified session tracking
   useEffect(() => {
-    let mounted = true;
-    
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, session) => {
-        if (!mounted) return;
-        
+      (event, session) => {
         console.log('AuthContext: Auth state change:', event, session?.user?.id);
         setSession(session);
         
         if (event === 'SIGNED_OUT') {
-          // Clear any cached data on sign out
+          // Only clear on actual sign out
           cleanupAuthState();
         }
       }
     );
 
     return () => {
-      mounted = false;
       subscription.unsubscribe();
     };
   }, []);
@@ -67,9 +54,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const login = useCallback(async (email: string, password: string) => {
     try {
       console.log('AuthContext: Login attempt for:', email);
-      
-      // Clean up any existing auth state first
-      cleanupAuthState();
       
       const { data, error } = await supabase.auth.signInWithPassword({ 
         email: email.trim(), 
@@ -96,10 +80,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const logout = useCallback(async () => {
     try {
-      cleanupAuthState();
       const { error } = await supabase.auth.signOut();
       if (!error) {
         setSession(null);
+        cleanupAuthState();
       }
       return { error };
     } catch (err) {

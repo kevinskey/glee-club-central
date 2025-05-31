@@ -30,34 +30,19 @@ const LoginPage = () => {
     addCentennialImageToLibrary();
   }, []);
   
-  // Handle authenticated user redirect - simplified logic
+  // Simplified redirect logic
   React.useEffect(() => {
-    console.log('LoginPage: Auth state check', {
-      isAuthenticated,
-      user: !!user,
-      isInitialized,
-      isLoading
-    });
-
-    // Only redirect if fully authenticated and initialized
-    if (isAuthenticated && user && isInitialized && !isLoading) {
+    if (isAuthenticated && user && isInitialized) {
       console.log('LoginPage: User is authenticated, redirecting...');
-      
       const from = location.state?.from?.pathname || '/role-dashboard';
-      console.log('LoginPage: Redirecting to:', from);
-      
-      // Clear any login errors
       setLoginError(null);
-      
-      // Navigate immediately
       navigate(from, { replace: true });
     }
-  }, [isAuthenticated, user, isInitialized, isLoading, navigate, location.state]);
+  }, [isAuthenticated, user, isInitialized, navigate, location.state]);
   
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    // Clear previous errors
     setLoginError(null);
     
     if (!email || !password) {
@@ -79,7 +64,6 @@ const LoginPage = () => {
       if (result.error) {
         console.error("LoginPage: Login error:", result.error);
         
-        // Handle specific Supabase auth errors
         let errorMessage = "Login failed";
         if (result.error.message) {
           if (result.error.message.includes('Invalid login credentials')) {
@@ -99,7 +83,6 @@ const LoginPage = () => {
       } else {
         console.log("LoginPage: Login successful!");
         toast.success("Login successful! Redirecting...");
-        // Don't set isSubmitting to false here - let the redirect effect handle it
       }
     } catch (err) {
       console.error("LoginPage: Unexpected login error:", err);
@@ -110,7 +93,6 @@ const LoginPage = () => {
     }
   };
   
-  // Handle auth system reset
   const handleResetAuth = async () => {
     if (window.confirm("Are you sure you want to reset the authentication system? This will clear all login data.")) {
       setIsResetting(true);
