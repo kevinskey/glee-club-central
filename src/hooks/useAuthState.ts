@@ -24,6 +24,8 @@ export const useAuthState = () => {
   
   const initializationRef = useRef(false);
   const isLoadingRef = useRef(true);
+  const lastEventRef = useRef<string>('');
+  const debounceTimeoutRef = useRef<NodeJS.Timeout>();
   
   // Fetch user data function - simplified and cached
   const fetchUserData = useCallback(async (userId: string) => {
@@ -121,22 +123,28 @@ export const useAuthState = () => {
       }
     };
     
-    // Set up auth state listener with debouncing
-    let authChangeTimeout: NodeJS.Timeout;
-    
+    // Set up auth state listener with better debouncing
     authSubscription = supabase.auth.onAuthStateChange(
       async (event, session) => {
         if (!mounted) return;
         
+        // Prevent duplicate events
+        const eventKey = `${event}-${session?.user?.id || 'null'}`;
+        if (lastEventRef.current === eventKey) {
+          console.log('Ignoring duplicate auth event:', event);
+          return;
+        }
+        lastEventRef.current = eventKey;
+        
         console.log('Auth state change:', event);
         
         // Clear any pending auth changes
-        if (authChangeTimeout) {
-          clearTimeout(authChangeTimeout);
+        if (debounceTimeoutRef.current) {
+          clearTimeout(debounceTimeoutRef.current);
         }
         
         // Debounce auth state changes to prevent rapid updates
-        authChangeTimeout = setTimeout(async () => {
+        debounceTimeoutRef.current = setTimeout(async () => {
           if (!mounted) return;
           
           if (event === 'SIGNED_IN' && session?.user) {
@@ -161,7 +169,7 @@ export const useAuthState = () => {
               if (mounted) {
                 fetchUserData(session.user.id);
               }
-            }, 100);
+            }, 200);
             
           } else if (event === 'SIGNED_OUT') {
             setState({
@@ -173,7 +181,7 @@ export const useAuthState = () => {
             });
             isLoadingRef.current = false;
           }
-        }, 200); // Debounce by 200ms
+        }, 300); // Increased debounce delay
       }
     );
     
@@ -182,8 +190,8 @@ export const useAuthState = () => {
     
     return () => {
       mounted = false;
-      if (authChangeTimeout) {
-        clearTimeout(authChangeTimeout);
+      if (debounceTimeoutRef.current) {
+        clearTimeout(debounceTimeoutRef.current);
       }
       if (authSubscription?.data?.subscription) {
         authSubscription.data.subscription.unsubscribe();
