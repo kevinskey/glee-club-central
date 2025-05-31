@@ -3,7 +3,6 @@ import React, { createContext, useContext, useEffect, useState, useCallback } fr
 import { supabase } from '@/integrations/supabase/client';
 import { AuthUser, Profile, AuthContextType } from '@/types/auth';
 import { useAuthState } from '@/hooks/useAuthState';
-import { fetchUserPermissions } from '@/utils/supabase/permissions';
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
@@ -44,10 +43,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   useEffect(() => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
+        console.log('Auth state change:', event, session?.user?.id);
         setSession(session);
+        
         if (event === 'SIGNED_OUT') {
           // Clear any cached data on sign out
-          localStorage.removeItem('supabase.auth.token');
+          cleanupAuthState();
         }
       }
     );
@@ -58,8 +59,25 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const isAuthenticated = !!user && !!session;
 
   const login = useCallback(async (email: string, password: string) => {
-    const { error } = await supabase.auth.signInWithPassword({ email, password });
-    return { error };
+    try {
+      console.log('Login attempt for:', email);
+      const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+      
+      if (error) {
+        console.error('Login error:', error);
+        return { error };
+      }
+      
+      if (data.session) {
+        console.log('Login successful, session created');
+        setSession(data.session);
+      }
+      
+      return { error: null };
+    } catch (err) {
+      console.error('Unexpected login error:', err);
+      return { error: err };
+    }
   }, []);
 
   const logout = useCallback(async () => {

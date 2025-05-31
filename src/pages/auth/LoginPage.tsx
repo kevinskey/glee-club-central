@@ -7,13 +7,13 @@ import { Spinner } from '@/components/ui/spinner';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
-import { LogIn, UserPlus, Mail, RefreshCcw } from 'lucide-react';
+import { LogIn, UserPlus, RefreshCcw } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { cleanupAuthState, resetAuthSystem } from '@/contexts/AuthContext';
 import { addCentennialImageToLibrary } from '@/utils/addCentennialImage';
 
 const LoginPage = () => {
-  const { login, isAuthenticated, isLoading } = useAuth();
+  const { login, isAuthenticated, isLoading, user } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   
@@ -28,14 +28,31 @@ const LoginPage = () => {
     addCentennialImageToLibrary();
   }, []);
   
-  // Handle authenticated user redirect
+  // Handle authenticated user redirect - improved logic
   React.useEffect(() => {
-    if (isAuthenticated && !isLoading) {
-      console.log('User authenticated, redirecting to role-dashboard');
-      setIsSubmitting(false);
-      navigate('/role-dashboard', { replace: true });
+    if (isAuthenticated && user && !isLoading) {
+      console.log('User authenticated, redirecting...', { userId: user.id, email: user.email });
+      
+      // Use a small delay to ensure state is fully settled
+      const timer = setTimeout(() => {
+        const from = location.state?.from?.pathname || '/role-dashboard';
+        console.log('Redirecting to:', from);
+        
+        // Force navigation using replace to prevent back button issues
+        navigate(from, { replace: true });
+        
+        // Fallback: if navigation doesn't work, force page reload
+        setTimeout(() => {
+          if (window.location.pathname === '/login') {
+            console.log('Navigation failed, forcing page reload');
+            window.location.href = from;
+          }
+        }, 1000);
+      }, 100);
+      
+      return () => clearTimeout(timer);
     }
-  }, [isAuthenticated, isLoading, navigate]);
+  }, [isAuthenticated, user, isLoading, navigate, location.state]);
   
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -48,6 +65,7 @@ const LoginPage = () => {
     setIsSubmitting(true);
     
     try {
+      console.log('Attempting login for:', email);
       const result = await login(email, password);
       
       if (result.error) {
@@ -55,8 +73,11 @@ const LoginPage = () => {
         toast.error(result.error.message || "Login failed");
         setIsSubmitting(false);
       } else {
+        console.log("Login successful!");
         toast.success("Login successful!");
-        // isSubmitting will be reset by the redirect effect
+        
+        // Don't reset isSubmitting here - let the redirect effect handle it
+        // The redirect effect will trigger and handle the navigation
       }
     } catch (err) {
       console.error("Unexpected login error:", err);
@@ -72,7 +93,7 @@ const LoginPage = () => {
       try {
         await resetAuthSystem();
         toast.success("Authentication system reset successfully");
-        window.location.reload(); // Force page reload after reset
+        window.location.reload();
       } catch (error) {
         console.error("Error resetting auth system:", error);
         toast.error("Failed to reset authentication system");
@@ -82,7 +103,7 @@ const LoginPage = () => {
   };
   
   // Show minimal loading for initial auth check
-  if (isLoading && !isAuthenticated) {
+  if (isLoading && !user) {
     return (
       <div className="flex items-center justify-center min-h-screen bg-background">
         <div className="flex flex-col items-center space-y-4">
@@ -93,9 +114,16 @@ const LoginPage = () => {
     );
   }
   
-  // If authenticated, don't show anything while redirecting
-  if (isAuthenticated) {
-    return null;
+  // If authenticated, show redirecting message
+  if (isAuthenticated && user) {
+    return (
+      <div className="flex items-center justify-center min-h-screen bg-background">
+        <div className="flex flex-col items-center space-y-4">
+          <Spinner size="lg" />
+          <p className="text-muted-foreground">Redirecting to dashboard...</p>
+        </div>
+      </div>
+    );
   }
 
   // Main login form
