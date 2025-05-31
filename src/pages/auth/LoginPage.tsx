@@ -1,3 +1,4 @@
+
 import * as React from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useNavigate, useLocation, Link } from 'react-router-dom';
@@ -10,6 +11,7 @@ import { LogIn, UserPlus, Mail, RefreshCcw } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { SiteImage } from '@/components/site/SiteImage';
 import { cleanupAuthState, resetAuthSystem } from '@/contexts/AuthContext';
+import { addCentennialImageToLibrary } from '@/utils/addCentennialImage';
 
 const LoginPage = () => {
   const { login, isAuthenticated, isLoading } = useAuth();
@@ -22,6 +24,11 @@ const LoginPage = () => {
   const [isSubmitting, setIsSubmitting] = React.useState(false);
   const [isResetting, setIsResetting] = React.useState(false);
   const [hasRedirected, setHasRedirected] = React.useState(false);
+  
+  // Add the centennial image to library on component mount
+  React.useEffect(() => {
+    addCentennialImageToLibrary();
+  }, []);
   
   // Get saved redirect path
   const getRedirectPath = () => {
@@ -127,17 +134,17 @@ const LoginPage = () => {
       {/* Background image with overlay */}
       <div className="absolute inset-0 z-0">
         <SiteImage 
-          src="/lovable-uploads/6855d8e0-d27d-4722-af13-73921e99ab52.png"
-          alt="Glee Club Background"
-          className="w-full h-full object-cover opacity-80"
+          src="/lovable-uploads/5d6ba7fa-4ea7-42ac-872e-940fb620a273.png"
+          alt="Centennial Celebration of Spelman College Glee Club"
+          className="w-full h-full object-cover opacity-90"
           objectFit="cover"
         />
-        <div className="absolute inset-0 bg-black/50"></div>
+        <div className="absolute inset-0 bg-black/40"></div>
       </div>
       
       {/* Login form container */}
       <div className="relative z-10 w-full max-w-md px-4">
-        <Card className="w-full border-border bg-card/90 backdrop-blur-md shadow-xl">
+        <Card className="w-full border-border bg-card/95 backdrop-blur-md shadow-xl">
           <CardHeader className="space-y-1 text-center">
             <CardTitle className="text-2xl font-bold text-card-foreground">Spelman Glee Club Portal</CardTitle>
             <CardDescription className="text-muted-foreground">
