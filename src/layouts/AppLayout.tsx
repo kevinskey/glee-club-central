@@ -12,6 +12,7 @@ import { MobileNav } from "@/components/layout/MobileNav";
 import { MobileBottomNav } from "@/components/layout/MobileBottomNav";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useAuth } from "@/contexts/AuthContext";
+import { PageLoader } from "@/components/ui/page-loader";
 
 type SidebarType = "admin" | "member" | "fan" | "none";
 
@@ -31,9 +32,18 @@ const AppLayout: React.FC<AppLayoutProps> = memo(function AppLayout({
   children
 }) {
   const isMobile = useIsMobile();
-  const { profile } = useAuth();
+  const { profile, isLoading, isAuthenticated } = useAuth();
   const location = useLocation();
   const isAdmin = profile?.is_super_admin || profile?.role === 'admin';
+  
+  // Show loading state while auth is initializing to prevent blinking
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <PageLoader message="Loading dashboard..." />
+      </div>
+    );
+  }
   
   // Determine which header to show
   const isLandingHeader = sidebarType === "none";
@@ -116,7 +126,7 @@ const AppLayout: React.FC<AppLayoutProps> = memo(function AppLayout({
     return `${baseClasses} p-3 sm:p-4 md:p-5 lg:p-6 md:ml-64 pb-20 md:pb-6`;
   };
 
-  // Layout content
+  // Layout content with consistent styling to prevent white flashes
   const layoutContent = (
     <div className="min-h-screen flex flex-col bg-background w-full">
       <Toaster position={isMobile ? "bottom-center" : "top-right"} />

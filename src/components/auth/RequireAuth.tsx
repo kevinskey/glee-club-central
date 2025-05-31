@@ -30,7 +30,7 @@ const RequireAuth = ({ children, requireAdmin, allowedUserTypes }: RequireAuthPr
     if (isLoading) {
       const timer = setTimeout(() => {
         setShowLoading(true);
-      }, 150); // Small delay before showing loading
+      }, 100); // Reduced delay to minimize perceived lag
       
       return () => clearTimeout(timer);
     } else {
@@ -45,7 +45,7 @@ const RequireAuth = ({ children, requireAdmin, allowedUserTypes }: RequireAuthPr
     }
   }, [isLoading, isAuthenticated, location.pathname, isRedirecting]);
   
-  // Show loading state only after debounce period
+  // Show loading state with consistent styling
   if (showLoading) {
     return (
       <div className="flex items-center justify-center min-h-screen bg-background">

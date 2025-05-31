@@ -5,8 +5,17 @@ import { Settings } from "lucide-react";
 import { NotificationPreferences } from '@/components/settings/NotificationPreferences';
 import { ProfileSummary } from '@/components/settings/ProfileSummary';
 import { AccountControls } from '@/components/settings/AccountControls';
+import { useAuth } from '@/contexts/AuthContext';
+import { PageLoader } from '@/components/ui/page-loader';
 
 const SettingsPage: React.FC = () => {
+  const { user, isLoading } = useAuth();
+
+  // Show loading state while auth is initializing
+  if (isLoading || !user) {
+    return <PageLoader message="Loading settings..." />;
+  }
+
   return (
     <div className="container mx-auto px-4 py-8 max-w-4xl">
       <PageHeader

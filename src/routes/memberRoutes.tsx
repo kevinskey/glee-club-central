@@ -23,9 +23,16 @@ import FanAnalyticsPage from '@/pages/dashboard/FanAnalyticsPage';
 import RoleDashboard from '@/components/auth/RoleDashboard';
 import SettingsPage from '@/pages/settings/SettingsPage';
 
-// Lazy Load Heavy Components
+// Lazy Load Heavy Components with stable keys to prevent remounting
 const MemberDashboardPage = React.lazy(() => import('@/pages/dashboard/MemberDashboardPage'));
 const FanDashboardPage = React.lazy(() => import('@/pages/FanDashboardPage'));
+
+// Consistent fallback component that matches layout styling
+const DashboardPageLoader = () => (
+  <div className="min-h-[60vh] flex items-center justify-center bg-background">
+    <PageLoader message="Loading dashboard..." size="lg" />
+  </div>
+);
 
 export const memberRoutes: RouteObject[] = [
   // Role-based dashboard redirection
@@ -58,7 +65,7 @@ export const memberRoutes: RouteObject[] = [
       { 
         path: 'member', 
         element: (
-          <Suspense fallback={<PageLoader />}>
+          <Suspense fallback={<DashboardPageLoader />} key="member-dashboard">
             <MemberDashboardPage />
           </Suspense>
         )
@@ -94,7 +101,7 @@ export const memberRoutes: RouteObject[] = [
       { 
         index: true, 
         element: (
-          <Suspense fallback={<PageLoader />}>
+          <Suspense fallback={<DashboardPageLoader />} key="fan-dashboard">
             <FanDashboardPage />
           </Suspense>
         )

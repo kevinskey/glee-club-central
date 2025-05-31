@@ -1,7 +1,7 @@
 
 /* Dashboard smooth transitions with loading coordination */
 .dashboard-content {
-  transition: opacity 0.4s ease-in-out, transform 0.3s ease-in-out;
+  transition: opacity 0.3s ease-in-out, transform 0.2s ease-in-out;
   min-height: calc(100vh - 200px);
   will-change: opacity, transform;
 }
@@ -48,7 +48,7 @@
   background: rgba(255, 255, 255, 0.9);
   z-index: 10;
   opacity: 0;
-  transition: opacity 0.3s ease-in-out;
+  transition: opacity 0.2s ease-in-out;
   pointer-events: none;
 }
 
@@ -68,9 +68,9 @@
   will-change: opacity, transform;
 }
 
-/* Smooth content transitions with auth debouncing */
+/* Smooth content transitions with reduced flashing */
 .dashboard-content > * {
-  transition: opacity 0.3s ease-in-out;
+  transition: opacity 0.2s ease-in-out;
 }
 
 /* Auth-optimized loading state with minimum duration */
@@ -78,11 +78,11 @@
   opacity: 0;
 }
 
-/* Loading guard with auth debouncing */
+/* Loading guard with reduced debouncing */
 .dashboard-loading-guard {
   position: relative;
   min-height: 200px;
-  transition-delay: 200ms; /* Debounce rapid auth changes */
+  transition-delay: 100ms; /* Reduced debounce for faster response */
 }
 
 .dashboard-loading-guard::before {
@@ -95,7 +95,7 @@
   background: rgba(255, 255, 255, 0.8);
   z-index: 1;
   opacity: 0;
-  transition: opacity 0.3s ease-in-out;
+  transition: opacity 0.2s ease-in-out;
 }
 
 .dashboard-loading-guard.loading::before {
@@ -104,7 +104,7 @@
 
 /* Enhanced skeleton loading with auth timing */
 .skeleton-content {
-  animation: fadeInUp 0.6s ease-out;
+  animation: fadeInUp 0.4s ease-out;
 }
 
 @keyframes fadeInUp {
@@ -130,19 +130,19 @@
   .dashboard-content {
     opacity: 1;
     pointer-events: auto;
-    transition: opacity 0.4s ease-in-out;
+    transition: opacity 0.3s ease-in-out;
   }
 }
 
 /* Auth state change optimizations */
 .auth-loading {
   opacity: 0.6;
-  transition: opacity 0.2s ease-in-out;
+  transition: opacity 0.15s ease-in-out;
 }
 
 .auth-ready {
   opacity: 1;
-  transition: opacity 0.4s ease-in-out;
+  transition: opacity 0.3s ease-in-out;
 }
 
 /* Reduce motion for users who prefer it */
@@ -158,7 +158,7 @@
 
 /* Debounced loading states with auth coordination */
 .dashboard-debounced-loading {
-  transition-delay: 300ms; /* Longer delay for auth changes */
+  transition-delay: 200ms; /* Reduced delay for auth changes */
 }
 
 /* Loading coordination fade optimized for auth */
@@ -168,7 +168,7 @@
 
 .loading-fade-enter-active {
   opacity: 1;
-  transition: opacity 0.5s ease-in-out;
+  transition: opacity 0.4s ease-in-out;
 }
 
 .loading-fade-exit {
@@ -177,7 +177,7 @@
 
 .loading-fade-exit-active {
   opacity: 0;
-  transition: opacity 0.3s ease-in-out;
+  transition: opacity 0.2s ease-in-out;
 }
 
 /* Auth-specific transition states */
@@ -189,7 +189,7 @@
 .auth-transition-enter-active {
   opacity: 1;
   transform: scale(1);
-  transition: opacity 0.4s ease-out, transform 0.3s ease-out;
+  transition: opacity 0.3s ease-out, transform 0.2s ease-out;
 }
 
 .auth-transition-exit {
@@ -200,5 +200,21 @@
 .auth-transition-exit-active {
   opacity: 0;
   transform: scale(0.98);
-  transition: opacity 0.3s ease-in, transform 0.2s ease-in;
+  transition: opacity 0.2s ease-in, transform 0.15s ease-in;
+}
+
+/* Prevent white flashes during page transitions */
+body {
+  background-color: hsl(var(--background));
+}
+
+.page-transition {
+  background-color: hsl(var(--background));
+  min-height: 100vh;
+}
+
+/* Optimize for dashboard container */
+.mobile-container {
+  background-color: hsl(var(--background));
+  min-height: inherit;
 }
