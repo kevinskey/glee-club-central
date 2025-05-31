@@ -1,4 +1,3 @@
-
 /* ... keep existing code */
 
 /* Media Library components */
@@ -89,19 +88,19 @@
 }
 
 .animate-marquee {
-  animation: marquee 90s linear infinite;
+  animation: marquee 135s linear infinite;
 }
 
 .animate-marquee-fast {
-  animation: marquee-fast 67.5s linear infinite;
+  animation: marquee-fast 101.25s linear infinite;
 }
 
 .animate-marquee-normal {
-  animation: marquee-normal 75s linear infinite;
+  animation: marquee-normal 112.5s linear infinite;
 }
 
 .animate-marquee-slow {
-  animation: marquee-slow 90s linear infinite;
+  animation: marquee-slow 135s linear infinite;
 }
 
 /* Pause animation on hover */
