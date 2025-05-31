@@ -22,15 +22,15 @@ import {
 
 export function DashboardQuickAccess() {
   const { isAdmin, profile } = useAuth();
-  const isAdminUser = profile?.is_super_admin || (isAdmin && isAdmin());
+  const isAdminUser = isAdmin && isAdmin();
   
-  // Debug logging to understand admin detection
-  console.log('DashboardQuickAccess debug:', {
+  // Debug logging for admin detection
+  console.log('DashboardQuickAccess admin check:', {
     hasProfile: !!profile,
-    profileIsSuperAdmin: profile?.is_super_admin,
     profileRole: profile?.role,
-    isAdminFunction: isAdmin ? isAdmin() : 'no function',
-    finalIsAdminUser: isAdminUser
+    profileIsSuperAdmin: profile?.is_super_admin,
+    isAdminFunction: isAdminUser,
+    finalDecision: isAdminUser
   });
   
   // Quick access links for regular users
@@ -55,9 +55,7 @@ export function DashboardQuickAccess() {
     { icon: <Settings className="h-5 w-5" />, title: "Settings", path: "/admin/settings", color: "bg-gray-500" },
   ];
   
-  // Force admin view if profile loading is problematic
-  const shouldShowAdminLinks = isAdminUser || profile?.role === 'admin' || (profile && Object.keys(profile).length === 0);
-  const currentLinks = shouldShowAdminLinks ? adminQuickAccessLinks : memberQuickAccessLinks;
+  const currentLinks = isAdminUser ? adminQuickAccessLinks : memberQuickAccessLinks;
 
   return (
     <Card>
@@ -66,7 +64,7 @@ export function DashboardQuickAccess() {
           <div>
             <CardTitle>Quick Access</CardTitle>
             <CardDescription>
-              {shouldShowAdminLinks ? "Administrative Tools & Resources" : "Frequently used resources"}
+              {isAdminUser ? "Administrative Tools & Resources" : "Frequently used resources"}
             </CardDescription>
           </div>
         </div>

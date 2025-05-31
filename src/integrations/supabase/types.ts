@@ -1706,6 +1706,10 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: boolean
       }
+      is_self_or_admin: {
+        Args: { profile_user_id: string }
+        Returns: boolean
+      }
       is_user_admin: {
         Args: { user_id: string }
         Returns: boolean

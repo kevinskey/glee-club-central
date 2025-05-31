@@ -2,6 +2,7 @@ import React, { createContext, useContext, useEffect, useState } from 'react';
 import { Session, User } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
 import { UserType } from '@/types/auth';
+import { toast } from 'sonner';
 
 interface Profile {
   id: string;
@@ -40,6 +41,7 @@ interface AuthContextType {
   updatePassword: (newPassword: string) => Promise<{ error: any }>;
   resetPassword: (email: string) => Promise<{ error: any }>;
   resetAuthSystem: () => Promise<{ success: boolean }>;
+  triggerAdminOverride: () => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -81,9 +83,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [isLoading, setIsLoading] = useState(true);
   const [isInitialized, setIsInitialized] = useState(false);
   const [permissions, setPermissions] = useState<{ [key: string]: boolean }>({});
+  const [profileLoadFailed, setProfileLoadFailed] = useState(false);
 
   const fetchProfile = async (userId: string) => {
     try {
+      console.log('Fetching profile for user:', userId);
       const { data, error } = await supabase
         .from('profiles')
         .select('*')
@@ -92,12 +96,22 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
       if (error) {
         console.error('Error fetching profile:', error);
+        setProfileLoadFailed(true);
+        
+        // Show warning about profile loading issue
+        if (error.code !== 'PGRST116') { // Not a "no rows" error
+          toast.warning('Profile loading issue detected. Admin access may be limited.');
+        }
         return null;
       }
 
+      console.log('Profile loaded successfully:', data);
+      setProfileLoadFailed(false);
       return data;
     } catch (error) {
       console.error('Profile fetch error:', error);
+      setProfileLoadFailed(true);
+      toast.error('Failed to load user profile. Some features may be unavailable.');
       return null;
     }
   };
@@ -131,6 +145,30 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       const permissionsData = await fetchPermissions(user.id);
       setPermissions(permissionsData);
     }
+  };
+
+  // Manual admin override function for when profile loading fails
+  const triggerAdminOverride = () => {
+    if (!user) {
+      toast.error('No authenticated user found');
+      return;
+    }
+
+    console.log('Triggering admin override for user:', user.id);
+    
+    // Create a minimal admin profile
+    const adminOverrideProfile: Profile = {
+      id: user.id,
+      first_name: 'Admin',
+      last_name: 'User',
+      role: 'admin',
+      is_super_admin: true,
+      status: 'active'
+    };
+    
+    setProfile(adminOverrideProfile);
+    setProfileLoadFailed(false);
+    toast.success('Admin override activated. You now have admin access.');
   };
 
   const login = async (email: string, password: string) => {
@@ -216,7 +254,22 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const isAdmin = () => {
-    return profile?.is_super_admin === true || profile?.role === 'admin';
+    // Enhanced admin detection with fallback
+    if (profile?.is_super_admin === true || profile?.role === 'admin') {
+      return true;
+    }
+    
+    // Fallback: If profile failed to load but user exists, 
+    // check user metadata for admin indicators
+    if (profileLoadFailed && user) {
+      const userRole = user.user_metadata?.role || user.app_metadata?.role;
+      if (userRole === 'admin' || userRole === 'super_admin') {
+        console.log('Admin detected via user metadata fallback');
+        return true;
+      }
+    }
+    
+    return false;
   };
 
   const isMember = () => {
@@ -224,7 +277,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const getUserType = (): UserType => {
-    if (profile?.is_super_admin === true || profile?.role === 'admin') {
+    if (isAdmin()) {
       return 'admin';
     }
     return 'member';
@@ -290,6 +343,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         } else {
           setProfile(null);
           setPermissions({});
+          setProfileLoadFailed(false);
         }
 
         if (!isInitialized) {
@@ -304,6 +358,28 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       subscription.unsubscribe();
     };
   }, [isInitialized]);
+
+  // Show warning when profile fails to load for authenticated users
+  useEffect(() => {
+    if (profileLoadFailed && user && isInitialized) {
+      console.warn('Profile failed to load for authenticated user:', user.id);
+      
+      // Show a toast with manual override option for admins
+      const userRole = user.user_metadata?.role || user.app_metadata?.role;
+      if (userRole === 'admin' || userRole === 'super_admin') {
+        toast.warning(
+          'Profile loading failed. Click here to activate admin override.',
+          {
+            duration: 10000,
+            action: {
+              label: 'Override',
+              onClick: triggerAdminOverride
+            }
+          }
+        );
+      }
+    }
+  }, [profileLoadFailed, user, isInitialized]);
 
   const value: AuthContextType = {
     user,
@@ -328,6 +404,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     updatePassword,
     resetPassword,
     resetAuthSystem,
+    triggerAdminOverride,
   };
 
   return (
