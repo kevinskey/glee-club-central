@@ -122,7 +122,7 @@ const LoginPage = () => {
   // Main login form
   return (
     <div 
-      className="relative min-h-screen w-full flex items-center justify-center"
+      className="relative min-h-screen w-full flex items-center justify-center animate-fade-in"
       style={{
         backgroundImage: `url('/lovable-uploads/5d6ba7fa-4ea7-42ac-872e-940fb620a273.png')`,
         backgroundSize: 'cover',
@@ -131,106 +131,110 @@ const LoginPage = () => {
         backgroundAttachment: 'fixed'
       }}
     >
-      {/* Dark overlay for better text readability */}
-      <div className="absolute inset-0 bg-black/40 z-0" />
+      {/* Dark overlay for better contrast */}
+      <div className="absolute inset-0 bg-black/30 z-0" />
       
-      {/* Login form container */}
+      {/* Login form container with semi-transparent background */}
       <div className="relative z-10 w-full max-w-md px-4">
-        <Card className="w-full border-border bg-card/95 backdrop-blur-md shadow-xl">
-          <CardHeader className="space-y-1 text-center">
-            <CardTitle className="text-2xl font-bold text-card-foreground">Spelman Glee Club Portal</CardTitle>
-            <CardDescription className="text-muted-foreground">
-              Enter your credentials to sign in to your account
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <form onSubmit={handleLogin} className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="email" className="text-foreground">Email</Label>
-                <Input
-                  id="email"
-                  type="email"
-                  placeholder="your.email@example.com"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  className="bg-background/70 text-foreground border-input"
-                  required
-                  disabled={isSubmitting}
-                />
-              </div>
-              <div className="space-y-2">
-                <div className="flex justify-between">
-                  <Label htmlFor="password" className="text-foreground">Password</Label>
-                  <Link to="/forgot-password" className="text-sm text-glee-purple hover:underline">
-                    Forgot password?
-                  </Link>
+        <div className="bg-white/85 dark:bg-black/65 backdrop-blur-sm rounded-lg shadow-xl p-6 border border-white/20 dark:border-white/10">
+          <Card className="w-full border-0 bg-transparent shadow-none">
+            <CardHeader className="space-y-1 text-center px-0">
+              <CardTitle className="text-2xl font-bold text-gray-900 dark:text-gray-100">
+                Spelman Glee Club Portal
+              </CardTitle>
+              <CardDescription className="text-gray-700 dark:text-gray-300">
+                Enter your credentials to sign in to your account
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="px-0">
+              <form onSubmit={handleLogin} className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="email" className="text-gray-900 dark:text-gray-100">Email</Label>
+                  <Input
+                    id="email"
+                    type="email"
+                    placeholder="your.email@example.com"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    className="bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 border-gray-300 dark:border-gray-600"
+                    required
+                    disabled={isSubmitting}
+                  />
                 </div>
-                <Input
-                  id="password"
-                  type="password"
-                  placeholder="••••••••"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  className="bg-background/70 text-foreground border-input"
-                  required
+                <div className="space-y-2">
+                  <div className="flex justify-between">
+                    <Label htmlFor="password" className="text-gray-900 dark:text-gray-100">Password</Label>
+                    <Link to="/forgot-password" className="text-sm text-glee-purple hover:underline">
+                      Forgot password?
+                    </Link>
+                  </div>
+                  <Input
+                    id="password"
+                    type="password"
+                    placeholder="••••••••"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    className="bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 border-gray-300 dark:border-gray-600"
+                    required
+                    disabled={isSubmitting}
+                  />
+                </div>
+                <Button 
+                  type="submit" 
+                  className="w-full bg-glee-spelman hover:bg-glee-spelman/90 text-white" 
                   disabled={isSubmitting}
-                />
-              </div>
-              <Button 
-                type="submit" 
-                className="w-full bg-glee-spelman hover:bg-glee-spelman/90 text-white" 
-                disabled={isSubmitting}
-              >
-                {isSubmitting ? (
-                  <Spinner size="sm" className="mr-2" />
-                ) : (
-                  <LogIn className="w-4 h-4 mr-2" />
-                )}
-                {isSubmitting ? 'Signing In...' : 'Sign In'}
-              </Button>
-            </form>
-            
-            <div className="mt-4 text-center text-sm">
-              <span className="text-muted-foreground">Don't have an account? </span>
-              <Link to="/signup" className="text-glee-purple hover:underline">
-                Sign up
-              </Link>
-            </div>
-          </CardContent>
-          
-          <CardFooter className="flex flex-col space-y-4">
-            <div className="relative">
-              <div className="absolute inset-0 flex items-center">
-                <span className="w-full border-t border-border" />
-              </div>
-              <div className="relative flex justify-center text-xs uppercase">
-                <span className="bg-card px-2 text-muted-foreground">Or</span>
-              </div>
-            </div>
-            
-            <div className="grid grid-cols-1 gap-2">
-              <Button variant="outline" className="w-full border-input text-foreground hover:bg-accent/10" asChild>
-                <Link to="/signup">
-                  <UserPlus className="w-4 h-4 mr-2" />
-                  Request Member Access
+                >
+                  {isSubmitting ? (
+                    <Spinner size="sm" className="mr-2" />
+                  ) : (
+                    <LogIn className="w-4 h-4 mr-2" />
+                  )}
+                  {isSubmitting ? 'Signing In...' : 'Sign In'}
+                </Button>
+              </form>
+              
+              <div className="mt-4 text-center text-sm">
+                <span className="text-gray-700 dark:text-gray-300">Don't have an account? </span>
+                <Link to="/signup" className="text-glee-purple hover:underline">
+                  Sign up
                 </Link>
-              </Button>
-              <Button variant="outline" className="w-full border-input text-foreground hover:bg-accent/10">
-                <Mail className="w-4 h-4 mr-2" />
-                Contact Administrator
-              </Button>
-              <Button 
-                variant="outline" 
-                className="w-full border-input text-destructive hover:bg-destructive/10"
-                onClick={handleResetAuth}
-                disabled={isResetting}
-              >
-                <RefreshCcw className="w-4 h-4 mr-2" />
-                {isResetting ? "Resetting..." : "Reset Authentication"}
-              </Button>
-            </div>
-          </CardFooter>
-        </Card>
+              </div>
+            </CardContent>
+            
+            <CardFooter className="flex flex-col space-y-4 px-0">
+              <div className="relative">
+                <div className="absolute inset-0 flex items-center">
+                  <span className="w-full border-t border-gray-300 dark:border-gray-600" />
+                </div>
+                <div className="relative flex justify-center text-xs uppercase">
+                  <span className="bg-white/85 dark:bg-black/65 px-2 text-gray-600 dark:text-gray-400">Or</span>
+                </div>
+              </div>
+              
+              <div className="grid grid-cols-1 gap-2">
+                <Button variant="outline" className="w-full border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-100 bg-white/50 dark:bg-gray-900/50 hover:bg-white/70 dark:hover:bg-gray-800/70" asChild>
+                  <Link to="/signup">
+                    <UserPlus className="w-4 h-4 mr-2" />
+                    Request Member Access
+                  </Link>
+                </Button>
+                <Button variant="outline" className="w-full border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-100 bg-white/50 dark:bg-gray-900/50 hover:bg-white/70 dark:hover:bg-gray-800/70">
+                  <Mail className="w-4 h-4 mr-2" />
+                  Contact Administrator
+                </Button>
+                <Button 
+                  variant="outline" 
+                  className="w-full border-red-300 dark:border-red-600 text-red-700 dark:text-red-400 bg-white/50 dark:bg-gray-900/50 hover:bg-red-50/70 dark:hover:bg-red-900/20"
+                  onClick={handleResetAuth}
+                  disabled={isResetting}
+                >
+                  <RefreshCcw className="w-4 h-4 mr-2" />
+                  {isResetting ? "Resetting..." : "Reset Authentication"}
+                </Button>
+              </div>
+            </CardFooter>
+          </Card>
+        </div>
       </div>
     </div>
   );
