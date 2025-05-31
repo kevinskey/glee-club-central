@@ -1,6 +1,4 @@
-
 import React, { useState, useEffect } from "react";
-import { HeaderNav } from "@/components/landing/HeaderNav";
 import { HeroBannerSection } from "@/components/landing/sections/HeroBannerSection";
 import { EventsSection } from "@/components/landing/sections/EventsSection";
 import { AudioSection } from "@/components/landing/sections/AudioSection";
@@ -177,16 +175,6 @@ const HomePage = () => {
   if (isLoading) {
     return (
       <div className="min-h-screen bg-background">
-        <HeaderNav 
-          logoText="GleeWorld"
-          navigationLinks={[
-            { label: "About", href: "/about" },
-            { label: "Events", href: "/events" },
-            { label: "Store", href: "/store" },
-            { label: "Press Kit", href: "/press-kit" }
-          ]}
-          showLoginButton={true}
-        />
         <div className="flex items-center justify-center min-h-[50vh]">
           <div className="text-center">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-glee-spelman mx-auto"></div>
@@ -199,18 +187,6 @@ const HomePage = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Header Navigation */}
-      <HeaderNav 
-        logoText="GleeWorld"
-        navigationLinks={[
-          { label: "About", href: "/about" },
-          { label: "Events", href: "/events" },
-          { label: "Store", href: "/store" },
-          { label: "Press Kit", href: "/press-kit" }
-        ]}
-        showLoginButton={true}
-      />
-
       {/* Main Content - Now using extracted section components */}
       <main className="w-full">
         <HeroBannerSection images={heroImages} />
