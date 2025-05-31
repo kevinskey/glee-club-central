@@ -1,3 +1,4 @@
+
 import React, { Suspense } from 'react';
 import { createBrowserRouter, Navigate, Outlet } from 'react-router-dom';
 import ErrorBoundary from "./components/ErrorBoundary";
@@ -13,7 +14,7 @@ import RoleDashboard from './components/auth/RoleDashboard';
 // Loading Component
 import { PageLoader } from './components/ui/page-loader';
 
-// Public Pages (keep as regular imports for faster initial load)
+// Public Pages
 import HomePage from './pages/HomePage';
 import AboutPage from './pages/AboutPage';
 import ContactPage from './pages/ContactPage';
@@ -24,14 +25,14 @@ import StorePage from './pages/StorePage';
 import CheckoutSuccessPage from './pages/CheckoutSuccessPage';
 import CheckoutCancelledPage from './pages/CheckoutCancelledPage';
 
-// Auth Pages (keep as regular imports)
+// Auth Pages
 import LoginPage from './pages/auth/LoginPage';
 import SignupPage from './pages/auth/SignupPage';
 import AdminRegistrationPage from './pages/admin/AdminRegistrationPage';
 import ForgotPasswordPage from './pages/auth/ForgotPasswordPage';
 import ResetPasswordPage from './pages/auth/ResetPasswordPage';
 
-// Regular Dashboard Pages (lighter components)
+// Dashboard Pages
 import ProfilePage from './pages/profile/ProfilePage';
 import MediaLibraryPage from './pages/MediaLibraryPage';
 import SheetMusicPage from './pages/SheetMusicPage';
@@ -39,8 +40,7 @@ import ViewSheetMusicPage from './pages/sheet-music/ViewSheetMusicPage';
 import PDFViewerPage from './pages/PDFViewerPage';
 import RecordingsPage from './pages/RecordingsPage';
 import RecordingStudioPage from './pages/recordings/RecordingStudioPage';
-import AnnouncementsPage from './pages/dashboard/AnnouncementsPage';
-import ArchivesPage from './pages/dashboard/ArchivesPage';
+import AnnouncementsPage from './pages/announcements/AnnouncementsPage';
 import AttendancePage from './pages/dashboard/AttendancePage';
 import AudioManagementPage from './pages/audio-management/AudioManagementPage';
 import FinancesPage from './pages/dashboard/FinancesPage';
@@ -61,7 +61,6 @@ const EventDetailsPage = React.lazy(() => import('./pages/events/EventDetailsPag
 
 export const router = createBrowserRouter([
   {
-    // Root element with error boundary
     element: <Outlet />,
     errorElement: (
       <ErrorBoundary>
@@ -82,7 +81,7 @@ export const router = createBrowserRouter([
       </ErrorBoundary>
     ),
     children: [
-      // ==================== PUBLIC ROUTES (with landing header) ====================
+      // ==================== PUBLIC ROUTES ====================
       {
         path: '/',
         element: <AppLayout sidebarType="none" showHeader={true} showFooter={true} />,
@@ -175,7 +174,6 @@ export const router = createBrowserRouter([
           { path: 'recording-studio', element: <RecordingStudioPage /> },
           { path: 'audio-management', element: <AudioManagementPage /> },
           { path: 'announcements', element: <AnnouncementsPage /> },
-          { path: 'archives', element: <ArchivesPage /> },
           { path: 'attendance', element: <AttendancePage /> },
           { path: 'finances', element: <FinancesPage /> },
           { path: 'members', element: <AdminRoute><MembersPage /></AdminRoute> },
@@ -192,7 +190,7 @@ export const router = createBrowserRouter([
         ],
       },
 
-      // ==================== ADMIN DASHBOARD ROUTES (LAZY LOADED) ====================
+      // ==================== ADMIN DASHBOARD ROUTES ====================
       {
         path: '/admin',
         element: <AdminRoute><AppLayout sidebarType="admin" showHeader={true} showFooter={false} /></AdminRoute>,
@@ -245,7 +243,7 @@ export const router = createBrowserRouter([
         ],
       },
 
-      // ==================== FAN DASHBOARD ROUTES (LAZY LOADED) ====================
+      // ==================== FAN DASHBOARD ROUTES ====================
       {
         path: '/fan-dashboard',
         element: <RequireAuth><AppLayout sidebarType="fan" showHeader={true} showFooter={false} /></RequireAuth>,

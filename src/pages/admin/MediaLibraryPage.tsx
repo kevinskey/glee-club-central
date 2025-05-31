@@ -1,6 +1,5 @@
 
 import React, { useState } from 'react';
-import { PageHeader } from '@/components/ui/page-header';
 import { FileImage } from 'lucide-react';
 import MediaLibraryPage from '../media-library/MediaLibraryPage';
 import { UploadMediaModal } from '@/components/UploadMediaModal';
@@ -15,16 +14,19 @@ const AdminMediaLibraryPage = () => {
   
   return (
     <div className="container mx-auto px-4 py-8">
-      <PageHeader
-        title="Media Library"
-        icon={<FileImage className="h-6 w-6" />}
-      />
+      <div className="mb-6">
+        <div className="flex justify-between items-center min-h-[3rem]">
+          <div className="flex items-center gap-2">
+            <div className="text-primary flex items-center"><FileImage className="h-6 w-6" /></div>
+            <h1 className="text-2xl font-bold tracking-tight text-foreground leading-none">Media Library</h1>
+          </div>
+        </div>
+      </div>
       
       <div className="mt-8">
         <MediaLibraryPage isAdminView={true} />
       </div>
       
-      {/* This is a backup in case the inner component's modal doesn't work */}
       <UploadMediaModal
         onUploadComplete={handleUploadComplete}
         open={isUploadModalOpen}

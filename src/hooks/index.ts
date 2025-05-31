@@ -15,7 +15,6 @@ export { type User } from './user/types';
 export { useAuthState as useAuth } from './useAuthState';
 export { usePermissions } from './usePermissions';
 export { useUserRole } from './useUserRole';
-export { useRoleLevels } from './useRoleLevels';
 
 // Events & Calendar Hooks
 export { useCalendarEvents } from './useCalendarEvents';
