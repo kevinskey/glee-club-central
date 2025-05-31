@@ -18,7 +18,18 @@ const RequireAuth = ({ children, requireAdmin, allowedUserTypes }: RequireAuthPr
   const { isSuperAdmin, isLoading: permissionsLoading } = usePermissions();
   const location = useLocation();
   
-  const isLoading = authLoading;
+  // Much shorter loading timeout - show content faster
+  const [loadingTimeout, setLoadingTimeout] = React.useState(false);
+  
+  React.useEffect(() => {
+    const timer = setTimeout(() => {
+      setLoadingTimeout(true);
+    }, 2000); // Show content after 2 seconds even if still loading
+    
+    return () => clearTimeout(timer);
+  }, []);
+  
+  const isLoading = authLoading && !loadingTimeout;
   
   // Track redirect attempts to prevent loops
   const redirectAttemptedRef = React.useRef(false);
@@ -34,15 +45,16 @@ const RequireAuth = ({ children, requireAdmin, allowedUserTypes }: RequireAuthPr
     userRole: profile?.role,
     requireAdmin,
     allowedUserTypes,
-    location: location.pathname
+    location: location.pathname,
+    loadingTimeout
   });
   
-  // Show loading state while auth is being determined
-  if (isLoading) {
+  // Show loading state only briefly
+  if (isLoading && !loadingTimeout) {
     console.log('RequireAuth: Still loading, showing loader');
     return (
       <PageLoader 
-        message="Verifying authentication..." 
+        message="Loading..." 
         className="min-h-screen"
       />
     );
@@ -61,7 +73,7 @@ const RequireAuth = ({ children, requireAdmin, allowedUserTypes }: RequireAuthPr
     return <Navigate to="/auth/login" replace />;
   }
   
-  // Check admin access if required (only if we have profile data or timeout)
+  // Check admin access if required (be more permissive)
   if (requireAdmin && isAuthenticated) {
     const hasAdminAccess = isSuperAdmin || 
                           profile?.is_super_admin === true || 
@@ -70,15 +82,16 @@ const RequireAuth = ({ children, requireAdmin, allowedUserTypes }: RequireAuthPr
     
     console.log('RequireAuth: Admin check:', { hasAdminAccess, isSuperAdmin, profileIsAdmin: profile?.is_super_admin });
     
-    if (!hasAdminAccess && profile) { // Only block if we have profile data
+    // Only block if we're sure they don't have admin access
+    if (!hasAdminAccess && (profile || loadingTimeout)) {
       console.log('RequireAuth: User lacks admin access, redirecting to dashboard');
       toast.error("You don't have admin privileges to access this page");
       return <Navigate to="/dashboard/member" replace />;
     }
   }
   
-  // Check user type restrictions (only if we have profile data)
-  if (allowedUserTypes && allowedUserTypes.length > 0 && isAuthenticated && profile) {
+  // Check user type restrictions (only if we have profile data or timeout reached)
+  if (allowedUserTypes && allowedUserTypes.length > 0 && isAuthenticated && (profile || loadingTimeout)) {
     const userType = getUserType();
     
     console.log('RequireAuth: User type check:', { userType, allowedUserTypes });
@@ -90,13 +103,13 @@ const RequireAuth = ({ children, requireAdmin, allowedUserTypes }: RequireAuthPr
     }
   }
   
-  // If authenticated and all checks pass, render children
+  // If authenticated, render children (even without complete profile)
   if (isAuthenticated) {
     console.log('RequireAuth: All checks passed, rendering children');
     return <>{children}</>;
   }
   
-  // Final fallback loader
+  // Final fallback loader (very brief)
   console.log('RequireAuth: Fallback loader');
   return (
     <PageLoader 

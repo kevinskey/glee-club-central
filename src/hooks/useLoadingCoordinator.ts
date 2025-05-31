@@ -42,10 +42,10 @@ export const useLoadingCoordinator = () => {
       // Immediate loading state
       updateState();
     } else {
-      // Debounce loading false to prevent flickering
+      // Much shorter debounce to prevent flickering
       debounceRef.current = setTimeout(() => {
         updateState();
-      }, 100);
+      }, 50); // Reduced from 100ms to 50ms
     }
   }, []);
 

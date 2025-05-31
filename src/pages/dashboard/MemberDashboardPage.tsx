@@ -8,22 +8,34 @@ import { DashboardAnnouncements } from "@/components/dashboard/DashboardAnnounce
 
 export default function MemberDashboardPage() {
   const { user, profile, isLoading } = useAuth();
+  
+  // Much shorter loading timeout for dashboard
+  const [showDashboard, setShowDashboard] = React.useState(false);
+  
+  React.useEffect(() => {
+    const timer = setTimeout(() => {
+      setShowDashboard(true);
+    }, 1000); // Show dashboard after 1 second even if profile is loading
+    
+    return () => clearTimeout(timer);
+  }, []);
 
   // Debug logging
   console.log('MemberDashboardPage state:', {
     hasUser: !!user,
     hasProfile: !!profile,
     userRole: profile?.role,
-    isLoading
+    isLoading,
+    showDashboard
   });
 
-  // Show loading only while auth is actively loading, not when profile is missing
-  if (isLoading) {
+  // Show loading only very briefly
+  if (isLoading && !showDashboard) {
     return <PageLoader message="Loading your dashboard..." />;
   }
 
-  // If no user after loading is complete, something is wrong
-  if (!user) {
+  // If no user after loading timeout, something is wrong
+  if (!user && showDashboard) {
     return <PageLoader message="Authentication required..." />;
   }
 
@@ -38,6 +50,7 @@ export default function MemberDashboardPage() {
         </h1>
         <p className="text-muted-foreground">
           Here's what's happening with the Spelman Glee Club
+          {!profile && " (Profile loading...)"}
         </p>
       </div>
       

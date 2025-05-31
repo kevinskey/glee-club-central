@@ -9,8 +9,7 @@ export default function RoleDashboard() {
   const navigate = useNavigate();
   const location = useLocation();
   const hasRedirected = useRef(false);
-  const [profileWaitTime, setProfileWaitTime] = useState(0);
-  const [maxWaitReached, setMaxWaitReached] = useState(false);
+  const [redirectTimeout, setRedirectTimeout] = useState(false);
 
   // Debug logging
   console.log('RoleDashboard state:', {
@@ -21,26 +20,17 @@ export default function RoleDashboard() {
     isLoading,
     isAuthenticated,
     hasRedirected: hasRedirected.current,
-    profileWaitTime,
-    maxWaitReached
+    redirectTimeout
   });
 
-  // Track how long we've been waiting for profile
+  // Set a timeout for redirection - don't wait forever
   useEffect(() => {
-    if (user && !profile && !isLoading && !maxWaitReached) {
-      const timer = setInterval(() => {
-        setProfileWaitTime(prev => {
-          const newTime = prev + 1;
-          if (newTime >= 3) {
-            setMaxWaitReached(true);
-          }
-          return newTime;
-        });
-      }, 1000);
-      
-      return () => clearInterval(timer);
-    }
-  }, [user, profile, isLoading, maxWaitReached]);
+    const timer = setTimeout(() => {
+      setRedirectTimeout(true);
+    }, 3000); // 3 second timeout for faster redirect
+    
+    return () => clearTimeout(timer);
+  }, []);
 
   useEffect(() => {
     // Prevent multiple redirects
@@ -49,9 +39,9 @@ export default function RoleDashboard() {
       return;
     }
 
-    // Wait for auth to be settled
-    if (isLoading) {
-      console.log('Still loading auth state');
+    // Wait for auth to be settled (but not too long)
+    if (isLoading && !redirectTimeout) {
+      console.log('Still loading auth state, waiting...');
       return;
     }
 
@@ -66,28 +56,14 @@ export default function RoleDashboard() {
       return;
     }
 
-    // If profile hasn't loaded after max wait time, proceed with fallback
-    if (!profile && maxWaitReached) {
-      console.log('Profile failed to load within timeout, using fallback member role');
-      hasRedirected.current = true;
-      navigate('/dashboard/member', { replace: true });
-      return;
-    }
-
-    // Wait for profile to be loaded (but not indefinitely)
-    if (!profile && !maxWaitReached) {
-      console.log('Profile not loaded yet, waiting... (' + profileWaitTime + 's)');
-      return;
-    }
-
-    // All conditions met - perform role-based redirect
-    if (profile) {
+    // If timeout reached or profile loaded, proceed with redirect
+    if (redirectTimeout || profile) {
       hasRedirected.current = true;
       
-      const userRole = profile.role || 'member';
-      const isAdmin = profile.is_super_admin || userRole === 'admin';
+      const userRole = profile?.role || 'member';
+      const isAdmin = profile?.is_super_admin || userRole === 'admin';
       
-      console.log('Performing role-based redirect:', { userRole, isAdmin });
+      console.log('Performing role-based redirect:', { userRole, isAdmin, hasProfile: !!profile });
       
       if (isAdmin || userRole === 'admin') {
         console.log('Redirecting admin to /admin');
@@ -100,7 +76,7 @@ export default function RoleDashboard() {
         navigate('/dashboard/member', { replace: true });
       }
     }
-  }, [user, profile, isLoading, isAuthenticated, navigate, location, maxWaitReached, profileWaitTime]);
+  }, [user, profile, isLoading, isAuthenticated, navigate, location, redirectTimeout]);
 
   // Reset redirect flag when component unmounts
   useEffect(() => {
@@ -109,12 +85,10 @@ export default function RoleDashboard() {
     };
   }, []);
 
-  // Show different messages based on wait time
+  // Show different messages based on state
   const getLoadingMessage = () => {
-    if (isLoading) return "Determining your dashboard access...";
-    if (!profile && profileWaitTime < 2) return "Loading your profile...";
-    if (!profile && profileWaitTime < 3) return "Still loading profile data...";
-    if (!profile && maxWaitReached) return "Finalizing dashboard setup...";
+    if (isLoading && !redirectTimeout) return "Determining your dashboard access...";
+    if (!profile && !redirectTimeout) return "Loading your profile...";
     return "Redirecting to your dashboard...";
   };
 

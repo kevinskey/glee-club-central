@@ -25,7 +25,8 @@ export const useAuthState = () => {
   const initializationRef = useRef(false);
   const mountedRef = useRef(true);
   const profileFetchAttempts = useRef(0);
-  const maxProfileAttempts = 3;
+  const maxProfileAttempts = 2; // Reduced attempts
+  const profileTimeout = useRef<NodeJS.Timeout>();
   
   // Debug logging
   console.log('useAuthState current state:', {
@@ -38,7 +39,19 @@ export const useAuthState = () => {
     profileFetchAttempts: profileFetchAttempts.current
   });
   
-  // Fetch user data function with improved retry logic
+  // Create fallback profile when max attempts reached
+  const createFallbackProfile = useCallback((userId: string): Profile => ({
+    id: userId,
+    first_name: 'User',
+    last_name: '',
+    role: 'member',
+    status: 'active',
+    is_super_admin: false,
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString()
+  }), []);
+  
+  // Optimized fetch user data function with shorter timeouts
   const fetchUserData = useCallback(async (userId: string) => {
     if (!mountedRef.current) return;
     
@@ -47,41 +60,47 @@ export const useAuthState = () => {
     try {
       console.log(`Fetching user data for: ${userId} (attempt ${profileFetchAttempts.current})`);
       
-      // Try to fetch profile first
+      // Set a timeout for profile fetching - much shorter now
+      const profilePromise = getProfile(userId);
+      const timeoutPromise = new Promise((_, reject) => {
+        profileTimeout.current = setTimeout(() => {
+          reject(new Error('Profile fetch timeout'));
+        }, 3000); // Reduced from longer timeout to 3 seconds
+      });
+      
       let profile = null;
       try {
-        profile = await getProfile(userId);
+        profile = await Promise.race([profilePromise, timeoutPromise]);
+        clearTimeout(profileTimeout.current);
         console.log('Successfully fetched user profile:', profile);
       } catch (profileError) {
+        clearTimeout(profileTimeout.current);
         console.error('Profile fetch failed:', profileError);
         
-        // Only retry if we haven't exceeded max attempts
+        // Only retry once, then use fallback
         if (profileFetchAttempts.current < maxProfileAttempts) {
-          console.log('Retrying profile fetch in 2 seconds...');
+          console.log('Retrying profile fetch in 1 second...');
           setTimeout(() => {
             if (mountedRef.current) {
               fetchUserData(userId);
             }
-          }, 2000);
+          }, 1000); // Reduced retry delay
           return;
         }
         
-        console.log('Max profile fetch attempts reached, using fallback');
-        // Create a minimal fallback profile after max attempts
-        profile = {
-          id: userId,
-          first_name: 'User',
-          last_name: '',
-          role: 'member',
-          status: 'active',
-          is_super_admin: false
-        } as Profile;
+        console.log('Using fallback profile after max attempts');
+        profile = createFallbackProfile(userId);
       }
       
-      // Fetch permissions in parallel
+      // Fetch permissions quickly with timeout
       let permissions = {};
       try {
-        permissions = await fetchUserPermissions(userId);
+        const permissionsPromise = fetchUserPermissions(userId);
+        const permissionsTimeout = new Promise((_, reject) => {
+          setTimeout(() => reject(new Error('Permissions timeout')), 2000); // 2 second timeout
+        });
+        
+        permissions = await Promise.race([permissionsPromise, permissionsTimeout]);
       } catch (permError) {
         console.warn('Failed to fetch permissions, using defaults:', permError);
         permissions = {
@@ -103,17 +122,10 @@ export const useAuthState = () => {
     } catch (error) {
       console.error('Error fetching user data:', error);
       if (mountedRef.current) {
-        // Set minimal state even on error
+        // Always provide fallback data to prevent infinite loading
         setState(prev => ({
           ...prev,
-          profile: {
-            id: userId,
-            first_name: 'User',
-            last_name: '',
-            role: 'member',
-            status: 'active',
-            is_super_admin: false
-          } as Profile,
+          profile: createFallbackProfile(userId),
           permissions: {
             'view_sheet_music': true,
             'view_calendar': true,
@@ -123,9 +135,9 @@ export const useAuthState = () => {
         }));
       }
     }
-  }, []);
+  }, [createFallbackProfile]);
   
-  // Initialize auth state
+  // Initialize auth state with faster timeout
   useEffect(() => {
     if (initializationRef.current) return;
     initializationRef.current = true;
@@ -136,8 +148,13 @@ export const useAuthState = () => {
       try {
         console.log('Initializing auth state...');
         
-        // Get initial session
-        const { data: { session }, error } = await supabase.auth.getSession();
+        // Get initial session with timeout
+        const sessionPromise = supabase.auth.getSession();
+        const sessionTimeout = new Promise((_, reject) => {
+          setTimeout(() => reject(new Error('Session fetch timeout')), 5000);
+        });
+        
+        const { data: { session }, error } = await Promise.race([sessionPromise, sessionTimeout]) as any;
         
         if (error) {
           console.error('Error getting session:', error);
@@ -235,6 +252,7 @@ export const useAuthState = () => {
         } else if (event === 'SIGNED_OUT') {
           console.log('Processing SIGNED_OUT event');
           profileFetchAttempts.current = 0;
+          clearTimeout(profileTimeout.current);
           setState({
             user: null,
             profile: null,
@@ -251,6 +269,7 @@ export const useAuthState = () => {
     
     return () => {
       mountedRef.current = false;
+      clearTimeout(profileTimeout.current);
       if (authSubscription?.data?.subscription) {
         authSubscription.data.subscription.unsubscribe();
       }
@@ -261,6 +280,7 @@ export const useAuthState = () => {
   useEffect(() => {
     return () => {
       mountedRef.current = false;
+      clearTimeout(profileTimeout.current);
     };
   }, []);
   
