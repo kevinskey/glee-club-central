@@ -21,8 +21,8 @@ const authCache = {
   userId: null as string | null
 };
 
-const CACHE_DURATION = 60000; // Increased to 60 seconds to prevent rapid invalidation
-const LOADING_DEBOUNCE = 150; // Reduced debounce for faster response
+const CACHE_DURATION = 30000; // Reduced to 30 seconds
+const LOADING_DEBOUNCE = 100; // Reduced debounce for faster response
 
 export const useAuthState = () => {
   const [state, setState] = useState<AuthState>({
@@ -37,30 +37,28 @@ export const useAuthState = () => {
   const isLoadingRef = useRef(false);
   const initializationRef = useRef(false);
   
-  // Debounced loading state setter with better control
+  // Debounced loading state setter
   const setLoadingState = useCallback((loading: boolean) => {
     if (loadingTimeoutRef.current) {
       clearTimeout(loadingTimeoutRef.current);
     }
     
     if (loading) {
-      // Only set loading if we're not already in a loading state
-      setState(prev => prev.isLoading ? prev : ({ ...prev, isLoading: true }));
+      setState(prev => ({ ...prev, isLoading: true }));
     } else {
-      // Debounced non-loading state to prevent rapid flickering
       loadingTimeoutRef.current = setTimeout(() => {
         setState(prev => ({ ...prev, isLoading: false }));
       }, LOADING_DEBOUNCE);
     }
   }, []);
   
-  // Cached profile and permissions fetcher with better cache management
+  // Cached profile and permissions fetcher
   const fetchUserData = useCallback(async (userId: string, forceRefresh = false) => {
     if (isLoadingRef.current && !forceRefresh) return;
     
     const now = Date.now();
     
-    // Use cache if valid and for same user (unless forced refresh)
+    // Use cache if valid and for same user
     if (!forceRefresh && 
         authCache.userId === userId && 
         authCache.lastFetch && 
@@ -110,7 +108,7 @@ export const useAuthState = () => {
     }
   }, []);
   
-  // Initialize auth state with better initialization control
+  // Initialize auth state
   useEffect(() => {
     let mounted = true;
     
@@ -166,7 +164,7 @@ export const useAuthState = () => {
       }
     };
     
-    // Set up auth state listener with better event filtering
+    // Set up auth state listener
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
         if (!mounted) return;
@@ -192,7 +190,7 @@ export const useAuthState = () => {
               if (mounted) {
                 fetchUserData(session.user.id, true); // Force refresh on sign in
               }
-            }, 100);
+            }, 50);
           } else {
             // Clear everything on sign out
             authCache.profile = null;
@@ -208,7 +206,6 @@ export const useAuthState = () => {
             }));
           }
         }
-        // Ignore TOKEN_REFRESHED to prevent unnecessary updates
       }
     );
     
@@ -224,7 +221,7 @@ export const useAuthState = () => {
     };
   }, [fetchUserData, setLoadingState]);
   
-  // Refresh user data function with force refresh option
+  // Refresh user data function
   const refreshUserData = useCallback(async () => {
     if (state.user?.id) {
       await fetchUserData(state.user.id, true);

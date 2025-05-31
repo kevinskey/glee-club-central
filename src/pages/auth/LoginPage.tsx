@@ -22,7 +22,15 @@ const LoginPage = () => {
   const [password, setPassword] = React.useState('');
   const [isSubmitting, setIsSubmitting] = React.useState(false);
   const [isResetting, setIsResetting] = React.useState(false);
-  const [pageInitialized, setPageInitialized] = React.useState(false);
+  const [pageReady, setPageReady] = React.useState(false);
+  
+  // Initialize page ready state
+  React.useEffect(() => {
+    const timer = setTimeout(() => {
+      setPageReady(true);
+    }, 100);
+    return () => clearTimeout(timer);
+  }, []);
   
   // Get saved redirect path from sessionStorage with default fallback
   const getRedirectPath = () => {
@@ -37,32 +45,22 @@ const LoginPage = () => {
     return '/role-dashboard';
   };
   
-  // Initialize the page to prevent early redirects
+  // Redirect if already authenticated
   React.useEffect(() => {
-    const timer = setTimeout(() => {
-      setPageInitialized(true);
-    }, 200);
-    return () => clearTimeout(timer);
-  }, []);
-  
-  // Redirect if already authenticated - using useEffect for controlled navigation
-  React.useEffect(() => {
-    // Only redirect if auth check is complete and not during form submission
-    if (isAuthenticated && !isLoading && !isSubmitting && pageInitialized) {
+    if (isAuthenticated && !isLoading && !isSubmitting && pageReady) {
       const redirectPath = getRedirectPath();
       
-      // Small delay to prevent flashing UI and allow toast to be visible
       const timer = setTimeout(() => {
         navigate(redirectPath);
         
         // Clean up stored redirect path after successful navigation
         sessionStorage.removeItem('authRedirectPath');
         sessionStorage.removeItem('authRedirectTimestamp');
-      }, 300);
+      }, 200);
       
       return () => clearTimeout(timer);
     }
-  }, [isAuthenticated, isLoading, navigate, isSubmitting, pageInitialized]);
+  }, [isAuthenticated, isLoading, navigate, isSubmitting, pageReady]);
   
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -81,11 +79,9 @@ const LoginPage = () => {
         console.error("Login error:", result.error);
         toast.error(result.error.message || "Login failed");
       } else {
-        // Get redirectPath from session storage
         const redirectPath = getRedirectPath();
         toast.success("Login successful!");
         
-        // Use navigate instead of direct location change
         navigate(redirectPath);
         
         // Clean up stored redirect path
@@ -107,7 +103,6 @@ const LoginPage = () => {
       try {
         await resetAuthSystem();
         toast.success("Authentication system reset successfully");
-        // Page will be reloaded by resetAuthSystem
       } catch (error) {
         console.error("Error resetting auth system:", error);
         toast.error("Failed to reset authentication system");
@@ -116,48 +111,46 @@ const LoginPage = () => {
     }
   };
   
-  // Apply fadeIn animation to prevent blinking
-  const containerClasses = `flex items-center min-h-[80vh] bg-background transition-opacity duration-300 ${
-    pageInitialized ? 'opacity-100' : 'opacity-0'
-  }`;
-  
-  // Show minimal loading state - improved loading indicator
-  if (isLoading && !pageInitialized) {
+  // Show loading state while initializing
+  if (!pageReady || (isLoading && !isAuthenticated)) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <Spinner size="lg" />
+      <div className="flex items-center justify-center min-h-screen bg-background">
+        <div className="flex flex-col items-center space-y-4">
+          <Spinner size="lg" />
+          <p className="text-muted-foreground">Loading login page...</p>
+        </div>
       </div>
     );
   }
   
-  // Improved loading state when authenticated and redirecting
-  if (isAuthenticated && !isSubmitting && pageInitialized) {
+  // Show redirecting state when authenticated
+  if (isAuthenticated && pageReady) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
+      <div className="flex items-center justify-center min-h-screen bg-background">
         <div className="flex flex-col items-center space-y-4">
           <Spinner size="lg" />
-          <p className="ml-2 text-muted-foreground">Redirecting to dashboard...</p>
+          <p className="text-muted-foreground">Redirecting to dashboard...</p>
         </div>
       </div>
     );
   }
 
-  // Main render with background image
+  // Main login form
   return (
-    <div className="relative min-h-screen flex items-center justify-center">
-      {/* Full-page background image with overlay */}
+    <div className="relative min-h-screen flex items-center justify-center bg-background">
+      {/* Background image with overlay */}
       <div className="absolute inset-0 z-0">
         <SiteImage 
           src="/lovable-uploads/6855d8e0-d27d-4722-af13-73921e99ab52.png"
           alt="Glee Club Background"
-          className="w-full h-full object-cover"
+          className="w-full h-full object-cover opacity-80"
           objectFit="cover"
         />
         <div className="absolute inset-0 bg-black/50"></div>
       </div>
       
       {/* Login form container */}
-      <div className={`relative z-10 w-full max-w-md px-4 ${containerClasses}`}>
+      <div className="relative z-10 w-full max-w-md px-4">
         <Card className="w-full border-border bg-card/90 backdrop-blur-md shadow-xl">
           <CardHeader className="space-y-1 text-center">
             <CardTitle className="text-2xl font-bold text-card-foreground">Spelman Glee Club Portal</CardTitle>
