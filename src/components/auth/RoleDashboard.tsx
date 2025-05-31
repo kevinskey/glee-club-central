@@ -38,7 +38,7 @@ export default function RoleDashboard() {
     if (!isAuthenticated || !user) {
       console.log('Not authenticated, redirecting to login');
       hasRedirected.current = true;
-      navigate('/login', { 
+      navigate('/auth/login', { 
         replace: true,
         state: { from: location }
       });

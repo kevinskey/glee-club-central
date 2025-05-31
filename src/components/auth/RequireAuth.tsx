@@ -22,12 +22,13 @@ const RequireAuth = ({ children, requireAdmin, allowedUserTypes }: RequireAuthPr
   
   // Track redirect attempts to prevent loops
   const redirectAttemptedRef = React.useRef(false);
-  const [hasShownError, setHasShownError] = React.useState(false);
   
   // Debug logging
   console.log('RequireAuth state:', {
     isAuthenticated,
     isLoading,
+    authLoading,
+    permissionsLoading,
     hasUser: !!user,
     hasProfile: !!profile,
     userRole: profile?.role,
@@ -51,19 +52,13 @@ const RequireAuth = ({ children, requireAdmin, allowedUserTypes }: RequireAuthPr
   if (!isAuthenticated && !redirectAttemptedRef.current) {
     redirectAttemptedRef.current = true;
     
-    // Show error toast only once
-    if (!hasShownError && !location.pathname.includes('login')) {
-      toast.error("Please log in to access this page");
-      setHasShownError(true);
-    }
-    
     // Store the current URL to redirect back after login
     const currentPath = location.pathname + location.search;
     sessionStorage.setItem('authRedirectPath', currentPath);
-    sessionStorage.setItem('authRedirectTimestamp', Date.now().toString());
     
     console.log("RequireAuth: Redirecting to login from:", currentPath);
-    return <Navigate to="/login" replace />;
+    toast.error("Please log in to access this page");
+    return <Navigate to="/auth/login" replace />;
   }
   
   // Check admin access if required

@@ -23,9 +23,7 @@ export const useAuthState = () => {
   });
   
   const initializationRef = useRef(false);
-  const isLoadingRef = useRef(true);
-  const lastEventRef = useRef<string>('');
-  const debounceTimeoutRef = useRef<NodeJS.Timeout>();
+  const mountedRef = useRef(true);
   
   // Debug logging
   console.log('useAuthState current state:', {
@@ -37,8 +35,10 @@ export const useAuthState = () => {
     isInitialized: state.isInitialized
   });
   
-  // Fetch user data function - simplified and cached
+  // Fetch user data function
   const fetchUserData = useCallback(async (userId: string) => {
+    if (!mountedRef.current) return;
+    
     try {
       console.log('Fetching user data for:', userId);
       
@@ -49,46 +49,53 @@ export const useAuthState = () => {
       
       console.log('Fetched user profile:', profile);
       
-      setState(prev => ({
-        ...prev,
-        profile,
-        permissions,
-        isLoading: false
-      }));
-      
-      isLoadingRef.current = false;
+      if (mountedRef.current) {
+        setState(prev => ({
+          ...prev,
+          profile,
+          permissions,
+          isLoading: false
+        }));
+      }
       
     } catch (error) {
       console.error('Error fetching user data:', error);
-      setState(prev => ({
-        ...prev,
-        isLoading: false
-      }));
-      isLoadingRef.current = false;
+      if (mountedRef.current) {
+        setState(prev => ({
+          ...prev,
+          isLoading: false
+        }));
+      }
     }
   }, []);
   
-  // Initialize auth state with better error handling
+  // Initialize auth state
   useEffect(() => {
     if (initializationRef.current) return;
     initializationRef.current = true;
     
-    let mounted = true;
     let authSubscription: any = null;
     
     const initializeAuth = async () => {
       try {
         console.log('Initializing auth state...');
         
-        // Get initial session with timeout
-        const sessionPromise = supabase.auth.getSession();
-        const timeoutPromise = new Promise((_, reject) => 
-          setTimeout(() => reject(new Error('Session timeout')), 5000)
-        );
+        // Get initial session
+        const { data: { session }, error } = await supabase.auth.getSession();
         
-        const { data: { session } } = await Promise.race([sessionPromise, timeoutPromise]) as any;
+        if (error) {
+          console.error('Error getting session:', error);
+          setState({
+            user: null,
+            profile: null,
+            permissions: {},
+            isLoading: false,
+            isInitialized: true
+          });
+          return;
+        }
         
-        if (!mounted) return;
+        if (!mountedRef.current) return;
         
         if (session?.user) {
           console.log('Found existing session for user:', session.user.id);
@@ -119,12 +126,11 @@ export const useAuthState = () => {
             isLoading: false,
             isInitialized: true
           });
-          isLoadingRef.current = false;
         }
         
       } catch (error) {
         console.error('Auth initialization error:', error);
-        if (mounted) {
+        if (mountedRef.current) {
           setState({
             user: null,
             profile: null,
@@ -132,72 +138,48 @@ export const useAuthState = () => {
             isLoading: false,
             isInitialized: true
           });
-          isLoadingRef.current = false;
         }
       }
     };
     
-    // Set up auth state listener with better debouncing
+    // Set up auth state listener
     authSubscription = supabase.auth.onAuthStateChange(
       async (event, session) => {
-        if (!mounted) return;
-        
-        // Prevent duplicate events
-        const eventKey = `${event}-${session?.user?.id || 'null'}`;
-        if (lastEventRef.current === eventKey) {
-          console.log('Ignoring duplicate auth event:', event);
-          return;
-        }
-        lastEventRef.current = eventKey;
+        if (!mountedRef.current) return;
         
         console.log('Auth state change event:', event, 'user:', session?.user?.id);
         
-        // Clear any pending auth changes
-        if (debounceTimeoutRef.current) {
-          clearTimeout(debounceTimeoutRef.current);
-        }
-        
-        // Debounce auth state changes to prevent rapid updates
-        debounceTimeoutRef.current = setTimeout(async () => {
-          if (!mounted) return;
+        if (event === 'SIGNED_IN' && session?.user) {
+          console.log('Processing SIGNED_IN event for user:', session.user.id);
+          const authUser: AuthUser = {
+            id: session.user.id,
+            email: session.user.email || '',
+            app_metadata: session.user.app_metadata,
+            user_metadata: session.user.user_metadata,
+            aud: session.user.aud,
+            created_at: session.user.created_at
+          };
           
-          if (event === 'SIGNED_IN' && session?.user) {
-            console.log('Processing SIGNED_IN event for user:', session.user.id);
-            const authUser: AuthUser = {
-              id: session.user.id,
-              email: session.user.email || '',
-              app_metadata: session.user.app_metadata,
-              user_metadata: session.user.user_metadata,
-              aud: session.user.aud,
-              created_at: session.user.created_at
-            };
-            
-            setState(prev => ({ 
-              ...prev, 
-              user: authUser,
-              isLoading: true,
-              isInitialized: true
-            }));
-            
-            // Defer user data fetching to prevent blocking
-            setTimeout(() => {
-              if (mounted) {
-                fetchUserData(session.user.id);
-              }
-            }, 200);
-            
-          } else if (event === 'SIGNED_OUT') {
-            console.log('Processing SIGNED_OUT event');
-            setState({
-              user: null,
-              profile: null,
-              permissions: {},
-              isLoading: false,
-              isInitialized: true
-            });
-            isLoadingRef.current = false;
-          }
-        }, 300);
+          setState(prev => ({ 
+            ...prev, 
+            user: authUser,
+            isLoading: true,
+            isInitialized: true
+          }));
+          
+          // Fetch user data
+          await fetchUserData(session.user.id);
+          
+        } else if (event === 'SIGNED_OUT') {
+          console.log('Processing SIGNED_OUT event');
+          setState({
+            user: null,
+            profile: null,
+            permissions: {},
+            isLoading: false,
+            isInitialized: true
+          });
+        }
       }
     );
     
@@ -205,19 +187,23 @@ export const useAuthState = () => {
     initializeAuth();
     
     return () => {
-      mounted = false;
-      if (debounceTimeoutRef.current) {
-        clearTimeout(debounceTimeoutRef.current);
-      }
+      mountedRef.current = false;
       if (authSubscription?.data?.subscription) {
         authSubscription.data.subscription.unsubscribe();
       }
     };
   }, [fetchUserData]);
   
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => {
+      mountedRef.current = false;
+    };
+  }, []);
+  
   // Refresh user data function
   const refreshUserData = useCallback(async () => {
-    if (state.user?.id && !isLoadingRef.current) {
+    if (state.user?.id && mountedRef.current) {
       await fetchUserData(state.user.id);
     }
   }, [state.user?.id, fetchUserData]);
