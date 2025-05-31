@@ -1,3 +1,4 @@
+
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { Session, User } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
@@ -361,18 +362,18 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     hasUser: !!user,
     supabaseClient: supabase,
     permissions,
-    signOut: async () => { /* keep existing implementation */ },
-    logout: async () => ({ error: null }),
+    signOut,
+    logout,
     refreshProfile,
     refreshPermissions,
-    login: async () => ({ error: null }),
-    signIn: async () => ({ error: null }),
-    signUp: async () => ({ data: null, error: null }),
+    login,
+    signIn,
+    signUp,
     isAdmin,
     isMember,
     getUserType,
-    updatePassword: async () => ({ error: null }),
-    resetPassword: async () => ({ error: null }),
+    updatePassword,
+    resetPassword,
     resetAuthSystem,
   };
 

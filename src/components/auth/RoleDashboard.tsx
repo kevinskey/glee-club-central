@@ -1,128 +1,51 @@
 
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
-import { useNavigate, useLocation } from 'react-router-dom';
 import { PageLoader } from '@/components/ui/page-loader';
+import { toast } from 'sonner';
 
-export default function RoleDashboard() {
+export const RoleDashboard: React.FC = () => {
   const { user, profile, isLoading, isAuthenticated, isAdmin } = useAuth();
   const navigate = useNavigate();
-  const location = useLocation();
-  const hasRedirected = useRef(false);
-  const [redirectTimeout, setRedirectTimeout] = useState(false);
-
-  // Debug logging
-  console.log('RoleDashboard state:', {
-    hasUser: !!user,
-    hasProfile: !!profile,
-    userRole: profile?.role,
-    isAdmin: profile?.is_super_admin,
-    isAdminFunction: isAdmin ? isAdmin() : false,
-    userEmail: user?.email,
-    isLoading,
-    isAuthenticated,
-    hasRedirected: hasRedirected.current,
-    redirectTimeout
-  });
-
-  // Set a timeout for redirection - very fast for better UX
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setRedirectTimeout(true);
-    }, 1000); // Reduced to 1 second for faster redirect
-    
-    return () => clearTimeout(timer);
-  }, []);
 
   useEffect(() => {
-    // Prevent multiple redirects
-    if (hasRedirected.current) {
-      console.log('Already redirected, skipping');
-      return;
-    }
-
-    // Wait for auth to be settled but not too long
-    if (isLoading && !redirectTimeout) {
-      console.log('Still loading auth state, waiting...');
-      return;
-    }
-
-    // If not authenticated, redirect to login
-    if (!isAuthenticated || !user) {
-      console.log('Not authenticated, redirecting to login');
-      hasRedirected.current = true;
-      navigate('/login', { 
-        replace: true,
-        state: { from: location }
-      });
-      return;
-    }
-
-    // If timeout reached or we have enough data, proceed with redirect
-    if (redirectTimeout || profile || user.email === 'kevinskey@mac.com') {
-      hasRedirected.current = true;
+    if (!isLoading && isAuthenticated && user) {
+      console.log('RoleDashboard: Determining user role for routing');
+      console.log('User:', user);
+      console.log('Profile:', profile);
+      console.log('Is Admin:', isAdmin());
       
-      // Enhanced admin detection with multiple fallbacks
-      const isAdminUser = 
-        // Primary: Profile-based detection
-        profile?.is_super_admin === true || 
-        profile?.role === 'admin' ||
-        // Secondary: isAdmin function (includes metadata fallback)
-        (isAdmin && isAdmin()) ||
-        // Tertiary: Direct user metadata check
-        user?.user_metadata?.role === 'admin' ||
-        user?.app_metadata?.role === 'admin' ||
-        user?.user_metadata?.role === 'super_admin' ||
-        user?.app_metadata?.role === 'super_admin' ||
-        // Quaternary: Known admin email
-        user?.email === 'kevinskey@mac.com';
-      
-      const userRole = profile?.role || 'member';
-      
-      console.log('Performing role-based redirect:', { 
-        userRole, 
-        isAdminUser, 
-        hasProfile: !!profile,
-        profileIsSuperAdmin: profile?.is_super_admin,
-        profileRole: profile?.role,
-        isAdminFunction: isAdmin ? isAdmin() : false,
-        userMetadataRole: user?.user_metadata?.role,
-        appMetadataRole: user?.app_metadata?.role,
-        userEmail: user?.email
-      });
-      
-      if (isAdminUser) {
-        console.log('Redirecting admin to /admin');
+      // Determine where to route based on role
+      if (isAdmin()) {
+        console.log('RoleDashboard: Routing admin to admin dashboard');
         navigate('/admin', { replace: true });
-      } else if (userRole === 'fan') {
-        console.log('Redirecting fan to /dashboard/fan');
-        navigate('/dashboard/fan', { replace: true });
       } else {
-        console.log('Redirecting member to /dashboard/member');
+        console.log('RoleDashboard: Routing member to member dashboard');
         navigate('/dashboard/member', { replace: true });
       }
+    } else if (!isLoading && !isAuthenticated) {
+      console.log('RoleDashboard: User not authenticated, redirecting to login');
+      navigate('/login', { replace: true });
     }
-  }, [user, profile, isLoading, isAuthenticated, navigate, location, redirectTimeout, isAdmin]);
+  }, [isLoading, isAuthenticated, user, profile, isAdmin, navigate]);
 
-  // Reset redirect flag when component unmounts
-  useEffect(() => {
-    return () => {
-      hasRedirected.current = false;
-    };
-  }, []);
+  if (isLoading || !isAuthenticated) {
+    return (
+      <PageLoader 
+        message="Determining your access level..." 
+        className="min-h-screen"
+      />
+    );
+  }
 
-  // Show different messages based on state
-  const getLoadingMessage = () => {
-    if (isLoading && !redirectTimeout) return "Checking your credentials...";
-    if (!profile && !redirectTimeout) return "Loading your profile...";
-    return "Redirecting to your dashboard...";
-  };
-
-  // Show loading while determining role
+  // Fallback loader while routing
   return (
     <PageLoader 
-      message={getLoadingMessage()} 
+      message="Loading your dashboard..." 
       className="min-h-screen"
     />
   );
-}
+};
+
+export default RoleDashboard;
