@@ -27,6 +27,16 @@ export const useAuthState = () => {
   const lastEventRef = useRef<string>('');
   const debounceTimeoutRef = useRef<NodeJS.Timeout>();
   
+  // Debug logging
+  console.log('useAuthState current state:', {
+    hasUser: !!state.user,
+    hasProfile: !!state.profile,
+    userRole: state.profile?.role,
+    isAdmin: state.profile?.is_super_admin,
+    isLoading: state.isLoading,
+    isInitialized: state.isInitialized
+  });
+  
   // Fetch user data function - simplified and cached
   const fetchUserData = useCallback(async (userId: string) => {
     try {
@@ -36,6 +46,8 @@ export const useAuthState = () => {
         getProfile(userId),
         fetchUserPermissions(userId)
       ]);
+      
+      console.log('Fetched user profile:', profile);
       
       setState(prev => ({
         ...prev,
@@ -79,6 +91,7 @@ export const useAuthState = () => {
         if (!mounted) return;
         
         if (session?.user) {
+          console.log('Found existing session for user:', session.user.id);
           const authUser: AuthUser = {
             id: session.user.id,
             email: session.user.email || '',
@@ -98,6 +111,7 @@ export const useAuthState = () => {
           // Fetch additional user data
           await fetchUserData(session.user.id);
         } else {
+          console.log('No existing session found');
           setState({
             user: null,
             profile: null,
@@ -136,7 +150,7 @@ export const useAuthState = () => {
         }
         lastEventRef.current = eventKey;
         
-        console.log('Auth state change:', event);
+        console.log('Auth state change event:', event, 'user:', session?.user?.id);
         
         // Clear any pending auth changes
         if (debounceTimeoutRef.current) {
@@ -148,6 +162,7 @@ export const useAuthState = () => {
           if (!mounted) return;
           
           if (event === 'SIGNED_IN' && session?.user) {
+            console.log('Processing SIGNED_IN event for user:', session.user.id);
             const authUser: AuthUser = {
               id: session.user.id,
               email: session.user.email || '',
@@ -172,6 +187,7 @@ export const useAuthState = () => {
             }, 200);
             
           } else if (event === 'SIGNED_OUT') {
+            console.log('Processing SIGNED_OUT event');
             setState({
               user: null,
               profile: null,
@@ -181,7 +197,7 @@ export const useAuthState = () => {
             });
             isLoadingRef.current = false;
           }
-        }, 300); // Increased debounce delay
+        }, 300);
       }
     );
     
