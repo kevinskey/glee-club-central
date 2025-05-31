@@ -18,27 +18,31 @@ export function PageHeaderWithToggle({
   actions 
 }: PageHeaderWithToggleProps) {
   return (
-    <div className={cn("mb-8 space-y-4", className)}>
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-3">
+    <div className={cn("mb-8 pb-6 border-b border-border/40", className)}>
+      <div className="flex items-start justify-between">
+        <div className="flex items-start gap-4">
           {icon && (
-            <div className="text-glee-spelman flex items-center justify-center h-10 w-10 rounded-full bg-blue-100 dark:bg-blue-900/20">
+            <div className="text-glee-spelman flex items-center justify-center h-12 w-12 rounded-lg bg-primary/10 mt-1">
               {icon}
             </div>
           )}
-          <h1 className="text-3xl font-bold tracking-tight text-foreground flex items-center min-h-[2.25rem]">
-            {title}
-          </h1>
+          <div className="space-y-2">
+            <h1 className="text-3xl font-bold tracking-tight text-foreground">
+              {title}
+            </h1>
+            {description && (
+              <p className="text-base text-muted-foreground max-w-3xl leading-relaxed">
+                {description}
+              </p>
+            )}
+          </div>
         </div>
-        <div className="flex items-center gap-3">
-          {actions && <div>{actions}</div>}
-        </div>
+        {actions && (
+          <div className="flex items-center gap-3 ml-6">
+            {actions}
+          </div>
+        )}
       </div>
-      {description && (
-        <p className="text-lg text-muted-foreground max-w-3xl">
-          {description}
-        </p>
-      )}
     </div>
   );
 }
