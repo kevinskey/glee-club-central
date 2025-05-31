@@ -81,8 +81,9 @@ export const memberRoutes: RouteObject[] = [
       { path: 'announcements', element: <AnnouncementsPage /> },
       { path: 'attendance', element: <AttendancePage /> },
       { path: 'finances', element: <FinancesPage /> },
-      { path: 'members', element: <AdminRoute><MembersPage /></AdminRoute> },
-      { path: 'fan', element: <AdminRoute><FanAnalyticsPage /></AdminRoute> },
+      // Admin-only route for member management - note the path difference
+      { path: 'user-management', element: <AdminRoute><MembersPage /></AdminRoute> },
+      { path: 'fan-analytics', element: <AdminRoute><FanAnalyticsPage /></AdminRoute> },
     ],
   },
   // PDF Viewer Routes

@@ -10,7 +10,7 @@ export const RoleDashboard: React.FC = () => {
   const [hasRedirected, setHasRedirected] = useState(false);
 
   useEffect(() => {
-    console.log('RoleDashboard: Auth state check', {
+    console.log('🎯 RoleDashboard: Auth state check', {
       isLoading,
       isAuthenticated,
       hasUser: !!user,
@@ -33,25 +33,30 @@ export const RoleDashboard: React.FC = () => {
 
     // Handle unauthenticated users
     if (!isAuthenticated || !user) {
-      console.log('RoleDashboard: User not authenticated, redirecting to login');
+      console.log('🚫 RoleDashboard: User not authenticated, redirecting to login');
       setHasRedirected(true);
       navigate('/login', { replace: true });
       return;
     }
 
-    // Handle authenticated users - simplified routing
+    // Handle authenticated users - role-based routing
     if (isAuthenticated && user) {
-      console.log('RoleDashboard: User authenticated, determining route...');
+      console.log('🎯 RoleDashboard: User authenticated, determining route...');
       
-      let targetRoute = '/dashboard/member'; // Default route
+      let targetRoute = '/dashboard/member'; // Default route for members
       
+      // Check if user is admin (super admin or admin role)
       if (isAdmin()) {
         targetRoute = '/admin';
+        console.log('👑 RoleDashboard: Admin user, redirecting to admin dashboard');
       } else if (profile?.role === 'fan') {
         targetRoute = '/fan-dashboard';
+        console.log('👤 RoleDashboard: Fan user, redirecting to fan dashboard');
+      } else {
+        console.log('👤 RoleDashboard: Member user, redirecting to member dashboard');
       }
       
-      console.log('RoleDashboard: Redirecting to:', targetRoute);
+      console.log('🎯 RoleDashboard: Redirecting to:', targetRoute);
       setHasRedirected(true);
       navigate(targetRoute, { replace: true });
     }

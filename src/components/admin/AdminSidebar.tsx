@@ -12,13 +12,13 @@ import {
   ShoppingCart,
   Megaphone,
   Image,
-  Music,
   UserPlus
 } from 'lucide-react';
 
 const navItems = [
   { to: '/admin', icon: LayoutDashboard, label: 'Dashboard', end: true },
   { to: '/admin/calendar', icon: Calendar, label: 'Calendar' },
+  // Updated to use the admin route for member management
   { to: '/admin/members', icon: Users, label: 'Members' },
   { to: '/admin/fan-upload', icon: UserPlus, label: 'Bulk Fan Upload' },
   { to: '/admin/media', icon: Image, label: 'Media Library' },

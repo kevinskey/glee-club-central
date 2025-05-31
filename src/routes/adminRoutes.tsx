@@ -35,6 +35,7 @@ export const adminRoutes: RouteObject[] = [
       { path: 'calendar', element: <AdminCalendarPage /> },
       { path: 'events/:id', element: <EventDetailsPage /> },
       { path: 'events/:id/rsvps', element: <EventRSVPsPage /> },
+      // Admin member management route - distinct path from member dashboard
       { path: 'members', element: <UserManagementPage /> },
       { path: 'user-management', element: <UserManagementPage /> },
       { path: 'hero-manager', element: <AdminHeroManager /> },
