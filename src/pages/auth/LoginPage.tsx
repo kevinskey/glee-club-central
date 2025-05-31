@@ -1,3 +1,4 @@
+
 import * as React from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useNavigate, useLocation, Link } from 'react-router-dom';
@@ -51,11 +52,14 @@ const LoginPage = () => {
   
   // Handle authenticated user redirect
   React.useEffect(() => {
-    if (isAuthenticated && !isLoading && !isSubmitting && !hasRedirected) {
+    if (isAuthenticated && !isLoading && !hasRedirected) {
       const redirectPath = getRedirectPath();
       console.log('User authenticated, redirecting to:', redirectPath);
       
       setHasRedirected(true);
+      
+      // Reset submitting state when authenticated
+      setIsSubmitting(false);
       
       // Use setTimeout to prevent redirect loops
       setTimeout(() => {
@@ -66,7 +70,7 @@ const LoginPage = () => {
         sessionStorage.removeItem('authRedirectTimestamp');
       }, 100);
     }
-  }, [isAuthenticated, isLoading, navigate, isSubmitting, hasRedirected]);
+  }, [isAuthenticated, isLoading, navigate, hasRedirected]);
   
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -87,7 +91,7 @@ const LoginPage = () => {
         setIsSubmitting(false);
       } else {
         toast.success("Login successful!");
-        // Don't set isSubmitting to false here - let the redirect effect handle it
+        // Don't reset isSubmitting here - let the redirect effect handle it
       }
     } catch (err) {
       console.error("Unexpected login error:", err);
