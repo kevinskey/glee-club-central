@@ -77,4 +77,3 @@ export function AdminSidebar() {
     </aside>
   );
 }
-</lov-code>
