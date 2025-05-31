@@ -110,7 +110,7 @@ export const CalendarHero: React.FC<CalendarHeroProps> = ({
                             {event.event_type.replace('_', ' ')}
                           </Badge>
                         )}
-                        <Link to={`/events/${event.id}`}>
+                        <Link to={`/event/${event.id}`}>
                           <Button size="sm" variant="ghost">
                             Learn More
                           </Button>
@@ -158,7 +158,7 @@ export const CalendarHero: React.FC<CalendarHeroProps> = ({
                           {event.event_type.replace('_', ' ')}
                         </Badge>
                       )}
-                      <Link to={`/events/${event.id}`}>
+                      <Link to={`/event/${event.id}`}>
                         <Button size="sm">
                           Learn More
                           <ArrowRight className="ml-2 h-4 w-4" />

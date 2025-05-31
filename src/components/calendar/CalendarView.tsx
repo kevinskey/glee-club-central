@@ -1,5 +1,6 @@
 
 import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
 import { CalendarEvent } from '@/types/calendar';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -58,55 +59,53 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
   const renderListView = () => (
     <div className="space-y-4">
       {upcomingEvents.map((event) => (
-        <Card 
-          key={event.id} 
-          className="cursor-pointer hover:shadow-md transition-shadow"
-          onClick={() => onEventClick(event)}
-        >
-          <CardContent className="p-4">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-              <div className="flex-1">
-                <div className="flex items-start gap-3">
-                  <div className="flex-shrink-0 mt-1">
-                    <Calendar className="h-5 w-5 text-glee-spelman" />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <h3 className="font-semibold text-lg text-gray-900 mb-1">{event.title}</h3>
-                    <div className="flex items-center text-sm text-gray-600 mb-2">
-                      <Clock className="h-4 w-4 mr-1" />
-                      {formatEventDate(event.start_time, event.end_time)}
+        <Link key={event.id} to={`/event/${event.id}`}>
+          <Card className="cursor-pointer hover:shadow-md transition-shadow mobile-touch-target">
+            <CardContent className="p-4">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <div className="flex-1">
+                  <div className="flex items-start gap-3">
+                    <div className="flex-shrink-0 mt-1">
+                      <Calendar className="h-5 w-5 text-glee-spelman" />
                     </div>
-                    {event.location_name && (
+                    <div className="flex-1 min-w-0">
+                      <h3 className="font-semibold text-lg text-gray-900 mb-1">{event.title}</h3>
                       <div className="flex items-center text-sm text-gray-600 mb-2">
-                        <MapPin className="h-4 w-4 mr-1" />
-                        {event.location_name}
+                        <Clock className="h-4 w-4 mr-1" />
+                        {formatEventDate(event.start_time, event.end_time)}
                       </div>
-                    )}
-                    {event.short_description && (
-                      <p className="text-sm text-gray-600 line-clamp-2">{event.short_description}</p>
-                    )}
+                      {event.location_name && (
+                        <div className="flex items-center text-sm text-gray-600 mb-2">
+                          <MapPin className="h-4 w-4 mr-1" />
+                          {event.location_name}
+                        </div>
+                      )}
+                      {event.short_description && (
+                        <p className="text-sm text-gray-600 line-clamp-2">{event.short_description}</p>
+                      )}
+                    </div>
                   </div>
                 </div>
+                <div className="flex flex-col items-end gap-2">
+                  {event.event_type && (
+                    <Badge variant="outline" className={getEventTypeColor(event.event_type)}>
+                      {event.event_type.replace('_', ' ')}
+                    </Badge>
+                  )}
+                  {event.is_private && showPrivateEvents && (
+                    <Badge variant="secondary">Private</Badge>
+                  )}
+                  {event.allow_rsvp && (
+                    <div className="flex items-center text-xs text-gray-500">
+                      <Users className="h-3 w-3 mr-1" />
+                      RSVP Available
+                    </div>
+                  )}
+                </div>
               </div>
-              <div className="flex flex-col items-end gap-2">
-                {event.event_type && (
-                  <Badge variant="outline" className={getEventTypeColor(event.event_type)}>
-                    {event.event_type.replace('_', ' ')}
-                  </Badge>
-                )}
-                {event.is_private && showPrivateEvents && (
-                  <Badge variant="secondary">Private</Badge>
-                )}
-                {event.allow_rsvp && (
-                  <div className="flex items-center text-xs text-gray-500">
-                    <Users className="h-3 w-3 mr-1" />
-                    RSVP Available
-                  </div>
-                )}
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+            </CardContent>
+          </Card>
+        </Link>
       ))}
     </div>
   );
@@ -149,13 +148,13 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
                 </div>
                 <div className="space-y-1">
                   {dayEvents.slice(0, 2).map((event) => (
-                    <div
+                    <Link
                       key={event.id}
-                      className="text-xs p-1 rounded bg-glee-spelman/10 text-glee-spelman cursor-pointer hover:bg-glee-spelman/20 truncate"
-                      onClick={() => onEventClick(event)}
+                      to={`/event/${event.id}`}
+                      className="block text-xs p-1 rounded bg-glee-spelman/10 text-glee-spelman hover:bg-glee-spelman/20 truncate transition-colors"
                     >
                       {event.title}
-                    </div>
+                    </Link>
                   ))}
                   {dayEvents.length > 2 && (
                     <div className="text-xs text-gray-500">
@@ -178,45 +177,43 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
     return (
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {weekEvents.map((event) => (
-          <Card 
-            key={event.id} 
-            className="cursor-pointer hover:shadow-md transition-shadow"
-            onClick={() => onEventClick(event)}
-          >
-            <CardContent className="p-4">
-              <div className="flex items-start gap-3">
-                <div className="flex-shrink-0 mt-1">
-                  <Calendar className="h-5 w-5 text-glee-spelman" />
-                </div>
-                <div className="flex-1 min-w-0">
-                  <h3 className="font-medium text-gray-900 mb-1 line-clamp-2">{event.title}</h3>
-                  <div className="flex items-center text-sm text-gray-600 mb-2">
-                    <Clock className="h-4 w-4 mr-1" />
-                    {format(new Date(event.start_time), 'EEE, MMM d • h:mm a')}
+          <Link key={event.id} to={`/event/${event.id}`}>
+            <Card className="cursor-pointer hover:shadow-md transition-shadow mobile-touch-target">
+              <CardContent className="p-4">
+                <div className="flex items-start gap-3">
+                  <div className="flex-shrink-0 mt-1">
+                    <Calendar className="h-5 w-5 text-glee-spelman" />
                   </div>
-                  {event.location_name && (
-                    <div className="flex items-center text-sm text-gray-600">
-                      <MapPin className="h-4 w-4 mr-1" />
-                      <span className="truncate">{event.location_name}</span>
+                  <div className="flex-1 min-w-0">
+                    <h3 className="font-medium text-gray-900 mb-1 line-clamp-2">{event.title}</h3>
+                    <div className="flex items-center text-sm text-gray-600 mb-2">
+                      <Clock className="h-4 w-4 mr-1" />
+                      {format(new Date(event.start_time), 'EEE, MMM d • h:mm a')}
+                    </div>
+                    {event.location_name && (
+                      <div className="flex items-center text-sm text-gray-600">
+                        <MapPin className="h-4 w-4 mr-1" />
+                        <span className="truncate">{event.location_name}</span>
+                      </div>
+                    )}
+                  </div>
+                </div>
+                <div className="flex justify-between items-center mt-3">
+                  {event.event_type && (
+                    <Badge variant="outline" className={`${getEventTypeColor(event.event_type)} text-xs`}>
+                      {event.event_type.replace('_', ' ')}
+                    </Badge>
+                  )}
+                  {event.allow_rsvp && (
+                    <div className="flex items-center text-xs text-gray-500">
+                      <Users className="h-3 w-3 mr-1" />
+                      RSVP
                     </div>
                   )}
                 </div>
-              </div>
-              <div className="flex justify-between items-center mt-3">
-                {event.event_type && (
-                  <Badge variant="outline" className={`${getEventTypeColor(event.event_type)} text-xs`}>
-                    {event.event_type.replace('_', ' ')}
-                  </Badge>
-                )}
-                {event.allow_rsvp && (
-                  <div className="flex items-center text-xs text-gray-500">
-                    <Users className="h-3 w-3 mr-1" />
-                    RSVP
-                  </div>
-                )}
-              </div>
-            </CardContent>
-          </Card>
+              </CardContent>
+            </Card>
+          </Link>
         ))}
       </div>
     );
@@ -245,6 +242,7 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
                 variant={viewMode === 'month' ? 'default' : 'outline'}
                 size="sm"
                 onClick={() => setViewMode('month')}
+                className="mobile-touch-target"
               >
                 Month
               </Button>
@@ -252,6 +250,7 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
                 variant={viewMode === 'week' ? 'default' : 'outline'}
                 size="sm"
                 onClick={() => setViewMode('week')}
+                className="mobile-touch-target"
               >
                 Week
               </Button>
@@ -259,6 +258,7 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
                 variant={viewMode === 'list' ? 'default' : 'outline'}
                 size="sm"
                 onClick={() => setViewMode('list')}
+                className="mobile-touch-target"
               >
                 List
               </Button>
@@ -266,13 +266,23 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
             
             {viewMode === 'month' && (
               <div className="flex items-center gap-2">
-                <Button variant="outline" size="sm" onClick={() => navigateMonth('prev')}>
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  onClick={() => navigateMonth('prev')}
+                  className="mobile-touch-target"
+                >
                   ←
                 </Button>
                 <span className="font-medium px-3">
                   {format(currentDate, 'MMMM yyyy')}
                 </span>
-                <Button variant="outline" size="sm" onClick={() => navigateMonth('next')}>
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  onClick={() => navigateMonth('next')}
+                  className="mobile-touch-target"
+                >
                   →
                 </Button>
               </div>

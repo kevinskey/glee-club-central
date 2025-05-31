@@ -3,42 +3,25 @@ import React from 'react';
 import { RouteObject } from 'react-router-dom';
 import AppLayout from '@/layouts/AppLayout';
 
-// Public Pages
-import HomePage from '@/pages/HomePage';
+// Import public pages
+import LandingPage from '@/pages/LandingPage';
+import CalendarPage from '@/pages/CalendarPage';
+import EventDetailPage from '@/pages/EventDetailPage';
 import AboutPage from '@/pages/AboutPage';
 import ContactPage from '@/pages/ContactPage';
-import PublicEventsPage from '@/pages/PublicEventsPage';
-import CalendarPage from '@/pages/CalendarPage';
-import JoinGleeFamPage from '@/pages/JoinGleeFamPage';
-import StorePage from '@/pages/StorePage';
-import CheckoutSuccessPage from '@/pages/CheckoutSuccessPage';
-import CheckoutCancelledPage from '@/pages/CheckoutCancelledPage';
+import LoginPage from '@/pages/auth/LoginPage';
 
 export const publicRoutes: RouteObject[] = [
   {
     path: '/',
     element: <AppLayout sidebarType="none" showHeader={true} showFooter={true} />,
     children: [
-      { index: true, element: <HomePage /> },
+      { index: true, element: <LandingPage /> },
+      { path: 'calendar', element: <CalendarPage /> },
+      { path: 'event/:id', element: <EventDetailPage /> },
       { path: 'about', element: <AboutPage /> },
       { path: 'contact', element: <ContactPage /> },
-      { path: 'events', element: <PublicEventsPage /> },
-      { path: 'calendar', element: <CalendarPage /> },
-      { path: 'join-glee-fam', element: <JoinGleeFamPage /> },
-      { path: 'store', element: <StorePage /> },
+      { path: 'login', element: <LoginPage /> },
     ],
-  },
-  // Checkout Routes
-  { 
-    path: '/checkout-success', 
-    element: <AppLayout sidebarType="none" showHeader={false} showFooter={false}><CheckoutSuccessPage /></AppLayout>
-  },
-  { 
-    path: '/store/success', 
-    element: <AppLayout sidebarType="none" showHeader={false} showFooter={false}><CheckoutSuccessPage /></AppLayout>
-  },
-  { 
-    path: '/store/cancelled', 
-    element: <AppLayout sidebarType="none" showHeader={false} showFooter={false}><CheckoutCancelledPage /></AppLayout>
   },
 ];

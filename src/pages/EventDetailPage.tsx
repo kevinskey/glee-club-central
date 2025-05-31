@@ -18,21 +18,24 @@ import {
   ArrowLeft, 
   ExternalLink,
   Download,
-  Users
+  Users,
+  Edit
 } from 'lucide-react';
 import { format, isSameDay } from 'date-fns';
 import { EventRSVPForm } from '@/components/events/EventRSVPForm';
 import { useAuth } from '@/contexts/AuthContext';
 import { useUserRole } from '@/hooks/useUserRole';
 import ErrorBoundary from '@/components/ErrorBoundary';
+import AppLayout from '@/layouts/AppLayout';
 
-export default function EventDetailPage() {
+function EventDetailPageContent() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { events, loading } = useCalendarEvents();
   const { user } = useAuth();
-  const { isMember } = useUserRole();
+  const { isAdmin } = useUserRole();
   const [event, setEvent] = useState<CalendarEvent | null>(null);
+  const { rsvpStats } = useEventRSVPs(id);
 
   useEffect(() => {
     if (events.length > 0 && id) {
@@ -94,260 +97,301 @@ END:VCALENDAR`;
     }
   };
 
+  const exportRSVPsToCSV = () => {
+    if (!event || !isAdmin) return;
+    
+    // This would typically fetch detailed RSVP data
+    const csvContent = `Name,Email,Status,Created At\n`;
+    const blob = new Blob([csvContent], { type: 'text/csv' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `${event.title}_rsvps.csv`;
+    link.click();
+    URL.revokeObjectURL(url);
+  };
+
   if (loading) {
     return (
-      <ErrorBoundary>
-        <div className="min-h-screen bg-gray-50/50">
-          <div className="container mx-auto px-4 py-6 max-w-4xl">
-            <div className="flex items-center justify-center h-64">
-              <div className="text-center">
-                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-glee-spelman mx-auto"></div>
-                <p className="mt-4 text-muted-foreground">Loading event...</p>
-              </div>
-            </div>
+      <div className="mobile-container mobile-section-padding">
+        <div className="flex items-center justify-center h-64">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-glee-spelman mx-auto"></div>
+            <p className="mt-4 text-muted-foreground">Loading event...</p>
           </div>
         </div>
-      </ErrorBoundary>
+      </div>
     );
   }
 
   if (!event) {
     return (
-      <ErrorBoundary>
-        <div className="min-h-screen bg-gray-50/50">
-          <div className="container mx-auto px-4 py-6 max-w-4xl">
-            <Card>
-              <CardContent className="flex flex-col items-center justify-center h-64 space-y-4">
-                <Calendar className="h-12 w-12 text-gray-400" />
-                <div className="text-center">
-                  <h2 className="text-xl font-semibold">Event Not Found</h2>
-                  <p className="text-muted-foreground mt-2">The event you're looking for doesn't exist or may have been removed.</p>
-                </div>
-                <Button onClick={() => navigate('/calendar')} variant="outline">
-                  <ArrowLeft className="h-4 w-4 mr-2" />
-                  Back to Calendar
-                </Button>
-              </CardContent>
-            </Card>
-          </div>
-        </div>
-      </ErrorBoundary>
-    );
-  }
-
-  // Check if user can view this event
-  if (event.is_private && !isMember) {
-    return (
-      <ErrorBoundary>
-        <div className="min-h-screen bg-gray-50/50">
-          <div className="container mx-auto px-4 py-6 max-w-4xl">
-            <Card>
-              <CardContent className="flex flex-col items-center justify-center h-64 space-y-4">
-                <Calendar className="h-12 w-12 text-gray-400" />
-                <div className="text-center">
-                  <h2 className="text-xl font-semibold">Private Event</h2>
-                  <p className="text-muted-foreground mt-2">This event is only visible to Glee Club members.</p>
-                </div>
-                <div className="flex gap-2">
-                  <Button onClick={() => navigate('/calendar')} variant="outline">
-                    <ArrowLeft className="h-4 w-4 mr-2" />
-                    Back to Calendar
-                  </Button>
-                  <Link to="/login">
-                    <Button>Sign In</Button>
-                  </Link>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-        </div>
-      </ErrorBoundary>
+      <div className="mobile-container mobile-section-padding">
+        <Card>
+          <CardContent className="flex flex-col items-center justify-center h-64 space-y-4">
+            <Calendar className="h-12 w-12 text-gray-400" />
+            <div className="text-center">
+              <h2 className="text-xl font-semibold">Event Not Found</h2>
+              <p className="text-muted-foreground mt-2">The event you're looking for doesn't exist or may have been removed.</p>
+            </div>
+            <Button onClick={() => navigate('/calendar')} variant="outline">
+              <ArrowLeft className="h-4 w-4 mr-2" />
+              Back to Calendar
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
     );
   }
 
   return (
-    <ErrorBoundary>
-      <div className="min-h-screen bg-gray-50/50">
-        <div className="container mx-auto px-4 py-6 max-w-4xl space-y-6">
-          {/* Header */}
-          <div className="bg-white rounded-lg border shadow-sm p-6">
-            <Button 
-              variant="ghost" 
-              onClick={() => navigate('/calendar')}
-              className="text-muted-foreground hover:text-foreground mb-4"
-            >
-              <ArrowLeft className="h-4 w-4 mr-2" />
-              Back to Calendar
+    <div className="mobile-container mobile-section-padding space-y-4 sm:space-y-6">
+      {/* Header */}
+      <div className="flex items-center justify-between mb-4">
+        <Button 
+          variant="ghost" 
+          onClick={() => navigate('/calendar')}
+          className="text-muted-foreground hover:text-foreground mobile-touch-target"
+        >
+          <ArrowLeft className="h-4 w-4 mr-2" />
+          Back to Calendar
+        </Button>
+        
+        {isAdmin && (
+          <Link to={`/admin/calendar?edit=${event.id}`}>
+            <Button variant="outline" size="sm" className="mobile-touch-target">
+              <Edit className="h-4 w-4 mr-2" />
+              Edit Event
             </Button>
-            
-            <PageHeader
-              title={event.title}
-              description={event.short_description}
-              icon={<Calendar className="h-6 w-6" />}
-            />
+          </Link>
+        )}
+      </div>
+      
+      <PageHeader
+        title={event.title}
+        description={event.short_description}
+        icon={<Calendar className="h-5 w-5 sm:h-6 sm:w-6" />}
+      />
 
-            {/* Event Types */}
-            <div className="flex flex-wrap gap-2 mt-4">
-              {event.event_types?.map((type) => (
-                <Badge
-                  key={type}
-                  variant="outline"
-                  className={getEventTypeColor(type)}
-                >
-                  {type.replace('_', ' ')}
-                </Badge>
-              )) || (event.event_type && (
-                <Badge
-                  variant="outline"
-                  className={getEventTypeColor(event.event_type)}
-                >
-                  {event.event_type.replace('_', ' ')}
-                </Badge>
-              ))}
-              {event.is_private && (
-                <Badge variant="secondary">Private Event</Badge>
-              )}
-            </div>
-          </div>
+      {/* Event Types */}
+      <div className="flex flex-wrap gap-2">
+        {event.event_types?.map((type) => (
+          <Badge
+            key={type}
+            variant="outline"
+            className={getEventTypeColor(type)}
+          >
+            {type.replace('_', ' ')}
+          </Badge>
+        )) || (event.event_type && (
+          <Badge
+            variant="outline"
+            className={getEventTypeColor(event.event_type)}
+          >
+            {event.event_type.replace('_', ' ')}
+          </Badge>
+        ))}
+        {event.is_private && (
+          <Badge variant="secondary">Private Event</Badge>
+        )}
+      </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            {/* Main Content */}
-            <div className="lg:col-span-2 space-y-6">
-              {/* Event Image */}
-              {event.feature_image_url && (
-                <Card>
-                  <CardContent className="p-0">
-                    <img 
-                      src={event.feature_image_url} 
-                      alt={event.title}
-                      className="w-full h-64 object-cover rounded-lg"
-                    />
-                  </CardContent>
-                </Card>
-              )}
+      {/* Event Overview */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
+        {/* Main Content */}
+        <div className="lg:col-span-2 space-y-4 sm:space-y-6">
+          {/* Event Image */}
+          {(event.feature_image_url || event.image_url) && (
+            <Card>
+              <CardContent className="p-0">
+                <img 
+                  src={event.feature_image_url || event.image_url} 
+                  alt={event.title}
+                  className="w-full h-48 sm:h-64 object-cover rounded-lg"
+                />
+              </CardContent>
+            </Card>
+          )}
 
-              {/* Description */}
-              {event.full_description && (
-                <Card>
-                  <CardHeader>
-                    <CardTitle>About This Event</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <p className="text-gray-700 whitespace-pre-wrap leading-relaxed">
-                      {event.full_description}
-                    </p>
-                  </CardContent>
-                </Card>
-              )}
+          {/* Description */}
+          {event.full_description && (
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-lg sm:text-xl">About This Event</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-gray-700 whitespace-pre-wrap leading-relaxed text-sm sm:text-base">
+                  {event.full_description}
+                </p>
+              </CardContent>
+            </Card>
+          )}
 
-              {/* Date & Time */}
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center">
-                    <Clock className="h-5 w-5 mr-2 text-glee-spelman" />
-                    When
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-gray-700 font-medium">
-                    {formatEventDate(event.start_time, event.end_time)}
-                  </p>
-                </CardContent>
-              </Card>
+          {/* Date & Time */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center text-lg sm:text-xl">
+                <Clock className="h-5 w-5 mr-2 text-glee-spelman" />
+                When
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-gray-700 font-medium text-sm sm:text-base">
+                {formatEventDate(event.start_time, event.end_time)}
+              </p>
+            </CardContent>
+          </Card>
 
-              {/* Location */}
-              {event.location_name && (
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="flex items-center">
-                      <MapPin className="h-5 w-5 mr-2 text-glee-spelman" />
-                      Where
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-3">
-                    <p className="text-gray-700 font-medium">{event.location_name}</p>
-                    {event.location_map_url && event.allow_google_map_link && (
-                      <Button 
-                        variant="outline" 
-                        size="sm"
-                        onClick={() => window.open(event.location_map_url, '_blank')}
-                      >
-                        <ExternalLink className="h-4 w-4 mr-2" />
-                        View on Map
-                      </Button>
-                    )}
-                  </CardContent>
-                </Card>
-              )}
-            </div>
-
-            {/* Sidebar */}
-            <div className="space-y-6">
-              {/* Host Information */}
-              {(event.event_host_name || event.event_host_contact) && (
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="flex items-center">
-                      <User className="h-5 w-5 mr-2 text-glee-spelman" />
-                      Host
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-3">
-                    {event.event_host_name && (
-                      <div className="flex items-center text-sm">
-                        <User className="h-4 w-4 mr-2 text-muted-foreground" />
-                        <span className="font-medium">{event.event_host_name}</span>
-                      </div>
-                    )}
-                    {event.event_host_contact && (
-                      <div className="flex items-center text-sm">
-                        {event.event_host_contact.includes('@') ? (
-                          <Mail className="h-4 w-4 mr-2 text-muted-foreground" />
-                        ) : (
-                          <Phone className="h-4 w-4 mr-2 text-muted-foreground" />
-                        )}
-                        <span>{event.event_host_contact}</span>
-                      </div>
-                    )}
-                  </CardContent>
-                </Card>
-              )}
-
-              {/* Actions */}
-              <Card>
-                <CardHeader>
-                  <CardTitle>Actions</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-3">
-                  {event.allow_ics_download && (
-                    <Button 
-                      variant="outline" 
-                      className="w-full"
-                      onClick={handleDownloadICS}
-                    >
-                      <Download className="h-4 w-4 mr-2" />
-                      Add to Calendar
-                    </Button>
-                  )}
+          {/* Location */}
+          {event.location_name && (
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center text-lg sm:text-xl">
+                  <MapPin className="h-5 w-5 mr-2 text-glee-spelman" />
+                  Where
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                <p className="text-gray-700 font-medium text-sm sm:text-base">{event.location_name}</p>
+                {event.location_map_url && event.allow_google_map_link && (
                   <Button 
                     variant="outline" 
-                    className="w-full"
-                    onClick={() => navigate('/calendar')}
+                    size="sm"
+                    onClick={() => window.open(event.location_map_url, '_blank')}
+                    className="mobile-touch-target"
                   >
-                    <Calendar className="h-4 w-4 mr-2" />
-                    View All Events
+                    <ExternalLink className="h-4 w-4 mr-2" />
+                    View on Google Maps
                   </Button>
-                </CardContent>
-              </Card>
+                )}
+              </CardContent>
+            </Card>
+          )}
+        </div>
 
-              {/* RSVP Form */}
-              {event.allow_rsvp && (event.is_public || isMember) && (
-                <EventRSVPForm event={event} />
+        {/* Sidebar */}
+        <div className="space-y-4 sm:space-y-6">
+          {/* Host Information */}
+          {(event.event_host_name || event.event_host_contact) && (
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center text-lg sm:text-xl">
+                  <User className="h-5 w-5 mr-2 text-glee-spelman" />
+                  Host
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                {event.event_host_name && (
+                  <div className="flex items-center text-sm">
+                    <User className="h-4 w-4 mr-2 text-muted-foreground" />
+                    <span className="font-medium">{event.event_host_name}</span>
+                  </div>
+                )}
+                {event.event_host_contact && (
+                  <div className="flex items-center text-sm">
+                    {event.event_host_contact.includes('@') ? (
+                      <Mail className="h-4 w-4 mr-2 text-muted-foreground" />
+                    ) : (
+                      <Phone className="h-4 w-4 mr-2 text-muted-foreground" />
+                    )}
+                    <span>{event.event_host_contact}</span>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Actions */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-lg sm:text-xl">Actions</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              {event.allow_ics_download && (
+                <Button 
+                  variant="outline" 
+                  className="w-full mobile-touch-target"
+                  onClick={handleDownloadICS}
+                >
+                  <Download className="h-4 w-4 mr-2" />
+                  Add to Calendar
+                </Button>
               )}
-            </div>
-          </div>
+              <Button 
+                variant="outline" 
+                className="w-full mobile-touch-target"
+                onClick={() => navigate('/calendar')}
+              >
+                <Calendar className="h-4 w-4 mr-2" />
+                View All Events
+              </Button>
+            </CardContent>
+          </Card>
+
+          {/* Admin Info */}
+          {isAdmin && (
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center text-lg sm:text-xl">
+                  <Users className="h-5 w-5 mr-2 text-glee-spelman" />
+                  Admin Info
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                <div className="text-sm">
+                  <span className="font-medium">Total RSVPs: </span>
+                  <span>{rsvpStats.total}</span>
+                </div>
+                <div className="grid grid-cols-3 gap-2 text-xs">
+                  <div className="text-center">
+                    <div className="font-semibold text-green-600">{rsvpStats.going}</div>
+                    <div className="text-muted-foreground">Going</div>
+                  </div>
+                  <div className="text-center">
+                    <div className="font-semibold text-yellow-600">{rsvpStats.maybe}</div>
+                    <div className="text-muted-foreground">Maybe</div>
+                  </div>
+                  <div className="text-center">
+                    <div className="font-semibold text-red-600">{rsvpStats.notGoing}</div>
+                    <div className="text-muted-foreground">Can't Go</div>
+                  </div>
+                </div>
+                <div className="flex gap-2">
+                  <Link to={`/admin/events/${event.id}/rsvps`} className="flex-1">
+                    <Button variant="outline" size="sm" className="w-full mobile-touch-target">
+                      <Users className="h-4 w-4 mr-2" />
+                      View RSVPs
+                    </Button>
+                  </Link>
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    onClick={exportRSVPsToCSV}
+                    className="mobile-touch-target"
+                  >
+                    Export CSV
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* RSVP Form */}
+          {event.allow_rsvp && event.is_public && (
+            <EventRSVPForm event={event} />
+          )}
         </div>
       </div>
-    </ErrorBoundary>
+    </div>
+  );
+}
+
+export default function EventDetailPage() {
+  return (
+    <AppLayout sidebarType="none" showHeader={true} showFooter={true}>
+      <ErrorBoundary>
+        <EventDetailPageContent />
+      </ErrorBoundary>
+    </AppLayout>
   );
 }
