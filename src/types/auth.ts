@@ -45,6 +45,7 @@ export interface AuthContextType {
   profile: Profile | null;
   isAuthenticated: boolean;
   isLoading: boolean;
+  isInitialized: boolean;
   session: any;
   supabaseClient: any;
   login: (email: string, password: string) => Promise<{ error: any }>;

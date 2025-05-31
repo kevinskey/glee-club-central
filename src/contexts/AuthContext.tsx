@@ -1,3 +1,4 @@
+
 import React, { createContext, useContext, useEffect, useState, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { AuthUser, Profile, AuthContextType } from '@/types/auth';
@@ -5,6 +6,35 @@ import { useAuthState } from '@/hooks/useAuthState';
 import { fetchUserPermissions } from '@/utils/supabase/permissions';
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
+
+// Export cleanup functions
+export const cleanupAuthState = () => {
+  // Remove standard auth tokens
+  localStorage.removeItem('supabase.auth.token');
+  // Remove all Supabase auth keys from localStorage
+  Object.keys(localStorage).forEach((key) => {
+    if (key.startsWith('supabase.auth.') || key.includes('sb-')) {
+      localStorage.removeItem(key);
+    }
+  });
+  // Remove from sessionStorage if in use
+  Object.keys(sessionStorage || {}).forEach((key) => {
+    if (key.startsWith('supabase.auth.') || key.includes('sb-')) {
+      sessionStorage.removeItem(key);
+    }
+  });
+};
+
+export const resetAuthSystem = async () => {
+  try {
+    await supabase.auth.signOut();
+    cleanupAuthState();
+    return { success: true };
+  } catch (error) {
+    console.error('Error resetting auth system:', error);
+    return { success: false };
+  }
+};
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { user, profile, isLoading, isInitialized, permissions, refreshUserData } = useAuthState();
@@ -88,16 +118,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   }, [user?.id, refreshUserData]);
 
-  const resetAuthSystem = useCallback(async () => {
-    try {
-      await supabase.auth.signOut();
-      localStorage.clear();
-      sessionStorage.clear();
-      return { success: true };
-    } catch (error) {
-      console.error('Error resetting auth system:', error);
-      return { success: false };
-    }
+  const resetAuthSystemCallback = useCallback(async () => {
+    return resetAuthSystem();
   }, []);
 
   const createFallbackProfile = useCallback(async () => {
@@ -131,6 +153,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     profile,
     isAuthenticated,
     isLoading,
+    isInitialized,
     session,
     supabaseClient: supabase,
     login,
@@ -145,7 +168,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     resetPassword,
     permissions,
     refreshPermissions,
-    resetAuthSystem,
+    resetAuthSystem: resetAuthSystemCallback,
     createFallbackProfile,
     refreshUserData,
   };
