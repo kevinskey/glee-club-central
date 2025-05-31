@@ -261,7 +261,9 @@ export type Database = {
           feature_image_url: string | null
           full_description: string | null
           id: string
+          image_url: string | null
           is_private: boolean | null
+          is_public: boolean | null
           location_map_url: string | null
           location_name: string | null
           short_description: string | null
@@ -283,7 +285,9 @@ export type Database = {
           feature_image_url?: string | null
           full_description?: string | null
           id?: string
+          image_url?: string | null
           is_private?: boolean | null
+          is_public?: boolean | null
           location_map_url?: string | null
           location_name?: string | null
           short_description?: string | null
@@ -305,7 +309,9 @@ export type Database = {
           feature_image_url?: string | null
           full_description?: string | null
           id?: string
+          image_url?: string | null
           is_private?: boolean | null
+          is_public?: boolean | null
           location_map_url?: string | null
           location_name?: string | null
           short_description?: string | null
@@ -318,11 +324,14 @@ export type Database = {
         Row: {
           created_at: string
           description: string | null
+          display_order: number | null
           file_path: string
           file_type: string
           file_url: string
           folder: string | null
+          hero_tag: string | null
           id: string
+          is_hero: boolean | null
           is_public: boolean | null
           size: number | null
           tags: string[] | null
@@ -332,11 +341,14 @@ export type Database = {
         Insert: {
           created_at?: string
           description?: string | null
+          display_order?: number | null
           file_path: string
           file_type: string
           file_url: string
           folder?: string | null
+          hero_tag?: string | null
           id?: string
+          is_hero?: boolean | null
           is_public?: boolean | null
           size?: number | null
           tags?: string[] | null
@@ -346,11 +358,14 @@ export type Database = {
         Update: {
           created_at?: string
           description?: string | null
+          display_order?: number | null
           file_path?: string
           file_type?: string
           file_url?: string
           folder?: string | null
+          hero_tag?: string | null
           id?: string
+          is_hero?: boolean | null
           is_public?: boolean | null
           size?: number | null
           tags?: string[] | null
@@ -783,6 +798,39 @@ export type Database = {
           minutes_practiced?: number
           updated_at?: string
           user_id?: string
+        }
+        Relationships: []
+      }
+      products: {
+        Row: {
+          created_at: string | null
+          featured: boolean | null
+          id: string
+          image_url: string | null
+          is_active: boolean | null
+          name: string
+          price: number
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          featured?: boolean | null
+          id?: string
+          image_url?: string | null
+          is_active?: boolean | null
+          name: string
+          price: number
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          featured?: boolean | null
+          id?: string
+          image_url?: string | null
+          is_active?: boolean | null
+          name?: string
+          price?: number
+          updated_at?: string | null
         }
         Relationships: []
       }
