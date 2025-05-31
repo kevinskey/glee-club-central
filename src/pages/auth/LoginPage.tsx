@@ -1,4 +1,3 @@
-
 import * as React from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useNavigate, useLocation, Link } from 'react-router-dom';
@@ -134,9 +133,9 @@ const LoginPage = () => {
       {/* Dark overlay for better contrast */}
       <div className="absolute inset-0 bg-black/30 z-0" />
       
-      {/* Login form container with semi-transparent background */}
+      {/* Login form container with reduced opacity */}
       <div className="relative z-10 w-full max-w-md px-4">
-        <div className="bg-white/85 dark:bg-black/65 backdrop-blur-sm rounded-lg shadow-xl p-6 border border-white/20 dark:border-white/10">
+        <div className="bg-white/70 dark:bg-black/50 backdrop-blur-sm rounded-lg shadow-xl p-6 border border-white/20 dark:border-white/10">
           <Card className="w-full border-0 bg-transparent shadow-none">
             <CardHeader className="space-y-1 text-center px-0">
               <CardTitle className="text-2xl font-bold text-gray-900 dark:text-gray-100">
