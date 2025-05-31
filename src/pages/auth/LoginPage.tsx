@@ -1,3 +1,4 @@
+
 import * as React from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useNavigate, useLocation, Link } from 'react-router-dom';
@@ -29,23 +30,26 @@ const LoginPage = () => {
     addCentennialImageToLibrary();
   }, []);
   
-  // Handle authenticated user redirect
+  // Handle authenticated user redirect - simplified logic
   React.useEffect(() => {
+    console.log('LoginPage: Auth state check', {
+      isAuthenticated,
+      user: !!user,
+      isInitialized,
+      isLoading
+    });
+
+    // Only redirect if fully authenticated and initialized
     if (isAuthenticated && user && isInitialized && !isLoading) {
-      console.log('User authenticated, preparing redirect...', { 
-        userId: user.id, 
-        email: user.email,
-        isAuthenticated,
-        isInitialized 
-      });
+      console.log('LoginPage: User is authenticated, redirecting...');
       
       const from = location.state?.from?.pathname || '/role-dashboard';
-      console.log('Redirecting authenticated user to:', from);
+      console.log('LoginPage: Redirecting to:', from);
       
-      // Clear any previous login errors
+      // Clear any login errors
       setLoginError(null);
       
-      // Use replace to prevent back button issues
+      // Navigate immediately
       navigate(from, { replace: true });
     }
   }, [isAuthenticated, user, isInitialized, isLoading, navigate, location.state]);
@@ -69,11 +73,11 @@ const LoginPage = () => {
     setIsSubmitting(true);
     
     try {
-      console.log('Attempting login for:', email);
+      console.log('LoginPage: Attempting login for:', email);
       const result = await login(email, password);
       
       if (result.error) {
-        console.error("Login error:", result.error);
+        console.error("LoginPage: Login error:", result.error);
         
         // Handle specific Supabase auth errors
         let errorMessage = "Login failed";
@@ -93,14 +97,12 @@ const LoginPage = () => {
         toast.error(errorMessage);
         setIsSubmitting(false);
       } else {
-        console.log("Login successful!");
+        console.log("LoginPage: Login successful!");
         toast.success("Login successful! Redirecting...");
-        
-        // Don't reset isSubmitting here - let the redirect effect handle it
-        // The redirect will happen via the useEffect above
+        // Don't set isSubmitting to false here - let the redirect effect handle it
       }
     } catch (err) {
-      console.error("Unexpected login error:", err);
+      console.error("LoginPage: Unexpected login error:", err);
       const errorMessage = "An unexpected error occurred. Please try again.";
       setLoginError(errorMessage);
       toast.error(errorMessage);
@@ -125,12 +127,12 @@ const LoginPage = () => {
   };
   
   // Show loading while checking authentication status
-  if (!isInitialized || (isLoading && !user)) {
+  if (!isInitialized) {
     return (
       <div className="flex items-center justify-center min-h-screen bg-background">
         <div className="flex flex-col items-center space-y-4">
           <Spinner size="lg" />
-          <p className="text-muted-foreground">Checking authentication...</p>
+          <p className="text-muted-foreground">Initializing authentication...</p>
         </div>
       </div>
     );

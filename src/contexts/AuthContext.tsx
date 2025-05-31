@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useEffect, useState, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { AuthUser, Profile, AuthContextType } from '@/types/auth';
@@ -47,7 +46,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       async (event, session) => {
         if (!mounted) return;
         
-        console.log('Auth state change:', event, session?.user?.id);
+        console.log('AuthContext: Auth state change:', event, session?.user?.id);
         setSession(session);
         
         if (event === 'SIGNED_OUT') {
@@ -67,7 +66,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const login = useCallback(async (email: string, password: string) => {
     try {
-      console.log('Login attempt for:', email);
+      console.log('AuthContext: Login attempt for:', email);
       
       // Clean up any existing auth state first
       cleanupAuthState();
@@ -78,19 +77,19 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       });
       
       if (error) {
-        console.error('Login error:', error);
+        console.error('AuthContext: Login error:', error);
         return { error };
       }
       
-      if (data.session) {
-        console.log('Login successful, session created');
+      if (data.session && data.user) {
+        console.log('AuthContext: Login successful, session created for user:', data.user.id);
         setSession(data.session);
         return { error: null };
       }
       
-      return { error: new Error('No session created') };
+      return { error: new Error('No session or user created') };
     } catch (err) {
-      console.error('Unexpected login error:', err);
+      console.error('AuthContext: Unexpected login error:', err);
       return { error: err };
     }
   }, []);

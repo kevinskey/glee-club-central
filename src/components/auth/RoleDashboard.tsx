@@ -3,7 +3,6 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { PageLoader } from '@/components/ui/page-loader';
-import { toast } from 'sonner';
 
 export const RoleDashboard: React.FC = () => {
   const { user, profile, isLoading, isAuthenticated, isAdmin, isInitialized } = useAuth();
@@ -11,9 +10,6 @@ export const RoleDashboard: React.FC = () => {
   const [hasRedirected, setHasRedirected] = useState(false);
 
   useEffect(() => {
-    // Only proceed if auth is initialized and we haven't redirected yet
-    if (!isInitialized || hasRedirected) return;
-
     console.log('RoleDashboard: Auth state check', {
       isLoading,
       isAuthenticated,
@@ -21,8 +17,15 @@ export const RoleDashboard: React.FC = () => {
       hasProfile: !!profile,
       userRole: profile?.role,
       isAdmin: isAdmin(),
-      isInitialized
+      isInitialized,
+      hasRedirected
     });
+
+    // Only proceed if auth is initialized and we haven't redirected yet
+    if (!isInitialized || hasRedirected) {
+      console.log('RoleDashboard: Not initialized or already redirected');
+      return;
+    }
 
     // Wait for loading to complete
     if (isLoading) {
@@ -38,50 +41,62 @@ export const RoleDashboard: React.FC = () => {
       return;
     }
 
-    // Handle authenticated users
+    // Handle authenticated users - redirect based on role
     if (isAuthenticated && user) {
-      console.log('RoleDashboard: Determining user role for routing');
-      console.log('User:', user);
-      console.log('Profile:', profile);
-      console.log('Is Admin:', isAdmin());
+      console.log('RoleDashboard: User authenticated, determining route...');
       
       let targetRoute = '/dashboard/member'; // Default route
       
       // Determine route based on role
       if (isAdmin()) {
         targetRoute = '/admin';
-        console.log('RoleDashboard: Routing admin to admin dashboard');
+        console.log('RoleDashboard: Routing admin user to admin dashboard');
       } else if (profile?.role === 'fan') {
         targetRoute = '/fan-dashboard';
-        console.log('RoleDashboard: Routing fan to fan dashboard');
+        console.log('RoleDashboard: Routing fan user to fan dashboard');
       } else {
         targetRoute = '/dashboard/member';
-        console.log('RoleDashboard: Routing member to member dashboard');
+        console.log('RoleDashboard: Routing member user to member dashboard');
       }
       
-      console.log('RoleDashboard: Redirecting to:', targetRoute);
+      console.log('RoleDashboard: Final redirect to:', targetRoute);
       setHasRedirected(true);
       navigate(targetRoute, { replace: true });
     }
   }, [isLoading, isAuthenticated, user, profile, isAdmin, navigate, isInitialized, hasRedirected]);
 
   // Show loading state
-  if (!isInitialized || isLoading || !hasRedirected) {
-    let message = "Loading...";
-    
-    if (!isInitialized) {
-      message = "Initializing authentication...";
-    } else if (isLoading) {
-      message = "Verifying your credentials...";
-    } else if (isAuthenticated && user) {
-      message = "Determining your access level...";
-    } else {
-      message = "Redirecting to login...";
-    }
-    
+  if (!isInitialized) {
     return (
       <PageLoader 
-        message={message}
+        message="Initializing authentication..."
+        className="min-h-screen"
+      />
+    );
+  }
+
+  if (isLoading) {
+    return (
+      <PageLoader 
+        message="Verifying your credentials..."
+        className="min-h-screen"
+      />
+    );
+  }
+
+  if (!isAuthenticated || !user) {
+    return (
+      <PageLoader 
+        message="Redirecting to login..."
+        className="min-h-screen"
+      />
+    );
+  }
+
+  if (isAuthenticated && user && !hasRedirected) {
+    return (
+      <PageLoader 
+        message="Determining your access level..."
         className="min-h-screen"
       />
     );
