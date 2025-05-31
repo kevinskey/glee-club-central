@@ -22,6 +22,7 @@ import CalendarPage from './pages/CalendarPage';
 import JoinGleeFamPage from './pages/JoinGleeFamPage';
 import StorePage from './pages/StorePage';
 import CheckoutSuccessPage from './pages/CheckoutSuccessPage';
+import CheckoutCancelledPage from './pages/CheckoutCancelledPage';
 
 // Auth Pages (keep as regular imports)
 import LoginPage from './pages/auth/LoginPage';
@@ -105,6 +106,14 @@ export const router = createBrowserRouter([
       { 
         path: '/checkout-success', 
         element: <AppLayout sidebarType="none" showHeader={false} showFooter={false}><CheckoutSuccessPage /></AppLayout>
+      },
+      { 
+        path: '/store/success', 
+        element: <AppLayout sidebarType="none" showHeader={false} showFooter={false}><CheckoutSuccessPage /></AppLayout>
+      },
+      { 
+        path: '/store/cancelled', 
+        element: <AppLayout sidebarType="none" showHeader={false} showFooter={false}><CheckoutCancelledPage /></AppLayout>
       },
 
       // ==================== AUTHENTICATION ROUTES ====================

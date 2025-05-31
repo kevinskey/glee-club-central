@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import { Button } from '@/components/ui/button';
@@ -18,27 +17,42 @@ export function CartDrawer() {
     }
 
     try {
-      // Call the checkout edge function
-      const { data, error } = await supabase.functions.invoke('create-checkout', {
+      console.log('🛒 Starting checkout process with items:', state.items);
+
+      // Format items for the checkout session
+      const checkoutItems = state.items.map(item => ({
+        product_id: item.id,
+        quantity: item.quantity
+      }));
+
+      // Call the new create_checkout_session edge function
+      const { data, error } = await supabase.functions.invoke('create_checkout_session', {
         body: {
-          items: state.items.map(item => ({
-            name: item.name,
-            price: item.price,
-            quantity: item.quantity,
-            image: item.image_url
-          }))
+          items: checkoutItems,
+          buyer_email: undefined // Optional: could collect email from user
         }
       });
 
-      if (error) throw error;
+      if (error) {
+        console.error('Checkout error:', error);
+        throw error;
+      }
+
+      if (!data?.url) {
+        throw new Error('No checkout URL received');
+      }
+
+      console.log('✅ Checkout session created, redirecting to:', data.url);
 
       // Redirect to Stripe checkout
-      if (data?.url) {
-        window.open(data.url, '_blank');
-      }
+      window.open(data.url, '_blank');
+      
+      // Optionally close the cart drawer
+      toggleCart();
+
     } catch (error) {
       console.error('Checkout error:', error);
-      toast.error('Failed to start checkout process');
+      toast.error('Failed to start checkout process. Please try again.');
     }
   };
 
