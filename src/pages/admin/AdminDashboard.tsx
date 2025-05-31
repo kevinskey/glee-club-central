@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { adminNavItems } from "@/components/layout/AdminNavItems";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import { Home, ChevronLeft, LayoutDashboard, Users, User, FileImage, Settings, BarChart3, Package, Calendar, Upload, Image, Tags, Activity } from "lucide-react";
+import { Home, ChevronLeft, LayoutDashboard, Users, User, FileImage, Settings, BarChart3, Package, Calendar, Upload, Image, Tags, Activity, Rss } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Link } from "react-router-dom";
 
@@ -57,6 +57,14 @@ const AdminDashboard: React.FC = () => {
       link: "/admin/media-uploader",
       color: "bg-indigo-500",
       stats: "342 files"
+    },
+    {
+      title: "News Ticker",
+      icon: <Rss className="h-5 w-5" />,
+      description: "Configure homepage news ticker settings",
+      link: "/admin/news-ticker",
+      color: "bg-cyan-500",
+      stats: "Active"
     },
     {
       title: "Orders",

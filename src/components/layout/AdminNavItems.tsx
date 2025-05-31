@@ -11,7 +11,8 @@ import {
   BarChart3,
   UserCog,
   Tags,
-  LayoutDashboard
+  LayoutDashboard,
+  Rss
 } from "lucide-react";
 import { LucideIcon } from "lucide-react";
 
@@ -51,6 +52,11 @@ export const adminNavItems: AdminNavItem[] = [
     title: "Media Manager",
     url: "/admin/media-uploader",
     icon: Upload,
+  },
+  {
+    title: "News Ticker",
+    url: "/admin/news-ticker",
+    icon: Rss,
   },
   {
     title: "Orders",

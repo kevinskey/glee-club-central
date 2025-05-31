@@ -1,4 +1,3 @@
-
 /* ... keep existing code */
 
 /* Media Library components */
@@ -70,6 +69,24 @@
   }
 }
 
+@keyframes marquee-normal {
+  0% {
+    transform: translateX(100%);
+  }
+  100% {
+    transform: translateX(-100%);
+  }
+}
+
+@keyframes marquee-slow {
+  0% {
+    transform: translateX(100%);
+  }
+  100% {
+    transform: translateX(-100%);
+  }
+}
+
 .animate-marquee {
   animation: marquee 30s linear infinite;
 }
@@ -78,8 +95,18 @@
   animation: marquee-fast 20s linear infinite;
 }
 
+.animate-marquee-normal {
+  animation: marquee-normal 25s linear infinite;
+}
+
+.animate-marquee-slow {
+  animation: marquee-slow 30s linear infinite;
+}
+
 /* Pause animation on hover */
 .animate-marquee:hover,
-.animate-marquee-fast:hover {
+.animate-marquee-fast:hover,
+.animate-marquee-normal:hover,
+.animate-marquee-slow:hover {
   animation-play-state: paused;
 }
