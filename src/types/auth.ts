@@ -18,8 +18,8 @@ export interface AuthUser {
 
 export interface Profile {
   id: string;
-  first_name: string;
-  last_name: string;
+  first_name?: string; // Made optional to match AuthContext interface
+  last_name?: string;  // Made optional to match AuthContext interface
   email?: string;
   avatar_url?: string;
   role?: string;
@@ -54,7 +54,7 @@ export interface AuthContextType {
   signUp: (email: string, password: string, firstName: string, lastName: string, userType?: UserType) => Promise<{ error: any, data: any }>;
   isAdmin: () => boolean;
   isMember: () => boolean;
-  getUserType: () => UserType;
+  getUserType: () => UserType; // Updated to return UserType instead of string
   updatePassword: (newPassword: string) => Promise<{ error: any }>;
   resetPassword: (email: string) => Promise<{ error: any }>;
   permissions: { [key: string]: boolean };

@@ -1,7 +1,7 @@
-
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { Session, User } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
+import { UserType } from '@/types/auth';
 
 interface Profile {
   id: string;
@@ -36,7 +36,7 @@ interface AuthContextType {
   signUp: (email: string, password: string, firstName: string, lastName: string, userType?: string) => Promise<{ error: any, data: any }>;
   isAdmin: () => boolean;
   isMember: () => boolean;
-  getUserType: () => string;
+  getUserType: () => UserType;
   updatePassword: (newPassword: string) => Promise<{ error: any }>;
   resetPassword: (email: string) => Promise<{ error: any }>;
   resetAuthSystem: () => Promise<{ success: boolean }>;
@@ -223,8 +223,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return profile?.role === 'member' || !profile?.role;
   };
 
-  const getUserType = () => {
-    return profile?.role || 'member';
+  const getUserType = (): UserType => {
+    if (profile?.is_super_admin === true || profile?.role === 'admin') {
+      return 'admin';
+    }
+    return 'member';
   };
 
   useEffect(() => {

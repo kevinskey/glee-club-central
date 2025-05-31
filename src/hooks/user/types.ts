@@ -3,8 +3,8 @@
 export interface User {
   id: string;
   email?: string | null;
-  first_name: string;
-  last_name: string;
+  first_name?: string; // Made optional to match Profile interface
+  last_name?: string;  // Made optional to match Profile interface
   phone?: string | null;
   voice_part: string | null;
   avatar_url?: string | null;
