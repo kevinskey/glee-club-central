@@ -1,13 +1,14 @@
 
 import React from 'react';
 import { PageHeader } from "@/components/ui/page-header";
-import { LayoutDashboard, Users, User, FileImage, Settings, BarChart3, Package, Calendar, Upload, Image, Tags } from "lucide-react";
+import { LayoutDashboard, Users, User, FileImage, Settings, BarChart3, Package, Calendar, Upload, Image, Tags, TrendingUp, Activity, DollarSign } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
+import { Badge } from "@/components/ui/badge";
 
 /**
- * Complete Admin Dashboard with all core administrative modules
+ * Complete Admin Dashboard with enhanced UI and design
  */
 const AdminDashboard: React.FC = () => {
   console.log('AdminDashboard: Component rendering');
@@ -15,183 +16,248 @@ const AdminDashboard: React.FC = () => {
   const adminModules = [
     {
       title: "Calendar Management",
-      icon: <Calendar className="h-6 w-6" />,
-      description: "Manage event calendar, performances, and RSVPs",
+      icon: <Calendar className="h-5 w-5" />,
+      description: "Manage events, performances, and RSVPs",
       link: "/admin/calendar",
-      color: "from-blue-500 to-blue-700"
+      color: "bg-blue-500",
+      stats: "24 events"
     },
     {
       title: "Member Management", 
-      icon: <Users className="h-6 w-6" />,
-      description: "Manage Glee Club member profiles and sections",
+      icon: <Users className="h-5 w-5" />,
+      description: "Manage Glee Club member profiles",
       link: "/admin/members",
-      color: "from-green-500 to-green-700"
+      color: "bg-green-500",
+      stats: "85 members"
     },
     {
       title: "User Management",
-      icon: <User className="h-6 w-6" />,
-      description: "Manage user accounts, permissions, and access",
+      icon: <User className="h-5 w-5" />,
+      description: "Manage user accounts and permissions",
       link: "/admin/user-management",
-      color: "from-purple-500 to-purple-700"
+      color: "bg-purple-500",
+      stats: "120 users"
     },
     {
       title: "Hero Manager",
-      icon: <Image className="h-6 w-6" />,
-      description: "Update landing page hero images and content",
+      icon: <Image className="h-5 w-5" />,
+      description: "Update landing page hero content",
       link: "/admin/hero-manager",
-      color: "from-orange-500 to-orange-700"
+      color: "bg-orange-500",
+      stats: "8 images"
     },
     {
       title: "Media Manager",
-      icon: <Upload className="h-6 w-6" />,
-      description: "Upload and organize photos, videos, and documents",
+      icon: <Upload className="h-5 w-5" />,
+      description: "Upload and organize media files",
       link: "/admin/media-uploader",
-      color: "from-indigo-500 to-indigo-700"
+      color: "bg-indigo-500",
+      stats: "342 files"
     },
     {
       title: "Orders",
-      icon: <Package className="h-6 w-6" />,
-      description: "Manage merchandise orders and fulfillment",
+      icon: <Package className="h-5 w-5" />,
+      description: "Manage merchandise orders",
       link: "/admin/orders",
-      color: "from-teal-500 to-teal-700"
+      color: "bg-teal-500",
+      stats: "12 pending"
     },
     {
-      title: "Analytics Dashboard",
-      icon: <BarChart3 className="h-6 w-6" />,
-      description: "View site analytics, metrics, and insights",
+      title: "Analytics",
+      icon: <BarChart3 className="h-5 w-5" />,
+      description: "View site metrics and insights",
       link: "/admin/analytics",
-      color: "from-red-500 to-red-700"
+      color: "bg-red-500",
+      stats: "↑ 12% growth"
     },
     {
-      title: "Fan Tags Manager",
-      icon: <Tags className="h-6 w-6" />,
-      description: "Organize and manage fan engagement tags",
+      title: "Fan Tags",
+      icon: <Tags className="h-5 w-5" />,
+      description: "Organize fan engagement tags",
       link: "/admin/fan-tags",
-      color: "from-pink-500 to-pink-700"
+      color: "bg-pink-500",
+      stats: "45 tags"
     },
     {
       title: "Settings",
-      icon: <Settings className="h-6 w-6" />,
-      description: "Configure system settings and preferences",
+      icon: <Settings className="h-5 w-5" />,
+      description: "Configure system preferences",
       link: "/admin/settings",
-      color: "from-gray-500 to-gray-700"
+      color: "bg-gray-500",
+      stats: "Updated"
+    }
+  ];
+
+  const quickStats = [
+    {
+      title: "Total Events",
+      value: "24",
+      change: "+3",
+      changeType: "positive",
+      icon: <Calendar className="h-4 w-4" />,
+      color: "text-blue-600"
+    },
+    {
+      title: "Active Members",
+      value: "85",
+      change: "+5",
+      changeType: "positive", 
+      icon: <Users className="h-4 w-4" />,
+      color: "text-green-600"
+    },
+    {
+      title: "Media Files",
+      value: "342",
+      change: "+18",
+      changeType: "positive",
+      icon: <FileImage className="h-4 w-4" />,
+      color: "text-purple-600"
+    },
+    {
+      title: "Pending Orders",
+      value: "12",
+      change: "-3",
+      changeType: "neutral",
+      icon: <Package className="h-4 w-4" />,
+      color: "text-orange-600"
     }
   ];
 
   return (
-    <div className="container mx-auto px-4 py-8 max-w-7xl">
-      <PageHeader
-        title="Admin Dashboard"
-        description="Comprehensive administrative control center for Spelman College Glee Club"
-        icon={<LayoutDashboard className="h-6 w-6" />}
-      />
-      
-      {/* Quick Stats Row */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mt-8 mb-8">
-        <Card>
-          <CardContent className="p-4">
-            <div className="flex items-center space-x-2">
-              <div className="p-2 bg-blue-100 rounded-lg">
-                <Calendar className="h-4 w-4 text-blue-600" />
-              </div>
-              <div>
-                <p className="text-sm text-muted-foreground">Events</p>
-                <p className="text-lg font-semibold">24</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="p-4">
-            <div className="flex items-center space-x-2">
-              <div className="p-2 bg-green-100 rounded-lg">
-                <Users className="h-4 w-4 text-green-600" />
-              </div>
-              <div>
-                <p className="text-sm text-muted-foreground">Members</p>
-                <p className="text-lg font-semibold">85</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="p-4">
-            <div className="flex items-center space-x-2">
-              <div className="p-2 bg-purple-100 rounded-lg">
-                <FileImage className="h-4 w-4 text-purple-600" />
-              </div>
-              <div>
-                <p className="text-sm text-muted-foreground">Media Files</p>
-                <p className="text-lg font-semibold">342</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="p-4">
-            <div className="flex items-center space-x-2">
-              <div className="p-2 bg-orange-100 rounded-lg">
-                <Package className="h-4 w-4 text-orange-600" />
-              </div>
-              <div>
-                <p className="text-sm text-muted-foreground">Orders</p>
-                <p className="text-lg font-semibold">12</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Admin Modules Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {adminModules.map((module, index) => (
-          <Card key={index} className="h-full hover:shadow-lg transition-all duration-200 hover:scale-105 group">
-            <CardHeader className={`bg-gradient-to-r ${module.color} text-white rounded-t-lg`}>
-              <CardTitle className="flex items-center text-lg">
-                <div className="bg-white/20 p-2 rounded-md mr-3 group-hover:bg-white/30 transition-colors">
-                  {module.icon}
+    <div className="min-h-screen bg-gray-50/50">
+      <div className="container mx-auto px-6 py-8 max-w-7xl">
+        {/* Header */}
+        <div className="mb-8">
+          <PageHeader
+            title="Admin Dashboard"
+            description="Comprehensive administrative control center for Spelman College Glee Club"
+            icon={<LayoutDashboard className="h-6 w-6" />}
+          />
+        </div>
+        
+        {/* Quick Stats */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+          {quickStats.map((stat, index) => (
+            <Card key={index} className="border-0 shadow-sm hover:shadow-md transition-all duration-200">
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-gray-600 mb-1">{stat.title}</p>
+                    <div className="flex items-center gap-2">
+                      <p className="text-2xl font-bold text-gray-900">{stat.value}</p>
+                      <Badge 
+                        variant="secondary" 
+                        className={`text-xs ${
+                          stat.changeType === 'positive' 
+                            ? 'bg-green-100 text-green-700' 
+                            : 'bg-gray-100 text-gray-600'
+                        }`}
+                      >
+                        {stat.change}
+                      </Badge>
+                    </div>
+                  </div>
+                  <div className={`p-3 rounded-full bg-gray-50 ${stat.color}`}>
+                    {stat.icon}
+                  </div>
                 </div>
-                {module.title}
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="pt-4 pb-6 flex flex-col justify-between h-full">
-              <p className="text-muted-foreground mb-4 flex-grow">{module.description}</p>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+
+        {/* Admin Modules Grid */}
+        <div className="mb-8">
+          <h2 className="text-lg font-semibold text-gray-900 mb-6">Administrative Tools</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {adminModules.map((module, index) => (
+              <Card key={index} className="border-0 shadow-sm hover:shadow-lg transition-all duration-200 hover:-translate-y-1 group">
+                <CardContent className="p-6">
+                  <div className="flex items-start justify-between mb-4">
+                    <div className={`p-3 rounded-xl ${module.color} text-white group-hover:scale-110 transition-transform duration-200`}>
+                      {module.icon}
+                    </div>
+                    <Badge variant="outline" className="text-xs">
+                      {module.stats}
+                    </Badge>
+                  </div>
+                  
+                  <h3 className="font-semibold text-gray-900 mb-2 group-hover:text-glee-spelman transition-colors">
+                    {module.title}
+                  </h3>
+                  <p className="text-sm text-gray-600 mb-4 leading-relaxed">
+                    {module.description}
+                  </p>
+                  
+                  <Button 
+                    asChild 
+                    className="w-full bg-white border border-gray-200 text-gray-700 hover:bg-gray-50 hover:border-glee-spelman hover:text-glee-spelman transition-all duration-200"
+                    variant="outline"
+                  >
+                    <Link to={module.link}>
+                      Access {module.title}
+                    </Link>
+                  </Button>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </div>
+
+        {/* Quick Actions Section */}
+        <Card className="border-0 shadow-sm">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Activity className="h-5 w-5 text-glee-spelman" />
+              Quick Actions
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <Button 
                 asChild 
-                className="w-full bg-glee-spelman hover:bg-glee-spelman/90 text-white"
+                variant="outline" 
+                className="h-auto p-4 flex flex-col items-center gap-3 hover:bg-blue-50 hover:border-blue-200 hover:text-blue-700 transition-all duration-200"
               >
-                <Link to={module.link}>
-                  Go to {module.title}
+                <Link to="/admin/calendar?create=true">
+                  <Calendar className="h-6 w-6" />
+                  <div className="text-center">
+                    <div className="font-medium">Create Event</div>
+                    <div className="text-xs text-gray-500">Schedule new performance</div>
+                  </div>
                 </Link>
               </Button>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
-
-      {/* Additional Admin Actions */}
-      <div className="mt-12 p-6 bg-gradient-to-r from-glee-purple/10 to-glee-spelman/10 rounded-lg border border-glee-purple/20">
-        <h3 className="text-xl font-semibold mb-4">Quick Actions</h3>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <Button variant="outline" asChild className="flex items-center justify-center p-4 h-auto">
-            <Link to="/admin/calendar?create=true" className="flex flex-col items-center space-y-2">
-              <Calendar className="h-5 w-5" />
-              <span>Create Event</span>
-            </Link>
-          </Button>
-          <Button variant="outline" asChild className="flex items-center justify-center p-4 h-auto">
-            <Link to="/admin/media-uploader" className="flex flex-col items-center space-y-2">
-              <Upload className="h-5 w-5" />
-              <span>Upload Media</span>
-            </Link>
-          </Button>
-          <Button variant="outline" asChild className="flex items-center justify-center p-4 h-auto">
-            <Link to="/admin/members?action=invite" className="flex flex-col items-center space-y-2">
-              <Users className="h-5 w-5" />
-              <span>Invite Member</span>
-            </Link>
-          </Button>
-        </div>
+              
+              <Button 
+                asChild 
+                variant="outline" 
+                className="h-auto p-4 flex flex-col items-center gap-3 hover:bg-green-50 hover:border-green-200 hover:text-green-700 transition-all duration-200"
+              >
+                <Link to="/admin/media-uploader">
+                  <Upload className="h-6 w-6" />
+                  <div className="text-center">
+                    <div className="font-medium">Upload Media</div>
+                    <div className="text-xs text-gray-500">Add photos & videos</div>
+                  </div>
+                </Link>
+              </Button>
+              
+              <Button 
+                asChild 
+                variant="outline" 
+                className="h-auto p-4 flex flex-col items-center gap-3 hover:bg-purple-50 hover:border-purple-200 hover:text-purple-700 transition-all duration-200"
+              >
+                <Link to="/admin/members?action=invite">
+                  <Users className="h-6 w-6" />
+                  <div className="text-center">
+                    <div className="font-medium">Invite Member</div>
+                    <div className="text-xs text-gray-500">Add new Glee member</div>
+                  </div>
+                </Link>
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
       </div>
     </div>
   );

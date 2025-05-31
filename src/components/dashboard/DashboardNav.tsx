@@ -9,13 +9,12 @@ import {
   Bell,
   DollarSign,
   Settings,
-  Mic,
   Home,
   Calendar,
   LayoutDashboard,
-  Library
+  Library,
+  ChevronRight
 } from 'lucide-react';
-import { useRolePermissions } from '@/contexts/RolePermissionContext';
 import { useAuth } from '@/contexts/AuthContext';
 
 interface DashboardNavProps extends React.HTMLAttributes<HTMLElement> {
@@ -28,125 +27,134 @@ export function DashboardNav({
   ...props
 }: DashboardNavProps) {
   const { pathname } = useLocation();
-  const { hasPermission, userRole } = useRolePermissions();
   const { isAdmin, profile } = useAuth();
   const isAdminUser = profile?.is_super_admin || (isAdmin && isAdmin());
   
-  // All buttons will use 'ghost' variant to remove highlights
+  const navItems = [
+    {
+      label: "Dashboard",
+      href: "/dashboard/member",
+      icon: Home,
+      active: pathname === "/dashboard/member"
+    },
+    {
+      label: "Calendar",
+      href: "/calendar",
+      icon: Calendar,
+      active: pathname === "/calendar"
+    },
+    {
+      label: "Sheet Music",
+      href: "/dashboard/sheet-music",
+      icon: FileMusic,
+      active: pathname === "/dashboard/sheet-music"
+    },
+    {
+      label: "Media Library",
+      href: "/dashboard/media-library",
+      icon: Library,
+      active: pathname === "/dashboard/media-library"
+    },
+    {
+      label: "Announcements",
+      href: "/dashboard/announcements",
+      icon: Bell,
+      active: pathname === "/dashboard/announcements"
+    }
+  ];
+
+  const adminItems = [
+    {
+      label: "Admin Dashboard",
+      href: "/admin",
+      icon: LayoutDashboard,
+      active: pathname.startsWith("/admin")
+    },
+    {
+      label: "Finances",
+      href: "/dashboard/finances",
+      icon: DollarSign,
+      active: pathname === "/dashboard/finances"
+    },
+    {
+      label: "Member Management",
+      href: "/admin/members",
+      icon: Users,
+      active: pathname === "/admin/members"
+    },
+    {
+      label: "Settings",
+      href: "/admin/settings",
+      icon: Settings,
+      active: pathname === "/admin/settings"
+    }
+  ];
+  
   return (
     <nav className={cn('flex flex-col gap-2', className)} {...props}>
-      {/* Dashboard link - goes to member dashboard for all users */}
-      <Button
-        variant="ghost"
-        className={cn('justify-start', isCollapsed && 'justify-center')}
-        asChild
-      >
-        <Link to="/dashboard/member">
-          <Home className="h-5 w-5 mr-2" />
-          {!isCollapsed && <span>Dashboard</span>}
-        </Link>
-      </Button>
+      {/* Main Navigation */}
+      <div className="space-y-1">
+        {navItems.map((item) => {
+          const Icon = item.icon;
+          return (
+            <Button
+              key={item.href}
+              variant={item.active ? "default" : "ghost"}
+              className={cn(
+                'justify-start w-full transition-all duration-200',
+                isCollapsed && 'justify-center px-2',
+                item.active && 'bg-glee-spelman text-white shadow-sm hover:bg-glee-spelman/90'
+              )}
+              asChild
+            >
+              <Link to={item.href}>
+                <Icon className={cn("h-4 w-4", !isCollapsed && "mr-3")} />
+                {!isCollapsed && <span>{item.label}</span>}
+                {item.active && !isCollapsed && (
+                  <ChevronRight className="h-3 w-3 ml-auto" />
+                )}
+              </Link>
+            </Button>
+          );
+        })}
+      </div>
 
-      <Button
-        variant="ghost"
-        className={cn('justify-start', isCollapsed && 'justify-center')}
-        asChild
-      >
-        <Link to="/calendar">
-          <Calendar className="h-5 w-5 mr-2" />
-          {!isCollapsed && <span>Calendar</span>}
-        </Link>
-      </Button>
-
-      <Button
-        variant="ghost"
-        className={cn('justify-start', isCollapsed && 'justify-center')}
-        asChild
-      >
-        <Link to="/dashboard/sheet-music">
-          <FileMusic className="h-5 w-5 mr-2" />
-          {!isCollapsed && <span>Sheet Music</span>}
-        </Link>
-      </Button>
-
-      <Button
-        variant="ghost"
-        className={cn('justify-start', isCollapsed && 'justify-center')}
-        asChild
-      >
-        <Link to="/dashboard/media-library">
-          <Library className="h-5 w-5 mr-2" />
-          {!isCollapsed && <span>Media Library</span>}
-        </Link>
-      </Button>
-
-      <Button
-        variant="ghost"
-        className={cn('justify-start', isCollapsed && 'justify-center')}
-        asChild
-      >
-        <Link to="/dashboard/announcements">
-          <Bell className="h-5 w-5 mr-2" />
-          {!isCollapsed && <span>Announcements</span>}
-        </Link>
-      </Button>
-
+      {/* Admin Section */}
       {isAdminUser && (
         <>
-          <Button
-            variant="ghost"
-            className={cn('justify-start', isCollapsed && 'justify-center')}
-            asChild
-          >
-            <Link to="/admin">
-              <LayoutDashboard className="h-5 w-5 mr-2" />
-              {!isCollapsed && <span>Admin Dashboard</span>}
-            </Link>
-          </Button>
-
-          <Button
-            variant="ghost"
-            className={cn('justify-start', isCollapsed && 'justify-center')}
-            asChild
-          >
-            <Link to="/dashboard/finances">
-              <DollarSign className="h-5 w-5 mr-2" />
-              {!isCollapsed && <span>Finances</span>}
-            </Link>
-          </Button>
-
-          <Button
-            variant="ghost"
-            className={cn('justify-start', isCollapsed && 'justify-center')}
-            asChild
-          >
-            <Link to="/admin/calendar">
-              <Calendar className="h-5 w-5 mr-2" />
-              {!isCollapsed && <span>Admin Calendar</span>}
-            </Link>
-          </Button>
-
-          <Button
-            variant="ghost"
-            className={cn('justify-start', isCollapsed && 'justify-center')}
-            asChild
-          >
-            <Link to="/admin/members">
-              <Users className="h-5 w-5 mr-2" />
-              {!isCollapsed && <span>Member Management</span>}
-            </Link>
-          </Button>
-
-          <Button
-            variant="ghost"
-            className={cn('justify-start', isCollapsed && 'justify-center')}
-            asChild
-          >
-            <Link to="/admin/settings">
-              <Settings className="h-5 w-5 mr-2" />
-              {!isCollapsed && <span>Settings</span>}
-            </Link>
-          </Button>
+          <div className="my-4">
+            <div className="h-px bg-border" />
+          </div>
+          <div className="space-y-1">
+            {!isCollapsed && (
+              <p className="px-3 py-2 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                Administration
+              </p>
+            )}
+            {adminItems.map((item) => {
+              const Icon = item.icon;
+              return (
+                <Button
+                  key={item.href}
+                  variant={item.active ? "default" : "ghost"}
+                  className={cn(
+                    'justify-start w-full transition-all duration-200',
+                    isCollapsed && 'justify-center px-2',
+                    item.active && 'bg-red-500 text-white shadow-sm hover:bg-red-500/90'
+                  )}
+                  asChild
+                >
+                  <Link to={item.href}>
+                    <Icon className={cn("h-4 w-4", !isCollapsed && "mr-3")} />
+                    {!isCollapsed && <span>{item.label}</span>}
+                    {item.active && !isCollapsed && (
+                      <ChevronRight className="h-3 w-3 ml-auto" />
+                    )}
+                  </Link>
+                </Button>
+              );
+            })}
+          </div>
         </>
       )}
     </nav>
