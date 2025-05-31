@@ -30,15 +30,15 @@ const LoginPage = () => {
     addCentennialImageToLibrary();
   }, []);
   
-  // Simplified redirect logic
+  // Handle redirect when authenticated
   React.useEffect(() => {
-    if (isAuthenticated && user && isInitialized) {
+    if (isAuthenticated && user && isInitialized && !isSubmitting) {
       console.log('LoginPage: User is authenticated, redirecting...');
       const from = location.state?.from?.pathname || '/role-dashboard';
       setLoginError(null);
       navigate(from, { replace: true });
     }
-  }, [isAuthenticated, user, isInitialized, navigate, location.state]);
+  }, [isAuthenticated, user, isInitialized, isSubmitting, navigate, location.state]);
   
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -83,6 +83,7 @@ const LoginPage = () => {
       } else {
         console.log("LoginPage: Login successful!");
         toast.success("Login successful! Redirecting...");
+        // Don't set isSubmitting to false here - let the redirect handle it
       }
     } catch (err) {
       console.error("LoginPage: Unexpected login error:", err);
@@ -224,11 +225,16 @@ const LoginPage = () => {
                   disabled={isSubmitting}
                 >
                   {isSubmitting ? (
-                    <Spinner size="sm" className="mr-2" />
+                    <>
+                      <Spinner size="sm" className="mr-2" />
+                      Signing In...
+                    </>
                   ) : (
-                    <LogIn className="w-4 h-4 mr-2" />
+                    <>
+                      <LogIn className="w-4 h-4 mr-2" />
+                      Sign In
+                    </>
                   )}
-                  {isSubmitting ? 'Signing In...' : 'Sign In'}
                 </Button>
               </form>
               
