@@ -1,4 +1,3 @@
-
 import React, { useState, useCallback } from "react";
 import { User } from "@/hooks/user/useUserManagement";
 import { Navigate } from "react-router-dom";
@@ -20,6 +19,7 @@ import { MemberPermissionsDialog } from "@/components/members/MemberPermissionsD
 import { Spinner } from "@/components/ui/spinner";
 import { Button } from "@/components/ui/button";
 import { UserPlus } from "lucide-react";
+import { MemberFilters } from "./MemberFilters";
 
 // Helper function to create a member refresh function that returns void
 export const createMemberRefreshFunction = (
@@ -57,7 +57,7 @@ export function MembersPageComponent({ useUserManagementHook }: MembersPageProps
   const [roleFilter, setRoleFilter] = useState("all");
   const [statusFilter, setStatusFilter] = useState("all");
   
-  // Dialog state - ensure they are properly initialized
+  // Dialog state
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [isManageRoleOpen, setIsManageRoleOpen] = useState(false);
   const [isAddMemberOpen, setIsAddMemberOpen] = useState(false);
@@ -83,14 +83,11 @@ export function MembersPageComponent({ useUserManagementHook }: MembersPageProps
     deleteUser
   } = useUserManagementHook();
   
-  console.log("[DEBUG] MembersPageComponent - All members from hook:", allMembers?.length || 0);
-  
-  // Apply filters based on search and status - but don't filter out users by default
+  // Apply filters
   const filteredMembers = React.useMemo(() => {
     if (!allMembers) return [];
     
     return allMembers.filter(member => {
-      // Search filter
       const matchesSearch = 
         !searchQuery || 
         (member.first_name || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -99,11 +96,9 @@ export function MembersPageComponent({ useUserManagementHook }: MembersPageProps
       
       if (!matchesSearch) return false;
       
-      // Role filter
       const matchesRole = roleFilter === "all" || (member.role || '') === roleFilter;
       if (!matchesRole) return false;
       
-      // Status filter - show all statuses unless specifically filtered
       const matchesStatus = statusFilter === "all" || (member.status || '') === statusFilter;
       if (!matchesStatus) return false;
       
@@ -111,13 +106,7 @@ export function MembersPageComponent({ useUserManagementHook }: MembersPageProps
     });
   }, [allMembers, searchQuery, roleFilter, statusFilter]);
 
-  console.log("[DEBUG] MembersPageComponent - Filtered members:", filteredMembers.length);
-  console.log("[DEBUG] Current filters - Search:", searchQuery, "Role:", roleFilter, "Status:", statusFilter);
-  
-  // Show all members that pass the filters (including deleted, pending, etc.)
   const members = filteredMembers;
-  
-  console.log("[DEBUG] MembersPageComponent - After filtering members:", members.length);
   
   // Create a wrapper function for fetchUsers that returns void
   const refreshUsers = createMemberRefreshFunction(fetchUsers);
@@ -233,45 +222,30 @@ export function MembersPageComponent({ useUserManagementHook }: MembersPageProps
   }
   
   if (!isAuthenticated) {
-    console.log("MembersPageComponent - Access denied, redirecting to login");
     return <Navigate to="/login" />;
   }
   
   if (!hasAdminAccess) {
-    console.log("MembersPageComponent - Not admin, redirecting to dashboard");
     return <Navigate to="/dashboard" />;
   }
   
   // Render the content
   return (
-    <div className="container mx-auto p-4 space-y-6">
+    <div className="space-y-6">
       <PageHeader
         title="Member Management"
         description="View and manage all Glee Club members"
         icon={<Users className="h-6 w-6" />}
       />
       
-      <Card className="p-4">
-        <UserManagementToolbar 
+      <Card className="p-6">
+        <MemberFilters
           searchTerm={searchQuery}
           setSearchTerm={setSearchQuery}
           roleFilter={roleFilter}
           setRoleFilter={setRoleFilter}
           statusFilter={statusFilter}
           setStatusFilter={setStatusFilter}
-          onCreateUserClick={() => {
-            console.log("Opening add member dialog");
-            setIsAddMemberOpen(true);
-          }}
-          onRefreshClick={() => {
-            console.log("Refreshing user list");
-            fetchUsers().then(() => {
-              console.log("User list refreshed, now have", allMembers?.length || 0, "users");
-            });
-          }}
-          isLoading={isLoading}
-          isMobile={isMobile}
-          canCreate={hasAdminAccess}
         />
         
         {isLoading ? (
@@ -310,25 +284,38 @@ export function MembersPageComponent({ useUserManagementHook }: MembersPageProps
           <MembersList 
             members={members} 
             onEditUser={(user) => {
-              handleUserSelection(user);
+              setSelectedUser(user);
               setIsEditUserOpen(true);
             }}
-            onDeleteUser={handleDeleteUser}
+            onDeleteUser={(userId) => {
+              const user = members.find(m => m.id === userId);
+              if (user) {
+                setUserToDelete(userId);
+                setUserToDeleteName(`${user.first_name} ${user.last_name}`);
+                setIsDeleteDialogOpen(true);
+              }
+            }}
             onManagePermissions={(user) => {
-              handleUserSelection(user);
+              setSelectedUser(user);
               setIsPermissionsOpen(true);
             }}
             onChangeRole={(user) => {
-              handleUserSelection(user);
+              setSelectedUser(user);
               setIsManageRoleOpen(true);
             }}
             canEdit={hasAdminAccess}
-            // Pass both onEditMember and onDeleteMember to maintain compatibility
             onEditMember={(user) => {
-              handleUserSelection(user);
+              setSelectedUser(user);
               setIsEditUserOpen(true);
             }}
-            onDeleteMember={handleDeleteUser}
+            onDeleteMember={(userId) => {
+              const user = members.find(m => m.id === userId);
+              if (user) {
+                setUserToDelete(userId);
+                setUserToDeleteName(`${user.first_name} ${user.last_name}`);
+                setIsDeleteDialogOpen(true);
+              }
+            }}
           />
         )}
       </Card>
