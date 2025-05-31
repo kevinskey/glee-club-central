@@ -1,3 +1,4 @@
+
 import React, { Suspense } from 'react';
 import { createBrowserRouter, Navigate, Outlet } from 'react-router-dom';
 import ErrorBoundary from "./components/ErrorBoundary";
@@ -48,6 +49,7 @@ import AdminCalendarPage from './pages/admin/AdminCalendarPage';
 import MembersPage from './pages/members/MembersPage';
 import SettingsPage from './pages/settings/SettingsPage';
 import FanAnalyticsPage from './pages/dashboard/FanAnalyticsPage';
+import OrdersPage from './pages/admin/OrdersPage';
 
 // Lazy Load Heavy/Admin Pages
 const MemberDashboardPage = React.lazy(() => import('./pages/dashboard/MemberDashboardPage'));
@@ -235,6 +237,7 @@ export const router = createBrowserRouter([
               </Suspense>
             )
           },
+          { path: 'orders', element: <OrdersPage /> },
           { path: 'settings', element: <SettingsPage /> },
         ],
       },

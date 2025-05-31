@@ -1,7 +1,7 @@
 
 import React from "react";
 import { NavLink } from "react-router-dom";
-import { Settings, Users, BarChart3, FileImage, LayoutDashboard } from "lucide-react";
+import { Settings, Users, BarChart3, FileImage, LayoutDashboard, ShoppingCart } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 
@@ -11,6 +11,11 @@ export function AdminSidebar() {
       title: "Dashboard",
       icon: <LayoutDashboard className="h-5 w-5" />,
       href: "/admin",
+    },
+    {
+      title: "Orders",
+      icon: <ShoppingCart className="h-5 w-5" />,
+      href: "/admin/orders",
     },
     {
       title: "Media Library",
@@ -72,3 +77,4 @@ export function AdminSidebar() {
     </aside>
   );
 }
+</lov-code>
