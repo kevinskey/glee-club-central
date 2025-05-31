@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { Session, User } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
@@ -49,6 +48,7 @@ interface AuthContextType {
   updatePassword: (newPassword: string) => Promise<{ error: any }>;
   resetPassword: (email: string) => Promise<{ error: any }>;
   resetAuthSystem: () => Promise<{ success: boolean }>;
+  createFallbackProfile: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -92,7 +92,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     try {
       console.log('Fetching profile for user:', userId);
       
-      // Try multiple approaches to get user data
       const { data: profileData, error: profileError } = await supabase
         .from('profiles')
         .select('*')
@@ -109,30 +108,75 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         return profileData;
       }
 
-      // If no profile found, try to get user email from auth
-      const { data: { user: authUser } } = await supabase.auth.getUser();
-      
-      if (authUser) {
-        // Create minimal profile with available data
-        const minimalProfile: Profile = {
-          id: userId,
-          email: authUser.email,
-          first_name: authUser.user_metadata?.first_name || 'User',
-          last_name: authUser.user_metadata?.last_name || '',
-          role: 'member',
-          status: 'active',
-          is_super_admin: false,
-          created_at: authUser.created_at
-        };
-        
-        console.log('Created minimal profile:', minimalProfile);
-        return minimalProfile;
-      }
-
+      console.warn('No profile found for user:', userId);
       return null;
     } catch (error) {
       console.error('Profile fetch error:', error);
       return null;
+    }
+  };
+
+  const createFallbackProfile = async () => {
+    if (!user) {
+      console.warn('Cannot create fallback profile: no user available');
+      return;
+    }
+
+    try {
+      console.log('Creating fallback profile for user:', user.id);
+      
+      // Check if profile already exists
+      const existingProfile = await fetchProfile(user.id);
+      if (existingProfile) {
+        setProfile(existingProfile);
+        return;
+      }
+
+      // Create minimal profile
+      const fallbackProfile: Partial<Profile> = {
+        id: user.id,
+        first_name: user.user_metadata?.first_name || 'User',
+        last_name: user.user_metadata?.last_name || '',
+        email: user.email,
+        role: 'member',
+        status: 'active',
+        is_super_admin: false,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
+      };
+
+      const { data, error } = await supabase
+        .from('profiles')
+        .insert([fallbackProfile])
+        .select()
+        .single();
+
+      if (error) {
+        console.error('Error creating fallback profile:', error);
+        // Set the fallback profile in state even if DB insert fails
+        setProfile(fallbackProfile as Profile);
+        toast.warning('Profile created locally. Some features may be limited.');
+      } else {
+        console.log('Fallback profile created successfully:', data);
+        setProfile(data);
+        toast.success('Profile created successfully');
+      }
+    } catch (error) {
+      console.error('Error in createFallbackProfile:', error);
+      // Create a minimal in-memory profile as last resort
+      const memoryProfile: Profile = {
+        id: user.id,
+        first_name: user.user_metadata?.first_name || 'User',
+        last_name: user.user_metadata?.last_name || '',
+        email: user.email,
+        role: 'member',
+        status: 'active',
+        is_super_admin: false,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
+      };
+      setProfile(memoryProfile);
+      toast.error('Could not create profile in database. Using temporary profile.');
     }
   };
 
@@ -144,7 +188,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       
       if (error) {
         console.error('Error fetching permissions:', error);
-        // Return default permissions on error
         return {
           'view_sheet_music': true,
           'view_calendar': true,
@@ -173,7 +216,19 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     if (user?.id) {
       console.log('Refreshing profile for user:', user.id);
       const profileData = await fetchProfile(user.id);
-      setProfile(profileData);
+      
+      if (profileData) {
+        setProfile(profileData);
+      } else {
+        console.warn('Profile refresh failed, showing fallback creation option');
+        toast.warning('Profile not found. Click to create a new profile.', {
+          action: {
+            label: 'Create Profile',
+            onClick: createFallbackProfile
+          },
+          duration: 10000
+        });
+      }
     }
   };
 
@@ -268,13 +323,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const isAdmin = () => {
-    // Check profile-based admin status
+    // Primary check: profile-based admin status
     if (profile?.is_super_admin === true || profile?.role === 'admin') {
       console.log('Admin detected via profile:', { is_super_admin: profile.is_super_admin, role: profile.role });
       return true;
     }
     
-    // Fallback: Check user metadata for known admin emails
+    // Fallback: Check user metadata for known admin emails or roles
     if (user) {
       const userRole = user.user_metadata?.role || user.app_metadata?.role;
       const userType = user.user_metadata?.user_type || user.app_metadata?.user_type;
@@ -310,14 +365,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     let mounted = true;
     let initTimeout: NodeJS.Timeout;
 
-    // Set a timeout for initialization
     initTimeout = setTimeout(() => {
       if (mounted && !isInitialized) {
         console.log('Auth initialization timeout, setting as initialized');
         setIsLoading(false);
         setIsInitialized(true);
       }
-    }, 3000); // Reduced timeout
+    }, 3000);
 
     const initializeAuth = async () => {
       try {
@@ -334,11 +388,21 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             setSession(initialSession);
             setUser(initialSession.user);
             
-            // Fetch profile and permissions
             try {
               const profileData = await fetchProfile(initialSession.user.id);
               if (mounted) {
-                setProfile(profileData);
+                if (profileData) {
+                  setProfile(profileData);
+                } else {
+                  console.warn('No profile found during initialization');
+                  toast.warning('Profile missing. Some features may be limited.', {
+                    action: {
+                      label: 'Create Profile',
+                      onClick: createFallbackProfile
+                    },
+                    duration: 8000
+                  });
+                }
               }
               
               const permissionsData = await fetchPermissions(initialSession.user.id);
@@ -366,7 +430,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     initializeAuth();
 
-    // Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, currentSession) => {
         if (!mounted) return;
@@ -377,13 +440,17 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setUser(currentSession?.user ?? null);
 
         if (currentSession?.user) {
-          // Defer data fetching to prevent deadlocks
           setTimeout(async () => {
             if (!mounted) return;
             
             const profileData = await fetchProfile(currentSession.user.id);
             if (mounted) {
-              setProfile(profileData);
+              if (profileData) {
+                setProfile(profileData);
+              } else {
+                console.warn('Profile not found after auth state change');
+                setProfile(null);
+              }
             }
             
             const permissionsData = await fetchPermissions(currentSession.user.id);
@@ -442,6 +509,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     },
     refreshProfile,
     refreshPermissions,
+    createFallbackProfile,
     login: async (email: string, password: string) => {
       try {
         cleanupAuthState();
