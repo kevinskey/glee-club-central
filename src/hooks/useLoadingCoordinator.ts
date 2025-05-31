@@ -8,6 +8,7 @@ interface LoadingState {
 export const useLoadingCoordinator = () => {
   const [loadingStates, setLoadingStates] = useState<LoadingState>({});
   const timeoutRef = useRef<{ [key: string]: NodeJS.Timeout }>({});
+  const debounceRef = useRef<NodeJS.Timeout>();
 
   const setLoading = useCallback((key: string, isLoading: boolean, delay = 0) => {
     // Clear existing timeout for this key
@@ -15,19 +16,36 @@ export const useLoadingCoordinator = () => {
       clearTimeout(timeoutRef.current[key]);
     }
 
+    // Clear any pending debounce
+    if (debounceRef.current) {
+      clearTimeout(debounceRef.current);
+    }
+
+    const updateState = () => {
+      setLoadingStates(prev => {
+        const newState = { ...prev };
+        if (isLoading) {
+          newState[key] = true;
+        } else {
+          delete newState[key];
+        }
+        return newState;
+      });
+    };
+
     if (delay > 0) {
       timeoutRef.current[key] = setTimeout(() => {
-        setLoadingStates(prev => ({
-          ...prev,
-          [key]: isLoading
-        }));
+        updateState();
         delete timeoutRef.current[key];
       }, delay);
+    } else if (isLoading) {
+      // Immediate loading state
+      updateState();
     } else {
-      setLoadingStates(prev => ({
-        ...prev,
-        [key]: isLoading
-      }));
+      // Debounce loading false to prevent flickering
+      debounceRef.current = setTimeout(() => {
+        updateState();
+      }, 100);
     }
   }, []);
 
@@ -38,6 +56,9 @@ export const useLoadingCoordinator = () => {
     if (timeoutRef.current[key]) {
       clearTimeout(timeoutRef.current[key]);
       delete timeoutRef.current[key];
+    }
+    if (debounceRef.current) {
+      clearTimeout(debounceRef.current);
     }
     setLoadingStates(prev => {
       const newState = { ...prev };
