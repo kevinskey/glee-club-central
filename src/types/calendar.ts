@@ -15,6 +15,7 @@ export interface CalendarEvent {
   event_types?: string[]; // Changed to array for multi-select
   event_type?: string; // Keep for backward compatibility
   is_private: boolean;
+  is_public: boolean; // Add the missing is_public property
   allow_rsvp: boolean;
   allow_reminders: boolean;
   allow_ics_download: boolean;
