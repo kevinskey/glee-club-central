@@ -10,7 +10,6 @@ interface Profile {
   last_name?: string;
   role?: string;
   avatar_url?: string;
-  email?: string;
   phone?: string;
   voice_part?: string;
   status?: string;
@@ -132,12 +131,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         return;
       }
 
-      // Create minimal profile
+      // Create minimal profile - NOTE: No email field as it's not in the profiles table
       const fallbackProfile: Partial<Profile> = {
         id: user.id,
         first_name: user.user_metadata?.first_name || 'User',
         last_name: user.user_metadata?.last_name || '',
-        email: user.email,
         role: 'member',
         status: 'active',
         is_super_admin: false,
@@ -168,7 +166,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         id: user.id,
         first_name: user.user_metadata?.first_name || 'User',
         last_name: user.user_metadata?.last_name || '',
-        email: user.email,
         role: 'member',
         status: 'active',
         is_super_admin: false,

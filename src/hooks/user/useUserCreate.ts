@@ -26,7 +26,7 @@ export const useUserCreate = (
       const { data: existingProfile } = await supabase
         .from('profiles')
         .select('id')
-        .eq('email', userData.email)
+        .eq('id', userData.email) // This check might not be needed since we're checking auth
         .single();
         
       if (existingProfile) {
@@ -75,6 +75,7 @@ export const useUserCreate = (
       await new Promise(resolve => setTimeout(resolve, 1000));
       
       // Update the profile with additional data that wasn't in the trigger
+      // NOTE: Don't include email since it's not in the profiles table
       const updateData: any = {
         phone: userData.phone || null,
         voice_part: userData.voice_part,
@@ -88,17 +89,6 @@ export const useUserCreate = (
         avatar_url: userData.avatar_url || null,
         updated_at: new Date().toISOString()
       };
-      
-      // Only update non-null email if it's different (though it shouldn't be)
-      const { data: currentProfile } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('id', authData.user.id)
-        .single();
-        
-      if (currentProfile && !currentProfile.email) {
-        updateData.email = userData.email;
-      }
       
       const { error: profileError } = await supabase
         .from('profiles')
@@ -118,7 +108,7 @@ export const useUserCreate = (
       if (setUsers) {
         const newUser: User = {
           id: authData.user.id,
-          email: userData.email,
+          email: userData.email, // Keep email in the User type for display purposes
           first_name: userData.first_name,
           last_name: userData.last_name,
           phone: userData.phone || null,

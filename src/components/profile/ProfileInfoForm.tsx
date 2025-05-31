@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -6,17 +5,16 @@ import { z } from 'zod';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { toast } from 'sonner';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Camera, Mail, Save, User } from 'lucide-react';
+import { useAuth } from '@/contexts/AuthContext';
 
 const profileSchema = z.object({
   first_name: z.string().min(1, 'First name is required'),
   last_name: z.string().min(1, 'Last name is required'),
-  email: z.string().email('Please enter a valid email address'),
 });
 
 type ProfileFormData = z.infer<typeof profileSchema>;
@@ -26,13 +24,13 @@ interface ProfileInfoFormProps {
     id: string;
     first_name?: string;
     last_name?: string;
-    email?: string;
     avatar_url?: string;
   };
   onUpdate?: () => void;
 }
 
 export function ProfileInfoForm({ profile, onUpdate }: ProfileInfoFormProps) {
+  const { user } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
 
@@ -41,14 +39,13 @@ export function ProfileInfoForm({ profile, onUpdate }: ProfileInfoFormProps) {
     defaultValues: {
       first_name: profile.first_name || '',
       last_name: profile.last_name || '',
-      email: profile.email || '',
     },
   });
 
   const onSubmit = async (data: ProfileFormData) => {
     setIsLoading(true);
     try {
-      // Update profile in Supabase
+      // Update profile in Supabase - only update fields that exist in the profiles table
       const { error } = await supabase
         .from('profiles')
         .update({
@@ -60,21 +57,7 @@ export function ProfileInfoForm({ profile, onUpdate }: ProfileInfoFormProps) {
 
       if (error) throw error;
 
-      // Update auth user metadata if email changed
-      if (data.email !== profile.email) {
-        const { error: authError } = await supabase.auth.updateUser({
-          email: data.email,
-        });
-
-        if (authError) {
-          toast.error('Profile updated, but email change requires verification');
-        } else {
-          toast.success('Profile updated successfully! Check your email to confirm the new address.');
-        }
-      } else {
-        toast.success('Profile updated successfully!');
-      }
-
+      toast.success('Profile updated successfully!');
       onUpdate?.();
     } catch (error: any) {
       console.error('Error updating profile:', error);
@@ -85,8 +68,13 @@ export function ProfileInfoForm({ profile, onUpdate }: ProfileInfoFormProps) {
   };
 
   const handlePasswordReset = async () => {
+    if (!user?.email) {
+      toast.error('No email address found for password reset');
+      return;
+    }
+    
     try {
-      const { error } = await supabase.auth.resetPasswordForEmail(profile.email || '', {
+      const { error } = await supabase.auth.resetPasswordForEmail(user.email, {
         redirectTo: `${window.location.origin}/reset-password`,
       });
 
@@ -151,10 +139,10 @@ export function ProfileInfoForm({ profile, onUpdate }: ProfileInfoFormProps) {
     }
   };
 
-  const getInitials = () => {
+  const getInitials = (profile: any) => {
     const first = profile.first_name?.[0] || '';
     const last = profile.last_name?.[0] || '';
-    return (first + last).toUpperCase() || profile.email?.[0]?.toUpperCase() || 'U';
+    return (first + last).toUpperCase() || 'U';
   };
 
   return (
@@ -210,7 +198,7 @@ export function ProfileInfoForm({ profile, onUpdate }: ProfileInfoFormProps) {
         <CardHeader>
           <CardTitle>Profile Information</CardTitle>
           <CardDescription>
-            Update your personal information and account settings
+            Update your personal information
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -246,19 +234,10 @@ export function ProfileInfoForm({ profile, onUpdate }: ProfileInfoFormProps) {
                 />
               </div>
 
-              <FormField
-                control={form.control}
-                name="email"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Email Address</FormLabel>
-                    <FormControl>
-                      <Input type="email" placeholder="Enter your email" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+              <div className="text-sm text-muted-foreground p-3 bg-muted rounded">
+                <strong>Email:</strong> {user?.email || 'Not available'}
+                <p className="text-xs mt-1">Email changes must be done through account settings</p>
+              </div>
 
               <Button type="submit" disabled={isLoading} className="w-full md:w-auto">
                 <Save className="h-4 w-4 mr-2" />

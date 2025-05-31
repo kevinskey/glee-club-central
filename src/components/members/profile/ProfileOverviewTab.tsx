@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { 
@@ -37,7 +36,7 @@ export const ProfileOverviewTab: React.FC<ProfileOverviewTabProps> = ({
   isEditable = false,
   onSave 
 }) => {
-  const { refreshPermissions } = useAuth();
+  const { refreshPermissions, user } = useAuth();
   const [formData, setFormData] = useState({
     personal_title: profile.personal_title || '',
     first_name: profile.first_name || '',
@@ -45,7 +44,6 @@ export const ProfileOverviewTab: React.FC<ProfileOverviewTabProps> = ({
     phone: profile.phone || '',
     voice_part: profile.voice_part || '', 
     class_year: profile.class_year || '',
-    email: profile.email || '',
     status: profile.status || '',
     role: profile.role || '',
     join_date: profile.join_date || '',
@@ -64,7 +62,6 @@ export const ProfileOverviewTab: React.FC<ProfileOverviewTabProps> = ({
         phone: profile.phone || '',
         voice_part: profile.voice_part || '',
         class_year: profile.class_year || '',
-        email: profile.email || '',
         status: profile.status || '',
         role: profile.role || '',
         join_date: profile.join_date || '',
@@ -150,7 +147,6 @@ export const ProfileOverviewTab: React.FC<ProfileOverviewTabProps> = ({
       phone: profile.phone || '',
       voice_part: profile.voice_part || '',
       class_year: profile.class_year || '',
-      email: profile.email || '',
       status: profile.status || '',
       role: profile.role || '',
       join_date: profile.join_date || '',
@@ -240,16 +236,6 @@ export const ProfileOverviewTab: React.FC<ProfileOverviewTabProps> = ({
                   id="last_name"
                   name="last_name"
                   value={formData.last_name}
-                  onChange={handleInputChange}
-                />
-              </div>
-              
-              <div className="space-y-2">
-                <Label htmlFor="email">Email Address</Label>
-                <Input 
-                  id="email"
-                  name="email"
-                  value={formData.email}
                   onChange={handleInputChange}
                 />
               </div>
@@ -363,7 +349,7 @@ export const ProfileOverviewTab: React.FC<ProfileOverviewTabProps> = ({
             <div className="flex items-center space-x-2">
               <Mail className="h-4 w-4 opacity-70" />
               <span className="font-semibold">Email:</span>
-              <span>{profile.email || "Not set"}</span>
+              <span>{user?.email || "Not available"}</span>
             </div>
             
             <div className="flex items-center space-x-2">
