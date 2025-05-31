@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -162,7 +163,7 @@ export function ProfileInfoForm({ profile, onUpdate }: ProfileInfoFormProps) {
           <div className="flex items-center gap-4">
             <Avatar className="h-20 w-20">
               <AvatarImage src={profile.avatar_url} alt="Profile picture" />
-              <AvatarFallback className="text-lg">{getInitials()}</AvatarFallback>
+              <AvatarFallback className="text-lg">{getInitials(profile)}</AvatarFallback>
             </Avatar>
             <div>
               <input

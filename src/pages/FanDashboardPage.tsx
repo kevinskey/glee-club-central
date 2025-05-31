@@ -12,7 +12,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Switch } from "@/components/ui/switch";
 
 export default function FanDashboardPage() {
-  const { profile } = useAuth();
+  const { profile, user } = useAuth();
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState("overview");
   
@@ -103,7 +103,7 @@ export default function FanDashboardPage() {
                   <AvatarFallback>{profile?.first_name?.charAt(0) || "F"}{profile?.last_name?.charAt(0) || ""}</AvatarFallback>
                 </Avatar>
                 <h3 className="font-medium text-lg">{profile?.first_name} {profile?.last_name}</h3>
-                <p className="text-muted-foreground text-sm">{profile?.email}</p>
+                <p className="text-muted-foreground text-sm">{user?.email}</p>
                 <div className="mt-3">
                   <Badge className={getTierColor(supporterTier)}>
                     {supporterTier} Supporter
