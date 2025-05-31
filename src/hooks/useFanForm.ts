@@ -59,7 +59,9 @@ export function useFanForm() {
         .insert({
           full_name: formData.fullName.trim(),
           email: formData.email.trim().toLowerCase(),
-          favorite_memory: formData.favoriteMemory.trim() || null
+          favorite_memory: formData.favoriteMemory.trim() || null,
+          tags: [], // Initialize with empty tags array
+          notes: null // Initialize with null notes
         });
 
       if (error) {

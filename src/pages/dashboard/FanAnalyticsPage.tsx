@@ -4,7 +4,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { PageHeader } from '@/components/ui/page-header';
 import { Button } from '@/components/ui/button';
 import { Spinner } from '@/components/ui/spinner';
-import { Users, TrendingUp, Download, Music } from 'lucide-react';
+import { Users, TrendingUp, Download, Music, Tags } from 'lucide-react';
 import { toast } from 'sonner';
 
 // Import our modular components
@@ -19,6 +19,8 @@ interface Fan {
   email: string;
   favorite_memory: string | null;
   created_at: string;
+  tags?: string[];
+  notes?: string;
 }
 
 interface FavoriteMemoryStats {
@@ -39,6 +41,7 @@ export default function FanAnalyticsPage() {
   const [favoriteMemoryStats, setFavoriteMemoryStats] = useState<FavoriteMemoryStats[]>([]);
   const [recentFans, setRecentFans] = useState<Fan[]>([]);
   const [weeklySignups, setWeeklySignups] = useState<DailySignup[]>([]);
+  const [totalTaggedFans, setTotalTaggedFans] = useState(0);
 
   useEffect(() => {
     fetchFanAnalytics();
@@ -48,7 +51,7 @@ export default function FanAnalyticsPage() {
     try {
       setIsLoading(true);
 
-      // Fetch all fans
+      // Fetch all fans with tags and notes
       const { data: allFans, error: fansError } = await supabase
         .from('fans')
         .select('*')
@@ -68,8 +71,12 @@ export default function FanAnalyticsPage() {
       ) || [];
       setNewSignupsThisWeek(recentSignups.length);
 
-      // Get recent 5 fans
-      setRecentFans(allFans?.slice(0, 5) || []);
+      // Count fans with tags
+      const taggedFans = allFans?.filter(fan => fan.tags && fan.tags.length > 0) || [];
+      setTotalTaggedFans(taggedFans.length);
+
+      // Get recent 10 fans for the table
+      setRecentFans(allFans?.slice(0, 10) || []);
 
       // Process favorite memories
       const memoryStats: { [key: string]: number } = {};
@@ -124,18 +131,54 @@ export default function FanAnalyticsPage() {
     }
   };
 
+  const handleFanUpdate = async (fanId: string, tags: string[], notes: string) => {
+    try {
+      const { error } = await supabase
+        .from('fans')
+        .update({ tags, notes })
+        .eq('id', fanId);
+
+      if (error) throw error;
+
+      // Update local state
+      setFans(prevFans => 
+        prevFans.map(fan => 
+          fan.id === fanId ? { ...fan, tags, notes } : fan
+        )
+      );
+      setRecentFans(prevFans => 
+        prevFans.map(fan => 
+          fan.id === fanId ? { ...fan, tags, notes } : fan
+        )
+      );
+
+      // Update tagged fans count
+      const updatedFans = fans.map(fan => 
+        fan.id === fanId ? { ...fan, tags, notes } : fan
+      );
+      const taggedFans = updatedFans.filter(fan => fan.tags && fan.tags.length > 0);
+      setTotalTaggedFans(taggedFans.length);
+
+    } catch (error) {
+      console.error('Error updating fan:', error);
+      throw error;
+    }
+  };
+
   const exportToCSV = () => {
     if (fans.length === 0) {
       toast.error('No data to export');
       return;
     }
 
-    const headers = ['Full Name', 'Email', 'Favorite Memory', 'Joined Date'];
+    const headers = ['Full Name', 'Email', 'Tags', 'Notes', 'Favorite Memory', 'Joined Date'];
     const csvContent = [
       headers.join(','),
       ...fans.map(fan => [
         `"${fan.full_name}"`,
         `"${fan.email}"`,
+        `"${fan.tags?.join(', ') || ''}"`,
+        `"${fan.notes || ''}"`,
         `"${fan.favorite_memory || ''}"`,
         `"${new Date(fan.created_at).toLocaleDateString()}"`
       ].join(','))
@@ -170,7 +213,7 @@ export default function FanAnalyticsPage() {
       {/* Header */}
       <PageHeader
         title="Fan Analytics"
-        description="Real-time metrics from our fan community"
+        description="Real-time metrics and segmentation from our fan community"
         actions={
           <Button onClick={exportToCSV} className="flex items-center gap-2">
             <Download className="w-4 h-4" />
@@ -180,7 +223,7 @@ export default function FanAnalyticsPage() {
       />
 
       {/* Overview Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
         <FanStatsCard
           title="Total Fans"
           value={totalFans}
@@ -193,6 +236,13 @@ export default function FanAnalyticsPage() {
           value={newSignupsThisWeek}
           description="Signups in the last 7 days"
           icon={<TrendingUp />}
+          isLoading={isLoading}
+        />
+        <FanStatsCard
+          title="Tagged Fans"
+          value={totalTaggedFans}
+          description="Fans with segmentation tags"
+          icon={<Tags />}
           isLoading={isLoading}
         />
         <FanStatsCard
@@ -210,8 +260,13 @@ export default function FanAnalyticsPage() {
         <FavoriteMemoriesList data={favoriteMemoryStats} isLoading={isLoading} />
       </div>
 
-      {/* Recent Signups Table */}
-      <RecentFansTable data={recentFans} isLoading={isLoading} />
+      {/* Enhanced Recent Signups Table with Tags */}
+      <RecentFansTable 
+        data={recentFans} 
+        isLoading={isLoading} 
+        onFanUpdate={handleFanUpdate}
+        showFilter={true}
+      />
     </div>
   );
 }

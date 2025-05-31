@@ -348,6 +348,8 @@ export type Database = {
           favorite_memory: string | null
           full_name: string
           id: string
+          notes: string | null
+          tags: string[] | null
         }
         Insert: {
           created_at?: string
@@ -355,6 +357,8 @@ export type Database = {
           favorite_memory?: string | null
           full_name: string
           id?: string
+          notes?: string | null
+          tags?: string[] | null
         }
         Update: {
           created_at?: string
@@ -362,6 +366,8 @@ export type Database = {
           favorite_memory?: string | null
           full_name?: string
           id?: string
+          notes?: string | null
+          tags?: string[] | null
         }
         Relationships: []
       }
