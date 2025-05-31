@@ -1,17 +1,18 @@
+
 import React from 'react';
 import { RouteObject } from 'react-router-dom';
-import { RequireAdmin } from '@/components/auth/RequireAdmin';
+import AdminRoute from '@/components/auth/AdminRoute';
 import AppLayout from '@/layouts/AppLayout';
 
-// Import all existing admin pages
+// Import existing admin pages
 import AdminDashboardPage from '@/pages/admin/AdminDashboardPage';
 import AdminCalendarPage from '@/pages/admin/AdminCalendarPage';
-import AdminMembersPage from '@/pages/admin/AdminMembersPage';
-import AdminMediaPage from '@/pages/admin/AdminMediaPage';
-import AdminAnnouncementsPage from '@/pages/admin/AdminAnnouncementsPage';
-import AdminSettingsPage from '@/pages/admin/AdminSettingsPage';
-import AdminOrdersPage from '@/pages/admin/AdminOrdersPage';
-import AdminAnalyticsPage from '@/pages/admin/AdminAnalyticsPage';
+import UserManagementPage from '@/pages/admin/UserManagementPage';
+import MediaLibraryPage from '@/pages/admin/MediaLibraryPage';
+import AnnouncementsPage from '@/pages/announcements/AnnouncementsPage';
+import SettingsPage from '@/pages/admin/SettingsPage';
+import OrdersPage from '@/pages/admin/OrdersPage';
+import AnalyticsPage from '@/pages/admin/AnalyticsPage';
 import EventDetailsPage from '@/pages/events/EventDetailsPage';
 import EventRSVPsPage from '@/pages/admin/EventRSVPsPage';
 
@@ -19,21 +20,21 @@ export const adminRoutes: RouteObject[] = [
   {
     path: '/admin',
     element: (
-      <RequireAdmin>
+      <AdminRoute>
         <AppLayout sidebarType="admin" showHeader={true} showFooter={false} />
-      </RequireAdmin>
+      </AdminRoute>
     ),
     children: [
       { index: true, element: <AdminDashboardPage /> },
       { path: 'calendar', element: <AdminCalendarPage /> },
       { path: 'events/:id', element: <EventDetailsPage /> },
       { path: 'events/:id/rsvps', element: <EventRSVPsPage /> },
-      { path: 'members', element: <AdminMembersPage /> },
-      { path: 'media', element: <AdminMediaPage /> },
-      { path: 'announcements', element: <AdminAnnouncementsPage /> },
-      { path: 'settings', element: <AdminSettingsPage /> },
-      { path: 'orders', element: <AdminOrdersPage /> },
-      { path: 'analytics', element: <AdminAnalyticsPage /> },
+      { path: 'members', element: <UserManagementPage /> },
+      { path: 'media', element: <MediaLibraryPage /> },
+      { path: 'announcements', element: <AnnouncementsPage /> },
+      { path: 'settings', element: <SettingsPage /> },
+      { path: 'orders', element: <OrdersPage /> },
+      { path: 'analytics', element: <AnalyticsPage /> },
     ],
   },
 ];
