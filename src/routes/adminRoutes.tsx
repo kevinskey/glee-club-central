@@ -6,6 +6,7 @@ import MediaLibrary from "@/pages/admin/MediaLibrary";
 import NewsItemsPage from "@/pages/admin/NewsItemsPage";
 import SiteSettingsPage from "@/pages/admin/SiteSettingsPage";
 import AdminHeroManager from "@/pages/admin/AdminHeroManager";
+import AdminMediaUploaderPage from "@/pages/admin/AdminMediaUploaderPage";
 import EventDetailsPage from '@/pages/events/EventDetailsPage';
 
 console.log('Admin routes loading...');
@@ -23,6 +24,10 @@ export const adminRoutes: RouteObject[] = [
   {
     path: "/media", 
     element: <MediaLibrary />,
+  },
+  {
+    path: "/media-uploader",
+    element: <AdminMediaUploaderPage />,
   },
   {
     path: "/hero-manager",
