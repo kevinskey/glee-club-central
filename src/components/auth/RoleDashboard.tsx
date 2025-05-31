@@ -5,7 +5,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { PageLoader } from '@/components/ui/page-loader';
 
 export default function RoleDashboard() {
-  const { user, profile, isLoading, isAuthenticated } = useAuth();
+  const { user, profile, isLoading, isAuthenticated, isAdmin } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   const hasRedirected = useRef(false);
@@ -17,6 +17,10 @@ export default function RoleDashboard() {
     hasProfile: !!profile,
     userRole: profile?.role,
     isAdmin: profile?.is_super_admin,
+    isAdminFunction: isAdmin ? isAdmin() : false,
+    userEmail: user?.email,
+    userMetadata: user?.user_metadata,
+    appMetadata: user?.app_metadata,
     isLoading,
     isAuthenticated,
     hasRedirected: hasRedirected.current,
@@ -27,7 +31,7 @@ export default function RoleDashboard() {
   useEffect(() => {
     const timer = setTimeout(() => {
       setRedirectTimeout(true);
-    }, 3000); // 3 second timeout for faster redirect
+    }, 2000); // Reduced to 2 seconds for faster redirect
     
     return () => clearTimeout(timer);
   }, []);
@@ -49,7 +53,7 @@ export default function RoleDashboard() {
     if (!isAuthenticated || !user) {
       console.log('Not authenticated, redirecting to login');
       hasRedirected.current = true;
-      navigate('/auth/login', { 
+      navigate('/login', { 
         replace: true,
         state: { from: location }
       });
@@ -60,12 +64,33 @@ export default function RoleDashboard() {
     if (redirectTimeout || profile) {
       hasRedirected.current = true;
       
+      // Enhanced admin detection with multiple fallbacks
+      const isAdminUser = 
+        // Primary: Profile-based detection
+        profile?.is_super_admin === true || 
+        profile?.role === 'admin' ||
+        // Secondary: isAdmin function (includes metadata fallback)
+        (isAdmin && isAdmin()) ||
+        // Tertiary: Direct user metadata check
+        user?.user_metadata?.role === 'admin' ||
+        user?.app_metadata?.role === 'admin' ||
+        user?.user_metadata?.role === 'super_admin' ||
+        user?.app_metadata?.role === 'super_admin';
+      
       const userRole = profile?.role || 'member';
-      const isAdmin = profile?.is_super_admin || userRole === 'admin';
       
-      console.log('Performing role-based redirect:', { userRole, isAdmin, hasProfile: !!profile });
+      console.log('Performing role-based redirect:', { 
+        userRole, 
+        isAdminUser, 
+        hasProfile: !!profile,
+        profileIsSuperAdmin: profile?.is_super_admin,
+        profileRole: profile?.role,
+        isAdminFunction: isAdmin ? isAdmin() : false,
+        userMetadataRole: user?.user_metadata?.role,
+        appMetadataRole: user?.app_metadata?.role
+      });
       
-      if (isAdmin || userRole === 'admin') {
+      if (isAdminUser) {
         console.log('Redirecting admin to /admin');
         navigate('/admin', { replace: true });
       } else if (userRole === 'fan') {
@@ -76,7 +101,7 @@ export default function RoleDashboard() {
         navigate('/dashboard/member', { replace: true });
       }
     }
-  }, [user, profile, isLoading, isAuthenticated, navigate, location, redirectTimeout]);
+  }, [user, profile, isLoading, isAuthenticated, navigate, location, redirectTimeout, isAdmin]);
 
   // Reset redirect flag when component unmounts
   useEffect(() => {

@@ -254,17 +254,26 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const isAdmin = () => {
-    // Enhanced admin detection with fallback
+    // Enhanced admin detection with multiple fallbacks
     if (profile?.is_super_admin === true || profile?.role === 'admin') {
+      console.log('Admin detected via profile:', { is_super_admin: profile.is_super_admin, role: profile.role });
       return true;
     }
     
-    // Fallback: If profile failed to load but user exists, 
-    // check user metadata for admin indicators
-    if (profileLoadFailed && user) {
+    // Fallback: If profile failed to load or doesn't exist, check user metadata
+    if (user && (!profile || profileLoadFailed)) {
       const userRole = user.user_metadata?.role || user.app_metadata?.role;
-      if (userRole === 'admin' || userRole === 'super_admin') {
-        console.log('Admin detected via user metadata fallback');
+      const userType = user.user_metadata?.user_type || user.app_metadata?.user_type;
+      
+      if (userRole === 'admin' || userRole === 'super_admin' || userType === 'admin') {
+        console.log('Admin detected via user metadata fallback:', { userRole, userType });
+        return true;
+      }
+      
+      // Check email-based admin detection for known admin emails
+      const adminEmails = ['kevinskey@mac.com']; // Add known admin emails here
+      if (user.email && adminEmails.includes(user.email.toLowerCase())) {
+        console.log('Admin detected via email whitelist:', user.email);
         return true;
       }
     }
