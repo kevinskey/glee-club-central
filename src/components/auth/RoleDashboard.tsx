@@ -39,9 +39,16 @@ export const RoleDashboard: React.FC = () => {
       return;
     }
 
-    // Handle authenticated users - role-based routing
-    if (isAuthenticated && user) {
-      console.log('🎯 RoleDashboard: User authenticated, determining route...');
+    // Wait for profile to load before making routing decisions
+    // This is crucial for proper role-based routing
+    if (!profile) {
+      console.log('⏳ RoleDashboard: Waiting for profile to load...');
+      return;
+    }
+
+    // Handle authenticated users with loaded profiles - role-based routing
+    if (isAuthenticated && user && profile) {
+      console.log('🎯 RoleDashboard: User and profile loaded, determining route...');
       
       let targetRoute = '/dashboard/member'; // Default route for members
       
@@ -85,6 +92,15 @@ export const RoleDashboard: React.FC = () => {
     return (
       <PageLoader 
         message="Redirecting to login..."
+        className="min-h-screen"
+      />
+    );
+  }
+
+  if (!profile) {
+    return (
+      <PageLoader 
+        message="Loading user profile..."
         className="min-h-screen"
       />
     );

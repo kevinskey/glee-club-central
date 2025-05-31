@@ -72,6 +72,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     };
   }, []);
 
+  // Authentication status - requires both user and session
   const isAuthenticated = !!user && !!session;
 
   const login = useCallback(async (email: string, password: string) => {
@@ -167,6 +168,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, []);
 
   const isAdmin = useCallback(() => {
+    // Ensure we have a profile before checking admin status
+    if (!profile) {
+      console.log('👑 AuthContext: Admin check - no profile loaded yet');
+      return false;
+    }
+    
     const adminStatus = profile?.is_super_admin === true || profile?.role === 'admin';
     console.log('👑 AuthContext: Admin check:', {
       hasProfile: !!profile,
@@ -179,6 +186,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, [profile, user]);
 
   const isMember = useCallback(() => {
+    if (!profile) {
+      console.log('👤 AuthContext: Member check - no profile loaded yet');
+      return false;
+    }
+    
     const memberStatus = profile?.role === 'member' || !profile?.role;
     console.log('👤 AuthContext: Member check:', {
       hasProfile: !!profile,
@@ -190,6 +202,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, [profile, user]);
 
   const getUserType = useCallback(() => {
+    if (!profile) {
+      console.log('🏷️ AuthContext: User type check - no profile loaded yet');
+      return 'member'; // Default to member while loading
+    }
+    
     const userType = (profile?.is_super_admin === true || profile?.role === 'admin') ? 'admin' : 'member';
     console.log('🏷️ AuthContext: User type check:', {
       hasProfile: !!profile,
