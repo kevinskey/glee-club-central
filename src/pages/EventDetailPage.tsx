@@ -201,11 +201,11 @@ END:VCALENDAR`;
         {/* Main Content */}
         <div className="lg:col-span-2 space-y-4 sm:space-y-6">
           {/* Event Image */}
-          {(event.feature_image_url || event.image_url) && (
+          {event.feature_image_url && (
             <Card>
               <CardContent className="p-0">
                 <img 
-                  src={event.feature_image_url || event.image_url} 
+                  src={event.feature_image_url} 
                   alt={event.title}
                   className="w-full h-48 sm:h-64 object-cover rounded-lg"
                 />

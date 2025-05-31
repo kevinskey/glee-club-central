@@ -4,7 +4,7 @@ import { RouteObject } from 'react-router-dom';
 import AppLayout from '@/layouts/AppLayout';
 
 // Import public pages
-import LandingPage from '@/pages/LandingPage';
+import HomePage from '@/pages/HomePage';
 import CalendarPage from '@/pages/CalendarPage';
 import EventDetailPage from '@/pages/EventDetailPage';
 import AboutPage from '@/pages/AboutPage';
@@ -16,7 +16,7 @@ export const publicRoutes: RouteObject[] = [
     path: '/',
     element: <AppLayout sidebarType="none" showHeader={true} showFooter={true} />,
     children: [
-      { index: true, element: <LandingPage /> },
+      { index: true, element: <HomePage /> },
       { path: 'calendar', element: <CalendarPage /> },
       { path: 'event/:id', element: <EventDetailPage /> },
       { path: 'about', element: <AboutPage /> },
