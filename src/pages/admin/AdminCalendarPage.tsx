@@ -1,5 +1,5 @@
 
-import React, { useState, useRef, useEffect, useMemo } from 'react';
+import React, { useState } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { CalendarView } from '@/components/calendar/CalendarView';
 import { EventDialog } from '@/components/calendar/EventDialog';
@@ -24,32 +24,10 @@ export default function AdminCalendarPage() {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isEditorOpen, setIsEditorOpen] = useState(false);
 
-  // Calculate dynamic stats from events
-  const eventStats = useMemo(() => {
-    const now = new Date();
-    const totalEvents = events.length;
-    const upcomingEvents = events.filter(event => 
-      new Date(event.start_time) > now
-    ).length;
-    const concerts = events.filter(event => {
-      const eventTypes = event.event_types || (event.event_type ? [event.event_type] : []);
-      return eventTypes.includes('performance') || 
-             eventTypes.includes('concert') || 
-             event.event_type === 'concert' ||
-             event.event_type === 'performance';
-    }).length;
-    
-    return {
-      totalEvents,
-      upcomingEvents,
-      concerts
-    };
-  }, [events]);
-
   // Handle URL parameters for editing
-  useEffect(() => {
+  React.useEffect(() => {
     const editEventId = searchParams.get('edit');
-    if (editEventId) {
+    if (editEventId && events.length > 0) {
       const eventToEdit = events.find(e => e.id === editEventId);
       if (eventToEdit) {
         setEditingEvent(eventToEdit);
@@ -85,7 +63,7 @@ export default function AdminCalendarPage() {
   };
 
   const handleDeleteEvent = async (event: CalendarEvent) => {
-    if (confirm(`Are you sure you want to delete "${event.title}"?`)) {
+    if (window.confirm(`Are you sure you want to delete "${event.title}"?`)) {
       try {
         await deleteEvent(event.id);
         toast.success('Event deleted successfully');
@@ -126,22 +104,20 @@ export default function AdminCalendarPage() {
   if (loading) {
     return (
       <ErrorBoundary>
-        <div className="min-h-screen bg-gray-50/50">
-          <div className="container mx-auto px-4 py-6 max-w-7xl">
-            <PageHeader
-              title="Calendar Management"
-              description="Manage all events and calendar settings"
-              icon={<Calendar className="h-6 w-6" />}
-            />
-            <Card className="mt-6">
-              <CardContent className="flex items-center justify-center h-64">
-                <div className="text-center space-y-3">
-                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-glee-purple mx-auto"></div>
-                  <div className="text-muted-foreground">Loading calendar...</div>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
+        <div className="container mx-auto px-4 py-6 max-w-7xl">
+          <PageHeader
+            title="Calendar Management"
+            description="Manage all events and calendar settings"
+            icon={<Calendar className="h-6 w-6" />}
+          />
+          <Card className="mt-6">
+            <CardContent className="flex items-center justify-center h-64">
+              <div className="text-center space-y-3">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-glee-spelman mx-auto"></div>
+                <div className="text-muted-foreground">Loading calendar...</div>
+              </div>
+            </CardContent>
+          </Card>
         </div>
       </ErrorBoundary>
     );
@@ -150,25 +126,23 @@ export default function AdminCalendarPage() {
   if (error) {
     return (
       <ErrorBoundary>
-        <div className="min-h-screen bg-gray-50/50">
-          <div className="container mx-auto px-4 py-6 max-w-7xl">
-            <PageHeader
-              title="Calendar Management"
-              description="Manage all events and calendar settings"
-              icon={<Calendar className="h-6 w-6" />}
-            />
-            <Card className="mt-6">
-              <CardContent className="flex flex-col items-center justify-center h-64 space-y-4">
-                <div className="text-red-600 text-center">
-                  <p className="font-semibold">Error loading calendar</p>
-                  <p className="text-sm mt-1">{error}</p>
-                </div>
-                <Button onClick={fetchEvents} variant="outline">
-                  Try Again
-                </Button>
-              </CardContent>
-            </Card>
-          </div>
+        <div className="container mx-auto px-4 py-6 max-w-7xl">
+          <PageHeader
+            title="Calendar Management"
+            description="Manage all events and calendar settings"
+            icon={<Calendar className="h-6 w-6" />}
+          />
+          <Card className="mt-6">
+            <CardContent className="flex flex-col items-center justify-center h-64 space-y-4">
+              <div className="text-red-600 text-center">
+                <p className="font-semibold">Error loading calendar</p>
+                <p className="text-sm mt-1">{error}</p>
+              </div>
+              <Button onClick={fetchEvents} variant="outline">
+                Try Again
+              </Button>
+            </CardContent>
+          </Card>
         </div>
       </ErrorBoundary>
     );
@@ -176,130 +150,137 @@ export default function AdminCalendarPage() {
 
   return (
     <ErrorBoundary>
-      <div className="min-h-screen bg-gray-50/50">
-        <div className="container mx-auto px-4 py-6 max-w-7xl space-y-6">
-          {/* Header Section */}
-          <div className="bg-white rounded-lg border shadow-sm p-6">
-            <PageHeader
-              title="Calendar Management"
-              description="Create, edit, and manage all Glee Club events and performances"
-              icon={<Calendar className="h-6 w-6" />}
-              actions={
-                <Button 
-                  onClick={handleCreateNew} 
-                  className="bg-glee-spelman hover:bg-glee-spelman/90 text-white border-glee-spelman"
-                >
-                  <Plus className="h-4 w-4 mr-2" />
-                  Create Event
-                </Button>
-              }
-            />
-          </div>
+      <div className="container mx-auto px-4 py-6 max-w-7xl space-y-6">
+        {/* Header Section */}
+        <PageHeader
+          title="Calendar Management"
+          description="Create, edit, and manage all Glee Club events and performances"
+          icon={<Calendar className="h-6 w-6" />}
+          actions={
+            <Button 
+              onClick={handleCreateNew} 
+              className="bg-glee-spelman hover:bg-glee-spelman/90 text-white"
+            >
+              <Plus className="h-4 w-4 mr-2" />
+              Create Event
+            </Button>
+          }
+        />
 
-          {/* Stats Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <Card>
-              <CardContent className="p-4">
-                <div className="flex items-center space-x-3">
-                  <div className="p-2 bg-blue-100 rounded-lg">
-                    <Calendar className="h-5 w-5 text-blue-600" />
-                  </div>
-                  <div>
-                    <p className="text-sm text-muted-foreground">Total Events</p>
-                    <p className="text-xl font-semibold">{eventStats.totalEvents}</p>
-                  </div>
+        {/* Stats Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <Card>
+            <CardContent className="p-4">
+              <div className="flex items-center space-x-3">
+                <div className="p-2 bg-blue-100 rounded-lg">
+                  <Calendar className="h-5 w-5 text-blue-600" />
                 </div>
-              </CardContent>
-            </Card>
-            
-            <Card>
-              <CardContent className="p-4">
-                <div className="flex items-center space-x-3">
-                  <div className="p-2 bg-green-100 rounded-lg">
-                    <Calendar className="h-5 w-5 text-green-600" />
-                  </div>
-                  <div>
-                    <p className="text-sm text-muted-foreground">Upcoming Events</p>
-                    <p className="text-xl font-semibold">{eventStats.upcomingEvents}</p>
-                  </div>
+                <div>
+                  <p className="text-sm text-muted-foreground">Total Events</p>
+                  <p className="text-xl font-semibold">{events.length}</p>
                 </div>
-              </CardContent>
-            </Card>
-            
-            <Card>
-              <CardContent className="p-4">
-                <div className="flex items-center space-x-3">
-                  <div className="p-2 bg-purple-100 rounded-lg">
-                    <Calendar className="h-5 w-5 text-purple-600" />
-                  </div>
-                  <div>
-                    <p className="text-sm text-muted-foreground">Concerts</p>
-                    <p className="text-xl font-semibold">{eventStats.concerts}</p>
-                  </div>
+              </div>
+            </CardContent>
+          </Card>
+          
+          <Card>
+            <CardContent className="p-4">
+              <div className="flex items-center space-x-3">
+                <div className="p-2 bg-green-100 rounded-lg">
+                  <Calendar className="h-5 w-5 text-green-600" />
                 </div>
-              </CardContent>
-            </Card>
-          </div>
+                <div>
+                  <p className="text-sm text-muted-foreground">Upcoming Events</p>
+                  <p className="text-xl font-semibold">
+                    {events.filter(event => new Date(event.start_time) > new Date()).length}
+                  </p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+          
+          <Card>
+            <CardContent className="p-4">
+              <div className="flex items-center space-x-3">
+                <div className="p-2 bg-purple-100 rounded-lg">
+                  <Calendar className="h-5 w-5 text-purple-600" />
+                </div>
+                <div>
+                  <p className="text-sm text-muted-foreground">Concerts</p>
+                  <p className="text-xl font-semibold">
+                    {events.filter(event => 
+                      event.event_type === 'concert' || 
+                      event.event_type === 'performance' ||
+                      event.event_types?.includes('concert') ||
+                      event.event_types?.includes('performance')
+                    ).length}
+                  </p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
 
-          {/* Calendar View */}
-          {!isEditorOpen && (
-            <div className="bg-white rounded-lg border shadow-sm p-6">
+        {/* Calendar View */}
+        {!isEditorOpen && (
+          <Card>
+            <CardContent className="p-6">
               <CalendarView
                 events={events}
                 onEventClick={handleEventClick}
                 showPrivateEvents={true}
               />
-            </div>
-          )}
+            </CardContent>
+          </Card>
+        )}
 
-          {/* Event Dialog */}
-          <EventDialog
-            event={selectedEvent}
-            isOpen={isDialogOpen}
-            onClose={() => {
-              setSelectedEvent(null);
-              setIsDialogOpen(false);
-            }}
-            canRSVP={false}
-            adminActions={
-              selectedEvent && (
-                <div className="flex gap-2 pt-4">
+        {/* Event Dialog */}
+        <EventDialog
+          event={selectedEvent}
+          isOpen={isDialogOpen}
+          onClose={() => {
+            setSelectedEvent(null);
+            setIsDialogOpen(false);
+          }}
+          canRSVP={false}
+          adminActions={
+            selectedEvent && (
+              <div className="flex gap-2 pt-4">
+                <Button 
+                  onClick={() => handleEditEvent(selectedEvent)}
+                  variant="outline"
+                >
+                  <Edit className="h-4 w-4 mr-2" />
+                  Edit Event
+                </Button>
+                {selectedEvent.allow_rsvp && (
                   <Button 
-                    onClick={() => handleEditEvent(selectedEvent)}
+                    onClick={() => handleViewRSVPs(selectedEvent)}
                     variant="outline"
                   >
-                    <Edit className="h-4 w-4 mr-2" />
-                    Edit Event
+                    <Users className="h-4 w-4 mr-2" />
+                    View RSVPs
                   </Button>
-                  {selectedEvent.allow_rsvp && (
-                    <Button 
-                      onClick={() => handleViewRSVPs(selectedEvent)}
-                      variant="outline"
-                    >
-                      <Users className="h-4 w-4 mr-2" />
-                      View RSVPs
-                    </Button>
-                  )}
-                  <Button 
-                    onClick={() => handleDeleteEvent(selectedEvent)}
-                    variant="destructive"
-                  >
-                    <Trash2 className="h-4 w-4 mr-2" />
-                    Delete
-                  </Button>
-                </div>
-              )
-            }
-          />
+                )}
+                <Button 
+                  onClick={() => handleDeleteEvent(selectedEvent)}
+                  variant="destructive"
+                >
+                  <Trash2 className="h-4 w-4 mr-2" />
+                  Delete
+                </Button>
+              </div>
+            )
+          }
+        />
 
-          {/* Event Editor */}
-          <EventEditor
-            event={editingEvent}
-            isOpen={isEditorOpen}
-            onClose={handleCloseEditor}
-            onSave={handleSaveEvent}
-          />
-        </div>
+        {/* Event Editor */}
+        <EventEditor
+          event={editingEvent}
+          isOpen={isEditorOpen}
+          onClose={handleCloseEditor}
+          onSave={handleSaveEvent}
+        />
       </div>
     </ErrorBoundary>
   );

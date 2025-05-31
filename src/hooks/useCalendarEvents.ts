@@ -17,7 +17,7 @@ export const useCalendarEvents = () => {
       
       console.log('Fetching events...');
       
-      // Simple query without complex joins or recursive lookups
+      // Simple query to get all events
       const { data, error } = await supabase
         .from('events')
         .select('*')
