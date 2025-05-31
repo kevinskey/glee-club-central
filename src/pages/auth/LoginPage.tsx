@@ -1,3 +1,4 @@
+
 import * as React from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useNavigate, useLocation, Link } from 'react-router-dom';
@@ -28,33 +29,16 @@ const LoginPage = () => {
     addCentennialImageToLibrary();
   }, []);
   
-  // Get saved redirect path
-  const getRedirectPath = () => {
-    const savedPath = sessionStorage.getItem('authRedirectPath');
-    const timestamp = sessionStorage.getItem('authRedirectTimestamp');
-    
-    if (savedPath && timestamp && Date.now() - parseInt(timestamp) < 5 * 60 * 1000) {
-      return savedPath;
-    }
-    
-    return '/role-dashboard';
-  };
-  
-  // Handle authenticated user redirect - simplified and more reliable
+  // Handle authenticated user redirect - always go to role-dashboard
   React.useEffect(() => {
     if (isAuthenticated && !isLoading) {
-      const redirectPath = getRedirectPath();
-      console.log('User authenticated, redirecting to:', redirectPath);
+      console.log('User authenticated, redirecting to role-dashboard');
       
       // Reset submitting state immediately
       setIsSubmitting(false);
       
-      // Clean up stored redirect path
-      sessionStorage.removeItem('authRedirectPath');
-      sessionStorage.removeItem('authRedirectTimestamp');
-      
-      // Navigate immediately
-      navigate(redirectPath, { replace: true });
+      // Navigate to role-dashboard for role-based routing
+      navigate('/role-dashboard', { replace: true });
     }
   }, [isAuthenticated, isLoading, navigate]);
   

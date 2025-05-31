@@ -41,17 +41,16 @@ export default function RoleDashboard() {
     // Single switch block for all role-based redirects
     const userRole = profile.role;
     const isAdmin = profile.is_super_admin || userRole === 'admin';
-    const userType = profile.user_type;
     
     switch (true) {
       case isAdmin:
         navigate('/admin', { replace: true });
         break;
-      case userType === 'member':
+      case userRole === 'member':
         navigate('/dashboard/member', { replace: true });
         break;
       default:
-        // Default to member dashboard for regular members
+        // Default to member dashboard for all other users
         navigate('/dashboard/member', { replace: true });
         break;
     }

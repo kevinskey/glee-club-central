@@ -11,13 +11,19 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
+import { PageLoader } from '@/components/ui/page-loader';
 
 export default function CalendarPage() {
   const { events, loading, error, fetchEvents } = useCalendarEvents();
   const { userRole, isMember } = useUserRole();
-  const { user } = useAuth();
+  const { user, isLoading: authLoading } = useAuth();
   const [selectedEvent, setSelectedEvent] = useState<CalendarEvent | null>(null);
   const [userRSVP, setUserRSVP] = useState<'going' | 'maybe' | 'not_going' | null>(null);
+
+  // Show loading while authentication is being checked
+  if (authLoading) {
+    return <PageLoader message="Loading calendar..." />;
+  }
 
   const handleEventClick = async (event: CalendarEvent) => {
     setSelectedEvent(event);

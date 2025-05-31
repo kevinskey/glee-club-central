@@ -6,11 +6,17 @@ import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 import { RecordingArchive } from "@/components/recordings/RecordingArchive";
 import { useAuth } from "@/contexts/AuthContext";
+import { PageLoader } from "@/components/ui/page-loader";
 
 export default function RecordingsPage() {
   const navigate = useNavigate();
   const { isAuthenticated, isLoading: authLoading } = useAuth();
   const [contentReady, setContentReady] = useState(false);
+  
+  // Show loading while authentication is being checked
+  if (authLoading) {
+    return <PageLoader message="Loading recordings..." />;
+  }
   
   // Set loaded state after a delay to prevent UI flicker
   useEffect(() => {
@@ -23,16 +29,6 @@ export default function RecordingsPage() {
       return () => clearTimeout(contentTimer);
     }
   }, [authLoading, isAuthenticated]);
-
-  // Show a loading state while authentication is being checked
-  if (authLoading) {
-    return (
-      <div className="space-y-6 animate-pulse">
-        <div className="h-10 w-full bg-muted rounded" />
-        <div className="h-40 w-full bg-muted rounded" />
-      </div>
-    );
-  }
 
   return (
     <div className={`space-y-6 transition-opacity duration-500 ${contentReady ? 'opacity-100' : 'opacity-0'}`}>

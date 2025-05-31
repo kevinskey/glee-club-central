@@ -9,6 +9,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { useUserManagement } from "@/hooks/user/useUserManagement";
+import { PageLoader } from "@/components/ui/page-loader";
 
 export default function ProfilePage() {
   const { profile, isLoading } = useAuth();
@@ -37,11 +38,7 @@ export default function ProfilePage() {
   };
   
   if (isLoading) {
-    return (
-      <div className="flex items-center justify-center h-64">
-        <div className="h-8 w-8 rounded-full border-4 border-primary border-t-transparent animate-spin"></div>
-      </div>
-    );
+    return <PageLoader message="Loading profile..." />;
   }
   
   if (!profile) {

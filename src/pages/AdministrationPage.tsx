@@ -6,9 +6,16 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 import { ChevronRight, FileText, Users, Calendar, Music, Headphones } from "lucide-react";
+import { useAuth } from "@/contexts/AuthContext";
+import { PageLoader } from "@/components/ui/page-loader";
 
 export default function AdministrationPage() {
   const navigate = useNavigate();
+  const { isLoading } = useAuth();
+
+  if (isLoading) {
+    return <PageLoader message="Loading administration..." />;
+  }
 
   return (
     <div className="flex min-h-screen flex-col">
