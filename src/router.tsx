@@ -82,18 +82,12 @@ export const router = createBrowserRouter([
       </ErrorBoundary>
     ),
     children: [
-      // ==================== PUBLIC ROUTES ====================
-      {
-        path: '/',
-        element: <AppLayout sidebarType="none" showHeader={false} showFooter={true} />,
-        children: [
-          { index: true, element: <HomePage /> },
-        ],
-      },
+      // ==================== PUBLIC ROUTES (with landing header) ====================
       {
         path: '/',
         element: <AppLayout sidebarType="none" showHeader={true} showFooter={true} />,
         children: [
+          { index: true, element: <HomePage /> },
           { path: 'about', element: <AboutPage /> },
           { path: 'contact', element: <ContactPage /> },
           { path: 'events', element: <PublicEventsPage /> },

@@ -1,5 +1,4 @@
 import React from "react";
-import { Header } from "@/components/landing/Header";
 import { Footer } from "@/components/landing/Footer";
 import { AspectRatio } from "@/components/ui/aspect-ratio";
 import { Card, CardContent } from "@/components/ui/card";
@@ -13,7 +12,6 @@ export default function AboutPage() {
   
   return (
     <div className="flex min-h-screen flex-col">
-      <Header />
       <main className="flex-1 bg-white dark:bg-gray-950">
         {/* Hero Section */}
         <div className="relative overflow-hidden bg-glee-purple py-16">
