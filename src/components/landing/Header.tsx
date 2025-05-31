@@ -1,5 +1,5 @@
 
-import React, { useState } from "react";
+import React from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { NewsTicker } from "@/components/landing/news/NewsTicker";
 import { HeaderLogo } from "@/components/layout/header/HeaderLogo";
@@ -97,34 +97,10 @@ export function Header() {
             
             {/* Mobile Navigation */}
             {isMobile && (
-              <>
-                {/* Mobile Auth Button */}
-                {isAuthenticated ? (
-                  <Button 
-                    variant="default"
-                    size="sm"
-                    onClick={handleDashboardClick}
-                    className="bg-glee-spelman hover:bg-glee-spelman/90"
-                  >
-                    <User className="h-4 w-4" />
-                  </Button>
-                ) : (
-                  <Button 
-                    variant="default"
-                    size="sm"
-                    onClick={() => navigate("/login")}
-                    className="bg-glee-spelman hover:bg-glee-spelman/90"
-                  >
-                    <LogIn className="h-4 w-4" />
-                  </Button>
-                )}
-
-                {/* Mobile Header Actions */}
+              <div className="flex items-center gap-2">
                 <HeaderActions />
-                
-                {/* Mobile Navigation Dropdown */}
                 <MobileNavDropdown />
-              </>
+              </div>
             )}
           </div>
         </div>
