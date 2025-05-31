@@ -1,7 +1,7 @@
 
 import React, { useState } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
-import { CalendarView } from '@/components/calendar/CalendarView';
+import { EnhancedCalendarView } from '@/components/calendar/EnhancedCalendarView';
 import { EventDialog } from '@/components/calendar/EventDialog';
 import { EventEditor } from '@/components/admin/EventEditor';
 import { useCalendarEvents } from '@/hooks/useCalendarEvents';
@@ -221,14 +221,15 @@ export default function AdminCalendarPage() {
           </Card>
         </div>
 
-        {/* Calendar View */}
+        {/* Enhanced Calendar View */}
         {!isEditorOpen && (
           <Card>
             <CardContent className="p-6">
-              <CalendarView
+              <EnhancedCalendarView
                 events={events}
                 onEventClick={handleEventClick}
-                showPrivateEvents={true}
+                onAddEvent={handleCreateNew}
+                loading={loading}
               />
             </CardContent>
           </Card>
