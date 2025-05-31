@@ -7,66 +7,32 @@ import { useUserRole } from '@/hooks/useUserRole';
 import { CalendarEvent } from '@/types/calendar';
 import { PageHeader } from '@/components/ui/page-header';
 import { Calendar } from 'lucide-react';
-import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
-import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { PageLoader } from '@/components/ui/page-loader';
+import { Card, CardContent } from '@/components/ui/card';
 
 export default function CalendarPage() {
   const { events, loading, error, fetchEvents } = useCalendarEvents();
   const { userRole, isMember } = useUserRole();
   const { user, isLoading: authLoading } = useAuth();
   const [selectedEvent, setSelectedEvent] = useState<CalendarEvent | null>(null);
-  const [userRSVP, setUserRSVP] = useState<'going' | 'maybe' | 'not_going' | null>(null);
+
+  // Filter events based on user authentication and public visibility
+  const filteredEvents = events.filter(event => {
+    // Show public events to everyone
+    if (event.is_public) return true;
+    // Show private events only to authenticated members
+    return isMember && !event.is_private;
+  });
 
   // Show loading while authentication is being checked
   if (authLoading) {
     return <PageLoader message="Loading calendar..." />;
   }
 
-  const handleEventClick = async (event: CalendarEvent) => {
+  const handleEventClick = (event: CalendarEvent) => {
     setSelectedEvent(event);
-    
-    if (event.allow_rsvp && user) {
-      try {
-        // Fetch user's current RSVP status
-        const { data } = await supabase
-          .from('event_rsvps')
-          .select('status')
-          .eq('event_id', event.id)
-          .eq('user_id', user.id)
-          .single();
-        
-        setUserRSVP(data?.status || null);
-      } catch (error) {
-        console.error('Error fetching RSVP status:', error);
-        setUserRSVP(null);
-      }
-    }
-  };
-
-  const handleRSVP = async (status: 'going' | 'maybe' | 'not_going') => {
-    if (!user || !selectedEvent) return;
-
-    try {
-      const { error } = await supabase
-        .from('event_rsvps')
-        .upsert({
-          event_id: selectedEvent.id,
-          user_id: user.id,
-          status,
-          updated_at: new Date().toISOString()
-        });
-
-      if (error) throw error;
-      
-      setUserRSVP(status);
-      toast.success('RSVP updated successfully');
-    } catch (error) {
-      console.error('Error updating RSVP:', error);
-      toast.error('Failed to update RSVP');
-    }
   };
 
   if (loading) {
@@ -78,7 +44,10 @@ export default function CalendarPage() {
           icon={<Calendar className="h-5 w-5 sm:h-6 sm:w-6" />}
         />
         <div className="flex items-center justify-center h-48 sm:h-64">
-          <div className="text-muted-foreground text-sm sm:text-base">Loading calendar...</div>
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-glee-spelman mx-auto"></div>
+            <p className="mt-4 text-muted-foreground text-sm sm:text-base">Loading calendar...</p>
+          </div>
         </div>
       </div>
     );
@@ -92,15 +61,17 @@ export default function CalendarPage() {
           description="View upcoming events and performances"
           icon={<Calendar className="h-5 w-5 sm:h-6 sm:w-6" />}
         />
-        <div className="flex flex-col items-center justify-center h-48 sm:h-64 space-y-4">
-          <div className="text-red-600 text-center">
-            <p className="font-semibold text-sm sm:text-base">Error loading calendar</p>
-            <p className="text-xs sm:text-sm mt-1">{error}</p>
-          </div>
-          <Button onClick={fetchEvents} variant="outline" className="mobile-touch-target">
-            Try Again
-          </Button>
-        </div>
+        <Card className="mt-6">
+          <CardContent className="flex flex-col items-center justify-center h-48 space-y-4">
+            <div className="text-red-600 text-center">
+              <p className="font-semibold text-sm sm:text-base">Error loading calendar</p>
+              <p className="text-xs sm:text-sm mt-1">{error}</p>
+            </div>
+            <Button onClick={fetchEvents} variant="outline" className="mobile-touch-target">
+              Try Again
+            </Button>
+          </CardContent>
+        </Card>
       </div>
     );
   }
@@ -109,23 +80,38 @@ export default function CalendarPage() {
     <div className="mobile-container mobile-section-padding space-y-4 sm:space-y-6 mobile-scroll">
       <PageHeader
         title="Calendar"
-        description="View upcoming events and performances"
+        description={`View ${isMember ? 'all events and performances' : 'upcoming public events'}`}
         icon={<Calendar className="h-5 w-5 sm:h-6 sm:w-6" />}
       />
 
-      <CalendarView
-        events={events}
-        onEventClick={handleEventClick}
-        showPrivateEvents={isMember}
-      />
+      {filteredEvents.length === 0 ? (
+        <Card>
+          <CardContent className="flex flex-col items-center justify-center h-48 space-y-4">
+            <Calendar className="h-12 w-12 text-gray-400" />
+            <div className="text-center">
+              <h3 className="text-lg font-semibold text-gray-900">No Events Found</h3>
+              <p className="text-gray-500 mt-2">
+                {isMember 
+                  ? "There are no upcoming events at this time." 
+                  : "There are no upcoming public events. Log in to see member events."
+                }
+              </p>
+            </div>
+          </CardContent>
+        </Card>
+      ) : (
+        <CalendarView
+          events={filteredEvents}
+          onEventClick={handleEventClick}
+          showPrivateEvents={isMember}
+        />
+      )}
 
       <EventDialog
         event={selectedEvent}
         isOpen={!!selectedEvent}
         onClose={() => setSelectedEvent(null)}
-        canRSVP={isMember}
-        userRSVP={userRSVP}
-        onRSVP={handleRSVP}
+        canRSVP={isMember && selectedEvent?.allow_rsvp}
       />
     </div>
   );

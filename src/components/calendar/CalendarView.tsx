@@ -1,231 +1,291 @@
 
-import React, { useState, useMemo } from 'react';
-import { Calendar } from '@/components/ui/calendar';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
+import React, { useState } from 'react';
 import { CalendarEvent } from '@/types/calendar';
-import { format, isSameDay, startOfMonth, endOfMonth, eachDayOfInterval, isToday, parseISO } from 'date-fns';
-import { ChevronLeft, ChevronRight, Calendar as CalendarIcon, Clock, MapPin, Users } from 'lucide-react';
-import { getEventTypeColor } from '@/utils/eventTypes';
-import { getNationalHolidays } from '@/utils/nationalHolidays';
-import { getSpelmanAcademicDates } from '@/utils/spelmanAcademicDates';
+import { Card, CardContent, CardHeader } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Calendar, Clock, MapPin, Users } from 'lucide-react';
+import { format, isAfter, isSameDay, startOfMonth, endOfMonth, eachDayOfInterval, getDay } from 'date-fns';
 
 interface CalendarViewProps {
   events: CalendarEvent[];
-  onEventClick?: (event: CalendarEvent) => void;
+  onEventClick: (event: CalendarEvent) => void;
   showPrivateEvents?: boolean;
 }
+
+type ViewMode = 'month' | 'week' | 'list';
 
 export const CalendarView: React.FC<CalendarViewProps> = ({
   events,
   onEventClick,
-  showPrivateEvents = true
+  showPrivateEvents = false
 }) => {
-  const [selectedDate, setSelectedDate] = useState<Date>(new Date());
-  const [currentMonth, setCurrentMonth] = useState<Date>(new Date());
+  const [viewMode, setViewMode] = useState<ViewMode>('month');
+  const [currentDate, setCurrentDate] = useState(new Date());
 
-  // Filter events based on showPrivateEvents prop
-  const filteredEvents = useMemo(() => {
-    if (showPrivateEvents) {
-      return events;
-    }
-    return events.filter(event => !event.is_private);
-  }, [events, showPrivateEvents]);
+  // Filter and sort events
+  const upcomingEvents = events
+    .filter(event => isAfter(new Date(event.start_time), new Date()) || isSameDay(new Date(event.start_time), new Date()))
+    .sort((a, b) => new Date(a.start_time).getTime() - new Date(b.start_time).getTime());
 
-  // Get events for the selected date
-  const selectedDateEvents = useMemo(() => {
-    return filteredEvents.filter(event => 
-      isSameDay(parseISO(event.start_time), selectedDate)
-    );
-  }, [filteredEvents, selectedDate]);
-
-  // Get all dates in the current month that have events
-  const eventDates = useMemo(() => {
-    const monthStart = startOfMonth(currentMonth);
-    const monthEnd = endOfMonth(currentMonth);
-    const daysInMonth = eachDayOfInterval({ start: monthStart, end: monthEnd });
-    
-    return daysInMonth.filter(date => 
-      filteredEvents.some(event => isSameDay(parseISO(event.start_time), date))
-    );
-  }, [filteredEvents, currentMonth]);
-
-  // Get holidays and academic dates for the current month
-  const monthHolidays = useMemo(() => {
-    const monthStart = startOfMonth(currentMonth);
-    const monthEnd = endOfMonth(currentMonth);
-    
-    const nationalHolidays = getNationalHolidays(currentMonth.getFullYear());
-    const holidays = nationalHolidays.filter(holiday => {
-      const holidayDate = holiday.date;
-      return holidayDate >= monthStart && holidayDate <= monthEnd;
-    });
-    
-    const spelmanAcademicDates = getSpelmanAcademicDates(currentMonth.getFullYear());
-    const academicDates = spelmanAcademicDates.filter(date => {
-      const academicDate = date.date;
-      return academicDate >= monthStart && academicDate <= monthEnd;
-    });
-    
-    return { holidays, academicDates };
-  }, [currentMonth]);
-
-  const handleDateSelect = (date: Date | undefined) => {
-    if (date) {
-      setSelectedDate(date);
+  const getEventTypeColor = (eventType?: string) => {
+    switch (eventType) {
+      case 'concert':
+      case 'performance':
+        return 'bg-purple-100 text-purple-800 border-purple-200';
+      case 'rehearsal':
+        return 'bg-blue-100 text-blue-800 border-blue-200';
+      case 'community':
+        return 'bg-green-100 text-green-800 border-green-200';
+      case 'tour':
+        return 'bg-orange-100 text-orange-800 border-orange-200';
+      default:
+        return 'bg-gray-100 text-gray-800 border-gray-200';
     }
   };
 
-  const handlePreviousMonth = () => {
-    setCurrentMonth(prev => new Date(prev.getFullYear(), prev.getMonth() - 1, 1));
+  const formatEventDate = (startTime: string, endTime: string) => {
+    const start = new Date(startTime);
+    const end = new Date(endTime);
+    
+    if (isSameDay(start, end)) {
+      return `${format(start, 'EEE, MMM d')} • ${format(start, 'h:mm a')} - ${format(end, 'h:mm a')}`;
+    } else {
+      return `${format(start, 'EEE, MMM d, h:mm a')} - ${format(end, 'EEE, MMM d, h:mm a')}`;
+    }
   };
 
-  const handleNextMonth = () => {
-    setCurrentMonth(prev => new Date(prev.getFullYear(), prev.getMonth() + 1, 1));
-  };
-
-  const handleEventClick = (event: CalendarEvent) => {
-    onEventClick?.(event);
-  };
-
-  return (
-    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-      {/* Calendar */}
-      <div className="lg:col-span-2">
-        <Card className="dark:bg-card/50 dark:border-border/50">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
-            <CardTitle className="text-xl font-semibold dark:text-foreground">
-              {format(currentMonth, 'MMMM yyyy')}
-            </CardTitle>
-            <div className="flex items-center space-x-2">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={handlePreviousMonth}
-                className="dark:border-border dark:hover:bg-muted/40"
-              >
-                <ChevronLeft className="h-4 w-4" />
-              </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={handleNextMonth}
-                className="dark:border-border dark:hover:bg-muted/40"
-              >
-                <ChevronRight className="h-4 w-4" />
-              </Button>
-            </div>
-          </CardHeader>
-          <CardContent>
-            <Calendar
-              mode="single"
-              selected={selectedDate}
-              onSelect={handleDateSelect}
-              month={currentMonth}
-              onMonthChange={setCurrentMonth}
-              modifiers={{
-                hasEvents: eventDates,
-                holiday: monthHolidays.holidays.map(h => h.date),
-                academic: monthHolidays.academicDates.map(d => d.date)
-              }}
-              modifiersStyles={{
-                hasEvents: {
-                  backgroundColor: 'rgb(79 158 232 / 0.2)',
-                  fontWeight: 'bold'
-                },
-                holiday: {
-                  backgroundColor: 'rgb(239 68 68 / 0.2)',
-                  color: 'rgb(239 68 68)'
-                },
-                academic: {
-                  backgroundColor: 'rgb(168 85 247 / 0.2)',
-                  color: 'rgb(168 85 247)'
-                }
-              }}
-              className="w-full"
-            />
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Events for Selected Date */}
-      <div className="space-y-4">
-        <Card className="dark:bg-card/50 dark:border-border/50">
-          <CardHeader>
-            <CardTitle className="text-lg flex items-center dark:text-foreground">
-              <CalendarIcon className="h-5 w-5 mr-2 text-glee-spelman dark:text-blue-400" />
-              {format(selectedDate, 'EEEE, MMMM d')}
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-3">
-            {selectedDateEvents.length > 0 ? (
-              selectedDateEvents.map((event) => (
-                <div
-                  key={event.id}
-                  className="p-3 border rounded-lg cursor-pointer hover:bg-muted/50 dark:border-border dark:hover:bg-muted/40 transition-colors"
-                  onClick={() => handleEventClick(event)}
-                >
-                  <div className="flex justify-between items-start mb-2">
-                    <h4 className="font-medium text-sm dark:text-foreground">{event.title}</h4>
-                    {event.event_type && (
-                      <Badge 
-                        variant="secondary" 
-                        className={`text-xs ${getEventTypeColor(event.event_type)} dark:bg-muted dark:text-foreground`}
-                      >
-                        {event.event_type}
-                      </Badge>
-                    )}
+  const renderListView = () => (
+    <div className="space-y-4">
+      {upcomingEvents.map((event) => (
+        <Card 
+          key={event.id} 
+          className="cursor-pointer hover:shadow-md transition-shadow"
+          onClick={() => onEventClick(event)}
+        >
+          <CardContent className="p-4">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+              <div className="flex-1">
+                <div className="flex items-start gap-3">
+                  <div className="flex-shrink-0 mt-1">
+                    <Calendar className="h-5 w-5 text-glee-spelman" />
                   </div>
-                  
-                  <div className="space-y-1 text-xs text-muted-foreground dark:text-gray-400">
-                    <div className="flex items-center">
-                      <Clock className="h-3 w-3 mr-1" />
-                      {format(parseISO(event.start_time), 'h:mm a')}
+                  <div className="flex-1 min-w-0">
+                    <h3 className="font-semibold text-lg text-gray-900 mb-1">{event.title}</h3>
+                    <div className="flex items-center text-sm text-gray-600 mb-2">
+                      <Clock className="h-4 w-4 mr-1" />
+                      {formatEventDate(event.start_time, event.end_time)}
                     </div>
                     {event.location_name && (
-                      <div className="flex items-center">
-                        <MapPin className="h-3 w-3 mr-1" />
+                      <div className="flex items-center text-sm text-gray-600 mb-2">
+                        <MapPin className="h-4 w-4 mr-1" />
                         {event.location_name}
                       </div>
                     )}
                     {event.short_description && (
-                      <p className="text-xs mt-1 dark:text-gray-300">
-                        {event.short_description}
-                      </p>
+                      <p className="text-sm text-gray-600 line-clamp-2">{event.short_description}</p>
                     )}
                   </div>
                 </div>
-              ))
-            ) : (
-              <div className="text-center py-6 text-muted-foreground dark:text-gray-400">
-                <CalendarIcon className="h-8 w-8 mx-auto mb-2 opacity-50" />
-                <p className="text-sm">No events on this date</p>
+              </div>
+              <div className="flex flex-col items-end gap-2">
+                {event.event_type && (
+                  <Badge variant="outline" className={getEventTypeColor(event.event_type)}>
+                    {event.event_type.replace('_', ' ')}
+                  </Badge>
+                )}
+                {event.is_private && showPrivateEvents && (
+                  <Badge variant="secondary">Private</Badge>
+                )}
+                {event.allow_rsvp && (
+                  <div className="flex items-center text-xs text-gray-500">
+                    <Users className="h-3 w-3 mr-1" />
+                    RSVP Available
+                  </div>
+                )}
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      ))}
+    </div>
+  );
+
+  const renderMonthView = () => {
+    const monthStart = startOfMonth(currentDate);
+    const monthEnd = endOfMonth(currentDate);
+    const monthDays = eachDayOfInterval({ start: monthStart, end: monthEnd });
+    
+    // Add padding days for proper grid layout
+    const startPadding = getDay(monthStart);
+    const paddedDays = [
+      ...Array(startPadding).fill(null),
+      ...monthDays
+    ];
+
+    return (
+      <div className="bg-white rounded-lg border">
+        <div className="grid grid-cols-7 gap-px bg-gray-200">
+          {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map((day) => (
+            <div key={day} className="bg-gray-50 p-2 text-center text-sm font-medium text-gray-700">
+              {day}
+            </div>
+          ))}
+        </div>
+        <div className="grid grid-cols-7 gap-px bg-gray-200">
+          {paddedDays.map((day, index) => {
+            if (!day) {
+              return <div key={index} className="bg-white p-2 h-24"></div>;
+            }
+            
+            const dayEvents = upcomingEvents.filter(event => 
+              isSameDay(new Date(event.start_time), day)
+            );
+
+            return (
+              <div key={day.toISOString()} className="bg-white p-1 h-24 overflow-hidden">
+                <div className="text-sm font-medium text-gray-900 mb-1">
+                  {format(day, 'd')}
+                </div>
+                <div className="space-y-1">
+                  {dayEvents.slice(0, 2).map((event) => (
+                    <div
+                      key={event.id}
+                      className="text-xs p-1 rounded bg-glee-spelman/10 text-glee-spelman cursor-pointer hover:bg-glee-spelman/20 truncate"
+                      onClick={() => onEventClick(event)}
+                    >
+                      {event.title}
+                    </div>
+                  ))}
+                  {dayEvents.length > 2 && (
+                    <div className="text-xs text-gray-500">
+                      +{dayEvents.length - 2} more
+                    </div>
+                  )}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    );
+  };
+
+  const renderWeekView = () => {
+    // For simplicity, show next 7 days with events
+    const weekEvents = upcomingEvents.slice(0, 10);
+    
+    return (
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        {weekEvents.map((event) => (
+          <Card 
+            key={event.id} 
+            className="cursor-pointer hover:shadow-md transition-shadow"
+            onClick={() => onEventClick(event)}
+          >
+            <CardContent className="p-4">
+              <div className="flex items-start gap-3">
+                <div className="flex-shrink-0 mt-1">
+                  <Calendar className="h-5 w-5 text-glee-spelman" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <h3 className="font-medium text-gray-900 mb-1 line-clamp-2">{event.title}</h3>
+                  <div className="flex items-center text-sm text-gray-600 mb-2">
+                    <Clock className="h-4 w-4 mr-1" />
+                    {format(new Date(event.start_time), 'EEE, MMM d • h:mm a')}
+                  </div>
+                  {event.location_name && (
+                    <div className="flex items-center text-sm text-gray-600">
+                      <MapPin className="h-4 w-4 mr-1" />
+                      <span className="truncate">{event.location_name}</span>
+                    </div>
+                  )}
+                </div>
+              </div>
+              <div className="flex justify-between items-center mt-3">
+                {event.event_type && (
+                  <Badge variant="outline" className={`${getEventTypeColor(event.event_type)} text-xs`}>
+                    {event.event_type.replace('_', ' ')}
+                  </Badge>
+                )}
+                {event.allow_rsvp && (
+                  <div className="flex items-center text-xs text-gray-500">
+                    <Users className="h-3 w-3 mr-1" />
+                    RSVP
+                  </div>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+    );
+  };
+
+  const navigateMonth = (direction: 'prev' | 'next') => {
+    setCurrentDate(prev => {
+      const newDate = new Date(prev);
+      if (direction === 'prev') {
+        newDate.setMonth(newDate.getMonth() - 1);
+      } else {
+        newDate.setMonth(newDate.getMonth() + 1);
+      }
+      return newDate;
+    });
+  };
+
+  return (
+    <div className="space-y-6">
+      {/* View Controls */}
+      <Card>
+        <CardHeader className="pb-3">
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+            <div className="flex items-center gap-2">
+              <Button
+                variant={viewMode === 'month' ? 'default' : 'outline'}
+                size="sm"
+                onClick={() => setViewMode('month')}
+              >
+                Month
+              </Button>
+              <Button
+                variant={viewMode === 'week' ? 'default' : 'outline'}
+                size="sm"
+                onClick={() => setViewMode('week')}
+              >
+                Week
+              </Button>
+              <Button
+                variant={viewMode === 'list' ? 'default' : 'outline'}
+                size="sm"
+                onClick={() => setViewMode('list')}
+              >
+                List
+              </Button>
+            </div>
+            
+            {viewMode === 'month' && (
+              <div className="flex items-center gap-2">
+                <Button variant="outline" size="sm" onClick={() => navigateMonth('prev')}>
+                  ←
+                </Button>
+                <span className="font-medium px-3">
+                  {format(currentDate, 'MMMM yyyy')}
+                </span>
+                <Button variant="outline" size="sm" onClick={() => navigateMonth('next')}>
+                  →
+                </Button>
               </div>
             )}
-          </CardContent>
-        </Card>
+          </div>
+        </CardHeader>
+      </Card>
 
-        {/* Legend */}
-        <Card className="dark:bg-card/50 dark:border-border/50">
-          <CardHeader>
-            <CardTitle className="text-sm dark:text-foreground">Legend</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-2">
-            <div className="flex items-center space-x-2 text-xs">
-              <div className="w-3 h-3 bg-blue-500/20 rounded border border-blue-500/50"></div>
-              <span className="dark:text-gray-300">Events</span>
-            </div>
-            <div className="flex items-center space-x-2 text-xs">
-              <div className="w-3 h-3 bg-red-500/20 rounded border border-red-500/50"></div>
-              <span className="dark:text-gray-300">Holidays</span>
-            </div>
-            <div className="flex items-center space-x-2 text-xs">
-              <div className="w-3 h-3 bg-purple-500/20 rounded border border-purple-500/50"></div>
-              <span className="dark:text-gray-300">Academic Dates</span>
-            </div>
-          </CardContent>
-        </Card>
+      {/* Calendar Content */}
+      <div className="min-h-[400px]">
+        {viewMode === 'list' && renderListView()}
+        {viewMode === 'month' && renderMonthView()}
+        {viewMode === 'week' && renderWeekView()}
       </div>
     </div>
   );

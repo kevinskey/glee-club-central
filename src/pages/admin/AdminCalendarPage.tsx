@@ -1,3 +1,4 @@
+
 import React, { useState, useRef, useEffect, useMemo } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { CalendarView } from '@/components/calendar/CalendarView';
@@ -8,13 +9,9 @@ import { CalendarEvent } from '@/types/calendar';
 import { PageHeader } from '@/components/ui/page-header';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { Calendar, Plus, Edit, Trash2, Music } from 'lucide-react';
+import { Calendar, Plus, Edit, Trash2, Users } from 'lucide-react';
 import { toast } from 'sonner';
 import ErrorBoundary from '@/components/ErrorBoundary';
-import { getNationalHolidays } from '@/utils/nationalHolidays';
-import { getSpelmanAcademicDates } from '@/utils/spelmanAcademicDates';
-
-const STORAGE_KEY = 'glee-event-editor-data';
 
 export default function AdminCalendarPage() {
   const { events, loading, error, createEvent, updateEvent, deleteEvent, fetchEvents } = useCalendarEvents();
@@ -26,65 +23,17 @@ export default function AdminCalendarPage() {
   const [isCreating, setIsCreating] = useState(false);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
 
-  // Get holidays and academic dates
-  const holidays = getNationalHolidays();
-  const spelmanDates = getSpelmanAcademicDates();
-
-  // Calculate dynamic stats from all events including holidays and academic dates
+  // Calculate dynamic stats from events
   const eventStats = useMemo(() => {
     const now = new Date();
-    
-    // Convert holidays and academic dates to CalendarEvent format for counting
-    const holidayEvents: CalendarEvent[] = holidays.map(holiday => ({
-      id: `holiday-${holiday.id}`,
-      title: holiday.title,
-      start_time: holiday.date.toISOString(),
-      end_time: holiday.date.toISOString(),
-      short_description: holiday.description,
-      full_description: holiday.description,
-      is_private: false,
-      is_public: true, // Add the missing is_public property
-      allow_rsvp: false,
-      allow_reminders: false,
-      allow_ics_download: false,
-      allow_google_map_link: false,
-      created_at: new Date().toISOString(),
-      event_types: ['holiday'],
-      event_type: 'holiday'
-    }));
-
-    const spelmanEvents: CalendarEvent[] = spelmanDates.map(date => ({
-      id: `spelman-${date.id}`,
-      title: date.title,
-      start_time: date.date.toISOString(),
-      end_time: date.date.toISOString(),
-      short_description: date.description,
-      full_description: date.description,
-      is_private: false,
-      is_public: true, // Add the missing is_public property
-      allow_rsvp: false,
-      allow_reminders: false,
-      allow_ics_download: false,
-      allow_google_map_link: false,
-      created_at: new Date().toISOString(),
-      event_types: ['academic'],
-      event_type: 'academic'
-    }));
-
-    // Combine all events
-    const allEvents = [...events, ...holidayEvents, ...spelmanEvents];
-    
-    const totalEvents = allEvents.length;
-    
-    const upcomingEvents = allEvents.filter(event => 
+    const totalEvents = events.length;
+    const upcomingEvents = events.filter(event => 
       new Date(event.start_time) > now
     ).length;
-    
-    const concerts = allEvents.filter(event => {
+    const concerts = events.filter(event => {
       const eventTypes = event.event_types || (event.event_type ? [event.event_type] : []);
       return eventTypes.includes('performance') || 
              eventTypes.includes('concert') || 
-             eventTypes.includes('tour_concert') ||
              event.event_type === 'concert' ||
              event.event_type === 'performance';
     }).length;
@@ -94,7 +43,7 @@ export default function AdminCalendarPage() {
       upcomingEvents,
       concerts
     };
-  }, [events, holidays, spelmanDates]);
+  }, [events]);
 
   // Handle URL parameters for editing
   useEffect(() => {
@@ -107,38 +56,9 @@ export default function AdminCalendarPage() {
     }
   }, [searchParams, events]);
 
-  // Check for saved draft on page load
-  useEffect(() => {
-    const savedData = localStorage.getItem(STORAGE_KEY);
-    if (savedData) {
-      try {
-        const parsed = JSON.parse(savedData);
-        // If we have meaningful draft data, automatically open the creator
-        if (parsed.isCreating && (parsed.formData?.title || parsed.formData?.short_description)) {
-          setIsCreating(true);
-          toast.info('Restored your event draft');
-        }
-      } catch (error) {
-        console.error('Error checking saved data:', error);
-        localStorage.removeItem(STORAGE_KEY);
-      }
-    }
-  }, []);
-
   const handleEventClick = (event: CalendarEvent) => {
-    // Navigate to event details page
-    navigate(`/admin/events/${event.id}`);
-  };
-
-  const handleEventTypesChange = async (eventId: string, newTypes: string[]) => {
-    try {
-      await updateEvent(eventId, { event_types: newTypes });
-      toast.success('Event types updated successfully');
-    } catch (error) {
-      console.error('Error updating event types:', error);
-      const errorMessage = error instanceof Error ? error.message : 'Failed to update event types';
-      toast.error(errorMessage);
-    }
+    setSelectedEvent(event);
+    setIsDialogOpen(true);
   };
 
   const handleSaveEvent = async (eventData: Omit<CalendarEvent, 'id' | 'created_at'>) => {
@@ -146,7 +66,6 @@ export default function AdminCalendarPage() {
       if (editingEvent) {
         await updateEvent(editingEvent.id, eventData);
         toast.success('Event updated successfully');
-        // Clear edit parameter from URL
         navigate('/admin/calendar');
       } else {
         await createEvent(eventData);
@@ -180,7 +99,6 @@ export default function AdminCalendarPage() {
   const handleCreateNew = () => {
     setIsCreating(true);
     setEditingEvent(null);
-    // Clear any edit parameters from URL
     navigate('/admin/calendar');
   };
 
@@ -188,10 +106,13 @@ export default function AdminCalendarPage() {
     navigate(`/admin/calendar?edit=${event.id}`);
   };
 
+  const handleViewRSVPs = (event: CalendarEvent) => {
+    navigate(`/admin/events/${event.id}/rsvps`);
+  };
+
   const handleCloseEditor = () => {
     setIsCreating(false);
     setEditingEvent(null);
-    // Clear edit parameter from URL
     navigate('/admin/calendar');
   };
 
@@ -302,7 +223,7 @@ export default function AdminCalendarPage() {
               <CardContent className="p-4">
                 <div className="flex items-center space-x-3">
                   <div className="p-2 bg-purple-100 rounded-lg">
-                    <Music className="h-5 w-5 text-purple-600" />
+                    <Calendar className="h-5 w-5 text-purple-600" />
                   </div>
                   <div>
                     <p className="text-sm text-muted-foreground">Concerts</p>
@@ -313,65 +234,64 @@ export default function AdminCalendarPage() {
             </Card>
           </div>
 
-          {/* Calendar Section */}
-          <Card className="shadow-sm">
-            <CardContent className="p-6">
-              <div className="mb-4">
-                <h3 className="text-lg font-semibold text-gray-900">Event Calendar</h3>
-                <p className="text-sm text-muted-foreground">
-                  Click on any event to view details or use the actions to edit or delete
-                </p>
-              </div>
-              
-              <div className="bg-white rounded-lg border">
-                <CalendarView
-                  events={events}
-                  onEventClick={handleEventClick}
-                  showPrivateEvents={true}
-                />
-              </div>
-            </CardContent>
-          </Card>
+          {/* Event Editor */}
+          {(isCreating || editingEvent) && (
+            <EventEditor
+              event={editingEvent}
+              onSave={handleSaveEvent}
+              onCancel={handleCloseEditor}
+            />
+          )}
 
-          {/* Event Details Dialog with Admin Actions */}
-          {selectedEvent && (
-            <EventDialog
-              event={selectedEvent}
-              isOpen={isDialogOpen}
-              onClose={() => {
-                setIsDialogOpen(false);
-                setSelectedEvent(null);
-              }}
-              canRSVP={false}
-              adminActions={
-                <div className="flex gap-2 mt-6 pt-4 border-t">
-                  <Button
-                    variant="outline"
+          {/* Calendar View */}
+          {!isCreating && !editingEvent && (
+            <div className="bg-white rounded-lg border shadow-sm p-6">
+              <CalendarView
+                events={events}
+                onEventClick={handleEventClick}
+                showPrivateEvents={true}
+              />
+            </div>
+          )}
+
+          {/* Event Dialog */}
+          <EventDialog
+            event={selectedEvent}
+            isOpen={isDialogOpen}
+            onClose={() => {
+              setSelectedEvent(null);
+              setIsDialogOpen(false);
+            }}
+            canRSVP={false}
+            adminActions={
+              selectedEvent && (
+                <div className="flex gap-2 pt-4">
+                  <Button 
                     onClick={() => handleEditEvent(selectedEvent)}
-                    className="flex-1"
+                    variant="outline"
                   >
                     <Edit className="h-4 w-4 mr-2" />
                     Edit Event
                   </Button>
-                  <Button
-                    variant="destructive"
+                  {selectedEvent.allow_rsvp && (
+                    <Button 
+                      onClick={() => handleViewRSVPs(selectedEvent)}
+                      variant="outline"
+                    >
+                      <Users className="h-4 w-4 mr-2" />
+                      View RSVPs
+                    </Button>
+                  )}
+                  <Button 
                     onClick={() => handleDeleteEvent(selectedEvent)}
-                    className="flex-1"
+                    variant="destructive"
                   >
                     <Trash2 className="h-4 w-4 mr-2" />
-                    Delete Event
+                    Delete
                   </Button>
                 </div>
-              }
-            />
-          )}
-
-          {/* Event Editor */}
-          <EventEditor
-            event={editingEvent}
-            isOpen={isCreating || !!editingEvent}
-            onClose={handleCloseEditor}
-            onSave={handleSaveEvent}
+              )
+            }
           />
         </div>
       </div>
