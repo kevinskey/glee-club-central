@@ -13,8 +13,10 @@ import { MobileBottomNav } from "@/components/layout/MobileBottomNav";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useAuth } from "@/contexts/AuthContext";
 
+type SidebarType = "admin" | "member" | "fan" | "none";
+
 interface AppLayoutProps {
-  sidebarType?: "admin" | "member" | "fan" | "none";
+  sidebarType?: SidebarType;
   showHeader?: boolean;
   showFooter?: boolean;
   title?: string;
