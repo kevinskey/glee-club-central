@@ -16,14 +16,16 @@ import {
   FileText,
   Headphones,
   Shirt,
-  DollarSign
+  DollarSign,
+  LayoutDashboard
 } from "lucide-react";
 
 export function DashboardQuickAccess() {
-  const { isAdmin } = useAuth();
+  const { isAdmin, profile } = useAuth();
+  const isAdminUser = profile?.is_super_admin || (isAdmin && isAdmin());
   
-  // Quick access links for users
-  const quickAccessLinks = [
+  // Quick access links for regular users
+  const memberQuickAccessLinks = [
     { icon: <User className="h-5 w-5" />, title: "My Profile", path: "/dashboard/profile", color: "bg-glee-spelman" },
     { icon: <Music className="h-5 w-5" />, title: "Sheet Music", path: "/dashboard/sheet-music", color: "bg-purple-500" },
     { icon: <Headphones className="h-5 w-5" />, title: "Practice Tracks", path: "/dashboard/recordings", color: "bg-blue-500" },
@@ -33,18 +35,18 @@ export function DashboardQuickAccess() {
     { icon: <Bell className="h-5 w-5" />, title: "Announcements", path: "/dashboard/announcements", color: "bg-red-500" },
   ];
   
-  // Admin quick links
-  const adminQuickLinks = [
-    { icon: <Users className="h-5 w-5" />, title: "Member Management", path: "/dashboard/admin/members", color: "bg-slate-500" },
+  // Enhanced quick access links for admin users
+  const adminQuickAccessLinks = [
+    { icon: <LayoutDashboard className="h-5 w-5" />, title: "Admin Dashboard", path: "/admin", color: "bg-glee-spelman" },
+    { icon: <Users className="h-5 w-5" />, title: "Member Management", path: "/admin/members", color: "bg-slate-500" },
     { icon: <Music className="h-5 w-5" />, title: "Sheet Music", path: "/dashboard/sheet-music", color: "bg-purple-500" },
-    { icon: <MessageSquare className="h-5 w-5" />, title: "Messaging", path: "/dashboard/messaging", color: "bg-blue-500" },
-    { icon: <DollarSign className="h-5 w-5" />, title: "Finance", path: "/dashboard/admin/finances", color: "bg-emerald-500" },
-    { icon: <Bell className="h-5 w-5" />, title: "Announcements", path: "/dashboard/announcements/new", color: "bg-red-500" },
-    { icon: <Upload className="h-5 w-5" />, title: "Media Manager", path: "/dashboard/media-library", color: "bg-pink-500" },
-    { icon: <Settings className="h-5 w-5" />, title: "Settings", path: "/dashboard/admin/settings", color: "bg-gray-500" },
+    { icon: <Upload className="h-5 w-5" />, title: "Media Manager", path: "/admin/media-uploader", color: "bg-pink-500" },
+    { icon: <BarChart className="h-5 w-5" />, title: "Analytics", path: "/admin/analytics", color: "bg-blue-500" },
+    { icon: <Bell className="h-5 w-5" />, title: "Announcements", path: "/admin/announcements", color: "bg-red-500" },
+    { icon: <Settings className="h-5 w-5" />, title: "Settings", path: "/admin/settings", color: "bg-gray-500" },
   ];
   
-  const currentLinks = isAdmin() ? adminQuickLinks : quickAccessLinks;
+  const currentLinks = isAdminUser ? adminQuickAccessLinks : memberQuickAccessLinks;
 
   return (
     <Card>
@@ -53,7 +55,7 @@ export function DashboardQuickAccess() {
           <div>
             <CardTitle>Quick Access</CardTitle>
             <CardDescription>
-              {isAdmin() ? "Administrative Tools" : "Frequently used resources"}
+              {isAdminUser ? "Administrative Tools & Resources" : "Frequently used resources"}
             </CardDescription>
           </div>
         </div>
