@@ -34,23 +34,37 @@ export function MobileNavDropdown() {
   ];
 
   const handleItemClick = (path: string) => {
+    console.log("Navigating to:", path);
     navigate(path);
   };
 
+  const handleOpenChange = (open: boolean) => {
+    console.log("Dropdown open state:", open);
+  };
+
   return (
-    <DropdownMenu>
+    <DropdownMenu onOpenChange={handleOpenChange}>
       <DropdownMenuTrigger asChild>
-        <Button variant="ghost" size="icon" className="md:hidden">
+        <Button 
+          variant="ghost" 
+          size="icon" 
+          className="md:hidden" 
+          onClick={() => console.log("Menu button clicked")}
+        >
           <Menu className="h-5 w-5" />
           <span className="sr-only">Open navigation menu</span>
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="w-56 bg-background border">
+      <DropdownMenuContent 
+        align="end" 
+        className="w-56 bg-popover border shadow-md z-50"
+        sideOffset={5}
+      >
         {menuItems.map((item, index) => (
           <React.Fragment key={item.path}>
             <DropdownMenuItem 
               onClick={() => handleItemClick(item.path)}
-              className="flex items-center cursor-pointer"
+              className="flex items-center cursor-pointer hover:bg-accent"
             >
               <item.icon className="mr-2 h-4 w-4" />
               {item.label}
