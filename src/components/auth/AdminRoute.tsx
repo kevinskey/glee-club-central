@@ -13,11 +13,12 @@ interface AdminRouteProps {
 }
 
 export const AdminRoute: React.FC<AdminRouteProps> = ({ children }) => {
-  const { user, profile, isLoading: authLoading, isAuthenticated, isAdmin, createFallbackProfile } = useAuth();
+  const { user, profile, isLoading: authLoading, isAuthenticated, isAdmin, refreshUserData } = useAuth();
   const { isSuperAdmin, isLoading: permissionsLoading } = usePermissions();
   
   const [loadingTimeout, setLoadingTimeout] = React.useState(false);
   const [showProfileWarning, setShowProfileWarning] = React.useState(false);
+  const [isCreatingProfile, setIsCreatingProfile] = React.useState(false);
   
   React.useEffect(() => {
     const timer = setTimeout(() => {
@@ -45,6 +46,45 @@ export const AdminRoute: React.FC<AdminRouteProps> = ({ children }) => {
     
     return false;
   }, [isSuperAdmin, profile, isAdmin]);
+  
+  const handleCreateProfile = async () => {
+    if (!user) return;
+    
+    setIsCreatingProfile(true);
+    try {
+      // Create a basic profile for the user
+      const { supabaseClient } = useAuth();
+      const { error } = await supabaseClient
+        .from('profiles')
+        .insert({
+          id: user.id,
+          first_name: user.user_metadata?.first_name || 'Admin',
+          last_name: user.user_metadata?.last_name || 'User',
+          role: 'admin',
+          is_super_admin: true,
+          status: 'active',
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        });
+      
+      if (error) {
+        console.error('Error creating profile:', error);
+        toast.error('Failed to create profile. Please try again.');
+      } else {
+        toast.success('Profile created successfully!');
+        // Refresh user data
+        if (refreshUserData) {
+          await refreshUserData();
+        }
+        setShowProfileWarning(false);
+      }
+    } catch (error) {
+      console.error('Error creating profile:', error);
+      toast.error('An unexpected error occurred while creating your profile.');
+    } finally {
+      setIsCreatingProfile(false);
+    }
+  };
   
   console.log('AdminRoute check:', {
     isLoading,
@@ -78,7 +118,7 @@ export const AdminRoute: React.FC<AdminRouteProps> = ({ children }) => {
     return <Navigate to="/login" replace />;
   }
   
-  // Show profile warning if user exists but no profile
+  // Show profile creation UI if user exists but no profile
   if (showProfileWarning && !profile) {
     return (
       <div className="min-h-screen flex items-center justify-center p-4">
@@ -86,12 +126,16 @@ export const AdminRoute: React.FC<AdminRouteProps> = ({ children }) => {
           <AlertCircle className="h-12 w-12 text-yellow-500 mx-auto mb-4" />
           <h2 className="text-xl font-bold mb-2">Profile Missing</h2>
           <p className="text-muted-foreground mb-4">
-            Your user account exists but no profile was found. This may prevent admin access.
+            Your user account exists but no profile was found. Click below to create your admin profile.
           </p>
           <div className="space-y-2">
-            <Button onClick={createFallbackProfile} className="w-full">
-              <RefreshCw className="h-4 w-4 mr-2" />
-              Create Profile
+            <Button 
+              onClick={handleCreateProfile} 
+              className="w-full"
+              disabled={isCreatingProfile}
+            >
+              <RefreshCw className={`h-4 w-4 mr-2 ${isCreatingProfile ? 'animate-spin' : ''}`} />
+              {isCreatingProfile ? 'Creating Profile...' : 'Create Admin Profile'}
             </Button>
             <Button 
               variant="outline" 

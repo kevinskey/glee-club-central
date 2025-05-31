@@ -60,4 +60,6 @@ export interface AuthContextType {
   permissions: { [key: string]: boolean };
   refreshPermissions: () => Promise<void>;
   resetAuthSystem: () => Promise<{ success: boolean }>;
+  createFallbackProfile?: () => Promise<void>;
+  refreshUserData?: () => Promise<void>;
 }
