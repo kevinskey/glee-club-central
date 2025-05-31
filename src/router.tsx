@@ -46,7 +46,7 @@ import AudioManagementPage from './pages/audio-management/AudioManagementPage';
 import FinancesPage from './pages/dashboard/FinancesPage';
 import AdminCalendarPage from './pages/admin/AdminCalendarPage';
 import MembersPage from './pages/members/MembersPage';
-import SettingsPage from './pages/settings/SettingsPage';
+import SettingsPage from './pages/admin/SettingsPage';
 import FanAnalyticsPage from './pages/dashboard/FanAnalyticsPage';
 import OrdersPage from './pages/admin/OrdersPage';
 

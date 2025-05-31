@@ -1,53 +1,54 @@
 
-import { RouteObject } from "react-router-dom";
-import AdminDashboardPage from "@/pages/admin/AdminDashboardPage";
-import LandingPageSettingsPage from "@/pages/admin/LandingPageSettingsPage";
-import MediaLibrary from "@/pages/admin/MediaLibrary";
-import NewsItemsPage from "@/pages/admin/NewsItemsPage";
-import SiteSettingsPage from "@/pages/admin/SiteSettingsPage";
-import AdminHeroManager from "@/pages/admin/AdminHeroManager";
-import AdminMediaUploaderPage from "@/pages/admin/AdminMediaUploaderPage";
-import EventDetailsPage from '@/pages/events/EventDetailsPage';
+import React from 'react';
+import { Navigate } from 'react-router-dom';
+import AdminDashboardPage from '@/pages/admin/AdminDashboardPage';
+import AdminCalendarPage from '@/pages/admin/AdminCalendarPage';
+import MembersPage from '@/pages/members/MembersPage';
+import UserManagementPage from '@/pages/admin/UserManagementPage';
+import AdminMediaUploaderPage from '@/pages/admin/AdminMediaUploaderPage';
+import AdminHeroManager from '@/pages/admin/AdminHeroManager';
+import OrdersPage from '@/pages/admin/OrdersPage';
+import SettingsPage from '@/pages/admin/SettingsPage';
 
-console.log('Admin routes loading...');
-
-/**
- * Admin Routes Configuration
- * Consolidated and cleaned up for better organization
- */
-export const adminRoutes: RouteObject[] = [
+export const adminRoutes = [
   {
-    path: "/",
+    index: true,
+    element: <Navigate to="/admin/dashboard" replace />,
+  },
+  {
+    path: 'dashboard',
     element: <AdminDashboardPage />,
   },
   {
-    path: "/landing",
-    element: <LandingPageSettingsPage />,
+    path: 'calendar',
+    element: <AdminCalendarPage />,
   },
   {
-    path: "/media", 
-    element: <MediaLibrary />,
+    path: 'members',
+    element: <MembersPage />,
   },
   {
-    path: "/media-uploader",
+    path: 'user-management',
+    element: <UserManagementPage />,
+  },
+  {
+    path: 'users',
+    element: <UserManagementPage />,
+  },
+  {
+    path: 'media-uploader',
     element: <AdminMediaUploaderPage />,
   },
   {
-    path: "/hero-manager",
+    path: 'hero-manager',
     element: <AdminHeroManager />,
   },
   {
-    path: "/news",
-    element: <NewsItemsPage />,
+    path: 'orders',
+    element: <OrdersPage />,
   },
   {
-    path: "/settings",
-    element: <SiteSettingsPage />,
-  },
-  {
-    path: "/admin/events/:id",
-    element: <EventDetailsPage />,
+    path: 'settings',
+    element: <SettingsPage />,
   },
 ];
-
-console.log('Admin routes configured:', adminRoutes.map(r => r.path));
