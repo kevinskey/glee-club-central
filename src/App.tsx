@@ -2,7 +2,7 @@
 import React from "react";
 import { RouterProvider } from "react-router-dom";
 import { router } from "./router";
-import { useAuth } from "./contexts/AuthContext";
+import { AuthProvider, useAuth } from "./contexts/AuthContext";
 
 function AppContent() {
   const { isLoading, isInitialized } = useAuth();
@@ -23,7 +23,11 @@ function AppContent() {
 }
 
 function App() {
-  return <AppContent />;
+  return (
+    <AuthProvider>
+      <AppContent />
+    </AuthProvider>
+  );
 }
 
 export default App;
