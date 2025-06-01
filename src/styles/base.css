@@ -82,20 +82,47 @@
     @apply font-playfair;
   }
   
-  /* Optimize text inputs for mobile */
+  /* Mobile-first input optimization */
   input, select, textarea {
     @apply text-base;
     font-size: 16px !important; /* Prevents zoom on focus in iOS */
+    -webkit-appearance: none;
+    border-radius: 6px;
   }
   
-  /* Ensure buttons are large enough for comfortable tapping */
+  /* Enhanced mobile touch targets */
   button, .btn, [role="button"] {
     @apply min-h-9;
     min-height: 44px; /* Apple recommended touch target size */
+    touch-action: manipulation; /* Prevents double-tap zoom */
+    -webkit-tap-highlight-color: transparent;
   }
   
-  /* Mobile calendar optimizations */
-  @media (max-width: 640px) {
+  /* Mobile-specific auth page optimizations */
+  @media (max-width: 768px) {
+    /* Prevent viewport zoom on input focus */
+    input[type="email"],
+    input[type="password"],
+    input[type="text"] {
+      font-size: 16px !important;
+      transform: scale(1);
+      -webkit-text-size-adjust: 100%;
+    }
+    
+    /* Improve touch targets on auth forms */
+    .auth-input {
+      min-height: 48px;
+      padding: 12px 16px;
+    }
+    
+    /* Better mobile button sizing */
+    .auth-button {
+      min-height: 48px;
+      font-size: 16px;
+      padding: 12px 24px;
+    }
+    
+    /* Mobile calendar optimizations */
     .fc .fc-toolbar-title {
       font-size: 1.2rem !important;
     }
@@ -117,6 +144,25 @@
     .fc .fc-list-event-title,
     .fc .fc-list-event-time {
       font-size: 0.875rem !important;
+    }
+  }
+  
+  /* Specific phone optimizations (smaller than tablets) */
+  @media (max-width: 480px) {
+    /* Larger touch targets for phones */
+    button, .btn, [role="button"] {
+      min-height: 48px;
+      padding: 12px 16px;
+    }
+    
+    /* Better form spacing */
+    form .space-y-4 > * + * {
+      margin-top: 1.5rem;
+    }
+    
+    /* Prevent background-attachment fixed issues */
+    .login-background {
+      background-attachment: scroll !important;
     }
   }
   
@@ -190,5 +236,38 @@
   [data-radix-popper-content-wrapper] [role="menuitem"]:hover, 
   [data-radix-popper-content-wrapper] [role="menuitem"]:focus {
     @apply bg-accent/10;
+  }
+  
+  /* Mobile viewport fixes for auth pages */
+  @media screen and (max-width: 768px) {
+    html {
+      -webkit-text-size-adjust: 100%;
+      -ms-text-size-adjust: 100%;
+    }
+    
+    /* Prevent horizontal scrolling */
+    body {
+      overflow-x: hidden;
+    }
+    
+    /* Better mobile touch handling */
+    * {
+      -webkit-tap-highlight-color: transparent;
+      -webkit-touch-callout: none;
+      -webkit-user-select: none;
+      -khtml-user-select: none;
+      -moz-user-select: none;
+      -ms-user-select: none;
+      user-select: none;
+    }
+    
+    /* Allow text selection for inputs and content */
+    input, textarea, [contenteditable] {
+      -webkit-user-select: text;
+      -khtml-user-select: text;
+      -moz-user-select: text;
+      -ms-user-select: text;
+      user-select: text;
+    }
   }
 }

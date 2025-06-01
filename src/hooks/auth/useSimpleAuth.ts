@@ -3,6 +3,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { AuthUser, Profile } from '@/types/auth';
 import { User } from '@supabase/supabase-js';
+import { logMobileAuthDebug } from '@/utils/mobileUtils';
 
 export const useSimpleAuth = () => {
   const [user, setUser] = useState<AuthUser | null>(null);
@@ -11,6 +12,9 @@ export const useSimpleAuth = () => {
   const [isInitialized, setIsInitialized] = useState(false);
 
   console.log('🚀 useSimpleAuth: Initializing...');
+  logMobileAuthDebug('useSimpleAuth-init', { 
+    timestamp: new Date().toISOString() 
+  });
 
   // Helper function to convert Supabase User to AuthUser
   const convertToAuthUser = (supabaseUser: User): AuthUser | null => {
@@ -31,6 +35,7 @@ export const useSimpleAuth = () => {
   const fetchProfile = useCallback(async (userId: string) => {
     try {
       console.log('👤 useSimpleAuth: Fetching profile for user:', userId);
+      logMobileAuthDebug('profile-fetch-start', { userId });
       
       const { data, error } = await supabase
         .from('profiles')
@@ -40,6 +45,7 @@ export const useSimpleAuth = () => {
 
       if (error) {
         console.error('❌ useSimpleAuth: Profile fetch error:', error);
+        logMobileAuthDebug('profile-fetch-error', { error: error.message, code: error.code });
         
         // Special handling for admin user - create profile if it doesn't exist
         if (error.code === 'PGRST116') { // No rows returned
@@ -48,6 +54,7 @@ export const useSimpleAuth = () => {
           
           if (userEmail === 'kevinskey@mac.com') {
             console.log('🔧 useSimpleAuth: Creating admin profile for kevinskey@mac.com');
+            logMobileAuthDebug('admin-profile-creation', { userEmail });
             
             const { data: newProfile, error: createError } = await supabase
               .from('profiles')
@@ -64,10 +71,12 @@ export const useSimpleAuth = () => {
               
             if (createError) {
               console.error('❌ useSimpleAuth: Failed to create admin profile:', createError);
+              logMobileAuthDebug('admin-profile-creation-error', { error: createError.message });
               return null;
             }
             
             console.log('✅ useSimpleAuth: Admin profile created:', newProfile);
+            logMobileAuthDebug('admin-profile-created', { profile: newProfile });
             return newProfile;
           }
         }
@@ -82,9 +91,15 @@ export const useSimpleAuth = () => {
         status: data?.status
       });
       
+      logMobileAuthDebug('profile-fetch-success', { 
+        role: data?.role,
+        isAdmin: data?.is_super_admin 
+      });
+      
       return data;
     } catch (err) {
       console.error('💥 useSimpleAuth: Profile fetch exception:', err);
+      logMobileAuthDebug('profile-fetch-exception', { error: err });
       return null;
     }
   }, []);
@@ -93,6 +108,7 @@ export const useSimpleAuth = () => {
     if (!user?.id) return;
     
     console.log('🔄 useSimpleAuth: Refreshing profile...');
+    logMobileAuthDebug('profile-refresh', { userId: user.id });
     const profileData = await fetchProfile(user.id);
     setProfile(profileData);
   }, [user?.id, fetchProfile]);
@@ -104,16 +120,23 @@ export const useSimpleAuth = () => {
     const initializeAuth = async () => {
       try {
         console.log('🔑 useSimpleAuth: Initializing auth state...');
+        logMobileAuthDebug('auth-init-start', {});
         
         // Get initial session
         const { data: { session }, error } = await supabase.auth.getSession();
         
         if (error) {
           console.error('❌ useSimpleAuth: Session error:', error);
+          logMobileAuthDebug('session-error', { error: error.message });
         }
         
         if (session?.user && mounted) {
           console.log('✅ useSimpleAuth: Initial session found for user:', session.user.id);
+          logMobileAuthDebug('initial-session-found', { 
+            userId: session.user.id,
+            email: session.user.email 
+          });
+          
           const authUser = convertToAuthUser(session.user);
           if (authUser) {
             setUser(authUser);
@@ -129,9 +152,11 @@ export const useSimpleAuth = () => {
         if (mounted) {
           setIsLoading(false);
           setIsInitialized(true);
+          logMobileAuthDebug('auth-init-complete', {});
         }
       } catch (err) {
         console.error('💥 useSimpleAuth: Init error:', err);
+        logMobileAuthDebug('auth-init-error', { error: err });
         if (mounted) {
           setIsLoading(false);
           setIsInitialized(true);
@@ -142,6 +167,13 @@ export const useSimpleAuth = () => {
     // Set up auth state listener
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
       console.log('🔔 useSimpleAuth: Auth state changed:', event, {
+        hasSession: !!session,
+        hasUser: !!session?.user,
+        userId: session?.user?.id
+      });
+
+      logMobileAuthDebug('auth-state-change', {
+        event,
         hasSession: !!session,
         hasUser: !!session?.user,
         userId: session?.user?.id

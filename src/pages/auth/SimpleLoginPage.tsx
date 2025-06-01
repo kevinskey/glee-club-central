@@ -45,6 +45,14 @@ export default function SimpleLoginPage() {
     
     try {
       console.log('🔐 SimpleLoginPage: Login attempt for:', email);
+      console.log('📱 SimpleLoginPage: User agent:', navigator.userAgent);
+      console.log('📱 SimpleLoginPage: Screen dimensions:', {
+        width: window.screen.width,
+        height: window.screen.height,
+        availWidth: window.screen.availWidth,
+        availHeight: window.screen.availHeight
+      });
+      
       const { error: loginError } = await login(email, password);
       
       if (loginError) {
@@ -89,26 +97,22 @@ export default function SimpleLoginPage() {
   }
 
   return (
-    <div 
-      className="relative min-h-screen w-full flex items-center justify-center animate-fade-in"
-      style={{
-        backgroundImage: `url('/lovable-uploads/5d6ba7fa-4ea7-42ac-872e-940fb620a273.png')`,
-        backgroundSize: 'cover',
-        backgroundPosition: 'center',
-        backgroundRepeat: 'no-repeat',
-        backgroundAttachment: 'fixed'
-      }}
-    >
-      {/* Dark overlay for better contrast */}
-      <div className="absolute inset-0 bg-black/30 z-0" />
+    <div className="min-h-screen w-full flex items-center justify-center animate-fade-in bg-gradient-to-br from-blue-50 via-white to-blue-100 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
+      {/* Background Image - Mobile Optimized */}
+      <div 
+        className="absolute inset-0 bg-cover bg-center bg-no-repeat opacity-20 dark:opacity-10"
+        style={{
+          backgroundImage: `url('/lovable-uploads/5d6ba7fa-4ea7-42ac-872e-940fb620a273.png')`,
+        }}
+      />
       
       {/* Login form container */}
-      <div className="relative z-10 w-full max-w-md px-4">
-        <div className="bg-white/90 dark:bg-black/80 backdrop-blur-sm rounded-lg shadow-xl p-6 border border-white/20 dark:border-white/10">
+      <div className="relative z-10 w-full max-w-md px-4 py-8">
+        <div className="bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm rounded-lg shadow-xl p-6 border border-gray-200/50 dark:border-gray-700/50">
           <Card className="w-full border-0 bg-transparent shadow-none">
             <CardHeader className="space-y-1 text-center px-0">
               <div className="flex justify-center mb-4">
-                <Music className="h-12 w-12 text-glee-purple" />
+                <Music className="h-12 w-12 text-blue-600 dark:text-blue-400" />
               </div>
               <CardTitle className="text-2xl font-bold text-gray-900 dark:text-gray-100">
                 Welcome to Glee World
@@ -142,10 +146,11 @@ export default function SimpleLoginPage() {
                     type="email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    className="bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 border-gray-300 dark:border-gray-600"
+                    className="bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 border-gray-300 dark:border-gray-600 h-12"
                     required
                     disabled={isSubmitting}
                     placeholder="your.email@example.com"
+                    autoComplete="email"
                   />
                 </div>
                 
@@ -157,10 +162,11 @@ export default function SimpleLoginPage() {
                       type={showPassword ? "text" : "password"}
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
-                      className="bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 border-gray-300 dark:border-gray-600 pr-10"
+                      className="bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 border-gray-300 dark:border-gray-600 h-12 pr-12"
                       required
                       disabled={isSubmitting}
                       placeholder="••••••••"
+                      autoComplete="current-password"
                     />
                     <Button
                       type="button"
@@ -181,7 +187,7 @@ export default function SimpleLoginPage() {
                 
                 <Button 
                   type="submit" 
-                  className="w-full bg-glee-spelman hover:bg-glee-spelman/90 text-white" 
+                  className="w-full h-12 bg-blue-600 hover:bg-blue-700 text-white" 
                   disabled={isSubmitting}
                 >
                   {isSubmitting ? (
@@ -202,7 +208,7 @@ export default function SimpleLoginPage() {
                 <div className="text-center">
                   <Link 
                     to="/forgot-password" 
-                    className="text-sm text-glee-purple hover:underline"
+                    className="text-sm text-blue-600 hover:underline dark:text-blue-400"
                   >
                     Forgot your password?
                   </Link>
@@ -210,14 +216,14 @@ export default function SimpleLoginPage() {
                 
                 <div className="text-center text-sm border-t pt-4">
                   <span className="text-gray-700 dark:text-gray-300">Don't have an account? </span>
-                  <Link to="/signup" className="text-glee-purple hover:underline font-medium">
+                  <Link to="/signup" className="text-blue-600 hover:underline font-medium dark:text-blue-400">
                     Sign up here
                   </Link>
                 </div>
                 
                 <div className="text-center text-sm">
                   <span className="text-gray-700 dark:text-gray-300">Want to join as a fan? </span>
-                  <Link to="/join-glee-fam" className="text-glee-purple hover:underline font-medium">
+                  <Link to="/join-glee-fam" className="text-blue-600 hover:underline font-medium dark:text-blue-400">
                     Join the Glee Fam
                   </Link>
                 </div>

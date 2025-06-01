@@ -4,6 +4,39 @@ export function isMobileDevice(): boolean {
   return window.innerWidth < 768;
 }
 
+// Detect phone specifically (vs tablet)
+export function isPhoneDevice(): boolean {
+  return window.innerWidth < 480 || (window.innerWidth < 768 && window.innerHeight < 1024);
+}
+
+// Detect iOS devices
+export function isIOSDevice(): boolean {
+  return /iPad|iPhone|iPod/.test(navigator.userAgent);
+}
+
+// Detect if user is on mobile Safari
+export function isMobileSafari(): boolean {
+  return isIOSDevice() && /Safari/.test(navigator.userAgent) && !/Chrome|CriOS|FxiOS/.test(navigator.userAgent);
+}
+
+// Add mobile-specific auth debugging
+export function logMobileAuthDebug(context: string, data: any): void {
+  if (isMobileDevice()) {
+    console.log(`📱 Mobile Auth Debug [${context}]:`, {
+      isMobile: isMobileDevice(),
+      isPhone: isPhoneDevice(),
+      isIOS: isIOSDevice(),
+      isMobileSafari: isMobileSafari(),
+      viewport: {
+        width: window.innerWidth,
+        height: window.innerHeight,
+        devicePixelRatio: window.devicePixelRatio
+      },
+      data
+    });
+  }
+}
+
 // Enable long-press functionality for mobile devices
 export function enableLongPress(element: HTMLElement, callback: () => void, duration: number = 800): () => void {
   let timer: ReturnType<typeof setTimeout> | null = null;
@@ -152,4 +185,35 @@ export function optimizeImageForMobile(imgElement: HTMLImageElement): void {
   }, { rootMargin: '200px' });
   
   observer.observe(imgElement);
+}
+
+// Fix mobile viewport issues on auth pages
+export function fixMobileViewport(): void {
+  if (isMobileDevice()) {
+    // Prevent zoom on input focus
+    const viewport = document.querySelector('meta[name=viewport]');
+    if (viewport) {
+      viewport.setAttribute('content', 'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no');
+    }
+    
+    // Add mobile-specific styles
+    const style = document.createElement('style');
+    style.textContent = `
+      @media (max-width: 768px) {
+        input, select, textarea {
+          font-size: 16px !important;
+          transform: scale(1);
+        }
+        
+        .mobile-auth-form {
+          padding: 16px;
+          min-height: 100vh;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+        }
+      }
+    `;
+    document.head.appendChild(style);
+  }
 }
