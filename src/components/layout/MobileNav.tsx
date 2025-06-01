@@ -14,7 +14,7 @@ import {
   Calendar,
   LayoutDashboard
 } from "lucide-react";
-import { useAuth } from "@/contexts/AuthContext";
+import { useSimpleAuthContext } from "@/contexts/SimpleAuthContext";
 import { usePermissions } from "@/hooks/usePermissions";
 import { useNotifications } from "@/hooks/useNotifications";
 
@@ -31,7 +31,7 @@ interface NavItem {
 
 export function MobileNav({ isAdmin: propIsAdmin }: MobileNavProps) {
   const location = useLocation();
-  const { profile } = useAuth();
+  const { profile } = useSimpleAuthContext();
   const { isSuperAdmin } = usePermissions();
   const { unreadCount } = useNotifications();
   

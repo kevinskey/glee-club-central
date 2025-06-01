@@ -10,13 +10,13 @@ import {
   Calendar,
   Settings
 } from 'lucide-react';
-import { useAuth } from '@/contexts/AuthContext';
+import { useSimpleAuthContext } from '@/contexts/SimpleAuthContext';
 import { useNotifications } from '@/hooks/useNotifications';
 import { Badge } from '@/components/ui/badge';
 
 export const MobileBottomNav: React.FC = () => {
   const location = useLocation();
-  const { profile } = useAuth();
+  const { profile } = useSimpleAuthContext();
   const { unreadCount } = useNotifications();
   
   // Check if user is admin

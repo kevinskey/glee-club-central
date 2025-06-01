@@ -3,7 +3,7 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Menu, X, LogIn, LogOut, User } from "lucide-react";
-import { useAuth } from "@/contexts/AuthContext";
+import { useSimpleAuthContext } from "@/contexts/SimpleAuthContext";
 import { MobileHeaderLogo } from "./mobile/MobileHeaderLogo";
 import { MobileHeaderActions } from "./mobile/MobileHeaderActions";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
@@ -11,7 +11,7 @@ import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 export function MobileHeader() {
   const [isOpen, setIsOpen] = useState(false);
   const navigate = useNavigate();
-  const { isAuthenticated, profile, logout } = useAuth();
+  const { isAuthenticated, profile, logout } = useSimpleAuthContext();
   
   const handleNavigate = (path: string) => {
     navigate(path);

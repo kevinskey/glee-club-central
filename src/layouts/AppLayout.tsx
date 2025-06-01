@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Outlet } from 'react-router-dom';
-import { useAuth } from '@/contexts/AuthContext';
+import { useSimpleAuthContext } from '@/contexts/SimpleAuthContext';
 import { ConsolidatedHeader } from '@/components/layout/ConsolidatedHeader';
 import { Footer } from '@/components/landing/Footer';
 import { Sidebar } from '@/components/layout/Sidebar';
@@ -27,11 +27,11 @@ const AppLayout: React.FC<AppLayoutProps> = ({
   let isAdmin = false;
   
   try {
-    const auth = useAuth();
+    const auth = useSimpleAuthContext();
     isAuthenticated = auth.isAuthenticated;
     isAdmin = auth.isAdmin ? auth.isAdmin() : false;
   } catch (error) {
-    // If useAuth fails, we're outside AuthProvider - that's ok for public routes
+    // If useSimpleAuthContext fails, we're outside SimpleAuthProvider - that's ok for public routes
     console.log('AppLayout: Auth context not available, treating as unauthenticated');
   }
 

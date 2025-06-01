@@ -2,8 +2,8 @@
 import React from "react";
 import { Button } from "@/components/ui/button";
 import { Menu, Bell, Search, Sun, Moon } from "lucide-react";
-import { useAuth } from "@/contexts/AuthContext";
-import { useTheme } from "@/contexts/ThemeContext";
+import { useSimpleAuthContext } from "@/contexts/SimpleAuthContext";
+import { useTheme } from "next-themes";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   DropdownMenu,
@@ -19,15 +19,19 @@ interface AdminTopBarProps {
 }
 
 export function AdminTopBar({ onMenuClick, isMobile = false }: AdminTopBarProps) {
-  const { user, signOut, profile } = useAuth();
-  const { theme, toggleTheme } = useTheme();
+  const { user, logout, profile } = useSimpleAuthContext();
+  const { theme, setTheme } = useTheme();
 
   const handleSignOut = async () => {
     try {
-      await signOut();
+      await logout();
     } catch (error) {
       console.error('Error signing out:', error);
     }
+  };
+
+  const toggleTheme = () => {
+    setTheme(theme === 'light' ? 'dark' : 'light');
   };
 
   const getInitials = (firstName?: string, lastName?: string) => {
