@@ -1,4 +1,3 @@
-
 import * as React from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useNavigate, useLocation, Link } from 'react-router-dom';
@@ -261,7 +260,7 @@ const LoginPage = () => {
                   onClick={handleResetAuth}
                   disabled={isResetting}
                 >
-                  <RefreshCw className="w-4 h-4 mr-2" />
+                  <RefreshCcw className="w-4 h-4 mr-2" />
                   {isResetting ? "Resetting..." : "Reset Authentication"}
                 </Button>
               </div>
