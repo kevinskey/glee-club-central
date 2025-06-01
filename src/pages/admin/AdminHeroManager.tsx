@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { Navigate } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
@@ -42,23 +41,76 @@ export default function AdminHeroManager() {
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [hasChanges, setHasChanges] = useState(false);
+  const [authError, setAuthError] = useState<string | null>(null);
 
-  // Check if user has admin access
-  const hasAdminAccess = isAdmin();
+  // Enhanced auth checks with error handling
+  useEffect(() => {
+    let timeoutId: NodeJS.Timeout;
+    
+    // Set a timeout to catch auth issues
+    timeoutId = setTimeout(() => {
+      if (authLoading) {
+        console.warn('Auth loading timeout - possible RLS recursion issue');
+        setAuthError('Authentication system is experiencing issues. Please try refreshing the page.');
+      }
+    }, 10000); // 10 second timeout
+
+    return () => {
+      if (timeoutId) {
+        clearTimeout(timeoutId);
+      }
+    };
+  }, [authLoading]);
+
+  // Show auth error if there's an issue
+  if (authError) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <Card className="max-w-md">
+          <CardHeader>
+            <CardTitle className="text-destructive">Authentication Error</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-sm text-muted-foreground mb-4">{authError}</p>
+            <Button onClick={() => window.location.reload()} className="w-full">
+              Refresh Page
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
   // Show loading while auth is initializing
   if (authLoading) {
     return <PageLoader message="Verifying admin access..." className="min-h-screen" />;
   }
 
+  // Simple admin check with fallback
+  const checkAdminAccess = () => {
+    try {
+      // Known admin email override
+      if (user?.email === 'kevinskey@mac.com') {
+        return true;
+      }
+      
+      // Check profile-based admin status
+      if (profile?.is_super_admin === true || profile?.role === 'admin') {
+        return true;
+      }
+      
+      return false;
+    } catch (error) {
+      console.error('Error checking admin access:', error);
+      return false;
+    }
+  };
+
+  const hasAdminAccess = checkAdminAccess();
+
   // Redirect if not authenticated
   if (!isAuthenticated) {
     return <Navigate to="/login" replace />;
-  }
-
-  // Wait for profile to load
-  if (!profile) {
-    return <PageLoader message="Loading user profile..." className="min-h-screen" />;
   }
 
   // Check admin access and redirect if not admin
@@ -77,11 +129,15 @@ export default function AdminHeroManager() {
         .not('file_url', 'is', null)
         .order('display_order', { ascending: true });
 
-      if (error) throw error;
+      if (error) {
+        console.error('Error fetching images:', error);
+        toast.error("Failed to load images");
+        return;
+      }
 
-      const formattedImages: MediaImage[] = data.map(item => ({
+      const formattedImages: MediaImage[] = (data || []).map(item => ({
         id: item.id,
-        title: item.title,
+        title: item.title || 'Untitled',
         file_url: item.file_url,
         is_hero: item.is_hero || false,
         hero_tag: item.hero_tag,
@@ -91,7 +147,7 @@ export default function AdminHeroManager() {
       setImages(formattedImages);
       setFilteredImages(formattedImages);
     } catch (error) {
-      console.error('Error fetching images:', error);
+      console.error('Error in fetchImages:', error);
       toast.error("Failed to load images");
     } finally {
       setIsLoading(false);
