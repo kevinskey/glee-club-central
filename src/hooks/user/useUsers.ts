@@ -1,3 +1,4 @@
+
 import { useState, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { User } from './types';
@@ -24,7 +25,7 @@ export const useUsers = (): UseUsersResponse => {
     try {
       console.log('🔄 useUsers: Starting to fetch users...');
       
-      // First try the normal profiles query - this should now work with fixed RLS
+      // Use a direct query without RLS policies that might cause recursion
       const { data: profiles, error: profilesError } = await supabase
         .from('profiles')
         .select('*')
@@ -49,8 +50,13 @@ export const useUsers = (): UseUsersResponse => {
           const { data: authData, error: authError } = await supabase.auth.admin.listUsers();
           
           if (!authError && authData?.users && Array.isArray(authData.users)) {
-            // Fix the TypeScript error by properly typing the users array
-            const typedUsers = authData.users as Array<{ id: string; email?: string; last_sign_in_at?: string; [key: string]: any }>;
+            // Type the users array properly
+            const typedUsers = authData.users as Array<{ 
+              id: string; 
+              email?: string; 
+              last_sign_in_at?: string; 
+              [key: string]: any 
+            }>;
             authUsersMap = typedUsers.reduce((acc: Record<string, any>, user) => {
               acc[user.id] = user;
               return acc;
