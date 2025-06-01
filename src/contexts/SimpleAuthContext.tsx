@@ -1,3 +1,4 @@
+
 import React, { createContext, useContext, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { AuthUser, Profile } from '@/types/auth';
@@ -143,11 +144,15 @@ export const SimpleAuthProvider: React.FC<{ children: React.ReactNode }> = ({ ch
     }
   }, []);
 
+  // Enhanced admin check with multiple fallbacks - prevent recursion
   const isAdmin = useCallback(() => {
-    // Enhanced admin check with multiple fallbacks
+    // Primary check: Known admin email
     const isKnownAdmin = user?.email === 'kevinskey@mac.com';
-    const profileAdmin = profile?.is_super_admin === true || profile?.role === 'admin';
-    const hasAdminAccess = profileAdmin || isKnownAdmin;
+    
+    // Secondary check: Profile admin status (only if profile exists to prevent recursion)
+    const profileAdmin = profile ? (profile.is_super_admin === true || profile.role === 'admin') : false;
+    
+    const hasAdminAccess = isKnownAdmin || profileAdmin;
     
     console.log('👑 SimpleAuth: Enhanced admin check:', {
       userEmail: user?.email,
@@ -163,7 +168,7 @@ export const SimpleAuthProvider: React.FC<{ children: React.ReactNode }> = ({ ch
   }, [profile, user?.email]);
 
   const isMember = useCallback(() => {
-    const memberStatus = profile?.role === 'member' || !profile?.role;
+    const memberStatus = !profile || profile.role === 'member' || !profile.role;
     console.log('👤 SimpleAuth: Member check:', {
       hasProfile: !!profile,
       profileRole: profile?.role,

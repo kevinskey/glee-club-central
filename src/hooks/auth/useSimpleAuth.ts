@@ -33,7 +33,7 @@ export const useSimpleAuth = () => {
     };
   }, []);
 
-  // Create fallback profile for known admin users
+  // Create fallback profile for known admin users - prevent recursive calls
   const createFallbackAdminProfile = useCallback((userId: string, userEmail?: string): Profile | null => {
     if (userEmail === 'kevinskey@mac.com') {
       console.log('🔧 useSimpleAuth: Creating fallback admin profile for kevinskey@mac.com');
@@ -51,24 +51,39 @@ export const useSimpleAuth = () => {
     return null;
   }, []);
 
-  const fetchProfile = useCallback(async (userId: string, userEmail?: string) => {
+  // Prevent infinite recursion with proper error handling and timeout
+  const fetchProfile = useCallback(async (userId: string, userEmail?: string, retryCount = 0) => {
+    // Prevent infinite retry loops
+    const MAX_RETRIES = 2;
+    if (retryCount > MAX_RETRIES) {
+      console.error('❌ useSimpleAuth: Max retries exceeded for profile fetch');
+      return createFallbackAdminProfile(userId, userEmail);
+    }
+
     try {
-      console.log('👤 useSimpleAuth: Fetching profile for user:', userId);
-      logMobileAuthDebug('profile-fetch-start', { userId });
+      console.log(`👤 useSimpleAuth: Fetching profile for user: ${userId} (attempt ${retryCount + 1})`);
+      logMobileAuthDebug('profile-fetch-start', { userId, retryCount });
       
-      const { data, error } = await supabase
+      // Add timeout to prevent hanging
+      const timeoutPromise = new Promise((_, reject) => {
+        setTimeout(() => reject(new Error('Profile fetch timeout')), 5000);
+      });
+
+      const fetchPromise = supabase
         .from('profiles')
         .select('*')
         .eq('id', userId)
         .single();
 
+      const { data, error } = await Promise.race([fetchPromise, timeoutPromise]) as any;
+
       if (error) {
         console.error('❌ useSimpleAuth: Profile fetch error:', error);
         logMobileAuthDebug('profile-fetch-error', { error: error.message, code: error.code });
         
-        // Handle RLS recursion error with fallback
-        if (error.code === '42P17' || error.message.includes('infinite recursion')) {
-          console.log('🔄 useSimpleAuth: RLS recursion detected, using fallback profile');
+        // Handle specific RLS or recursion errors
+        if (error.code === '42P17' || error.message.includes('infinite recursion') || error.code === 'PGRST116') {
+          console.log('🔄 useSimpleAuth: RLS/recursion error detected, using fallback profile');
           const fallbackProfile = createFallbackAdminProfile(userId, userEmail);
           if (fallbackProfile) {
             logMobileAuthDebug('fallback-profile-created', { profile: fallbackProfile });
@@ -76,12 +91,12 @@ export const useSimpleAuth = () => {
           }
         }
         
-        // Special handling for admin user - create profile if it doesn't exist
-        if (error.code === 'PGRST116') { // No rows returned
-          if (userEmail === 'kevinskey@mac.com') {
-            console.log('🔧 useSimpleAuth: Creating admin profile for kevinskey@mac.com');
-            logMobileAuthDebug('admin-profile-creation', { userEmail });
-            
+        // For admin user, create profile if it doesn't exist
+        if (error.code === 'PGRST116' && userEmail === 'kevinskey@mac.com') {
+          console.log('🔧 useSimpleAuth: Creating admin profile for kevinskey@mac.com');
+          logMobileAuthDebug('admin-profile-creation', { userEmail });
+          
+          try {
             const { data: newProfile, error: createError } = await supabase
               .from('profiles')
               .insert({
@@ -98,13 +113,15 @@ export const useSimpleAuth = () => {
             if (createError) {
               console.error('❌ useSimpleAuth: Failed to create admin profile:', createError);
               logMobileAuthDebug('admin-profile-creation-error', { error: createError.message });
-              // Return fallback profile even if creation fails
               return createFallbackAdminProfile(userId, userEmail);
             }
             
             console.log('✅ useSimpleAuth: Admin profile created:', newProfile);
             logMobileAuthDebug('admin-profile-created', { profile: newProfile });
             return newProfile;
+          } catch (createErr) {
+            console.error('💥 useSimpleAuth: Profile creation exception:', createErr);
+            return createFallbackAdminProfile(userId, userEmail);
           }
         }
         
@@ -148,18 +165,24 @@ export const useSimpleAuth = () => {
     setProfile(profileData);
   }, [user?.id, user?.email, fetchProfile]);
 
-  // Initialize auth state
+  // Initialize auth state with proper cleanup and timeout handling
   useEffect(() => {
     let mounted = true;
     let timeoutId: NodeJS.Timeout;
+    let authSubscription: any;
 
     const initializeAuth = async () => {
       try {
         console.log('🔑 useSimpleAuth: Initializing auth state...');
         logMobileAuthDebug('auth-init-start', {});
         
-        // Get initial session
-        const { data: { session }, error } = await supabase.auth.getSession();
+        // Get initial session with timeout
+        const sessionPromise = supabase.auth.getSession();
+        const timeoutPromise = new Promise((_, reject) => {
+          setTimeout(() => reject(new Error('Session fetch timeout')), 10000);
+        });
+
+        const { data: { session }, error } = await Promise.race([sessionPromise, timeoutPromise]) as any;
         
         if (error) {
           console.error('❌ useSimpleAuth: Session error:', error);
@@ -185,7 +208,6 @@ export const useSimpleAuth = () => {
               }
             } catch (profileError) {
               console.warn('⚠️ useSimpleAuth: Profile fetch failed during init:', profileError);
-              // For admin users, set a fallback profile
               if (session.user.email === 'kevinskey@mac.com') {
                 const fallbackProfile = createFallbackAdminProfile(session.user.id, session.user.email);
                 if (mounted && fallbackProfile) {
@@ -211,64 +233,74 @@ export const useSimpleAuth = () => {
       }
     };
 
-    // Set up auth state listener
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
-      console.log('🔔 useSimpleAuth: Auth state changed:', event, {
-        hasSession: !!session,
-        hasUser: !!session?.user,
-        userId: session?.user?.id
-      });
+    // Set up auth state listener with debouncing to prevent rapid state changes
+    let debounceTimeout: NodeJS.Timeout;
+    authSubscription = supabase.auth.onAuthStateChange(async (event, session) => {
+      // Clear any existing debounce
+      if (debounceTimeout) {
+        clearTimeout(debounceTimeout);
+      }
 
-      logMobileAuthDebug('auth-state-change', {
-        event,
-        hasSession: !!session,
-        hasUser: !!session?.user,
-        userId: session?.user?.id
-      });
+      // Debounce auth state changes to prevent rapid-fire calls
+      debounceTimeout = setTimeout(async () => {
+        console.log('🔔 useSimpleAuth: Auth state changed:', event, {
+          hasSession: !!session,
+          hasUser: !!session?.user,
+          userId: session?.user?.id
+        });
 
-      if (mounted) {
-        if (session?.user) {
-          const authUser = convertToAuthUser(session.user);
-          if (authUser) {
-            setUser(authUser);
-            
-            // Fetch profile for authenticated user with enhanced error handling
-            setTimeout(async () => {
-              try {
-                const profileData = await fetchProfile(session.user.id, session.user.email);
-                if (mounted) {
-                  setProfile(profileData);
-                }
-              } catch (profileError) {
-                console.warn('⚠️ useSimpleAuth: Profile fetch failed during auth change:', profileError);
-                // For admin users, set a fallback profile
-                if (session.user.email === 'kevinskey@mac.com') {
-                  const fallbackProfile = createFallbackAdminProfile(session.user.id, session.user.email);
-                  if (mounted && fallbackProfile) {
-                    setProfile(fallbackProfile);
+        logMobileAuthDebug('auth-state-change', {
+          event,
+          hasSession: !!session,
+          hasUser: !!session?.user,
+          userId: session?.user?.id
+        });
+
+        if (mounted) {
+          if (session?.user) {
+            const authUser = convertToAuthUser(session.user);
+            if (authUser) {
+              setUser(authUser);
+              
+              // Fetch profile for authenticated user with enhanced error handling
+              setTimeout(async () => {
+                if (!mounted) return;
+                
+                try {
+                  const profileData = await fetchProfile(session.user.id, session.user.email);
+                  if (mounted) {
+                    setProfile(profileData);
+                  }
+                } catch (profileError) {
+                  console.warn('⚠️ useSimpleAuth: Profile fetch failed during auth change:', profileError);
+                  if (session.user.email === 'kevinskey@mac.com') {
+                    const fallbackProfile = createFallbackAdminProfile(session.user.id, session.user.email);
+                    if (mounted && fallbackProfile) {
+                      setProfile(fallbackProfile);
+                    }
                   }
                 }
-              }
-            }, 0);
+              }, 100); // Small delay to prevent rapid calls
+            }
+          } else {
+            setUser(null);
+            setProfile(null);
           }
-        } else {
-          setUser(null);
-          setProfile(null);
+          
+          setIsLoading(false);
+          setIsInitialized(true);
         }
-        
-        setIsLoading(false);
-        setIsInitialized(true);
-      }
+      }, 250); // 250ms debounce
     });
 
-    // Set timeout to prevent hanging (reduced to 5 seconds)
+    // Set timeout to prevent hanging (increased to 10 seconds)
     timeoutId = setTimeout(() => {
       if (mounted && !isInitialized) {
         console.warn('⚠️ useSimpleAuth: Init timeout, forcing completion');
         setIsLoading(false);
         setIsInitialized(true);
       }
-    }, 5000);
+    }, 10000);
 
     // Initialize
     initializeAuth();
@@ -278,7 +310,12 @@ export const useSimpleAuth = () => {
       if (timeoutId) {
         clearTimeout(timeoutId);
       }
-      subscription.unsubscribe();
+      if (debounceTimeout) {
+        clearTimeout(debounceTimeout);
+      }
+      if (authSubscription?.data?.subscription) {
+        authSubscription.data.subscription.unsubscribe();
+      }
     };
   }, [fetchProfile, convertToAuthUser, isInitialized, createFallbackAdminProfile]);
 
