@@ -12,7 +12,6 @@ export const ConsolidatedHeader = memo(function ConsolidatedHeader() {
   const navigationLinks = [
     { label: "Home", href: "/" },
     { label: "About", href: "/about" },
-    { label: "Events", href: "/events" },
     { label: "Calendar", href: "/calendar" },
     { label: "Store", href: "/store" },
     { label: "Contact", href: "/contact" }

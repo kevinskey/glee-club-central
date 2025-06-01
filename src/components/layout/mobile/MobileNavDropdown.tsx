@@ -65,15 +65,6 @@ export function MobileNavDropdown() {
             </Link>
             
             <Link 
-              to="/events" 
-              className="flex items-center gap-3 px-3 py-2 rounded-md hover:bg-muted transition-colors"
-              onClick={handleNavClick}
-            >
-              <Calendar className="h-5 w-5" />
-              <span>Events</span>
-            </Link>
-            
-            <Link 
               to="/calendar" 
               className="flex items-center gap-3 px-3 py-2 rounded-md hover:bg-muted transition-colors"
               onClick={handleNavClick}

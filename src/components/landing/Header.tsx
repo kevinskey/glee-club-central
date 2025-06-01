@@ -48,9 +48,6 @@ export function Header() {
             <Link to="/about" className="font-medium text-foreground hover:text-glee-spelman transition-colors">
               About
             </Link>
-            <Link to="/events" className="font-medium text-foreground hover:text-glee-spelman transition-colors">
-              Events
-            </Link>
             <Link to="/calendar" className="font-medium text-foreground hover:text-glee-spelman transition-colors">
               Calendar
             </Link>

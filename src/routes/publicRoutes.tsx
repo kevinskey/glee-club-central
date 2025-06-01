@@ -7,7 +7,6 @@ import AppLayout from '@/layouts/AppLayout';
 import HomePage from '@/pages/HomePage';
 import AboutPage from '@/pages/AboutPage';
 import ContactPage from '@/pages/ContactPage';
-import PublicEventsPage from '@/pages/PublicEventsPage';
 import EnhancedCalendarPage from '@/pages/EnhancedCalendarPage';
 import JoinGleeFamPage from '@/pages/JoinGleeFamPage';
 import StorePage from '@/pages/StorePage';
@@ -22,7 +21,6 @@ export const publicRoutes: RouteObject[] = [
       { index: true, element: <HomePage /> },
       { path: 'about', element: <AboutPage /> },
       { path: 'contact', element: <ContactPage /> },
-      { path: 'events', element: <PublicEventsPage /> },
       { path: 'calendar', element: <EnhancedCalendarPage /> },
       { path: 'join-glee-fam', element: <JoinGleeFamPage /> },
       { path: 'store', element: <StorePage /> },
