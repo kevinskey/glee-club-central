@@ -120,6 +120,12 @@ export function MembersPageRefactor() {
     setShowEditDialog(true);
   };
 
+  const handleUserCardClick = (user: User) => {
+    if (isAdminUser) {
+      handleEditUser(user);
+    }
+  };
+
   const handleSaveUser = async (data: UserFormValues) => {
     if (!selectedUser) return;
     
@@ -279,7 +285,15 @@ export function MembersPageRefactor() {
           ) : (
             <div className="grid gap-4">
               {filteredMembers.map((member) => (
-                <Card key={member.id}>
+                <Card 
+                  key={member.id} 
+                  className={`transition-all duration-200 ${
+                    isAdminUser 
+                      ? 'cursor-pointer hover:shadow-md hover:scale-[1.01] hover:border-primary/50' 
+                      : ''
+                  }`}
+                  onClick={() => handleUserCardClick(member)}
+                >
                   <CardContent className="p-4">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center space-x-4">
@@ -322,13 +336,16 @@ export function MembersPageRefactor() {
                         </Badge>
                         {isAdminUser && (
                           <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
+                            <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
                               <Button variant="ghost" size="sm">
                                 <MoreVertical className="h-4 w-4" />
                               </Button>
                             </DropdownMenuTrigger>
                             <DropdownMenuContent align="end">
-                              <DropdownMenuItem onClick={() => handleEditUser(member)}>
+                              <DropdownMenuItem onClick={(e) => {
+                                e.stopPropagation();
+                                handleEditUser(member);
+                              }}>
                                 <Edit className="mr-2 h-4 w-4" />
                                 Edit Member
                               </DropdownMenuItem>
