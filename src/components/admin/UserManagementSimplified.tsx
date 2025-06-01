@@ -9,7 +9,6 @@ import {
   Users, 
   Search, 
   UserPlus, 
-  RefreshCw,
   AlertTriangle,
   Database
 } from 'lucide-react';
@@ -36,10 +35,12 @@ export function UserManagementSimplified() {
     });
   }, [isAuthenticated, isLoading, isAdminUser, user?.email, usersLoading, error, users.length]);
 
-  const handleRefresh = async () => {
-    console.log('🔄 UserManagementSimplified: Refreshing users...');
-    await refreshUsers();
-  };
+  // Auto-refresh users when component mounts and when authenticated
+  useEffect(() => {
+    if (isAuthenticated && isAdminUser) {
+      refreshUsers();
+    }
+  }, [isAuthenticated, isAdminUser, refreshUsers]);
 
   const filteredUsers = users.filter(user => {
     const searchTermLower = searchTerm.toLowerCase();
@@ -91,10 +92,6 @@ export function UserManagementSimplified() {
           </p>
         </div>
         <div className="flex gap-2">
-          <Button onClick={handleRefresh} variant="outline" disabled={usersLoading}>
-            <RefreshCw className={`mr-2 h-4 w-4 ${usersLoading ? 'animate-spin' : ''}`} />
-            Refresh
-          </Button>
           <Button>
             <UserPlus className="mr-2 h-4 w-4" />
             Add User
@@ -107,16 +104,6 @@ export function UserManagementSimplified() {
           <AlertTriangle className="h-4 w-4" />
           <AlertDescription>
             <strong>Database error:</strong> {error}
-            <br />
-            <Button 
-              onClick={handleRefresh} 
-              variant="outline" 
-              size="sm" 
-              className="mt-2"
-            >
-              <RefreshCw className="mr-2 h-4 w-4" />
-              Try Again
-            </Button>
           </AlertDescription>
         </Alert>
       )}
@@ -126,6 +113,9 @@ export function UserManagementSimplified() {
           <CardTitle className="flex items-center gap-2">
             <Users className="h-5 w-5" />
             Members ({filteredUsers.length})
+            {usersLoading && (
+              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-primary ml-2"></div>
+            )}
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
@@ -160,12 +150,6 @@ export function UserManagementSimplified() {
                     : 'No members have been added yet.'
                 }
               </p>
-              {error && (
-                <Button onClick={handleRefresh} variant="outline">
-                  <RefreshCw className="mr-2 h-4 w-4" />
-                  Retry Loading
-                </Button>
-              )}
             </div>
           ) : (
             <div className="grid gap-4">

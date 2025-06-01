@@ -1,5 +1,5 @@
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 
@@ -122,6 +122,30 @@ export const useUsersSimplified = (): UseUsersSimplifiedResponse => {
       setIsLoading(false);
     }
   }, []);
+
+  // Set up real-time subscriptions for automatic updates
+  useEffect(() => {
+    const channel = supabase
+      .channel('profiles-changes')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'profiles'
+        },
+        (payload) => {
+          console.log('🔄 Real-time update received:', payload);
+          // Refresh users when any change occurs to profiles table
+          refreshUsers();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [refreshUsers]);
 
   return {
     users,
