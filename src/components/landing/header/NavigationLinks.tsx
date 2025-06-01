@@ -1,6 +1,5 @@
 
 import React from "react";
-import { Button } from "@/components/ui/button";
 import { Link, useLocation } from "react-router-dom";
 
 interface NavigationLinksProps {
@@ -25,19 +24,17 @@ export function NavigationLinks({ className = "" }: NavigationLinksProps) {
         const isActive = location.pathname === link.href;
         
         return (
-          <Button 
+          <Link
             key={link.href}
-            variant={isActive ? "default" : "ghost"}
-            size="sm"
-            asChild
-            className={`text-sm font-medium ${
+            to={link.href}
+            className={`px-3 py-2 text-sm font-medium rounded-md transition-colors ${
               isActive 
                 ? "bg-primary/10 text-primary" 
-                : "text-foreground/80 hover:text-foreground"
+                : "text-foreground/80 hover:text-foreground hover:bg-accent/10"
             }`}
           >
-            <Link to={link.href}>{link.label}</Link>
-          </Button>
+            {link.label}
+          </Link>
         );
       })}
     </nav>

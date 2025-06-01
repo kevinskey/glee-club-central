@@ -23,11 +23,6 @@ export const ConsolidatedHeader = memo(function ConsolidatedHeader() {
     { label: "Contact", href: "/contact" }
   ];
 
-  // Add Login to navigation links if not authenticated
-  if (!isAuthenticated) {
-    navigationLinks.push({ label: "Login", href: "/login" });
-  }
-
   const handleDashboardClick = () => {
     console.log('🎯 ConsolidatedHeader: Dashboard button clicked');
     navigate("/role-dashboard");
@@ -58,26 +53,24 @@ export const ConsolidatedHeader = memo(function ConsolidatedHeader() {
             {navigationLinks.map((link) => {
               const isActive = location.pathname === link.href;
               return (
-                <Button
+                <Link
                   key={link.href}
-                  variant={isActive ? "default" : "ghost"}
-                  size="sm"
-                  asChild
-                  className={`text-sm font-medium relative px-4 lg:px-5 ${
+                  to={link.href}
+                  className={`text-sm font-medium relative px-4 lg:px-5 py-2 rounded-md transition-colors ${
                     isActive 
                       ? "bg-transparent text-glee-spelman after:content-[''] after:absolute after:bottom-0 after:left-1/2 after:transform after:-translate-x-1/2 after:w-8 after:h-0.5 after:bg-glee-spelman" 
-                      : "text-foreground/80 hover:text-glee-spelman"
+                      : "text-foreground/80 hover:text-glee-spelman hover:bg-accent/10"
                   }`}
                 >
-                  <Link to={link.href}>{link.label}</Link>
-                </Button>
+                  {link.label}
+                </Link>
               );
             })}
           </nav>
 
           {/* Right side: Auth buttons and HeaderActions */}
           <div className="flex items-center gap-4 lg:gap-6 flex-shrink-0">
-            {/* Authentication Buttons - Show dashboard if NOT authenticated, show logout if authenticated */}
+            {/* Authentication Buttons */}
             {!isAuthenticated ? (
               <Button 
                 variant="default"
