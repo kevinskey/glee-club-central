@@ -1,4 +1,3 @@
-
 import { useState, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { User } from './types';
@@ -49,12 +48,13 @@ export const useUsers = (): UseUsersResponse => {
         if (currentUser?.email === 'kevinskey@mac.com') {
           const { data: authData, error: authError } = await supabase.auth.admin.listUsers();
           
-          if (!authError && authData?.users) {
-            // Fix the TypeScript error by properly typing the reduce function
-            authUsersMap = authData.users.reduce((acc: Record<string, any>, user: any) => {
+          if (!authError && authData?.users && Array.isArray(authData.users)) {
+            // Fix the TypeScript error by properly typing the users array
+            const typedUsers = authData.users as Array<{ id: string; email?: string; last_sign_in_at?: string; [key: string]: any }>;
+            authUsersMap = typedUsers.reduce((acc: Record<string, any>, user) => {
               acc[user.id] = user;
               return acc;
-            }, {} as Record<string, any>);
+            }, {});
             console.log('📧 Auth users data loaded for admin');
           }
         }
