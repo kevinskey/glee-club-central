@@ -79,10 +79,10 @@ export const ConsolidatedHeader = memo(function ConsolidatedHeader() {
               <Button 
                 variant="default"
                 onClick={handleDashboardClick}
-                size={isMobile ? "sm" : "default"}
-                className="bg-glee-spelman hover:bg-glee-spelman/90 px-4 lg:px-6"
+                size="sm"
+                className="bg-glee-spelman hover:bg-glee-spelman/90 px-3 py-1 h-8 text-xs lg:px-4 lg:h-9 lg:text-sm"
               >
-                <User className="w-4 h-4 mr-2" />
+                <User className="w-3 h-3 mr-1 lg:w-4 lg:h-4 lg:mr-2" />
                 <span className="hidden sm:inline">My Dashboard</span>
                 <span className="sm:hidden">Dashboard</span>
               </Button>
@@ -90,10 +90,10 @@ export const ConsolidatedHeader = memo(function ConsolidatedHeader() {
               <Button 
                 variant="outline"
                 onClick={handleLogout}
-                size={isMobile ? "sm" : "default"}
-                className="border-glee-spelman text-glee-spelman hover:bg-glee-spelman/10 px-4 lg:px-6"
+                size="sm"
+                className="border-glee-spelman text-glee-spelman hover:bg-glee-spelman/10 px-3 py-1 h-8 text-xs lg:px-4 lg:h-9 lg:text-sm"
               >
-                <LogOut className="w-4 h-4 mr-2" />
+                <LogOut className="w-3 h-3 mr-1 lg:w-4 lg:h-4 lg:mr-2" />
                 <span className="hidden sm:inline">Sign Out</span>
                 <span className="sm:hidden">Out</span>
               </Button>
