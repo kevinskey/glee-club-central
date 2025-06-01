@@ -24,7 +24,23 @@ interface SimpleAuthContextType {
 const SimpleAuthContext = createContext<SimpleAuthContextType | undefined>(undefined);
 
 export const SimpleAuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const { user, profile, isLoading, isInitialized, refreshProfile } = useSimpleAuth();
+  // Use error boundary approach for auth hook
+  let authState;
+  try {
+    authState = useSimpleAuth();
+  } catch (error) {
+    console.error('💥 SimpleAuthProvider: useSimpleAuth failed:', error);
+    // Fallback state to prevent complete app crash
+    authState = {
+      user: null,
+      profile: null,
+      isLoading: false,
+      isInitialized: true,
+      refreshProfile: async () => {}
+    };
+  }
+
+  const { user, profile, isLoading, isInitialized, refreshProfile } = authState;
 
   const isAuthenticated = !!user;
 

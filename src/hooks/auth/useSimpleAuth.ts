@@ -6,6 +6,7 @@ import { User } from '@supabase/supabase-js';
 import { logMobileAuthDebug } from '@/utils/mobileUtils';
 
 export const useSimpleAuth = () => {
+  // Initialize with null to prevent React dispatcher issues
   const [user, setUser] = useState<AuthUser | null>(null);
   const [profile, setProfile] = useState<Profile | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -17,7 +18,7 @@ export const useSimpleAuth = () => {
   });
 
   // Helper function to convert Supabase User to AuthUser
-  const convertToAuthUser = (supabaseUser: User): AuthUser | null => {
+  const convertToAuthUser = useCallback((supabaseUser: User): AuthUser | null => {
     if (!supabaseUser.email) {
       console.warn('⚠️ useSimpleAuth: User has no email, cannot convert to AuthUser');
       return null;
@@ -30,7 +31,7 @@ export const useSimpleAuth = () => {
       created_at: supabaseUser.created_at,
       updated_at: supabaseUser.updated_at,
     };
-  };
+  }, []);
 
   const fetchProfile = useCallback(async (userId: string) => {
     try {
@@ -116,6 +117,7 @@ export const useSimpleAuth = () => {
   // Initialize auth state
   useEffect(() => {
     let mounted = true;
+    let timeoutId: NodeJS.Timeout;
 
     const initializeAuth = async () => {
       try {
@@ -141,10 +143,15 @@ export const useSimpleAuth = () => {
           if (authUser) {
             setUser(authUser);
             
-            // Fetch profile
-            const profileData = await fetchProfile(session.user.id);
-            if (mounted) {
-              setProfile(profileData);
+            // Fetch profile with error handling
+            try {
+              const profileData = await fetchProfile(session.user.id);
+              if (mounted) {
+                setProfile(profileData);
+              }
+            } catch (profileError) {
+              console.warn('⚠️ useSimpleAuth: Profile fetch failed during init:', profileError);
+              // Continue without profile - app should still work
             }
           }
         }
@@ -185,11 +192,16 @@ export const useSimpleAuth = () => {
           if (authUser) {
             setUser(authUser);
             
-            // Fetch profile for authenticated user
+            // Fetch profile for authenticated user with error handling
             setTimeout(async () => {
-              const profileData = await fetchProfile(session.user.id);
-              if (mounted) {
-                setProfile(profileData);
+              try {
+                const profileData = await fetchProfile(session.user.id);
+                if (mounted) {
+                  setProfile(profileData);
+                }
+              } catch (profileError) {
+                console.warn('⚠️ useSimpleAuth: Profile fetch failed during auth change:', profileError);
+                // Continue without profile
               }
             }, 0);
           }
@@ -203,14 +215,26 @@ export const useSimpleAuth = () => {
       }
     });
 
+    // Set timeout to prevent hanging
+    timeoutId = setTimeout(() => {
+      if (mounted && !isInitialized) {
+        console.warn('⚠️ useSimpleAuth: Init timeout, forcing completion');
+        setIsLoading(false);
+        setIsInitialized(true);
+      }
+    }, 10000);
+
     // Initialize
     initializeAuth();
 
     return () => {
       mounted = false;
+      if (timeoutId) {
+        clearTimeout(timeoutId);
+      }
       subscription.unsubscribe();
     };
-  }, [fetchProfile]);
+  }, [fetchProfile, convertToAuthUser, isInitialized]);
 
   return {
     user,
