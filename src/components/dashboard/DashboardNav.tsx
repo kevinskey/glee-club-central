@@ -77,9 +77,9 @@ export function DashboardNav({
   const adminItems = [
     {
       label: "Admin Dashboard",
-      href: "/admin",
+      href: "/dashboard/admin",
       icon: LayoutDashboard,
-      active: pathname.startsWith("/admin")
+      active: pathname.startsWith("/dashboard/admin")
     },
     {
       label: "Finances",

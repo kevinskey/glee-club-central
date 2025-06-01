@@ -2,8 +2,7 @@
 import React from 'react';
 import { dashboardModules, getModulesByRole, DashboardModule } from '@/utils/dashboardModules';
 import { Link } from 'react-router-dom';
-import { useAuth } from '@/contexts/AuthContext';
-import { useProfile } from '@/contexts/ProfileContext';
+import { useSimpleAuthContext } from '@/contexts/SimpleAuthContext';
 import { 
   CreditCard, DollarSign, FileText, CheckSquare, Shirt, Scissors,
   Upload, Map, Layout, Heart, Bell, Calendar, Users, Settings,
@@ -52,8 +51,7 @@ const groupModulesByCategory = (modules: DashboardModule[]): GroupedModules => {
 };
 
 export function DashboardModules() {
-  const { user } = useAuth();
-  const { profile, isAdmin } = useProfile();
+  const { user, isAdmin } = useSimpleAuthContext();
   
   const availableModules = getModulesByRole(isAdmin());
   const groupedModules = groupModulesByCategory(availableModules);
