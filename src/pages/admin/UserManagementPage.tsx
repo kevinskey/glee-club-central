@@ -1,5 +1,6 @@
 
 import React, { useState, useEffect, useMemo } from 'react';
+import { Navigate } from 'react-router-dom';
 import { PageHeader } from '@/components/ui/page-header';
 import { Users, Plus, Search, SortAsc, SortDesc } from 'lucide-react';
 import { Input } from '@/components/ui/input';
@@ -17,20 +18,48 @@ import { UserManagementTableMobile } from '@/components/admin/UserManagementTabl
 import { InviteUserModal } from '@/components/admin/InviteUserModal';
 import { userManagementService, UserManagementData } from '@/services/userManagementService';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { useSimpleAuthContext } from '@/contexts/SimpleAuthContext';
 import { toast } from 'sonner';
 import { AdminSidebar } from '@/components/admin/AdminSidebar';
 import { AdminTopBar } from '@/components/admin/AdminTopBar';
 import { AdminMobileSidebar } from '@/components/admin/AdminMobileSidebar';
+import { PageLoader } from '@/components/ui/page-loader';
 
 export default function UserManagementPage() {
+  const { user, profile, isAuthenticated, isLoading: authLoading, isAdmin } = useSimpleAuthContext();
   const [users, setUsers] = useState<UserManagementData[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [sortOrder, setSortOrder] = useState<'newest' | 'oldest'>('newest');
   const [statusFilter, setStatusFilter] = useState<'all' | 'active' | 'disabled' | 'invited'>('all');
   const [isInviteModalOpen, setIsInviteModalOpen] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const isMobile = useIsMobile();
+
+  // Check if user has admin access
+  const hasAdminAccess = isAdmin();
+
+  // Show loading while auth is initializing
+  if (authLoading) {
+    return <PageLoader message="Verifying admin access..." className="min-h-screen" />;
+  }
+
+  // Redirect if not authenticated
+  if (!isAuthenticated) {
+    return <Navigate to="/login" replace />;
+  }
+
+  // Wait for profile to load
+  if (!profile) {
+    return <PageLoader message="Loading user profile..." className="min-h-screen" />;
+  }
+
+  // Check admin access and redirect if not admin
+  if (!hasAdminAccess) {
+    toast.error("Access denied. Admin privileges required.");
+    return <Navigate to="/" replace />;
+  }
 
   // Load users on component mount
   useEffect(() => {
@@ -39,15 +68,22 @@ export default function UserManagementPage() {
 
   const loadUsers = async () => {
     setIsLoading(true);
+    setError(null);
     try {
       const data = await userManagementService.getUsers();
       setUsers(data);
     } catch (error) {
-      toast.error('Failed to load users');
+      const errorMessage = error instanceof Error ? error.message : 'Failed to load users';
+      setError(errorMessage);
+      toast.error(errorMessage);
       console.error('Error loading users:', error);
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const retryLoadUsers = () => {
+    loadUsers();
   };
 
   // Filter and sort users
@@ -85,19 +121,105 @@ export default function UserManagementPage() {
   }, [users, searchTerm, sortOrder, statusFilter]);
 
   const handleRoleUpdate = async (userId: string, newRole: string) => {
-    await userManagementService.updateUserRole(userId, newRole);
-    await loadUsers(); // Refresh the list
+    try {
+      await userManagementService.updateUserRole(userId, newRole);
+      await loadUsers(); // Refresh the list
+      toast.success('User role updated successfully');
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Failed to update user role';
+      toast.error(errorMessage);
+      console.error('Error updating user role:', error);
+    }
   };
 
   const handleStatusToggle = async (userId: string, isDisabled: boolean) => {
-    await userManagementService.toggleUserStatus(userId, isDisabled);
-    await loadUsers(); // Refresh the list
+    try {
+      await userManagementService.toggleUserStatus(userId, isDisabled);
+      await loadUsers(); // Refresh the list
+      toast.success(`User ${isDisabled ? 'disabled' : 'enabled'} successfully`);
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Failed to update user status';
+      toast.error(errorMessage);
+      console.error('Error updating user status:', error);
+    }
   };
 
   const handleInviteUser = async (email: string, role: string, firstName?: string, lastName?: string) => {
-    await userManagementService.inviteUser(email, role, firstName, lastName);
-    await loadUsers(); // Refresh the list
+    try {
+      await userManagementService.inviteUser(email, role, firstName, lastName);
+      await loadUsers(); // Refresh the list
+      toast.success('User invited successfully');
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Failed to invite user';
+      toast.error(errorMessage);
+      console.error('Error inviting user:', error);
+    }
   };
+
+  // Show error state with retry option
+  if (error && !isLoading) {
+    return (
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 transition-colors duration-200">
+        {!isMobile && (
+          <div className="flex h-screen">
+            <AdminSidebar />
+            <div className="flex-1 flex flex-col overflow-hidden">
+              <AdminTopBar />
+              <main className="flex-1 overflow-auto">
+                <div className="container mx-auto p-6 space-y-6">
+                  <PageHeader
+                    title="User Management"
+                    description="Manage all users in the system"
+                    icon={<Users className="h-6 w-6" />}
+                  />
+                  <Card>
+                    <CardContent className="text-center py-8">
+                      <h3 className="font-semibold mb-2 text-destructive">Error Loading Users</h3>
+                      <p className="text-muted-foreground mb-4">{error}</p>
+                      <Button onClick={retryLoadUsers}>
+                        Try Again
+                      </Button>
+                    </CardContent>
+                  </Card>
+                </div>
+              </main>
+            </div>
+          </div>
+        )}
+        
+        {isMobile && (
+          <div className="min-h-screen">
+            <AdminTopBar 
+              onMenuClick={() => setSidebarOpen(true)}
+              isMobile={true}
+            />
+            <AdminMobileSidebar 
+              isOpen={sidebarOpen}
+              onClose={() => setSidebarOpen(false)}
+            />
+            <main className="pt-16">
+              <div className="p-4 space-y-6">
+                <PageHeader
+                  title="User Management"
+                  description="Manage all users in the system"
+                  icon={<Users className="h-6 w-6" />}
+                />
+                <Card>
+                  <CardContent className="text-center py-8">
+                    <h3 className="font-semibold mb-2 text-destructive">Error Loading Users</h3>
+                    <p className="text-muted-foreground mb-4">{error}</p>
+                    <Button onClick={retryLoadUsers} className="w-full">
+                      Try Again
+                    </Button>
+                  </CardContent>
+                </Card>
+              </div>
+            </main>
+          </div>
+        )}
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 transition-colors duration-200">
@@ -173,12 +295,20 @@ export default function UserManagementPage() {
                     </CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <UserManagementTable
-                      users={filteredAndSortedUsers}
-                      onRoleUpdate={handleRoleUpdate}
-                      onStatusToggle={handleStatusToggle}
-                      isLoading={isLoading}
-                    />
+                    {isLoading ? (
+                      <PageLoader message="Loading users..." />
+                    ) : filteredAndSortedUsers.length === 0 ? (
+                      <div className="text-center py-8 text-muted-foreground">
+                        {users.length === 0 ? 'No members found' : 'No users match your search criteria'}
+                      </div>
+                    ) : (
+                      <UserManagementTable
+                        users={filteredAndSortedUsers}
+                        onRoleUpdate={handleRoleUpdate}
+                        onStatusToggle={handleStatusToggle}
+                        isLoading={isLoading}
+                      />
+                    )}
                   </CardContent>
                 </Card>
 
@@ -274,12 +404,20 @@ export default function UserManagementPage() {
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <UserManagementTableMobile
-                    users={filteredAndSortedUsers}
-                    onRoleUpdate={handleRoleUpdate}
-                    onStatusToggle={handleStatusToggle}
-                    isLoading={isLoading}
-                  />
+                  {isLoading ? (
+                    <PageLoader message="Loading users..." />
+                  ) : filteredAndSortedUsers.length === 0 ? (
+                    <div className="text-center py-8 text-muted-foreground">
+                      {users.length === 0 ? 'No members found' : 'No users match your search criteria'}
+                    </div>
+                  ) : (
+                    <UserManagementTableMobile
+                      users={filteredAndSortedUsers}
+                      onRoleUpdate={handleRoleUpdate}
+                      onStatusToggle={handleStatusToggle}
+                      isLoading={isLoading}
+                    />
+                  )}
                 </CardContent>
               </Card>
 
