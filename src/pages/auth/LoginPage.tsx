@@ -30,14 +30,19 @@ const LoginPage = () => {
     addCentennialImageToLibrary();
   }, []);
   
-  // Simple redirect when authenticated
+  // Handle redirect after successful authentication
   React.useEffect(() => {
-    if (isAuthenticated && user && isInitialized) {
-      console.log('LoginPage: Authenticated user detected, redirecting...');
+    if (isAuthenticated && user && isInitialized && !isSubmitting) {
+      console.log('LoginPage: Authenticated user detected, starting redirect...');
       const from = location.state?.from?.pathname || '/role-dashboard';
-      navigate(from, { replace: true });
+      
+      // Small delay to ensure auth state is fully settled
+      setTimeout(() => {
+        console.log('LoginPage: Executing redirect to:', from);
+        navigate(from, { replace: true });
+      }, 100);
     }
-  }, [isAuthenticated, user, isInitialized, navigate, location.state]);
+  }, [isAuthenticated, user, isInitialized, navigate, location.state, isSubmitting]);
   
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -80,7 +85,7 @@ const LoginPage = () => {
         toast.error(errorMessage);
         setIsSubmitting(false);
       } else {
-        console.log("LoginPage: Login successful, redirect will happen automatically");
+        console.log("LoginPage: Login successful, waiting for redirect...");
         toast.success("Login successful!");
         // Don't set isSubmitting false here - let the redirect happen
       }
@@ -109,7 +114,7 @@ const LoginPage = () => {
   };
   
   // Show loading during initialization
-  if (!isInitialized && isLoading) {
+  if (!isInitialized) {
     return (
       <div className="flex items-center justify-center min-h-screen bg-background">
         <div className="flex flex-col items-center space-y-4">
@@ -120,7 +125,7 @@ const LoginPage = () => {
     );
   }
   
-  // Silent redirect for authenticated users
+  // Show redirecting message for authenticated users
   if (isAuthenticated && user) {
     return (
       <div className="flex items-center justify-center min-h-screen bg-background">
