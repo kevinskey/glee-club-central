@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { User } from 'lucide-react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { AuthUser, Profile } from '@/types/auth';
 
 interface DashboardHeaderProps {
@@ -11,11 +11,10 @@ interface DashboardHeaderProps {
 
 export function DashboardHeader({ user, profile }: DashboardHeaderProps) {
   const displayName = profile?.first_name || 
-                     user?.user_metadata?.first_name || 
                      user?.email?.split('@')[0] || 
                      'Member';
 
-  const lastName = profile?.last_name || user?.user_metadata?.last_name || '';
+  const lastName = profile?.last_name || '';
   const fullName = lastName ? `${displayName} ${lastName}` : displayName;
   const memberRole = profile?.role || 'member';
   const memberStatus = profile?.status || 'active';
