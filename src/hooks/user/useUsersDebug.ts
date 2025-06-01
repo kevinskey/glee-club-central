@@ -28,8 +28,12 @@ export const useUsersDebug = (): UseUsersDebugResponse => {
     try {
       addResult('Testing basic Supabase connection...');
       
-      // Test 1: Basic connection
-      const { data, error } = await supabase.rpc('now');
+      // Test 1: Basic connection using a simple query
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('count')
+        .limit(1);
+        
       if (error) {
         addResult(`❌ Connection test failed: ${error.message}`);
       } else {
