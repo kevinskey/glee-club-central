@@ -12,23 +12,22 @@ function AppContent() {
     isLoading,
     isAuthenticated,
     hasUser: !!user,
-    userId: user?.id,
-    userEmail: user?.email
+    userId: user?.id
   });
 
-  // Show loading only if not initialized
-  if (!isInitialized) {
+  // Show loading only briefly during initial auth check
+  if (!isInitialized && isLoading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-glee-spelman mx-auto"></div>
-          <p className="mt-4 text-muted-foreground">Starting GleeWorld...</p>
+          <p className="mt-4 text-muted-foreground">Loading GleeWorld...</p>
         </div>
       </div>
     );
   }
 
-  // Once initialized, let the router handle everything
+  // Once any initialization is complete, let the router handle everything
   return <RouterProvider router={router} />;
 }
 
