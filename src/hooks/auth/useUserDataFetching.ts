@@ -9,7 +9,7 @@ export const useUserDataFetching = (
   setState: React.Dispatch<React.SetStateAction<AuthState>>,
   mountedRef: React.MutableRefObject<boolean>
 ) => {
-  // Fetch user data with enhanced coordination
+  // Fetch user data with enhanced coordination and error handling
   const fetchUserData = useCallback(async (userId: string, userEmail?: string, userMetadata?: any) => {
     if (!mountedRef.current) return;
     
@@ -27,7 +27,7 @@ export const useUserDataFetching = (
     try {
       console.log('📋 useUserDataFetching: Ensuring profile exists...');
       
-      // Ensure profile exists (create if missing)
+      // Ensure profile exists with enhanced retry logic
       profile = await ensureProfileExists(userId, userEmail, userMetadata);
       
       console.log('📋 useUserDataFetching: Profile ensure result:', {
@@ -35,7 +35,9 @@ export const useUserDataFetching = (
         profileId: profile?.id,
         profileRole: profile?.role,
         profileIsAdmin: profile?.is_super_admin,
-        profileStatus: profile?.status
+        profileStatus: profile?.status,
+        profileFirstName: profile?.first_name,
+        profileLastName: profile?.last_name
       });
       
     } catch (error) {
@@ -45,7 +47,7 @@ export const useUserDataFetching = (
     
     // Final profile validation
     if (!profile) {
-      console.error(`❌ useUserDataFetching: Profile ensure failed for user ${userId}`);
+      console.error(`❌ useUserDataFetching: Profile ensure failed for user ${userId}, updating state with error`);
       if (mountedRef.current) {
         setState(prev => ({
           ...prev,
@@ -58,19 +60,19 @@ export const useUserDataFetching = (
       return;
     }
     
-    // Validate profile role
+    // Validate and fix profile role if needed
     if (!profile.role) {
       console.warn(`⚠️ useUserDataFetching: Role undefined for profile ${profile.id}, setting default`);
       profile.role = 'member';
     }
     
-    // Fetch permissions with retry logic
+    // Fetch permissions with enhanced error handling
     try {
       console.log('🔑 useUserDataFetching: Fetching permissions...');
       permissions = await Promise.race([
         fetchUserPermissions(userId),
         new Promise<{}>((_, reject) => {
-          setTimeout(() => reject(new Error('Permissions timeout')), 3000);
+          setTimeout(() => reject(new Error('Permissions timeout')), 5000);
         })
       ]);
       console.log('🔑 useUserDataFetching: Permissions fetch COMPLETE:', {
@@ -92,6 +94,8 @@ export const useUserDataFetching = (
         profileId: profile?.id,
         profileRole: profile?.role,
         profileIsAdmin: profile?.is_super_admin,
+        profileFirstName: profile?.first_name,
+        profileLastName: profile?.last_name,
         permissionCount: Object.keys(permissions).length
       });
       

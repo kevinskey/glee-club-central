@@ -10,7 +10,7 @@ export const getProfile = async (userId: string): Promise<Profile | null> => {
       .from('profiles')
       .select('*')
       .eq('id', userId)
-      .single();
+      .maybeSingle();
     
     console.log('📋 getProfile: Database response:', {
       hasData: !!data,
@@ -22,25 +22,25 @@ export const getProfile = async (userId: string): Promise<Profile | null> => {
     });
       
     if (error) {
-      if (error.code === 'PGRST116') {
-        console.log(`ℹ️ getProfile: No profile found for user ${userId}`);
-      } else {
-        console.error('❌ getProfile: Error fetching profile:', error);
-      }
+      console.error('❌ getProfile: Error fetching profile:', error);
       return null;
     }
     
-    if (!data.role) {
+    if (data && !data.role) {
       console.warn(`⚠️ getProfile: Role undefined for profile ${data.id}, setting default`);
       data.role = 'member';
     }
     
-    console.log('✅ getProfile: Profile fetched successfully:', {
-      id: data.id,
-      role: data.role,
-      is_super_admin: data.is_super_admin,
-      status: data.status
-    });
+    if (data) {
+      console.log('✅ getProfile: Profile fetched successfully:', {
+        id: data.id,
+        role: data.role,
+        is_super_admin: data.is_super_admin,
+        status: data.status
+      });
+    } else {
+      console.log(`ℹ️ getProfile: No profile found for user ${userId}`);
+    }
     
     return data as Profile;
   } catch (error) {
@@ -51,18 +51,20 @@ export const getProfile = async (userId: string): Promise<Profile | null> => {
 
 export const createProfile = async (userId: string, userEmail?: string, metadata?: any): Promise<Profile | null> => {
   try {
-    console.log('🔧 createProfile: Creating profile for user:', userId);
+    console.log('🔧 createProfile: Creating profile for user:', userId, 'with email:', userEmail);
     
     const profileData = {
       id: userId,
-      first_name: metadata?.first_name || 'User',
-      last_name: metadata?.last_name || '',
+      first_name: metadata?.first_name || metadata?.full_name?.split(' ')[0] || 'User',
+      last_name: metadata?.last_name || metadata?.full_name?.split(' ').slice(1).join(' ') || '',
       role: 'member',
       status: 'active',
       is_super_admin: userEmail === 'kevinskey@mac.com',
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString()
     };
+    
+    console.log('🔧 createProfile: Profile data to insert:', profileData);
     
     const { data, error } = await supabase
       .from('profiles')
@@ -115,7 +117,7 @@ export const updateProfile = async (profile: Partial<Profile>): Promise<{ succes
 };
 
 // Enhanced function to wait for profile creation with retries
-export const waitForProfile = async (userId: string, maxRetries: number = 3, retryDelay: number = 1000): Promise<Profile | null> => {
+export const waitForProfile = async (userId: string, maxRetries: number = 5, retryDelay: number = 1000): Promise<Profile | null> => {
   console.log(`⏳ waitForProfile: Waiting for profile creation for user ${userId}`);
   
   for (let attempt = 1; attempt <= maxRetries; attempt++) {
@@ -140,26 +142,35 @@ export const waitForProfile = async (userId: string, maxRetries: number = 3, ret
 
 // Main function to ensure profile exists - creates if missing
 export const ensureProfileExists = async (userId: string, userEmail?: string, userMetadata?: any): Promise<Profile | null> => {
-  console.log('🔍 ensureProfileExists: Checking profile for user:', userId);
+  console.log('🔍 ensureProfileExists: Checking profile for user:', userId, 'email:', userEmail);
   
   // First try to get existing profile
   let profile = await getProfile(userId);
   
   if (!profile) {
-    console.log('🔧 ensureProfileExists: No profile found, creating new profile...');
-    // Create profile if it doesn't exist
+    console.log('🔧 ensureProfileExists: No profile found, attempting to create new profile...');
+    
+    // Try to create profile
     profile = await createProfile(userId, userEmail, userMetadata);
     
     if (!profile) {
-      console.log('⏳ ensureProfileExists: Profile creation failed, waiting for trigger...');
-      // If manual creation failed, wait a bit for the trigger
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      profile = await waitForProfile(userId);
+      console.log('⏳ ensureProfileExists: Direct creation failed, waiting for database trigger...');
+      // If creation failed, wait a bit for potential database trigger
+      await new Promise(resolve => setTimeout(resolve, 2000));
+      
+      // Try to fetch again in case trigger created it
+      profile = await waitForProfile(userId, 3, 1500);
+      
+      if (!profile) {
+        console.log('🔧 ensureProfileExists: Still no profile, attempting one more creation...');
+        // One more attempt to create
+        profile = await createProfile(userId, userEmail, userMetadata);
+      }
     }
   }
   
   if (profile) {
-    console.log('✅ ensureProfileExists: Profile ensured for user:', userId, 'role:', profile.role);
+    console.log('✅ ensureProfileExists: Profile ensured for user:', userId, 'role:', profile.role, 'admin:', profile.is_super_admin);
   } else {
     console.error('❌ ensureProfileExists: Failed to ensure profile for user:', userId);
   }
