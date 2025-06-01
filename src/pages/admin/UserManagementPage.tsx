@@ -27,7 +27,7 @@ import {
   Download,
   Upload
 } from 'lucide-react';
-import { useAuthMigration } from '@/hooks/useAuthMigration';
+import { useSimpleAuthContext } from '@/contexts/SimpleAuthContext';
 import { useUserManagement } from '@/hooks/user/useUserManagement';
 import { CreateUserModal } from '@/components/members/CreateUserModal';
 import { AddMemberDialog } from '@/components/members/AddMemberDialog';
@@ -37,7 +37,7 @@ import { UserFormValues } from '@/components/members/form/userFormSchema';
 import { useUserCreate } from '@/hooks/user/useUserCreate';
 
 export default function UserManagementPage() {
-  const { isAdmin, isLoading, isAuthenticated, profile } = useAuthMigration();
+  const { isAuthenticated, isLoading, isAdmin } = useSimpleAuthContext();
   const { users, isLoading: usersLoading, refreshUsers } = useUserManagement();
   const { addUser } = useUserCreate();
   const [searchTerm, setSearchTerm] = useState('');
@@ -47,7 +47,7 @@ export default function UserManagementPage() {
   const [showAddMemberDialog, setShowAddMemberDialog] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const isAdminUser = isAdmin();
+  const isAdminUser = isAdmin ? isAdmin() : false;
 
   useEffect(() => {
     if (isAuthenticated) {
