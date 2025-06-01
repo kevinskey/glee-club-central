@@ -22,14 +22,11 @@ export const RoleDashboard: React.FC = () => {
       hasUser: !!user,
       userId: user?.id,
       userEmail: user?.email,
-      userMetadata: user?.user_metadata,
       hasProfile: !!profile,
       profileId: profile?.id,
       profileRole: profile?.role,
       profileIsAdmin: profile?.is_super_admin,
       profileStatus: profile?.status,
-      profileFirstName: profile?.first_name,
-      profileLastName: profile?.last_name,
       isAdminFunction: isAdmin ? isAdmin() : false,
       isInitialized,
       hasRedirected,
@@ -50,28 +47,21 @@ export const RoleDashboard: React.FC = () => {
       return;
     }
 
-    // Continue loading if we're still fetching profile data
+    // Don't redirect while actively loading profile data
     if (isLoading) {
       console.log('⏳ RoleDashboard: Still loading profile data, waiting...');
       return;
     }
 
-    // Show error if profile is missing after loading completes
-    if (!profile && isAuthenticated && user && !isLoading) {
-      console.error(`❌ RoleDashboard: Profile missing for authenticated user ${user.id}`);
-      setShowError(true);
-      return;
-    }
-
-    // Route to appropriate dashboard when we have complete data
-    if (isAuthenticated && user && profile && !hasRedirected && !isLoading) {
+    // Route to appropriate dashboard when we have complete data OR after timeout
+    if (isAuthenticated && user && (profile || waitTime >= 8)) {
       let targetRoute = '/dashboard/member';
       
       // Use the isAdmin function for role detection
-      if (isAdmin && isAdmin()) {
+      if (profile && isAdmin && isAdmin()) {
         targetRoute = '/admin';
         console.log('👑 RoleDashboard: Admin role detected, routing to admin dashboard');
-      } else if (profile.role === 'fan') {
+      } else if (profile?.role === 'fan') {
         targetRoute = '/fan-dashboard';
         console.log('👤 RoleDashboard: Fan role detected, routing to fan dashboard');
       } else {
@@ -81,27 +71,39 @@ export const RoleDashboard: React.FC = () => {
       console.log('🎯 RoleDashboard: Routing to:', targetRoute);
       setHasRedirected(true);
       navigate(targetRoute, { replace: true });
+      return;
     }
-  }, [isLoading, isAuthenticated, user, profile, isAdmin, navigate, isInitialized, hasRedirected, showError]);
 
-  // Auto-retry timer for profile creation
+    // Show error if profile is missing after loading completes and reasonable wait time
+    if (!profile && isAuthenticated && user && !isLoading && waitTime >= 5) {
+      console.error(`❌ RoleDashboard: Profile missing for authenticated user ${user.id}`);
+      setShowError(true);
+      return;
+    }
+  }, [isLoading, isAuthenticated, user, profile, isAdmin, navigate, isInitialized, hasRedirected, showError, waitTime]);
+
+  // Auto-retry timer and timeout handling
   useEffect(() => {
-    if (showError && waitTime < 10) {
+    if (isAuthenticated && user && !profile && !hasRedirected && !showError) {
       const timer = setTimeout(() => {
-        setWaitTime(prev => prev + 1);
-        if (waitTime >= 5 && !isRetrying) {
-          console.log('🔄 RoleDashboard: Auto-retrying profile resolution...');
-          handleRetry();
-        }
+        setWaitTime(prev => {
+          const newTime = prev + 1;
+          if (newTime >= 8 && !isRetrying) {
+            console.log('🔄 RoleDashboard: Timeout reached, auto-retrying or continuing...');
+            if (newTime === 8) {
+              handleRetry();
+            }
+          }
+          return newTime;
+        });
       }, 1000);
       return () => clearTimeout(timer);
     }
-  }, [showError, waitTime, isRetrying]);
+  }, [isAuthenticated, user, profile, hasRedirected, showError, waitTime, isRetrying]);
 
   const handleRetry = async () => {
     setIsRetrying(true);
     setShowError(false);
-    setHasRedirected(false);
     setWaitTime(0);
     
     try {
@@ -141,30 +143,30 @@ export const RoleDashboard: React.FC = () => {
     );
   }
 
-  // Show profile resolution loading
-  if (isLoading && !showError) {
+  // Show profile resolution loading (with timeout)
+  if (isLoading && waitTime < 8) {
     return (
       <PageLoader 
-        message="Setting up your profile..."
+        message={`Setting up your profile... (${waitTime}s)`}
         className="min-h-screen"
       />
     );
   }
 
   // Show error state with retry options
-  if (showError || (!profile && !isLoading)) {
+  if (showError || (!profile && !isLoading && waitTime >= 8)) {
     return (
       <div className="min-h-screen flex items-center justify-center p-4">
         <Card className="w-full max-w-md">
           <CardHeader className="text-center">
-            <AlertCircle className="h-12 w-12 text-red-500 mx-auto mb-4" />
+            <AlertCircle className="h-12 w-12 text-yellow-500 mx-auto mb-4" />
             <CardTitle>Profile Setup Issue</CardTitle>
             <CardDescription>
-              We're setting up your profile. This process usually completes automatically.
+              We're having trouble loading your profile. You can try again or continue to the dashboard.
               {waitTime > 0 && (
                 <div className="flex items-center justify-center gap-2 mt-2 text-sm">
                   <Clock className="h-4 w-4" />
-                  <span>Waited {waitTime} seconds...</span>
+                  <span>Waited {waitTime} seconds</span>
                 </div>
               )}
             </CardDescription>
@@ -177,10 +179,7 @@ export const RoleDashboard: React.FC = () => {
               </div>
               <p><strong>User ID:</strong> {user?.id}</p>
               <p><strong>Email:</strong> {user?.email}</p>
-              <p><strong>Status:</strong> Profile Creation in Progress</p>
-              {user?.user_metadata && Object.keys(user.user_metadata).length > 0 && (
-                <p><strong>Metadata:</strong> {JSON.stringify(user.user_metadata, null, 2)}</p>
-              )}
+              <p><strong>Status:</strong> Profile Loading Issue</p>
             </div>
             <div className="flex flex-col space-y-2">
               <Button 
@@ -189,7 +188,14 @@ export const RoleDashboard: React.FC = () => {
                 className="w-full"
               >
                 <RefreshCw className={`h-4 w-4 mr-2 ${isRetrying ? 'animate-spin' : ''}`} />
-                {isRetrying ? 'Setting up profile...' : 'Retry Profile Setup'}
+                {isRetrying ? 'Retrying...' : 'Retry Profile Setup'}
+              </Button>
+              <Button 
+                variant="outline" 
+                onClick={() => navigate('/dashboard/member', { replace: true })}
+                className="w-full"
+              >
+                Continue to Dashboard
               </Button>
               <Button 
                 variant="outline" 

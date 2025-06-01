@@ -5,9 +5,19 @@ import { router } from "./router";
 import { AuthProvider, useAuth } from "./contexts/AuthContext";
 
 function AppContent() {
-  const { isLoading, isInitialized } = useAuth();
+  const { isLoading, isInitialized, isAuthenticated, user, profile } = useAuth();
 
-  // Simple loading check - only show loader if not initialized
+  console.log('🏗️ App: Render state check:', {
+    isInitialized,
+    isLoading,
+    isAuthenticated,
+    hasUser: !!user,
+    hasProfile: !!profile,
+    userId: user?.id,
+    userEmail: user?.email
+  });
+
+  // Only show loader if not initialized
   if (!isInitialized) {
     return (
       <div className="flex items-center justify-center min-h-screen">
@@ -19,6 +29,7 @@ function AppContent() {
     );
   }
 
+  // Once initialized, let the router handle routing based on auth state
   return <RouterProvider router={router} />;
 }
 

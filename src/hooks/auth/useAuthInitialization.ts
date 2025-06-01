@@ -7,7 +7,8 @@ import { AuthState } from './types';
 export const useAuthInitialization = (
   setState: React.Dispatch<React.SetStateAction<AuthState>>,
   fetchUserData: (userId: string, userEmail?: string, userMetadata?: any) => Promise<void>,
-  mountedRef: React.MutableRefObject<boolean>
+  mountedRef: React.MutableRefObject<boolean>,
+  fetchingRef: React.MutableRefObject<boolean>
 ) => {
   useEffect(() => {
     console.log('🚀 useAuthInitialization: Starting auth initialization...');
@@ -60,11 +61,10 @@ export const useAuthInitialization = (
           // Defer user data fetching to avoid initialization deadlock
           console.log('📡 useAuthInitialization: Scheduling user data fetch...');
           setTimeout(() => {
-            if (mountedRef.current) {
-              setState(prev => ({ ...prev, isLoading: true }));
+            if (mountedRef.current && !fetchingRef.current) {
               fetchUserData(session.user.id, session.user.email, session.user.user_metadata);
             }
-          }, 500); // Give the UI time to render before fetching profile data
+          }, 1000); // Give the UI time to render before fetching profile data
           
         } else {
           console.log('ℹ️ useAuthInitialization: No session found');
@@ -125,14 +125,14 @@ export const useAuthInitialization = (
           // Defer profile data fetching after sign in
           console.log('📡 useAuthInitialization: Scheduling profile fetch after sign in...');
           setTimeout(() => {
-            if (mountedRef.current) {
-              setState(prev => ({ ...prev, isLoading: true }));
+            if (mountedRef.current && !fetchingRef.current) {
               fetchUserData(session.user.id, session.user.email, session.user.user_metadata);
             }
-          }, 300);
+          }, 500);
           
         } else if (event === 'SIGNED_OUT') {
           console.log('👋 useAuthInitialization: User signed out');
+          fetchingRef.current = false; // Reset fetching state
           setState({
             user: null,
             profile: null,
@@ -151,5 +151,5 @@ export const useAuthInitialization = (
       console.log('🔄 useAuthInitialization: Cleaning up auth state listener');
       subscription.unsubscribe();
     };
-  }, [setState, fetchUserData, mountedRef]);
+  }, [setState, fetchUserData, mountedRef, fetchingRef]);
 };
