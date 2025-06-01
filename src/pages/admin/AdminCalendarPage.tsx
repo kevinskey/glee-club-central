@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { EnhancedCalendarView } from '@/components/calendar/EnhancedCalendarView';
@@ -6,6 +7,7 @@ import { EventEditor } from '@/components/admin/EventEditor';
 import { useCalendarEvents } from '@/hooks/useCalendarEvents';
 import { CalendarEvent } from '@/types/calendar';
 import { PageHeader } from '@/components/ui/page-header';
+import { BackButton } from '@/components/ui/back-button';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Calendar, Plus, Edit, Trash2, Users } from 'lucide-react';
@@ -148,11 +150,14 @@ export default function AdminCalendarPage() {
     return (
       <ErrorBoundary>
         <div className="container mx-auto px-4 py-6 max-w-7xl">
-          <PageHeader
-            title="Calendar Management"
-            description="Manage all events and calendar settings"
-            icon={<Calendar className="h-6 w-6" />}
-          />
+          <div className="flex items-center gap-4 mb-6">
+            <BackButton fallbackPath="/admin" />
+            <PageHeader
+              title="Calendar Management"
+              description="Manage all events and calendar settings"
+              icon={<Calendar className="h-6 w-6" />}
+            />
+          </div>
           <Card className="mt-6">
             <CardContent className="flex items-center justify-center h-64">
               <div className="text-center space-y-3">
@@ -170,11 +175,14 @@ export default function AdminCalendarPage() {
     return (
       <ErrorBoundary>
         <div className="container mx-auto px-4 py-6 max-w-7xl">
-          <PageHeader
-            title="Calendar Management"
-            description="Manage all events and calendar settings"
-            icon={<Calendar className="h-6 w-6" />}
-          />
+          <div className="flex items-center gap-4 mb-6">
+            <BackButton fallbackPath="/admin" />
+            <PageHeader
+              title="Calendar Management"
+              description="Manage all events and calendar settings"
+              icon={<Calendar className="h-6 w-6" />}
+            />
+          </div>
           <Card className="mt-6">
             <CardContent className="flex flex-col items-center justify-center h-64 space-y-4">
               <div className="text-red-600 text-center">
@@ -194,21 +202,24 @@ export default function AdminCalendarPage() {
   return (
     <ErrorBoundary>
       <div className="container mx-auto px-4 py-6 max-w-7xl space-y-6">
-        {/* Header Section */}
-        <PageHeader
-          title="Calendar Management"
-          description="Create, edit, and manage all Glee Club events and performances"
-          icon={<Calendar className="h-6 w-6" />}
-          actions={
-            <Button 
-              onClick={handleCreateNew} 
-              className="bg-glee-spelman hover:bg-glee-spelman/90 text-white"
-            >
-              <Plus className="h-4 w-4 mr-2" />
-              Create Event
-            </Button>
-          }
-        />
+        {/* Header Section with Back Button */}
+        <div className="flex items-center gap-4">
+          <BackButton fallbackPath="/admin" />
+          <PageHeader
+            title="Calendar Management"
+            description="Create, edit, and manage all Glee Club events and performances"
+            icon={<Calendar className="h-6 w-6" />}
+            actions={
+              <Button 
+                onClick={handleCreateNew} 
+                className="bg-glee-spelman hover:bg-glee-spelman/90 text-white"
+              >
+                <Plus className="h-4 w-4 mr-2" />
+                Create Event
+              </Button>
+            }
+          />
+        </div>
 
         {/* Stats Cards */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
