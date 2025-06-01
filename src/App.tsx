@@ -7,7 +7,7 @@ import { AuthProvider, useAuth } from "./contexts/AuthContext";
 function AppContent() {
   const { isLoading, isInitialized, isAuthenticated, user } = useAuth();
 
-  console.log('🏗️ App: Render state check:', {
+  console.log('🏗️ App: State check:', {
     isInitialized,
     isLoading,
     isAuthenticated,
@@ -15,8 +15,8 @@ function AppContent() {
     userId: user?.id
   });
 
-  // Show loading only very briefly during initial auth check
-  if (!isInitialized && isLoading) {
+  // Show loading only during initial auth check
+  if (!isInitialized) {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="text-center">

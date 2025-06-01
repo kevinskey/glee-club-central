@@ -11,16 +11,15 @@ export const useAuthInitialization = (
   fetchingRef: React.MutableRefObject<boolean>
 ) => {
   useEffect(() => {
-    console.log('🚀 useAuthInitialization: Starting auth initialization...');
+    console.log('🚀 useAuthInitialization: Starting simplified auth initialization...');
     
-    let initializationComplete = false;
+    let initComplete = false;
     
-    const completeInitialization = (user: AuthUser | null = null) => {
-      if (initializationComplete || !mountedRef.current) return;
+    const completeInit = (user: AuthUser | null = null) => {
+      if (initComplete || !mountedRef.current) return;
+      initComplete = true;
       
-      initializationComplete = true;
-      console.log('✅ useAuthInitialization: Completing initialization with user:', user?.id);
-      
+      console.log('✅ useAuthInitialization: Initialization complete with user:', user?.id);
       setState(prev => ({
         ...prev,
         user,
@@ -29,25 +28,26 @@ export const useAuthInitialization = (
       }));
     };
     
-    // Much shorter timeout - force completion quickly
-    const forceTimeout = setTimeout(() => {
-      console.log('⏰ useAuthInitialization: Force completing initialization after timeout');
-      completeInitialization();
-    }, 1000); // Reduced from 3000ms to 1000ms
+    // Simple timeout - don't wait too long
+    const timeout = setTimeout(() => {
+      console.log('⏰ useAuthInitialization: Timeout reached, completing initialization');
+      completeInit();
+    }, 2000);
     
-    const initializeAuth = async () => {
+    const initialize = async () => {
       try {
-        console.log('🔄 useAuthInitialization: Getting current session...');
+        console.log('🔄 useAuthInitialization: Checking session...');
         const { data: { session }, error } = await supabase.auth.getSession();
         
         if (error) {
           console.error('❌ useAuthInitialization: Session error:', error);
-          completeInitialization();
+          completeInit();
           return;
         }
         
         if (session?.user && mountedRef.current) {
-          console.log('✅ useAuthInitialization: Found session for user:', session.user.id);
+          console.log('✅ useAuthInitialization: Found valid session for:', session.user.id);
+          
           const authUser: AuthUser = {
             id: session.user.id,
             email: session.user.email || '',
@@ -57,33 +57,33 @@ export const useAuthInitialization = (
             created_at: session.user.created_at
           };
           
-          completeInitialization(authUser);
+          completeInit(authUser);
           
-          // Very quick background profile fetch
+          // Background profile fetch - don't block initialization
           setTimeout(() => {
             if (mountedRef.current && !fetchingRef.current) {
-              console.log('📡 useAuthInitialization: Starting quick background profile fetch...');
+              console.log('📡 useAuthInitialization: Background profile fetch');
               fetchUserData(session.user.id, session.user.email, session.user.user_metadata);
             }
-          }, 100); // Reduced delay
+          }, 200);
           
         } else {
-          console.log('ℹ️ useAuthInitialization: No session found');
-          completeInitialization();
+          console.log('ℹ️ useAuthInitialization: No valid session found');
+          completeInit();
         }
         
       } catch (error) {
-        console.error('💥 useAuthInitialization: Auth initialization error:', error);
-        completeInitialization();
+        console.error('💥 useAuthInitialization: Error during initialization:', error);
+        completeInit();
       }
     };
     
-    // Set up auth state listener
+    // Set up auth listener
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
         if (!mountedRef.current) return;
         
-        console.log('🔔 useAuthInitialization: Auth state change:', {
+        console.log('🔔 useAuthInitialization: Auth event:', {
           event,
           hasSession: !!session,
           userId: session?.user?.id
@@ -106,12 +106,12 @@ export const useAuthInitialization = (
             isInitialized: true
           }));
           
-          // Quick background profile fetch after sign in
+          // Background profile fetch
           setTimeout(() => {
             if (mountedRef.current && !fetchingRef.current) {
               fetchUserData(session.user.id, session.user.email, session.user.user_metadata);
             }
-          }, 100); // Reduced delay
+          }, 200);
           
         } else if (event === 'SIGNED_OUT') {
           console.log('👋 useAuthInitialization: User signed out');
@@ -127,12 +127,12 @@ export const useAuthInitialization = (
       }
     );
     
-    // Initialize auth immediately
-    initializeAuth();
+    // Start initialization
+    initialize();
     
     return () => {
-      console.log('🔄 useAuthInitialization: Cleaning up auth state listener');
-      clearTimeout(forceTimeout);
+      console.log('🔄 useAuthInitialization: Cleanup');
+      clearTimeout(timeout);
       subscription.unsubscribe();
     };
   }, [setState, fetchUserData, mountedRef, fetchingRef]);

@@ -6,17 +6,20 @@ import { useAuthState } from '@/hooks/auth/useAuthState';
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-// Simplified cleanup function - only clear specific problematic keys
+// Clean up problematic auth keys
 export const cleanupAuthState = () => {
-  // Only remove keys that might be causing conflicts
   const keysToRemove = Object.keys(localStorage).filter(key => 
-    key.includes('sb-') && key.includes('auth-token')
+    key.includes('sb-') && (key.includes('auth-token') || key.includes('refresh-token'))
   );
-  keysToRemove.forEach(key => localStorage.removeItem(key));
+  keysToRemove.forEach(key => {
+    console.log('🧹 Cleaning up auth key:', key);
+    localStorage.removeItem(key);
+  });
 };
 
 export const resetAuthSystem = async () => {
   try {
+    console.log('🔄 Resetting auth system...');
     await supabase.auth.signOut();
     cleanupAuthState();
     return { success: true };
@@ -30,45 +33,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const { user, profile, isLoading, isInitialized, permissions, refreshUserData } = useAuthState();
   const [session, setSession] = useState<any>(null);
 
-  // Enhanced debug logging for auth state
+  // Session tracking
   useEffect(() => {
-    console.log('🔍 AuthContext: AUTH STATE DEBUG:', {
-      hasUser: !!user,
-      userId: user?.id,
-      userEmail: user?.email,
-      userMetadata: user?.user_metadata,
-      hasProfile: !!profile,
-      profileId: profile?.id,
-      profileRole: profile?.role,
-      profileIsAdmin: profile?.is_super_admin,
-      profileStatus: profile?.status,
-      profileFirstName: profile?.first_name,
-      profileLastName: profile?.last_name,
-      isLoading,
-      isInitialized,
-      hasSession: !!session,
-      sessionUserId: session?.user?.id,
-      sessionUserEmail: session?.user?.email,
-      permissions: Object.keys(permissions || {}),
-      timestamp: new Date().toISOString()
-    });
-  }, [user, profile, isLoading, isInitialized, session, permissions]);
-
-  // Session tracking with detailed logging
-  useEffect(() => {
-    console.log('🔄 AuthContext: Setting up auth state listener...');
+    console.log('🔄 AuthContext: Setting up session listener...');
     
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
-        console.log('🔄 AuthContext: AUTH STATE CHANGE EVENT:', {
+        console.log('🔄 AuthContext: Session change:', {
           event,
           hasSession: !!session,
           userId: session?.user?.id,
-          userEmail: session?.user?.email,
-          userMetadata: session?.user?.user_metadata,
-          expiresAt: session?.expires_at,
-          accessToken: session?.access_token ? 'present' : 'missing',
-          refreshToken: session?.refresh_token ? 'present' : 'missing',
           timestamp: new Date().toISOString()
         });
         
@@ -77,31 +51,32 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     );
 
     return () => {
-      console.log('🔄 AuthContext: Cleaning up auth state listener');
+      console.log('🔄 AuthContext: Cleaning up session listener');
       subscription.unsubscribe();
     };
   }, []);
 
-  // Authentication status - requires both user and session
+  // Authentication status
   const isAuthenticated = !!user && !!session;
 
   const login = useCallback(async (email: string, password: string) => {
     try {
-      console.log('🔐 AuthContext: LOGIN ATTEMPT for:', email);
+      console.log('🔐 AuthContext: Login attempt for:', email);
+      
+      // Clean up any existing problematic state first
+      cleanupAuthState();
       
       const { data, error } = await supabase.auth.signInWithPassword({ 
         email: email.trim(), 
         password 
       });
       
-      console.log('🔐 AuthContext: LOGIN RESPONSE:', {
+      console.log('🔐 AuthContext: Login response:', {
         hasData: !!data,
         hasSession: !!data?.session,
         hasUser: !!data?.user,
         userId: data?.user?.id,
-        userEmail: data?.user?.email,
-        error: error?.message,
-        errorCode: error?.code
+        error: error?.message
       });
       
       if (error) {
@@ -110,13 +85,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }
       
       if (data.session && data.user) {
-        console.log('✅ AuthContext: Login successful, session created for user:', data.user.id);
+        console.log('✅ AuthContext: Login successful for user:', data.user.id);
         setSession(data.session);
         return { error: null };
       }
       
-      console.warn('⚠️ AuthContext: Login completed but no session or user created');
-      return { error: new Error('No session or user created') };
+      console.warn('⚠️ AuthContext: Login completed but no session created');
+      return { error: new Error('No session created') };
     } catch (err) {
       console.error('💥 AuthContext: Unexpected login error:', err);
       return { error: err };
@@ -125,7 +100,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const logout = useCallback(async () => {
     try {
-      console.log('🚪 AuthContext: LOGOUT ATTEMPT');
+      console.log('🚪 AuthContext: Logout attempt');
       const { error } = await supabase.auth.signOut();
       console.log('🚪 AuthContext: Logout response:', { error: error?.message });
       
@@ -143,7 +118,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const signUp = useCallback(async (email: string, password: string, firstName: string, lastName: string, userType: any = 'member') => {
     try {
-      console.log('📝 AuthContext: SIGN UP ATTEMPT for:', email);
+      console.log('📝 AuthContext: Sign up attempt for:', email);
       
       const { data, error } = await supabase.auth.signUp({
         email: email.trim(),
@@ -157,13 +132,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         },
       });
       
-      console.log('📝 AuthContext: SIGN UP RESPONSE:', {
+      console.log('📝 AuthContext: Sign up response:', {
         hasData: !!data,
         hasUser: !!data?.user,
         userId: data?.user?.id,
-        userEmail: data?.user?.email,
-        error: error?.message,
-        errorCode: error?.code
+        error: error?.message
       });
       
       return { error, data };
@@ -174,57 +147,36 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, []);
 
   const isAdmin = useCallback(() => {
-    if (!profile) {
-      console.log('👑 AuthContext: ADMIN CHECK - no profile loaded yet');
-      return false;
-    }
-    
     const adminStatus = profile?.is_super_admin === true || profile?.role === 'admin';
-    console.log('👑 AuthContext: ADMIN CHECK RESULT:', {
+    console.log('👑 AuthContext: Admin check:', {
       hasProfile: !!profile,
       profileRole: profile?.role,
       isSuperAdmin: profile?.is_super_admin,
-      isAdmin: adminStatus,
-      userId: user?.id,
-      profileId: profile?.id
+      result: adminStatus
     });
     return adminStatus;
-  }, [profile, user]);
+  }, [profile]);
 
   const isMember = useCallback(() => {
-    if (!profile) {
-      console.log('👤 AuthContext: MEMBER CHECK - no profile loaded yet');
-      return false;
-    }
-    
     const memberStatus = profile?.role === 'member' || !profile?.role;
-    console.log('👤 AuthContext: MEMBER CHECK RESULT:', {
+    console.log('👤 AuthContext: Member check:', {
       hasProfile: !!profile,
       profileRole: profile?.role,
-      isMember: memberStatus,
-      userId: user?.id,
-      profileId: profile?.id
+      result: memberStatus
     });
     return memberStatus;
-  }, [profile, user]);
+  }, [profile]);
 
   const getUserType = useCallback(() => {
-    if (!profile) {
-      console.log('🏷️ AuthContext: USER TYPE CHECK - no profile loaded yet, defaulting to member');
-      return 'member';
-    }
-    
     const userType = (profile?.is_super_admin === true || profile?.role === 'admin') ? 'admin' : 'member';
-    console.log('🏷️ AuthContext: USER TYPE CHECK RESULT:', {
+    console.log('🏷️ AuthContext: User type:', {
       hasProfile: !!profile,
       profileRole: profile?.role,
       isSuperAdmin: profile?.is_super_admin,
-      userType,
-      userId: user?.id,
-      profileId: profile?.id
+      result: userType
     });
     return userType;
-  }, [profile, user]);
+  }, [profile]);
 
   const updatePassword = useCallback(async (newPassword: string) => {
     const { error } = await supabase.auth.updateUser({ password: newPassword });
@@ -259,8 +211,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           created_at: new Date().toISOString(),
           updated_at: new Date().toISOString()
         });
-      
-      console.log('🔧 AuthContext: Fallback profile creation result:', { error: error?.message });
       
       if (error) {
         console.error('❌ AuthContext: Error creating fallback profile:', error);

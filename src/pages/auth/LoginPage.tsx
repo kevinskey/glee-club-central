@@ -1,3 +1,4 @@
+
 import * as React from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useNavigate, useLocation, Link } from 'react-router-dom';
@@ -29,10 +30,10 @@ const LoginPage = () => {
     addCentennialImageToLibrary();
   }, []);
   
-  // Simplified redirect logic - immediate redirect when authenticated
+  // Simple redirect when authenticated
   React.useEffect(() => {
     if (isAuthenticated && user && isInitialized) {
-      console.log('LoginPage: User is authenticated, redirecting immediately...');
+      console.log('LoginPage: Authenticated user detected, redirecting...');
       const from = location.state?.from?.pathname || '/role-dashboard';
       navigate(from, { replace: true });
     }
@@ -56,11 +57,11 @@ const LoginPage = () => {
     setIsSubmitting(true);
     
     try {
-      console.log('LoginPage: Attempting login for:', email);
+      console.log('LoginPage: Starting login for:', email);
       const result = await login(email, password);
       
       if (result.error) {
-        console.error("LoginPage: Login error:", result.error);
+        console.error("LoginPage: Login failed:", result.error);
         
         let errorMessage = "Login failed";
         if (result.error.message) {
@@ -79,12 +80,12 @@ const LoginPage = () => {
         toast.error(errorMessage);
         setIsSubmitting(false);
       } else {
-        console.log("LoginPage: Login successful!");
+        console.log("LoginPage: Login successful, redirect will happen automatically");
         toast.success("Login successful!");
-        // The redirect will happen automatically via useEffect
+        // Don't set isSubmitting false here - let the redirect happen
       }
     } catch (err) {
-      console.error("LoginPage: Unexpected login error:", err);
+      console.error("LoginPage: Unexpected error:", err);
       const errorMessage = "An unexpected error occurred. Please try again.";
       setLoginError(errorMessage);
       toast.error(errorMessage);
@@ -107,7 +108,7 @@ const LoginPage = () => {
     }
   };
   
-  // Show loading only very briefly
+  // Show loading during initialization
   if (!isInitialized && isLoading) {
     return (
       <div className="flex items-center justify-center min-h-screen bg-background">
@@ -119,9 +120,16 @@ const LoginPage = () => {
     );
   }
   
-  // Don't show redirect message - let the redirect happen silently
+  // Silent redirect for authenticated users
   if (isAuthenticated && user) {
-    return null; // Silent redirect
+    return (
+      <div className="flex items-center justify-center min-h-screen bg-background">
+        <div className="flex flex-col items-center space-y-4">
+          <Spinner size="lg" />
+          <p className="text-muted-foreground">Redirecting to dashboard...</p>
+        </div>
+      </div>
+    );
   }
 
   // Main login form
