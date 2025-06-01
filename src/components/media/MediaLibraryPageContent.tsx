@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Media } from 'lucide-react';
+import { FileImage } from 'lucide-react';
 
 interface MediaLibraryPageContentProps {
   isAdminView?: boolean;
@@ -27,7 +27,7 @@ export const MediaLibraryPageContent: React.FC<MediaLibraryPageContentProps> = (
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <Media className="h-5 w-5" />
+            <FileImage className="h-5 w-5" />
             Media Library
           </CardTitle>
           <CardDescription>
@@ -38,7 +38,7 @@ export const MediaLibraryPageContent: React.FC<MediaLibraryPageContentProps> = (
           </CardDescription>
         </CardHeader>
         <CardContent className="text-center py-8">
-          <Media className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+          <FileImage className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
           <h3 className="font-semibold mb-2">Media Library Coming Soon</h3>
           <p className="text-muted-foreground">
             Media library functionality will be implemented here.

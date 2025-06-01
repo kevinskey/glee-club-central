@@ -1,7 +1,7 @@
 
 import React, { useState } from 'react';
 import { FileImage } from 'lucide-react';
-import MediaLibraryPage from '../media-library/MediaLibraryPage';
+import { MediaLibraryPageContent } from '@/components/media/MediaLibraryPageContent';
 import { UploadMediaModal } from '@/components/UploadMediaModal';
 
 const AdminMediaLibraryPage = () => {
@@ -24,7 +24,7 @@ const AdminMediaLibraryPage = () => {
       </div>
       
       <div className="mt-8">
-        <MediaLibraryPage isAdminView={true} />
+        <MediaLibraryPageContent isAdminView={true} />
       </div>
       
       <UploadMediaModal

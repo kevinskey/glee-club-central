@@ -128,6 +128,7 @@ export default function ProfilePage() {
             
             <TabsContent value="overview">
               <ProfileOverviewTab 
+                profile={profile}
                 isEditable={isEditing} 
                 onSave={handleProfileUpdate}
               />
