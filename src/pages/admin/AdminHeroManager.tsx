@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { Navigate } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
@@ -20,6 +21,7 @@ interface MediaImage {
   id: string;
   title: string;
   file_url: string;
+  file_type?: string;
   is_hero: boolean;
   hero_tag: string | null;
   display_order: number | null;
@@ -31,6 +33,12 @@ const HERO_TAG_OPTIONS = [
   { value: "audio-hero", label: "Audio Hero" },
   { value: "store-hero", label: "Store Hero" }
 ];
+
+// Helper function to check if file is an image
+const isImageFile = (fileType: string | null | undefined): boolean => {
+  if (!fileType) return false;
+  return fileType.startsWith('image/');
+};
 
 export default function AdminHeroManager() {
   const { user, profile, isAuthenticated, isLoading: authLoading } = useSimpleAuthContext();
@@ -66,7 +74,7 @@ export default function AdminHeroManager() {
     return <Navigate to="/" replace />;
   }
 
-  // Fetch all media images
+  // Fetch all media images (only images, no PDFs)
   const fetchImages = async () => {
     setIsLoading(true);
     try {
@@ -74,8 +82,9 @@ export default function AdminHeroManager() {
       
       const { data, error } = await supabase
         .from('media_library')
-        .select('id, title, file_url, is_hero, hero_tag, display_order')
+        .select('id, title, file_url, file_type, is_hero, hero_tag, display_order')
         .not('file_url', 'is', null)
+        .like('file_type', 'image/%') // Only fetch image files
         .order('display_order', { ascending: true });
 
       if (error) {
@@ -86,14 +95,17 @@ export default function AdminHeroManager() {
 
       console.log('✅ Images fetched successfully:', data?.length || 0);
 
-      const formattedImages: MediaImage[] = (data || []).map(item => ({
-        id: item.id,
-        title: item.title || 'Untitled',
-        file_url: item.file_url,
-        is_hero: item.is_hero || false,
-        hero_tag: item.hero_tag,
-        display_order: item.display_order || 0
-      }));
+      const formattedImages: MediaImage[] = (data || [])
+        .filter(item => isImageFile(item.file_type)) // Double-check to ensure only images
+        .map(item => ({
+          id: item.id,
+          title: item.title || 'Untitled',
+          file_url: item.file_url,
+          file_type: item.file_type,
+          is_hero: item.is_hero || false,
+          hero_tag: item.hero_tag,
+          display_order: item.display_order || 0
+        }));
 
       setImages(formattedImages);
       setFilteredImages(formattedImages);
@@ -321,7 +333,7 @@ export default function AdminHeroManager() {
     <div className="container mx-auto px-4 py-8">
       <div className="mb-8">
         <h1 className="text-3xl font-bold mb-2">Hero Image Manager</h1>
-        <p className="text-muted-foreground">Manage which images appear in hero sections across the site</p>
+        <p className="text-muted-foreground">Manage which images appear in hero sections across the site (Images only - PDFs excluded)</p>
       </div>
 
       {/* Enhanced Controls Section */}
@@ -438,7 +450,7 @@ export default function AdminHeroManager() {
             <CardContent className="p-4">
               <div className="flex items-center gap-2">
                 <Badge variant="destructive" className="animate-pulse">
-                  {images.filter((_, i, arr) => arr.findIndex(img => img.id === _.id) !== arr.findLastIndex(img => img.id === _.id)).length || images.length} Unsaved Changes
+                  Unsaved Changes
                 </Badge>
                 <Button 
                   onClick={saveChanges} 
