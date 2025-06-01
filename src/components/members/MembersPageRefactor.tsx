@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -15,9 +16,15 @@ import {
   Phone,
   Calendar,
   Music,
-  Settings as SettingsIcon
+  Settings as SettingsIcon,
+  Download,
+  Upload
 } from 'lucide-react';
 import { useAuthMigration } from '@/hooks/useAuthMigration';
+import { useUserManagement } from '@/hooks/user/useUserManagement';
+import { CreateUserModal } from './CreateUserModal';
+import { MemberCSVUpload } from './MemberCSVUpload';
+import { MemberCSVDownload } from './MemberCSVDownload';
 
 interface Member {
   id: string;
@@ -34,75 +41,34 @@ interface Member {
 
 export function MembersPageRefactor() {
   const { isAdmin, isLoading, isAuthenticated, profile } = useAuthMigration();
-  const [members, setMembers] = useState<Member[]>([]);
+  const { users, isLoading: usersLoading, refreshUsers } = useUserManagement();
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedVoicePart, setSelectedVoicePart] = useState('all');
-  const [loading, setLoading] = useState(true);
+  const [showCreateModal, setShowCreateModal] = useState(false);
 
   const isAdminUser = isAdmin();
 
   useEffect(() => {
-    const fetchMembers = async () => {
-      setLoading(true);
-      // Mock data - replace with actual data fetching
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      const mockMembers: Member[] = [
-        {
-          id: '1',
-          first_name: 'John',
-          last_name: 'Doe',
-          email: 'john.doe@example.com',
-          voice_part: 'Tenor',
-          status: 'active',
-          join_date: '2022-08-15',
-          avatar_url: 'https://avatars.dicebear.com/api/male/john.svg',
-          phone: '123-456-7890',
-          class_year: '2024'
-        },
-        {
-          id: '2',
-          first_name: 'Jane',
-          last_name: 'Smith',
-          email: 'jane.smith@example.com',
-          voice_part: 'Soprano',
-          status: 'active',
-          join_date: '2023-01-20',
-          avatar_url: 'https://avatars.dicebear.com/api/female/jane.svg',
-          phone: '987-654-3210',
-          class_year: '2025'
-        },
-        {
-          id: '3',
-          first_name: 'Alice',
-          last_name: 'Johnson',
-          email: 'alice.johnson@example.com',
-          voice_part: 'Alto',
-          status: 'inactive',
-          join_date: '2022-05-10',
-          avatar_url: 'https://avatars.dicebear.com/api/female/alice.svg',
-          class_year: '2023'
-        },
-      ];
-      setMembers(mockMembers);
-      setLoading(false);
-    };
-
     if (isAuthenticated) {
-      fetchMembers();
+      refreshUsers();
     }
-  }, [isAuthenticated]);
+  }, [isAuthenticated, refreshUsers]);
 
-  const filteredMembers = members.filter(member => {
+  const filteredMembers = users.filter(user => {
     const searchTermLower = searchTerm.toLowerCase();
-    const fullName = `${member.first_name} ${member.last_name}`.toLowerCase();
-    const matchesSearch = fullName.includes(searchTermLower) || member.email.toLowerCase().includes(searchTermLower);
+    const fullName = `${user.first_name || ''} ${user.last_name || ''}`.toLowerCase();
+    const matchesSearch = fullName.includes(searchTermLower) || (user.email || '').toLowerCase().includes(searchTermLower);
 
-    const matchesVoicePart = selectedVoicePart === 'all' || member.voice_part === selectedVoicePart;
+    const matchesVoicePart = selectedVoicePart === 'all' || user.voice_part === selectedVoicePart;
 
     return matchesSearch && matchesVoicePart;
   });
 
-  if (isLoading || loading) {
+  const handleUserCreated = () => {
+    refreshUsers();
+  };
+
+  if (isLoading || usersLoading) {
     return (
       <div className="flex items-center justify-center p-8">
         <div className="text-center">
@@ -137,7 +103,7 @@ export function MembersPageRefactor() {
           </p>
         </div>
         {isAdminUser && (
-          <Button>
+          <Button onClick={() => setShowCreateModal(true)}>
             <UserPlus className="mr-2 h-4 w-4" />
             Add Member
           </Button>
@@ -169,16 +135,127 @@ export function MembersPageRefactor() {
         </CardContent>
       </Card>
 
-      {/* Members list placeholder */}
-      <Card>
-        <CardContent className="text-center py-8">
-          <Users className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-          <h3 className="font-semibold mb-2">Member List Coming Soon</h3>
-          <p className="text-muted-foreground">
-            Member management functionality will be implemented here.
-          </p>
-        </CardContent>
-      </Card>
+      {/* Tabs for different views */}
+      <Tabs defaultValue="list" className="w-full">
+        <TabsList className="grid w-full grid-cols-4">
+          <TabsTrigger value="list">Member List</TabsTrigger>
+          <TabsTrigger value="create">Create User</TabsTrigger>
+          <TabsTrigger value="upload">Batch Upload</TabsTrigger>
+          <TabsTrigger value="export">Export Data</TabsTrigger>
+        </TabsList>
+        
+        <TabsContent value="list" className="space-y-4">
+          {filteredMembers.length === 0 ? (
+            <Card>
+              <CardContent className="text-center py-8">
+                <Users className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                <h3 className="font-semibold mb-2">No Members Found</h3>
+                <p className="text-muted-foreground">
+                  {searchTerm ? 'No members match your search criteria.' : 'No members have been added yet.'}
+                </p>
+              </CardContent>
+            </Card>
+          ) : (
+            <div className="grid gap-4">
+              {filteredMembers.map((member) => (
+                <Card key={member.id}>
+                  <CardContent className="p-4">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center space-x-4">
+                        <Avatar>
+                          <AvatarImage src={member.avatar_url} />
+                          <AvatarFallback>
+                            {`${member.first_name?.[0] || ''}${member.last_name?.[0] || ''}`}
+                          </AvatarFallback>
+                        </Avatar>
+                        <div>
+                          <h3 className="font-semibold">
+                            {member.first_name} {member.last_name}
+                          </h3>
+                          <p className="text-sm text-muted-foreground flex items-center">
+                            <Mail className="mr-1 h-3 w-3" />
+                            {member.email}
+                          </p>
+                          {member.phone && (
+                            <p className="text-sm text-muted-foreground flex items-center">
+                              <Phone className="mr-1 h-3 w-3" />
+                              {member.phone}
+                            </p>
+                          )}
+                        </div>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        {member.voice_part && (
+                          <Badge variant="outline">
+                            <Music className="mr-1 h-3 w-3" />
+                            {member.voice_part}
+                          </Badge>
+                        )}
+                        <Badge variant={member.status === 'active' ? 'default' : 'secondary'}>
+                          {member.status}
+                        </Badge>
+                        {isAdminUser && (
+                          <Button variant="ghost" size="sm">
+                            <MoreVertical className="h-4 w-4" />
+                          </Button>
+                        )}
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          )}
+        </TabsContent>
+
+        <TabsContent value="create">
+          {isAdminUser ? (
+            <Card>
+              <CardHeader>
+                <CardTitle>Create Individual User</CardTitle>
+                <CardDescription>
+                  Add a single new member to the system.
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <Button onClick={() => setShowCreateModal(true)} className="w-full">
+                  <UserPlus className="mr-2 h-4 w-4" />
+                  Open Create User Form
+                </Button>
+              </CardContent>
+            </Card>
+          ) : (
+            <Card>
+              <CardContent className="text-center py-8">
+                <p className="text-muted-foreground">Admin access required to create users.</p>
+              </CardContent>
+            </Card>
+          )}
+        </TabsContent>
+
+        <TabsContent value="upload">
+          {isAdminUser ? (
+            <MemberCSVUpload />
+          ) : (
+            <Card>
+              <CardContent className="text-center py-8">
+                <p className="text-muted-foreground">Admin access required for batch uploads.</p>
+              </CardContent>
+            </Card>
+          )}
+        </TabsContent>
+
+        <TabsContent value="export">
+          <MemberCSVDownload />
+        </TabsContent>
+      </Tabs>
+
+      {/* Create User Modal */}
+      <CreateUserModal
+        isOpen={showCreateModal}
+        onClose={() => setShowCreateModal(false)}
+        onUserCreated={handleUserCreated}
+      />
     </div>
   );
 }

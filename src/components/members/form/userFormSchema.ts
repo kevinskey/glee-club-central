@@ -1,36 +1,21 @@
 
-import * as z from "zod";
-import { formatPhoneNumber } from "@/utils/formatters";
-
-const emailRegex = /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i;
+import { z } from "zod";
 
 export const userFormSchema = z.object({
-  title: z.string().optional(),
   first_name: z.string().min(1, "First name is required"),
   last_name: z.string().min(1, "Last name is required"),
-  email: z.string().email("Invalid email format").regex(emailRegex, "Invalid email format"),
+  email: z.string().email("Invalid email address"),
   password: z.string().min(6, "Password must be at least 6 characters"),
   phone: z.string().optional(),
-  voice_part: z.enum(["soprano_1", "soprano_2", "alto_1", "alto_2", "tenor", "bass", "director"]).nullable(),
-  status: z.enum(["active", "pending", "inactive", "alumni"]).default("active"),
+  voice_part: z.string().default(""),
   class_year: z.string().optional(),
-  notes: z.string().optional(),
-  dues_paid: z.boolean().default(false),
+  role: z.enum(["admin", "member"]).default("member"),
   is_admin: z.boolean().default(false),
+  status: z.string().default("active"),
+  dues_paid: z.boolean().default(false),
   join_date: z.string().optional(),
-  role: z.string().optional(),
-  avatar_url: z.string().optional()
+  notes: z.string().optional(),
+  avatar_url: z.string().optional(),
 });
 
 export type UserFormValues = z.infer<typeof userFormSchema>;
-
-export type VoicePart = "soprano_1" | "soprano_2" | "alto_1" | "alto_2" | "tenor" | "bass" | "director" | null;
-
-export const formatUserData = (formData: UserFormValues) => {
-  // Format phone number if present
-  if (formData.phone) {
-    formData.phone = formatPhoneNumber(formData.phone);
-  }
-
-  return formData;
-};
