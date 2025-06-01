@@ -18,6 +18,7 @@ import JoinGleeFamPage from "./pages/JoinGleeFamPage";
 import RoleDashboardPage from "./pages/RoleDashboardPage";
 import AdminDashboardPage from "./pages/admin/AdminDashboardPage";
 import MemberDashboardPage from "./pages/dashboard/MemberDashboardPage";
+import FanDashboardPage from "./pages/dashboard/FanDashboardPage";
 import NotFoundPage from "./pages/NotFoundPage";
 
 export const router = createBrowserRouter([
@@ -85,7 +86,7 @@ export const router = createBrowserRouter([
       </SimpleAuthProvider>
     ),
   },
-  // Admin dashboard
+  // Admin dashboard - fixed path
   {
     path: "/dashboard/admin",
     element: (
@@ -106,6 +107,19 @@ export const router = createBrowserRouter([
         <SimpleRequireAuth>
           <AppLayout sidebarType="member" showHeader={false} showFooter={false}>
             <MemberDashboardPage />
+          </AppLayout>
+        </SimpleRequireAuth>
+      </SimpleAuthProvider>
+    ),
+  },
+  // Fan dashboard
+  {
+    path: "/dashboard/fan",
+    element: (
+      <SimpleAuthProvider>
+        <SimpleRequireAuth>
+          <AppLayout sidebarType="none" showHeader={false} showFooter={false}>
+            <FanDashboardPage />
           </AppLayout>
         </SimpleRequireAuth>
       </SimpleAuthProvider>

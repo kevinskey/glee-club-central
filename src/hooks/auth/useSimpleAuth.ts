@@ -3,140 +3,165 @@ import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { AuthUser, Profile } from '@/types/auth';
 
-interface SimpleAuthState {
-  user: AuthUser | null;
-  profile: Profile | null;
-  isLoading: boolean;
-  isInitialized: boolean;
-}
-
 export const useSimpleAuth = () => {
-  const [state, setState] = useState<SimpleAuthState>({
-    user: null,
-    profile: null,
-    isLoading: true,
-    isInitialized: false
-  });
+  const [user, setUser] = useState<AuthUser | null>(null);
+  const [profile, setProfile] = useState<Profile | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isInitialized, setIsInitialized] = useState(false);
+
+  console.log('🚀 useSimpleAuth: Initializing...');
 
   const fetchProfile = useCallback(async (userId: string) => {
     try {
-      console.log('🔍 useSimpleAuth: Fetching profile for user:', userId);
+      console.log('👤 useSimpleAuth: Fetching profile for user:', userId);
       
-      const { data: profile, error } = await supabase
+      const { data, error } = await supabase
         .from('profiles')
         .select('*')
         .eq('id', userId)
-        .maybeSingle();
+        .single();
 
       if (error) {
         console.error('❌ useSimpleAuth: Profile fetch error:', error);
+        
+        // Special handling for admin user - create profile if it doesn't exist
+        if (error.code === 'PGRST116') { // No rows returned
+          const { data: userData } = await supabase.auth.getUser();
+          const userEmail = userData.user?.email;
+          
+          if (userEmail === 'kevinskey@mac.com') {
+            console.log('🔧 useSimpleAuth: Creating admin profile for kevinskey@mac.com');
+            
+            const { data: newProfile, error: createError } = await supabase
+              .from('profiles')
+              .insert({
+                id: userId,
+                first_name: 'Kevin',
+                last_name: 'Key',
+                role: 'admin',
+                is_super_admin: true,
+                status: 'active'
+              })
+              .select()
+              .single();
+              
+            if (createError) {
+              console.error('❌ useSimpleAuth: Failed to create admin profile:', createError);
+              return null;
+            }
+            
+            console.log('✅ useSimpleAuth: Admin profile created:', newProfile);
+            return newProfile;
+          }
+        }
+        
         return null;
       }
 
-      if (!profile) {
-        console.warn('⚠️ useSimpleAuth: No profile found, creating fallback');
-        // Create a fallback profile if none exists
-        const fallback: Profile = {
-          id: userId,
-          first_name: 'User',
-          last_name: '',
-          role: 'member',
-          status: 'active',
-          is_super_admin: false,
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString()
-        };
-        return fallback;
-      }
-
-      console.log('✅ useSimpleAuth: Profile loaded:', {
-        id: profile.id,
-        role: profile.role,
-        is_super_admin: profile.is_super_admin,
-        status: profile.status
+      console.log('✅ useSimpleAuth: Profile fetched:', {
+        id: data?.id,
+        role: data?.role,
+        isAdmin: data?.is_super_admin,
+        status: data?.status
       });
-
-      return profile as Profile;
-    } catch (error) {
-      console.error('💥 useSimpleAuth: Profile fetch failed:', error);
+      
+      return data;
+    } catch (err) {
+      console.error('💥 useSimpleAuth: Profile fetch exception:', err);
       return null;
     }
   }, []);
 
-  const updateAuthState = useCallback(async (session: any) => {
-    if (session?.user) {
-      const authUser: AuthUser = {
-        id: session.user.id,
-        email: session.user.email || '',
-        app_metadata: session.user.app_metadata,
-        user_metadata: session.user.user_metadata,
-        aud: session.user.aud,
-        created_at: session.user.created_at
-      };
+  const refreshProfile = useCallback(async () => {
+    if (!user?.id) return;
+    
+    console.log('🔄 useSimpleAuth: Refreshing profile...');
+    const profileData = await fetchProfile(user.id);
+    setProfile(profileData);
+  }, [user?.id, fetchProfile]);
 
-      console.log('🔄 useSimpleAuth: Setting user state:', authUser.id);
-      setState(prev => ({ ...prev, user: authUser, isLoading: false, isInitialized: true }));
-
-      // Fetch profile in background
-      const profile = await fetchProfile(session.user.id);
-      setState(prev => ({ ...prev, profile, isLoading: false }));
-    } else {
-      console.log('👋 useSimpleAuth: Clearing auth state');
-      setState({
-        user: null,
-        profile: null,
-        isLoading: false,
-        isInitialized: true
-      });
-    }
-  }, [fetchProfile]);
-
+  // Initialize auth state
   useEffect(() => {
-    console.log('🚀 useSimpleAuth: Initializing...');
+    let mounted = true;
 
-    // Set up auth listener
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, session) => {
-        console.log('🔔 useSimpleAuth: Auth event:', event, !!session);
-        await updateAuthState(session);
+    const initializeAuth = async () => {
+      try {
+        console.log('🔑 useSimpleAuth: Initializing auth state...');
+        
+        // Get initial session
+        const { data: { session }, error } = await supabase.auth.getSession();
+        
+        if (error) {
+          console.error('❌ useSimpleAuth: Session error:', error);
+        }
+        
+        if (session?.user && mounted) {
+          console.log('✅ useSimpleAuth: Initial session found for user:', session.user.id);
+          setUser(session.user);
+          
+          // Fetch profile
+          const profileData = await fetchProfile(session.user.id);
+          if (mounted) {
+            setProfile(profileData);
+          }
+        }
+        
+        if (mounted) {
+          setIsLoading(false);
+          setIsInitialized(true);
+        }
+      } catch (err) {
+        console.error('💥 useSimpleAuth: Init error:', err);
+        if (mounted) {
+          setIsLoading(false);
+          setIsInitialized(true);
+        }
       }
-    );
+    };
 
-    // Get initial session
-    supabase.auth.getSession().then(({ data: { session }, error }) => {
-      if (error) {
-        console.error('❌ useSimpleAuth: Session error:', error);
-        setState(prev => ({ ...prev, isLoading: false, isInitialized: true }));
-      } else {
-        updateAuthState(session);
+    // Set up auth state listener
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+      console.log('🔔 useSimpleAuth: Auth state changed:', event, {
+        hasSession: !!session,
+        hasUser: !!session?.user,
+        userId: session?.user?.id
+      });
+
+      if (mounted) {
+        if (session?.user) {
+          setUser(session.user);
+          
+          // Fetch profile for authenticated user
+          setTimeout(async () => {
+            const profileData = await fetchProfile(session.user.id);
+            if (mounted) {
+              setProfile(profileData);
+            }
+          }, 0);
+        } else {
+          setUser(null);
+          setProfile(null);
+        }
+        
+        setIsLoading(false);
+        setIsInitialized(true);
       }
     });
 
-    // Timeout to prevent infinite loading
-    const timeout = setTimeout(() => {
-      setState(prev => ({ 
-        ...prev, 
-        isLoading: false, 
-        isInitialized: true 
-      }));
-    }, 3000); // Reduced timeout for faster fallback
+    // Initialize
+    initializeAuth();
 
     return () => {
+      mounted = false;
       subscription.unsubscribe();
-      clearTimeout(timeout);
     };
-  }, [updateAuthState]);
-
-  const refreshProfile = useCallback(async () => {
-    if (state.user?.id) {
-      setState(prev => ({ ...prev, isLoading: true }));
-      const profile = await fetchProfile(state.user.id);
-      setState(prev => ({ ...prev, profile, isLoading: false }));
-    }
-  }, [state.user?.id, fetchProfile]);
+  }, [fetchProfile]);
 
   return {
-    ...state,
-    refreshProfile
+    user,
+    profile,
+    isLoading,
+    isInitialized,
+    refreshProfile,
   };
 };

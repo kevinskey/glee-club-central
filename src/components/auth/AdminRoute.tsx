@@ -14,8 +14,8 @@ export const AdminRoute: React.FC<AdminRouteProps> = ({ children }) => {
   
   console.log('🛡️ AdminRoute: Admin access check:', {
     hasUser: !!user,
-    hasProfile: !!profile,
     userEmail: user?.email,
+    hasProfile: !!profile,
     profileRole: profile?.role,
     profileIsAdmin: profile?.is_super_admin,
     isAdminFunction: isAdmin(),
@@ -50,8 +50,16 @@ export const AdminRoute: React.FC<AdminRouteProps> = ({ children }) => {
     );
   }
   
-  // Check admin access
-  const hasAdminAccess = isAdmin();
+  // Special handling for kevinskey@mac.com
+  const isKnownAdmin = user.email === 'kevinskey@mac.com';
+  const hasAdminAccess = isAdmin() || isKnownAdmin;
+  
+  console.log('🔍 AdminRoute: Final admin check:', {
+    isKnownAdmin,
+    hasAdminAccess,
+    profileRole: profile?.role,
+    profileIsAdmin: profile?.is_super_admin
+  });
   
   if (!hasAdminAccess) {
     console.log('🚫 AdminRoute: User does not have admin access, redirecting to member dashboard');

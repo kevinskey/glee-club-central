@@ -9,6 +9,7 @@ const RoleDashboardPage = () => {
 
   console.log('🏠 RoleDashboardPage: State check:', {
     hasUser: !!user,
+    userEmail: user?.email,
     hasProfile: !!profile,
     isLoading,
     isInitialized,
@@ -44,15 +45,21 @@ const RoleDashboardPage = () => {
     );
   }
 
-  // Determine redirect based on user type - check admin status properly
-  const hasAdminAccess = isAdmin();
+  // Determine redirect based on user type
   let redirectPath = '/dashboard/member'; // Default fallback
+  
+  // Check if user is kevinskey@mac.com (known admin)
+  const isKnownAdmin = user.email === 'kevinskey@mac.com';
+  const hasAdminAccess = isAdmin() || isKnownAdmin;
   
   if (hasAdminAccess) {
     redirectPath = '/dashboard/admin';
     console.log('🎯 RoleDashboardPage: Admin user detected, redirecting to admin dashboard');
+  } else if (profile?.role === 'fan') {
+    redirectPath = '/dashboard/fan';
+    console.log('🎯 RoleDashboardPage: Fan user detected, redirecting to fan dashboard');
   } else {
-    console.log('🎯 RoleDashboardPage: Regular user, redirecting to member dashboard');
+    console.log('🎯 RoleDashboardPage: Regular member, redirecting to member dashboard');
   }
   
   console.log('🎯 RoleDashboardPage: Redirecting to:', redirectPath);
