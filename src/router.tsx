@@ -5,6 +5,7 @@ import { AuthProvider } from "@/contexts/AuthContext";
 import { ProfileProvider } from "@/contexts/ProfileContext";
 import { SimpleAuthProvider } from "@/contexts/SimpleAuthContext";
 import RequireAuth from "@/components/auth/RequireAuth";
+import AdminRoute from "@/components/auth/AdminRoute";
 import AppLayout from "@/layouts/AppLayout";
 
 // Import pages
@@ -86,7 +87,9 @@ export const router = createBrowserRouter([
     path: "/admin",
     element: (
       <SimpleAuthProvider>
-        <AdminDashboardPage />
+        <AdminRoute>
+          <AdminDashboardPage />
+        </AdminRoute>
       </SimpleAuthProvider>
     ),
   },
