@@ -28,16 +28,15 @@ export const useUsersDebug = (): UseUsersDebugResponse => {
     try {
       addResult('Testing basic Supabase connection...');
       
-      // Test 1: Basic connection using a simple query
-      const { data, error } = await supabase
+      // Test 1: Basic connection with a simple count query
+      const { count, error } = await supabase
         .from('profiles')
-        .select('count')
-        .limit(1);
+        .select('*', { count: 'exact', head: true });
         
       if (error) {
         addResult(`❌ Connection test failed: ${error.message}`);
       } else {
-        addResult('✅ Basic connection successful');
+        addResult(`✅ Basic connection successful - found ${count || 0} profiles`);
       }
     } catch (err) {
       addResult(`💥 Connection error: ${err instanceof Error ? err.message : 'Unknown error'}`);
@@ -58,6 +57,7 @@ export const useUsersDebug = (): UseUsersDebugResponse => {
       } else if (user) {
         addResult(`✅ User authenticated: ${user.email}`);
         addResult(`User ID: ${user.id}`);
+        addResult(`Is admin email: ${user.email === 'kevinskey@mac.com' ? 'Yes' : 'No'}`);
       } else {
         addResult('⚠️ No authenticated user');
       }
@@ -84,7 +84,7 @@ export const useUsersDebug = (): UseUsersDebugResponse => {
       // Test own profile query
       const { data: ownProfile, error: ownError } = await supabase
         .from('profiles')
-        .select('id, first_name, last_name, role')
+        .select('id, first_name, last_name, role, is_super_admin')
         .eq('id', user.id)
         .maybeSingle();
 
@@ -92,6 +92,8 @@ export const useUsersDebug = (): UseUsersDebugResponse => {
         addResult(`❌ Own profile query failed: ${ownError.message}`);
       } else if (ownProfile) {
         addResult(`✅ Own profile found: ${ownProfile.first_name} ${ownProfile.last_name}`);
+        addResult(`Profile role: ${ownProfile.role}`);
+        addResult(`Is super admin: ${ownProfile.is_super_admin ? 'Yes' : 'No'}`);
       } else {
         addResult('⚠️ No profile found for current user');
       }
@@ -119,11 +121,11 @@ export const useUsersDebug = (): UseUsersDebugResponse => {
         addResult(`✅ Profiles count: ${count || 0}`);
       }
 
-      // Test fetching all profiles
+      // Test fetching all profiles (should work for admin, limited for others due to RLS)
       const { data: allProfiles, error: allError } = await supabase
         .from('profiles')
-        .select('id, first_name, last_name, role')
-        .limit(5);
+        .select('id, first_name, last_name, role, is_super_admin')
+        .limit(10);
 
       if (allError) {
         addResult(`❌ All profiles query failed: ${allError.message}`);
@@ -131,6 +133,14 @@ export const useUsersDebug = (): UseUsersDebugResponse => {
         addResult(`✅ Fetched ${allProfiles?.length || 0} profiles successfully`);
         if (allProfiles && allProfiles.length > 0) {
           addResult(`First profile: ${allProfiles[0].first_name} ${allProfiles[0].last_name}`);
+          
+          // Check if we can see multiple profiles (admin) or just our own (non-admin)
+          const uniqueIds = new Set(allProfiles.map(p => p.id));
+          if (uniqueIds.size > 1) {
+            addResult('✅ Can see multiple profiles - admin access confirmed');
+          } else {
+            addResult('ℹ️ Can only see own profile - limited user access (normal for non-admin)');
+          }
         }
       }
     } catch (err) {

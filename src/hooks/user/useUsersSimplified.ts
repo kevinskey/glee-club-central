@@ -21,9 +21,9 @@ export const useUsersSimplified = (): UseUsersSimplifiedResponse => {
     setError(null);
     
     try {
-      console.log('🔄 Fetching users with enhanced error handling');
+      console.log('🔄 useUsersSimplified: Starting to fetch users...');
       
-      // First check if user is authenticated
+      // Check authentication first
       const { data: { user: currentUser } } = await supabase.auth.getUser();
       
       if (!currentUser) {
@@ -34,104 +34,84 @@ export const useUsersSimplified = (): UseUsersSimplifiedResponse => {
 
       console.log('✅ Current user authenticated:', currentUser.email);
 
-      // Enhanced direct admin check
-      const isKnownAdmin = currentUser.email === 'kevinskey@mac.com';
-      console.log('🔍 Direct admin check:', { email: currentUser.email, isKnownAdmin });
+      // Now try to fetch profiles with the fixed RLS policies
+      const { data: profiles, error: profilesError } = await supabase
+        .from('profiles')
+        .select(`
+          id,
+          first_name,
+          last_name,
+          phone,
+          voice_part,
+          avatar_url,
+          status,
+          join_date,
+          class_year,
+          dues_paid,
+          notes,
+          created_at,
+          updated_at,
+          is_super_admin,
+          role,
+          title,
+          special_roles
+        `)
+        .order('last_name', { ascending: true });
 
-      // Try a safe profiles query with timeout to prevent hanging
-      console.log('🔍 Attempting safe profiles query...');
-      
-      const timeoutPromise = new Promise((_, reject) => {
-        setTimeout(() => reject(new Error('Query timeout')), 10000);
+      console.log('📊 Profiles query result:', {
+        profilesCount: profiles?.length || 0,
+        hasError: !!profilesError,
+        errorMessage: profilesError?.message,
+        errorCode: profilesError?.code
       });
 
-      const queryPromise = supabase
-        .from('profiles')
-        .select('id, first_name, last_name, role, is_super_admin, status, voice_part, phone, join_date, class_year, dues_paid, notes, created_at, updated_at, avatar_url, title, special_roles')
-        .limit(50); // Limit to prevent overwhelming queries
-
-      const { data: profiles, error: profilesError } = await Promise.race([queryPromise, timeoutPromise]) as any;
-
       if (profilesError) {
-        console.error('❌ Profiles query failed:', profilesError);
-        
-        // Check if it's a recursion error
-        if (profilesError.code === '42P17' || profilesError.message.includes('infinite recursion')) {
-          console.log('🔄 Recursion detected, trying fallback approach...');
-          
-          // Fallback: Try to get just the current user's profile
-          try {
-            const { data: ownProfile, error: ownError } = await supabase
-              .from('profiles')
-              .select('*')
-              .eq('id', currentUser.id)
-              .maybeSingle();
-            
-            if (!ownError && ownProfile) {
-              console.log('✅ Fallback: Got own profile only');
-              const fallbackUsers: User[] = [{
-                id: ownProfile.id,
-                email: currentUser.email,
-                first_name: ownProfile.first_name || '',
-                last_name: ownProfile.last_name || '',
-                phone: ownProfile.phone,
-                voice_part: ownProfile.voice_part,
-                avatar_url: ownProfile.avatar_url,
-                status: ownProfile.status || 'active',
-                join_date: ownProfile.join_date,
-                class_year: ownProfile.class_year,
-                dues_paid: ownProfile.dues_paid || false,
-                notes: ownProfile.notes,
-                created_at: ownProfile.created_at,
-                updated_at: ownProfile.updated_at,
-                last_sign_in_at: null,
-                is_super_admin: ownProfile.is_super_admin || false,
-                role: ownProfile.role || 'member',
-                personal_title: ownProfile.title || null,
-                title: ownProfile.title || null,
-                special_roles: ownProfile.special_roles || null
-              }];
-              
-              setUserCount(1);
-              toast.warning('RLS policies need fixing - showing own profile only');
-              return fallbackUsers;
-            }
-          } catch (fallbackError) {
-            console.error('❌ Fallback query also failed:', fallbackError);
-          }
-        }
-        
+        console.error('❌ Error fetching profiles:', profilesError);
         setError(`Database error: ${profilesError.message}`);
         toast.error(`Failed to load users: ${profilesError.message}`);
         return null;
       }
 
-      console.log('✅ Profiles query successful:', profiles?.length || 0, 'profiles');
-
-      // Get auth users for additional info (with error handling and timeout)
-      let authUsers: any[] = [];
-      try {
-        // This might not work if we don't have admin API access
-        const authPromise = supabase.auth.admin.listUsers();
-        const authTimeoutPromise = new Promise((_, reject) => {
-          setTimeout(() => reject(new Error('Auth users timeout')), 5000);
-        });
-
-        const { data: authData } = await Promise.race([authPromise, authTimeoutPromise]) as any;
-        authUsers = authData?.users || [];
-        console.log('✅ Auth users fetched:', authUsers.length);
-      } catch (authError) {
-        console.log('⚠️ Could not fetch auth users (expected for non-admin clients)');
-        // This is expected - continue with profile data only
+      if (!profiles || profiles.length === 0) {
+        console.log('ℹ️ No profiles found in database');
+        setUserCount(0);
+        toast.info('No user profiles found');
+        return [];
       }
 
-      // Transform data without causing loops
-      const users: User[] = (profiles || []).map(profile => {
-        const authUser = authUsers.find((u: any) => u?.id === profile.id);
+      console.log('✅ Successfully fetched profiles:', profiles.length);
+
+      // Get auth users for additional details like email
+      let authUsersMap: Record<string, any> = {};
+      try {
+        // Check if current user is admin to get additional auth data
+        if (currentUser.email === 'kevinskey@mac.com') {
+          console.log('🔑 Admin user detected, fetching auth data...');
+          const { data: authData, error: authError } = await supabase.auth.admin.listUsers();
+          
+          if (!authError && authData?.users && Array.isArray(authData.users)) {
+            authUsersMap = authData.users.reduce((acc: Record<string, any>, user: any) => {
+              acc[user.id] = user;
+              return acc;
+            }, {});
+            console.log('📧 Auth users data loaded, count:', Object.keys(authUsersMap).length);
+          } else {
+            console.warn('⚠️ Could not fetch auth users:', authError?.message);
+          }
+        } else {
+          console.log('ℹ️ Non-admin user, skipping auth data fetch');
+        }
+      } catch (err) {
+        console.warn('⚠️ Could not fetch auth users data:', err);
+      }
+
+      // Transform the data to match User interface
+      const users: User[] = profiles.map(profile => {
+        const authUser = authUsersMap[profile.id];
         
         return {
           id: profile.id,
-          email: authUser?.email || currentUser?.email || 'Unknown',
+          email: authUser?.email || currentUser.email || null,
           first_name: profile.first_name || '',
           last_name: profile.last_name || '',
           phone: profile.phone,
@@ -147,27 +127,22 @@ export const useUsersSimplified = (): UseUsersSimplifiedResponse => {
           last_sign_in_at: authUser?.last_sign_in_at || null,
           is_super_admin: profile.is_super_admin || false,
           role: profile.role || 'member',
-          personal_title: profile.title || null,
-          title: profile.title || null,
-          special_roles: profile.special_roles || null
+          personal_title: profile.title,
+          title: profile.title,
+          special_roles: profile.special_roles
         };
       });
 
+      console.log('🎉 Total users processed successfully:', users.length);
       setUserCount(users.length);
-      
-      if (users.length === 1 && users[0].id === currentUser.id) {
-        toast.warning(`Loaded own profile only (${users.length} user) - RLS may need admin setup`);
-      } else {
-        toast.success(`Successfully loaded ${users.length} users`);
-      }
-      
+      toast.success(`Successfully loaded ${users.length} users`);
       return users;
       
     } catch (err) {
       console.error('💥 Unexpected error fetching users:', err);
       const errorMessage = err instanceof Error ? err.message : 'Unknown error occurred';
       setError(errorMessage);
-      toast.error('Failed to load users due to unexpected error');
+      toast.error(`Failed to load users: ${errorMessage}`);
       return null;
     } finally {
       setIsLoading(false);
