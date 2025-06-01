@@ -1,4 +1,5 @@
 
+
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -121,9 +122,12 @@ export function MemberCSVDownload() {
         return;
       }
 
-      // Process profiles data - properly handle the response type
-      const processedProfiles: ProfileData[] = profiles.filter((profile): profile is ProfileData => {
-        return profile !== null && typeof profile === 'object' && 'id' in profile && typeof profile.id === 'string';
+      // Process profiles data - handle the response properly without type conflicts
+      const processedProfiles = profiles.filter((profile: any): profile is ProfileData => {
+        return profile !== null && 
+               typeof profile === 'object' && 
+               'id' in profile && 
+               typeof profile.id === 'string';
       });
 
       if (processedProfiles.length === 0) {
@@ -329,3 +333,4 @@ export function MemberCSVDownload() {
     </div>
   );
 }
+
