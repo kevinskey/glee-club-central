@@ -117,8 +117,8 @@ export function MemberCSVDownload() {
                 // Transform auth users to our expected format
                 profiles = (authData?.users || []).map(authUser => ({
                   id: authUser.id,
-                  first_name: authUser.user_metadata?.first_name || authUser.user_metadata?.first_name || '',
-                  last_name: authUser.user_metadata?.last_name || authUser.user_metadata?.last_name || '',
+                  first_name: authUser.user_metadata?.first_name || '',
+                  last_name: authUser.user_metadata?.last_name || '',
                   phone: authUser.user_metadata?.phone || null,
                   voice_part: authUser.user_metadata?.voice_part || null,
                   status: 'active',
