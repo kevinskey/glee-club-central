@@ -3,17 +3,10 @@ export type UserType = 'admin' | 'member';
 
 export interface AuthUser {
   id: string;
-  email: string | null;
-  user_metadata: {
-    full_name?: string;
-    first_name?: string;
-    last_name?: string;
-    avatar_url?: string;
-    user_type?: UserType;
-  };
-  app_metadata: any;
-  aud: string;
-  created_at: string;
+  email: string;
+  email_confirmed_at?: string | null;
+  created_at?: string;
+  updated_at?: string;
 }
 
 export interface Profile {
