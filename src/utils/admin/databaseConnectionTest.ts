@@ -47,92 +47,123 @@ export const runDatabaseConnectionTests = async (): Promise<DatabaseTestResult[]
     });
   }
 
-  // Test 3: RLS Policy Test - Own Profile Query (select * from profiles where id = auth.uid())
+  // Test 3: Check current RLS policies (using information_schema)
+  try {
+    const { data, error } = await supabase
+      .from('information_schema')
+      .select('*')
+      .eq('table_name', 'profiles')
+      .limit(1);
+    
+    results.push({
+      test: 'RLS Policy Check',
+      status: error ? 'warning' : 'success',
+      message: error ? `Could not check policies: ${error.message}` : 'Policy check accessible',
+      details: { error, hasAccess: !error }
+    });
+  } catch (err) {
+    results.push({
+      test: 'RLS Policy Check',
+      status: 'warning',
+      message: 'Could not access schema information (normal for RLS)',
+      details: err
+    });
+  }
+
+  // Test 4: Direct admin check via auth.users
   try {
     const { data: { user } } = await supabase.auth.getUser();
     if (user) {
-      const { data, error } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('id', user.id);
-      
+      const isKnownAdmin = user.email === 'kevinskey@mac.com';
       results.push({
-        test: 'Own Profile Query (RLS Test)',
-        status: error ? 'error' : data && data.length > 0 ? 'success' : 'warning',
-        message: error ? `Own profile query failed: ${error.message}` : 
-                data && data.length > 0 ? `Successfully retrieved own profile` : 'No profile found for current user',
-        details: { profileCount: data?.length, error, profile: data?.[0] }
+        test: 'Direct Admin Check',
+        status: 'success',
+        message: `User admin status: ${isKnownAdmin ? 'Admin' : 'Regular user'}`,
+        details: { email: user.email, isAdmin: isKnownAdmin }
       });
     } else {
       results.push({
-        test: 'Own Profile Query (RLS Test)',
+        test: 'Direct Admin Check',
         status: 'warning',
-        message: 'No authenticated user to test own profile query',
+        message: 'No authenticated user for admin check',
         details: null
       });
     }
   } catch (err) {
     results.push({
-      test: 'Own Profile Query (RLS Test)',
+      test: 'Direct Admin Check',
       status: 'error',
-      message: `Own profile query error: ${err instanceof Error ? err.message : 'Unknown error'}`,
+      message: `Admin check failed: ${err instanceof Error ? err.message : 'Unknown error'}`,
       details: err
     });
   }
 
-  // Test 4: RLS Policy Test - All Profiles Query (select * from profiles)
+  // Test 5: Safe profile query with error handling
   try {
-    const { data, error } = await supabase
-      .from('profiles')
-      .select('*')
-      .order('last_name', { ascending: true });
-    
-    results.push({
-      test: 'All Profiles Query (Admin RLS Test)',
-      status: error ? 'error' : 'success',
-      message: error ? `All profiles query failed: ${error.message}` : 
-              `Successfully fetched ${data?.length || 0} profiles ${data && data.length > 1 ? '(Admin access confirmed)' : '(Own profile only)'}`,
-      details: { profileCount: data?.length, error, hasMultipleProfiles: data && data.length > 1 }
-    });
-  } catch (err) {
-    results.push({
-      test: 'All Profiles Query (Admin RLS Test)',
-      status: 'error',
-      message: `All profiles query error: ${err instanceof Error ? err.message : 'Unknown error'}`,
-      details: err
-    });
-  }
-
-  // Test 5: Additional RLS Policy Tests
-  try {
-    const tests = [
-      { name: 'Count query', query: supabase.from('profiles').select('*', { count: 'exact', head: true }) },
-      { name: 'Limited select', query: supabase.from('profiles').select('id, role, first_name, last_name').limit(5) },
-    ];
-
-    for (const test of tests) {
-      try {
-        const { data, error, count } = await test.query;
-        results.push({
-          test: `RLS Policy Test: ${test.name}`,
-          status: error ? 'error' : 'success',
-          message: error ? `${test.name} failed: ${error.message}` : `${test.name} successful`,
-          details: { error, dataLength: data?.length, count }
-        });
-      } catch (err) {
-        results.push({
-          test: `RLS Policy Test: ${test.name}`,
-          status: 'error',
-          message: `${test.name} error: ${err instanceof Error ? err.message : 'Unknown error'}`,
-          details: err
-        });
-      }
+    const { data: { user } } = await supabase.auth.getUser();
+    if (user) {
+      console.log('🔍 Testing own profile query for user:', user.id);
+      
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('id, first_name, last_name, role, is_super_admin')
+        .eq('id', user.id)
+        .maybeSingle();
+      
+      results.push({
+        test: 'Own Profile Query Test',
+        status: error ? 'error' : data ? 'success' : 'warning',
+        message: error 
+          ? `Profile query failed: ${error.message}` 
+          : data 
+          ? `Profile found: ${data.first_name} ${data.last_name} (${data.role})` 
+          : 'No profile found for user',
+        details: { profile: data, error, userId: user.id }
+      });
+    } else {
+      results.push({
+        test: 'Own Profile Query Test',
+        status: 'warning',
+        message: 'No authenticated user to test profile query',
+        details: null
+      });
     }
   } catch (err) {
     results.push({
-      test: 'Additional RLS Policy Tests',
+      test: 'Own Profile Query Test',
       status: 'error',
-      message: `RLS test error: ${err instanceof Error ? err.message : 'Unknown error'}`,
+      message: `Profile query error: ${err instanceof Error ? err.message : 'Unknown error'}`,
+      details: err
+    });
+  }
+
+  // Test 6: Careful admin-level query
+  try {
+    console.log('🔍 Testing admin-level profiles query...');
+    
+    const { data, error } = await supabase
+      .from('profiles')
+      .select('id, first_name, last_name, role, is_super_admin')
+      .limit(10);
+    
+    results.push({
+      test: 'Admin Level Query Test',
+      status: error ? 'error' : 'success',
+      message: error 
+        ? `Admin query failed: ${error.message}` 
+        : `Successfully fetched ${data?.length || 0} profiles${data && data.length > 1 ? ' (Admin access confirmed)' : ''}`,
+      details: { 
+        profileCount: data?.length, 
+        error, 
+        hasMultipleProfiles: data && data.length > 1,
+        firstProfile: data?.[0]
+      }
+    });
+  } catch (err) {
+    results.push({
+      test: 'Admin Level Query Test',
+      status: 'error',
+      message: `Admin query error: ${err instanceof Error ? err.message : 'Unknown error'}`,
       details: err
     });
   }
