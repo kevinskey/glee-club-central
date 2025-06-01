@@ -43,15 +43,15 @@ export const ConsolidatedHeader = memo(function ConsolidatedHeader() {
 
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-      <div className="max-w-screen-2xl mx-auto px-4 md:px-6 lg:px-8">
-        <div className="flex h-16 md:h-20 items-center justify-between">
+      <div className="max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="flex h-16 md:h-20 items-center justify-between gap-4 md:gap-6">
           {/* Left side: Logo and site name */}
-          <div className="flex items-center">
+          <div className="flex items-center flex-shrink-0">
             <HeaderLogo />
           </div>
             
           {/* Middle: Navigation Links - Desktop only */}
-          <nav className="hidden md:flex items-center space-x-1 lg:space-x-2">
+          <nav className="hidden md:flex items-center space-x-2 lg:space-x-4 xl:space-x-6">
             {navigationLinks.map((link) => {
               const isActive = location.pathname === link.href;
               return (
@@ -73,14 +73,14 @@ export const ConsolidatedHeader = memo(function ConsolidatedHeader() {
           </nav>
 
           {/* Right side: Auth buttons and HeaderActions */}
-          <div className="flex items-center gap-2 lg:gap-3">
+          <div className="flex items-center gap-3 lg:gap-4 flex-shrink-0">
             {/* Authentication Buttons - Show dashboard if NOT authenticated, show logout if authenticated */}
             {!isAuthenticated ? (
               <Button 
                 variant="default"
                 onClick={handleDashboardClick}
                 size={isMobile ? "sm" : "default"}
-                className="bg-glee-spelman hover:bg-glee-spelman/90 px-3 lg:px-4"
+                className="bg-glee-spelman hover:bg-glee-spelman/90 px-4 lg:px-6"
               >
                 <User className="w-4 h-4 mr-2" />
                 <span className="hidden sm:inline">My Dashboard</span>
@@ -91,7 +91,7 @@ export const ConsolidatedHeader = memo(function ConsolidatedHeader() {
                 variant="outline"
                 onClick={handleLogout}
                 size={isMobile ? "sm" : "default"}
-                className="border-glee-spelman text-glee-spelman hover:bg-glee-spelman/10 px-3 lg:px-4"
+                className="border-glee-spelman text-glee-spelman hover:bg-glee-spelman/10 px-4 lg:px-6"
               >
                 <LogOut className="w-4 h-4 mr-2" />
                 <span className="hidden sm:inline">Sign Out</span>
