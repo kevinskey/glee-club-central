@@ -86,9 +86,9 @@ export const router = createBrowserRouter([
       </SimpleAuthProvider>
     ),
   },
-  // Admin dashboard - fixed path
+  // Admin dashboard - updated to use /admin route
   {
-    path: "/dashboard/admin",
+    path: "/admin",
     element: (
       <SimpleAuthProvider>
         <AdminRoute>

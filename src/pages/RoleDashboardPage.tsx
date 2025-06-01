@@ -53,7 +53,7 @@ const RoleDashboardPage = () => {
   const hasAdminAccess = isAdmin() || isKnownAdmin;
   
   if (hasAdminAccess) {
-    redirectPath = '/dashboard/admin';
+    redirectPath = '/admin';
     console.log('🎯 RoleDashboardPage: Admin user detected, redirecting to admin dashboard');
   } else if (profile?.role === 'fan') {
     redirectPath = '/dashboard/fan';
