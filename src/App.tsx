@@ -6,11 +6,11 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { SimpleAuthProvider } from "@/contexts/SimpleAuthContext";
 import { RolePermissionProvider } from "@/contexts/RolePermissionContext";
 import SimpleRequireAuth from "@/components/auth/SimpleRequireAuth";
-import Index from "./pages/Index";
-import LoginPage from "./pages/auth/LoginPage";
+import HomePage from "./pages/HomePage";
+import SimpleLoginPage from "./pages/auth/SimpleLoginPage";
 import RoleDashboardPage from "./pages/RoleDashboardPage";
 import AdminDashboardPage from "./pages/admin/AdminDashboardPage";
-import MemberDashboardPage from "./pages/member/MemberDashboardPage";
+import MemberDashboardPage from "./pages/dashboard/MemberDashboardPage";
 
 const queryClient = new QueryClient();
 
@@ -24,8 +24,8 @@ function App() {
             <RolePermissionProvider>
               <Routes>
                 {/* Public routes */}
-                <Route path="/" element={<Index />} />
-                <Route path="/login" element={<LoginPage />} />
+                <Route path="/" element={<HomePage />} />
+                <Route path="/login" element={<SimpleLoginPage />} />
                 
                 {/* Protected routes */}
                 <Route path="/role-dashboard" element={
