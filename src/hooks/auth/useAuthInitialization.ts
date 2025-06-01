@@ -1,5 +1,5 @@
 
-import { useEffect, useRef, useCallback } from 'react';
+import { useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { AuthUser } from '@/types/auth';
 import { AuthState } from './types';
@@ -9,106 +9,95 @@ export const useAuthInitialization = (
   fetchUserData: (userId: string) => Promise<void>,
   mountedRef: React.MutableRefObject<boolean>
 ) => {
-  const initTimeoutRef = useRef<NodeJS.Timeout>();
-
-  const initializeAuth = useCallback(async () => {
-    try {
-      console.log('Getting current session...');
-      const { data: { session }, error } = await supabase.auth.getSession();
-      
-      if (error) {
-        console.error('Session error:', error);
-        if (initTimeoutRef.current) clearTimeout(initTimeoutRef.current);
-        setState({
-          user: null,
-          profile: null,
-          permissions: {},
-          isLoading: false,
-          isInitialized: true
-        });
-        return;
-      }
-      
-      if (session?.user && mountedRef.current) {
-        console.log('Found session for user:', session.user.id);
-        const authUser: AuthUser = {
-          id: session.user.id,
-          email: session.user.email || '',
-          app_metadata: session.user.app_metadata,
-          user_metadata: session.user.user_metadata,
-          aud: session.user.aud,
-          created_at: session.user.created_at
-        };
-        
-        setState(prev => ({ 
-          ...prev, 
-          user: authUser,
-          isLoading: false,
-          isInitialized: true
-        }));
-        
-        if (initTimeoutRef.current) clearTimeout(initTimeoutRef.current);
-        
-        // Fetch additional data in background
-        setTimeout(() => {
-          if (mountedRef.current) {
-            fetchUserData(session.user.id);
-          }
-        }, 100);
-      } else {
-        console.log('No session found');
-        if (initTimeoutRef.current) clearTimeout(initTimeoutRef.current);
-        setState({
-          user: null,
-          profile: null,
-          permissions: {},
-          isLoading: false,
-          isInitialized: true
-        });
-      }
-      
-    } catch (error) {
-      console.error('Auth initialization error:', error);
-      if (initTimeoutRef.current) clearTimeout(initTimeoutRef.current);
-      if (mountedRef.current) {
-        setState({
-          user: null,
-          profile: null,
-          permissions: {},
-          isLoading: false,
-          isInitialized: true
-        });
-      }
-    }
-  }, [setState, fetchUserData, mountedRef]);
-
-  // Initialize auth state
   useEffect(() => {
-    console.log('Initializing auth state...');
+    console.log('🚀 useAuthInitialization: Starting auth initialization...');
     
-    // Clear any existing timeout
-    if (initTimeoutRef.current) {
-      clearTimeout(initTimeoutRef.current);
-    }
-    
-    // Hard timeout for initialization
-    initTimeoutRef.current = setTimeout(() => {
-      console.log('Auth initialization timeout reached');
-      if (mountedRef.current) {
-        setState(prev => ({
-          ...prev,
-          isLoading: false,
-          isInitialized: true
-        }));
+    const initializeAuth = async () => {
+      try {
+        console.log('🔄 useAuthInitialization: Getting current session...');
+        const { data: { session }, error } = await supabase.auth.getSession();
+        
+        console.log('🔄 useAuthInitialization: Session check result:', {
+          hasSession: !!session,
+          hasUser: !!session?.user,
+          userId: session?.user?.id,
+          userEmail: session?.user?.email,
+          error: error?.message
+        });
+        
+        if (error) {
+          console.error('❌ useAuthInitialization: Session error:', error);
+          if (mountedRef.current) {
+            setState({
+              user: null,
+              profile: null,
+              permissions: {},
+              isLoading: false,
+              isInitialized: true
+            });
+          }
+          return;
+        }
+        
+        if (session?.user && mountedRef.current) {
+          console.log('✅ useAuthInitialization: Found session for user:', session.user.id);
+          const authUser: AuthUser = {
+            id: session.user.id,
+            email: session.user.email || '',
+            app_metadata: session.user.app_metadata,
+            user_metadata: session.user.user_metadata,
+            aud: session.user.aud,
+            created_at: session.user.created_at
+          };
+          
+          setState(prev => ({ 
+            ...prev, 
+            user: authUser,
+            isLoading: true, // Keep loading until profile is fetched
+            isInitialized: true
+          }));
+          
+          // Fetch profile data immediately
+          console.log('📡 useAuthInitialization: Fetching user profile data...');
+          await fetchUserData(session.user.id);
+        } else {
+          console.log('ℹ️ useAuthInitialization: No session found');
+          if (mountedRef.current) {
+            setState({
+              user: null,
+              profile: null,
+              permissions: {},
+              isLoading: false,
+              isInitialized: true
+            });
+          }
+        }
+        
+      } catch (error) {
+        console.error('💥 useAuthInitialization: Auth initialization error:', error);
+        if (mountedRef.current) {
+          setState({
+            user: null,
+            profile: null,
+            permissions: {},
+            isLoading: false,
+            isInitialized: true
+          });
+        }
       }
-    }, 10000); // 10 second timeout
+    };
     
     // Set up auth state listener
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
         if (!mountedRef.current) return;
         
-        console.log('Auth state change:', event, session?.user?.id);
+        console.log('🔔 useAuthInitialization: Auth state change:', {
+          event,
+          hasSession: !!session,
+          userId: session?.user?.id,
+          userEmail: session?.user?.email
+        });
         
         if (event === 'SIGNED_IN' && session?.user) {
           const authUser: AuthUser = {
@@ -123,18 +112,16 @@ export const useAuthInitialization = (
           setState(prev => ({ 
             ...prev, 
             user: authUser,
-            isLoading: false,
+            isLoading: true, // Keep loading until profile is fetched
             isInitialized: true
           }));
           
-          // Fetch additional data in background
-          setTimeout(() => {
-            if (mountedRef.current) {
-              fetchUserData(session.user.id);
-            }
-          }, 100);
+          // Fetch profile data immediately after sign in
+          console.log('📡 useAuthInitialization: Fetching profile after sign in...');
+          await fetchUserData(session.user.id);
           
         } else if (event === 'SIGNED_OUT') {
+          console.log('👋 useAuthInitialization: User signed out');
           setState({
             user: null,
             profile: null,
@@ -146,15 +133,12 @@ export const useAuthInitialization = (
       }
     );
     
+    // Initialize auth
     initializeAuth();
     
     return () => {
-      if (initTimeoutRef.current) {
-        clearTimeout(initTimeoutRef.current);
-      }
+      console.log('🔄 useAuthInitialization: Cleaning up auth state listener');
       subscription.unsubscribe();
     };
-  }, [initializeAuth]);
-
-  return { initTimeoutRef };
+  }, [setState, fetchUserData, mountedRef]);
 };

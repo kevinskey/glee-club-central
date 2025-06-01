@@ -1,7 +1,7 @@
 
 import { useCallback } from 'react';
 import { Profile } from '@/types/auth';
-import { getProfile } from '@/utils/supabase/profiles';
+import { getProfile, createFallbackProfile } from '@/utils/supabase/profiles';
 import { fetchUserPermissions } from '@/utils/supabase/permissions';
 import { AuthState } from './types';
 
@@ -9,23 +9,11 @@ export const useUserDataFetching = (
   setState: React.Dispatch<React.SetStateAction<AuthState>>,
   mountedRef: React.MutableRefObject<boolean>
 ) => {
-  // Create fallback profile
-  const createFallbackProfile = useCallback((userId: string): Profile => ({
-    id: userId,
-    first_name: 'User',
-    last_name: '',
-    role: 'member',
-    status: 'active',
-    is_super_admin: false,
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString()
-  }), []);
-  
-  // Fetch user data with enhanced debugging
-  const fetchUserData = useCallback(async (userId: string) => {
+  // Fetch user data with enhanced debugging and profile creation fallback
+  const fetchUserData = useCallback(async (userId: string, userEmail?: string) => {
     if (!mountedRef.current) return;
     
-    console.log(`📡 useUserDataFetching: STARTING DATA FETCH for user: ${userId}`);
+    console.log(`📡 useUserDataFetching: STARTING DATA FETCH for user: ${userId}, email: ${userEmail}`);
     
     let profile: Profile | null = null;
     let permissions = {};
@@ -39,6 +27,7 @@ export const useUserDataFetching = (
           setTimeout(() => reject(new Error('Profile timeout')), 5000);
         })
       ]);
+      
       console.log('📋 useUserDataFetching: Profile fetch COMPLETE:', {
         hasProfile: !!profile,
         profileId: profile?.id,
@@ -47,10 +36,51 @@ export const useUserDataFetching = (
         profileStatus: profile?.status,
         profileData: profile
       });
+      
+      // If profile is missing, try to create one
+      if (!profile) {
+        console.log('🔧 useUserDataFetching: Profile missing, attempting to create fallback profile...');
+        profile = await createFallbackProfile(userId, userEmail);
+        
+        if (!profile) {
+          console.error(`❌ useUserDataFetching: Profile fetch failed for user ${userId} and could not create fallback`);
+          // Set error state but don't completely fail
+          if (mountedRef.current) {
+            setState(prev => ({
+              ...prev,
+              profile: null,
+              permissions: {},
+              isLoading: false,
+              isInitialized: true
+            }));
+          }
+          return;
+        }
+      }
+      
     } catch (error) {
-      console.warn('⚠️ useUserDataFetching: Profile fetch FAILED, using fallback:', error);
-      profile = createFallbackProfile(userId);
+      console.warn(`⚠️ useUserDataFetching: Profile fetch failed for user ${userId}, attempting fallback:`, error);
+      profile = await createFallbackProfile(userId, userEmail);
+      
+      if (!profile) {
+        console.error(`❌ useUserDataFetching: Profile fetch failed for user ${userId} and could not create fallback`);
+        if (mountedRef.current) {
+          setState(prev => ({
+            ...prev,
+            profile: null,
+            permissions: {},
+            isLoading: false,
+            isInitialized: true
+          }));
+        }
+        return;
+      }
       console.log('🔄 useUserDataFetching: Created fallback profile:', profile);
+    }
+    
+    // Validate profile role
+    if (!profile.role) {
+      console.warn(`⚠️ useUserDataFetching: Role undefined for profile ${profile.id}`);
     }
     
     try {
@@ -81,6 +111,7 @@ export const useUserDataFetching = (
       console.log('✅ useUserDataFetching: UPDATING STATE with fetched data:', {
         profileId: profile?.id,
         profileRole: profile?.role,
+        profileIsAdmin: profile?.is_super_admin,
         permissionCount: Object.keys(permissions).length
       });
       setState(prev => ({
@@ -93,7 +124,7 @@ export const useUserDataFetching = (
     } else {
       console.log('⚠️ useUserDataFetching: Component unmounted, skipping state update');
     }
-  }, [createFallbackProfile, setState, mountedRef]);
+  }, [setState, mountedRef]);
 
   return { fetchUserData };
 };

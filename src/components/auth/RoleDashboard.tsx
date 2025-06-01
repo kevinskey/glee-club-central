@@ -3,12 +3,16 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { PageLoader } from '@/components/ui/page-loader';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { AlertCircle, RefreshCw } from 'lucide-react';
 
 export const RoleDashboard: React.FC = () => {
-  const { user, profile, isLoading, isAuthenticated, isAdmin, isInitialized } = useAuth();
+  const { user, profile, isLoading, isAuthenticated, isAdmin, isInitialized, refreshUserData } = useAuth();
   const navigate = useNavigate();
   const [hasRedirected, setHasRedirected] = useState(false);
-  const [debugMode] = useState(true); // Enable debug mode temporarily
+  const [showError, setShowError] = useState(false);
+  const [isRetrying, setIsRetrying] = useState(false);
 
   useEffect(() => {
     console.log('🎯 RoleDashboard: DETAILED AUTH STATE CHECK:', {
@@ -27,12 +31,6 @@ export const RoleDashboard: React.FC = () => {
       hasRedirected,
       timestamp: new Date().toISOString()
     });
-
-    // TEMPORARILY DISABLED: Skip all role-based redirects for debugging
-    if (debugMode) {
-      console.log('🚧 RoleDashboard: DEBUG MODE - Skipping role-based redirects');
-      return;
-    }
 
     // Wait for initialization and prevent multiple redirects
     if (!isInitialized || hasRedirected) {
@@ -53,115 +51,118 @@ export const RoleDashboard: React.FC = () => {
       return;
     }
 
-    // After a reasonable timeout, proceed with default routing even if profile isn't loaded
-    const timeoutId = setTimeout(() => {
-      if (isAuthenticated && user && !hasRedirected) {
-        console.log('⏰ RoleDashboard: Profile load timeout, using default routing');
-        
-        let targetRoute = '/dashboard/member'; // Default for authenticated users
-        
-        // Only check admin status if profile is loaded
-        if (profile) {
-          if (isAdmin()) {
-            targetRoute = '/admin';
-            console.log('👑 RoleDashboard: Admin user, redirecting to admin dashboard');
-          } else if (profile.role === 'fan') {
-            targetRoute = '/fan-dashboard';
-            console.log('👤 RoleDashboard: Fan user, redirecting to fan dashboard');
-          } else {
-            console.log('👤 RoleDashboard: Member user, redirecting to member dashboard');
-          }
-        } else {
-          console.log('👤 RoleDashboard: No profile loaded, defaulting to member dashboard');
-        }
-        
-        console.log('🎯 RoleDashboard: Redirecting to:', targetRoute);
-        setHasRedirected(true);
-        navigate(targetRoute, { replace: true });
-      }
-    }, 3000); // 3 second timeout
+    // If profile is missing after loading is complete, show error
+    if (!isLoading && !profile && isAuthenticated && user) {
+      console.error(`❌ RoleDashboard: Profile fetch failed for user ${user.id}`);
+      setShowError(true);
+      return;
+    }
 
-    // If we have both user and profile, redirect immediately
+    // If we have both user and profile, redirect to appropriate dashboard
     if (isAuthenticated && user && profile && !hasRedirected) {
-      clearTimeout(timeoutId);
-      
       let targetRoute = '/dashboard/member';
       
       if (isAdmin()) {
         targetRoute = '/admin';
-        console.log('👑 RoleDashboard: Admin user detected');
+        console.log('👑 RoleDashboard: Admin user detected, redirecting to admin dashboard');
       } else if (profile.role === 'fan') {
         targetRoute = '/fan-dashboard';
-        console.log('👤 RoleDashboard: Fan user detected');
+        console.log('👤 RoleDashboard: Fan user detected, redirecting to fan dashboard');
       } else {
-        console.log('👤 RoleDashboard: Member user detected');
+        console.log('👤 RoleDashboard: Member user detected, redirecting to member dashboard');
       }
       
-      console.log('🎯 RoleDashboard: Immediate redirect to:', targetRoute);
+      console.log('🎯 RoleDashboard: Redirecting to:', targetRoute);
       setHasRedirected(true);
       navigate(targetRoute, { replace: true });
     }
+  }, [isLoading, isAuthenticated, user, profile, isAdmin, navigate, isInitialized, hasRedirected]);
 
-    return () => clearTimeout(timeoutId);
-  }, [isLoading, isAuthenticated, user, profile, isAdmin, navigate, isInitialized, hasRedirected, debugMode]);
+  const handleRetry = async () => {
+    setIsRetrying(true);
+    setShowError(false);
+    
+    try {
+      if (refreshUserData) {
+        await refreshUserData();
+      }
+    } catch (error) {
+      console.error('Error retrying profile fetch:', error);
+      setShowError(true);
+    } finally {
+      setIsRetrying(false);
+    }
+  };
+
+  const handleSupportRedirect = () => {
+    // Redirect to a support page or contact form
+    navigate('/support', { replace: true });
+  };
 
   // Show appropriate loading states
   if (!isInitialized) {
     return (
-      <div>
-        <PageLoader 
-          message="Initializing authentication..."
-          className="min-h-screen"
-        />
-        {debugMode && (
-          <div className="fixed bottom-4 left-4 bg-black text-white p-4 rounded text-xs">
-            <div>🚧 DEBUG MODE ACTIVE</div>
-            <div>Auth initialized: {isInitialized ? 'Yes' : 'No'}</div>
-            <div>User: {user?.email || 'None'}</div>
-            <div>Profile: {profile?.role || 'None'}</div>
-          </div>
-        )}
-      </div>
+      <PageLoader 
+        message="Initializing authentication..."
+        className="min-h-screen"
+      />
     );
   }
 
   if (!isAuthenticated || !user) {
     return (
-      <div>
-        <PageLoader 
-          message="Redirecting to login..."
-          className="min-h-screen"
-        />
-        {debugMode && (
-          <div className="fixed bottom-4 left-4 bg-black text-white p-4 rounded text-xs">
-            <div>🚧 DEBUG MODE ACTIVE</div>
-            <div>Authenticated: {isAuthenticated ? 'Yes' : 'No'}</div>
-            <div>User: {user?.email || 'None'}</div>
-          </div>
-        )}
+      <PageLoader 
+        message="Redirecting to login..."
+        className="min-h-screen"
+      />
+    );
+  }
+
+  // Show error state if profile is missing
+  if (showError) {
+    return (
+      <div className="min-h-screen flex items-center justify-center p-4">
+        <Card className="w-full max-w-md">
+          <CardHeader className="text-center">
+            <AlertCircle className="h-12 w-12 text-red-500 mx-auto mb-4" />
+            <CardTitle>Profile Not Found</CardTitle>
+            <CardDescription>
+              We couldn't load your profile information. This may be because your account is still being set up.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="text-sm text-muted-foreground">
+              <p><strong>User ID:</strong> {user?.id}</p>
+              <p><strong>Email:</strong> {user?.email}</p>
+            </div>
+            <div className="flex flex-col space-y-2">
+              <Button 
+                onClick={handleRetry} 
+                disabled={isRetrying}
+                className="w-full"
+              >
+                <RefreshCw className={`h-4 w-4 mr-2 ${isRetrying ? 'animate-spin' : ''}`} />
+                {isRetrying ? 'Retrying...' : 'Try Again'}
+              </Button>
+              <Button 
+                variant="outline" 
+                onClick={handleSupportRedirect}
+                className="w-full"
+              >
+                Contact Support
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
       </div>
     );
   }
 
   return (
-    <div>
-      <PageLoader 
-        message="Loading your dashboard..." 
-        className="min-h-screen"
-      />
-      {debugMode && (
-        <div className="fixed bottom-4 left-4 bg-black text-white p-4 rounded text-xs max-w-sm">
-          <div className="font-bold mb-2">🚧 DEBUG INFO</div>
-          <div>User ID: {user?.id}</div>
-          <div>Email: {user?.email}</div>
-          <div>Profile ID: {profile?.id || 'Missing'}</div>
-          <div>Role: {profile?.role || 'Missing'}</div>
-          <div>Is Admin: {profile?.is_super_admin ? 'Yes' : 'No'}</div>
-          <div>Loading: {isLoading ? 'Yes' : 'No'}</div>
-          <div>Redirects disabled for debugging</div>
-        </div>
-      )}
-    </div>
+    <PageLoader 
+      message="Loading your dashboard..." 
+      className="min-h-screen"
+    />
   );
 };
 

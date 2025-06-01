@@ -15,14 +15,23 @@ export const getProfile = async (userId: string): Promise<Profile | null> => {
     console.log('📋 getProfile: Database response:', {
       hasData: !!data,
       error: error?.message,
+      errorCode: error?.code,
       profileRole: data?.role,
       profileIsAdmin: data?.is_super_admin,
       profileStatus: data?.status
     });
       
     if (error) {
-      console.error('❌ getProfile: Error fetching profile:', error);
+      if (error.code === 'PGRST116') {
+        console.error(`❌ getProfile: Profile fetch failed for user ${userId} - No profile found`);
+      } else {
+        console.error('❌ getProfile: Error fetching profile:', error);
+      }
       return null;
+    }
+    
+    if (!data.role) {
+      console.warn(`⚠️ getProfile: Role undefined for profile ${data.id}`);
     }
     
     console.log('✅ getProfile: Profile fetched successfully:', {
@@ -34,7 +43,7 @@ export const getProfile = async (userId: string): Promise<Profile | null> => {
     
     return data as Profile;
   } catch (error) {
-    console.error('💥 getProfile: Unexpected error fetching profile:', error);
+    console.error(`💥 getProfile: Profile fetch failed for user ${userId}:`, error);
     return null;
   }
 };
@@ -67,5 +76,47 @@ export const updateProfile = async (profile: Partial<Profile>): Promise<{ succes
   } catch (error) {
     console.error('💥 updateProfile: Unexpected error updating profile:', error);
     return { success: false, error };
+  }
+};
+
+export const createFallbackProfile = async (userId: string, userEmail?: string): Promise<Profile | null> => {
+  try {
+    console.log('🔧 createFallbackProfile: Creating profile for user:', userId);
+    
+    // Determine if this should be an admin based on email
+    const isAdmin = userEmail === 'kevinskey@mac.com';
+    const role = isAdmin ? 'admin' : 'member';
+    
+    const { data, error } = await supabase
+      .from('profiles')
+      .insert({
+        id: userId,
+        first_name: 'User',
+        last_name: '',
+        role: role,
+        is_super_admin: isAdmin,
+        status: 'active',
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
+      })
+      .select()
+      .single();
+    
+    console.log('🔧 createFallbackProfile: Creation result:', { 
+      error: error?.message,
+      created: !!data,
+      role: data?.role 
+    });
+    
+    if (error) {
+      console.error('❌ createFallbackProfile: Error creating profile:', error);
+      return null;
+    }
+    
+    console.log('✅ createFallbackProfile: Profile created successfully');
+    return data as Profile;
+  } catch (error) {
+    console.error('💥 createFallbackProfile: Error creating profile:', error);
+    return null;
   }
 };

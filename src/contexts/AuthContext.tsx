@@ -220,8 +220,22 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, [login]);
 
   const signOut = useCallback(async () => {
-    return logout();
-  }, [logout]);
+    try {
+      console.log('🚪 AuthContext: LOGOUT ATTEMPT');
+      const { error } = await supabase.auth.signOut();
+      console.log('🚪 AuthContext: Logout response:', { error: error?.message });
+      
+      if (!error) {
+        setSession(null);
+        cleanupAuthState();
+        console.log('✅ AuthContext: Logout successful');
+      }
+      return { error };
+    } catch (err) {
+      console.error('💥 AuthContext: Logout error:', err);
+      return { error: err };
+    }
+  }, []);
 
   const signUp = useCallback(async (email: string, password: string, firstName: string, lastName: string, userType: any = 'member') => {
     try {
@@ -369,19 +383,124 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     session,
     supabaseClient: supabase,
     login,
-    logout,
-    signIn,
-    signOut,
-    signUp,
+    logout: useCallback(async () => {
+      try {
+        console.log('🚪 AuthContext: LOGOUT ATTEMPT');
+        const { error } = await supabase.auth.signOut();
+        console.log('🚪 AuthContext: Logout response:', { error: error?.message });
+        
+        if (!error) {
+          setSession(null);
+          cleanupAuthState();
+          console.log('✅ AuthContext: Logout successful');
+        }
+        return { error };
+      } catch (err) {
+        console.error('💥 AuthContext: Logout error:', err);
+        return { error: err };
+      }
+    }, []),
+    signIn: useCallback(async (email: string, password: string) => {
+      return login(email, password);
+    }, [login]),
+    signOut: useCallback(async () => {
+      try {
+        console.log('🚪 AuthContext: LOGOUT ATTEMPT');
+        const { error } = await supabase.auth.signOut();
+        console.log('🚪 AuthContext: Logout response:', { error: error?.message });
+        
+        if (!error) {
+          setSession(null);
+          cleanupAuthState();
+          console.log('✅ AuthContext: Logout successful');
+        }
+        return { error };
+      } catch (err) {
+        console.error('💥 AuthContext: Logout error:', err);
+        return { error: err };
+      }
+    }, []),
+    signUp: useCallback(async (email: string, password: string, firstName: string, lastName: string, userType: any = 'member') => {
+      try {
+        console.log('📝 AuthContext: SIGN UP ATTEMPT for:', email);
+        
+        const { data, error } = await supabase.auth.signUp({
+          email: email.trim(),
+          password,
+          options: {
+            data: {
+              first_name: firstName,
+              last_name: lastName,
+              user_type: userType,
+            },
+          },
+        });
+        
+        console.log('📝 AuthContext: SIGN UP RESPONSE:', {
+          hasData: !!data,
+          hasUser: !!data?.user,
+          userId: data?.user?.id,
+          userEmail: data?.user?.email,
+          error: error?.message,
+          errorCode: error?.code
+        });
+        
+        return { error, data };
+      } catch (err) {
+        console.error('💥 AuthContext: Sign up error:', err);
+        return { error: err, data: null };
+      }
+    }, []),
     isAdmin,
     isMember,
     getUserType,
-    updatePassword,
-    resetPassword,
+    updatePassword: useCallback(async (newPassword: string) => {
+      const { error } = await supabase.auth.updateUser({ password: newPassword });
+      return { error };
+    }, []),
+    resetPassword: useCallback(async (email: string) => {
+      const { error } = await supabase.auth.resetPasswordForEmail(email);
+      return { error };
+    }, []),
     permissions,
-    refreshPermissions,
-    resetAuthSystem: resetAuthSystemCallback,
-    createFallbackProfile,
+    refreshPermissions: useCallback(async () => {
+      if (user?.id) {
+        await refreshUserData();
+      }
+    }, [user?.id, refreshUserData]),
+    resetAuthSystem: useCallback(async () => {
+      return resetAuthSystem();
+    }, []),
+    createFallbackProfile: useCallback(async () => {
+      if (!user) return;
+      
+      try {
+        console.log('🔧 AuthContext: Creating fallback profile for user:', user.id);
+        
+        const { error } = await supabase
+          .from('profiles')
+          .insert({
+            id: user.id,
+            first_name: user.user_metadata?.first_name || 'User',
+            last_name: user.user_metadata?.last_name || '',
+            role: 'member',
+            status: 'active',
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString()
+          });
+        
+        console.log('🔧 AuthContext: Fallback profile creation result:', { error: error?.message });
+        
+        if (error) {
+          console.error('❌ AuthContext: Error creating fallback profile:', error);
+        } else {
+          console.log('✅ AuthContext: Fallback profile created successfully');
+          await refreshUserData();
+        }
+      } catch (error) {
+        console.error('💥 AuthContext: Error creating fallback profile:', error);
+      }
+    }, [user, refreshUserData]),
     refreshUserData,
   };
 
