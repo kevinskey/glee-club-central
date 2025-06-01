@@ -1,4 +1,3 @@
-
 import { createBrowserRouter } from "react-router-dom";
 import { SimpleAuthProvider } from "@/contexts/SimpleAuthContext";
 import SimpleRequireAuth from "@/components/auth/SimpleRequireAuth";
@@ -24,7 +23,7 @@ import AdminHeroManager from "./pages/admin/AdminHeroManager";
 import UserManagementPage from "./pages/admin/UserManagementPage";
 import MemberDashboardPage from "./pages/dashboard/MemberDashboardPage";
 import FanDashboardPage from "./pages/dashboard/FanDashboardPage";
-import ProfilePage from "./pages/profile/ProfilePage";
+import ProfilePageFixed from "./pages/profile/ProfilePageFixed";
 import NotFoundPage from "./pages/NotFoundPage";
 
 export const router = createBrowserRouter([
@@ -115,14 +114,14 @@ export const router = createBrowserRouter([
       </SimpleAuthProvider>
     ),
   },
-  // Profile route - standalone profile page
+  // Profile route - standalone profile page with fixed auth
   {
     path: "/profile",
     element: (
       <SimpleAuthProvider>
         <SimpleRequireAuth>
           <AppLayout sidebarType="member" showHeader={false} showFooter={false}>
-            <ProfilePage />
+            <ProfilePageFixed />
           </AppLayout>
         </SimpleRequireAuth>
       </SimpleAuthProvider>
