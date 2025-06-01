@@ -80,8 +80,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           userId: session?.user?.id,
           userEmail: session?.user?.email,
           userMetadata: session?.user?.user_metadata,
-          sessionCreatedAt: session?.created_at,
-          sessionExpiresAt: session?.expires_at,
+          expiresAt: session?.expires_at,
           accessToken: session?.access_token ? 'present' : 'missing',
           refreshToken: session?.refresh_token ? 'present' : 'missing',
           timestamp: new Date().toISOString()

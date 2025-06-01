@@ -36,7 +36,12 @@ const LoginPage = () => {
       console.log('LoginPage: User is authenticated, redirecting...');
       const from = location.state?.from?.pathname || '/role-dashboard';
       setLoginError(null);
-      navigate(from, { replace: true });
+      
+      // Use setTimeout to ensure state updates have processed
+      setTimeout(() => {
+        console.log('LoginPage: Executing redirect to:', from);
+        navigate(from, { replace: true });
+      }, 100);
     }
   }, [isAuthenticated, user, isInitialized, isSubmitting, navigate, location.state]);
   
@@ -81,9 +86,17 @@ const LoginPage = () => {
         toast.error(errorMessage);
         setIsSubmitting(false);
       } else {
-        console.log("LoginPage: Login successful!");
+        console.log("LoginPage: Login successful! Waiting for auth state update...");
         toast.success("Login successful! Redirecting...");
-        // Don't set isSubmitting to false here - let the redirect handle it
+        
+        // Wait for auth state to update, then redirect will happen via useEffect
+        setTimeout(() => {
+          if (!isAuthenticated) {
+            console.log("LoginPage: Auth state hasn't updated yet, manually redirecting...");
+            navigate('/role-dashboard', { replace: true });
+          }
+          setIsSubmitting(false);
+        }, 2000);
       }
     } catch (err) {
       console.error("LoginPage: Unexpected login error:", err);
