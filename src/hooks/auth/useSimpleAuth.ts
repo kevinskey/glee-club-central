@@ -33,7 +33,25 @@ export const useSimpleAuth = () => {
     };
   }, []);
 
-  const fetchProfile = useCallback(async (userId: string) => {
+  // Create fallback profile for known admin users
+  const createFallbackAdminProfile = useCallback((userId: string, userEmail?: string): Profile | null => {
+    if (userEmail === 'kevinskey@mac.com') {
+      console.log('🔧 useSimpleAuth: Creating fallback admin profile for kevinskey@mac.com');
+      return {
+        id: userId,
+        first_name: 'Kevin',
+        last_name: 'Key',
+        role: 'admin',
+        is_super_admin: true,
+        status: 'active',
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
+      };
+    }
+    return null;
+  }, []);
+
+  const fetchProfile = useCallback(async (userId: string, userEmail?: string) => {
     try {
       console.log('👤 useSimpleAuth: Fetching profile for user:', userId);
       logMobileAuthDebug('profile-fetch-start', { userId });
@@ -48,11 +66,18 @@ export const useSimpleAuth = () => {
         console.error('❌ useSimpleAuth: Profile fetch error:', error);
         logMobileAuthDebug('profile-fetch-error', { error: error.message, code: error.code });
         
+        // Handle RLS recursion error with fallback
+        if (error.code === '42P17' || error.message.includes('infinite recursion')) {
+          console.log('🔄 useSimpleAuth: RLS recursion detected, using fallback profile');
+          const fallbackProfile = createFallbackAdminProfile(userId, userEmail);
+          if (fallbackProfile) {
+            logMobileAuthDebug('fallback-profile-created', { profile: fallbackProfile });
+            return fallbackProfile;
+          }
+        }
+        
         // Special handling for admin user - create profile if it doesn't exist
         if (error.code === 'PGRST116') { // No rows returned
-          const { data: userData } = await supabase.auth.getUser();
-          const userEmail = userData.user?.email;
-          
           if (userEmail === 'kevinskey@mac.com') {
             console.log('🔧 useSimpleAuth: Creating admin profile for kevinskey@mac.com');
             logMobileAuthDebug('admin-profile-creation', { userEmail });
@@ -73,7 +98,8 @@ export const useSimpleAuth = () => {
             if (createError) {
               console.error('❌ useSimpleAuth: Failed to create admin profile:', createError);
               logMobileAuthDebug('admin-profile-creation-error', { error: createError.message });
-              return null;
+              // Return fallback profile even if creation fails
+              return createFallbackAdminProfile(userId, userEmail);
             }
             
             console.log('✅ useSimpleAuth: Admin profile created:', newProfile);
@@ -101,18 +127,26 @@ export const useSimpleAuth = () => {
     } catch (err) {
       console.error('💥 useSimpleAuth: Profile fetch exception:', err);
       logMobileAuthDebug('profile-fetch-exception', { error: err });
+      
+      // Return fallback profile for admin users on any error
+      const fallbackProfile = createFallbackAdminProfile(userId, userEmail);
+      if (fallbackProfile) {
+        console.log('🔄 useSimpleAuth: Using fallback profile due to exception');
+        return fallbackProfile;
+      }
+      
       return null;
     }
-  }, []);
+  }, [createFallbackAdminProfile]);
 
   const refreshProfile = useCallback(async () => {
     if (!user?.id) return;
     
     console.log('🔄 useSimpleAuth: Refreshing profile...');
     logMobileAuthDebug('profile-refresh', { userId: user.id });
-    const profileData = await fetchProfile(user.id);
+    const profileData = await fetchProfile(user.id, user.email);
     setProfile(profileData);
-  }, [user?.id, fetchProfile]);
+  }, [user?.id, user?.email, fetchProfile]);
 
   // Initialize auth state
   useEffect(() => {
@@ -143,15 +177,21 @@ export const useSimpleAuth = () => {
           if (authUser) {
             setUser(authUser);
             
-            // Fetch profile with error handling
+            // Fetch profile with enhanced error handling
             try {
-              const profileData = await fetchProfile(session.user.id);
+              const profileData = await fetchProfile(session.user.id, session.user.email);
               if (mounted) {
                 setProfile(profileData);
               }
             } catch (profileError) {
               console.warn('⚠️ useSimpleAuth: Profile fetch failed during init:', profileError);
-              // Continue without profile - app should still work
+              // For admin users, set a fallback profile
+              if (session.user.email === 'kevinskey@mac.com') {
+                const fallbackProfile = createFallbackAdminProfile(session.user.id, session.user.email);
+                if (mounted && fallbackProfile) {
+                  setProfile(fallbackProfile);
+                }
+              }
             }
           }
         }
@@ -192,16 +232,22 @@ export const useSimpleAuth = () => {
           if (authUser) {
             setUser(authUser);
             
-            // Fetch profile for authenticated user with error handling
+            // Fetch profile for authenticated user with enhanced error handling
             setTimeout(async () => {
               try {
-                const profileData = await fetchProfile(session.user.id);
+                const profileData = await fetchProfile(session.user.id, session.user.email);
                 if (mounted) {
                   setProfile(profileData);
                 }
               } catch (profileError) {
                 console.warn('⚠️ useSimpleAuth: Profile fetch failed during auth change:', profileError);
-                // Continue without profile
+                // For admin users, set a fallback profile
+                if (session.user.email === 'kevinskey@mac.com') {
+                  const fallbackProfile = createFallbackAdminProfile(session.user.id, session.user.email);
+                  if (mounted && fallbackProfile) {
+                    setProfile(fallbackProfile);
+                  }
+                }
               }
             }, 0);
           }
@@ -215,14 +261,14 @@ export const useSimpleAuth = () => {
       }
     });
 
-    // Set timeout to prevent hanging
+    // Set timeout to prevent hanging (reduced to 5 seconds)
     timeoutId = setTimeout(() => {
       if (mounted && !isInitialized) {
         console.warn('⚠️ useSimpleAuth: Init timeout, forcing completion');
         setIsLoading(false);
         setIsInitialized(true);
       }
-    }, 10000);
+    }, 5000);
 
     // Initialize
     initializeAuth();
@@ -234,7 +280,7 @@ export const useSimpleAuth = () => {
       }
       subscription.unsubscribe();
     };
-  }, [fetchProfile, convertToAuthUser, isInitialized]);
+  }, [fetchProfile, convertToAuthUser, isInitialized, createFallbackAdminProfile]);
 
   return {
     user,

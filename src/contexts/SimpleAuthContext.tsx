@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { AuthUser, Profile } from '@/types/auth';
@@ -24,7 +23,7 @@ interface SimpleAuthContextType {
 const SimpleAuthContext = createContext<SimpleAuthContextType | undefined>(undefined);
 
 export const SimpleAuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  // Use error boundary approach for auth hook
+  // Use error boundary approach for auth hook with more robust fallback
   let authState;
   try {
     authState = useSimpleAuth();
@@ -145,7 +144,7 @@ export const SimpleAuthProvider: React.FC<{ children: React.ReactNode }> = ({ ch
   }, []);
 
   const isAdmin = useCallback(() => {
-    // Enhanced admin check with fallback for kevinskey@mac.com
+    // Enhanced admin check with multiple fallbacks
     const isKnownAdmin = user?.email === 'kevinskey@mac.com';
     const profileAdmin = profile?.is_super_admin === true || profile?.role === 'admin';
     const hasAdminAccess = profileAdmin || isKnownAdmin;
