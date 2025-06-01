@@ -1,18 +1,15 @@
 
 import React, { useState } from 'react';
-import { PageHeader } from "@/components/ui/page-header";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useSimpleAuthContext } from "@/contexts/SimpleAuthContext";
-import { User, Edit, Save } from "lucide-react";
-import { ProfileOverviewTab } from "@/components/profile/ProfileOverviewTab";
-import { ProfileParticipationTab } from "@/components/profile/ProfileParticipationTab";
-import { ProfileMusicTab } from "@/components/profile/ProfileMusicTab";
-import { ProfileSidebar } from "@/components/profile/ProfileSidebar";
-import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { PageLoader } from "@/components/ui/page-loader";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useUserUpdate } from "@/hooks/user/useUserUpdate";
+import { EnhancedProfileHeader } from "@/components/profile/EnhancedProfileHeader";
+import { MobileProfileTabs } from "@/components/profile/MobileProfileTabs";
+import { EnhancedProfileOverview } from "@/components/profile/EnhancedProfileOverview";
+import { ProfileParticipationTab } from "@/components/profile/ProfileParticipationTab";
+import { ProfileMusicTab } from "@/components/profile/ProfileMusicTab";
 
 export default function ProfilePage() {
   const { user, profile, isLoading } = useSimpleAuthContext();
@@ -55,6 +52,24 @@ export default function ProfilePage() {
       setIsEditing(false);
     }
   };
+
+  const handleShare = () => {
+    if (navigator.share) {
+      navigator.share({
+        title: 'My Glee Club Profile',
+        text: `Check out ${profile?.first_name}'s profile in the Spelman Glee Club`,
+        url: window.location.href,
+      });
+    } else {
+      // Fallback: copy link to clipboard
+      navigator.clipboard.writeText(window.location.href);
+      toast.success("Profile link copied to clipboard");
+    }
+  };
+
+  const handleSettings = () => {
+    toast.info("Settings feature coming soon");
+  };
   
   if (isLoading) {
     return <PageLoader message="Loading profile..." />;
@@ -72,74 +87,46 @@ export default function ProfilePage() {
     );
   }
 
+  const renderTabContent = () => {
+    switch (activeTab) {
+      case "overview":
+        return (
+          <EnhancedProfileOverview
+            profile={{
+              ...profile,
+              email: user.email
+            }}
+            isEditable={isEditing}
+            onSave={handleProfileUpdate}
+          />
+        );
+      case "participation":
+        return <ProfileParticipationTab profile={profile} />;
+      case "music":
+        return <ProfileMusicTab profile={profile} />;
+      default:
+        return null;
+    }
+  };
+
   return (
-    <div className="container mx-auto p-4 space-y-6">
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-        <PageHeader
-          title="My Profile"
-          description="View and manage your Glee Club membership information"
-          icon={<User className="h-6 w-6" />}
+    <div className="min-h-screen bg-background">
+      <div className="container mx-auto px-4 py-4 max-w-6xl">
+        <EnhancedProfileHeader
+          profile={profile}
+          user={user}
+          isEditing={isEditing}
+          onToggleEdit={toggleEditMode}
+          onShare={handleShare}
+          onSettings={handleSettings}
         />
-        {activeTab === "overview" && (
-          <Button 
-            variant="outline" 
-            size="sm" 
-            onClick={toggleEditMode}
-            className="flex items-center gap-1"
-          >
-            {isEditing ? (
-              <>
-                <Save className="h-4 w-4" />
-                <span>Exit Edit Mode</span>
-              </>
-            ) : (
-              <>
-                <Edit className="h-4 w-4" />
-                <span>Edit Profile</span>
-              </>
-            )}
-          </Button>
-        )}
-      </div>
-      
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div className="md:col-span-2">
-          <Tabs 
-            defaultValue="overview" 
-            value={activeTab} 
-            onValueChange={handleTabChange}
-            className="w-full"
-          >
-            <TabsList className="mb-4 grid grid-cols-3">
-              <TabsTrigger value="overview">Overview</TabsTrigger>
-              <TabsTrigger value="participation">Participation</TabsTrigger>
-              <TabsTrigger value="music">Music</TabsTrigger>
-            </TabsList>
-            
-            <TabsContent value="overview">
-              <ProfileOverviewTab 
-                profile={{
-                  ...profile,
-                  email: user.email
-                }}
-                isEditable={isEditing} 
-                onSave={handleProfileUpdate}
-              />
-            </TabsContent>
-            
-            <TabsContent value="participation">
-              <ProfileParticipationTab profile={profile} />
-            </TabsContent>
-            
-            <TabsContent value="music">
-              <ProfileMusicTab profile={profile} />
-            </TabsContent>
-          </Tabs>
-        </div>
         
-        <div className="space-y-6">
-          <ProfileSidebar profile={profile} />
-        </div>
+        <MobileProfileTabs
+          activeTab={activeTab}
+          onTabChange={handleTabChange}
+        >
+          {renderTabContent()}
+        </MobileProfileTabs>
       </div>
     </div>
   );
