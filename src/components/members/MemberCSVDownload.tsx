@@ -1,6 +1,4 @@
 
-
-
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -86,7 +84,7 @@ export function MemberCSVDownload() {
         query = query.eq('status', 'active');
       }
 
-      const { data: profilesData, error: profilesError } = await query
+      const { data, error: profilesError } = await query
         .order('last_name', { ascending: true });
 
       if (profilesError) {
@@ -94,7 +92,7 @@ export function MemberCSVDownload() {
         throw new Error(`Failed to fetch member data: ${profilesError.message}`);
       }
 
-      console.log('✅ Profiles query successful:', profilesData?.length || 0);
+      console.log('✅ Profiles query successful:', data?.length || 0);
 
       // Get email addresses from auth users (for admins)
       let emails: { [key: string]: string } = {};
@@ -118,23 +116,30 @@ export function MemberCSVDownload() {
       }
 
       // Check if we have valid profile data
-      if (!profilesData || profilesData.length === 0) {
+      if (!data || data.length === 0) {
         toast.warning('No members found to export');
         return;
       }
 
-      // Type guard function to validate ProfileData
-      const isValidProfile = (profile: any): profile is ProfileData => {
-        return profile !== null && 
-               typeof profile === 'object' && 
-               'id' in profile && 
-               typeof profile.id === 'string';
-      };
+      // Safely transform the data to ProfileData format
+      const safeProfiles: ProfileData[] = Array.isArray(data)
+        ? data.map((item: any) => ({
+            id: item.id ?? '',
+            first_name: item.first_name ?? null,
+            last_name: item.last_name ?? null,
+            phone: item.phone ?? null,
+            voice_part: item.voice_part ?? null,
+            status: item.status ?? null,
+            join_date: item.join_date ?? null,
+            class_year: item.class_year ?? null,
+            dues_paid: item.dues_paid ?? null,
+            notes: item.notes ?? null,
+            role: item.role ?? null,
+            is_super_admin: item.is_super_admin ?? null,
+          }))
+        : [];
 
-      // Process profiles data - handle the response properly with proper typing
-      const processedProfiles: ProfileData[] = profilesData.filter(isValidProfile);
-
-      if (processedProfiles.length === 0) {
+      if (safeProfiles.length === 0) {
         toast.warning('No valid member data found to export');
         return;
       }
@@ -159,7 +164,7 @@ export function MemberCSVDownload() {
       }
 
       // Build CSV rows
-      const csvRows = processedProfiles.map((profile: ProfileData) => {
+      const csvRows = safeProfiles.map((profile: ProfileData) => {
         const row = [profile.id];
         
         if (options.includePersonalInfo) {
@@ -223,7 +228,7 @@ export function MemberCSVDownload() {
         document.body.removeChild(link);
       }
 
-      toast.success(`Successfully exported ${processedProfiles.length} members`);
+      toast.success(`Successfully exported ${safeProfiles.length} members`);
       
     } catch (error: any) {
       console.error('💥 Export error:', error);
@@ -337,4 +342,3 @@ export function MemberCSVDownload() {
     </div>
   );
 }
-
