@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuthMigration } from '@/hooks/useAuthMigration';
@@ -46,8 +45,10 @@ export const RoleDashboard: React.FC = () => {
     if (auth.isAuthenticated && auth.user && (auth.profile || waitTime >= 5)) {
       let targetRoute = '/dashboard/member';
       
-      // Use the isAdmin function for role detection - FIX: Add parentheses
-      if (auth.profile && auth.isAdmin && auth.isAdmin()) {
+      // Check if user is admin using profile data directly to avoid function call issues
+      const isUserAdmin = auth.profile?.is_super_admin === true || auth.profile?.role === 'admin';
+      
+      if (auth.profile && isUserAdmin) {
         targetRoute = '/admin';
         console.log('👑 RoleDashboard: Admin role detected, routing to admin dashboard');
       } else if (auth.profile?.role === 'fan') {
@@ -69,7 +70,7 @@ export const RoleDashboard: React.FC = () => {
       setShowError(true);
       return;
     }
-  }, [auth.isLoading, auth.isAuthenticated, auth.user, auth.profile, auth.isAdmin, navigate, auth.isInitialized, hasRedirected, showError, waitTime]);
+  }, [auth.isLoading, auth.isAuthenticated, auth.user, auth.profile, navigate, auth.isInitialized, hasRedirected, showError, waitTime]);
 
   // Quick timer for timeout handling
   useEffect(() => {
