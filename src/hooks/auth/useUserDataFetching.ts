@@ -9,7 +9,7 @@ export const useUserDataFetching = (
   setState: React.Dispatch<React.SetStateAction<AuthState>>,
   mountedRef: React.MutableRefObject<boolean>
 ) => {
-  // Fetch user data with enhanced coordination and fallback handling
+  // Fetch user data with enhanced coordination
   const fetchUserData = useCallback(async (userId: string, userEmail?: string) => {
     if (!mountedRef.current) return;
     
@@ -27,11 +27,11 @@ export const useUserDataFetching = (
     try {
       console.log('📋 useUserDataFetching: Ensuring profile exists...');
       
-      // Use the new ensureProfileExists function which handles both fetching and creation
+      // Wait for profile to be available (either existing or created by trigger)
       profile = await Promise.race([
         ensureProfileExists(userId, userEmail),
         new Promise<null>((_, reject) => {
-          setTimeout(() => reject(new Error('Profile ensure timeout')), 10000);
+          setTimeout(() => reject(new Error('Profile ensure timeout')), 15000);
         })
       ]);
       

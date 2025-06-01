@@ -23,7 +23,7 @@ export const getProfile = async (userId: string): Promise<Profile | null> => {
       
     if (error) {
       if (error.code === 'PGRST116') {
-        console.log(`ℹ️ getProfile: No profile found for user ${userId} - will need to create one`);
+        console.log(`ℹ️ getProfile: No profile found for user ${userId} - trigger should have created one`);
       } else {
         console.error('❌ getProfile: Error fetching profile:', error);
       }
@@ -80,62 +80,32 @@ export const updateProfile = async (profile: Partial<Profile>): Promise<{ succes
   }
 };
 
-export const createFallbackProfile = async (userId: string, userEmail?: string): Promise<Profile | null> => {
-  try {
-    console.log('🔧 createFallbackProfile: Creating profile for user:', userId, 'email:', userEmail);
+// Enhanced function to wait for profile creation with retries
+export const waitForProfile = async (userId: string, maxRetries: number = 5, retryDelay: number = 1000): Promise<Profile | null> => {
+  console.log(`⏳ waitForProfile: Waiting for profile creation for user ${userId}`);
+  
+  for (let attempt = 1; attempt <= maxRetries; attempt++) {
+    console.log(`🔄 waitForProfile: Attempt ${attempt}/${maxRetries}`);
     
-    // Determine if this should be an admin based on email
-    const isAdmin = userEmail === 'kevinskey@mac.com';
-    const role = isAdmin ? 'admin' : 'member';
-    
-    console.log('🔧 createFallbackProfile: Profile will be created with role:', role, 'admin status:', isAdmin);
-    
-    const profileData = {
-      id: userId,
-      first_name: 'User',
-      last_name: '',
-      role: role,
-      is_super_admin: isAdmin,
-      status: 'active',
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString()
-    };
-    
-    console.log('🔧 createFallbackProfile: Inserting profile data:', profileData);
-    
-    const { data, error } = await supabase
-      .from('profiles')
-      .insert(profileData)
-      .select()
-      .single();
-    
-    console.log('🔧 createFallbackProfile: Creation result:', { 
-      error: error?.message,
-      errorCode: error?.code,
-      created: !!data,
-      role: data?.role,
-      isAdmin: data?.is_super_admin
-    });
-    
-    if (error) {
-      console.error('❌ createFallbackProfile: Error creating profile:', error);
-      return null;
+    const profile = await getProfile(userId);
+    if (profile) {
+      console.log(`✅ waitForProfile: Profile found on attempt ${attempt}`);
+      return profile;
     }
     
-    console.log('✅ createFallbackProfile: Profile created successfully:', {
-      id: data.id,
-      role: data.role,
-      is_super_admin: data.is_super_admin
-    });
-    
-    return data as Profile;
-  } catch (error) {
-    console.error('💥 createFallbackProfile: Error creating profile:', error);
-    return null;
+    if (attempt < maxRetries) {
+      console.log(`⏳ waitForProfile: Profile not found, waiting ${retryDelay}ms before retry...`);
+      await new Promise(resolve => setTimeout(resolve, retryDelay));
+      // Increase delay for subsequent attempts
+      retryDelay = Math.min(retryDelay * 1.5, 5000);
+    }
   }
+  
+  console.error(`❌ waitForProfile: Profile not found after ${maxRetries} attempts`);
+  return null;
 };
 
-// New function to ensure profile exists or create it
+// Simplified function that relies on the database trigger for profile creation
 export const ensureProfileExists = async (userId: string, userEmail?: string): Promise<Profile | null> => {
   console.log('🔍 ensureProfileExists: Checking profile for user:', userId);
   
@@ -143,8 +113,9 @@ export const ensureProfileExists = async (userId: string, userEmail?: string): P
   let profile = await getProfile(userId);
   
   if (!profile) {
-    console.log('🔧 ensureProfileExists: No profile found, creating fallback...');
-    profile = await createFallbackProfile(userId, userEmail);
+    console.log('⏳ ensureProfileExists: Profile not found, waiting for trigger to create it...');
+    // Wait for the trigger to create the profile (it should happen automatically on user creation)
+    profile = await waitForProfile(userId);
   }
   
   if (profile) {

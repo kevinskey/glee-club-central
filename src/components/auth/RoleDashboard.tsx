@@ -5,7 +5,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { PageLoader } from '@/components/ui/page-loader';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { AlertCircle, RefreshCw, User } from 'lucide-react';
+import { AlertCircle, RefreshCw, User, Clock } from 'lucide-react';
 
 export const RoleDashboard: React.FC = () => {
   const { user, profile, isLoading, isAuthenticated, isAdmin, isInitialized, refreshUserData } = useAuth();
@@ -14,6 +14,7 @@ export const RoleDashboard: React.FC = () => {
   const [showError, setShowError] = useState(false);
   const [isRetrying, setIsRetrying] = useState(false);
   const [loadingTimeout, setLoadingTimeout] = useState(false);
+  const [waitingForProfile, setWaitingForProfile] = useState(false);
 
   // Set up loading timeout to prevent infinite loading
   useEffect(() => {
@@ -23,10 +24,19 @@ export const RoleDashboard: React.FC = () => {
         setLoadingTimeout(true);
         setShowError(true);
       }
-    }, 15000); // 15 second timeout for better profile resolution
+    }, 20000); // 20 second timeout for profile creation
 
     return () => clearTimeout(timer);
   }, [isLoading, profile, isAuthenticated, user]);
+
+  // Monitor for new user profile creation
+  useEffect(() => {
+    if (isAuthenticated && user && !profile && !showError && !loadingTimeout) {
+      setWaitingForProfile(true);
+    } else {
+      setWaitingForProfile(false);
+    }
+  }, [isAuthenticated, user, profile, showError, loadingTimeout]);
 
   useEffect(() => {
     console.log('🎯 RoleDashboard: COORDINATION CHECK:', {
@@ -43,7 +53,8 @@ export const RoleDashboard: React.FC = () => {
       isInitialized,
       hasRedirected,
       loadingTimeout,
-      showError
+      showError,
+      waitingForProfile
     });
 
     // Wait for initialization and prevent multiple redirects
@@ -98,6 +109,7 @@ export const RoleDashboard: React.FC = () => {
     setShowError(false);
     setLoadingTimeout(false);
     setHasRedirected(false);
+    setWaitingForProfile(false);
     
     try {
       console.log('🔄 RoleDashboard: Retrying profile resolution...');
@@ -136,11 +148,22 @@ export const RoleDashboard: React.FC = () => {
     );
   }
 
+  // Show profile creation waiting state for new users
+  if (waitingForProfile && !showError && !loadingTimeout) {
+    return (
+      <PageLoader 
+        message="Setting up your profile for the first time..."
+        className="min-h-screen"
+        icon={<Clock className="h-8 w-8 animate-pulse" />}
+      />
+    );
+  }
+
   // Show profile resolution loading
   if (isLoading && !showError && !loadingTimeout) {
     return (
       <PageLoader 
-        message="Setting up your profile and permissions..."
+        message="Loading your profile and permissions..."
         className="min-h-screen"
       />
     );
@@ -155,7 +178,10 @@ export const RoleDashboard: React.FC = () => {
             <AlertCircle className="h-12 w-12 text-red-500 mx-auto mb-4" />
             <CardTitle>Profile Setup Issue</CardTitle>
             <CardDescription>
-              We're having trouble setting up your profile. This usually resolves quickly with a retry.
+              {loadingTimeout 
+                ? "Profile creation is taking longer than expected. This sometimes happens with new accounts."
+                : "We're having trouble setting up your profile. This usually resolves quickly with a retry."
+              }
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
@@ -166,7 +192,7 @@ export const RoleDashboard: React.FC = () => {
               </div>
               <p><strong>User ID:</strong> {user?.id}</p>
               <p><strong>Email:</strong> {user?.email}</p>
-              <p><strong>Status:</strong> {loadingTimeout ? 'Timeout' : 'Profile Missing'}</p>
+              <p><strong>Status:</strong> {loadingTimeout ? 'Profile Creation Timeout' : 'Profile Missing'}</p>
             </div>
             <div className="flex flex-col space-y-2">
               <Button 
