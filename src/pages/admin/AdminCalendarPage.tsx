@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { EnhancedCalendarView } from '@/components/calendar/EnhancedCalendarView';
@@ -7,10 +6,9 @@ import { EventEditor } from '@/components/admin/EventEditor';
 import { useCalendarEvents } from '@/hooks/useCalendarEvents';
 import { CalendarEvent } from '@/types/calendar';
 import { PageHeader } from '@/components/ui/page-header';
-import { BackButton } from '@/components/ui/back-button';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { Calendar, Plus, Edit, Trash2, Users } from 'lucide-react';
+import { Calendar, Plus, Edit, Trash2, Users, ArrowLeft } from 'lucide-react';
 import { toast } from 'sonner';
 import { useSimpleAuthContext } from '@/contexts/SimpleAuthContext';
 import { supabase } from '@/integrations/supabase/client';
@@ -40,6 +38,10 @@ export default function AdminCalendarPage() {
       }
     }
   }, [searchParams, events]);
+
+  const handleBackToAdmin = () => {
+    navigate('/admin');
+  };
 
   const handleEventClick = async (event: CalendarEvent) => {
     setSelectedEvent(event);
@@ -155,7 +157,15 @@ export default function AdminCalendarPage() {
             description="Manage all events and calendar settings"
             icon={<Calendar className="h-6 w-6" />}
           />
-          <BackButton fallbackPath="/admin" label="Back to Admin Dashboard" />
+          <Button
+            variant="ghost"
+            size="default"
+            onClick={handleBackToAdmin}
+            className="mb-3 sm:mb-0 self-start h-7 sm:h-8 px-2"
+          >
+            <ArrowLeft className="mr-1 h-3 w-3" />
+            Back to Admin Dashboard
+          </Button>
           <Card className="mt-6">
             <CardContent className="flex items-center justify-center h-64">
               <div className="text-center space-y-3">
@@ -178,7 +188,15 @@ export default function AdminCalendarPage() {
             description="Manage all events and calendar settings"
             icon={<Calendar className="h-6 w-6" />}
           />
-          <BackButton fallbackPath="/admin" label="Back to Admin Dashboard" />
+          <Button
+            variant="ghost"
+            size="default"
+            onClick={handleBackToAdmin}
+            className="mb-3 sm:mb-0 self-start h-7 sm:h-8 px-2"
+          >
+            <ArrowLeft className="mr-1 h-3 w-3" />
+            Back to Admin Dashboard
+          </Button>
           <Card className="mt-6">
             <CardContent className="flex flex-col items-center justify-center h-64 space-y-4">
               <div className="text-red-600 text-center">
@@ -215,7 +233,15 @@ export default function AdminCalendarPage() {
         />
         
         {/* Back Button Below Subtitle */}
-        <BackButton fallbackPath="/admin" label="Back to Admin Dashboard" />
+        <Button
+          variant="ghost"
+          size="default"
+          onClick={handleBackToAdmin}
+          className="mb-3 sm:mb-0 self-start h-7 sm:h-8 px-2"
+        >
+          <ArrowLeft className="mr-1 h-3 w-3" />
+          Back to Admin Dashboard
+        </Button>
 
         {/* Stats Cards */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
