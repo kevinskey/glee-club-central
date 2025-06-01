@@ -1,7 +1,9 @@
 
+
 import { createBrowserRouter } from "react-router-dom";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { ProfileProvider } from "@/contexts/ProfileContext";
+import { SimpleAuthProvider } from "@/contexts/SimpleAuthContext";
 import RequireAuth from "@/components/auth/RequireAuth";
 import AppLayout from "@/layouts/AppLayout";
 
@@ -42,74 +44,60 @@ export const router = createBrowserRouter([
   {
     path: "/login",
     element: (
-      <AuthProvider>
-        <ProfileProvider>
-          <AppLayout sidebarType="none" showHeader={false} showFooter={false}>
-            <LoginPage />
-          </AppLayout>
-        </ProfileProvider>
-      </AuthProvider>
+      <SimpleAuthProvider>
+        <AppLayout sidebarType="none" showHeader={false} showFooter={false}>
+          <LoginPage />
+        </AppLayout>
+      </SimpleAuthProvider>
     ),
   },
   {
     path: "/signup", 
     element: (
-      <AuthProvider>
-        <ProfileProvider>
-          <AppLayout sidebarType="none" showHeader={false} showFooter={false}>
-            <SignupPage />
-          </AppLayout>
-        </ProfileProvider>
-      </AuthProvider>
+      <SimpleAuthProvider>
+        <AppLayout sidebarType="none" showHeader={false} showFooter={false}>
+          <SignupPage />
+        </AppLayout>
+      </SimpleAuthProvider>
     ),
   },
   {
     path: "/register",
     element: (
-      <AuthProvider>
-        <ProfileProvider>
-          <AppLayout sidebarType="none" showHeader={false} showFooter={false}>
-            <RegisterPage />
-          </AppLayout>
-        </ProfileProvider>
-      </AuthProvider>
+      <SimpleAuthProvider>
+        <AppLayout sidebarType="none" showHeader={false} showFooter={false}>
+          <RegisterPage />
+        </AppLayout>
+      </SimpleAuthProvider>
     ),
   },
-  // Protected routes
+  // Protected routes - using SimpleAuthProvider for admin functionality
   {
     path: "/role-dashboard",
     element: (
-      <AuthProvider>
-        <ProfileProvider>
-          <RequireAuth>
-            <RoleDashboardPage />
-          </RequireAuth>
-        </ProfileProvider>
-      </AuthProvider>
+      <SimpleAuthProvider>
+        <RequireAuth>
+          <RoleDashboardPage />
+        </RequireAuth>
+      </SimpleAuthProvider>
     ),
   },
   {
     path: "/admin",
     element: (
-      <AuthProvider>
-        <ProfileProvider>
-          <RequireAuth requireAdmin>
-            <AdminDashboardPage />
-          </RequireAuth>
-        </ProfileProvider>
-      </AuthProvider>
+      <SimpleAuthProvider>
+        <AdminDashboardPage />
+      </SimpleAuthProvider>
     ),
   },
   {
     path: "/dashboard/member",
     element: (
-      <AuthProvider>
-        <ProfileProvider>
-          <RequireAuth>
-            <MemberDashboardPage />
-          </RequireAuth>
-        </ProfileProvider>
-      </AuthProvider>
+      <SimpleAuthProvider>
+        <RequireAuth>
+          <MemberDashboardPage />
+        </RequireAuth>
+      </SimpleAuthProvider>
     ),
   },
   // Catch-all 404 route
@@ -118,3 +106,4 @@ export const router = createBrowserRouter([
     element: <NotFoundPage />,
   },
 ]);
+
