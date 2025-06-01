@@ -9,51 +9,52 @@ export const useUserDataFetching = (
   mountedRef: React.MutableRefObject<boolean>,
   fetchingRef: React.MutableRefObject<boolean>
 ) => {
-  // Enhanced user data fetching with database profile creation
+  // Enhanced user data fetching with fixed RLS policies
   const fetchUserData = useCallback(async (userId: string, userEmail?: string, userMetadata?: any) => {
     if (!mountedRef.current || fetchingRef.current) return;
     
-    console.log(`📡 useUserDataFetching: STARTING ENHANCED PROFILE FETCH for user: ${userId}, email: ${userEmail}`);
+    console.log(`📡 useUserDataFetching: STARTING PROFILE FETCH for user: ${userId}, email: ${userEmail}`);
     
     fetchingRef.current = true;
     
     try {
-      // First, try to fetch existing profile from database
-      console.log('📋 useUserDataFetching: Checking for existing profile...');
-      const { data: existingProfile, error: fetchError } = await supabase
+      // Try to fetch existing profile from database
+      console.log('📋 useUserDataFetching: Fetching profile from database...');
+      const { data: profileData, error: fetchError } = await supabase
         .from('profiles')
         .select('*')
         .eq('id', userId)
         .maybeSingle();
       
       console.log('📋 useUserDataFetching: Profile fetch result:', {
-        hasProfile: !!existingProfile,
-        profileRole: existingProfile?.role,
-        profileIsAdmin: existingProfile?.is_super_admin,
-        fetchError: fetchError?.message
+        hasProfile: !!profileData,
+        profileRole: profileData?.role,
+        profileIsAdmin: profileData?.is_super_admin,
+        fetchError: fetchError?.message,
+        errorCode: fetchError?.code
       });
       
-      let profile: Profile | null = existingProfile;
+      let profile: Profile | null = profileData;
       
-      // If no profile exists, create one
+      // If no profile exists and no error, create one
       if (!profile && !fetchError) {
-        console.log('🔧 useUserDataFetching: Creating new profile...');
+        console.log('🔧 useUserDataFetching: No profile found, creating new profile...');
         
         // Determine if user should be admin based on email
-        const isAdmin = userEmail === 'kevinskey@mac.com';
+        const isAdminUser = userEmail === 'kevinskey@mac.com';
         
         const newProfileData = {
           id: userId,
           first_name: userMetadata?.first_name || userEmail?.split('@')[0] || 'User',
           last_name: userMetadata?.last_name || '',
-          role: isAdmin ? 'admin' : 'member',
+          role: isAdminUser ? 'admin' : 'member',
           status: 'active',
-          is_super_admin: isAdmin,
+          is_super_admin: isAdminUser,
           created_at: new Date().toISOString(),
           updated_at: new Date().toISOString()
         };
         
-        console.log('🔧 useUserDataFetching: Inserting profile data:', newProfileData);
+        console.log('🔧 useUserDataFetching: Creating profile with data:', newProfileData);
         
         const { data: newProfile, error: createError } = await supabase
           .from('profiles')
@@ -63,7 +64,7 @@ export const useUserDataFetching = (
         
         if (createError) {
           console.error('❌ useUserDataFetching: Profile creation failed:', createError);
-          // Fall back to in-memory profile
+          // Use fallback profile
           profile = newProfileData as Profile;
         } else {
           console.log('✅ useUserDataFetching: Profile created successfully:', newProfile);
@@ -71,18 +72,18 @@ export const useUserDataFetching = (
         }
       }
       
-      // If we still don't have a profile, create a fallback
+      // If we still don't have a profile, create emergency fallback
       if (!profile) {
-        console.log('🔧 useUserDataFetching: Creating fallback profile...');
-        const isAdmin = userEmail === 'kevinskey@mac.com';
+        console.log('🆘 useUserDataFetching: Creating emergency fallback profile...');
+        const isAdminUser = userEmail === 'kevinskey@mac.com';
         
         profile = {
           id: userId,
           first_name: userMetadata?.first_name || userEmail?.split('@')[0] || 'User',
           last_name: userMetadata?.last_name || '',
-          role: isAdmin ? 'admin' : 'member',
+          role: isAdminUser ? 'admin' : 'member',
           status: 'active',
-          is_super_admin: isAdmin,
+          is_super_admin: isAdminUser,
           created_at: new Date().toISOString(),
           updated_at: new Date().toISOString()
         };
@@ -102,7 +103,7 @@ export const useUserDataFetching = (
         profileIsAdmin: profile.is_super_admin,
         profileFirstName: profile.first_name,
         profileLastName: profile.last_name,
-        permissionCount: Object.keys(permissions).length
+        hasAdminAccess: permissions.admin_access
       });
       
       // Update state with profile data
@@ -117,17 +118,17 @@ export const useUserDataFetching = (
       }
       
     } catch (error) {
-      console.error('❌ useUserDataFetching: Enhanced profile fetch failed:', error);
+      console.error('❌ useUserDataFetching: Profile fetch failed with exception:', error);
       
       // Create emergency fallback profile
-      const isAdmin = userEmail === 'kevinskey@mac.com';
+      const isAdminUser = userEmail === 'kevinskey@mac.com';
       const fallbackProfile: Profile = {
         id: userId,
         first_name: userMetadata?.first_name || userEmail?.split('@')[0] || 'User',
         last_name: userMetadata?.last_name || '',
-        role: isAdmin ? 'admin' : 'member',
+        role: isAdminUser ? 'admin' : 'member',
         status: 'active',
-        is_super_admin: isAdmin,
+        is_super_admin: isAdminUser,
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString()
       };
@@ -136,10 +137,10 @@ export const useUserDataFetching = (
         'view_sheet_music': true,
         'view_calendar': true,
         'view_announcements': true,
-        'admin_access': isAdmin
+        'admin_access': isAdminUser
       };
       
-      console.log('🆘 useUserDataFetching: Using emergency fallback profile');
+      console.log('🆘 useUserDataFetching: Using emergency fallback profile with admin access:', isAdminUser);
       
       if (mountedRef.current) {
         setState(prev => ({

@@ -95,15 +95,23 @@ export const SimpleAuthProvider: React.FC<{ children: React.ReactNode }> = ({ ch
   }, []);
 
   const isAdmin = useCallback(() => {
-    const adminStatus = profile?.is_super_admin === true || profile?.role === 'admin';
-    console.log('👑 SimpleAuth: Admin check:', {
+    // Enhanced admin check with fallback for kevinskey@mac.com
+    const isKnownAdmin = user?.email === 'kevinskey@mac.com';
+    const profileAdmin = profile?.is_super_admin === true || profile?.role === 'admin';
+    const hasAdminAccess = profileAdmin || isKnownAdmin;
+    
+    console.log('👑 SimpleAuth: Enhanced admin check:', {
+      userEmail: user?.email,
+      isKnownAdmin,
       hasProfile: !!profile,
       profileRole: profile?.role,
-      isSuperAdmin: profile?.is_super_admin,
-      result: adminStatus
+      profileIsSuperAdmin: profile?.is_super_admin,
+      profileAdmin,
+      finalResult: hasAdminAccess
     });
-    return adminStatus;
-  }, [profile]);
+    
+    return hasAdminAccess;
+  }, [profile, user?.email]);
 
   const isMember = useCallback(() => {
     const memberStatus = profile?.role === 'member' || !profile?.role;

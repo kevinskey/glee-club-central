@@ -40,25 +40,16 @@ export const AdminRoute: React.FC<AdminRouteProps> = ({ children }) => {
     return <Navigate to="/login" replace />;
   }
   
-  // Wait for profile to load before making admin decisions
-  if (!profile) {
-    return (
-      <PageLoader 
-        message="Loading profile data..." 
-        className="min-h-screen"
-      />
-    );
-  }
+  // Check admin access using the enhanced isAdmin function
+  const hasAdminAccess = isAdmin();
   
-  // Special handling for kevinskey@mac.com
-  const isKnownAdmin = user.email === 'kevinskey@mac.com';
-  const hasAdminAccess = isAdmin() || isKnownAdmin;
-  
-  console.log('🔍 AdminRoute: Final admin check:', {
-    isKnownAdmin,
-    hasAdminAccess,
+  console.log('🔍 AdminRoute: Final admin access check:', {
+    userEmail: user?.email,
+    hasProfile: !!profile,
     profileRole: profile?.role,
-    profileIsAdmin: profile?.is_super_admin
+    profileIsAdmin: profile?.is_super_admin,
+    hasAdminAccess,
+    isKnownAdmin: user?.email === 'kevinskey@mac.com'
   });
   
   if (!hasAdminAccess) {
