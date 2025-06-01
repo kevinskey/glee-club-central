@@ -1,3 +1,4 @@
+
 import React, { createContext, useContext, useEffect, useState, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { AuthUser, Profile, AuthContextType } from '@/types/auth';
@@ -199,14 +200,18 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     try {
       console.log('🔧 AuthContext: Creating fallback profile for user:', user.id);
       
+      // Determine if user should be admin based on email
+      const isAdmin = user.email === 'kevinskey@mac.com';
+      
       const { error } = await supabase
         .from('profiles')
         .insert({
           id: user.id,
-          first_name: user.user_metadata?.first_name || 'User',
+          first_name: user.user_metadata?.first_name || user.email?.split('@')[0] || 'User',
           last_name: user.user_metadata?.last_name || '',
-          role: 'member',
+          role: isAdmin ? 'admin' : 'member',
           status: 'active',
+          is_super_admin: isAdmin,
           created_at: new Date().toISOString(),
           updated_at: new Date().toISOString()
         });
