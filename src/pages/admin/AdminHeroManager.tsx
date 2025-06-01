@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { Navigate } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
@@ -71,6 +70,8 @@ export default function AdminHeroManager() {
   const fetchImages = async () => {
     setIsLoading(true);
     try {
+      console.log('🔄 Fetching images from media_library...');
+      
       const { data, error } = await supabase
         .from('media_library')
         .select('id, title, file_url, is_hero, hero_tag, display_order')
@@ -78,10 +79,12 @@ export default function AdminHeroManager() {
         .order('display_order', { ascending: true });
 
       if (error) {
-        console.error('Error fetching images:', error);
-        toast.error("Failed to load images");
+        console.error('❌ Error fetching images:', error);
+        toast.error(`Failed to load images: ${error.message}`);
         return;
       }
+
+      console.log('✅ Images fetched successfully:', data?.length || 0);
 
       const formattedImages: MediaImage[] = (data || []).map(item => ({
         id: item.id,
@@ -95,8 +98,8 @@ export default function AdminHeroManager() {
       setImages(formattedImages);
       setFilteredImages(formattedImages);
     } catch (error) {
-      console.error('Error in fetchImages:', error);
-      toast.error("Failed to load images");
+      console.error('💥 Exception in fetchImages:', error);
+      toast.error("Unexpected error while loading images");
     } finally {
       setIsLoading(false);
     }
@@ -126,6 +129,7 @@ export default function AdminHeroManager() {
 
   // Update image data
   const updateImage = (id: string, field: keyof MediaImage, value: any) => {
+    console.log(`🔄 Updating image ${id}: ${field} = ${value}`);
     setImages(prev => prev.map(img => 
       img.id === id ? { ...img, [field]: value } : img
     ));
@@ -190,58 +194,89 @@ export default function AdminHeroManager() {
 
   // Save all changes with better error handling
   const saveChanges = async () => {
-    setIsSaving(true);
-    try {
-      const updates = images.map(img => ({
-        id: img.id,
-        is_hero: img.is_hero,
-        hero_tag: img.hero_tag,
-        display_order: img.display_order
-      }));
+    if (!hasChanges) {
+      toast.info("No changes to save");
+      return;
+    }
 
-      // Process updates in smaller batches to avoid timeouts
-      const batchSize = 10;
-      for (let i = 0; i < updates.length; i += batchSize) {
-        const batch = updates.slice(i, i + batchSize);
-        
-        for (const update of batch) {
+    setIsSaving(true);
+    console.log('💾 Starting to save changes...');
+
+    try {
+      let successCount = 0;
+      let errorCount = 0;
+      const errors: string[] = [];
+
+      // Process images one by one for better error tracking
+      for (const img of images) {
+        try {
+          console.log(`💾 Updating image: ${img.id}`);
+          
           const { error } = await supabase
             .from('media_library')
             .update({
-              is_hero: update.is_hero,
-              hero_tag: update.hero_tag,
-              display_order: update.display_order
+              is_hero: img.is_hero,
+              hero_tag: img.hero_tag,
+              display_order: img.display_order
             })
-            .eq('id', update.id);
+            .eq('id', img.id);
 
           if (error) {
-            console.error('Update error for image:', update.id, error);
-            throw error;
+            console.error(`❌ Error updating image ${img.id}:`, error);
+            errors.push(`${img.title}: ${error.message}`);
+            errorCount++;
+          } else {
+            console.log(`✅ Successfully updated image: ${img.id}`);
+            successCount++;
           }
+
+          // Small delay to prevent overwhelming the database
+          await new Promise(resolve => setTimeout(resolve, 10));
+        } catch (err) {
+          console.error(`💥 Exception updating image ${img.id}:`, err);
+          errors.push(`${img.title}: Unexpected error`);
+          errorCount++;
         }
       }
 
-      toast.success("All changes saved successfully");
-      setHasChanges(false);
-      await fetchImages(); // Refresh data
+      // Show results
+      if (successCount > 0 && errorCount === 0) {
+        toast.success(`All ${successCount} changes saved successfully!`);
+        setHasChanges(false);
+      } else if (successCount > 0 && errorCount > 0) {
+        toast.warning(`${successCount} changes saved, but ${errorCount} failed. Check console for details.`);
+        console.warn('⚠️ Save errors:', errors);
+      } else {
+        toast.error(`Failed to save changes. ${errors.length > 0 ? errors[0] : 'Unknown error'}`);
+        console.error('❌ All save operations failed:', errors);
+      }
+
+      // Refresh data to ensure consistency
+      await fetchImages();
     } catch (error) {
-      console.error('Error saving changes:', error);
-      toast.error("Failed to save some changes. Please try again.");
+      console.error('💥 Critical error in saveChanges:', error);
+      toast.error("Critical error while saving. Please try again.");
     } finally {
       setIsSaving(false);
     }
   };
 
-  // Delete image
+  // Delete image with better error handling
   const deleteImage = async (id: string) => {
     try {
+      console.log(`🗑️ Deleting image: ${id}`);
+      
       const { error } = await supabase
         .from('media_library')
         .delete()
         .eq('id', id);
 
-      if (error) throw error;
+      if (error) {
+        console.error('❌ Delete error:', error);
+        throw error;
+      }
 
+      console.log('✅ Image deleted successfully');
       setImages(prev => prev.filter(img => img.id !== id));
       setSelectedImages(prev => {
         const newSet = new Set(prev);
@@ -249,9 +284,9 @@ export default function AdminHeroManager() {
         return newSet;
       });
       toast.success("Image deleted successfully");
-    } catch (error) {
-      console.error('Error deleting image:', error);
-      toast.error("Failed to delete image");
+    } catch (error: any) {
+      console.error('💥 Error deleting image:', error);
+      toast.error(`Failed to delete image: ${error.message || 'Unknown error'}`);
     }
   };
 
@@ -396,17 +431,20 @@ export default function AdminHeroManager() {
         </Card>
       </div>
 
-      {/* Save Changes Button - Enhanced */}
+      {/* Enhanced Save Changes Button */}
       {hasChanges && (
         <div className="fixed bottom-4 right-4 z-50">
-          <Card className="shadow-lg">
+          <Card className="shadow-lg border-orange-200">
             <CardContent className="p-4">
               <div className="flex items-center gap-2">
-                <Badge variant="destructive">Unsaved Changes</Badge>
+                <Badge variant="destructive" className="animate-pulse">
+                  {images.filter((_, i, arr) => arr.findIndex(img => img.id === _.id) !== arr.findLastIndex(img => img.id === _.id)).length || images.length} Unsaved Changes
+                </Badge>
                 <Button 
                   onClick={saveChanges} 
                   disabled={isSaving}
                   size="sm"
+                  className="bg-orange-600 hover:bg-orange-700"
                 >
                   {isSaving ? (
                     <>
@@ -444,7 +482,7 @@ export default function AdminHeroManager() {
                       className={`transition-all ${
                         snapshot.isDragging ? 'shadow-lg scale-105' : ''
                       } ${
-                        selectedImages.has(image.id) ? 'ring-2 ring-primary' : ''
+                        selectedImages.has(image.id) ? 'ring-2 ring-orange-500' : ''
                       }`}
                     >
                       <CardContent className="p-4">
