@@ -1,3 +1,4 @@
+
 import React, { useState, useRef, useEffect } from 'react';
 import FullCalendar from '@fullcalendar/react';
 import dayGridPlugin from '@fullcalendar/daygrid';
@@ -10,6 +11,7 @@ import { CalendarHeader } from './CalendarHeader';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { format, isAfter } from 'date-fns';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 interface EnhancedCalendarViewProps {
   events: CalendarEvent[];
@@ -25,7 +27,10 @@ export function EnhancedCalendarView({
   loading = false 
 }: EnhancedCalendarViewProps) {
   const { isAuthenticated } = useSimpleAuthContext();
-  const [view, setView] = useState<'dayGridMonth' | 'timeGridWeek' | 'timeGridDay' | 'listWeek'>('dayGridMonth');
+  const isMobile = useIsMobile();
+  const [view, setView] = useState<'dayGridMonth' | 'timeGridWeek' | 'timeGridDay' | 'listWeek'>(
+    isMobile ? 'listWeek' : 'dayGridMonth'
+  );
   const calendarRef = useRef<FullCalendar>(null);
 
   // Filter events based on authentication status and date
@@ -103,16 +108,16 @@ export function EnhancedCalendarView({
     return (
       <div className={`p-1 ${isListView ? 'flex items-center gap-2' : ''}`}>
         <div className="flex-1 min-w-0">
-          <div className="font-medium text-xs truncate">
-            {event.title}
+          <div className={`font-medium truncate ${isMobile ? 'text-xs' : 'text-sm'}`}>
+            {isMobile && event.title.length > 15 ? `${event.title.substring(0, 15)}...` : event.title}
           </div>
-          {event.extendedProps.location && (
+          {event.extendedProps.location && !isMobile && (
             <div className="text-xs opacity-80 truncate">
               📍 {event.extendedProps.location}
             </div>
           )}
         </div>
-        {event.extendedProps.eventType && (
+        {event.extendedProps.eventType && !isMobile && (
           <Badge 
             variant="secondary" 
             className="text-xs bg-white/20 text-white border-white/30"
@@ -155,10 +160,10 @@ export function EnhancedCalendarView({
           events={calendarEvents}
           eventClick={handleEventClick}
           eventContent={renderEventContent}
-          headerToolbar={false} // We use our custom header
+          headerToolbar={false}
           height="auto"
-          aspectRatio={1.8}
-          dayMaxEventRows={3}
+          aspectRatio={isMobile ? 1.0 : 1.8}
+          dayMaxEventRows={isMobile ? 2 : 3}
           moreLinkClick="popover"
           eventDisplay="block"
           displayEventTime={true}
@@ -172,16 +177,23 @@ export function EnhancedCalendarView({
             minute: '2-digit',
             meridiem: 'short'
           }}
-          // Mobile optimizations
-          dayHeaderFormat={window.innerWidth < 768 ? { weekday: 'narrow' } : { weekday: 'short' }}
-          // Custom styling
+          // Mobile-optimized settings
+          dayHeaderFormat={isMobile ? { weekday: 'narrow' } : { weekday: 'short' }}
           eventClassNames="hover:opacity-80 transition-opacity cursor-pointer"
           dayCellClassNames="hover:bg-gray-50"
-          // List view customization
           listDayFormat={{ weekday: 'long', month: 'long', day: 'numeric' }}
           listDaySideFormat={{ weekday: 'narrow' }}
-          // Responsive behavior
-          contentHeight={window.innerWidth < 768 ? 400 : 600}
+          contentHeight={isMobile ? 300 : 600}
+          // Mobile-specific improvements
+          nowIndicator={true}
+          scrollTime="09:00:00"
+          slotMinTime="06:00:00"
+          slotMaxTime="23:00:00"
+          // Better mobile touch handling
+          eventMinHeight={isMobile ? 20 : 25}
+          dayMaxEvents={isMobile ? 2 : 4}
+          // Mobile calendar styling
+          themeSystem="standard"
         />
       </Card>
 
