@@ -10,15 +10,17 @@ import { MobileBottomNav } from '@/components/layout/MobileBottomNav';
 import { HeroImageInitializer } from '@/components/landing/HeroImageInitializer';
 
 interface AppLayoutProps {
-  sidebarType?: 'member' | 'admin' | 'none';
+  sidebarType?: 'member' | 'admin' | 'fan' | 'none';
   showHeader?: boolean;
   showFooter?: boolean;
+  children?: React.ReactNode;
 }
 
 const AppLayout: React.FC<AppLayoutProps> = ({ 
   sidebarType = 'none', 
   showHeader = true, 
-  showFooter = false 
+  showFooter = false,
+  children 
 }) => {
   // Safely get auth context - handle case where it might not be available
   let isAuthenticated = false;
@@ -52,12 +54,12 @@ const AppLayout: React.FC<AppLayoutProps> = ({
         <main className="flex-1 min-h-screen">
           {shouldShowSidebar && (
             <div className="lg:hidden">
-              <MobileBottomNav isAdmin={isAdmin} />
+              <MobileBottomNav />
             </div>
           )}
           
           <div className={`${shouldShowSidebar ? 'p-6' : ''}`}>
-            <Outlet />
+            {children || <Outlet />}
           </div>
         </main>
       </div>

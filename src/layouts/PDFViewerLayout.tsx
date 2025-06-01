@@ -8,7 +8,6 @@ export default function PDFViewerLayout() {
       sidebarType="none" 
       showHeader={true} 
       showFooter={false}
-      title="PDF Viewer"
     />
   );
 }

@@ -97,7 +97,7 @@ export const memberRoutes: RouteObject[] = [
   // Fan Dashboard Routes
   {
     path: '/fan-dashboard',
-    element: <RequireAuth><AppLayout sidebarType="fan" showHeader={true} showFooter={false} /></RequireAuth>,
+    element: <RequireAuth><AppLayout sidebarType="member" showHeader={true} showFooter={false} /></RequireAuth>,
     children: [
       { 
         index: true, 
