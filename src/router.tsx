@@ -24,6 +24,7 @@ import AdminHeroManager from "./pages/admin/AdminHeroManager";
 import UserManagementPage from "./pages/admin/UserManagementPage";
 import MemberDashboardPage from "./pages/dashboard/MemberDashboardPage";
 import FanDashboardPage from "./pages/dashboard/FanDashboardPage";
+import ProfilePage from "./pages/profile/ProfilePage";
 import NotFoundPage from "./pages/NotFoundPage";
 
 export const router = createBrowserRouter([
@@ -111,6 +112,19 @@ export const router = createBrowserRouter([
         <AppLayout sidebarType="none" showHeader={false} showFooter={false}>
           <JoinGleeFamPage />
         </AppLayout>
+      </SimpleAuthProvider>
+    ),
+  },
+  // Profile route - standalone profile page
+  {
+    path: "/profile",
+    element: (
+      <SimpleAuthProvider>
+        <SimpleRequireAuth>
+          <AppLayout sidebarType="member" showHeader={false} showFooter={false}>
+            <ProfilePage />
+          </AppLayout>
+        </SimpleRequireAuth>
       </SimpleAuthProvider>
     ),
   },
