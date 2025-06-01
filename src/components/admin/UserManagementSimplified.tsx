@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -21,11 +20,13 @@ import {
   Phone,
   Music,
   RefreshCw,
-  AlertCircle
+  AlertCircle,
+  Database
 } from 'lucide-react';
 import { useSimpleAuthContext } from '@/contexts/SimpleAuthContext';
 import { useUsersSimplified } from '@/hooks/user/useUsersSimplified';
 import { User } from '@/hooks/user/types';
+import { DatabaseConnectionTest } from './DatabaseConnectionTest';
 
 export function UserManagementSimplified() {
   const { isAuthenticated, isLoading, isAdmin } = useSimpleAuthContext();
@@ -34,6 +35,7 @@ export function UserManagementSimplified() {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedVoicePart, setSelectedVoicePart] = useState('all');
   const [selectedRole, setSelectedRole] = useState('all');
+  const [showDatabaseTest, setShowDatabaseTest] = useState(false);
 
   const isAdminUser = isAdmin ? isAdmin() : false;
 
@@ -102,24 +104,37 @@ export function UserManagementSimplified() {
 
   if (error) {
     return (
-      <Card>
-        <CardContent className="text-center py-8">
-          <AlertCircle className="h-12 w-12 text-red-500 mx-auto mb-4" />
-          <h3 className="font-semibold mb-2">Error Loading Members</h3>
-          <p className="text-muted-foreground mb-4">{error}</p>
-          <div className="space-y-2">
-            <Button onClick={loadUsers} variant="outline">
-              <RefreshCw className="mr-2 h-4 w-4" />
-              Try Again
-            </Button>
-            {error.includes('Database policy') && (
-              <p className="text-sm text-muted-foreground">
-                If this error persists, the database policies may need to be updated by an administrator.
-              </p>
-            )}
-          </div>
-        </CardContent>
-      </Card>
+      <div className="space-y-6">
+        <Card>
+          <CardContent className="text-center py-8">
+            <AlertCircle className="h-12 w-12 text-red-500 mx-auto mb-4" />
+            <h3 className="font-semibold mb-2">Error Loading Members</h3>
+            <p className="text-muted-foreground mb-4">{error}</p>
+            <div className="space-y-2">
+              <div className="flex gap-2 justify-center">
+                <Button onClick={loadUsers} variant="outline">
+                  <RefreshCw className="mr-2 h-4 w-4" />
+                  Try Again
+                </Button>
+                <Button 
+                  onClick={() => setShowDatabaseTest(!showDatabaseTest)} 
+                  variant="secondary"
+                >
+                  <Database className="mr-2 h-4 w-4" />
+                  Run Database Test
+                </Button>
+              </div>
+              {error.includes('Database policy') && (
+                <p className="text-sm text-muted-foreground">
+                  If this error persists, the database policies may need to be updated by an administrator.
+                </p>
+              )}
+            </div>
+          </CardContent>
+        </Card>
+        
+        {showDatabaseTest && <DatabaseConnectionTest />}
+      </div>
     );
   }
   
@@ -137,12 +152,22 @@ export function UserManagementSimplified() {
             <RefreshCw className="mr-2 h-4 w-4" />
             Refresh
           </Button>
+          <Button 
+            onClick={() => setShowDatabaseTest(!showDatabaseTest)} 
+            variant="outline" 
+            size="sm"
+          >
+            <Database className="mr-2 h-4 w-4" />
+            DB Test
+          </Button>
           <Button variant="default">
             <UserPlus className="mr-2 h-4 w-4" />
             Add Member
           </Button>
         </div>
       </div>
+
+      {showDatabaseTest && <DatabaseConnectionTest />}
 
       {/* Search and filter controls */}
       <Card>
