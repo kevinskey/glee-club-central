@@ -152,10 +152,9 @@ export const useAuthState = () => {
           const authUser: AuthUser = {
             id: session.user.id,
             email: session.user.email || '',
-            app_metadata: session.user.app_metadata,
-            user_metadata: session.user.user_metadata,
-            aud: session.user.aud,
-            created_at: session.user.created_at
+            email_confirmed_at: session.user.email_confirmed_at,
+            created_at: session.user.created_at,
+            updated_at: session.user.updated_at
           };
           
           setState(prev => ({ 
@@ -217,10 +216,9 @@ export const useAuthState = () => {
           const authUser: AuthUser = {
             id: session.user.id,
             email: session.user.email || '',
-            app_metadata: session.user.app_metadata,
-            user_metadata: session.user.user_metadata,
-            aud: session.user.aud,
-            created_at: session.user.created_at
+            email_confirmed_at: session.user.email_confirmed_at,
+            created_at: session.user.created_at,
+            updated_at: session.user.updated_at
           };
           
           setState(prev => ({ 
