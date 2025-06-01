@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
@@ -154,7 +153,6 @@ export const RoleDashboard: React.FC = () => {
       <PageLoader 
         message="Setting up your profile for the first time..."
         className="min-h-screen"
-        icon={<Clock className="h-8 w-8 animate-pulse" />}
       />
     );
   }
