@@ -12,16 +12,7 @@ export const useAuthInitialization = (
   useEffect(() => {
     console.log('🚀 useAuthInitialization: Starting auth initialization...');
     
-    let isInitializing = false;
-    
     const initializeAuth = async () => {
-      if (isInitializing) {
-        console.log('🔄 useAuthInitialization: Already initializing, skipping...');
-        return;
-      }
-      
-      isInitializing = true;
-      
       try {
         console.log('🔄 useAuthInitialization: Getting current session...');
         const { data: { session }, error } = await supabase.auth.getSession();
@@ -93,8 +84,6 @@ export const useAuthInitialization = (
             isInitialized: true
           });
         }
-      } finally {
-        isInitializing = false;
       }
     };
     
