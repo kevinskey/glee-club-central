@@ -50,10 +50,11 @@ export const useUsers = (): UseUsersResponse => {
           const { data: authData, error: authError } = await supabase.auth.admin.listUsers();
           
           if (!authError && authData?.users) {
+            // Fix the TypeScript error by properly typing the reduce function
             authUsersMap = authData.users.reduce((acc: Record<string, any>, user: any) => {
               acc[user.id] = user;
               return acc;
-            }, {});
+            }, {} as Record<string, any>);
             console.log('📧 Auth users data loaded for admin');
           }
         }
