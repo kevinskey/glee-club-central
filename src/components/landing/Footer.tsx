@@ -72,18 +72,6 @@ export function Footer() {
                 </p>
               </div>
             </div>
-            <p className="text-muted-foreground mb-4 max-w-md">
-              The Spelman College Glee Club has maintained a standard of choral excellence for women of African descent for over 95 years.
-            </p>
-            <div className="text-sm">
-              <span className="text-muted-foreground">Contact us: </span>
-              <a 
-                href="mailto:gleeworld@spelman.edu"
-                className="text-glee-spelman hover:underline"
-              >
-                gleeworld@spelman.edu
-              </a>
-            </div>
           </div>
 
           {/* Quick Links */}
