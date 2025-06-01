@@ -1,6 +1,7 @@
 
 import { createBrowserRouter } from "react-router-dom";
 import { AuthProvider } from "@/contexts/AuthContext";
+import { ProfileProvider } from "@/contexts/ProfileContext";
 import RequireAuth from "@/components/auth/RequireAuth";
 import AppLayout from "@/layouts/AppLayout";
 
@@ -19,12 +20,14 @@ import MemberDashboardPage from "./pages/dashboard/MemberDashboardPage";
 import NotFoundPage from "./pages/NotFoundPage";
 
 export const router = createBrowserRouter([
-  // Public routes - wrapped with AuthProvider
+  // Public routes - wrapped with AuthProvider and ProfileProvider
   {
     path: "/",
     element: (
       <AuthProvider>
-        <AppLayout sidebarType="none" showHeader={true} showFooter={true} />
+        <ProfileProvider>
+          <AppLayout sidebarType="none" showHeader={true} showFooter={true} />
+        </ProfileProvider>
       </AuthProvider>
     ),
     children: [
@@ -40,9 +43,11 @@ export const router = createBrowserRouter([
     path: "/login",
     element: (
       <AuthProvider>
-        <AppLayout sidebarType="none" showHeader={false} showFooter={false}>
-          <LoginPage />
-        </AppLayout>
+        <ProfileProvider>
+          <AppLayout sidebarType="none" showHeader={false} showFooter={false}>
+            <LoginPage />
+          </AppLayout>
+        </ProfileProvider>
       </AuthProvider>
     ),
   },
@@ -50,9 +55,11 @@ export const router = createBrowserRouter([
     path: "/signup", 
     element: (
       <AuthProvider>
-        <AppLayout sidebarType="none" showHeader={false} showFooter={false}>
-          <SignupPage />
-        </AppLayout>
+        <ProfileProvider>
+          <AppLayout sidebarType="none" showHeader={false} showFooter={false}>
+            <SignupPage />
+          </AppLayout>
+        </ProfileProvider>
       </AuthProvider>
     ),
   },
@@ -60,9 +67,11 @@ export const router = createBrowserRouter([
     path: "/register",
     element: (
       <AuthProvider>
-        <AppLayout sidebarType="none" showHeader={false} showFooter={false}>
-          <RegisterPage />
-        </AppLayout>
+        <ProfileProvider>
+          <AppLayout sidebarType="none" showHeader={false} showFooter={false}>
+            <RegisterPage />
+          </AppLayout>
+        </ProfileProvider>
       </AuthProvider>
     ),
   },
@@ -71,9 +80,11 @@ export const router = createBrowserRouter([
     path: "/role-dashboard",
     element: (
       <AuthProvider>
-        <RequireAuth>
-          <RoleDashboardPage />
-        </RequireAuth>
+        <ProfileProvider>
+          <RequireAuth>
+            <RoleDashboardPage />
+          </RequireAuth>
+        </ProfileProvider>
       </AuthProvider>
     ),
   },
@@ -81,9 +92,11 @@ export const router = createBrowserRouter([
     path: "/admin",
     element: (
       <AuthProvider>
-        <RequireAuth requireAdmin>
-          <AdminDashboardPage />
-        </RequireAuth>
+        <ProfileProvider>
+          <RequireAuth requireAdmin>
+            <AdminDashboardPage />
+          </RequireAuth>
+        </ProfileProvider>
       </AuthProvider>
     ),
   },
@@ -91,9 +104,11 @@ export const router = createBrowserRouter([
     path: "/dashboard/member",
     element: (
       <AuthProvider>
-        <RequireAuth>
-          <MemberDashboardPage />
-        </RequireAuth>
+        <ProfileProvider>
+          <RequireAuth>
+            <MemberDashboardPage />
+          </RequireAuth>
+        </ProfileProvider>
       </AuthProvider>
     ),
   },
