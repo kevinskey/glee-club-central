@@ -1,150 +1,122 @@
 
-import React from "react";
-import { Header } from "@/components/landing/Header";
-import { Footer } from "@/components/landing/Footer";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { useNavigate } from "react-router-dom";
-import { ChevronRight, FileText, Users, Calendar, Music, Headphones } from "lucide-react";
-import { useAuth } from "@/contexts/AuthContext";
-import { PageLoader } from "@/components/ui/page-loader";
+import React from 'react';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { useAuthMigration } from '@/hooks/useAuthMigration';
+import { Link } from 'react-router-dom';
+import { 
+  Users, 
+  Calendar, 
+  BarChart, 
+  Settings, 
+  Music, 
+  DollarSign,
+  Shield,
+  Bell
+} from 'lucide-react';
 
 export default function AdministrationPage() {
-  const navigate = useNavigate();
-  const { isLoading } = useAuth();
+  const { isLoading } = useAuthMigration();
 
   if (isLoading) {
-    return <PageLoader message="Loading administration..." />;
+    return (
+      <div className="flex items-center justify-center p-8">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
+          <p>Loading administration panel...</p>
+        </div>
+      </div>
+    );
   }
 
+  const adminModules = [
+    {
+      title: 'Member Management',
+      description: 'Manage choir members, roles, and permissions',
+      icon: <Users className="h-8 w-8" />,
+      href: '/admin/members',
+      color: 'bg-blue-500'
+    },
+    {
+      title: 'Analytics Dashboard',
+      description: 'View performance metrics and statistics',
+      icon: <BarChart className="h-8 w-8" />,
+      href: '/admin/analytics',
+      color: 'bg-green-500'
+    },
+    {
+      title: 'Financial Management',
+      description: 'Track dues, expenses, and revenue',
+      icon: <DollarSign className="h-8 w-8" />,
+      href: '/admin/finances',
+      color: 'bg-yellow-500'
+    },
+    {
+      title: 'Calendar Management',
+      description: 'Manage events, rehearsals, and performances',
+      icon: <Calendar className="h-8 w-8" />,
+      href: '/admin/calendar',
+      color: 'bg-purple-500'
+    },
+    {
+      title: 'Music Library',
+      description: 'Manage sheet music and audio files',
+      icon: <Music className="h-8 w-8" />,
+      href: '/admin/music',
+      color: 'bg-pink-500'
+    },
+    {
+      title: 'Announcements',
+      description: 'Create and manage choir announcements',
+      icon: <Bell className="h-8 w-8" />,
+      href: '/admin/announcements',
+      color: 'bg-red-500'
+    },
+    {
+      title: 'System Settings',
+      description: 'Configure application settings and preferences',
+      icon: <Settings className="h-8 w-8" />,
+      href: '/admin/settings',
+      color: 'bg-gray-500'
+    },
+    {
+      title: 'Security & Permissions',
+      description: 'Manage user roles and access permissions',
+      icon: <Shield className="h-8 w-8" />,
+      href: '/admin/security',
+      color: 'bg-indigo-500'
+    }
+  ];
+
   return (
-    <div className="flex min-h-screen flex-col">
-      <Header />
-      <main className="flex-1 bg-white dark:bg-gray-950">
-        <div className="container mx-auto px-4 py-12">
-          <div className="max-w-4xl mx-auto">
-            <h1 className="font-playfair text-3xl md:text-4xl lg:text-5xl font-bold text-glee-purple mb-6">
-              Administration
-            </h1>
-            <p className="text-lg mb-8 text-gray-700 dark:text-gray-300">
-              Welcome to the administration portal for the Spelman College Glee Club. Please log in 
-              to access administrative tools and resources.
-            </p>
-            
-            <div className="mb-10 p-6 bg-glee-purple/10 rounded-lg border border-glee-purple/20">
-              <h2 className="text-xl font-semibold mb-3">Administrator Access</h2>
-              <p className="mb-4">
-                This area is restricted to authorized club administrators and faculty. If you're an 
-                administrator or faculty member, please log in to access management tools.
-              </p>
-              <div className="flex flex-wrap gap-3">
-                <Button 
-                  onClick={() => navigate("/login")}
-                  className="bg-glee-purple hover:bg-glee-purple/90 text-white"
-                >
-                  Log In to Admin Portal
-                </Button>
-                <Button 
-                  variant="outline"
-                  onClick={() => navigate("/dashboard/members")}
-                  className="border-glee-purple text-glee-purple hover:bg-glee-purple/10"
-                >
-                  <Users className="mr-2 h-4 w-4" /> View Members
-                </Button>
+    <div className="space-y-6">
+      <div>
+        <h1 className="text-3xl font-bold">Administration</h1>
+        <p className="text-muted-foreground">
+          Manage all aspects of the Spelman Glee Club
+        </p>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {adminModules.map((module) => (
+          <Card key={module.href} className="hover:shadow-lg transition-shadow">
+            <CardHeader>
+              <div className={`w-12 h-12 ${module.color} rounded-lg flex items-center justify-center text-white mb-4`}>
+                {module.icon}
               </div>
-            </div>
-            
-            <h2 className="text-xl font-semibold mb-4">Administration Features</h2>
-            <div className="grid gap-4 md:grid-cols-2">
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Users className="h-5 w-5 text-glee-purple" />
-                    Member Management
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
-                    Manage member profiles, section assignments, attendance records, and contact information.
-                  </p>
-                  <Button variant="outline" className="w-full" onClick={() => navigate("/dashboard/members")}>
-                    Access <ChevronRight className="h-4 w-4 ml-2" />
-                  </Button>
-                </CardContent>
-              </Card>
-              
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Calendar className="h-5 w-5 text-glee-purple" />
-                    Event Scheduling
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
-                    Create and manage rehearsals, performances, tours, and other club events.
-                  </p>
-                  <Button variant="outline" className="w-full" onClick={() => navigate("/login")}>
-                    Access <ChevronRight className="h-4 w-4 ml-2" />
-                  </Button>
-                </CardContent>
-              </Card>
-              
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Music className="h-5 w-5 text-glee-purple" />
-                    Repertoire Library
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
-                    Manage sheet music, organize by section, and upload new scores for member access.
-                  </p>
-                  <Button variant="outline" className="w-full" onClick={() => navigate("/login")}>
-                    Access <ChevronRight className="h-4 w-4 ml-2" />
-                  </Button>
-                </CardContent>
-              </Card>
-              
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Headphones className="h-5 w-5 text-glee-purple" />
-                    Media Resources
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
-                    Upload and manage recordings, practice tracks, and performance videos.
-                  </p>
-                  <Button variant="outline" className="w-full" onClick={() => navigate("/login")}>
-                    Access <ChevronRight className="h-4 w-4 ml-2" />
-                  </Button>
-                </CardContent>
-              </Card>
-              
-              <Card className="md:col-span-2">
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <FileText className="h-5 w-5 text-glee-purple" />
-                    Forms & Documentation
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
-                    Access administrative forms, handbook documents, and other important club paperwork.
-                  </p>
-                  <Button variant="outline" className="w-full" onClick={() => navigate("/login")}>
-                    Access <ChevronRight className="h-4 w-4 ml-2" />
-                  </Button>
-                </CardContent>
-              </Card>
-            </div>
-          </div>
-        </div>
-      </main>
-      <Footer />
+              <CardTitle>{module.title}</CardTitle>
+              <CardDescription>{module.description}</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <Button asChild className="w-full">
+                <Link to={module.href}>
+                  Access Module
+                </Link>
+              </Button>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
     </div>
   );
 }
