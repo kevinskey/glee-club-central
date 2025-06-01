@@ -5,11 +5,9 @@ import { PageLoader } from "@/components/ui/page-loader";
 import AdminDashboard from "./AdminDashboard";
 
 export default function AdminDashboardPage() {
-  const { user, profile, isLoading } = useAuth();
-  const [debugMode] = React.useState(true); // Enable debug mode temporarily
+  const { user, profile, isLoading, isInitialized, isAdmin } = useAuth();
 
-  // Enhanced debug logging
-  console.log('🏛️ AdminDashboardPage: DETAILED RENDER STATE:', {
+  console.log('🏛️ AdminDashboardPage: ADMIN DASHBOARD STATE:', {
     hasUser: !!user,
     userId: user?.id,
     userEmail: user?.email,
@@ -19,71 +17,40 @@ export default function AdminDashboardPage() {
     profileIsAdmin: profile?.is_super_admin,
     profileStatus: profile?.status,
     isLoading,
-    timestamp: new Date().toISOString()
+    isInitialized,
+    isAdminFunction: isAdmin ? isAdmin() : false
   });
 
-  // Show loading while auth data is being fetched
-  if (isLoading) {
-    console.log('🏛️ AdminDashboardPage: Still loading auth data');
+  // Wait for full initialization and profile resolution
+  if (!isInitialized || isLoading) {
     return (
-      <div>
-        <PageLoader message="Loading admin dashboard..." />
-        {debugMode && (
-          <div className="fixed top-4 left-4 bg-purple-600 text-white p-4 rounded text-xs">
-            <div>🏛️ ADMIN DASHBOARD DEBUG</div>
-            <div>Loading: {isLoading ? 'Yes' : 'No'}</div>
-            <div>User: {user?.email || 'None'}</div>
-            <div>Profile: {profile?.role || 'None'}</div>
-          </div>
-        )}
-      </div>
+      <PageLoader 
+        message={!isInitialized ? "Initializing admin dashboard..." : "Verifying admin permissions..."}
+        className="min-h-screen"
+      />
     );
   }
 
+  // Ensure we have a user
   if (!user) {
-    console.log('🏛️ AdminDashboardPage: No user found');
     return (
-      <div>
-        <PageLoader message="Authenticating..." />
-        {debugMode && (
-          <div className="fixed top-4 left-4 bg-red-600 text-white p-4 rounded text-xs">
-            <div>❌ NO USER - ADMIN DASHBOARD</div>
-            <div>This shouldn't happen if auth is working</div>
-          </div>
-        )}
-      </div>
+      <PageLoader 
+        message="Authentication required..."
+        className="min-h-screen"
+      />
     );
   }
 
-  if (!profile && !debugMode) {
-    console.log('🏛️ AdminDashboardPage: No profile found for user');
+  // Wait for profile to be fully resolved before checking admin status
+  if (!profile) {
     return (
-      <div>
-        <PageLoader message="Loading profile..." />
-        {debugMode && (
-          <div className="fixed top-4 left-4 bg-yellow-600 text-white p-4 rounded text-xs">
-            <div>⚠️ NO PROFILE - ADMIN DASHBOARD</div>
-            <div>User: {user?.email}</div>
-            <div>Normally would show loading...</div>
-          </div>
-        )}
-      </div>
+      <PageLoader 
+        message="Resolving admin permissions..."
+        className="min-h-screen"
+      />
     );
   }
 
   console.log('🏛️ AdminDashboardPage: Rendering AdminDashboard component');
-  return (
-    <div>
-      <AdminDashboard />
-      {debugMode && (
-        <div className="fixed top-4 left-4 bg-green-600 text-white p-4 rounded text-xs max-w-sm">
-          <div className="font-bold mb-2">✅ ADMIN DASHBOARD LOADED</div>
-          <div>User: {user?.email}</div>
-          <div>Profile Role: {profile?.role || 'Missing'}</div>
-          <div>Is Super Admin: {profile?.is_super_admin ? 'Yes' : 'No'}</div>
-          <div>Profile Status: {profile?.status || 'Missing'}</div>
-        </div>
-      )}
-    </div>
-  );
+  return <AdminDashboard />;
 }

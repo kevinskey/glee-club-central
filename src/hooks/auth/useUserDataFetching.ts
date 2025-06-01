@@ -9,83 +9,96 @@ export const useUserDataFetching = (
   setState: React.Dispatch<React.SetStateAction<AuthState>>,
   mountedRef: React.MutableRefObject<boolean>
 ) => {
-  // Fetch user data with enhanced debugging and profile creation fallback
+  // Fetch user data with enhanced coordination and fallback handling
   const fetchUserData = useCallback(async (userId: string, userEmail?: string) => {
     if (!mountedRef.current) return;
     
     console.log(`📡 useUserDataFetching: STARTING DATA FETCH for user: ${userId}, email: ${userEmail}`);
     
+    // Set loading state immediately
+    setState(prev => ({
+      ...prev,
+      isLoading: true
+    }));
+    
     let profile: Profile | null = null;
     let permissions = {};
+    let profileFetchAttempts = 0;
+    const maxAttempts = 3;
     
-    try {
-      console.log('📋 useUserDataFetching: Fetching profile from Supabase...');
-      // Fetch profile with timeout and enhanced logging
-      profile = await Promise.race([
-        getProfile(userId),
-        new Promise<null>((_, reject) => {
-          setTimeout(() => reject(new Error('Profile timeout')), 5000);
-        })
-      ]);
+    // Enhanced profile fetching with retry logic
+    while (profileFetchAttempts < maxAttempts && !profile && mountedRef.current) {
+      profileFetchAttempts++;
       
-      console.log('📋 useUserDataFetching: Profile fetch COMPLETE:', {
-        hasProfile: !!profile,
-        profileId: profile?.id,
-        profileRole: profile?.role,
-        profileIsAdmin: profile?.is_super_admin,
-        profileStatus: profile?.status,
-        profileData: profile
-      });
-      
-      // If profile is missing, try to create one
-      if (!profile) {
-        console.log('🔧 useUserDataFetching: Profile missing, attempting to create fallback profile...');
-        profile = await createFallbackProfile(userId, userEmail);
+      try {
+        console.log(`📋 useUserDataFetching: Profile fetch attempt ${profileFetchAttempts}/${maxAttempts}...`);
         
-        if (!profile) {
-          console.error(`❌ useUserDataFetching: Profile fetch failed for user ${userId} and could not create fallback`);
-          // Set error state but don't completely fail
-          if (mountedRef.current) {
-            setState(prev => ({
-              ...prev,
-              profile: null,
-              permissions: {},
-              isLoading: false,
-              isInitialized: true
-            }));
+        profile = await Promise.race([
+          getProfile(userId),
+          new Promise<null>((_, reject) => {
+            setTimeout(() => reject(new Error('Profile timeout')), 5000);
+          })
+        ]);
+        
+        console.log('📋 useUserDataFetching: Profile fetch result:', {
+          attempt: profileFetchAttempts,
+          hasProfile: !!profile,
+          profileId: profile?.id,
+          profileRole: profile?.role,
+          profileIsAdmin: profile?.is_super_admin,
+          profileStatus: profile?.status
+        });
+        
+        if (profile) {
+          break; // Successfully fetched profile
+        }
+        
+      } catch (error) {
+        console.warn(`⚠️ useUserDataFetching: Profile fetch attempt ${profileFetchAttempts} failed:`, error);
+        
+        // If this is the last attempt, try to create fallback profile
+        if (profileFetchAttempts === maxAttempts) {
+          console.log('🔧 useUserDataFetching: Max attempts reached, creating fallback profile...');
+          try {
+            profile = await createFallbackProfile(userId, userEmail);
+            if (profile) {
+              console.log('✅ useUserDataFetching: Fallback profile created successfully');
+            }
+          } catch (fallbackError) {
+            console.error('❌ useUserDataFetching: Fallback profile creation failed:', fallbackError);
           }
-          return;
+        } else {
+          // Wait before retry
+          await new Promise(resolve => setTimeout(resolve, 1000));
         }
       }
-      
-    } catch (error) {
-      console.warn(`⚠️ useUserDataFetching: Profile fetch failed for user ${userId}, attempting fallback:`, error);
-      profile = await createFallbackProfile(userId, userEmail);
-      
-      if (!profile) {
-        console.error(`❌ useUserDataFetching: Profile fetch failed for user ${userId} and could not create fallback`);
-        if (mountedRef.current) {
-          setState(prev => ({
-            ...prev,
-            profile: null,
-            permissions: {},
-            isLoading: false,
-            isInitialized: true
-          }));
-        }
-        return;
+    }
+    
+    // Final profile validation
+    if (!profile) {
+      console.error(`❌ useUserDataFetching: Profile fetch failed for user ${userId} after ${maxAttempts} attempts`);
+      if (mountedRef.current) {
+        setState(prev => ({
+          ...prev,
+          profile: null,
+          permissions: {},
+          isLoading: false,
+          isInitialized: true
+        }));
       }
-      console.log('🔄 useUserDataFetching: Created fallback profile:', profile);
+      return;
     }
     
     // Validate profile role
     if (!profile.role) {
       console.warn(`⚠️ useUserDataFetching: Role undefined for profile ${profile.id}`);
+      // Set default role if missing
+      profile.role = 'member';
     }
     
+    // Fetch permissions with retry logic
     try {
       console.log('🔑 useUserDataFetching: Fetching permissions...');
-      // Fetch permissions with timeout
       permissions = await Promise.race([
         fetchUserPermissions(userId),
         new Promise<{}>((_, reject) => {
@@ -94,8 +107,7 @@ export const useUserDataFetching = (
       ]);
       console.log('🔑 useUserDataFetching: Permissions fetch COMPLETE:', {
         permissionCount: Object.keys(permissions).length,
-        permissions: Object.keys(permissions),
-        permissionsData: permissions
+        permissions: Object.keys(permissions)
       });
     } catch (error) {
       console.warn('⚠️ useUserDataFetching: Permissions fetch FAILED, using defaults:', error);
@@ -104,16 +116,17 @@ export const useUserDataFetching = (
         'view_calendar': true,
         'view_announcements': true
       };
-      console.log('🔄 useUserDataFetching: Using default permissions:', permissions);
     }
     
+    // Update state with complete data
     if (mountedRef.current) {
-      console.log('✅ useUserDataFetching: UPDATING STATE with fetched data:', {
+      console.log('✅ useUserDataFetching: UPDATING STATE with complete data:', {
         profileId: profile?.id,
         profileRole: profile?.role,
         profileIsAdmin: profile?.is_super_admin,
         permissionCount: Object.keys(permissions).length
       });
+      
       setState(prev => ({
         ...prev,
         profile,
@@ -121,8 +134,6 @@ export const useUserDataFetching = (
         isLoading: false,
         isInitialized: true
       }));
-    } else {
-      console.log('⚠️ useUserDataFetching: Component unmounted, skipping state update');
     }
   }, [setState, mountedRef]);
 

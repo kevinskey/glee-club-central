@@ -7,22 +7,9 @@ import { DashboardEvents } from "@/components/dashboard/DashboardEvents";
 import { DashboardAnnouncements } from "@/components/dashboard/DashboardAnnouncements";
 
 export default function MemberDashboardPage() {
-  const { user, profile, isLoading } = useAuth();
+  const { user, profile, isLoading, isInitialized } = useAuth();
   
-  // Show loading only very briefly
-  const [showContent, setShowContent] = React.useState(false);
-  const [debugMode] = React.useState(true); // Enable debug mode temporarily
-  
-  React.useEffect(() => {
-    // Show content after a short delay, even if profile is still loading
-    const timer = setTimeout(() => {
-      setShowContent(true);
-    }, 500);
-    
-    return () => clearTimeout(timer);
-  }, []);
-
-  console.log('📊 MemberDashboardPage: DETAILED RENDER STATE:', {
+  console.log('📊 MemberDashboardPage: DASHBOARD STATE:', {
     hasUser: !!user,
     userId: user?.id,
     userEmail: user?.email,
@@ -33,39 +20,26 @@ export default function MemberDashboardPage() {
     profileFirstName: profile?.first_name,
     profileLastName: profile?.last_name,
     isLoading,
-    showContent,
-    timestamp: new Date().toISOString()
+    isInitialized
   });
 
-  // Show loading state briefly
-  if (isLoading && !showContent) {
+  // Wait for full initialization and profile resolution
+  if (!isInitialized || isLoading) {
     return (
-      <div>
-        <PageLoader message="Loading your dashboard..." />
-        {debugMode && (
-          <div className="fixed top-4 right-4 bg-blue-600 text-white p-4 rounded text-xs">
-            <div>📊 MEMBER DASHBOARD DEBUG</div>
-            <div>Loading: {isLoading ? 'Yes' : 'No'}</div>
-            <div>Show Content: {showContent ? 'Yes' : 'No'}</div>
-            <div>User: {user?.email || 'None'}</div>
-          </div>
-        )}
-      </div>
+      <PageLoader 
+        message={!isInitialized ? "Initializing dashboard..." : "Loading your profile..."}
+        className="min-h-screen"
+      />
     );
   }
 
-  // If no user, something is wrong with auth
+  // Ensure we have a user
   if (!user) {
     return (
-      <div>
-        <PageLoader message="Authentication required..." />
-        {debugMode && (
-          <div className="fixed top-4 right-4 bg-red-600 text-white p-4 rounded text-xs">
-            <div>❌ NO USER FOUND</div>
-            <div>This shouldn't happen if auth is working</div>
-          </div>
-        )}
-      </div>
+      <PageLoader 
+        message="Authentication required..."
+        className="min-h-screen"
+      />
     );
   }
 
@@ -75,6 +49,8 @@ export default function MemberDashboardPage() {
                      user?.email?.split('@')[0] || 
                      'Member';
 
+  const memberRole = profile?.role || 'member';
+
   return (
     <div className="space-y-6">
       <div className="flex flex-col space-y-2">
@@ -82,30 +58,19 @@ export default function MemberDashboardPage() {
           Welcome back, {displayName}!
         </h1>
         <p className="text-muted-foreground">
-          Here's what's happening with the Spelman Glee Club
-          {!profile && " (Profile loading...)"}
+          {profile ? `Member Dashboard • Role: ${memberRole}` : 'Member Dashboard'}
         </p>
       </div>
-      
-      <div className="grid gap-6">
-        <DashboardModules />
-        <div className="grid gap-6 lg:grid-cols-2">
-          <DashboardEvents events={[]} />
+
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="lg:col-span-2 space-y-6">
+          <DashboardModules />
+          <DashboardEvents />
+        </div>
+        <div className="space-y-6">
           <DashboardAnnouncements />
         </div>
       </div>
-
-      {debugMode && (
-        <div className="fixed top-4 right-4 bg-green-600 text-white p-4 rounded text-xs max-w-sm">
-          <div className="font-bold mb-2">✅ MEMBER DASHBOARD LOADED</div>
-          <div>User ID: {user?.id}</div>
-          <div>Email: {user?.email}</div>
-          <div>Profile ID: {profile?.id || 'Missing'}</div>
-          <div>Display Name: {displayName}</div>
-          <div>Role: {profile?.role || 'Missing'}</div>
-          <div>Profile Status: {profile?.status || 'Missing'}</div>
-        </div>
-      )}
     </div>
   );
 }

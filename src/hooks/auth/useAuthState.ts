@@ -26,12 +26,29 @@ export const useAuthState = (): UseAuthStateReturn => {
     };
   }, []);
   
-  // Refresh user data function
+  // Enhanced refresh function with coordination
   const refreshUserData = useCallback(async () => {
     if (state.user?.id && mountedRef.current) {
-      await fetchUserData(state.user.id);
+      console.log('🔄 useAuthState: Coordinated refresh for user:', state.user.id);
+      
+      // Set loading state during refresh
+      setState(prev => ({
+        ...prev,
+        isLoading: true
+      }));
+      
+      try {
+        await fetchUserData(state.user.id, state.user.email);
+      } catch (error) {
+        console.error('❌ useAuthState: Refresh failed:', error);
+        // Ensure loading state is cleared even on error
+        setState(prev => ({
+          ...prev,
+          isLoading: false
+        }));
+      }
     }
-  }, [state.user?.id, fetchUserData]);
+  }, [state.user?.id, state.user?.email, fetchUserData]);
   
   return {
     ...state,
