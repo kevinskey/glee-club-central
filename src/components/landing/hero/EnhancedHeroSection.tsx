@@ -11,24 +11,21 @@ import { useSiteImages } from "@/hooks/useSiteImages";
 export function EnhancedHeroSection() {
   const isMobile = useIsMobile();
   const { images, isLoading } = useSiteImages("hero");
-  const [slideImages, setSlideImages] = useState<string[]>([]);
+  const [heroImage, setHeroImage] = useState<string | null>(null);
 
   useEffect(() => {
     if (images && images.length > 0) {
-      // Extract URLs from image objects
-      const imageUrls = images.map(img => img.file_url);
-      setSlideImages(imageUrls);
+      // Use only the first image
+      setHeroImage(images[0].file_url);
     }
   }, [images]);
 
   return (
     <section className="relative h-[70vh] md:h-[80vh] flex flex-col justify-center pb-6 md:pb-12 overflow-hidden">
-      {/* Image Slideshow */}
-      {slideImages.length > 0 ? (
+      {/* Single Hero Image */}
+      {heroImage ? (
         <BackgroundSlideshow 
-          images={slideImages} 
-          duration={7000} 
-          transition={1500} 
+          images={[heroImage]} 
           overlayOpacity={0.6} 
         />
       ) : (
