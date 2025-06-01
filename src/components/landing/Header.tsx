@@ -7,7 +7,7 @@ import { HeaderActions } from "@/components/layout/header/HeaderActions";
 import { MobileNavDropdown } from "@/components/layout/mobile/MobileNavDropdown";
 import { Button } from "@/components/ui/button";
 import { useSimpleAuthContext } from "@/contexts/SimpleAuthContext";
-import { LogIn, User, LogOut } from "lucide-react";
+import { LogIn, User, LogOut, UserPlus } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
 
 export function Header() {
@@ -84,14 +84,24 @@ export function Header() {
                     </Button>
                   </div>
                 ) : (
-                  <Button 
-                    variant="default"
-                    onClick={() => navigate("/login")}
-                    className="bg-glee-spelman hover:bg-glee-spelman/90"
-                  >
-                    <LogIn className="w-4 h-4 mr-2" />
-                    Login
-                  </Button>
+                  <div className="flex items-center gap-2">
+                    <Button 
+                      variant="outline"
+                      onClick={() => navigate("/signup")}
+                      className="border-glee-spelman text-glee-spelman hover:bg-glee-spelman/10"
+                    >
+                      <UserPlus className="w-4 h-4 mr-2" />
+                      Sign Up
+                    </Button>
+                    <Button 
+                      variant="default"
+                      onClick={() => navigate("/login")}
+                      className="bg-glee-spelman hover:bg-glee-spelman/90"
+                    >
+                      <LogIn className="w-4 h-4 mr-2" />
+                      Login
+                    </Button>
+                  </div>
                 )}
                 <HeaderActions />
               </>
@@ -111,14 +121,24 @@ export function Header() {
                     <User className="w-4 h-4" />
                   </Button>
                 ) : (
-                  <Button 
-                    variant="default"
-                    onClick={() => navigate("/login")}
-                    size="sm"
-                    className="bg-glee-spelman hover:bg-glee-spelman/90"
-                  >
-                    <LogIn className="w-4 h-4" />
-                  </Button>
+                  <div className="flex items-center gap-1">
+                    <Button 
+                      variant="outline"
+                      onClick={() => navigate("/signup")}
+                      size="sm"
+                      className="border-glee-spelman text-glee-spelman hover:bg-glee-spelman/10"
+                    >
+                      <UserPlus className="w-4 h-4" />
+                    </Button>
+                    <Button 
+                      variant="default"
+                      onClick={() => navigate("/login")}
+                      size="sm"
+                      className="bg-glee-spelman hover:bg-glee-spelman/90"
+                    >
+                      <LogIn className="w-4 h-4" />
+                    </Button>
+                  </div>
                 )}
                 <HeaderActions />
                 <MobileNavDropdown />

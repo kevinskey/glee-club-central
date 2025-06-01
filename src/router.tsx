@@ -14,6 +14,7 @@ import StorePage from "./pages/StorePage";
 import LoginPage from "./pages/auth/LoginPage";
 import SignupPage from "./pages/auth/SignupPage";
 import RegisterPage from "./pages/RegisterPage";
+import JoinGleeFamPage from "./pages/JoinGleeFamPage";
 import RoleDashboardPage from "./pages/RoleDashboardPage";
 import AdminDashboardPage from "./pages/admin/AdminDashboardPage";
 import MemberDashboardPage from "./pages/dashboard/MemberDashboardPage";
@@ -59,6 +60,16 @@ export const router = createBrowserRouter([
       <SimpleAuthProvider>
         <AppLayout sidebarType="none" showHeader={false} showFooter={false}>
           <RegisterPage />
+        </AppLayout>
+      </SimpleAuthProvider>
+    ),
+  },
+  {
+    path: "/join-glee-fam",
+    element: (
+      <SimpleAuthProvider>
+        <AppLayout sidebarType="none" showHeader={false} showFooter={false}>
+          <JoinGleeFamPage />
         </AppLayout>
       </SimpleAuthProvider>
     ),
