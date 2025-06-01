@@ -1,3 +1,4 @@
+
 import React, { createContext, useContext, useEffect, useState, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { AuthUser, Profile, AuthContextType } from '@/types/auth';
@@ -51,24 +52,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       permissions: Object.keys(permissions || {}),
       timestamp: new Date().toISOString()
     });
-
-    // Additional profile-specific logging
-    if (profile) {
-      console.log('👤 AuthContext: PROFILE DETAILS:', {
-        fullProfile: profile,
-        profileKeys: Object.keys(profile),
-        profileValues: Object.values(profile)
-      });
-    }
-
-    // Auth.uid() check
-    console.log('🔑 AuthContext: Current auth.uid():', {
-      authUid: user?.id,
-      profileMatchesAuth: profile?.id === user?.id
-    });
   }, [user, profile, isLoading, isInitialized, session, permissions]);
 
-  // Enhanced session tracking with detailed logging
+  // Session tracking with detailed logging
   useEffect(() => {
     console.log('🔄 AuthContext: Setting up auth state listener...');
     
@@ -87,39 +73,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         });
         
         setSession(session);
-        
-        if (event === 'SIGNED_IN' && session?.user) {
-          console.log('✅ AuthContext: User signed in successfully:', {
-            userId: session.user.id,
-            email: session.user.email,
-            metadata: session.user.user_metadata
-          });
-
-          // Try to fetch profile immediately after sign in
-          try {
-            console.log('📋 AuthContext: Attempting to fetch profile for user:', session.user.id);
-            const { data: profileData, error: profileError } = await supabase
-              .from('profiles')
-              .select('*')
-              .eq('id', session.user.id)
-              .single();
-
-            console.log('📋 AuthContext: Profile fetch result:', {
-              hasProfileData: !!profileData,
-              profileData,
-              profileError: profileError?.message,
-              errorCode: profileError?.code,
-              errorDetails: profileError?.details
-            });
-          } catch (err) {
-            console.error('💥 AuthContext: Profile fetch error:', err);
-          }
-        }
-        
-        if (event === 'SIGNED_OUT') {
-          console.log('👋 AuthContext: User signed out, cleaning up');
-          cleanupAuthState();
-        }
       }
     );
 
@@ -147,12 +100,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         hasUser: !!data?.user,
         userId: data?.user?.id,
         userEmail: data?.user?.email,
-        userMetadata: data?.user?.user_metadata,
-        sessionDetails: data?.session ? {
-          accessToken: data.session.access_token ? 'present' : 'missing',
-          refreshToken: data.session.refresh_token ? 'present' : 'missing',
-          expiresAt: data.session.expires_at
-        } : null,
         error: error?.message,
         errorCode: error?.code
       });
@@ -165,27 +112,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       if (data.session && data.user) {
         console.log('✅ AuthContext: Login successful, session created for user:', data.user.id);
         setSession(data.session);
-
-        // Immediately try to verify profile access
-        setTimeout(async () => {
-          try {
-            console.log('🔍 AuthContext: Post-login profile verification...');
-            const { data: profileCheck, error: profileCheckError } = await supabase
-              .from('profiles')
-              .select('*')
-              .eq('id', data.user.id)
-              .single();
-
-            console.log('🔍 AuthContext: Post-login profile check:', {
-              hasProfile: !!profileCheck,
-              profileData: profileCheck,
-              error: profileCheckError?.message
-            });
-          } catch (err) {
-            console.error('💥 AuthContext: Post-login profile check failed:', err);
-          }
-        }, 1000);
-
         return { error: null };
       }
       
@@ -198,28 +124,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, []);
 
   const logout = useCallback(async () => {
-    try {
-      console.log('🚪 AuthContext: LOGOUT ATTEMPT');
-      const { error } = await supabase.auth.signOut();
-      console.log('🚪 AuthContext: Logout response:', { error: error?.message });
-      
-      if (!error) {
-        setSession(null);
-        cleanupAuthState();
-        console.log('✅ AuthContext: Logout successful');
-      }
-      return { error };
-    } catch (err) {
-      console.error('💥 AuthContext: Logout error:', err);
-      return { error: err };
-    }
-  }, []);
-
-  const signIn = useCallback(async (email: string, password: string) => {
-    return login(email, password);
-  }, [login]);
-
-  const signOut = useCallback(async () => {
     try {
       console.log('🚪 AuthContext: LOGOUT ATTEMPT');
       const { error } = await supabase.auth.signOut();
@@ -270,7 +174,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, []);
 
   const isAdmin = useCallback(() => {
-    // Ensure we have a profile before checking admin status
     if (!profile) {
       console.log('👑 AuthContext: ADMIN CHECK - no profile loaded yet');
       return false;
@@ -308,7 +211,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const getUserType = useCallback(() => {
     if (!profile) {
       console.log('🏷️ AuthContext: USER TYPE CHECK - no profile loaded yet, defaulting to member');
-      return 'member'; // Default to member while loading
+      return 'member';
     }
     
     const userType = (profile?.is_super_admin === true || profile?.role === 'admin') ? 'admin' : 'member';
@@ -338,10 +241,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       await refreshUserData();
     }
   }, [user?.id, refreshUserData]);
-
-  const resetAuthSystemCallback = useCallback(async () => {
-    return resetAuthSystem();
-  }, []);
 
   const createFallbackProfile = useCallback(async () => {
     if (!user) return;
@@ -383,124 +282,21 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     session,
     supabaseClient: supabase,
     login,
-    logout: useCallback(async () => {
-      try {
-        console.log('🚪 AuthContext: LOGOUT ATTEMPT');
-        const { error } = await supabase.auth.signOut();
-        console.log('🚪 AuthContext: Logout response:', { error: error?.message });
-        
-        if (!error) {
-          setSession(null);
-          cleanupAuthState();
-          console.log('✅ AuthContext: Logout successful');
-        }
-        return { error };
-      } catch (err) {
-        console.error('💥 AuthContext: Logout error:', err);
-        return { error: err };
-      }
-    }, []),
-    signIn: useCallback(async (email: string, password: string) => {
-      return login(email, password);
-    }, [login]),
-    signOut: useCallback(async () => {
-      try {
-        console.log('🚪 AuthContext: LOGOUT ATTEMPT');
-        const { error } = await supabase.auth.signOut();
-        console.log('🚪 AuthContext: Logout response:', { error: error?.message });
-        
-        if (!error) {
-          setSession(null);
-          cleanupAuthState();
-          console.log('✅ AuthContext: Logout successful');
-        }
-        return { error };
-      } catch (err) {
-        console.error('💥 AuthContext: Logout error:', err);
-        return { error: err };
-      }
-    }, []),
-    signUp: useCallback(async (email: string, password: string, firstName: string, lastName: string, userType: any = 'member') => {
-      try {
-        console.log('📝 AuthContext: SIGN UP ATTEMPT for:', email);
-        
-        const { data, error } = await supabase.auth.signUp({
-          email: email.trim(),
-          password,
-          options: {
-            data: {
-              first_name: firstName,
-              last_name: lastName,
-              user_type: userType,
-            },
-          },
-        });
-        
-        console.log('📝 AuthContext: SIGN UP RESPONSE:', {
-          hasData: !!data,
-          hasUser: !!data?.user,
-          userId: data?.user?.id,
-          userEmail: data?.user?.email,
-          error: error?.message,
-          errorCode: error?.code
-        });
-        
-        return { error, data };
-      } catch (err) {
-        console.error('💥 AuthContext: Sign up error:', err);
-        return { error: err, data: null };
-      }
-    }, []),
+    logout,
+    signIn: login,
+    signOut: logout,
+    signUp,
     isAdmin,
     isMember,
     getUserType,
-    updatePassword: useCallback(async (newPassword: string) => {
-      const { error } = await supabase.auth.updateUser({ password: newPassword });
-      return { error };
-    }, []),
-    resetPassword: useCallback(async (email: string) => {
-      const { error } = await supabase.auth.resetPasswordForEmail(email);
-      return { error };
-    }, []),
+    updatePassword,
+    resetPassword,
     permissions,
-    refreshPermissions: useCallback(async () => {
-      if (user?.id) {
-        await refreshUserData();
-      }
-    }, [user?.id, refreshUserData]),
+    refreshPermissions,
     resetAuthSystem: useCallback(async () => {
       return resetAuthSystem();
     }, []),
-    createFallbackProfile: useCallback(async () => {
-      if (!user) return;
-      
-      try {
-        console.log('🔧 AuthContext: Creating fallback profile for user:', user.id);
-        
-        const { error } = await supabase
-          .from('profiles')
-          .insert({
-            id: user.id,
-            first_name: user.user_metadata?.first_name || 'User',
-            last_name: user.user_metadata?.last_name || '',
-            role: 'member',
-            status: 'active',
-            created_at: new Date().toISOString(),
-            updated_at: new Date().toISOString()
-          });
-        
-        console.log('🔧 AuthContext: Fallback profile creation result:', { error: error?.message });
-        
-        if (error) {
-          console.error('❌ AuthContext: Error creating fallback profile:', error);
-        } else {
-          console.log('✅ AuthContext: Fallback profile created successfully');
-          await refreshUserData();
-        }
-      } catch (error) {
-        console.error('💥 AuthContext: Error creating fallback profile:', error);
-      }
-    }, [user, refreshUserData]),
+    createFallbackProfile,
     refreshUserData,
   };
 
