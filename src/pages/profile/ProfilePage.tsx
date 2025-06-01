@@ -3,7 +3,6 @@ import React, { useState } from 'react';
 import { PageHeader } from "@/components/ui/page-header";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useSimpleAuthContext } from "@/contexts/SimpleAuthContext";
-import { useProfile } from "@/contexts/ProfileContext";
 import { User, Edit, Save } from "lucide-react";
 import { ProfileOverviewTab } from "@/components/profile/ProfileOverviewTab";
 import { ProfileParticipationTab } from "@/components/profile/ProfileParticipationTab";
