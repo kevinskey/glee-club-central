@@ -94,10 +94,10 @@ export const memberRoutes: RouteObject[] = [
       { path: ':id', element: <ViewSheetMusicPage /> },
     ],
   },
-  // Fan Dashboard Routes
+  // Fan Dashboard Routes - using 'fan' sidebar type for different navigation
   {
     path: '/fan-dashboard',
-    element: <RequireAuth><AppLayout sidebarType="member" showHeader={true} showFooter={false} /></RequireAuth>,
+    element: <RequireAuth><AppLayout sidebarType="fan" showHeader={true} showFooter={false} /></RequireAuth>,
     children: [
       { 
         index: true, 

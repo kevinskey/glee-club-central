@@ -35,8 +35,20 @@ const AppLayout: React.FC<AppLayoutProps> = ({
     console.log('AppLayout: Auth context not available, treating as unauthenticated');
   }
 
+  // Determine if sidebar should be shown
   const shouldShowSidebar = sidebarType !== 'none' && isAuthenticated;
-  const SidebarComponent = sidebarType === 'admin' ? AdminSidebar : Sidebar;
+  
+  // Select the appropriate sidebar component
+  const getSidebarComponent = () => {
+    if (sidebarType === 'admin') {
+      return AdminSidebar;
+    }
+    // Both 'member' and 'fan' use the regular Sidebar component
+    // The Sidebar component itself will handle different content based on user role
+    return Sidebar;
+  };
+
+  const SidebarComponent = getSidebarComponent();
 
   return (
     <div className="min-h-screen bg-background">

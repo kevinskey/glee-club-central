@@ -1,77 +1,95 @@
 
 import React from 'react';
-import { NavLink } from 'react-router-dom';
-import { Home, CalendarDays, FileText, FileAudio, Mic } from 'lucide-react';
+import { Link, useLocation } from 'react-router-dom';
 import { cn } from '@/lib/utils';
-import { useRolePermissions } from '@/contexts/RolePermissionContext';
+import { 
+  Home, 
+  Music, 
+  Bell, 
+  User,
+  Calendar,
+  Settings
+} from 'lucide-react';
+import { useAuth } from '@/contexts/AuthContext';
+import { useNotifications } from '@/hooks/useNotifications';
+import { Badge } from '@/components/ui/badge';
 
-interface MobileNavItemProps {
-  to: string;
-  icon: React.ReactNode;
-  label: string;
-  exact?: boolean;
-}
+export const MobileBottomNav: React.FC = () => {
+  const location = useLocation();
+  const { profile } = useAuth();
+  const { unreadCount } = useNotifications();
+  
+  // Check if user is admin
+  const isAdmin = profile?.is_super_admin || profile?.role === 'admin';
+  
+  const isActiveRoute = (href: string) => {
+    return location.pathname.startsWith(href);
+  };
 
-const MobileNavItem = ({ to, icon, label, exact }: MobileNavItemProps) => (
-  <NavLink
-    to={to}
-    className={({ isActive }) => 
-      cn(
-        "flex flex-col items-center justify-center text-xs pt-1 pb-0.5 text-muted-foreground",
-        isActive && "text-primary"
-      )
+  const navItems = [
+    {
+      title: "Home",
+      href: "/dashboard/member",
+      icon: Home,
+      active: location.pathname === "/dashboard/member"
+    },
+    {
+      title: "Calendar",
+      href: "/calendar",
+      icon: Calendar,
+      active: location.pathname === "/calendar"
+    },
+    {
+      title: "Music",
+      href: "/dashboard/sheet-music",
+      icon: Music,
+      active: isActiveRoute("/dashboard/sheet-music")
+    },
+    {
+      title: "Alerts",
+      href: "/dashboard/announcements",
+      icon: Bell,
+      active: isActiveRoute("/dashboard/announcements"),
+      badge: unreadCount > 0 ? unreadCount : null
+    },
+    {
+      title: isAdmin ? "Admin" : "Profile",
+      href: isAdmin ? "/admin" : "/dashboard/profile",
+      icon: isAdmin ? Settings : User,
+      active: isAdmin ? isActiveRoute("/admin") : isActiveRoute("/dashboard/profile")
     }
-    end={exact}
-  >
-    <div className="mb-0.5">{icon}</div>
-    <span>{label}</span>
-  </NavLink>
-);
-
-export function MobileBottomNav() {
-  const { userRole } = useRolePermissions();
-
-  // Only show member items for members and admins
-  const showMemberItems = userRole === 'member' || userRole === 'admin';
+  ];
 
   return (
-    <div className="md:hidden fixed bottom-0 left-0 right-0 z-30 bg-background border-t py-1 flex items-center justify-around">
-      <MobileNavItem 
-        to="/dashboard" 
-        icon={<Home className="h-5 w-5" />} 
-        label="Home" 
-        exact={true} 
-      />
-      
-      <MobileNavItem 
-        to="/dashboard/calendar" 
-        icon={<CalendarDays className="h-5 w-5" />} 
-        label="Calendar" 
-      />
-      
-      {showMemberItems && (
-        <MobileNavItem 
-          to="/dashboard/sheet-music" 
-          icon={<FileText className="h-5 w-5" />} 
-          label="Music" 
-        />
-      )}
-      
-      {showMemberItems && (
-        <MobileNavItem 
-          to="/dashboard/recordings" 
-          icon={<FileAudio className="h-5 w-5" />} 
-          label="Recordings" 
-        />
-      )}
-      
-      {showMemberItems && (
-        <MobileNavItem 
-          to="/dashboard/recording-studio" 
-          icon={<Mic className="h-5 w-5" />} 
-          label="Studio" 
-        />
-      )}
-    </div>
+    <nav className="fixed bottom-0 left-0 right-0 z-50 bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-700 lg:hidden">
+      <div className="grid grid-cols-5 h-16">
+        {navItems.map((item) => {
+          const Icon = item.icon;
+          return (
+            <Link
+              key={item.href}
+              to={item.href}
+              className={cn(
+                "flex flex-col items-center justify-center space-y-1 text-xs transition-colors relative",
+                item.active
+                  ? "text-glee-spelman bg-glee-spelman/5"
+                  : "text-gray-600 dark:text-gray-400 hover:text-glee-spelman"
+              )}
+            >
+              <Icon className="h-5 w-5" />
+              <span className="font-medium">{item.title}</span>
+              {item.badge && (
+                <Badge 
+                  variant="destructive" 
+                  className="absolute -top-1 -right-1 h-5 w-5 rounded-full p-0 flex items-center justify-center text-xs"
+                >
+                  {item.badge}
+                </Badge>
+              )}
+            </Link>
+          );
+        })}
+      </div>
+    </nav>
   );
-}
+};

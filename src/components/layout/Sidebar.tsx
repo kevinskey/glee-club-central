@@ -38,6 +38,9 @@ export function Sidebar({ className }: SidebarProps) {
   // Check if user is admin
   const isAdmin = profile?.is_super_admin || isSuperAdmin;
   
+  // Check if user is a fan (has limited access)
+  const isFan = profile?.role === 'fan' || (!profile?.role && !isAdmin);
+  
   const isActiveRoute = (href: string, exact?: boolean) => {
     if (exact) {
       return location.pathname === href;
@@ -45,8 +48,43 @@ export function Sidebar({ className }: SidebarProps) {
     return location.pathname.startsWith(href);
   };
 
-  // Organized menu sections
-  const menuSections = [
+  // Fan menu sections (limited access)
+  const fanMenuSections = [
+    {
+      title: "Dashboard",
+      items: [
+        {
+          title: "Home",
+          href: "/fan-dashboard",
+          icon: Home,
+          exact: true
+        }
+      ]
+    },
+    {
+      title: "Events",
+      items: [
+        {
+          title: "Calendar",
+          href: "/calendar",
+          icon: Calendar
+        }
+      ]
+    },
+    {
+      title: "Personal",
+      items: [
+        {
+          title: "My Profile",
+          href: "/profile",
+          icon: User
+        }
+      ]
+    }
+  ];
+
+  // Full member menu sections
+  const memberMenuSections = [
     {
       title: "Dashboard",
       items: [
@@ -121,6 +159,9 @@ export function Sidebar({ className }: SidebarProps) {
     }
   ];
 
+  // Choose appropriate menu based on user type
+  const menuSections = isFan ? fanMenuSections : memberMenuSections;
+
   // Admin menu items
   const adminMenuItems = [
     {
@@ -151,7 +192,7 @@ export function Sidebar({ className }: SidebarProps) {
       className
     )}>
       <nav className="space-y-6">
-        {/* Regular menu sections */}
+        {/* Menu sections based on user type */}
         {menuSections.map((section) => (
           <div key={section.title}>
             <h3 className="mb-3 px-2 text-sm font-semibold text-muted-foreground uppercase tracking-wider">
@@ -186,7 +227,7 @@ export function Sidebar({ className }: SidebarProps) {
           </div>
         ))}
         
-        {/* Admin section */}
+        {/* Admin section - only for admin users */}
         {isAdmin && (
           <>
             <Separator className="my-4" />
