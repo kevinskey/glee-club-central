@@ -105,12 +105,14 @@ export function MemberCSVDownload() {
         }
       }
 
-      const typedProfiles = profiles as ProfileData[] | null;
-
-      if (!typedProfiles || typedProfiles.length === 0) {
+      // Check if we have valid profile data
+      if (!profiles || profiles.length === 0) {
         toast.warning('No members found to export');
         return;
       }
+
+      // Type the profiles data properly
+      const typedProfiles = profiles as ProfileData[];
 
       // Build CSV headers
       const headers = ['ID'];
