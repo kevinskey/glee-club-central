@@ -7,9 +7,7 @@ import {
   Settings, 
   ShoppingCart, 
   BarChart3, 
-  Upload,
-  UserPlus,
-  FileUp
+  Upload
 } from "lucide-react";
 
 export const adminNavItems = [
@@ -27,16 +25,6 @@ export const adminNavItems = [
     title: "Members",
     url: "/admin/members",
     icon: Users,
-  },
-  {
-    title: "Member Upload",
-    url: "/admin/member-upload",
-    icon: UserPlus,
-  },
-  {
-    title: "Fan Upload",
-    url: "/admin/fan-upload",
-    icon: FileUp,
   },
   {
     title: "Hero Manager",
