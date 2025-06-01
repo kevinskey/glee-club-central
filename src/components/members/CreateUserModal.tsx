@@ -1,173 +1,209 @@
 
 import React, { useState } from 'react';
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Textarea } from '@/components/ui/textarea';
 import { Switch } from '@/components/ui/switch';
 import { toast } from 'sonner';
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { userFormSchema, UserFormValues } from './form/userFormSchema';
-import { useUserCreate } from '@/hooks/user/useUserCreate';
+import { supabase } from '@/integrations/supabase/client';
+import { UserPlus, Loader2 } from 'lucide-react';
 
 interface CreateUserModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onUserCreated?: () => void;
+  onUserCreated: () => void;
+}
+
+interface UserFormData {
+  email: string;
+  password: string;
+  first_name: string;
+  last_name: string;
+  phone: string;
+  voice_part: string;
+  role: string;
+  status: string;
+  class_year: string;
+  notes: string;
+  dues_paid: boolean;
+  join_date: string;
 }
 
 export function CreateUserModal({ isOpen, onClose, onUserCreated }: CreateUserModalProps) {
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const { addUser } = useUserCreate();
-
-  const {
-    register,
-    handleSubmit,
-    setValue,
-    watch,
-    reset,
-    formState: { errors }
-  } = useForm<UserFormValues>({
-    resolver: zodResolver(userFormSchema),
-    defaultValues: {
-      role: 'member',
-      is_admin: false,
-      status: 'active',
-      dues_paid: false,
-      voice_part: '',
-      join_date: new Date().toISOString().split('T')[0]
-    }
+  const [isLoading, setIsLoading] = useState(false);
+  const [formData, setFormData] = useState<UserFormData>({
+    email: '',
+    password: '',
+    first_name: '',
+    last_name: '',
+    phone: '',
+    voice_part: '',
+    role: 'member',
+    status: 'active',
+    class_year: '',
+    notes: '',
+    dues_paid: false,
+    join_date: new Date().toISOString().split('T')[0],
   });
 
-  const watchRole = watch('role');
-  const watchIsAdmin = watch('is_admin');
-  const watchDuesPaid = watch('dues_paid');
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsLoading(true);
 
-  const onSubmit = async (data: UserFormValues) => {
-    setIsSubmitting(true);
     try {
-      const success = await addUser(data);
-      
-      if (success) {
-        toast.success(`User ${data.first_name} ${data.last_name} created successfully`);
-        reset();
-        onUserCreated?.();
-        onClose();
-      }
-    } catch (error) {
-      toast.error('Failed to create user');
+      // Create auth user first
+      const { data: authData, error: authError } = await supabase.auth.signUp({
+        email: formData.email,
+        password: formData.password,
+        options: {
+          data: {
+            first_name: formData.first_name,
+            last_name: formData.last_name
+          }
+        }
+      });
+
+      if (authError) throw authError;
+      if (!authData.user?.id) throw new Error('User creation failed');
+
+      // Update the profile with additional data
+      const { error: profileError } = await supabase
+        .from('profiles')
+        .update({
+          phone: formData.phone || null,
+          voice_part: formData.voice_part || null,
+          status: formData.status,
+          class_year: formData.class_year || null,
+          notes: formData.notes || null,
+          dues_paid: formData.dues_paid,
+          join_date: formData.join_date,
+          role: formData.role,
+          is_super_admin: formData.role === 'admin',
+        })
+        .eq('id', authData.user.id);
+
+      if (profileError) throw profileError;
+
+      toast.success(`Successfully created user: ${formData.first_name} ${formData.last_name}`);
+      onUserCreated();
+      handleClose();
+    } catch (error: any) {
+      console.error('Error creating user:', error);
+      toast.error(error?.message || 'Failed to create user');
     } finally {
-      setIsSubmitting(false);
+      setIsLoading(false);
     }
   };
 
   const handleClose = () => {
-    if (!isSubmitting) {
-      reset();
-      onClose();
-    }
+    setFormData({
+      email: '',
+      password: '',
+      first_name: '',
+      last_name: '',
+      phone: '',
+      voice_part: '',
+      role: 'member',
+      status: 'active',
+      class_year: '',
+      notes: '',
+      dues_paid: false,
+      join_date: new Date().toISOString().split('T')[0],
+    });
+    onClose();
+  };
+
+  const updateFormData = (field: keyof UserFormData, value: any) => {
+    setFormData(prev => ({ ...prev, [field]: value }));
   };
 
   return (
     <Dialog open={isOpen} onOpenChange={handleClose}>
-      <DialogContent className="sm:max-w-lg max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>Create New User</DialogTitle>
-          <DialogDescription>
-            Add a new member to the Glee Club system.
-          </DialogDescription>
+          <DialogTitle className="flex items-center gap-2">
+            <UserPlus className="h-5 w-5" />
+            Create New Member
+          </DialogTitle>
         </DialogHeader>
         
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-          <div className="grid grid-cols-2 gap-4">
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {/* Basic Info */}
+            <div className="space-y-2">
+              <Label htmlFor="email">Email *</Label>
+              <Input
+                id="email"
+                type="email"
+                value={formData.email}
+                onChange={(e) => updateFormData('email', e.target.value)}
+                required
+              />
+            </div>
+            
+            <div className="space-y-2">
+              <Label htmlFor="password">Temporary Password *</Label>
+              <Input
+                id="password"
+                type="password"
+                value={formData.password}
+                onChange={(e) => updateFormData('password', e.target.value)}
+                required
+                placeholder="Min 6 characters"
+              />
+            </div>
+            
             <div className="space-y-2">
               <Label htmlFor="first_name">First Name *</Label>
               <Input
                 id="first_name"
-                {...register('first_name')}
-                disabled={isSubmitting}
+                value={formData.first_name}
+                onChange={(e) => updateFormData('first_name', e.target.value)}
+                required
               />
-              {errors.first_name && (
-                <p className="text-sm text-destructive">{errors.first_name.message}</p>
-              )}
             </div>
             
             <div className="space-y-2">
               <Label htmlFor="last_name">Last Name *</Label>
               <Input
                 id="last_name"
-                {...register('last_name')}
-                disabled={isSubmitting}
+                value={formData.last_name}
+                onChange={(e) => updateFormData('last_name', e.target.value)}
+                required
               />
-              {errors.last_name && (
-                <p className="text-sm text-destructive">{errors.last_name.message}</p>
-              )}
             </div>
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="email">Email Address *</Label>
-            <Input
-              id="email"
-              type="email"
-              {...register('email')}
-              disabled={isSubmitting}
-            />
-            {errors.email && (
-              <p className="text-sm text-destructive">{errors.email.message}</p>
-            )}
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="password">Password *</Label>
-            <Input
-              id="password"
-              type="password"
-              {...register('password')}
-              disabled={isSubmitting}
-            />
-            {errors.password && (
-              <p className="text-sm text-destructive">{errors.password.message}</p>
-            )}
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="phone">Phone</Label>
-            <Input
-              id="phone"
-              {...register('phone')}
-              disabled={isSubmitting}
-            />
-          </div>
-
-          <div className="grid grid-cols-2 gap-4">
+            
+            <div className="space-y-2">
+              <Label htmlFor="phone">Phone</Label>
+              <Input
+                id="phone"
+                type="tel"
+                value={formData.phone}
+                onChange={(e) => updateFormData('phone', e.target.value)}
+              />
+            </div>
+            
+            <div className="space-y-2">
+              <Label htmlFor="class_year">Class Year</Label>
+              <Input
+                id="class_year"
+                value={formData.class_year}
+                onChange={(e) => updateFormData('class_year', e.target.value)}
+                placeholder="e.g., 2025"
+              />
+            </div>
+            
+            {/* Choir Info */}
             <div className="space-y-2">
               <Label htmlFor="voice_part">Voice Part</Label>
-              <Select 
-                value={watch('voice_part')} 
-                onValueChange={(value) => setValue('voice_part', value)}
-                disabled={isSubmitting}
-              >
+              <Select value={formData.voice_part} onValueChange={(value) => updateFormData('voice_part', value)}>
                 <SelectTrigger>
                   <SelectValue placeholder="Select voice part" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">None</SelectItem>
                   <SelectItem value="soprano_1">Soprano 1</SelectItem>
                   <SelectItem value="soprano_2">Soprano 2</SelectItem>
                   <SelectItem value="alto_1">Alto 1</SelectItem>
@@ -177,71 +213,78 @@ export function CreateUserModal({ isOpen, onClose, onUserCreated }: CreateUserMo
                 </SelectContent>
               </Select>
             </div>
-
+            
             <div className="space-y-2">
-              <Label htmlFor="class_year">Class Year</Label>
+              <Label htmlFor="role">Role</Label>
+              <Select value={formData.role} onValueChange={(value) => updateFormData('role', value)}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="member">Member</SelectItem>
+                  <SelectItem value="admin">Admin</SelectItem>
+                  <SelectItem value="fan">Fan</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            
+            <div className="space-y-2">
+              <Label htmlFor="status">Status</Label>
+              <Select value={formData.status} onValueChange={(value) => updateFormData('status', value)}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="active">Active</SelectItem>
+                  <SelectItem value="inactive">Inactive</SelectItem>
+                  <SelectItem value="pending">Pending</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            
+            <div className="space-y-2">
+              <Label htmlFor="join_date">Join Date</Label>
               <Input
-                id="class_year"
-                {...register('class_year')}
-                placeholder="e.g., 2025"
-                disabled={isSubmitting}
+                id="join_date"
+                type="date"
+                value={formData.join_date}
+                onChange={(e) => updateFormData('join_date', e.target.value)}
               />
             </div>
           </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="role">Role</Label>
-            <Select 
-              value={watchRole} 
-              onValueChange={(value: 'admin' | 'member') => {
-                setValue('role', value);
-                setValue('is_admin', value === 'admin');
-              }}
-              disabled={isSubmitting}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="Select a role" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="member">Member</SelectItem>
-                <SelectItem value="admin">Admin</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-
+          
+          {/* Dues Paid Switch */}
           <div className="flex items-center space-x-2">
             <Switch
               id="dues_paid"
-              checked={watchDuesPaid}
-              onCheckedChange={(checked) => setValue('dues_paid', checked)}
-              disabled={isSubmitting}
+              checked={formData.dues_paid}
+              onCheckedChange={(checked) => updateFormData('dues_paid', checked)}
             />
             <Label htmlFor="dues_paid">Dues Paid</Label>
           </div>
-
+          
+          {/* Notes */}
           <div className="space-y-2">
-            <Label htmlFor="join_date">Join Date</Label>
-            <Input
-              id="join_date"
-              type="date"
-              {...register('join_date')}
-              disabled={isSubmitting}
+            <Label htmlFor="notes">Notes</Label>
+            <Textarea
+              id="notes"
+              value={formData.notes}
+              onChange={(e) => updateFormData('notes', e.target.value)}
+              placeholder="Any additional notes about this member..."
+              rows={3}
             />
           </div>
           
-          <DialogFooter>
-            <Button
-              type="button"
-              variant="outline"
-              onClick={handleClose}
-              disabled={isSubmitting}
-            >
+          {/* Actions */}
+          <div className="flex justify-end space-x-2 pt-4">
+            <Button type="button" variant="outline" onClick={handleClose}>
               Cancel
             </Button>
-            <Button type="submit" disabled={isSubmitting}>
-              {isSubmitting ? 'Creating...' : 'Create User'}
+            <Button type="submit" disabled={isLoading}>
+              {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              Create Member
             </Button>
-          </DialogFooter>
+          </div>
         </form>
       </DialogContent>
     </Dialog>

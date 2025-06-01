@@ -1,129 +1,285 @@
 
 import React, { useState } from 'react';
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Download, Users, FileText } from "lucide-react";
-import { toast } from "sonner";
-import { useUserManagement } from "@/hooks/user/useUserManagement";
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Download, Loader2, Users, AlertCircle } from 'lucide-react';
+import { toast } from 'sonner';
+import { supabase } from '@/integrations/supabase/client';
 
-export const MemberCSVDownload: React.FC = () => {
-  const [isDownloading, setIsDownloading] = useState(false);
-  const { users, fetchUsers } = useUserManagement();
+interface ExportOptions {
+  includePersonalInfo: boolean;
+  includeContactInfo: boolean;
+  includeChoirInfo: boolean;
+  includeAdminInfo: boolean;
+  activeOnly: boolean;
+}
 
-  const downloadUsersCSV = async () => {
-    setIsDownloading(true);
+export function MemberCSVDownload() {
+  const [isExporting, setIsExporting] = useState(false);
+  const [options, setOptions] = useState<ExportOptions>({
+    includePersonalInfo: true,
+    includeContactInfo: true,
+    includeChoirInfo: true,
+    includeAdminInfo: false,
+    activeOnly: true,
+  });
+
+  const updateOption = (key: keyof ExportOptions, value: boolean) => {
+    setOptions(prev => ({ ...prev, [key]: value }));
+  };
+
+  const exportToCSV = async () => {
+    setIsExporting(true);
+    
     try {
-      // Refresh users data
-      await fetchUsers();
+      // Build the select query based on options
+      let selectFields = ['id'];
       
-      if (users.length === 0) {
-        toast.error("No users found to download");
+      if (options.includePersonalInfo) {
+        selectFields.push('first_name', 'last_name', 'join_date', 'class_year');
+      }
+      
+      if (options.includeContactInfo) {
+        selectFields.push('phone');
+      }
+      
+      if (options.includeChoirInfo) {
+        selectFields.push('voice_part', 'dues_paid');
+      }
+      
+      if (options.includeAdminInfo) {
+        selectFields.push('role', 'is_super_admin', 'status', 'notes');
+      }
+
+      // Get profiles data
+      let query = supabase
+        .from('profiles')
+        .select(selectFields.join(', '));
+
+      if (options.activeOnly) {
+        query = query.eq('status', 'active');
+      }
+
+      const { data: profiles, error: profilesError } = await query
+        .order('last_name', { ascending: true });
+
+      if (profilesError) throw profilesError;
+
+      // Get email addresses from auth users (if we have admin access)
+      let emails: { [key: string]: string } = {};
+      try {
+        const { data: authUsers } = await supabase.auth.admin.listUsers();
+        authUsers?.users?.forEach(user => {
+          if (user.email) {
+            emails[user.id] = user.email;
+          }
+        });
+      } catch (authError) {
+        console.warn('Could not fetch email addresses (admin access required)');
+      }
+
+      if (!profiles || profiles.length === 0) {
+        toast.warning('No members found to export');
         return;
       }
 
-      // Create CSV headers
-      const headers = [
-        'FirstName',
-        'LastName', 
-        'Email',
-        'Phone',
-        'VoicePart',
-        'Role',
-        'Status',
-        'ClassYear',
-        'JoinDate',
-        'DuesPaid',
-        'CreatedAt'
-      ];
+      // Build CSV headers
+      const headers = ['ID'];
+      
+      if (options.includePersonalInfo) {
+        headers.push('First Name', 'Last Name', 'Join Date', 'Class Year');
+      }
+      
+      if (options.includeContactInfo) {
+        headers.push('Email', 'Phone');
+      }
+      
+      if (options.includeChoirInfo) {
+        headers.push('Voice Part', 'Dues Paid');
+      }
+      
+      if (options.includeAdminInfo) {
+        headers.push('Role', 'Is Admin', 'Status', 'Notes');
+      }
 
-      // Convert users to CSV rows
-      const csvRows = users.map(user => [
-        user.first_name || '',
-        user.last_name || '',
-        user.email || '',
-        user.phone || '',
-        user.voice_part || '',
-        user.role || '',
-        user.status || '',
-        user.class_year || '',
-        user.join_date || '',
-        user.dues_paid ? 'Yes' : 'No',
-        user.created_at ? new Date(user.created_at).toLocaleDateString() : ''
-      ]);
+      // Build CSV rows
+      const csvRows = profiles.map(profile => {
+        const row = [profile.id];
+        
+        if (options.includePersonalInfo) {
+          row.push(
+            profile.first_name || '',
+            profile.last_name || '',
+            profile.join_date || '',
+            profile.class_year || ''
+          );
+        }
+        
+        if (options.includeContactInfo) {
+          row.push(
+            emails[profile.id] || '',
+            profile.phone || ''
+          );
+        }
+        
+        if (options.includeChoirInfo) {
+          row.push(
+            profile.voice_part || '',
+            profile.dues_paid ? 'Yes' : 'No'
+          );
+        }
+        
+        if (options.includeAdminInfo) {
+          row.push(
+            profile.role || '',
+            profile.is_super_admin ? 'Yes' : 'No',
+            profile.status || '',
+            profile.notes || ''
+          );
+        }
+        
+        return row;
+      });
 
-      // Combine headers and rows
+      // Create CSV content
       const csvContent = [
         headers.join(','),
         ...csvRows.map(row => 
-          row.map(field => 
-            // Escape quotes and wrap fields containing commas
-            typeof field === 'string' && (field.includes(',') || field.includes('"')) 
-              ? `"${field.replace(/"/g, '""')}"` 
-              : field
+          row.map(cell => 
+            typeof cell === 'string' && (cell.includes(',') || cell.includes('"')) 
+              ? `"${cell.replace(/"/g, '""')}"` 
+              : cell
           ).join(',')
         )
       ].join('\n');
 
-      // Create and download file
+      // Download the file
       const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-      const url = window.URL.createObjectURL(blob);
       const link = document.createElement('a');
-      link.href = url;
-      link.download = `members_export_${new Date().toISOString().split('T')[0]}.csv`;
-      link.click();
-      window.URL.revokeObjectURL(url);
+      
+      if (link.download !== undefined) {
+        const url = URL.createObjectURL(blob);
+        link.setAttribute('href', url);
+        link.setAttribute('download', `members_export_${new Date().toISOString().split('T')[0]}.csv`);
+        link.style.visibility = 'hidden';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+      }
 
-      toast.success(`Downloaded ${users.length} users to CSV file`);
-    } catch (error) {
-      console.error('Download error:', error);
-      toast.error("Failed to download users CSV");
+      toast.success(`Successfully exported ${profiles.length} members`);
+      
+    } catch (error: any) {
+      console.error('Export error:', error);
+      toast.error(error?.message || 'Failed to export members');
     } finally {
-      setIsDownloading(false);
+      setIsExporting(false);
     }
   };
 
   return (
-    <Card className="w-full max-w-2xl mx-auto">
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <FileText className="h-5 w-5" />
-          Export Members
-        </CardTitle>
-        <CardDescription>
-          Download all member data as a CSV file for backup or external use.
-        </CardDescription>
-      </CardHeader>
-      <CardContent className="space-y-4">
-        <div className="flex items-center justify-between p-4 bg-muted rounded-lg">
-          <div>
-            <h4 className="font-medium">Export All Members</h4>
-            <p className="text-sm text-muted-foreground">
-              Download a CSV file containing all member information
-            </p>
-          </div>
-          <Button 
-            onClick={downloadUsersCSV}
-            disabled={isDownloading}
-            className="flex items-center gap-2"
-          >
-            {isDownloading ? (
-              <>
-                <Download className="h-4 w-4 animate-spin" />
-                Downloading...
-              </>
-            ) : (
-              <>
-                <Download className="h-4 w-4" />
-                Download CSV
-              </>
-            )}
-          </Button>
-        </div>
+    <div className="space-y-6">
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Download className="h-5 w-5" />
+            Export Member Data
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-6">
+          <Alert>
+            <Users className="h-4 w-4" />
+            <AlertDescription>
+              Export member data to a CSV file. Select which information to include in the export.
+            </AlertDescription>
+          </Alert>
 
-        <div className="text-sm text-muted-foreground">
-          <p><strong>Note:</strong> The exported CSV will include all user data including names, emails, roles, and membership information. Handle this data securely and in accordance with privacy policies.</p>
-        </div>
-      </CardContent>
-    </Card>
+          <div className="space-y-4">
+            <h4 className="font-medium">Data to Include:</h4>
+            
+            <div className="space-y-3">
+              <div className="flex items-center space-x-2">
+                <Checkbox
+                  id="personal"
+                  checked={options.includePersonalInfo}
+                  onCheckedChange={(checked) => updateOption('includePersonalInfo', checked as boolean)}
+                />
+                <label htmlFor="personal" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                  Personal Information (Name, Join Date, Class Year)
+                </label>
+              </div>
+
+              <div className="flex items-center space-x-2">
+                <Checkbox
+                  id="contact"
+                  checked={options.includeContactInfo}
+                  onCheckedChange={(checked) => updateOption('includeContactInfo', checked as boolean)}
+                />
+                <label htmlFor="contact" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                  Contact Information (Email, Phone)
+                </label>
+              </div>
+
+              <div className="flex items-center space-x-2">
+                <Checkbox
+                  id="choir"
+                  checked={options.includeChoirInfo}
+                  onCheckedChange={(checked) => updateOption('includeChoirInfo', checked as boolean)}
+                />
+                <label htmlFor="choir" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                  Choir Information (Voice Part, Dues Status)
+                </label>
+              </div>
+
+              <div className="flex items-center space-x-2">
+                <Checkbox
+                  id="admin"
+                  checked={options.includeAdminInfo}
+                  onCheckedChange={(checked) => updateOption('includeAdminInfo', checked as boolean)}
+                />
+                <label htmlFor="admin" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                  Administrative Information (Role, Status, Notes)
+                </label>
+              </div>
+            </div>
+
+            <hr />
+
+            <h4 className="font-medium">Filter Options:</h4>
+            
+            <div className="flex items-center space-x-2">
+              <Checkbox
+                id="active"
+                checked={options.activeOnly}
+                onCheckedChange={(checked) => updateOption('activeOnly', checked as boolean)}
+              />
+              <label htmlFor="active" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                Active Members Only
+              </label>
+            </div>
+          </div>
+
+          {!options.includePersonalInfo && !options.includeContactInfo && !options.includeChoirInfo && !options.includeAdminInfo && (
+            <Alert>
+              <AlertCircle className="h-4 w-4" />
+              <AlertDescription>
+                Please select at least one data category to export.
+              </AlertDescription>
+            </Alert>
+          )}
+
+          <Button
+            onClick={exportToCSV}
+            disabled={isExporting || (!options.includePersonalInfo && !options.includeContactInfo && !options.includeChoirInfo && !options.includeAdminInfo)}
+            className="w-full"
+          >
+            {isExporting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+            {isExporting ? 'Exporting...' : 'Export to CSV'}
+          </Button>
+        </CardContent>
+      </Card>
+    </div>
   );
-};
+}
