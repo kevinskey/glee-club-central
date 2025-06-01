@@ -2,6 +2,7 @@
 import React from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
+import { useProfile } from '@/contexts/ProfileContext';
 import { Spinner } from '@/components/ui/spinner';
 
 interface RequireAuthProps {
@@ -10,11 +11,12 @@ interface RequireAuthProps {
 }
 
 const RequireAuth: React.FC<RequireAuthProps> = ({ children, requireAdmin = false }) => {
-  const { user, profile, isLoading, isAuthenticated } = useAuth();
+  const { user, loading: authLoading } = useAuth();
+  const { profile, isAuthenticated, isInitialized, isAdmin } = useProfile();
   const location = useLocation();
 
   // Show loading while auth state is being determined
-  if (isLoading) {
+  if (authLoading || !isInitialized) {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <Spinner size="lg" />
@@ -28,11 +30,8 @@ const RequireAuth: React.FC<RequireAuthProps> = ({ children, requireAdmin = fals
   }
 
   // Check admin requirement
-  if (requireAdmin) {
-    const isAdmin = profile?.is_super_admin === true || profile?.role === 'admin';
-    if (!isAdmin) {
-      return <Navigate to="/dashboard/member" replace />;
-    }
+  if (requireAdmin && !isAdmin()) {
+    return <Navigate to="/dashboard/member" replace />;
   }
 
   return <>{children}</>;

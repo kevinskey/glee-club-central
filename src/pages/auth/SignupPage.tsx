@@ -1,6 +1,7 @@
 
 import React from 'react';
 import { useAuth } from '@/contexts/AuthContext';
+import { useProfile } from '@/contexts/ProfileContext';
 import { useNavigate, Link } from 'react-router-dom';
 import { toast } from 'sonner';
 import { Spinner } from '@/components/ui/spinner';
@@ -11,7 +12,8 @@ import { UserPlus } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 
 export default function SignupPage() {
-  const { signUp, isAuthenticated, isLoading } = useAuth();
+  const { signUp, loading: authLoading } = useAuth();
+  const { isAuthenticated } = useProfile();
   const navigate = useNavigate();
   
   // Form state
@@ -25,10 +27,10 @@ export default function SignupPage() {
   
   // Redirect if already authenticated
   React.useEffect(() => {
-    if (isAuthenticated && !isLoading) {
+    if (isAuthenticated && !authLoading) {
       navigate('/role-dashboard');
     }
-  }, [isAuthenticated, isLoading, navigate]);
+  }, [isAuthenticated, authLoading, navigate]);
   
   const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -94,7 +96,7 @@ export default function SignupPage() {
   };
   
   // Show loading state while checking auth
-  if (isLoading) {
+  if (authLoading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <Spinner size="lg" />
