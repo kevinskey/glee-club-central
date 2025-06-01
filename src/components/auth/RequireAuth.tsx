@@ -1,122 +1,41 @@
 
-import * as React from 'react';
+import React from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
-import { useSimpleAuthContext } from '@/contexts/SimpleAuthContext';
-import { usePermissions } from '@/hooks/usePermissions';
-import { PageLoader } from '@/components/ui/page-loader';
-import { UserType } from '@/types/auth';
-import { toast } from 'sonner';
+import { useAuth } from '@/contexts/AuthContext';
+import { Spinner } from '@/components/ui/spinner';
 
 interface RequireAuthProps {
   children: React.ReactNode;
   requireAdmin?: boolean;
-  allowedUserTypes?: UserType[];
 }
 
-const RequireAuth = ({ children, requireAdmin, allowedUserTypes }: RequireAuthProps) => {
-  const { isAuthenticated, isLoading: authLoading, isAdmin, getUserType, user, profile } = useSimpleAuthContext();
-  const { isSuperAdmin, isLoading: permissionsLoading } = usePermissions();
+const RequireAuth: React.FC<RequireAuthProps> = ({ children, requireAdmin = false }) => {
+  const { user, profile, isLoading, isAuthenticated } = useAuth();
   const location = useLocation();
-  
-  // Much shorter loading timeout - show content faster
-  const [loadingTimeout, setLoadingTimeout] = React.useState(false);
-  
-  React.useEffect(() => {
-    const timer = setTimeout(() => {
-      setLoadingTimeout(true);
-    }, 2000); // Show content after 2 seconds even if still loading
-    
-    return () => clearTimeout(timer);
-  }, []);
-  
-  const isLoading = authLoading && !loadingTimeout;
-  
-  // Track redirect attempts to prevent loops
-  const redirectAttemptedRef = React.useRef(false);
-  
-  // Debug logging
-  console.log('RequireAuth state:', {
-    isAuthenticated,
-    isLoading,
-    authLoading,
-    permissionsLoading,
-    hasUser: !!user,
-    hasProfile: !!profile,
-    userRole: profile?.role,
-    requireAdmin,
-    allowedUserTypes,
-    location: location.pathname,
-    loadingTimeout
-  });
-  
-  // Show loading state only briefly
-  if (isLoading && !loadingTimeout) {
-    console.log('RequireAuth: Still loading, showing loader');
+
+  // Show loading while auth state is being determined
+  if (isLoading) {
     return (
-      <PageLoader 
-        message="Loading..." 
-        className="min-h-screen"
-      />
+      <div className="flex items-center justify-center min-h-screen">
+        <Spinner size="lg" />
+      </div>
     );
   }
-  
-  // Handle unauthenticated users
-  if (!isAuthenticated && !redirectAttemptedRef.current) {
-    redirectAttemptedRef.current = true;
-    
-    // Store the current URL to redirect back after login
-    const currentPath = location.pathname + location.search;
-    sessionStorage.setItem('authRedirectPath', currentPath);
-    
-    console.log("RequireAuth: Redirecting to login from:", currentPath);
-    toast.error("Please log in to access this page");
-    return <Navigate to="/login" replace />;
+
+  // Redirect to login if not authenticated
+  if (!isAuthenticated || !user) {
+    return <Navigate to="/login" state={{ from: location }} replace />;
   }
-  
-  // Check admin access if required (be more permissive)
-  if (requireAdmin && isAuthenticated) {
-    const hasAdminAccess = isSuperAdmin || 
-                          profile?.is_super_admin === true || 
-                          profile?.role === 'admin' ||
-                          (isAdmin && isAdmin());
-    
-    console.log('RequireAuth: Admin check:', { hasAdminAccess, isSuperAdmin, profileIsAdmin: profile?.is_super_admin });
-    
-    // Only block if we're sure they don't have admin access
-    if (!hasAdminAccess && (profile || loadingTimeout)) {
-      console.log('RequireAuth: User lacks admin access, redirecting to dashboard');
-      toast.error("You don't have admin privileges to access this page");
+
+  // Check admin requirement
+  if (requireAdmin) {
+    const isAdmin = profile?.is_super_admin === true || profile?.role === 'admin';
+    if (!isAdmin) {
       return <Navigate to="/dashboard/member" replace />;
     }
   }
-  
-  // Check user type restrictions (only if we have profile data or timeout reached)
-  if (allowedUserTypes && allowedUserTypes.length > 0 && isAuthenticated && (profile || loadingTimeout)) {
-    const userType = getUserType();
-    
-    console.log('RequireAuth: User type check:', { userType, allowedUserTypes });
-    
-    if (!userType || !allowedUserTypes.includes(userType)) {
-      console.log('RequireAuth: User type not allowed, redirecting to dashboard');
-      toast.error("You don't have permission to access this page");
-      return <Navigate to="/dashboard/member" replace />;
-    }
-  }
-  
-  // If authenticated, render children (even without complete profile)
-  if (isAuthenticated) {
-    console.log('RequireAuth: All checks passed, rendering children');
-    return <>{children}</>;
-  }
-  
-  // Final fallback loader (very brief)
-  console.log('RequireAuth: Fallback loader');
-  return (
-    <PageLoader 
-      message="Loading..." 
-      className="min-h-screen"
-    />
-  );
+
+  return <>{children}</>;
 };
 
 export default RequireAuth;

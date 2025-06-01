@@ -1,10 +1,11 @@
 
 import { createBrowserRouter } from "react-router-dom";
-import { SimpleAuthProvider } from "@/contexts/SimpleAuthContext";
-import { RolePermissionProvider } from "@/contexts/RolePermissionContext";
-import SimpleRequireAuth from "@/components/auth/SimpleRequireAuth";
+import { AuthProvider } from "@/contexts/AuthContext";
+import RequireAuth from "@/components/auth/RequireAuth";
 import HomePage from "./pages/HomePage";
-import SimpleLoginPage from "./pages/auth/SimpleLoginPage";
+import LoginPage from "./pages/auth/LoginPage";
+import SignupPage from "./pages/auth/SignupPage";
+import RegisterPage from "./pages/RegisterPage";
 import RoleDashboardPage from "./pages/RoleDashboardPage";
 import AdminDashboardPage from "./pages/admin/AdminDashboardPage";
 import MemberDashboardPage from "./pages/dashboard/MemberDashboardPage";
@@ -16,30 +17,38 @@ export const router = createBrowserRouter([
   },
   {
     path: "/login",
-    element: <SimpleLoginPage />,
+    element: <LoginPage />,
+  },
+  {
+    path: "/signup",
+    element: <SignupPage />,
+  },
+  {
+    path: "/register",
+    element: <RegisterPage />,
   },
   {
     path: "/role-dashboard",
     element: (
-      <SimpleRequireAuth>
+      <RequireAuth>
         <RoleDashboardPage />
-      </SimpleRequireAuth>
+      </RequireAuth>
     ),
   },
   {
     path: "/dashboard/admin",
     element: (
-      <SimpleRequireAuth requireAdmin>
+      <RequireAuth requireAdmin>
         <AdminDashboardPage />
-      </SimpleRequireAuth>
+      </RequireAuth>
     ),
   },
   {
     path: "/dashboard/member",
     element: (
-      <SimpleRequireAuth>
+      <RequireAuth>
         <MemberDashboardPage />
-      </SimpleRequireAuth>
+      </RequireAuth>
     ),
   },
 ]);
