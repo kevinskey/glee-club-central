@@ -1,114 +1,209 @@
 
 import React, { useState, useEffect } from 'react';
-import { useSimpleAuthContext } from '@/contexts/SimpleAuthContext';
-import { PageLoader } from '@/components/ui/page-loader';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { AlertCircle, RefreshCw } from 'lucide-react';
+import { Input } from '@/components/ui/input';
+import { Badge } from '@/components/ui/badge';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { 
+  Users, 
+  Search, 
+  UserPlus, 
+  RefreshCw,
+  AlertTriangle,
+  Database
+} from 'lucide-react';
+import { useSimpleAuthContextFixed } from '@/contexts/SimpleAuthContextFixed';
 import { useUsersSimplified } from '@/hooks/user/useUsersSimplified';
-import { DatabaseDebugPanel } from './DatabaseDebugPanel';
+import { toast } from 'sonner';
 
-export const UserManagementSimplified: React.FC = () => {
-  const { user, isAuthenticated, isLoading, isAdmin } = useSimpleAuthContext();
-  const { fetchUsers, isLoading: usersLoading, error, userCount } = useUsersSimplified();
-  const [showDebugPanel, setShowDebugPanel] = useState(false);
+export function UserManagementSimplified() {
+  const { isAuthenticated, isLoading, isAdmin, user } = useSimpleAuthContextFixed();
+  const { users, isLoading: usersLoading, error, refreshUsers } = useUsersSimplified();
+  const [searchTerm, setSearchTerm] = useState('');
 
-  console.log('🔍 UserManagementSimplified: Component state:', {
-    isAuthenticated,
-    isLoading,
-    isAdminUser: isAdmin(),
-    userEmail: user?.email,
-    usersLoading,
-    error,
-    usersCount: userCount
-  });
+  const isAdminUser = isAdmin();
 
   useEffect(() => {
-    if (isAuthenticated && !isLoading) {
-      console.log('🔄 UserManagementSimplified: Attempting to fetch users...');
-      fetchUsers();
-    }
-  }, [isAuthenticated, isLoading, fetchUsers]);
+    console.log('🔍 UserManagementSimplified: Component state:', {
+      isAuthenticated,
+      isLoading,
+      isAdminUser,
+      userEmail: user?.email,
+      usersLoading,
+      error,
+      usersCount: users.length
+    });
+  }, [isAuthenticated, isLoading, isAdminUser, user?.email, usersLoading, error, users.length]);
+
+  const handleRefresh = async () => {
+    console.log('🔄 UserManagementSimplified: Refreshing users...');
+    await refreshUsers();
+  };
+
+  const filteredUsers = users.filter(user => {
+    const searchTermLower = searchTerm.toLowerCase();
+    const fullName = `${user.first_name || ''} ${user.last_name || ''}`.toLowerCase();
+    const email = (user.email || '').toLowerCase();
+    return fullName.includes(searchTermLower) || email.includes(searchTermLower);
+  });
 
   if (isLoading) {
-    return <PageLoader message="Loading..." />;
+    return (
+      <div className="flex items-center justify-center p-8">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
+          <p>Loading user management...</p>
+        </div>
+      </div>
+    );
   }
 
   if (!isAuthenticated) {
     return (
-      <Card>
-        <CardContent className="p-6">
-          <div className="text-center">
-            <AlertCircle className="h-12 w-12 text-orange-500 mx-auto mb-4" />
-            <h3 className="text-lg font-semibold mb-2">Authentication Required</h3>
-            <p className="text-muted-foreground">Please log in to access user management.</p>
-          </div>
-        </CardContent>
-      </Card>
+      <Alert>
+        <AlertTriangle className="h-4 w-4" />
+        <AlertDescription>
+          You must be logged in to access user management.
+        </AlertDescription>
+      </Alert>
     );
   }
 
-  const handleRefresh = () => {
-    fetchUsers();
-  };
+  if (!isAdminUser) {
+    return (
+      <Alert>
+        <AlertTriangle className="h-4 w-4" />
+        <AlertDescription>
+          You don't have permission to access user management. Admin access required.
+        </AlertDescription>
+      </Alert>
+    );
+  }
 
   return (
     <div className="space-y-6">
-      {error && (
-        <>
-          <Card className="border-red-200">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2 text-red-600">
-                <AlertCircle className="h-5 w-5" />
-                Database Connection Error
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-red-600 mb-4">{error}</p>
-              <div className="flex gap-2">
-                <Button onClick={handleRefresh} disabled={usersLoading}>
-                  <RefreshCw className="mr-2 h-4 w-4" />
-                  Try Again
-                </Button>
-                <Button 
-                  variant="outline" 
-                  onClick={() => setShowDebugPanel(!showDebugPanel)}
-                >
-                  {showDebugPanel ? 'Hide' : 'Show'} Debug Panel
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
+      <div className="flex items-center justify-between">
+        <div>
+          <h2 className="text-2xl font-bold">User Management</h2>
+          <p className="text-muted-foreground">
+            Manage members and their information
+          </p>
+        </div>
+        <div className="flex gap-2">
+          <Button onClick={handleRefresh} variant="outline" disabled={usersLoading}>
+            <RefreshCw className={`mr-2 h-4 w-4 ${usersLoading ? 'animate-spin' : ''}`} />
+            Refresh
+          </Button>
+          <Button>
+            <UserPlus className="mr-2 h-4 w-4" />
+            Add User
+          </Button>
+        </div>
+      </div>
 
-          {showDebugPanel && <DatabaseDebugPanel />}
-        </>
+      {error && (
+        <Alert variant="destructive">
+          <AlertTriangle className="h-4 w-4" />
+          <AlertDescription>
+            <strong>Database error:</strong> {error}
+            <br />
+            <Button 
+              onClick={handleRefresh} 
+              variant="outline" 
+              size="sm" 
+              className="mt-2"
+            >
+              <RefreshCw className="mr-2 h-4 w-4" />
+              Try Again
+            </Button>
+          </AlertDescription>
+        </Alert>
       )}
 
       <Card>
         <CardHeader>
-          <CardTitle>User Management</CardTitle>
+          <CardTitle className="flex items-center gap-2">
+            <Users className="h-5 w-5" />
+            Members ({filteredUsers.length})
+          </CardTitle>
         </CardHeader>
-        <CardContent>
+        <CardContent className="space-y-4">
+          <div className="flex items-center gap-4">
+            <div className="relative flex-1">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
+              <Input
+                placeholder="Search members..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="pl-10"
+              />
+            </div>
+          </div>
+
           {usersLoading ? (
             <div className="text-center py-8">
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
-              <p>Loading users...</p>
+              <p>Loading members...</p>
             </div>
-          ) : (
+          ) : filteredUsers.length === 0 ? (
             <div className="text-center py-8">
-              <p className="text-muted-foreground">
-                {error ? 'Unable to load users due to connection error.' : `Found ${userCount} users.`}
+              <Database className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+              <h3 className="font-semibold mb-2">
+                {error ? 'Unable to Load Members' : 'No Members Found'}
+              </h3>
+              <p className="text-muted-foreground mb-4">
+                {error 
+                  ? 'There was an issue connecting to the database.' 
+                  : searchTerm 
+                    ? 'No members match your search criteria.' 
+                    : 'No members have been added yet.'
+                }
               </p>
-              {!error && (
-                <Button onClick={handleRefresh} className="mt-4">
+              {error && (
+                <Button onClick={handleRefresh} variant="outline">
                   <RefreshCw className="mr-2 h-4 w-4" />
-                  Refresh Users
+                  Retry Loading
                 </Button>
               )}
+            </div>
+          ) : (
+            <div className="grid gap-4">
+              {filteredUsers.map((member) => (
+                <Card key={member.id} className="p-4">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h3 className="font-semibold">
+                        {member.first_name} {member.last_name}
+                      </h3>
+                      {member.email && (
+                        <p className="text-sm text-muted-foreground">
+                          {member.email}
+                        </p>
+                      )}
+                      {member.voice_part && (
+                        <p className="text-sm text-muted-foreground">
+                          Voice Part: {member.voice_part}
+                        </p>
+                      )}
+                    </div>
+                    <div className="flex items-center gap-2">
+                      {member.role && (
+                        <Badge variant={member.role === 'admin' ? 'destructive' : 'outline'}>
+                          {member.role}
+                        </Badge>
+                      )}
+                      <Badge variant={member.status === 'active' ? 'default' : 'secondary'}>
+                        {member.status || 'active'}
+                      </Badge>
+                    </div>
+                  </div>
+                </Card>
+              ))}
             </div>
           )}
         </CardContent>
       </Card>
     </div>
   );
-};
+}
