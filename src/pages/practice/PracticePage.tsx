@@ -17,7 +17,6 @@ import { toast } from "sonner";
 interface PracticeLog {
   id?: string;
   user_id?: string;
-  title: string;
   duration: number;
   notes?: string;
   created_at?: string;
@@ -54,12 +53,11 @@ export default function PracticePage() {
     );
   }
 
-  const handleAddPracticeLog = async (logData: Omit<PracticeLog, 'id' | 'created_at'>) => {
+  const handleAddPracticeLog = async (minutes: number, category: string, description: string, date?: string) => {
     try {
       const success = await addLog({
-        title: logData.title,
-        duration: logData.duration,
-        notes: logData.notes,
+        duration: minutes,
+        notes: description,
         user_id: user.id
       });
       
@@ -67,12 +65,15 @@ export default function PracticePage() {
         toast.success("Practice session logged successfully!");
         setShowAddForm(false);
         fetchLogs();
+        return true;
       } else {
         toast.error("Failed to log practice session");
+        return false;
       }
     } catch (error) {
       console.error('Error adding practice log:', error);
       toast.error("An error occurred while logging your practice session");
+      return false;
     }
   };
 
@@ -204,7 +205,7 @@ export default function PracticePage() {
                   <CardContent className="p-4">
                     <div className="flex justify-between items-start">
                       <div className="flex-1">
-                        <h3 className="font-semibold">{log.title}</h3>
+                        <h3 className="font-semibold">Practice Session</h3>
                         <p className="text-sm text-muted-foreground">
                           {new Date(log.created_at || '').toLocaleDateString()}
                         </p>
@@ -224,7 +225,19 @@ export default function PracticePage() {
         </TabsContent>
         
         <TabsContent value="stats">
-          <PracticeStats logs={logs} />
+          <Card>
+            <CardHeader>
+              <CardTitle>Practice Statistics</CardTitle>
+              <CardDescription>
+                Your practice progress over time
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <p className="text-muted-foreground">
+                Statistics visualization coming soon.
+              </p>
+            </CardContent>
+          </Card>
         </TabsContent>
       </Tabs>
     </div>

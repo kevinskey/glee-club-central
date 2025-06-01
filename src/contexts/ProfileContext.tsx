@@ -6,7 +6,7 @@ import { supabase } from "@/integrations/supabase/client";
 interface ProfileContextType {
   profile: any;
   permissions: any[];
-  isAdmin: boolean;
+  isAdmin: () => boolean;
   loading: boolean;
   isAuthenticated: boolean;
   isInitialized: boolean;
@@ -23,7 +23,6 @@ export const ProfileProvider = ({ children }: { children: React.ReactNode }) => 
   const [profile, setProfile] = useState(null);
   const [permissions, setPermissions] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [isAdmin, setIsAdmin] = useState(false);
   const [isInitialized, setIsInitialized] = useState(false);
 
   const createFallbackProfile = (userId: string) => ({
@@ -41,7 +40,6 @@ export const ProfileProvider = ({ children }: { children: React.ReactNode }) => 
     if (!user) {
       setProfile(null);
       setPermissions([]);
-      setIsAdmin(false);
       setLoading(false);
       setIsInitialized(true);
       return;
@@ -60,11 +58,9 @@ export const ProfileProvider = ({ children }: { children: React.ReactNode }) => 
       const fallbackProfile = createFallbackProfile(user.id);
       setProfile(fallbackProfile);
       setPermissions([]);
-      setIsAdmin(false);
     } else {
       setProfile(profileData);
       setPermissions(profileData?.permissions || []);
-      setIsAdmin(profileData?.role === "admin" || profileData?.is_super_admin === true);
     }
 
     setLoading(false);
@@ -82,8 +78,12 @@ export const ProfileProvider = ({ children }: { children: React.ReactNode }) => 
   const isAuthenticated = !!user;
   const isMember = profile?.role === 'member' || !profile?.role;
 
+  const isAdmin = (): boolean => {
+    return profile?.role === "admin" || profile?.is_super_admin === true;
+  };
+
   const getUserType = (): 'admin' | 'member' => {
-    return isAdmin ? 'admin' : 'member';
+    return isAdmin() ? 'admin' : 'member';
   };
 
   return (
