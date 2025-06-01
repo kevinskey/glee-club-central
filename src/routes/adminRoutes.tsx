@@ -27,7 +27,7 @@ export const adminRoutes: RouteObject[] = [
     path: '/admin',
     element: (
       <AdminRoute>
-        <AppLayout sidebarType="admin" showHeader={true} showFooter={false} />
+        <AppLayout sidebarType="none" showHeader={true} showFooter={false} />
       </AdminRoute>
     ),
     children: [
