@@ -85,7 +85,10 @@ export function MemberCSVDownload() {
       const { data: profiles, error: profilesError } = await query
         .order('last_name', { ascending: true });
 
-      if (profilesError) throw profilesError;
+      if (profilesError) {
+        console.error('Profiles query error:', profilesError);
+        throw profilesError;
+      }
 
       // Get email addresses from auth users (if we have admin access)
       let emails: { [key: string]: string } = {};
@@ -111,8 +114,8 @@ export function MemberCSVDownload() {
         return;
       }
 
-      // Type the profiles data properly
-      const typedProfiles = profiles as ProfileData[];
+      // Safely type the profiles data - use unknown first to avoid TypeScript error
+      const typedProfiles = profiles as unknown as ProfileData[];
 
       // Build CSV headers
       const headers = ['ID'];
