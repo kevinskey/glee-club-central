@@ -1,4 +1,3 @@
-
 import React, { useState, useRef, useEffect } from 'react';
 import FullCalendar from '@fullcalendar/react';
 import dayGridPlugin from '@fullcalendar/daygrid';
@@ -6,7 +5,7 @@ import timeGridPlugin from '@fullcalendar/timegrid';
 import listPlugin from '@fullcalendar/list';
 import interactionPlugin from '@fullcalendar/interaction';
 import { CalendarEvent } from '@/types/calendar';
-import { useProfile } from '@/contexts/ProfileContext';
+import { useSimpleAuthContext } from '@/contexts/SimpleAuthContext';
 import { CalendarHeader } from './CalendarHeader';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -25,7 +24,7 @@ export function EnhancedCalendarView({
   onAddEvent,
   loading = false 
 }: EnhancedCalendarViewProps) {
-  const { isAuthenticated } = useProfile();
+  const { isAuthenticated } = useSimpleAuthContext();
   const [view, setView] = useState<'dayGridMonth' | 'timeGridWeek' | 'timeGridDay' | 'listWeek'>('dayGridMonth');
   const calendarRef = useRef<FullCalendar>(null);
 
