@@ -46,7 +46,7 @@ export const RoleDashboard: React.FC = () => {
     if (auth.isAuthenticated && auth.user && (auth.profile || waitTime >= 5)) {
       let targetRoute = '/dashboard/member';
       
-      // Check if user is admin using profile data directly to avoid function call issues
+      // Check if user is admin using profile data directly
       const isUserAdmin = auth.profile?.is_super_admin === true || auth.profile?.role === 'admin';
       
       if (auth.profile && isUserAdmin) {
