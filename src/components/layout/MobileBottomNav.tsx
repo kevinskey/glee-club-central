@@ -31,32 +31,33 @@ export function MobileBottomNav() {
   const navItems: NavItem[] = [
     { to: '/dashboard/member', icon: Home, label: 'Home' },
     { to: '/calendar', icon: Calendar, label: 'Calendar' },
-    { to: '/music', icon: Music, label: 'Music' },
-    { to: '/notifications', icon: Bell, label: 'Alerts' },
+    { to: '/dashboard/sheet-music', icon: Music, label: 'Music' },
+    { to: '/dashboard/announcements', icon: Bell, label: 'Alerts' },
     { to: '/profile', icon: User, label: 'Profile' },
   ];
 
   // Add admin-specific items if user is admin
-  if (isAdmin()) {
-    navItems.splice(1, 0, { to: '/dashboard/admin', icon: Users, label: 'Admin', adminOnly: true });
-    navItems.push({ to: '/admin/settings', icon: Settings, label: 'Settings', adminOnly: true });
+  if (isAdmin && isAdmin()) {
+    navItems.splice(1, 0, { to: '/admin', icon: Users, label: 'Admin', adminOnly: true });
+    navItems.push({ to: '/settings', icon: Settings, label: 'Settings', adminOnly: true });
   }
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-700 z-50">
+    <nav className="fixed bottom-0 left-0 right-0 bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-700 z-50 lg:hidden">
       <div className="flex justify-around items-center py-2">
         {navItems.map((item) => {
-          const isActive = location.pathname === item.to;
+          const isActive = location.pathname === item.to || 
+                          (item.to === '/dashboard/member' && location.pathname.startsWith('/dashboard'));
           const Icon = item.icon;
           
           return (
             <Link
               key={item.to}
               to={item.to}
-              className={`flex flex-col items-center justify-center p-2 text-xs ${
+              className={`flex flex-col items-center justify-center p-2 text-xs transition-colors ${
                 isActive 
-                  ? 'text-primary' 
-                  : 'text-gray-600 dark:text-gray-400'
+                  ? 'text-glee-spelman' 
+                  : 'text-gray-600 dark:text-gray-400 hover:text-glee-spelman'
               }`}
             >
               <div className="relative">
