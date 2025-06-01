@@ -75,7 +75,7 @@ export function MemberCSVDownload() {
         selectFields.push('role', 'is_super_admin', 'status', 'notes');
       }
 
-      // Query profiles using the fixed RLS policies
+      // Query profiles using standard RLS policies
       let query = supabase
         .from('profiles')
         .select(selectFields.join(', '));
@@ -121,7 +121,7 @@ export function MemberCSVDownload() {
         return;
       }
 
-      // Safely type the profiles data
+      // Safely type the profiles data - fix the TypeScript error
       const typedProfiles = profiles as ProfileData[];
 
       // Build CSV headers

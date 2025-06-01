@@ -14,6 +14,12 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { 
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import { 
   Users, 
   Search, 
   Filter, 
@@ -25,16 +31,22 @@ import {
   Music,
   Settings as SettingsIcon,
   Download,
-  Upload
+  Upload,
+  Edit,
+  Trash2
 } from 'lucide-react';
 import { useAuthMigration } from '@/hooks/useAuthMigration';
 import { useUserManagement } from '@/hooks/user/useUserManagement';
+import { useUserUpdate } from '@/hooks/user/useUserUpdate';
 import { CreateUserModal } from './CreateUserModal';
 import { AddMemberDialog } from './AddMemberDialog';
+import { EditUserDialog } from './EditUserDialog';
 import { MemberCSVUpload } from './MemberCSVUpload';
 import { MemberCSVDownload } from './MemberCSVDownload';
 import { UserFormValues } from './form/userFormSchema';
 import { useUserCreate } from '@/hooks/user/useUserCreate';
+import { User } from '@/hooks/user/types';
+import { toast } from 'sonner';
 
 interface Member {
   id: string;
@@ -54,11 +66,15 @@ export function MembersPageRefactor() {
   const { isAdmin, isLoading, isAuthenticated, profile } = useAuthMigration();
   const { users, isLoading: usersLoading, refreshUsers } = useUserManagement();
   const { addUser } = useUserCreate();
+  const { updateUser } = useUserUpdate(refreshUsers);
+  
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedVoicePart, setSelectedVoicePart] = useState('all');
   const [selectedRole, setSelectedRole] = useState('all');
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [showAddMemberDialog, setShowAddMemberDialog] = useState(false);
+  const [showEditDialog, setShowEditDialog] = useState(false);
+  const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const isAdminUser = isAdmin();
@@ -94,6 +110,44 @@ export function MembersPageRefactor() {
       }
     } catch (error) {
       console.error('Error adding member:', error);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleEditUser = (user: User) => {
+    setSelectedUser(user);
+    setShowEditDialog(true);
+  };
+
+  const handleSaveUser = async (data: UserFormValues) => {
+    if (!selectedUser) return;
+    
+    setIsSubmitting(true);
+    try {
+      // Convert form data to User update format
+      const updateData: Partial<User> = {
+        first_name: data.first_name,
+        last_name: data.last_name,
+        phone: data.phone,
+        voice_part: data.voice_part,
+        status: data.status,
+        class_year: data.class_year,
+        notes: data.notes,
+        dues_paid: data.dues_paid,
+        is_super_admin: data.is_admin,
+        role: data.is_admin ? 'admin' : 'member'
+      };
+
+      const success = await updateUser(selectedUser.id, updateData);
+      if (success) {
+        setShowEditDialog(false);
+        setSelectedUser(null);
+        toast.success('User updated successfully');
+      }
+    } catch (error) {
+      console.error('Error updating user:', error);
+      toast.error('Failed to update user');
     } finally {
       setIsSubmitting(false);
     }
@@ -267,9 +321,23 @@ export function MembersPageRefactor() {
                           {member.status}
                         </Badge>
                         {isAdminUser && (
-                          <Button variant="ghost" size="sm">
-                            <MoreVertical className="h-4 w-4" />
-                          </Button>
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <Button variant="ghost" size="sm">
+                                <MoreVertical className="h-4 w-4" />
+                              </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end">
+                              <DropdownMenuItem onClick={() => handleEditUser(member)}>
+                                <Edit className="mr-2 h-4 w-4" />
+                                Edit Member
+                              </DropdownMenuItem>
+                              <DropdownMenuItem className="text-destructive">
+                                <Trash2 className="mr-2 h-4 w-4" />
+                                Delete Member
+                              </DropdownMenuItem>
+                            </DropdownMenuContent>
+                          </DropdownMenu>
                         )}
                       </div>
                     </div>
@@ -335,6 +403,18 @@ export function MembersPageRefactor() {
         onOpenChange={setShowAddMemberDialog}
         onMemberAdd={handleAddMember}
         isSubmitting={isSubmitting}
+      />
+
+      {/* Edit User Dialog */}
+      <EditUserDialog
+        isOpen={showEditDialog}
+        onOpenChange={(open) => {
+          setShowEditDialog(open);
+          if (!open) setSelectedUser(null);
+        }}
+        onSave={handleSaveUser}
+        isSubmitting={isSubmitting}
+        user={selectedUser}
       />
     </div>
   );
