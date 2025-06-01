@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuthMigration } from '@/hooks/useAuthMigration';
@@ -7,7 +8,7 @@ import { Button } from '@/components/ui/button';
 import { AlertCircle, RefreshCw, User } from 'lucide-react';
 
 export const RoleDashboard: React.FC = () => {
-  const auth = useAuthMigration(); // Use migration hook for backward compatibility
+  const auth = useAuthMigration();
   const navigate = useNavigate();
   const [hasRedirected, setHasRedirected] = useState(false);
   const [showError, setShowError] = useState(false);
