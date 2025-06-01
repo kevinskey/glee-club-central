@@ -10,7 +10,6 @@ import { Label } from '@/components/ui/label';
 import { LogIn, UserPlus, RefreshCcw, Eye, EyeOff } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { cleanupAuthState, resetAuthSystem } from '@/contexts/AuthContext';
-import { addCentennialImageToLibrary } from '@/utils/addCentennialImage';
 
 const LoginPage = () => {
   const { login, isAuthenticated, isLoading, user, isInitialized } = useAuth();
@@ -24,11 +23,6 @@ const LoginPage = () => {
   const [isResetting, setIsResetting] = React.useState(false);
   const [showPassword, setShowPassword] = React.useState(false);
   const [loginError, setLoginError] = React.useState<string | null>(null);
-  
-  // Add the centennial image to library on component mount
-  React.useEffect(() => {
-    addCentennialImageToLibrary();
-  }, []);
   
   // Handle redirect after successful authentication
   React.useEffect(() => {
