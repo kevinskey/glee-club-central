@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { RouteObject } from 'react-router-dom';
 import AdminRoute from '@/components/auth/AdminRoute';
@@ -15,6 +14,7 @@ import AnalyticsPage from '@/pages/admin/AnalyticsPage';
 import EventDetailsPage from '@/pages/events/EventDetailsPage';
 import EventRSVPsPage from '@/pages/admin/EventRSVPsPage';
 import FanBulkUploadPage from '@/pages/admin/FanBulkUploadPage';
+import MemberBulkUploadPage from '@/pages/admin/MemberBulkUploadPage';
 
 // Import additional admin pages
 import AdminHeroManager from '@/pages/admin/AdminHeroManager';
@@ -131,6 +131,14 @@ export const adminRoutes: RouteObject[] = [
     element: (
       <AdminRoute>
         <SettingsPage />
+      </AdminRoute>
+    ),
+  },
+  {
+    path: '/admin/member-upload',
+    element: (
+      <AdminRoute>
+        <MemberBulkUploadPage />
       </AdminRoute>
     ),
   },

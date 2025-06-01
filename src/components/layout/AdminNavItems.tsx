@@ -1,32 +1,22 @@
 
-import React from "react";
 import { 
   Calendar, 
   Users, 
-  User,
-  Upload, 
+  FileText, 
   Image, 
-  ShoppingBag, 
-  Settings,
-  BarChart3,
-  UserCog,
-  Tags,
-  LayoutDashboard,
-  Rss
+  Settings, 
+  ShoppingCart, 
+  BarChart3, 
+  Upload,
+  UserPlus,
+  FileUp
 } from "lucide-react";
-import { LucideIcon } from "lucide-react";
 
-export interface AdminNavItem {
-  title: string;
-  url: string;
-  icon: LucideIcon;
-}
-
-export const adminNavItems: AdminNavItem[] = [
+export const adminNavItems = [
   {
     title: "Dashboard",
     url: "/admin",
-    icon: LayoutDashboard,
+    icon: BarChart3,
   },
   {
     title: "Calendar",
@@ -39,9 +29,14 @@ export const adminNavItems: AdminNavItem[] = [
     icon: Users,
   },
   {
-    title: "User Management",
-    url: "/admin/user-management",
-    icon: UserCog,
+    title: "Member Upload",
+    url: "/admin/member-upload",
+    icon: UserPlus,
+  },
+  {
+    title: "Fan Upload",
+    url: "/admin/fan-upload",
+    icon: FileUp,
   },
   {
     title: "Hero Manager",
@@ -49,19 +44,24 @@ export const adminNavItems: AdminNavItem[] = [
     icon: Image,
   },
   {
-    title: "Media Manager",
+    title: "Media Uploader",
     url: "/admin/media-uploader",
     icon: Upload,
   },
   {
+    title: "Media Library",
+    url: "/admin/media",
+    icon: Image,
+  },
+  {
     title: "News Ticker",
     url: "/admin/news-ticker",
-    icon: Rss,
+    icon: FileText,
   },
   {
     title: "Orders",
     url: "/admin/orders",
-    icon: ShoppingBag,
+    icon: ShoppingCart,
   },
   {
     title: "Analytics",
@@ -69,9 +69,9 @@ export const adminNavItems: AdminNavItem[] = [
     icon: BarChart3,
   },
   {
-    title: "Fan Tags",
-    url: "/admin/fan-tags",
-    icon: Tags,
+    title: "Announcements",
+    url: "/admin/announcements",
+    icon: FileText,
   },
   {
     title: "Settings",
@@ -79,21 +79,3 @@ export const adminNavItems: AdminNavItem[] = [
     icon: Settings,
   },
 ];
-
-export const adminIcons = {
-  LayoutDashboard,
-  Calendar,
-  Users,
-  User,
-  Upload,
-  Image,
-  ShoppingBag,
-  Settings,
-  BarChart3,
-  UserCog,
-  Tags,
-};
-
-export function AdminNavItems() {
-  return null; // This is just for exporting the nav items data
-}
