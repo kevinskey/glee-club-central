@@ -5,7 +5,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { PageLoader } from '@/components/ui/page-loader';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { AlertCircle, RefreshCw } from 'lucide-react';
+import { AlertCircle, RefreshCw, User } from 'lucide-react';
 
 export const RoleDashboard: React.FC = () => {
   const { user, profile, isLoading, isAuthenticated, isAdmin, isInitialized, refreshUserData } = useAuth();
@@ -23,7 +23,7 @@ export const RoleDashboard: React.FC = () => {
         setLoadingTimeout(true);
         setShowError(true);
       }
-    }, 10000); // 10 second timeout
+    }, 15000); // 15 second timeout for better profile resolution
 
     return () => clearTimeout(timer);
   }, [isLoading, profile, isAuthenticated, user]);
@@ -140,7 +140,7 @@ export const RoleDashboard: React.FC = () => {
   if (isLoading && !showError && !loadingTimeout) {
     return (
       <PageLoader 
-        message="Resolving your profile and permissions..."
+        message="Setting up your profile and permissions..."
         className="min-h-screen"
       />
     );
@@ -153,13 +153,17 @@ export const RoleDashboard: React.FC = () => {
         <Card className="w-full max-w-md">
           <CardHeader className="text-center">
             <AlertCircle className="h-12 w-12 text-red-500 mx-auto mb-4" />
-            <CardTitle>Profile Resolution Failed</CardTitle>
+            <CardTitle>Profile Setup Issue</CardTitle>
             <CardDescription>
-              Unable to load your profile and role information. This may be a temporary issue.
+              We're having trouble setting up your profile. This usually resolves quickly with a retry.
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="text-sm text-muted-foreground bg-muted p-3 rounded">
+              <div className="flex items-center gap-2 mb-2">
+                <User className="h-4 w-4" />
+                <span className="font-medium">Account Details</span>
+              </div>
               <p><strong>User ID:</strong> {user?.id}</p>
               <p><strong>Email:</strong> {user?.email}</p>
               <p><strong>Status:</strong> {loadingTimeout ? 'Timeout' : 'Profile Missing'}</p>
@@ -171,7 +175,7 @@ export const RoleDashboard: React.FC = () => {
                 className="w-full"
               >
                 <RefreshCw className={`h-4 w-4 mr-2 ${isRetrying ? 'animate-spin' : ''}`} />
-                {isRetrying ? 'Retrying...' : 'Retry Profile Resolution'}
+                {isRetrying ? 'Setting up profile...' : 'Retry Profile Setup'}
               </Button>
               <Button 
                 variant="outline" 

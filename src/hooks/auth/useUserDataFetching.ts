@@ -1,7 +1,7 @@
 
 import { useCallback } from 'react';
 import { Profile } from '@/types/auth';
-import { getProfile, createFallbackProfile } from '@/utils/supabase/profiles';
+import { ensureProfileExists } from '@/utils/supabase/profiles';
 import { fetchUserPermissions } from '@/utils/supabase/permissions';
 import { AuthState } from './types';
 
@@ -23,60 +23,34 @@ export const useUserDataFetching = (
     
     let profile: Profile | null = null;
     let permissions = {};
-    let profileFetchAttempts = 0;
-    const maxAttempts = 3;
     
-    // Enhanced profile fetching with retry logic
-    while (profileFetchAttempts < maxAttempts && !profile && mountedRef.current) {
-      profileFetchAttempts++;
+    try {
+      console.log('📋 useUserDataFetching: Ensuring profile exists...');
       
-      try {
-        console.log(`📋 useUserDataFetching: Profile fetch attempt ${profileFetchAttempts}/${maxAttempts}...`);
-        
-        profile = await Promise.race([
-          getProfile(userId),
-          new Promise<null>((_, reject) => {
-            setTimeout(() => reject(new Error('Profile timeout')), 5000);
-          })
-        ]);
-        
-        console.log('📋 useUserDataFetching: Profile fetch result:', {
-          attempt: profileFetchAttempts,
-          hasProfile: !!profile,
-          profileId: profile?.id,
-          profileRole: profile?.role,
-          profileIsAdmin: profile?.is_super_admin,
-          profileStatus: profile?.status
-        });
-        
-        if (profile) {
-          break; // Successfully fetched profile
-        }
-        
-      } catch (error) {
-        console.warn(`⚠️ useUserDataFetching: Profile fetch attempt ${profileFetchAttempts} failed:`, error);
-        
-        // If this is the last attempt, try to create fallback profile
-        if (profileFetchAttempts === maxAttempts) {
-          console.log('🔧 useUserDataFetching: Max attempts reached, creating fallback profile...');
-          try {
-            profile = await createFallbackProfile(userId, userEmail);
-            if (profile) {
-              console.log('✅ useUserDataFetching: Fallback profile created successfully');
-            }
-          } catch (fallbackError) {
-            console.error('❌ useUserDataFetching: Fallback profile creation failed:', fallbackError);
-          }
-        } else {
-          // Wait before retry
-          await new Promise(resolve => setTimeout(resolve, 1000));
-        }
-      }
+      // Use the new ensureProfileExists function which handles both fetching and creation
+      profile = await Promise.race([
+        ensureProfileExists(userId, userEmail),
+        new Promise<null>((_, reject) => {
+          setTimeout(() => reject(new Error('Profile ensure timeout')), 10000);
+        })
+      ]);
+      
+      console.log('📋 useUserDataFetching: Profile ensure result:', {
+        hasProfile: !!profile,
+        profileId: profile?.id,
+        profileRole: profile?.role,
+        profileIsAdmin: profile?.is_super_admin,
+        profileStatus: profile?.status
+      });
+      
+    } catch (error) {
+      console.error('❌ useUserDataFetching: Profile ensure failed:', error);
+      profile = null;
     }
     
     // Final profile validation
     if (!profile) {
-      console.error(`❌ useUserDataFetching: Profile fetch failed for user ${userId} after ${maxAttempts} attempts`);
+      console.error(`❌ useUserDataFetching: Profile ensure failed for user ${userId}`);
       if (mountedRef.current) {
         setState(prev => ({
           ...prev,
@@ -91,8 +65,7 @@ export const useUserDataFetching = (
     
     // Validate profile role
     if (!profile.role) {
-      console.warn(`⚠️ useUserDataFetching: Role undefined for profile ${profile.id}`);
-      // Set default role if missing
+      console.warn(`⚠️ useUserDataFetching: Role undefined for profile ${profile.id}, setting default`);
       profile.role = 'member';
     }
     
