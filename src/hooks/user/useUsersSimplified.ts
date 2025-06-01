@@ -81,7 +81,7 @@ export const useUsersSimplified = (): UseUsersSimplifiedResponse => {
 
       console.log('✅ Successfully fetched profiles:', profiles.length);
 
-      // Get auth users for additional details like email
+      // Get auth users for additional details like email (only for admin)
       let authUsersMap: Record<string, any> = {};
       try {
         // Check if current user is admin to get additional auth data
