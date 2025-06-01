@@ -26,7 +26,7 @@ const UpcomingEvents: React.FC<UpcomingEventsProps> = ({ className }) => {
       time: format(new Date(event.start_time), 'h:mm a'),
       location: event.location_name,
       type: event.event_type || 'event',
-      image: event.image_url
+      image: event.feature_image_url || 'https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=400&h=300&fit=crop'
     }));
   
   if (loading) {

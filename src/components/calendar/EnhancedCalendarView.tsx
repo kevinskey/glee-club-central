@@ -213,7 +213,6 @@ export function EnhancedCalendarView({
           dayMaxEvents={isMobile ? 1 : 4}
           themeSystem="standard"
           longPressDelay={isMobile ? 200 : 1000}
-          eventInteractionEnabled={true}
         />
       </Card>
 

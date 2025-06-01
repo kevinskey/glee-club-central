@@ -12,6 +12,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { PageLoader } from '@/components/ui/page-loader';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 export default function EnhancedCalendarPage() {
   const { events, loading, error, fetchEvents } = useCalendarEvents();
@@ -19,6 +20,7 @@ export default function EnhancedCalendarPage() {
   const { user, loading: authLoading } = useAuth();
   const [selectedEvent, setSelectedEvent] = useState<CalendarEvent | null>(null);
   const [userRSVP, setUserRSVP] = useState<'going' | 'maybe' | 'not_going' | null>(null);
+  const isMobile = useIsMobile();
 
   // Show loading while authentication is being checked
   if (authLoading) {
@@ -76,7 +78,7 @@ export default function EnhancedCalendarPage() {
 
   if (loading) {
     return (
-      <div className="mobile-container mobile-section-padding">
+      <div className={`${isMobile ? 'p-4' : 'mobile-container mobile-section-padding'}`}>
         <PageHeader
           title="Calendar"
           description="View upcoming events and performances"
@@ -94,7 +96,7 @@ export default function EnhancedCalendarPage() {
 
   if (error) {
     return (
-      <div className="mobile-container mobile-section-padding">
+      <div className={`${isMobile ? 'p-4' : 'mobile-container mobile-section-padding'}`}>
         <PageHeader
           title="Calendar"
           description="View upcoming events and performances"
@@ -105,7 +107,7 @@ export default function EnhancedCalendarPage() {
             <p className="font-semibold text-sm sm:text-base">Error loading calendar</p>
             <p className="text-xs sm:text-sm mt-1">{error}</p>
           </div>
-          <Button onClick={fetchEvents} variant="outline" className="mobile-touch-target">
+          <Button onClick={fetchEvents} variant="outline" className={`${isMobile ? 'w-full' : 'mobile-touch-target'}`}>
             Try Again
           </Button>
         </div>
@@ -114,7 +116,7 @@ export default function EnhancedCalendarPage() {
   }
 
   return (
-    <div className="mobile-container mobile-section-padding space-y-4 sm:space-y-6 mobile-scroll">
+    <div className={`${isMobile ? 'p-4 pb-20' : 'mobile-container mobile-section-padding'} space-y-4 sm:space-y-6 mobile-scroll`}>
       <PageHeader
         title="Calendar"
         description={`View ${isMember ? 'all events and performances' : 'upcoming public events'}`}

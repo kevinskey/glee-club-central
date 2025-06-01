@@ -13,8 +13,10 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { UserManagementTable } from '@/components/admin/UserManagementTable';
+import { UserManagementTableMobile } from '@/components/admin/UserManagementTableMobile';
 import { InviteUserModal } from '@/components/admin/InviteUserModal';
 import { userManagementService, UserManagementData } from '@/services/userManagementService';
+import { useIsMobile } from '@/hooks/use-mobile';
 import { toast } from 'sonner';
 
 export default function UserManagementPage() {
@@ -24,6 +26,7 @@ export default function UserManagementPage() {
   const [sortOrder, setSortOrder] = useState<'newest' | 'oldest'>('newest');
   const [statusFilter, setStatusFilter] = useState<'all' | 'active' | 'disabled' | 'invited'>('all');
   const [isInviteModalOpen, setIsInviteModalOpen] = useState(false);
+  const isMobile = useIsMobile();
 
   // Load users on component mount
   useEffect(() => {
@@ -93,7 +96,7 @@ export default function UserManagementPage() {
   };
 
   return (
-    <div className="container mx-auto p-6 space-y-6">
+    <div className={`${isMobile ? 'p-4' : 'container mx-auto p-6'} space-y-6`}>
       <PageHeader
         title="User Management"
         description="Manage all users in the system"
@@ -106,9 +109,9 @@ export default function UserManagementPage() {
           <CardTitle>Filters & Actions</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center">
+          <div className={`flex ${isMobile ? 'flex-col' : 'flex-row'} gap-4 items-start ${isMobile ? '' : 'sm:items-center'}`}>
             {/* Search */}
-            <div className="relative flex-1 min-w-0">
+            <div className={`relative ${isMobile ? 'w-full' : 'flex-1'} min-w-0`}>
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
               <Input
                 placeholder="Search by name or email..."
@@ -120,7 +123,7 @@ export default function UserManagementPage() {
 
             {/* Status Filter */}
             <Select value={statusFilter} onValueChange={(value: any) => setStatusFilter(value)}>
-              <SelectTrigger className="w-40">
+              <SelectTrigger className={`${isMobile ? 'w-full' : 'w-40'}`}>
                 <SelectValue placeholder="Filter by status" />
               </SelectTrigger>
               <SelectContent>
@@ -135,14 +138,17 @@ export default function UserManagementPage() {
             <Button
               variant="outline"
               onClick={() => setSortOrder(sortOrder === 'newest' ? 'oldest' : 'newest')}
-              className="flex items-center gap-2"
+              className={`flex items-center gap-2 ${isMobile ? 'w-full justify-center' : ''}`}
             >
               {sortOrder === 'newest' ? <SortDesc className="w-4 h-4" /> : <SortAsc className="w-4 h-4" />}
               {sortOrder === 'newest' ? 'Newest First' : 'Oldest First'}
             </Button>
 
             {/* Invite User Button */}
-            <Button onClick={() => setIsInviteModalOpen(true)}>
+            <Button 
+              onClick={() => setIsInviteModalOpen(true)}
+              className={`${isMobile ? 'w-full' : ''}`}
+            >
               <Plus className="w-4 h-4 mr-2" />
               Invite User
             </Button>
@@ -150,7 +156,7 @@ export default function UserManagementPage() {
         </CardContent>
       </Card>
 
-      {/* Users Table */}
+      {/* Users Table/Cards */}
       <Card>
         <CardHeader>
           <CardTitle>
@@ -158,12 +164,21 @@ export default function UserManagementPage() {
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <UserManagementTable
-            users={filteredAndSortedUsers}
-            onRoleUpdate={handleRoleUpdate}
-            onStatusToggle={handleStatusToggle}
-            isLoading={isLoading}
-          />
+          {isMobile ? (
+            <UserManagementTableMobile
+              users={filteredAndSortedUsers}
+              onRoleUpdate={handleRoleUpdate}
+              onStatusToggle={handleStatusToggle}
+              isLoading={isLoading}
+            />
+          ) : (
+            <UserManagementTable
+              users={filteredAndSortedUsers}
+              onRoleUpdate={handleRoleUpdate}
+              onStatusToggle={handleStatusToggle}
+              isLoading={isLoading}
+            />
+          )}
         </CardContent>
       </Card>
 
