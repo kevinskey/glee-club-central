@@ -1,195 +1,70 @@
 
-import React, { useEffect, memo } from "react";
-import { Outlet, useLocation } from "react-router-dom";
-import { Toaster } from "sonner";
-import { SidebarProvider } from "@/components/ui/sidebar";
-import { ConsolidatedHeader } from "@/components/layout/ConsolidatedHeader";
-import { Header } from "@/components/landing/Header";
-import { Footer } from "@/components/landing/Footer";
-import { Sidebar } from "@/components/layout/Sidebar";
-import { AdminSidebar } from "@/components/admin/AdminSidebar";
-import { MobileNav } from "@/components/layout/MobileNav";
-import { MobileBottomNav } from "@/components/layout/MobileBottomNav";
-import { useIsMobile } from "@/hooks/use-mobile";
-import { useAuth } from "@/contexts/AuthContext";
-import { PageLoader } from "@/components/ui/page-loader";
-
-type SidebarType = "admin" | "member" | "fan" | "none";
+import React from 'react';
+import { Outlet } from 'react-router-dom';
+import { useAuth } from '@/contexts/AuthContext';
+import { ConsolidatedHeader } from '@/components/layout/ConsolidatedHeader';
+import { Footer } from '@/components/landing/Footer';
+import { Sidebar } from '@/components/layout/Sidebar';
+import { AdminSidebar } from '@/components/admin/AdminSidebar';
+import { MobileBottomNav } from '@/components/layout/MobileBottomNav';
+import { HeroImageInitializer } from '@/components/landing/HeroImageInitializer';
 
 interface AppLayoutProps {
-  sidebarType?: SidebarType;
+  sidebarType?: 'member' | 'admin' | 'none';
   showHeader?: boolean;
   showFooter?: boolean;
-  title?: string;
-  children?: React.ReactNode;
 }
 
-const AppLayout: React.FC<AppLayoutProps> = memo(function AppLayout({
-  sidebarType = "none",
-  showHeader = true,
-  showFooter = false,
-  title,
-  children
-}) {
-  const isMobile = useIsMobile();
-  const { profile, isLoading, isAuthenticated } = useAuth();
-  const location = useLocation();
-  const isAdmin = profile?.is_super_admin || profile?.role === 'admin';
+const AppLayout: React.FC<AppLayoutProps> = ({ 
+  sidebarType = 'none', 
+  showHeader = true, 
+  showFooter = false 
+}) => {
+  // Safely get auth context - handle case where it might not be available
+  let isAuthenticated = false;
+  let isAdmin = false;
   
-  // Debug logging for admin layout
-  console.log('AppLayout render:', {
-    location: location.pathname,
-    sidebarType,
-    isAdmin,
-    profile: profile ? { role: profile.role, is_super_admin: profile.is_super_admin } : null
-  });
-  
-  // Set viewport height for mobile
-  useEffect(() => {
-    const setVh = () => {
-      const vh = window.innerHeight * 0.01;
-      document.documentElement.style.setProperty('--vh', `${vh}px`);
-    };
-    
-    setVh();
-    
-    if (isMobile) {
-      window.addEventListener('resize', setVh);
-      return () => window.removeEventListener('resize', setVh);
-    }
-  }, [isMobile]);
-
-  // Set viewport-specific body class
-  useEffect(() => {
-    if (isMobile) {
-      document.body.classList.add('is-mobile-view');
-    } else {
-      document.body.classList.remove('is-mobile-view');
-    }
-    
-    return () => {
-      document.body.classList.remove('is-mobile-view');
-    };
-  }, [isMobile]);
-  
-  // Show loading state with timeout for auth pages
-  if (isLoading && location.pathname !== '/login') {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-background">
-        <PageLoader message="Loading..." />
-      </div>
-    );
+  try {
+    const auth = useAuth();
+    isAuthenticated = auth.isAuthenticated;
+    isAdmin = auth.isAdmin ? auth.isAdmin() : false;
+  } catch (error) {
+    // If useAuth fails, we're outside AuthProvider - that's ok for public routes
+    console.log('AppLayout: Auth context not available, treating as unauthenticated');
   }
-  
-  // Determine which header to show
-  const isLandingHeader = sidebarType === "none";
-  
-  // Determine if we need mobile bottom nav
-  const showMobileBottomNav = sidebarType === "none" && isMobile;
-  
-  // Dynamic sidebar type determination for settings page
-  const getEffectiveSidebarType = (): SidebarType => {
-    if (sidebarType !== "none") return sidebarType;
-    
-    // For settings page, determine sidebar based on user role
-    if (location.pathname === '/settings') {
-      if (isAdmin) return "admin";
-      if (profile?.role === 'fan') return "fan";
-      return "member";
-    }
-    
-    return sidebarType;
-  };
-  
-  const effectiveSidebarType = getEffectiveSidebarType();
 
-  // Render sidebar based on effective type
-  const renderSidebar = () => {
-    if (effectiveSidebarType === "none" || isMobile) return null;
-    
-    console.log('AppLayout: Rendering sidebar type:', effectiveSidebarType);
-    
-    switch (effectiveSidebarType) {
-      case "admin":
-        console.log('AppLayout: Rendering AdminSidebar');
-        return <AdminSidebar />;
-      case "member":
-      case "fan":
-        console.log('AppLayout: Rendering regular Sidebar');
-        return <Sidebar />;
-      default:
-        return null;
-    }
-  };
+  const shouldShowSidebar = sidebarType !== 'none' && isAuthenticated;
+  const SidebarComponent = sidebarType === 'admin' ? AdminSidebar : Sidebar;
 
-  // Render mobile nav
-  const renderMobileNav = () => {
-    if (!isMobile) return null;
-    
-    if (effectiveSidebarType === "none") {
-      return showMobileBottomNav ? <MobileBottomNav /> : null;
-    }
-    
-    return <MobileNav isAdmin={isAdmin} />;
-  };
-
-  // Determine main content classes
-  const getMainClasses = () => {
-    const baseClasses = "flex-1 overflow-x-hidden";
-    
-    if (effectiveSidebarType === "none") {
-      return `${baseClasses} ${showMobileBottomNav ? 'pb-20' : 'pb-6'}`;
-    }
-    
-    return `${baseClasses} p-3 sm:p-4 md:p-5 lg:p-6 md:ml-64 pb-20 md:pb-6`;
-  };
-
-  // Layout content with consistent styling
-  const layoutContent = (
-    <div className="min-h-screen flex flex-col bg-background w-full">
-      <Toaster position={isMobile ? "bottom-center" : "top-right"} />
+  return (
+    <div className="min-h-screen bg-background">
+      <HeroImageInitializer />
       
-      {/* Header */}
-      {showHeader && (
-        isLandingHeader ? <Header /> : <ConsolidatedHeader />
-      )}
+      {showHeader && <ConsolidatedHeader />}
       
-      {/* Main content area */}
-      <div className="flex-1 flex flex-col md:flex-row">
-        {/* Desktop Sidebar */}
-        {renderSidebar()}
+      <div className="flex">
+        {shouldShowSidebar && (
+          <div className="hidden lg:block w-64 flex-shrink-0">
+            <SidebarComponent />
+          </div>
+        )}
         
-        {/* Main content */}
-        <main className={getMainClasses()}>
-          <div className="mobile-container">
-            {title && (
-              <div className="mb-4">
-                <h1 className="text-2xl font-bold">{title}</h1>
-              </div>
-            )}
-            {children || <Outlet />}
+        <main className="flex-1 min-h-screen">
+          {shouldShowSidebar && (
+            <div className="lg:hidden">
+              <MobileBottomNav isAdmin={isAdmin} />
+            </div>
+          )}
+          
+          <div className={`${shouldShowSidebar ? 'p-6' : ''}`}>
+            <Outlet />
           </div>
         </main>
       </div>
       
-      {/* Footer */}
       {showFooter && <Footer />}
-      
-      {/* Mobile Navigation */}
-      {renderMobileNav()}
     </div>
   );
-
-  // Wrap with SidebarProvider if we have a sidebar
-  if (effectiveSidebarType !== "none") {
-    return (
-      <SidebarProvider>
-        {layoutContent}
-      </SidebarProvider>
-    );
-  }
-
-  return layoutContent;
-});
+};
 
 export default AppLayout;

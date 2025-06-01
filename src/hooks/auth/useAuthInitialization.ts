@@ -11,7 +11,7 @@ export const useAuthInitialization = (
   fetchingRef: React.MutableRefObject<boolean>
 ) => {
   useEffect(() => {
-    console.log('🚀 useAuthInitialization: Starting simplified auth initialization...');
+    console.log('🚀 useAuthInitialization: Starting auth initialization...');
     
     let initComplete = false;
     
@@ -28,11 +28,11 @@ export const useAuthInitialization = (
       }));
     };
     
-    // Simple timeout - don't wait too long
+    // Aggressive timeout - don't wait too long
     const timeout = setTimeout(() => {
       console.log('⏰ useAuthInitialization: Timeout reached, completing initialization');
       completeInit();
-    }, 2000);
+    }, 3000);
     
     const initialize = async () => {
       try {
@@ -65,7 +65,7 @@ export const useAuthInitialization = (
               console.log('📡 useAuthInitialization: Background profile fetch');
               fetchUserData(session.user.id, session.user.email, session.user.user_metadata);
             }
-          }, 200);
+          }, 100);
           
         } else {
           console.log('ℹ️ useAuthInitialization: No valid session found');
@@ -111,7 +111,7 @@ export const useAuthInitialization = (
             if (mountedRef.current && !fetchingRef.current) {
               fetchUserData(session.user.id, session.user.email, session.user.user_metadata);
             }
-          }, 200);
+          }, 100);
           
         } else if (event === 'SIGNED_OUT') {
           console.log('👋 useAuthInitialization: User signed out');
@@ -127,7 +127,7 @@ export const useAuthInitialization = (
       }
     );
     
-    // Start initialization
+    // Start initialization immediately
     initialize();
     
     return () => {

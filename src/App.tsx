@@ -5,14 +5,11 @@ import { router } from "./router";
 import { AuthProvider, useAuth } from "./contexts/AuthContext";
 
 function AppContent() {
-  const { isLoading, isInitialized, isAuthenticated, user } = useAuth();
+  const { isLoading, isInitialized } = useAuth();
 
   console.log('🏗️ App: State check:', {
     isInitialized,
-    isLoading,
-    isAuthenticated,
-    hasUser: !!user,
-    userId: user?.id
+    isLoading
   });
 
   // Show loading only during initial auth check
