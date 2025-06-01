@@ -47,66 +47,67 @@ export const runDatabaseConnectionTests = async (): Promise<DatabaseTestResult[]
     });
   }
 
-  // Test 3: Current user profile query
+  // Test 3: RLS Policy Test - Own Profile Query (select * from profiles where id = auth.uid())
   try {
     const { data: { user } } = await supabase.auth.getUser();
     if (user) {
       const { data, error } = await supabase
         .from('profiles')
-        .select('id, role, is_super_admin, first_name, last_name')
-        .eq('id', user.id)
-        .maybeSingle();
+        .select('*')
+        .eq('id', user.id);
       
       results.push({
-        test: 'Current User Profile Query',
-        status: error ? 'error' : data ? 'success' : 'warning',
-        message: error ? `Profile query failed: ${error.message}` : data ? 'Profile found' : 'No profile found',
-        details: { profile: data, error }
+        test: 'Own Profile Query (RLS Test)',
+        status: error ? 'error' : data && data.length > 0 ? 'success' : 'warning',
+        message: error ? `Own profile query failed: ${error.message}` : 
+                data && data.length > 0 ? `Successfully retrieved own profile` : 'No profile found for current user',
+        details: { profileCount: data?.length, error, profile: data?.[0] }
       });
     } else {
       results.push({
-        test: 'Current User Profile Query',
+        test: 'Own Profile Query (RLS Test)',
         status: 'warning',
-        message: 'No authenticated user to test profile query',
+        message: 'No authenticated user to test own profile query',
         details: null
       });
     }
   } catch (err) {
     results.push({
-      test: 'Current User Profile Query',
+      test: 'Own Profile Query (RLS Test)',
       status: 'error',
-      message: `Profile query error: ${err instanceof Error ? err.message : 'Unknown error'}`,
+      message: `Own profile query error: ${err instanceof Error ? err.message : 'Unknown error'}`,
       details: err
     });
   }
 
-  // Test 4: All profiles query (should work now with fixed RLS)
+  // Test 4: RLS Policy Test - All Profiles Query (select * from profiles)
   try {
     const { data, error } = await supabase
       .from('profiles')
-      .select('id, role, is_super_admin, first_name, last_name')
-      .limit(5);
+      .select('*')
+      .order('last_name', { ascending: true });
     
     results.push({
-      test: 'All Profiles Query',
+      test: 'All Profiles Query (Admin RLS Test)',
       status: error ? 'error' : 'success',
-      message: error ? `All profiles query failed: ${error.message}` : `Successfully fetched ${data?.length || 0} profiles`,
-      details: { profileCount: data?.length, error, profiles: data }
+      message: error ? `All profiles query failed: ${error.message}` : 
+              `Successfully fetched ${data?.length || 0} profiles ${data && data.length > 1 ? '(Admin access confirmed)' : '(Own profile only)'}`,
+      details: { profileCount: data?.length, error, hasMultipleProfiles: data && data.length > 1 }
     });
   } catch (err) {
     results.push({
-      test: 'All Profiles Query',
+      test: 'All Profiles Query (Admin RLS Test)',
       status: 'error',
       message: `All profiles query error: ${err instanceof Error ? err.message : 'Unknown error'}`,
       details: err
     });
   }
 
-  // Test 5: RLS Policy Test with different operations
+  // Test 5: Additional RLS Policy Tests
   try {
     const tests = [
-      { name: 'Simple select', query: supabase.from('profiles').select('id').limit(1) },
       { name: 'Count query', query: supabase.from('profiles').select('*', { count: 'exact', head: true }) },
+      { name: 'Limited select', query: supabase.from('profiles').select('id, role, first_name, last_name').limit(5) },
     ];
 
     for (const test of tests) {
@@ -129,7 +130,7 @@ export const runDatabaseConnectionTests = async (): Promise<DatabaseTestResult[]
     }
   } catch (err) {
     results.push({
-      test: 'RLS Policy Test',
+      test: 'Additional RLS Policy Tests',
       status: 'error',
       message: `RLS test error: ${err instanceof Error ? err.message : 'Unknown error'}`,
       details: err
