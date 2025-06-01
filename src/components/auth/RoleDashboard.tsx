@@ -21,17 +21,12 @@ export const RoleDashboard: React.FC = () => {
       hasRedirected
     });
 
-    // Wait for initialization
+    // Wait for initialization and prevent multiple redirects
     if (!isInitialized || hasRedirected) {
       return;
     }
 
-    // Wait for loading to complete
-    if (isLoading) {
-      return;
-    }
-
-    // Handle unauthenticated users
+    // Handle unauthenticated users immediately
     if (!isAuthenticated || !user) {
       console.log('🚫 RoleDashboard: User not authenticated, redirecting to login');
       setHasRedirected(true);
@@ -39,50 +34,69 @@ export const RoleDashboard: React.FC = () => {
       return;
     }
 
-    // Wait for profile to load before making routing decisions
-    // This is crucial for proper role-based routing
-    if (!profile) {
-      console.log('⏳ RoleDashboard: Waiting for profile to load...');
+    // If user is authenticated but still loading profile, wait a bit
+    if (isLoading && !profile) {
+      console.log('⏳ RoleDashboard: Still loading profile...');
       return;
     }
 
-    // Handle authenticated users with loaded profiles - role-based routing
-    if (isAuthenticated && user && profile) {
-      console.log('🎯 RoleDashboard: User and profile loaded, determining route...');
+    // After a reasonable timeout, proceed with default routing even if profile isn't loaded
+    const timeoutId = setTimeout(() => {
+      if (isAuthenticated && user && !hasRedirected) {
+        console.log('⏰ RoleDashboard: Profile load timeout, using default routing');
+        
+        let targetRoute = '/dashboard/member'; // Default for authenticated users
+        
+        // Only check admin status if profile is loaded
+        if (profile) {
+          if (isAdmin()) {
+            targetRoute = '/admin';
+            console.log('👑 RoleDashboard: Admin user, redirecting to admin dashboard');
+          } else if (profile.role === 'fan') {
+            targetRoute = '/fan-dashboard';
+            console.log('👤 RoleDashboard: Fan user, redirecting to fan dashboard');
+          } else {
+            console.log('👤 RoleDashboard: Member user, redirecting to member dashboard');
+          }
+        } else {
+          console.log('👤 RoleDashboard: No profile loaded, defaulting to member dashboard');
+        }
+        
+        console.log('🎯 RoleDashboard: Redirecting to:', targetRoute);
+        setHasRedirected(true);
+        navigate(targetRoute, { replace: true });
+      }
+    }, 3000); // 3 second timeout
+
+    // If we have both user and profile, redirect immediately
+    if (isAuthenticated && user && profile && !hasRedirected) {
+      clearTimeout(timeoutId);
       
-      let targetRoute = '/dashboard/member'; // Default route for members
+      let targetRoute = '/dashboard/member';
       
-      // Check if user is admin (super admin or admin role)
       if (isAdmin()) {
         targetRoute = '/admin';
-        console.log('👑 RoleDashboard: Admin user, redirecting to admin dashboard');
-      } else if (profile?.role === 'fan') {
+        console.log('👑 RoleDashboard: Admin user detected');
+      } else if (profile.role === 'fan') {
         targetRoute = '/fan-dashboard';
-        console.log('👤 RoleDashboard: Fan user, redirecting to fan dashboard');
+        console.log('👤 RoleDashboard: Fan user detected');
       } else {
-        console.log('👤 RoleDashboard: Member user, redirecting to member dashboard');
+        console.log('👤 RoleDashboard: Member user detected');
       }
       
-      console.log('🎯 RoleDashboard: Redirecting to:', targetRoute);
+      console.log('🎯 RoleDashboard: Immediate redirect to:', targetRoute);
       setHasRedirected(true);
       navigate(targetRoute, { replace: true });
     }
+
+    return () => clearTimeout(timeoutId);
   }, [isLoading, isAuthenticated, user, profile, isAdmin, navigate, isInitialized, hasRedirected]);
 
-  // Show loading states with clearer messaging
+  // Show appropriate loading states
   if (!isInitialized) {
     return (
       <PageLoader 
-        message="Initializing authentication..."
-        className="min-h-screen"
-      />
-    );
-  }
-
-  if (isLoading) {
-    return (
-      <PageLoader 
-        message="Loading your profile..."
+        message="Initializing..."
         className="min-h-screen"
       />
     );
@@ -92,15 +106,6 @@ export const RoleDashboard: React.FC = () => {
     return (
       <PageLoader 
         message="Redirecting to login..."
-        className="min-h-screen"
-      />
-    );
-  }
-
-  if (!profile) {
-    return (
-      <PageLoader 
-        message="Loading user profile..."
         className="min-h-screen"
       />
     );

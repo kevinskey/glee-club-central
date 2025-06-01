@@ -9,38 +9,41 @@ import { DashboardAnnouncements } from "@/components/dashboard/DashboardAnnounce
 export default function MemberDashboardPage() {
   const { user, profile, isLoading } = useAuth();
   
-  // Much shorter loading timeout for dashboard
-  const [showDashboard, setShowDashboard] = React.useState(false);
+  // Show loading only very briefly
+  const [showContent, setShowContent] = React.useState(false);
   
   React.useEffect(() => {
+    // Show content after a short delay, even if profile is still loading
     const timer = setTimeout(() => {
-      setShowDashboard(true);
-    }, 1000); // Show dashboard after 1 second even if profile is loading
+      setShowContent(true);
+    }, 500);
     
     return () => clearTimeout(timer);
   }, []);
 
-  // Debug logging
-  console.log('MemberDashboardPage state:', {
+  console.log('MemberDashboardPage render:', {
     hasUser: !!user,
     hasProfile: !!profile,
     userRole: profile?.role,
     isLoading,
-    showDashboard
+    showContent
   });
 
-  // Show loading only very briefly
-  if (isLoading && !showDashboard) {
+  // Show loading state briefly
+  if (isLoading && !showContent) {
     return <PageLoader message="Loading your dashboard..." />;
   }
 
-  // If no user after loading timeout, something is wrong
-  if (!user && showDashboard) {
+  // If no user, something is wrong with auth
+  if (!user) {
     return <PageLoader message="Authentication required..." />;
   }
 
-  // Get display name with fallback
-  const displayName = profile?.first_name || user?.email?.split('@')[0] || 'Member';
+  // Get display name with fallbacks
+  const displayName = profile?.first_name || 
+                     user?.user_metadata?.first_name || 
+                     user?.email?.split('@')[0] || 
+                     'Member';
 
   return (
     <div className="space-y-6">
