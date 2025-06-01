@@ -1,5 +1,6 @@
 
 
+
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -85,7 +86,7 @@ export function MemberCSVDownload() {
         query = query.eq('status', 'active');
       }
 
-      const { data: profiles, error: profilesError } = await query
+      const { data: profilesData, error: profilesError } = await query
         .order('last_name', { ascending: true });
 
       if (profilesError) {
@@ -93,7 +94,7 @@ export function MemberCSVDownload() {
         throw new Error(`Failed to fetch member data: ${profilesError.message}`);
       }
 
-      console.log('✅ Profiles query successful:', profiles?.length || 0);
+      console.log('✅ Profiles query successful:', profilesData?.length || 0);
 
       // Get email addresses from auth users (for admins)
       let emails: { [key: string]: string } = {};
@@ -117,18 +118,21 @@ export function MemberCSVDownload() {
       }
 
       // Check if we have valid profile data
-      if (!profiles || profiles.length === 0) {
+      if (!profilesData || profilesData.length === 0) {
         toast.warning('No members found to export');
         return;
       }
 
-      // Process profiles data - handle the response properly without type conflicts
-      const processedProfiles = profiles.filter((profile: any): profile is ProfileData => {
+      // Type guard function to validate ProfileData
+      const isValidProfile = (profile: any): profile is ProfileData => {
         return profile !== null && 
                typeof profile === 'object' && 
                'id' in profile && 
                typeof profile.id === 'string';
-      });
+      };
+
+      // Process profiles data - handle the response properly with proper typing
+      const processedProfiles: ProfileData[] = profilesData.filter(isValidProfile);
 
       if (processedProfiles.length === 0) {
         toast.warning('No valid member data found to export');
