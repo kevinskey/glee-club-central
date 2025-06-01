@@ -2,6 +2,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { AuthUser, Profile } from '@/types/auth';
+import { User } from '@supabase/supabase-js';
 
 export const useSimpleAuth = () => {
   const [user, setUser] = useState<AuthUser | null>(null);
@@ -10,6 +11,22 @@ export const useSimpleAuth = () => {
   const [isInitialized, setIsInitialized] = useState(false);
 
   console.log('🚀 useSimpleAuth: Initializing...');
+
+  // Helper function to convert Supabase User to AuthUser
+  const convertToAuthUser = (supabaseUser: User): AuthUser | null => {
+    if (!supabaseUser.email) {
+      console.warn('⚠️ useSimpleAuth: User has no email, cannot convert to AuthUser');
+      return null;
+    }
+    
+    return {
+      id: supabaseUser.id,
+      email: supabaseUser.email,
+      email_confirmed_at: supabaseUser.email_confirmed_at,
+      created_at: supabaseUser.created_at,
+      updated_at: supabaseUser.updated_at,
+    };
+  };
 
   const fetchProfile = useCallback(async (userId: string) => {
     try {
@@ -97,12 +114,15 @@ export const useSimpleAuth = () => {
         
         if (session?.user && mounted) {
           console.log('✅ useSimpleAuth: Initial session found for user:', session.user.id);
-          setUser(session.user);
-          
-          // Fetch profile
-          const profileData = await fetchProfile(session.user.id);
-          if (mounted) {
-            setProfile(profileData);
+          const authUser = convertToAuthUser(session.user);
+          if (authUser) {
+            setUser(authUser);
+            
+            // Fetch profile
+            const profileData = await fetchProfile(session.user.id);
+            if (mounted) {
+              setProfile(profileData);
+            }
           }
         }
         
@@ -129,15 +149,18 @@ export const useSimpleAuth = () => {
 
       if (mounted) {
         if (session?.user) {
-          setUser(session.user);
-          
-          // Fetch profile for authenticated user
-          setTimeout(async () => {
-            const profileData = await fetchProfile(session.user.id);
-            if (mounted) {
-              setProfile(profileData);
-            }
-          }, 0);
+          const authUser = convertToAuthUser(session.user);
+          if (authUser) {
+            setUser(authUser);
+            
+            // Fetch profile for authenticated user
+            setTimeout(async () => {
+              const profileData = await fetchProfile(session.user.id);
+              if (mounted) {
+                setProfile(profileData);
+              }
+            }, 0);
+          }
         } else {
           setUser(null);
           setProfile(null);
