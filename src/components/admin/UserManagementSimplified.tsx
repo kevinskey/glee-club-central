@@ -10,7 +10,8 @@ import {
   Search, 
   UserPlus, 
   AlertTriangle,
-  Database
+  Database,
+  Edit
 } from 'lucide-react';
 import { useSimpleAuthContextFixed } from '@/contexts/SimpleAuthContextFixed';
 import { useUsersSimplified } from '@/hooks/user/useUsersSimplified';
@@ -48,6 +49,11 @@ export function UserManagementSimplified() {
     const email = (user.email || '').toLowerCase();
     return fullName.includes(searchTermLower) || email.includes(searchTermLower);
   });
+
+  const handleEditUser = (member: any) => {
+    console.log('Edit user:', member);
+    toast.info(`Edit functionality for ${member.first_name} ${member.last_name} coming soon`);
+  };
 
   if (isLoading) {
     return (
@@ -172,6 +178,14 @@ export function UserManagementSimplified() {
                       )}
                     </div>
                     <div className="flex items-center gap-2">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handleEditUser(member)}
+                        className="mr-2"
+                      >
+                        <Edit className="h-4 w-4" />
+                      </Button>
                       {member.role && (
                         <Badge variant={member.role === 'admin' ? 'destructive' : 'outline'}>
                           {member.role}
