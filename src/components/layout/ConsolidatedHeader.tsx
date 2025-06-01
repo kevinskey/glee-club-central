@@ -4,7 +4,7 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 import { HeaderLogo } from "./header/HeaderLogo";
 import { HeaderActions } from "./header/HeaderActions";
 import { Button } from "@/components/ui/button";
-import { LogIn, User, LogOut } from "lucide-react";
+import { User, LogOut } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useIsMobile } from "@/hooks/use-mobile";
 
@@ -22,6 +22,11 @@ export const ConsolidatedHeader = memo(function ConsolidatedHeader() {
     { label: "Store", href: "/store" },
     { label: "Contact", href: "/contact" }
   ];
+
+  // Add Login to navigation links if not authenticated
+  if (!isAuthenticated) {
+    navigationLinks.push({ label: "Login", href: "/login" });
+  }
 
   const handleDashboardClick = () => {
     navigate("/role-dashboard");
@@ -68,8 +73,8 @@ export const ConsolidatedHeader = memo(function ConsolidatedHeader() {
 
         {/* Right side: Auth buttons and HeaderActions */}
         <div className="flex items-center gap-2">
-          {/* Authentication Buttons */}
-          {isAuthenticated ? (
+          {/* Authentication Buttons - Only show dashboard/logout for authenticated users */}
+          {isAuthenticated && (
             <div className="flex items-center gap-2">
               <Button 
                 variant="default"
@@ -90,16 +95,6 @@ export const ConsolidatedHeader = memo(function ConsolidatedHeader() {
                 {isMobile ? 'Out' : 'Sign Out'}
               </Button>
             </div>
-          ) : (
-            <Button 
-              variant="default"
-              onClick={() => navigate("/login")}
-              size={isMobile ? "sm" : "default"}
-              className="bg-glee-spelman hover:bg-glee-spelman/90"
-            >
-              <LogIn className="w-4 h-4 mr-2" />
-              Login
-            </Button>
           )}
           
           {/* HeaderActions (theme toggle, etc.) */}
