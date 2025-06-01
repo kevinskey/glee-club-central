@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import { PageHeader } from "@/components/ui/page-header";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { useAuth } from "@/contexts/AuthContext";
+import { useSimpleAuthContext } from "@/contexts/SimpleAuthContext";
 import { useProfile } from "@/contexts/ProfileContext";
 import { User, Edit, Save } from "lucide-react";
 import { ProfileOverviewTab } from "@/components/profile/ProfileOverviewTab";
@@ -16,8 +16,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useUserUpdate } from "@/hooks/user/useUserUpdate";
 
 export default function ProfilePage() {
-  const { user, loading: authLoading } = useAuth();
-  const { profile, loading: profileLoading } = useProfile();
+  const { user, profile, isLoading } = useSimpleAuthContext();
   const { updateUser } = useUserUpdate();
   const [isEditing, setIsEditing] = useState(false);
   const [activeTab, setActiveTab] = useState("overview");
@@ -58,7 +57,7 @@ export default function ProfilePage() {
     }
   };
   
-  if (authLoading || profileLoading) {
+  if (isLoading) {
     return <PageLoader message="Loading profile..." />;
   }
   
