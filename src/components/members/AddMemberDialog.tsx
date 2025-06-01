@@ -86,8 +86,8 @@ export function AddMemberDialog({
       email: initialValues?.email || '',
       password: '',
       phone: initialValues?.phone || '',
-      role: initialValues?.role || 'student',
-      voice_part: initialValues?.voice_part || 'soprano_1',
+      role: initialValues?.role || 'member',
+      voice_part: initialValues?.voice_part || '',
       status: initialValues?.status || 'active',
       join_date: initialValues?.join_date || format(new Date(), 'yyyy-MM-dd'),
       class_year: initialValues?.class_year || '',
@@ -292,7 +292,7 @@ export function AddMemberDialog({
                           field.onChange(value);
                           form.setValue("is_admin", value === "admin");
                         }}
-                        defaultValue={field.value || "student"}
+                        defaultValue={field.value || "member"}
                       >
                         <FormControl>
                           <SelectTrigger>
@@ -301,10 +301,7 @@ export function AddMemberDialog({
                         </FormControl>
                         <SelectContent>
                           <SelectItem value="admin">Administrator</SelectItem>
-                          <SelectItem value="section_leader">Section Leader</SelectItem>
-                          <SelectItem value="student">Student Member</SelectItem>
-                          <SelectItem value="staff">Staff</SelectItem>
-                          <SelectItem value="guest">Guest/Alumni</SelectItem>
+                          <SelectItem value="member">Member</SelectItem>
                         </SelectContent>
                       </Select>
                       <FormMessage />
