@@ -21,6 +21,7 @@ import RoleDashboardPage from "./pages/RoleDashboardPage";
 import AdminDashboardPage from "./pages/admin/AdminDashboardPage";
 import AdminCalendarPage from "./pages/admin/AdminCalendarPage";
 import AdminHeroManager from "./pages/admin/AdminHeroManager";
+import UserManagementPage from "./pages/admin/UserManagementPage";
 import MemberDashboardPage from "./pages/dashboard/MemberDashboardPage";
 import FanDashboardPage from "./pages/dashboard/FanDashboardPage";
 import NotFoundPage from "./pages/NotFoundPage";
@@ -120,7 +121,7 @@ export const router = createBrowserRouter([
       </SimpleAuthProvider>
     ),
   },
-  // Admin routes - updated to include all admin pages
+  // Admin routes - updated to include all admin pages including members
   {
     path: "/admin",
     element: (
@@ -134,6 +135,7 @@ export const router = createBrowserRouter([
       { index: true, element: <AdminDashboardPage /> },
       { path: "calendar", element: <AdminCalendarPage /> },
       { path: "hero-manager", element: <AdminHeroManager /> },
+      { path: "members", element: <UserManagementPage /> },
     ],
   },
   // Member dashboard
