@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -121,8 +120,15 @@ export function MemberCSVDownload() {
         return;
       }
 
-      // Safely type the profiles data - fix the TypeScript error
-      const typedProfiles = profiles as ProfileData[];
+      // Process profiles data - remove unsafe casting and handle data properly
+      const processedProfiles = profiles.filter((profile): profile is ProfileData => {
+        return profile && typeof profile === 'object' && 'id' in profile;
+      });
+
+      if (processedProfiles.length === 0) {
+        toast.warning('No valid member data found to export');
+        return;
+      }
 
       // Build CSV headers
       const headers = ['ID'];
@@ -144,7 +150,7 @@ export function MemberCSVDownload() {
       }
 
       // Build CSV rows
-      const csvRows = typedProfiles.map((profile: ProfileData) => {
+      const csvRows = processedProfiles.map((profile: ProfileData) => {
         const row = [profile.id];
         
         if (options.includePersonalInfo) {
@@ -208,7 +214,7 @@ export function MemberCSVDownload() {
         document.body.removeChild(link);
       }
 
-      toast.success(`Successfully exported ${typedProfiles.length} members`);
+      toast.success(`Successfully exported ${processedProfiles.length} members`);
       
     } catch (error: any) {
       console.error('💥 Export error:', error);
