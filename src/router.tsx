@@ -3,7 +3,6 @@ import { createBrowserRouter } from "react-router-dom";
 import { AuthProvider } from "@/contexts/AuthContext";
 import RequireAuth from "@/components/auth/RequireAuth";
 import AppLayout from "@/layouts/AppLayout";
-import ErrorBoundary from "@/components/ErrorBoundary";
 
 // Import pages
 import HomePage from "./pages/HomePage";
@@ -23,7 +22,11 @@ export const router = createBrowserRouter([
   // Public routes
   {
     path: "/",
-    element: <AppLayout sidebarType="none" showHeader={true} showFooter={true} />,
+    element: (
+      <AuthProvider>
+        <AppLayout sidebarType="none" showHeader={true} showFooter={true} />
+      </AuthProvider>
+    ),
     children: [
       { index: true, element: <HomePage /> },
       { path: "about", element: <AboutPage /> },
@@ -35,39 +38,63 @@ export const router = createBrowserRouter([
   // Auth routes
   {
     path: "/login",
-    element: <AppLayout sidebarType="none" showHeader={false} showFooter={false}><LoginPage /></AppLayout>,
+    element: (
+      <AuthProvider>
+        <AppLayout sidebarType="none" showHeader={false} showFooter={false}>
+          <LoginPage />
+        </AppLayout>
+      </AuthProvider>
+    ),
   },
   {
     path: "/signup", 
-    element: <AppLayout sidebarType="none" showHeader={false} showFooter={false}><SignupPage /></AppLayout>,
+    element: (
+      <AuthProvider>
+        <AppLayout sidebarType="none" showHeader={false} showFooter={false}>
+          <SignupPage />
+        </AppLayout>
+      </AuthProvider>
+    ),
   },
   {
     path: "/register",
-    element: <AppLayout sidebarType="none" showHeader={false} showFooter={false}><RegisterPage /></AppLayout>,
+    element: (
+      <AuthProvider>
+        <AppLayout sidebarType="none" showHeader={false} showFooter={false}>
+          <RegisterPage />
+        </AppLayout>
+      </AuthProvider>
+    ),
   },
   // Protected routes
   {
     path: "/role-dashboard",
     element: (
-      <RequireAuth>
-        <RoleDashboardPage />
-      </RequireAuth>
+      <AuthProvider>
+        <RequireAuth>
+          <RoleDashboardPage />
+        </RequireAuth>
+      </AuthProvider>
     ),
   },
   {
     path: "/admin",
     element: (
-      <RequireAuth requireAdmin>
-        <AdminDashboardPage />
-      </RequireAuth>
+      <AuthProvider>
+        <RequireAuth requireAdmin>
+          <AdminDashboardPage />
+        </RequireAuth>
+      </AuthProvider>
     ),
   },
   {
     path: "/dashboard/member",
     element: (
-      <RequireAuth>
-        <MemberDashboardPage />
-      </RequireAuth>
+      <AuthProvider>
+        <RequireAuth>
+          <MemberDashboardPage />
+        </RequireAuth>
+      </AuthProvider>
     ),
   },
   // Catch-all 404 route
