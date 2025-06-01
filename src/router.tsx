@@ -110,7 +110,7 @@ export const router = createBrowserRouter([
     path: "/join-glee-fam",
     element: (
       <SimpleAuthProviderFixed>
-        <AppLayout sidebarType="none" showHeader={false} showFooter={false">
+        <AppLayout sidebarType="none" showHeader={false} showFooter={false}>
           <JoinGleeFamPage />
         </AppLayout>
       </SimpleAuthProviderFixed>
