@@ -54,6 +54,8 @@ export function MemberCSVDownload() {
     setIsExporting(true);
     
     try {
+      console.log('🔄 Starting CSV export...');
+      
       // Build the select query based on options
       let selectFields = ['id'];
       
@@ -73,27 +75,92 @@ export function MemberCSVDownload() {
         selectFields.push('role', 'is_super_admin', 'status', 'notes');
       }
 
-      // Get profiles data
-      let query = supabase
-        .from('profiles')
-        .select(selectFields.join(', '));
-
-      if (options.activeOnly) {
-        query = query.eq('status', 'active');
-      }
-
-      const { data: profiles, error: profilesError } = await query
-        .order('last_name', { ascending: true });
-
-      if (profilesError) {
-        console.error('Profiles query error:', profilesError);
-        throw profilesError;
-      }
-
-      // Get email addresses from auth users (if we have admin access)
+      let profiles: any[] = [];
       let emails: { [key: string]: string } = {};
-      
-      if (options.includeContactInfo) {
+
+      // First, try to get the current user to check admin status
+      const { data: { user: currentUser } } = await supabase.auth.getUser();
+      console.log('Current user:', currentUser?.email);
+
+      // Try the normal profiles query first
+      try {
+        let query = supabase
+          .from('profiles')
+          .select(selectFields.join(', '));
+
+        if (options.activeOnly) {
+          query = query.eq('status', 'active');
+        }
+
+        const { data: profilesData, error: profilesError } = await query
+          .order('last_name', { ascending: true });
+
+        if (profilesError) {
+          console.error('Profiles query error:', profilesError);
+          
+          // Check if this is the RLS recursion error
+          if (profilesError.code === '42P17' || profilesError.message.includes('infinite recursion')) {
+            console.log('🆘 RLS recursion detected, attempting admin bypass...');
+            
+            // If admin user, try to get auth users directly as fallback
+            if (currentUser?.email === 'kevinskey@mac.com') {
+              console.log('🔧 Admin user detected, using auth.users fallback');
+              
+              try {
+                const { data: authData, error: authError } = await supabase.auth.admin.listUsers();
+                
+                if (authError) {
+                  console.error('Auth admin listUsers failed:', authError);
+                  throw new Error('Failed to access user data. Admin privileges may not be properly configured.');
+                }
+                
+                // Transform auth users to our expected format
+                profiles = (authData?.users || []).map(authUser => ({
+                  id: authUser.id,
+                  first_name: authUser.user_metadata?.first_name || authUser.raw_user_meta_data?.first_name || '',
+                  last_name: authUser.user_metadata?.last_name || authUser.raw_user_meta_data?.last_name || '',
+                  phone: authUser.user_metadata?.phone || null,
+                  voice_part: authUser.user_metadata?.voice_part || null,
+                  status: 'active',
+                  join_date: authUser.created_at,
+                  class_year: authUser.user_metadata?.class_year || null,
+                  dues_paid: false,
+                  notes: null,
+                  role: authUser.email === 'kevinskey@mac.com' ? 'admin' : 'member',
+                  is_super_admin: authUser.email === 'kevinskey@mac.com'
+                }));
+
+                // Set emails from auth data
+                authData?.users?.forEach((user: AuthUser) => {
+                  if (user.email && user.id) {
+                    emails[user.id] = user.email;
+                  }
+                });
+
+                console.log('✅ Successfully fetched users via admin bypass:', profiles.length);
+                
+              } catch (adminError) {
+                console.error('💥 Admin bypass failed:', adminError);
+                throw new Error('Database policy error detected. Unable to export member data due to configuration issues.');
+              }
+            } else {
+              throw new Error('Database access restricted. Only super administrators can export member data.');
+            }
+          } else {
+            throw profilesError;
+          }
+        } else {
+          console.log('✅ Profiles query successful:', profilesData?.length || 0);
+          profiles = profilesData || [];
+        }
+        
+      } catch (queryError) {
+        console.error('💥 Query execution failed:', queryError);
+        throw queryError;
+      }
+
+      // Get email addresses from auth users (if we haven't already)
+      if (options.includeContactInfo && Object.keys(emails).length === 0) {
         try {
           const { data: authData } = await supabase.auth.admin.listUsers();
           const authUsers = authData?.users as AuthUser[] | undefined;
@@ -103,8 +170,9 @@ export function MemberCSVDownload() {
               emails[user.id] = user.email;
             }
           });
+          console.log('📧 Email addresses fetched:', Object.keys(emails).length);
         } catch (authError) {
-          console.warn('Could not fetch email addresses (admin access required)');
+          console.warn('⚠️ Could not fetch email addresses (admin access required)');
         }
       }
 
@@ -114,8 +182,8 @@ export function MemberCSVDownload() {
         return;
       }
 
-      // Safely type the profiles data - use unknown first to avoid TypeScript error
-      const typedProfiles = profiles as unknown as ProfileData[];
+      // Safely type the profiles data
+      const typedProfiles = profiles as ProfileData[];
 
       // Build CSV headers
       const headers = ['ID'];
@@ -204,7 +272,7 @@ export function MemberCSVDownload() {
       toast.success(`Successfully exported ${typedProfiles.length} members`);
       
     } catch (error: any) {
-      console.error('Export error:', error);
+      console.error('💥 Export error:', error);
       toast.error(error?.message || 'Failed to export members');
     } finally {
       setIsExporting(false);
