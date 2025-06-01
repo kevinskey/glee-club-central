@@ -74,32 +74,29 @@ export const ConsolidatedHeader = memo(function ConsolidatedHeader() {
 
           {/* Right side: Auth buttons and HeaderActions */}
           <div className="flex items-center gap-2 lg:gap-3">
-            {/* Authentication Buttons - Only show dashboard/logout for authenticated users */}
-            {isAuthenticated && (
-              <div className="flex items-center gap-2">
-                <Button 
-                  variant="default"
-                  onClick={handleDashboardClick}
-                  size={isMobile ? "sm" : "default"}
-                  className="bg-glee-spelman hover:bg-glee-spelman/90 px-3 lg:px-4"
-                >
-                  <User className="w-4 h-4 mr-2" />
-                  <span className="hidden sm:inline">
-                    {profile?.first_name ? `${profile.first_name}'s Dashboard` : 'My Dashboard'}
-                  </span>
-                  <span className="sm:hidden">Dashboard</span>
-                </Button>
-                <Button 
-                  variant="outline"
-                  onClick={handleLogout}
-                  size={isMobile ? "sm" : "default"}
-                  className="border-glee-spelman text-glee-spelman hover:bg-glee-spelman/10 px-3 lg:px-4"
-                >
-                  <LogOut className="w-4 h-4 mr-2" />
-                  <span className="hidden sm:inline">Sign Out</span>
-                  <span className="sm:hidden">Out</span>
-                </Button>
-              </div>
+            {/* Authentication Buttons - Show dashboard if NOT authenticated, show logout if authenticated */}
+            {!isAuthenticated ? (
+              <Button 
+                variant="default"
+                onClick={handleDashboardClick}
+                size={isMobile ? "sm" : "default"}
+                className="bg-glee-spelman hover:bg-glee-spelman/90 px-3 lg:px-4"
+              >
+                <User className="w-4 h-4 mr-2" />
+                <span className="hidden sm:inline">My Dashboard</span>
+                <span className="sm:hidden">Dashboard</span>
+              </Button>
+            ) : (
+              <Button 
+                variant="outline"
+                onClick={handleLogout}
+                size={isMobile ? "sm" : "default"}
+                className="border-glee-spelman text-glee-spelman hover:bg-glee-spelman/10 px-3 lg:px-4"
+              >
+                <LogOut className="w-4 h-4 mr-2" />
+                <span className="hidden sm:inline">Sign Out</span>
+                <span className="sm:hidden">Out</span>
+              </Button>
             )}
             
             {/* HeaderActions (theme toggle, etc.) */}
