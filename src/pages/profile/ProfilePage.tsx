@@ -1,12 +1,14 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { PageHeader } from "@/components/ui/page-header";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useAuth } from "@/contexts/AuthContext";
 import { useProfile } from "@/contexts/ProfileContext";
-import { User, Edit, Save, AlertCircle } from "lucide-react";
-import { ProfileOverviewTab } from "@/components/members/profile/ProfileOverviewTab";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { User, Edit, Save } from "lucide-react";
+import { ProfileOverviewTab } from "@/components/profile/ProfileOverviewTab";
+import { ProfileParticipationTab } from "@/components/profile/ProfileParticipationTab";
+import { ProfileMusicTab } from "@/components/profile/ProfileMusicTab";
+import { ProfileSidebar } from "@/components/profile/ProfileSidebar";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { PageLoader } from "@/components/ui/page-loader";
@@ -30,14 +32,12 @@ export default function ProfilePage() {
       return;
     }
     
-    // If updatedProfile is null, it means the user cancelled the edit
     if (updatedProfile === null) {
       setIsEditing(false);
       return;
     }
     
     try {
-      console.log("Updating profile with data:", updatedProfile);
       const success = await updateUser(profile.id, updatedProfile);
       if (success) {
         toast.success("Profile updated successfully");
@@ -62,26 +62,12 @@ export default function ProfilePage() {
     return <PageLoader message="Loading profile..." />;
   }
   
-  if (!user) {
+  if (!user || !profile) {
     return (
       <div className="container mx-auto p-4">
         <Alert className="mb-6">
-          <AlertCircle className="h-4 w-4" />
           <AlertDescription>
-            You need to be logged in to view your profile.
-          </AlertDescription>
-        </Alert>
-      </div>
-    );
-  }
-
-  if (!profile) {
-    return (
-      <div className="container mx-auto p-4">
-        <Alert className="mb-6">
-          <AlertCircle className="h-4 w-4" />
-          <AlertDescription>
-            Profile information is not available. This may be because your account is still being set up.
+            Profile information is not available. Please try refreshing the page.
           </AlertDescription>
         </Alert>
       </div>
@@ -144,57 +130,17 @@ export default function ProfilePage() {
             </TabsContent>
             
             <TabsContent value="participation">
-              <Card>
-                <CardContent className="p-6 text-center">
-                  <p className="text-muted-foreground">Participation tracking coming soon.</p>
-                </CardContent>
-              </Card>
+              <ProfileParticipationTab profile={profile} />
             </TabsContent>
             
             <TabsContent value="music">
-              <Card>
-                <CardContent className="p-6 text-center">
-                  <p className="text-muted-foreground">Music access information coming soon.</p>
-                </CardContent>
-              </Card>
+              <ProfileMusicTab profile={profile} />
             </TabsContent>
           </Tabs>
         </div>
         
         <div className="space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle>Member Information</CardTitle>
-              <CardDescription>
-                Your membership details
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <p className="text-sm mb-4">
-                As a member of the Spelman College Glee Club, you have access to resources, 
-                sheet music, and other materials.
-              </p>
-              <div className="space-y-2">
-                <h4 className="text-sm font-medium">Membership Status:</h4>
-                <div className="flex items-center gap-2">
-                  <span className={`w-2 h-2 rounded-full ${profile.status === "active" ? "bg-green-500" : "bg-yellow-500"}`}></span>
-                  <span className="capitalize">{profile.status || "Active"}</span>
-                </div>
-              </div>
-              {profile.role && (
-                <div className="space-y-2 mt-4">
-                  <h4 className="text-sm font-medium">Role:</h4>
-                  <span className="capitalize text-sm">{profile.role.replace('_', ' ')}</span>
-                </div>
-              )}
-              {profile.voice_part && (
-                <div className="space-y-2 mt-4">
-                  <h4 className="text-sm font-medium">Voice Part:</h4>
-                  <span className="text-sm">{profile.voice_part}</span>
-                </div>
-              )}
-            </CardContent>
-          </Card>
+          <ProfileSidebar profile={profile} />
         </div>
       </div>
     </div>
