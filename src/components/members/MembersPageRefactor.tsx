@@ -7,6 +7,13 @@ import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { 
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { 
   Users, 
   Search, 
   Filter, 
@@ -37,6 +44,7 @@ interface Member {
   avatar_url?: string;
   phone?: string;
   class_year?: string;
+  role: string;
 }
 
 export function MembersPageRefactor() {
@@ -44,6 +52,7 @@ export function MembersPageRefactor() {
   const { users, isLoading: usersLoading, refreshUsers } = useUserManagement();
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedVoicePart, setSelectedVoicePart] = useState('all');
+  const [selectedRole, setSelectedRole] = useState('all');
   const [showCreateModal, setShowCreateModal] = useState(false);
 
   const isAdminUser = isAdmin();
@@ -60,8 +69,9 @@ export function MembersPageRefactor() {
     const matchesSearch = fullName.includes(searchTermLower) || (user.email || '').toLowerCase().includes(searchTermLower);
 
     const matchesVoicePart = selectedVoicePart === 'all' || user.voice_part === selectedVoicePart;
+    const matchesRole = selectedRole === 'all' || user.role === selectedRole;
 
-    return matchesSearch && matchesVoicePart;
+    return matchesSearch && matchesVoicePart && matchesRole;
   });
 
   const handleUserCreated = () => {
@@ -126,6 +136,30 @@ export function MembersPageRefactor() {
               </div>
             </div>
             <div className="flex gap-2">
+              <Select value={selectedVoicePart} onValueChange={setSelectedVoicePart}>
+                <SelectTrigger className="w-[140px]">
+                  <SelectValue placeholder="Voice Part" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Voice Parts</SelectItem>
+                  <SelectItem value="soprano_1">Soprano 1</SelectItem>
+                  <SelectItem value="soprano_2">Soprano 2</SelectItem>
+                  <SelectItem value="alto_1">Alto 1</SelectItem>
+                  <SelectItem value="alto_2">Alto 2</SelectItem>
+                  <SelectItem value="tenor">Tenor</SelectItem>
+                  <SelectItem value="bass">Bass</SelectItem>
+                </SelectContent>
+              </Select>
+              <Select value={selectedRole} onValueChange={setSelectedRole}>
+                <SelectTrigger className="w-[120px]">
+                  <SelectValue placeholder="Role" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Roles</SelectItem>
+                  <SelectItem value="admin">Admin</SelectItem>
+                  <SelectItem value="member">Member</SelectItem>
+                </SelectContent>
+              </Select>
               <Button variant="outline" size="sm">
                 <Filter className="mr-2 h-4 w-4" />
                 Filter
@@ -151,7 +185,7 @@ export function MembersPageRefactor() {
                 <Users className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
                 <h3 className="font-semibold mb-2">No Members Found</h3>
                 <p className="text-muted-foreground">
-                  {searchTerm ? 'No members match your search criteria.' : 'No members have been added yet.'}
+                  {searchTerm || selectedVoicePart !== 'all' || selectedRole !== 'all' ? 'No members match your search criteria.' : 'No members have been added yet.'}
                 </p>
               </CardContent>
             </Card>
@@ -185,6 +219,11 @@ export function MembersPageRefactor() {
                         </div>
                       </div>
                       <div className="flex items-center space-x-2">
+                        {member.role && (
+                          <Badge variant={member.role === 'admin' ? 'destructive' : 'outline'}>
+                            {member.role}
+                          </Badge>
+                        )}
                         {member.voice_part && (
                           <Badge variant="outline">
                             <Music className="mr-1 h-3 w-3" />
