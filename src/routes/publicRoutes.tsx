@@ -3,13 +3,16 @@ import React from 'react';
 import { RouteObject } from 'react-router-dom';
 import AppLayout from '@/layouts/AppLayout';
 
-// Import public pages
+// Public Pages
 import HomePage from '@/pages/HomePage';
-import CalendarPage from '@/pages/CalendarPage';
-import EventDetailPage from '@/pages/EventDetailPage';
 import AboutPage from '@/pages/AboutPage';
 import ContactPage from '@/pages/ContactPage';
-import LoginPage from '@/pages/auth/LoginPage';
+import PublicEventsPage from '@/pages/PublicEventsPage';
+import EnhancedCalendarPage from '@/pages/EnhancedCalendarPage';
+import JoinGleeFamPage from '@/pages/JoinGleeFamPage';
+import StorePage from '@/pages/StorePage';
+import CheckoutSuccessPage from '@/pages/CheckoutSuccessPage';
+import CheckoutCancelledPage from '@/pages/CheckoutCancelledPage';
 
 export const publicRoutes: RouteObject[] = [
   {
@@ -17,11 +20,25 @@ export const publicRoutes: RouteObject[] = [
     element: <AppLayout sidebarType="none" showHeader={true} showFooter={true} />,
     children: [
       { index: true, element: <HomePage /> },
-      { path: 'calendar', element: <CalendarPage /> },
-      { path: 'event/:id', element: <EventDetailPage /> },
       { path: 'about', element: <AboutPage /> },
       { path: 'contact', element: <ContactPage /> },
-      { path: 'login', element: <LoginPage /> },
+      { path: 'events', element: <PublicEventsPage /> },
+      { path: 'calendar', element: <EnhancedCalendarPage /> },
+      { path: 'join-glee-fam', element: <JoinGleeFamPage /> },
+      { path: 'store', element: <StorePage /> },
     ],
+  },
+  // Checkout Routes
+  { 
+    path: '/checkout-success', 
+    element: <AppLayout sidebarType="none" showHeader={false} showFooter={false}><CheckoutSuccessPage /></AppLayout>
+  },
+  { 
+    path: '/store/success', 
+    element: <AppLayout sidebarType="none" showHeader={false} showFooter={false}><CheckoutSuccessPage /></AppLayout>
+  },
+  { 
+    path: '/store/cancelled', 
+    element: <AppLayout sidebarType="none" showHeader={false} showFooter={false}><CheckoutCancelledPage /></AppLayout>
   },
 ];
