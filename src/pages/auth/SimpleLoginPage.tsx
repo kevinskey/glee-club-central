@@ -1,4 +1,5 @@
-import * as React from 'react';
+
+import React from 'react';
 import { useSimpleAuthContext } from '@/contexts/SimpleAuthContext';
 import { useNavigate, useLocation, Link } from 'react-router-dom';
 import { toast } from 'sonner';
@@ -6,11 +7,10 @@ import { Spinner } from '@/components/ui/spinner';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
-import { LogIn, UserPlus, RefreshCcw, Eye, EyeOff } from 'lucide-react';
+import { LogIn, UserPlus, Eye, EyeOff } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { cleanupAuthState, resetAuthSystem } from '@/contexts/AuthContext';
 
-const LoginPage = () => {
+const SimpleLoginPage = () => {
   const { login, isAuthenticated, isLoading, user, isInitialized } = useSimpleAuthContext();
   const navigate = useNavigate();
   const location = useLocation();
@@ -19,19 +19,17 @@ const LoginPage = () => {
   const [email, setEmail] = React.useState('');
   const [password, setPassword] = React.useState('');
   const [isSubmitting, setIsSubmitting] = React.useState(false);
-  const [isResetting, setIsResetting] = React.useState(false);
   const [showPassword, setShowPassword] = React.useState(false);
   const [loginError, setLoginError] = React.useState<string | null>(null);
   
   // Handle redirect after successful authentication
   React.useEffect(() => {
     if (isAuthenticated && user && isInitialized && !isSubmitting) {
-      console.log('LoginPage: Authenticated user detected, starting redirect...');
+      console.log('SimpleLoginPage: Authenticated user detected, redirecting...');
       const from = location.state?.from?.pathname || '/role-dashboard';
       
-      // Small delay to ensure auth state is fully settled
       setTimeout(() => {
-        console.log('LoginPage: Executing redirect to:', from);
+        console.log('SimpleLoginPage: Executing redirect to:', from);
         navigate(from, { replace: true });
       }, 100);
     }
@@ -55,11 +53,11 @@ const LoginPage = () => {
     setIsSubmitting(true);
     
     try {
-      console.log('LoginPage: Starting login for:', email);
+      console.log('SimpleLoginPage: Starting login for:', email);
       const result = await login(email, password);
       
       if (result.error) {
-        console.error("LoginPage: Login failed:", result.error);
+        console.error("SimpleLoginPage: Login failed:", result.error);
         
         let errorMessage = "Login failed";
         if (result.error.message) {
@@ -78,31 +76,16 @@ const LoginPage = () => {
         toast.error(errorMessage);
         setIsSubmitting(false);
       } else {
-        console.log("LoginPage: Login successful, waiting for redirect...");
+        console.log("SimpleLoginPage: Login successful, waiting for redirect...");
         toast.success("Login successful!");
         // Don't set isSubmitting false here - let the redirect happen
       }
     } catch (err) {
-      console.error("LoginPage: Unexpected error:", err);
+      console.error("SimpleLoginPage: Unexpected error:", err);
       const errorMessage = "An unexpected error occurred. Please try again.";
       setLoginError(errorMessage);
       toast.error(errorMessage);
       setIsSubmitting(false);
-    }
-  };
-  
-  const handleResetAuth = async () => {
-    if (window.confirm("Are you sure you want to reset the authentication system? This will clear all login data.")) {
-      setIsResetting(true);
-      try {
-        await resetAuthSystem();
-        toast.success("Authentication system reset successfully");
-        window.location.reload();
-      } catch (error) {
-        console.error("Error resetting auth system:", error);
-        toast.error("Failed to reset authentication system");
-        setIsResetting(false);
-      }
     }
   };
   
@@ -253,23 +236,12 @@ const LoginPage = () => {
                 </div>
               </div>
               
-              <div className="grid grid-cols-1 gap-2">
-                <Button variant="outline" className="w-full border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-100 bg-white/50 dark:bg-gray-900/50 hover:bg-white/70 dark:hover:bg-gray-800/70" asChild>
-                  <Link to="/signup">
-                    <UserPlus className="w-4 h-4 mr-2" />
-                    Request Member Access
-                  </Link>
-                </Button>
-                <Button 
-                  variant="outline" 
-                  className="w-full border-red-300 dark:border-red-600 text-red-700 dark:text-red-400 bg-white/50 dark:bg-gray-900/50 hover:bg-red-50/70 dark:hover:bg-red-900/20"
-                  onClick={handleResetAuth}
-                  disabled={isResetting}
-                >
-                  <RefreshCcw className="w-4 h-4 mr-2" />
-                  {isResetting ? "Resetting..." : "Reset Authentication"}
-                </Button>
-              </div>
+              <Button variant="outline" className="w-full border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-100 bg-white/50 dark:bg-gray-900/50 hover:bg-white/70 dark:hover:bg-gray-800/70" asChild>
+                <Link to="/signup">
+                  <UserPlus className="w-4 h-4 mr-2" />
+                  Request Member Access
+                </Link>
+              </Button>
             </CardFooter>
           </Card>
         </div>
@@ -278,4 +250,4 @@ const LoginPage = () => {
   );
 };
 
-export default LoginPage;
+export default SimpleLoginPage;

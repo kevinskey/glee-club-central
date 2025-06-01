@@ -1,14 +1,14 @@
 
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { useAuth } from "@/contexts/AuthContext";
+import { useSimpleAuthContext } from "@/contexts/SimpleAuthContext";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { Menu, User, LogIn, LogOut, Home, Calendar, Users, Mail, Store } from "lucide-react";
 
 export function MobileNavDropdown() {
   const [isOpen, setIsOpen] = useState(false);
-  const { isAuthenticated, profile, logout } = useAuth();
+  const { isAuthenticated, profile, logout } = useSimpleAuthContext();
   const navigate = useNavigate();
 
   const handleDashboardClick = () => {

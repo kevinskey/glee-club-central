@@ -1,11 +1,11 @@
 
 import React from "react";
-import { useAuth } from "@/contexts/AuthContext";
+import { useSimpleAuthContext } from "@/contexts/SimpleAuthContext";
 import { PageLoader } from "@/components/ui/page-loader";
 import AdminDashboard from "./AdminDashboard";
 
 export default function AdminDashboardPage() {
-  const { user, profile, isLoading, isInitialized, isAdmin } = useAuth();
+  const { user, profile, isLoading, isInitialized, isAdmin } = useSimpleAuthContext();
 
   console.log('🏛️ AdminDashboardPage: ADMIN DASHBOARD STATE:', {
     hasUser: !!user,
@@ -18,7 +18,7 @@ export default function AdminDashboardPage() {
     profileStatus: profile?.status,
     isLoading,
     isInitialized,
-    isAdminFunction: isAdmin ? isAdmin() : false
+    isAdminFunction: isAdmin()
   });
 
   // Wait for full initialization and profile resolution

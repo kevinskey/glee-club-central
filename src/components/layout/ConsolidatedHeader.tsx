@@ -5,14 +5,14 @@ import { HeaderLogo } from "./header/HeaderLogo";
 import { HeaderActions } from "./header/HeaderActions";
 import { Button } from "@/components/ui/button";
 import { User, LogOut } from "lucide-react";
-import { useAuth } from "@/contexts/AuthContext";
+import { useSimpleAuthContext } from "@/contexts/SimpleAuthContext";
 import { useIsMobile } from "@/hooks/use-mobile";
 
 // Memoize the ConsolidatedHeader component to prevent unnecessary re-renders
 export const ConsolidatedHeader = memo(function ConsolidatedHeader() {
   const location = useLocation();
   const navigate = useNavigate();
-  const { isAuthenticated, profile, logout } = useAuth();
+  const { isAuthenticated, profile, logout } = useSimpleAuthContext();
   const isMobile = useIsMobile();
   
   const navigationLinks = [
