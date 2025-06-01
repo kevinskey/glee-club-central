@@ -5,7 +5,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { PageLoader } from '@/components/ui/page-loader';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { AlertCircle, RefreshCw, User, Clock } from 'lucide-react';
+import { AlertCircle, RefreshCw, User } from 'lucide-react';
 
 export const RoleDashboard: React.FC = () => {
   const { user, profile, isLoading, isAuthenticated, isAdmin, isInitialized, refreshUserData } = useAuth();
@@ -16,22 +16,15 @@ export const RoleDashboard: React.FC = () => {
   const [waitTime, setWaitTime] = useState(0);
 
   useEffect(() => {
-    console.log('🎯 RoleDashboard: COMPREHENSIVE AUTH STATE CHECK:', {
+    console.log('🎯 RoleDashboard: AUTH STATE CHECK:', {
       isLoading,
       isAuthenticated,
       hasUser: !!user,
       userId: user?.id,
-      userEmail: user?.email,
       hasProfile: !!profile,
-      profileId: profile?.id,
       profileRole: profile?.role,
-      profileIsAdmin: profile?.is_super_admin,
-      profileStatus: profile?.status,
-      isAdminFunction: isAdmin ? isAdmin() : false,
       isInitialized,
-      hasRedirected,
-      showError,
-      waitTime
+      hasRedirected
     });
 
     // Wait for initialization and prevent multiple redirects
@@ -47,14 +40,8 @@ export const RoleDashboard: React.FC = () => {
       return;
     }
 
-    // Don't redirect while actively loading profile data
-    if (isLoading) {
-      console.log('⏳ RoleDashboard: Still loading profile data, waiting...');
-      return;
-    }
-
-    // Route to appropriate dashboard when we have complete data OR after timeout
-    if (isAuthenticated && user && (profile || waitTime >= 8)) {
+    // Route quickly - don't wait too long for profile
+    if (isAuthenticated && user && (profile || waitTime >= 3)) {
       let targetRoute = '/dashboard/member';
       
       // Use the isAdmin function for role detection
@@ -74,32 +61,23 @@ export const RoleDashboard: React.FC = () => {
       return;
     }
 
-    // Show error if profile is missing after loading completes and reasonable wait time
-    if (!profile && isAuthenticated && user && !isLoading && waitTime >= 5) {
+    // Show error if profile is missing after reasonable wait
+    if (!profile && isAuthenticated && user && !isLoading && waitTime >= 3) {
       console.error(`❌ RoleDashboard: Profile missing for authenticated user ${user.id}`);
       setShowError(true);
       return;
     }
   }, [isLoading, isAuthenticated, user, profile, isAdmin, navigate, isInitialized, hasRedirected, showError, waitTime]);
 
-  // Auto-retry timer and timeout handling
+  // Quick timer for timeout handling
   useEffect(() => {
     if (isAuthenticated && user && !profile && !hasRedirected && !showError) {
       const timer = setTimeout(() => {
-        setWaitTime(prev => {
-          const newTime = prev + 1;
-          if (newTime >= 8 && !isRetrying) {
-            console.log('🔄 RoleDashboard: Timeout reached, auto-retrying or continuing...');
-            if (newTime === 8) {
-              handleRetry();
-            }
-          }
-          return newTime;
-        });
+        setWaitTime(prev => prev + 1);
       }, 1000);
       return () => clearTimeout(timer);
     }
-  }, [isAuthenticated, user, profile, hasRedirected, showError, waitTime, isRetrying]);
+  }, [isAuthenticated, user, profile, hasRedirected, showError, waitTime]);
 
   const handleRetry = async () => {
     setIsRetrying(true);
@@ -119,15 +97,11 @@ export const RoleDashboard: React.FC = () => {
     }
   };
 
-  const handleSupportRedirect = () => {
-    navigate('/support', { replace: true });
-  };
-
   // Show initialization loading
   if (!isInitialized) {
     return (
       <PageLoader 
-        message="Initializing authentication system..."
+        message="Starting GleeWorld..."
         className="min-h-screen"
       />
     );
@@ -143,18 +117,18 @@ export const RoleDashboard: React.FC = () => {
     );
   }
 
-  // Show profile resolution loading (with timeout)
-  if (isLoading && waitTime < 8) {
+  // Show profile loading briefly
+  if (isLoading && waitTime < 3) {
     return (
       <PageLoader 
-        message={`Setting up your profile... (${waitTime}s)`}
+        message={`Loading your dashboard... (${waitTime}s)`}
         className="min-h-screen"
       />
     );
   }
 
   // Show error state with retry options
-  if (showError || (!profile && !isLoading && waitTime >= 8)) {
+  if (showError || (!profile && !isLoading && waitTime >= 3)) {
     return (
       <div className="min-h-screen flex items-center justify-center p-4">
         <Card className="w-full max-w-md">
@@ -163,12 +137,6 @@ export const RoleDashboard: React.FC = () => {
             <CardTitle>Profile Setup Issue</CardTitle>
             <CardDescription>
               We're having trouble loading your profile. You can try again or continue to the dashboard.
-              {waitTime > 0 && (
-                <div className="flex items-center justify-center gap-2 mt-2 text-sm">
-                  <Clock className="h-4 w-4" />
-                  <span>Waited {waitTime} seconds</span>
-                </div>
-              )}
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
@@ -196,13 +164,6 @@ export const RoleDashboard: React.FC = () => {
                 className="w-full"
               >
                 Continue to Dashboard
-              </Button>
-              <Button 
-                variant="outline" 
-                onClick={handleSupportRedirect}
-                className="w-full"
-              >
-                Contact Support
               </Button>
             </div>
           </CardContent>

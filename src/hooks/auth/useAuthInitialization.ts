@@ -29,11 +29,11 @@ export const useAuthInitialization = (
       }));
     };
     
-    // Force completion after 3 seconds maximum
+    // Much shorter timeout - force completion quickly
     const forceTimeout = setTimeout(() => {
       console.log('⏰ useAuthInitialization: Force completing initialization after timeout');
       completeInitialization();
-    }, 3000);
+    }, 1000); // Reduced from 3000ms to 1000ms
     
     const initializeAuth = async () => {
       try {
@@ -59,13 +59,13 @@ export const useAuthInitialization = (
           
           completeInitialization(authUser);
           
-          // Fetch profile data in background after initialization is complete
+          // Very quick background profile fetch
           setTimeout(() => {
             if (mountedRef.current && !fetchingRef.current) {
-              console.log('📡 useAuthInitialization: Starting background profile fetch...');
+              console.log('📡 useAuthInitialization: Starting quick background profile fetch...');
               fetchUserData(session.user.id, session.user.email, session.user.user_metadata);
             }
-          }, 500);
+          }, 100); // Reduced delay
           
         } else {
           console.log('ℹ️ useAuthInitialization: No session found');
@@ -106,12 +106,12 @@ export const useAuthInitialization = (
             isInitialized: true
           }));
           
-          // Background profile fetch after sign in
+          // Quick background profile fetch after sign in
           setTimeout(() => {
             if (mountedRef.current && !fetchingRef.current) {
               fetchUserData(session.user.id, session.user.email, session.user.user_metadata);
             }
-          }, 1000);
+          }, 100); // Reduced delay
           
         } else if (event === 'SIGNED_OUT') {
           console.log('👋 useAuthInitialization: User signed out');

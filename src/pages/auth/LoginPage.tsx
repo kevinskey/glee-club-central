@@ -1,3 +1,4 @@
+
 import * as React from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useNavigate, useLocation, Link } from 'react-router-dom';
@@ -29,17 +30,14 @@ const LoginPage = () => {
     addCentennialImageToLibrary();
   }, []);
   
-  // Handle redirect when authenticated - simplified logic
+  // Simplified redirect logic - immediate redirect when authenticated
   React.useEffect(() => {
-    if (isAuthenticated && user && !isSubmitting) {
-      console.log('LoginPage: User is authenticated, redirecting...');
+    if (isAuthenticated && user && isInitialized) {
+      console.log('LoginPage: User is authenticated, redirecting immediately...');
       const from = location.state?.from?.pathname || '/role-dashboard';
-      setLoginError(null);
-      
-      // Simple redirect without delays
       navigate(from, { replace: true });
     }
-  }, [isAuthenticated, user, isSubmitting, navigate, location.state]);
+  }, [isAuthenticated, user, isInitialized, navigate, location.state]);
   
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -84,7 +82,7 @@ const LoginPage = () => {
       } else {
         console.log("LoginPage: Login successful!");
         toast.success("Login successful!");
-        // Don't set isSubmitting to false here - let the redirect handle it
+        // The redirect will happen automatically via useEffect
       }
     } catch (err) {
       console.error("LoginPage: Unexpected login error:", err);
@@ -110,28 +108,21 @@ const LoginPage = () => {
     }
   };
   
-  // Simplified loading check - don't wait too long
+  // Show loading only very briefly
   if (!isInitialized && isLoading) {
     return (
       <div className="flex items-center justify-center min-h-screen bg-background">
         <div className="flex flex-col items-center space-y-4">
           <Spinner size="lg" />
-          <p className="text-muted-foreground">Checking authentication...</p>
+          <p className="text-muted-foreground">Loading GleeWorld...</p>
         </div>
       </div>
     );
   }
   
-  // If authenticated, show simple redirect message
+  // Don't show redirect message - let the redirect happen silently
   if (isAuthenticated && user) {
-    return (
-      <div className="flex items-center justify-center min-h-screen bg-background">
-        <div className="flex flex-col items-center space-y-4">
-          <Spinner size="lg" />
-          <p className="text-muted-foreground">Redirecting to dashboard...</p>
-        </div>
-      </div>
-    );
+    return null; // Silent redirect
   }
 
   // Main login form
@@ -270,7 +261,7 @@ const LoginPage = () => {
                   onClick={handleResetAuth}
                   disabled={isResetting}
                 >
-                  <RefreshCcw className="w-4 h-4 mr-2" />
+                  <RefreshCw className="w-4 h-4 mr-2" />
                   {isResetting ? "Resetting..." : "Reset Authentication"}
                 </Button>
               </div>
