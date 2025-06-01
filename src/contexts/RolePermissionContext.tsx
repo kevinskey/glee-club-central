@@ -1,6 +1,6 @@
 
 import React, { createContext, useContext, ReactNode } from "react";
-import { useAuth } from "./AuthContext";
+import { useSimpleAuthContext } from "./SimpleAuthContext";
 
 // Define context type
 interface RolePermissionContextType {
@@ -18,7 +18,7 @@ const RolePermissionContext = createContext<RolePermissionContextType>({
 
 // Provider component
 export const RolePermissionProvider = ({ children }: { children: ReactNode }) => {
-  const { isAdmin, isLoading, profile } = useAuth();
+  const { isAdmin, isLoading, profile } = useSimpleAuthContext();
   
   // Determine user role based on admin status
   const userRole = profile?.is_super_admin ? "admin" : "member";
