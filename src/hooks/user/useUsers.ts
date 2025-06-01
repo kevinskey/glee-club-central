@@ -25,32 +25,79 @@ export const useUsers = (): UseUsersResponse => {
     try {
       console.log('🔄 useUsers: Starting to fetch users...');
       
-      // Use a direct query without RLS policies that might cause recursion
+      // Test basic connection first
+      const { data: testData, error: testError } = await supabase
+        .from('profiles')
+        .select('count')
+        .limit(1);
+      
+      console.log('🧪 Connection test:', { testData, testError });
+      
+      if (testError) {
+        console.error('❌ Basic connection failed:', testError);
+        setError(`Connection failed: ${testError.message}`);
+        toast.error('Database connection failed');
+        return null;
+      }
+
+      // Now try to fetch all profiles
       const { data: profiles, error: profilesError } = await supabase
         .from('profiles')
-        .select('*')
+        .select(`
+          id,
+          first_name,
+          last_name,
+          phone,
+          voice_part,
+          avatar_url,
+          status,
+          join_date,
+          class_year,
+          dues_paid,
+          notes,
+          created_at,
+          updated_at,
+          is_super_admin,
+          role,
+          title,
+          special_roles
+        `)
         .order('last_name', { ascending: true });
+
+      console.log('📊 Profiles query result:', {
+        profilesCount: profiles?.length || 0,
+        hasError: !!profilesError,
+        errorMessage: profilesError?.message,
+        errorCode: profilesError?.code
+      });
 
       if (profilesError) {
         console.error('❌ Error fetching profiles:', profilesError);
         setError(profilesError.message);
-        toast.error('Failed to load users');
+        toast.error('Failed to load user profiles');
         return null;
       }
 
-      console.log('✅ Successfully fetched profiles:', profiles?.length || 0);
+      if (!profiles || profiles.length === 0) {
+        console.log('ℹ️ No profiles found in database');
+        setUserCount(0);
+        return [];
+      }
+
+      console.log('✅ Successfully fetched profiles:', profiles.length);
 
       // Get auth users for additional details like email and sign-in times
       let authUsersMap: Record<string, any> = {};
       try {
         const { data: { user: currentUser } } = await supabase.auth.getUser();
+        console.log('👤 Current user for admin check:', currentUser?.email);
         
         // Only try to get auth.users data if we're an admin user
         if (currentUser?.email === 'kevinskey@mac.com') {
+          console.log('🔑 Admin user detected, fetching auth data...');
           const { data: authData, error: authError } = await supabase.auth.admin.listUsers();
           
           if (!authError && authData?.users && Array.isArray(authData.users)) {
-            // Type the users array properly
             const typedUsers = authData.users as Array<{ 
               id: string; 
               email?: string; 
@@ -61,15 +108,19 @@ export const useUsers = (): UseUsersResponse => {
               acc[user.id] = user;
               return acc;
             }, {});
-            console.log('📧 Auth users data loaded for admin');
+            console.log('📧 Auth users data loaded, count:', Object.keys(authUsersMap).length);
+          } else {
+            console.warn('⚠️ Could not fetch auth users:', authError?.message);
           }
+        } else {
+          console.log('ℹ️ Non-admin user, skipping auth data fetch');
         }
       } catch (err) {
         console.warn('⚠️ Could not fetch auth users data:', err);
       }
 
       // Transform the data to match User interface
-      const users: User[] = (profiles || []).map(profile => {
+      const users: User[] = profiles.map(profile => {
         const authUser = authUsersMap[profile.id];
         
         return {
@@ -96,15 +147,16 @@ export const useUsers = (): UseUsersResponse => {
         };
       });
 
-      console.log('🎉 Total users processed:', users.length);
+      console.log('🎉 Total users processed successfully:', users.length);
       setUserCount(users.length);
+      toast.success(`Successfully loaded ${users.length} users`);
       return users;
       
     } catch (err) {
       console.error('💥 Unexpected error fetching users:', err);
       const errorMessage = err instanceof Error ? err.message : 'Unknown error occurred';
       setError(errorMessage);
-      toast.error('Failed to load users');
+      toast.error(`Failed to load users: ${errorMessage}`);
       return null;
     } finally {
       setIsLoading(false);
@@ -113,6 +165,7 @@ export const useUsers = (): UseUsersResponse => {
 
   const getUserCount = useCallback(async (): Promise<number> => {
     try {
+      console.log('📊 Getting user count...');
       const { count, error: countError } = await supabase
         .from('profiles')
         .select('*', { count: 'exact', head: true });
@@ -122,6 +175,7 @@ export const useUsers = (): UseUsersResponse => {
         return 0;
       }
 
+      console.log('📊 User count:', count);
       return count || 0;
     } catch (err) {
       console.error('Unexpected error getting user count:', err);
@@ -131,6 +185,7 @@ export const useUsers = (): UseUsersResponse => {
 
   const getUserById = useCallback(async (userId: string): Promise<User | null> => {
     try {
+      console.log('👤 Fetching user by ID:', userId);
       const { data, error: fetchError } = await supabase
         .from('profiles')
         .select('*')
