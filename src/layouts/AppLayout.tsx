@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Outlet } from 'react-router-dom';
+import { Outlet, useLocation } from 'react-router-dom';
 import { useSimpleAuthContext } from '@/contexts/SimpleAuthContext';
 import { ConsolidatedHeader } from '@/components/layout/ConsolidatedHeader';
 import { Footer } from '@/components/landing/Footer';
@@ -22,6 +22,8 @@ const AppLayout: React.FC<AppLayoutProps> = ({
   showFooter = false,
   children 
 }) => {
+  const location = useLocation();
+  
   // Safely get auth context - handle case where it might not be available
   let isAuthenticated = false;
   let isAdmin = false;
@@ -35,8 +37,12 @@ const AppLayout: React.FC<AppLayoutProps> = ({
     console.log('AppLayout: Auth context not available, treating as unauthenticated');
   }
 
+  // Check if we're on an admin route - if so, don't render any sidebar here
+  // The admin routes will handle their own AdminSidebar
+  const isAdminRoute = location.pathname.startsWith('/admin');
+  
   // Determine if sidebar should be shown
-  const shouldShowSidebar = sidebarType !== 'none' && isAuthenticated;
+  const shouldShowSidebar = sidebarType !== 'none' && isAuthenticated && !isAdminRoute;
   
   // Select the appropriate sidebar component
   const getSidebarComponent = () => {

@@ -18,7 +18,8 @@ const AdminDashboard: React.FC = () => {
       {/* Desktop Layout */}
       {!isMobile && (
         <div className="flex h-screen">
-          <AdminSidebar />
+          {/* Only render AdminSidebar on desktop for admin dashboard page */}
+          {location.pathname === '/admin' && <AdminSidebar />}
           <div className="flex-1 flex flex-col overflow-hidden">
             <AdminTopBar />
             <main className="flex-1 overflow-auto">
