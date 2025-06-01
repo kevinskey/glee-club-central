@@ -6,9 +6,8 @@ import { router } from "./router";
 import { ThemeProvider } from "./providers/ThemeProvider";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "sonner";
-import { SessionContextProvider } from "@supabase/auth-helpers-react";
-import { supabase } from "./integrations/supabase/client";
-import { AuthProvider } from "./contexts/AuthContext";
+import { SimpleAuthProvider } from "./contexts/SimpleAuthContext";
+import { RolePermissionProvider } from "./contexts/RolePermissionContext";
 import "./index.css";
 
 // Check if dark mode is preferred and apply it immediately to prevent flickering
@@ -41,18 +40,17 @@ if (!rootElement) {
 const root = ReactDOM.createRoot(rootElement);
 
 // Initialize app with proper provider nesting order
-// Important: SessionContextProvider must be before AuthProvider
 root.render(
   <React.StrictMode>
     <QueryClientProvider client={queryClient}>
-      <SessionContextProvider supabaseClient={supabase}>
-        <ThemeProvider>
-          <AuthProvider>
+      <ThemeProvider>
+        <SimpleAuthProvider>
+          <RolePermissionProvider>
             <RouterProvider router={router} />
             <Toaster />
-          </AuthProvider>
-        </ThemeProvider>
-      </SessionContextProvider>
+          </RolePermissionProvider>
+        </SimpleAuthProvider>
+      </ThemeProvider>
     </QueryClientProvider>
   </React.StrictMode>
 );
