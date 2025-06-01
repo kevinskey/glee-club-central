@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuthMigration } from '@/hooks/useAuthMigration';
@@ -98,9 +97,9 @@ export const RoleDashboard: React.FC = () => {
       
       // If still no profile, try to create fallback
       setTimeout(async () => {
-        if (!auth.profile && auth.createFallbackProfile) {
+        if (!auth.profile && auth.createFallbackProfile && auth.user?.id) {
           console.log('🔧 RoleDashboard: Creating fallback profile...');
-          await auth.createFallbackProfile();
+          await auth.createFallbackProfile(auth.user.id);
         }
       }, 1000);
       
