@@ -1,6 +1,7 @@
 
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { useCalendarEvents } from "@/hooks/useCalendarEvents";
 
 // Type definitions for reusability
 interface HeroImage {
@@ -40,21 +41,25 @@ interface AudioTrack {
 
 export const useHomePageData = () => {
   const [heroImages, setHeroImages] = useState<HeroImage[]>([]);
-  const [upcomingEvents, setUpcomingEvents] = useState<Event[]>([]);
   const [storeProducts, setStoreProducts] = useState<Product[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const { events } = useCalendarEvents();
 
-  // Audio tracks placeholder data (not connected to DB yet)
-  const audioTracks: AudioTrack[] = [
-    {
-      id: "track-1",
-      title: "Lift Every Voice",
-      audioUrl: "/placeholder.mp3",
-      albumArt: "https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=200&h=200&fit=crop",
-      artist: "Spelman Glee Club",
-      duration: "3:45"
-    }
-  ];
+  // Transform calendar events for homepage use
+  const upcomingEvents: Event[] = events
+    .filter(event => event.is_public && new Date(event.start_time) > new Date())
+    .slice(0, 6)
+    .map(event => ({
+      id: event.id,
+      title: event.title,
+      date: event.start_time.split('T')[0],
+      location: event.location_name,
+      imageUrl: event.image_url || "https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=400&h=300&fit=crop",
+      isPublic: event.is_public
+    }));
+
+  // Audio tracks from database
+  const [audioTracks, setAudioTracks] = useState<AudioTrack[]>([]);
 
   // Data fetching functions
   const fetchHeroImages = async () => {
@@ -86,43 +91,6 @@ export const useHomePageData = () => {
           url: "https://images.unsplash.com/photo-1493836434471-b9d2aa522a8e?w=1200&h=600&fit=crop",
           title: "Spelman College Glee Club",
           alt: "Glee Club Performance"
-        }
-      ]);
-    }
-  };
-
-  const fetchUpcomingEvents = async () => {
-    try {
-      const today = new Date().toISOString().split('T')[0];
-      const { data, error } = await supabase
-        .from('events')
-        .select('id, title, start_time, location_name, image_url')
-        .eq('is_public', true)
-        .gte('start_time', today)
-        .order('start_time', { ascending: true })
-        .limit(6);
-
-      if (error) throw error;
-
-      const formattedEvents: Event[] = data?.map(event => ({
-        id: event.id,
-        title: event.title,
-        date: event.start_time.split('T')[0],
-        location: event.location_name,
-        imageUrl: event.image_url || "https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=400&h=300&fit=crop"
-      })) || [];
-
-      setUpcomingEvents(formattedEvents);
-    } catch (error) {
-      console.error('Error fetching events:', error);
-      // Fallback to placeholder events
-      setUpcomingEvents([
-        {
-          id: "event-fallback-1",
-          title: "Spring Concert",
-          date: "2024-04-15",
-          location: "Sisters Chapel",
-          imageUrl: "https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=400&h=300&fit=crop"
         }
       ]);
     }
@@ -161,14 +129,50 @@ export const useHomePageData = () => {
     }
   };
 
+  const fetchAudioTracks = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('audio_files')
+        .select('id, title, file_url, description')
+        .eq('category', 'recordings')
+        .limit(5);
+
+      if (error) throw error;
+
+      const formattedTracks: AudioTrack[] = data?.map(track => ({
+        id: track.id,
+        title: track.title,
+        audioUrl: track.file_url,
+        albumArt: "https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=200&h=200&fit=crop",
+        artist: "Spelman Glee Club",
+        duration: "3:45" // This would need to be calculated from actual audio files
+      })) || [];
+
+      setAudioTracks(formattedTracks);
+    } catch (error) {
+      console.error('Error fetching audio tracks:', error);
+      // Fallback to placeholder
+      setAudioTracks([
+        {
+          id: "track-1",
+          title: "Lift Every Voice",
+          audioUrl: "/placeholder.mp3",
+          albumArt: "https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=200&h=200&fit=crop",
+          artist: "Spelman Glee Club",
+          duration: "3:45"
+        }
+      ]);
+    }
+  };
+
   // Load all data on component mount
   useEffect(() => {
     const loadData = async () => {
       setIsLoading(true);
       await Promise.all([
         fetchHeroImages(),
-        fetchUpcomingEvents(),
-        fetchStoreProducts()
+        fetchStoreProducts(),
+        fetchAudioTracks()
       ]);
       setIsLoading(false);
     };

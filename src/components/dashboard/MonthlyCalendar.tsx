@@ -5,22 +5,26 @@ import { ChevronLeft, ChevronRight } from "lucide-react";
 import { format, addMonths, subMonths, startOfMonth, endOfMonth, startOfWeek, endOfWeek, addDays, isSameMonth, isSameDay } from "date-fns";
 import { cn } from "@/lib/utils";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { useCalendarEvents } from "@/hooks/useCalendarEvents";
 
 interface MonthlyCalendarProps {
-  events: Array<{
-    id: string;
-    title: string;
-    date: Date;
-    type: string;
-  }>;
   className?: string;
   onEventClick?: (eventId: string) => void;
 }
 
-const MonthlyCalendar: React.FC<MonthlyCalendarProps> = ({ events, className, onEventClick }) => {
+const MonthlyCalendar: React.FC<MonthlyCalendarProps> = ({ className, onEventClick }) => {
   const [currentMonth, setCurrentMonth] = useState(new Date());
   const [selectedDate, setSelectedDate] = useState(new Date());
   const isMobile = useIsMobile();
+  const { events } = useCalendarEvents();
+
+  // Transform calendar events to match the expected format
+  const transformedEvents = events.map(event => ({
+    id: event.id,
+    title: event.title,
+    date: new Date(event.start_time),
+    type: event.event_type || 'event'
+  }));
 
   const prevMonth = () => {
     setCurrentMonth(subMonths(currentMonth, 1));
@@ -96,8 +100,8 @@ const MonthlyCalendar: React.FC<MonthlyCalendarProps> = ({ events, className, on
         const cloneDay = day;
         const formattedDate = format(day, "d");
         
-        // Find events for this day
-        const dayEvents = events.filter(event => isSameDay(event.date, cloneDay));
+        // Find events for this day using real event data
+        const dayEvents = transformedEvents.filter(event => isSameDay(event.date, cloneDay));
         const maxEventsToShow = isMobile ? 1 : 2;
         
         days.push(
@@ -126,6 +130,7 @@ const MonthlyCalendar: React.FC<MonthlyCalendarProps> = ({ events, className, on
                     event.type === "sectional" && "bg-green-500 text-white",
                     event.type === "special" && "bg-amber-500 text-white",
                     event.type === "tour" && "bg-red-500 text-white",
+                    (!event.type || event.type === "event") && "bg-gray-500 text-white",
                     isMobile && "text-xs leading-tight"
                   )}
                   onClick={(e) => {

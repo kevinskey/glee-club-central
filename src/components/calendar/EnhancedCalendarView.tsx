@@ -199,26 +199,19 @@ export function EnhancedCalendarView({
             minute: '2-digit',
             meridiem: 'short'
           }}
-          // Mobile-optimized settings
           dayHeaderFormat={isMobile ? { weekday: 'narrow' } : { weekday: 'short' }}
           eventClassNames="hover:opacity-80 transition-opacity cursor-pointer"
           dayCellClassNames="hover:bg-gray-50 dark:hover:bg-gray-800"
           listDayFormat={{ weekday: 'long', month: 'long', day: 'numeric' }}
           listDaySideFormat={isMobile ? { weekday: 'narrow' } : { weekday: 'short' }}
           contentHeight={isMobile ? 400 : 600}
-          // Mobile-specific improvements
           nowIndicator={true}
           scrollTime="09:00:00"
           slotMinTime="06:00:00"
           slotMaxTime="23:00:00"
-          // Better mobile touch handling
           eventMinHeight={isMobile ? 25 : 30}
           dayMaxEvents={isMobile ? 1 : 4}
-          // Responsive settings
           themeSystem="standard"
-          // Mobile list view optimizations
-          listDayAltFormat={false}
-          // Improve mobile interaction
           longPressDelay={isMobile ? 200 : 1000}
           eventInteractionEnabled={true}
         />
