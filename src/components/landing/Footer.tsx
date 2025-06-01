@@ -3,7 +3,6 @@ import React from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { Instagram, Facebook, Youtube, Twitter } from "lucide-react";
 import { Icons } from "@/components/Icons";
-import { Button } from "@/components/ui/button";
 
 export function Footer() {
   const navigate = useNavigate();
@@ -55,9 +54,9 @@ export function Footer() {
     <footer className="border-t py-10 sm:py-12 md:py-14 bg-white dark:bg-gray-950">
       <div className="container px-4 sm:px-6 md:px-8 max-w-7xl mx-auto">
         {/* Main Footer Content */}
-        <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-4 mb-8">
+        <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3 mb-8">
           {/* Logo & Tagline */}
-          <div className="lg:col-span-2">
+          <div className="lg:col-span-1">
             <div className="flex items-center mb-4">
               <img 
                 src="/lovable-uploads/8aa13e63-fb9a-4c52-95cf-86b458c58f1c.png" 
@@ -104,10 +103,10 @@ export function Footer() {
             </ul>
           </div>
 
-          {/* Legal & Member Access */}
+          {/* Legal Links */}
           <div>
-            <h3 className="font-semibold mb-4">Legal & Access</h3>
-            <ul className="space-y-2 mb-4">
+            <h3 className="font-semibold mb-4">Legal</h3>
+            <ul className="space-y-2">
               {legalLinks.map((link) => (
                 <li key={link.href}>
                   <Link
@@ -119,14 +118,6 @@ export function Footer() {
                 </li>
               ))}
             </ul>
-            <Button
-              variant="default"
-              size="sm"
-              asChild
-              className="bg-glee-spelman hover:bg-glee-spelman/90"
-            >
-              <Link to="/login">Member Login</Link>
-            </Button>
           </div>
         </div>
         

@@ -59,8 +59,8 @@ export function Header() {
             </Link>
           </nav>
           
-          {/* Right side: Actions and Auth */}
-          <div className="flex items-center gap-4">
+          {/* Right side: Auth buttons, Actions and Mobile Nav */}
+          <div className="flex items-center gap-2">
             {/* Desktop Auth Buttons */}
             {!isMobile && (
               <>
@@ -69,7 +69,7 @@ export function Header() {
                     <Button 
                       variant="default"
                       onClick={handleDashboardClick}
-                      className="hidden sm:flex items-center bg-glee-spelman hover:bg-glee-spelman/90"
+                      className="bg-glee-spelman hover:bg-glee-spelman/90"
                     >
                       <User className="w-4 h-4 mr-2" />
                       {profile?.first_name ? `${profile.first_name}'s Dashboard` : 'My Dashboard'}
@@ -77,21 +77,20 @@ export function Header() {
                     <Button 
                       variant="outline"
                       onClick={handleLogout}
-                      className="flex items-center border-glee-spelman text-glee-spelman hover:bg-glee-spelman/10"
+                      className="border-glee-spelman text-glee-spelman hover:bg-glee-spelman/10"
                     >
                       <LogOut className="w-4 h-4 mr-2" />
-                      <span className="hidden sm:inline">Sign Out</span>
+                      Sign Out
                     </Button>
                   </div>
                 ) : (
                   <Button 
                     variant="default"
                     onClick={() => navigate("/login")}
-                    className="flex items-center bg-glee-spelman hover:bg-glee-spelman/90"
+                    className="bg-glee-spelman hover:bg-glee-spelman/90"
                   >
                     <LogIn className="w-4 h-4 mr-2" />
-                    <span className="hidden sm:inline">Member Login</span>
-                    <span className="sm:hidden">Login</span>
+                    Member Login
                   </Button>
                 )}
                 <HeaderActions />
@@ -101,6 +100,26 @@ export function Header() {
             {/* Mobile Navigation */}
             {isMobile && (
               <div className="flex items-center gap-2">
+                {/* Mobile Auth Button */}
+                {isAuthenticated ? (
+                  <Button 
+                    variant="default"
+                    onClick={handleDashboardClick}
+                    size="sm"
+                    className="bg-glee-spelman hover:bg-glee-spelman/90"
+                  >
+                    <User className="w-4 h-4" />
+                  </Button>
+                ) : (
+                  <Button 
+                    variant="default"
+                    onClick={() => navigate("/login")}
+                    size="sm"
+                    className="bg-glee-spelman hover:bg-glee-spelman/90"
+                  >
+                    <LogIn className="w-4 h-4" />
+                  </Button>
+                )}
                 <HeaderActions />
                 <MobileNavDropdown />
               </div>
