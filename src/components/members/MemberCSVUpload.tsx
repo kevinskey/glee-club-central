@@ -1,4 +1,3 @@
-
 import React, { useState, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -80,32 +79,43 @@ student@spelman.edu,Mary,Smith,555-0124,alto_1,member,active,2026,Another member
   };
 
   const createUser = async (userData: CSVRow): Promise<void> => {
-    // Generate a temporary password
-    const tempPassword = Math.random().toString(36).substring(2, 10) + 'Aa1!';
-    
-    // Create auth user
-    const { data: authData, error: authError } = await supabase.auth.signUp({
-      email: userData.email,
-      password: tempPassword,
-      options: {
-        data: {
+    try {
+      console.log('Creating user:', userData.email);
+      
+      // Generate a secure temporary password
+      const tempPassword = `Temp${Math.random().toString(36).substring(2, 8)}Glee!1`;
+      
+      // Create auth user using admin API
+      const { data: authData, error: authError } = await supabase.auth.admin.createUser({
+        email: userData.email,
+        password: tempPassword,
+        email_confirm: true,
+        user_metadata: {
           first_name: userData.first_name,
           last_name: userData.last_name
         }
+      });
+
+      if (authError) {
+        console.error('Auth creation error:', authError);
+        throw new Error(`Failed to create auth user: ${authError.message}`);
       }
-    });
+      
+      if (!authData.user?.id) {
+        throw new Error('User creation failed - no user ID returned');
+      }
 
-    if (authError) throw authError;
-    if (!authData.user?.id) throw new Error('User creation failed');
+      console.log('Auth user created:', authData.user.id);
 
-    // Parse boolean and date values
-    const duesPaid = userData.dues_paid?.toLowerCase() === 'true';
-    const joinDate = userData.join_date || new Date().toISOString().split('T')[0];
+      // Parse boolean and date values
+      const duesPaid = userData.dues_paid?.toLowerCase() === 'true';
+      const joinDate = userData.join_date || new Date().toISOString().split('T')[0];
 
-    // Update profile with additional data
-    const { error: profileError } = await supabase
-      .from('profiles')
-      .update({
+      // Create/update profile with additional data
+      const profileData = {
+        id: authData.user.id,
+        first_name: userData.first_name,
+        last_name: userData.last_name,
         phone: userData.phone || null,
         voice_part: userData.voice_part || null,
         status: userData.status || 'active',
@@ -115,10 +125,35 @@ student@spelman.edu,Mary,Smith,555-0124,alto_1,member,active,2026,Another member
         join_date: joinDate,
         role: userData.role || 'member',
         is_super_admin: userData.role === 'admin',
-      })
-      .eq('id', authData.user.id);
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
+      };
 
-    if (profileError) throw profileError;
+      console.log('Creating profile with data:', profileData);
+
+      const { error: profileError } = await supabase
+        .from('profiles')
+        .upsert(profileData, { 
+          onConflict: 'id',
+          ignoreDuplicates: false 
+        });
+
+      if (profileError) {
+        console.error('Profile creation error:', profileError);
+        // Try to clean up the auth user if profile creation fails
+        try {
+          await supabase.auth.admin.deleteUser(authData.user.id);
+        } catch (cleanupError) {
+          console.error('Failed to cleanup auth user:', cleanupError);
+        }
+        throw new Error(`Failed to create profile: ${profileError.message}`);
+      }
+
+      console.log('Profile created successfully for:', userData.email);
+    } catch (error: any) {
+      console.error('User creation failed:', error);
+      throw error;
+    }
   };
 
   const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -156,13 +191,18 @@ student@spelman.edu,Mary,Smith,555-0124,alto_1,member,active,2026,Another member
       errors: []
     };
 
+    console.log(`Starting upload of ${csvData.length} users`);
+
     for (let i = 0; i < csvData.length; i++) {
       const row = csvData[i];
       setUploadProgress(((i + 1) / csvData.length) * 100);
 
+      console.log(`Processing row ${i + 1}/${csvData.length}:`, row.email);
+
       // Validate row
       const validationError = validateRow(row, i);
       if (validationError) {
+        console.log('Validation error:', validationError);
         result.errors.push({
           row: i + 2,
           email: row.email,
@@ -174,18 +214,21 @@ student@spelman.edu,Mary,Smith,555-0124,alto_1,member,active,2026,Another member
       try {
         await createUser(row);
         result.success++;
+        console.log(`Successfully created user ${result.success}:`, row.email);
       } catch (error: any) {
+        console.error(`Failed to create user ${row.email}:`, error);
         result.errors.push({
           row: i + 2,
           email: row.email,
-          error: error.message
+          error: error.message || 'Unknown error occurred'
         });
       }
 
       // Small delay to prevent overwhelming the server
-      await new Promise(resolve => setTimeout(resolve, 100));
+      await new Promise(resolve => setTimeout(resolve, 200));
     }
 
+    console.log('Upload completed:', result);
     setUploadResult(result);
     setIsUploading(false);
     setCsvData([]);

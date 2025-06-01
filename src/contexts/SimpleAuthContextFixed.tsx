@@ -104,8 +104,19 @@ export const SimpleAuthProviderFixed: React.FC<{ children: React.ReactNode }> = 
   }, []);
 
   const isAdmin = useCallback(() => {
+    // Check if user is the known admin email
     const isKnownAdmin = user?.email === 'kevinskey@mac.com';
+    // Check profile-based admin status
     const profileAdmin = profile ? (profile.is_super_admin === true || profile.role === 'admin') : false;
+    
+    console.log('🔍 isAdmin check:', {
+      userEmail: user?.email,
+      isKnownAdmin,
+      profileAdmin,
+      profileRole: profile?.role,
+      profileIsSuper: profile?.is_super_admin
+    });
+    
     return isKnownAdmin || profileAdmin;
   }, [profile, user?.email]);
 

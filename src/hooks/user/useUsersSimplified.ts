@@ -42,7 +42,7 @@ export const useUsersSimplified = (): UseUsersSimplifiedResponse => {
         throw new Error('User not authenticated');
       }
 
-      // Try to fetch profiles directly with email from auth.users
+      // Fetch profiles using the fixed RLS policies
       const { data: profiles, error: profilesError } = await supabase
         .from('profiles')
         .select(`
@@ -67,62 +67,98 @@ export const useUsersSimplified = (): UseUsersSimplifiedResponse => {
         console.error('❌ Error fetching profiles:', profilesError);
         setError(profilesError.message);
         
-        // Fallback: create a minimal user list with just the current user
-        const fallbackUsers: SimpleUser[] = [
-          {
-            id: currentUser.id,
-            first_name: 'Current',
-            last_name: 'User',
-            email: currentUser.email || '',
-            role: currentUser.email === 'kevinskey@mac.com' ? 'admin' : 'member',
-            status: 'active',
-            is_super_admin: currentUser.email === 'kevinskey@mac.com'
-          }
-        ];
-        setUsers(fallbackUsers);
+        // Fallback: create a minimal user list with just the current user if admin
+        if (currentUser.email === 'kevinskey@mac.com') {
+          const fallbackUsers: SimpleUser[] = [
+            {
+              id: currentUser.id,
+              first_name: 'Admin',
+              last_name: 'User',
+              email: currentUser.email || '',
+              role: 'admin',
+              status: 'active',
+              is_super_admin: true
+            }
+          ];
+          setUsers(fallbackUsers);
+        } else {
+          setUsers([]);
+        }
         return;
       }
 
       if (!profiles || profiles.length === 0) {
-        console.log('ℹ️ No profiles found, creating fallback user');
-        const fallbackUsers: SimpleUser[] = [
-          {
-            id: currentUser.id,
-            first_name: 'Admin',
-            last_name: 'User',
-            email: currentUser.email || '',
-            role: 'admin',
-            status: 'active',
-            is_super_admin: true
-          }
-        ];
-        setUsers(fallbackUsers);
+        console.log('ℹ️ No profiles found');
+        // If admin and no profiles, create a fallback
+        if (currentUser.email === 'kevinskey@mac.com') {
+          const fallbackUsers: SimpleUser[] = [
+            {
+              id: currentUser.id,
+              first_name: 'Admin',
+              last_name: 'User',
+              email: currentUser.email || '',
+              role: 'admin',
+              status: 'active',
+              is_super_admin: true
+            }
+          ];
+          setUsers(fallbackUsers);
+        } else {
+          setUsers([]);
+        }
         return;
       }
 
-      // Get emails for all users by fetching from auth metadata or admin function
-      const usersWithEmails = await Promise.all(
-        profiles.map(async (profile) => {
-          try {
-            // Try to get email from user metadata if available
-            const { data: authUser } = await supabase.auth.admin.getUserById(profile.id);
-            return {
-              ...profile,
-              email: authUser.user?.email || '',
-              first_name: profile.first_name || 'Unknown',
-              last_name: profile.last_name || 'User',
-            };
-          } catch {
-            // Fallback if admin call fails
-            return {
+      // Get emails for users by querying auth.users (admin only)
+      const isCurrentUserAdmin = currentUser.email === 'kevinskey@mac.com';
+      
+      let usersWithEmails: SimpleUser[];
+      
+      if (isCurrentUserAdmin) {
+        // Admin can fetch all user emails
+        try {
+          const { data: authUsers, error: authError } = await supabase.auth.admin.listUsers();
+          
+          if (authError) {
+            console.warn('Could not fetch auth users:', authError);
+            // Fallback to profiles only
+            usersWithEmails = profiles.map(profile => ({
               ...profile,
               email: profile.id === currentUser.id ? currentUser.email || '' : '',
               first_name: profile.first_name || 'Unknown',
               last_name: profile.last_name || 'User',
-            };
+            }));
+          } else {
+            // Map profiles with auth user emails
+            const authUserMap = new Map(authUsers.users.map(user => [user.id, user.email]));
+            
+            usersWithEmails = profiles.map(profile => ({
+              ...profile,
+              email: authUserMap.get(profile.id) || '',
+              first_name: profile.first_name || 'Unknown',
+              last_name: profile.last_name || 'User',
+            }));
           }
-        })
-      );
+        } catch (authFetchError) {
+          console.warn('Auth fetch failed:', authFetchError);
+          usersWithEmails = profiles.map(profile => ({
+            ...profile,
+            email: profile.id === currentUser.id ? currentUser.email || '' : '',
+            first_name: profile.first_name || 'Unknown',
+            last_name: profile.last_name || 'User',
+          }));
+        }
+      } else {
+        // Non-admin users can only see their own profile
+        usersWithEmails = profiles
+          .filter(profile => profile.id === currentUser.id)
+          .map(profile => ({
+            ...profile,
+            email: currentUser.email || '',
+            first_name: profile.first_name || 'Unknown',
+            last_name: profile.last_name || 'User',
+          }));
+      }
 
       console.log('✅ Successfully processed users:', usersWithEmails.length);
       setUsers(usersWithEmails);
@@ -160,38 +196,7 @@ export const useUsersSimplified = (): UseUsersSimplifiedResponse => {
                role.includes(searchTermLower);
       });
 
-      // Also try database search for more comprehensive results
-      const { data: dbResults, error } = await supabase
-        .from('profiles')
-        .select(`
-          id,
-          first_name,
-          last_name,
-          voice_part,
-          status,
-          role,
-          is_super_admin
-        `)
-        .or(`first_name.ilike.%${searchTerm}%,last_name.ilike.%${searchTerm}%,voice_part.ilike.%${searchTerm}%,role.ilike.%${searchTerm}%`)
-        .order('last_name', { ascending: true });
-
-      if (!error && dbResults) {
-        // Merge and deduplicate results
-        const combinedResults = [...clientSideResults];
-        dbResults.forEach(dbUser => {
-          if (!combinedResults.find(existing => existing.id === dbUser.id)) {
-            combinedResults.push({
-              ...dbUser,
-              first_name: dbUser.first_name || 'Unknown',
-              last_name: dbUser.last_name || 'User',
-            });
-          }
-        });
-        
-        console.log('🔍 Search completed:', combinedResults.length, 'results');
-        return combinedResults;
-      }
-
+      console.log('🔍 Search completed:', clientSideResults.length, 'results');
       return clientSideResults;
     } catch (err) {
       console.error('❌ Search error:', err);

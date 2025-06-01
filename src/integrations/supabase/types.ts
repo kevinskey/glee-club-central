@@ -1635,6 +1635,10 @@ export type Database = {
         Args: { profile_user_id: string }
         Returns: boolean
       }
+      can_access_profile_safe: {
+        Args: { profile_user_id: string }
+        Returns: boolean
+      }
       check_user_is_admin: {
         Args: Record<PropertyKey, never>
         Returns: boolean
@@ -1727,6 +1731,10 @@ export type Database = {
         Returns: boolean
       }
       is_current_user_admin: {
+        Args: Record<PropertyKey, never>
+        Returns: boolean
+      }
+      is_current_user_admin_safe: {
         Args: Record<PropertyKey, never>
         Returns: boolean
       }
