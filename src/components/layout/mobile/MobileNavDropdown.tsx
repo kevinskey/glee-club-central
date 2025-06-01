@@ -1,102 +1,144 @@
 
-import React from "react";
-import { Button } from "@/components/ui/button";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { useNavigate } from "react-router-dom";
-import { 
-  Menu,
-  Home,
-  Info,
-  Calendar,
-  Mail,
-  LogIn,
-  User,
-  LogOut
-} from "lucide-react";
+import React, { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
+import { Button } from "@/components/ui/button";
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
+import { Menu, User, LogIn, LogOut, Home, Calendar, Users, Mail, Store } from "lucide-react";
 
 export function MobileNavDropdown() {
-  const navigate = useNavigate();
+  const [isOpen, setIsOpen] = useState(false);
   const { isAuthenticated, profile, logout } = useAuth();
+  const navigate = useNavigate();
 
-  const handleItemClick = (path: string) => {
-    console.log("Navigating to:", path);
-    navigate(path);
+  const handleDashboardClick = () => {
+    setIsOpen(false);
+    navigate("/role-dashboard");
   };
 
   const handleLogout = async () => {
     try {
       await logout();
+      setIsOpen(false);
       navigate("/");
     } catch (error) {
       console.error("Logout error:", error);
     }
   };
 
+  const handleNavClick = () => {
+    setIsOpen(false);
+  };
+
   return (
-    <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <Button 
-          variant="ghost" 
-          size="icon" 
-          className="md:hidden" 
-        >
+    <Sheet open={isOpen} onOpenChange={setIsOpen}>
+      <SheetTrigger asChild>
+        <Button variant="ghost" size="icon" className="md:hidden">
           <Menu className="h-5 w-5" />
-          <span className="sr-only">Open navigation menu</span>
+          <span className="sr-only">Toggle menu</span>
         </Button>
-      </DropdownMenuTrigger>
-      <DropdownMenuContent 
-        align="end" 
-        className="w-56 bg-background border border-border shadow-lg z-[100]"
-        sideOffset={5}
-      >
-        <DropdownMenuItem onClick={() => handleItemClick("/")}>
-          <Home className="mr-2 h-4 w-4" />
-          Home
-        </DropdownMenuItem>
+      </SheetTrigger>
+      <SheetContent side="right" className="w-80">
+        <SheetHeader>
+          <SheetTitle>Navigation</SheetTitle>
+        </SheetHeader>
         
-        <DropdownMenuItem onClick={() => handleItemClick("/about")}>
-          <Info className="mr-2 h-4 w-4" />
-          About
-        </DropdownMenuItem>
-        
-        <DropdownMenuItem onClick={() => handleItemClick("/events")}>
-          <Calendar className="mr-2 h-4 w-4" />
-          Events
-        </DropdownMenuItem>
-        
-        <DropdownMenuItem onClick={() => handleItemClick("/contact")}>
-          <Mail className="mr-2 h-4 w-4" />
-          Contact
-        </DropdownMenuItem>
-        
-        <DropdownMenuSeparator />
-        
-        {isAuthenticated ? (
-          <>
-            <DropdownMenuItem onClick={() => handleItemClick("/role-dashboard")}>
-              <User className="mr-2 h-4 w-4" />
-              {profile?.first_name ? `${profile.first_name}'s Dashboard` : 'My Dashboard'}
-            </DropdownMenuItem>
+        <div className="mt-6 space-y-4">
+          {/* Navigation Links */}
+          <div className="space-y-2">
+            <Link 
+              to="/" 
+              className="flex items-center gap-3 px-3 py-2 rounded-md hover:bg-muted transition-colors"
+              onClick={handleNavClick}
+            >
+              <Home className="h-5 w-5" />
+              <span>Home</span>
+            </Link>
             
-            <DropdownMenuItem onClick={handleLogout}>
-              <LogOut className="mr-2 h-4 w-4" />
-              Sign Out
-            </DropdownMenuItem>
-          </>
-        ) : (
-          <DropdownMenuItem onClick={() => handleItemClick("/login")}>
-            <LogIn className="mr-2 h-4 w-4" />
-            Member Login
-          </DropdownMenuItem>
-        )}
-      </DropdownMenuContent>
-    </DropdownMenu>
+            <Link 
+              to="/about" 
+              className="flex items-center gap-3 px-3 py-2 rounded-md hover:bg-muted transition-colors"
+              onClick={handleNavClick}
+            >
+              <Users className="h-5 w-5" />
+              <span>About</span>
+            </Link>
+            
+            <Link 
+              to="/events" 
+              className="flex items-center gap-3 px-3 py-2 rounded-md hover:bg-muted transition-colors"
+              onClick={handleNavClick}
+            >
+              <Calendar className="h-5 w-5" />
+              <span>Events</span>
+            </Link>
+            
+            <Link 
+              to="/calendar" 
+              className="flex items-center gap-3 px-3 py-2 rounded-md hover:bg-muted transition-colors"
+              onClick={handleNavClick}
+            >
+              <Calendar className="h-5 w-5" />
+              <span>Calendar</span>
+            </Link>
+            
+            <Link 
+              to="/store" 
+              className="flex items-center gap-3 px-3 py-2 rounded-md hover:bg-muted transition-colors"
+              onClick={handleNavClick}
+            >
+              <Store className="h-5 w-5" />
+              <span>Store</span>
+            </Link>
+            
+            <Link 
+              to="/contact" 
+              className="flex items-center gap-3 px-3 py-2 rounded-md hover:bg-muted transition-colors"
+              onClick={handleNavClick}
+            >
+              <Mail className="h-5 w-5" />
+              <span>Contact</span>
+            </Link>
+          </div>
+
+          {/* Divider */}
+          <div className="border-t pt-4">
+            {/* Authentication Section */}
+            {isAuthenticated ? (
+              <div className="space-y-2">
+                <Button 
+                  variant="default"
+                  onClick={handleDashboardClick}
+                  className="w-full justify-start bg-glee-spelman hover:bg-glee-spelman/90"
+                >
+                  <User className="w-4 h-4 mr-2" />
+                  {profile?.first_name ? `${profile.first_name}'s Dashboard` : 'My Dashboard'}
+                </Button>
+                <Button 
+                  variant="outline"
+                  onClick={handleLogout}
+                  className="w-full justify-start border-glee-spelman text-glee-spelman hover:bg-glee-spelman/10"
+                >
+                  <LogOut className="w-4 h-4 mr-2" />
+                  Sign Out
+                </Button>
+              </div>
+            ) : (
+              <Button 
+                variant="default"
+                onClick={() => {
+                  setIsOpen(false);
+                  navigate("/login");
+                }}
+                className="w-full justify-start bg-glee-spelman hover:bg-glee-spelman/90"
+              >
+                <LogIn className="w-4 h-4 mr-2" />
+                Member Login
+              </Button>
+            )}
+          </div>
+        </div>
+      </SheetContent>
+    </Sheet>
   );
 }
