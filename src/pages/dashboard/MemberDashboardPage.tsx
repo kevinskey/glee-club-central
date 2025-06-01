@@ -11,6 +11,7 @@ export default function MemberDashboardPage() {
   
   // Show loading only very briefly
   const [showContent, setShowContent] = React.useState(false);
+  const [debugMode] = React.useState(true); // Enable debug mode temporarily
   
   React.useEffect(() => {
     // Show content after a short delay, even if profile is still loading
@@ -21,22 +22,51 @@ export default function MemberDashboardPage() {
     return () => clearTimeout(timer);
   }, []);
 
-  console.log('MemberDashboardPage render:', {
+  console.log('📊 MemberDashboardPage: DETAILED RENDER STATE:', {
     hasUser: !!user,
+    userId: user?.id,
+    userEmail: user?.email,
     hasProfile: !!profile,
-    userRole: profile?.role,
+    profileId: profile?.id,
+    profileRole: profile?.role,
+    profileStatus: profile?.status,
+    profileFirstName: profile?.first_name,
+    profileLastName: profile?.last_name,
     isLoading,
-    showContent
+    showContent,
+    timestamp: new Date().toISOString()
   });
 
   // Show loading state briefly
   if (isLoading && !showContent) {
-    return <PageLoader message="Loading your dashboard..." />;
+    return (
+      <div>
+        <PageLoader message="Loading your dashboard..." />
+        {debugMode && (
+          <div className="fixed top-4 right-4 bg-blue-600 text-white p-4 rounded text-xs">
+            <div>📊 MEMBER DASHBOARD DEBUG</div>
+            <div>Loading: {isLoading ? 'Yes' : 'No'}</div>
+            <div>Show Content: {showContent ? 'Yes' : 'No'}</div>
+            <div>User: {user?.email || 'None'}</div>
+          </div>
+        )}
+      </div>
+    );
   }
 
   // If no user, something is wrong with auth
   if (!user) {
-    return <PageLoader message="Authentication required..." />;
+    return (
+      <div>
+        <PageLoader message="Authentication required..." />
+        {debugMode && (
+          <div className="fixed top-4 right-4 bg-red-600 text-white p-4 rounded text-xs">
+            <div>❌ NO USER FOUND</div>
+            <div>This shouldn't happen if auth is working</div>
+          </div>
+        )}
+      </div>
+    );
   }
 
   // Get display name with fallbacks
@@ -64,6 +94,18 @@ export default function MemberDashboardPage() {
           <DashboardAnnouncements />
         </div>
       </div>
+
+      {debugMode && (
+        <div className="fixed top-4 right-4 bg-green-600 text-white p-4 rounded text-xs max-w-sm">
+          <div className="font-bold mb-2">✅ MEMBER DASHBOARD LOADED</div>
+          <div>User ID: {user?.id}</div>
+          <div>Email: {user?.email}</div>
+          <div>Profile ID: {profile?.id || 'Missing'}</div>
+          <div>Display Name: {displayName}</div>
+          <div>Role: {profile?.role || 'Missing'}</div>
+          <div>Profile Status: {profile?.status || 'Missing'}</div>
+        </div>
+      )}
     </div>
   );
 }

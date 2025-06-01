@@ -29,36 +29,93 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const { user, profile, isLoading, isInitialized, permissions, refreshUserData } = useAuthState();
   const [session, setSession] = useState<any>(null);
 
-  // Debug logging for auth state
+  // Enhanced debug logging for auth state
   useEffect(() => {
-    console.log('🔍 AuthContext: Auth state debug:', {
+    console.log('🔍 AuthContext: AUTH STATE DEBUG:', {
       hasUser: !!user,
       userId: user?.id,
       userEmail: user?.email,
+      userMetadata: user?.user_metadata,
       hasProfile: !!profile,
+      profileId: profile?.id,
       profileRole: profile?.role,
       profileIsAdmin: profile?.is_super_admin,
+      profileStatus: profile?.status,
+      profileFirstName: profile?.first_name,
+      profileLastName: profile?.last_name,
       isLoading,
       isInitialized,
       hasSession: !!session,
       sessionUserId: session?.user?.id,
+      sessionUserEmail: session?.user?.email,
       permissions: Object.keys(permissions || {}),
       timestamp: new Date().toISOString()
     });
+
+    // Additional profile-specific logging
+    if (profile) {
+      console.log('👤 AuthContext: PROFILE DETAILS:', {
+        fullProfile: profile,
+        profileKeys: Object.keys(profile),
+        profileValues: Object.values(profile)
+      });
+    }
+
+    // Auth.uid() check
+    console.log('🔑 AuthContext: Current auth.uid():', {
+      authUid: user?.id,
+      profileMatchesAuth: profile?.id === user?.id
+    });
   }, [user, profile, isLoading, isInitialized, session, permissions]);
 
-  // Simplified session tracking
+  // Enhanced session tracking with detailed logging
   useEffect(() => {
+    console.log('🔄 AuthContext: Setting up auth state listener...');
+    
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (event, session) => {
-        console.log('🔄 AuthContext: Auth state change:', {
+      async (event, session) => {
+        console.log('🔄 AuthContext: AUTH STATE CHANGE EVENT:', {
           event,
           hasSession: !!session,
           userId: session?.user?.id,
           userEmail: session?.user?.email,
+          userMetadata: session?.user?.user_metadata,
+          sessionCreatedAt: session?.created_at,
+          sessionExpiresAt: session?.expires_at,
+          accessToken: session?.access_token ? 'present' : 'missing',
+          refreshToken: session?.refresh_token ? 'present' : 'missing',
           timestamp: new Date().toISOString()
         });
+        
         setSession(session);
+        
+        if (event === 'SIGNED_IN' && session?.user) {
+          console.log('✅ AuthContext: User signed in successfully:', {
+            userId: session.user.id,
+            email: session.user.email,
+            metadata: session.user.user_metadata
+          });
+
+          // Try to fetch profile immediately after sign in
+          try {
+            console.log('📋 AuthContext: Attempting to fetch profile for user:', session.user.id);
+            const { data: profileData, error: profileError } = await supabase
+              .from('profiles')
+              .select('*')
+              .eq('id', session.user.id)
+              .single();
+
+            console.log('📋 AuthContext: Profile fetch result:', {
+              hasProfileData: !!profileData,
+              profileData,
+              profileError: profileError?.message,
+              errorCode: profileError?.code,
+              errorDetails: profileError?.details
+            });
+          } catch (err) {
+            console.error('💥 AuthContext: Profile fetch error:', err);
+          }
+        }
         
         if (event === 'SIGNED_OUT') {
           console.log('👋 AuthContext: User signed out, cleaning up');
@@ -68,6 +125,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     );
 
     return () => {
+      console.log('🔄 AuthContext: Cleaning up auth state listener');
       subscription.unsubscribe();
     };
   }, []);
@@ -77,19 +135,27 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const login = useCallback(async (email: string, password: string) => {
     try {
-      console.log('🔐 AuthContext: Login attempt for:', email);
+      console.log('🔐 AuthContext: LOGIN ATTEMPT for:', email);
       
       const { data, error } = await supabase.auth.signInWithPassword({ 
         email: email.trim(), 
         password 
       });
       
-      console.log('🔐 AuthContext: Login response:', {
+      console.log('🔐 AuthContext: LOGIN RESPONSE:', {
         hasData: !!data,
         hasSession: !!data?.session,
         hasUser: !!data?.user,
         userId: data?.user?.id,
-        error: error?.message
+        userEmail: data?.user?.email,
+        userMetadata: data?.user?.user_metadata,
+        sessionDetails: data?.session ? {
+          accessToken: data.session.access_token ? 'present' : 'missing',
+          refreshToken: data.session.refresh_token ? 'present' : 'missing',
+          expiresAt: data.session.expires_at
+        } : null,
+        error: error?.message,
+        errorCode: error?.code
       });
       
       if (error) {
@@ -100,6 +166,27 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       if (data.session && data.user) {
         console.log('✅ AuthContext: Login successful, session created for user:', data.user.id);
         setSession(data.session);
+
+        // Immediately try to verify profile access
+        setTimeout(async () => {
+          try {
+            console.log('🔍 AuthContext: Post-login profile verification...');
+            const { data: profileCheck, error: profileCheckError } = await supabase
+              .from('profiles')
+              .select('*')
+              .eq('id', data.user.id)
+              .single();
+
+            console.log('🔍 AuthContext: Post-login profile check:', {
+              hasProfile: !!profileCheck,
+              profileData: profileCheck,
+              error: profileCheckError?.message
+            });
+          } catch (err) {
+            console.error('💥 AuthContext: Post-login profile check failed:', err);
+          }
+        }, 1000);
+
         return { error: null };
       }
       
@@ -113,7 +200,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const logout = useCallback(async () => {
     try {
-      console.log('🚪 AuthContext: Logout attempt');
+      console.log('🚪 AuthContext: LOGOUT ATTEMPT');
       const { error } = await supabase.auth.signOut();
       console.log('🚪 AuthContext: Logout response:', { error: error?.message });
       
@@ -139,7 +226,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const signUp = useCallback(async (email: string, password: string, firstName: string, lastName: string, userType: any = 'member') => {
     try {
-      console.log('📝 AuthContext: Sign up attempt for:', email);
+      console.log('📝 AuthContext: SIGN UP ATTEMPT for:', email);
       
       const { data, error } = await supabase.auth.signUp({
         email: email.trim(),
@@ -153,11 +240,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         },
       });
       
-      console.log('📝 AuthContext: Sign up response:', {
+      console.log('📝 AuthContext: SIGN UP RESPONSE:', {
         hasData: !!data,
         hasUser: !!data?.user,
         userId: data?.user?.id,
-        error: error?.message
+        userEmail: data?.user?.email,
+        error: error?.message,
+        errorCode: error?.code
       });
       
       return { error, data };
@@ -170,50 +259,53 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const isAdmin = useCallback(() => {
     // Ensure we have a profile before checking admin status
     if (!profile) {
-      console.log('👑 AuthContext: Admin check - no profile loaded yet');
+      console.log('👑 AuthContext: ADMIN CHECK - no profile loaded yet');
       return false;
     }
     
     const adminStatus = profile?.is_super_admin === true || profile?.role === 'admin';
-    console.log('👑 AuthContext: Admin check:', {
+    console.log('👑 AuthContext: ADMIN CHECK RESULT:', {
       hasProfile: !!profile,
       profileRole: profile?.role,
       isSuperAdmin: profile?.is_super_admin,
       isAdmin: adminStatus,
-      userId: user?.id
+      userId: user?.id,
+      profileId: profile?.id
     });
     return adminStatus;
   }, [profile, user]);
 
   const isMember = useCallback(() => {
     if (!profile) {
-      console.log('👤 AuthContext: Member check - no profile loaded yet');
+      console.log('👤 AuthContext: MEMBER CHECK - no profile loaded yet');
       return false;
     }
     
     const memberStatus = profile?.role === 'member' || !profile?.role;
-    console.log('👤 AuthContext: Member check:', {
+    console.log('👤 AuthContext: MEMBER CHECK RESULT:', {
       hasProfile: !!profile,
       profileRole: profile?.role,
       isMember: memberStatus,
-      userId: user?.id
+      userId: user?.id,
+      profileId: profile?.id
     });
     return memberStatus;
   }, [profile, user]);
 
   const getUserType = useCallback(() => {
     if (!profile) {
-      console.log('🏷️ AuthContext: User type check - no profile loaded yet');
+      console.log('🏷️ AuthContext: USER TYPE CHECK - no profile loaded yet, defaulting to member');
       return 'member'; // Default to member while loading
     }
     
     const userType = (profile?.is_super_admin === true || profile?.role === 'admin') ? 'admin' : 'member';
-    console.log('🏷️ AuthContext: User type check:', {
+    console.log('🏷️ AuthContext: USER TYPE CHECK RESULT:', {
       hasProfile: !!profile,
       profileRole: profile?.role,
       isSuperAdmin: profile?.is_super_admin,
       userType,
-      userId: user?.id
+      userId: user?.id,
+      profileId: profile?.id
     });
     return userType;
   }, [profile, user]);
