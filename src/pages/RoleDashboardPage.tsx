@@ -5,7 +5,7 @@ import { Navigate } from 'react-router-dom';
 import { PageLoader } from '@/components/ui/page-loader';
 
 const RoleDashboardPage = () => {
-  const { user, profile, isLoading, isInitialized, isAuthenticated, getUserType } = useSimpleAuthContext();
+  const { user, profile, isLoading, isInitialized, isAuthenticated, isAdmin } = useSimpleAuthContext();
 
   console.log('🏠 RoleDashboardPage: State check:', {
     hasUser: !!user,
@@ -14,7 +14,8 @@ const RoleDashboardPage = () => {
     isInitialized,
     isAuthenticated,
     profileRole: profile?.role,
-    profileIsAdmin: profile?.is_super_admin
+    profileIsAdmin: profile?.is_super_admin,
+    isAdminFunction: isAdmin()
   });
 
   // Show loading during initialization
@@ -43,10 +44,11 @@ const RoleDashboardPage = () => {
     );
   }
 
-  // Determine redirect based on user type - with fallback
+  // Determine redirect based on user type - check admin status properly
+  const hasAdminAccess = isAdmin();
   let redirectPath = '/dashboard/member'; // Default fallback
   
-  if (profile?.is_super_admin === true || profile?.role === 'admin') {
+  if (hasAdminAccess) {
     redirectPath = '/dashboard/admin';
     console.log('🎯 RoleDashboardPage: Admin user detected, redirecting to admin dashboard');
   } else {

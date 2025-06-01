@@ -32,7 +32,7 @@ export const router = createBrowserRouter([
       { path: "store", element: <StorePage /> },
     ],
   },
-  // Auth routes
+  // Auth routes - wrapped with SimpleAuthProvider
   {
     path: "/login",
     element: (
@@ -63,7 +63,7 @@ export const router = createBrowserRouter([
       </SimpleAuthProvider>
     ),
   },
-  // Protected routes - all using SimpleAuthProvider
+  // Role dashboard - determines redirect based on user role
   {
     path: "/role-dashboard",
     element: (
@@ -74,8 +74,9 @@ export const router = createBrowserRouter([
       </SimpleAuthProvider>
     ),
   },
+  // Admin dashboard - fixed path to match RoleDashboardPage redirect
   {
-    path: "/admin",
+    path: "/dashboard/admin",
     element: (
       <SimpleAuthProvider>
         <AdminRoute>
@@ -84,6 +85,7 @@ export const router = createBrowserRouter([
       </SimpleAuthProvider>
     ),
   },
+  // Member dashboard
   {
     path: "/dashboard/member",
     element: (
