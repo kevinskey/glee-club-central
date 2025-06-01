@@ -1,45 +1,62 @@
 
-import React, { createContext, useContext, ReactNode } from "react";
-import { useSimpleAuthContext } from "./SimpleAuthContext";
+import React, { createContext, useContext, useState, useEffect } from 'react';
+import { useSimpleAuthContext } from './SimpleAuthContext';
 
-// Define context type
 interface RolePermissionContextType {
+  userRole: string | null;
   hasPermission: (permission: string) => boolean;
-  userRole: string;
   isLoading: boolean;
 }
 
-// Create context with defaults
-const RolePermissionContext = createContext<RolePermissionContextType>({
-  hasPermission: () => false,
-  userRole: "member",
-  isLoading: true,
-});
+const RolePermissionContext = createContext<RolePermissionContextType | undefined>(undefined);
 
-// Provider component
-export const RolePermissionProvider = ({ children }: { children: ReactNode }) => {
-  const { isAdmin, isLoading, profile } = useSimpleAuthContext();
-  
-  // Determine user role based on admin status
-  const userRole = profile?.is_super_admin ? "admin" : "member";
-  
-  // Simple permission check function
+export const RolePermissionProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const { user, profile, isAuthenticated, isInitialized } = useSimpleAuthContext();
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    // Only set loading to false once we're initialized and have resolved auth state
+    if (isInitialized) {
+      setIsLoading(false);
+    }
+  }, [isInitialized]);
+
+  const userRole = profile?.role || 'member';
+
   const hasPermission = (permission: string): boolean => {
-    return profile?.is_super_admin || (isAdmin ? isAdmin() : false);
+    if (!isAuthenticated || !profile) return false;
+    
+    // Super admins have all permissions
+    if (profile.is_super_admin || profile.role === 'admin') {
+      return true;
+    }
+    
+    // Basic permissions for all authenticated users
+    const basicPermissions = ['view_calendar', 'view_announcements', 'view_sheet_music'];
+    if (basicPermissions.includes(permission)) {
+      return true;
+    }
+    
+    return false;
   };
 
-  const value = {
-    hasPermission,
+  const contextValue: RolePermissionContextType = {
     userRole,
+    hasPermission,
     isLoading,
   };
 
   return (
-    <RolePermissionContext.Provider value={value}>
+    <RolePermissionContext.Provider value={contextValue}>
       {children}
     </RolePermissionContext.Provider>
   );
 };
 
-// Custom hook for using this context
-export const useRolePermissions = () => useContext(RolePermissionContext);
+export const useRolePermissions = () => {
+  const context = useContext(RolePermissionContext);
+  if (context === undefined) {
+    throw new Error('useRolePermissions must be used within a RolePermissionProvider');
+  }
+  return context;
+};

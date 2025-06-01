@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useSimpleAuthContext } from '@/contexts/SimpleAuthContext';
 import { useNavigate, useLocation, Link } from 'react-router-dom';
 import { toast } from 'sonner';
@@ -16,22 +16,18 @@ const SimpleLoginPage = () => {
   const location = useLocation();
   
   // Form state
-  const [email, setEmail] = React.useState('');
-  const [password, setPassword] = React.useState('');
-  const [isSubmitting, setIsSubmitting] = React.useState(false);
-  const [showPassword, setShowPassword] = React.useState(false);
-  const [loginError, setLoginError] = React.useState<string | null>(null);
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [loginError, setLoginError] = useState<string | null>(null);
   
   // Handle redirect after successful authentication
-  React.useEffect(() => {
+  useEffect(() => {
     if (isAuthenticated && user && isInitialized && !isSubmitting) {
       console.log('SimpleLoginPage: Authenticated user detected, redirecting...');
       const from = location.state?.from?.pathname || '/role-dashboard';
-      
-      setTimeout(() => {
-        console.log('SimpleLoginPage: Executing redirect to:', from);
-        navigate(from, { replace: true });
-      }, 100);
+      navigate(from, { replace: true });
     }
   }, [isAuthenticated, user, isInitialized, navigate, location.state, isSubmitting]);
   
@@ -76,7 +72,7 @@ const SimpleLoginPage = () => {
         toast.error(errorMessage);
         setIsSubmitting(false);
       } else {
-        console.log("SimpleLoginPage: Login successful, waiting for redirect...");
+        console.log("SimpleLoginPage: Login successful");
         toast.success("Login successful!");
         // Don't set isSubmitting false here - let the redirect happen
       }
