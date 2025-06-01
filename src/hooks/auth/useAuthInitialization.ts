@@ -51,6 +51,7 @@ export const useAuthInitialization = (
             created_at: session.user.created_at
           };
           
+          // Set user immediately and mark as initialized to unblock UI
           setState(prev => ({ 
             ...prev, 
             user: authUser,
@@ -58,13 +59,14 @@ export const useAuthInitialization = (
             isInitialized: true
           }));
           
-          // Defer user data fetching to avoid initialization deadlock
-          console.log('📡 useAuthInitialization: Scheduling user data fetch...');
+          // Delay profile fetching significantly to avoid blocking login
+          console.log('📡 useAuthInitialization: Scheduling profile fetch with delay...');
           setTimeout(() => {
             if (mountedRef.current && !fetchingRef.current) {
+              console.log('📡 useAuthInitialization: Starting delayed profile fetch...');
               fetchUserData(session.user.id, session.user.email, session.user.user_metadata);
             }
-          }, 1000); // Give the UI time to render before fetching profile data
+          }, 3000); // 3 second delay to let login complete first
           
         } else {
           console.log('ℹ️ useAuthInitialization: No session found');
@@ -115,6 +117,7 @@ export const useAuthInitialization = (
             created_at: session.user.created_at
           };
           
+          // Set user immediately and mark as initialized
           setState(prev => ({ 
             ...prev, 
             user: authUser,
@@ -122,13 +125,13 @@ export const useAuthInitialization = (
             isInitialized: true
           }));
           
-          // Defer profile data fetching after sign in
+          // Delay profile fetching after sign in
           console.log('📡 useAuthInitialization: Scheduling profile fetch after sign in...');
           setTimeout(() => {
             if (mountedRef.current && !fetchingRef.current) {
               fetchUserData(session.user.id, session.user.email, session.user.user_metadata);
             }
-          }, 500);
+          }, 2000); // 2 second delay after sign in
           
         } else if (event === 'SIGNED_OUT') {
           console.log('👋 useAuthInitialization: User signed out');
@@ -144,11 +147,24 @@ export const useAuthInitialization = (
       }
     );
     
+    // Add timeout to force initialization completion
+    const initTimeout = setTimeout(() => {
+      console.log('⏰ useAuthInitialization: Forcing initialization completion after timeout');
+      if (mountedRef.current) {
+        setState(prev => ({
+          ...prev,
+          isLoading: false,
+          isInitialized: true
+        }));
+      }
+    }, 5000); // 5 second timeout
+    
     // Initialize auth
     initializeAuth();
     
     return () => {
       console.log('🔄 useAuthInitialization: Cleaning up auth state listener');
+      clearTimeout(initTimeout);
       subscription.unsubscribe();
     };
   }, [setState, fetchUserData, mountedRef, fetchingRef]);
