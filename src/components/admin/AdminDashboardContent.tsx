@@ -1,5 +1,6 @@
 
 import React from "react";
+import { useSimpleAuthContext } from "@/contexts/SimpleAuthContext";
 import { AdminStatsCards } from "./AdminStatsCards";
 import { AdminQuickActions } from "./AdminQuickActions";
 import { AdminRecentActivity } from "./AdminRecentActivity";
@@ -10,14 +11,21 @@ interface AdminDashboardContentProps {
 }
 
 export function AdminDashboardContent({ isMobile = false }: AdminDashboardContentProps) {
+  const { user, profile } = useSimpleAuthContext();
+  
   console.log('AdminDashboardContent: Rendering with isMobile:', isMobile);
+  
+  // Get the user's first name
+  const firstName = profile?.first_name || 
+                   user?.email?.split('@')[0] || 
+                   'Admin';
   
   return (
     <div className="p-4 md:p-6 space-y-6 max-w-7xl mx-auto">
       {/* Header */}
       <div className="mb-6">
         <h1 className="text-2xl md:text-3xl font-bold text-gray-900 dark:text-gray-100 mb-2">
-          Welcome back! 👋
+          Welcome back, {firstName}! 👋
         </h1>
         <p className="text-gray-600 dark:text-gray-400">
           Here's what's happening with the Glee Club today.
