@@ -29,12 +29,15 @@ export const ConsolidatedHeader = memo(function ConsolidatedHeader() {
   }
 
   const handleDashboardClick = () => {
+    console.log('🎯 ConsolidatedHeader: Dashboard button clicked');
     navigate("/role-dashboard");
   };
   
   const handleLogout = async () => {
     try {
+      console.log('🚪 ConsolidatedHeader: Logout initiated');
       await logout();
+      console.log('🚪 ConsolidatedHeader: Logout successful, redirecting to home');
       navigate("/");
     } catch (error) {
       console.error("Logout error:", error);
@@ -44,14 +47,14 @@ export const ConsolidatedHeader = memo(function ConsolidatedHeader() {
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex h-16 md:h-20 items-center justify-between gap-4 md:gap-6">
+        <div className="flex h-16 md:h-20 items-center justify-between gap-6 md:gap-8">
           {/* Left side: Logo and site name */}
           <div className="flex items-center flex-shrink-0">
             <HeaderLogo />
           </div>
             
           {/* Middle: Navigation Links - Desktop only */}
-          <nav className="hidden md:flex items-center space-x-2 lg:space-x-4 xl:space-x-6">
+          <nav className="hidden md:flex items-center space-x-4 lg:space-x-6 xl:space-x-8">
             {navigationLinks.map((link) => {
               const isActive = location.pathname === link.href;
               return (
@@ -60,7 +63,7 @@ export const ConsolidatedHeader = memo(function ConsolidatedHeader() {
                   variant={isActive ? "default" : "ghost"}
                   size="sm"
                   asChild
-                  className={`text-sm font-medium relative px-3 lg:px-4 ${
+                  className={`text-sm font-medium relative px-4 lg:px-5 ${
                     isActive 
                       ? "bg-transparent text-glee-spelman after:content-[''] after:absolute after:bottom-0 after:left-1/2 after:transform after:-translate-x-1/2 after:w-8 after:h-0.5 after:bg-glee-spelman" 
                       : "text-foreground/80 hover:text-glee-spelman"
@@ -73,7 +76,7 @@ export const ConsolidatedHeader = memo(function ConsolidatedHeader() {
           </nav>
 
           {/* Right side: Auth buttons and HeaderActions */}
-          <div className="flex items-center gap-3 lg:gap-4 flex-shrink-0">
+          <div className="flex items-center gap-4 lg:gap-6 flex-shrink-0">
             {/* Authentication Buttons - Show dashboard if NOT authenticated, show logout if authenticated */}
             {!isAuthenticated ? (
               <Button 

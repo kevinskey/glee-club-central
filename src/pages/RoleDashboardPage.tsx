@@ -18,23 +18,23 @@ const RoleDashboardPage = () => {
   });
 
   // Show loading during initialization
-  if (!isInitialized || isLoading) {
+  if (!isInitialized) {
     return (
       <PageLoader 
-        message="Loading dashboard..." 
+        message="Starting GleeWorld..." 
         className="min-h-screen"
       />
     );
   }
 
   // Redirect to login if not authenticated
-  if (!isAuthenticated) {
+  if (!isAuthenticated || !user) {
     console.log('🔒 RoleDashboardPage: Not authenticated, redirecting to login');
     return <Navigate to="/login" replace />;
   }
 
-  // Wait for profile to load before determining redirect
-  if (!profile) {
+  // Show loading while profile loads
+  if (isLoading) {
     return (
       <PageLoader 
         message="Loading your profile..." 
@@ -43,11 +43,17 @@ const RoleDashboardPage = () => {
     );
   }
 
-  // Determine redirect based on user type
-  const userType = getUserType();
-  const redirectPath = userType === 'admin' ? '/dashboard/admin' : '/dashboard/member';
+  // Determine redirect based on user type - with fallback
+  let redirectPath = '/dashboard/member'; // Default fallback
   
-  console.log('🎯 RoleDashboardPage: Redirecting to:', redirectPath, 'for user type:', userType);
+  if (profile?.is_super_admin === true || profile?.role === 'admin') {
+    redirectPath = '/dashboard/admin';
+    console.log('🎯 RoleDashboardPage: Admin user detected, redirecting to admin dashboard');
+  } else {
+    console.log('🎯 RoleDashboardPage: Regular user, redirecting to member dashboard');
+  }
+  
+  console.log('🎯 RoleDashboardPage: Redirecting to:', redirectPath);
   
   return <Navigate to={redirectPath} replace />;
 };

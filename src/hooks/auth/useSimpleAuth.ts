@@ -79,7 +79,7 @@ export const useSimpleAuth = () => {
 
       // Fetch profile in background
       const profile = await fetchProfile(session.user.id);
-      setState(prev => ({ ...prev, profile }));
+      setState(prev => ({ ...prev, profile, isLoading: false }));
     } else {
       console.log('👋 useSimpleAuth: Clearing auth state');
       setState({
@@ -114,8 +114,12 @@ export const useSimpleAuth = () => {
 
     // Timeout to prevent infinite loading
     const timeout = setTimeout(() => {
-      setState(prev => ({ ...prev, isLoading: false, isInitialized: true }));
-    }, 5000);
+      setState(prev => ({ 
+        ...prev, 
+        isLoading: false, 
+        isInitialized: true 
+      }));
+    }, 3000); // Reduced timeout for faster fallback
 
     return () => {
       subscription.unsubscribe();
@@ -125,8 +129,9 @@ export const useSimpleAuth = () => {
 
   const refreshProfile = useCallback(async () => {
     if (state.user?.id) {
+      setState(prev => ({ ...prev, isLoading: true }));
       const profile = await fetchProfile(state.user.id);
-      setState(prev => ({ ...prev, profile }));
+      setState(prev => ({ ...prev, profile, isLoading: false }));
     }
   }, [state.user?.id, fetchProfile]);
 
