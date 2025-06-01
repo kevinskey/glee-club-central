@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -21,7 +22,8 @@ import {
   Music,
   RefreshCw,
   AlertCircle,
-  Database
+  Database,
+  CheckCircle
 } from 'lucide-react';
 import { useSimpleAuthContext } from '@/contexts/SimpleAuthContext';
 import { useUsersSimplified } from '@/hooks/user/useUsersSimplified';
@@ -124,11 +126,6 @@ export function UserManagementSimplified() {
                   Run Database Test
                 </Button>
               </div>
-              {error.includes('Database policy') && (
-                <p className="text-sm text-muted-foreground">
-                  If this error persists, the database policies may need to be updated by an administrator.
-                </p>
-              )}
             </div>
           </CardContent>
         </Card>
@@ -168,6 +165,20 @@ export function UserManagementSimplified() {
       </div>
 
       {showDatabaseTest && <DatabaseConnectionTest />}
+
+      {/* Success message if users loaded successfully */}
+      {users.length > 0 && !error && (
+        <Card className="border-green-200 bg-green-50">
+          <CardContent className="py-3">
+            <div className="flex items-center gap-2 text-green-700">
+              <CheckCircle className="h-4 w-4" />
+              <span className="text-sm font-medium">
+                Database connection successful! Loaded {users.length} users.
+              </span>
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       {/* Search and filter controls */}
       <Card>

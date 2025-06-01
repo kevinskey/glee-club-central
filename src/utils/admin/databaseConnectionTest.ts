@@ -47,9 +47,9 @@ export const runDatabaseConnectionTests = async (): Promise<DatabaseTestResult[]
     });
   }
 
-  // Test 3: Admin function check
+  // Test 3: Admin function check (using the new non-recursive function)
   try {
-    const { data, error } = await supabase.rpc('is_current_user_super_admin');
+    const { data, error } = await supabase.rpc('is_current_user_admin_simple');
     results.push({
       test: 'Admin Function Check',
       status: error ? 'error' : 'success',
@@ -65,7 +65,7 @@ export const runDatabaseConnectionTests = async (): Promise<DatabaseTestResult[]
     });
   }
 
-  // Test 4: Direct profile query (current user)
+  // Test 4: Current user profile query
   try {
     const { data: { user } } = await supabase.auth.getUser();
     if (user) {
@@ -98,7 +98,7 @@ export const runDatabaseConnectionTests = async (): Promise<DatabaseTestResult[]
     });
   }
 
-  // Test 5: All profiles query (admin only)
+  // Test 5: All profiles query (should work now with fixed RLS)
   try {
     const { data, error } = await supabase
       .from('profiles')
@@ -106,23 +106,22 @@ export const runDatabaseConnectionTests = async (): Promise<DatabaseTestResult[]
       .limit(5);
     
     results.push({
-      test: 'All Profiles Query (Admin)',
+      test: 'All Profiles Query',
       status: error ? 'error' : 'success',
-      message: error ? `All profiles query failed: ${error.message}` : `Found ${data?.length || 0} profiles`,
+      message: error ? `All profiles query failed: ${error.message}` : `Successfully fetched ${data?.length || 0} profiles`,
       details: { profileCount: data?.length, error, profiles: data }
     });
   } catch (err) {
     results.push({
-      test: 'All Profiles Query (Admin)',
+      test: 'All Profiles Query',
       status: 'error',
       message: `All profiles query error: ${err instanceof Error ? err.message : 'Unknown error'}`,
       details: err
     });
   }
 
-  // Test 6: RLS Policy Test
+  // Test 6: RLS Policy Test with different operations
   try {
-    // Try to access profiles table with different approaches
     const tests = [
       { name: 'Simple select', query: supabase.from('profiles').select('id').limit(1) },
       { name: 'Count query', query: supabase.from('profiles').select('*', { count: 'exact', head: true }) },
