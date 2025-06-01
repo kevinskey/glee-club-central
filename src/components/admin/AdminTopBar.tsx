@@ -3,7 +3,7 @@ import React from "react";
 import { Button } from "@/components/ui/button";
 import { Menu, Bell, Search, Sun, Moon } from "lucide-react";
 import { useSimpleAuthContext } from "@/contexts/SimpleAuthContext";
-import { useTheme } from "next-themes";
+import { useTheme } from "@/providers/ThemeProvider";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   DropdownMenu,
@@ -20,7 +20,7 @@ interface AdminTopBarProps {
 
 export function AdminTopBar({ onMenuClick, isMobile = false }: AdminTopBarProps) {
   const { user, logout, profile } = useSimpleAuthContext();
-  const { theme, setTheme } = useTheme();
+  const { theme, toggleTheme } = useTheme();
 
   const handleSignOut = async () => {
     try {
@@ -28,10 +28,6 @@ export function AdminTopBar({ onMenuClick, isMobile = false }: AdminTopBarProps)
     } catch (error) {
       console.error('Error signing out:', error);
     }
-  };
-
-  const toggleTheme = () => {
-    setTheme(theme === 'light' ? 'dark' : 'light');
   };
 
   const getInitials = (firstName?: string, lastName?: string) => {
@@ -65,6 +61,7 @@ export function AdminTopBar({ onMenuClick, isMobile = false }: AdminTopBarProps)
           size="sm"
           onClick={toggleTheme}
           className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+          aria-label={theme === "light" ? "Switch to dark mode" : "Switch to light mode"}
         >
           {theme === 'light' ? <Moon className="h-5 w-5" /> : <Sun className="h-5 w-5" />}
         </Button>
