@@ -38,11 +38,11 @@ export const useUsersSimplified = (): UseUsersSimplifiedResponse => {
       const isKnownAdmin = currentUser.email === 'kevinskey@mac.com';
       console.log('🔍 Direct admin check:', { email: currentUser.email, isKnownAdmin });
 
-      // Try a safe profiles query with limited fields first
+      // Try a safe profiles query with limited fields first - including title and special_roles
       console.log('🔍 Attempting safe profiles query...');
       const { data: profiles, error: profilesError } = await supabase
         .from('profiles')
-        .select('id, first_name, last_name, role, is_super_admin, status, voice_part, phone, join_date, class_year, dues_paid, notes, created_at, updated_at, avatar_url')
+        .select('id, first_name, last_name, role, is_super_admin, status, voice_part, phone, join_date, class_year, dues_paid, notes, created_at, updated_at, avatar_url, title, special_roles')
         .limit(50); // Limit to prevent overwhelming queries
 
       if (profilesError) {
@@ -79,9 +79,9 @@ export const useUsersSimplified = (): UseUsersSimplifiedResponse => {
               last_sign_in_at: null,
               is_super_admin: ownProfile.is_super_admin || false,
               role: ownProfile.role || 'member',
-              personal_title: ownProfile.title,
-              title: ownProfile.title,
-              special_roles: ownProfile.special_roles
+              personal_title: ownProfile.title || null,
+              title: ownProfile.title || null,
+              special_roles: ownProfile.special_roles || null
             }];
             
             setUserCount(1);
@@ -131,9 +131,9 @@ export const useUsersSimplified = (): UseUsersSimplifiedResponse => {
           last_sign_in_at: authUser?.last_sign_in_at || null,
           is_super_admin: profile.is_super_admin || false,
           role: profile.role || 'member',
-          personal_title: profile.title,
-          title: profile.title,
-          special_roles: profile.special_roles
+          personal_title: profile.title || null,
+          title: profile.title || null,
+          special_roles: profile.special_roles || null
         };
       });
 
