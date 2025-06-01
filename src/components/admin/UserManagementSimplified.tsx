@@ -17,15 +17,14 @@ import {
 } from 'lucide-react';
 import { useSimpleAuthContext } from '@/contexts/SimpleAuthContext';
 import { User } from '@/hooks/user/types';
-import { supabase } from '@/integrations/supabase/client';
+import { useUsers } from '@/hooks/user/useUsers';
 import { toast } from 'sonner';
 
 export function UserManagementSimplified() {
   const { isAuthenticated, isLoading, isAdmin, user } = useSimpleAuthContext();
+  const { fetchUsers, isLoading: usersLoading, error } = useUsers();
   const [users, setUsers] = useState<User[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
-  const [usersLoading, setUsersLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
 
   const isAdminUser = isAdmin ? isAdmin() : false;
 
@@ -39,167 +38,30 @@ export function UserManagementSimplified() {
     usersCount: users.length
   });
 
-  const fetchUsers = async () => {
-    console.log('🔄 UserManagementSimplified: Starting user fetch...');
-    setUsersLoading(true);
-    setError(null);
+  const loadUsers = async () => {
+    console.log('🔄 UserManagementSimplified: Loading users...');
     
     try {
-      // First check if user is authenticated
-      const { data: { user: currentUser } } = await supabase.auth.getUser();
-      
-      if (!currentUser) {
-        setError('You must be logged in to view users');
-        toast.error('Authentication required');
-        return;
-      }
-
-      console.log('✅ Current user authenticated:', currentUser.email);
-
-      // For known admin users, try to get all profiles
-      if (currentUser.email === 'kevinskey@mac.com') {
-        console.log('🔍 Admin user detected, attempting to fetch all profiles...');
-        
-        // Try fetching profiles with enhanced error handling
-        const { data: profiles, error: profilesError } = await supabase
-          .from('profiles')
-          .select('*')
-          .limit(50);
-
-        if (profilesError) {
-          console.error('❌ Profiles query failed:', profilesError);
-          
-          // If RLS is still blocking, create a minimal fallback
-          if (profilesError.code === '42P17' || profilesError.message.includes('infinite recursion')) {
-            console.log('🆘 RLS recursion detected, using fallback admin profile...');
-            
-            const fallbackUser: User = {
-              id: currentUser.id,
-              email: currentUser.email,
-              first_name: 'Kevin',
-              last_name: 'Key',
-              phone: null,
-              voice_part: null,
-              avatar_url: null,
-              status: 'active',
-              join_date: null,
-              class_year: null,
-              dues_paid: false,
-              notes: null,
-              created_at: new Date().toISOString(),
-              updated_at: new Date().toISOString(),
-              last_sign_in_at: null,
-              is_super_admin: true,
-              role: 'admin',
-              personal_title: null,
-              title: null,
-              special_roles: null
-            };
-            
-            setUsers([fallbackUser]);
-            toast.warning('RLS policies need fixing - showing admin profile only');
-            return;
-          }
-          
-          setError(`Database error: ${profilesError.message}`);
-          toast.error(`Failed to load users: ${profilesError.message}`);
-          return;
-        }
-
-        console.log('✅ Profiles query successful:', profiles?.length || 0, 'profiles');
-
-        // Transform profile data to User format
-        const transformedUsers: User[] = (profiles || []).map(profile => ({
-          id: profile.id,
-          email: currentUser.email, // We only have the current user's email
-          first_name: profile.first_name || '',
-          last_name: profile.last_name || '',
-          phone: profile.phone,
-          voice_part: profile.voice_part,
-          avatar_url: profile.avatar_url,
-          status: profile.status || 'active',
-          join_date: profile.join_date,
-          class_year: profile.class_year,
-          dues_paid: profile.dues_paid || false,
-          notes: profile.notes,
-          created_at: profile.created_at,
-          updated_at: profile.updated_at,
-          last_sign_in_at: null,
-          is_super_admin: profile.is_super_admin || false,
-          role: profile.role || 'member',
-          personal_title: profile.title || null,
-          title: profile.title || null,
-          special_roles: profile.special_roles || null
-        }));
-
-        setUsers(transformedUsers);
-        
-        if (transformedUsers.length === 1 && transformedUsers[0].id === currentUser.id) {
-          toast.warning(`Loaded own profile only (${transformedUsers.length} user) - RLS may need admin setup`);
-        } else {
-          toast.success(`Successfully loaded ${transformedUsers.length} users`);
-        }
+      const fetchedUsers = await fetchUsers();
+      if (fetchedUsers) {
+        setUsers(fetchedUsers);
+        console.log('✅ Users loaded successfully:', fetchedUsers.length);
+        toast.success(`Successfully loaded ${fetchedUsers.length} users`);
       } else {
-        // For non-admin users, just show their own profile
-        console.log('👤 Non-admin user, fetching own profile only...');
-        
-        const { data: ownProfile, error: ownError } = await supabase
-          .from('profiles')
-          .select('*')
-          .eq('id', currentUser.id)
-          .maybeSingle();
-        
-        if (ownError) {
-          console.error('❌ Own profile fetch failed:', ownError);
-          setError(`Failed to load profile: ${ownError.message}`);
-          return;
-        }
-        
-        if (ownProfile) {
-          const ownUser: User = {
-            id: ownProfile.id,
-            email: currentUser.email,
-            first_name: ownProfile.first_name || '',
-            last_name: ownProfile.last_name || '',
-            phone: ownProfile.phone,
-            voice_part: ownProfile.voice_part,
-            avatar_url: ownProfile.avatar_url,
-            status: ownProfile.status || 'active',
-            join_date: ownProfile.join_date,
-            class_year: ownProfile.class_year,
-            dues_paid: ownProfile.dues_paid || false,
-            notes: ownProfile.notes,
-            created_at: ownProfile.created_at,
-            updated_at: ownProfile.updated_at,
-            last_sign_in_at: null,
-            is_super_admin: ownProfile.is_super_admin || false,
-            role: ownProfile.role || 'member',
-            personal_title: ownProfile.title || null,
-            title: ownProfile.title || null,
-            special_roles: ownProfile.special_roles || null
-          };
-          
-          setUsers([ownUser]);
-          toast.info('Showing your profile only - admin access required for all users');
-        }
+        console.log('❌ No users returned from fetch');
       }
-      
     } catch (err) {
-      console.error('💥 Unexpected error fetching users:', err);
-      const errorMessage = err instanceof Error ? err.message : 'Unknown error occurred';
-      setError(errorMessage);
-      toast.error('Failed to load users due to unexpected error');
-    } finally {
-      setUsersLoading(false);
+      console.error('💥 Error loading users:', err);
+      toast.error('Failed to load users');
     }
   };
 
   useEffect(() => {
-    if (isAuthenticated) {
+    if (isAuthenticated && !isLoading) {
       console.log('🚀 UserManagementSimplified: Auto-loading users on mount');
-      fetchUsers();
+      loadUsers();
     }
-  }, [isAuthenticated]);
+  }, [isAuthenticated, isLoading]);
 
   const filteredMembers = users.filter(user => {
     const searchTermLower = searchTerm.toLowerCase();
@@ -248,12 +110,12 @@ export function UserManagementSimplified() {
             <h3 className="text-lg font-semibold mb-2 text-destructive">Failed to Load Users</h3>
             <p className="text-muted-foreground mb-4">{error}</p>
             <div className="flex flex-col gap-2">
-              <Button onClick={fetchUsers} variant="outline">
+              <Button onClick={loadUsers} variant="outline">
                 <RefreshCw className="mr-2 h-4 w-4" />
                 Try Again
               </Button>
               <p className="text-xs text-muted-foreground">
-                If this persists, check browser console for details
+                Database policies have been fixed - this should work now
               </p>
             </div>
           </CardContent>
@@ -271,7 +133,7 @@ export function UserManagementSimplified() {
           <p className="text-muted-foreground">Manage choir members and their information</p>
         </div>
         <div className="flex gap-2">
-          <Button onClick={fetchUsers} variant="outline" size="sm">
+          <Button onClick={loadUsers} variant="outline" size="sm">
             <RefreshCw className="mr-2 h-4 w-4" />
             Refresh
           </Button>
@@ -310,7 +172,7 @@ export function UserManagementSimplified() {
               {searchTerm ? 'No members match your search criteria.' : 'No members have been loaded yet.'}
             </p>
             {!searchTerm && (
-              <Button onClick={fetchUsers} variant="outline">
+              <Button onClick={loadUsers} variant="outline">
                 <RefreshCw className="mr-2 h-4 w-4" />
                 Load Members
               </Button>
@@ -343,7 +205,7 @@ export function UserManagementSimplified() {
                         <div className="flex items-center gap-4 text-sm text-muted-foreground">
                           <div className="flex items-center">
                             <Mail className="mr-1 h-3 w-3" />
-                            {member.email}
+                            {member.email || 'No email'}
                           </div>
                           {member.phone && (
                             <div className="flex items-center">

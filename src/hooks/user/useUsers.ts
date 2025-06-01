@@ -18,104 +18,54 @@ export const useUsers = (): UseUsersResponse => {
   const [error, setError] = useState<string | null>(null);
   const [userCount, setUserCount] = useState(0);
 
-  const fetchUsersWithFallback = useCallback(async (): Promise<User[] | null> => {
-    console.log('Attempting to fetch users with RLS fallback handling');
+  const fetchUsers = useCallback(async (): Promise<User[] | null> => {
+    setIsLoading(true);
+    setError(null);
     
     try {
-      // First try the normal profiles query
+      console.log('🔄 useUsers: Starting to fetch users...');
+      
+      // First try the normal profiles query - this should now work with fixed RLS
       const { data: profiles, error: profilesError } = await supabase
         .from('profiles')
         .select('*')
         .order('last_name', { ascending: true });
 
       if (profilesError) {
-        console.error('Error fetching profiles:', profilesError);
-        
-        // Check if this is the RLS recursion error
-        if (profilesError.code === '42P17' || profilesError.message.includes('infinite recursion')) {
-          console.log('RLS recursion detected, attempting admin bypass');
-          
-          // Try to get current user to check if they're admin
-          const { data: { user } } = await supabase.auth.getUser();
-          
-          if (user?.email === 'kevinskey@mac.com') {
-            console.log('Admin user detected, attempting direct auth.users fetch');
-            
-            // For admin users, try to get users from auth.users directly
-            try {
-              const { data: authData, error: authError } = await supabase.auth.admin.listUsers();
-              
-              if (authError) {
-                console.error('Admin listUsers failed:', authError);
-                throw authError;
-              }
-              
-              // Transform auth users to our User format
-              const users: User[] = (authData?.users || []).map(authUser => ({
-                id: authUser.id,
-                email: authUser.email || '',
-                first_name: authUser.user_metadata?.first_name || '',
-                last_name: authUser.user_metadata?.last_name || '',
-                phone: authUser.user_metadata?.phone || null,
-                voice_part: authUser.user_metadata?.voice_part || '',
-                avatar_url: authUser.user_metadata?.avatar_url || null,
-                status: 'active',
-                join_date: authUser.created_at,
-                class_year: authUser.user_metadata?.class_year || null,
-                dues_paid: false,
-                notes: null,
-                created_at: authUser.created_at,
-                updated_at: authUser.updated_at || authUser.created_at,
-                last_sign_in_at: authUser.last_sign_in_at,
-                is_super_admin: authUser.email === 'kevinskey@mac.com',
-                role: authUser.email === 'kevinskey@mac.com' ? 'admin' : 'member',
-                personal_title: authUser.user_metadata?.title || null,
-                title: authUser.user_metadata?.title || null,
-                special_roles: null
-              }));
-              
-              console.log('Successfully fetched users via admin bypass:', users.length);
-              return users;
-              
-            } catch (adminError) {
-              console.error('Admin bypass failed:', adminError);
-              // Fall through to show error
-            }
-          }
-          
-          // Show specific error for RLS recursion
-          setError('Database policy error detected. Please contact system administrator.');
-          toast.error('Unable to load users due to database configuration issue');
-          return [];
-        }
-        
+        console.error('❌ Error fetching profiles:', profilesError);
         setError(profilesError.message);
         toast.error('Failed to load users');
         return null;
       }
 
-      console.log('Successfully fetched profiles:', profiles?.length || 0);
+      console.log('✅ Successfully fetched profiles:', profiles?.length || 0);
 
-      // Get auth users for email addresses
-      let authUsers: any[] = [];
+      // Get auth users for additional details like email and sign-in times
+      let authUsersMap: Record<string, any> = {};
       try {
-        const { data: authData, error: authError } = await supabase.auth.admin.listUsers();
+        const { data: { user: currentUser } } = await supabase.auth.getUser();
         
-        if (authError) {
-          console.error('Error fetching auth users:', authError);
-        } else {
-          authUsers = authData?.users || [];
-          console.log('Auth users fetched:', authUsers.length);
+        // Only try to get auth.users data if we're an admin user
+        if (currentUser?.email === 'kevinskey@mac.com') {
+          const { data: authData, error: authError } = await supabase.auth.admin.listUsers();
+          
+          if (!authError && authData?.users) {
+            authUsersMap = authData.users.reduce((acc: Record<string, any>, user: any) => {
+              acc[user.id] = user;
+              return acc;
+            }, {});
+            console.log('📧 Auth users data loaded for admin');
+          }
         }
       } catch (err) {
-        console.error('Error accessing auth users:', err);
+        console.warn('⚠️ Could not fetch auth users data:', err);
       }
 
       // Transform the data to match User interface
       const users: User[] = (profiles || []).map(profile => {
-        const authUser = authUsers.find((u: any) => u?.id === profile.id);
+        const authUser = authUsersMap[profile.id];
         
-        const user: User = {
+        return {
           id: profile.id,
           email: authUser?.email || null,
           first_name: profile.first_name || '',
@@ -137,55 +87,30 @@ export const useUsers = (): UseUsersResponse => {
           title: profile.title,
           special_roles: profile.special_roles
         };
-
-        return user;
       });
 
-      console.log('Total users processed:', users.length);
+      console.log('🎉 Total users processed:', users.length);
       setUserCount(users.length);
       return users;
       
     } catch (err) {
-      console.error('Unexpected error fetching users:', err);
+      console.error('💥 Unexpected error fetching users:', err);
       const errorMessage = err instanceof Error ? err.message : 'Unknown error occurred';
       setError(errorMessage);
       toast.error('Failed to load users');
       return null;
-    }
-  }, []);
-
-  const fetchUsers = useCallback(async (): Promise<User[] | null> => {
-    setIsLoading(true);
-    setError(null);
-    
-    try {
-      const result = await fetchUsersWithFallback();
-      return result;
     } finally {
       setIsLoading(false);
     }
-  }, [fetchUsersWithFallback]);
+  }, []);
 
   const getUserCount = useCallback(async (): Promise<number> => {
     try {
-      // Try normal count first
       const { count, error: countError } = await supabase
         .from('profiles')
         .select('*', { count: 'exact', head: true });
 
       if (countError) {
-        // If RLS recursion, try admin bypass
-        if (countError.code === '42P17') {
-          const { data: { user } } = await supabase.auth.getUser();
-          if (user?.email === 'kevinskey@mac.com') {
-            try {
-              const { data: authData } = await supabase.auth.admin.listUsers();
-              return authData?.users?.length || 0;
-            } catch {
-              return 0;
-            }
-          }
-        }
         console.error('Error getting user count:', countError);
         return 0;
       }
@@ -203,7 +128,6 @@ export const useUsers = (): UseUsersResponse => {
         .from('profiles')
         .select('*')
         .eq('id', userId)
-        .neq('status', 'deleted')
         .single();
 
       if (fetchError) {
@@ -213,12 +137,16 @@ export const useUsers = (): UseUsersResponse => {
 
       if (!data) return null;
 
-      // Get auth user for email
+      // Get auth user for email if we're admin
       let authUser: any = null;
       try {
-        const { data: authData, error: authError } = await supabase.auth.admin.getUserById(userId);
-        if (!authError) {
-          authUser = authData?.user;
+        const { data: { user: currentUser } } = await supabase.auth.getUser();
+        
+        if (currentUser?.email === 'kevinskey@mac.com') {
+          const { data: authData, error: authError } = await supabase.auth.admin.getUserById(userId);
+          if (!authError) {
+            authUser = authData?.user;
+          }
         }
       } catch (err) {
         console.error('Error fetching auth user:', err);
