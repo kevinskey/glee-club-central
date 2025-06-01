@@ -17,6 +17,7 @@ import RegisterPage from "./pages/RegisterPage";
 import JoinGleeFamPage from "./pages/JoinGleeFamPage";
 import RoleDashboardPage from "./pages/RoleDashboardPage";
 import AdminDashboardPage from "./pages/admin/AdminDashboardPage";
+import AdminCalendarPage from "./pages/admin/AdminCalendarPage";
 import MemberDashboardPage from "./pages/dashboard/MemberDashboardPage";
 import FanDashboardPage from "./pages/dashboard/FanDashboardPage";
 import NotFoundPage from "./pages/NotFoundPage";
@@ -86,18 +87,20 @@ export const router = createBrowserRouter([
       </SimpleAuthProvider>
     ),
   },
-  // Admin dashboard - updated to use /admin route
+  // Admin routes - updated to include calendar and other admin pages
   {
     path: "/admin",
     element: (
       <SimpleAuthProvider>
         <AdminRoute>
-          <AppLayout sidebarType="admin" showHeader={false} showFooter={false}>
-            <AdminDashboardPage />
-          </AppLayout>
+          <AppLayout sidebarType="admin" showHeader={false} showFooter={false} />
         </AdminRoute>
       </SimpleAuthProvider>
     ),
+    children: [
+      { index: true, element: <AdminDashboardPage /> },
+      { path: "calendar", element: <AdminCalendarPage /> },
+    ],
   },
   // Member dashboard
   {
