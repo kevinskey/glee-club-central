@@ -5,9 +5,9 @@ import { PageLoader } from '@/components/ui/page-loader';
 import { useAuth } from '@/contexts/AuthContext';
 
 export default function NewsTickerSettingsPage() {
-  const { isLoading } = useAuth();
+  const { loading } = useAuth();
 
-  if (isLoading) {
+  if (loading) {
     return <PageLoader message="Loading ticker settings..." />;
   }
 

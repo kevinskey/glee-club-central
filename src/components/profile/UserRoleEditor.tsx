@@ -1,11 +1,11 @@
 
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { useAuth } from '@/contexts/AuthContext';
+import { useProfile } from '@/contexts/ProfileContext';
 
 // This is a stub component for backward compatibility
 export function UserRoleEditor() {
-  const { profile } = useAuth();
+  const { profile } = useProfile();
   
   return (
     <Card>

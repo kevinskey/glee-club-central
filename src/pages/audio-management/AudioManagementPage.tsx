@@ -1,6 +1,6 @@
-
 import React, { useState, useEffect } from "react";
 import { useAuth } from "@/contexts/AuthContext";
+import { useProfile } from "@/contexts/ProfileContext";
 import { AudioCategorySelector } from "@/components/audio/AudioCategorySelector";
 import { AudioFilesList } from "@/components/audio/AudioFilesList";
 import { AudioSearchAndFilter } from "@/components/audio/AudioSearchAndFilter";
@@ -28,7 +28,9 @@ import {
 import { Switch } from "@/components/ui/switch";
 
 export default function AudioManagementPage() {
-  const { user, isAuthenticated } = useAuth();
+  const { user } = useAuth();
+  const { isAuthenticated } = useProfile();
+  
   const [category, setCategory] = useState<AudioPageCategory>("all");
   const [searchQuery, setSearchQuery] = useState("");
   const [isUploadDialogOpen, setIsUploadDialogOpen] = useState(false);

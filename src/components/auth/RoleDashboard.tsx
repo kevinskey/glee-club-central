@@ -1,14 +1,13 @@
-
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useAuth } from '@/contexts/AuthContext';
+import { useAuthMigration } from '@/hooks/useAuthMigration';
 import { PageLoader } from '@/components/ui/page-loader';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { AlertCircle, RefreshCw, User } from 'lucide-react';
 
 export const RoleDashboard: React.FC = () => {
-  const { user, profile, isLoading, isAuthenticated, isAdmin, isInitialized, refreshUserData, createFallbackProfile } = useAuth();
+  const auth = useAuthMigration(); // Use migration hook for backward compatibility
   const navigate = useNavigate();
   const [hasRedirected, setHasRedirected] = useState(false);
   const [showError, setShowError] = useState(false);
@@ -17,25 +16,25 @@ export const RoleDashboard: React.FC = () => {
 
   useEffect(() => {
     console.log('🎯 RoleDashboard: AUTH STATE CHECK:', {
-      isLoading,
-      isAuthenticated,
-      hasUser: !!user,
-      userId: user?.id,
-      userEmail: user?.email,
-      hasProfile: !!profile,
-      profileRole: profile?.role,
-      profileIsAdmin: profile?.is_super_admin,
-      isInitialized,
+      isLoading: auth.isLoading,
+      isAuthenticated: auth.isAuthenticated,
+      hasUser: !!auth.user,
+      userId: auth.user?.id,
+      userEmail: auth.user?.email,
+      hasProfile: !!auth.profile,
+      profileRole: auth.profile?.role,
+      profileIsAdmin: auth.profile?.is_super_admin,
+      isInitialized: auth.isInitialized,
       hasRedirected
     });
 
     // Wait for initialization and prevent multiple redirects
-    if (!isInitialized || hasRedirected) {
+    if (!auth.isInitialized || hasRedirected) {
       return;
     }
 
     // Handle unauthenticated users immediately
-    if (!isAuthenticated || !user) {
+    if (!auth.isAuthenticated || !auth.user) {
       console.log('🚫 RoleDashboard: User not authenticated, redirecting to login');
       setHasRedirected(true);
       navigate('/login', { replace: true });
@@ -43,14 +42,14 @@ export const RoleDashboard: React.FC = () => {
     }
 
     // Route quickly if we have a profile - don't wait too long
-    if (isAuthenticated && user && (profile || waitTime >= 5)) {
+    if (auth.isAuthenticated && auth.user && (auth.profile || waitTime >= 5)) {
       let targetRoute = '/dashboard/member';
       
       // Use the isAdmin function for role detection
-      if (profile && isAdmin && isAdmin()) {
+      if (auth.profile && auth.isAdmin && auth.isAdmin()) {
         targetRoute = '/admin';
         console.log('👑 RoleDashboard: Admin role detected, routing to admin dashboard');
-      } else if (profile?.role === 'fan') {
+      } else if (auth.profile?.role === 'fan') {
         targetRoute = '/fan-dashboard';
         console.log('👤 RoleDashboard: Fan role detected, routing to fan dashboard');
       } else {
@@ -64,22 +63,22 @@ export const RoleDashboard: React.FC = () => {
     }
 
     // Show error if profile is missing after reasonable wait
-    if (!profile && isAuthenticated && user && !isLoading && waitTime >= 5) {
-      console.error(`❌ RoleDashboard: Profile missing for authenticated user ${user.id}`);
+    if (!auth.profile && auth.isAuthenticated && auth.user && !auth.isLoading && waitTime >= 5) {
+      console.error(`❌ RoleDashboard: Profile missing for authenticated user ${auth.user.id}`);
       setShowError(true);
       return;
     }
-  }, [isLoading, isAuthenticated, user, profile, isAdmin, navigate, isInitialized, hasRedirected, showError, waitTime]);
+  }, [auth.isLoading, auth.isAuthenticated, auth.user, auth.profile, auth.isAdmin, navigate, auth.isInitialized, hasRedirected, showError, waitTime]);
 
   // Quick timer for timeout handling
   useEffect(() => {
-    if (isAuthenticated && user && !profile && !hasRedirected && !showError) {
+    if (auth.isAuthenticated && auth.user && !auth.profile && !hasRedirected && !showError) {
       const timer = setTimeout(() => {
         setWaitTime(prev => prev + 1);
       }, 1000);
       return () => clearTimeout(timer);
     }
-  }, [isAuthenticated, user, profile, hasRedirected, showError, waitTime]);
+  }, [auth.isAuthenticated, auth.user, auth.profile, hasRedirected, showError, waitTime]);
 
   const handleRetry = async () => {
     setIsRetrying(true);
@@ -90,15 +89,15 @@ export const RoleDashboard: React.FC = () => {
       console.log('🔄 RoleDashboard: Retrying profile resolution...');
       
       // First try to refresh user data
-      if (refreshUserData) {
-        await refreshUserData();
+      if (auth.refreshUserData) {
+        await auth.refreshUserData();
       }
       
       // If still no profile, try to create fallback
       setTimeout(async () => {
-        if (!profile && createFallbackProfile) {
+        if (!auth.profile && auth.createFallbackProfile) {
           console.log('🔧 RoleDashboard: Creating fallback profile...');
-          await createFallbackProfile();
+          await auth.createFallbackProfile();
         }
       }, 1000);
       
@@ -115,12 +114,12 @@ export const RoleDashboard: React.FC = () => {
     setHasRedirected(true);
     
     // Route based on email for admin detection
-    const targetRoute = user?.email === 'kevinskey@mac.com' ? '/admin' : '/dashboard/member';
+    const targetRoute = auth.user?.email === 'kevinskey@mac.com' ? '/admin' : '/dashboard/member';
     navigate(targetRoute, { replace: true });
   };
 
   // Show initialization loading
-  if (!isInitialized) {
+  if (!auth.isInitialized) {
     return (
       <PageLoader 
         message="Starting GleeWorld..."
@@ -130,7 +129,7 @@ export const RoleDashboard: React.FC = () => {
   }
 
   // Show authentication redirect
-  if (!isAuthenticated || !user) {
+  if (!auth.isAuthenticated || !auth.user) {
     return (
       <PageLoader 
         message="Redirecting to login..."
@@ -140,7 +139,7 @@ export const RoleDashboard: React.FC = () => {
   }
 
   // Show profile loading briefly
-  if (isLoading && waitTime < 3) {
+  if (auth.isLoading && waitTime < 3) {
     return (
       <PageLoader 
         message={`Loading your profile... (${waitTime}s)`}
@@ -150,7 +149,7 @@ export const RoleDashboard: React.FC = () => {
   }
 
   // Show error state with retry options
-  if (showError || (!profile && !isLoading && waitTime >= 5)) {
+  if (showError || (!auth.profile && !auth.isLoading && waitTime >= 5)) {
     return (
       <div className="min-h-screen flex items-center justify-center p-4">
         <Card className="w-full max-w-md">
@@ -167,10 +166,10 @@ export const RoleDashboard: React.FC = () => {
                 <User className="h-4 w-4" />
                 <span className="font-medium">Account Details</span>
               </div>
-              <p><strong>User ID:</strong> {user?.id}</p>
-              <p><strong>Email:</strong> {user?.email}</p>
-              <p><strong>Status:</strong> Profile {profile ? 'Loading' : 'Missing'}</p>
-              {user?.email === 'kevinskey@mac.com' && (
+              <p><strong>User ID:</strong> {auth.user?.id}</p>
+              <p><strong>Email:</strong> {auth.user?.email}</p>
+              <p><strong>Status:</strong> Profile {auth.profile ? 'Loading' : 'Missing'}</p>
+              {auth.user?.email === 'kevinskey@mac.com' && (
                 <p><strong>Expected Role:</strong> Admin</p>
               )}
             </div>

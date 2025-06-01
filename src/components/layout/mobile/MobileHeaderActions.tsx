@@ -1,15 +1,15 @@
 
 import React from "react";
 import { MobileNavDropdown } from "./MobileNavDropdown";
-import { useAuth } from "@/contexts/AuthContext";
+import { useProfile } from "@/contexts/ProfileContext";
 
 interface MobileHeaderActionsProps {
   onMenuClick: () => void;
 }
 
 export function MobileHeaderActions({ onMenuClick }: MobileHeaderActionsProps) {
-  const { isAdmin } = useAuth();
-  const isAdminUser = isAdmin && isAdmin();
+  const { isAdmin } = useProfile();
+  const isAdminUser = isAdmin();
 
   return (
     <div className="flex items-center gap-2">

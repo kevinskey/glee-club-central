@@ -16,7 +16,7 @@ import { PageLoader } from '@/components/ui/page-loader';
 export default function EnhancedCalendarPage() {
   const { events, loading, error, fetchEvents } = useCalendarEvents();
   const { userRole, isMember } = useUserRole();
-  const { user, isLoading: authLoading } = useAuth();
+  const { user, loading: authLoading } = useAuth();
   const [selectedEvent, setSelectedEvent] = useState<CalendarEvent | null>(null);
   const [userRSVP, setUserRSVP] = useState<'going' | 'maybe' | 'not_going' | null>(null);
 
