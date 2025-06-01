@@ -85,13 +85,15 @@ export const router = createBrowserRouter([
       </SimpleAuthProvider>
     ),
   },
-  // Admin dashboard - fixed path to match RoleDashboardPage redirect
+  // Admin dashboard
   {
     path: "/dashboard/admin",
     element: (
       <SimpleAuthProvider>
         <AdminRoute>
-          <AdminDashboardPage />
+          <AppLayout sidebarType="admin" showHeader={false} showFooter={false}>
+            <AdminDashboardPage />
+          </AppLayout>
         </AdminRoute>
       </SimpleAuthProvider>
     ),
@@ -102,7 +104,9 @@ export const router = createBrowserRouter([
     element: (
       <SimpleAuthProvider>
         <SimpleRequireAuth>
-          <MemberDashboardPage />
+          <AppLayout sidebarType="member" showHeader={false} showFooter={false}>
+            <MemberDashboardPage />
+          </AppLayout>
         </SimpleRequireAuth>
       </SimpleAuthProvider>
     ),
