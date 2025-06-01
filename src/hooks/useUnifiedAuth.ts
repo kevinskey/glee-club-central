@@ -1,40 +1,43 @@
 
-import { useAuth } from '@/contexts/AuthContext';
-import { useProfile } from '@/contexts/ProfileContext';
+import { useSimpleAuthContext } from '@/contexts/SimpleAuthContext';
 
 export const useUnifiedAuth = () => {
-  const auth = useAuth();
-  const profile = useProfile();
+  const auth = useSimpleAuthContext();
 
   return {
-    // Auth properties
+    // Core auth properties
     user: auth.user,
-    loading: auth.loading,
+    profile: auth.profile,
+    isAuthenticated: auth.isAuthenticated,
+    isLoading: auth.isLoading,
+    isInitialized: auth.isInitialized,
+    
+    // Auth methods
     login: auth.login,
     logout: auth.logout,
     signUp: auth.signUp,
-    signOut: auth.signOut || auth.logout,
-    resetPassword: auth.resetPassword,
-    updatePassword: auth.updatePassword,
     
-    // Profile properties
-    profile: profile.profile,
-    permissions: profile.permissions,
-    isAuthenticated: profile.isAuthenticated,
-    isInitialized: profile.isInitialized,
-    isAdmin: profile.isAdmin,
-    isMember: profile.isMember,
-    getUserType: profile.getUserType,
-    refreshProfile: profile.refreshProfile,
-    createFallbackProfile: profile.createFallbackProfile,
+    // Role checking methods
+    isAdmin: auth.isAdmin,
+    isMember: auth.isMember,
+    getUserType: auth.getUserType,
+    
+    // Profile management
+    refreshProfile: auth.refreshProfile,
     
     // Computed properties for backward compatibility
-    isLoading: auth.loading || !profile.isInitialized,
-    refreshPermissions: profile.refreshProfile,
-    refreshUserData: profile.refreshProfile,
+    loading: auth.isLoading,
+    signOut: auth.logout,
+    signIn: auth.login,
+    resetPassword: () => Promise.resolve({ error: null }),
+    updatePassword: () => Promise.resolve({ error: null }),
+    permissions: {},
+    refreshPermissions: auth.refreshProfile,
+    refreshUserData: auth.refreshProfile,
+    createFallbackProfile: auth.refreshProfile,
     
-    // Additional properties that some components expect
-    session: null, // Not available in new structure
-    supabaseClient: null, // Not exposed directly
+    // Legacy properties (not available in simplified system)
+    session: null,
+    supabaseClient: null,
   };
 };

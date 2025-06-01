@@ -1,9 +1,6 @@
 
 import { createBrowserRouter } from "react-router-dom";
-import { AuthProvider } from "@/contexts/AuthContext";
-import { ProfileProvider } from "@/contexts/ProfileContext";
 import { SimpleAuthProvider } from "@/contexts/SimpleAuthContext";
-import RequireAuth from "@/components/auth/RequireAuth";
 import SimpleRequireAuth from "@/components/auth/SimpleRequireAuth";
 import AdminRoute from "@/components/auth/AdminRoute";
 import AppLayout from "@/layouts/AppLayout";
@@ -23,16 +20,10 @@ import MemberDashboardPage from "./pages/dashboard/MemberDashboardPage";
 import NotFoundPage from "./pages/NotFoundPage";
 
 export const router = createBrowserRouter([
-  // Public routes - wrapped with AuthProvider and ProfileProvider
+  // Public routes - no auth context needed for public pages
   {
     path: "/",
-    element: (
-      <AuthProvider>
-        <ProfileProvider>
-          <AppLayout sidebarType="none" showHeader={true} showFooter={true} />
-        </ProfileProvider>
-      </AuthProvider>
-    ),
+    element: <AppLayout sidebarType="none" showHeader={true} showFooter={true} />,
     children: [
       { index: true, element: <HomePage /> },
       { path: "about", element: <AboutPage /> },
@@ -72,7 +63,7 @@ export const router = createBrowserRouter([
       </SimpleAuthProvider>
     ),
   },
-  // Protected routes - using SimpleAuthProvider for admin functionality
+  // Protected routes - all using SimpleAuthProvider
   {
     path: "/role-dashboard",
     element: (

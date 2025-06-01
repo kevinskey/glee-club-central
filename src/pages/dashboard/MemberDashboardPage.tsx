@@ -1,29 +1,28 @@
 
 import React from "react";
-import { useAuth } from "@/contexts/AuthContext";
-import { useProfile } from "@/contexts/ProfileContext";
+import { useSimpleAuthContext } from "@/contexts/SimpleAuthContext";
 import { useNavigate, Navigate } from "react-router-dom";
 import { PageLoader } from "@/components/ui/page-loader";
 import { DashboardHeader } from "@/components/dashboard/DashboardHeader";
 import { DashboardContent } from "@/components/dashboard/DashboardContent";
-import { ProfileErrorDisplay } from "@/components/dashboard/ProfileErrorDisplay";
 import ErrorBoundary from "@/components/ErrorBoundary";
 
 export default function MemberDashboardPage() {
-  const { user, loading: authLoading } = useAuth();
-  const { profile, isAuthenticated, isInitialized } = useProfile();
+  const { user, profile, isLoading, isInitialized, isAuthenticated } = useSimpleAuthContext();
   const navigate = useNavigate();
 
   console.log('📊 MemberDashboard: State check:', {
     hasUser: !!user,
     hasProfile: !!profile,
-    authLoading,
+    isLoading,
     isAuthenticated,
-    isInitialized
+    isInitialized,
+    userEmail: user?.email,
+    profileRole: profile?.role
   });
 
   // Show loading during auth initialization
-  if (authLoading || !isInitialized) {
+  if (!isInitialized || isLoading) {
     return (
       <PageLoader 
         message="Initializing dashboard..."
@@ -37,14 +36,12 @@ export default function MemberDashboardPage() {
     return <Navigate to="/login" replace />;
   }
 
-  // Show error if profile is missing (shouldn't happen with ProfileContext)
+  // Show loading while profile loads
   if (!profile) {
     return (
-      <ProfileErrorDisplay
-        user={user}
-        profileError="Profile not found"
-        onRetry={() => window.location.reload()}
-        onBackToLogin={() => navigate('/login', { replace: true })}
+      <PageLoader 
+        message="Loading your profile..."
+        className="min-h-screen"
       />
     );
   }
