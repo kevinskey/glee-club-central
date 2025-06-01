@@ -6,13 +6,32 @@ export function useIsMobile() {
 
   useEffect(() => {
     const checkScreenSize = () => {
-      setIsMobile(window.innerWidth < 768);
+      // Enhanced detection for iPad and mobile devices
+      const width = window.innerWidth;
+      const userAgent = navigator.userAgent;
+      
+      // Consider iPad as mobile for layout purposes if in portrait mode
+      const isIPad = /iPad/.test(userAgent) || 
+        (navigator.maxTouchPoints > 1 && /Macintosh/.test(userAgent));
+      
+      // Mobile if width < 768 OR iPad in portrait mode
+      const shouldBeMobile = width < 768 || (isIPad && width <= 1024);
+      
+      setIsMobile(shouldBeMobile);
     };
 
     checkScreenSize();
     window.addEventListener('resize', checkScreenSize);
+    
+    // Also check on orientation change for iPad
+    window.addEventListener('orientationchange', () => {
+      setTimeout(checkScreenSize, 100); // Small delay for orientation change
+    });
 
-    return () => window.removeEventListener('resize', checkScreenSize);
+    return () => {
+      window.removeEventListener('resize', checkScreenSize);
+      window.removeEventListener('orientationchange', checkScreenSize);
+    };
   }, []);
 
   return isMobile;

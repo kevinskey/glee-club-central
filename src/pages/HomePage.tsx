@@ -13,6 +13,7 @@ const HomePage = () => {
     isLoading
   } = useHomePageData();
 
+  // Show loader while data is being fetched
   if (isLoading) {
     return <HomePageLoader />;
   }

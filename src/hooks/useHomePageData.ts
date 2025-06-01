@@ -42,7 +42,9 @@ interface AudioTrack {
 export const useHomePageData = () => {
   const [heroImages, setHeroImages] = useState<HeroImage[]>([]);
   const [storeProducts, setStoreProducts] = useState<Product[]>([]);
+  const [audioTracks, setAudioTracks] = useState<AudioTrack[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [hasLoadedOnce, setHasLoadedOnce] = useState(false);
   const { events } = useCalendarEvents();
 
   // Transform calendar events for homepage use
@@ -58,9 +60,6 @@ export const useHomePageData = () => {
       isPublic: event.is_public
     }));
 
-  // Audio tracks from database
-  const [audioTracks, setAudioTracks] = useState<AudioTrack[]>([]);
-
   // Data fetching functions
   const fetchHeroImages = async () => {
     try {
@@ -72,7 +71,10 @@ export const useHomePageData = () => {
         .eq('is_public', true)
         .order('display_order', { ascending: true });
 
-      if (error) throw error;
+      if (error) {
+        console.error('Error fetching hero images:', error);
+        throw error;
+      }
 
       const formattedImages: HeroImage[] = data?.map(item => ({
         id: item.id,
@@ -81,18 +83,27 @@ export const useHomePageData = () => {
         alt: item.title
       })) || [];
 
-      setHeroImages(formattedImages);
-    } catch (error) {
-      console.error('Error fetching hero images:', error);
-      // Fallback to placeholder images
-      setHeroImages([
-        {
+      if (formattedImages.length === 0) {
+        // Fallback to placeholder images if none found
+        const fallbackImages: HeroImage[] = [{
           id: "fallback-1",
           url: "https://images.unsplash.com/photo-1493836434471-b9d2aa522a8e?w=1200&h=600&fit=crop",
           title: "Spelman College Glee Club",
           alt: "Glee Club Performance"
-        }
-      ]);
+        }];
+        setHeroImages(fallbackImages);
+      } else {
+        setHeroImages(formattedImages);
+      }
+    } catch (error) {
+      console.error('Error fetching hero images:', error);
+      // Always provide fallback
+      setHeroImages([{
+        id: "fallback-1",
+        url: "https://images.unsplash.com/photo-1493836434471-b9d2aa522a8e?w=1200&h=600&fit=crop",
+        title: "Spelman College Glee Club",
+        alt: "Glee Club Performance"
+      }]);
     }
   };
 
@@ -118,14 +129,12 @@ export const useHomePageData = () => {
     } catch (error) {
       console.error('Error fetching products:', error);
       // Fallback to placeholder products
-      setStoreProducts([
-        {
-          id: "product-fallback-1",
-          name: "Glee Club T-Shirt",
-          price: 25.00,
-          imageUrl: "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=300&h=300&fit=crop"
-        }
-      ]);
+      setStoreProducts([{
+        id: "product-fallback-1",
+        name: "Glee Club T-Shirt",
+        price: 25.00,
+        imageUrl: "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=300&h=300&fit=crop"
+      }]);
     }
   };
 
@@ -145,40 +154,46 @@ export const useHomePageData = () => {
         audioUrl: track.file_url,
         albumArt: "https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=200&h=200&fit=crop",
         artist: "Spelman Glee Club",
-        duration: "3:45" // This would need to be calculated from actual audio files
+        duration: "3:45"
       })) || [];
 
       setAudioTracks(formattedTracks);
     } catch (error) {
       console.error('Error fetching audio tracks:', error);
       // Fallback to placeholder
-      setAudioTracks([
-        {
-          id: "track-1",
-          title: "Lift Every Voice",
-          audioUrl: "/placeholder.mp3",
-          albumArt: "https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=200&h=200&fit=crop",
-          artist: "Spelman Glee Club",
-          duration: "3:45"
-        }
-      ]);
+      setAudioTracks([{
+        id: "track-1",
+        title: "Lift Every Voice",
+        audioUrl: "/placeholder.mp3",
+        albumArt: "https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=200&h=200&fit=crop",
+        artist: "Spelman Glee Club",
+        duration: "3:45"
+      }]);
     }
   };
 
-  // Load all data on component mount
+  // Load all data on component mount - only once
   useEffect(() => {
+    if (hasLoadedOnce) return;
+    
     const loadData = async () => {
       setIsLoading(true);
-      await Promise.all([
-        fetchHeroImages(),
-        fetchStoreProducts(),
-        fetchAudioTracks()
-      ]);
-      setIsLoading(false);
+      try {
+        await Promise.all([
+          fetchHeroImages(),
+          fetchStoreProducts(),
+          fetchAudioTracks()
+        ]);
+      } catch (error) {
+        console.error('Error loading homepage data:', error);
+      } finally {
+        setIsLoading(false);
+        setHasLoadedOnce(true);
+      }
     };
 
     loadData();
-  }, []);
+  }, [hasLoadedOnce]);
 
   return {
     heroImages,
