@@ -1,17 +1,22 @@
 
 import React from 'react';
-import { useProfile } from '@/contexts/ProfileContext';
-import { useAuth } from '@/contexts/AuthContext';
+import { useSimpleAuthContext } from '@/contexts/SimpleAuthContext';
 import { PageLoader } from '@/components/ui/page-loader';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Users, Music, Calendar, Heart } from 'lucide-react';
+import { Navigate } from 'react-router-dom';
 
 export default function FanDashboardPage() {
-  const { user, loading: authLoading } = useAuth();
-  const { profile, loading: profileLoading } = useProfile();
+  const { user, profile, isLoading, isInitialized, isAuthenticated } = useSimpleAuthContext();
 
-  if (authLoading || profileLoading) {
-    return <PageLoader message="Loading fan dashboard..." />;
+  // Show loading during auth initialization
+  if (!isInitialized || isLoading) {
+    return <PageLoader message="Loading fan dashboard..." className="min-h-screen" />;
+  }
+
+  // Redirect to login if not authenticated
+  if (!isAuthenticated || !user) {
+    return <Navigate to="/login" replace />;
   }
 
   return (
