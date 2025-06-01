@@ -19,7 +19,7 @@ import MemberDashboardPage from "./pages/dashboard/MemberDashboardPage";
 import NotFoundPage from "./pages/NotFoundPage";
 
 export const router = createBrowserRouter([
-  // Public routes
+  // Public routes - wrapped with AuthProvider
   {
     path: "/",
     element: (
