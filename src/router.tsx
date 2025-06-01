@@ -24,7 +24,6 @@ export const router = createBrowserRouter([
   {
     path: "/",
     element: <AppLayout sidebarType="none" showHeader={true} showFooter={true} />,
-    errorElement: <ErrorBoundary />,
     children: [
       { index: true, element: <HomePage /> },
       { path: "about", element: <AboutPage /> },
@@ -37,17 +36,14 @@ export const router = createBrowserRouter([
   {
     path: "/login",
     element: <AppLayout sidebarType="none" showHeader={false} showFooter={false}><LoginPage /></AppLayout>,
-    errorElement: <ErrorBoundary />,
   },
   {
     path: "/signup", 
     element: <AppLayout sidebarType="none" showHeader={false} showFooter={false}><SignupPage /></AppLayout>,
-    errorElement: <ErrorBoundary />,
   },
   {
     path: "/register",
     element: <AppLayout sidebarType="none" showHeader={false} showFooter={false}><RegisterPage /></AppLayout>,
-    errorElement: <ErrorBoundary />,
   },
   // Protected routes
   {
@@ -57,7 +53,6 @@ export const router = createBrowserRouter([
         <RoleDashboardPage />
       </RequireAuth>
     ),
-    errorElement: <ErrorBoundary />,
   },
   {
     path: "/admin",
@@ -66,7 +61,6 @@ export const router = createBrowserRouter([
         <AdminDashboardPage />
       </RequireAuth>
     ),
-    errorElement: <ErrorBoundary />,
   },
   {
     path: "/dashboard/member",
@@ -75,7 +69,6 @@ export const router = createBrowserRouter([
         <MemberDashboardPage />
       </RequireAuth>
     ),
-    errorElement: <ErrorBoundary />,
   },
   // Catch-all 404 route
   {
