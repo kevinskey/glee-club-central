@@ -1,10 +1,10 @@
+
 import React, { useState, useEffect } from "react";
 import { HeroBannerSection } from "@/components/landing/sections/HeroBannerSection";
 import { EventsSection } from "@/components/landing/sections/EventsSection";
 import { AudioSection } from "@/components/landing/sections/AudioSection";
 import { StoreSection } from "@/components/landing/sections/StoreSection";
 import { FanSignupForm } from "@/components/landing/FanSignupForm";
-import { FooterLinks } from "@/components/landing/FooterLinks";
 import { supabase } from "@/integrations/supabase/client";
 
 // Type definitions moved to separate interface file for reusability
@@ -195,27 +195,6 @@ const HomePage = () => {
         <StoreSection products={storeProducts} />
         <FanSignupForm />
       </main>
-
-      {/* Footer */}
-      <FooterLinks 
-        logoText="GleeWorld"
-        tagline="Spelman College Glee Club Official Site"
-        email="gleeworld@spelman.edu"
-        socialLinks={[
-          { platform: 'instagram', url: 'https://instagram.com/spelmanglee', label: 'Instagram' },
-          { platform: 'youtube', url: 'https://youtube.com/@SpelmanCollegeGleeClub', label: 'YouTube' },
-          { platform: 'facebook', url: 'https://facebook.com/SpelmanGlee', label: 'Facebook' },
-          { platform: 'tiktok', url: 'https://tiktok.com/@spelmanglee', label: 'TikTok' }
-        ]}
-        siteLinks={[
-          { label: 'About', href: '/about' },
-          { label: 'Events', href: '/events' },
-          { label: 'Contact', href: '/contact' },
-          { label: 'Press Kit', href: '/press-kit' },
-          { label: 'Fan Login', href: '/login' }
-        ]}
-        developerCredit="Built with ♪ for the Spelman Glee Club"
-      />
     </div>
   );
 };

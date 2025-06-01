@@ -10,11 +10,17 @@ export function Footer() {
   const currentYear = new Date().getFullYear();
   
   const quickLinks = [
+    { label: "About", href: "/about" },
+    { label: "Calendar", href: "/calendar" },
+    { label: "Contact", href: "/contact" },
+    { label: "Store", href: "/store" },
+    { label: "Join Glee Fam", href: "/join-glee-fam" }
+  ];
+
+  const legalLinks = [
     { label: "Press Kit", href: "/press-kit" },
     { label: "Privacy Policy", href: "/privacy" },
-    { label: "Terms of Service", href: "/terms" },
-    { label: "About", href: "/about" },
-    { label: "Contact", href: "/contact" }
+    { label: "Terms of Service", href: "/terms" }
   ];
   
   const socialLinks = [
@@ -48,41 +54,76 @@ export function Footer() {
   return (
     <footer className="border-t py-10 sm:py-12 md:py-14 bg-white dark:bg-gray-950">
       <div className="container px-4 sm:px-6 md:px-8 max-w-7xl mx-auto">
-        {/* Footer Top - Main Links & Images */}
-        <div className="flex flex-col md:flex-row justify-between items-center gap-8 md:gap-0 mb-8">
-          <div className="flex items-center">
-            <img 
-              src="/lovable-uploads/8aa13e63-fb9a-4c52-95cf-86b458c58f1c.png" 
-              alt="Spelman College Glee Club" 
-              className="h-16 mr-4"
-            />
-            <div>
-              <h3 className="font-playfair text-xl sm:text-2xl font-semibold text-glee-spelman mb-1">
-                Glee World
-              </h3>
-              <p className="text-sm text-gray-600 dark:text-gray-400">
-                Spelman College Glee Club Official Site
-              </p>
+        {/* Main Footer Content */}
+        <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-4 mb-8">
+          {/* Logo & Tagline */}
+          <div className="lg:col-span-2">
+            <div className="flex items-center mb-4">
+              <img 
+                src="/lovable-uploads/8aa13e63-fb9a-4c52-95cf-86b458c58f1c.png" 
+                alt="Spelman College Glee Club" 
+                className="h-16 mr-4"
+              />
+              <div>
+                <h3 className="font-playfair text-xl sm:text-2xl font-semibold text-glee-spelman mb-1">
+                  Glee World
+                </h3>
+                <p className="text-sm text-gray-600 dark:text-gray-400">
+                  Spelman College Glee Club Official Site
+                </p>
+              </div>
+            </div>
+            <p className="text-muted-foreground mb-4 max-w-md">
+              The Spelman College Glee Club has maintained a standard of choral excellence for women of African descent for over 95 years.
+            </p>
+            <div className="text-sm">
+              <span className="text-muted-foreground">Contact us: </span>
+              <a 
+                href="mailto:gleeworld@spelman.edu"
+                className="text-glee-spelman hover:underline"
+              >
+                gleeworld@spelman.edu
+              </a>
             </div>
           </div>
-          
-          <div className="flex flex-wrap justify-center gap-3">
-            {quickLinks.map((link) => (
-              <Button
-                key={link.href}
-                variant="outline"
-                size="sm"
-                asChild
-                className="border-gray-200 dark:border-gray-800"
-              >
-                <Link to={link.href}>{link.label}</Link>
-              </Button>
-            ))}
+
+          {/* Quick Links */}
+          <div>
+            <h3 className="font-semibold mb-4">Quick Links</h3>
+            <ul className="space-y-2">
+              {quickLinks.map((link) => (
+                <li key={link.href}>
+                  <Link
+                    to={link.href}
+                    className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+                  >
+                    {link.label}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          {/* Legal & Member Access */}
+          <div>
+            <h3 className="font-semibold mb-4">Legal & Access</h3>
+            <ul className="space-y-2 mb-4">
+              {legalLinks.map((link) => (
+                <li key={link.href}>
+                  <Link
+                    to={link.href}
+                    className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+                  >
+                    {link.label}
+                  </Link>
+                </li>
+              ))}
+            </ul>
             <Button
               variant="default"
               size="sm"
               asChild
-              className="bg-glee-purple hover:bg-glee-purple/90"
+              className="bg-glee-spelman hover:bg-glee-spelman/90"
             >
               <Link to="/login">Member Login</Link>
             </Button>
@@ -107,9 +148,13 @@ export function Footer() {
           </div>
         </div>
         
+        {/* Bottom Bar */}
         <div className="text-center">
-          <p className="text-gray-500 dark:text-gray-400 text-sm">
+          <p className="text-gray-500 dark:text-gray-400 text-sm mb-2">
             © {currentYear} Spelman College Glee Club. All rights reserved.
+          </p>
+          <p className="text-sm text-muted-foreground">
+            Built with ♪ for the Spelman Glee Club
           </p>
         </div>
       </div>
