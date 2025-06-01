@@ -18,6 +18,9 @@ import { InviteUserModal } from '@/components/admin/InviteUserModal';
 import { userManagementService, UserManagementData } from '@/services/userManagementService';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { toast } from 'sonner';
+import { AdminSidebar } from '@/components/admin/AdminSidebar';
+import { AdminTopBar } from '@/components/admin/AdminTopBar';
+import { AdminMobileSidebar } from '@/components/admin/AdminMobileSidebar';
 
 export default function UserManagementPage() {
   const [users, setUsers] = useState<UserManagementData[]>([]);
@@ -26,6 +29,7 @@ export default function UserManagementPage() {
   const [sortOrder, setSortOrder] = useState<'newest' | 'oldest'>('newest');
   const [statusFilter, setStatusFilter] = useState<'all' | 'active' | 'disabled' | 'invited'>('all');
   const [isInviteModalOpen, setIsInviteModalOpen] = useState(false);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
   const isMobile = useIsMobile();
 
   // Load users on component mount
@@ -96,98 +100,199 @@ export default function UserManagementPage() {
   };
 
   return (
-    <div className={`${isMobile ? 'p-4' : 'container mx-auto p-6'} space-y-6`}>
-      <PageHeader
-        title="User Management"
-        description="Manage all users in the system"
-        icon={<Users className="h-6 w-6" />}
-      />
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 transition-colors duration-200">
+      {/* Desktop Layout */}
+      {!isMobile && (
+        <div className="flex h-screen">
+          <AdminSidebar />
+          <div className="flex-1 flex flex-col overflow-hidden">
+            <AdminTopBar />
+            <main className="flex-1 overflow-auto">
+              <div className="container mx-auto p-6 space-y-6">
+                <PageHeader
+                  title="User Management"
+                  description="Manage all users in the system"
+                  icon={<Users className="h-6 w-6" />}
+                />
 
-      {/* Filters and Actions */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Filters & Actions</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className={`flex ${isMobile ? 'flex-col' : 'flex-row'} gap-4 items-start ${isMobile ? '' : 'sm:items-center'}`}>
-            {/* Search */}
-            <div className={`relative ${isMobile ? 'w-full' : 'flex-1'} min-w-0`}>
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
-              <Input
-                placeholder="Search by name or email..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-9"
+                {/* Filters and Actions */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Filters & Actions</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="flex flex-row gap-4 items-center">
+                      {/* Search */}
+                      <div className="relative flex-1 min-w-0">
+                        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
+                        <Input
+                          placeholder="Search by name or email..."
+                          value={searchTerm}
+                          onChange={(e) => setSearchTerm(e.target.value)}
+                          className="pl-9"
+                        />
+                      </div>
+
+                      {/* Status Filter */}
+                      <Select value={statusFilter} onValueChange={(value: any) => setStatusFilter(value)}>
+                        <SelectTrigger className="w-40">
+                          <SelectValue placeholder="Filter by status" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="all">All Users</SelectItem>
+                          <SelectItem value="active">Active</SelectItem>
+                          <SelectItem value="disabled">Disabled</SelectItem>
+                          <SelectItem value="invited">Invited</SelectItem>
+                        </SelectContent>
+                      </Select>
+
+                      {/* Sort Order */}
+                      <Button
+                        variant="outline"
+                        onClick={() => setSortOrder(sortOrder === 'newest' ? 'oldest' : 'newest')}
+                        className="flex items-center gap-2"
+                      >
+                        {sortOrder === 'newest' ? <SortDesc className="w-4 h-4" /> : <SortAsc className="w-4 h-4" />}
+                        {sortOrder === 'newest' ? 'Newest First' : 'Oldest First'}
+                      </Button>
+
+                      {/* Invite User Button */}
+                      <Button onClick={() => setIsInviteModalOpen(true)}>
+                        <Plus className="w-4 h-4 mr-2" />
+                        Invite User
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                {/* Users Table */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle>
+                      Users ({filteredAndSortedUsers.length})
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <UserManagementTable
+                      users={filteredAndSortedUsers}
+                      onRoleUpdate={handleRoleUpdate}
+                      onStatusToggle={handleStatusToggle}
+                      isLoading={isLoading}
+                    />
+                  </CardContent>
+                </Card>
+
+                {/* Invite User Modal */}
+                <InviteUserModal
+                  isOpen={isInviteModalOpen}
+                  onClose={() => setIsInviteModalOpen(false)}
+                  onInvite={handleInviteUser}
+                />
+              </div>
+            </main>
+          </div>
+        </div>
+      )}
+
+      {/* Mobile Layout */}
+      {isMobile && (
+        <div className="min-h-screen">
+          <AdminTopBar 
+            onMenuClick={() => setSidebarOpen(true)}
+            isMobile={true}
+          />
+          <AdminMobileSidebar 
+            isOpen={sidebarOpen}
+            onClose={() => setSidebarOpen(false)}
+          />
+          <main className="pt-16">
+            <div className="p-4 space-y-6">
+              <PageHeader
+                title="User Management"
+                description="Manage all users in the system"
+                icon={<Users className="h-6 w-6" />}
+              />
+
+              {/* Filters and Actions */}
+              <Card>
+                <CardHeader>
+                  <CardTitle>Filters & Actions</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="flex flex-col gap-4 items-start">
+                    {/* Search */}
+                    <div className="relative w-full min-w-0">
+                      <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
+                      <Input
+                        placeholder="Search by name or email..."
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                        className="pl-9"
+                      />
+                    </div>
+
+                    {/* Status Filter */}
+                    <Select value={statusFilter} onValueChange={(value: any) => setStatusFilter(value)}>
+                      <SelectTrigger className="w-full">
+                        <SelectValue placeholder="Filter by status" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all">All Users</SelectItem>
+                        <SelectItem value="active">Active</SelectItem>
+                        <SelectItem value="disabled">Disabled</SelectItem>
+                        <SelectItem value="invited">Invited</SelectItem>
+                      </SelectContent>
+                    </Select>
+
+                    {/* Sort Order */}
+                    <Button
+                      variant="outline"
+                      onClick={() => setSortOrder(sortOrder === 'newest' ? 'oldest' : 'newest')}
+                      className="flex items-center gap-2 w-full justify-center"
+                    >
+                      {sortOrder === 'newest' ? <SortDesc className="w-4 h-4" /> : <SortAsc className="w-4 h-4" />}
+                      {sortOrder === 'newest' ? 'Newest First' : 'Oldest First'}
+                    </Button>
+
+                    {/* Invite User Button */}
+                    <Button 
+                      onClick={() => setIsInviteModalOpen(true)}
+                      className="w-full"
+                    >
+                      <Plus className="w-4 h-4 mr-2" />
+                      Invite User
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Users Table/Cards */}
+              <Card>
+                <CardHeader>
+                  <CardTitle>
+                    Users ({filteredAndSortedUsers.length})
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <UserManagementTableMobile
+                    users={filteredAndSortedUsers}
+                    onRoleUpdate={handleRoleUpdate}
+                    onStatusToggle={handleStatusToggle}
+                    isLoading={isLoading}
+                  />
+                </CardContent>
+              </Card>
+
+              {/* Invite User Modal */}
+              <InviteUserModal
+                isOpen={isInviteModalOpen}
+                onClose={() => setIsInviteModalOpen(false)}
+                onInvite={handleInviteUser}
               />
             </div>
-
-            {/* Status Filter */}
-            <Select value={statusFilter} onValueChange={(value: any) => setStatusFilter(value)}>
-              <SelectTrigger className={`${isMobile ? 'w-full' : 'w-40'}`}>
-                <SelectValue placeholder="Filter by status" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Users</SelectItem>
-                <SelectItem value="active">Active</SelectItem>
-                <SelectItem value="disabled">Disabled</SelectItem>
-                <SelectItem value="invited">Invited</SelectItem>
-              </SelectContent>
-            </Select>
-
-            {/* Sort Order */}
-            <Button
-              variant="outline"
-              onClick={() => setSortOrder(sortOrder === 'newest' ? 'oldest' : 'newest')}
-              className={`flex items-center gap-2 ${isMobile ? 'w-full justify-center' : ''}`}
-            >
-              {sortOrder === 'newest' ? <SortDesc className="w-4 h-4" /> : <SortAsc className="w-4 h-4" />}
-              {sortOrder === 'newest' ? 'Newest First' : 'Oldest First'}
-            </Button>
-
-            {/* Invite User Button */}
-            <Button 
-              onClick={() => setIsInviteModalOpen(true)}
-              className={`${isMobile ? 'w-full' : ''}`}
-            >
-              <Plus className="w-4 h-4 mr-2" />
-              Invite User
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Users Table/Cards */}
-      <Card>
-        <CardHeader>
-          <CardTitle>
-            Users ({filteredAndSortedUsers.length})
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          {isMobile ? (
-            <UserManagementTableMobile
-              users={filteredAndSortedUsers}
-              onRoleUpdate={handleRoleUpdate}
-              onStatusToggle={handleStatusToggle}
-              isLoading={isLoading}
-            />
-          ) : (
-            <UserManagementTable
-              users={filteredAndSortedUsers}
-              onRoleUpdate={handleRoleUpdate}
-              onStatusToggle={handleStatusToggle}
-              isLoading={isLoading}
-            />
-          )}
-        </CardContent>
-      </Card>
-
-      {/* Invite User Modal */}
-      <InviteUserModal
-        isOpen={isInviteModalOpen}
-        onClose={() => setIsInviteModalOpen(false)}
-        onInvite={handleInviteUser}
-      />
+          </main>
+        </div>
+      )}
     </div>
   );
 }

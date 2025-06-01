@@ -5,7 +5,7 @@ import AdminRoute from '@/components/auth/AdminRoute';
 import AppLayout from '@/layouts/AppLayout';
 
 // Import existing admin pages
-import AdminDashboardPage from '@/pages/admin/AdminDashboardPage';
+import AdminDashboard from '@/pages/admin/AdminDashboard';
 import AdminCalendarPage from '@/pages/admin/AdminCalendarPage';
 import UserManagementPage from '@/pages/admin/UserManagementPage';
 import MediaLibraryPage from '@/pages/admin/MediaLibraryPage';
@@ -27,27 +27,128 @@ export const adminRoutes: RouteObject[] = [
     path: '/admin',
     element: (
       <AdminRoute>
-        <AppLayout sidebarType="none" showHeader={true} showFooter={false} />
+        <AdminDashboard />
       </AdminRoute>
     ),
-    children: [
-      { index: true, element: <AdminDashboardPage /> },
-      { path: 'calendar', element: <AdminCalendarPage /> },
-      { path: 'events/:id', element: <EventDetailsPage /> },
-      { path: 'events/:id/rsvps', element: <EventRSVPsPage /> },
-      // Admin member management route - distinct path from member dashboard
-      { path: 'members', element: <UserManagementPage /> },
-      { path: 'user-management', element: <UserManagementPage /> },
-      { path: 'hero-manager', element: <AdminHeroManager /> },
-      { path: 'media-uploader', element: <AdminMediaUploaderPage /> },
-      { path: 'media', element: <MediaLibraryPage /> },
-      { path: 'news-ticker', element: <NewsTickerSettingsPage /> },
-      { path: 'orders', element: <OrdersPage /> },
-      { path: 'analytics', element: <AnalyticsPage /> },
-      { path: 'fan-tags', element: <UserManagementPage /> }, // Can be updated to specific fan tags page
-      { path: 'fan-upload', element: <FanBulkUploadPage /> },
-      { path: 'announcements', element: <AnnouncementsPage /> },
-      { path: 'settings', element: <SettingsPage /> },
-    ],
+  },
+  {
+    path: '/admin/calendar',
+    element: (
+      <AdminRoute>
+        <AdminCalendarPage />
+      </AdminRoute>
+    ),
+  },
+  {
+    path: '/admin/events/:id',
+    element: (
+      <AdminRoute>
+        <EventDetailsPage />
+      </AdminRoute>
+    ),
+  },
+  {
+    path: '/admin/events/:id/rsvps',
+    element: (
+      <AdminRoute>
+        <EventRSVPsPage />
+      </AdminRoute>
+    ),
+  },
+  {
+    path: '/admin/members',
+    element: (
+      <AdminRoute>
+        <UserManagementPage />
+      </AdminRoute>
+    ),
+  },
+  {
+    path: '/admin/user-management',
+    element: (
+      <AdminRoute>
+        <UserManagementPage />
+      </AdminRoute>
+    ),
+  },
+  {
+    path: '/admin/hero-manager',
+    element: (
+      <AdminRoute>
+        <AdminHeroManager />
+      </AdminRoute>
+    ),
+  },
+  {
+    path: '/admin/media-uploader',
+    element: (
+      <AdminRoute>
+        <AdminMediaUploaderPage />
+      </AdminRoute>
+    ),
+  },
+  {
+    path: '/admin/media',
+    element: (
+      <AdminRoute>
+        <MediaLibraryPage />
+      </AdminRoute>
+    ),
+  },
+  {
+    path: '/admin/news-ticker',
+    element: (
+      <AdminRoute>
+        <NewsTickerSettingsPage />
+      </AdminRoute>
+    ),
+  },
+  {
+    path: '/admin/orders',
+    element: (
+      <AdminRoute>
+        <OrdersPage />
+      </AdminRoute>
+    ),
+  },
+  {
+    path: '/admin/analytics',
+    element: (
+      <AdminRoute>
+        <AnalyticsPage />
+      </AdminRoute>
+    ),
+  },
+  {
+    path: '/admin/fan-tags',
+    element: (
+      <AdminRoute>
+        <UserManagementPage />
+      </AdminRoute>
+    ),
+  },
+  {
+    path: '/admin/fan-upload',
+    element: (
+      <AdminRoute>
+        <FanBulkUploadPage />
+      </AdminRoute>
+    ),
+  },
+  {
+    path: '/admin/announcements',
+    element: (
+      <AdminRoute>
+        <AnnouncementsPage />
+      </AdminRoute>
+    ),
+  },
+  {
+    path: '/admin/settings',
+    element: (
+      <AdminRoute>
+        <SettingsPage />
+      </AdminRoute>
+    ),
   },
 ];
