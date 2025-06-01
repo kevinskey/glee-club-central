@@ -16,6 +16,26 @@ interface ExportOptions {
   activeOnly: boolean;
 }
 
+interface ProfileData {
+  id: string;
+  first_name: string | null;
+  last_name: string | null;
+  phone: string | null;
+  voice_part: string | null;
+  status: string | null;
+  join_date: string | null;
+  class_year: string | null;
+  dues_paid: boolean | null;
+  notes: string | null;
+  role: string | null;
+  is_super_admin: boolean | null;
+}
+
+interface AuthUser {
+  id: string;
+  email?: string;
+}
+
 export function MemberCSVDownload() {
   const [isExporting, setIsExporting] = useState(false);
   const [options, setOptions] = useState<ExportOptions>({
@@ -69,18 +89,25 @@ export function MemberCSVDownload() {
 
       // Get email addresses from auth users (if we have admin access)
       let emails: { [key: string]: string } = {};
-      try {
-        const { data: authUsers } = await supabase.auth.admin.listUsers();
-        authUsers?.users?.forEach(user => {
-          if (user.email) {
-            emails[user.id] = user.email;
-          }
-        });
-      } catch (authError) {
-        console.warn('Could not fetch email addresses (admin access required)');
+      
+      if (options.includeContactInfo) {
+        try {
+          const { data: authData } = await supabase.auth.admin.listUsers();
+          const authUsers = authData?.users as AuthUser[] | undefined;
+          
+          authUsers?.forEach((user: AuthUser) => {
+            if (user.email && user.id) {
+              emails[user.id] = user.email;
+            }
+          });
+        } catch (authError) {
+          console.warn('Could not fetch email addresses (admin access required)');
+        }
       }
 
-      if (!profiles || profiles.length === 0) {
+      const typedProfiles = profiles as ProfileData[] | null;
+
+      if (!typedProfiles || typedProfiles.length === 0) {
         toast.warning('No members found to export');
         return;
       }
@@ -105,7 +132,7 @@ export function MemberCSVDownload() {
       }
 
       // Build CSV rows
-      const csvRows = profiles.map(profile => {
+      const csvRows = typedProfiles.map((profile: ProfileData) => {
         const row = [profile.id];
         
         if (options.includePersonalInfo) {
@@ -169,7 +196,7 @@ export function MemberCSVDownload() {
         document.body.removeChild(link);
       }
 
-      toast.success(`Successfully exported ${profiles.length} members`);
+      toast.success(`Successfully exported ${typedProfiles.length} members`);
       
     } catch (error: any) {
       console.error('Export error:', error);
