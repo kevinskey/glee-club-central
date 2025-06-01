@@ -54,9 +54,9 @@ export function Footer() {
     <footer className="border-t py-10 sm:py-12 md:py-14 bg-white dark:bg-gray-950">
       <div className="container px-4 sm:px-6 md:px-8 max-w-7xl mx-auto">
         {/* Main Footer Content */}
-        <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3 mb-8">
+        <div className="grid gap-8 md:grid-cols-3 mb-8">
           {/* Logo & Tagline */}
-          <div className="lg:col-span-1">
+          <div>
             <div className="flex items-center mb-4">
               <img 
                 src="/lovable-uploads/8aa13e63-fb9a-4c52-95cf-86b458c58f1c.png" 
