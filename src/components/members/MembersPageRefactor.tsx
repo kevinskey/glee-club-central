@@ -30,8 +30,11 @@ import {
 import { useAuthMigration } from '@/hooks/useAuthMigration';
 import { useUserManagement } from '@/hooks/user/useUserManagement';
 import { CreateUserModal } from './CreateUserModal';
+import { AddMemberDialog } from './AddMemberDialog';
 import { MemberCSVUpload } from './MemberCSVUpload';
 import { MemberCSVDownload } from './MemberCSVDownload';
+import { UserFormValues } from './form/userFormSchema';
+import { useUserCreate } from '@/hooks/user/useUserCreate';
 
 interface Member {
   id: string;
@@ -50,10 +53,13 @@ interface Member {
 export function MembersPageRefactor() {
   const { isAdmin, isLoading, isAuthenticated, profile } = useAuthMigration();
   const { users, isLoading: usersLoading, refreshUsers } = useUserManagement();
+  const { addUser } = useUserCreate();
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedVoicePart, setSelectedVoicePart] = useState('all');
   const [selectedRole, setSelectedRole] = useState('all');
   const [showCreateModal, setShowCreateModal] = useState(false);
+  const [showAddMemberDialog, setShowAddMemberDialog] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const isAdminUser = isAdmin();
 
@@ -76,6 +82,21 @@ export function MembersPageRefactor() {
 
   const handleUserCreated = () => {
     refreshUsers();
+  };
+
+  const handleAddMember = async (data: UserFormValues) => {
+    setIsSubmitting(true);
+    try {
+      const success = await addUser(data);
+      if (success) {
+        setShowAddMemberDialog(false);
+        refreshUsers();
+      }
+    } catch (error) {
+      console.error('Error adding member:', error);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   if (isLoading || usersLoading) {
@@ -113,10 +134,16 @@ export function MembersPageRefactor() {
           </p>
         </div>
         {isAdminUser && (
-          <Button onClick={() => setShowCreateModal(true)}>
-            <UserPlus className="mr-2 h-4 w-4" />
-            Add Member
-          </Button>
+          <div className="flex gap-2">
+            <Button onClick={() => setShowAddMemberDialog(true)} variant="default">
+              <UserPlus className="mr-2 h-4 w-4" />
+              Add Member
+            </Button>
+            <Button onClick={() => setShowCreateModal(true)} variant="outline">
+              <UserPlus className="mr-2 h-4 w-4" />
+              Quick Add
+            </Button>
+          </div>
         )}
       </div>
 
@@ -187,6 +214,12 @@ export function MembersPageRefactor() {
                 <p className="text-muted-foreground">
                   {searchTerm || selectedVoicePart !== 'all' || selectedRole !== 'all' ? 'No members match your search criteria.' : 'No members have been added yet.'}
                 </p>
+                {isAdminUser && filteredMembers.length === 0 && !searchTerm && selectedVoicePart === 'all' && selectedRole === 'all' && (
+                  <Button onClick={() => setShowAddMemberDialog(true)} className="mt-4">
+                    <UserPlus className="mr-2 h-4 w-4" />
+                    Add Your First Member
+                  </Button>
+                )}
               </CardContent>
             </Card>
           ) : (
@@ -294,6 +327,14 @@ export function MembersPageRefactor() {
         isOpen={showCreateModal}
         onClose={() => setShowCreateModal(false)}
         onUserCreated={handleUserCreated}
+      />
+
+      {/* Add Member Dialog */}
+      <AddMemberDialog
+        isOpen={showAddMemberDialog}
+        onOpenChange={setShowAddMemberDialog}
+        onMemberAdd={handleAddMember}
+        isSubmitting={isSubmitting}
       />
     </div>
   );
