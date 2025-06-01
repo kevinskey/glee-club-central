@@ -27,10 +27,14 @@ import FanDashboardPage from "./pages/dashboard/FanDashboardPage";
 import NotFoundPage from "./pages/NotFoundPage";
 
 export const router = createBrowserRouter([
-  // Public routes - no auth context needed for public pages
+  // Public routes - now wrapped with auth context for header functionality
   {
     path: "/",
-    element: <AppLayout sidebarType="none" showHeader={true} showFooter={true} />,
+    element: (
+      <SimpleAuthProvider>
+        <AppLayout sidebarType="none" showHeader={true} showFooter={true} />
+      </SimpleAuthProvider>
+    ),
     children: [
       { index: true, element: <HomePage /> },
       { path: "about", element: <AboutPage /> },
@@ -74,7 +78,7 @@ export const router = createBrowserRouter([
     path: "/reset-password",
     element: (
       <SimpleAuthProvider>
-        <AppLayout sidebarType="none" showHeader={false} showFooter={false}>
+        <AppLayout sidebarType="none" showHeader={false} showFooter={false">
           <ResetPasswordPage />
         </AppLayout>
       </SimpleAuthProvider>
@@ -94,7 +98,7 @@ export const router = createBrowserRouter([
     path: "/register",
     element: (
       <SimpleAuthProvider>
-        <AppLayout sidebarType="none" showHeader={false} showFooter={false}>
+        <AppLayout sidebarType="none" showHeader={false} showFooter={false">
           <RegisterPage />
         </AppLayout>
       </SimpleAuthProvider>
@@ -104,7 +108,7 @@ export const router = createBrowserRouter([
     path: "/join-glee-fam",
     element: (
       <SimpleAuthProvider>
-        <AppLayout sidebarType="none" showHeader={false} showFooter={false}>
+        <AppLayout sidebarType="none" showHeader={false} showFooter={false">
           <JoinGleeFamPage />
         </AppLayout>
       </SimpleAuthProvider>
