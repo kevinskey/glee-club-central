@@ -11,10 +11,12 @@ import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { PageLoader } from "@/components/ui/page-loader";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { useUserUpdate } from "@/hooks/user/useUserUpdate";
 
 export default function ProfilePage() {
   const { user, loading: authLoading } = useAuth();
   const { profile, loading: profileLoading } = useProfile();
+  const { updateUser } = useUserUpdate();
   const [isEditing, setIsEditing] = useState(false);
   const [activeTab, setActiveTab] = useState("overview");
   
@@ -36,9 +38,13 @@ export default function ProfilePage() {
     
     try {
       console.log("Updating profile with data:", updatedProfile);
-      // Mock profile update - replace with actual update logic
-      toast.success("Profile updated successfully");
-      setIsEditing(false);
+      const success = await updateUser(profile.id, updatedProfile);
+      if (success) {
+        toast.success("Profile updated successfully");
+        setIsEditing(false);
+      } else {
+        toast.error("Failed to update profile");
+      }
     } catch (error) {
       console.error("Error updating profile:", error);
       toast.error("An error occurred while updating your profile");
@@ -128,7 +134,10 @@ export default function ProfilePage() {
             
             <TabsContent value="overview">
               <ProfileOverviewTab 
-                profile={profile}
+                profile={{
+                  ...profile,
+                  email: user.email
+                }}
                 isEditable={isEditing} 
                 onSave={handleProfileUpdate}
               />
@@ -168,10 +177,22 @@ export default function ProfilePage() {
               <div className="space-y-2">
                 <h4 className="text-sm font-medium">Membership Status:</h4>
                 <div className="flex items-center gap-2">
-                  <span className="w-2 h-2 rounded-full bg-green-500"></span>
-                  <span className="capitalize">Active</span>
+                  <span className={`w-2 h-2 rounded-full ${profile.status === "active" ? "bg-green-500" : "bg-yellow-500"}`}></span>
+                  <span className="capitalize">{profile.status || "Active"}</span>
                 </div>
               </div>
+              {profile.role && (
+                <div className="space-y-2 mt-4">
+                  <h4 className="text-sm font-medium">Role:</h4>
+                  <span className="capitalize text-sm">{profile.role.replace('_', ' ')}</span>
+                </div>
+              )}
+              {profile.voice_part && (
+                <div className="space-y-2 mt-4">
+                  <h4 className="text-sm font-medium">Voice Part:</h4>
+                  <span className="text-sm">{profile.voice_part}</span>
+                </div>
+              )}
             </CardContent>
           </Card>
         </div>
