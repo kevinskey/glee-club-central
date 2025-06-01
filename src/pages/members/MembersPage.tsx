@@ -1,7 +1,8 @@
+
 import React from 'react';
-import { MembersPageComponent } from '@/components/members/MembersPageRefactor';
+import { MembersPageRefactor } from '@/components/members/MembersPageRefactor';
 import { useUserManagement } from '@/hooks/user/useUserManagement';
 
 export default function MembersPage() {
-  return <MembersPageComponent useUserManagementHook={useUserManagement} />;
+  return <MembersPageRefactor />;
 }

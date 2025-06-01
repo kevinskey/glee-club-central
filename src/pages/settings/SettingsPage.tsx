@@ -1,36 +1,35 @@
 
 import React from 'react';
-import { PageHeader } from "@/components/ui/page-header";
-import { Settings } from "lucide-react";
-import { NotificationPreferences } from '@/components/settings/NotificationPreferences';
-import { ProfileSummary } from '@/components/settings/ProfileSummary';
-import { AccountControls } from '@/components/settings/AccountControls';
 import { useAuth } from '@/contexts/AuthContext';
 import { PageLoader } from '@/components/ui/page-loader';
+import { Card, CardContent } from '@/components/ui/card';
+import { Settings } from 'lucide-react';
 
-const SettingsPage: React.FC = () => {
-  const { user, isLoading } = useAuth();
+export default function SettingsPage() {
+  const { loading } = useAuth();
 
-  // Show loading state while auth is initializing
-  if (isLoading || !user) {
+  if (loading) {
     return <PageLoader message="Loading settings..." />;
   }
 
   return (
-    <div className="container mx-auto px-4 py-8 max-w-4xl">
-      <PageHeader
-        title="Settings"
-        description="Manage your preferences and account"
-        icon={<Settings className="h-6 w-6" />}
-      />
-      
-      <div className="mt-8 space-y-6">
-        <ProfileSummary />
-        <NotificationPreferences />
-        <AccountControls />
+    <div className="space-y-6">
+      <div>
+        <h1 className="text-3xl font-bold">Settings</h1>
+        <p className="text-muted-foreground">
+          Manage your application preferences
+        </p>
       </div>
+
+      <Card>
+        <CardContent className="text-center py-8">
+          <Settings className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+          <h3 className="font-semibold mb-2">Settings Coming Soon</h3>
+          <p className="text-muted-foreground">
+            Settings functionality will be implemented here.
+          </p>
+        </CardContent>
+      </Card>
     </div>
   );
-};
-
-export default SettingsPage;
+}

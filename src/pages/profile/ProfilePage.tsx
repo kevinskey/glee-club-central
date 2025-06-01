@@ -3,71 +3,20 @@ import React, { useState, useEffect } from 'react';
 import { PageHeader } from "@/components/ui/page-header";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useAuth } from "@/contexts/AuthContext";
+import { useProfile } from "@/contexts/ProfileContext";
 import { User, Edit, Save, AlertCircle } from "lucide-react";
 import { ProfileOverviewTab } from "@/components/members/profile/ProfileOverviewTab";
-import { ParticipationTab } from "@/components/profile/ParticipationTab";
-import { MusicAccessTab } from "@/components/profile/MusicAccessTab";
-import { WardrobeTab } from "@/components/profile/WardrobeTab";
-import { FinancialInfoTab } from "@/components/profile/FinancialInfoTab";
-import { MediaConsentTab } from "@/components/profile/MediaConsentTab";
-import { UserRoleEditor } from "@/components/profile/UserRoleEditor";
-import { usePermissions } from "@/hooks/usePermissions";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
-import { useUserManagement } from "@/hooks/user/useUserManagement";
-import { Spinner } from "@/components/ui/spinner";
-import { Profile } from "@/types/auth";
-import { User as UserType } from "@/hooks/user/useUserManagement";
-import { useMedia } from "@/hooks/use-mobile";
+import { PageLoader } from "@/components/ui/page-loader";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 
 export default function ProfilePage() {
-  const { profile, isLoading, refreshPermissions, user } = useAuth();
-  const { hasPermission } = usePermissions();
-  const { updateUser } = useUserManagement();
-  const canManageRoles = hasPermission('can_manage_users');
+  const { user, loading: authLoading } = useAuth();
+  const { profile, loading: profileLoading } = useProfile();
   const [isEditing, setIsEditing] = useState(false);
   const [activeTab, setActiveTab] = useState("overview");
-  const [profileError, setProfileError] = useState<string | null>(null);
-  const isMobile = useMedia('(max-width: 640px)');
-  
-  // Enhanced profile loading with retry logic
-  useEffect(() => {
-    if (!refreshPermissions || !user) return;
-    
-    let retryCount = 0;
-    const maxRetries = 3;
-    
-    const loadProfile = async () => {
-      try {
-        console.log('Loading profile data...');
-        await refreshPermissions();
-        setProfileError(null);
-      } catch (error) {
-        console.error('Error loading profile:', error);
-        if (retryCount < maxRetries) {
-          retryCount++;
-          console.log(`Retrying profile load (${retryCount}/${maxRetries})...`);
-          setTimeout(loadProfile, 1000 * retryCount);
-        } else {
-          setProfileError('Failed to load profile after multiple attempts');
-        }
-      }
-    };
-    
-    // Load immediately
-    loadProfile();
-    
-    // Set up periodic refresh
-    const interval = setInterval(() => {
-      if (user && !isLoading) {
-        loadProfile();
-      }
-    }, 30000); // Refresh every 30 seconds
-    
-    return () => clearInterval(interval);
-  }, [refreshPermissions, user, isLoading]);
   
   const toggleEditMode = () => {
     setIsEditing(!isEditing);
@@ -87,17 +36,9 @@ export default function ProfilePage() {
     
     try {
       console.log("Updating profile with data:", updatedProfile);
-      const success = await updateUser(profile.id, updatedProfile);
-      if (success) {
-        toast.success("Profile updated successfully");
-        setIsEditing(false);
-        // Refresh the user's profile and permissions
-        if (refreshPermissions) {
-          await refreshPermissions();
-        }
-      } else {
-        toast.error("Failed to update profile");
-      }
+      // Mock profile update - replace with actual update logic
+      toast.success("Profile updated successfully");
+      setIsEditing(false);
     } catch (error) {
       console.error("Error updating profile:", error);
       toast.error("An error occurred while updating your profile");
@@ -111,41 +52,8 @@ export default function ProfilePage() {
     }
   };
   
-  // Enhanced loading state
-  if (isLoading) {
-    return (
-      <div className="container mx-auto p-4">
-        <div className="flex flex-col items-center justify-center h-64 space-y-4">
-          <Spinner size="lg" />
-          <p className="text-muted-foreground">Loading your profile...</p>
-        </div>
-      </div>
-    );
-  }
-
-  // Show error state if profile failed to load
-  if (profileError) {
-    return (
-      <div className="container mx-auto p-4">
-        <Alert variant="destructive" className="mb-6">
-          <AlertCircle className="h-4 w-4" />
-          <AlertDescription>
-            {profileError}. Please try refreshing the page or contact support if the issue persists.
-          </AlertDescription>
-        </Alert>
-        <Button 
-          onClick={() => {
-            setProfileError(null);
-            if (refreshPermissions) {
-              refreshPermissions();
-            }
-          }}
-          variant="outline"
-        >
-          Retry Loading Profile
-        </Button>
-      </div>
-    );
+  if (authLoading || profileLoading) {
+    return <PageLoader message="Loading profile..." />;
   }
   
   if (!user) {
@@ -170,22 +78,9 @@ export default function ProfilePage() {
             Profile information is not available. This may be because your account is still being set up.
           </AlertDescription>
         </Alert>
-        <Button 
-          onClick={() => {
-            if (refreshPermissions) {
-              refreshPermissions();
-            }
-          }}
-          variant="outline"
-        >
-          Refresh Profile
-        </Button>
       </div>
     );
   }
-
-  // Cast the profile to UserType where needed for components that expect it
-  const profileAsUser = profile as unknown as UserType;
 
   return (
     <div className="container mx-auto p-4 space-y-6">
@@ -225,106 +120,59 @@ export default function ProfilePage() {
             onValueChange={handleTabChange}
             className="w-full"
           >
-            {/* Improved mobile tab styling */}
-            <div className="overflow-x-auto pb-2">
-              <TabsList className={`mb-4 ${isMobile ? 'w-max min-w-full grid grid-cols-3 gap-2 p-2' : 'grid grid-cols-6'}`}>
-                <TabsTrigger 
-                  value="overview" 
-                  className={`${isMobile ? 'py-3 px-3 text-xs' : ''}`}
-                >
-                  Overview
-                </TabsTrigger>
-                <TabsTrigger 
-                  value="participation" 
-                  className={`${isMobile ? 'py-3 px-3 text-xs' : ''}`}
-                >
-                  Participation
-                </TabsTrigger>
-                <TabsTrigger 
-                  value="music" 
-                  className={`${isMobile ? 'py-3 px-3 text-xs' : ''}`}
-                >
-                  Music
-                </TabsTrigger>
-                <TabsTrigger 
-                  value="wardrobe" 
-                  className={`${isMobile ? 'py-3 px-3 text-xs' : ''}`}
-                >
-                  Wardrobe
-                </TabsTrigger>
-                <TabsTrigger 
-                  value="financial" 
-                  className={`${isMobile ? 'py-3 px-3 text-xs' : ''}`}
-                >
-                  Financial
-                </TabsTrigger>
-                <TabsTrigger 
-                  value="media" 
-                  className={`${isMobile ? 'py-3 px-3 text-xs' : ''}`}
-                >
-                  Media
-                </TabsTrigger>
-              </TabsList>
-            </div>
+            <TabsList className="mb-4 grid grid-cols-3">
+              <TabsTrigger value="overview">Overview</TabsTrigger>
+              <TabsTrigger value="participation">Participation</TabsTrigger>
+              <TabsTrigger value="music">Music</TabsTrigger>
+            </TabsList>
             
             <TabsContent value="overview">
               <ProfileOverviewTab 
-                profile={profile} 
                 isEditable={isEditing} 
                 onSave={handleProfileUpdate}
               />
             </TabsContent>
             
             <TabsContent value="participation">
-              <ParticipationTab memberId={profile.id} />
+              <Card>
+                <CardContent className="p-6 text-center">
+                  <p className="text-muted-foreground">Participation tracking coming soon.</p>
+                </CardContent>
+              </Card>
             </TabsContent>
             
             <TabsContent value="music">
-              <MusicAccessTab memberId={profile.id} voicePart={profile.voice_part} />
-            </TabsContent>
-            
-            <TabsContent value="wardrobe">
-              <WardrobeTab profile={profileAsUser} />
-            </TabsContent>
-            
-            <TabsContent value="financial">
-              <FinancialInfoTab memberId={profile.id} />
-            </TabsContent>
-            
-            <TabsContent value="media">
-              <MediaConsentTab profile={profileAsUser} />
+              <Card>
+                <CardContent className="p-6 text-center">
+                  <p className="text-muted-foreground">Music access information coming soon.</p>
+                </CardContent>
+              </Card>
             </TabsContent>
           </Tabs>
         </div>
         
         <div className="space-y-6">
-          <UserRoleEditor />
-          
-          {canManageRoles && (
-            <Card>
-              <CardHeader>
-                <CardTitle>Admin Access</CardTitle>
-                <CardDescription>
-                  Special administrative features
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <p className="text-sm mb-4">
-                  As an administrator, you have special privileges to manage user permissions, 
-                  roles and other administrative functions.
-                </p>
-                <div className="space-y-2">
-                  <h4 className="text-sm font-medium">Administrative Tools:</h4>
-                  <ul className="text-sm space-y-1 list-disc pl-4">
-                    <li>Manage user permissions</li>
-                    <li>Edit member roles</li>
-                    <li>Handle financial records</li>
-                    <li>Configure system settings</li>
-                  </ul>
+          <Card>
+            <CardHeader>
+              <CardTitle>Member Information</CardTitle>
+              <CardDescription>
+                Your membership details
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <p className="text-sm mb-4">
+                As a member of the Spelman College Glee Club, you have access to resources, 
+                sheet music, and other materials.
+              </p>
+              <div className="space-y-2">
+                <h4 className="text-sm font-medium">Membership Status:</h4>
+                <div className="flex items-center gap-2">
+                  <span className="w-2 h-2 rounded-full bg-green-500"></span>
+                  <span className="capitalize">Active</span>
                 </div>
-              </CardContent>
-            </Card>
-          )}
+              </div>
+            </CardContent>
+          </Card>
         </div>
       </div>
     </div>

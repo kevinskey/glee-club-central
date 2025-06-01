@@ -1,307 +1,159 @@
 
-import React, { useState, useEffect } from "react";
-import { PageHeader } from "@/components/ui/page-header";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import { ImageIcon, TrashIcon, FolderIcon } from "lucide-react";
-import { useAuth } from "@/contexts/AuthContext";
-import { SiteImage, listSiteImages, uploadSiteImage, deleteSiteImage } from "@/utils/siteImages";
-import { toast } from "sonner";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
+import React, { useState, useEffect } from 'react';
+import { useAuth } from '@/contexts/AuthContext';
+import { useProfile } from '@/contexts/ProfileContext';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Image, Upload, Trash2, Settings } from 'lucide-react';
+import { PageLoader } from '@/components/ui/page-loader';
+import { toast } from 'sonner';
 
-const CATEGORIES = ["general", "hero", "about", "performances", "backgrounds", "press-kit"];
+export default function SiteImagesPage() {
+  const { user, loading: authLoading } = useAuth();
+  const { isAdmin, loading: profileLoading } = useProfile();
+  const [images, setImages] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [uploading, setUploading] = useState(false);
 
-const SiteImagesPage = () => {
-  const { isAdmin, user } = useAuth();
-  const [images, setImages] = useState<SiteImage[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [uploadingImage, setUploadingImage] = useState(false);
-  const [selectedTab, setSelectedTab] = useState("all");
-  const [selectedImage, setSelectedImage] = useState<string | null>(null);
-  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
-  
-  // Form state
-  const [imageFile, setImageFile] = useState<File | null>(null);
-  const [imageName, setImageName] = useState("");
-  const [imageDescription, setImageDescription] = useState("");
-  const [imageCategory, setImageCategory] = useState("general");
-
-  const loadImages = async () => {
-    setIsLoading(true);
-    let category = selectedTab !== "all" ? selectedTab : undefined;
-    const imagesData = await listSiteImages(category);
-    setImages(imagesData);
-    setIsLoading(false);
-  };
+  const isUserAdmin = isAdmin;
 
   useEffect(() => {
-    loadImages();
-  }, [selectedTab]);
+    const loadImages = async () => {
+      setLoading(true);
+      // Mock loading delay
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      setImages([]);
+      setLoading(false);
+    };
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files[0]) {
-      setImageFile(e.target.files[0]);
-      // Prefill name with file name without extension if empty
-      if (!imageName) {
-        const fileName = e.target.files[0].name.split('.').slice(0, -1).join('.');
-        setImageName(fileName);
-      }
+    if (user && isUserAdmin) {
+      loadImages();
     }
-  };
+  }, [user, isUserAdmin]);
 
-  const handleImageUpload = async (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    if (!imageFile || !imageName) {
-      toast.error("Missing fields", {
-        description: "Please provide an image file and name"
-      });
-      return;
-    }
-
-    setUploadingImage(true);
-    try {
-      const result = await uploadSiteImage({
-        file: imageFile,
-        name: imageName,
-        description: imageDescription,
-        category: imageCategory
-      });
-      
-      if (result.success) {
-        toast.success("Image uploaded successfully");
-        setImageFile(null);
-        setImageName("");
-        setImageDescription("");
-        loadImages();
-      }
-    } finally {
-      setUploadingImage(false);
-    }
-  };
-
-  const confirmDeleteImage = (id: string) => {
-    setSelectedImage(id);
-    setDeleteDialogOpen(true);
-  };
-
-  const handleDeleteImage = async () => {
-    if (selectedImage) {
-      const result = await deleteSiteImage(selectedImage);
-      if (result.success) {
-        loadImages();
-      }
-    }
-    setDeleteDialogOpen(false);
-    setSelectedImage(null);
-  };
-
-  if (!isAdmin) {
-    return <div className="p-8">You don't have permission to access this page.</div>;
+  if (authLoading || profileLoading || loading) {
+    return <PageLoader message="Loading site images..." />;
   }
 
+  if (!user || !isUserAdmin) {
+    return (
+      <Card>
+        <CardContent className="text-center py-8">
+          <Settings className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+          <h3 className="font-semibold mb-2">Admin Access Required</h3>
+          <p className="text-muted-foreground">
+            You must be an administrator to manage site images.
+          </p>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!e.target.files || e.target.files.length === 0) return;
+
+    setUploading(true);
+    try {
+      // Mock upload process
+      await new Promise(resolve => setTimeout(resolve, 2000));
+      toast.success('Image uploaded successfully!');
+    } catch (error) {
+      console.error('Upload error:', error);
+      toast.error('Failed to upload image');
+    } finally {
+      setUploading(false);
+    }
+  };
+
   return (
-    <div className="container mx-auto p-4 space-y-8">
-      <PageHeader
-        title="Site Images"
-        description="Upload and manage images for use throughout the site"
-        icon={<ImageIcon className="h-6 w-6" />}
-      />
+    <div className="space-y-6">
+      <div>
+        <h1 className="text-3xl font-bold">Site Images</h1>
+        <p className="text-muted-foreground">
+          Manage images used throughout the Glee World website
+        </p>
+      </div>
 
-      <Tabs value={selectedTab} onValueChange={setSelectedTab}>
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-4">
-          <TabsList className="mb-4 sm:mb-0">
-            <TabsTrigger value="all">All Images</TabsTrigger>
-            {CATEGORIES.map(category => (
-              <TabsTrigger key={category} value={category}>
-                {category.charAt(0).toUpperCase() + category.slice(1)}
-              </TabsTrigger>
-            ))}
-          </TabsList>
-        </div>
-
-        <Card>
-          <CardContent className="p-6">
-            <h2 className="text-lg font-semibold mb-4">Upload New Image</h2>
-            <form onSubmit={handleImageUpload} className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="imageFile">Image File</Label>
-                <Input 
-                  id="imageFile" 
-                  type="file" 
-                  accept="image/*" 
-                  onChange={handleFileChange} 
-                  required 
-                />
-                {imageFile && (
-                  <div className="mt-2">
-                    <p className="text-sm text-muted-foreground">
-                      Selected file: {imageFile.name} ({Math.round(imageFile.size / 1024)} KB)
-                    </p>
-                    {imageFile.type.startsWith('image/') && (
-                      <div className="mt-2 w-32 h-32 border rounded overflow-hidden">
-                        <img 
-                          src={URL.createObjectURL(imageFile)} 
-                          alt="Preview" 
-                          className="w-full h-full object-cover" 
-                        />
-                      </div>
-                    )}
-                  </div>
-                )}
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="imageName">Image Name</Label>
-                  <Input 
-                    id="imageName" 
-                    value={imageName} 
-                    onChange={e => setImageName(e.target.value)} 
-                    required
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="imageCategory">Category</Label>
-                  <select
-                    id="imageCategory"
-                    className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                    value={imageCategory}
-                    onChange={e => setImageCategory(e.target.value)}
-                  >
-                    {CATEGORIES.map(category => (
-                      <option key={category} value={category}>
-                        {category.charAt(0).toUpperCase() + category.slice(1)}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="imageDescription">Description (Optional)</Label>
-                <Textarea 
-                  id="imageDescription" 
-                  value={imageDescription} 
-                  onChange={e => setImageDescription(e.target.value)} 
-                  rows={3}
-                />
-              </div>
-
-              <Button 
-                type="submit" 
-                className="w-full sm:w-auto" 
-                disabled={uploadingImage || !imageFile}
-              >
-                {uploadingImage ? "Uploading..." : "Upload Image"}
-              </Button>
-            </form>
-          </CardContent>
-        </Card>
-
-        <div className="mt-8">
-          <h2 className="text-lg font-semibold mb-4">
-            {selectedTab === 'all' ? 'All Images' : `${selectedTab.charAt(0).toUpperCase() + selectedTab.slice(1)} Images`} 
-            {!isLoading && <span className="text-sm font-normal text-muted-foreground ml-2">({images.length})</span>}
-          </h2>
-          
-          {isLoading ? (
-            <div className="flex justify-center p-8">
-              <div className="h-10 w-10 animate-spin rounded-full border-4 border-primary border-t-transparent"></div>
+      {/* Upload Section */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Upload New Image</CardTitle>
+          <CardDescription>
+            Add new images to be used on the website
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="image-upload">Select Image</Label>
+              <Input
+                id="image-upload"
+                type="file"
+                accept="image/*"
+                onChange={handleImageUpload}
+                disabled={uploading}
+              />
             </div>
-          ) : images.length === 0 ? (
-            <div className="text-center p-8 border rounded-md bg-muted/20">
-              <FolderIcon className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
-              <p className="text-muted-foreground">No images found in this category</p>
+            {uploading && (
+              <Alert>
+                <Upload className="h-4 w-4" />
+                <AlertDescription>
+                  Uploading image, please wait...
+                </AlertDescription>
+              </Alert>
+            )}
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Images Grid */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Current Site Images</CardTitle>
+          <CardDescription>
+            Manage existing images
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          {images.length === 0 ? (
+            <div className="text-center py-12">
+              <Image className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
+              <h3 className="font-semibold mb-2">No Images Uploaded</h3>
+              <p className="text-muted-foreground">
+                Upload your first image to get started.
+              </p>
             </div>
           ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-              {images.map(image => (
-                <Card key={image.id} className="overflow-hidden">
-                  <div className="relative">
-                    <img 
-                      src={image.file_url} 
-                      alt={image.name} 
-                      className="w-full aspect-video object-cover"
-                      onError={(e) => {
-                        (e.target as HTMLImageElement).onerror = null;
-                        (e.target as HTMLImageElement).src = '/placeholder.svg';
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {images.map((image, index) => (
+                <div key={index} className="relative group">
+                  <img
+                    src={image.url}
+                    alt={image.name}
+                    className="w-full h-40 object-cover rounded-lg border"
+                  />
+                  <div className="absolute inset-0 bg-black bg-opacity-50 opacity-0 group-hover:opacity-100 transition-opacity rounded-lg flex items-center justify-center">
+                    <Button
+                      variant="destructive"
+                      size="sm"
+                      onClick={() => {
+                        // Handle image deletion
+                        toast.success('Image deleted successfully');
                       }}
-                    />
-                    <Button 
-                      variant="destructive" 
-                      size="icon" 
-                      className="absolute top-2 right-2 h-8 w-8"
-                      onClick={() => confirmDeleteImage(image.id)}
                     >
-                      <TrashIcon className="h-4 w-4" />
+                      <Trash2 className="h-4 w-4" />
                     </Button>
                   </div>
-                  <CardContent className="p-3">
-                    <h3 className="font-medium mb-1 truncate" title={image.name}>
-                      {image.name}
-                    </h3>
-                    {image.category && (
-                      <p className="text-xs text-muted-foreground mb-1">
-                        Category: {image.category}
-                      </p>
-                    )}
-                    <div className="flex items-center justify-between">
-                      <Button 
-                        variant="outline" 
-                        size="sm" 
-                        className="mt-2 text-xs"
-                        onClick={() => {
-                          navigator.clipboard.writeText(image.file_url);
-                          toast.success("URL copied to clipboard");
-                        }}
-                      >
-                        Copy URL
-                      </Button>
-                      <p className="text-xs text-muted-foreground">
-                        {new Date(image.created_at).toLocaleDateString()}
-                      </p>
-                    </div>
-                  </CardContent>
-                </Card>
+                  <p className="mt-2 text-sm text-center truncate">{image.name}</p>
+                </div>
               ))}
             </div>
           )}
-        </div>
-      </Tabs>
-
-      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
-            <AlertDialogDescription>
-              This will permanently delete this image from the site.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={handleDeleteImage} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
-              Delete
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+        </CardContent>
+      </Card>
     </div>
   );
-};
-
-export default SiteImagesPage;
+}

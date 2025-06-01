@@ -39,7 +39,7 @@ const registerSchema = z.object({
 type RegisterFormValues = z.infer<typeof registerSchema>;
 
 export default function RegisterPage() {
-  const { signUp, isAuthenticated, isLoading } = useAuth();
+  const { user, loading, signUp, isAuthenticated } = useAuth();
   const navigate = useNavigate();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [registerError, setRegisterError] = useState<string | null>(null);
@@ -59,10 +59,10 @@ export default function RegisterPage() {
 
   // If user is already authenticated, redirect to dashboard
   useEffect(() => {
-    if (isAuthenticated && !isLoading) {
+    if (isAuthenticated && !loading) {
       navigate("/dashboard");
     }
-  }, [isAuthenticated, isLoading, navigate]);
+  }, [isAuthenticated, loading, navigate]);
 
   const sendWelcomeEmail = async (email: string, firstName: string) => {
     try {
@@ -153,7 +153,7 @@ export default function RegisterPage() {
   };
 
   // If already authenticated and not loading, don't render the register form
-  if (isAuthenticated && !isLoading) {
+  if (isAuthenticated && !loading) {
     return null; // Will redirect in the useEffect
   }
 
