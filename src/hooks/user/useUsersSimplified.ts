@@ -23,7 +23,32 @@ export const useUsersSimplified = (): UseUsersSimplifiedResponse => {
     try {
       console.log('Fetching users with simplified approach');
       
-      // Try the profiles table first
+      // First check if user is authenticated and has admin access
+      const { data: { user: currentUser } } = await supabase.auth.getUser();
+      
+      if (!currentUser) {
+        setError('You must be logged in to view users');
+        return null;
+      }
+
+      // Try to get current user's profile to check admin status
+      const { data: currentProfile, error: profileError } = await supabase
+        .from('profiles')
+        .select('is_super_admin, role')
+        .eq('id', currentUser.id)
+        .single();
+
+      // Check if user has admin access
+      const isAdmin = currentUser.email === 'kevinskey@mac.com' || 
+                    currentProfile?.is_super_admin === true || 
+                    currentProfile?.role === 'admin';
+
+      if (!isAdmin) {
+        setError('Admin access required to view users');
+        return null;
+      }
+
+      // Try the profiles table query with better error handling
       const { data: profiles, error: profilesError } = await supabase
         .from('profiles')
         .select('*')
@@ -32,21 +57,25 @@ export const useUsersSimplified = (): UseUsersSimplifiedResponse => {
       if (profilesError) {
         console.error('Error fetching profiles:', profilesError);
         
-        // If RLS recursion error, show helpful message
-        if (profilesError.code === '42P17') {
-          setError('Database configuration issue. Please contact administrator.');
-          toast.error('Unable to load users due to database configuration');
+        // Handle specific error cases
+        if (profilesError.code === '42P17' || profilesError.message.includes('infinite recursion')) {
+          setError('Database policy issue detected. The RLS policies may need to be updated.');
+          toast.error('Database configuration error - contact administrator');
+        } else if (profilesError.code === 'PGRST116') {
+          // No rows returned
+          console.log('No profiles found');
+          setUserCount(0);
           return [];
+        } else {
+          setError(profilesError.message);
+          toast.error('Failed to load users: ' + profilesError.message);
         }
-        
-        setError(profilesError.message);
-        toast.error('Failed to load users');
         return null;
       }
 
       console.log('Successfully fetched profiles:', profiles?.length || 0);
 
-      // Get auth users for additional info
+      // Get auth users for additional info (fallback if this fails)
       let authUsers: any[] = [];
       try {
         const { data: authData } = await supabase.auth.admin.listUsers();
@@ -61,7 +90,7 @@ export const useUsersSimplified = (): UseUsersSimplifiedResponse => {
         
         return {
           id: profile.id,
-          email: authUser?.email || 'No email available',
+          email: authUser?.email || profile.id, // Fallback to showing ID if no email
           first_name: profile.first_name || '',
           last_name: profile.last_name || '',
           phone: profile.phone,

@@ -20,7 +20,8 @@ import {
   Mail, 
   Phone,
   Music,
-  RefreshCw
+  RefreshCw,
+  AlertCircle
 } from 'lucide-react';
 import { useSimpleAuthContext } from '@/contexts/SimpleAuthContext';
 import { useUsersSimplified } from '@/hooks/user/useUsersSimplified';
@@ -44,10 +45,10 @@ export function UserManagementSimplified() {
   };
 
   useEffect(() => {
-    if (isAuthenticated) {
+    if (isAuthenticated && isAdminUser) {
       loadUsers();
     }
-  }, [isAuthenticated]);
+  }, [isAuthenticated, isAdminUser]);
 
   const filteredMembers = users.filter(user => {
     const searchTermLower = searchTerm.toLowerCase();
@@ -85,17 +86,38 @@ export function UserManagementSimplified() {
     );
   }
 
+  if (!isAdminUser) {
+    return (
+      <Card>
+        <CardContent className="text-center py-8">
+          <AlertCircle className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+          <h3 className="font-semibold mb-2">Admin Access Required</h3>
+          <p className="text-muted-foreground">
+            You need administrator privileges to view this page.
+          </p>
+        </CardContent>
+      </Card>
+    );
+  }
+
   if (error) {
     return (
       <Card>
         <CardContent className="text-center py-8">
-          <Users className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+          <AlertCircle className="h-12 w-12 text-red-500 mx-auto mb-4" />
           <h3 className="font-semibold mb-2">Error Loading Members</h3>
           <p className="text-muted-foreground mb-4">{error}</p>
-          <Button onClick={loadUsers} variant="outline">
-            <RefreshCw className="mr-2 h-4 w-4" />
-            Try Again
-          </Button>
+          <div className="space-y-2">
+            <Button onClick={loadUsers} variant="outline">
+              <RefreshCw className="mr-2 h-4 w-4" />
+              Try Again
+            </Button>
+            {error.includes('Database policy') && (
+              <p className="text-sm text-muted-foreground">
+                If this error persists, the database policies may need to be updated by an administrator.
+              </p>
+            )}
+          </div>
         </CardContent>
       </Card>
     );
@@ -115,12 +137,10 @@ export function UserManagementSimplified() {
             <RefreshCw className="mr-2 h-4 w-4" />
             Refresh
           </Button>
-          {isAdminUser && (
-            <Button variant="default">
-              <UserPlus className="mr-2 h-4 w-4" />
-              Add Member
-            </Button>
-          )}
+          <Button variant="default">
+            <UserPlus className="mr-2 h-4 w-4" />
+            Add Member
+          </Button>
         </div>
       </div>
 
@@ -226,11 +246,9 @@ export function UserManagementSimplified() {
                     <Badge variant={member.status === 'active' ? 'default' : 'secondary'}>
                       {member.status}
                     </Badge>
-                    {isAdminUser && (
-                      <Button variant="ghost" size="sm">
-                        <MoreVertical className="h-4 w-4" />
-                      </Button>
-                    )}
+                    <Button variant="ghost" size="sm">
+                      <MoreVertical className="h-4 w-4" />
+                    </Button>
                   </div>
                 </div>
               </CardContent>
