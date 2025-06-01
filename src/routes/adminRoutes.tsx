@@ -2,7 +2,6 @@
 import React from 'react';
 import { RouteObject } from 'react-router-dom';
 import AdminRoute from '@/components/auth/AdminRoute';
-import AppLayout from '@/layouts/AppLayout';
 
 // Import existing admin pages
 import AdminDashboard from '@/pages/admin/AdminDashboard';
@@ -17,7 +16,7 @@ import EventDetailsPage from '@/pages/events/EventDetailsPage';
 import EventRSVPsPage from '@/pages/admin/EventRSVPsPage';
 import FanBulkUploadPage from '@/pages/admin/FanBulkUploadPage';
 
-// Import additional admin pages (these may need to be created if they don't exist)
+// Import additional admin pages
 import AdminHeroManager from '@/pages/admin/AdminHeroManager';
 import AdminMediaUploaderPage from '@/pages/admin/AdminMediaUploaderPage';
 import NewsTickerSettingsPage from '@/pages/admin/NewsTickerSettingsPage';
@@ -57,14 +56,6 @@ export const adminRoutes: RouteObject[] = [
   },
   {
     path: '/admin/members',
-    element: (
-      <AdminRoute>
-        <UserManagementPage />
-      </AdminRoute>
-    ),
-  },
-  {
-    path: '/admin/user-management',
     element: (
       <AdminRoute>
         <UserManagementPage />
@@ -116,14 +107,6 @@ export const adminRoutes: RouteObject[] = [
     element: (
       <AdminRoute>
         <AnalyticsPage />
-      </AdminRoute>
-    ),
-  },
-  {
-    path: '/admin/fan-tags',
-    element: (
-      <AdminRoute>
-        <UserManagementPage />
       </AdminRoute>
     ),
   },
