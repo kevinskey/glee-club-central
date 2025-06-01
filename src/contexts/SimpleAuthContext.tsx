@@ -13,6 +13,8 @@ interface SimpleAuthContextType {
   login: (email: string, password: string) => Promise<{ error: any }>;
   logout: () => Promise<{ error: any }>;
   signUp: (email: string, password: string, firstName: string, lastName: string) => Promise<{ error: any; data: any }>;
+  resetPassword: (email: string) => Promise<{ error: any }>;
+  updatePassword: (password: string) => Promise<{ error: any }>;
   isAdmin: () => boolean;
   isMember: () => boolean;
   getUserType: () => 'admin' | 'member';
@@ -94,6 +96,38 @@ export const SimpleAuthProvider: React.FC<{ children: React.ReactNode }> = ({ ch
     }
   }, []);
 
+  const resetPassword = useCallback(async (email: string) => {
+    try {
+      console.log('🔒 SimpleAuth: Reset password attempt for:', email);
+      
+      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: `${window.location.origin}/reset-password`,
+      });
+      
+      console.log('🔒 SimpleAuth: Reset password response:', { error: error?.message });
+      
+      return { error };
+    } catch (err) {
+      console.error('💥 SimpleAuth: Reset password error:', err);
+      return { error: err };
+    }
+  }, []);
+
+  const updatePassword = useCallback(async (password: string) => {
+    try {
+      console.log('🔐 SimpleAuth: Update password attempt');
+      
+      const { error } = await supabase.auth.updateUser({ password });
+      
+      console.log('🔐 SimpleAuth: Update password response:', { error: error?.message });
+      
+      return { error };
+    } catch (err) {
+      console.error('💥 SimpleAuth: Update password error:', err);
+      return { error: err };
+    }
+  }, []);
+
   const isAdmin = useCallback(() => {
     // Enhanced admin check with fallback for kevinskey@mac.com
     const isKnownAdmin = user?.email === 'kevinskey@mac.com';
@@ -136,6 +170,8 @@ export const SimpleAuthProvider: React.FC<{ children: React.ReactNode }> = ({ ch
     login,
     logout,
     signUp,
+    resetPassword,
+    updatePassword,
     isAdmin,
     isMember,
     getUserType,

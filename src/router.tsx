@@ -13,6 +13,8 @@ import EnhancedCalendarPage from "./pages/EnhancedCalendarPage";
 import StorePage from "./pages/StorePage";
 import LoginPage from "./pages/auth/LoginPage";
 import SignupPage from "./pages/auth/SignupPage";
+import ForgotPasswordPage from "./pages/auth/ForgotPasswordPage";
+import ResetPasswordPage from "./pages/auth/ResetPasswordPage";
 import RegisterPage from "./pages/RegisterPage";
 import JoinGleeFamPage from "./pages/JoinGleeFamPage";
 import RoleDashboardPage from "./pages/RoleDashboardPage";
@@ -52,6 +54,36 @@ export const router = createBrowserRouter([
       <SimpleAuthProvider>
         <AppLayout sidebarType="none" showHeader={false} showFooter={false}>
           <SignupPage />
+        </AppLayout>
+      </SimpleAuthProvider>
+    ),
+  },
+  {
+    path: "/forgot-password",
+    element: (
+      <SimpleAuthProvider>
+        <AppLayout sidebarType="none" showHeader={false} showFooter={false}>
+          <ForgotPasswordPage />
+        </AppLayout>
+      </SimpleAuthProvider>
+    ),
+  },
+  {
+    path: "/reset-password",
+    element: (
+      <SimpleAuthProvider>
+        <AppLayout sidebarType="none" showHeader={false} showFooter={false}>
+          <ResetPasswordPage />
+        </AppLayout>
+      </SimpleAuthProvider>
+    ),
+  },
+  {
+    path: "/update-password",
+    element: (
+      <SimpleAuthProvider>
+        <AppLayout sidebarType="none" showHeader={false} showFooter={false}>
+          <ResetPasswordPage />
         </AppLayout>
       </SimpleAuthProvider>
     ),

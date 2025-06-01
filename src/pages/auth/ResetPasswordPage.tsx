@@ -5,148 +5,122 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
-import { useToast } from "@/components/ui/use-toast";
-import { useAuth } from "@/contexts/AuthContext";
-import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
+import { useSimpleAuthContext } from "@/contexts/SimpleAuthContext";
+import { Music } from "lucide-react";
 
 export default function ResetPasswordPage() {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [isProcessing, setIsProcessing] = useState(false);
-  const [hash, setHash] = useState<string | null>(null);
-  const { updatePassword } = useAuth();
-  const { toast } = useToast();
+  const { updatePassword } = useSimpleAuthContext();
   const navigate = useNavigate();
   const location = useLocation();
-
-  // Extract access token from URL or hash fragment
-  useEffect(() => {
-    // First check for token in hash (for old URLs)
-    const hashParams = new URLSearchParams(window.location.hash.substring(1));
-    const hashToken = hashParams.get("access_token");
-    
-    // Then check for token in search params (for new URLs)
-    const searchParams = new URLSearchParams(window.location.search);
-    const queryToken = searchParams.get("token");
-    
-    // Use whichever token is available
-    setHash(hashToken || queryToken);
-  }, [location]);
 
   const handleResetPassword = async (e: React.FormEvent) => {
     e.preventDefault();
     
     if (password !== confirmPassword) {
-      toast({
-        title: "Error",
-        description: "Passwords do not match.",
-        variant: "destructive",
-      });
+      toast.error("Passwords do not match.");
       return;
     }
 
     if (password.length < 6) {
-      toast({
-        title: "Error",
-        description: "Password must be at least 6 characters.",
-        variant: "destructive",
-      });
+      toast.error("Password must be at least 6 characters.");
       return;
     }
 
     try {
       setIsProcessing(true);
       
-      if (hash) {
-        // If we have a hash/token, we need to verify it first
-        const { data, error } = await supabase.auth.verifyOtp({
-          token_hash: hash,
-          type: 'recovery'
-        });
-        
-        if (error) throw error;
-      }
+      const { error } = await updatePassword(password);
       
-      if (updatePassword) {
-        const { error } = await updatePassword(password);
-        if (error) throw error;
-        
-        toast({
-          title: "Success",
-          description: "Your password has been updated successfully.",
-        });
-        navigate("/login");
+      if (error) {
+        console.error("Error resetting password:", error);
+        toast.error(error.message || "An error occurred while resetting your password.");
       } else {
-        throw new Error("Password update functionality not available");
+        toast.success("Your password has been updated successfully.");
+        navigate("/login");
       }
     } catch (error: any) {
       console.error("Error resetting password:", error);
-      toast({
-        title: "Error",
-        description: error.message || "An error occurred while resetting your password.",
-        variant: "destructive",
-      });
+      toast.error("An error occurred while resetting your password.");
     } finally {
       setIsProcessing(false);
     }
   };
 
   return (
-    <div className="container relative min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
-      <div className="w-full max-w-md space-y-8">
-        <div>
-          <h1 className="text-center text-3xl font-extrabold text-glee-spelman">
-            Reset Your Password
-          </h1>
-          <p className="mt-2 text-center text-sm text-gray-600">
-            Please enter your new password below.
-          </p>
+    <div 
+      className="relative min-h-screen w-full flex items-center justify-center animate-fade-in"
+      style={{
+        backgroundImage: `url('/lovable-uploads/5d6ba7fa-4ea7-42ac-872e-940fb620a273.png')`,
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+        backgroundRepeat: 'no-repeat',
+        backgroundAttachment: 'fixed'
+      }}
+    >
+      {/* Dark overlay for better contrast */}
+      <div className="absolute inset-0 bg-black/30 z-0" />
+      
+      {/* Reset password form container */}
+      <div className="relative z-10 w-full max-w-md px-4">
+        <div className="bg-white/90 dark:bg-black/80 backdrop-blur-sm rounded-lg shadow-xl p-6 border border-white/20 dark:border-white/10">
+          <Card className="w-full border-0 bg-transparent shadow-none">
+            <CardHeader className="space-y-1 text-center px-0">
+              <div className="flex justify-center mb-4">
+                <Music className="h-12 w-12 text-glee-purple" />
+              </div>
+              <CardTitle className="text-2xl font-bold text-gray-900 dark:text-gray-100">
+                Reset Your Password
+              </CardTitle>
+              <CardDescription className="text-gray-700 dark:text-gray-300">
+                Please enter your new password below.
+              </CardDescription>
+            </CardHeader>
+            
+            <CardContent className="px-0">
+              <form onSubmit={handleResetPassword} className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="password" className="text-gray-900 dark:text-gray-100">New Password</Label>
+                  <Input
+                    id="password"
+                    type="password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    placeholder="Enter your new password"
+                    className="bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 border-gray-300 dark:border-gray-600"
+                    required
+                    disabled={isProcessing}
+                  />
+                </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="confirmPassword" className="text-gray-900 dark:text-gray-100">Confirm Password</Label>
+                  <Input
+                    id="confirmPassword"
+                    type="password"
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                    placeholder="Confirm your new password"
+                    className="bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 border-gray-300 dark:border-gray-600"
+                    required
+                    disabled={isProcessing}
+                  />
+                </div>
+                
+                <Button 
+                  type="submit" 
+                  className="w-full bg-glee-spelman hover:bg-glee-spelman/90 text-white" 
+                  disabled={isProcessing}
+                >
+                  {isProcessing ? "Processing..." : "Reset Password"}
+                </Button>
+              </form>
+            </CardContent>
+          </Card>
         </div>
-        
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-center">New Password</CardTitle>
-            <CardDescription className="text-center">
-              Create a strong, secure password
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <form onSubmit={handleResetPassword} className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="password">New Password</Label>
-                <Input
-                  id="password"
-                  type="password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  placeholder="Enter your new password"
-                  required
-                />
-              </div>
-              
-              <div className="space-y-2">
-                <Label htmlFor="confirmPassword">Confirm Password</Label>
-                <Input
-                  id="confirmPassword"
-                  type="password"
-                  value={confirmPassword}
-                  onChange={(e) => setConfirmPassword(e.target.value)}
-                  placeholder="Confirm your new password"
-                  required
-                />
-              </div>
-              
-              <Button 
-                type="submit" 
-                className="w-full" 
-                variant="spelman" 
-                disabled={isProcessing}
-              >
-                {isProcessing ? "Processing..." : "Reset Password"}
-              </Button>
-            </form>
-          </CardContent>
-        </Card>
       </div>
     </div>
   );
