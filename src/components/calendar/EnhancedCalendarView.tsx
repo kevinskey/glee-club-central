@@ -33,6 +33,13 @@ export function EnhancedCalendarView({
   );
   const calendarRef = useRef<FullCalendar>(null);
 
+  // Update view when mobile state changes
+  useEffect(() => {
+    if (isMobile && view !== 'listWeek' && view !== 'dayGridMonth') {
+      setView('listWeek');
+    }
+  }, [isMobile, view]);
+
   // Filter events based on authentication status and date
   const filteredEvents = events.filter(event => {
     const eventDate = new Date(event.start_time);
@@ -105,19 +112,34 @@ export function EnhancedCalendarView({
     const { event } = eventInfo;
     const isListView = view === 'listWeek';
     
+    if (isMobile) {
+      return (
+        <div className="p-1 text-xs">
+          <div className="font-medium truncate leading-tight">
+            {event.title.length > 12 ? `${event.title.substring(0, 12)}...` : event.title}
+          </div>
+          {event.extendedProps.location && isListView && (
+            <div className="text-xs opacity-80 truncate mt-0.5">
+              📍 {event.extendedProps.location}
+            </div>
+          )}
+        </div>
+      );
+    }
+    
     return (
       <div className={`p-1 ${isListView ? 'flex items-center gap-2' : ''}`}>
         <div className="flex-1 min-w-0">
-          <div className={`font-medium truncate ${isMobile ? 'text-xs' : 'text-sm'}`}>
-            {isMobile && event.title.length > 15 ? `${event.title.substring(0, 15)}...` : event.title}
+          <div className="font-medium truncate text-sm">
+            {event.title}
           </div>
-          {event.extendedProps.location && !isMobile && (
+          {event.extendedProps.location && (
             <div className="text-xs opacity-80 truncate">
               📍 {event.extendedProps.location}
             </div>
           )}
         </div>
-        {event.extendedProps.eventType && !isMobile && (
+        {event.extendedProps.eventType && (
           <Badge 
             variant="secondary" 
             className="text-xs bg-white/20 text-white border-white/30"
@@ -152,7 +174,7 @@ export function EnhancedCalendarView({
         userCanCreate={isAuthenticated}
       />
 
-      <Card className="p-2 sm:p-4">
+      <Card className={`${isMobile ? 'p-2' : 'p-4'}`}>
         <FullCalendar
           ref={calendarRef}
           plugins={[dayGridPlugin, timeGridPlugin, listPlugin, interactionPlugin]}
@@ -162,8 +184,8 @@ export function EnhancedCalendarView({
           eventContent={renderEventContent}
           headerToolbar={false}
           height="auto"
-          aspectRatio={isMobile ? 1.0 : 1.8}
-          dayMaxEventRows={isMobile ? 2 : 3}
+          aspectRatio={isMobile ? 0.8 : 1.8}
+          dayMaxEventRows={isMobile ? 1 : 3}
           moreLinkClick="popover"
           eventDisplay="block"
           displayEventTime={true}
@@ -180,20 +202,25 @@ export function EnhancedCalendarView({
           // Mobile-optimized settings
           dayHeaderFormat={isMobile ? { weekday: 'narrow' } : { weekday: 'short' }}
           eventClassNames="hover:opacity-80 transition-opacity cursor-pointer"
-          dayCellClassNames="hover:bg-gray-50"
+          dayCellClassNames="hover:bg-gray-50 dark:hover:bg-gray-800"
           listDayFormat={{ weekday: 'long', month: 'long', day: 'numeric' }}
-          listDaySideFormat={{ weekday: 'narrow' }}
-          contentHeight={isMobile ? 300 : 600}
+          listDaySideFormat={isMobile ? { weekday: 'narrow' } : { weekday: 'short' }}
+          contentHeight={isMobile ? 400 : 600}
           // Mobile-specific improvements
           nowIndicator={true}
           scrollTime="09:00:00"
           slotMinTime="06:00:00"
           slotMaxTime="23:00:00"
           // Better mobile touch handling
-          eventMinHeight={isMobile ? 20 : 25}
-          dayMaxEvents={isMobile ? 2 : 4}
-          // Mobile calendar styling
+          eventMinHeight={isMobile ? 25 : 30}
+          dayMaxEvents={isMobile ? 1 : 4}
+          // Responsive settings
           themeSystem="standard"
+          // Mobile list view optimizations
+          listDayAltFormat={false}
+          // Improve mobile interaction
+          longPressDelay={isMobile ? 200 : 1000}
+          eventInteractionEnabled={true}
         />
       </Card>
 
