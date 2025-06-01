@@ -40,6 +40,16 @@ export const AdminRoute: React.FC<AdminRouteProps> = ({ children }) => {
     return <Navigate to="/login" replace />;
   }
   
+  // Wait for profile to load
+  if (!profile) {
+    return (
+      <PageLoader 
+        message="Loading user profile..." 
+        className="min-h-screen"
+      />
+    );
+  }
+  
   // Check admin access using the enhanced isAdmin function
   const hasAdminAccess = isAdmin();
   

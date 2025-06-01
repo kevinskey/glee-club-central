@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { cn } from '@/lib/utils';
@@ -77,9 +76,9 @@ export function DashboardNav({
   const adminItems = [
     {
       label: "Admin Dashboard",
-      href: "/dashboard/admin",
+      href: "/admin",
       icon: LayoutDashboard,
-      active: pathname.startsWith("/dashboard/admin")
+      active: pathname.startsWith("/admin")
     },
     {
       label: "Finances",

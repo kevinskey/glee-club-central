@@ -2,6 +2,7 @@
 import React from "react";
 import { useSimpleAuthContext } from "@/contexts/SimpleAuthContext";
 import { PageLoader } from "@/components/ui/page-loader";
+import { Navigate } from "react-router-dom";
 import AdminDashboard from "./AdminDashboard";
 
 export default function AdminDashboardPage() {
@@ -33,12 +34,8 @@ export default function AdminDashboardPage() {
 
   // Ensure we have a user
   if (!user) {
-    return (
-      <PageLoader 
-        message="Authentication required..."
-        className="min-h-screen"
-      />
-    );
+    console.log('🚫 AdminDashboardPage: No user found, redirecting to login');
+    return <Navigate to="/login" replace />;
   }
 
   // Wait for profile to be fully resolved before checking admin status
@@ -49,6 +46,14 @@ export default function AdminDashboardPage() {
         className="min-h-screen"
       />
     );
+  }
+
+  // Check admin access
+  const hasAdminAccess = isAdmin();
+  
+  if (!hasAdminAccess) {
+    console.log('🚫 AdminDashboardPage: User lacks admin access, redirecting to member dashboard');
+    return <Navigate to="/dashboard/member" replace />;
   }
 
   console.log('🏛️ AdminDashboardPage: Rendering AdminDashboard component');
