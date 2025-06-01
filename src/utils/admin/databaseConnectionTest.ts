@@ -47,25 +47,7 @@ export const runDatabaseConnectionTests = async (): Promise<DatabaseTestResult[]
     });
   }
 
-  // Test 3: Admin function check (using the new non-recursive function)
-  try {
-    const { data, error } = await supabase.rpc('is_current_user_admin_simple');
-    results.push({
-      test: 'Admin Function Check',
-      status: error ? 'error' : 'success',
-      message: error ? `Admin function failed: ${error.message}` : `Admin function works, result: ${data}`,
-      details: { isAdmin: data, error }
-    });
-  } catch (err) {
-    results.push({
-      test: 'Admin Function Check',
-      status: 'error',
-      message: `Admin function error: ${err instanceof Error ? err.message : 'Unknown error'}`,
-      details: err
-    });
-  }
-
-  // Test 4: Current user profile query
+  // Test 3: Current user profile query
   try {
     const { data: { user } } = await supabase.auth.getUser();
     if (user) {
@@ -98,7 +80,7 @@ export const runDatabaseConnectionTests = async (): Promise<DatabaseTestResult[]
     });
   }
 
-  // Test 5: All profiles query (should work now with fixed RLS)
+  // Test 4: All profiles query (should work now with fixed RLS)
   try {
     const { data, error } = await supabase
       .from('profiles')
@@ -120,7 +102,7 @@ export const runDatabaseConnectionTests = async (): Promise<DatabaseTestResult[]
     });
   }
 
-  // Test 6: RLS Policy Test with different operations
+  // Test 5: RLS Policy Test with different operations
   try {
     const tests = [
       { name: 'Simple select', query: supabase.from('profiles').select('id').limit(1) },

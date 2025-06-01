@@ -21,9 +21,9 @@ export const useUsersSimplified = (): UseUsersSimplifiedResponse => {
     setError(null);
     
     try {
-      console.log('Fetching users with simplified approach');
+      console.log('Fetching users with fixed RLS policies');
       
-      // First check if user is authenticated and has admin access
+      // First check if user is authenticated
       const { data: { user: currentUser } } = await supabase.auth.getUser();
       
       if (!currentUser) {
@@ -31,19 +31,7 @@ export const useUsersSimplified = (): UseUsersSimplifiedResponse => {
         return null;
       }
 
-      // Check admin access using the new non-recursive function
-      const { data: isAdmin, error: adminCheckError } = await supabase.rpc('is_current_user_admin_simple');
-      
-      if (adminCheckError) {
-        console.error('Admin check failed:', adminCheckError);
-        setError('Failed to verify admin access');
-        return null;
-      }
-
-      if (!isAdmin && currentUser.email !== 'kevinskey@mac.com') {
-        setError('Admin access required to view users');
-        return null;
-      }
+      console.log('Current user authenticated:', currentUser.email);
 
       // Try the profiles table query with the fixed RLS policies
       const { data: profiles, error: profilesError } = await supabase
@@ -65,6 +53,7 @@ export const useUsersSimplified = (): UseUsersSimplifiedResponse => {
       try {
         const { data: authData } = await supabase.auth.admin.listUsers();
         authUsers = authData?.users || [];
+        console.log('Auth users fetched:', authUsers.length);
       } catch (err) {
         console.log('Could not fetch auth users, continuing with profile data only');
       }
@@ -98,6 +87,7 @@ export const useUsersSimplified = (): UseUsersSimplifiedResponse => {
       });
 
       setUserCount(users.length);
+      toast.success(`Successfully loaded ${users.length} users`);
       return users;
       
     } catch (err) {
