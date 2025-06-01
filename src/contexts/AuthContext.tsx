@@ -9,6 +9,9 @@ interface AuthContextType {
   login: (email: string, password: string) => Promise<{ error: any }>;
   logout: () => Promise<{ error: any }>;
   signUp: (email: string, password: string, firstName: string, lastName: string) => Promise<{ error: any, data: any }>;
+  signOut: () => Promise<{ error: any }>;
+  resetPassword: (email: string) => Promise<{ error: any }>;
+  updatePassword: (newPassword: string) => Promise<{ error: any }>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -123,6 +126,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   }, []);
 
+  const signOut = logout; // Alias for compatibility
+
   const signUp = useCallback(async (email: string, password: string, firstName: string, lastName: string) => {
     try {
       console.log('📝 AuthContext: Sign up attempt for:', email);
@@ -152,12 +157,37 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   }, []);
 
+  const resetPassword = useCallback(async (email: string) => {
+    try {
+      console.log('🔒 AuthContext: Reset password for:', email);
+      const { error } = await supabase.auth.resetPasswordForEmail(email);
+      return { error };
+    } catch (err) {
+      console.error('💥 AuthContext: Reset password error:', err);
+      return { error: err };
+    }
+  }, []);
+
+  const updatePassword = useCallback(async (newPassword: string) => {
+    try {
+      console.log('🔒 AuthContext: Update password');
+      const { error } = await supabase.auth.updateUser({ password: newPassword });
+      return { error };
+    } catch (err) {
+      console.error('💥 AuthContext: Update password error:', err);
+      return { error: err };
+    }
+  }, []);
+
   const contextValue: AuthContextType = {
     user,
     loading,
     login,
     logout,
     signUp,
+    signOut,
+    resetPassword,
+    updatePassword,
   };
 
   return (
@@ -173,4 +203,24 @@ export const useAuth = () => {
     throw new Error('useAuth must be used within an AuthProvider');
   }
   return context;
+};
+
+// Export utility functions for compatibility
+export const cleanupAuthState = () => {
+  Object.keys(localStorage).forEach((key) => {
+    if (key.startsWith('supabase.auth.') || key.includes('sb-')) {
+      localStorage.removeItem(key);
+    }
+  });
+};
+
+export const resetAuthSystem = async () => {
+  try {
+    cleanupAuthState();
+    await supabase.auth.signOut();
+    return { success: true };
+  } catch (error) {
+    console.error('Error resetting auth system:', error);
+    return { success: false };
+  }
 };

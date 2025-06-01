@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 import { PageHeader } from "@/components/ui/page-header";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useAuth } from "@/contexts/AuthContext";
+import { useProfile } from "@/contexts/ProfileContext";
 import { User, Edit, Save } from "lucide-react";
 import { ProfileOverviewTab } from "@/components/members/profile/ProfileOverviewTab";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -12,7 +13,8 @@ import { useUserManagement } from "@/hooks/user/useUserManagement";
 import { PageLoader } from "@/components/ui/page-loader";
 
 export default function ProfilePage() {
-  const { profile, isLoading } = useAuth();
+  const { loading: authLoading } = useAuth();
+  const { profile, isInitialized } = useProfile();
   const { updateUser } = useUserManagement();
   const [isEditing, setIsEditing] = useState(false);
   
@@ -37,7 +39,7 @@ export default function ProfilePage() {
     }
   };
   
-  if (isLoading) {
+  if (authLoading || !isInitialized) {
     return <PageLoader message="Loading profile..." />;
   }
   

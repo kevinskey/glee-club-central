@@ -8,6 +8,7 @@ import { CalendarEvent } from '@/types/calendar';
 import { PageHeader } from '@/components/ui/page-header';
 import { Calendar } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
+import { useProfile } from '@/contexts/ProfileContext';
 import { Button } from '@/components/ui/button';
 import { PageLoader } from '@/components/ui/page-loader';
 import { Card, CardContent } from '@/components/ui/card';
@@ -15,7 +16,8 @@ import { Card, CardContent } from '@/components/ui/card';
 export default function CalendarPage() {
   const { events, loading, error, fetchEvents } = useCalendarEvents();
   const { userRole, isMember } = useUserRole();
-  const { user, isLoading: authLoading } = useAuth();
+  const { user, loading: authLoading } = useAuth();
+  const { isAuthenticated } = useProfile();
   const [selectedEvent, setSelectedEvent] = useState<CalendarEvent | null>(null);
 
   // Filter events based on user authentication and public visibility

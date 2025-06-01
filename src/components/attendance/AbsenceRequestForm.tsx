@@ -6,7 +6,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { CalendarDays, Clock } from 'lucide-react';
-import { useAuth } from '@/contexts/AuthContext';
+import { useProfile } from '@/contexts/ProfileContext';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 
@@ -24,7 +24,7 @@ interface AbsenceRequestFormProps {
 }
 
 export const AbsenceRequestForm: React.FC<AbsenceRequestFormProps> = ({ events, onSubmit }) => {
-  const { profile } = useAuth();
+  const { profile } = useProfile();
   const [selectedEventId, setSelectedEventId] = useState<string>('');
   const [reason, setReason] = useState<string>('');
   const [isSubmitting, setIsSubmitting] = useState(false);
