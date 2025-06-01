@@ -98,7 +98,7 @@ export const ConsolidatedHeader = memo(function ConsolidatedHeader() {
               className="bg-glee-spelman hover:bg-glee-spelman/90"
             >
               <LogIn className="w-4 h-4 mr-2" />
-              {isMobile ? 'Login' : 'Member Login'}
+              {isMobile ? 'Login' : 'Login'}
             </Button>
           )}
           

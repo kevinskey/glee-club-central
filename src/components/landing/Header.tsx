@@ -90,7 +90,7 @@ export function Header() {
                     className="bg-glee-spelman hover:bg-glee-spelman/90"
                   >
                     <LogIn className="w-4 h-4 mr-2" />
-                    Member Login
+                    Login
                   </Button>
                 )}
                 <HeaderActions />
