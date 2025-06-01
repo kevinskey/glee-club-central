@@ -53,13 +53,19 @@ export const useAuthInitialization = (
           setState(prev => ({ 
             ...prev, 
             user: authUser,
-            isLoading: true, // Keep loading until profile is fetched
+            isLoading: false,
             isInitialized: true
           }));
           
-          // Fetch profile data with user metadata
-          console.log('📡 useAuthInitialization: Fetching user profile data...');
-          await fetchUserData(session.user.id, session.user.email, session.user.user_metadata);
+          // Defer user data fetching to avoid initialization deadlock
+          console.log('📡 useAuthInitialization: Scheduling user data fetch...');
+          setTimeout(() => {
+            if (mountedRef.current) {
+              setState(prev => ({ ...prev, isLoading: true }));
+              fetchUserData(session.user.id, session.user.email, session.user.user_metadata);
+            }
+          }, 500); // Give the UI time to render before fetching profile data
+          
         } else {
           console.log('ℹ️ useAuthInitialization: No session found');
           if (mountedRef.current) {
@@ -112,17 +118,18 @@ export const useAuthInitialization = (
           setState(prev => ({ 
             ...prev, 
             user: authUser,
-            isLoading: true, // Keep loading until profile is fetched
+            isLoading: false,
             isInitialized: true
           }));
           
-          // Fetch profile data after sign in with metadata
-          console.log('📡 useAuthInitialization: Fetching profile after sign in...');
-          setTimeout(async () => {
+          // Defer profile data fetching after sign in
+          console.log('📡 useAuthInitialization: Scheduling profile fetch after sign in...');
+          setTimeout(() => {
             if (mountedRef.current) {
-              await fetchUserData(session.user.id, session.user.email, session.user.user_metadata);
+              setState(prev => ({ ...prev, isLoading: true }));
+              fetchUserData(session.user.id, session.user.email, session.user.user_metadata);
             }
-          }, 100);
+          }, 300);
           
         } else if (event === 'SIGNED_OUT') {
           console.log('👋 useAuthInitialization: User signed out');

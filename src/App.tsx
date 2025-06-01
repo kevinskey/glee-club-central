@@ -7,13 +7,13 @@ import { AuthProvider, useAuth } from "./contexts/AuthContext";
 function AppContent() {
   const { isLoading, isInitialized } = useAuth();
 
-  // Show loading only very briefly while initializing
+  // Simple loading check - only show loader if not initialized
   if (!isInitialized) {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-glee-spelman mx-auto"></div>
-          <p className="mt-4 text-muted-foreground">Loading GleeWorld...</p>
+          <p className="mt-4 text-muted-foreground">Initializing GleeWorld...</p>
         </div>
       </div>
     );

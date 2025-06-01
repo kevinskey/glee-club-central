@@ -8,24 +8,14 @@ export const useAuthState = (): UseAuthStateReturn => {
   const [state, setState] = useState<AuthState>({
     user: null,
     profile: null,
-    isLoading: false, // Start with false to prevent loading flicker
+    isLoading: false,
     isInitialized: false,
     permissions: {}
   });
   
   const mountedRef = useRef(true);
-  const initializationRef = useRef(false);
   
   const { fetchUserData } = useUserDataFetching(setState, mountedRef);
-  
-  // Only initialize once
-  useEffect(() => {
-    if (initializationRef.current) return;
-    initializationRef.current = true;
-    
-    // Set loading only when actually starting initialization
-    setState(prev => ({ ...prev, isLoading: true }));
-  }, []);
   
   useAuthInitialization(setState, fetchUserData, mountedRef);
   
@@ -36,26 +26,18 @@ export const useAuthState = (): UseAuthStateReturn => {
     };
   }, []);
   
-  // Enhanced refresh function with coordination
+  // Enhanced refresh function
   const refreshUserData = useCallback(async () => {
     if (state.user?.id && mountedRef.current) {
-      console.log('🔄 useAuthState: Coordinated refresh for user:', state.user.id);
+      console.log('🔄 useAuthState: Refreshing user data for:', state.user.id);
       
-      // Set loading state during refresh
-      setState(prev => ({
-        ...prev,
-        isLoading: true
-      }));
+      setState(prev => ({ ...prev, isLoading: true }));
       
       try {
         await fetchUserData(state.user.id, state.user.email);
       } catch (error) {
         console.error('❌ useAuthState: Refresh failed:', error);
-        // Ensure loading state is cleared even on error
-        setState(prev => ({
-          ...prev,
-          isLoading: false
-        }));
+        setState(prev => ({ ...prev, isLoading: false }));
       }
     }
   }, [state.user?.id, state.user?.email, fetchUserData]);
