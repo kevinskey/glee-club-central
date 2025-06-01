@@ -1,5 +1,6 @@
 
 import React, { useState, useEffect } from "react";
+import { Navigate } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -9,10 +10,12 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { Badge } from "@/components/ui/badge";
-import { Trash2, Save, Eye, GripVertical } from "lucide-react";
+import { Trash2, Save, Eye, GripVertical, Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
+import { useSimpleAuthContext } from "@/contexts/SimpleAuthContext";
+import { PageLoader } from "@/components/ui/page-loader";
 
 interface MediaImage {
   id: string;
@@ -31,6 +34,7 @@ const HERO_TAG_OPTIONS = [
 ];
 
 export default function AdminHeroManager() {
+  const { user, profile, isAuthenticated, isLoading: authLoading, isAdmin } = useSimpleAuthContext();
   const [images, setImages] = useState<MediaImage[]>([]);
   const [filteredImages, setFilteredImages] = useState<MediaImage[]>([]);
   const [selectedFilter, setSelectedFilter] = useState<string>("all");
@@ -38,6 +42,30 @@ export default function AdminHeroManager() {
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [hasChanges, setHasChanges] = useState(false);
+
+  // Check if user has admin access
+  const hasAdminAccess = isAdmin();
+
+  // Show loading while auth is initializing
+  if (authLoading) {
+    return <PageLoader message="Verifying admin access..." className="min-h-screen" />;
+  }
+
+  // Redirect if not authenticated
+  if (!isAuthenticated) {
+    return <Navigate to="/login" replace />;
+  }
+
+  // Wait for profile to load
+  if (!profile) {
+    return <PageLoader message="Loading user profile..." className="min-h-screen" />;
+  }
+
+  // Check admin access and redirect if not admin
+  if (!hasAdminAccess) {
+    toast.error("Access denied. Admin privileges required.");
+    return <Navigate to="/" replace />;
+  }
 
   // Fetch all media images
   const fetchImages = async () => {
@@ -179,14 +207,7 @@ export default function AdminHeroManager() {
   };
 
   if (isLoading) {
-    return (
-      <div className="flex items-center justify-center min-h-[50vh]">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
-          <p className="mt-4 text-muted-foreground">Loading hero images...</p>
-        </div>
-      </div>
-    );
+    return <PageLoader message="Loading hero images..." className="min-h-screen" />;
   }
 
   return (
