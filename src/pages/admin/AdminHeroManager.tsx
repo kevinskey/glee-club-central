@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { Navigate } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
@@ -9,7 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { Badge } from "@/components/ui/badge";
-import { Trash2, Save, Eye, GripVertical, Loader2 } from "lucide-react";
+import { Trash2, Save, Eye, GripVertical, Loader2, Plus, ArrowUp, ArrowDown, Check, X } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
@@ -33,7 +34,7 @@ const HERO_TAG_OPTIONS = [
 ];
 
 export default function AdminHeroManager() {
-  const { user, profile, isAuthenticated, isLoading: authLoading, isAdmin } = useSimpleAuthContext();
+  const { user, profile, isAuthenticated, isLoading: authLoading } = useSimpleAuthContext();
   const [images, setImages] = useState<MediaImage[]>([]);
   const [filteredImages, setFilteredImages] = useState<MediaImage[]>([]);
   const [selectedFilter, setSelectedFilter] = useState<string>("all");
@@ -41,72 +42,19 @@ export default function AdminHeroManager() {
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [hasChanges, setHasChanges] = useState(false);
-  const [authError, setAuthError] = useState<string | null>(null);
+  const [selectedImages, setSelectedImages] = useState<Set<string>>(new Set());
 
-  // Enhanced auth checks with error handling
-  useEffect(() => {
-    let timeoutId: NodeJS.Timeout;
-    
-    // Set a timeout to catch auth issues
-    timeoutId = setTimeout(() => {
-      if (authLoading) {
-        console.warn('Auth loading timeout - possible RLS recursion issue');
-        setAuthError('Authentication system is experiencing issues. Please try refreshing the page.');
-      }
-    }, 10000); // 10 second timeout
-
-    return () => {
-      if (timeoutId) {
-        clearTimeout(timeoutId);
-      }
-    };
-  }, [authLoading]);
-
-  // Show auth error if there's an issue
-  if (authError) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <Card className="max-w-md">
-          <CardHeader>
-            <CardTitle className="text-destructive">Authentication Error</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-sm text-muted-foreground mb-4">{authError}</p>
-            <Button onClick={() => window.location.reload()} className="w-full">
-              Refresh Page
-            </Button>
-          </CardContent>
-        </Card>
-      </div>
-    );
-  }
+  // Simple admin check with enhanced fallback
+  const isAdmin = () => {
+    if (user?.email === 'kevinskey@mac.com') return true;
+    if (profile?.is_super_admin === true || profile?.role === 'admin') return true;
+    return false;
+  };
 
   // Show loading while auth is initializing
   if (authLoading) {
     return <PageLoader message="Verifying admin access..." className="min-h-screen" />;
   }
-
-  // Simple admin check with fallback
-  const checkAdminAccess = () => {
-    try {
-      // Known admin email override
-      if (user?.email === 'kevinskey@mac.com') {
-        return true;
-      }
-      
-      // Check profile-based admin status
-      if (profile?.is_super_admin === true || profile?.role === 'admin') {
-        return true;
-      }
-      
-      return false;
-    } catch (error) {
-      console.error('Error checking admin access:', error);
-      return false;
-    }
-  };
-
-  const hasAdminAccess = checkAdminAccess();
 
   // Redirect if not authenticated
   if (!isAuthenticated) {
@@ -114,7 +62,7 @@ export default function AdminHeroManager() {
   }
 
   // Check admin access and redirect if not admin
-  if (!hasAdminAccess) {
+  if (!isAdmin()) {
     toast.error("Access denied. Admin privileges required.");
     return <Navigate to="/" replace />;
   }
@@ -184,6 +132,36 @@ export default function AdminHeroManager() {
     setHasChanges(true);
   };
 
+  // Batch toggle hero status
+  const batchToggleHero = (isHero: boolean) => {
+    if (selectedImages.size === 0) {
+      toast.error("Please select images first");
+      return;
+    }
+
+    setImages(prev => prev.map(img => 
+      selectedImages.has(img.id) ? { ...img, is_hero: isHero } : img
+    ));
+    setHasChanges(true);
+    setSelectedImages(new Set());
+    toast.success(`${selectedImages.size} images ${isHero ? 'added to' : 'removed from'} hero section`);
+  };
+
+  // Batch set hero tag
+  const batchSetHeroTag = (tag: string) => {
+    if (selectedImages.size === 0) {
+      toast.error("Please select images first");
+      return;
+    }
+
+    setImages(prev => prev.map(img => 
+      selectedImages.has(img.id) ? { ...img, hero_tag: tag, is_hero: true } : img
+    ));
+    setHasChanges(true);
+    setSelectedImages(new Set());
+    toast.success(`${selectedImages.size} images assigned to ${HERO_TAG_OPTIONS.find(opt => opt.value === tag)?.label}`);
+  };
+
   // Handle drag and drop reordering
   const handleDragEnd = (result: any) => {
     if (!result.destination) return;
@@ -210,7 +188,7 @@ export default function AdminHeroManager() {
     setHasChanges(true);
   };
 
-  // Save all changes
+  // Save all changes with better error handling
   const saveChanges = async () => {
     setIsSaving(true);
     try {
@@ -221,24 +199,34 @@ export default function AdminHeroManager() {
         display_order: img.display_order
       }));
 
-      for (const update of updates) {
-        const { error } = await supabase
-          .from('media_library')
-          .update({
-            is_hero: update.is_hero,
-            hero_tag: update.hero_tag,
-            display_order: update.display_order
-          })
-          .eq('id', update.id);
+      // Process updates in smaller batches to avoid timeouts
+      const batchSize = 10;
+      for (let i = 0; i < updates.length; i += batchSize) {
+        const batch = updates.slice(i, i + batchSize);
+        
+        for (const update of batch) {
+          const { error } = await supabase
+            .from('media_library')
+            .update({
+              is_hero: update.is_hero,
+              hero_tag: update.hero_tag,
+              display_order: update.display_order
+            })
+            .eq('id', update.id);
 
-        if (error) throw error;
+          if (error) {
+            console.error('Update error for image:', update.id, error);
+            throw error;
+          }
+        }
       }
 
-      toast.success("Changes saved successfully");
+      toast.success("All changes saved successfully");
       setHasChanges(false);
+      await fetchImages(); // Refresh data
     } catch (error) {
       console.error('Error saving changes:', error);
-      toast.error("Failed to save changes");
+      toast.error("Failed to save some changes. Please try again.");
     } finally {
       setIsSaving(false);
     }
@@ -255,11 +243,39 @@ export default function AdminHeroManager() {
       if (error) throw error;
 
       setImages(prev => prev.filter(img => img.id !== id));
+      setSelectedImages(prev => {
+        const newSet = new Set(prev);
+        newSet.delete(id);
+        return newSet;
+      });
       toast.success("Image deleted successfully");
     } catch (error) {
       console.error('Error deleting image:', error);
       toast.error("Failed to delete image");
     }
+  };
+
+  // Toggle image selection
+  const toggleImageSelection = (id: string) => {
+    setSelectedImages(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(id)) {
+        newSet.delete(id);
+      } else {
+        newSet.add(id);
+      }
+      return newSet;
+    });
+  };
+
+  // Select all filtered images
+  const selectAllFiltered = () => {
+    setSelectedImages(new Set(filteredImages.map(img => img.id)));
+  };
+
+  // Clear selection
+  const clearSelection = () => {
+    setSelectedImages(new Set());
   };
 
   if (isLoading) {
@@ -273,35 +289,77 @@ export default function AdminHeroManager() {
         <p className="text-muted-foreground">Manage which images appear in hero sections across the site</p>
       </div>
 
-      {/* Filter and Preview Section */}
+      {/* Enhanced Controls Section */}
       <div className="grid gap-6 mb-8">
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Eye className="h-5 w-5" />
-              Filter & Preview
+              Quick Controls & Preview
             </CardTitle>
             <CardDescription>
-              Filter images by hero section and preview active hero images
+              Bulk actions and preview of active hero images
             </CardDescription>
           </CardHeader>
-          <CardContent>
-            <div className="mb-4">
-              <Label htmlFor="filter">Filter by Hero Section</Label>
-              <Select value={selectedFilter} onValueChange={setSelectedFilter}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Select section" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Images</SelectItem>
-                  {HERO_TAG_OPTIONS.map(option => (
-                    <SelectItem key={option.value} value={option.value}>
-                      {option.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+          <CardContent className="space-y-6">
+            {/* Filter and Selection Controls */}
+            <div className="flex flex-wrap items-center gap-4">
+              <div className="flex items-center gap-2">
+                <Label htmlFor="filter">Filter:</Label>
+                <Select value={selectedFilter} onValueChange={setSelectedFilter}>
+                  <SelectTrigger className="w-48">
+                    <SelectValue placeholder="Select section" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Images</SelectItem>
+                    {HERO_TAG_OPTIONS.map(option => (
+                      <SelectItem key={option.value} value={option.value}>
+                        {option.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="flex items-center gap-2">
+                <Button variant="outline" size="sm" onClick={selectAllFiltered}>
+                  Select All
+                </Button>
+                <Button variant="outline" size="sm" onClick={clearSelection}>
+                  Clear
+                </Button>
+                {selectedImages.size > 0 && (
+                  <Badge variant="secondary">
+                    {selectedImages.size} selected
+                  </Badge>
+                )}
+              </div>
             </div>
+
+            {/* Batch Actions */}
+            {selectedImages.size > 0 && (
+              <div className="flex flex-wrap items-center gap-2 p-4 bg-muted rounded-lg">
+                <span className="text-sm font-medium">Batch Actions:</span>
+                <Button size="sm" onClick={() => batchToggleHero(true)}>
+                  <Plus className="h-4 w-4 mr-1" />
+                  Add to Hero
+                </Button>
+                <Button size="sm" variant="destructive" onClick={() => batchToggleHero(false)}>
+                  <X className="h-4 w-4 mr-1" />
+                  Remove from Hero
+                </Button>
+                {HERO_TAG_OPTIONS.map(option => (
+                  <Button 
+                    key={option.value}
+                    size="sm" 
+                    variant="outline"
+                    onClick={() => batchSetHeroTag(option.value)}
+                  >
+                    Set as {option.label}
+                  </Button>
+                ))}
+              </div>
+            )}
 
             {/* Preview Carousel */}
             {previewImages.length > 0 && (
@@ -338,22 +396,37 @@ export default function AdminHeroManager() {
         </Card>
       </div>
 
-      {/* Save Changes Button */}
+      {/* Save Changes Button - Enhanced */}
       {hasChanges && (
         <div className="fixed bottom-4 right-4 z-50">
-          <Button 
-            onClick={saveChanges} 
-            disabled={isSaving}
-            size="lg"
-            className="shadow-lg"
-          >
-            <Save className="mr-2 h-4 w-4" />
-            {isSaving ? "Saving..." : "Save Changes"}
-          </Button>
+          <Card className="shadow-lg">
+            <CardContent className="p-4">
+              <div className="flex items-center gap-2">
+                <Badge variant="destructive">Unsaved Changes</Badge>
+                <Button 
+                  onClick={saveChanges} 
+                  disabled={isSaving}
+                  size="sm"
+                >
+                  {isSaving ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Saving...
+                    </>
+                  ) : (
+                    <>
+                      <Save className="mr-2 h-4 w-4" />
+                      Save All Changes
+                    </>
+                  )}
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
         </div>
       )}
 
-      {/* Images Grid */}
+      {/* Images Grid - Enhanced */}
       <DragDropContext onDragEnd={handleDragEnd}>
         <Droppable droppableId="images">
           {(provided) => (
@@ -368,14 +441,22 @@ export default function AdminHeroManager() {
                     <Card
                       ref={provided.innerRef}
                       {...provided.draggableProps}
-                      className={`transition-shadow ${
-                        snapshot.isDragging ? 'shadow-lg' : ''
+                      className={`transition-all ${
+                        snapshot.isDragging ? 'shadow-lg scale-105' : ''
+                      } ${
+                        selectedImages.has(image.id) ? 'ring-2 ring-primary' : ''
                       }`}
                     >
                       <CardContent className="p-4">
                         <div className="flex flex-col md:flex-row gap-4">
-                          {/* Drag Handle and Thumbnail */}
+                          {/* Selection Checkbox, Drag Handle and Thumbnail */}
                           <div className="flex items-center gap-3">
+                            <input
+                              type="checkbox"
+                              checked={selectedImages.has(image.id)}
+                              onChange={() => toggleImageSelection(image.id)}
+                              className="w-4 h-4"
+                            />
                             <div 
                               {...provided.dragHandleProps}
                               className="cursor-grab active:cursor-grabbing"
@@ -397,10 +478,15 @@ export default function AdminHeroManager() {
                               <p className="text-sm text-muted-foreground truncate">
                                 {image.file_url}
                               </p>
+                              {image.is_hero && (
+                                <Badge variant="default" className="text-xs mt-1">
+                                  Active Hero
+                                </Badge>
+                              )}
                             </div>
                           </div>
 
-                          {/* Controls */}
+                          {/* Enhanced Controls */}
                           <div className="flex flex-col md:flex-row gap-4 md:items-center">
                             {/* Is Hero Toggle */}
                             <div className="flex items-center space-x-2">
@@ -410,7 +496,7 @@ export default function AdminHeroManager() {
                                   updateImage(image.id, 'is_hero', checked)
                                 }
                               />
-                              <Label className="text-sm">Hero Image</Label>
+                              <Label className="text-sm">Hero</Label>
                             </div>
 
                             {/* Hero Tag Dropdown */}
@@ -447,31 +533,53 @@ export default function AdminHeroManager() {
                               />
                             </div>
 
-                            {/* Delete Button */}
-                            <AlertDialog>
-                              <AlertDialogTrigger asChild>
-                                <Button variant="destructive" size="sm">
-                                  <Trash2 className="h-4 w-4" />
-                                </Button>
-                              </AlertDialogTrigger>
-                              <AlertDialogContent>
-                                <AlertDialogHeader>
-                                  <AlertDialogTitle>Delete Image</AlertDialogTitle>
-                                  <AlertDialogDescription>
-                                    Are you sure you want to delete "{image.title}"? This action cannot be undone.
-                                  </AlertDialogDescription>
-                                </AlertDialogHeader>
-                                <AlertDialogFooter>
-                                  <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                  <AlertDialogAction
-                                    onClick={() => deleteImage(image.id)}
-                                    className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                                  >
-                                    Delete
-                                  </AlertDialogAction>
-                                </AlertDialogFooter>
-                              </AlertDialogContent>
-                            </AlertDialog>
+                            {/* Action Buttons */}
+                            <div className="flex gap-1">
+                              <Button 
+                                variant="outline" 
+                                size="sm"
+                                onClick={() => {
+                                  const newOrder = Math.max(0, (image.display_order || 0) - 1);
+                                  updateImage(image.id, 'display_order', newOrder);
+                                }}
+                              >
+                                <ArrowUp className="h-4 w-4" />
+                              </Button>
+                              <Button 
+                                variant="outline" 
+                                size="sm"
+                                onClick={() => {
+                                  const newOrder = (image.display_order || 0) + 1;
+                                  updateImage(image.id, 'display_order', newOrder);
+                                }}
+                              >
+                                <ArrowDown className="h-4 w-4" />
+                              </Button>
+                              <AlertDialog>
+                                <AlertDialogTrigger asChild>
+                                  <Button variant="destructive" size="sm">
+                                    <Trash2 className="h-4 w-4" />
+                                  </Button>
+                                </AlertDialogTrigger>
+                                <AlertDialogContent>
+                                  <AlertDialogHeader>
+                                    <AlertDialogTitle>Delete Image</AlertDialogTitle>
+                                    <AlertDialogDescription>
+                                      Are you sure you want to delete "{image.title}"? This action cannot be undone.
+                                    </AlertDialogDescription>
+                                  </AlertDialogHeader>
+                                  <AlertDialogFooter>
+                                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                    <AlertDialogAction
+                                      onClick={() => deleteImage(image.id)}
+                                      className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                                    >
+                                      Delete
+                                    </AlertDialogAction>
+                                  </AlertDialogFooter>
+                                </AlertDialogContent>
+                              </AlertDialog>
+                            </div>
                           </div>
                         </div>
                       </CardContent>
