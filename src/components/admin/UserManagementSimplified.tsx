@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -11,7 +10,8 @@ import {
   UserPlus, 
   AlertTriangle,
   Database,
-  Edit
+  Edit,
+  RefreshCw
 } from 'lucide-react';
 import { useSimpleAuthContextFixed } from '@/contexts/SimpleAuthContextFixed';
 import { useUsersSimplified } from '@/hooks/user/useUsersSimplified';
@@ -19,8 +19,10 @@ import { toast } from 'sonner';
 
 export function UserManagementSimplified() {
   const { isAuthenticated, isLoading, isAdmin, user } = useSimpleAuthContextFixed();
-  const { users, isLoading: usersLoading, error, refreshUsers } = useUsersSimplified();
+  const { users, isLoading: usersLoading, error, refreshUsers, searchUsers } = useUsersSimplified();
   const [searchTerm, setSearchTerm] = useState('');
+  const [filteredUsers, setFilteredUsers] = useState(users);
+  const [isSearching, setIsSearching] = useState(false);
 
   const isAdminUser = isAdmin();
 
@@ -43,16 +45,44 @@ export function UserManagementSimplified() {
     }
   }, [isAuthenticated, isAdminUser, refreshUsers]);
 
-  const filteredUsers = users.filter(user => {
-    const searchTermLower = searchTerm.toLowerCase();
-    const fullName = `${user.first_name || ''} ${user.last_name || ''}`.toLowerCase();
-    const email = (user.email || '').toLowerCase();
-    return fullName.includes(searchTermLower) || email.includes(searchTermLower);
-  });
+  // Update filtered users when users change or search term is empty
+  useEffect(() => {
+    if (!searchTerm.trim()) {
+      setFilteredUsers(users);
+    }
+  }, [users, searchTerm]);
+
+  // Handle search with debouncing
+  useEffect(() => {
+    const timeoutId = setTimeout(async () => {
+      if (searchTerm.trim()) {
+        setIsSearching(true);
+        try {
+          const results = await searchUsers(searchTerm);
+          setFilteredUsers(results);
+        } catch (err) {
+          console.error('Search error:', err);
+          toast.error('Search failed');
+        } finally {
+          setIsSearching(false);
+        }
+      } else {
+        setFilteredUsers(users);
+      }
+    }, 300);
+
+    return () => clearTimeout(timeoutId);
+  }, [searchTerm, searchUsers, users]);
 
   const handleEditUser = (member: any) => {
     console.log('Edit user:', member);
     toast.info(`Edit functionality for ${member.first_name} ${member.last_name} coming soon`);
+  };
+
+  const handleManualRefresh = () => {
+    console.log('🔄 Manual refresh triggered');
+    refreshUsers();
+    toast.success('User list refreshed');
   };
 
   if (isLoading) {
@@ -98,6 +128,10 @@ export function UserManagementSimplified() {
           </p>
         </div>
         <div className="flex gap-2">
+          <Button variant="outline" onClick={handleManualRefresh} disabled={usersLoading}>
+            <RefreshCw className={`mr-2 h-4 w-4 ${usersLoading ? 'animate-spin' : ''}`} />
+            Refresh
+          </Button>
           <Button>
             <UserPlus className="mr-2 h-4 w-4" />
             Add User
@@ -119,7 +153,7 @@ export function UserManagementSimplified() {
           <CardTitle className="flex items-center gap-2">
             <Users className="h-5 w-5" />
             Members ({filteredUsers.length})
-            {usersLoading && (
+            {(usersLoading || isSearching) && (
               <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-primary ml-2"></div>
             )}
           </CardTitle>
@@ -129,7 +163,7 @@ export function UserManagementSimplified() {
             <div className="relative flex-1">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
               <Input
-                placeholder="Search members..."
+                placeholder="Search by name, email, voice part, or role..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="pl-10"
@@ -137,7 +171,7 @@ export function UserManagementSimplified() {
             </div>
           </div>
 
-          {usersLoading ? (
+          {usersLoading && !isSearching ? (
             <div className="text-center py-8">
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
               <p>Loading members...</p>
@@ -146,13 +180,13 @@ export function UserManagementSimplified() {
             <div className="text-center py-8">
               <Database className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
               <h3 className="font-semibold mb-2">
-                {error ? 'Unable to Load Members' : 'No Members Found'}
+                {error ? 'Unable to Load Members' : searchTerm ? 'No Search Results' : 'No Members Found'}
               </h3>
               <p className="text-muted-foreground mb-4">
                 {error 
                   ? 'There was an issue connecting to the database.' 
                   : searchTerm 
-                    ? 'No members match your search criteria.' 
+                    ? `No members match "${searchTerm}".` 
                     : 'No members have been added yet.'
                 }
               </p>

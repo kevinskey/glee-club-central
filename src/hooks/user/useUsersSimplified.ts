@@ -19,6 +19,7 @@ interface UseUsersSimplifiedResponse {
   isLoading: boolean;
   error: string | null;
   refreshUsers: () => Promise<void>;
+  searchUsers: (searchTerm: string) => Promise<SimpleUser[]>;
 }
 
 export const useUsersSimplified = (): UseUsersSimplifiedResponse => {
@@ -41,7 +42,7 @@ export const useUsersSimplified = (): UseUsersSimplifiedResponse => {
         throw new Error('User not authenticated');
       }
 
-      // Try to fetch profiles directly with minimal fields to avoid recursion
+      // Try to fetch profiles directly with email from auth.users
       const { data: profiles, error: profilesError } = await supabase
         .from('profiles')
         .select(`
@@ -99,19 +100,32 @@ export const useUsersSimplified = (): UseUsersSimplifiedResponse => {
         return;
       }
 
-      // Convert profiles to simple user format
-      const simpleUsers: SimpleUser[] = profiles.map(profile => ({
-        id: profile.id,
-        first_name: profile.first_name || 'Unknown',
-        last_name: profile.last_name || 'User',
-        voice_part: profile.voice_part,
-        status: profile.status || 'active',
-        role: profile.role || 'member',
-        is_super_admin: profile.is_super_admin || false
-      }));
+      // Get emails for all users by fetching from auth metadata or admin function
+      const usersWithEmails = await Promise.all(
+        profiles.map(async (profile) => {
+          try {
+            // Try to get email from user metadata if available
+            const { data: authUser } = await supabase.auth.admin.getUserById(profile.id);
+            return {
+              ...profile,
+              email: authUser.user?.email || '',
+              first_name: profile.first_name || 'Unknown',
+              last_name: profile.last_name || 'User',
+            };
+          } catch {
+            // Fallback if admin call fails
+            return {
+              ...profile,
+              email: profile.id === currentUser.id ? currentUser.email || '' : '',
+              first_name: profile.first_name || 'Unknown',
+              last_name: profile.last_name || 'User',
+            };
+          }
+        })
+      );
 
-      console.log('✅ Successfully processed users:', simpleUsers.length);
-      setUsers(simpleUsers);
+      console.log('✅ Successfully processed users:', usersWithEmails.length);
+      setUsers(usersWithEmails);
       
     } catch (err) {
       console.error('💥 Unexpected error fetching users:', err);
@@ -122,6 +136,74 @@ export const useUsersSimplified = (): UseUsersSimplifiedResponse => {
       setIsLoading(false);
     }
   }, []);
+
+  const searchUsers = useCallback(async (searchTerm: string): Promise<SimpleUser[]> => {
+    if (!searchTerm.trim()) {
+      return users;
+    }
+
+    try {
+      console.log('🔍 Searching users with term:', searchTerm);
+      
+      const searchTermLower = searchTerm.toLowerCase();
+      
+      // Search in current users list first (client-side filtering)
+      const clientSideResults = users.filter(user => {
+        const fullName = `${user.first_name || ''} ${user.last_name || ''}`.toLowerCase();
+        const email = (user.email || '').toLowerCase();
+        const voicePart = (user.voice_part || '').toLowerCase();
+        const role = (user.role || '').toLowerCase();
+        
+        return fullName.includes(searchTermLower) || 
+               email.includes(searchTermLower) ||
+               voicePart.includes(searchTermLower) ||
+               role.includes(searchTermLower);
+      });
+
+      // Also try database search for more comprehensive results
+      const { data: dbResults, error } = await supabase
+        .from('profiles')
+        .select(`
+          id,
+          first_name,
+          last_name,
+          voice_part,
+          status,
+          role,
+          is_super_admin
+        `)
+        .or(`first_name.ilike.%${searchTerm}%,last_name.ilike.%${searchTerm}%,voice_part.ilike.%${searchTerm}%,role.ilike.%${searchTerm}%`)
+        .order('last_name', { ascending: true });
+
+      if (!error && dbResults) {
+        // Merge and deduplicate results
+        const combinedResults = [...clientSideResults];
+        dbResults.forEach(dbUser => {
+          if (!combinedResults.find(existing => existing.id === dbUser.id)) {
+            combinedResults.push({
+              ...dbUser,
+              first_name: dbUser.first_name || 'Unknown',
+              last_name: dbUser.last_name || 'User',
+            });
+          }
+        });
+        
+        console.log('🔍 Search completed:', combinedResults.length, 'results');
+        return combinedResults;
+      }
+
+      return clientSideResults;
+    } catch (err) {
+      console.error('❌ Search error:', err);
+      // Fallback to client-side search
+      return users.filter(user => {
+        const searchTermLower = searchTerm.toLowerCase();
+        const fullName = `${user.first_name || ''} ${user.last_name || ''}`.toLowerCase();
+        const email = (user.email || '').toLowerCase();
+        return fullName.includes(searchTermLower) || email.includes(searchTermLower);
+      });
+    }
+  }, [users]);
 
   // Set up real-time subscriptions for automatic updates
   useEffect(() => {
@@ -151,6 +233,7 @@ export const useUsersSimplified = (): UseUsersSimplifiedResponse => {
     users,
     isLoading,
     error,
-    refreshUsers
+    refreshUsers,
+    searchUsers
   };
 };
