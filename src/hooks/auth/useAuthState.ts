@@ -8,14 +8,24 @@ export const useAuthState = (): UseAuthStateReturn => {
   const [state, setState] = useState<AuthState>({
     user: null,
     profile: null,
-    isLoading: true,
+    isLoading: false, // Start with false to prevent loading flicker
     isInitialized: false,
     permissions: {}
   });
   
   const mountedRef = useRef(true);
+  const initializationRef = useRef(false);
   
   const { fetchUserData } = useUserDataFetching(setState, mountedRef);
+  
+  // Only initialize once
+  useEffect(() => {
+    if (initializationRef.current) return;
+    initializationRef.current = true;
+    
+    // Set loading only when actually starting initialization
+    setState(prev => ({ ...prev, isLoading: true }));
+  }, []);
   
   useAuthInitialization(setState, fetchUserData, mountedRef);
   

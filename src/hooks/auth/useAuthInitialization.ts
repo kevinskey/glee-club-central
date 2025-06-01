@@ -12,7 +12,16 @@ export const useAuthInitialization = (
   useEffect(() => {
     console.log('🚀 useAuthInitialization: Starting auth initialization...');
     
+    let isInitializing = false;
+    
     const initializeAuth = async () => {
+      if (isInitializing) {
+        console.log('🔄 useAuthInitialization: Already initializing, skipping...');
+        return;
+      }
+      
+      isInitializing = true;
+      
       try {
         console.log('🔄 useAuthInitialization: Getting current session...');
         const { data: { session }, error } = await supabase.auth.getSession();
@@ -57,7 +66,7 @@ export const useAuthInitialization = (
             isInitialized: true
           }));
           
-          // Fetch profile data immediately with user metadata
+          // Fetch profile data with user metadata
           console.log('📡 useAuthInitialization: Fetching user profile data...');
           await fetchUserData(session.user.id, session.user.email, session.user.user_metadata);
         } else {
@@ -84,6 +93,8 @@ export const useAuthInitialization = (
             isInitialized: true
           });
         }
+      } finally {
+        isInitializing = false;
       }
     };
     
@@ -116,9 +127,13 @@ export const useAuthInitialization = (
             isInitialized: true
           }));
           
-          // Fetch profile data immediately after sign in with metadata
+          // Fetch profile data after sign in with metadata
           console.log('📡 useAuthInitialization: Fetching profile after sign in...');
-          await fetchUserData(session.user.id, session.user.email, session.user.user_metadata);
+          setTimeout(async () => {
+            if (mountedRef.current) {
+              await fetchUserData(session.user.id, session.user.email, session.user.user_metadata);
+            }
+          }, 100);
           
         } else if (event === 'SIGNED_OUT') {
           console.log('👋 useAuthInitialization: User signed out');
