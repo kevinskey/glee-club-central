@@ -150,14 +150,12 @@ export default function AdminCalendarPage() {
     return (
       <ErrorBoundary>
         <div className="container mx-auto px-4 py-6 max-w-7xl">
-          <div className="flex items-center gap-4 mb-6">
-            <BackButton fallbackPath="/admin" label="Back to Admin Dashboard" />
-            <PageHeader
-              title="Calendar Management"
-              description="Manage all events and calendar settings"
-              icon={<Calendar className="h-6 w-6" />}
-            />
-          </div>
+          <PageHeader
+            title="Calendar Management"
+            description="Manage all events and calendar settings"
+            icon={<Calendar className="h-6 w-6" />}
+          />
+          <BackButton fallbackPath="/admin" label="Back to Admin Dashboard" />
           <Card className="mt-6">
             <CardContent className="flex items-center justify-center h-64">
               <div className="text-center space-y-3">
@@ -175,14 +173,12 @@ export default function AdminCalendarPage() {
     return (
       <ErrorBoundary>
         <div className="container mx-auto px-4 py-6 max-w-7xl">
-          <div className="flex items-center gap-4 mb-6">
-            <BackButton fallbackPath="/admin" label="Back to Admin Dashboard" />
-            <PageHeader
-              title="Calendar Management"
-              description="Manage all events and calendar settings"
-              icon={<Calendar className="h-6 w-6" />}
-            />
-          </div>
+          <PageHeader
+            title="Calendar Management"
+            description="Manage all events and calendar settings"
+            icon={<Calendar className="h-6 w-6" />}
+          />
+          <BackButton fallbackPath="/admin" label="Back to Admin Dashboard" />
           <Card className="mt-6">
             <CardContent className="flex flex-col items-center justify-center h-64 space-y-4">
               <div className="text-red-600 text-center">
@@ -202,24 +198,24 @@ export default function AdminCalendarPage() {
   return (
     <ErrorBoundary>
       <div className="container mx-auto px-4 py-6 max-w-7xl space-y-6">
-        {/* Header Section with Back Button */}
-        <div className="flex items-center gap-4">
-          <BackButton fallbackPath="/admin" label="Back to Admin Dashboard" />
-          <PageHeader
-            title="Calendar Management"
-            description="Create, edit, and manage all Glee Club events and performances"
-            icon={<Calendar className="h-6 w-6" />}
-            actions={
-              <Button 
-                onClick={handleCreateNew} 
-                className="bg-glee-spelman hover:bg-glee-spelman/90 text-white"
-              >
-                <Plus className="h-4 w-4 mr-2" />
-                Create Event
-              </Button>
-            }
-          />
-        </div>
+        {/* Header Section */}
+        <PageHeader
+          title="Calendar Management"
+          description="Create, edit, and manage all Glee Club events and performances"
+          icon={<Calendar className="h-6 w-6" />}
+          actions={
+            <Button 
+              onClick={handleCreateNew} 
+              className="bg-glee-spelman hover:bg-glee-spelman/90 text-white"
+            >
+              <Plus className="h-4 w-4 mr-2" />
+              Create Event
+            </Button>
+          }
+        />
+        
+        {/* Back Button Below Subtitle */}
+        <BackButton fallbackPath="/admin" label="Back to Admin Dashboard" />
 
         {/* Stats Cards */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
