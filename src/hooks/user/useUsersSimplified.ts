@@ -90,8 +90,8 @@ export const useUsersSimplified = (): UseUsersSimplifiedResponse => {
           const { data: authData, error: authError } = await supabase.auth.admin.listUsers();
           
           if (!authError && authData?.users && Array.isArray(authData.users)) {
-            // Fix the TypeScript error by properly typing the reduce function
-            authUsersMap = authData.users.reduce<Record<string, any>>((acc, user) => {
+            // Fix the TypeScript error by properly typing the auth users
+            authUsersMap = (authData.users as any[]).reduce((acc: Record<string, any>, user: any) => {
               acc[user.id] = user;
               return acc;
             }, {});
