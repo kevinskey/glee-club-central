@@ -1,7 +1,7 @@
 
 import * as React from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
-import { useAuth } from '@/contexts/AuthContext';
+import { useSimpleAuthContext } from '@/contexts/SimpleAuthContext';
 import { usePermissions } from '@/hooks/usePermissions';
 import { PageLoader } from '@/components/ui/page-loader';
 import { UserType } from '@/types/auth';
@@ -14,7 +14,7 @@ interface RequireAuthProps {
 }
 
 const RequireAuth = ({ children, requireAdmin, allowedUserTypes }: RequireAuthProps) => {
-  const { isAuthenticated, isLoading: authLoading, isAdmin, getUserType, user, profile } = useAuth();
+  const { isAuthenticated, isLoading: authLoading, isAdmin, getUserType, user, profile } = useSimpleAuthContext();
   const { isSuperAdmin, isLoading: permissionsLoading } = usePermissions();
   const location = useLocation();
   
@@ -70,7 +70,7 @@ const RequireAuth = ({ children, requireAdmin, allowedUserTypes }: RequireAuthPr
     
     console.log("RequireAuth: Redirecting to login from:", currentPath);
     toast.error("Please log in to access this page");
-    return <Navigate to="/auth/login" replace />;
+    return <Navigate to="/login" replace />;
   }
   
   // Check admin access if required (be more permissive)

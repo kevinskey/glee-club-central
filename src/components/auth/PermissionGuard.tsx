@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
-import { useAuth } from '@/contexts/AuthContext';
+import { useSimpleAuthContext } from '@/contexts/SimpleAuthContext';
 import { useRolePermissions } from '@/contexts/RolePermissionContext';
 import { Spinner } from '@/components/ui/spinner';
 
@@ -16,7 +16,7 @@ export function PermissionGuard({
   requiredPermission,
   requiredRole
 }: PermissionGuardProps) {
-  const { isAuthenticated, isLoading: authLoading } = useAuth();
+  const { isAuthenticated, isLoading: authLoading } = useSimpleAuthContext();
   const { hasPermission, userRole, isLoading: permissionsLoading } = useRolePermissions();
   const location = useLocation();
   

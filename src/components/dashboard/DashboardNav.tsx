@@ -16,7 +16,7 @@ import {
   ChevronRight,
   LogOut
 } from 'lucide-react';
-import { useAuth } from '@/contexts/AuthContext';
+import { useSimpleAuthContext } from '@/contexts/SimpleAuthContext';
 
 interface DashboardNavProps extends React.HTMLAttributes<HTMLElement> {
   isCollapsed?: boolean;
@@ -29,8 +29,8 @@ export function DashboardNav({
 }: DashboardNavProps) {
   const { pathname } = useLocation();
   const navigate = useNavigate();
-  const { isAdmin, profile, logout } = useAuth();
-  const isAdminUser = profile?.is_super_admin || (isAdmin && isAdmin());
+  const { isAdmin, profile, logout } = useSimpleAuthContext();
+  const isAdminUser = profile?.is_super_admin || isAdmin();
   
   const handleLogout = async () => {
     try {

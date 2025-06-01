@@ -1,7 +1,7 @@
 
 import * as React from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
-import { useAuth } from '@/contexts/AuthContext';
+import { useSimpleAuthContext } from '@/contexts/SimpleAuthContext';
 import { Spinner } from '@/components/ui/spinner';
 
 interface PermissionRouteProps {
@@ -13,7 +13,7 @@ export function PermissionRoute({
   children, 
   requireSuperAdmin = false
 }: PermissionRouteProps) {
-  const { isAuthenticated, isLoading, isAdmin, profile } = useAuth();
+  const { isAuthenticated, isLoading, isAdmin, profile } = useSimpleAuthContext();
   const location = useLocation();
   
   console.log('PermissionRoute check:', { 
