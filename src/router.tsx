@@ -1,10 +1,10 @@
 
-
 import { createBrowserRouter } from "react-router-dom";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { ProfileProvider } from "@/contexts/ProfileContext";
 import { SimpleAuthProvider } from "@/contexts/SimpleAuthContext";
 import RequireAuth from "@/components/auth/RequireAuth";
+import SimpleRequireAuth from "@/components/auth/SimpleRequireAuth";
 import AdminRoute from "@/components/auth/AdminRoute";
 import AppLayout from "@/layouts/AppLayout";
 
@@ -77,9 +77,9 @@ export const router = createBrowserRouter([
     path: "/role-dashboard",
     element: (
       <SimpleAuthProvider>
-        <RequireAuth>
+        <SimpleRequireAuth>
           <RoleDashboardPage />
-        </RequireAuth>
+        </SimpleRequireAuth>
       </SimpleAuthProvider>
     ),
   },
@@ -97,9 +97,9 @@ export const router = createBrowserRouter([
     path: "/dashboard/member",
     element: (
       <SimpleAuthProvider>
-        <RequireAuth>
+        <SimpleRequireAuth>
           <MemberDashboardPage />
-        </RequireAuth>
+        </SimpleRequireAuth>
       </SimpleAuthProvider>
     ),
   },
@@ -109,4 +109,3 @@ export const router = createBrowserRouter([
     element: <NotFoundPage />,
   },
 ]);
-
