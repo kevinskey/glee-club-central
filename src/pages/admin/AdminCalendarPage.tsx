@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { EnhancedCalendarView } from '@/components/calendar/EnhancedCalendarView';
@@ -11,10 +10,13 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Calendar, Plus, Edit, Trash2, Users } from 'lucide-react';
 import { toast } from 'sonner';
+import { useSimpleAuthContext } from '@/contexts/SimpleAuthContext';
+import { supabase } from '@/integrations/supabase/client';
 import ErrorBoundary from '@/components/ErrorBoundary';
 
 export default function AdminCalendarPage() {
   const { events, loading, error, createEvent, updateEvent, deleteEvent, fetchEvents } = useCalendarEvents();
+  const { user } = useSimpleAuthContext();
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   
@@ -23,6 +25,7 @@ export default function AdminCalendarPage() {
   const [isCreating, setIsCreating] = useState(false);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isEditorOpen, setIsEditorOpen] = useState(false);
+  const [userRSVP, setUserRSVP] = useState<'going' | 'maybe' | 'not_going' | null>(null);
 
   // Handle URL parameters for editing
   React.useEffect(() => {
@@ -36,9 +39,49 @@ export default function AdminCalendarPage() {
     }
   }, [searchParams, events]);
 
-  const handleEventClick = (event: CalendarEvent) => {
+  const handleEventClick = async (event: CalendarEvent) => {
     setSelectedEvent(event);
     setIsDialogOpen(true);
+    
+    if (event.allow_rsvp && user) {
+      try {
+        // Fetch user's current RSVP status
+        const { data } = await supabase
+          .from('event_rsvps')
+          .select('status')
+          .eq('event_id', event.id)
+          .eq('user_id', user.id)
+          .single();
+        
+        setUserRSVP(data?.status || null);
+      } catch (error) {
+        console.error('Error fetching RSVP status:', error);
+        setUserRSVP(null);
+      }
+    }
+  };
+
+  const handleRSVP = async (status: 'going' | 'maybe' | 'not_going') => {
+    if (!user || !selectedEvent) return;
+
+    try {
+      const { error } = await supabase
+        .from('event_rsvps')
+        .upsert({
+          event_id: selectedEvent.id,
+          user_id: user.id,
+          status,
+          updated_at: new Date().toISOString()
+        });
+
+      if (error) throw error;
+      
+      setUserRSVP(status);
+      toast.success('RSVP updated successfully');
+    } catch (error) {
+      console.error('Error updating RSVP:', error);
+      toast.error('Failed to update RSVP');
+    }
   };
 
   const handleSaveEvent = async (eventData: Omit<CalendarEvent, 'id' | 'created_at'>) => {
@@ -243,7 +286,9 @@ export default function AdminCalendarPage() {
             setSelectedEvent(null);
             setIsDialogOpen(false);
           }}
-          canRSVP={false}
+          canRSVP={true}
+          userRSVP={userRSVP}
+          onRSVP={handleRSVP}
           adminActions={
             selectedEvent && (
               <div className="flex gap-2 pt-4">
