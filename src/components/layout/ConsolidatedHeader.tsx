@@ -54,9 +54,9 @@ export const ConsolidatedHeader = memo(function ConsolidatedHeader() {
                 variant={isActive ? "default" : "ghost"}
                 size="sm"
                 asChild
-                className={`text-sm font-medium ${
+                className={`text-sm font-medium relative ${
                   isActive 
-                    ? "bg-glee-spelman hover:bg-glee-spelman/90 text-white" 
+                    ? "bg-transparent text-glee-spelman after:content-[''] after:absolute after:bottom-0 after:left-1/2 after:transform after:-translate-x-1/2 after:w-8 after:h-0.5 after:bg-glee-spelman" 
                     : "text-foreground/80 hover:text-glee-spelman"
                 }`}
               >
@@ -98,7 +98,7 @@ export const ConsolidatedHeader = memo(function ConsolidatedHeader() {
               className="bg-glee-spelman hover:bg-glee-spelman/90"
             >
               <LogIn className="w-4 h-4 mr-2" />
-              {isMobile ? 'Login' : 'Login'}
+              Login
             </Button>
           )}
           
