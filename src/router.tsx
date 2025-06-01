@@ -78,7 +78,7 @@ export const router = createBrowserRouter([
     path: "/reset-password",
     element: (
       <SimpleAuthProvider>
-        <AppLayout sidebarType="none" showHeader={false} showFooter={false">
+        <AppLayout sidebarType="none" showHeader={false} showFooter={false}>
           <ResetPasswordPage />
         </AppLayout>
       </SimpleAuthProvider>
@@ -98,7 +98,7 @@ export const router = createBrowserRouter([
     path: "/register",
     element: (
       <SimpleAuthProvider>
-        <AppLayout sidebarType="none" showHeader={false} showFooter={false">
+        <AppLayout sidebarType="none" showHeader={false} showFooter={false}>
           <RegisterPage />
         </AppLayout>
       </SimpleAuthProvider>
@@ -108,7 +108,7 @@ export const router = createBrowserRouter([
     path: "/join-glee-fam",
     element: (
       <SimpleAuthProvider>
-        <AppLayout sidebarType="none" showHeader={false} showFooter={false">
+        <AppLayout sidebarType="none" showHeader={false} showFooter={false}>
           <JoinGleeFamPage />
         </AppLayout>
       </SimpleAuthProvider>
