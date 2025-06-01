@@ -17,6 +17,7 @@ import {
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
+import { useProfile } from "@/contexts/ProfileContext";
 import { truncateText } from "@/lib/utils";
 
 interface UploadSheetMusicModalProps {
@@ -48,7 +49,8 @@ export function UploadSheetMusicModal({
   const [overallProgress, setOverallProgress] = useState(0);
   const [isDragging, setIsDragging] = useState(false);
   const { toast } = useToast();
-  const { user, profile } = useAuth();
+  const { user } = useAuth();
+  const { profile } = useProfile();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const dropZoneRef = useRef<HTMLDivElement>(null);
   

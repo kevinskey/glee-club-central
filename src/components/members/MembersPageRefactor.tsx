@@ -1,370 +1,184 @@
-import React, { useState, useCallback } from "react";
-import { User } from "@/hooks/user/useUserManagement";
-import { Navigate } from "react-router-dom";
-import { PageHeader } from "@/components/ui/page-header";
-import { Users } from "lucide-react";
-import { Card } from "@/components/ui/card";
-import { useAuth } from "@/contexts/AuthContext";
-import { usePermissions } from "@/hooks/usePermissions";
-import { useMedia } from "@/hooks/use-mobile";
-import { MembersList } from "@/components/members/MembersList";
-import { UserManagementToolbar } from "@/components/members/UserManagementToolbar";
-import { UserTitleManagement } from "@/components/admin/UserTitleManagement";
-import { AddMemberDialog } from "@/components/members/AddMemberDialog";
-import { UserFormValues } from "@/components/members/form/userFormSchema";
-import { toast } from "sonner";
-import { EditUserDialog } from "@/components/members/EditUserDialog";
-import { DeleteMemberDialog } from "@/components/members/DeleteMemberDialog";
-import { MemberPermissionsDialog } from "@/components/members/MemberPermissionsDialog";
-import { Spinner } from "@/components/ui/spinner";
-import { Button } from "@/components/ui/button";
-import { UserPlus } from "lucide-react";
-import { MemberFilters } from "./MemberFilters";
+import React, { useState, useEffect } from 'react';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Badge } from '@/components/ui/badge';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { 
+  Users, 
+  Search, 
+  Filter, 
+  UserPlus, 
+  MoreVertical, 
+  Mail, 
+  Phone,
+  Calendar,
+  Music,
+  Settings as SettingsIcon
+} from 'lucide-react';
+import { useAuthMigration } from '@/hooks/useAuthMigration';
 
-// Helper function to create a member refresh function that returns void
-export const createMemberRefreshFunction = (
-  fetchUsers: () => Promise<any>
-): (() => Promise<void>) => {
-  return async () => {
-    try {
-      await fetchUsers();
-    } catch (error) {
-      console.error("Error refreshing members:", error);
-    }
-  };
-};
-
-// Type for the MembersPageComponent props
-export interface MembersPageProps {
-  useUserManagementHook: () => {
-    users: User[];
-    isLoading: boolean;
-    fetchUsers: () => Promise<any>;
-    addUser: (data: UserFormValues) => Promise<boolean>;
-    updateUser?: (userId: string, data: any) => Promise<boolean>;
-    deleteUser?: (userId: string) => Promise<boolean>;
-  };
+interface Member {
+  id: string;
+  first_name: string;
+  last_name: string;
+  email: string;
+  voice_part: string;
+  status: string;
+  join_date: string;
+  avatar_url?: string;
+  phone?: string;
+  class_year?: string;
 }
 
-export function MembersPageComponent({ useUserManagementHook }: MembersPageProps) {
-  // All hooks at the top
-  const { isAdmin, isLoading: authLoading, isAuthenticated, profile } = useAuth();
-  const { hasPermission, isSuperAdmin } = usePermissions();
-  const isMobile = useMedia('(max-width: 640px)');
-  
-  // UI state
-  const [searchQuery, setSearchQuery] = useState("");
-  const [roleFilter, setRoleFilter] = useState("all");
-  const [statusFilter, setStatusFilter] = useState("all");
-  
-  // Dialog state
-  const [selectedUser, setSelectedUser] = useState<User | null>(null);
-  const [isManageRoleOpen, setIsManageRoleOpen] = useState(false);
-  const [isAddMemberOpen, setIsAddMemberOpen] = useState(false);
-  const [isEditUserOpen, setIsEditUserOpen] = useState(false);
-  const [isPermissionsOpen, setIsPermissionsOpen] = useState(false);
-  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
-  
-  // Loading state
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [isDeleting, setIsDeleting] = useState(false);
-  
-  // User to delete
-  const [userToDelete, setUserToDelete] = useState<string | null>(null);
-  const [userToDeleteName, setUserToDeleteName] = useState("");
-  
-  // Get user management data and functions
-  const {
-    users: allMembers,
-    isLoading,
-    fetchUsers,
-    addUser,
-    updateUser,
-    deleteUser
-  } = useUserManagementHook();
-  
-  // Apply filters
-  const filteredMembers = React.useMemo(() => {
-    if (!allMembers) return [];
-    
-    return allMembers.filter(member => {
-      const matchesSearch = 
-        !searchQuery || 
-        (member.first_name || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
-        (member.last_name || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
-        (member.email || '').toLowerCase().includes(searchQuery.toLowerCase());
-      
-      if (!matchesSearch) return false;
-      
-      const matchesRole = roleFilter === "all" || (member.role || '') === roleFilter;
-      if (!matchesRole) return false;
-      
-      const matchesStatus = statusFilter === "all" || (member.status || '') === statusFilter;
-      if (!matchesStatus) return false;
-      
-      return true;
-    });
-  }, [allMembers, searchQuery, roleFilter, statusFilter]);
+export function MembersPageRefactor() {
+  const { isAdmin, isLoading, isAuthenticated, profile } = useAuthMigration();
+  const [members, setMembers] = useState<Member[]>([]);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [selectedVoicePart, setSelectedVoicePart] = useState('all');
+  const [loading, setLoading] = useState(true);
 
-  const members = filteredMembers;
-  
-  // Create a wrapper function for fetchUsers that returns void
-  const refreshUsers = createMemberRefreshFunction(fetchUsers);
+  const isAdminUser = isAdmin();
 
-  // Memoize handlers to prevent unnecessary re-renders
-  const handleRoleUpdateSuccess = useCallback(async () => {
-    await refreshUsers();
-    toast.success("Member list refreshed");
-  }, [refreshUsers]);
-  
-  // Handler functions
-  const handleAddMember = useCallback(async (data: UserFormValues) => {
-    setIsSubmitting(true);
-    try {
-      console.log("Adding member with data:", data);
-      const success = await addUser(data);
-      if (success) {
-        setIsAddMemberOpen(false);
-        toast.success(`Added ${data.first_name} ${data.last_name} successfully`);
-        // No need to call refreshUsers here since we're adding the user to local state in addUser function
-      } else {
-        toast.error("Failed to add member");
-      }
-    } catch (error) {
-      console.error("Error adding member:", error);
-      toast.error("Failed to add member");
-    } finally {
-      setIsSubmitting(false);
-    }
-  }, [addUser]);
+  useEffect(() => {
+    const fetchMembers = async () => {
+      setLoading(true);
+      // Mock data - replace with actual data fetching
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      const mockMembers: Member[] = [
+        {
+          id: '1',
+          first_name: 'John',
+          last_name: 'Doe',
+          email: 'john.doe@example.com',
+          voice_part: 'Tenor',
+          status: 'active',
+          join_date: '2022-08-15',
+          avatar_url: 'https://avatars.dicebear.com/api/male/john.svg',
+          phone: '123-456-7890',
+          class_year: '2024'
+        },
+        {
+          id: '2',
+          first_name: 'Jane',
+          last_name: 'Smith',
+          email: 'jane.smith@example.com',
+          voice_part: 'Soprano',
+          status: 'active',
+          join_date: '2023-01-20',
+          avatar_url: 'https://avatars.dicebear.com/api/female/jane.svg',
+          phone: '987-654-3210',
+          class_year: '2025'
+        },
+        {
+          id: '3',
+          first_name: 'Alice',
+          last_name: 'Johnson',
+          email: 'alice.johnson@example.com',
+          voice_part: 'Alto',
+          status: 'inactive',
+          join_date: '2022-05-10',
+          avatar_url: 'https://avatars.dicebear.com/api/female/alice.svg',
+          class_year: '2023'
+        },
+      ];
+      setMembers(mockMembers);
+      setLoading(false);
+    };
 
-  // Handle updating a user's information
-  const handleUpdateUser = useCallback(async (data: UserFormValues) => {
-    if (!selectedUser || !updateUser) return;
-    
-    setIsSubmitting(true);
-    try {
-      const success = await updateUser(selectedUser.id, data);
-      if (success) {
-        setIsEditUserOpen(false);
-        setSelectedUser(null);
-        toast.success(`Updated ${data.first_name} ${data.last_name} successfully`);
-        await refreshUsers();
-      }
-    } catch (error) {
-      console.error("Error updating user:", error);
-      toast.error("Failed to update user");
-    } finally {
-      setIsSubmitting(false);
+    if (isAuthenticated) {
+      fetchMembers();
     }
-  }, [selectedUser, updateUser, refreshUsers]);
-  
-  // Fixed: Handle user selection, ensuring we get a User object even if given an ID
-  const handleUserSelection = useCallback((userOrId: User | string) => {
-    // If we received a user ID string, find the user object
-    if (typeof userOrId === 'string') {
-      const userObj = members.find(m => m.id === userOrId);
-      if (userObj) {
-        setSelectedUser(userObj);
-      } else {
-        console.error("User not found with ID:", userOrId);
-      }
-    } else {
-      // We received a User object directly
-      setSelectedUser(userOrId);
-    }
-  }, [members]);
-  
-  // Handle deleting a user
-  const handleDeleteUser = useCallback((userId: string) => {
-    const user = members.find(m => m.id === userId);
-    if (user) {
-      setUserToDelete(userId);
-      setUserToDeleteName(`${user.first_name} ${user.last_name}`);
-      setIsDeleteDialogOpen(true);
-    }
-  }, [members]);
-  
-  const confirmDeleteUser = useCallback(async () => {
-    if (!userToDelete || !deleteUser) return;
-    
-    setIsDeleting(true);
-    try {
-      // Call the deleteUser function from the hook
-      const success = await deleteUser(userToDelete);
-      
-      if (success) {
-        // The deleteUser function now handles removing the user from the local state
-        setIsDeleteDialogOpen(false);
-        setUserToDelete(null);
-        toast.success(`${userToDeleteName} has been deleted`);
-      } else {
-        toast.error(`Failed to delete ${userToDeleteName}`);
-      }
-    } catch (error) {
-      console.error("Error deleting user:", error);
-      toast.error("Failed to delete user");
-    } finally {
-      setIsDeleting(false);
-    }
-  }, [userToDelete, deleteUser, userToDeleteName]);
+  }, [isAuthenticated]);
 
-  // Check if user has admin privileges
-  const hasAdminAccess = (isAdmin && isAdmin()) || isSuperAdmin || profile?.is_super_admin || hasPermission('can_manage_users');
+  const filteredMembers = members.filter(member => {
+    const searchTermLower = searchTerm.toLowerCase();
+    const fullName = `${member.first_name} ${member.last_name}`.toLowerCase();
+    const matchesSearch = fullName.includes(searchTermLower) || member.email.toLowerCase().includes(searchTermLower);
 
-  // Use conditional rendering instead of early returns for auth checks
-  if (authLoading) {
+    const matchesVoicePart = selectedVoicePart === 'all' || member.voice_part === selectedVoicePart;
+
+    return matchesSearch && matchesVoicePart;
+  });
+
+  if (isLoading || loading) {
     return (
-      <div className="flex items-center justify-center min-h-[60vh]">
-        <Spinner size="lg" />
+      <div className="flex items-center justify-center p-8">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
+          <p>Loading members...</p>
+        </div>
       </div>
     );
   }
-  
+
   if (!isAuthenticated) {
-    return <Navigate to="/login" />;
+    return (
+      <Card>
+        <CardContent className="text-center py-8">
+          <Users className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+          <h3 className="font-semibold mb-2">Access Restricted</h3>
+          <p className="text-muted-foreground">
+            You must be logged in to view member information.
+          </p>
+        </CardContent>
+      </Card>
+    );
   }
   
-  if (!hasAdminAccess) {
-    return <Navigate to="/dashboard" />;
-  }
-  
-  // Render the content
   return (
     <div className="space-y-6">
-      <PageHeader
-        title="Member Management"
-        description="View and manage all Glee Club members"
-        icon={<Users className="h-6 w-6" />}
-      />
-      
-      <Card className="p-6">
-        <MemberFilters
-          searchTerm={searchQuery}
-          setSearchTerm={setSearchQuery}
-          roleFilter={roleFilter}
-          setRoleFilter={setRoleFilter}
-          statusFilter={statusFilter}
-          setStatusFilter={setStatusFilter}
-        />
-        
-        {isLoading ? (
-          <div className="flex items-center justify-center h-40">
-            <Spinner size="lg" />
-          </div>
-        ) : members.length === 0 ? (
-          <div className="text-center p-8">
-            <p className="text-muted-foreground mb-2">
-              {allMembers?.length === 0 ? "No members found" : "No members match your current filters"}
-            </p>
-            {allMembers?.length === 0 ? (
-              <Button 
-                variant="outline" 
-                onClick={() => setIsAddMemberOpen(true)}
-                className="mt-2"
-              >
-                <UserPlus className="mr-2 h-4 w-4" />
-                Add your first member
-              </Button>
-            ) : (
-              <Button 
-                variant="outline" 
-                onClick={() => {
-                  setSearchQuery("");
-                  setRoleFilter("all");
-                  setStatusFilter("all");
-                }}
-                className="mt-2"
-              >
-                Clear Filters
-              </Button>
-            )}
-          </div>
-        ) : (
-          <MembersList 
-            members={members} 
-            onEditUser={(user) => {
-              setSelectedUser(user);
-              setIsEditUserOpen(true);
-            }}
-            onDeleteUser={(userId) => {
-              const user = members.find(m => m.id === userId);
-              if (user) {
-                setUserToDelete(userId);
-                setUserToDeleteName(`${user.first_name} ${user.last_name}`);
-                setIsDeleteDialogOpen(true);
-              }
-            }}
-            onManagePermissions={(user) => {
-              setSelectedUser(user);
-              setIsPermissionsOpen(true);
-            }}
-            onChangeRole={(user) => {
-              setSelectedUser(user);
-              setIsManageRoleOpen(true);
-            }}
-            canEdit={hasAdminAccess}
-            onEditMember={(user) => {
-              setSelectedUser(user);
-              setIsEditUserOpen(true);
-            }}
-            onDeleteMember={(userId) => {
-              const user = members.find(m => m.id === userId);
-              if (user) {
-                setUserToDelete(userId);
-                setUserToDeleteName(`${user.first_name} ${user.last_name}`);
-                setIsDeleteDialogOpen(true);
-              }
-            }}
-          />
+      <div className="flex justify-between items-center">
+        <div>
+          <h1 className="text-3xl font-bold">Members</h1>
+          <p className="text-muted-foreground">
+            Manage choir members and their information
+          </p>
+        </div>
+        {isAdminUser && (
+          <Button>
+            <UserPlus className="mr-2 h-4 w-4" />
+            Add Member
+          </Button>
         )}
+      </div>
+
+      {/* Search and filter controls */}
+      <Card>
+        <CardContent className="p-4">
+          <div className="flex flex-col sm:flex-row gap-4">
+            <div className="flex-1">
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
+                <Input
+                  placeholder="Search members..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="pl-10"
+                />
+              </div>
+            </div>
+            <div className="flex gap-2">
+              <Button variant="outline" size="sm">
+                <Filter className="mr-2 h-4 w-4" />
+                Filter
+              </Button>
+            </div>
+          </div>
+        </CardContent>
       </Card>
-      
-      {/* Role Management Dialog */}
-      <UserTitleManagement
-        user={selectedUser}
-        isOpen={isManageRoleOpen}
-        setIsOpen={setIsManageRoleOpen}
-        onSuccess={handleRoleUpdateSuccess}
-      />
-      
-      {/* Add Member Dialog */}
-      {isAddMemberOpen && (
-        <AddMemberDialog
-          isOpen={isAddMemberOpen}
-          onOpenChange={setIsAddMemberOpen}
-          onMemberAdd={handleAddMember}
-          isSubmitting={isSubmitting}
-        />
-      )}
-      
-      {/* Edit User Dialog */}
-      {updateUser && isEditUserOpen && selectedUser && (
-        <EditUserDialog
-          isOpen={isEditUserOpen}
-          onOpenChange={setIsEditUserOpen}
-          onSave={handleUpdateUser}
-          isSubmitting={isSubmitting}
-          user={selectedUser}
-        />
-      )}
-      
-      {/* Delete User Dialog */}
-      <DeleteMemberDialog
-        isOpen={isDeleteDialogOpen}
-        onOpenChange={setIsDeleteDialogOpen}
-        onConfirm={confirmDeleteUser}
-        memberName={userToDeleteName}
-        isDeleting={isDeleting}
-      />
-      
-      {/* Permissions Dialog */}
-      <MemberPermissionsDialog
-        user={selectedUser}
-        isOpen={isPermissionsOpen}
-        setIsOpen={setIsPermissionsOpen}
-        onSuccess={refreshUsers}
-      />
+
+      {/* Members list placeholder */}
+      <Card>
+        <CardContent className="text-center py-8">
+          <Users className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+          <h3 className="font-semibold mb-2">Member List Coming Soon</h3>
+          <p className="text-muted-foreground">
+            Member management functionality will be implemented here.
+          </p>
+        </CardContent>
+      </Card>
     </div>
   );
 }

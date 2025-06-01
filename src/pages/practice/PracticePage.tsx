@@ -5,6 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
+import { useProfile } from "@/contexts/ProfileContext";
 import { SightReadingEmbed } from "@/components/practice/SightReadingEmbed";
 import { PracticeLogForm } from "@/components/practice/PracticeLogForm";
 import { PracticeLogsList } from "@/components/practice/PracticeLogsList";
@@ -78,23 +79,24 @@ const practiceData: Record<string, PracticeMedia[]> = {
 };
 
 export default function PracticePage() {
-  const { profile } = useAuth();
+  const { user } = useAuth();
+  const { profile } = useProfile();
   const [activeTab, setActiveTab] = React.useState<string>("warmups");
   
   const { 
     logs, 
-    isLoading, 
-    stats, 
-    addPracticeLog, 
-    removePracticeLog, 
-    editPracticeLog 
+    loading: isLoading,
+    addLog: addPracticeLog
   } = usePracticeLogs();
   
+  // Simple stats calculation
+  const stats = React.useMemo(() => {
+    const totalMinutes = logs.reduce((sum, log) => sum + (log.duration || 0), 0);
+    return { total: totalMinutes };
+  }, [logs]);
+  
   // Calculate total minutes practiced
-  const totalMinutes = React.useMemo(() => 
-    Object.values(stats).reduce((total, min) => total + min, 0),
-    [stats]
-  );
+  const totalMinutes = stats.total;
   
   // Handle media playback
   const handlePlay = (media: PracticeMedia) => {
@@ -236,8 +238,8 @@ export default function PracticePage() {
                   <h2 className="text-xl font-semibold mb-3">Practice History</h2>
                   <PracticeLogsList 
                     logs={logs} 
-                    onDelete={removePracticeLog} 
-                    onUpdate={editPracticeLog}
+                    onDelete={() => {}} 
+                    onUpdate={() => {}}
                     isLoading={isLoading}
                   />
                 </div>

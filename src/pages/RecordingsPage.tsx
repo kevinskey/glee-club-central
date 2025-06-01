@@ -1,49 +1,51 @@
 
-import React, { useEffect, useState } from "react";
-import { PageHeader } from "@/components/ui/page-header";
-import { Mic } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { useNavigate } from "react-router-dom";
-import { RecordingArchive } from "@/components/recordings/RecordingArchive";
-import { useAuth } from "@/contexts/AuthContext";
-import { PageLoader } from "@/components/ui/page-loader";
+import React from 'react';
+import { useAuth } from '@/contexts/AuthContext';
+import { useProfile } from '@/contexts/ProfileContext';
+import { PageLoader } from '@/components/ui/page-loader';
+import { Card, CardContent } from '@/components/ui/card';
+import { Headphones } from 'lucide-react';
 
 export default function RecordingsPage() {
-  const navigate = useNavigate();
-  const { isAuthenticated, isLoading: authLoading } = useAuth();
-  const [contentReady, setContentReady] = useState(false);
-  
-  // Show loading while authentication is being checked
-  if (authLoading) {
+  const { loading } = useAuth();
+  const { isAuthenticated } = useProfile();
+
+  if (loading) {
     return <PageLoader message="Loading recordings..." />;
   }
-  
-  // Set loaded state after a delay to prevent UI flicker
-  useEffect(() => {
-    if (!authLoading && isAuthenticated) {
-      // Trigger content animation once authentication is confirmed
-      const contentTimer = setTimeout(() => {
-        setContentReady(true);
-      }, 300); // Slightly longer delay for smoother transition
-      
-      return () => clearTimeout(contentTimer);
-    }
-  }, [authLoading, isAuthenticated]);
+
+  if (!isAuthenticated) {
+    return (
+      <Card>
+        <CardContent className="text-center py-8">
+          <Headphones className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+          <h3 className="font-semibold mb-2">Access Restricted</h3>
+          <p className="text-muted-foreground">
+            You must be logged in to access recordings.
+          </p>
+        </CardContent>
+      </Card>
+    );
+  }
 
   return (
-    <div className={`space-y-6 transition-opacity duration-500 ${contentReady ? 'opacity-100' : 'opacity-0'}`}>
-      <PageHeader
-        title="Recordings"
-        description="Submit and listen to vocal recordings"
-        icon={<Mic className="h-6 w-6" />}
-        actions={
-          <Button onClick={() => navigate("/recordings/submit")}>
-            Submit Recording
-          </Button>
-        }
-      />
-      
-      <RecordingArchive />
+    <div className="space-y-6">
+      <div>
+        <h1 className="text-3xl font-bold">Recordings</h1>
+        <p className="text-muted-foreground">
+          Access practice tracks and performance recordings
+        </p>
+      </div>
+
+      <Card>
+        <CardContent className="text-center py-8">
+          <Headphones className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+          <h3 className="font-semibold mb-2">Recordings Coming Soon</h3>
+          <p className="text-muted-foreground">
+            Recording functionality will be implemented here.
+          </p>
+        </CardContent>
+      </Card>
     </div>
   );
 }

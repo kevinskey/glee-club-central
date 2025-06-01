@@ -1,296 +1,206 @@
 
-import React from "react";
-import { useAuth } from "@/contexts/AuthContext";
-import { Navigate } from "react-router-dom";
-import { PageHeader } from "@/components/ui/page-header";
+import React, { useState, useEffect } from 'react';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { 
-  BarChart3, 
-  Calendar, 
-  ArrowUp, 
-  ArrowDown, 
+  BarChart, 
+  LineChart, 
   Users, 
-  CreditCard,
+  Calendar, 
+  TrendingUp, 
   Music,
-  PieChart,
-  LineChart,
-  Clock
-} from "lucide-react";
-import { 
-  Card, 
-  CardContent, 
-  CardDescription, 
-  CardHeader, 
-  CardTitle 
-} from "@/components/ui/card";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue
-} from "@/components/ui/select";
-import {
-  Tabs,
-  TabsContent,
-  TabsList,
-  TabsTrigger
-} from "@/components/ui/tabs";
+  DollarSign,
+  Award
+} from 'lucide-react';
+import { PageHeader } from '@/components/ui/page-header';
+import { useAuthMigration } from '@/hooks/useAuthMigration';
+import { Badge } from '@/components/ui/badge';
 
-// Mock data for charts
-const attendanceData = [
-  { month: "Jan", value: 85 },
-  { month: "Feb", value: 78 },
-  { month: "Mar", value: 92 },
-  { month: "Apr", value: 88 },
-  { month: "May", value: 95 }
-];
-
-const duesCollection = [
-  { month: "Jan", value: 65 },
-  { month: "Feb", value: 72 },
-  { month: "Mar", value: 83 },
-  { month: "Apr", value: 87 },
-  { month: "May", value: 92 }
-];
-
-const voicePartDistribution = [
-  { name: "Soprano 1", value: 12 },
-  { name: "Soprano 2", value: 11 },
-  { name: "Alto 1", value: 10 },
-  { name: "Alto 2", value: 9 }
-];
+interface AnalyticsData {
+  totalMembers: number;
+  activeMembers: number;
+  eventsThisMonth: number;
+  attendanceRate: number;
+  monthlyGrowth: number;
+  revenueThisMonth: number;
+}
 
 export default function AdminAnalyticsPage() {
-  const { isAdmin, isLoading, isAuthenticated } = useAuth();
-  
-  // Redirect if user is not authenticated or not an admin
-  if (!isLoading && (!isAuthenticated || !isAdmin())) {
-    return <Navigate to="/dashboard" />;
-  }
-  
+  const { isAdmin, isLoading, isAuthenticated } = useAuthMigration();
+  const [analyticsData, setAnalyticsData] = useState<AnalyticsData | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  const isAdminUser = isAdmin();
+
+  useEffect(() => {
+    // Simulate loading analytics data
+    const loadAnalytics = async () => {
+      setLoading(true);
+      // Mock data - in real app this would come from API
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      setAnalyticsData({
+        totalMembers: 45,
+        activeMembers: 42,
+        eventsThisMonth: 8,
+        attendanceRate: 87.5,
+        monthlyGrowth: 5.2,
+        revenueThisMonth: 2250
+      });
+      setLoading(false);
+    };
+
+    if (isAuthenticated && isAdminUser) {
+      loadAnalytics();
+    }
+  }, [isAuthenticated, isAdminUser]);
+
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center min-h-[60vh]">
-        <div className="h-8 w-8 rounded-full border-4 border-primary border-t-transparent animate-spin"></div>
+      <div className="flex items-center justify-center p-8">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
+          <p>Loading analytics...</p>
+        </div>
       </div>
     );
   }
-  
-  const renderLegend = (items) => {
+
+  if (!isAuthenticated || !isAdminUser) {
     return (
-      <div className="flex flex-wrap gap-4 justify-center text-sm">
-        {items.map((item, index) => (
-          <div key={index} className="flex items-center gap-2">
-            <div 
-              className="w-3 h-3 rounded-full" 
-              style={{ backgroundColor: getColor(index) }}
-            ></div>
-            <span>{item.name}</span>
-          </div>
-        ))}
-      </div>
+      <Card>
+        <CardContent className="text-center py-8">
+          <BarChart className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+          <h3 className="font-semibold mb-2">Admin Access Required</h3>
+          <p className="text-muted-foreground">
+            You must be an administrator to view analytics.
+          </p>
+        </CardContent>
+      </Card>
     );
-  };
-  
-  const getColor = (index) => {
-    const colors = [
-      "#8884d8", "#82ca9d", "#ffc658", "#ff8042", 
-      "#0088FE", "#00C49F", "#FFBB28", "#FF8042"
-    ];
-    return colors[index % colors.length];
-  };
+  }
 
   return (
-    <div className="container mx-auto p-4 space-y-6">
+    <div className="space-y-6">
       <PageHeader
         title="Analytics Dashboard"
-        description="Track performance and key metrics"
-        icon={<BarChart3 className="h-6 w-6" />}
+        description="Overview of choir performance and member statistics"
+        icon={<BarChart className="h-6 w-6" />}
       />
-      
-      <div className="flex justify-between">
-        <Tabs defaultValue="overview" className="w-full">
-          <TabsList className="mb-4">
-            <TabsTrigger value="overview">Overview</TabsTrigger>
-            <TabsTrigger value="attendance">Attendance</TabsTrigger>
-            <TabsTrigger value="finances">Finances</TabsTrigger>
-            <TabsTrigger value="membership">Membership</TabsTrigger>
-          </TabsList>
-          
-          <div className="flex justify-end mb-4">
-            <Select defaultValue="2025">
-              <SelectTrigger className="w-[150px]">
-                <SelectValue placeholder="Select year" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="2023">2023</SelectItem>
-                <SelectItem value="2024">2024</SelectItem>
-                <SelectItem value="2025">2025</SelectItem>
-              </SelectContent>
-            </Select>
+
+      {loading ? (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          {[...Array(4)].map((_, i) => (
+            <Card key={i} className="animate-pulse">
+              <CardContent className="p-6">
+                <div className="h-16 bg-gray-200 rounded"></div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      ) : analyticsData ? (
+        <>
+          {/* Key Metrics */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">Total Members</CardTitle>
+                <Users className="h-4 w-4 text-muted-foreground" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">{analyticsData.totalMembers}</div>
+                <p className="text-xs text-muted-foreground">
+                  {analyticsData.activeMembers} active
+                </p>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">Events This Month</CardTitle>
+                <Calendar className="h-4 w-4 text-muted-foreground" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">{analyticsData.eventsThisMonth}</div>
+                <p className="text-xs text-muted-foreground">
+                  +{analyticsData.monthlyGrowth}% from last month
+                </p>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">Attendance Rate</CardTitle>
+                <TrendingUp className="h-4 w-4 text-muted-foreground" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">{analyticsData.attendanceRate}%</div>
+                <p className="text-xs text-muted-foreground">
+                  Above target of 85%
+                </p>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">Revenue</CardTitle>
+                <DollarSign className="h-4 w-4 text-muted-foreground" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">${analyticsData.revenueThisMonth}</div>
+                <p className="text-xs text-muted-foreground">
+                  This month
+                </p>
+              </CardContent>
+            </Card>
           </div>
-          
-          <TabsContent value="overview" className="space-y-6">
-            <div className="grid gap-4 md:grid-cols-3">
-              <Card>
-                <CardHeader className="pb-2">
-                  <CardTitle className="flex items-center justify-between text-sm font-medium">
-                    <span>Member Growth</span>
-                    <Users className="h-4 w-4 text-muted-foreground" />
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold">+12%</div>
-                  <div className="flex items-center text-xs text-emerald-500">
-                    <ArrowUp className="h-3 w-3 mr-1" />
-                    <span>Since last semester</span>
-                  </div>
-                </CardContent>
-              </Card>
-              
-              <Card>
-                <CardHeader className="pb-2">
-                  <CardTitle className="flex items-center justify-between text-sm font-medium">
-                    <span>Event Attendance</span>
-                    <Calendar className="h-4 w-4 text-muted-foreground" />
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold">87%</div>
-                  <div className="flex items-center text-xs text-muted-foreground">
-                    <span>Average this semester</span>
-                  </div>
-                </CardContent>
-              </Card>
-              
-              <Card>
-                <CardHeader className="pb-2">
-                  <CardTitle className="flex items-center justify-between text-sm font-medium">
-                    <span>Dues Collection</span>
-                    <CreditCard className="h-4 w-4 text-muted-foreground" />
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold">$4,250</div>
-                  <div className="flex items-center text-xs text-emerald-500">
-                    <ArrowUp className="h-3 w-3 mr-1" />
-                    <span>94% collected</span>
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
-            
-            <div className="grid gap-4 md:grid-cols-2">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Attendance Rate</CardTitle>
-                  <CardDescription>Monthly attendance percentage</CardDescription>
-                </CardHeader>
-                <CardContent className="h-[300px] relative">
-                  <div className="w-full h-full flex flex-col justify-between">
-                    <div className="flex-1 flex items-end">
-                      {attendanceData.map((item, index) => (
-                        <div key={index} className="flex-1 flex flex-col items-center">
-                          <div 
-                            className="w-8 bg-primary rounded-t" 
-                            style={{ height: `${item.value * 0.8}%` }}
-                          ></div>
-                          <div className="mt-2 text-sm">{item.month}</div>
-                        </div>
-                      ))}
-                    </div>
-                    <div className="mt-8 space-y-1">
-                      <div className="h-4 w-full grid grid-cols-5 gap-px">
-                        {[0, 25, 50, 75, 100].map((value) => (
-                          <div key={value} className="text-xs text-muted-foreground text-center">
-                            {value}%
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-              
-              <Card>
-                <CardHeader>
-                  <CardTitle>Voice Part Distribution</CardTitle>
-                  <CardDescription>Current member voice parts</CardDescription>
-                </CardHeader>
-                <CardContent className="h-[300px] relative">
-                  <div className="h-3/4 flex items-center justify-center">
-                    <div className="w-48 h-48 rounded-full border-8 border-background relative">
-                      {/* Simplified pie chart visualization */}
-                      <div className="absolute inset-0 bg-[#8884d8] rounded-full" style={{ clipPath: 'polygon(50% 50%, 50% 0, 100% 0, 100% 50%)' }}></div>
-                      <div className="absolute inset-0 bg-[#82ca9d] rounded-full" style={{ clipPath: 'polygon(50% 50%, 100% 50%, 100% 100%, 50% 100%)' }}></div>
-                      <div className="absolute inset-0 bg-[#ffc658] rounded-full" style={{ clipPath: 'polygon(50% 50%, 50% 100%, 0 100%, 0 50%)' }}></div>
-                      <div className="absolute inset-0 bg-[#ff8042] rounded-full" style={{ clipPath: 'polygon(50% 50%, 0 50%, 0 0, 50% 0)' }}></div>
-                    </div>
-                  </div>
-                  {renderLegend(voicePartDistribution)}
-                </CardContent>
-              </Card>
-            </div>
-          </TabsContent>
-          
-          <TabsContent value="attendance" className="space-y-4">
+
+          {/* Charts Placeholder */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             <Card>
               <CardHeader>
-                <CardTitle>Detailed Attendance Analytics</CardTitle>
+                <CardTitle>Member Growth</CardTitle>
                 <CardDescription>
-                  Track attendance rates across events and rehearsals
+                  Member count over the past 6 months
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <p className="text-muted-foreground mb-4">
-                  Select specific date ranges and event types to analyze attendance patterns
-                </p>
-                <div className="border rounded-md p-6 flex items-center justify-center min-h-[300px]">
-                  <p className="text-muted-foreground">Attendance charts would be displayed here</p>
+                <div className="h-[300px] flex items-center justify-center border-2 border-dashed border-gray-200 rounded">
+                  <div className="text-center text-muted-foreground">
+                    <LineChart className="h-12 w-12 mx-auto mb-2" />
+                    <p>Chart will be displayed here</p>
+                  </div>
                 </div>
               </CardContent>
             </Card>
-          </TabsContent>
-          
-          <TabsContent value="finances" className="space-y-4">
+
             <Card>
               <CardHeader>
-                <CardTitle>Financial Analytics</CardTitle>
+                <CardTitle>Event Attendance</CardTitle>
                 <CardDescription>
-                  Track dues collection and financial trends
+                  Attendance by event type
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <p className="text-muted-foreground mb-4">
-                  Analyze dues collection rates and payment methods
-                </p>
-                <div className="border rounded-md p-6 flex items-center justify-center min-h-[300px]">
-                  <p className="text-muted-foreground">Financial charts would be displayed here</p>
+                <div className="h-[300px] flex items-center justify-center border-2 border-dashed border-gray-200 rounded">
+                  <div className="text-center text-muted-foreground">
+                    <BarChart className="h-12 w-12 mx-auto mb-2" />
+                    <p>Chart will be displayed here</p>
+                  </div>
                 </div>
               </CardContent>
             </Card>
-          </TabsContent>
-          
-          <TabsContent value="membership" className="space-y-4">
-            <Card>
-              <CardHeader>
-                <CardTitle>Membership Analytics</CardTitle>
-                <CardDescription>
-                  Track membership changes and demographics
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <p className="text-muted-foreground mb-4">
-                  Analyze member retention, class year distribution, and voice part balance
-                </p>
-                <div className="border rounded-md p-6 flex items-center justify-center min-h-[300px]">
-                  <p className="text-muted-foreground">Membership charts would be displayed here</p>
-                </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
-        </Tabs>
-      </div>
+          </div>
+        </>
+      ) : (
+        <Card>
+          <CardContent className="text-center py-8">
+            <BarChart className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+            <h3 className="font-semibold mb-2">No Data Available</h3>
+            <p className="text-muted-foreground">
+              Analytics data could not be loaded at this time.
+            </p>
+          </CardContent>
+        </Card>
+      )}
     </div>
   );
 }

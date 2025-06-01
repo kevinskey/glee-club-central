@@ -1,13 +1,16 @@
+
 import React, { useState } from "react";
-import { useNavigate, useLocation } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
-import { MusicIcon, Menu, X } from "lucide-react";
+import { Music, Menu, X } from "lucide-react";
 import { MobileNavDropdown } from "./mobile/MobileNavDropdown";
-import { useAuthMigration } from "@/hooks/useAuthMigration";
+import { useAuth } from "@/contexts/AuthContext";
+import { useProfile } from "@/contexts/ProfileContext";
 
 export function MusicAppHeader({ currentSection }: { currentSection: string }) {
-  const { isAuthenticated, logout } = useAuthMigration();
+  const { user, logout } = useAuth();
+  const { isAuthenticated } = useProfile();
   const navigate = useNavigate();
   const location = useLocation();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -21,27 +24,27 @@ export function MusicAppHeader({ currentSection }: { currentSection: string }) {
     {
       name: "Home",
       href: "/dashboard",
-      icon: MusicIcon,
+      icon: Music,
     },
     {
       name: "Music",
       href: "/dashboard/music",
-      icon: MusicIcon,
+      icon: Music,
     },
     {
       name: "Calendar",
       href: "/dashboard/calendar",
-      icon: MusicIcon,
+      icon: Music,
     },
     {
       name: "Members",
       href: "/dashboard/members",
-      icon: MusicIcon,
+      icon: Music,
     },
     {
       name: "Recordings",
       href: "/dashboard/recordings",
-      icon: MusicIcon,
+      icon: Music,
     },
   ];
 
@@ -49,7 +52,7 @@ export function MusicAppHeader({ currentSection }: { currentSection: string }) {
     <header className="border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container flex h-16 items-center justify-between">
         <Link to="/dashboard" className="flex items-center gap-2">
-          <MusicIcon />
+          <Music />
           <span className="font-bold">GleeClub</span>
         </Link>
         <div className="hidden md:flex items-center gap-4">

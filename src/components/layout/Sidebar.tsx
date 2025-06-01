@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { cn } from "@/lib/utils";
 import { Link, useLocation } from "react-router-dom";
@@ -21,13 +22,13 @@ import {
   Shield
 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
-import { usePermissions } from "@/hooks/usePermissions";
+import { useProfile } from "@/contexts/ProfileContext";
 
 interface SidebarProps extends React.HTMLAttributes<HTMLDivElement> {}
 
 export function Sidebar({ className }: SidebarProps) {
   const { user, logout } = useAuth();
-  const { profile, isAdmin } = usePermissions();
+  const { profile, isAdmin } = useProfile();
   const location = useLocation();
 
   const navigation = [
@@ -103,7 +104,7 @@ export function Sidebar({ className }: SidebarProps) {
       <div className="space-y-4 py-4">
         <div className="px-3 py-2">
           <Link to="/dashboard" className="flex items-center gap-2 font-semibold">
-            <MusicIcon className="h-6 w-6" />
+            <Music className="h-6 w-6" />
             <span>Glee Club</span>
           </Link>
         </div>
