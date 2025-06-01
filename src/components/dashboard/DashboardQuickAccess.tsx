@@ -2,6 +2,7 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
+import { useProfile } from "@/contexts/ProfileContext";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import {
   User,
@@ -21,8 +22,9 @@ import {
 } from "lucide-react";
 
 export function DashboardQuickAccess() {
-  const { isAdmin, profile } = useAuth();
-  const isAdminUser = isAdmin && isAdmin();
+  const { user } = useAuth();
+  const { profile, isAdmin } = useProfile();
+  const isAdminUser = isAdmin();
   
   // Debug logging for admin detection
   console.log('DashboardQuickAccess admin check:', {

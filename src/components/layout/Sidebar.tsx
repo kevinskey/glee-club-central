@@ -1,262 +1,158 @@
-
-import React from "react";
-import { Link, useLocation } from "react-router-dom";
+import React from 'react';
 import { cn } from "@/lib/utils";
+import { Link, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
 import { 
   Home, 
   Music, 
-  Bell, 
+  Calendar, 
+  Users, 
   FileText, 
+  Settings, 
+  Headphones, 
+  BookOpen,
+  Bell,
   User,
-  Users,
-  Mic,
-  Settings,
-  Archive,
-  ClipboardList,
-  Calendar,
-  LayoutDashboard,
-  Library,
-  Headphones
+  LogOut,
+  Shield
 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { usePermissions } from "@/hooks/usePermissions";
-import { useNotifications } from "@/hooks/useNotifications";
-import { Badge } from "@/components/ui/badge";
 
-interface SidebarProps {
-  className?: string;
-}
+interface SidebarProps extends React.HTMLAttributes<HTMLDivElement> {}
 
 export function Sidebar({ className }: SidebarProps) {
+  const { user, logout } = useAuth();
+  const { profile, isAdmin } = usePermissions();
   const location = useLocation();
-  const { profile } = useAuth();
-  const { isSuperAdmin } = usePermissions();
-  const { unreadCount } = useNotifications();
-  
-  // Check if user is admin
-  const isAdmin = profile?.is_super_admin || isSuperAdmin;
-  
-  // Check if user is a fan (has limited access)
-  const isFan = profile?.role === 'fan' || (!profile?.role && !isAdmin);
-  
-  const isActiveRoute = (href: string, exact?: boolean) => {
-    if (exact) {
-      return location.pathname === href;
-    }
-    return location.pathname.startsWith(href);
+
+  const navigation = [
+    {
+      name: "Home",
+      href: "/dashboard",
+      icon: Home,
+    },
+    {
+      name: "Profile",
+      href: "/dashboard/profile",
+      icon: User,
+    },
+    {
+      name: "Sheet Music",
+      href: "/dashboard/sheet-music",
+      icon: Music,
+    },
+    {
+      name: "Recordings",
+      href: "/dashboard/recordings",
+      icon: Headphones,
+    },
+    {
+      name: "Calendar",
+      href: "/dashboard/calendar",
+      icon: Calendar,
+    },
+    {
+      name: "Announcements",
+      href: "/dashboard/announcements",
+      icon: Bell,
+    },
+    {
+      name: "Attendance",
+      href: "/dashboard/attendance",
+      icon: FileText,
+    },
+  ];
+
+  const adminNavigation = [
+    {
+      name: "Admin",
+      href: "/admin",
+      icon: Shield,
+    },
+    {
+      name: "Members",
+      href: "/admin/members",
+      icon: Users,
+    },
+    {
+      name: "Settings",
+      href: "/admin/settings",
+      icon: Settings,
+    },
+  ];
+
+  const logoutNavigation = [
+    {
+      name: "Logout",
+      href: "/",
+      icon: LogOut,
+    },
+  ];
+
+  const handleSignOut = async () => {
+    await logout();
   };
 
-  // Fan menu sections (limited access)
-  const fanMenuSections = [
-    {
-      title: "Dashboard",
-      items: [
-        {
-          title: "Home",
-          href: "/fan-dashboard",
-          icon: Home,
-          exact: true
-        }
-      ]
-    },
-    {
-      title: "Events",
-      items: [
-        {
-          title: "Calendar",
-          href: "/calendar",
-          icon: Calendar
-        }
-      ]
-    },
-    {
-      title: "Personal",
-      items: [
-        {
-          title: "My Profile",
-          href: "/profile",
-          icon: User
-        }
-      ]
-    }
-  ];
-
-  // Full member menu sections
-  const memberMenuSections = [
-    {
-      title: "Dashboard",
-      items: [
-        {
-          title: "Home",
-          href: "/dashboard/member",
-          icon: Home,
-          exact: true
-        }
-      ]
-    },
-    {
-      title: "My Music",
-      items: [
-        {
-          title: "Sheet Music",
-          href: "/dashboard/sheet-music",
-          icon: Music
-        },
-        {
-          title: "Practice Recordings",
-          href: "/dashboard/recordings",
-          icon: Headphones
-        },
-        {
-          title: "Recording Studio",
-          href: "/dashboard/recording-studio",
-          icon: Mic
-        },
-        {
-          title: "Media Library",
-          href: "/dashboard/media-library",
-          icon: Library
-        }
-      ]
-    },
-    {
-      title: "Events & Activities",
-      items: [
-        {
-          title: "Calendar",
-          href: "/calendar",
-          icon: Calendar
-        },
-        {
-          title: "Attendance",
-          href: "/dashboard/attendance",
-          icon: ClipboardList
-        }
-      ]
-    },
-    {
-      title: "Personal",
-      items: [
-        {
-          title: "My Profile",
-          href: "/dashboard/profile",
-          icon: User
-        },
-        {
-          title: "Announcements",
-          href: "/dashboard/announcements",
-          icon: Bell,
-          badge: unreadCount > 0 ? unreadCount : null
-        },
-        {
-          title: "Archives",
-          href: "/dashboard/archives",
-          icon: Archive
-        }
-      ]
-    }
-  ];
-
-  // Choose appropriate menu based on user type
-  const menuSections = isFan ? fanMenuSections : memberMenuSections;
-
-  // Admin menu items
-  const adminMenuItems = [
-    {
-      title: "Admin Dashboard",
-      href: "/admin",
-      icon: LayoutDashboard
-    },
-    {
-      title: "Admin Calendar",
-      href: "/admin/calendar",
-      icon: Calendar
-    },
-    {
-      title: "Member Management",
-      href: "/dashboard/members",
-      icon: Users
-    },
-    {
-      title: "Settings",
-      href: "/admin/settings",
-      icon: Settings
-    }
-  ];
-
   return (
-    <div className={cn(
-      "fixed left-0 top-16 h-[calc(100vh-4rem)] w-64 border-r bg-background p-4 z-40 hidden md:block overflow-y-auto",
-      className
-    )}>
-      <nav className="space-y-6">
-        {/* Menu sections based on user type */}
-        {menuSections.map((section) => (
-          <div key={section.title}>
-            <h3 className="mb-3 px-2 text-sm font-semibold text-muted-foreground uppercase tracking-wider">
-              {section.title}
-            </h3>
+    <div className={cn("pb-12", className)}>
+      <div className="space-y-4 py-4">
+        <div className="px-3 py-2">
+          <Link to="/dashboard" className="flex items-center gap-2 font-semibold">
+            <MusicIcon className="h-6 w-6" />
+            <span>Glee Club</span>
+          </Link>
+        </div>
+        <Separator />
+        <div className="px-3">
+          <ScrollArea className="h-[calc(100vh-200px)] w-full">
             <div className="space-y-1">
-              {section.items.map((item) => (
-                <Button
+              {navigation.map((item) => (
+                <Link
                   key={item.href}
-                  variant={isActiveRoute(item.href, item.exact) ? "secondary" : "ghost"}
+                  to={item.href}
                   className={cn(
-                    "w-full justify-start relative",
-                    isActiveRoute(item.href, item.exact) && "bg-glee-spelman/10 text-glee-spelman font-medium"
+                    "group flex w-full items-center rounded-md px-2 py-2 text-sm font-medium hover:bg-secondary hover:text-foreground",
+                    location.pathname === item.href ? "bg-secondary text-foreground" : "text-muted-foreground"
                   )}
-                  asChild
                 >
-                  <Link to={item.href}>
-                    <item.icon className="mr-3 h-4 w-4" />
-                    {item.title}
-                    {item.badge && (
-                      <Badge 
-                        variant="destructive" 
-                        className="ml-auto h-5 w-5 rounded-full p-0 flex items-center justify-center text-xs"
-                      >
-                        {item.badge}
-                      </Badge>
-                    )}
-                  </Link>
-                </Button>
+                  <item.icon className="mr-2 h-4 w-4" />
+                  <span>{item.name}</span>
+                </Link>
               ))}
-            </div>
-          </div>
-        ))}
-        
-        {/* Admin section - only for admin users */}
-        {isAdmin && (
-          <>
-            <Separator className="my-4" />
-            <div>
-              <h3 className="mb-3 px-2 text-sm font-semibold text-muted-foreground uppercase tracking-wider">
-                Administration
-              </h3>
-              <div className="space-y-1">
-                {adminMenuItems.map((item) => (
-                  <Button
-                    key={item.href}
-                    variant={isActiveRoute(item.href) ? "secondary" : "ghost"}
-                    className={cn(
-                      "w-full justify-start",
-                      isActiveRoute(item.href) && "bg-amber-100 text-amber-900 font-medium"
-                    )}
-                    asChild
-                  >
-                    <Link to={item.href}>
-                      <item.icon className="mr-3 h-4 w-4" />
-                      {item.title}
+              {isAdmin() && (
+                <>
+                  <Separator className="my-2" />
+                  {adminNavigation.map((item) => (
+                    <Link
+                      key={item.href}
+                      to={item.href}
+                      className={cn(
+                        "group flex w-full items-center rounded-md px-2 py-2 text-sm font-medium hover:bg-secondary hover:text-foreground",
+                        location.pathname === item.href ? "bg-secondary text-foreground" : "text-muted-foreground"
+                      )}
+                    >
+                      <item.icon className="mr-2 h-4 w-4" />
+                      <span>{item.name}</span>
                     </Link>
-                  </Button>
-                ))}
-              </div>
+                  ))}
+                </>
+              )}
             </div>
-          </>
-        )}
-      </nav>
+          </ScrollArea>
+        </div>
+        <Separator />
+        <div className="px-3">
+          <Button variant="outline" className="w-full justify-start" onClick={handleSignOut}>
+            <LogOut className="mr-2 h-4 w-4" />
+            Logout
+          </Button>
+        </div>
+      </div>
     </div>
   );
 }

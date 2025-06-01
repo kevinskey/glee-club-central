@@ -3,11 +3,11 @@ import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { useAuth } from '@/contexts/AuthContext';
+import { useProfile } from '@/contexts/ProfileContext';
 import { CreditCard, Calendar } from 'lucide-react';
 
 export function DuesStatusCard() {
-  const { profile } = useAuth();
+  const { profile } = useProfile();
   const duesPaid = profile?.dues_paid || false;
   
   return (

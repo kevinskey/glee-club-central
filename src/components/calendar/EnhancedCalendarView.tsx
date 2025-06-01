@@ -6,7 +6,7 @@ import timeGridPlugin from '@fullcalendar/timegrid';
 import listPlugin from '@fullcalendar/list';
 import interactionPlugin from '@fullcalendar/interaction';
 import { CalendarEvent } from '@/types/calendar';
-import { useAuth } from '@/contexts/AuthContext';
+import { useProfile } from '@/contexts/ProfileContext';
 import { CalendarHeader } from './CalendarHeader';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -25,7 +25,7 @@ export function EnhancedCalendarView({
   onAddEvent,
   loading = false 
 }: EnhancedCalendarViewProps) {
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated } = useProfile();
   const [view, setView] = useState<'dayGridMonth' | 'timeGridWeek' | 'timeGridDay' | 'listWeek'>('dayGridMonth');
   const calendarRef = useRef<FullCalendar>(null);
 

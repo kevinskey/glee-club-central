@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useAuth } from "@/contexts/AuthContext";
+import { useAuthMigration } from "@/hooks/useAuthMigration";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { Input } from "@/components/ui/input";
@@ -32,7 +32,7 @@ const formSchema = z.object({
 });
 
 export default function DeveloperTools() {
-  const { session } = useAuth();
+  const { user } = useAuthMigration();
   const [userId, setUserId] = useState('');
   const [userPermissions, setUserPermissions] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -44,11 +44,11 @@ export default function DeveloperTools() {
   });
 
   useEffect(() => {
-    if (session?.user?.id) {
-      setUserId(session.user.id);
-      form.setValue("userId", session.user.id);
+    if (user?.id) {
+      setUserId(user.id);
+      form.setValue("userId", user.id);
     }
-  }, [session?.user?.id, form]);
+  }, [user?.id, form]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setUserId(e.target.value);
