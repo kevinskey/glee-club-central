@@ -151,7 +151,7 @@ export default function AdminCalendarPage() {
       <ErrorBoundary>
         <div className="container mx-auto px-4 py-6 max-w-7xl">
           <div className="flex items-center gap-4 mb-6">
-            <BackButton fallbackPath="/admin" />
+            <BackButton fallbackPath="/admin" label="Back to Admin Dashboard" />
             <PageHeader
               title="Calendar Management"
               description="Manage all events and calendar settings"
@@ -176,7 +176,7 @@ export default function AdminCalendarPage() {
       <ErrorBoundary>
         <div className="container mx-auto px-4 py-6 max-w-7xl">
           <div className="flex items-center gap-4 mb-6">
-            <BackButton fallbackPath="/admin" />
+            <BackButton fallbackPath="/admin" label="Back to Admin Dashboard" />
             <PageHeader
               title="Calendar Management"
               description="Manage all events and calendar settings"
@@ -204,7 +204,7 @@ export default function AdminCalendarPage() {
       <div className="container mx-auto px-4 py-6 max-w-7xl space-y-6">
         {/* Header Section with Back Button */}
         <div className="flex items-center gap-4">
-          <BackButton fallbackPath="/admin" />
+          <BackButton fallbackPath="/admin" label="Back to Admin Dashboard" />
           <PageHeader
             title="Calendar Management"
             description="Create, edit, and manage all Glee Club events and performances"
