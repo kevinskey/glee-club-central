@@ -23,7 +23,7 @@ export const getProfile = async (userId: string): Promise<Profile | null> => {
       
     if (error) {
       if (error.code === 'PGRST116') {
-        console.log(`ℹ️ getProfile: No profile found for user ${userId} - trigger should have created one`);
+        console.log(`ℹ️ getProfile: No profile found for user ${userId}`);
       } else {
         console.error('❌ getProfile: Error fetching profile:', error);
       }
@@ -45,6 +45,40 @@ export const getProfile = async (userId: string): Promise<Profile | null> => {
     return data as Profile;
   } catch (error) {
     console.error(`💥 getProfile: Profile fetch failed for user ${userId}:`, error);
+    return null;
+  }
+};
+
+export const createProfile = async (userId: string, userEmail?: string, metadata?: any): Promise<Profile | null> => {
+  try {
+    console.log('🔧 createProfile: Creating profile for user:', userId);
+    
+    const profileData = {
+      id: userId,
+      first_name: metadata?.first_name || 'User',
+      last_name: metadata?.last_name || '',
+      role: 'member',
+      status: 'active',
+      is_super_admin: userEmail === 'kevinskey@mac.com',
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString()
+    };
+    
+    const { data, error } = await supabase
+      .from('profiles')
+      .insert(profileData)
+      .select()
+      .single();
+    
+    if (error) {
+      console.error('❌ createProfile: Error creating profile:', error);
+      return null;
+    }
+    
+    console.log('✅ createProfile: Profile created successfully:', data);
+    return data as Profile;
+  } catch (error) {
+    console.error('💥 createProfile: Unexpected error creating profile:', error);
     return null;
   }
 };
@@ -81,7 +115,7 @@ export const updateProfile = async (profile: Partial<Profile>): Promise<{ succes
 };
 
 // Enhanced function to wait for profile creation with retries
-export const waitForProfile = async (userId: string, maxRetries: number = 5, retryDelay: number = 1000): Promise<Profile | null> => {
+export const waitForProfile = async (userId: string, maxRetries: number = 3, retryDelay: number = 1000): Promise<Profile | null> => {
   console.log(`⏳ waitForProfile: Waiting for profile creation for user ${userId}`);
   
   for (let attempt = 1; attempt <= maxRetries; attempt++) {
@@ -96,8 +130,7 @@ export const waitForProfile = async (userId: string, maxRetries: number = 5, ret
     if (attempt < maxRetries) {
       console.log(`⏳ waitForProfile: Profile not found, waiting ${retryDelay}ms before retry...`);
       await new Promise(resolve => setTimeout(resolve, retryDelay));
-      // Increase delay for subsequent attempts
-      retryDelay = Math.min(retryDelay * 1.5, 5000);
+      retryDelay = Math.min(retryDelay * 1.2, 3000);
     }
   }
   
@@ -105,17 +138,24 @@ export const waitForProfile = async (userId: string, maxRetries: number = 5, ret
   return null;
 };
 
-// Simplified function that relies on the database trigger for profile creation
-export const ensureProfileExists = async (userId: string, userEmail?: string): Promise<Profile | null> => {
+// Main function to ensure profile exists - creates if missing
+export const ensureProfileExists = async (userId: string, userEmail?: string, userMetadata?: any): Promise<Profile | null> => {
   console.log('🔍 ensureProfileExists: Checking profile for user:', userId);
   
   // First try to get existing profile
   let profile = await getProfile(userId);
   
   if (!profile) {
-    console.log('⏳ ensureProfileExists: Profile not found, waiting for trigger to create it...');
-    // Wait for the trigger to create the profile (it should happen automatically on user creation)
-    profile = await waitForProfile(userId);
+    console.log('🔧 ensureProfileExists: No profile found, creating new profile...');
+    // Create profile if it doesn't exist
+    profile = await createProfile(userId, userEmail, userMetadata);
+    
+    if (!profile) {
+      console.log('⏳ ensureProfileExists: Profile creation failed, waiting for trigger...');
+      // If manual creation failed, wait a bit for the trigger
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      profile = await waitForProfile(userId);
+    }
   }
   
   if (profile) {

@@ -6,7 +6,7 @@ import { AuthState } from './types';
 
 export const useAuthInitialization = (
   setState: React.Dispatch<React.SetStateAction<AuthState>>,
-  fetchUserData: (userId: string) => Promise<void>,
+  fetchUserData: (userId: string, userEmail?: string, userMetadata?: any) => Promise<void>,
   mountedRef: React.MutableRefObject<boolean>
 ) => {
   useEffect(() => {
@@ -57,9 +57,9 @@ export const useAuthInitialization = (
             isInitialized: true
           }));
           
-          // Fetch profile data immediately
+          // Fetch profile data immediately with user metadata
           console.log('📡 useAuthInitialization: Fetching user profile data...');
-          await fetchUserData(session.user.id);
+          await fetchUserData(session.user.id, session.user.email, session.user.user_metadata);
         } else {
           console.log('ℹ️ useAuthInitialization: No session found');
           if (mountedRef.current) {
@@ -116,9 +116,9 @@ export const useAuthInitialization = (
             isInitialized: true
           }));
           
-          // Fetch profile data immediately after sign in
+          // Fetch profile data immediately after sign in with metadata
           console.log('📡 useAuthInitialization: Fetching profile after sign in...');
-          await fetchUserData(session.user.id);
+          await fetchUserData(session.user.id, session.user.email, session.user.user_metadata);
           
         } else if (event === 'SIGNED_OUT') {
           console.log('👋 useAuthInitialization: User signed out');

@@ -10,7 +10,7 @@ export const useUserDataFetching = (
   mountedRef: React.MutableRefObject<boolean>
 ) => {
   // Fetch user data with enhanced coordination
-  const fetchUserData = useCallback(async (userId: string, userEmail?: string) => {
+  const fetchUserData = useCallback(async (userId: string, userEmail?: string, userMetadata?: any) => {
     if (!mountedRef.current) return;
     
     console.log(`📡 useUserDataFetching: STARTING DATA FETCH for user: ${userId}, email: ${userEmail}`);
@@ -27,13 +27,8 @@ export const useUserDataFetching = (
     try {
       console.log('📋 useUserDataFetching: Ensuring profile exists...');
       
-      // Wait for profile to be available (either existing or created by trigger)
-      profile = await Promise.race([
-        ensureProfileExists(userId, userEmail),
-        new Promise<null>((_, reject) => {
-          setTimeout(() => reject(new Error('Profile ensure timeout')), 15000);
-        })
-      ]);
+      // Ensure profile exists (create if missing)
+      profile = await ensureProfileExists(userId, userEmail, userMetadata);
       
       console.log('📋 useUserDataFetching: Profile ensure result:', {
         hasProfile: !!profile,
