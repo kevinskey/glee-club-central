@@ -12,6 +12,7 @@ interface AuthContextType {
   isInitialized: boolean;
   login: (email: string, password: string) => Promise<{ error: any }>;
   logout: () => Promise<{ error: any }>;
+  signOut: () => Promise<{ error: any }>;
   signUp: (email: string, password: string, firstName: string, lastName: string) => Promise<{ error: any; data: any }>;
   resetPassword: (email: string) => Promise<{ error: any }>;
   updatePassword: (password: string) => Promise<{ error: any }>;
@@ -60,13 +61,22 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         }
 
         if (mounted) {
-          const sessionUser = session?.user ?? null;
-          setUser(sessionUser);
-          
+          const sessionUser = session?.user;
           if (sessionUser) {
+            const authUser: AuthUser = {
+              id: sessionUser.id,
+              email: sessionUser.email,
+              email_confirmed_at: sessionUser.email_confirmed_at,
+              created_at: sessionUser.created_at,
+              updated_at: sessionUser.updated_at,
+              user_metadata: sessionUser.user_metadata
+            };
+            setUser(authUser);
+            
             const userProfile = await ensureProfileExists(sessionUser.id, sessionUser.email, sessionUser.user_metadata);
             setProfile(userProfile);
           } else {
+            setUser(null);
             setProfile(null);
           }
           
@@ -88,10 +98,18 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       
       if (!mounted) return;
 
-      const sessionUser = session?.user ?? null;
-      setUser(sessionUser);
-      
+      const sessionUser = session?.user;
       if (sessionUser && event === 'SIGNED_IN') {
+        const authUser: AuthUser = {
+          id: sessionUser.id,
+          email: sessionUser.email,
+          email_confirmed_at: sessionUser.email_confirmed_at,
+          created_at: sessionUser.created_at,
+          updated_at: sessionUser.updated_at,
+          user_metadata: sessionUser.user_metadata
+        };
+        setUser(authUser);
+        
         // Defer profile loading to prevent potential deadlocks
         setTimeout(async () => {
           if (mounted) {
@@ -100,6 +118,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           }
         }, 0);
       } else {
+        setUser(null);
         setProfile(null);
       }
       
@@ -147,6 +166,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       return { error: err };
     }
   }, []);
+
+  const signOut = logout; // Alias for compatibility
 
   const signUp = useCallback(async (email: string, password: string, firstName: string, lastName: string) => {
     try {
@@ -212,6 +233,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     isInitialized,
     login,
     logout,
+    signOut,
     signUp,
     resetPassword,
     updatePassword,

@@ -1,12 +1,12 @@
 
 import React from "react";
-import { useSimpleAuthContext } from "@/contexts/SimpleAuthContext";
+import { useAuth } from "@/contexts/AuthContext";
 import { PageLoader } from "@/components/ui/page-loader";
 import { Navigate } from "react-router-dom";
 import AdminDashboard from "./AdminDashboard";
 
 export default function AdminDashboardPage() {
-  const { user, profile, isLoading, isInitialized, isAdmin } = useSimpleAuthContext();
+  const { user, profile, isLoading, isInitialized, isAdmin } = useAuth();
 
   console.log('🏛️ AdminDashboardPage: ADMIN DASHBOARD STATE:', {
     hasUser: !!user,

@@ -3,16 +3,17 @@ export type UserType = 'admin' | 'member';
 
 export interface AuthUser {
   id: string;
-  email: string;
+  email?: string;
   email_confirmed_at?: string | null;
   created_at?: string;
   updated_at?: string;
+  user_metadata?: any;
 }
 
 export interface Profile {
   id: string;
-  first_name?: string; // Made optional to match AuthContext interface
-  last_name?: string;  // Made optional to match AuthContext interface
+  first_name?: string;
+  last_name?: string;
   email?: string;
   avatar_url?: string;
   role?: string;
@@ -48,7 +49,7 @@ export interface AuthContextType {
   signUp: (email: string, password: string, firstName: string, lastName: string, userType?: UserType) => Promise<{ error: any, data: any }>;
   isAdmin: () => boolean;
   isMember: () => boolean;
-  getUserType: () => UserType; // Updated to return UserType instead of string
+  getUserType: () => UserType;
   updatePassword: (newPassword: string) => Promise<{ error: any }>;
   resetPassword: (email: string) => Promise<{ error: any }>;
   permissions: { [key: string]: boolean };
@@ -56,4 +57,5 @@ export interface AuthContextType {
   resetAuthSystem: () => Promise<{ success: boolean }>;
   createFallbackProfile?: () => Promise<void>;
   refreshUserData?: () => Promise<void>;
+  refreshProfile: () => Promise<void>;
 }
