@@ -1,5 +1,6 @@
 
 import React, { createContext, useContext, useReducer, useEffect } from 'react';
+import { useUserOrders } from '@/hooks/useUserOrders';
 
 export interface CartItem {
   id: string;
@@ -89,6 +90,7 @@ interface CartContextType {
   toggleCart: () => void;
   getTotalItems: () => number;
   getTotalPrice: () => number;
+  createOrderFromCart: (shippingAddress?: string) => void;
 }
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
@@ -98,6 +100,8 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
     items: [],
     isOpen: false
   });
+
+  const { createOrder } = useUserOrders();
 
   // Load cart from localStorage on mount
   useEffect(() => {
@@ -145,6 +149,22 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return state.items.reduce((total, item) => total + (item.price * item.quantity), 0);
   };
 
+  const createOrderFromCart = (shippingAddress?: string) => {
+    if (state.items.length === 0) return;
+    
+    const itemIds = state.items.map(item => item.id);
+    const totalPrice = getTotalPrice();
+    
+    createOrder({
+      item_ids: itemIds,
+      total_price: totalPrice,
+      shipping_address: shippingAddress
+    });
+    
+    // Clear cart after creating order
+    clearCart();
+  };
+
   return (
     <CartContext.Provider value={{
       state,
@@ -154,7 +174,8 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
       clearCart,
       toggleCart,
       getTotalItems,
-      getTotalPrice
+      getTotalPrice,
+      createOrderFromCart
     }}>
       {children}
     </CartContext.Provider>
