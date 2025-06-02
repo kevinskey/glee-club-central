@@ -125,20 +125,42 @@ export function ModernHeroSection({
       console.log('🎭 Hero: Fetched slides:', fetchedSlides);
       console.log('🎭 Hero: Fetched media files:', fetchedMedia);
 
-      // If no media files found, try fetching with different approach
-      if (fetchedMedia.length === 0) {
-        console.log('🎭 Hero: No media files found, trying alternative query...');
-        const alternativeMediaResult = await supabase
-          .from('media_library')
-          .select('*');
+      // Set media files first
+      setMediaFiles(fetchedMedia);
+      
+      // If no media files found but we have slides with media_ids, try to fetch them specifically
+      if (fetchedMedia.length === 0 && fetchedSlides.some(slide => slide.media_id)) {
+        console.log('🎭 Hero: No media files found but slides have media_ids, trying specific queries...');
         
-        console.log('🎭 Hero: Alternative media query result:', alternativeMediaResult);
+        const mediaIds = fetchedSlides
+          .filter(slide => slide.media_id)
+          .map(slide => slide.media_id);
         
-        if (alternativeMediaResult.data && alternativeMediaResult.data.length > 0) {
-          setMediaFiles(alternativeMediaResult.data);
+        console.log('🎭 Hero: Looking for media IDs:', mediaIds);
+        
+        if (mediaIds.length > 0) {
+          const specificMediaResult = await supabase
+            .from('media_library')
+            .select('id, file_url, file_type, title')
+            .in('id', mediaIds);
+          
+          console.log('🎭 Hero: Specific media query result:', specificMediaResult);
+          
+          if (specificMediaResult.data && specificMediaResult.data.length > 0) {
+            setMediaFiles(specificMediaResult.data);
+          } else {
+            // Try one more time with all fields and no filters
+            const allMediaResult = await supabase
+              .from('media_library')
+              .select('*');
+            
+            console.log('🎭 Hero: All media query result:', allMediaResult);
+            
+            if (allMediaResult.data) {
+              setMediaFiles(allMediaResult.data);
+            }
+          }
         }
-      } else {
-        setMediaFiles(fetchedMedia);
       }
 
       setSlides(fetchedSlides);
@@ -320,7 +342,7 @@ export function ModernHeroSection({
     >
       {/* Background Media */}
       <div className="absolute inset-0">
-        {currentMedia ? (
+        {currentMedia && currentMedia.file_url ? (
           currentSlideData.media_type === 'video' ? (
             <video
               key={currentMedia.id}
@@ -330,7 +352,10 @@ export function ModernHeroSection({
               muted
               loop
               playsInline
-              onError={(e) => console.error('🎭 Hero: Video load error:', e)}
+              onError={(e) => {
+                console.error('🎭 Hero: Video load error:', e);
+                console.error('🎭 Hero: Failed video URL:', currentMedia.file_url);
+              }}
               onLoadStart={() => console.log('🎭 Hero: Video loading started for:', currentMedia.file_url)}
               onLoadedData={() => console.log('🎭 Hero: Video loaded successfully for:', currentMedia.file_url)}
             />
@@ -340,16 +365,22 @@ export function ModernHeroSection({
               src={currentMedia.file_url}
               alt={currentMedia.title}
               className={cn("absolute inset-0 w-full h-full object-cover", getAnimationClass())}
-              onError={(e) => console.error('🎭 Hero: Image load error:', e, 'URL:', currentMedia.file_url)}
+              onError={(e) => {
+                console.error('🎭 Hero: Image load error:', e);
+                console.error('🎭 Hero: Failed image URL:', currentMedia.file_url);
+              }}
               onLoad={() => console.log('🎭 Hero: Image loaded successfully for:', currentMedia.file_url)}
             />
           )
         ) : (
-          // Fixed: Removed console.log from JSX and added it before the JSX block
-          (() => {
-            console.log('🎭 Hero: No media found, showing gradient background');
-            return <div className="absolute inset-0 bg-gradient-to-r from-blue-900 to-purple-900"></div>;
-          })()
+          <div className="absolute inset-0 bg-gradient-to-r from-blue-900 to-purple-900">
+            {(() => {
+              console.log('🎭 Hero: No media found, showing gradient background');
+              console.log('🎭 Hero: Current slide media_id:', currentSlideData.media_id);
+              console.log('🎭 Hero: Available media count:', mediaFiles.length);
+              return null;
+            })()}
+          </div>
         )}
         
         {/* Dark overlay for better text readability */}
