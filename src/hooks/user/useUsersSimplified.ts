@@ -1,3 +1,4 @@
+
 import { useState, useCallback, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
@@ -19,6 +20,12 @@ interface UseUsersSimplifiedResponse {
   error: string | null;
   refreshUsers: () => Promise<void>;
   searchUsers: (searchTerm: string) => Promise<SimpleUser[]>;
+}
+
+// Type for auth user from Supabase
+interface AuthUser {
+  id: string;
+  email?: string;
 }
 
 export const useUsersSimplified = (): UseUsersSimplifiedResponse => {
@@ -116,7 +123,7 @@ export const useUsersSimplified = (): UseUsersSimplifiedResponse => {
       if (isCurrentUserAdmin) {
         // Admin can fetch all user emails
         try {
-          const { data: authUsers, error: authError } = await supabase.auth.admin.listUsers();
+          const { data: authData, error: authError } = await supabase.auth.admin.listUsers();
           
           if (authError) {
             console.warn('Could not fetch auth users:', authError);
@@ -134,7 +141,8 @@ export const useUsersSimplified = (): UseUsersSimplifiedResponse => {
           } else {
             // Create a properly typed Map from auth users
             const authUserMap = new Map<string, string>();
-            authUsers.users.forEach(user => {
+            const authUsers = authData.users as AuthUser[];
+            authUsers.forEach(user => {
               authUserMap.set(user.id, user.email || '');
             });
             
