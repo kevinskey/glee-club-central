@@ -26,7 +26,6 @@ import AdminHeroManager from "./pages/admin/AdminHeroManager";
 import UserManagementPage from "./pages/admin/UserManagementPage";
 import UserSystemResetPage from "./pages/admin/UserSystemResetPage";
 import AdminMediaLibraryPage from "./pages/admin/AdminMediaLibraryPage";
-import AdminMediaUploaderPage from "./pages/admin/AdminMediaUploaderPage";
 import NewsTickerSettingsPage from "./pages/admin/NewsTickerSettingsPage";
 import AnnouncementsPage from "./pages/announcements/AnnouncementsPage";
 import SettingsPage from "./pages/admin/SettingsPage";
@@ -188,7 +187,6 @@ export const router = createBrowserRouter([
       { path: "members", element: withErrorBoundary(<UserManagementPage />) },
       { path: "hero-manager", element: withErrorBoundary(<AdminHeroManager />) },
       { path: "media", element: withErrorBoundary(<AdminMediaLibraryPage />) },
-      { path: "media-uploader", element: withErrorBoundary(<AdminMediaUploaderPage />) },
       { path: "news-ticker", element: withErrorBoundary(<NewsTickerSettingsPage />) },
       { path: "orders", element: withErrorBoundary(<OrdersPage />) },
       { path: "analytics", element: withErrorBoundary(<AnalyticsPage />) },
