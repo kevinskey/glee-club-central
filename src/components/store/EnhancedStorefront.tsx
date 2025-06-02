@@ -5,7 +5,6 @@ import { ProductCard } from '@/components/store/ProductCard';
 import { ProductFilter } from '@/components/store/ProductFilter';
 import { ProductDetails } from '@/components/store/ProductDetails';
 import { CartDrawer } from '@/components/store/CartDrawer';
-import { PageHeader } from '@/components/ui/page-header';
 import { Spinner } from '@/components/ui/spinner';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
@@ -135,11 +134,14 @@ export function EnhancedStorefront() {
 
   return (
     <div className="space-y-8">
-      <PageHeader
-        title="GleeWorld Store"
-        description="Show your Spelman Glee Club pride with official merchandise"
-        actions={<CartDrawer />}
-      />
+      {/* Header with Cart */}
+      <div className="flex justify-between items-center">
+        <div>
+          <h1 className="text-3xl font-bold">GleeWorld Store</h1>
+          <p className="text-muted-foreground mt-2">Show your Spelman Glee Club pride with official merchandise</p>
+        </div>
+        <CartDrawer />
+      </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
         {/* Filters Sidebar */}
