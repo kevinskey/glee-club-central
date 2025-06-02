@@ -1,120 +1,123 @@
-import React from 'react';
-import { NavLink } from 'react-router-dom';
-import { useAuth } from '@/contexts/AuthContext';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
-import { Button } from '@/components/ui/button';
-import { 
-  Menu, 
-  Home, 
-  Info, 
-  Calendar, 
-  Store, 
-  Phone, 
-  LogIn, 
-  UserPlus,
-  User,
-  LogOut
-} from 'lucide-react';
+
+import React, { useState } from "react";
+import { Link } from "react-router-dom";
+import { Button } from "@/components/ui/button";
+import { ThemeToggle } from "@/components/ui/theme-toggle";
+import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import { Menu, User, LogIn, LogOut, UserPlus } from "lucide-react";
+import { useAuth } from "@/contexts/AuthContext";
+import { useNavigate } from "react-router-dom";
 
 export function MobileNavDropdown() {
+  const [isOpen, setIsOpen] = useState(false);
   const { isAuthenticated, profile, logout } = useAuth();
+  const navigate = useNavigate();
 
+  const handleDashboardClick = () => {
+    navigate("/role-dashboard");
+    setIsOpen(false);
+  };
+  
   const handleLogout = async () => {
     try {
       await logout();
-      window.location.href = '/';
+      navigate("/");
+      setIsOpen(false);
     } catch (error) {
-      console.error('Logout error:', error);
+      console.error("Logout error:", error);
     }
   };
 
+  const navigationLinks = [
+    { label: "Home", href: "/" },
+    { label: "About", href: "/about" },
+    { label: "Calendar", href: "/calendar" },
+    { label: "Store", href: "/store" },
+    { label: "Contact", href: "/contact" },
+  ];
+
   return (
-    <DropdownMenu>
-      <DropdownMenuTrigger asChild>
+    <Sheet open={isOpen} onOpenChange={setIsOpen}>
+      <SheetTrigger asChild>
         <Button variant="ghost" size="icon" className="md:hidden">
-          <Menu className="h-5 w-5" />
+          <Menu className="h-6 w-6" />
           <span className="sr-only">Toggle menu</span>
         </Button>
-      </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="w-56">
-        {/* Navigation Links */}
-        <DropdownMenuItem asChild>
-          <NavLink to="/" className="flex items-center">
-            <Home className="mr-2 h-4 w-4" />
-            Home
-          </NavLink>
-        </DropdownMenuItem>
-        <DropdownMenuItem asChild>
-          <NavLink to="/about" className="flex items-center">
-            <Info className="mr-2 h-4 w-4" />
-            About
-          </NavLink>
-        </DropdownMenuItem>
-        <DropdownMenuItem asChild>
-          <NavLink to="/calendar" className="flex items-center">
-            <Calendar className="mr-2 h-4 w-4" />
-            Calendar
-          </NavLink>
-        </DropdownMenuItem>
-        <DropdownMenuItem asChild>
-          <NavLink to="/store" className="flex items-center">
-            <Store className="mr-2 h-4 w-4" />
-            Store
-          </NavLink>
-        </DropdownMenuItem>
-        <DropdownMenuItem asChild>
-          <NavLink to="/contact" className="flex items-center">
-            <Phone className="mr-2 h-4 w-4" />
-            Contact
-          </NavLink>
-        </DropdownMenuItem>
-        
-        <DropdownMenuSeparator />
-        
-        {/* Auth Links */}
-        {isAuthenticated ? (
-          <>
-            <DropdownMenuItem asChild>
-              <NavLink to="/role-dashboard" className="flex items-center">
-                <User className="mr-2 h-4 w-4" />
-                {profile?.first_name ? `${profile.first_name}'s Dashboard` : 'My Dashboard'}
-              </NavLink>
-            </DropdownMenuItem>
-            <DropdownMenuItem onClick={handleLogout} className="flex items-center text-red-600">
-              <LogOut className="mr-2 h-4 w-4" />
-              Sign Out
-            </DropdownMenuItem>
-          </>
-        ) : (
-          <>
-            <DropdownMenuItem asChild>
-              <NavLink to="/signup" className="flex items-center">
-                <UserPlus className="mr-2 h-4 w-4" />
-                Sign Up
-              </NavLink>
-            </DropdownMenuItem>
-            <DropdownMenuItem asChild>
-              <NavLink to="/login" className="flex items-center">
-                <LogIn className="mr-2 h-4 w-4" />
-                Login
-              </NavLink>
-            </DropdownMenuItem>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem asChild>
-              <NavLink to="/join-glee-fam" className="flex items-center text-glee-purple">
-                <UserPlus className="mr-2 h-4 w-4" />
-                Join as Fan
-              </NavLink>
-            </DropdownMenuItem>
-          </>
-        )}
-      </DropdownMenuContent>
-    </DropdownMenu>
+      </SheetTrigger>
+      <SheetContent side="right" className="w-[300px] sm:w-[400px]">
+        <nav className="flex flex-col gap-4">
+          {/* Navigation Links */}
+          <div className="flex flex-col gap-2 pt-4">
+            {navigationLinks.map((link) => (
+              <Link
+                key={link.href}
+                to={link.href}
+                className="block px-2 py-2 text-lg font-medium text-foreground hover:text-primary transition-colors"
+                onClick={() => setIsOpen(false)}
+              >
+                {link.label}
+              </Link>
+            ))}
+          </div>
+
+          {/* Auth Section */}
+          <div className="flex flex-col gap-2 pt-4 border-t">
+            {isAuthenticated ? (
+              <>
+                <Button 
+                  variant="default"
+                  onClick={handleDashboardClick}
+                  className="w-full justify-start bg-glee-spelman hover:bg-glee-spelman/90"
+                >
+                  <User className="w-4 h-4 mr-2" />
+                  {profile?.first_name ? `${profile.first_name}'s Dashboard` : 'My Dashboard'}
+                </Button>
+                <Button 
+                  variant="outline"
+                  onClick={handleLogout}
+                  className="w-full justify-start border-glee-spelman text-glee-spelman hover:bg-glee-spelman/10"
+                >
+                  <LogOut className="w-4 h-4 mr-2" />
+                  Sign Out
+                </Button>
+              </>
+            ) : (
+              <>
+                <Button 
+                  variant="outline"
+                  onClick={() => {
+                    navigate("/signup");
+                    setIsOpen(false);
+                  }}
+                  className="w-full justify-start border-glee-spelman text-glee-spelman hover:bg-glee-spelman/10"
+                >
+                  <UserPlus className="w-4 h-4 mr-2" />
+                  Sign Up
+                </Button>
+                <Button 
+                  variant="default"
+                  onClick={() => {
+                    navigate("/login");
+                    setIsOpen(false);
+                  }}
+                  className="w-full justify-start bg-glee-spelman hover:bg-glee-spelman/90"
+                >
+                  <LogIn className="w-4 h-4 mr-2" />
+                  Login
+                </Button>
+              </>
+            )}
+          </div>
+
+          {/* Theme Toggle */}
+          <div className="pt-4 border-t">
+            <div className="flex items-center justify-between">
+              <span className="text-sm font-medium">Theme</span>
+              <ThemeToggle />
+            </div>
+          </div>
+        </nav>
+      </SheetContent>
+    </Sheet>
   );
 }
