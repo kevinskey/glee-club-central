@@ -27,21 +27,24 @@ export function useMediaUpload(
     setUploadProgress(0);
   };
 
+  const validateUpload = () => {
+    if (files.length === 0 || !title) {
+      toast("Missing information", {
+        description: "Please fill in the title and select at least one file",
+      });
+      return false;
+    }
+    
+    return true;
+  };
+
   const handleUpload = async () => {
     if (!user) {
       toast.error("You must be logged in to upload files");
       return;
     }
     
-    if (!files.length) {
-      toast.error("Please select at least one file");
-      return;
-    }
-    
-    if (!title.trim()) {
-      toast.error("Please provide a title");
-      return;
-    }
+    if (!validateUpload()) return;
     
     setUploading(true);
     setUploadProgress(0);
