@@ -40,26 +40,26 @@ export default function AdminDashboardPage() {
     return <Navigate to="/login" replace />;
   }
 
-  // Check admin access immediately - don't wait for profile if user email is admin
+  // Check admin access immediately - prioritize known admin email
   const isKnownAdmin = user.email === 'kevinskey@mac.com';
-  const hasAdminAccess = isKnownAdmin || (profile && isAdmin());
   
   console.log('🔍 AdminDashboardPage: ADMIN ACCESS CHECK:', {
     isKnownAdmin,
     hasProfileAccess: profile && isAdmin(),
-    hasAdminAccess,
-    willRenderDashboard: hasAdminAccess || isKnownAdmin
+    userEmail: user.email,
+    profileRole: profile?.role,
+    isLoadingProfile: isLoading
   });
   
-  // If we know the user is admin by email, don't wait for profile
+  // If user is a known admin by email, allow access regardless of profile status
   if (isKnownAdmin) {
     console.log('🏛️ AdminDashboardPage: Known admin by email, rendering dashboard');
     return <AdminDashboard />;
   }
   
-  // If still loading profile and not a known admin, wait briefly
-  if (isLoading && !profile) {
-    console.log('⏳ AdminDashboardPage: Loading profile...');
+  // For non-known admin emails, we need to wait for profile to load
+  if (isLoading) {
+    console.log('⏳ AdminDashboardPage: Loading profile for non-admin email...');
     return (
       <PageLoader 
         message="Verifying admin permissions..."
@@ -68,12 +68,14 @@ export default function AdminDashboardPage() {
     );
   }
 
-  // Final admin check
+  // Final check for admin access via profile
+  const hasAdminAccess = profile && isAdmin();
+  
   if (!hasAdminAccess) {
     console.log('🚫 AdminDashboardPage: User lacks admin access, redirecting to member dashboard');
     return <Navigate to="/dashboard/member" replace />;
   }
 
-  console.log('🏛️ AdminDashboardPage: All checks passed, rendering AdminDashboard component');
+  console.log('🏛️ AdminDashboardPage: Profile-based admin access granted, rendering dashboard');
   return <AdminDashboard />;
 }
