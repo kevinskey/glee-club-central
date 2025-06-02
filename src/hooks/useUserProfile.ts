@@ -171,6 +171,7 @@ export const useUserProfile = (user: AuthUser | null): UseUserProfileReturn => {
     } else {
       setProfile(null);
       setError(null);
+      setIsLoading(false);
     }
   }, [user?.id, user?.email, fetchProfile]);
 

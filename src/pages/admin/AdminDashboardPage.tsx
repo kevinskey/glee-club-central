@@ -22,11 +22,11 @@ export default function AdminDashboardPage() {
     isAdminFunction: isAdmin()
   });
 
-  // Wait for full initialization and profile resolution
-  if (!isInitialized || isLoading) {
+  // Wait for initialization only
+  if (!isInitialized) {
     return (
       <PageLoader 
-        message={!isInitialized ? "Initializing admin dashboard..." : "Verifying admin permissions..."}
+        message="Initializing admin dashboard..."
         className="min-h-screen"
       />
     );
@@ -38,19 +38,27 @@ export default function AdminDashboardPage() {
     return <Navigate to="/login" replace />;
   }
 
-  // Wait for profile to be fully resolved before checking admin status
-  if (!profile) {
+  // Check admin access immediately - don't wait for profile if user email is admin
+  const isKnownAdmin = user.email === 'kevinskey@mac.com';
+  const hasAdminAccess = isKnownAdmin || (profile && isAdmin());
+  
+  // If we know the user is admin by email, don't wait for profile
+  if (isKnownAdmin) {
+    console.log('🏛️ AdminDashboardPage: Known admin by email, rendering dashboard');
+    return <AdminDashboard />;
+  }
+  
+  // If still loading profile and not a known admin, wait briefly
+  if (isLoading && !profile) {
     return (
       <PageLoader 
-        message="Resolving admin permissions..."
+        message="Verifying admin permissions..."
         className="min-h-screen"
       />
     );
   }
 
-  // Check admin access
-  const hasAdminAccess = isAdmin();
-  
+  // Final admin check
   if (!hasAdminAccess) {
     console.log('🚫 AdminDashboardPage: User lacks admin access, redirecting to member dashboard');
     return <Navigate to="/dashboard/member" replace />;

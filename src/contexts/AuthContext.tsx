@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useEffect, useState, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { AuthUser, Profile } from '@/types/auth';
@@ -30,7 +29,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [isInitialized, setIsInitialized] = useState(false);
 
   // Use the consolidated profile hook
-  const { profile, refreshProfile: refreshUserProfile, updateProfile } = useUserProfile(user);
+  const { profile, refreshProfile: refreshUserProfile } = useUserProfile(user);
 
   useEffect(() => {
     let mounted = true;
@@ -61,6 +60,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             setUser(null);
           }
           
+          // Set loading to false and initialized to true regardless of session
           setIsLoading(false);
           setIsInitialized(true);
           console.log('✅ AuthContext: Auth initialization complete');
@@ -90,10 +90,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           user_metadata: sessionUser.user_metadata
         };
         setUser(authUser);
-      } else {
+      } else if (event === 'SIGNED_OUT') {
         setUser(null);
       }
       
+      // Ensure loading stops after any auth state change
       setIsLoading(false);
       setIsInitialized(true);
     });
