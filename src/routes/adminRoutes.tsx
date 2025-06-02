@@ -16,7 +16,6 @@ import EventDetailsPage from '@/pages/events/EventDetailsPage';
 import EventRSVPsPage from '@/pages/admin/EventRSVPsPage';
 
 // Import additional admin pages
-import AdminModularHeroPage from '@/pages/admin/AdminModularHeroPage';
 import AdminMediaUploaderPage from '@/pages/admin/AdminMediaUploaderPage';
 import NewsTickerSettingsPage from '@/pages/admin/NewsTickerSettingsPage';
 
@@ -58,14 +57,6 @@ export const adminRoutes: RouteObject[] = [
     element: (
       <AdminRoute>
         <UserManagementPage />
-      </AdminRoute>
-    ),
-  },
-  {
-    path: '/admin/hero-manager',
-    element: (
-      <AdminRoute>
-        <AdminModularHeroPage />
       </AdminRoute>
     ),
   },
