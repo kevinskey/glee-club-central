@@ -83,7 +83,6 @@ export function ModernHeroSection({
   const fetchHeroData = async () => {
     try {
       setIsLoading(true);
-      console.log('🎭 Hero: Fetching hero data for section:', sectionId);
       
       // Fetch slides, settings, and media files in parallel
       const [slidesResult, settingsResult, mediaResult] = await Promise.all([
@@ -100,7 +99,7 @@ export function ModernHeroSection({
         supabase
           .from('media_library')
           .select('id, file_url, file_type, title')
-          .eq('is_public', true) // Now we only fetch public media files
+          .eq('is_public', true)
       ]);
 
       if (slidesResult.error) {
@@ -118,8 +117,6 @@ export function ModernHeroSection({
 
       const fetchedSlides = slidesResult.data || [];
       const fetchedMedia = mediaResult.data || [];
-      
-      console.log('🎭 Hero: Successfully fetched', fetchedSlides.length, 'slides and', fetchedMedia.length, 'media files');
 
       setMediaFiles(fetchedMedia);
       setSlides(fetchedSlides);
@@ -411,13 +408,6 @@ export function ModernHeroSection({
                   onClick={() => goToSlide(index)}
                 />
               ))}
-            </div>
-          )}
-
-          {/* Slide Counter */}
-          {showCounter && (
-            <div className="absolute top-4 right-4 bg-black/50 text-white px-3 py-1 rounded-full text-sm z-20">
-              {currentSlide + 1} / {slides.length}
             </div>
           )}
         </>
