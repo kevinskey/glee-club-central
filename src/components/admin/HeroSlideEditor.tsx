@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -170,6 +171,19 @@ export function HeroSlideEditor({ slide, onUpdate, onDelete }: HeroSlideEditorPr
     setSelectMediaOpen(false);
   };
 
+  const handleYouTubeUrlChange = (url: string) => {
+    setEditData(prev => ({
+      ...prev,
+      youtube_url: url,
+      media_id: url.trim() ? '' : prev.media_id // Clear media_id when YouTube URL is entered
+    }));
+    
+    // Clear selected media when YouTube URL is entered
+    if (url.trim()) {
+      setSelectedMedia(null);
+    }
+  };
+
   const isYouTubeEmbed = (url: string) => {
     return url?.includes('youtube.com/embed/');
   };
@@ -191,7 +205,15 @@ export function HeroSlideEditor({ slide, onUpdate, onDelete }: HeroSlideEditorPr
           {/* Media Preview */}
           <div className="w-48 flex-shrink-0">
             <AspectRatio ratio={16/9}>
-              {slide.media_id && isYouTubeEmbed(slide.media_id) ? (
+              {editData.youtube_url.trim() ? (
+                <iframe
+                  src={convertYouTubeToEmbed(editData.youtube_url)}
+                  className="w-full h-full object-cover"
+                  frameBorder="0"
+                  allow="autoplay; encrypted-media"
+                  allowFullScreen
+                />
+              ) : slide.media_id && isYouTubeEmbed(slide.media_id) ? (
                 <iframe
                   src={slide.media_id}
                   className="w-full h-full object-cover"
@@ -287,7 +309,7 @@ export function HeroSlideEditor({ slide, onUpdate, onDelete }: HeroSlideEditorPr
                       onClick={() => setSelectMediaOpen(true)}
                       className="w-full justify-start"
                     >
-                      {currentMedia ? currentMedia.title : 'Select Media'}
+                      {currentMedia && !editData.youtube_url.trim() ? currentMedia.title : 'Select Media'}
                     </Button>
                   </div>
                 </div>
@@ -308,7 +330,7 @@ export function HeroSlideEditor({ slide, onUpdate, onDelete }: HeroSlideEditorPr
                   <Input
                     id="youtube-url"
                     value={editData.youtube_url}
-                    onChange={(e) => setEditData(prev => ({ ...prev, youtube_url: e.target.value, media_id: '' }))}
+                    onChange={(e) => handleYouTubeUrlChange(e.target.value)}
                     placeholder="https://www.youtube.com/watch?v=..."
                   />
                   <p className="text-xs text-muted-foreground">
