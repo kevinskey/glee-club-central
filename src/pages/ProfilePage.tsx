@@ -14,13 +14,25 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { User, Edit, Save, X, ArrowLeft } from 'lucide-react';
 import { toast } from 'sonner';
+import { Profile } from '@/types/auth';
 
 export default function ProfilePage() {
   const { user, profile, isLoading, isInitialized, isAuthenticated, refreshProfile } = useAuth();
   const navigate = useNavigate();
   const [isEditing, setIsEditing] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
-  const [editedProfile, setEditedProfile] = useState(profile || {});
+  
+  // Create a properly typed default profile
+  const defaultProfile: Partial<Profile> = {
+    first_name: '',
+    last_name: '',
+    phone: '',
+    voice_part: '',
+    class_year: '',
+    notes: ''
+  };
+  
+  const [editedProfile, setEditedProfile] = useState<Partial<Profile>>(profile || defaultProfile);
 
   // Wait for initialization
   if (!isInitialized) {
@@ -55,12 +67,12 @@ export default function ProfilePage() {
   };
 
   const handleEdit = () => {
-    setEditedProfile(profile || {});
+    setEditedProfile(profile || defaultProfile);
     setIsEditing(true);
   };
 
   const handleCancel = () => {
-    setEditedProfile(profile || {});
+    setEditedProfile(profile || defaultProfile);
     setIsEditing(false);
   };
 
