@@ -8,7 +8,6 @@ import { UserPlus, Users, Search, AlertTriangle } from 'lucide-react';
 import { UserTable } from './UserTable';
 import { UserForm } from './UserForm';
 import { AddUserDialog } from './AddUserDialog';
-import { UserCSVImport } from './UserCSVImport';
 import { UserFormValues } from '@/components/members/form/userFormSchema';
 import { toast } from 'sonner';
 
@@ -92,10 +91,6 @@ export default function UserManagement() {
 
   const handleImportUsers = () => {
     setShowImportDialog(true);
-  };
-
-  const handleImportComplete = () => {
-    refreshUsers();
   };
 
   if (error) {
@@ -241,12 +236,25 @@ export default function UserManagement() {
         />
       )}
 
-      {/* CSV Import Dialog */}
-      <UserCSVImport
-        isOpen={showImportDialog}
-        onClose={() => setShowImportDialog(false)}
-        onImportComplete={handleImportComplete}
-      />
+      {/* TODO: Add import dialog component here when ready */}
+      {showImportDialog && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+          <div className="bg-white dark:bg-gray-800 p-6 rounded-lg max-w-md w-full mx-4">
+            <h3 className="text-lg font-semibold mb-4">Import Users</h3>
+            <p className="text-sm text-muted-foreground mb-4">
+              CSV import functionality will be implemented here.
+            </p>
+            <div className="flex justify-end gap-2">
+              <Button variant="outline" onClick={() => setShowImportDialog(false)}>
+                Cancel
+              </Button>
+              <Button onClick={() => setShowImportDialog(false)}>
+                Coming Soon
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
