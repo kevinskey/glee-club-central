@@ -1,4 +1,3 @@
-
 import { createBrowserRouter } from "react-router-dom";
 import { AuthProvider } from "@/contexts/AuthContext";
 import RequireAuth from "@/components/auth/RequireAuth";
@@ -12,6 +11,7 @@ import AboutPage from "./pages/AboutPage";
 import ContactPage from "./pages/ContactPage";
 import CalendarPage from "./pages/CalendarPage";
 import StorePage from "./pages/StorePage";
+import DesignStudioPage from "./pages/DesignStudioPage";
 import NewsArticlePage from "./pages/news/NewsArticlePage";
 import LoginPage from "./pages/auth/LoginPage";
 import SignupPage from "./pages/auth/SignupPage";
@@ -59,6 +59,7 @@ export const router = createBrowserRouter([
       { path: "contact", element: <ContactPage /> },
       { path: "calendar", element: <CalendarPage /> },
       { path: "store", element: <StorePage /> },
+      { path: "design-studio", element: <DesignStudioPage /> },
       { path: "news/:id", element: <NewsArticlePage /> },
     ],
   },

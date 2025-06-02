@@ -6,7 +6,8 @@ import {
   Image, 
   Settings, 
   ShoppingCart, 
-  BarChart3
+  BarChart3,
+  Palette
 } from "lucide-react";
 
 export const adminNavItems = [
@@ -44,6 +45,11 @@ export const adminNavItems = [
     title: "Orders",
     url: "/admin/orders",
     icon: ShoppingCart,
+  },
+  {
+    title: "Design Studio",
+    url: "/admin/design-studio",
+    icon: Palette,
   },
   {
     title: "Analytics",
