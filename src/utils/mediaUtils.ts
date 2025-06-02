@@ -2,15 +2,26 @@
 export type MediaType = "image" | "video" | "audio" | "pdf" | "other";
 
 export function getMediaType(fileType: string): MediaType {
-  if (fileType.startsWith("image/")) {
+  console.log('getMediaType called with:', fileType);
+  
+  if (!fileType) {
+    console.log('No file type provided, returning other');
+    return "other";
+  }
+  
+  const lowerFileType = fileType.toLowerCase();
+  
+  if (lowerFileType.startsWith("image/")) {
     return "image";
-  } else if (fileType.startsWith("video/")) {
+  } else if (lowerFileType.startsWith("video/")) {
     return "video";
-  } else if (fileType.startsWith("audio/")) {
+  } else if (lowerFileType.startsWith("audio/")) {
     return "audio";
-  } else if (fileType === "application/pdf" || fileType.includes("pdf")) {
+  } else if (lowerFileType === "application/pdf" || lowerFileType.includes("pdf")) {
+    console.log('Detected PDF file type:', fileType);
     return "pdf";
   } else {
+    console.log('File type not recognized, returning other:', fileType);
     return "other";
   }
 }

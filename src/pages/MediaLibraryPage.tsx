@@ -48,7 +48,11 @@ const MediaLibraryPage: React.FC<MediaLibraryPageProps> = ({ isAdminView = false
   // Calculate counts for each media type from all files (not filtered)
   const mediaCounts = {
     all: allMediaFiles.length,
-    pdf: allMediaFiles.filter(file => getMediaType(file.file_type) === "pdf").length,
+    pdf: allMediaFiles.filter(file => {
+      const mediaType = getMediaType(file.file_type);
+      console.log('PDF Filter Debug:', { fileName: file.title, fileType: file.file_type, detectedType: mediaType });
+      return mediaType === "pdf";
+    }).length,
     image: allMediaFiles.filter(file => getMediaType(file.file_type) === "image").length,
     audio: allMediaFiles.filter(file => getMediaType(file.file_type) === "audio").length,
     video: allMediaFiles.filter(file => getMediaType(file.file_type) === "video").length,
@@ -56,6 +60,7 @@ const MediaLibraryPage: React.FC<MediaLibraryPageProps> = ({ isAdminView = false
   
   // Update state when mediaType is changed
   useEffect(() => {
+    console.log('Setting selected media type to:', activeTab);
     setSelectedMediaType(activeTab);
   }, [activeTab, setSelectedMediaType]);
   
@@ -113,10 +118,20 @@ const MediaLibraryPage: React.FC<MediaLibraryPageProps> = ({ isAdminView = false
       return filteredMediaFiles;
     }
     
-    return filteredMediaFiles.filter(file => {
+    const filtered = filteredMediaFiles.filter(file => {
       const mediaType = getMediaType(file.file_type);
+      console.log('Tab Filter Debug:', { 
+        tabType, 
+        fileName: file.title, 
+        fileType: file.file_type, 
+        detectedType: mediaType,
+        matches: mediaType === tabType 
+      });
       return mediaType === tabType;
     });
+    
+    console.log(`Files for tab ${tabType}:`, filtered.length);
+    return filtered;
   };
 
   // Sort files by title for better organization
@@ -128,6 +143,11 @@ const MediaLibraryPage: React.FC<MediaLibraryPageProps> = ({ isAdminView = false
       });
     });
   };
+
+  // Debug log for media counts
+  console.log('Media counts:', mediaCounts);
+  console.log('All media files:', allMediaFiles.length);
+  console.log('Filtered media files:', filteredMediaFiles.length);
 
   return (
     <div className="container mx-auto px-4 py-6">
@@ -170,7 +190,10 @@ const MediaLibraryPage: React.FC<MediaLibraryPageProps> = ({ isAdminView = false
       <Tabs 
         defaultValue="all" 
         value={activeTab}
-        onValueChange={(value) => setActiveTab(value as MediaType | "all")}
+        onValueChange={(value) => {
+          console.log('Tab changed to:', value);
+          setActiveTab(value as MediaType | "all");
+        }}
         className="w-full mb-6"
       >
         <TabsList className="grid grid-cols-5 mb-8">
@@ -284,16 +307,28 @@ const MediaGrid: React.FC<MediaGridProps> = ({ files, onFileOpen, showPDFCount =
                     />
                   </div>
                 ) : mediaType === "image" ? (
-                  <img 
-                    src={file.file_url} 
-                    alt={file.title}
-                    className="w-full h-full object-cover"
-                    onError={(e) => {
-                      e.currentTarget.style.display = 'none';
-                      const fallback = e.currentTarget.parentNode?.querySelector('.fallback-icon') as HTMLElement;
-                      if (fallback) fallback.style.display = 'flex';
-                    }}
-                  />
+                  <div className="w-full h-full relative">
+                    <img 
+                      src={file.file_url} 
+                      alt={file.title}
+                      className="w-full h-full object-cover"
+                      onError={(e) => {
+                        console.log('Image failed to load:', file.file_url);
+                        const target = e.target as HTMLImageElement;
+                        target.style.display = 'none';
+                        const parent = target.parentElement;
+                        if (parent) {
+                          parent.innerHTML = `
+                            <div class="w-full h-full flex items-center justify-center">
+                              <svg class="h-16 w-16 text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                              </svg>
+                            </div>
+                          `;
+                        }
+                      }}
+                    />
+                  </div>
                 ) : mediaType === "audio" ? (
                   <div className="w-full h-full flex items-center justify-center">
                     <Music className="h-16 w-16 text-muted-foreground" />
@@ -305,13 +340,6 @@ const MediaGrid: React.FC<MediaGridProps> = ({ files, onFileOpen, showPDFCount =
                 ) : (
                   <div className="w-full h-full flex items-center justify-center">
                     <FileText className="h-16 w-16 text-muted-foreground" />
-                  </div>
-                )}
-                
-                {/* Fallback icon for broken images */}
-                {mediaType === "image" && (
-                  <div className="fallback-icon w-full h-full items-center justify-center hidden">
-                    <Image className="h-16 w-16 text-muted-foreground" />
                   </div>
                 )}
               </div>
