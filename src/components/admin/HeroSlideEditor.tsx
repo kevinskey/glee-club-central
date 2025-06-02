@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -55,7 +56,8 @@ export function HeroSlideEditor({ slide, onUpdate, onDelete }: HeroSlideEditorPr
     button_link: slide.button_link || '',
     text_position: slide.text_position,
     text_alignment: slide.text_alignment,
-    visible: slide.visible
+    visible: slide.visible,
+    youtube_url: ''
   });
 
   useEffect(() => {
@@ -64,6 +66,12 @@ export function HeroSlideEditor({ slide, onUpdate, onDelete }: HeroSlideEditorPr
       loadSelectedMedia();
     }
   }, [slide.media_id]);
+
+  const convertYouTubeToEmbed = (url: string) => {
+    const regex = /(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/;
+    const match = url.match(regex);
+    return match ? `https://www.youtube.com/embed/${match[1]}?autoplay=1&mute=1&loop=1&playlist=${match[1]}&controls=0&showinfo=0&rel=0&modestbranding=1` : url;
+  };
 
   const loadSelectedMedia = async () => {
     if (!slide.media_id) return;
@@ -82,18 +90,26 @@ export function HeroSlideEditor({ slide, onUpdate, onDelete }: HeroSlideEditorPr
 
     setIsSaving(true);
     try {
+      let updateData = { ...editData };
+      
+      // If YouTube URL is provided, use it as media_id and set type to video
+      if (editData.youtube_url.trim()) {
+        updateData.media_id = convertYouTubeToEmbed(editData.youtube_url.trim());
+        updateData.media_type = 'video';
+      }
+
       const { error } = await supabase
         .from('hero_slides')
         .update({
-          media_id: editData.media_id || null,
-          media_type: editData.media_type,
-          title: editData.title.trim(),
-          description: editData.description.trim(),
-          button_text: editData.button_text.trim() || null,
-          button_link: editData.button_link.trim() || null,
-          text_position: editData.text_position,
-          text_alignment: editData.text_alignment,
-          visible: editData.visible,
+          media_id: updateData.media_id || null,
+          media_type: updateData.media_type,
+          title: updateData.title.trim(),
+          description: updateData.description.trim(),
+          button_text: updateData.button_text.trim() || null,
+          button_link: updateData.button_link.trim() || null,
+          text_position: updateData.text_position,
+          text_alignment: updateData.text_alignment,
+          visible: updateData.visible,
           updated_at: new Date().toISOString()
         })
         .eq('id', slide.id);
@@ -121,7 +137,8 @@ export function HeroSlideEditor({ slide, onUpdate, onDelete }: HeroSlideEditorPr
       button_link: slide.button_link || '',
       text_position: slide.text_position,
       text_alignment: slide.text_alignment,
-      visible: slide.visible
+      visible: slide.visible,
+      youtube_url: ''
     });
     setIsEditing(false);
   };
@@ -148,10 +165,15 @@ export function HeroSlideEditor({ slide, onUpdate, onDelete }: HeroSlideEditorPr
     setEditData(prev => ({
       ...prev,
       media_id: media.id,
-      media_type: media.file_type.startsWith('video/') ? 'video' : 'image'
+      media_type: media.file_type.startsWith('video/') ? 'video' : 'image',
+      youtube_url: '' // Clear YouTube URL when selecting from media library
     }));
     setSelectedMedia(media);
     setSelectMediaOpen(false);
+  };
+
+  const isYouTubeEmbed = (url: string) => {
+    return url?.includes('youtube.com/embed/');
   };
 
   const mediaLibrary = filteredMediaFiles.filter(file => 
@@ -171,7 +193,15 @@ export function HeroSlideEditor({ slide, onUpdate, onDelete }: HeroSlideEditorPr
           {/* Media Preview */}
           <div className="w-48 flex-shrink-0">
             <AspectRatio ratio={16/9}>
-              {currentMedia ? (
+              {slide.media_id && isYouTubeEmbed(slide.media_id) ? (
+                <iframe
+                  src={slide.media_id}
+                  className="w-full h-full object-cover"
+                  frameBorder="0"
+                  allow="autoplay; encrypted-media"
+                  allowFullScreen
+                />
+              ) : currentMedia ? (
                 currentMedia.file_type?.startsWith('video/') ? (
                   <video
                     src={currentMedia.file_url}
@@ -204,10 +234,10 @@ export function HeroSlideEditor({ slide, onUpdate, onDelete }: HeroSlideEditorPr
                       <Badge variant={slide.visible ? "default" : "secondary"}>
                         {slide.visible ? 'Visible' : 'Hidden'}
                       </Badge>
-                      {currentMedia && (
+                      {slide.media_id && (
                         <Badge variant="outline">
                           {slide.media_type === 'video' ? <Video className="w-3 h-3 mr-1" /> : <ImageIcon className="w-3 h-3 mr-1" />}
-                          {slide.media_type}
+                          {isYouTubeEmbed(slide.media_id) ? 'YouTube' : slide.media_type}
                         </Badge>
                       )}
                     </div>
@@ -273,6 +303,19 @@ export function HeroSlideEditor({ slide, onUpdate, onDelete }: HeroSlideEditorPr
                     placeholder="Slide description"
                     rows={3}
                   />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="youtube-url">YouTube Video URL</Label>
+                  <Input
+                    id="youtube-url"
+                    value={editData.youtube_url}
+                    onChange={(e) => setEditData(prev => ({ ...prev, youtube_url: e.target.value, media_id: '' }))}
+                    placeholder="https://www.youtube.com/watch?v=..."
+                  />
+                  <p className="text-xs text-muted-foreground">
+                    Paste a YouTube URL to use as background video. This will override media library selection.
+                  </p>
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">
@@ -411,7 +454,15 @@ export function HeroSlideEditor({ slide, onUpdate, onDelete }: HeroSlideEditorPr
             <DialogTitle>Preview: {slide.title}</DialogTitle>
           </DialogHeader>
           <div className="relative aspect-video overflow-hidden rounded-lg bg-black">
-            {currentMedia && (
+            {slide.media_id && isYouTubeEmbed(slide.media_id) ? (
+              <iframe
+                src={slide.media_id}
+                className="w-full h-full object-cover"
+                frameBorder="0"
+                allow="autoplay; encrypted-media"
+                allowFullScreen
+              />
+            ) : currentMedia && (
               currentMedia.file_type?.startsWith('video/') ? (
                 <video
                   src={currentMedia.file_url}
