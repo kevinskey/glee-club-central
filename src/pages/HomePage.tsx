@@ -20,15 +20,11 @@ const HomePage = () => {
   }
 
   return (
-    <div className="min-h-screen overflow-x-hidden">
-      {/* First Hero Section at the top */}
-      <EnhancedHeroSection />
-      
-      {/* Add spacing after first hero section */}
-      <div className="h-8 sm:h-12"></div>
-      
-      {/* Additional Hero Section */}
-      <EnhancedHeroSection />
+    <div className="min-h-screen overflow-x-hidden m-0 p-0">
+      {/* Hero Section at the very top with no spacing */}
+      <div className="w-full m-0 p-0">
+        <EnhancedHeroSection />
+      </div>
       
       <HomePageContent
         heroImages={heroImages}

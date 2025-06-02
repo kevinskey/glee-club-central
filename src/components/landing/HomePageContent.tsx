@@ -49,13 +49,13 @@ export const HomePageContent = ({
 }: HomePageContentProps) => {
   return (
     <div className="min-h-screen bg-background w-full overflow-x-hidden">
-      {/* Hero Section - Full width */}
-      <div className="w-full overflow-x-hidden">
+      {/* Hero Section - Full width, no padding or margin */}
+      <div className="w-full overflow-x-hidden m-0 p-0">
         <HeroBannerSection images={heroImages} />
       </div>
       
       {/* Main Content Sections */}
-      <div className="w-full overflow-x-hidden space-y-6 sm:space-y-8">
+      <div className="w-full overflow-x-hidden space-y-3 sm:space-y-4">
         <div className="events-section w-full px-4 sm:px-6 lg:px-8">
           <EventsSection events={upcomingEvents} />
         </div>
