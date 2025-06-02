@@ -6,7 +6,6 @@ import { AudioSection } from "@/components/landing/sections/AudioSection";
 import { StoreSection } from "@/components/landing/sections/StoreSection";
 import { FanSignupForm } from "@/components/landing/FanSignupForm";
 import { Footer } from "@/components/landing/Footer";
-import { MobileOptimizedContainer } from "@/components/mobile/MobileOptimizedContainer";
 
 interface HomePageContentProps {
   heroImages: Array<{
@@ -49,28 +48,26 @@ export const HomePageContent = ({
   audioTracks
 }: HomePageContentProps) => {
   return (
-    <div className="min-h-screen bg-background w-full max-w-[100vw] overflow-x-hidden">
-      {/* Hero Section - Full width but contained within viewport */}
-      <div className="w-full max-w-[100vw] overflow-x-hidden">
+    <div className="min-h-screen bg-background w-full overflow-x-hidden">
+      {/* Hero Section - Full width */}
+      <div className="w-full overflow-x-hidden">
         <HeroBannerSection images={heroImages} />
       </div>
       
-      {/* Main Content Sections - Mobile optimized with consistent padding */}
-      <div className="w-full max-w-[100vw] overflow-x-hidden">
-        <MobileOptimizedContainer padding="md" maxWidth="full" className="space-y-8 sm:space-y-12">
-          <div className="events-section w-full">
-            <EventsSection events={upcomingEvents} />
-          </div>
-          <div className="audio-section w-full">
-            <AudioSection tracks={audioTracks} />
-          </div>
-          <div className="store-section w-full">
-            <StoreSection products={storeProducts} />
-          </div>
-          <div className="signup-section w-full">
-            <FanSignupForm />
-          </div>
-        </MobileOptimizedContainer>
+      {/* Main Content Sections */}
+      <div className="w-full overflow-x-hidden space-y-6 sm:space-y-8">
+        <div className="events-section w-full px-4 sm:px-6 lg:px-8">
+          <EventsSection events={upcomingEvents} />
+        </div>
+        <div className="audio-section w-full px-4 sm:px-6 lg:px-8">
+          <AudioSection tracks={audioTracks} />
+        </div>
+        <div className="store-section w-full px-4 sm:px-6 lg:px-8">
+          <StoreSection products={storeProducts} />
+        </div>
+        <div className="signup-section w-full px-4 sm:px-6 lg:px-8">
+          <FanSignupForm />
+        </div>
       </div>
       
       <Footer />

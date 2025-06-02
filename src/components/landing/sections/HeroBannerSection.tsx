@@ -15,7 +15,7 @@ interface HeroBannerSectionProps {
 
 export function HeroBannerSection({ images }: HeroBannerSectionProps) {
   return (
-    <section className="w-full flex justify-center px-4 sm:px-0">
+    <section className="w-full">
       <HeroBanner 
         images={images}
         autoPlayInterval={5000}

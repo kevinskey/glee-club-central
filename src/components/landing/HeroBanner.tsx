@@ -40,7 +40,7 @@ export function HeroBanner({
   const displayImages = images.length > 0 ? images : [fallbackImage];
 
   return (
-    <section className={`relative w-full max-w-[90vw] mx-auto overflow-hidden ${className}`}>
+    <section className={`relative w-full overflow-hidden ${className}`}>
       <Carousel
         opts={{
           align: "start",
@@ -48,7 +48,7 @@ export function HeroBanner({
         }}
         className="w-full"
       >
-        <CarouselContent className="-ml-0">
+        <CarouselContent className="ml-0">
           {displayImages.map((image, index) => (
             <CarouselItem key={image.id || index} className="pl-0">
               <Card className="border-0 rounded-none">
@@ -67,8 +67,8 @@ export function HeroBanner({
                   
                   {/* Text Overlay */}
                   {showOverlayText && image.title && (
-                    <div className="absolute inset-0 flex items-center justify-center">
-                      <MobileOptimizedContainer padding="sm" className="text-center text-white w-full">
+                    <div className="absolute inset-0 flex items-center justify-center px-4">
+                      <div className="text-center text-white w-full">
                         <MobileResponsiveText 
                           as="h1" 
                           size={isMobile ? "2xl" : "3xl"} 
@@ -84,7 +84,7 @@ export function HeroBanner({
                         >
                           Spelman College Glee Club
                         </MobileResponsiveText>
-                      </MobileOptimizedContainer>
+                      </div>
                     </div>
                   )}
                 </div>

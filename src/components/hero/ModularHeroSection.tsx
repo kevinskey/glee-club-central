@@ -135,8 +135,8 @@ export function ModularHeroSection({
 
       {/* Content Overlay */}
       {showOverlay && (overlayTitle || overlaySubtitle || currentImage.title) && (
-        <div className="absolute inset-0 flex items-center justify-center">
-          <div className="text-center text-white px-4 max-w-4xl">
+        <div className="absolute inset-0 flex items-center justify-center px-4">
+          <div className="text-center text-white max-w-4xl">
             <h1 className="text-4xl md:text-6xl font-bold mb-4">
               {overlayTitle || currentImage.title}
             </h1>

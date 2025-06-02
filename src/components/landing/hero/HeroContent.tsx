@@ -5,15 +5,14 @@ import { ArrowRight } from "lucide-react";
 import { Link } from "react-router-dom";
 import { MobileResponsiveText } from "@/components/mobile/MobileResponsiveText";
 import { useIsMobile, useIsSmallMobile } from "@/hooks/use-mobile";
-import { MobileOptimizedContainer } from "@/components/mobile/MobileOptimizedContainer";
 
 export function HeroContent() {
   const isMobile = useIsMobile();
   const isSmallMobile = useIsSmallMobile();
   
   return (
-    <MobileOptimizedContainer padding="md" className="text-center">
-      <div className="max-w-4xl mx-auto mb-6 md:mb-8">
+    <div className="text-center px-4">
+      <div className="max-w-4xl mx-auto">
         <div className="mb-4 sm:mb-6 relative">
           {isSmallMobile ? (
             // Extra small screens
@@ -65,6 +64,6 @@ export function HeroContent() {
           </Button>
         </div>
       </div>
-    </MobileOptimizedContainer>
+    </div>
   );
 }

@@ -23,7 +23,7 @@ export function EnhancedHeroSection() {
   }, [images]);
 
   return (
-    <section className="relative w-full max-w-[100vw] mx-auto overflow-hidden" style={{ height: isMobile ? '40vh' : '60vh' }}>
+    <section className="relative w-full overflow-hidden" style={{ height: isMobile ? '40vh' : '60vh' }}>
       {/* Single Hero Image */}
       {heroImage ? (
         <BackgroundSlideshow 
@@ -36,8 +36,8 @@ export function EnhancedHeroSection() {
       
       {/* Content overlay with Spelman Glee Club branding */}
       <div className="relative z-10 h-full flex items-center justify-center">
-        <MobileOptimizedContainer padding="sm" className="w-full">
-          <div className="max-w-3xl mx-auto text-center">
+        <div className="w-full text-center px-4">
+          <div className="max-w-3xl mx-auto">
             <h1 className={cn(
               "font-bold text-white mb-3 leading-tight",
               isMobile ? "text-xl sm:text-2xl" : "text-3xl md:text-4xl lg:text-5xl"
@@ -63,7 +63,7 @@ export function EnhancedHeroSection() {
               </Button>
             </div>
           </div>
-        </MobileOptimizedContainer>
+        </div>
       </div>
     </section>
   );
