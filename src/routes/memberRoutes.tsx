@@ -4,19 +4,19 @@ import { RouteObject } from 'react-router-dom';
 import AuthRoute from '@/components/auth/AuthRoute';
 
 // Member Pages
-import DashboardPage from '@/pages/DashboardPage';
+import MemberDashboardPage from '@/pages/dashboard/MemberDashboardPage';
 import SheetMusicPage from '@/pages/SheetMusicPage';
-import RecordingStudioPage from '@/pages/RecordingStudioPage';
+import RecordingStudioPage from '@/pages/recordings/RecordingStudioPage';
 import MyOrdersPage from '@/pages/MyOrdersPage';
 import CheckoutPage from '@/pages/CheckoutPage';
-import MyProfilePage from '@/pages/MyProfilePage';
+import ProfilePage from '@/pages/ProfilePage';
 
 export const memberRoutes: RouteObject[] = [
   {
     path: '/dashboard',
     element: (
       <AuthRoute>
-        <DashboardPage />
+        <MemberDashboardPage />
       </AuthRoute>
     ),
   },
@@ -56,7 +56,7 @@ export const memberRoutes: RouteObject[] = [
     path: '/profile',
     element: (
       <AuthRoute>
-        <MyProfilePage />
+        <ProfilePage />
       </AuthRoute>
     ),
   },
