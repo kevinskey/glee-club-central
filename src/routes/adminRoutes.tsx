@@ -19,7 +19,6 @@ import NewsItemsPage from '@/pages/admin/NewsItemsPage';
 import AdminHeroManager from '@/pages/admin/AdminHeroManager';
 import SiteImagesPage from '@/pages/admin/SiteImagesPage';
 import AdminMediaLibraryPage from '@/pages/admin/AdminMediaLibraryPage';
-import AdminMediaUploaderPage from '@/pages/admin/AdminMediaUploaderPage';
 import AnalyticsPage from '@/pages/admin/AnalyticsPage';
 import FanTagManagerPage from '@/pages/admin/FanTagManagerPage';
 import SectionManagerPage from '@/pages/admin/SectionManagerPage';
@@ -181,14 +180,6 @@ export const adminRoutes: RouteObject[] = [
     element: (
       <AdminRoute>
         <AdminMediaLibraryPage />
-      </AdminRoute>
-    ),
-  },
-  {
-    path: '/dashboard/media-uploader',
-    element: (
-      <AdminRoute>
-        <AdminMediaUploaderPage />
       </AdminRoute>
     ),
   },
