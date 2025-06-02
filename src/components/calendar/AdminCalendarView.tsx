@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useCalendarEvents } from '@/hooks/useCalendarEvents';
 import { CalendarEvent } from '@/types/calendar';
@@ -12,16 +11,16 @@ import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameDay, startOf
 interface AdminCalendarViewProps {
   view: 'month' | 'week' | 'day';
   searchQuery?: string;
-  selectedEventTypes?: string[];
+  selectedEventType?: string;
 }
 
-export function AdminCalendarView({ view, searchQuery = '', selectedEventTypes = [] }: AdminCalendarViewProps) {
+export function AdminCalendarView({ view, searchQuery = '', selectedEventType = 'all' }: AdminCalendarViewProps) {
   const { events, loading, error } = useCalendarEvents();
   const [selectedDate, setSelectedDate] = useState(new Date());
 
   console.log('AdminCalendarView: Events loaded:', events?.length || 0);
   console.log('AdminCalendarView: Search query:', searchQuery);
-  console.log('AdminCalendarView: Selected event types:', selectedEventTypes);
+  console.log('AdminCalendarView: Selected event type:', selectedEventType);
 
   // Filter events based on search and event types
   const filteredEvents = events.filter(event => {
@@ -36,9 +35,9 @@ export function AdminCalendarView({ view, searchQuery = '', selectedEventTypes =
         (event.location_name && event.location_name.toLowerCase().includes(searchQuery.toLowerCase()));
     }
     
-    // Type filter - only apply if specific types are selected (not 'all')
-    if (selectedEventTypes.length > 0) {
-      matchesType = selectedEventTypes.includes(event.event_type || '');
+    // Type filter - only apply if not 'all'
+    if (selectedEventType && selectedEventType !== 'all') {
+      matchesType = event.event_type === selectedEventType;
     }
     
     console.log(`Event "${event.title}": search=${matchesSearch}, type=${matchesType}`);
@@ -153,7 +152,7 @@ export function AdminCalendarView({ view, searchQuery = '', selectedEventTypes =
       {/* Debug info */}
       <div className="text-xs text-muted-foreground bg-gray-50 p-2 rounded">
         Total events: {events.length} | Filtered: {filteredEvents.length} | 
-        Search: "{searchQuery}" | Types: {selectedEventTypes.join(', ') || 'all'}
+        Search: "{searchQuery}" | Type: {selectedEventType}
       </div>
 
       {view === 'month' && (
@@ -288,7 +287,7 @@ export function AdminCalendarView({ view, searchQuery = '', selectedEventTypes =
                 <p className="text-muted-foreground">
                   {events.length === 0 ? 'No events found in database' : 'No events match current filters'}
                 </p>
-                {searchQuery && (
+                {(searchQuery || selectedEventType !== 'all') && (
                   <p className="text-xs text-muted-foreground mt-1">
                     Try clearing the search or adjusting filters
                   </p>
