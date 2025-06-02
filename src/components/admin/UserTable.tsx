@@ -1,6 +1,6 @@
 
-import React, { useState } from 'react';
-import { format } from 'date-fns';
+import React from 'react';
+import { User } from '@/hooks/user/useUserManagement';
 import {
   Table,
   TableBody,
@@ -12,8 +12,8 @@ import {
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Edit, Trash2, Shield, ArrowUpDown, ArrowUp, ArrowDown } from 'lucide-react';
-import { User } from '@/hooks/user/types';
+import { Edit2, Trash2, Shield, ShieldCheck } from 'lucide-react';
+import { Skeleton } from '@/components/ui/skeleton';
 
 interface UserTableProps {
   users: User[];
@@ -22,243 +22,157 @@ interface UserTableProps {
   onDelete: (userId: string) => void;
 }
 
-type SortField = 'name' | 'email' | 'voice_part' | 'role' | 'status' | 'created_at';
-type SortDirection = 'asc' | 'desc';
-
 export function UserTable({ users, isLoading, onEdit, onDelete }: UserTableProps) {
-  const [sortField, setSortField] = useState<SortField>('name');
-  const [sortDirection, setSortDirection] = useState<SortDirection>('asc');
-
-  const handleSort = (field: SortField) => {
-    if (sortField === field) {
-      setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
-    } else {
-      setSortField(field);
-      setSortDirection('asc');
-    }
-  };
-
-  const getSortIcon = (field: SortField) => {
-    if (sortField !== field) {
-      return <ArrowUpDown className="h-4 w-4" />;
-    }
-    return sortDirection === 'asc' ? <ArrowUp className="h-4 w-4" /> : <ArrowDown className="h-4 w-4" />;
-  };
-
-  const getInitials = (firstName: string, lastName: string) => {
-    return `${firstName?.charAt(0) || ''}${lastName?.charAt(0) || ''}`.toUpperCase();
-  };
-
-  const sortedUsers = [...users].sort((a, b) => {
-    let aValue: any;
-    let bValue: any;
-
-    switch (sortField) {
-      case 'name':
-        aValue = `${a.last_name || ''} ${a.first_name || ''}`.toLowerCase();
-        bValue = `${b.last_name || ''} ${b.first_name || ''}`.toLowerCase();
-        break;
-      case 'email':
-        aValue = (a.email || '').toLowerCase();
-        bValue = (b.email || '').toLowerCase();
-        break;
-      case 'voice_part':
-        aValue = (a.voice_part || '').toLowerCase();
-        bValue = (b.voice_part || '').toLowerCase();
-        break;
-      case 'role':
-        aValue = (a.role || '').toLowerCase();
-        bValue = (b.role || '').toLowerCase();
-        break;
-      case 'status':
-        aValue = (a.status || '').toLowerCase();
-        bValue = (b.status || '').toLowerCase();
-        break;
-      case 'created_at':
-        aValue = new Date(a.created_at || 0);
-        bValue = new Date(b.created_at || 0);
-        break;
-      default:
-        return 0;
-    }
-
-    if (aValue < bValue) {
-      return sortDirection === 'asc' ? -1 : 1;
-    }
-    if (aValue > bValue) {
-      return sortDirection === 'asc' ? 1 : -1;
-    }
-    return 0;
-  });
-
-  const getStatusBadge = (status: string) => {
-    switch (status) {
+  const getStatusColor = (status: string) => {
+    switch (status?.toLowerCase()) {
       case 'active':
-        return <Badge variant="default">Active</Badge>;
+        return 'bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400';
       case 'inactive':
-        return <Badge variant="secondary">Inactive</Badge>;
+        return 'bg-gray-100 text-gray-800 dark:bg-gray-900/20 dark:text-gray-400';
       case 'pending':
-        return <Badge variant="outline">Pending</Badge>;
+        return 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-400';
+      case 'alumni':
+        return 'bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-400';
       default:
-        return <Badge variant="secondary">{status}</Badge>;
+        return 'bg-gray-100 text-gray-800 dark:bg-gray-900/20 dark:text-gray-400';
     }
   };
 
-  const getRoleBadge = (user: User) => {
-    if (user.is_super_admin) {
-      return (
-        <Badge variant="destructive" className="flex items-center gap-1">
-          <Shield className="h-3 w-3" />
-          Super Admin
-        </Badge>
-      );
-    }
-    if (user.role === 'admin') {
-      return <Badge variant="default">Admin</Badge>;
-    }
-    return <Badge variant="outline">{user.role || 'Member'}</Badge>;
+  const getVoicePartDisplay = (voicePart: string | null) => {
+    if (!voicePart) return 'Not assigned';
+    
+    const voicePartMap: Record<string, string> = {
+      'soprano_1': 'Soprano 1',
+      'soprano_2': 'Soprano 2',
+      'alto_1': 'Alto 1',
+      'alto_2': 'Alto 2',
+      'tenor': 'Tenor',
+      'bass': 'Bass',
+      'director': 'Director'
+    };
+    
+    return voicePartMap[voicePart] || voicePart;
+  };
+
+  const getInitials = (firstName?: string, lastName?: string) => {
+    const first = firstName?.charAt(0)?.toUpperCase() || '';
+    const last = lastName?.charAt(0)?.toUpperCase() || '';
+    return first + last || 'U';
   };
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center h-32">
-        <div className="text-muted-foreground">Loading users...</div>
+      <div className="space-y-4">
+        {Array.from({ length: 5 }).map((_, index) => (
+          <div key={index} className="flex items-center space-x-4">
+            <Skeleton className="h-10 w-10 rounded-full" />
+            <div className="space-y-2">
+              <Skeleton className="h-4 w-[200px]" />
+              <Skeleton className="h-4 w-[150px]" />
+            </div>
+          </div>
+        ))}
+      </div>
+    );
+  }
+
+  if (users.length === 0) {
+    return (
+      <div className="text-center py-8">
+        <p className="text-muted-foreground">No users found</p>
       </div>
     );
   }
 
   return (
-    <div className="overflow-x-auto">
+    <div className="rounded-md border">
       <Table>
         <TableHeader>
           <TableRow>
-            <TableHead>
-              <Button
-                variant="ghost"
-                size="sm"
-                className="h-auto p-0 font-medium"
-                onClick={() => handleSort('name')}
-              >
-                User
-                {getSortIcon('name')}
-              </Button>
-            </TableHead>
-            <TableHead>
-              <Button
-                variant="ghost"
-                size="sm"
-                className="h-auto p-0 font-medium"
-                onClick={() => handleSort('email')}
-              >
-                Email
-                {getSortIcon('email')}
-              </Button>
-            </TableHead>
-            <TableHead>
-              <Button
-                variant="ghost"
-                size="sm"
-                className="h-auto p-0 font-medium"
-                onClick={() => handleSort('voice_part')}
-              >
-                Voice Part
-                {getSortIcon('voice_part')}
-              </Button>
-            </TableHead>
-            <TableHead>
-              <Button
-                variant="ghost"
-                size="sm"
-                className="h-auto p-0 font-medium"
-                onClick={() => handleSort('role')}
-              >
-                Role
-                {getSortIcon('role')}
-              </Button>
-            </TableHead>
-            <TableHead>
-              <Button
-                variant="ghost"
-                size="sm"
-                className="h-auto p-0 font-medium"
-                onClick={() => handleSort('status')}
-              >
-                Status
-                {getSortIcon('status')}
-              </Button>
-            </TableHead>
-            <TableHead>
-              <Button
-                variant="ghost"
-                size="sm"
-                className="h-auto p-0 font-medium"
-                onClick={() => handleSort('created_at')}
-              >
-                Joined
-                {getSortIcon('created_at')}
-              </Button>
-            </TableHead>
+            <TableHead>User</TableHead>
+            <TableHead>Voice Part</TableHead>
+            <TableHead>Status</TableHead>
+            <TableHead>Role</TableHead>
+            <TableHead>Dues</TableHead>
             <TableHead className="text-right">Actions</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
-          {sortedUsers.map((user) => (
+          {users.map((user) => (
             <TableRow key={user.id}>
-              <TableCell className="font-medium">
+              <TableCell>
                 <div className="flex items-center gap-3">
                   <Avatar className="h-8 w-8">
-                    <AvatarImage src={user.avatar_url || undefined} alt={`${user.first_name} ${user.last_name}`} />
+                    <AvatarImage src={user.avatar_url || ''} alt={`${user.first_name} ${user.last_name}`} />
                     <AvatarFallback className="text-xs">
-                      {getInitials(user.first_name || '', user.last_name || '')}
+                      {getInitials(user.first_name, user.last_name)}
                     </AvatarFallback>
                   </Avatar>
-                  <span>{user.first_name} {user.last_name}</span>
+                  <div>
+                    <p className="font-medium text-sm">
+                      {user.first_name} {user.last_name}
+                    </p>
+                    <p className="text-xs text-muted-foreground">
+                      {user.email || 'No email'}
+                    </p>
+                  </div>
                 </div>
               </TableCell>
-              <TableCell>{user.email || 'No email'}</TableCell>
               <TableCell>
-                {user.voice_part ? (
-                  <Badge variant="outline">{user.voice_part}</Badge>
-                ) : (
-                  <span className="text-muted-foreground">Not set</span>
-                )}
+                <span className="text-sm">
+                  {getVoicePartDisplay(user.voice_part)}
+                </span>
               </TableCell>
-              <TableCell>{getRoleBadge(user)}</TableCell>
-              <TableCell>{getStatusBadge(user.status)}</TableCell>
               <TableCell>
-                {user.created_at 
-                  ? format(new Date(user.created_at), 'MMM dd, yyyy')
-                  : 'Unknown'
-                }
+                <Badge 
+                  variant="outline"
+                  className={`text-xs ${getStatusColor(user.status)}`}
+                >
+                  {user.status || 'Unknown'}
+                </Badge>
+              </TableCell>
+              <TableCell>
+                <div className="flex items-center gap-1">
+                  {user.is_super_admin ? (
+                    <ShieldCheck className="h-3 w-3 text-orange-500" />
+                  ) : user.role === 'admin' ? (
+                    <Shield className="h-3 w-3 text-blue-500" />
+                  ) : null}
+                  <span className="text-sm capitalize">
+                    {user.is_super_admin ? 'Super Admin' : user.role || 'Member'}
+                  </span>
+                </div>
+              </TableCell>
+              <TableCell>
+                <Badge 
+                  variant={user.dues_paid ? "default" : "secondary"}
+                  className="text-xs"
+                >
+                  {user.dues_paid ? 'Paid' : 'Pending'}
+                </Badge>
               </TableCell>
               <TableCell className="text-right">
-                <div className="flex items-center gap-2 justify-end">
+                <div className="flex justify-end gap-1">
                   <Button
-                    variant="outline"
+                    variant="ghost"
                     size="sm"
                     onClick={() => onEdit(user)}
+                    className="h-8 w-8 p-0"
                   >
-                    <Edit className="h-4 w-4" />
+                    <Edit2 className="h-3 w-3" />
                   </Button>
                   <Button
-                    variant="outline"
+                    variant="ghost"
                     size="sm"
                     onClick={() => onDelete(user.id)}
-                    className="text-destructive hover:text-destructive"
+                    className="h-8 w-8 p-0 text-destructive hover:text-destructive"
                   >
-                    <Trash2 className="h-4 w-4" />
+                    <Trash2 className="h-3 w-3" />
                   </Button>
                 </div>
               </TableCell>
             </TableRow>
           ))}
-          {sortedUsers.length === 0 && (
-            <TableRow>
-              <TableCell colSpan={7} className="text-center py-8 text-muted-foreground">
-                No users found
-              </TableCell>
-            </TableRow>
-          )}
         </TableBody>
       </Table>
     </div>

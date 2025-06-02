@@ -1,62 +1,102 @@
 
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import { User } from './types';
-import { useUsers } from './useUsers';
-import { useUserUpdate } from './useUserUpdate';
-import { useUserCreate } from './useUserCreate';
-import { useUserDelete } from './useUserDelete';
+import { userManagementService } from '@/services/userManagement';
+import { UserFormValues } from '@/components/members/form/userFormSchema';
+import { toast } from 'sonner';
 
-// Re-export the User type
-export type { User };
+interface UseUserManagementReturn {
+  users: User[];
+  isLoading: boolean;
+  error: string | null;
+  refreshUsers: () => Promise<void>;
+  updateUser: (userId: string, userData: Partial<User>) => Promise<boolean>;
+  addUser: (userData: UserFormValues) => Promise<boolean>;
+  deleteUser: (userId: string) => Promise<boolean>;
+}
 
-export const useUserManagement = () => {
+export const useUserManagement = (): UseUserManagementReturn => {
   const [users, setUsers] = useState<User[]>([]);
-  
-  // Use the individual hooks
-  const { 
-    fetchUsers, 
-    isLoading, 
-    error, 
-    userCount,
-    getUserCount,
-    getUserById
-  } = useUsers();
-  
-  // Create a wrapper function for refreshUsers
-  const refreshUsers = async () => {
-    const fetchedUsers = await fetchUsers();
-    if (fetchedUsers) {
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const refreshUsers = useCallback(async () => {
+    setIsLoading(true);
+    setError(null);
+    try {
+      const fetchedUsers = await userManagementService.getUsers();
       setUsers(fetchedUsers);
-      return fetchedUsers;
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Failed to fetch users';
+      setError(errorMessage);
+      console.error('Error fetching users:', err);
+    } finally {
+      setIsLoading(false);
     }
-    return [];
-  };
-  
-  const { updateUser, updateUserStatus } = useUserUpdate(refreshUsers);
-  const { addUser } = useUserCreate(setUsers);
-  const { deleteUser } = useUserDelete(setUsers);
-  
-  // Initialize users from the useUsers hook if not loaded yet
-  if (users.length === 0 && !isLoading) {
-    fetchUsers().then(fetchedUsers => {
-      if (fetchedUsers) {
-        setUsers(fetchedUsers);
+  }, []);
+
+  const updateUser = useCallback(async (userId: string, userData: Partial<User>): Promise<boolean> => {
+    try {
+      // Filter out email field since it's not in the profiles table
+      const { email, ...profileData } = userData as any;
+      
+      console.log('Updating user with data:', profileData);
+      const success = await userManagementService.updateUser(userId, profileData);
+      
+      if (success) {
+        await refreshUsers();
+        return true;
       }
-    });
-  }
+      return false;
+    } catch (err) {
+      console.error('Error updating user:', err);
+      toast.error('Failed to update user');
+      return false;
+    }
+  }, [refreshUsers]);
+
+  const addUser = useCallback(async (userData: UserFormValues): Promise<boolean> => {
+    try {
+      const success = await userManagementService.createUser(userData);
+      
+      if (success) {
+        await refreshUsers();
+        return true;
+      }
+      return false;
+    } catch (err) {
+      console.error('Error adding user:', err);
+      toast.error('Failed to add user');
+      return false;
+    }
+  }, [refreshUsers]);
+
+  const deleteUser = useCallback(async (userId: string): Promise<boolean> => {
+    try {
+      const success = await userManagementService.deleteUser(userId);
+      
+      if (success) {
+        await refreshUsers();
+        return true;
+      }
+      return false;
+    } catch (err) {
+      console.error('Error deleting user:', err);
+      toast.error('Failed to delete user');
+      return false;
+    }
+  }, [refreshUsers]);
 
   return {
     users,
     isLoading,
     error,
-    fetchUsers,
     refreshUsers,
-    deleteUser,
-    getUserCount,
-    userCount,
-    getUserById,
     updateUser,
-    updateUserStatus,
-    addUser
+    addUser,
+    deleteUser,
   };
 };
+
+// Export the User type for convenience
+export type { User };
