@@ -58,27 +58,27 @@ module.exports = {
           foreground: "hsl(var(--card-foreground))",
         },
         glee: {
-          orange: "#87CEEB", // Sky blue
-          carolina: "#87CEEB", // Sky blue
-          purple: "#87CEEB", // Sky blue
-          darkPurple: "#4169E1", // Royal blue
-          lightPurple: "#B0E0E6", // Powder blue
+          orange: "#4A90E2", // Carolina blue
+          carolina: "#4A90E2", // Carolina blue
+          purple: "#4A90E2", // Carolina blue
+          darkPurple: "#2E5BBA", // Darker Carolina blue
+          lightPurple: "#7BB3F0", // Lighter Carolina blue
           gray: "#8E9196",
-          columbia: "#87CEEB", // Sky blue
+          columbia: "#4A90E2", // Carolina blue
         },
-        'glee-spelman': "#87CEEB", // Sky blue
-        'glee-columbia': "#87CEEB", // Sky blue
-        'columbia-blue': "#87CEEB", // Sky blue
+        'glee-spelman': "#4A90E2", // Carolina blue
+        'glee-columbia': "#4A90E2", // Carolina blue
+        'columbia-blue': "#4A90E2", // Carolina blue
         'blue': {
           100: "#E6F3FF", // Very light blue
           200: "#CCE7FF", // Light blue
           300: "#99D6FF", // Medium light blue
           400: "#66C2FF", // Medium blue
-          500: "#33AAFF", // Default blue
-          600: "#0088FF", // Bright blue
-          700: "#0066CC", // Darker blue
-          800: "#004499", // Dark blue
-          900: "#002266", // Very dark blue
+          500: "#4A90E2", // Carolina blue
+          600: "#2E5BBA", // Darker Carolina blue
+          700: "#1E3A8A", // Dark blue
+          800: "#1E40AF", // Very dark blue
+          900: "#1E3A8A", // Very dark blue
         }
       },
       borderRadius: {

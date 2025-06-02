@@ -46,7 +46,7 @@ export function HeroContent() {
         <div className="flex flex-col sm:flex-row gap-3 md:gap-4 justify-center">
           <Button
             asChild
-            className="bg-glee-purple hover:bg-glee-purple/90 text-white mobile-button"
+            className="bg-blue-500 hover:bg-blue-600 text-white mobile-button"
           >
             <Link to="/calendar">
               Upcoming Performances <ArrowRight className="ml-2 h-5 w-5" />
