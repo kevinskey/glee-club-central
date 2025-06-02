@@ -158,6 +158,17 @@ export const router = createBrowserRouter([
       </AuthProvider>
     ),
   },
+  // Add redirect route for role-dashboard to dashboard
+  {
+    path: "/role-dashboard",
+    element: (
+      <AuthProvider>
+        <RequireAuth>
+          {withErrorBoundary(<RoleDashboardPage />)}
+        </RequireAuth>
+      </AuthProvider>
+    ),
+  },
   // Admin routes with error boundaries
   {
     path: "/admin",
