@@ -6,7 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Calendar, Clock, MapPin, Users, Search, Filter, Plus, Edit, Trash2, CalendarDays } from 'lucide-react';
-import { EnhancedCalendarView } from '@/components/calendar/EnhancedCalendarView';
+import { AdminCalendarView } from '@/components/calendar/AdminCalendarView';
 import { CalendarViewToggle } from '@/components/calendar/CalendarViewToggle';
 import { EventTypeFilter } from '@/components/calendar/EventTypeFilter';
 import { useAuth } from '@/contexts/AuthContext';
@@ -15,7 +15,7 @@ export default function AdminCalendarPage() {
   const { user, profile, isLoading } = useAuth();
 
   const [searchQuery, setSearchQuery] = useState('');
-  const [selectedView, setSelectedView] = useState('month');
+  const [selectedView, setSelectedView] = useState<'month' | 'week' | 'day'>('month');
   const [selectedEventType, setSelectedEventType] = useState('all');
 
   useEffect(() => {
@@ -105,17 +105,15 @@ export default function AdminCalendarPage() {
             <CardHeader className="border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50">
               <CardTitle className="flex items-center gap-2 text-lg">
                 <Calendar className="h-5 w-5 text-glee-spelman" />
-                Calendar View
+                Calendar View - {selectedView.charAt(0).toUpperCase() + selectedView.slice(1)}
               </CardTitle>
             </CardHeader>
-            <CardContent className="p-0">
-              <div className="min-h-[600px]">
-                <EnhancedCalendarView 
-                  view={selectedView}
-                  searchQuery={searchQuery}
-                  selectedEventTypes={selectedEventType === 'all' ? [] : [selectedEventType]}
-                />
-              </div>
+            <CardContent className="p-6">
+              <AdminCalendarView 
+                view={selectedView}
+                searchQuery={searchQuery}
+                selectedEventTypes={selectedEventType === 'all' ? [] : [selectedEventType]}
+              />
             </CardContent>
           </Card>
 
