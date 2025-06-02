@@ -20,7 +20,7 @@ serve(async (req) => {
   }
 
   try {
-    console.log('Starting mockup generation...');
+    console.log('Starting Amazon-style mockup generation...');
 
     if (!openAIApiKey) {
       console.error('OpenAI API key not found');
@@ -33,39 +33,54 @@ serve(async (req) => {
       });
     }
 
-    const { userImageUrl, productType, designName, designDescription } = await req.json();
+    const { 
+      userImageUrl, 
+      productType, 
+      designName, 
+      designDescription,
+      brandInfo,
+      amazonStyle = true,
+      singleMockup = true 
+    } = await req.json();
 
-    console.log('Generating mockup for:', { productType, designName, designDescription });
+    console.log('Generating mockup for:', { 
+      productType, 
+      designName, 
+      designDescription, 
+      brandInfo,
+      amazonStyle,
+      singleMockup 
+    });
 
-    // Enhanced product-specific prompts with better detail and context
-    const productPrompts = {
-      't-shirt': `Professional product photography of a ${designName} design printed on a premium cotton t-shirt. The shirt should be displayed on a clean white studio background with soft, even lighting. Show the t-shirt from a slight front angle to showcase the design clearly. The design should be prominently placed on the chest area with realistic fabric printing texture. Use professional e-commerce photography style with subtle shadows and highlights that emphasize the quality of both the garment and the printed design.`,
+    // Amazon-style product photography prompts
+    const amazonStylePrompts = {
+      't-shirt': `Professional Amazon product photography of a ${brandInfo?.color?.name || 'colored'} ${brandInfo?.brand || 'premium'} t-shirt with "${designName}" design printed on the front center chest area. Pure white background, studio lighting with soft shadows. The t-shirt should be laid flat or displayed on an invisible mannequin in a front-facing view. Design should be clearly visible with realistic fabric printing texture showing screen-printing quality. Professional e-commerce photography style with even lighting, sharp focus, and high contrast. No wrinkles, perfect presentation suitable for Amazon product listing.`,
       
-      'hoodie': `High-quality product mockup of a ${designName} design on a premium pullover hoodie. Professional studio photography on a clean white background. The hoodie should be displayed flat or on a hanger, front-facing view. The design should be centered on the chest area with realistic screen-printing or embroidered appearance. Show the hoodie's texture, drawstrings, and kangaroo pocket. Use soft, diffused lighting with minimal shadows for an e-commerce ready appearance.`,
+      'hoodie': `Professional Amazon product photography of a ${brandInfo?.color?.name || 'colored'} ${brandInfo?.brand || 'premium'} pullover hoodie featuring "${designName}" design on the front chest area. Clean white studio background with professional lighting. Display the hoodie front-facing, showing the design clearly with realistic embroidered or screen-printed texture. Include hoodie details like drawstrings and kangaroo pocket. Studio photography with soft, even lighting and minimal shadows for e-commerce use.`,
       
-      'mug': `Clean, professional product photography of a white ceramic coffee mug featuring the ${designName} design. Place the mug at a 3/4 angle on a pure white background. The design should wrap around the visible side of the mug with realistic printing quality - crisp edges and vibrant colors that look professionally applied. Use studio lighting with soft shadows to create depth. The mug should appear premium quality with a smooth, glossy finish.`,
+      'tank-top': `Professional Amazon product photography of a ${brandInfo?.color?.name || 'colored'} ${brandInfo?.brand || 'premium'} tank top with "${designName}" design on the front center. Pure white background, professional studio lighting. Front-facing view showing the design with realistic printing quality. Clean, minimalist e-commerce photography suitable for Amazon product listing with sharp details and professional presentation.`,
       
-      'tote-bag': `Professional product mockup of a natural canvas tote bag featuring the ${designName} design. Show the bag from a slight front angle on a clean white background. The design should be prominently displayed on the front center of the bag with realistic screen-printing texture. Include the bag's handles and show its natural canvas texture. Use soft, even lighting typical of e-commerce product photography.`,
-      
-      'phone-case': `Clean product photography of a modern smartphone case featuring the ${designName} design on the back. Show the case at a slight angle on a white background to display the design clearly. The case should appear to be made of quality materials (plastic, silicone, or clear) with the design printed or embedded professionally. Use studio lighting with minimal shadows to highlight both the case design and the printed artwork.`,
-      
-      'sticker': `Professional product photography showing multiple ${designName} vinyl stickers arranged attractively on a white background. Display 3-5 stickers of the same design in a scattered but organized layout. The stickers should have a glossy, high-quality vinyl finish with vibrant colors and sharp edges. Show realistic printing quality with slight reflections from studio lighting to emphasize the premium vinyl material.`
+      'long-sleeve': `Professional Amazon product photography of a ${brandInfo?.color?.name || 'colored'} ${brandInfo?.brand || 'premium'} long sleeve shirt featuring "${designName}" design on the front chest. Clean white studio background with professional lighting. Front-facing display showing design clarity with realistic screen-printing texture. E-commerce quality photography with even lighting and sharp focus.`
     };
 
-    let enhancedPrompt = productPrompts[productType as keyof typeof productPrompts] || productPrompts['t-shirt'];
+    let enhancedPrompt = amazonStylePrompts[productType as keyof typeof amazonStylePrompts] || amazonStylePrompts['t-shirt'];
     
-    // Add design description context if provided
+    // Add design context and color information
     if (designDescription) {
       enhancedPrompt += ` Design context: ${designDescription}.`;
     }
     
-    // Add specific styling and quality instructions
-    enhancedPrompt += ` Technical requirements: 1024x1024 resolution, photorealistic rendering, professional commercial photography quality, accurate color reproduction, sharp details, clean composition suitable for online retail. The final image should look like a professional product photo ready for an e-commerce website.`;
+    if (brandInfo?.color) {
+      enhancedPrompt += ` The garment color is ${brandInfo.color.name} (${brandInfo.color.hex}).`;
+    }
+    
+    // Add Amazon-specific technical requirements
+    enhancedPrompt += ` Amazon product photography requirements: 1024x1024 resolution, pure white background (RGB 255,255,255), professional studio lighting with soft shadows, high contrast and sharpness, product fills 85% of frame, no logo watermarks, clean and professional presentation. The image should meet Amazon's image guidelines for main product photos.`;
 
-    console.log('Enhanced prompt:', enhancedPrompt);
-    console.log('Sending request to OpenAI...');
+    console.log('Enhanced Amazon-style prompt:', enhancedPrompt);
+    console.log('Sending request to OpenAI DALL-E 3...');
 
-    // Generate the mockup using DALL-E with enhanced parameters
+    // Generate single mockup using DALL-E 3 with Amazon specifications
     const response = await fetch('https://api.openai.com/v1/images/generations', {
       method: 'POST',
       headers: {
@@ -75,9 +90,9 @@ serve(async (req) => {
       body: JSON.stringify({
         model: 'dall-e-3',
         prompt: enhancedPrompt,
-        n: 1,
+        n: 1, // Single mockup as requested
         size: '1024x1024',
-        quality: 'hd', // Use HD quality for better results
+        quality: 'hd',
         style: 'natural', // Natural style for product photography
       }),
     });
@@ -103,10 +118,11 @@ serve(async (req) => {
 
     console.log('Uploading to Supabase storage...');
 
-    // Upload to Supabase storage with better naming
+    // Upload to Supabase storage with Amazon-style naming
     const timestamp = Date.now();
     const sanitizedName = designName.replace(/[^a-zA-Z0-9]/g, '-').toLowerCase();
-    const fileName = `mockup-${productType}-${sanitizedName}-${timestamp}.png`;
+    const colorName = brandInfo?.color?.name?.replace(/[^a-zA-Z0-9]/g, '-').toLowerCase() || 'default';
+    const fileName = `amazon-mockup-${productType}-${sanitizedName}-${colorName}-${timestamp}.png`;
     const filePath = `generated-mockups/${fileName}`;
 
     const { data: uploadData, error: uploadError } = await supabase.storage
@@ -126,14 +142,16 @@ serve(async (req) => {
       .from('media-library')
       .getPublicUrl(filePath);
 
-    console.log('Mockup generated successfully:', publicUrl);
+    console.log('Amazon-style mockup generated successfully:', publicUrl);
 
     return new Response(JSON.stringify({ 
       mockupUrl: publicUrl,
       success: true,
       productType,
       designName,
-      fileName
+      brandInfo,
+      fileName,
+      amazonStyle: true
     }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });

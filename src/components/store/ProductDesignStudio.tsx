@@ -9,19 +9,27 @@ import { Textarea } from '@/components/ui/textarea';
 import { Upload, Wand2, Download, ShoppingCart, AlertCircle } from 'lucide-react';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
+import { BrandSelector } from './BrandSelector';
+import { ColorSelector } from './ColorSelector';
 
 const PRODUCT_TYPES = [
-  { id: 't-shirt', name: 'T-Shirt', price: 25.00 },
-  { id: 'hoodie', name: 'Hoodie', price: 45.00 },
-  { id: 'mug', name: 'Mug', price: 15.00 },
-  { id: 'tote-bag', name: 'Tote Bag', price: 20.00 },
-  { id: 'phone-case', name: 'Phone Case', price: 18.00 },
-  { id: 'sticker', name: 'Sticker Pack', price: 8.00 },
+  { id: 't-shirt', name: 'T-Shirt', basePrice: 25.00 },
+  { id: 'hoodie', name: 'Hoodie', basePrice: 45.00 },
+  { id: 'tank-top', name: 'Tank Top', basePrice: 22.00 },
+  { id: 'long-sleeve', name: 'Long Sleeve', basePrice: 30.00 },
 ];
+
+const BRAND_PRICING = {
+  gildan: 15.00,
+  nextlevel: 22.00,
+  comfortcolors: 28.00,
+};
 
 export function ProductDesignStudio() {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [selectedProduct, setSelectedProduct] = useState<string>('');
+  const [selectedBrand, setSelectedBrand] = useState<string>('');
+  const [selectedColor, setSelectedColor] = useState<{ name: string; hex: string; code: string } | null>(null);
   const [designName, setDesignName] = useState('');
   const [designDescription, setDesignDescription] = useState('');
   const [generatedMockup, setGeneratedMockup] = useState<string | null>(null);
@@ -47,8 +55,8 @@ export function ProductDesignStudio() {
   };
 
   const generateMockup = async () => {
-    if (!selectedFile || !selectedProduct) {
-      toast.error('Please upload an image and select a product type');
+    if (!selectedFile || !selectedProduct || !selectedBrand || !selectedColor) {
+      toast.error('Please complete all selections: upload image, select product type, brand, and color');
       return;
     }
 
@@ -56,7 +64,7 @@ export function ProductDesignStudio() {
     setError(null);
     
     try {
-      console.log('Starting mockup generation process...');
+      console.log('Starting Amazon-style mockup generation process...');
       
       // Upload the user's graphic to Supabase storage
       const fileExt = selectedFile.name.split('.').pop();
@@ -79,13 +87,19 @@ export function ProductDesignStudio() {
 
       console.log('Calling AI mockup generation...');
       
-      // Generate AI mockup using the uploaded image and selected product
+      // Generate AI mockup with enhanced Amazon-style parameters
       const { data, error } = await supabase.functions.invoke('generate-product-mockup', {
         body: {
           userImageUrl: publicUrl,
           productType: selectedProduct,
           designName,
-          designDescription
+          designDescription,
+          brandInfo: {
+            brand: selectedBrand,
+            color: selectedColor
+          },
+          amazonStyle: true, // New flag for Amazon-style product photography
+          singleMockup: true // Ensure only one mockup per request
         }
       });
 
@@ -99,7 +113,7 @@ export function ProductDesignStudio() {
       }
 
       setGeneratedMockup(data.mockupUrl);
-      toast.success('Mockup generated successfully!');
+      toast.success('Amazon-style mockup generated successfully!');
     } catch (error) {
       console.error('Error generating mockup:', error);
       const errorMessage = error instanceof Error ? error.message : 'Failed to generate mockup. Please try again.';
@@ -111,7 +125,7 @@ export function ProductDesignStudio() {
   };
 
   const createProduct = async () => {
-    if (!generatedMockup || !selectedProduct || !designName) {
+    if (!generatedMockup || !selectedProduct || !designName || !selectedBrand || !selectedColor) {
       toast.error('Please complete the design process first');
       return;
     }
@@ -119,15 +133,17 @@ export function ProductDesignStudio() {
     setIsCreatingProduct(true);
     try {
       const productType = PRODUCT_TYPES.find(p => p.id === selectedProduct);
+      const brandPrice = BRAND_PRICING[selectedBrand as keyof typeof BRAND_PRICING];
+      const totalPrice = (productType?.basePrice || 25.00) + brandPrice;
       
       const { error } = await supabase
         .from('store_items')
         .insert({
-          name: designName,
-          description: designDescription || `Custom ${productType?.name} with your design`,
-          price: productType?.price || 25.00,
+          name: `${designName} - ${selectedColor.name}`,
+          description: `${designDescription || `Custom ${productType?.name} with your design`}\n\nBrand: ${selectedBrand}\nColor: ${selectedColor.name} (${selectedColor.code})`,
+          price: totalPrice,
           image_url: generatedMockup,
-          tags: ['custom', 'ai-generated', selectedProduct],
+          tags: ['custom', 'ai-generated', selectedProduct, selectedBrand, selectedColor.name.toLowerCase()],
           quantity_in_stock: 999, // Custom products are made on demand
           is_active: true
         });
@@ -139,6 +155,8 @@ export function ProductDesignStudio() {
       // Reset form
       setSelectedFile(null);
       setSelectedProduct('');
+      setSelectedBrand('');
+      setSelectedColor(null);
       setDesignName('');
       setDesignDescription('');
       setGeneratedMockup(null);
@@ -151,7 +169,12 @@ export function ProductDesignStudio() {
     }
   };
 
-  const selectedProductData = PRODUCT_TYPES.find(p => p.id === selectedProduct);
+  const calculatePrice = () => {
+    if (!selectedProduct || !selectedBrand) return 0;
+    const productType = PRODUCT_TYPES.find(p => p.id === selectedProduct);
+    const brandPrice = BRAND_PRICING[selectedBrand as keyof typeof BRAND_PRICING];
+    return (productType?.basePrice || 25.00) + brandPrice;
+  };
 
   return (
     <div className="max-w-4xl mx-auto space-y-6">
@@ -159,7 +182,7 @@ export function ProductDesignStudio() {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Wand2 className="h-5 w-5" />
-            AI Product Design Studio
+            AI Product Design Studio - Amazon Ready
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-6">
@@ -208,12 +231,29 @@ export function ProductDesignStudio() {
               <SelectContent>
                 {PRODUCT_TYPES.map(product => (
                   <SelectItem key={product.id} value={product.id}>
-                    {product.name} - ${product.price.toFixed(2)}
+                    {product.name} - Base ${product.basePrice.toFixed(2)}
                   </SelectItem>
                 ))}
               </SelectContent>
             </Select>
           </div>
+
+          {/* Brand Selection */}
+          {selectedProduct && (
+            <BrandSelector 
+              selectedBrand={selectedBrand}
+              onBrandSelect={setSelectedBrand}
+            />
+          )}
+
+          {/* Color Selection */}
+          {selectedBrand && (
+            <ColorSelector
+              selectedBrand={selectedBrand}
+              selectedColor={selectedColor}
+              onColorSelect={setSelectedColor}
+            />
+          )}
 
           {/* Design Details */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -238,21 +278,34 @@ export function ProductDesignStudio() {
             </div>
           </div>
 
+          {/* Price Display */}
+          {selectedProduct && selectedBrand && (
+            <div className="bg-gray-50 rounded-lg p-4">
+              <h3 className="font-semibold text-lg">Price Preview</h3>
+              <p className="text-2xl font-bold text-glee-spelman">
+                ${calculatePrice().toFixed(2)}
+              </p>
+              <p className="text-sm text-gray-600 mt-1">
+                Includes base product + {selectedBrand} tier pricing
+              </p>
+            </div>
+          )}
+
           {/* Generate Button */}
           <Button
             onClick={generateMockup}
-            disabled={!selectedFile || !selectedProduct || isGenerating}
+            disabled={!selectedFile || !selectedProduct || !selectedBrand || !selectedColor || isGenerating}
             className="w-full"
           >
             {isGenerating ? (
               <>
                 <Wand2 className="h-4 w-4 mr-2 animate-spin" />
-                Generating AI Mockup...
+                Generating Amazon-Style Mockup...
               </>
             ) : (
               <>
                 <Wand2 className="h-4 w-4 mr-2" />
-                Generate AI Mockup
+                Generate Amazon-Style Mockup
               </>
             )}
           </Button>
@@ -263,10 +316,10 @@ export function ProductDesignStudio() {
       {generatedMockup && (
         <Card>
           <CardHeader>
-            <CardTitle>Generated Mockup Preview</CardTitle>
+            <CardTitle>Amazon-Style Product Mockup</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div className="aspect-square max-w-md mx-auto bg-gray-100 rounded-lg overflow-hidden">
+            <div className="aspect-square max-w-md mx-auto bg-white rounded-lg overflow-hidden border">
               <img
                 src={generatedMockup}
                 alt="Generated product mockup"
@@ -276,11 +329,12 @@ export function ProductDesignStudio() {
             
             <div className="text-center space-y-2">
               <h3 className="text-lg font-semibold">{designName}</h3>
-              {selectedProductData && (
-                <p className="text-glee-purple font-bold text-xl">
-                  ${selectedProductData.price.toFixed(2)}
-                </p>
-              )}
+              <p className="text-gray-600">
+                {selectedBrand} • {selectedColor?.name} • {selectedProduct}
+              </p>
+              <p className="text-glee-spelman font-bold text-xl">
+                ${calculatePrice().toFixed(2)}
+              </p>
               {designDescription && (
                 <p className="text-gray-600">{designDescription}</p>
               )}
