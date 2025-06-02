@@ -80,13 +80,13 @@ export function AdminMediaOverview() {
           </div>
           <div className="text-center">
             <div className="text-2xl font-bold text-purple-600">
-              {mediaStats.filesByType.image || 0}
+              {mediaStats.filesByType?.image || 0}
             </div>
             <div className="text-xs text-muted-foreground">Images</div>
           </div>
           <div className="text-center">
             <div className="text-2xl font-bold text-orange-600">
-              {(mediaStats.filesByType.application || 0) + (mediaStats.filesByType.audio || 0)}
+              {(mediaStats.filesByType?.application || 0) + (mediaStats.filesByType?.audio || 0)}
             </div>
             <div className="text-xs text-muted-foreground">Documents</div>
           </div>

@@ -10,7 +10,7 @@ const AdminDashboard: React.FC = () => {
 
   return (
     <div className="flex-1 overflow-auto min-h-screen bg-background">
-      <AdminDashboardContent isMobile={isMobile} />
+      <AdminDashboardContent />
     </div>
   );
 };
