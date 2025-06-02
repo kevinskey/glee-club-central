@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { PageHeader } from "@/components/ui/page-header";
 import { Library, FileText, Image, Music, Video, Search, Filter, Upload } from "lucide-react";
@@ -7,7 +8,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent } from "@/components/ui/card";
 import { useMediaLibrary } from "@/hooks/useMediaLibrary";
 import { getMediaType, getMediaTypeLabel } from "@/utils/mediaUtils";
-import { PDFPreview } from "@/components/pdf/PDFPreview";
+import { PDFThumbnail } from "@/components/pdf/PDFThumbnail";
 import { formatFileSize } from "@/utils/file-utils";
 import { MediaType } from "@/utils/mediaUtils";
 import { useNavigate } from 'react-router-dom';
@@ -52,10 +53,6 @@ const MediaLibraryPage: React.FC<MediaLibraryPageProps> = ({ isAdminView = false
     audio: allMediaFiles.filter(file => getMediaType(file.file_type) === "audio").length,
     video: allMediaFiles.filter(file => getMediaType(file.file_type) === "video").length,
   };
-  
-  console.log("Media counts:", mediaCounts);
-  console.log("All media files count:", allMediaFiles.length);
-  console.log("Filtered media files count:", filteredMediaFiles.length);
   
   // Update state when mediaType is changed
   useEffect(() => {
@@ -212,8 +209,6 @@ interface MediaGridProps {
 }
 
 const MediaGrid: React.FC<MediaGridProps> = ({ files, onViewPDF, showPDFCount = false }) => {
-  console.log("MediaGrid received files:", files.length, files.map(f => ({ title: f.title, type: f.file_type })));
-  
   if (files.length === 0) {
     return (
       <div className="text-center py-12 border border-dashed rounded-lg">
@@ -239,29 +234,18 @@ const MediaGrid: React.FC<MediaGridProps> = ({ files, onViewPDF, showPDFCount = 
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
         {files.map((file) => {
           const mediaType = getMediaType(file.file_type);
-          console.log(`Rendering file: ${file.title}, mediaType: ${mediaType}, file_type: ${file.file_type}`);
           
           return (
             <Card key={file.id} className="overflow-hidden h-full flex flex-col">
               <div className="relative aspect-video bg-muted flex items-center justify-center">
                 {mediaType === "pdf" ? (
-                  <div className="w-full h-full bg-white relative">
-                    <PDFPreview
+                  <div className="w-full h-full bg-white relative overflow-hidden">
+                    <PDFThumbnail
                       url={file.file_url}
                       title={file.title}
-                      className="w-full h-full cursor-pointer"
-                      previewWidth={300}
-                      previewHeight={200}
-                      mediaSourceId={file.id}
-                      category={file.category || "General"}
-                    >
-                      <div className="w-full h-full flex items-center justify-center bg-gray-100">
-                        <FileText className="h-16 w-16 text-muted-foreground" />
-                        <div className="absolute bottom-2 left-2 right-2 text-xs text-gray-600 bg-white/80 p-1 rounded truncate">
-                          {file.title}
-                        </div>
-                      </div>
-                    </PDFPreview>
+                      className="w-full h-full"
+                      aspectRatio={16/9}
+                    />
                   </div>
                 ) : mediaType === "image" ? (
                   <img 
