@@ -1340,6 +1340,45 @@ export type Database = {
         }
         Relationships: []
       }
+      store_items: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          image_url: string | null
+          is_active: boolean
+          name: string
+          price: number
+          quantity_in_stock: number
+          tags: string[] | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          image_url?: string | null
+          is_active?: boolean
+          name: string
+          price: number
+          quantity_in_stock?: number
+          tags?: string[] | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          image_url?: string | null
+          is_active?: boolean
+          name?: string
+          price?: number
+          quantity_in_stock?: number
+          tags?: string[] | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       title_permissions: {
         Row: {
           created_at: string

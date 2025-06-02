@@ -1,145 +1,185 @@
 
-import React from "react";
-import { Card, CardContent } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
+import React, { useState, useEffect } from 'react';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { ShoppingBag, Star } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
 
-interface Product {
+interface StoreItem {
   id: string;
   name: string;
+  description?: string;
   price: number;
-  imageUrl?: string;
-  isNew?: boolean;
-  isSale?: boolean;
-  originalPrice?: number;
+  quantity_in_stock: number;
+  image_url?: string;
+  tags: string[];
+  is_active: boolean;
 }
 
 interface StorePreviewProps {
-  products: Product[];
+  products?: any[]; // Keep for backwards compatibility
   title?: string;
   subtitle?: string;
   showShopAllButton?: boolean;
   onShopAll?: () => void;
-  className?: string;
 }
 
-export function StorePreview({
-  products = [],
-  title = "Glee Club Store",
-  subtitle = "Show your Spelman Glee Club pride",
+export function StorePreview({ 
+  title = "Featured Products", 
+  subtitle = "Check out our latest merchandise",
   showShopAllButton = true,
-  onShopAll,
-  className = ""
+  onShopAll
 }: StorePreviewProps) {
+  const [featuredItems, setFeaturedItems] = useState<StoreItem[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    fetchFeaturedItems();
+  }, []);
+
+  const fetchFeaturedItems = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('store_items')
+        .select('*')
+        .eq('is_active', true)
+        .gt('quantity_in_stock', 0)
+        .order('created_at', { ascending: false })
+        .limit(4); // Show 4 featured items
+
+      if (error) throw error;
+      setFeaturedItems(data || []);
+    } catch (error) {
+      console.error('Error fetching featured items:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const formatPrice = (price: number) => {
     return new Intl.NumberFormat('en-US', {
       style: 'currency',
-      currency: 'USD'
+      currency: 'USD',
     }).format(price);
   };
 
-  // Mock products if none provided
-  const mockProducts: Product[] = [
-    {
-      id: "1",
-      name: "Glee Club T-Shirt",
-      price: 25.00,
-      imageUrl: "/placeholder.svg",
-      isNew: true
-    },
-    {
-      id: "2",
-      name: "Concert Program",
-      price: 15.00,
-      imageUrl: "/placeholder.svg"
-    },
-    {
-      id: "3",
-      name: "Glee Club Hoodie",
-      price: 45.00,
-      imageUrl: "/placeholder.svg",
-      isSale: true,
-      originalPrice: 55.00
-    },
-    {
-      id: "4",
-      name: "Alumni Pin",
-      price: 12.00,
-      imageUrl: "/placeholder.svg"
-    }
-  ];
-
-  const displayProducts = products.length > 0 ? products : mockProducts;
-
-  return (
-    <section className={`py-12 ${className}`}>
+  if (isLoading) {
+    return (
       <div className="container mx-auto px-4">
         <div className="text-center mb-8">
-          <h2 className="text-3xl font-playfair font-bold mb-2">{title}</h2>
+          <h2 className="text-3xl font-bold mb-2">{title}</h2>
           <p className="text-muted-foreground">{subtitle}</p>
         </div>
-
-        {/* Products Grid */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6 mb-8">
-          {displayProducts.slice(0, 4).map((product) => (
-            <Card key={product.id} className="group cursor-pointer hover:shadow-lg transition-shadow">
-              <CardContent className="p-0">
-                <div className="relative aspect-square overflow-hidden rounded-t-lg">
-                  <img
-                    src={product.imageUrl || "/placeholder.svg"}
-                    alt={product.name}
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                  />
-                  
-                  {/* Badges */}
-                  <div className="absolute top-2 left-2 flex flex-col gap-1">
-                    {product.isNew && (
-                      <Badge variant="secondary" className="bg-glee-spelman text-white">
-                        New
-                      </Badge>
-                    )}
-                    {product.isSale && (
-                      <Badge variant="destructive">
-                        Sale
-                      </Badge>
-                    )}
-                  </div>
-                </div>
-                
-                <div className="p-3">
-                  <h3 className="font-medium text-sm md:text-base line-clamp-2 mb-2">
-                    {product.name}
-                  </h3>
-                  <div className="flex items-center gap-2">
-                    <span className="font-semibold text-glee-spelman">
-                      {formatPrice(product.price)}
-                    </span>
-                    {product.originalPrice && (
-                      <span className="text-sm text-muted-foreground line-through">
-                        {formatPrice(product.originalPrice)}
-                      </span>
-                    )}
-                  </div>
-                </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          {[...Array(4)].map((_, i) => (
+            <Card key={i} className="animate-pulse">
+              <CardHeader>
+                <div className="w-full h-48 bg-gray-200 rounded"></div>
+              </CardHeader>
+              <CardContent>
+                <div className="h-4 bg-gray-200 rounded mb-2"></div>
+                <div className="h-4 bg-gray-200 rounded w-2/3"></div>
               </CardContent>
             </Card>
           ))}
         </div>
-
-        {/* Shop All Button */}
-        {showShopAllButton && (
-          <div className="text-center">
-            <Button 
-              variant="outline" 
-              size="lg"
-              onClick={onShopAll}
-              className="border-glee-spelman text-glee-spelman hover:bg-glee-spelman hover:text-white"
-            >
-              Shop All Products
-            </Button>
-          </div>
-        )}
       </div>
-    </section>
+    );
+  }
+
+  if (featuredItems.length === 0) {
+    return (
+      <div className="container mx-auto px-4 text-center py-12">
+        <h2 className="text-3xl font-bold mb-2">{title}</h2>
+        <p className="text-muted-foreground mb-8">{subtitle}</p>
+        <p className="text-muted-foreground">No items available at the moment.</p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="container mx-auto px-4">
+      <div className="text-center mb-8">
+        <h2 className="text-3xl font-bold mb-2">{title}</h2>
+        <p className="text-muted-foreground">{subtitle}</p>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        {featuredItems.map((item) => (
+          <Card key={item.id} className="group hover:shadow-lg transition-shadow">
+            <CardHeader className="p-0">
+              <div className="relative overflow-hidden rounded-t-lg">
+                {item.image_url ? (
+                  <img
+                    src={item.image_url}
+                    alt={item.name}
+                    className="w-full h-48 object-cover group-hover:scale-105 transition-transform"
+                  />
+                ) : (
+                  <div className="w-full h-48 bg-gradient-to-br from-glee-purple/20 to-glee-orange/20 flex items-center justify-center">
+                    <ShoppingBag className="h-12 w-12 text-glee-purple/50" />
+                  </div>
+                )}
+                {item.tags.includes('new') && (
+                  <Badge className="absolute top-2 left-2 bg-green-500">
+                    New
+                  </Badge>
+                )}
+                {item.tags.includes('featured') && (
+                  <Badge className="absolute top-2 right-2 bg-yellow-500">
+                    <Star className="h-3 w-3 mr-1" />
+                    Featured
+                  </Badge>
+                )}
+              </div>
+            </CardHeader>
+            <CardContent className="p-4">
+              <h3 className="font-semibold text-lg mb-2 line-clamp-1">{item.name}</h3>
+              {item.description && (
+                <p className="text-sm text-muted-foreground mb-2 line-clamp-2">
+                  {item.description}
+                </p>
+              )}
+              <div className="flex justify-between items-center">
+                <span className="text-lg font-bold text-glee-purple">
+                  {formatPrice(item.price)}
+                </span>
+                <span className="text-sm text-muted-foreground">
+                  {item.quantity_in_stock} in stock
+                </span>
+              </div>
+              {item.tags.length > 0 && (
+                <div className="flex flex-wrap gap-1 mt-2">
+                  {item.tags.slice(0, 3).map((tag, index) => (
+                    <Badge key={index} variant="outline" className="text-xs">
+                      {tag}
+                    </Badge>
+                  ))}
+                </div>
+              )}
+            </CardContent>
+            <CardFooter className="p-4 pt-0">
+              <Button className="w-full bg-glee-purple hover:bg-glee-purple/90">
+                Add to Cart
+              </Button>
+            </CardFooter>
+          </Card>
+        ))}
+      </div>
+
+      {showShopAllButton && (
+        <div className="text-center">
+          <Button 
+            size="lg" 
+            className="bg-glee-orange hover:bg-glee-orange/90"
+            onClick={onShopAll || (() => window.location.href = '/store')}
+          >
+            <ShoppingBag className="h-5 w-5 mr-2" />
+            Shop All Items
+          </Button>
+        </div>
+      )}
+    </div>
   );
 }
