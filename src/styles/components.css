@@ -1,127 +1,39 @@
-
-/* ... keep existing code */
-
-/* Media Library components */
-.media-list-item {
-  @apply flex items-center p-2 border rounded-md cursor-pointer transition-colors;
-}
-
-.media-list-item:hover {
-  @apply bg-muted/20;
-}
-
-.media-item-icon {
-  @apply flex-shrink-0 w-10 h-10 flex items-center justify-center bg-muted rounded mr-2;
-}
-
-.media-item-content {
-  @apply flex-grow min-w-0;
-}
-
-.media-item-actions {
-  @apply flex-shrink-0 flex gap-1;
-}
-
-.media-grid {
-  @apply grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4;
-}
-
-/* Simple file type indicators */
-.file-type-badge {
-  @apply inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium;
-}
-
-.file-type-image {
-  @apply bg-blue-50 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400;
-}
-
-.file-type-audio {
-  @apply bg-green-50 text-green-700 dark:bg-green-900/30 dark:text-green-400;
-}
-
-.file-type-video {
-  @apply bg-purple-50 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400;
-}
-
-.file-type-document {
-  @apply bg-amber-50 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400;
-}
-
-.file-type-other {
-  @apply bg-gray-50 text-gray-700 dark:bg-gray-800/50 dark:text-gray-400;
-}
-
-/* News Ticker Marquee Animation */
-@keyframes marquee {
+/* News Ticker Animations */
+@keyframes marquee-slow {
   0% {
-    transform: translateX(100%);
+    transform: translate3d(100%, 0, 0);
   }
   100% {
-    transform: translateX(-100%);
-  }
-}
-
-@keyframes marquee-fast {
-  0% {
-    transform: translateX(100%);
-  }
-  100% {
-    transform: translateX(-100%);
+    transform: translate3d(-100%, 0, 0);
   }
 }
 
 @keyframes marquee-normal {
   0% {
-    transform: translateX(100%);
+    transform: translate3d(100%, 0, 0);
   }
   100% {
-    transform: translateX(-100%);
+    transform: translate3d(-100%, 0, 0);
   }
 }
 
-@keyframes marquee-slow {
+@keyframes marquee-fast {
   0% {
-    transform: translateX(100%);
+    transform: translate3d(100%, 0, 0);
   }
   100% {
-    transform: translateX(-100%);
+    transform: translate3d(-100%, 0, 0);
   }
-}
-
-@keyframes marquee-slower {
-  0% {
-    transform: translateX(100%);
-  }
-  100% {
-    transform: translateX(-100%);
-  }
-}
-
-.animate-marquee {
-  animation: marquee 337.5s linear infinite;
-}
-
-.animate-marquee-fast {
-  animation: marquee-fast 253.125s linear infinite;
-}
-
-.animate-marquee-normal {
-  animation: marquee-normal 281.25s linear infinite;
 }
 
 .animate-marquee-slow {
-  animation: marquee-slow 337.5s linear infinite;
+  animation: marquee-slow 60s linear infinite;
 }
 
-.animate-marquee-slower {
-  animation: marquee-slower 388.125s linear infinite;
+.animate-marquee-normal {
+  animation: marquee-normal 40s linear infinite;
 }
 
-/* Pause animation on hover */
-.animate-marquee:hover,
-.animate-marquee-fast:hover,
-.animate-marquee-normal:hover,
-.animate-marquee-slow:hover,
-.animate-marquee-slower:hover {
-  animation-play-state: paused;
+.animate-marquee-fast {
+  animation: marquee-fast 25s linear infinite;
 }

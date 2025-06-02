@@ -1,5 +1,14 @@
 
 import React, { useState, useEffect } from "react";
+import { Settings } from "lucide-react";
+import { useAuth } from "@/contexts/AuthContext";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Button } from "@/components/ui/button";
 
 export interface NewsItem {
   id: string;
@@ -19,7 +28,8 @@ export const NewsTicker: React.FC<NewsTickerProps> = ({
   hideAfter = 8000 
 }) => {
   const [isVisible, setIsVisible] = useState(true);
-  const [currentIndex, setCurrentIndex] = useState(0);
+  const [scrollSpeed, setScrollSpeed] = useState<'slow' | 'normal' | 'fast'>('fast');
+  const { isAdmin } = useAuth();
   
   // Simple predefined news items with content
   const newsItems: NewsItem[] = [
@@ -53,15 +63,6 @@ export const NewsTicker: React.FC<NewsTickerProps> = ({
     }
   ];
 
-  // Cycle through news items faster (3 seconds instead of 4)
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setCurrentIndex((prevIndex) => (prevIndex + 1) % newsItems.length);
-    }, 3000);
-
-    return () => clearInterval(interval);
-  }, [newsItems.length]);
-
   // Auto-hide functionality
   useEffect(() => {
     if (autoHide && hideAfter) {
@@ -77,29 +78,66 @@ export const NewsTicker: React.FC<NewsTickerProps> = ({
     return null;
   }
 
-  const currentItem = newsItems[currentIndex];
-
-  const handleNewsClick = () => {
+  const handleNewsClick = (item: NewsItem) => {
     // Open the news article page
-    window.location.href = `/news/${currentItem.id}`;
+    window.location.href = `/news/${item.id}`;
   };
+
+  const getAnimationClass = () => {
+    switch (scrollSpeed) {
+      case 'slow': return 'animate-marquee-slow';
+      case 'normal': return 'animate-marquee-normal'; 
+      case 'fast': return 'animate-marquee-fast';
+      default: return 'animate-marquee-fast';
+    }
+  };
+
+  // Create continuous news string with spacing
+  const continuousNews = newsItems.map(item => item.headline).join(' • ');
+  const doubledNews = `${continuousNews} • ${continuousNews}`;
 
   return (
     <div className="bg-glee-columbia text-white py-2 relative w-full overflow-hidden">
-      <div className="w-full px-4 flex items-center justify-center text-sm font-medium">
+      <div className="w-full px-4 flex items-center justify-between">
         <div className="flex-1 overflow-hidden flex items-center justify-center">
-          <div 
-            className="whitespace-nowrap animate-marquee-fast"
-            onClick={handleNewsClick}
-          >
+          <div className={`whitespace-nowrap ${getAnimationClass()}`}>
             <span 
               className="cursor-pointer hover:text-yellow-200 transition-colors text-white drop-shadow-sm"
               title="Click to read more"
+              onClick={() => handleNewsClick(newsItems[0])}
             >
-              {currentItem.headline}
+              {doubledNews}
             </span>
           </div>
         </div>
+        
+        {/* Admin Controls */}
+        {isAdmin() && (
+          <div className="ml-4">
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  className="text-white hover:bg-white/20 p-1"
+                >
+                  <Settings className="h-4 w-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-48">
+                <DropdownMenuItem onClick={() => setScrollSpeed('slow')}>
+                  Slow Speed
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => setScrollSpeed('normal')}>
+                  Normal Speed
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => setScrollSpeed('fast')}>
+                  Fast Speed
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
+        )}
       </div>
     </div>
   );
