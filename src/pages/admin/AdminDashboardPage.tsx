@@ -4,6 +4,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { PageLoader } from "@/components/ui/page-loader";
 import { Navigate } from "react-router-dom";
 import AdminDashboard from "./AdminDashboard";
+import { DatabaseConnectionTest } from "@/components/admin/DatabaseConnectionTest";
 
 export default function AdminDashboardPage() {
   const { user, profile, isLoading, isInitialized, isAdmin } = useAuth();
@@ -51,10 +52,20 @@ export default function AdminDashboardPage() {
     isLoadingProfile: isLoading
   });
   
-  // If user is a known admin by email, allow access regardless of profile status
+  // If user is a known admin by email, show dashboard with diagnostic tools
   if (isKnownAdmin) {
-    console.log('🏛️ AdminDashboardPage: Known admin by email, rendering dashboard');
-    return <AdminDashboard />;
+    console.log('🏛️ AdminDashboardPage: Known admin by email, rendering dashboard with diagnostics');
+    return (
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+        <div className="p-6">
+          <h1 className="text-2xl font-bold mb-6">Admin Dashboard - Diagnostic Mode</h1>
+          <div className="mb-8">
+            <DatabaseConnectionTest />
+          </div>
+          <AdminDashboard />
+        </div>
+      </div>
+    );
   }
   
   // For non-known admin emails, we need to wait for profile to load
