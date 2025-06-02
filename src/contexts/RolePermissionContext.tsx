@@ -1,6 +1,7 @@
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { useAuth } from './AuthContext';
+import { hasPermission as checkPermission } from '@/utils/permissionChecker';
 
 interface RolePermissionContextType {
   userRole: string | null;
@@ -24,20 +25,22 @@ export const RolePermissionProvider: React.FC<{ children: React.ReactNode }> = (
   const userRole = profile?.role || 'member';
 
   const hasPermission = (permission: string): boolean => {
-    if (!isAuthenticated || !profile) return false;
+    if (!isAuthenticated || !user) return false;
     
     // Super admins have all permissions
-    if (profile.is_super_admin || profile.role === 'admin') {
+    if (profile?.is_super_admin || profile?.role === 'admin') {
       return true;
     }
     
-    // Basic permissions for all authenticated users
-    const basicPermissions = ['view_calendar', 'view_announcements', 'view_sheet_music'];
-    if (basicPermissions.includes(permission)) {
-      return true;
-    }
+    // Create user object for permission checking
+    const currentUser = {
+      ...user,
+      role: profile?.role,
+      role_tags: profile?.role_tags || []
+    };
     
-    return false;
+    // Use the updated permission checker
+    return checkPermission(currentUser, permission);
   };
 
   const contextValue: RolePermissionContextType = {

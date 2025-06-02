@@ -8,13 +8,30 @@ import { rolePermissions } from './permissionsMap.js';
  * @returns {boolean} - True if the user has permission, false otherwise
  */
 export const hasPermission = (user, action) => {
-  // Return false if user is null/undefined or has no role_tags
-  if (!user || !user.role_tags || !Array.isArray(user.role_tags)) {
+  // Return false if user is null/undefined
+  if (!user) {
     return false;
   }
 
   // Return false if action is not provided
   if (!action) {
+    return false;
+  }
+
+  // Basic view permissions for all members (even without role_tags)
+  const basicMemberPermissions = [
+    'view_sheet_music',
+    'view_calendar', 
+    'view_announcements'
+  ];
+
+  // If user has role 'member' or 'Member' and is requesting basic permissions
+  if ((user.role === 'member' || user.role === 'Member') && basicMemberPermissions.includes(action)) {
+    return true;
+  }
+
+  // If user has no role_tags, deny all edit-level permissions
+  if (!user.role_tags || !Array.isArray(user.role_tags) || user.role_tags.length === 0) {
     return false;
   }
 
