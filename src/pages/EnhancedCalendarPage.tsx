@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -19,16 +20,14 @@ export default function EnhancedCalendarPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [activeTab, setActiveTab] = useState('all');
   const [calendarView, setCalendarView] = useState('month');
-  const [selectedEventTypes, setSelectedEventTypes] = useState<string[]>([]);
+  const [selectedEventType, setSelectedEventType] = useState('all');
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchQuery(e.target.value);
   };
 
-  const toggleEventType = (type: string) => {
-    setSelectedEventTypes((prev) =>
-      prev.includes(type) ? prev.filter((t) => t !== type) : [...prev, type]
-    );
+  const handleEventTypeChange = (type: string) => {
+    setSelectedEventType(type);
   };
 
   if (isLoading) {
@@ -76,15 +75,15 @@ export default function EnhancedCalendarPage() {
             <TabsContent value="all" className="space-y-2">
               <div className="flex items-center space-x-2">
                 <EventTypeFilter
-                  selectedEventTypes={selectedEventTypes}
-                  toggleEventType={toggleEventType}
+                  selectedEventType={selectedEventType}
+                  onEventTypeChange={handleEventTypeChange}
                 />
               </div>
               <EnhancedCalendarView
                 searchQuery={searchQuery}
                 activeTab={activeTab}
                 calendarView={calendarView}
-                selectedEventTypes={selectedEventTypes}
+                selectedEventTypes={selectedEventType === 'all' ? [] : [selectedEventType]}
               />
             </TabsContent>
             <TabsContent value="performances">
