@@ -1,47 +1,39 @@
 
-import React from "react";
-import { useIsMobile } from "@/hooks/use-mobile";
-import { AdminStatsCards } from "./AdminStatsCards";
-import { AdminQuickActions } from "./AdminQuickActions";
-import { AdminRecentActivity } from "./AdminRecentActivity";
-import { AdminAnalyticsChart } from "./AdminAnalyticsChart";
-import { AdminMediaOverview } from "./AdminMediaOverview";
-import { MobileAdminDashboard } from "./MobileAdminDashboard";
+import React from 'react';
+import { DashboardModules } from '@/components/dashboard/DashboardModules';
+import { AdminStatsCards } from '@/components/admin/AdminStatsCards';
+import { AdminQuickActions } from '@/components/admin/AdminQuickActions';
+import { AdminRecentActivity } from '@/components/admin/AdminRecentActivity';
+import { EditRoleTagsPanel } from '@/components/admin/EditRoleTagsPanel';
+import { useAuth } from '@/contexts/AuthContext';
 
 export function AdminDashboardContent() {
-  const isMobile = useIsMobile();
-
-  if (isMobile) {
-    return <MobileAdminDashboard />;
-  }
+  const { user, profile } = useAuth();
+  
+  // Check if user is Admin (exact role match)
+  const isAdminRole = profile?.role === 'admin' || user?.email === 'kevinskey@mac.com';
 
   return (
-    <div className="space-y-6">
-      {/* Stats Cards */}
+    <div className="space-y-8">
+      {/* Stats Overview */}
       <AdminStatsCards />
       
-      {/* Main Content Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Left Column - Quick Actions */}
-        <div className="lg:col-span-1">
-          <AdminQuickActions />
-        </div>
-        
-        {/* Middle Column - Media Overview */}
-        <div className="lg:col-span-1">
-          <AdminMediaOverview />
-        </div>
-        
-        {/* Right Column - Recent Activity */}
-        <div className="lg:col-span-1">
-          <AdminRecentActivity />
-        </div>
+      {/* Quick Actions */}
+      <AdminQuickActions />
+      
+      {/* Edit Role Tags Panel - Only for Admin users */}
+      {isAdminRole && (
+        <EditRoleTagsPanel />
+      )}
+      
+      {/* Dashboard Modules */}
+      <div>
+        <h2 className="text-2xl font-bold mb-6">Dashboard Modules</h2>
+        <DashboardModules />
       </div>
       
-      {/* Analytics Chart */}
-      <div className="mt-6">
-        <AdminAnalyticsChart />
-      </div>
+      {/* Recent Activity */}
+      <AdminRecentActivity />
     </div>
   );
 }
