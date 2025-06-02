@@ -11,6 +11,7 @@ export interface User {
   status?: string;
   join_date?: string;
   created_at?: string;
+  updated_at?: string;
   last_sign_in_at?: string;
   is_super_admin?: boolean;
   disabled?: boolean;
