@@ -10,7 +10,7 @@ export function HeroBannerSection() {
         height="standard"
         showNavigation={false}
         showPlayPause={false}
-        showCounter={true}
+        showCounter={false}
         showDots={false}
         enableAutoplay={true}
       />
