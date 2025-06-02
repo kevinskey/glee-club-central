@@ -5,7 +5,7 @@ import { cn } from '@/lib/utils';
 interface MobileResponsiveTextProps {
   children: React.ReactNode;
   as?: 'h1' | 'h2' | 'h3' | 'h4' | 'p' | 'span';
-  size?: 'xs' | 'sm' | 'base' | 'lg' | 'xl' | '2xl' | '3xl';
+  size?: 'xs' | 'sm' | 'base' | 'lg' | 'xl' | '2xl' | '3xl' | '4xl' | '5xl';
   className?: string;
   weight?: 'normal' | 'medium' | 'semibold' | 'bold';
 }
@@ -24,7 +24,9 @@ export function MobileResponsiveText({
     lg: 'text-lg sm:text-xl',
     xl: 'text-xl sm:text-2xl',
     '2xl': 'text-2xl sm:text-3xl md:text-4xl',
-    '3xl': 'text-3xl sm:text-4xl md:text-5xl'
+    '3xl': 'text-3xl sm:text-4xl md:text-5xl',
+    '4xl': 'text-4xl sm:text-5xl md:text-6xl',
+    '5xl': 'text-5xl sm:text-6xl md:text-7xl'
   };
 
   const weightClasses = {

@@ -5,6 +5,7 @@ import { Card } from "@/components/ui/card";
 import { MobileOptimizedContainer } from "@/components/mobile/MobileOptimizedContainer";
 import { MobileResponsiveText } from "@/components/mobile/MobileResponsiveText";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { cn } from "@/lib/utils";
 
 interface HeroImage {
   id: string;
@@ -51,7 +52,10 @@ export function HeroBanner({
           {displayImages.map((image, index) => (
             <CarouselItem key={image.id || index}>
               <Card className="border-0 rounded-none">
-                <div className={`relative overflow-hidden ${isMobile ? 'aspect-[4/3]' : 'aspect-[16/9] md:aspect-[21/9]'}`}>
+                <div className={cn(
+                  "relative overflow-hidden",
+                  isMobile ? "aspect-[4/3] max-h-[50vh]" : "aspect-[16/9] md:aspect-[21/9] max-h-[70vh]"
+                )}>
                   <img
                     src={image.url}
                     alt={image.alt || image.title || "Hero image"}
@@ -64,18 +68,18 @@ export function HeroBanner({
                   {/* Text Overlay */}
                   {showOverlayText && image.title && (
                     <div className="absolute inset-0 flex items-center justify-center">
-                      <MobileOptimizedContainer padding="md" className="text-center text-white w-full">
+                      <MobileOptimizedContainer padding="sm" className="text-center text-white w-full">
                         <MobileResponsiveText 
                           as="h1" 
-                          size={isMobile ? "3xl" : "5xl"} 
+                          size={isMobile ? "2xl" : "4xl"} 
                           weight="bold" 
-                          className="mb-4"
+                          className="mb-2"
                         >
                           {image.title}
                         </MobileResponsiveText>
                         <MobileResponsiveText 
                           as="p" 
-                          size={isMobile ? "base" : "xl"} 
+                          size={isMobile ? "sm" : "lg"} 
                           className="text-white/90 max-w-2xl mx-auto"
                         >
                           Spelman College Glee Club
