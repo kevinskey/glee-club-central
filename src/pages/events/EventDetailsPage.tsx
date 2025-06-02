@@ -16,7 +16,7 @@ interface EventDetails {
   id: string;
   title: string;
   start_time: string;
-  end_time?: string;
+  end_time: string; // Make this required to match CalendarEvent
   location_name?: string;
   short_description?: string;
   full_description?: string;
@@ -58,6 +58,7 @@ export default function EventDetailsPage() {
       // Transform the data to match our interface
       const transformedEvent: EventDetails = {
         ...data,
+        end_time: data.end_time || data.start_time, // Ensure end_time is never null
         is_private: data.is_private || false,
         allow_reminders: data.allow_reminders || false,
         allow_ics_download: data.allow_ics_download || true,
