@@ -55,9 +55,9 @@ export const HomePageContent = ({
         <HeroBannerSection images={heroImages} />
       </div>
       
-      {/* Main Content Sections - Reduced spacing */}
+      {/* Main Content Sections - Reduced spacing and mobile optimized */}
       <div className="w-full max-w-[100vw] overflow-x-hidden">
-        <MobileOptimizedContainer padding="md" maxWidth="full" className="space-y-6">
+        <MobileOptimizedContainer padding="md" maxWidth="full" className="space-y-4">
           <div className="events-section w-full">
             <EventsSection events={upcomingEvents} />
           </div>

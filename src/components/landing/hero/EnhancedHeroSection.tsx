@@ -22,7 +22,10 @@ export function EnhancedHeroSection() {
   }, [images]);
 
   return (
-    <section className="relative w-full max-w-[100vw] mx-auto overflow-hidden" style={{ height: isMobile ? '50vh' : '70vh' }}>
+    <section 
+      className="relative w-full max-w-[100vw] mx-auto overflow-hidden" 
+      style={{ height: isMobile ? '60vh' : '70vh', minHeight: isMobile ? '300px' : '400px' }}
+    >
       {/* Hero Image */}
       {heroImage ? (
         <BackgroundSlideshow 
