@@ -16,6 +16,7 @@ import {
 } from 'lucide-react';
 import { useSimpleAuthContextFixed } from '@/contexts/SimpleAuthContextFixed';
 import { useUsersSimplified } from '@/hooks/user/useUsersSimplified';
+import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 
 export function UserManagementSimplified() {
@@ -24,6 +25,7 @@ export function UserManagementSimplified() {
   const [searchTerm, setSearchTerm] = useState('');
   const [filteredUsers, setFilteredUsers] = useState(users);
   const [isSearching, setIsSearching] = useState(false);
+  const [debugInfo, setDebugInfo] = useState<string>('');
 
   const isAdminUser = isAdmin();
 
@@ -87,6 +89,53 @@ export function UserManagementSimplified() {
     toast.success('User list refreshed');
   };
 
+  const handleDebugDatabase = async () => {
+    try {
+      console.log('🔍 Running database debug check...');
+      
+      // Check total profiles count
+      const { count: profilesCount, error: countError } = await supabase
+        .from('profiles')
+        .select('*', { count: 'exact', head: true });
+      
+      // Check auth users count (admin only)
+      let authUsersCount = 'N/A (admin required)';
+      if (isAdminUser) {
+        try {
+          const { data: authUsers, error: authError } = await supabase.auth.admin.listUsers();
+          authUsersCount = authUsers?.users?.length?.toString() || '0';
+        } catch (err) {
+          authUsersCount = 'Error fetching';
+        }
+      }
+
+      // Try to fetch a few sample profiles
+      const { data: sampleProfiles, error: sampleError } = await supabase
+        .from('profiles')
+        .select('id, first_name, last_name, role')
+        .limit(5);
+
+      const debugMessage = `
+Database Debug Info:
+- Profiles in database: ${profilesCount || 'Error: ' + countError?.message}
+- Auth users: ${authUsersCount}
+- Sample profiles: ${sampleProfiles?.length || 0}
+- Sample data: ${JSON.stringify(sampleProfiles, null, 2)}
+- Current user: ${user?.email}
+- Is admin: ${isAdminUser}
+- Sample error: ${sampleError?.message || 'None'}
+      `;
+      
+      setDebugInfo(debugMessage);
+      console.log(debugMessage);
+      
+    } catch (err) {
+      const errorMsg = `Debug error: ${err instanceof Error ? err.message : 'Unknown error'}`;
+      setDebugInfo(errorMsg);
+      console.error(errorMsg);
+    }
+  };
+
   if (isLoading) {
     return (
       <div className="flex items-center justify-center p-8">
@@ -130,6 +179,10 @@ export function UserManagementSimplified() {
           </p>
         </div>
         <div className="flex gap-2">
+          <Button variant="outline" onClick={handleDebugDatabase}>
+            <Database className="mr-2 h-4 w-4" />
+            Debug DB
+          </Button>
           <Button variant="outline" onClick={handleManualRefresh} disabled={usersLoading}>
             <RefreshCw className={`mr-2 h-4 w-4 ${usersLoading ? 'animate-spin' : ''}`} />
             Refresh
@@ -146,6 +199,15 @@ export function UserManagementSimplified() {
           <AlertTriangle className="h-4 w-4" />
           <AlertDescription>
             <strong>Database error:</strong> {error}
+          </AlertDescription>
+        </Alert>
+      )}
+
+      {debugInfo && (
+        <Alert>
+          <Database className="h-4 w-4" />
+          <AlertDescription>
+            <pre className="whitespace-pre-wrap text-xs">{debugInfo}</pre>
           </AlertDescription>
         </Alert>
       )}
@@ -192,6 +254,10 @@ export function UserManagementSimplified() {
                     : 'No members have been added yet.'
                 }
               </p>
+              <Button onClick={handleDebugDatabase} variant="outline">
+                <Database className="mr-2 h-4 w-4" />
+                Debug Database
+              </Button>
             </div>
           ) : (
             <div className="grid gap-4">

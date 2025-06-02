@@ -1,4 +1,3 @@
-
 import { useState, useCallback, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
@@ -45,6 +44,13 @@ export const useUsersSimplified = (): UseUsersSimplifiedResponse => {
         return;
       }
 
+      // First, let's check how many profiles exist in total
+      const { count, error: countError } = await supabase
+        .from('profiles')
+        .select('*', { count: 'exact', head: true });
+
+      console.log('📊 Total profiles in database:', count, 'Error:', countError);
+
       // Fetch profiles using the fixed RLS policies
       const { data: profiles, error: profilesError } = await supabase
         .from('profiles')
@@ -63,7 +69,8 @@ export const useUsersSimplified = (): UseUsersSimplifiedResponse => {
         profilesCount: profiles?.length || 0,
         hasError: !!profilesError,
         errorMessage: profilesError?.message,
-        errorCode: profilesError?.code
+        errorCode: profilesError?.code,
+        profiles: profiles
       });
 
       if (profilesError) {
@@ -151,7 +158,7 @@ export const useUsersSimplified = (): UseUsersSimplifiedResponse => {
           }));
       }
 
-      console.log('✅ Successfully processed users:', usersWithEmails.length);
+      console.log('✅ Successfully processed users:', usersWithEmails.length, usersWithEmails);
       setUsers(usersWithEmails);
       
     } catch (err) {
