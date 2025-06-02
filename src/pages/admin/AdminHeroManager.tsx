@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { HeroSlidesManager } from '@/components/admin/HeroSlidesManager';
+import { UniversalHeroManager } from '@/components/admin/UniversalHeroManager';
 import { PageHeader } from "@/components/ui/page-header";
 import { FloatingThemeToggle } from "@/components/ui/floating-theme-toggle";
 import { AdminTopBar } from "@/components/admin/AdminTopBar";
@@ -16,11 +16,11 @@ export default function AdminHeroManager() {
       {/* Main Content */}
       <div className="space-y-6 p-6">
         <PageHeader 
-          title="Hero Section Manager" 
-          description="Create and manage hero slides with custom text, buttons, and links for your homepage slideshow"
+          title="Universal Hero Section Manager" 
+          description="Manage all hero sections across your entire application from one central location"
         />
         
-        <HeroSlidesManager />
+        <UniversalHeroManager />
         
         <FloatingThemeToggle position="bottom-right" />
       </div>
