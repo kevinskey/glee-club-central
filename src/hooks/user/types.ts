@@ -1,4 +1,5 @@
 
+
 export interface User {
   id: string;
   first_name?: string;
@@ -19,4 +20,6 @@ export interface User {
   dues_paid?: boolean;
   notes?: string;
   role_tags?: string[];
+  personal_title?: string;
 }
+
