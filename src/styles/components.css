@@ -28,13 +28,13 @@
 }
 
 .animate-marquee-slow {
-  animation: marquee-slow 120s linear infinite;
+  animation: marquee-slow 96s linear infinite; /* 20% faster: 120s -> 96s */
 }
 
 .animate-marquee-normal {
-  animation: marquee-normal 80s linear infinite;
+  animation: marquee-normal 64s linear infinite; /* 20% faster: 80s -> 64s */
 }
 
 .animate-marquee-fast {
-  animation: marquee-fast 50s linear infinite;
+  animation: marquee-fast 40s linear infinite; /* 20% faster: 50s -> 40s */
 }

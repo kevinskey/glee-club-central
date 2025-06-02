@@ -103,7 +103,7 @@ export const NewsTicker: React.FC<NewsTickerProps> = ({
         <div className="flex-1 overflow-hidden flex items-center justify-center">
           <div className={`whitespace-nowrap ${getAnimationClass()}`}>
             <span 
-              className="cursor-pointer hover:text-yellow-200 transition-colors text-white drop-shadow-sm"
+              className="cursor-pointer hover:text-yellow-200 transition-colors text-white drop-shadow-sm font-bold text-xs"
               title="Click to read more"
               onClick={() => handleNewsClick(newsItems[0])}
             >
