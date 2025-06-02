@@ -12,7 +12,6 @@ import {
   ShoppingCart,
   Megaphone,
   Image,
-  UserPlus,
   ImageIcon
 } from 'lucide-react';
 
@@ -20,7 +19,6 @@ const navItems = [
   { to: '/admin', icon: LayoutDashboard, label: 'Dashboard', end: true },
   { to: '/admin/calendar', icon: Calendar, label: 'Calendar' },
   { to: '/admin/members', icon: Users, label: 'Members' },
-  { to: '/admin/fan-upload', icon: UserPlus, label: 'Bulk Fan Upload' },
   { to: '/admin/hero-manager', icon: ImageIcon, label: 'Hero Manager' },
   { to: '/admin/media', icon: Image, label: 'Media Library' },
   { to: '/admin/media-uploader', icon: Upload, label: 'Media Uploader' },
