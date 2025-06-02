@@ -1,4 +1,6 @@
 
+import { FileText, Image, Video, Music, File } from "lucide-react";
+
 /**
  * Format file size in bytes to human readable format
  */
@@ -54,4 +56,21 @@ export function isAudioFile(filename: string): boolean {
  */
 export function isPDFFile(filename: string): boolean {
   return getFileExtension(filename) === 'pdf';
+}
+
+/**
+ * Get the appropriate icon component for a file type
+ */
+export function getFileTypeIcon(fileType: string) {
+  if (fileType.startsWith('image/')) {
+    return Image;
+  } else if (fileType.startsWith('video/')) {
+    return Video;
+  } else if (fileType.startsWith('audio/')) {
+    return Music;
+  } else if (fileType === 'application/pdf' || fileType.includes('pdf')) {
+    return FileText;
+  } else {
+    return File;
+  }
 }

@@ -252,6 +252,11 @@ const MediaGrid: React.FC<MediaGridProps> = ({ files, onViewPDF, showPDFCount = 
                     src={file.file_url} 
                     alt={file.title}
                     className="w-full h-full object-cover"
+                    onError={(e) => {
+                      e.currentTarget.style.display = 'none';
+                      const fallback = e.currentTarget.parentNode?.querySelector('.fallback-icon') as HTMLElement;
+                      if (fallback) fallback.style.display = 'flex';
+                    }}
                   />
                 ) : mediaType === "audio" ? (
                   <div className="w-full h-full flex items-center justify-center">
@@ -266,6 +271,13 @@ const MediaGrid: React.FC<MediaGridProps> = ({ files, onViewPDF, showPDFCount = 
                     <FileText className="h-16 w-16 text-muted-foreground" />
                   </div>
                 )}
+                
+                {/* Fallback icon for broken images */}
+                {mediaType === "image" && (
+                  <div className="fallback-icon w-full h-full items-center justify-center hidden">
+                    <Image className="h-16 w-16 text-muted-foreground" />
+                  </div>
+                )}
               </div>
               <CardContent className="p-4 flex-1 flex flex-col">
                 <h3 className="font-medium line-clamp-2 mb-2">{file.title}</h3>
@@ -275,7 +287,7 @@ const MediaGrid: React.FC<MediaGridProps> = ({ files, onViewPDF, showPDFCount = 
                 <div className="mt-auto pt-4">
                   <div className="flex justify-between items-center text-xs text-muted-foreground mb-2">
                     <span>{mediaType.toUpperCase()}</span>
-                    <span>{formatFileSize(file.size || 0)}</span>
+                    <span>{formatFileSize(file.size)}</span>
                   </div>
                   {mediaType === "pdf" && (
                     <Button 
