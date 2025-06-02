@@ -40,7 +40,7 @@ export function HeroBanner({
   const displayImages = images.length > 0 ? images : [fallbackImage];
 
   return (
-    <section className={`relative w-full overflow-hidden ${className}`}>
+    <section className={`relative w-full max-w-[90vw] mx-auto overflow-hidden ${className}`}>
       <Carousel
         opts={{
           align: "start",
@@ -54,7 +54,7 @@ export function HeroBanner({
               <Card className="border-0 rounded-none">
                 <div className={cn(
                   "relative overflow-hidden",
-                  isMobile ? "aspect-[4/3] max-h-[50vh]" : "aspect-[16/9] md:aspect-[21/9] max-h-[70vh]"
+                  isMobile ? "aspect-[4/3] max-h-[40vh]" : "aspect-[16/9] md:aspect-[21/9] max-h-[60vh]"
                 )}>
                   <img
                     src={image.url}
@@ -71,7 +71,7 @@ export function HeroBanner({
                       <MobileOptimizedContainer padding="sm" className="text-center text-white w-full">
                         <MobileResponsiveText 
                           as="h1" 
-                          size={isMobile ? "2xl" : "4xl"} 
+                          size={isMobile ? "2xl" : "3xl"} 
                           weight="bold" 
                           className="mb-2"
                         >

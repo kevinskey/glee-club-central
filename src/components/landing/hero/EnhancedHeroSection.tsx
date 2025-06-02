@@ -23,7 +23,7 @@ export function EnhancedHeroSection() {
   }, [images]);
 
   return (
-    <section className="relative w-full overflow-hidden" style={{ height: isMobile ? '50vh' : '70vh' }}>
+    <section className="relative w-full max-w-[90vw] mx-auto overflow-hidden" style={{ height: isMobile ? '40vh' : '60vh' }}>
       {/* Single Hero Image */}
       {heroImage ? (
         <BackgroundSlideshow 
@@ -40,13 +40,13 @@ export function EnhancedHeroSection() {
           <div className="max-w-3xl mx-auto text-center">
             <h1 className={cn(
               "font-bold text-white mb-3 leading-tight",
-              isMobile ? "text-2xl sm:text-3xl" : "text-4xl md:text-5xl lg:text-6xl"
+              isMobile ? "text-xl sm:text-2xl" : "text-3xl md:text-4xl lg:text-5xl"
             )}>
               Spelman College Glee Club
             </h1>
             <p className={cn(
               "text-white/90 mb-4 max-w-2xl mx-auto",
-              isMobile ? "text-base sm:text-lg" : "text-lg md:text-xl lg:text-2xl"
+              isMobile ? "text-sm sm:text-base" : "text-base md:text-lg lg:text-xl"
             )}>
               A distinguished ensemble with a rich heritage of musical excellence
             </p>
