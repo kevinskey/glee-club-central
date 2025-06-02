@@ -92,9 +92,10 @@ export const NewsTicker: React.FC<NewsTickerProps> = ({
     }
   };
 
-  // Create continuous news string with spacing
-  const continuousNews = newsItems.map(item => item.headline).join(' • ');
-  const doubledNews = `${continuousNews} • ${continuousNews}`;
+  // Create seamless infinite scroll by repeating content multiple times
+  const newsContent = newsItems.map(item => item.headline).join(' • ');
+  // Repeat the content multiple times to ensure seamless infinite scroll
+  const repeatedContent = Array(10).fill(newsContent).join(' • ');
 
   return (
     <div className="bg-glee-columbia text-white py-2 relative w-full overflow-hidden">
@@ -106,7 +107,7 @@ export const NewsTicker: React.FC<NewsTickerProps> = ({
               title="Click to read more"
               onClick={() => handleNewsClick(newsItems[0])}
             >
-              {doubledNews}
+              {repeatedContent}
             </span>
           </div>
         </div>
