@@ -32,7 +32,7 @@ const navItems = [
 
 export const AdminSidebar: React.FC = () => {
   return (
-    <aside className="w-64 bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 h-screen overflow-y-auto">
+    <aside className="fixed left-0 top-0 z-30 w-64 h-screen bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 overflow-y-auto">
       <div className="p-6">
         <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-6">
           Admin Panel
