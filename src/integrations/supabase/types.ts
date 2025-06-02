@@ -1145,6 +1145,7 @@ export type Database = {
           notes: string | null
           phone: string | null
           role: string | null
+          role_tags: string[] | null
           special_roles: string | null
           status: string | null
           title: Database["public"]["Enums"]["user_title"] | null
@@ -1165,6 +1166,7 @@ export type Database = {
           notes?: string | null
           phone?: string | null
           role?: string | null
+          role_tags?: string[] | null
           special_roles?: string | null
           status?: string | null
           title?: Database["public"]["Enums"]["user_title"] | null
@@ -1185,6 +1187,7 @@ export type Database = {
           notes?: string | null
           phone?: string | null
           role?: string | null
+          role_tags?: string[] | null
           special_roles?: string | null
           status?: string | null
           title?: Database["public"]["Enums"]["user_title"] | null

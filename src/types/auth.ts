@@ -1,4 +1,3 @@
-
 export type UserType = 'admin' | 'member';
 
 export interface AuthUser {
@@ -30,6 +29,7 @@ export interface Profile {
   personal_title?: string;
   title?: string;
   special_roles?: string[];
+  role_tags?: string[];
   updated_at?: string;
   last_sign_in_at?: string;
 }

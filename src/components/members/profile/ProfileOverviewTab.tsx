@@ -6,6 +6,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Badge } from "@/components/ui/badge";
+import { X, Plus } from "lucide-react";
 
 interface ProfileOverviewTabProps {
   profile: any;
@@ -20,6 +22,7 @@ export const ProfileOverviewTab: React.FC<ProfileOverviewTabProps> = ({
 }) => {
   const [editedProfile, setEditedProfile] = useState(profile || {});
   const [isLoading, setIsLoading] = useState(false);
+  const [newRoleTag, setNewRoleTag] = useState('');
 
   const handleSave = async () => {
     if (!onSave) return;
@@ -45,6 +48,23 @@ export const ProfileOverviewTab: React.FC<ProfileOverviewTabProps> = ({
     setEditedProfile(prev => ({
       ...prev,
       [field]: value
+    }));
+  };
+
+  const addRoleTag = () => {
+    if (newRoleTag.trim() && !editedProfile.role_tags?.includes(newRoleTag.trim())) {
+      setEditedProfile(prev => ({
+        ...prev,
+        role_tags: [...(prev.role_tags || []), newRoleTag.trim()]
+      }));
+      setNewRoleTag('');
+    }
+  };
+
+  const removeRoleTag = (tagToRemove: string) => {
+    setEditedProfile(prev => ({
+      ...prev,
+      role_tags: (prev.role_tags || []).filter(tag => tag !== tagToRemove)
     }));
   };
 
@@ -152,6 +172,49 @@ export const ProfileOverviewTab: React.FC<ProfileOverviewTabProps> = ({
           ) : (
             <p className="text-sm py-2 px-3 bg-muted rounded">{profile?.class_year || 'Not provided'}</p>
           )}
+        </div>
+
+        <div className="space-y-2">
+          <Label>Additional Roles</Label>
+          <div className="space-y-2">
+            <div className="flex flex-wrap gap-2">
+              {(editedProfile.role_tags || profile?.role_tags || []).map((tag, index) => (
+                <Badge key={index} variant="secondary" className="flex items-center gap-1">
+                  {tag}
+                  {isEditable && (
+                    <button
+                      onClick={() => removeRoleTag(tag)}
+                      className="ml-1 hover:bg-muted-foreground/20 rounded-full p-0.5"
+                    >
+                      <X className="h-3 w-3" />
+                    </button>
+                  )}
+                </Badge>
+              ))}
+              {(!editedProfile.role_tags?.length && !profile?.role_tags?.length) && (
+                <p className="text-sm text-muted-foreground">No additional roles assigned</p>
+              )}
+            </div>
+            
+            {isEditable && (
+              <div className="flex gap-2">
+                <Input
+                  value={newRoleTag}
+                  onChange={(e) => setNewRoleTag(e.target.value)}
+                  placeholder="Add role (e.g., President, Tour Manager)"
+                  onKeyPress={(e) => e.key === 'Enter' && addRoleTag()}
+                />
+                <Button
+                  type="button"
+                  onClick={addRoleTag}
+                  size="sm"
+                  disabled={!newRoleTag.trim()}
+                >
+                  <Plus className="h-4 w-4" />
+                </Button>
+              </div>
+            )}
+          </div>
         </div>
 
         <div className="space-y-2">
