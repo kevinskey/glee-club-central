@@ -136,7 +136,7 @@ export const router = createBrowserRouter([
       </AuthProvider>
     ),
   },
-  // Dashboard routing
+  // Dashboard routing - main entry point for role-based redirection
   {
     path: "/dashboard",
     element: (
