@@ -50,11 +50,11 @@ export function DashboardQuickAccess() {
   const adminQuickAccessLinks = [
     { icon: <LayoutDashboard className="h-5 w-5" />, title: "Admin Dashboard", path: "/admin", color: "bg-glee-spelman" },
     { icon: <Users className="h-5 w-5" />, title: "Member Management", path: "/admin/members", color: "bg-slate-500" },
-    { icon: <Music className="h-5 w-5" />, title: "Sheet Music", path: "/calendar", color: "bg-purple-500" },
+    { icon: <Music className="h-5 w-5" />, title: "Sheet Music", path: "/admin/media-uploader", color: "bg-purple-500" },
     { icon: <Upload className="h-5 w-5" />, title: "Media Manager", path: "/admin/hero-manager", color: "bg-pink-500" },
-    { icon: <BarChart className="h-5 w-5" />, title: "Analytics", path: "/admin", color: "bg-blue-500" },
-    { icon: <Bell className="h-5 w-5" />, title: "Announcements", path: "/admin", color: "bg-red-500" },
-    { icon: <Settings className="h-5 w-5" />, title: "Settings", path: "/admin", color: "bg-gray-500" },
+    { icon: <BarChart className="h-5 w-5" />, title: "Analytics", path: "/admin/analytics", color: "bg-blue-500" },
+    { icon: <Bell className="h-5 w-5" />, title: "Announcements", path: "/admin/announcements", color: "bg-red-500" },
+    { icon: <Settings className="h-5 w-5" />, title: "Settings", path: "/admin/settings", color: "bg-gray-500" },
   ];
   
   const currentLinks = isAdminUser ? adminQuickAccessLinks : memberQuickAccessLinks;

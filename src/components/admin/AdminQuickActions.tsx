@@ -12,7 +12,8 @@ import {
   Music,
   Bell,
   BarChart,
-  FileText
+  FileText,
+  LayoutDashboard
 } from "lucide-react";
 
 interface AdminQuickActionsProps {
@@ -23,6 +24,14 @@ export function AdminQuickActions({ isMobile = false }: AdminQuickActionsProps) 
   const navigate = useNavigate();
 
   const quickActions = [
+    {
+      title: "Dashboard",
+      description: "Admin dashboard home",
+      icon: <LayoutDashboard className="h-5 w-5" />,
+      action: () => navigate("/admin"),
+      color: "bg-glee-spelman",
+      category: "Navigation"
+    },
     {
       title: "Add Member",
       description: "Create new member account",
