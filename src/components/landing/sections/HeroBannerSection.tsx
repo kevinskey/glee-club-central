@@ -8,7 +8,7 @@ export function HeroBannerSection() {
       <UniversalHero 
         sectionId="homepage-main"
         height="standard"
-        showNavigation={true}
+        showNavigation={false}
         showPlayPause={true}
         showCounter={true}
         showDots={true}
