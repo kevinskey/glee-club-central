@@ -21,3 +21,10 @@ export interface NavigationItem {
   href: string;
   icon?: React.ComponentType;
 }
+
+export interface NavItem {
+  title: string;
+  href: string;
+  icon?: React.ComponentType;
+  roles?: string[];
+}
