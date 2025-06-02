@@ -23,6 +23,7 @@ import { Switch } from '@/components/ui/switch';
 import { Textarea } from '@/components/ui/textarea';
 import { userFormSchema, UserFormValues } from '@/components/members/form/userFormSchema';
 import { User } from '@/hooks/user/types';
+import { z } from 'zod';
 
 interface UserFormProps {
   user?: User;
@@ -32,6 +33,11 @@ interface UserFormProps {
 }
 
 export function UserForm({ user, onSubmit, onCancel, title }: UserFormProps) {
+  // Create a schema that makes password optional for editing
+  const editUserSchema = userFormSchema.extend({
+    password: user ? z.string().optional() : z.string().min(6, "Password must be at least 6 characters")
+  });
+
   const {
     register,
     handleSubmit,
@@ -39,7 +45,7 @@ export function UserForm({ user, onSubmit, onCancel, title }: UserFormProps) {
     watch,
     formState: { errors, isSubmitting }
   } = useForm<UserFormValues>({
-    resolver: zodResolver(userFormSchema),
+    resolver: zodResolver(editUserSchema),
     defaultValues: user ? {
       first_name: user.first_name || '',
       last_name: user.last_name || '',
@@ -72,7 +78,13 @@ export function UserForm({ user, onSubmit, onCancel, title }: UserFormProps) {
   });
 
   const handleFormSubmit = (data: UserFormValues) => {
-    onSubmit(data);
+    // If editing and password is empty, remove it from the data
+    if (user && !data.password) {
+      const { password, ...dataWithoutPassword } = data;
+      onSubmit(dataWithoutPassword as UserFormValues);
+    } else {
+      onSubmit(data);
+    }
   };
 
   return (
