@@ -3,35 +3,26 @@ import React, { useState } from 'react';
 import { CalendarView } from '@/components/calendar/CalendarView';
 import { EventDialog } from '@/components/calendar/EventDialog';
 import { useCalendarEvents } from '@/hooks/useCalendarEvents';
-import { useUserRole } from '@/hooks/useUserRole';
 import { CalendarEvent } from '@/types/calendar';
 import { PageHeader } from '@/components/ui/page-header';
 import { Calendar } from 'lucide-react';
-import { useAuth } from '@/contexts/AuthContext';
-import { useProfile } from '@/contexts/ProfileContext';
+import { useSimpleAuthContext } from '@/contexts/SimpleAuthContext';
 import { Button } from '@/components/ui/button';
 import { PageLoader } from '@/components/ui/page-loader';
 import { Card, CardContent } from '@/components/ui/card';
 
 export default function CalendarPage() {
   const { events, loading, error, fetchEvents } = useCalendarEvents();
-  const { userRole, isMember } = useUserRole();
-  const { user, loading: authLoading } = useAuth();
-  const { isAuthenticated } = useProfile();
+  const { isAuthenticated, user } = useSimpleAuthContext();
   const [selectedEvent, setSelectedEvent] = useState<CalendarEvent | null>(null);
 
-  // Filter events based on user authentication and public visibility
+  // Filter events based on user authentication status
   const filteredEvents = events.filter(event => {
-    // Show public events to everyone
+    // Always show public events
     if (event.is_public) return true;
-    // Show private events only to authenticated members
-    return isMember && !event.is_private;
+    // Show private events only to authenticated users
+    return isAuthenticated && !event.is_private;
   });
-
-  // Show loading while authentication is being checked
-  if (authLoading) {
-    return <PageLoader message="Loading calendar..." />;
-  }
 
   const handleEventClick = (event: CalendarEvent) => {
     setSelectedEvent(event);
@@ -82,7 +73,7 @@ export default function CalendarPage() {
     <div className="mobile-container mobile-section-padding space-y-4 sm:space-y-6 mobile-scroll">
       <PageHeader
         title="Calendar"
-        description={`View ${isMember ? 'all events and performances' : 'upcoming public events'}`}
+        description={`View ${isAuthenticated ? 'all events and performances' : 'upcoming public events'}`}
         icon={<Calendar className="h-5 w-5 sm:h-6 sm:w-6" />}
       />
 
@@ -93,7 +84,7 @@ export default function CalendarPage() {
             <div className="text-center">
               <h3 className="text-lg font-semibold text-gray-900">No Events Found</h3>
               <p className="text-gray-500 mt-2">
-                {isMember 
+                {isAuthenticated 
                   ? "There are no upcoming events at this time." 
                   : "There are no upcoming public events. Log in to see member events."
                 }
@@ -105,7 +96,7 @@ export default function CalendarPage() {
         <CalendarView
           events={filteredEvents}
           onEventClick={handleEventClick}
-          showPrivateEvents={isMember}
+          showPrivateEvents={isAuthenticated}
         />
       )}
 
@@ -113,7 +104,7 @@ export default function CalendarPage() {
         event={selectedEvent}
         isOpen={!!selectedEvent}
         onClose={() => setSelectedEvent(null)}
-        canRSVP={isMember && selectedEvent?.allow_rsvp}
+        canRSVP={isAuthenticated && selectedEvent?.allow_rsvp}
       />
     </div>
   );

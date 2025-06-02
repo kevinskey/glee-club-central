@@ -8,16 +8,16 @@ export const useCalendarEvents = () => {
   const [events, setEvents] = useState<CalendarEvent[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const { user } = useSimpleAuthContext();
+  const { user, isAuthenticated } = useSimpleAuthContext();
 
   const fetchEvents = async () => {
     try {
       setLoading(true);
       setError(null);
       
-      console.log('Fetching events...');
+      console.log('Fetching events... Authentication status:', isAuthenticated);
       
-      // Simple query to get all events
+      // Fetch all events - we'll filter client-side for better performance
       const { data, error } = await supabase
         .from('events')
         .select('*')
@@ -130,7 +130,7 @@ export const useCalendarEvents = () => {
 
   useEffect(() => {
     fetchEvents();
-  }, []);
+  }, []); // Remove dependency on user to allow public access
 
   return {
     events,
