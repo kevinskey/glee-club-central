@@ -15,9 +15,9 @@ import {
 } from '@/components/ui/dialog';
 
 interface CSVRow {
-  email: string;
-  first_name: string;
-  last_name: string;
+  email?: string;
+  first_name?: string;
+  last_name?: string;
   phone?: string;
   voice_part?: string;
   role?: string;
@@ -78,34 +78,32 @@ student@spelman.edu,Mary,Smith,555-0124,alto_1,member,active,2026,Another member
     });
   };
 
-  const validateRow = (row: CSVRow, index: number): string | null => {
-    if (!row.email || !row.email.includes('@')) {
-      return `Row ${index + 2}: Invalid email address`;
-    }
-    if (!row.first_name) {
-      return `Row ${index + 2}: First name is required`;
-    }
-    if (!row.last_name) {
-      return `Row ${index + 2}: Last name is required`;
-    }
-    return null;
+  const generateFallbackEmail = (firstName: string, lastName: string, index: number): string => {
+    const cleanFirst = firstName.toLowerCase().replace(/[^a-z]/g, '');
+    const cleanLast = lastName.toLowerCase().replace(/[^a-z]/g, '');
+    return `${cleanFirst}.${cleanLast}.${index}@temp.spelman.edu`;
   };
 
-  const createUser = async (userData: CSVRow): Promise<void> => {
+  const createUser = async (userData: CSVRow, index: number): Promise<void> => {
     try {
-      console.log('Creating user:', userData.email);
+      // Provide fallback values for missing data
+      const firstName = userData.first_name || 'Member';
+      const lastName = userData.last_name || `User${index + 1}`;
+      const email = userData.email || generateFallbackEmail(firstName, lastName, index);
+      
+      console.log('Creating user:', email);
       
       // Generate a secure temporary password
       const tempPassword = `Temp${Math.random().toString(36).substring(2, 8)}Glee!1`;
       
       // Create auth user using admin API
       const { data: authData, error: authError } = await supabase.auth.admin.createUser({
-        email: userData.email,
+        email: email,
         password: tempPassword,
         email_confirm: true,
         user_metadata: {
-          first_name: userData.first_name,
-          last_name: userData.last_name
+          first_name: firstName,
+          last_name: lastName
         }
       });
 
@@ -120,24 +118,30 @@ student@spelman.edu,Mary,Smith,555-0124,alto_1,member,active,2026,Another member
 
       console.log('Auth user created:', authData.user.id);
 
-      // Parse boolean and date values
+      // Parse boolean and date values with fallbacks
       const duesPaid = userData.dues_paid?.toLowerCase() === 'true';
       const joinDate = userData.join_date || new Date().toISOString().split('T')[0];
+      const phone = userData.phone || null;
+      const voicePart = userData.voice_part || null;
+      const status = userData.status || 'active';
+      const classYear = userData.class_year || null;
+      const notes = userData.notes || null;
+      const role = userData.role || 'member';
 
       // Create/update profile with additional data
       const profileData = {
         id: authData.user.id,
-        first_name: userData.first_name,
-        last_name: userData.last_name,
-        phone: userData.phone || null,
-        voice_part: userData.voice_part || null,
-        status: userData.status || 'active',
-        class_year: userData.class_year || null,
-        notes: userData.notes || null,
+        first_name: firstName,
+        last_name: lastName,
+        phone: phone,
+        voice_part: voicePart,
+        status: status,
+        class_year: classYear,
+        notes: notes,
         dues_paid: duesPaid,
         join_date: joinDate,
-        role: userData.role || 'member',
-        is_super_admin: userData.role === 'admin',
+        role: role,
+        is_super_admin: role === 'admin',
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString()
       };
@@ -162,7 +166,7 @@ student@spelman.edu,Mary,Smith,555-0124,alto_1,member,active,2026,Another member
         throw new Error(`Failed to create profile: ${profileError.message}`);
       }
 
-      console.log('Profile created successfully for:', userData.email);
+      console.log('Profile created successfully for:', email);
     } catch (error: any) {
       console.error('User creation failed:', error);
       throw error;
@@ -210,29 +214,18 @@ student@spelman.edu,Mary,Smith,555-0124,alto_1,member,active,2026,Another member
       const row = csvData[i];
       setUploadProgress(((i + 1) / csvData.length) * 100);
 
-      console.log(`Processing row ${i + 1}/${csvData.length}:`, row.email);
-
-      // Validate row
-      const validationError = validateRow(row, i);
-      if (validationError) {
-        console.log('Validation error:', validationError);
-        result.errors.push({
-          row: i + 2,
-          email: row.email,
-          error: validationError
-        });
-        continue;
-      }
+      const displayEmail = row.email || `Row ${i + 2}`;
+      console.log(`Processing row ${i + 1}/${csvData.length}:`, displayEmail);
 
       try {
-        await createUser(row);
+        await createUser(row, i);
         result.success++;
-        console.log(`Successfully created user ${result.success}:`, row.email);
+        console.log(`Successfully created user ${result.success}:`, displayEmail);
       } catch (error: any) {
-        console.error(`Failed to create user ${row.email}:`, error);
+        console.error(`Failed to create user ${displayEmail}:`, error);
         result.errors.push({
           row: i + 2,
-          email: row.email,
+          email: displayEmail,
           error: error.message || 'Unknown error occurred'
         });
       }
@@ -290,8 +283,8 @@ student@spelman.edu,Mary,Smith,555-0124,alto_1,member,active,2026,Another member
               <Alert>
                 <AlertCircle className="h-4 w-4" />
                 <AlertDescription>
-                  Upload a CSV file to create multiple users at once. Required fields: email, first_name, last_name.
-                  Optional fields: phone, voice_part, role, status, class_year, notes, dues_paid, join_date.
+                  Upload a CSV file to create multiple users at once. All fields are optional - missing data will be filled with appropriate defaults.
+                  Available fields: email, first_name, last_name, phone, voice_part, role, status, class_year, notes, dues_paid, join_date.
                 </AlertDescription>
               </Alert>
 
