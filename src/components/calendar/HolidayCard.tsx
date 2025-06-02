@@ -1,47 +1,25 @@
 
 import React from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
+import { Card, CardContent } from '@/components/ui/card';
 
-interface NationalHoliday {
-  id: string;
-  title: string;
-  date: Date;
-  description: string;
-  imageUrl: string;
-  isObserved: boolean;
-  category: 'federal' | 'observance';
+export interface HolidayCardProps {
+  holiday: {
+    name: string;
+    date: string;
+    description?: string;
+  };
 }
 
-interface HolidayCardProps {
-  holiday: NationalHoliday;
-  className?: string;
-}
-
-export const HolidayCard: React.FC<HolidayCardProps> = ({ holiday, className }) => {
+export function HolidayCard({ holiday }: HolidayCardProps) {
   return (
-    <Card className={`overflow-hidden border-red-300 bg-gradient-to-br from-red-50 via-white to-blue-50 shadow-lg ${className || ''}`}>
-      <div className="relative h-32 overflow-hidden">
-        <img 
-          src={holiday.imageUrl} 
-          alt={holiday.title}
-          className="w-full h-full object-cover"
-        />
-        <div className="absolute top-2 right-2">
-          <Badge 
-            variant={holiday.category === 'federal' ? 'default' : 'secondary'}
-            className={holiday.category === 'federal' ? 'bg-blue-700 text-white border-red-300' : 'bg-red-100 text-blue-800 border-blue-300'}
-          >
-            {holiday.category === 'federal' ? 'Federal Holiday' : 'Observance'}
-          </Badge>
-        </div>
-      </div>
-      <CardHeader className="pb-2">
-        <CardTitle className="text-lg text-blue-900">{holiday.title}</CardTitle>
-      </CardHeader>
-      <CardContent>
-        <p className="text-sm text-blue-800">{holiday.description}</p>
+    <Card>
+      <CardContent className="p-4">
+        <h3 className="font-medium">{holiday.name}</h3>
+        <p className="text-sm text-muted-foreground">{holiday.date}</p>
+        {holiday.description && (
+          <p className="text-sm mt-2">{holiday.description}</p>
+        )}
       </CardContent>
     </Card>
   );
-};
+}

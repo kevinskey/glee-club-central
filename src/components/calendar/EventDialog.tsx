@@ -1,135 +1,62 @@
-import React, { useState, useEffect } from 'react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Calendar, Clock, MapPin, Users } from 'lucide-react';
-import { useAuth } from '@/contexts/AuthContext';
 
-interface EventDialogProps {
+import React from 'react';
+import { useAuth } from '@/contexts/AuthContext';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
+import { Calendar, MapPin, Clock } from 'lucide-react';
+
+export interface EventDialogProps {
+  event: any;
   isOpen: boolean;
   onClose: () => void;
-  eventData?: any; // Replace 'any' with a more specific type if possible
+  canRSVP?: boolean;
+  userRSVP?: any;
+  onRSVP?: () => void;
 }
 
-export function EventDialog({ isOpen, onClose, eventData }: EventDialogProps) {
+export function EventDialog({ event, isOpen, onClose, canRSVP = false, userRSVP, onRSVP }: EventDialogProps) {
   const { user } = useAuth();
-  const [title, setTitle] = useState('');
-  const [description, setDescription] = useState('');
-  const [location, setLocation] = useState('');
-  const [startTime, setStartTime] = useState('');
-  const [endTime, setEndTime] = useState('');
-  const [attendees, setAttendees] = useState('');
 
-  useEffect(() => {
-    if (eventData) {
-      setTitle(eventData.title || '');
-      setDescription(eventData.description || '');
-      setLocation(eventData.location || '');
-      setStartTime(eventData.startTime || '');
-      setEndTime(eventData.endTime || '');
-      setAttendees(eventData.attendees || '');
-    } else {
-      // Reset form fields when creating a new event
-      setTitle('');
-      setDescription('');
-      setLocation('');
-      setStartTime('');
-      setEndTime('');
-      setAttendees('');
-    }
-  }, [eventData]);
-
-  const handleSubmit = () => {
-    // Handle event submission logic here
-    console.log('Event submitted:', {
-      title,
-      description,
-      location,
-      startTime,
-      endTime,
-      attendees,
-    });
-    onClose();
-  };
+  if (!event) return null;
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[425px]">
+      <DialogContent className="max-w-md">
         <DialogHeader>
-          <DialogTitle>{eventData ? 'Edit Event' : 'Create New Event'}</DialogTitle>
+          <DialogTitle>{event.title}</DialogTitle>
         </DialogHeader>
-        <div className="grid gap-4 py-4">
-          <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="title" className="text-right">
-              Title
-            </Label>
-            <Input id="title" value={title} onChange={(e) => setTitle(e.target.value)} className="col-span-3" />
+        <div className="space-y-4">
+          <div className="flex items-start gap-2">
+            <Calendar className="h-4 w-4 mt-1 text-muted-foreground" />
+            <div>
+              <p className="font-medium">
+                {new Date(event.start_time).toLocaleDateString()}
+              </p>
+              <p className="text-sm text-muted-foreground">
+                {new Date(event.start_time).toLocaleTimeString()} - {new Date(event.end_time).toLocaleTimeString()}
+              </p>
+            </div>
           </div>
-          <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="description" className="text-right">
-              Description
-            </Label>
-            <Textarea
-              id="description"
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              className="col-span-3"
-            />
-          </div>
-          <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="location" className="text-right">
-              Location
-            </Label>
-            <Input
-              id="location"
-              value={location}
-              onChange={(e) => setLocation(e.target.value)}
-              className="col-span-3"
-            />
-          </div>
-          <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="startTime" className="text-right">
-              Start Time
-            </Label>
-            <Input
-              type="datetime-local"
-              id="startTime"
-              value={startTime}
-              onChange={(e) => setStartTime(e.target.value)}
-              className="col-span-3"
-            />
-          </div>
-          <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="endTime" className="text-right">
-              End Time
-            </Label>
-            <Input
-              type="datetime-local"
-              id="endTime"
-              value={endTime}
-              onChange={(e) => setEndTime(e.target.value)}
-              className="col-span-3"
-            />
-          </div>
-          <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="attendees" className="text-right">
-              Attendees
-            </Label>
-            <Input
-              id="attendees"
-              value={attendees}
-              onChange={(e) => setAttendees(e.target.value)}
-              className="col-span-3"
-            />
-          </div>
+          
+          {event.location_name && (
+            <div className="flex items-start gap-2">
+              <MapPin className="h-4 w-4 mt-1 text-muted-foreground" />
+              <p>{event.location_name}</p>
+            </div>
+          )}
+
+          {event.short_description && (
+            <p className="text-sm text-muted-foreground">{event.short_description}</p>
+          )}
+
+          {canRSVP && user && (
+            <div className="flex gap-2">
+              <Button onClick={onRSVP} className="flex-1">
+                {userRSVP ? 'Update RSVP' : 'RSVP'}
+              </Button>
+            </div>
+          )}
         </div>
-        <Button type="submit" onClick={handleSubmit}>
-          {eventData ? 'Update Event' : 'Create Event'}
-        </Button>
       </DialogContent>
     </Dialog>
   );

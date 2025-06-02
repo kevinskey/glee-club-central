@@ -1,118 +1,38 @@
 
 import React from 'react';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Card } from '@/components/ui/card';
-import { CalendarPlus, ChevronLeft, ChevronRight, RefreshCw, 
-  CalendarDays, Calendar, List } from 'lucide-react';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 export interface CalendarHeaderProps {
-  view: 'dayGridMonth' | 'timeGridWeek' | 'timeGridDay' | 'listWeek';
-  onViewChange: (view: 'dayGridMonth' | 'timeGridWeek' | 'timeGridDay' | 'listWeek') => void;
-  onAddEvent: () => void;
-  onResetCalendar?: () => Promise<boolean>;
-  onPrevious?: () => void;
-  onNext?: () => void;
-  onToday?: () => void;
-  userCanCreate?: boolean;
+  selectedDate: Date;
+  onDateChange: (date: Date) => void;
+  isMobile: boolean;
 }
 
-export const CalendarHeader: React.FC<CalendarHeaderProps> = ({
-  onAddEvent,
-  view,
-  onViewChange,
-  onResetCalendar,
-  onPrevious,
-  onNext,
-  onToday,
-  userCanCreate = true
-}) => {
-  const isMobile = window.innerWidth < 768; // Simple mobile detection
+export function CalendarHeader({ selectedDate, onDateChange, isMobile }: CalendarHeaderProps) {
+  const goToPrevious = () => {
+    const prevDate = new Date(selectedDate);
+    prevDate.setMonth(prevDate.getMonth() - 1);
+    onDateChange(prevDate);
+  };
+
+  const goToNext = () => {
+    const nextDate = new Date(selectedDate);
+    nextDate.setMonth(nextDate.getMonth() + 1);
+    onDateChange(nextDate);
+  };
 
   return (
-    <Card className="p-4 mb-4 flex flex-col sm:flex-row justify-between items-center gap-4">
-      <div className="flex items-center gap-2">
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={onAddEvent}
-          className="flex items-center justify-center bg-glee-spelman hover:bg-glee-spelman/90 text-white border-glee-spelman hover:border-glee-spelman/90"
-        >
-          <CalendarPlus className="h-4 w-4 mr-2" />
-          Create Event
-        </Button>
-        
-        {onResetCalendar && (
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={onResetCalendar}
-            className="hidden sm:flex items-center"
-          >
-            <RefreshCw className="h-4 w-4 mr-2" />
-            Reset
-          </Button>
-        )}
-      </div>
-
-      <div className="flex flex-wrap items-center justify-center gap-2">
-        {onPrevious && onNext && onToday && (
-          <div className="flex items-center mr-2 border rounded-md">
-            <Button 
-              variant="ghost" 
-              size="icon" 
-              onClick={onPrevious} 
-              className="h-8 w-8 rounded-none rounded-l-md"
-            >
-              <ChevronLeft className="h-4 w-4" />
-            </Button>
-            <Button 
-              variant="ghost" 
-              size="sm" 
-              onClick={onToday} 
-              className="h-8 rounded-none border-l border-r px-2"
-            >
-              Today
-            </Button>
-            <Button 
-              variant="ghost" 
-              size="icon" 
-              onClick={onNext} 
-              className="h-8 w-8 rounded-none rounded-r-md"
-            >
-              <ChevronRight className="h-4 w-4" />
-            </Button>
-          </div>
-        )}
-        
-        <Select value={view} onValueChange={onViewChange}>
-          <SelectTrigger className="w-[130px]">
-            <SelectValue placeholder="View" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="dayGridMonth">
-              <div className="flex items-center">
-                <CalendarDays className="h-4 w-4 mr-2" />
-                Month
-              </div>
-            </SelectItem>
-            {!isMobile && (
-              <SelectItem value="timeGridWeek">
-                <div className="flex items-center">
-                  <Calendar className="h-4 w-4 mr-2" />
-                  Week
-                </div>
-              </SelectItem>
-            )}
-            <SelectItem value="listWeek">
-              <div className="flex items-center">
-                <List className="h-4 w-4 mr-2" />
-                List
-              </div>
-            </SelectItem>
-          </SelectContent>
-        </Select>
-      </div>
-    </Card>
+    <div className="flex items-center justify-between mb-4">
+      <Button variant="outline" size="sm" onClick={goToPrevious}>
+        <ChevronLeft className="h-4 w-4" />
+      </Button>
+      <h2 className="text-xl font-semibold">
+        {selectedDate.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
+      </h2>
+      <Button variant="outline" size="sm" onClick={goToNext}>
+        <ChevronRight className="h-4 w-4" />
+      </Button>
+    </div>
   );
-};
+}

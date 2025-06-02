@@ -28,7 +28,7 @@ import {
 } from 'lucide-react';
 import { useMediaLibrary } from '@/hooks/useMediaLibrary';
 import { formatFileSize } from '@/utils/file-utils';
-import { getMediaType } from '@/utils/mediaUtils';
+import { getMediaType, MediaType } from '@/utils/mediaUtils';
 import { toast } from 'sonner';
 
 interface EnhancedMediaLibraryProps {
@@ -225,7 +225,7 @@ export function EnhancedMediaLibrary({ isAdminView = false }: EnhancedMediaLibra
 
             {/* Quick Filters */}
             <div className="flex gap-2 flex-wrap">
-              <Select value={selectedMediaType} onValueChange={setSelectedMediaType}>
+              <Select value={selectedMediaType} onValueChange={(value: string) => setSelectedMediaType(value as MediaType | "all")}>
                 <SelectTrigger className="w-32">
                   <FileType className="h-4 w-4 mr-2" />
                   <SelectValue placeholder="Type" />
@@ -297,7 +297,7 @@ export function EnhancedMediaLibrary({ isAdminView = false }: EnhancedMediaLibra
             <div className="mt-4 pt-4 border-t grid grid-cols-1 md:grid-cols-3 gap-4">
               <div>
                 <Label>File Size</Label>
-                <Select value={sizeFilter} onValueChange={setSizeFilter}>
+                <Select value={sizeFilter} onValueChange={(value: string) => setSizeFilter(value as 'all' | 'small' | 'medium' | 'large')}>
                   <SelectTrigger>
                     <SelectValue />
                   </SelectTrigger>
@@ -312,7 +312,7 @@ export function EnhancedMediaLibrary({ isAdminView = false }: EnhancedMediaLibra
 
               <div>
                 <Label>Date Range</Label>
-                <Select value={dateRangeFilter} onValueChange={setDateRangeFilter}>
+                <Select value={dateRangeFilter} onValueChange={(value: string) => setDateRangeFilter(value as 'all' | 'today' | 'week' | 'month' | 'year')}>
                   <SelectTrigger>
                     <SelectValue />
                   </SelectTrigger>

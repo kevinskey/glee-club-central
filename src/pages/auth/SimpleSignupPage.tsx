@@ -1,281 +1,223 @@
-import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+
+import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
+import { useLocation, useNavigate, Link } from 'react-router-dom';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { PageLoader } from '@/components/ui/page-loader';
+import { Music, Eye, EyeOff, UserPlus } from 'lucide-react';
+import { toast } from 'sonner';
 
 export default function SimpleSignupPage() {
-  const { signUp, isAuthenticated, isLoading, isInitialized } = useAuth();
+  const { signup, user } = useAuth();
   const navigate = useNavigate();
-  
-  const [firstName, setFirstName] = useState('');
-  const [lastName, setLastName] = useState('');
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
+  const location = useLocation();
+  const [formData, setFormData] = useState({
+    email: '',
+    password: '',
+    confirmPassword: '',
+    firstName: '',
+    lastName: ''
+  });
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [errors, setErrors] = useState<string[]>([]);
 
-  // Redirect if already authenticated
   useEffect(() => {
-    if (isAuthenticated && isInitialized) {
-      navigate('/role-dashboard');
+    if (user) {
+      navigate('/dashboard', { replace: true });
     }
-  }, [isAuthenticated, isInitialized, navigate]);
+  }, [user, navigate]);
+
+  const validateForm = () => {
+    const newErrors: string[] = [];
+    
+    if (!formData.email || !formData.email.includes('@')) {
+      newErrors.push('Please enter a valid email address');
+    }
+    
+    if (!formData.password || formData.password.length < 6) {
+      newErrors.push('Password must be at least 6 characters long');
+    }
+    
+    if (formData.password !== formData.confirmPassword) {
+      newErrors.push('Passwords do not match');
+    }
+    
+    if (!formData.firstName || !formData.lastName) {
+      newErrors.push('Please enter your first and last name');
+    }
+    
+    setErrors(newErrors);
+    return newErrors.length === 0;
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError(null);
     
-    // Validate form fields
-    if (!firstName || !lastName || !email || !password || !confirmPassword) {
-      setError('Please fill in all required fields');
-      return;
-    }
-    
-    if (password !== confirmPassword) {
-      setError('Passwords do not match');
-      return;
-    }
-    
-    if (password.length < 6) {
-      setError('Password must be at least 6 characters');
-      return;
-    }
-    
-    if (!email.includes('@')) {
-      setError('Please enter a valid email address');
+    if (!validateForm()) {
+      toast.error('Please fix the errors below');
       return;
     }
 
-    setIsSubmitting(true);
-    
+    setLoading(true);
     try {
-      console.log('🔐 SimpleSignupPage: Signup attempt for:', email);
-      const { error: signupError, data } = await signUp(email, password, firstName, lastName);
-      
-      if (signupError) {
-        console.error('❌ SimpleSignupPage: Signup error:', signupError);
-        let errorMessage = 'Signup failed';
-        
-        if (signupError.message) {
-          if (signupError.message.includes('already registered')) {
-            errorMessage = 'This email is already registered. Please use a different email or try logging in.';
-          } else if (signupError.message.includes('Password')) {
-            errorMessage = 'Password does not meet requirements. Please try a stronger password.';
-          } else {
-            errorMessage = signupError.message;
-          }
-        }
-        
-        setError(errorMessage);
-        toast.error(errorMessage);
-      } else {
-        console.log('✅ SimpleSignupPage: Signup successful');
-        toast.success('Account created successfully! Please check your email to verify your account.');
-        navigate('/login', { 
-          state: { 
-            message: "Account created successfully! Please check your email for a verification link to complete your registration." 
-          } 
-        });
-      }
-    } catch (err: any) {
-      console.error('💥 SimpleSignupPage: Unexpected signup error:', err);
-      const errorMessage = 'An unexpected error occurred during signup';
-      setError(errorMessage);
-      toast.error(errorMessage);
+      await signup(formData.email, formData.password, {
+        firstName: formData.firstName,
+        lastName: formData.lastName
+      });
+      toast.success('Account created successfully! Please check your email to verify your account.');
+      navigate('/login');
+    } catch (error: any) {
+      console.error('Signup error:', error);
+      toast.error(error.message || 'Failed to create account');
     } finally {
-      setIsSubmitting(false);
+      setLoading(false);
     }
   };
 
-  // Show loading state while checking auth
-  if (!isInitialized || (isAuthenticated && isLoading)) {
-    return (
-      <PageLoader 
-        message="Checking authentication..." 
-        className="min-h-screen"
-      />
-    );
+  const handleInputChange = (field: string, value: string) => {
+    setFormData(prev => ({ ...prev, [field]: value }));
+    if (errors.length > 0) {
+      setErrors([]);
+    }
+  };
+
+  if (loading) {
+    return <PageLoader message="Creating your account..." />;
   }
 
   return (
-    <div 
-      className="relative min-h-screen w-full flex items-center justify-center animate-fade-in"
-      style={{
-        backgroundImage: `url('/lovable-uploads/5d6ba7fa-4ea7-42ac-872e-940fb620a273.png')`,
-        backgroundSize: 'cover',
-        backgroundPosition: 'center',
-        backgroundRepeat: 'no-repeat',
-        backgroundAttachment: 'fixed'
-      }}
-    >
-      {/* Dark overlay for better contrast */}
-      <div className="absolute inset-0 bg-black/30 z-0" />
-      
-      {/* Signup form container */}
-      <div className="relative z-10 w-full max-w-md px-4">
-        <div className="bg-white/90 dark:bg-black/80 backdrop-blur-sm rounded-lg shadow-xl p-6 border border-white/20 dark:border-white/10">
-          <Card className="w-full border-0 bg-transparent shadow-none">
-            <CardHeader className="space-y-1 text-center px-0">
-              <div className="flex justify-center mb-4">
-                <Music className="h-12 w-12 text-glee-purple" />
+    <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+      <Card className="w-full max-w-md">
+        <CardHeader className="space-y-1">
+          <div className="flex items-center justify-center mb-4">
+            <div className="h-12 w-12 bg-glee-purple rounded-full flex items-center justify-center">
+              <Music className="h-6 w-6 text-white" />
+            </div>
+          </div>
+          <CardTitle className="text-2xl text-center">Join Glee World</CardTitle>
+          <CardDescription className="text-center">
+            Create your account to access the Spelman Glee Club community
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          {errors.length > 0 && (
+            <Alert variant="destructive" className="mb-4">
+              <AlertDescription>
+                {errors.map((error, index) => (
+                  <div key={index}>{error}</div>
+                ))}
+              </AlertDescription>
+            </Alert>
+          )}
+
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label htmlFor="firstName">First Name</Label>
+                <Input
+                  id="firstName"
+                  value={formData.firstName}
+                  onChange={(e) => handleInputChange('firstName', e.target.value)}
+                  required
+                  disabled={loading}
+                />
               </div>
-              <CardTitle className="text-2xl font-bold text-gray-900 dark:text-gray-100">
-                Join Glee World
-              </CardTitle>
-              <CardDescription className="text-gray-700 dark:text-gray-300">
-                Create your account to access member resources
-              </CardDescription>
-            </CardHeader>
-            
-            <CardContent className="px-0">
-              {error && (
-                <Alert variant="destructive" className="mb-4">
-                  <AlertDescription>{error}</AlertDescription>
-                </Alert>
-              )}
-              
-              <form onSubmit={handleSubmit} className="space-y-4">
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="firstName" className="text-gray-900 dark:text-gray-100">First Name</Label>
-                    <Input
-                      id="firstName"
-                      value={firstName}
-                      onChange={(e) => setFirstName(e.target.value)}
-                      className="bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 border-gray-300 dark:border-gray-600"
-                      required
-                      disabled={isSubmitting}
-                      placeholder="Jane"
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="lastName" className="text-gray-900 dark:text-gray-100">Last Name</Label>
-                    <Input
-                      id="lastName"
-                      value={lastName}
-                      onChange={(e) => setLastName(e.target.value)}
-                      className="bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 border-gray-300 dark:border-gray-600"
-                      required
-                      disabled={isSubmitting}
-                      placeholder="Doe"
-                    />
-                  </div>
-                </div>
-                
-                <div className="space-y-2">
-                  <Label htmlFor="email" className="text-gray-900 dark:text-gray-100">Email</Label>
-                  <Input
-                    id="email"
-                    type="email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    className="bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 border-gray-300 dark:border-gray-600"
-                    required
-                    disabled={isSubmitting}
-                    placeholder="jane.doe@example.com"
-                  />
-                </div>
-                
-                <div className="space-y-2">
-                  <Label htmlFor="password" className="text-gray-900 dark:text-gray-100">Password</Label>
-                  <div className="relative">
-                    <Input
-                      id="password"
-                      type={showPassword ? "text" : "password"}
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                      className="bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 border-gray-300 dark:border-gray-600 pr-10"
-                      required
-                      disabled={isSubmitting}
-                      placeholder="••••••••"
-                    />
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="sm"
-                      className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
-                      onClick={() => setShowPassword(!showPassword)}
-                      disabled={isSubmitting}
-                    >
-                      {showPassword ? (
-                        <EyeOff className="h-4 w-4 text-gray-500" />
-                      ) : (
-                        <Eye className="h-4 w-4 text-gray-500" />
-                      )}
-                    </Button>
-                  </div>
-                </div>
-                
-                <div className="space-y-2">
-                  <Label htmlFor="confirmPassword" className="text-gray-900 dark:text-gray-100">Confirm Password</Label>
-                  <div className="relative">
-                    <Input
-                      id="confirmPassword"
-                      type={showConfirmPassword ? "text" : "password"}
-                      value={confirmPassword}
-                      onChange={(e) => setConfirmPassword(e.target.value)}
-                      className="bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 border-gray-300 dark:border-gray-600 pr-10"
-                      required
-                      disabled={isSubmitting}
-                      placeholder="••••••••"
-                    />
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="sm"
-                      className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
-                      onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                      disabled={isSubmitting}
-                    >
-                      {showConfirmPassword ? (
-                        <EyeOff className="h-4 w-4 text-gray-500" />
-                      ) : (
-                        <Eye className="h-4 w-4 text-gray-500" />
-                      )}
-                    </Button>
-                  </div>
-                </div>
-                
-                <Button 
-                  type="submit" 
-                  className="w-full bg-glee-spelman hover:bg-glee-spelman/90 text-white" 
-                  disabled={isSubmitting}
+              <div>
+                <Label htmlFor="lastName">Last Name</Label>
+                <Input
+                  id="lastName"
+                  value={formData.lastName}
+                  onChange={(e) => handleInputChange('lastName', e.target.value)}
+                  required
+                  disabled={loading}
+                />
+              </div>
+            </div>
+
+            <div>
+              <Label htmlFor="email">Email Address</Label>
+              <Input
+                id="email"
+                type="email"
+                value={formData.email}
+                onChange={(e) => handleInputChange('email', e.target.value)}
+                required
+                disabled={loading}
+              />
+            </div>
+
+            <div>
+              <Label htmlFor="password">Password</Label>
+              <div className="relative">
+                <Input
+                  id="password"
+                  type={showPassword ? 'text' : 'password'}
+                  value={formData.password}
+                  onChange={(e) => handleInputChange('password', e.target.value)}
+                  required
+                  disabled={loading}
+                />
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
+                  onClick={() => setShowPassword(!showPassword)}
                 >
-                  {isSubmitting ? (
-                    <>
-                      <div className="h-4 w-4 rounded-full border-2 border-white border-t-transparent animate-spin mr-2" />
-                      Creating Account...
-                    </>
-                  ) : (
-                    <>
-                      <UserPlus className="w-4 h-4 mr-2" />
-                      Create Account
-                    </>
-                  )}
+                  {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                 </Button>
-              </form>
-              
-              <div className="mt-6 space-y-4">
-                <div className="text-center text-sm border-t pt-4">
-                  <span className="text-gray-700 dark:text-gray-300">Already have an account? </span>
-                  <Link to="/login" className="text-glee-purple hover:underline font-medium">
-                    Sign in here
-                  </Link>
-                </div>
-                
-                <div className="text-center text-sm">
-                  <span className="text-gray-700 dark:text-gray-300">Want to join as a fan? </span>
-                  <Link to="/join-glee-fam" className="text-glee-purple hover:underline font-medium">
-                    Join the Glee Fam
-                  </Link>
-                </div>
               </div>
-            </CardContent>
-          </Card>
-        </div>
-      </div>
+            </div>
+
+            <div>
+              <Label htmlFor="confirmPassword">Confirm Password</Label>
+              <div className="relative">
+                <Input
+                  id="confirmPassword"
+                  type={showConfirmPassword ? 'text' : 'password'}
+                  value={formData.confirmPassword}
+                  onChange={(e) => handleInputChange('confirmPassword', e.target.value)}
+                  required
+                  disabled={loading}
+                />
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
+                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                >
+                  {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                </Button>
+              </div>
+            </div>
+
+            <Button type="submit" className="w-full" disabled={loading}>
+              {loading ? 'Creating Account...' : (
+                <>
+                  <UserPlus className="mr-2 h-4 w-4" />
+                  Create Account
+                </>
+              )}
+            </Button>
+          </form>
+
+          <div className="mt-4 text-center space-y-2">
+            <div>
+              <span className="text-sm text-muted-foreground">Already have an account? </span>
+              <Link to="/login" className="text-sm text-primary hover:underline">
+                Sign in
+              </Link>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
     </div>
   );
 }
