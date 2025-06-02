@@ -50,14 +50,14 @@ export const HomePageContent = ({
 }: HomePageContentProps) => {
   return (
     <div className="min-h-screen bg-background w-full max-w-[100vw] overflow-x-hidden">
-      {/* Hero Section - Full width but contained within viewport */}
+      {/* Hero Banner Section */}
       <div className="w-full max-w-[100vw] overflow-x-hidden">
         <HeroBannerSection images={heroImages} />
       </div>
       
-      {/* Main Content Sections - Mobile optimized with consistent padding */}
+      {/* Main Content Sections - Reduced spacing */}
       <div className="w-full max-w-[100vw] overflow-x-hidden">
-        <MobileOptimizedContainer padding="md" maxWidth="full" className="space-y-8 sm:space-y-12">
+        <MobileOptimizedContainer padding="md" maxWidth="full" className="space-y-6">
           <div className="events-section w-full">
             <EventsSection events={upcomingEvents} />
           </div>

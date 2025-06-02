@@ -17,14 +17,13 @@ export function EnhancedHeroSection() {
 
   useEffect(() => {
     if (images && images.length > 0) {
-      // Use only the first image
       setHeroImage(images[0].file_url);
     }
   }, [images]);
 
   return (
-    <section className="relative w-full max-w-[100vw] mx-auto overflow-hidden" style={{ height: isMobile ? '40vh' : '60vh' }}>
-      {/* Single Hero Image */}
+    <section className="relative w-full max-w-[100vw] mx-auto overflow-hidden" style={{ height: isMobile ? '50vh' : '70vh' }}>
+      {/* Hero Image */}
       {heroImage ? (
         <BackgroundSlideshow 
           images={[heroImage]} 
@@ -34,23 +33,23 @@ export function EnhancedHeroSection() {
         <div className="absolute inset-0 bg-black/60"></div>
       )}
       
-      {/* Content overlay with Spelman Glee Club branding */}
+      {/* Content overlay */}
       <div className="relative z-10 h-full flex items-center justify-center">
         <MobileOptimizedContainer padding="sm" className="w-full">
           <div className="max-w-3xl mx-auto text-center">
             <h1 className={cn(
-              "font-bold text-white mb-3 leading-tight",
-              isMobile ? "text-xl sm:text-2xl" : "text-3xl md:text-4xl lg:text-5xl"
+              "font-bold text-white mb-4 leading-tight",
+              isMobile ? "text-2xl sm:text-3xl" : "text-4xl md:text-5xl lg:text-6xl"
             )}>
               Spelman College Glee Club
             </h1>
             <p className={cn(
-              "text-white/90 mb-4 max-w-2xl mx-auto",
-              isMobile ? "text-sm sm:text-base" : "text-base md:text-lg lg:text-xl"
+              "text-white/90 mb-6 max-w-2xl mx-auto",
+              isMobile ? "text-base sm:text-lg" : "text-lg md:text-xl lg:text-2xl"
             )}>
               A distinguished ensemble with a rich heritage of musical excellence
             </p>
-            <div className="flex flex-col sm:flex-row gap-3 justify-center items-center">
+            <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
               <Button size={isMobile ? "default" : "lg"} asChild className="bg-indigo-500 hover:bg-indigo-600 text-white w-auto px-6">
                 <Link to="/events">
                   Upcoming Performances <ChevronRight className="h-4 w-4 ml-1" />
