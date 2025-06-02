@@ -48,12 +48,12 @@ export function HeroBanner({
         }}
         className="w-full"
       >
-        <CarouselContent>
+        <CarouselContent className="-ml-0">
           {displayImages.map((image, index) => (
-            <CarouselItem key={image.id || index}>
+            <CarouselItem key={image.id || index} className="pl-0">
               <Card className="border-0 rounded-none">
                 <div className={cn(
-                  "relative overflow-hidden",
+                  "relative overflow-hidden w-full",
                   isMobile ? "aspect-[4/3] max-h-[40vh]" : "aspect-[16/9] md:aspect-[21/9] max-h-[60vh]"
                 )}>
                   <img

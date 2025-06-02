@@ -35,7 +35,7 @@ export function EnhancedHeroSection() {
       )}
       
       {/* Content overlay with Spelman Glee Club branding */}
-      <div className="relative z-10 h-full flex items-center">
+      <div className="relative z-10 h-full flex items-center justify-center">
         <MobileOptimizedContainer padding="sm" className="w-full">
           <div className="max-w-3xl mx-auto text-center">
             <h1 className={cn(
