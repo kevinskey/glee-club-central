@@ -18,6 +18,7 @@ import EventRSVPsPage from '@/pages/admin/EventRSVPsPage';
 // Import additional admin pages
 import AdminMediaUploaderPage from '@/pages/admin/AdminMediaUploaderPage';
 import NewsTickerSettingsPage from '@/pages/admin/NewsTickerSettingsPage';
+import AdminStorePage from '@/pages/admin/AdminStorePage';
 
 export const adminRoutes: RouteObject[] = [
   {
@@ -81,6 +82,14 @@ export const adminRoutes: RouteObject[] = [
     element: (
       <AdminRoute>
         <NewsTickerSettingsPage />
+      </AdminRoute>
+    ),
+  },
+  {
+    path: '/admin/store',
+    element: (
+      <AdminRoute>
+        <AdminStorePage />
       </AdminRoute>
     ),
   },

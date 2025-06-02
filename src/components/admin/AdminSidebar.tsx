@@ -25,6 +25,7 @@ const navItems = [
   { to: '/admin/hero-manager', icon: ImageIcon, label: 'Hero Manager' },
   { to: '/admin/media', icon: Image, label: 'Media Library' },
   { to: '/admin/media-uploader', icon: Upload, label: 'Media Uploader' },
+  { to: '/admin/store', icon: ShoppingCart, label: 'Store Admin' },
   { to: '/admin/orders', icon: ShoppingCart, label: 'Orders' },
   { to: '/admin/analytics', icon: BarChart3, label: 'Analytics' },
   { to: '/admin/announcements', icon: Megaphone, label: 'Announcements' },

@@ -1,17 +1,14 @@
 
-import React from "react";
-import { UniversalHero } from "@/components/hero/UniversalHero";
+import React from 'react';
+import { UniversalHero } from '@/components/hero/UniversalHero';
 
 export function HeroBannerSection() {
   return (
-    <section className="w-full">
+    <section className="relative">
       <UniversalHero 
-        sectionId="homepage-main"
+        sectionId="homepage-banner"
         height="standard"
         showNavigation={false}
-        showPlayPause={false}
-        showCounter={false}
-        showDots={false}
         enableAutoplay={true}
       />
     </section>
