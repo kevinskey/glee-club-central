@@ -24,6 +24,7 @@ export default function AdminDashboardPage() {
 
   // Wait for initialization only
   if (!isInitialized) {
+    console.log('⏳ AdminDashboardPage: Waiting for initialization...');
     return (
       <PageLoader 
         message="Initializing admin dashboard..."
@@ -50,6 +51,7 @@ export default function AdminDashboardPage() {
   
   // If still loading profile and not a known admin, wait briefly
   if (isLoading && !profile) {
+    console.log('⏳ AdminDashboardPage: Loading profile...');
     return (
       <PageLoader 
         message="Verifying admin permissions..."
