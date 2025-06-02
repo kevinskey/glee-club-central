@@ -9,9 +9,9 @@ export function HeroBannerSection() {
         sectionId="homepage-main"
         height="standard"
         showNavigation={false}
-        showPlayPause={true}
+        showPlayPause={false}
         showCounter={true}
-        showDots={true}
+        showDots={false}
         enableAutoplay={true}
       />
     </section>
