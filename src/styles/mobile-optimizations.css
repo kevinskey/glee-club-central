@@ -221,9 +221,9 @@ p {
     z-index: 101 !important;
   }
   
-  /* Main content needs padding to account for sticky header */
+  /* Main content needs padding to account for sticky header + matching gap */
   main {
-    margin-top: 96px !important; /* Height of ticker (40px) + header (~56px) */
+    margin-top: 104px !important; /* Height of ticker (40px) + header (~56px) + gap (8px) */
     padding-top: 0 !important;
   }
   
@@ -244,7 +244,7 @@ p {
   .main-content:not(.hero-content),
   [class*="content"]:not([class*="hero"]) {
     padding-top: 16px !important; /* Small padding since main already has margin */
-    min-height: calc(100vh - 96px) !important;
+    min-height: calc(100vh - 104px) !important; /* Adjusted for new margin */
   }
 }
 
