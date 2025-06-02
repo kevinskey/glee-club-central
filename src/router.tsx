@@ -228,3 +228,16 @@ export const router = createBrowserRouter([
     element: withErrorBoundary(<NotFoundPage />),
   },
 ]);
+
+// Add API route handler for hero content generation
+if (typeof window !== 'undefined') {
+  // Client-side API route handling
+  const originalFetch = window.fetch;
+  window.fetch = function(input: RequestInfo | URL, init?: RequestInit) {
+    if (typeof input === 'string' && input === '/api/generate-hero-content') {
+      // Redirect to Supabase edge function
+      return originalFetch('https://dzzptovqfqausipsgabw.supabase.co/functions/v1/generate-hero-content', init);
+    }
+    return originalFetch(input, init);
+  };
+}
