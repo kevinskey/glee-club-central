@@ -1,4 +1,5 @@
 
+
 import React, { useState } from 'react';
 import { useCalendarEvents } from '@/hooks/useCalendarEvents';
 import { CalendarEvent } from '@/types/calendar';
@@ -391,7 +392,7 @@ export function AdminCalendarView({ view, searchQuery = '', selectedEventType = 
               )}
             </div>
           </CardContent>
-        </div>
+        </Card>
       )}
 
       {/* All Events List - Only show when no active search or filter */}
@@ -429,3 +430,4 @@ export function AdminCalendarView({ view, searchQuery = '', selectedEventType = 
     </div>
   );
 }
+
