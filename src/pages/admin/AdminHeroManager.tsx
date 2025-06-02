@@ -2,6 +2,7 @@
 import React from 'react';
 import { HeroSlidesManager } from '@/components/admin/HeroSlidesManager';
 import { PageHeader } from "@/components/ui/page-header";
+import { FloatingThemeToggle } from "@/components/ui/floating-theme-toggle";
 
 export default function AdminHeroManager() {
   return (
@@ -12,6 +13,8 @@ export default function AdminHeroManager() {
       />
       
       <HeroSlidesManager />
+      
+      <FloatingThemeToggle position="bottom-right" />
     </div>
   );
 }
