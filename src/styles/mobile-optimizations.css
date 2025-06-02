@@ -48,11 +48,13 @@ body {
   overflow-x: hidden;
 }
 
-/* Hero Section Mobile Fixes */
+/* Hero Section Mobile Fixes - NO MARGINS OR PADDING */
 .hero-section, [class*="hero"] {
   width: 100% !important;
   max-width: 100vw !important;
   overflow-x: hidden;
+  margin: 0 !important;
+  padding: 0 !important;
 }
 
 /* Image Container Fixes */
@@ -219,22 +221,26 @@ p {
     z-index: 101 !important;
   }
   
-  /* Adjust main content to account for both ticker and header */
+  /* Remove all margin/padding adjustments for hero sections on mobile */
   main {
-    margin-top: 0 !important; /* Remove margin since hero will handle positioning */
+    margin-top: 0 !important;
     padding-top: 0 !important;
   }
   
-  /* Hero sections start immediately after sticky header with no gap */
+  /* Hero sections start at the very top with no spacing */
   .hero-section,
   [class*="hero"],
   .enhanced-hero-section {
-    margin-top: 96px !important; /* Start exactly at bottom of sticky elements */
-    padding-top: 0 !important; /* Remove padding to eliminate gap */
+    margin-top: 0 !important;
+    padding-top: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
   }
   
-  /* Ensure page content starts below sticky elements for non-hero pages */
-  .min-h-screen {
+  /* Only non-hero pages get padding for sticky elements */
+  .page-content:not(.hero-page),
+  .main-content:not(.hero-content),
+  [class*="content"]:not([class*="hero"]) {
     padding-top: 96px !important; /* Height of ticker + header */
     min-height: calc(100vh - 96px) !important;
   }
@@ -427,13 +433,6 @@ p {
     width: 100%;
     max-width: 100%;
   }
-  
-  /* Adjust all page content for sticky elements on non-hero pages */
-  .page-content,
-  .main-content,
-  [class*="content"]:not([class*="hero"]) {
-    padding-top: 16px !important;
-  }
 }
 
 /* Dark Mode Optimizations */
@@ -530,24 +529,5 @@ p {
     padding-left: 16px;
     padding-right: 16px;
     box-sizing: border-box;
-  }
-}
-
-/* Ensure sticky elements work across all pages - but not hero sections */
-@media (max-width: 768px) {
-  /* Apply to all pages and routes that don't have hero sections */
-  [data-route]:not([data-route="/"]),
-  .page:not(.home-page),
-  .route:not(.hero-route) {
-    padding-top: 96px !important; /* Height of ticker + header */
-  }
-  
-  /* Specific route adjustments for non-hero pages */
-  [data-route="/about"],
-  [data-route="/contact"],
-  [data-route="/calendar"],
-  [data-route="/store"],
-  [data-route*="/news/"] {
-    padding-top: 96px !important; /* Height of ticker + header */
   }
 }
