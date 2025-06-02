@@ -24,6 +24,16 @@ import AdminCalendarPage from "./pages/admin/AdminCalendarPage";
 import AdminHeroManager from "./pages/admin/AdminHeroManager";
 import UserManagementPage from "./pages/admin/UserManagementPage";
 import UserSystemResetPage from "./pages/admin/UserSystemResetPage";
+import AdminMediaLibraryPage from "./pages/admin/AdminMediaLibraryPage";
+import AdminMediaUploaderPage from "./pages/admin/AdminMediaUploaderPage";
+import NewsTickerSettingsPage from "./pages/admin/NewsTickerSettingsPage";
+import AdminModularHeroPage from "./pages/admin/AdminModularHeroPage";
+import AnnouncementsPage from "./pages/announcements/AnnouncementsPage";
+import SettingsPage from "./pages/admin/SettingsPage";
+import OrdersPage from "./pages/admin/OrdersPage";
+import AnalyticsPage from "./pages/admin/AnalyticsPage";
+import EventDetailsPage from "./pages/events/EventDetailsPage";
+import EventRSVPsPage from "./pages/admin/EventRSVPsPage";
 import MemberDashboardPage from "./pages/dashboard/MemberDashboardPage";
 import FanDashboardPage from "./pages/dashboard/FanDashboardPage";
 import ProfilePage from "./pages/ProfilePage";
@@ -161,8 +171,18 @@ export const router = createBrowserRouter([
     children: [
       { index: true, element: withErrorBoundary(<AdminDashboardPage />) },
       { path: "calendar", element: withErrorBoundary(<AdminCalendarPage />) },
-      { path: "hero-manager", element: withErrorBoundary(<AdminHeroManager />) },
+      { path: "events/:id", element: withErrorBoundary(<EventDetailsPage />) },
+      { path: "events/:id/rsvps", element: withErrorBoundary(<EventRSVPsPage />) },
       { path: "members", element: withErrorBoundary(<UserManagementPage />) },
+      { path: "hero-manager", element: withErrorBoundary(<AdminHeroManager />) },
+      { path: "modular-hero", element: withErrorBoundary(<AdminModularHeroPage />) },
+      { path: "media", element: withErrorBoundary(<AdminMediaLibraryPage />) },
+      { path: "media-uploader", element: withErrorBoundary(<AdminMediaUploaderPage />) },
+      { path: "news-ticker", element: withErrorBoundary(<NewsTickerSettingsPage />) },
+      { path: "orders", element: withErrorBoundary(<OrdersPage />) },
+      { path: "analytics", element: withErrorBoundary(<AnalyticsPage />) },
+      { path: "announcements", element: withErrorBoundary(<AnnouncementsPage />) },
+      { path: "settings", element: withErrorBoundary(<SettingsPage />) },
       { path: "system-reset", element: withErrorBoundary(<UserSystemResetPage />) },
     ],
   },
